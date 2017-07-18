@@ -1,10 +1,10 @@
 #include "ffmpeg_decoder.hpp"
 
-// auto_ptr
 #include <memory>
 
 #include <stdexcept>
 #include <sstream>
+#include <algorithm>
 
 #include <components/vfs/manager.hpp>
 
@@ -242,6 +242,10 @@ void FFmpeg_Decoder::open(const std::string &fname)
     }
     catch(std::exception&)
     {
+        if(mStream)
+            avcodec_close((*mStream)->codec);
+        mStream = NULL;
+
         if (mFormatCtx->pb->buffer != NULL)
         {
           av_free(mFormatCtx->pb->buffer);

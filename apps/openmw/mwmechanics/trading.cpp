@@ -37,7 +37,7 @@ namespace MWMechanics
         int b = std::abs(playerOffer);
         int d = (buying)
             ? int(100 * (a - b) / a)
-            : int(100 * (b - a) / a);
+            : int(100 * (b - a) / b);
 
         int clampedDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(merchant);
 
@@ -52,7 +52,7 @@ namespace MWMechanics
         float f1 = 0.2f * merchantStats.getAttribute(ESM::Attribute::Personality).getModified();
 
         float dispositionTerm = gmst.find("fDispositionMod")->getFloat() * (clampedDisposition - 50);
-        float pcTerm = (dispositionTerm - 50 + a1 + b1 + c1) * playerStats.getFatigueTerm();
+        float pcTerm = (dispositionTerm + a1 + b1 + c1) * playerStats.getFatigueTerm();
         float npcTerm = (d1 + e1 + f1) * merchantStats.getFatigueTerm();
         float x = gmst.find("fBargainOfferMulti")->getFloat() * d
             + gmst.find("fBargainOfferBase")->getFloat()

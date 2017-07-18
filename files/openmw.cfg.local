@@ -9,3 +9,6 @@ resources=./resources
 script-blacklist=Museum
 script-blacklist=MockChangeScript
 script-blacklist=doortestwarp
+script-blacklist=WereChange2Script
+script-blacklist=wereDreamScript2
+script-blacklist=wereDreamScript3

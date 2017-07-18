@@ -70,6 +70,7 @@ opencs_units (view/world
     cellcreator pathgridcreator referenceablecreator startscriptcreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
     dialoguespinbox recordbuttonbar tableeditidaction scripterrortable extendedcommandconfigurator
+    bodypartcreator
     )
 
 opencs_units_noqt (view/world
@@ -109,7 +110,7 @@ opencs_units_noqt (view/tools
     )
 
 opencs_units (view/prefs
-    dialogue pagebase page keybindingpage
+    dialogue pagebase page keybindingpage contextmenulist
     )
 
 opencs_units (model/prefs

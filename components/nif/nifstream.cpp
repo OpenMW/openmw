@@ -103,11 +103,11 @@ std::string NIFStream::getVersionString()
     return result;
 }
 
-void NIFStream::getUShorts(osg::VectorGLushort* vec, size_t size)
+void NIFStream::getUShorts(std::vector<unsigned short> &vec, size_t size)
 {
-    vec->reserve(size);
-    for(size_t i = 0;i < size;i++)
-        vec->push_back(getUShort());
+    vec.resize(size);
+    for(size_t i = 0;i < vec.size();i++)
+        vec[i] = getUShort();
 }
 void NIFStream::getFloats(std::vector<float> &vec, size_t size)
 {
@@ -115,23 +115,23 @@ void NIFStream::getFloats(std::vector<float> &vec, size_t size)
     for(size_t i = 0;i < vec.size();i++)
         vec[i] = getFloat();
 }
-void NIFStream::getVector2s(osg::Vec2Array* vec, size_t size)
+void NIFStream::getVector2s(std::vector<osg::Vec2f> &vec, size_t size)
 {
-    vec->reserve(size);
-    for(size_t i = 0;i < size;i++)
-        vec->push_back(getVector2());
+    vec.resize(size);
+    for(size_t i = 0;i < vec.size();i++)
+        vec[i] = getVector2();
 }
-void NIFStream::getVector3s(osg::Vec3Array* vec, size_t size)
+void NIFStream::getVector3s(std::vector<osg::Vec3f> &vec, size_t size)
 {
-    vec->reserve(size);
-    for(size_t i = 0;i < size;i++)
-        vec->push_back(getVector3());
+    vec.resize(size);
+    for(size_t i = 0;i < vec.size();i++)
+        vec[i] = getVector3();
 }
-void NIFStream::getVector4s(osg::Vec4Array* vec, size_t size)
+void NIFStream::getVector4s(std::vector<osg::Vec4f> &vec, size_t size)
 {
-    vec->reserve(size);
-    for(size_t i = 0;i < size;i++)
-        vec->push_back(getVector4());
+    vec.resize(size);
+    for(size_t i = 0;i < vec.size();i++)
+        vec[i] = getVector4();
 }
 void NIFStream::getQuaternions(std::vector<osg::Quat> &quat, size_t size)
 {

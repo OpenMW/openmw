@@ -49,6 +49,8 @@ namespace MWGui
 
         ItemSelectionDialog* mItemSelectionDialog;
 
+        MyGUI::Widget* mChanceLayout;
+
         MyGUI::Button* mCancelButton;
         ItemWidget* mItemBox;
         ItemWidget* mSoulBox;
@@ -60,6 +62,7 @@ namespace MWGui
         MyGUI::TextBox* mEnchantmentPoints;
         MyGUI::TextBox* mCastCost;
         MyGUI::TextBox* mCharge;
+        MyGUI::TextBox* mSuccessChance;
         MyGUI::TextBox* mPrice;
         MyGUI::TextBox* mPriceText;
 

@@ -15,11 +15,6 @@ namespace osg
     class Group;
 }
 
-namespace osgUtil
-{
-    class IncrementalCompileOperation;
-}
-
 namespace Resource
 {
     class ResourceSystem;
@@ -42,7 +37,7 @@ class Animation;
 class PtrHolder : public osg::Object
 {
 public:
-    PtrHolder(MWWorld::Ptr ptr)
+    PtrHolder(const MWWorld::Ptr& ptr)
         : mPtr(ptr)
     {
     }
@@ -62,7 +57,7 @@ public:
 };
 
 class Objects{
-    typedef std::map<MWWorld::ConstPtr,Animation*> PtrAnimationMap;
+    typedef std::map<MWWorld::ConstPtr,osg::ref_ptr<Animation> > PtrAnimationMap;
 
     typedef std::map<const MWWorld::CellStore*, osg::ref_ptr<osg::Group> > CellMap;
     CellMap mCellSceneNodes;

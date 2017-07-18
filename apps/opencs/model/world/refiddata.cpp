@@ -389,7 +389,7 @@ void CSMWorld::RefIdData::copyTo (int index, RefIdData& target) const
 
     std::string id = source->getId (localIndex.first);
 
-    std::auto_ptr<CSMWorld::RecordBase> newRecord (source->getRecord (localIndex.first).modifiedCopy());
+    std::unique_ptr<CSMWorld::RecordBase> newRecord (source->getRecord (localIndex.first).modifiedCopy());
 
     target.insertRecord (*newRecord, localIndex.second, id);
 }

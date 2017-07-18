@@ -1,7 +1,6 @@
 #include "keyframemanager.hpp"
 
 #include <components/vfs/manager.hpp>
-#include <components/nifosg/nifloader.hpp>
 
 #include "objectcache.hpp"
 
@@ -33,6 +32,11 @@ namespace Resource
             mCache->addEntryToObjectCache(normalized, loaded);
             return loaded;
         }
+    }
+
+    void KeyframeManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
+    {
+        stats->setAttribute(frameNumber, "Keyframe", mCache->getCacheSize());
     }
 
 

@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstdio>
 
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
@@ -7,11 +6,8 @@
 #include <components/fallback/validate.hpp>
 
 #include <SDL_messagebox.h>
-#include <SDL_main.h>
 #include "engine.hpp"
 
-#include <boost/iostreams/concepts.hpp>
-#include <boost/iostreams/stream_buffer.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 #if defined(_WIN32)
@@ -37,7 +33,6 @@ extern int cc_install_handlers(int argc, char **argv, int num_signals, int *sigs
 extern int is_debugger_attached(void);
 #endif
 
-#include <boost/version.hpp>
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */
@@ -98,9 +93,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("no-sound", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "disable all sounds")
 
-        ("script-verbose", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "verbose script output")
-
         ("script-all", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "compile all scripts (excluding dialogue scripts) at startup")
 
@@ -148,7 +140,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
             ->multitoken()->composing(), "fallback values")
 
-        ("no-grab", "Don't grab mouse cursor")
+        ("no-grab", bpo::value<bool>()->implicit_value(true)->default_value(false), "Don't grab mouse cursor")
 
         ("export-fonts", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "Export Morrowind .fnt fonts to PNG image and XML file in current directory")
@@ -184,7 +176,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapeHashString>().toStdString());
     std::cout << v.describe() << std::endl;
 
-    engine.setGrabMouse(!variables.count("no-grab"));
+    engine.setGrabMouse(!variables["no-grab"].as<bool>());
 
     // Font encoding settings
     std::string encoding(variables["encoding"].as<Files::EscapeHashString>().toStdString());
@@ -233,12 +225,11 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCell(variables["start"].as<Files::EscapeHashString>().toStdString());
     engine.setSkipMenu (variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
     if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
-        std::cerr << "new-game used without skip-menu -> ignoring it" << std::endl;
+        std::cerr << "Warning: new-game used without skip-menu -> ignoring it" << std::endl;
 
     // scripts
     engine.setCompileAll(variables["script-all"].as<bool>());
     engine.setCompileAllDialogue(variables["script-all-dialogue"].as<bool>());
-    engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
     engine.setStartupScript (variables["script-run"].as<Files::EscapeHashString>().toStdString());
     engine.setWarningsMode (variables["script-warn"].as<int>());
@@ -314,7 +305,7 @@ int main(int argc, char**argv)
 
     boost::filesystem::ofstream logfile;
 
-    std::auto_ptr<OMW::Engine> engine;
+    std::unique_ptr<OMW::Engine> engine;
 
     int ret = 0;
     try

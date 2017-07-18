@@ -51,8 +51,11 @@ namespace MWClass
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0,
                                                                       MWBase::SoundManager::Play_TypeSfx,
                                                                       MWBase::SoundManager::Play_Loop);
+    }
 
-        MWBase::Environment::get().getMechanicsManager()->add(ptr);
+    bool Light::useAnim() const
+    {
+        return true;
     }
 
     std::string Light::getModel(const MWWorld::ConstPtr &ptr) const
@@ -76,15 +79,15 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    boost::shared_ptr<MWWorld::Action> Light::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Light::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         if(!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::NullAction());
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::NullAction());
 
         MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
         if(!(ref->mBase->mData.mFlags&ESM::Light::Carry))
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction());
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction());
 
         return defaultItemActivate(ptr, actor);
     }
@@ -117,7 +120,7 @@ namespace MWClass
 
     void Light::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Light);
+        std::shared_ptr<Class> instance (new Light);
 
         registerClass (typeid (ESM::Light).name(), instance);
     }
@@ -183,9 +186,9 @@ namespace MWClass
         return Class::showsInInventory(ptr);
     }
 
-    boost::shared_ptr<MWWorld::Action> Light::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Light::use (const MWWorld::Ptr& ptr) const
     {
-        boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
+        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
 
         action->setSound(getUpSoundId(ptr));
 
@@ -230,8 +233,8 @@ namespace MWClass
         if (!(ref->mBase->mData.mFlags & ESM::Light::Carry))
             return std::make_pair(0,"");
 
-        MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
-        MWWorld::ContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        const MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
+        MWWorld::ConstContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
         if(weapon == invStore.end())
             return std::make_pair(1,"");

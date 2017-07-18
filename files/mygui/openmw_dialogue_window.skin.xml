@@ -1,14 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Resource" version="1.1">
-
-    <Resource type="ResourceSkin" name="MW_DispositionEdit" size="0 0 50 50">
-        <Property key="FontName" value="Default"/>
-        <Property key="TextAlign" value="Center"/>
-        <Property key="Static" value="1"/>
-        <Property key="WordWrap" value="true"/>
-        <Property key="TextShadow" value="true"/>
-        <Child type="TextBox" skin="SandText" offset="0 0 0 -4" align="Stretch" name="Client"/>
-    </Resource>
-
 </MyGUI>

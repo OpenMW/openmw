@@ -13,6 +13,8 @@ namespace Compiler
     {
             std::ostream& mStream;
 
+            std::string mContext;
+
         // not implemented
 
             StreamErrorHandler (const StreamErrorHandler&);
@@ -25,6 +27,8 @@ namespace Compiler
             ///< Report a file related error
 
         public:
+
+            void setContext(const std::string& context);
 
         // constructors
 

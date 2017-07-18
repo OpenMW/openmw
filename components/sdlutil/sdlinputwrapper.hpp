@@ -31,7 +31,7 @@ namespace SDLUtil
         void setControllerEventCallback(ControllerListener* listen) { mConListener = listen; }
 
         void capture(bool windowEventsOnly);
-        bool isModifierHeld(SDL_Keymod mod);
+        bool isModifierHeld(int mod);
         bool isKeyDown(SDL_Scancode key);
 
         void setMouseVisible (bool visible);

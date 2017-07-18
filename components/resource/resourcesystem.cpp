@@ -1,5 +1,7 @@
 #include "resourcesystem.hpp"
 
+#include <algorithm>
+
 #include "scenemanager.hpp"
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
@@ -28,8 +30,6 @@ namespace Resource
         // this has to be defined in the .cpp file as we can't delete incomplete types
 
         mResourceManagers.clear();
-
-        // no delete, all handled by auto_ptr
     }
 
     SceneManager* ResourceSystem::getSceneManager()
@@ -83,6 +83,12 @@ namespace Resource
     const VFS::Manager* ResourceSystem::getVFS() const
     {
         return mVFS;
+    }
+
+    void ResourceSystem::reportStats(unsigned int frameNumber, osg::Stats *stats) const
+    {
+        for (std::vector<ResourceManager*>::const_iterator it = mResourceManagers.begin(); it != mResourceManagers.end(); ++it)
+            (*it)->reportStats(frameNumber, stats);
     }
 
 }

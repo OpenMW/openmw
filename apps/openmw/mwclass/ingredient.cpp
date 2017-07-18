@@ -54,7 +54,7 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    boost::shared_ptr<MWWorld::Action> Ingredient::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Ingredient::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -75,9 +75,9 @@ namespace MWClass
     }
 
 
-    boost::shared_ptr<MWWorld::Action> Ingredient::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Ingredient::use (const MWWorld::Ptr& ptr) const
     {
-        boost::shared_ptr<MWWorld::Action> action (new MWWorld::ActionEat (ptr));
+        std::shared_ptr<MWWorld::Action> action (new MWWorld::ActionEat (ptr));
 
         action->setSound ("Swallow");
 
@@ -86,7 +86,7 @@ namespace MWClass
 
     void Ingredient::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Ingredient);
+        std::shared_ptr<Class> instance (new Ingredient);
 
         registerClass (typeid (ESM::Ingredient).name(), instance);
     }

@@ -1,8 +1,6 @@
 #include "charactermanager.hpp"
 
 #include <sstream>
-#include <stdexcept>
-#include <cctype> // std::isalnum
 
 #include <boost/filesystem.hpp>
 
@@ -60,7 +58,7 @@ MWState::Character* MWState::CharacterManager::createCharacter(const std::string
     // The character name is user-supplied, so we need to escape the path
     for (std::string::const_iterator it = name.begin(); it != name.end(); ++it)
     {
-        if (std::isalnum(*it)) // Ignores multibyte characters and non alphanumeric characters
+        if (isalnum(*it)) // Ignores multibyte characters and non alphanumeric characters
             stream << *it;
         else
             stream << "_";

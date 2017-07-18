@@ -35,18 +35,14 @@ set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VER
 
 set(GIT_CHECKOUT FALSE)
 if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
-    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
-        find_package(Git)
+    find_package(Git)
 
-        if(GIT_FOUND)
-            set(GIT_CHECKOUT TRUE)
-        else(GIT_FOUND)
-            message(WARNING "Git executable not found")
-        endif(GIT_FOUND)
-    else(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
-        message(STATUS "Shallow Git clone detected, not attempting to retrieve version info")
-    endif(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
-endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)	
+    if(GIT_FOUND)
+        set(GIT_CHECKOUT TRUE)
+    else(GIT_FOUND)
+        message(WARNING "Git executable not found")
+    endif(GIT_FOUND)
+endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 
 # Macros
 include(OpenMWMacros)
@@ -254,11 +250,16 @@ IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)
 endif()
 
+set(REQUIRED_BULLET_VERSION 286) # Bullet 286 required due to runtime bugfixes for btCapsuleShape
+if (DEFINED ENV{TRAVIS_BRANCH} OR DEFINED ENV{APPVEYOR})
+    set(REQUIRED_BULLET_VERSION 283) # but for build testing, 283 is fine
+endif()
+
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(MyGUI 3.2.1 REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
-find_package(Bullet 283 REQUIRED COMPONENTS BulletCollision LinearMath)
+find_package(Bullet ${REQUIRED_BULLET_VERSION} REQUIRED COMPONENTS BulletCollision LinearMath)
 
 include_directories("."
     SYSTEM
@@ -342,7 +343,13 @@ endif()
 
 # CXX Compiler settings
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wundef -Wno-unused-parameter -std=c++98 -pedantic -Wno-long-long")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wundef -Wno-unused-parameter -std=c++11 -pedantic -Wno-long-long")
+    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS=ON )
+
+    if (APPLE)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
+    endif()
 
     if (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT APPLE)
         if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 3.6 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 3.6)
@@ -710,7 +717,7 @@ if (WIN32)
 endif()
 
 # Apple bundling
-if (APPLE)
+if (APPLE AND DESIRED_QT_VERSION MATCHES 5)
     get_property(QT_COCOA_PLUGIN_PATH TARGET Qt5::QCocoaIntegrationPlugin PROPERTY LOCATION_RELEASE)
     get_filename_component(QT_COCOA_PLUGIN_DIR "${QT_COCOA_PLUGIN_PATH}" DIRECTORY)
     get_filename_component(QT_COCOA_PLUGIN_GROUP "${QT_COCOA_PLUGIN_DIR}" NAME)
@@ -795,7 +802,7 @@ if (APPLE)
         fixup_bundle(\"${INSTALLED_OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"\")
         " COMPONENT Runtime)
     include(CPack)
-endif (APPLE)
+endif (APPLE AND DESIRED_QT_VERSION MATCHES 5)
 
 # Doxygen Target -- simply run 'make doc' or 'make doc_pages'
 # output directory for 'make doc'       is "${OpenMW_BINARY_DIR}/docs/Doxygen"

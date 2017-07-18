@@ -35,6 +35,8 @@ CSVWorld::ReferenceCreator::ReferenceCreator (CSMWorld::Data& data, QUndoStack& 
     QLabel *label = new QLabel ("Cell", this);
     insertBeforeButtons (label, false);
 
+    // Add cell ID input with auto-completion.
+    // Only existing cell IDs are accepted so no ID validation is performed.
     mCell = new CSVWidget::DropLineEdit(CSMWorld::ColumnBase::Display_Cell, this);
     mCell->setCompleter(completionManager.getCompleter(CSMWorld::ColumnBase::Display_Cell).get());
     insertBeforeButtons (mCell, true);

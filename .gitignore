@@ -8,6 +8,10 @@ makefile
 build*
 prebuilt
 
+##windows build process
+/deps
+/MSVC*
+
 ## doxygen
 Doxygen
 

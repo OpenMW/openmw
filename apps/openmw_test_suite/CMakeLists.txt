@@ -11,6 +11,8 @@ if (GTEST_FOUND)
         mwdialogue/test_keywordsearch.cpp
 
         esm/test_fixed_string.cpp
+
+        misc/test_stringops.cpp
     )
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})

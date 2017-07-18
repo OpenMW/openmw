@@ -692,7 +692,7 @@ void CSVWorld::Table::requestFocus (const std::string& id)
         scrollTo (index, QAbstractItemView::PositionAtTop);
 }
 
-void CSVWorld::Table::recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter)
+void CSVWorld::Table::recordFilterChanged (std::shared_ptr<CSMFilter::Node> filter)
 {
     mProxyModel->setFilter (filter);
     tableSizeUpdate();

@@ -48,6 +48,9 @@ cache:
 
 clone_folder: C:\projects\openmw
 
+install:
+    - set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
+
 before_build:
     - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -u -p %PLATFORM% -v %msvc%
 

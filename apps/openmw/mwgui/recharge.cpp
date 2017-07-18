@@ -32,6 +32,7 @@ namespace MWGui
 
 Recharge::Recharge()
     : WindowBase("openmw_recharge_dialog.layout")
+    , mItemSelectionDialog(NULL)
 {
     getWidget(mBox, "Box");
     getWidget(mGemBox, "GemBox");
@@ -43,6 +44,8 @@ Recharge::Recharge()
     mBox->eventItemClicked += MyGUI::newDelegate(this, &Recharge::onItemClicked);
 
     mBox->setDisplayMode(ItemChargeView::DisplayMode_EnchantmentCharge);
+
+    mGemIcon->eventMouseButtonClick += MyGUI::newDelegate(this, &Recharge::onSelectItem);
 
     setVisible(false);
 }
@@ -68,7 +71,7 @@ void Recharge::start (const MWWorld::Ptr &item)
 {
     mGemIcon->setItem(item);
     mGemIcon->setUserString("ToolTipType", "ItemPtr");
-    mGemIcon->setUserData(item);
+    mGemIcon->setUserData(MWWorld::Ptr(item));
 
     updateView();
 }
@@ -86,6 +89,12 @@ void Recharge::updateView()
     mGemBox->setVisible(toolBoxVisible);
     mGemBox->setUserString("Hidden", toolBoxVisible ? "false" : "true");
 
+    if (!toolBoxVisible)
+    {
+        mGemIcon->setItem(MWWorld::Ptr());
+        mGemIcon->clearUserStrings();
+    }
+
     mBox->update();
 
     Gui::Box* box = dynamic_cast<Gui::Box*>(mMainWidget);
@@ -99,6 +108,34 @@ void Recharge::updateView()
 void Recharge::onCancel(MyGUI::Widget *sender)
 {
     exit();
+}
+
+void Recharge::onSelectItem(MyGUI::Widget *sender)
+{
+    delete mItemSelectionDialog;
+    mItemSelectionDialog = new ItemSelectionDialog("#{sSoulGemsWithSouls}");
+    mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &Recharge::onItemSelected);
+    mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &Recharge::onItemCancel);
+    mItemSelectionDialog->setVisible(true);
+    mItemSelectionDialog->openContainer(MWMechanics::getPlayer());
+    mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyChargedSoulstones);
+}
+
+void Recharge::onItemSelected(MWWorld::Ptr item)
+{
+    mItemSelectionDialog->setVisible(false);
+
+    mGemIcon->setItem(item);
+    mGemIcon->setUserString ("ToolTipType", "ItemPtr");
+    mGemIcon->setUserData(item);
+
+    MWBase::Environment::get().getWindowManager()->playSound(item.getClass().getDownSoundId(item));
+    updateView();
+}
+
+void Recharge::onItemCancel()
+{
+    mItemSelectionDialog->setVisible(false);
 }
 
 void Recharge::onItemClicked(MyGUI::Widget *sender, const MWWorld::Ptr& item)
@@ -137,9 +174,15 @@ void Recharge::onItemClicked(MyGUI::Widget *sender, const MWWorld::Ptr& item)
         item.getCellRef().setEnchantmentCharge(
             std::min(item.getCellRef().getEnchantmentCharge() + restored, static_cast<float>(enchantment->mData.mCharge)));
 
+        MWBase::Environment::get().getWindowManager()->playSound("Enchant Success");
+
         player.getClass().getContainerStore(player).restack(item);
 
         player.getClass().skillUsageSucceeded (player, ESM::Skill::Enchant, 0);
+    }
+    else
+    {
+        MWBase::Environment::get().getWindowManager()->playSound("Enchant Fail");
     }
 
     gem.getContainerStore()->remove(gem, 1, player);

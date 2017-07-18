@@ -46,11 +46,6 @@ namespace MWMechanics
 
     float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap)
     {
-        CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-
-        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude())
-            return 0;
-
         float y = std::numeric_limits<float>::max();
         float lowestSkill = 0;
 
@@ -80,6 +75,13 @@ namespace MWMechanics
             }
         }
 
+        bool godmode = actor == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+
+        CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+
+        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude()&& !godmode)
+            return 0;
+
         if (spell->mData.mType == ESM::Spell::ST_Power)
             return stats.getSpells().canUsePower(spell) ? 100 : 0;
 
@@ -89,14 +91,17 @@ namespace MWMechanics
         if (spell->mData.mFlags & ESM::Spell::F_Always)
             return 100;
 
+        if (godmode)
+        {
+            return 100;
+        }
+
         float castBonus = -stats.getMagicEffects().get(ESM::MagicEffect::Sound).getMagnitude();
 
         int actorWillpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
         int actorLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
 
         float castChance = (lowestSkill - spell->mData.mCost + castBonus + 0.2f * actorWillpower + 0.1f * actorLuck) * stats.getFatigueTerm();
-        if (MWBase::Environment::get().getWorld()->getGodModeState() && actor == getPlayer())
-            castChance = 100;
 
         if (!cap)
             return std::max(0.f, castChance);
@@ -413,10 +418,6 @@ namespace MWMechanics
             float magnitudeMult = 1;
             if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && target.getClass().isActor())
             {
-                // Notify the target actor they've been hit
-                if (target != caster && !caster.isEmpty())
-                    target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
-
                 if (absorbed)
                     continue;
 
@@ -449,6 +450,10 @@ namespace MWMechanics
                 // If player is attempting to cast a harmful spell, show the target's HP bar
                 if (castByPlayer && target != caster)
                     MWBase::Environment::get().getWindowManager()->setEnemy(target);
+
+                // Notify the target actor they've been hit
+                if (target != caster && !caster.isEmpty())
+                    target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
             }
 
             if (magnitudeMult > 0 && !absorbed)
@@ -711,13 +716,18 @@ namespace MWMechanics
 
         mStack = false;
 
+        bool godmode = mCaster == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+
         // Check if there's enough charge left
         if (enchantment->mData.mType == ESM::Enchantment::WhenUsed || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
         {
-            const int castCost = getEffectiveEnchantmentCastCost(static_cast<float>(enchantment->mData.mCost), mCaster);
+            int castCost = getEffectiveEnchantmentCastCost(static_cast<float>(enchantment->mData.mCost), mCaster);
 
             if (item.getCellRef().getEnchantmentCharge() == -1)
                 item.getCellRef().setEnchantmentCharge(static_cast<float>(enchantment->mData.mCharge));
+
+            if (godmode)
+                castCost = 0;
 
             if (item.getCellRef().getEnchantmentCharge() < castCost)
             {
@@ -748,8 +758,10 @@ namespace MWMechanics
             if (mCaster == getPlayer())
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 1);
         }
-        if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
+        if (enchantment->mData.mType == ESM::Enchantment::CastOnce && !godmode)
+        {
             item.getContainerStore()->remove(item, 1, mCaster);
+        }
         else if (enchantment->mData.mType != ESM::Enchantment::WhenStrikes)
         {
             if (mCaster == getPlayer())
@@ -799,41 +811,50 @@ namespace MWMechanics
 
         int school = 0;
 
+        bool godmode = mCaster == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+
         if (mCaster.getClass().isActor() && !mAlwaysSucceed)
         {
             school = getSpellSchool(spell, mCaster);
 
             CreatureStats& stats = mCaster.getClass().getCreatureStats(mCaster);
 
-            // Reduce fatigue (note that in the vanilla game, both GMSTs are 0, and there's no fatigue loss)
-            static const float fFatigueSpellBase = store.get<ESM::GameSetting>().find("fFatigueSpellBase")->getFloat();
-            static const float fFatigueSpellMult = store.get<ESM::GameSetting>().find("fFatigueSpellMult")->getFloat();
-            DynamicStat<float> fatigue = stats.getFatigue();
-            const float normalizedEncumbrance = mCaster.getClass().getNormalizedEncumbrance(mCaster);
-            float fatigueLoss = spell->mData.mCost * (fFatigueSpellBase + normalizedEncumbrance * fFatigueSpellMult);
-            fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss); stats.setFatigue(fatigue);
-
-            bool fail = false;
-
-            // Check success
-            float successChance = getSpellSuccessChance(spell, mCaster);
-            if (Misc::Rng::roll0to99() >= successChance)
+            if (!godmode)
             {
-                if (mCaster == getPlayer())
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
-                fail = true;
-            }
+                // Reduce fatigue (note that in the vanilla game, both GMSTs are 0, and there's no fatigue loss)
+                static const float fFatigueSpellBase = store.get<ESM::GameSetting>().find("fFatigueSpellBase")->getFloat();
+                static const float fFatigueSpellMult = store.get<ESM::GameSetting>().find("fFatigueSpellMult")->getFloat();
+                DynamicStat<float> fatigue = stats.getFatigue();
+                const float normalizedEncumbrance = mCaster.getClass().getNormalizedEncumbrance(mCaster);
 
-            if (fail)
-            {
-                // Failure sound
-                static const std::string schools[] = {
-                    "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-                };
+                float fatigueLoss = spell->mData.mCost * (fFatigueSpellBase + normalizedEncumbrance * fFatigueSpellMult);
+                fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss); stats.setFatigue(fatigue);
 
-                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                sndMgr->playSound3D(mCaster, "Spell Failure " + schools[school], 1.0f, 1.0f);
-                return false;
+                bool fail = false;
+
+                // Check success
+                if (!(mCaster == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState()))
+                {
+                    float successChance = getSpellSuccessChance(spell, mCaster);
+                    if (Misc::Rng::roll0to99() >= successChance)
+                    {
+                        if (mCaster == getPlayer())
+                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
+                        fail = true;
+                    }
+                }
+
+                if (fail)
+                {
+                    // Failure sound
+                    static const std::string schools[] = {
+                        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                    };
+
+                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                    sndMgr->playSound3D(mCaster, "Spell Failure " + schools[school], 1.0f, 1.0f);
+                    return false;
+                }
             }
 
             // A power can be used once per 24h
@@ -1041,6 +1062,8 @@ namespace MWMechanics
 
         bool receivedMagicDamage = false;
 
+        bool godmode = actor == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState(); 
+
         switch (effectKey.mId)
         {
         case ESM::MagicEffect::DamageAttribute:
@@ -1063,17 +1086,34 @@ namespace MWMechanics
             adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::RestoreHealth, magnitude);
             break;
         case ESM::MagicEffect::DamageHealth:
+            if (!godmode)
+            {
+                receivedMagicDamage = true;
+                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
+            }
         case ESM::MagicEffect::DamageMagicka:
         case ESM::MagicEffect::DamageFatigue:
-            receivedMagicDamage = true;
-            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
+            if (!godmode)
+            {
+                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
+            }
+
             break;
+
         case ESM::MagicEffect::AbsorbHealth:
+            if (!godmode)
+            {
+                if (magnitude > 0.f)
+                    receivedMagicDamage = true;
+                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
+            }
         case ESM::MagicEffect::AbsorbMagicka:
         case ESM::MagicEffect::AbsorbFatigue:
-            if (magnitude > 0.f)
-                receivedMagicDamage = true;
-            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
+            if (!godmode)
+            {
+                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
+            }
+
             break;
 
         case ESM::MagicEffect::DisintegrateArmor:
@@ -1118,9 +1158,13 @@ namespace MWMechanics
             if (weather > 1)
                 damageScale *= fMagicSunBlockedMult;
 
-            adjustDynamicStat(creatureStats, 0, -magnitude * damageScale);
-            if (magnitude * damageScale > 0.f)
-                receivedMagicDamage = true;
+            if (!godmode)
+            {
+                adjustDynamicStat(creatureStats, 0, -magnitude * damageScale);
+                if (magnitude * damageScale > 0.f)
+                    receivedMagicDamage = true;
+            }
+
             break;
         }
 
@@ -1129,8 +1173,12 @@ namespace MWMechanics
         case ESM::MagicEffect::FrostDamage:
         case ESM::MagicEffect::Poison:
         {
-            adjustDynamicStat(creatureStats, 0, -magnitude);
-            receivedMagicDamage = true;
+            if (!godmode)
+            {
+                adjustDynamicStat(creatureStats, 0, -magnitude);
+                receivedMagicDamage = true;
+            }
+
             break;
         }
 
@@ -1173,6 +1221,42 @@ namespace MWMechanics
         if (receivedMagicDamage && actor == getPlayer())
             MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
         return true;
+    }
+
+    std::string getSummonedCreature(int effectId)
+    {
+        static std::map<int, std::string> summonMap;
+        if (summonMap.empty())
+        {
+            summonMap[ESM::MagicEffect::SummonAncestralGhost] = "sMagicAncestralGhostID";
+            summonMap[ESM::MagicEffect::SummonBonelord] = "sMagicBonelordID";
+            summonMap[ESM::MagicEffect::SummonBonewalker] = "sMagicLeastBonewalkerID";
+            summonMap[ESM::MagicEffect::SummonCenturionSphere] = "sMagicCenturionSphereID";
+            summonMap[ESM::MagicEffect::SummonClannfear] = "sMagicClannfearID";
+            summonMap[ESM::MagicEffect::SummonDaedroth] = "sMagicDaedrothID";
+            summonMap[ESM::MagicEffect::SummonDremora] = "sMagicDremoraID";
+            summonMap[ESM::MagicEffect::SummonFabricant] = "sMagicFabricantID";
+            summonMap[ESM::MagicEffect::SummonFlameAtronach] = "sMagicFlameAtronachID";
+            summonMap[ESM::MagicEffect::SummonFrostAtronach] = "sMagicFrostAtronachID";
+            summonMap[ESM::MagicEffect::SummonGoldenSaint] = "sMagicGoldenSaintID";
+            summonMap[ESM::MagicEffect::SummonGreaterBonewalker] = "sMagicGreaterBonewalkerID";
+            summonMap[ESM::MagicEffect::SummonHunger] = "sMagicHungerID";
+            summonMap[ESM::MagicEffect::SummonScamp] = "sMagicScampID";
+            summonMap[ESM::MagicEffect::SummonSkeletalMinion] = "sMagicSkeletalMinionID";
+            summonMap[ESM::MagicEffect::SummonStormAtronach] = "sMagicStormAtronachID";
+            summonMap[ESM::MagicEffect::SummonWingedTwilight] = "sMagicWingedTwilightID";
+            summonMap[ESM::MagicEffect::SummonWolf] = "sMagicCreature01ID";
+            summonMap[ESM::MagicEffect::SummonBear] = "sMagicCreature02ID";
+            summonMap[ESM::MagicEffect::SummonBonewolf] = "sMagicCreature03ID";
+            summonMap[ESM::MagicEffect::SummonCreature04] = "sMagicCreature04ID";
+            summonMap[ESM::MagicEffect::SummonCreature05] = "sMagicCreature05ID";
+        }
+
+        std::map<int, std::string>::const_iterator it = summonMap.find(effectId);
+        if (it == summonMap.end())
+            return std::string();
+        else
+            return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(it->second)->getString();
     }
 
 }

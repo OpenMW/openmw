@@ -68,11 +68,13 @@
     <Resource type="ResourceLayout" name="MW_StatNameValue" version="3.2.0">
         <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
             <Property key="NeedMouse" value="true"/>
-            <Widget type="TextBox" skin="SandText" position="0 0 160 18" align="Left HStretch" name="StatName">
+            <Widget type="TextBox" skin="SandText" position="0 0 168 18" align="Left HStretch" name="StatName">
                 <Property key="NeedMouse" value="false"/>
+                <Property key="TextAlign" value="Left"/>
             </Widget>
-            <Widget type="TextBox" skin="SandTextRight" position="160 0 40 18" align="Right Top" name="StatValue">
+            <Widget type="TextBox" skin="SandTextRight" position="168 0 32 18" align="Right Top" name="StatValue">
                 <Property key="NeedMouse" value="false"/>
+                <Property key="TextAlign" value="Right"/>
             </Widget>
         </Widget>
     </Resource>
@@ -101,10 +103,10 @@
             <Property key="ModeDrop" value="true"/>
 
             <Widget type="Widget" skin="MW_Box" position="0 0 100 26" align="Stretch">
-                <Widget type="TextBox" skin="SandText" position="6 2 71 20" align="Stretch" name="Client">
+                <Widget type="TextBox" skin="SandText" position="6 3 71 20" align="Stretch" name="Client">
                     <Property key="TextAlign" value="Left VCenter"/>
                 </Widget>
-                <Widget type="ListBox" skin="MW_PopupList" position="65 38 100 200" style="Popup" layer="Popup" name="List">
+                <Widget type="ListBox" skin="MW_PopupListNoTransp" position="65 38 100 200" style="Popup" layer="Popup" name="List">
                     <Property key="Visible" value="false"/>
                 </Widget>
                 <Widget type="Button" skin="MW_ArrowDown" position="79 7 14 11" align="Right VCenter" name="Button"/>
@@ -124,6 +126,18 @@
                     <Property key="Colour" value="0 0 0"/>
                     <Property key="Alpha" value="0.5"/>
                 </Widget>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_ItemIconNoShadow" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 42 42" name="Root">
+            <Widget type="ImageBox" skin="ImageBox" position="0 0 42 42" align="Stretch" name="Frame">
+                <Widget type="TextBox" skin="CountText" position="5 19 32 18" align="Right Bottom" name="Text">
+                    <Property key="TextAlign" value="Right"/>
+                    <Property key="TextShadow" value="true"/>
+                </Widget>
+                <Widget type="ImageBox" skin="ImageBox" position="5 5 32 32" align="Stretch" name="Item"/>
             </Widget>
         </Widget>
     </Resource>

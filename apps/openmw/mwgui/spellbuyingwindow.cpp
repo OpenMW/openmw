@@ -6,7 +6,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
@@ -26,8 +25,6 @@ namespace MWGui
         , mLastPos(0)
         , mCurrentY(0)
     {
-        setCoord(0, 0, 450, 300);
-
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
         getWidget(mSpellsView, "SpellsView");
@@ -68,7 +65,7 @@ namespace MWGui
 
         toAdd->setUserData(price);
         toAdd->setCaptionWithReplacing(spell->mName+"   -   "+MyGUI::utility::toString(price)+"#{sgp}");
-        toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
+        toAdd->setSize(mSpellsView->getWidth(),sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
         toAdd->setUserString("Spell", spellId);
@@ -148,7 +145,7 @@ namespace MWGui
 
         startSpellBuying(mPtr);
 
-        MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
+        MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
     }
 
     void SpellBuyingWindow::onCancelButtonClicked(MyGUI::Widget* _sender)

@@ -23,7 +23,7 @@ namespace MWClass
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
-            virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            virtual std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 
@@ -70,6 +70,8 @@ namespace MWClass
             virtual void restock (const MWWorld::Ptr &ptr) const;
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
+
+            virtual bool useAnim() const;
     };
 }
 

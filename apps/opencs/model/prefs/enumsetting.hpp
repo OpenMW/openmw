@@ -5,6 +5,8 @@
 
 #include "setting.hpp"
 
+class QComboBox;
+
 namespace CSMPrefs
 {
     struct EnumValue
@@ -35,6 +37,7 @@ namespace CSMPrefs
             std::string mTooltip;
             EnumValue mDefault;
             EnumValues mValues;
+            QComboBox* mWidget;
 
         public:
 
@@ -52,6 +55,8 @@ namespace CSMPrefs
 
             /// Return label, input widget.
             virtual std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent);
+
+            virtual void updateWidget();
 
         private slots:
 

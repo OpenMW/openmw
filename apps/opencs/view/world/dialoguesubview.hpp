@@ -84,7 +84,7 @@ namespace CSVWorld
 
         CSMWorld::ColumnBase::Display mDisplay;
 
-        std::auto_ptr<refWrapper> mIndexWrapper;
+        std::unique_ptr<refWrapper> mIndexWrapper;
 
     public:
         DialogueDelegateDispatcherProxy(QWidget* editor,

@@ -157,6 +157,7 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
 
     mProxyModel = new QSortFilterProxyModel (this);
     mProxyModel->setSourceModel (mModel);
+    mProxyModel->setSortRole(Qt::UserRole);
 
     setModel (mProxyModel);
     setColumnHidden (2, true);

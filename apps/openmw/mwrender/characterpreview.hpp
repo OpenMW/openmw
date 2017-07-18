@@ -28,7 +28,7 @@ namespace MWRender
     class CharacterPreview
     {
     public:
-        CharacterPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, MWWorld::Ptr character, int sizeX, int sizeY,
+        CharacterPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, const MWWorld::Ptr& character, int sizeX, int sizeY,
                          const osg::Vec3f& position, const osg::Vec3f& lookAt);
         virtual ~CharacterPreview();
 
@@ -47,6 +47,7 @@ namespace MWRender
 
     protected:
         virtual bool renderHeadOnly() { return false; }
+        void setBlendMode();
         virtual void onSetup();
 
         osg::ref_ptr<osg::Group> mParent;
@@ -60,7 +61,7 @@ namespace MWRender
 
         MWWorld::Ptr mCharacter;
 
-        std::auto_ptr<MWRender::NpcAnimation> mAnimation;
+        osg::ref_ptr<MWRender::NpcAnimation> mAnimation;
         osg::ref_ptr<osg::PositionAttitudeTransform> mNode;
         std::string mCurrentAnimGroup;
 
@@ -72,7 +73,7 @@ namespace MWRender
     {
     public:
 
-        InventoryPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, MWWorld::Ptr character);
+        InventoryPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, const MWWorld::Ptr& character);
 
         void updatePtr(const MWWorld::Ptr& ptr);
 

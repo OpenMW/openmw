@@ -1,5 +1,5 @@
 #include "loadordererror.hpp"
-#include <assert.h>
+#include <cassert>
 
 QString ContentSelectorModel::LoadOrderError::sErrorToolTips[ErrorCode_LoadOrder] =
 {

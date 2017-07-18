@@ -108,7 +108,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<CreatureCustomData> data (new CreatureCustomData);
+            std::unique_ptr<CreatureCustomData> data (new CreatureCustomData);
 
             MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
@@ -194,10 +194,10 @@ namespace MWClass
         // FIXME: use const version of InventoryStore functions once they are available
         if (ptr.getClass().hasInventoryStore(ptr))
         {
-            MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+            const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
             for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
             {
-                MWWorld::ContainerStoreIterator equipped = invStore.getSlot(slot);
+                MWWorld::ConstContainerStoreIterator equipped = invStore.getSlot(slot);
                 if (equipped != invStore.end())
                 {
                     model = equipped->getClass().getModel(*equipped);
@@ -249,7 +249,12 @@ namespace MWClass
         if (!weapon.isEmpty())
             dist *= weapon.get<ESM::Weapon>()->mBase->mData.mReach;
 
-        std::pair<MWWorld::Ptr, osg::Vec3f> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist);
+        // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+        std::vector<MWWorld::Ptr> targetActors;
+        if (!ptr.isEmpty() && ptr.getClass().isActor() && ptr != MWMechanics::getPlayer())
+            ptr.getClass().getCreatureStats(ptr).getAiSequence().getCombatTargets(targetActors);
+
+        std::pair<MWWorld::Ptr, osg::Vec3f> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist, targetActors);
         if (result.first.isEmpty())
             return; // Didn't hit anything
 
@@ -318,6 +323,9 @@ namespace MWClass
         if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage, attackStrength))
             damage = 0;
 
+        if (victim == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState())
+            damage = 0;
+
         MWMechanics::diseaseContact(victim, ptr);
 
         victim.getClass().onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true);
@@ -325,22 +333,38 @@ namespace MWClass
 
     void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) const
     {
-        // NOTE: 'object' and/or 'attacker' may be empty.
+        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-        if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
-            getCreatureStats(ptr).setAttacked(true);
+        // NOTE: 'object' and/or 'attacker' may be empty.        
+        if (!attacker.isEmpty() && attacker.getClass().isActor() && !stats.getAiSequence().isInCombat(attacker))
+            stats.setAttacked(true);
 
         // Self defense
         bool setOnPcHitMe = true; // Note OnPcHitMe is not set for friendly hits.
         
         // No retaliation for totally static creatures (they have no movement or attacks anyway)
         if (isMobile(ptr) && !attacker.isEmpty())
-        {
             setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+
+        // Attacker and target store each other as hitattemptactor if they have no one stored yet
+        if (!attacker.isEmpty() && attacker.getClass().isActor() && !ptr.isEmpty() && ptr.getClass().isActor())
+        {
+            MWMechanics::CreatureStats& statsAttacker = attacker.getClass().getCreatureStats(attacker);
+            // First handle the attacked actor
+            if ((stats.getHitAttemptActorId() == -1)
+                && (statsAttacker.getAiSequence().isInCombat(ptr)
+                    || attacker == MWMechanics::getPlayer()))
+                stats.setHitAttemptActorId(statsAttacker.getActorId());
+
+            // Next handle the attacking actor
+            if ((statsAttacker.getHitAttemptActorId() == -1)
+                && (statsAttacker.getAiSequence().isInCombat(ptr)
+                    || attacker == MWMechanics::getPlayer()))
+                statsAttacker.setHitAttemptActorId(stats.getActorId());
         }
 
         if (!object.isEmpty())
-            getCreatureStats(ptr).setLastHitAttemptObject(object.getCellRef().getRefId());
+            stats.setLastHitAttemptObject(object.getCellRef().getRefId());
 
         if (setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
         {
@@ -350,6 +374,11 @@ namespace MWClass
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
 
+        bool godmode = object == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+
+        if (godmode)
+            damage = 0;
+
         if (!successful)
         {
             // Missed
@@ -358,7 +387,7 @@ namespace MWClass
         }
 
         if (!object.isEmpty())
-            getCreatureStats(ptr).setLastHitObject(object.getCellRef().getRefId());
+            stats.setLastHitObject(object.getCellRef().getRefId());
 
         if (damage > 0.0f && !object.isEmpty())
             MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
@@ -371,23 +400,20 @@ namespace MWClass
             if (!attacker.isEmpty())
             {
                 // Check for knockdown
-                float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
-                float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
+                float agilityTerm = stats.getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
+                float knockdownTerm = stats.getAttribute(ESM::Attribute::Agility).getModified()
                         * getGmst().iKnockDownOddsMult->getInt() * 0.01f + getGmst().iKnockDownOddsBase->getInt();
                 if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99())
-                {
-                    getCreatureStats(ptr).setKnockedDown(true);
-
-                }
+                    stats.setKnockedDown(true);
                 else
-                    getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
+                    stats.setHitRecovery(true); // Is this supposed to always occur?
             }
 
             damage = std::max(1.f, damage);
 
             if(ishealth)
             {
-                if (!attacker.isEmpty())
+                if (!attacker.isEmpty() && !godmode)
                 {
                     damage = scaleDamage(damage, attacker, ptr);
                     MWBase::Environment::get().getWorld()->spawnBloodEffect(ptr, hitPosition);
@@ -395,20 +421,20 @@ namespace MWClass
 
                 MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
 
-                MWMechanics::DynamicStat<float> health(getCreatureStats(ptr).getHealth());
+                MWMechanics::DynamicStat<float> health(stats.getHealth());
                 health.setCurrent(health.getCurrent() - damage);
-                getCreatureStats(ptr).setHealth(health);
+                stats.setHealth(health);
             }
             else
             {
-                MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
+                MWMechanics::DynamicStat<float> fatigue(stats.getFatigue());
                 fatigue.setCurrent(fatigue.getCurrent() - damage, true);
-                getCreatureStats(ptr).setFatigue(fatigue);
+                stats.setFatigue(fatigue);
             }
         }
     }
 
-    boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
@@ -416,17 +442,17 @@ namespace MWClass
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfCreature");
 
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
 
         if(getCreatureStats(ptr).isDead())
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
         if(ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat())
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
-        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
+        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
     MWWorld::ContainerStore& Creature::getContainerStore (const MWWorld::Ptr& ptr) const
@@ -463,7 +489,7 @@ namespace MWClass
 
     void Creature::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Creature);
+        std::shared_ptr<Class> instance (new Creature);
 
         registerClass (typeid (ESM::Creature).name(), instance);
     }
@@ -528,7 +554,7 @@ namespace MWClass
 
     bool Creature::hasToolTip(const MWWorld::ConstPtr& ptr) const
     {
-        if (!ptr.getRefData().getCustomData())
+        if (!ptr.getRefData().getCustomData() || MWBase::Environment::get().getWindowManager()->isGuiMode())
             return true;
 
         const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
@@ -716,7 +742,7 @@ namespace MWClass
             if (!ptr.getRefData().getCustomData())
             {
                 // Create a CustomData, but don't fill it from ESM records (not needed)
-                std::auto_ptr<CreatureCustomData> data (new CreatureCustomData);
+                std::unique_ptr<CreatureCustomData> data (new CreatureCustomData);
 
                 if (hasInventoryStore(ptr))
                     data->mContainerStore = new MWWorld::InventoryStore();

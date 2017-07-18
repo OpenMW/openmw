@@ -45,9 +45,9 @@ CSMTools::MergeOperation::MergeOperation (CSMDoc::Document& document, ToUTF8::Fr
     appendStage (new FinishMergedDocumentStage (mState, encoding));
 }
 
-void CSMTools::MergeOperation::setTarget (std::auto_ptr<CSMDoc::Document> document)
+void CSMTools::MergeOperation::setTarget (std::unique_ptr<CSMDoc::Document> document)
 {
-    mState.mTarget = document;
+    mState.mTarget = std::move(document);
 }
 
 void CSMTools::MergeOperation::operationDone()

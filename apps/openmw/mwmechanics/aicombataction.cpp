@@ -45,23 +45,21 @@ int getRangeTypes (const ESM::EffectList& effects)
 
 float suggestCombatRange(int rangeTypes)
 {
+    static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
+    static float fHandToHandReach = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
+
+    // This distance is a possible distance of melee attack
+    static float distance = fCombatDistance * std::max(2.f, fHandToHandReach);
+
     if (rangeTypes & Touch)
     {
-        static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
         return fCombatDistance;
     }
-    else if (rangeTypes & Target)
-    {
-        return 1000.f;
-    }
-    else
-    {
-        // For Self spells, distance doesn't matter, so back away slightly to avoid enemy hits
-        return 600.f;
-    }
+
+    return distance * 4;
 }
 
-int numEffectsToCure (const MWWorld::Ptr& actor, int effectFilter=-1)
+int numEffectsToDispel (const MWWorld::Ptr& actor, int effectFilter=-1, bool negative = true)
 {
     int toCure=0;
     const MWMechanics::ActiveSpells& activeSpells = actor.getClass().getCreatureStats(actor).getActiveSpells();
@@ -75,9 +73,14 @@ int numEffectsToCure (const MWWorld::Ptr& actor, int effectFilter=-1)
             if (effectFilter != -1 && effectId != effectFilter)
                 continue;
             const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful
-                    && effectIt->mDuration > 3 // Don't attempt to cure if effect runs out shortly anyway
-                    )
+
+            if (effectIt->mDuration <= 3) // Don't attempt to dispel if effect runs out shortly anyway
+                continue;
+
+            if (negative && magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
+                ++toCure;
+
+            if (!negative && !(magicEffect->mData.mFlags & ESM::MagicEffect::Harmful))
                 ++toCure;
         }
     }
@@ -264,7 +267,31 @@ namespace MWMechanics
         case ESM::MagicEffect::ResistCorprusDisease:
         case ESM::MagicEffect::Invisibility:
         case ESM::MagicEffect::Chameleon:
+        case ESM::MagicEffect::NightEye:
+        case ESM::MagicEffect::Vampirism:
+        case ESM::MagicEffect::StuntedMagicka:
+        case ESM::MagicEffect::ExtraSpell:
+        case ESM::MagicEffect::RemoveCurse:
+        case ESM::MagicEffect::CommandCreature:
+        case ESM::MagicEffect::CommandHumanoid:
             return 0.f;
+
+        case ESM::MagicEffect::Sound:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                // there is no need to cast sound if enemy is not able to cast spells
+                CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
+
+                if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude() > 0)
+                    return 0.f;
+
+                if (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                    return 0.f;
+
+                break;
+            }
 
         case ESM::MagicEffect::RestoreAttribute:
             return 0.f; // TODO: implement based on attribute damage
@@ -278,6 +305,8 @@ namespace MWMechanics
         case ESM::MagicEffect::ResistParalysis:
         case ESM::MagicEffect::ResistPoison:
         case ESM::MagicEffect::ResistShock:
+        case ESM::MagicEffect::SpellAbsorption:
+        case ESM::MagicEffect::Reflect:
             return 0.f; // probably useless since we don't know in advance what the enemy will cast
 
         // don't cast these for now as they would make the NPC cast the same effect over and over again, especially when they have potions
@@ -287,13 +316,50 @@ namespace MWMechanics
         case ESM::MagicEffect::FortifyFatigue:
         case ESM::MagicEffect::FortifySkill:
         case ESM::MagicEffect::FortifyMaximumMagicka:
+        case ESM::MagicEffect::FortifyAttack:
             return 0.f;
 
+        case ESM::MagicEffect::Burden:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                // Ignore enemy without inventory
+                if (!enemy.getClass().hasInventoryStore(enemy))
+                    return 0.f;
+
+                // burden makes sense only to overburden an enemy
+                float burden = enemy.getClass().getEncumbrance(enemy) - enemy.getClass().getCapacity(enemy);
+                if (burden > 0)
+                    return 0.f;
+
+                if ((effect.mMagnMin + effect.mMagnMax)/2.f > -burden)
+                    rating *= 3;
+                else
+                    return 0.f;
+
+                break;
+            }
+
         case ESM::MagicEffect::Feather:
-            if (actor.getClass().getEncumbrance(actor) - actor.getClass().getCapacity(actor) >= 0)
-                return 100.f;
-            else
-                return 0.f;
+            {
+                // Ignore actors without inventory
+                if (!actor.getClass().hasInventoryStore(actor))
+                    return 0.f;
+
+                // feather makes sense only for overburden actors
+                float burden = actor.getClass().getEncumbrance(actor) - actor.getClass().getCapacity(actor);
+                if (burden <= 0)
+                    return 0.f;
+
+                if ((effect.mMagnMin + effect.mMagnMax)/2.f >= burden)
+                    rating *= 3;
+                else
+                    return 0.f;
+
+                break;
+            }
+
         case ESM::MagicEffect::Levitate:
             return 0.f; // AI isn't designed to take advantage of this, and could be perceived as unfair anyway
         case ESM::MagicEffect::BoundBoots:
@@ -337,17 +403,109 @@ namespace MWMechanics
             }
             break;
 
-        // Prefer Cure effects over Dispel, because Dispel also removes positive effects
         case ESM::MagicEffect::Dispel:
-            return 1000.f * numEffectsToCure(actor);
-        case ESM::MagicEffect::CureParalyzation:
-            return 1001.f * numEffectsToCure(actor, ESM::MagicEffect::Paralyze);
-        case ESM::MagicEffect::CurePoison:
-            return 1001.f * numEffectsToCure(actor, ESM::MagicEffect::Poison);
+        {
+            int numPositive = 0;
+            int numNegative = 0;
+            int diff = 0;
 
-        case ESM::MagicEffect::DisintegrateArmor: // TODO: check if actor is wearing armor
-        case ESM::MagicEffect::DisintegrateWeapon: // TODO: check if actor is wearing weapon
+            if (effect.mRange == ESM::RT_Self)
+            {
+                numPositive = numEffectsToDispel(actor, -1, false);
+                numNegative = numEffectsToDispel(actor);
+
+                diff = numNegative - numPositive;
+            }
+            else
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                numPositive = numEffectsToDispel(enemy, -1, false);
+                numNegative = numEffectsToDispel(enemy);
+
+                diff = numPositive - numNegative;
+
+                // if rating < 0 here, the spell will be considered as negative later
+                rating *= -1;
+            }
+
+            if (diff <= 0)
+                return 0.f;
+
+            rating *= (diff) / 5.f;
+
             break;
+        }
+
+        // Prefer Cure effects over Dispel, because Dispel also removes positive effects
+        case ESM::MagicEffect::CureParalyzation:
+            return 1001.f * numEffectsToDispel(actor, ESM::MagicEffect::Paralyze);
+
+        case ESM::MagicEffect::CurePoison:
+            return 1001.f * numEffectsToDispel(actor, ESM::MagicEffect::Poison);
+        case ESM::MagicEffect::DisintegrateArmor:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                // Ignore enemy without inventory
+                if (!enemy.getClass().hasInventoryStore(enemy))
+                    return 0.f;
+
+                MWWorld::InventoryStore& inv = enemy.getClass().getInventoryStore(enemy);
+
+                // According to UESP
+                static const int armorSlots[] = {
+                    MWWorld::InventoryStore::Slot_CarriedLeft,
+                    MWWorld::InventoryStore::Slot_Cuirass,
+                    MWWorld::InventoryStore::Slot_LeftPauldron,
+                    MWWorld::InventoryStore::Slot_RightPauldron,
+                    MWWorld::InventoryStore::Slot_LeftGauntlet,
+                    MWWorld::InventoryStore::Slot_RightGauntlet,
+                    MWWorld::InventoryStore::Slot_Helmet,
+                    MWWorld::InventoryStore::Slot_Greaves,
+                    MWWorld::InventoryStore::Slot_Boots
+                };
+
+                bool enemyHasArmor = false;
+
+                // Ignore enemy without armor
+                for (unsigned int i=0; i<sizeof(armorSlots)/sizeof(int); ++i)
+                {
+                    MWWorld::ContainerStoreIterator item = inv.getSlot(armorSlots[i]);
+
+                    if (item != inv.end() && (item.getType() == MWWorld::ContainerStore::Type_Armor))
+                    {
+                        enemyHasArmor = true;
+                        break;
+                    }
+                }
+
+                if (!enemyHasArmor)
+                    return 0.f;
+
+                break;
+            }
+
+        case ESM::MagicEffect::DisintegrateWeapon:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                // Ignore enemy without inventory
+                if (!enemy.getClass().hasInventoryStore(enemy))
+                    return 0.f;
+
+                MWWorld::InventoryStore& inv = enemy.getClass().getInventoryStore(enemy);
+                MWWorld::ContainerStoreIterator item = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+
+                // Ignore enemy without weapons
+                if (item == inv.end() || (item.getType() != MWWorld::ContainerStore::Type_Weapon))
+                    return 0.f;
+
+                break;
+            }
 
         case ESM::MagicEffect::DamageAttribute:
         case ESM::MagicEffect::DrainAttribute:
@@ -383,26 +541,70 @@ namespace MWMechanics
             break;
         }
 
-        // TODO: for non-cumulative effects (e.g. paralyze), check if the enemy is already suffering from them
-
-        // TODO: could take into account enemy's resistance/weakness against the effect
-
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
+
+        // Underwater casting not possible
+        if (effect.mRange == ESM::RT_Target)
+        {
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(actor), 0.75f))
+                return 0.f;
+
+            if (enemy.isEmpty())
+                return 0.f;
+
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(enemy), 0.75f))
+                return 0.f;
+        }
 
         rating *= magicEffect->mData.mBaseCost;
 
-        if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+        if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
+        {
+            rating *= -1.f;
+
+            if (enemy.isEmpty())
+                return 0.f;
+
+            // Check resistance for harmful effects
+            CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
+
+            float resistance = MWMechanics::getEffectResistanceAttribute(effect.mEffectID, &stats.getMagicEffects());
+
+            rating *= (1.f - std::min(resistance, 100.f) / 100.f);
+        }
+
+        // for harmful no-magnitude effects (e.g. silence) check if enemy is already has them
+        // for non-harmful no-magnitude effects (e.g. bound items) check if actor is already has them
+        if (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude)
+        {
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
+            {
+                CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
+
+                if (stats.getMagicEffects().get(effect.mEffectID).getMagnitude() > 0)
+                    return 0.f;
+            }
+            else
+            {
+                CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+
+                if (stats.getMagicEffects().get(effect.mEffectID).getMagnitude() > 0)
+                    return 0.f;
+            }
+        }
+        else
+        {
             rating *= (effect.mMagnMin + effect.mMagnMax)/2.f;
+        }
+
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
             rating *= effect.mDuration;
-
-        if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
-            rating *= -1.f;
 
         // Currently treating all "on target" or "on touch" effects to target the enemy actor.
         // Combat AI is egoistic, so doesn't consider applying positive effects to friendly actors.
         if (effect.mRange != ESM::RT_Self)
             rating *= -1.f;
+
         return rating;
     }
 
@@ -426,6 +628,9 @@ namespace MWMechanics
             MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
             inv.setSelectedEnchantItem(inv.end());
         }
+
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(mSpellId);
+        MWBase::Environment::get().getWorld()->preloadEffects(&spell->mEffects);
     }
 
     float ActionSpell::getCombatRange (bool& isRanged) const
@@ -433,7 +638,7 @@ namespace MWMechanics
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(mSpellId);
         int types = getRangeTypes(spell->mEffects);
 
-        isRanged = (types & Target);
+        isRanged = (types & Target) | (types & Self);
         return suggestCombatRange(types);
     }
 
@@ -453,7 +658,8 @@ namespace MWMechanics
 
     float ActionPotion::getCombatRange(bool& isRanged) const
     {
-        // distance doesn't matter, so back away slightly to avoid enemy hits
+        // Distance doesn't matter since this action has no animation
+        // If we want to back away slightly to avoid enemy hits, we should set isRanged to "true"
         return 600.f;
     }
 
@@ -515,14 +721,14 @@ namespace MWMechanics
         return mWeapon.get<ESM::Weapon>()->mBase;
     }
 
-    boost::shared_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
+    std::shared_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
     {
         Spells& spells = actor.getClass().getCreatureStats(actor).getSpells();
 
         float bestActionRating = 0.f;
         float antiFleeRating = 0.f;
         // Default to hand-to-hand combat
-        boost::shared_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
+        std::shared_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             bestAction->prepare(actor);
@@ -682,7 +888,7 @@ namespace MWMechanics
                 for (std::vector<ESM::ENAMstruct>::const_iterator effectIt =
                      spell->mEffects.mList.begin(); effectIt != spell->mEffects.mList.end(); ++effectIt)
                 {
-                    if (effectIt->mArea == ESM::RT_Target)
+                    if (effectIt->mRange == ESM::RT_Target)
                     {
                         const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
                         dist = effect->mData.mSpeed;
@@ -699,7 +905,7 @@ namespace MWMechanics
                     for (std::vector<ESM::ENAMstruct>::const_iterator effectIt =
                          ench->mEffects.mList.begin(); effectIt != ench->mEffects.mList.end(); ++effectIt)
                     {
-                        if (effectIt->mArea == ESM::RT_Target)
+                        if (effectIt->mRange == ESM::RT_Target)
                         {
                             const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
                             dist = effect->mData.mSpeed;
@@ -822,7 +1028,7 @@ namespace MWMechanics
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt =
              spell->mEffects.mList.begin(); effectIt != spell->mEffects.mList.end(); ++effectIt)
         {
-            if (effectIt->mArea == ESM::RT_Target)
+            if (effectIt->mRange == ESM::RT_Target)
             {
                 if (!MWBase::Environment::get().getWorld()->isSwimming(enemy))
                     mult = fAIRangeMagicSpellMult;

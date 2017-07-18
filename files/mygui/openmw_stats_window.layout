@@ -20,9 +20,9 @@
                     </Widget>
                     <Widget type="ProgressBar" skin="MW_Progress_Red" position="74 0 130 18" name="HBar" align="Right Top">
                         <Property key="NeedMouse" value="false"/>
-                    </Widget>
-                    <Widget type="TextBox" skin="ProgressText" position="74 0 130 18" name="HBarT" align="Right Top">
-                        <Property key="NeedMouse" value="false"/>
+                        <Widget type="TextBox" skin="ProgressText" position="0 0 130 14" name="HBarT" align="Right VCenter">
+                            <Property key="NeedMouse" value="false"/>
+                        </Widget>
                     </Widget>
                 </Widget>
 
@@ -40,10 +40,9 @@
 
                     <Widget type="ProgressBar" skin="MW_Progress_Blue" position="74 0 130 18" name="MBar" align="Right Top">
                         <Property key="NeedMouse" value="false"/>
-                    </Widget>
-
-                    <Widget type="TextBox" skin="ProgressText" position="74 0 130 18" name="MBarT" align="Right Top">
-                        <Property key="NeedMouse" value="false"/>
+                        <Widget type="TextBox" skin="ProgressText" position="0 0 130 14" name="MBarT" align="Right VCenter">
+                            <Property key="NeedMouse" value="false"/>
+                        </Widget>
                     </Widget>
                 </Widget>
 
@@ -61,9 +60,9 @@
 
                     <Widget type="ProgressBar" skin="MW_Progress_Green" position="74 0 130 18" name="FBar" align="Right Top">
                         <Property key="NeedMouse" value="false"/>
-                    </Widget>
-                    <Widget type="TextBox" skin="ProgressText" position="74 0 130 18" name="FBarT" align="Right Top">
-                        <Property key="NeedMouse" value="false"/>
+                        <Widget type="TextBox" skin="ProgressText" position="0 0 130 14" name="FBarT" align="Right VCenter">
+                            <Property key="NeedMouse" value="false"/>
+                        </Widget>
                     </Widget>
                 </Widget>
             </Widget>
@@ -88,12 +87,12 @@
                     <Widget type="AutoSizedTextBox" skin="NormalText" position="0 0 95 18" name="Race_str" align="Left Top">
                         <Property key="Caption" value="#{sRace}"/>
                         <UserString key="ToolTipType" value="Layout"/>
-                        <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
+                        <UserString key="ToolTipLayout" value="RaceToolTip"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandTextRight" position="104 0 200 18" name="RaceText" align="Left Top">
                         <Property key="TextAlign" value="Right Top"/>
                         <UserString key="ToolTipType" value="Layout"/>
-                        <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
+                        <UserString key="ToolTipLayout" value="RaceToolTip"/>
                         <UserString key="HStretch" value="true"/>
                     </Widget>
                 </Widget>

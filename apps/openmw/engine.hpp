@@ -18,6 +18,11 @@ namespace Resource
     class ResourceSystem;
 }
 
+namespace SceneUtil
+{
+    class WorkQueue;
+}
+
 namespace VFS
 {
     class Manager;
@@ -66,8 +71,9 @@ namespace OMW
     class Engine
     {
             SDL_Window* mWindow;
-            std::auto_ptr<VFS::Manager> mVFS;
-            std::auto_ptr<Resource::ResourceSystem> mResourceSystem;
+            std::unique_ptr<VFS::Manager> mVFS;
+            std::unique_ptr<Resource::ResourceSystem> mResourceSystem;
+            osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
             MWBase::Environment mEnvironment;
             ToUTF8::FromType mEncoding;
             ToUTF8::Utf8Encoder* mEncoder;
@@ -78,7 +84,6 @@ namespace OMW
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
             std::string mCellName;
             std::vector<std::string> mContentFiles;
-            bool mVerboseScripts;
             bool mSkipMenu;
             bool mUseSound;
             bool mCompileAll;
@@ -151,9 +156,6 @@ namespace OMW
              * @param file - filename (extension is required)
              */
             void addContentFile(const std::string& file);
-
-            /// Enable or disable verbose script output
-            void setScriptsVerbosity(bool scriptsVerbosity);
 
             /// Disable or enable all sounds
             void setSoundUsage(bool soundUsage);

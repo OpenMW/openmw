@@ -95,8 +95,6 @@ namespace MWBase
 
             virtual ~World() {}
 
-            virtual void preloadCommonAssets() = 0;
-
             virtual void startNewGame (bool bypass) = 0;
             ///< \param bypass Bypass regular game start.
 
@@ -257,7 +255,7 @@ namespace MWBase
             /// Returns a pointer to the object the provided object would hit (if within the
             /// specified distance), and the point where the hit occurs. This will attempt to
             /// use the "Head" node, or alternatively the "Bip01 Head" node as a basis.
-            virtual std::pair<MWWorld::Ptr,osg::Vec3f> getHitContact(const MWWorld::ConstPtr &ptr, float distance) = 0;
+            virtual std::pair<MWWorld::Ptr,osg::Vec3f> getHitContact(const MWWorld::ConstPtr &ptr, float distance, std::vector<MWWorld::Ptr> &targets) = 0;
 
             virtual void adjustPosition (const MWWorld::Ptr& ptr, bool force) = 0;
             ///< Adjust position after load to be on ground. Must be called after model load.
@@ -385,6 +383,7 @@ namespace MWBase
             ///Is the head of the creature underwater?
             virtual bool isSubmerged(const MWWorld::ConstPtr &object) const = 0;
             virtual bool isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const = 0;
+            virtual bool isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const = 0;
             virtual bool isWaterWalkingCastableOnTarget(const MWWorld::ConstPtr &target) const = 0;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
 
@@ -567,6 +566,13 @@ namespace MWBase
 
             /// Return physical or rendering half extents of the given actor.
             virtual osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& actor, bool rendering=false) const = 0;
+
+            /// Export scene graph to a file and return the filename.
+            /// \param ptr object to export scene graph for (if empty, export entire scene graph)
+            virtual std::string exportSceneGraph(const MWWorld::Ptr& ptr) = 0;
+
+            /// Preload VFX associated with this effect list
+            virtual void preloadEffects(const ESM::EffectList* effectList) = 0;
     };
 }
 

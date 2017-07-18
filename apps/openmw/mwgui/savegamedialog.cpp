@@ -7,6 +7,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ListBox.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_LanguageManager.h>
 
 #include <osgDB/ReadFile>
 #include <osg/Texture2D>
@@ -168,9 +169,9 @@ namespace MWGui
                         className = "?"; // From an older savegame format that did not support custom classes properly.
                 }
 
-                title << " (Level " << it->getSignature().mPlayerLevel << " " << className << ")";
+                title << " (#{sLevel} " << it->getSignature().mPlayerLevel << " " << MyGUI::TextIterator::toTagsString(className) << ")";
 
-                mCharacterSelection->addItem (title.str());
+                mCharacterSelection->addItem (MyGUI::LanguageManager::getInstance().replaceTags(title.str()));
 
                 if (mCurrentCharacter == &*it ||
                     (!mCurrentCharacter && !mSaving && directory==Misc::StringUtils::lowerCase (
@@ -250,6 +251,21 @@ namespace MWGui
             if (mSaveNameEdit->getCaption().empty())
             {
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage65}");
+                return;
+            }
+        }
+        else
+        {
+            MWBase::StateManager::State state = MWBase::Environment::get().getStateManager()->getState();
+
+            // If game is running, ask for confirmation first
+            if (state == MWBase::StateManager::State_Running && !reallySure)
+            {
+                ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
+                dialog->askForConfirmation("#{sMessage1}");
+                dialog->eventOkClicked.clear();
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationGiven);
+                dialog->eventCancelClicked.clear();
                 return;
             }
         }
@@ -405,14 +421,14 @@ namespace MWGui
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
         if (!readerwriter)
         {
-            std::cerr << "Can't open savegame screenshot, no jpg readerwriter found" << std::endl;
+            std::cerr << "Error: Can't open savegame screenshot, no jpg readerwriter found" << std::endl;
             return;
         }
 
         osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(instream);
         if (!result.success())
         {
-            std::cerr << "Failed to read savegame screenshot: " << result.message() << " code " << result.status() << std::endl;
+            std::cerr << "Error: Failed to read savegame screenshot: " << result.message() << " code " << result.status() << std::endl;
             return;
         }
 

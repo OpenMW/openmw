@@ -202,7 +202,7 @@ public:
         bool isDeleted = false;
 
         book.load(esm, isDeleted);
-        if (book.mData.mSkillID == -1)
+        if (book.mData.mSkillId == -1)
             mContext->mPlayer.mObject.mNpcStats.mUsedIds.push_back(Misc::StringUtils::lowerCase(book.mId));
 
         mRecords[book.mId] = book;

@@ -67,19 +67,29 @@ namespace MWGui
 
     void ItemWidget::setIcon(const std::string &icon)
     {
-        if (mItemShadow)
-            mItemShadow->setImageTexture(icon);
-        if (mItem)
-            mItem->setImageTexture(icon);
+        if (mCurrentIcon != icon)
+        {
+            mCurrentIcon = icon;
+
+            if (mItemShadow)
+                mItemShadow->setImageTexture(icon);
+            if (mItem)
+                mItem->setImageTexture(icon);
+        }
     }
 
     void ItemWidget::setFrame(const std::string &frame, const MyGUI::IntCoord &coord)
     {
         if (mFrame)
         {
-            mFrame->setImageTexture(frame);
             mFrame->setImageTile(MyGUI::IntSize(coord.width, coord.height)); // Why is this needed? MyGUI bug?
             mFrame->setImageCoord(coord);
+        }
+
+        if (mCurrentFrame != frame)
+        {
+            mCurrentFrame = frame;
+            mFrame->setImageTexture(frame);
         }
     }
 
@@ -105,6 +115,8 @@ namespace MWGui
                 mItemShadow->setImageTexture("");
             mItem->setImageTexture("");
             mText->setCaption("");
+            mCurrentIcon.clear();
+            mCurrentFrame.clear();
             return;
         }
 

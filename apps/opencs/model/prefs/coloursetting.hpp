@@ -5,6 +5,11 @@
 
 #include <QColor>
 
+namespace CSVWidget
+{
+    class ColorEditor;
+}
+
 namespace CSMPrefs
 {
     class ColourSetting : public Setting
@@ -13,6 +18,7 @@ namespace CSMPrefs
 
             std::string mTooltip;
             QColor mDefault;
+            CSVWidget::ColorEditor* mWidget;
 
         public:
 
@@ -24,6 +30,8 @@ namespace CSMPrefs
 
             /// Return label, input widget.
             virtual std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent);
+
+            virtual void updateWidget();
 
         private slots:
 

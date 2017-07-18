@@ -51,14 +51,14 @@ namespace MWDialogue
             void updateTopics();
             void updateGlobals();
 
-            bool compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code);
-            void executeScript (const std::string& script);
+            bool compile (const std::string& cmd, std::vector<Interpreter::Type_Code>& code, const MWWorld::Ptr& actor);
+            void executeScript (const std::string& script, const MWWorld::Ptr& actor);
 
             void executeTopic (const std::string& topic);
 
         public:
 
-            DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose, Translation::Storage& translationDataStorage);
+            DialogueManager (const Compiler::Extensions& extensions, Translation::Storage& translationDataStorage);
 
             virtual void clear();
 
@@ -74,7 +74,7 @@ namespace MWDialogue
 
             virtual bool checkServiceRefused ();
 
-            virtual void say(const MWWorld::Ptr &actor, const std::string &topic) const;
+            virtual void say(const MWWorld::Ptr &actor, const std::string &topic);
 
             //calbacks for the GUI
             virtual void keywordSelected (const std::string& keyword);

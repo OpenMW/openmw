@@ -5,8 +5,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
-
 #include <QColor>
 
 #include <components/esm/loadbody.hpp>
@@ -1750,6 +1748,41 @@ namespace CSMWorld
             record2.mData.mGender = data.toInt();
 
             record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+    
+    template<typename ESXRecordT>
+    struct GenderNpcColumn : public Column<ESXRecordT>
+    {
+        GenderNpcColumn()
+            : Column<ESXRecordT>(Columns::ColumnId_GenderNpc, ColumnBase::Display_GenderNpc)
+        {}
+
+        virtual QVariant get(const Record<ESXRecordT>& record) const
+        {
+            // Implemented this way to allow additional gender types in the future.
+            if ((record.get().mData.mFlags & ESM::BodyPart::BPF_Female) == ESM::BodyPart::BPF_Female)
+                return 1;
+
+            return 0;
+        }
+
+        virtual void set(Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            // Implemented this way to allow additional gender types in the future.
+            if (data.toInt() == 1)
+                record2.mData.mFlags = (record2.mData.mFlags & ~ESM::BodyPart::BPF_Female) | ESM::BodyPart::BPF_Female;
+            else
+                record2.mData.mFlags = record2.mData.mFlags & ~ESM::BodyPart::BPF_Female;
+
+            record.setModified(record2);
         }
 
         virtual bool isEditable() const

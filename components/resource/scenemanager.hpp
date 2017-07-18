@@ -15,11 +15,17 @@ namespace Resource
 {
     class ImageManager;
     class NifFileManager;
+    class SharedStateManager;
 }
 
 namespace osgUtil
 {
     class IncrementalCompileOperation;
+}
+
+namespace osgDB
+{
+    class SharedStateManager;
 }
 
 namespace Shader
@@ -72,6 +78,9 @@ namespace Resource
 
         void setShaderPath(const std::string& path);
 
+        /// Check if a given scene is loaded and if so, update its usage timestamp to prevent it from being unloaded
+        bool checkLoaded(const std::string& name, double referenceTime);
+
         /// Get a read-only copy of this scene "template"
         /// @note If the given filename does not exist or fails to load, an error marker mesh will be used instead.
         ///  If even the error marker mesh can not be found, an exception is thrown.
@@ -83,6 +92,10 @@ namespace Resource
         /// @note The returned ref_ptr may be kept around by the caller to ensure that the object stays in cache for as long as needed.
         /// @note Thread safe.
         osg::ref_ptr<osg::Node> cacheInstance(const std::string& name);
+
+        osg::ref_ptr<osg::Node> createInstance(const std::string& name);
+
+        osg::ref_ptr<osg::Node> createInstance(const osg::Node* base);
 
         /// Get an instance of the given scene template
         /// @see getTemplate
@@ -108,8 +121,7 @@ namespace Resource
         /// Set up an IncrementalCompileOperation for background compiling of loaded scenes.
         void setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation* ico);
 
-        /// @note SceneManager::attachTo calls this method automatically, only needs to be called by users if manually attaching
-        void notifyAttached(osg::Node* node) const;
+        osgUtil::IncrementalCompileOperation* getIncrementalCompileOperation();
 
         Resource::ImageManager* getImageManager();
 
@@ -131,11 +143,11 @@ namespace Resource
         /// @see ResourceManager::updateCache
         virtual void updateCache(double referenceTime);
 
+        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
+
     private:
 
-        osg::ref_ptr<osg::Node> createInstance(const std::string& name);
-
-        std::auto_ptr<Shader::ShaderManager> mShaderManager;
+        std::unique_ptr<Shader::ShaderManager> mShaderManager;
         bool mForceShaders;
         bool mClampLighting;
         bool mForcePerPixelLighting;
@@ -147,7 +159,8 @@ namespace Resource
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
-        OpenThreads::Mutex mSharedStateMutex;
+        osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
+        mutable OpenThreads::Mutex mSharedStateMutex;
 
         Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;

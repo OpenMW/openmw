@@ -192,15 +192,38 @@ namespace
     };
 
     // Removes all drawables from a graph.
-    class RemoveDrawableVisitor : public RemoveVisitor
+    class CleanObjectRootVisitor : public RemoveVisitor
     {
     public:
         virtual void apply(osg::Drawable& drw)
         {
-            applyImpl(drw);
+            applyDrawable(drw);
         }
 
-        void applyImpl(osg::Node& node)
+        virtual void apply(osg::Group& node)
+        {
+            applyNode(node);
+        }
+        virtual void apply(osg::MatrixTransform& node)
+        {
+            applyNode(node);
+        }
+        virtual void apply(osg::Node& node)
+        {
+            applyNode(node);
+        }
+
+        void applyNode(osg::Node& node)
+        {
+            if (node.getStateSet())
+                node.setStateSet(NULL);
+
+            if (node.getNodeMask() == 0x1 && node.getNumParents() == 1)
+                mToRemove.push_back(std::make_pair(&node, node.getParent(0)));
+            else
+                traverse(node);
+        }
+        void applyDrawable(osg::Node& node)
         {
             osg::NodePath::iterator parent = getNodePath().end()-2;
             // We know that the parent is a Group because only Groups can have children.
@@ -231,6 +254,15 @@ namespace
             applyImpl(drw);
         }
 
+        virtual void apply(osg::Group& node)
+        {
+            traverse(node);
+        }
+        virtual void apply(osg::MatrixTransform& node)
+        {
+            traverse(node);
+        }
+
         void applyImpl(osg::Node& node)
         {
             const std::string toFind = "tri bip";
@@ -250,7 +282,7 @@ namespace MWRender
     class GlowUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        GlowUpdater(int texUnit, osg::Vec4f color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures,
+        GlowUpdater(int texUnit, const osg::Vec4f& color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures,
             osg::Node* node, float duration, Resource::ResourceSystem* resourcesystem)
             : mTexUnit(texUnit)
             , mColor(color)
@@ -351,7 +383,7 @@ namespace MWRender
             return mDone;
         }
 
-        void setColor(osg::Vec4f color)
+        void setColor(const osg::Vec4f& color)
         {
             mColor = color;
             mColorChanged = true;
@@ -446,6 +478,11 @@ namespace MWRender
         return mPtr;
     }
 
+    MWWorld::Ptr Animation::getPtr()
+    {
+        return mPtr;
+    }
+
     void Animation::setActive(bool active)
     {
         if (mSkeleton)
@@ -509,7 +546,7 @@ namespace MWRender
         if(!mResourceSystem->getVFS()->exists(kfname))
             return;
 
-        boost::shared_ptr<AnimSource> animsrc;
+        std::shared_ptr<AnimSource> animsrc;
         animsrc.reset(new AnimSource);
         animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(kfname);
 
@@ -525,7 +562,7 @@ namespace MWRender
             NodeMap::const_iterator found = nodeMap.find(bonename);
             if (found == nodeMap.end())
             {
-                std::cerr << "addAnimSource: can't find bone '" + bonename << "' in " << model << " (referenced by " << kfname << ")" << std::endl;
+                std::cerr << "Warning: addAnimSource: can't find bone '" + bonename << "' in " << model << " (referenced by " << kfname << ")" << std::endl;
                 continue;
             }
 
@@ -534,7 +571,7 @@ namespace MWRender
             size_t blendMask = detectBlendMask(node);
 
             // clone the controller, because each Animation needs its own ControllerSource
-            osg::ref_ptr<NifOsg::KeyframeController> cloned = osg::clone(it->second.get(), osg::CopyOp::DEEP_COPY_ALL);
+            osg::ref_ptr<NifOsg::KeyframeController> cloned = new NifOsg::KeyframeController(*it->second, osg::CopyOp::SHALLOW_COPY);
             cloned->setSource(mAnimationTimePtr[blendMask]);
 
             animsrc->mControllerMap[blendMask].insert(std::make_pair(bonename, cloned));
@@ -561,11 +598,13 @@ namespace MWRender
         mStates.clear();
 
         for(size_t i = 0;i < sNumBlendMasks;i++)
-            mAnimationTimePtr[i]->setTimePtr(boost::shared_ptr<float>());
+            mAnimationTimePtr[i]->setTimePtr(std::shared_ptr<float>());
 
         mAccumCtrl = NULL;
 
         mAnimSources.clear();
+
+        mAnimVelocities.clear();
     }
 
     bool Animation::hasAnimation(const std::string &anim) const
@@ -842,12 +881,12 @@ namespace MWRender
                     active = state;
             }
 
-            mAnimationTimePtr[blendMask]->setTimePtr(active == mStates.end() ? boost::shared_ptr<float>() : active->second.mTime);
+            mAnimationTimePtr[blendMask]->setTimePtr(active == mStates.end() ? std::shared_ptr<float>() : active->second.mTime);
 
             // add external controllers for the AnimSource active in this blend mask
             if (active != mStates.end())
             {
-                boost::shared_ptr<AnimSource> animsrc = active->second.mSource;
+                std::shared_ptr<AnimSource> animsrc = active->second.mSource;
 
                 for (AnimSource::ControllerMap::iterator it = animsrc->mControllerMap[blendMask].begin(); it != animsrc->mControllerMap[blendMask].end(); ++it)
                 {
@@ -943,6 +982,10 @@ namespace MWRender
         if (!mAccumRoot)
             return 0.0f;
 
+        std::map<std::string, float>::const_iterator found = mAnimVelocities.find(groupname);
+        if (found != mAnimVelocities.end())
+            return found->second;
+
         // Look in reverse; last-inserted source has priority.
         AnimSourceList::const_reverse_iterator animsrc(mAnimSources.rbegin());
         for(;animsrc != mAnimSources.rend();++animsrc)
@@ -990,6 +1033,8 @@ namespace MWRender
             }
         }
 
+        mAnimVelocities.insert(std::make_pair(groupname, velocity));
+
         return velocity;
     }
 
@@ -1013,11 +1058,9 @@ namespace MWRender
             float timepassed = duration * state.mSpeedMult;
             while(state.mPlaying)
             {
-                float targetTime;
-
                 if (!state.shouldLoop())
                 {
-                    targetTime = state.getTime() + timepassed;
+                    float targetTime = state.getTime() + timepassed;
                     if(textkey == textkeys.end() || textkey->first > targetTime)
                     {
                         if(mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
@@ -1092,6 +1135,32 @@ namespace MWRender
             state->second.mLoopingEnabled = enabled;
     }
 
+    osg::ref_ptr<osg::Node> getModelInstance(Resource::SceneManager* sceneMgr, const std::string& model, bool baseonly)
+    {
+        if (baseonly)
+        {
+            typedef std::map<std::string, osg::ref_ptr<osg::Node> > Cache;
+            static Cache cache;
+            Cache::iterator found = cache.find(model);
+            if (found == cache.end())
+            {
+                osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
+
+                CleanObjectRootVisitor removeDrawableVisitor;
+                created->accept(removeDrawableVisitor);
+                removeDrawableVisitor.remove();
+
+                cache.insert(std::make_pair(model, created));
+
+                return sceneMgr->createInstance(created);
+            }
+            else
+                return sceneMgr->createInstance(found->second);
+        }
+        else
+            return sceneMgr->createInstance(model);
+    }
+
     void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature)
     {
         osg::ref_ptr<osg::StateSet> previousStateset;
@@ -1113,7 +1182,8 @@ namespace MWRender
 
         if (!forceskeleton)
         {
-            osg::ref_ptr<osg::Node> created = mResourceSystem->getSceneManager()->getInstance(model, mInsert);
+            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem->getSceneManager(), model, baseonly);
+            mInsert->addChild(created);
             mObjectRoot = created->asGroup();
             if (!mObjectRoot)
             {
@@ -1125,7 +1195,7 @@ namespace MWRender
         }
         else
         {
-            osg::ref_ptr<osg::Node> created = mResourceSystem->getSceneManager()->getInstance(model);
+            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem->getSceneManager(), model, baseonly);
             osg::ref_ptr<SceneUtil::Skeleton> skel = dynamic_cast<SceneUtil::Skeleton*>(created.get());
             if (!skel)
             {
@@ -1139,13 +1209,6 @@ namespace MWRender
 
         if (previousStateset)
             mObjectRoot->setStateSet(previousStateset);
-
-        if (baseonly)
-        {
-            RemoveDrawableVisitor removeDrawableVisitor;
-            mObjectRoot->accept(removeDrawableVisitor);
-            removeDrawableVisitor.remove();
-        }
 
         if (isCreature)
         {
@@ -1250,7 +1313,7 @@ namespace MWRender
             writableStateSet = node->getOrCreateStateSet();
         else
         {
-            writableStateSet = osg::clone(node->getStateSet(), osg::CopyOp::SHALLOW_COPY);
+            writableStateSet = new osg::StateSet(*node->getStateSet(), osg::CopyOp::SHALLOW_COPY);
             node->setStateSet(writableStateSet);
         }
         writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
@@ -1299,7 +1362,7 @@ namespace MWRender
                             useQuadratic, quadraticValue, quadraticRadiusMult, useLinear, linearRadiusMult, linearValue);
     }
 
-    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, std::string texture)
+    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture)
     {
         if (!mObjectRoot.get())
             return;
@@ -1343,9 +1406,9 @@ namespace MWRender
         params.mEffectId = effectId;
         params.mBoneName = bonename;
 
-        params.mAnimTime = boost::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
+        params.mAnimTime = std::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
 
-        SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
+        SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
         node->accept(assignVisitor);
 
         overrideFirstRootTexture(texture, mResourceSystem, node);
@@ -1632,19 +1695,14 @@ namespace MWRender
     PartHolder::~PartHolder()
     {
         if (mNode.get() && !mNode->getNumParents())
-            std::cerr << "Warning: part has no parents " << std::endl;
+            std::cerr << "Error: part has no parents " << std::endl;
 
         if (mNode.get() && mNode->getNumParents())
         {
             if (mNode->getNumParents() > 1)
-                std::cerr << "Warning: part has multiple parents " << mNode->getNumParents() << " " << mNode.get() << std::endl;
+                std::cerr << "Error: part has multiple parents " << mNode->getNumParents() << " " << mNode.get() << std::endl;
             mNode->getParent(0)->removeChild(mNode);
         }
-    }
-
-    void PartHolder::unlink()
-    {
-        mNode = NULL;
     }
 
 }

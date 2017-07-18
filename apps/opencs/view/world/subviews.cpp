@@ -17,6 +17,7 @@
 #include "infocreator.hpp"
 #include "pathgridcreator.hpp"
 #include "previewsubview.hpp"
+#include "bodypartcreator.hpp"
 
 void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 {
@@ -41,7 +42,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Birthsigns,
         CSMWorld::UniversalId::Type_Spells,
         CSMWorld::UniversalId::Type_Enchantments,
-        CSMWorld::UniversalId::Type_BodyParts,
         CSMWorld::UniversalId::Type_SoundGens,
 
         CSMWorld::UniversalId::Type_None // end marker
@@ -50,6 +50,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     for (int i=0; sTableTypes[i]!=CSMWorld::UniversalId::Type_None; ++i)
         manager.add (sTableTypes[i],
             new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GenericCreator> >);
+
+    manager.add (CSMWorld::UniversalId::Type_BodyParts,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<BodyPartCreator> >);
 
     manager.add (CSMWorld::UniversalId::Type_StartScripts,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, StartScriptCreatorFactory>);
@@ -76,7 +79,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, InfoCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_Pathgrids,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<PathgridCreator> >);
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, PathgridCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_Globals,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GlobalCreator> >);
@@ -129,7 +132,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Sound,
         CSMWorld::UniversalId::Type_Faction,
         CSMWorld::UniversalId::Type_Enchantment,
-        CSMWorld::UniversalId::Type_BodyPart,
         CSMWorld::UniversalId::Type_SoundGen,
 
         CSMWorld::UniversalId::Type_None // end marker
@@ -139,6 +141,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         manager.add (sTableTypes2[i],
             new CSVDoc::SubViewFactoryWithCreator<DialogueSubView,
             CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_BodyPart,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<BodyPartCreator> > (false));
 
     manager.add (CSMWorld::UniversalId::Type_StartScript,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, StartScriptCreatorFactory>(false));
@@ -174,7 +179,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, JournalCreatorFactory> (false));
 
     manager.add (CSMWorld::UniversalId::Type_Pathgrid,
-        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<PathgridCreator> > (false));
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, PathgridCreatorFactory> (false));
 
     manager.add (CSMWorld::UniversalId::Type_DebugProfile,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> > (false));

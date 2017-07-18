@@ -185,7 +185,7 @@ namespace MWGui
 
         button->setItem(item, ItemWidget::Barter);
         button->setUserString ("ToolTipType", "ItemPtr");
-        button->setUserData(item);
+        button->setUserData(MWWorld::Ptr(item));
 
         if (mItemSelectionDialog)
             mItemSelectionDialog->setVisible(false);
@@ -209,7 +209,7 @@ namespace MWGui
         button->setIcon(item);
 
         button->setUserString ("ToolTipType", "ItemPtr");
-        button->setUserData(item);
+        button->setUserData(MWWorld::Ptr(item));
 
         if (mMagicSelectionDialog)
             mMagicSelectionDialog->setVisible(false);
@@ -278,7 +278,7 @@ namespace MWGui
                     if (Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), id))
                     {
                         item = *it;
-                        button->setUserData(item);
+                        button->setUserData(MWWorld::Ptr(item));
                         break;
                     }
                 }
@@ -310,7 +310,7 @@ namespace MWGui
         {
             MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
             MWBase::Environment::get().getWindowManager()->useItem(item);
-            MWWorld::ContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            MWWorld::ConstContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             // change draw state only if the item is in player's right hand
             if (rightHand != store.end() && item == *rightHand)
             {
@@ -370,7 +370,8 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(mParent, &QuickKeysMenu::onCancelButtonClicked);
 
 
-        int maxWidth = mItemButton->getTextSize ().width + 24;
+        int maxWidth = mLabel->getTextSize ().width + 24;
+        maxWidth = std::max(maxWidth, mItemButton->getTextSize ().width + 24);
         maxWidth = std::max(maxWidth, mMagicButton->getTextSize ().width + 24);
         maxWidth = std::max(maxWidth, mUnassignButton->getTextSize ().width + 24);
         maxWidth = std::max(maxWidth, mCancelButton->getTextSize ().width + 24);

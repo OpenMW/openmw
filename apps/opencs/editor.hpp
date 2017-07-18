@@ -47,7 +47,7 @@ namespace CS
             Q_OBJECT
 
             // FIXME: should be moved to document, so we can have different resources for each opened project
-            std::auto_ptr<VFS::Manager> mVFS;
+            std::unique_ptr<VFS::Manager> mVFS;
 
             Files::ConfigurationManager mCfgMgr;
             CSMPrefs::State mSettingsState;

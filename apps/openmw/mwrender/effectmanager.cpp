@@ -52,7 +52,6 @@ void EffectManager::addEffect(const std::string &model, const std::string& textu
         overrideTexture(textureOverride, mResourceSystem, node);
 
     mParentNode->addChild(trans);
-    mResourceSystem->getSceneManager()->notifyAttached(node);
 
     mEffects[trans] = effect;
 }

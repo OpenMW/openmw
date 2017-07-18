@@ -4,12 +4,9 @@
 #include <osg/ref_ptr>
 #include <string>
 
-#include "resourcemanager.hpp"
+#include <components/nifosg/nifloader.hpp>
 
-namespace NifOsg
-{
-    class KeyframeHolder;
-}
+#include "resourcemanager.hpp"
 
 namespace Resource
 {
@@ -25,6 +22,8 @@ namespace Resource
         /// Retrieve a read-only keyframe resource by name (case-insensitive).
         /// @note Throws an exception if the resource is not found.
         osg::ref_ptr<const NifOsg::KeyframeHolder> get(const std::string& name);
+
+        void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
     };
 
 }

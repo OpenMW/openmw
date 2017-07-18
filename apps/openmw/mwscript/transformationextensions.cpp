@@ -307,7 +307,7 @@ namespace MWScript
                         store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
                         if(!cell)
                         {
-                            std::string error = "PositionCell: unknown interior cell (" + cellID + "), moving to exterior instead";
+                            std::string error = "Warning: PositionCell: unknown interior cell (" + cellID + "), moving to exterior instead";
                             runtime.getContext().report (error);
                             std::cerr << error << std::endl;
                         }

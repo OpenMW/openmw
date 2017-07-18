@@ -38,6 +38,12 @@ namespace
             }
             return x->mX < y->mX;
         }
+        bool operator()(const ESM::Land *x, const std::pair<int, int>& y) {
+            if (x->mX == y.first) {
+                return x->mY < y.second;
+            }
+            return x->mX < y.first;
+        }
     };
 }
 
@@ -130,15 +136,14 @@ namespace MWWorld
     template<typename T>
     const T *Store<T>::search(const std::string &id) const
     {
-        T item;
-        item.mId = Misc::StringUtils::lowerCase(id);
+        std::string idLower = Misc::StringUtils::lowerCase(id);
 
-        typename Dynamic::const_iterator dit = mDynamic.find(item.mId);
+        typename Dynamic::const_iterator dit = mDynamic.find(idLower);
         if (dit != mDynamic.end()) {
             return &dit->second;
         }
 
-        typename std::map<std::string, T>::const_iterator it = mStatic.find(item.mId);
+        typename std::map<std::string, T>::const_iterator it = mStatic.find(idLower);
 
         if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
             return &(it->second);
@@ -268,10 +273,9 @@ namespace MWWorld
     template<typename T>
     bool Store<T>::eraseStatic(const std::string &id)
     {
-        T item;
-        item.mId = Misc::StringUtils::lowerCase(id);
+        std::string idLower = Misc::StringUtils::lowerCase(id);
 
-        typename std::map<std::string, T>::iterator it = mStatic.find(item.mId);
+        typename std::map<std::string, T>::iterator it = mStatic.find(idLower);
 
         if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
             // delete from the static part of mShared
@@ -279,7 +283,7 @@ namespace MWWorld
             typename std::vector<T *>::iterator end = sharedIter + mStatic.size();
 
             while (sharedIter != mShared.end() && sharedIter != end) {
-                if((*sharedIter)->mId == item.mId) {
+                if((*sharedIter)->mId == idLower) {
                     mShared.erase(sharedIter);
                     break;
                 }
@@ -436,22 +440,21 @@ namespace MWWorld
     {
         return iterator(mStatic.end());
     }
-    ESM::Land *Store<ESM::Land>::search(int x, int y) const
+    const ESM::Land *Store<ESM::Land>::search(int x, int y) const
     {
-        ESM::Land land;
-        land.mX = x, land.mY = y;
+        std::pair<int, int> comp(x,y);
 
         std::vector<ESM::Land *>::const_iterator it =
-            std::lower_bound(mStatic.begin(), mStatic.end(), &land, Compare());
+            std::lower_bound(mStatic.begin(), mStatic.end(), comp, Compare());
 
         if (it != mStatic.end() && (*it)->mX == x && (*it)->mY == y) {
-            return const_cast<ESM::Land *>(*it);
+            return *it;
         }
         return 0;
     }
-    ESM::Land *Store<ESM::Land>::find(int x, int y) const
+    const ESM::Land *Store<ESM::Land>::find(int x, int y) const
     {
-        ESM::Land *ptr = search(x, y);
+        const ESM::Land *ptr = search(x, y);
         if (ptr == 0) {
             std::ostringstream msg;
             msg << "Land at (" << x << ", " << y << ") not found";
@@ -684,7 +687,7 @@ namespace MWWorld
                             if (it_lease != wipecell->mLeasedRefs.end())
                                 wipecell->mLeasedRefs.erase(it_lease);
                             else
-                                std::cerr << "can't find " << it->mRefNum.mIndex << " " << it->mRefNum.mContentFile  << " in leasedRefs " << std::endl;
+                                std::cerr << "Error: can't find " << it->mRefNum.mIndex << " " << it->mRefNum.mContentFile  << " in leasedRefs " << std::endl;
                         }
                         *itold = *it;
                     }

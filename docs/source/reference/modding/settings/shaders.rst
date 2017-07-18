@@ -1,0 +1,122 @@
+Shader Settings
+###############
+
+force shaders
+-------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Force rendering with shaders. By default, only bump-mapped objects will use shaders.
+Enabling this option may cause slightly different visuals if the "clamp lighting" option is set to false.
+Otherwise, there should not be a visual difference.
+
+force per pixel lighting
+------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Force the use of per pixel lighting. By default, only bump mapped objects use per-pixel lighting.
+Has no effect if the 'force shaders' option is false.
+Enabling per-pixel lighting can result in visual differences to the original MW engine.
+It is not recommended to enable this option when using vanilla Morrowind files,
+because certain lights in Morrowind rely on vertex lighting to look as intended.
+
+clamp lighting
+--------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Restrict the amount of lighting that an object can receive to a maximum of (1,1,1).
+Only affects objects that render with shaders (see 'force shaders' option).
+Always affects terrain. Setting this option to 'true' results in fixed-function compatible lighting,
+but the lighting may appear 'dull' and there might be color shifts.
+Setting this option to 'false' results in more realistic lighting.
+
+auto use object normal maps
+---------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this option is enabled, normal maps are automatically recognized and used if they are named appropriately
+(see 'normal map pattern', e.g. for a base texture foo.dds, the normal map texture would have to be named foo_n.dds).
+If this option is disabled,
+normal maps are only used if they are explicitly listed within the mesh file (.nif or .osg file). Affects objects.
+
+auto use object specular maps
+-----------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this option is enabled, specular maps are automatically recognized and used if they are named appropriately
+(see 'specular map pattern', e.g. for a base texture foo.dds,
+the specular map texture would have to be named foo_spec.dds).
+If this option is disabled, normal maps are only used if they are explicitly listed within the mesh file
+(.osg file, not supported in .nif files). Affects objects.
+
+auto use terrain normal maps
+----------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+See 'auto use object normal maps'. Affects terrain.
+
+auto use terrain specular maps
+------------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If a file with pattern 'terrain specular map pattern' exists, use that file as a 'diffuse specular' map.
+The texture must contain the layer color in the RGB channel (as usual), and a specular multiplier in the alpha channel.
+
+normal map pattern
+------------------
+
+:Type:		string
+:Range:
+:Default:	_n
+
+The filename pattern to probe for when detecting normal maps
+(see 'auto use object normal maps', 'auto use terrain normal maps')
+
+normal height map pattern
+-------------------------
+
+:Type:		string
+:Range:
+:Default:	_nh
+
+Alternative filename pattern to probe for when detecting normal maps.
+Files with this pattern are expected to include 'height' in the alpha channel.
+This height is used for parallax effects. Works for both terrain and objects.
+
+specular map pattern
+--------------------
+
+:Type:		string
+:Range:
+:Default:	_spec
+
+The filename pattern to probe for when detecting object specular maps (see 'auto use object specular maps')
+
+terrain specular map pattern
+----------------------------
+
+:Type:		string
+:Range:
+:Default:	_diffusespec
+
+The filename pattern to probe for when detecting terrain specular maps (see 'auto use terrain specular maps')

@@ -119,9 +119,9 @@ namespace CSMWorld
             std::map<std::string, std::map<ESM::RefNum, std::string> > mRefLoadCache;
             int mReaderIndex;
 
-            boost::shared_ptr<Resource::ResourceSystem> mResourceSystem;
+            std::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
-            std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
+            std::vector<std::shared_ptr<ESM::ESMReader> > mReaders;
 
             std::map<std::string, int> mContentFileNames;
 
@@ -148,9 +148,9 @@ namespace CSMWorld
 
             const Fallback::Map* getFallbackMap() const;
 
-            boost::shared_ptr<Resource::ResourceSystem> getResourceSystem();
+            std::shared_ptr<Resource::ResourceSystem> getResourceSystem();
 
-            boost::shared_ptr<const Resource::ResourceSystem> getResourceSystem() const;
+            std::shared_ptr<const Resource::ResourceSystem> getResourceSystem() const;
 
             const IdCollection<ESM::Global>& getGlobals() const;
 

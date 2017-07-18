@@ -31,6 +31,9 @@ namespace SceneUtil
         /// Internal use by the WorkQueue.
         void signalDone();
 
+        /// Set abort flag in order to return from doWork() as soon as possible. May not be respected by all WorkItems.
+        virtual void abort() {}
+
     protected:
         OpenThreads::Atomic mDone;
         OpenThreads::Mutex mMutex;
@@ -58,11 +61,15 @@ namespace SceneUtil
         /// @par Used internally by the WorkThread.
         osg::ref_ptr<WorkItem> removeWorkItem();
 
+        unsigned int getNumItems() const;
+
+        unsigned int getNumActiveThreads() const;
+
     private:
         bool mIsReleased;
         std::deque<osg::ref_ptr<WorkItem> > mQueue;
 
-        OpenThreads::Mutex mMutex;
+        mutable OpenThreads::Mutex mMutex;
         OpenThreads::Condition mCondition;
 
         std::vector<WorkThread*> mThreads;
@@ -76,8 +83,11 @@ namespace SceneUtil
 
         virtual void run();
 
+        bool isActive() const;
+
     private:
         WorkQueue* mWorkQueue;
+        volatile bool mActive;
     };
 
 

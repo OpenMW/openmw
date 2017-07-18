@@ -56,8 +56,8 @@ WeaponAnimation::~WeaponAnimation()
 
 void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
 {
-    MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
-    MWWorld::ContainerStoreIterator weaponSlot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+    const MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
+    MWWorld::ConstContainerStoreIterator weaponSlot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     if (weaponSlot == inv.end())
         return;
     if (weaponSlot->getTypeName() != typeid(ESM::Weapon).name())
@@ -79,7 +79,7 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
         if (!parent)
             return;
 
-        MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+        MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
         if (ammo == inv.end())
             return;
         std::string model = ammo->getClass().getModel(*ammo);

@@ -21,7 +21,7 @@ struct Book
     struct BKDTstruct
     {
         float mWeight;
-        int mValue, mIsScroll, mSkillID, mEnchant;
+        int mValue, mIsScroll, mSkillId, mEnchant;
     };
 
     BKDTstruct mData;

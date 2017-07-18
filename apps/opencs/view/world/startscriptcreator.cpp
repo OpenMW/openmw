@@ -29,15 +29,16 @@ CSVWorld::StartScriptCreator::StartScriptCreator(
     QUndoStack &undoStack,
     const CSMWorld::UniversalId &id,
     CSMWorld::IdCompletionManager& completionManager
-) : GenericCreator(data, undoStack, id, true)
+) : GenericCreator(data, undoStack, id)
 {
     setManualEditing(false);
 
     // Add script ID input label.
-    QLabel *label = new QLabel("Script ID", this);
+    QLabel *label = new QLabel("Script", this);
     insertBeforeButtons(label, false);
 
     // Add script ID input with auto-completion.
+    // Only existing script IDs are accepted so no ID validation is performed.
     CSMWorld::ColumnBase::Display displayType = CSMWorld::ColumnBase::Display_Script;
     mScript = new CSVWidget::DropLineEdit(displayType, this);
     mScript->setCompleter(completionManager.getCompleter(displayType).get());

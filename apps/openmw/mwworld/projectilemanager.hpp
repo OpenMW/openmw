@@ -73,7 +73,7 @@ namespace MWWorld
         struct State
         {
             osg::ref_ptr<osg::PositionAttitudeTransform> mNode;
-            boost::shared_ptr<MWRender::EffectAnimationTime> mEffectAnimationTime;
+            std::shared_ptr<MWRender::EffectAnimationTime> mEffectAnimationTime;
 
             int mActorId;
 

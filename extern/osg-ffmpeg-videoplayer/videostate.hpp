@@ -5,8 +5,6 @@
 #include <vector>
 #include <memory>
 
-#include <boost/shared_ptr.hpp>
-
 #include <OpenThreads/Thread>
 #include <OpenThreads/Mutex>
 #include <OpenThreads/Condition>
@@ -94,7 +92,7 @@ struct VideoState {
 
     void setAudioFactory(MovieAudioFactory* factory);
 
-    void init(boost::shared_ptr<std::istream> inputstream, const std::string& name);
+    void init(std::shared_ptr<std::istream> inputstream, const std::string& name);
     void deinit();
 
     void setPaused(bool isPaused);
@@ -127,11 +125,11 @@ struct VideoState {
     osg::ref_ptr<osg::Texture2D> mTexture;
 
     MovieAudioFactory* mAudioFactory;
-    boost::shared_ptr<MovieAudioDecoder> mAudioDecoder;
+    std::shared_ptr<MovieAudioDecoder> mAudioDecoder;
 
     ExternalClock mExternalClock;
 
-    boost::shared_ptr<std::istream> stream;
+    std::shared_ptr<std::istream> stream;
     AVFormatContext* format_ctx;
 
     int av_sync_type;
@@ -152,8 +150,8 @@ struct VideoState {
     OpenThreads::Mutex pictq_mutex;
     OpenThreads::Condition pictq_cond;
 
-    std::auto_ptr<ParseThread> parse_thread;
-    std::auto_ptr<VideoThread> video_thread;
+    std::unique_ptr<ParseThread> parse_thread;
+    std::unique_ptr<VideoThread> video_thread;
 
     volatile bool mSeekRequested;
     uint64_t mSeekPos;

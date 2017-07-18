@@ -137,7 +137,7 @@ namespace ESSImport
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
         if (!readerwriter)
         {
-            std::cerr << "can't write global map image, no png readerwriter found" << std::endl;
+            std::cerr << "Error: can't write global map image, no png readerwriter found" << std::endl;
             return;
         }
 
@@ -146,7 +146,7 @@ namespace ESSImport
         osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*image2, ostream);
         if (!result.success())
         {
-            std::cerr << "can't write global map image: " << result.message() << " code " << result.status() << std::endl;
+            std::cerr << "Error: can't write global map image: " << result.message() << " code " << result.status() << std::endl;
             return;
         }
 

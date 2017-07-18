@@ -183,7 +183,7 @@ namespace MWGui
         int modified = static_cast<int>(value.getModified());
 
         MyGUI::Widget* w;
-        std::string valStr = MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(modified);
+        std::string valStr = MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         if (id == "HBar")
         {
             mHealth->setProgressRange(modified);
@@ -417,7 +417,7 @@ namespace MWGui
         mSpellStatus->setProgressPosition(chargePercent);
 
         mSpellBox->setUserString("ToolTipType", "ItemPtr");
-        mSpellBox->setUserData(item);
+        mSpellBox->setUserData(MWWorld::Ptr(item));
 
         mSpellImage->setItem(item);
     }
@@ -435,7 +435,7 @@ namespace MWGui
 
         mWeapBox->clearUserStrings();
         mWeapBox->setUserString("ToolTipType", "ItemPtr");
-        mWeapBox->setUserData(item);
+        mWeapBox->setUserData(MWWorld::Ptr(item));
 
         mWeapStatus->setProgressRange(100);
         mWeapStatus->setProgressPosition(durabilityPercent);
@@ -609,8 +609,9 @@ namespace MWGui
 
         if (mIsDrowning)
         {
-            float intensity = (cos(mDrowningFlashTheta) + 1.0f) / 2.0f;
-            mDrowningFlash->setColour(MyGUI::Colour(intensity, 0, 0));
+            float intensity = (cos(mDrowningFlashTheta) + 2.0f) / 3.0f;
+
+            mDrowningFlash->setAlpha(intensity);
         }
     }
 

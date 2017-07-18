@@ -67,6 +67,8 @@ namespace MWMechanics
     /// @return Was the effect a tickable effect with a magnitude?
     bool effectTick(CreatureStats& creatureStats, const MWWorld::Ptr& actor, const MWMechanics::EffectKey& effectKey, float magnitude);
 
+    std::string getSummonedCreature(int effectId);
+
     class CastSpell
     {
     private:

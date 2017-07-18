@@ -9,6 +9,11 @@
 #include <osg/NodeVisitor>
 #include <osg/observer_ptr>
 
+namespace osgUtil
+{
+    class CullVisitor;
+}
+
 namespace SceneUtil
 {
 
@@ -32,7 +37,7 @@ namespace SceneUtil
 
     public:
 
-        META_Node(SceneUtil, SceneUtil::LightSource)
+        META_Node(SceneUtil, LightSource)
 
         LightSource();
 
@@ -64,7 +69,7 @@ namespace SceneUtil
         void setLight(osg::Light* light)
         {
             mLight[0] = light;
-            mLight[1] = osg::clone(light);
+            mLight[1] = new osg::Light(*light);
         }
 
         /// Get the unique ID for this light source.
@@ -79,7 +84,7 @@ namespace SceneUtil
     {
     public:
 
-        META_Node(SceneUtil, SceneUtil::LightManager)
+        META_Node(SceneUtil, LightManager)
 
         LightManager();
 
@@ -148,6 +153,7 @@ namespace SceneUtil
     /// rendering when the size of a light list exceeds the OpenGL limit on the number of concurrent lights (8). A good
     /// starting point is to attach a LightListCallback to each game object's base node.
     /// @note Not thread safe for CullThreadPerCamera threading mode.
+    /// @note Due to lack of OSG support, the callback does not work on Drawables.
     class LightListCallback : public osg::NodeCallback
     {
     public:
@@ -165,6 +171,8 @@ namespace SceneUtil
         META_Object(SceneUtil, LightListCallback)
 
         void operator()(osg::Node* node, osg::NodeVisitor* nv);
+
+        bool pushLightState(osg::Node* node, osgUtil::CullVisitor* nv);
 
         std::set<SceneUtil::LightSource*>& getIgnoredLightSources() { return mIgnoredLightSources; }
 

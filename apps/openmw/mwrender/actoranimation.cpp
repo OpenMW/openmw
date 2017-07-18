@@ -26,14 +26,13 @@
 namespace MWRender
 {
 
-ActorAnimation::ActorAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem,
-                               bool disableListener)
-    : Animation(ptr, parentNode, resourceSystem),
-      mListenerDisabled(disableListener)
+ActorAnimation::ActorAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
+    : Animation(ptr, parentNode, resourceSystem)
 {
     MWWorld::ContainerStore& store = mPtr.getClass().getContainerStore(mPtr);
 
-    for (MWWorld::ContainerStoreIterator iter = store.begin(MWWorld::ContainerStore::Type_Light); iter != store.end(); ++iter)
+    for (MWWorld::ConstContainerStoreIterator iter = store.cbegin(MWWorld::ContainerStore::Type_Light);
+         iter != store.cend(); ++iter)
     {
         const ESM::Light* light = iter->get<ESM::Light>()->mBase;
         if (!(light->mData.mFlags & ESM::Light::Carry))
@@ -41,16 +40,10 @@ ActorAnimation::ActorAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group>
             addHiddenItemLight(*iter, light);
         }
     }
-
-    if (!mListenerDisabled)
-        store.setContListener(this);
 }
 
 ActorAnimation::~ActorAnimation()
 {
-    if (!mListenerDisabled && mPtr.getRefData().getCustomData() && mPtr.getClass().getContainerStore(mPtr).getContListener() == this)
-        mPtr.getClass().getContainerStore(mPtr).setContListener(NULL);
-
     for (ItemLightMap::iterator iter = mItemLights.begin(); iter != mItemLights.end(); ++iter)
     {
         mInsert->removeChild(iter->second);

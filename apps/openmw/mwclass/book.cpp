@@ -54,7 +54,7 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    boost::shared_ptr<MWWorld::Action> Book::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Book::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
@@ -62,13 +62,13 @@ namespace MWClass
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfItem");
 
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
 
-        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
+        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
     }
 
     std::string Book::getScript (const MWWorld::ConstPtr& ptr) const
@@ -87,7 +87,7 @@ namespace MWClass
 
     void Book::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Book);
+        std::shared_ptr<Class> instance (new Book);
 
         registerClass (typeid (ESM::Book).name(), instance);
     }
@@ -162,9 +162,9 @@ namespace MWClass
         return record->mId;
     }
 
-    boost::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr) const
     {
-        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
+        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
     }
 
     MWWorld::Ptr Book::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const

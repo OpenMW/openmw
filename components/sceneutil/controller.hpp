@@ -1,8 +1,7 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_CONTROLLER_H
 #define OPENMW_COMPONENTS_SCENEUTIL_CONTROLLER_H
 
-#include <boost/shared_ptr.hpp>
-
+#include <memory>
 #include <osg/NodeVisitor>
 
 namespace SceneUtil
@@ -43,17 +42,17 @@ namespace SceneUtil
 
         float getInputValue(osg::NodeVisitor* nv);
 
-        void setSource(boost::shared_ptr<ControllerSource> source);
-        void setFunction(boost::shared_ptr<ControllerFunction> function);
+        void setSource(std::shared_ptr<ControllerSource> source);
+        void setFunction(std::shared_ptr<ControllerFunction> function);
 
-        boost::shared_ptr<ControllerSource> getSource() const;
-        boost::shared_ptr<ControllerFunction> getFunction() const;
+        std::shared_ptr<ControllerSource> getSource() const;
+        std::shared_ptr<ControllerFunction> getFunction() const;
 
     private:
-        boost::shared_ptr<ControllerSource> mSource;
+        std::shared_ptr<ControllerSource> mSource;
 
         // The source value gets passed through this function before it's passed on to the DestValue.
-        boost::shared_ptr<ControllerFunction> mFunction;
+        std::shared_ptr<ControllerFunction> mFunction;
     };
 
     /// Pure virtual base class - visit() all controllers that are attached as UpdateCallbacks in a scene graph.
@@ -64,6 +63,13 @@ namespace SceneUtil
 
         virtual void apply(osg::Node& node);
 
+        // Technically not required as the default implementation would trickle down to apply(Node&) anyway,
+        // but we'll shortcut instead to avoid the chain of virtual function calls
+        virtual void apply(osg::MatrixTransform& node);
+        virtual void apply(osg::Geometry& node);
+
+        void applyNode(osg::Node& node);
+
         virtual void visit(osg::Node& node, Controller& ctrl) = 0;
     };
 
@@ -71,14 +77,14 @@ namespace SceneUtil
     {
     public:
         AssignControllerSourcesVisitor();
-        AssignControllerSourcesVisitor(boost::shared_ptr<ControllerSource> toAssign);
+        AssignControllerSourcesVisitor(std::shared_ptr<ControllerSource> toAssign);
 
         /// Assign the wanted ControllerSource. May be overridden in derived classes.
         /// By default assigns the ControllerSource passed to the constructor of this class if no ControllerSource is assigned to that controller yet.
         virtual void visit(osg::Node& node, Controller& ctrl);
 
     private:
-        boost::shared_ptr<ControllerSource> mToAssign;
+        std::shared_ptr<ControllerSource> mToAssign;
     };
 
     /// Finds the maximum of all controller functions in the given scene graph

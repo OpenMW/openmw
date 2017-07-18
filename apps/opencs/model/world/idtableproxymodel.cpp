@@ -82,7 +82,7 @@ void CSMWorld::IdTableProxyModel::setSourceModel(QAbstractItemModel *model)
             SLOT(sourceDataChanged(const QModelIndex &, const QModelIndex &)));
 }
 
-void CSMWorld::IdTableProxyModel::setFilter (const boost::shared_ptr<CSMFilter::Node>& filter)
+void CSMWorld::IdTableProxyModel::setFilter (const std::shared_ptr<CSMFilter::Node>& filter)
 {
     beginResetModel();
     mFilter = filter;

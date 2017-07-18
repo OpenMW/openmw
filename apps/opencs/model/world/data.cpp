@@ -363,7 +363,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mBodyParts.addColumn (new FixedRecordTypeColumn<ESM::BodyPart> (UniversalId::Type_BodyPart));
     mBodyParts.addColumn (new BodyPartTypeColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new VampireColumn<ESM::BodyPart>);
-    mBodyParts.addColumn (new FlagColumn<ESM::BodyPart> (Columns::ColumnId_Female, ESM::BodyPart::BPF_Female));
+    mBodyParts.addColumn(new GenderNpcColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new FlagColumn<ESM::BodyPart> (Columns::ColumnId_Playable,
         ESM::BodyPart::BPF_NotPlayable, ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, true));
 
@@ -554,12 +554,12 @@ CSMWorld::Data::~Data()
     delete mReader;
 }
 
-boost::shared_ptr<Resource::ResourceSystem> CSMWorld::Data::getResourceSystem()
+std::shared_ptr<Resource::ResourceSystem> CSMWorld::Data::getResourceSystem()
 {
     return mResourceSystem;
 }
 
-boost::shared_ptr<const Resource::ResourceSystem> CSMWorld::Data::getResourceSystem() const
+std::shared_ptr<const Resource::ResourceSystem> CSMWorld::Data::getResourceSystem() const
 {
     return mResourceSystem;
 }
@@ -891,7 +891,7 @@ void CSMWorld::Data::merge()
 int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base, bool project)
 {
     // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading
-    boost::shared_ptr<ESM::ESMReader> ptr(mReader);
+    std::shared_ptr<ESM::ESMReader> ptr(mReader);
     mReaders.push_back(ptr);
     mReader = 0;
 
@@ -945,7 +945,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading.
             // We don't store non-base reader, because everything going into modified will be
             // fully loaded during the initial loading process.
-            boost::shared_ptr<ESM::ESMReader> ptr(mReader);
+            std::shared_ptr<ESM::ESMReader> ptr(mReader);
             mReaders.push_back(ptr);
         }
         else
@@ -993,7 +993,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             if (index!=-1/* && !mBase*/)
                 mLand.getRecord (index).get().loadData (
                     ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR |
-                    ESM::Land::DATA_VTEX | ESM::Land::DATA_WNAM);
+                    ESM::Land::DATA_VTEX);
 
             break;
         }

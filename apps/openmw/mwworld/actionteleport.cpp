@@ -4,6 +4,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "../mwworld/class.hpp"
 
 #include "player.hpp"
@@ -34,6 +36,7 @@ namespace MWWorld
     void ActionTeleport::teleport(const Ptr &actor)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
+        actor.getClass().getCreatureStats(actor).land();
         if(actor == world->getPlayerPtr())
         {
             world->getPlayer().setTeleported(true);

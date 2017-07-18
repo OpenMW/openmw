@@ -6,12 +6,12 @@
 #include <components/esm/loadmgef.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "../mwrender/animation.hpp"
 
 namespace MWWorld
 {
-    class ContainerStoreIterator;
     class InventoryStore;
 }
 
@@ -268,7 +268,7 @@ public:
     bool isSneaking() const;
 
     void setAttackingOrSpell(bool attackingOrSpell);
-    void setAIAttackType(std::string attackType); // set and used by AiCombat
+    void setAIAttackType(const std::string& attackType);
     static void setAttackTypeRandomly(std::string& attackType);
 
     bool readyToPrepareAttack() const;

@@ -93,7 +93,7 @@ void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
             for (std::list<std::pair<std::string, Ptr> >::iterator iter = mScripts.begin(); iter!=mScripts.end(); ++iter)
                 if (iter->second==ptr)
                 {
-                    std::cerr << "warning, tried to add local script twice for " << ptr.getCellRef().getRefId() << std::endl;
+                    std::cerr << "Error: tried to add local script twice for " << ptr.getCellRef().getRefId() << std::endl;
                     remove(ptr);
                     break;
                 }

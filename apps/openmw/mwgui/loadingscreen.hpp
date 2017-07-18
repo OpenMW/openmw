@@ -47,6 +47,8 @@ namespace MWGui
         void findSplashScreens();
         bool needToDrawLoadingScreen();
 
+        void setupCopyFramebufferToTextureCallback();
+
         const VFS::Manager* mVFS;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
 
@@ -61,6 +63,8 @@ namespace MWGui
 
         size_t mProgress;
 
+        bool mShowWallpaper;
+
         MyGUI::Widget* mLoadingBox;
 
         MyGUI::TextBox* mLoadingText;
@@ -72,7 +76,7 @@ namespace MWGui
         // TODO: add releaseGLObjects() for mTexture
 
         osg::ref_ptr<osg::Texture2D> mTexture;
-        std::auto_ptr<MyGUI::ITexture> mGuiTexture;
+        std::unique_ptr<MyGUI::ITexture> mGuiTexture;
 
         void changeWallpaper();
 

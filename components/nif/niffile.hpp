@@ -92,7 +92,7 @@ public:
     /// Get the name of the file
     std::string getFilename() const { return filename; }
 };
-typedef boost::shared_ptr<const Nif::NIFFile> NIFFilePtr;
+typedef std::shared_ptr<const Nif::NIFFile> NIFFilePtr;
 
 
 

@@ -9,6 +9,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -46,7 +47,7 @@ namespace MWMechanics
         bool mCombatMove;
         osg::Vec3f mLastTargetPos;
         const MWWorld::CellStore* mCell;
-        boost::shared_ptr<Action> mCurrentAction;
+        std::shared_ptr<Action> mCurrentAction;
         float mActionCooldown;
         float mStrength;
         bool mForceNoShortcut;
@@ -233,9 +234,14 @@ namespace MWMechanics
             storage.stopAttack();
             characterController.setAttackingOrSpell(false);
             storage.mActionCooldown = 0.f;
-            if (target == MWMechanics::getPlayer())
+            // Continue combat if target is player or player follower/escorter and an attack has been attempted
+            const std::list<MWWorld::Ptr>& playerFollowersAndEscorters = MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(MWMechanics::getPlayer());
+            bool targetSidesWithPlayer = (std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), target) != playerFollowersAndEscorters.end());
+            if ((target == MWMechanics::getPlayer() || targetSidesWithPlayer)
+                && ((actor.getClass().getCreatureStats(actor).getHitAttemptActorId() == target.getClass().getCreatureStats(target).getActorId())
+                || (target.getClass().getCreatureStats(target).getHitAttemptActorId() == actor.getClass().getCreatureStats(actor).getActorId())))
                 forceFlee = true;
-            else
+            else // Otherwise end combat
                 return true;
         }
 
@@ -243,7 +249,7 @@ namespace MWMechanics
         actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
         float& actionCooldown = storage.mActionCooldown;
-        boost::shared_ptr<Action>& currentAction = storage.mCurrentAction;
+        std::shared_ptr<Action>& currentAction = storage.mCurrentAction;
 
         if (!forceFlee)
         {
@@ -473,7 +479,7 @@ namespace MWMechanics
 
     void AiCombat::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
-        std::auto_ptr<ESM::AiSequence::AiCombat> combat(new ESM::AiSequence::AiCombat());
+        std::unique_ptr<ESM::AiSequence::AiCombat> combat(new ESM::AiSequence::AiCombat());
         combat->mTargetActorId = mTargetActorId;
 
         ESM::AiSequence::AiPackageContainer package;
@@ -494,8 +500,7 @@ namespace MWMechanics
         {
             // get the range of the target's weapon
             float rangeAttackOfTarget = 0.f;
-            bool isRangedCombat = false;
-            MWWorld::Ptr targetWeapon = MWWorld::Ptr();         
+            MWWorld::Ptr targetWeapon = MWWorld::Ptr();
             const MWWorld::Class& targetClass = target.getClass();
 
             if (targetClass.hasInventoryStore(target))
@@ -507,10 +512,13 @@ namespace MWMechanics
                     targetWeapon = *weaponSlot;
             }
 
-            boost::shared_ptr<Action> targetWeaponAction (new ActionWeapon(targetWeapon));
+            std::shared_ptr<Action> targetWeaponAction (new ActionWeapon(targetWeapon));
 
             if (targetWeaponAction.get())
+            {
+                bool isRangedCombat = false;
                 rangeAttackOfTarget = targetWeaponAction->getCombatRange(isRangedCombat);
+            }
               
             // apply sideway movement (kind of dodging) with some probability
             // if actor is within range of target's weapon

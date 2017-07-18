@@ -1,17 +1,12 @@
 #include "importer.hpp"
 
-#include <ctime>
 #include <iostream>
-#include <string>
-#include <map>
-#include <vector>
-#include <algorithm>
 #include <sstream>
 #include <components/misc/stringops.hpp>
 
-#include <boost/version.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/version.hpp>
 
 namespace bfs = boost::filesystem;
 

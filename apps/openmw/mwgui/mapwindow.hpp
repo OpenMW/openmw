@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#include <boost/shared_ptr.hpp>
-
 #include "windowpinnablebase.hpp"
 
 #include <components/esm/cellid.hpp>
@@ -31,6 +29,11 @@ namespace MWWorld
 namespace Loading
 {
     class Listener;
+}
+
+namespace SceneUtil
+{
+    class WorkQueue;
 }
 
 namespace MWGui
@@ -125,7 +128,7 @@ namespace MWGui
         std::vector<MyGUI::ImageBox*> mMapWidgets;
         std::vector<MyGUI::ImageBox*> mFogWidgets;
 
-        typedef std::vector<boost::shared_ptr<MyGUI::ITexture> > TextureVector;
+        typedef std::vector<std::shared_ptr<MyGUI::ITexture> > TextureVector;
         TextureVector mMapTextures;
         TextureVector mFogTextures;
 
@@ -193,14 +196,15 @@ namespace MWGui
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase, public NoDrop
     {
     public:
-        MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender);
+        MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender, SceneUtil::WorkQueue* workQueue);
         virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);
 
         virtual void setAlpha(float alpha);
+        void setVisible(bool visible);
 
-        void renderGlobalMap(Loading::Listener* loadingListener);
+        void renderGlobalMap();
 
         /// adds the marker to the global map
         /// @param name The ESM::Cell::mName
@@ -211,6 +215,8 @@ namespace MWGui
 
         void setGlobalMapPlayerPosition (float worldX, float worldY);
         void setGlobalMapPlayerDir(const float x, const float y);
+
+        void ensureGlobalMapLoaded();
 
         virtual void open();
 
@@ -239,8 +245,8 @@ namespace MWGui
         void setGlobalMapMarkerTooltip(MyGUI::Widget* widget, int x, int y);
 
         MyGUI::ScrollView* mGlobalMap;
-        std::auto_ptr<MyGUI::ITexture> mGlobalMapTexture;
-        std::auto_ptr<MyGUI::ITexture> mGlobalMapOverlayTexture;
+        std::unique_ptr<MyGUI::ITexture> mGlobalMapTexture;
+        std::unique_ptr<MyGUI::ITexture> mGlobalMapOverlayTexture;
         MyGUI::ImageBox* mGlobalMapImage;
         MyGUI::ImageBox* mGlobalMapOverlay;
         MyGUI::ImageBox* mPlayerArrowLocal;

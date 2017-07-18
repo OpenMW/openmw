@@ -55,8 +55,7 @@ public:
 
         parent = NULL;
 
-        boneTrafo = NULL;
-        boneIndex = -1;
+        isBone = false;
     }
 
     void post(NIFFile *nif)
@@ -69,27 +68,11 @@ public:
     // NiNodes (or types derived from NiNodes) can be parents.
     NiNode *parent;
 
-    // Bone transformation. If set, node is a part of a skeleton.
-    const Transformation *boneTrafo;
+    bool isBone;
 
-    // Bone weight info, from NiSkinData
-    const NiSkinData::BoneInfo *boneInfo;
-
-    // Bone index. If -1, this node is either not a bone, or if
-    // boneTrafo is set it is the root bone in the skeleton.
-    short boneIndex;
-
-    void makeRootBone(const Transformation *tr)
+    void setBone()
     {
-        boneTrafo = tr;
-        boneIndex = -1;
-    }
-
-    void makeBone(short ind, const NiSkinData::BoneInfo &bi)
-    {
-        boneInfo = &bi;
-        boneTrafo = &bi.trafo;
-        boneIndex = ind;
+        isBone = true;
     }
 };
 

@@ -414,10 +414,10 @@ namespace MWGui
 
         const MyGUI::IntPoint padding(8, 8);
 
-        const int maximumWidth = 500;
-
         const int imageCaptionHPadding = (caption != "" ? 8 : 0);
         const int imageCaptionVPadding = (caption != "" ? 4 : 0);
+
+        const int maximumWidth = MyGUI::RenderManager::getInstance().getViewSize().width - imageCaptionHPadding * 2;
 
         std::string realImage = MWBase::Environment::get().getWindowManager()->correctIconPath(image);
 
@@ -594,6 +594,14 @@ namespace MWGui
             return "\n" + prefix + ": " + toString(weight);
     }
 
+    std::string ToolTips::getPercentString(const float value, const std::string& prefix)
+    {
+        if (value == 0)
+            return "";
+        else
+            return "\n" + prefix + ": " + toString(value*100) +"%";
+    }
+
     std::string ToolTips::getValueString(const int value, const std::string& prefix)
     {
         if (value == 0)
@@ -701,20 +709,28 @@ namespace MWGui
 
     void ToolTips::createSpecializationToolTip(MyGUI::Widget* widget, const std::string& name, int specId)
     {
-        widget->setUserString("Caption_CenteredCaption", name);
+        widget->setUserString("Caption_Caption", name);
         std::string specText;
         // get all skills of this specialisation
         const MWWorld::Store<ESM::Skill> &skills =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
 
+        bool isFirst = true;
         MWWorld::Store<ESM::Skill>::iterator it = skills.begin();
         for (; it != skills.end(); ++it)
         {
             if (it->second.mData.mSpecialization == specId)
-                specText += std::string("\n#{") + ESM::Skill::sSkillNameIds[it->first] + "}";
+            {
+                if (isFirst)
+                    isFirst = false;
+                else
+                    specText += "\n";
+
+                specText += std::string("#{") + ESM::Skill::sSkillNameIds[it->first] + "}";
+            }
         }
-        widget->setUserString("Caption_CenteredCaptionText", specText);
-        widget->setUserString("ToolTipLayout", "TextWithCenteredCaptionToolTip");
+        widget->setUserString("Caption_ColumnText", specText);
+        widget->setUserString("ToolTipLayout", "SpecializationToolTip");
         widget->setUserString("ToolTipType", "Layout");
     }
 
@@ -769,7 +785,7 @@ namespace MWGui
             {
                 if (it == categories[category].spells.begin())
                 {
-                    text += std::string("\n#{fontcolourhtml=header}") + std::string("#{") + categories[category].label + "}";
+                    text += std::string("\n\n#{fontcolourhtml=header}") + std::string("#{") + categories[category].label + "}";
                 }
 
                 const std::string &spellId = *it;
@@ -787,7 +803,7 @@ namespace MWGui
         widget->setUserString("Caption_CenteredCaption", playerRace->mName);
         widget->setUserString("Caption_CenteredCaptionText", playerRace->mDescription);
         widget->setUserString("ToolTipType", "Layout");
-        widget->setUserString("ToolTipLayout", "TextWithCenteredCaptionToolTip");
+        widget->setUserString("ToolTipLayout", "RaceToolTip");
     }
 
     void ToolTips::createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass)

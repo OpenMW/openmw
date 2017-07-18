@@ -52,7 +52,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<ContainerCustomData> data (new ContainerCustomData);
+            std::unique_ptr<ContainerCustomData> data (new ContainerCustomData);
 
             MWWorld::LiveCellRef<ESM::Container> *ref =
                 ptr.get<ESM::Container>();
@@ -100,7 +100,6 @@ namespace MWClass
     {
         if(!model.empty())
             physics.addObject(ptr, model);
-        MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
     std::string Container::getModel(const MWWorld::ConstPtr &ptr) const
@@ -114,18 +113,23 @@ namespace MWClass
         return "";
     }
 
-    boost::shared_ptr<MWWorld::Action> Container::activate (const MWWorld::Ptr& ptr,
+    bool Container::useAnim() const
+    {
+        return true;
+    }
+
+    std::shared_ptr<MWWorld::Action> Container::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
+            return std::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
 
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfContainer");
 
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
 
             return action;
@@ -135,7 +139,7 @@ namespace MWClass
         const std::string trapActivationSound = "Disarm Trap Fail";
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
+        const MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
 
         bool isLocked = ptr.getCellRef().getLockLevel() > 0;
         bool isTrapped = !ptr.getCellRef().getTrap().empty();
@@ -145,7 +149,7 @@ namespace MWClass
         // make key id lowercase
         std::string keyId = ptr.getCellRef().getKey();
         Misc::StringUtils::lowerCaseInPlace(keyId);
-        for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
+        for (MWWorld::ConstContainerStoreIterator it = invStore.cbegin(); it != invStore.cend(); ++it)
         {
             std::string refId = it->getCellRef().getRefId();
             Misc::StringUtils::lowerCaseInPlace(refId);
@@ -177,20 +181,20 @@ namespace MWClass
         {
             if(!isTrapped)
             {
-                boost::shared_ptr<MWWorld::Action> action (new MWWorld::ActionOpen(ptr));
+                std::shared_ptr<MWWorld::Action> action (new MWWorld::ActionOpen(ptr));
                 return action;
             }
             else
             {
                 // Activate trap
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(ptr.getCellRef().getTrap(), ptr));
+                std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(ptr.getCellRef().getTrap(), ptr));
                 action->setSound(trapActivationSound);
                 return action;
             }
         }
         else
         {
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction(std::string(), ptr));
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction(std::string(), ptr));
             action->setSound(lockedSound);
             return action;
         }
@@ -220,7 +224,7 @@ namespace MWClass
 
     void Container::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Container);
+        std::shared_ptr<Class> instance (new Container);
 
         registerClass (typeid (ESM::Container).name(), instance);
     }
@@ -304,7 +308,7 @@ namespace MWClass
         if (!ptr.getRefData().getCustomData())
         {
             // Create a CustomData, but don't fill it from ESM records (not needed)
-            std::auto_ptr<ContainerCustomData> data (new ContainerCustomData);
+            std::unique_ptr<ContainerCustomData> data (new ContainerCustomData);
             ptr.getRefData().setCustomData (data.release());
         }
 

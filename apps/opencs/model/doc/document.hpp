@@ -3,7 +3,6 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/filesystem/path.hpp>
 
 #include <QUndoStack>
@@ -137,7 +136,7 @@ namespace CSMDoc
 
             void runSearch (const CSMWorld::UniversalId& searchId, const CSMTools::Search& search);
 
-            void runMerge (std::auto_ptr<CSMDoc::Document> target);
+            void runMerge (std::unique_ptr<CSMDoc::Document> target);
 
             void abortOperation (int type);
 

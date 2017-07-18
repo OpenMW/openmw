@@ -61,7 +61,7 @@ namespace MWRender
         bool mShowWeapons;
         bool mShowCarriedLeft;
 
-        boost::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
+        std::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
     };
 }
 

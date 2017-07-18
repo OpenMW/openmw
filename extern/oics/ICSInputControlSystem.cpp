@@ -28,6 +28,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace ICS
 {
+	const float ICS_MAX = std::numeric_limits<float>::max();
+
 	InputControlSystem::InputControlSystem(std::string file, bool active
 		, DetectingBindingListener* detectingBindingListener
 		, InputControlSystemLog* log, size_t channelCount)
