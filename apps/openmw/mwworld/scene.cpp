@@ -478,6 +478,7 @@ namespace MWWorld
     , mPreloadExteriorGrid(Settings::Manager::getBool("preload exterior grid", "Cells"))
     , mPreloadDoors(Settings::Manager::getBool("preload doors", "Cells"))
     , mPreloadFastTravel(Settings::Manager::getBool("preload fast travel", "Cells"))
+    , mPredictionTime(Settings::Manager::getFloat("prediction time", "Cells"))
     {
         mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager(), rendering.getTerrain(), rendering.getLandManager()));
         mPreloader->setWorkQueue(mRendering.getWorkQueue());
@@ -685,7 +686,7 @@ namespace MWWorld
         const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
         osg::Vec3f moved = playerPos - mLastPlayerPos;
-        osg::Vec3f predictedPos = playerPos + moved / dt;
+        osg::Vec3f predictedPos = playerPos + moved / dt * mPredictionTime;
 
         if (mCurrentCell->isExterior())
             exteriorPositions.push_back(predictedPos);
