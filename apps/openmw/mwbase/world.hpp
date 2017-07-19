@@ -363,6 +363,8 @@ namespace MWBase
 
             virtual void update (float duration, bool paused) = 0;
 
+            virtual void updateWindowManager () = 0;
+
             virtual MWWorld::Ptr placeObject (const MWWorld::ConstPtr& object, float cursorX, float cursorY, int amount) = 0;
             ///< copy and place an object into the gameworld at the specified cursor position
             /// @param object

@@ -14,6 +14,7 @@ namespace osg
     class Group;
     class Stats;
     class Node;
+    class Object;
 }
 
 namespace Resource
@@ -86,6 +87,9 @@ namespace Terrain
         virtual void preload(View* view, const osg::Vec3f& eyePoint) {}
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
+
+        /// Set the default viewer (usually a Camera), used as viewpoint for any viewers that don't use their own viewpoint.
+        virtual void setDefaultViewer(osg::Object* obj) {}
 
         Storage* getStorage() { return mStorage; }
 

@@ -155,6 +155,19 @@ preload cell expiry delay
 The amount of time (in seconds) that a preloaded cell will stay in cache after it is no longer referenced or required,
 for example, after the player has moved away from a door without entering it.
 
+prediction time
+---------------
+
+:Type:		floating point
+:Range:		>=0
+:Default:	1
+
+The amount of time (in seconds) in the future to predict the player position for. This predicted position is used to preload any cells and/or distant terrain required at that position.
+
+This setting will only have an effect if 'preload enabled' is set or the 'distant terrain' in the Terrain section is set.
+
+Increasing this setting from its default may help if your computer/hard disk is too slow to preload in time and you see loading screens and/or lag spikes.
+
 cache expiry delay
 ------------------
 
