@@ -52,7 +52,7 @@ int FactionFunctions::GetFactionRank(unsigned short pid, unsigned int i) noexcep
     return player->factionChanges.factions.at(i).rank;
 }
 
-bool FactionFunctions::GetFactionExpelledState(unsigned short pid, unsigned int i) noexcept
+bool FactionFunctions::GetFactionExpulsionState(unsigned short pid, unsigned int i) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, false);
@@ -86,9 +86,9 @@ void FactionFunctions::SetFactionRank(unsigned int rank) noexcept
     tempFaction.rank = rank;
 }
 
-void FactionFunctions::SetFactionExpulsionState(bool isExpelled) noexcept
+void FactionFunctions::SetFactionExpulsionState(bool expulsionState) noexcept
 {
-    tempFaction.isExpelled = isExpelled;
+    tempFaction.isExpelled = expulsionState;
 }
 
 void FactionFunctions::SetFactionReputation(int reputation) noexcept
