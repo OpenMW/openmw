@@ -132,14 +132,14 @@ ViewData* QuadTreeNode::getView(osg::NodeVisitor &nv)
     if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
-        ViewData* vd = mViewDataMap->getViewData(cv->getCurrentCamera(), true);
+        ViewData* vd = mViewDataMap->getViewData(cv->getCurrentCamera());
         vd->setEyePoint(nv.getEyePoint());
         return vd;
     }
     else // INTERSECTION_VISITOR
     {
         static osg::ref_ptr<osg::Object> dummyObj = new osg::DummyObject;
-        ViewData* vd = mViewDataMap->getViewData(dummyObj.get(), true);
+        ViewData* vd = mViewDataMap->getViewData(dummyObj.get());
         ViewData* defaultView = mViewDataMap->getDefaultView();
         if (defaultView->hasEyePoint())
             vd->setEyePoint(defaultView->getEyePoint());

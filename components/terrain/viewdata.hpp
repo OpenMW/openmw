@@ -70,7 +70,7 @@ namespace Terrain
     class ViewDataMap : public osg::Referenced
     {
     public:
-        ViewData* getViewData(osg::Object* viewer, bool ref);
+        ViewData* getViewData(osg::Object* viewer);
 
         ViewData* createOrReuseView();
 
