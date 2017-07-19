@@ -33,6 +33,8 @@ namespace Terrain
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats);
 
+        virtual void setDefaultViewer(osg::Object* obj);
+
     private:
         void ensureQuadTreeBuilt();
 

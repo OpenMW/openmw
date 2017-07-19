@@ -7,6 +7,7 @@ ViewData::ViewData()
     : mNumEntries(0)
     , mFrameLastUsed(0)
     , mChanged(false)
+    , mHasEyePoint(false)
 {
 
 }
@@ -41,6 +42,22 @@ ViewData::Entry &ViewData::getEntry(unsigned int i)
 bool ViewData::hasChanged() const
 {
     return mChanged;
+}
+
+bool ViewData::hasEyePoint() const
+{
+    return mHasEyePoint;
+}
+
+void ViewData::setEyePoint(const osg::Vec3f &eye)
+{
+    mEyePoint = eye;
+    mHasEyePoint = true;
+}
+
+const osg::Vec3f& ViewData::getEyePoint() const
+{
+    return mEyePoint;
 }
 
 void ViewData::reset(unsigned int frame)
@@ -148,6 +165,16 @@ void ViewDataMap::clear()
     mViews.clear();
     mUnusedViews.clear();
     mViewVector.clear();
+}
+
+void ViewDataMap::setDefaultViewer(osg::Object *viewer)
+{
+    mDefaultViewer = viewer;
+}
+
+ViewData* ViewDataMap::getDefaultView()
+{
+    return getViewData(mDefaultViewer, true);
 }
 
 
