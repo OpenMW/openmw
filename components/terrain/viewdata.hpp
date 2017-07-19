@@ -52,24 +52,35 @@ namespace Terrain
         /// @return Have any nodes changed since the last frame
         bool hasChanged() const;
 
+        bool hasEyePoint() const;
+
+        void setEyePoint(const osg::Vec3f& eye);
+        const osg::Vec3f& getEyePoint() const;
+
     private:
         std::vector<Entry> mEntries;
         unsigned int mNumEntries;
         unsigned int mFrameLastUsed;
         bool mChanged;
         osg::ref_ptr<osg::Object> mViewer;
+        osg::Vec3f mEyePoint;
+        bool mHasEyePoint;
     };
 
     class ViewDataMap : public osg::Referenced
     {
     public:
-        ViewData* getViewData(osg::Object* viewer, bool ref);
+        ViewData* getViewData(osg::Object* viewer);
 
         ViewData* createOrReuseView();
 
         void clearUnusedViews(unsigned int frame);
 
         void clear();
+
+        void setDefaultViewer(osg::Object* viewer);
+
+        ViewData* getDefaultView();
 
     private:
         std::list<ViewData> mViewVector;
@@ -78,6 +89,8 @@ namespace Terrain
         Map mViews;
 
         std::deque<ViewData*> mUnusedViews;
+
+        osg::ref_ptr<osg::Object> mDefaultViewer;
     };
 
 }

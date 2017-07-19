@@ -7,6 +7,7 @@ ViewData::ViewData()
     : mNumEntries(0)
     , mFrameLastUsed(0)
     , mChanged(false)
+    , mHasEyePoint(false)
 {
 
 }
@@ -41,6 +42,22 @@ ViewData::Entry &ViewData::getEntry(unsigned int i)
 bool ViewData::hasChanged() const
 {
     return mChanged;
+}
+
+bool ViewData::hasEyePoint() const
+{
+    return mHasEyePoint;
+}
+
+void ViewData::setEyePoint(const osg::Vec3f &eye)
+{
+    mEyePoint = eye;
+    mHasEyePoint = true;
+}
+
+const osg::Vec3f& ViewData::getEyePoint() const
+{
+    return mEyePoint;
 }
 
 void ViewData::reset(unsigned int frame)
@@ -95,14 +112,13 @@ bool ViewData::Entry::set(QuadTreeNode *node, bool visible)
     }
 }
 
-ViewData *ViewDataMap::getViewData(osg::Object *viewer, bool ref)
+ViewData *ViewDataMap::getViewData(osg::Object *viewer)
 {
     Map::const_iterator found = mViews.find(viewer);
     if (found == mViews.end())
     {
         ViewData* vd = createOrReuseView();
-        if (ref)
-            vd->setViewer(viewer);
+        vd->setViewer(viewer);
         mViews[viewer] = vd;
         return vd;
     }
@@ -130,8 +146,7 @@ void ViewDataMap::clearUnusedViews(unsigned int frame)
     for (Map::iterator it = mViews.begin(); it != mViews.end(); )
     {
         ViewData* vd = it->second;
-        if ((!vd->getViewer() // if no ref was held, always need to clear to avoid holding a dangling ref.
-                || vd->getFrameLastUsed() + 2 < frame))
+        if (vd->getFrameLastUsed() + 2 < frame)
         {
             vd->setViewer(NULL);
             vd->clear();
@@ -148,6 +163,16 @@ void ViewDataMap::clear()
     mViews.clear();
     mUnusedViews.clear();
     mViewVector.clear();
+}
+
+void ViewDataMap::setDefaultViewer(osg::Object *viewer)
+{
+    mDefaultViewer = viewer;
+}
+
+ViewData* ViewDataMap::getDefaultView()
+{
+    return getViewData(mDefaultViewer);
 }
 
 

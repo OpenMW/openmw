@@ -67,6 +67,7 @@ namespace MWWorld
             bool mPreloadExteriorGrid;
             bool mPreloadDoors;
             bool mPreloadFastTravel;
+            float mPredictionTime;
 
             osg::Vec3f mLastPlayerPos;
 

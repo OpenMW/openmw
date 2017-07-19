@@ -254,7 +254,10 @@ namespace MWRender
         sizeX = std::max(sizeX, 0);
         sizeY = std::max(sizeY, 0);
 
-        mCamera->setViewport(0, mSizeY-sizeY, std::min(mSizeX, sizeX), std::min(mSizeY, sizeY));
+        // NB Camera::setViewport has threading issues
+        osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+        stateset->setAttributeAndModes(new osg::Viewport(0, mSizeY-sizeY, std::min(mSizeX, sizeX), std::min(mSizeY, sizeY)));
+        mCamera->setStateSet(stateset);
 
         redraw();
     }

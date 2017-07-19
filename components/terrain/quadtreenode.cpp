@@ -99,8 +99,10 @@ void QuadTreeNode::traverse(osg::NodeVisitor &nv)
     if (!hasValidBounds())
         return;
 
-    if ((mLodCallback && mLodCallback->isSufficientDetail(this, nv.getEyePoint())) || !getNumChildren())
-        getView(nv)->add(this, true);
+    ViewData* vd = getView(nv);
+
+    if ((mLodCallback && mLodCallback->isSufficientDetail(this, vd->getEyePoint())) || !getNumChildren())
+        vd->add(this, true);
     else
         osg::Group::traverse(nv);
 }
@@ -130,11 +132,20 @@ ViewData* QuadTreeNode::getView(osg::NodeVisitor &nv)
     if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
-        return mViewDataMap->getViewData(cv->getCurrentCamera(), true);
+        ViewData* vd = mViewDataMap->getViewData(cv->getCurrentCamera());
+        vd->setEyePoint(nv.getEyePoint());
+        return vd;
     }
     else // INTERSECTION_VISITOR
     {
-        return mViewDataMap->getViewData(&nv, (nv.referenceCount() > 0)); // if no referenceCount, the visitor was allocated on the stack
+        static osg::ref_ptr<osg::Object> dummyObj = new osg::DummyObject;
+        ViewData* vd = mViewDataMap->getViewData(dummyObj.get());
+        ViewData* defaultView = mViewDataMap->getDefaultView();
+        if (defaultView->hasEyePoint())
+            vd->setEyePoint(defaultView->getEyePoint());
+        else
+            vd->setEyePoint(nv.getEyePoint());
+        return vd;
     }
 }
 
