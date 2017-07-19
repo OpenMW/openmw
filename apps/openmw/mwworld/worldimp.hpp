@@ -130,7 +130,6 @@ namespace MWWorld
             Ptr copyObjectToCell(const ConstPtr &ptr, CellStore* cell, ESM::Position pos, int count, bool adjustPos);
 
             void updateSoundListener();
-            void updateWindowManager ();
             void updatePlayer(bool paused);
 
             void preloadSpells();
@@ -460,6 +459,8 @@ namespace MWWorld
             /// \return pointer to created record
 
             virtual void update (float duration, bool paused);
+
+            virtual void updateWindowManager ();
 
             virtual MWWorld::Ptr placeObject (const MWWorld::ConstPtr& object, float cursorX, float cursorY, int amount);
             ///< copy and place an object into the gameworld at the specified cursor position

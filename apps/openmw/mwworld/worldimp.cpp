@@ -1624,15 +1624,13 @@ namespace MWWorld
         if (!paused)
             doPhysics (duration);
 
+        updatePlayer(paused);
+
         mPhysics->debugDraw();
 
         mWorldScene->update (duration, paused);
 
-        updateWindowManager ();
-
         updateSoundListener();
-
-        updatePlayer(paused);
 
         mSpellPreloadTimer -= duration;
         if (mSpellPreloadTimer <= 0.f)

@@ -709,6 +709,9 @@ void OMW::Engine::go()
         {
             mViewer->eventTraversal();
             mViewer->updateTraversal();
+
+            mEnvironment.getWorld()->updateWindowManager();
+
             mViewer->renderingTraversals();
         }
 
