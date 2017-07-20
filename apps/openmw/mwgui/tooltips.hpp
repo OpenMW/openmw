@@ -50,6 +50,7 @@ namespace MWGui
         ToolTips();
 
         void onFrame(float frameDuration);
+        void update(float frameDuration);
 
         void setEnabled(bool enabled);
 
@@ -126,6 +127,8 @@ namespace MWGui
         bool mFullHelp;
         
         int mShowOwned;
+
+        float mFrameDuration;
     };
 }
 #endif

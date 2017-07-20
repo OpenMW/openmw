@@ -40,6 +40,7 @@ namespace MWGui
         , mEnabled(true)
         , mFullHelp(false)
         , mShowOwned(0)
+        , mFrameDuration(0.f)
     {
         getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
@@ -67,6 +68,11 @@ namespace MWGui
     }
 
     void ToolTips::onFrame(float frameDuration)
+    {
+        mFrameDuration = frameDuration;
+    }
+
+    void ToolTips::update(float frameDuration)
     {
 
         while (mDynamicToolTipBox->getChildCount())
@@ -320,6 +326,8 @@ namespace MWGui
     void ToolTips::setFocusObject(const MWWorld::ConstPtr& focus)
     {
         mFocusObject = focus;
+
+        update(mFrameDuration);
     }
 
     MyGUI::IntSize ToolTips::getToolTipViaPtr (int count, bool image)
