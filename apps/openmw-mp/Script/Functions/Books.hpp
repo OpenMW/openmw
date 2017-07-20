@@ -38,7 +38,7 @@ public:
     * \brief Add a new book to the book changes for a player.
     *
     * \param pid The player ID whose book changes should be used.
-    * \param topicId The bookId of the book.
+    * \param bookId The bookId of the book.
     * \return void
     */
     static void AddBook(unsigned short pid, const char* bookId) noexcept;

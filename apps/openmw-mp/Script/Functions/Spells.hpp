@@ -5,10 +5,10 @@
     {"InitializeSpellbookChanges", SpellFunctions::InitializeSpellbookChanges},\
     \
     {"GetSpellbookChangesSize",    SpellFunctions::GetSpellbookChangesSize},\
-    {"GetSpellbookAction",         SpellFunctions::GetSpellbookAction},\
+    {"GetSpellbookChangesAction",  SpellFunctions::GetSpellbookChangesAction},\
     \
+    {"SetSpellbookChangesAction",  SpellFunctions::SetSpellbookChangesAction},\
     {"AddSpell",                   SpellFunctions::AddSpell},\
-    {"RemoveSpell",                SpellFunctions::RemoveSpell},\
     \
     {"GetSpellId",                 SpellFunctions::GetSpellId},\
     \
@@ -42,31 +42,25 @@ public:
     * \param pid The player ID whose faction changes should be used.
     * \return The action type (0 for SET, 1 for ADD, 2 for REMOVE).
     */
-    static unsigned int GetSpellbookAction(unsigned short pid) noexcept;
+    static unsigned int GetSpellbookChangesAction(unsigned short pid) noexcept;
 
     /**
-    * \brief Prepare the addition of a spell to a player.
+    * \brief Set the action type in a player's spellbook changes.
     *
-    * In practice, this changes the action type of the PlayerSpellbook packet to
-    * ADD and adds this spell to it.
+    * \param pid The player ID whose spellbook changes should be used.
+    * \param action The action (0 for SET, 1 for ADD, 2 for REMOVE).
+    * \return void
+    */
+    static void SetSpellbookChangesAction(unsigned short pid, unsigned char action) noexcept;
+
+    /**
+    * \brief Add a new spell to the spellbook changes for a player.
     *
     * \param pid The player ID whose spellbook changes should be used.
     * \param topicId The spellId of the spell.
     * \return void
     */
     static void AddSpell(unsigned short pid, const char* spellId) noexcept;
-
-    /**
-    * \brief Prepare the removal of a spell from a player.
-    *
-    * In practice, this changes the action type of the PlayerSpellbook packet to
-    * REMOVE and adds this spell to it.
-    *
-    * \param pid The player ID whose spellbook changes should be used.
-    * \param topicId The spellId of the spell.
-    * \return void
-    */
-    static void RemoveSpell(unsigned short pid, const char* spellId) noexcept;
 
     /**
     * \brief Get the spellId at a certain index in a player's latest spellbook changes.

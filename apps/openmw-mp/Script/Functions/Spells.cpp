@@ -12,7 +12,6 @@ void SpellFunctions::InitializeSpellbookChanges(unsigned short pid) noexcept
     GET_PLAYER(pid, player, );
 
     player->spellbookChanges.spells.clear();
-    player->spellbookChanges.action = SpellbookChanges::SET;
 }
 
 unsigned int SpellFunctions::GetSpellbookChangesSize(unsigned short pid) noexcept
@@ -23,12 +22,20 @@ unsigned int SpellFunctions::GetSpellbookChangesSize(unsigned short pid) noexcep
     return player->spellbookChanges.count;
 }
 
-unsigned int SpellFunctions::GetSpellbookAction(unsigned short pid) noexcept
+unsigned int SpellFunctions::GetSpellbookChangesAction(unsigned short pid) noexcept
 {
     Player *player;
     GET_PLAYER(pid, player, 0);
 
     return player->spellbookChanges.action;
+}
+
+void SpellFunctions::SetSpellbookChangesAction(unsigned short pid, unsigned char action) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, );
+
+    player->spellbookChanges.action = action;
 }
 
 void SpellFunctions::AddSpell(unsigned short pid, const char* spellId) noexcept
@@ -40,19 +47,6 @@ void SpellFunctions::AddSpell(unsigned short pid, const char* spellId) noexcept
     spell.mId = spellId;
 
     player->spellbookChanges.spells.push_back(spell);
-    player->spellbookChanges.action = SpellbookChanges::ADD;
-}
-
-void SpellFunctions::RemoveSpell(unsigned short pid, const char* spellId) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, );
-
-    ESM::Spell spell;
-    spell.mId = spellId;
-
-    player->spellbookChanges.spells.push_back(spell);
-    player->spellbookChanges.action = SpellbookChanges::REMOVE;
 }
 
 const char *SpellFunctions::GetSpellId(unsigned short pid, unsigned int i) noexcept
