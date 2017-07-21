@@ -17,6 +17,7 @@ namespace osg
     class Texture2D;
     class Camera;
     class Group;
+    class Viewport;
 }
 
 namespace MWRender
@@ -83,6 +84,8 @@ namespace MWRender
         int getSlotSelected(int posX, int posY);
 
     protected:
+        osg::ref_ptr<osg::Viewport> mViewport;
+
         virtual void onSetup();
     };
 
