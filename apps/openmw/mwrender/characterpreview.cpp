@@ -133,6 +133,7 @@ namespace MWRender
         mCamera->setRenderOrder(osg::Camera::PRE_RENDER);
         mCamera->attach(osg::Camera::COLOR_BUFFER, mTexture);
         mCamera->setName("CharacterPreview");
+        mCamera->setComputeNearFarMode(osg::Camera::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
 
         mCamera->setNodeMask(Mask_RenderToTexture);
 
