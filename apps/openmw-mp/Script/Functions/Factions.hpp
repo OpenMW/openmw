@@ -132,6 +132,9 @@ public:
     /**
     * \brief Add the server's temporary faction to the faction changes for a player.
     *
+    * In the process, the server's temporary faction will automatically be cleared so a new one
+    * can be set up.
+    *
     * \param pid The player ID whose faction changes should be used.
     * \return void
     */
