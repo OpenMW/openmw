@@ -1732,6 +1732,8 @@ namespace MWGui
         mCompanionWindow->resetReference();
         mConsole->resetReference();
 
+        mToolTips->setFocusObject(MWWorld::ConstPtr());
+
         mInventoryWindow->clear();
 
         mSelectedSpell.clear();

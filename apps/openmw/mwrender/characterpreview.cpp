@@ -133,6 +133,7 @@ namespace MWRender
         mCamera->setRenderOrder(osg::Camera::PRE_RENDER);
         mCamera->attach(osg::Camera::COLOR_BUFFER, mTexture);
         mCamera->setName("CharacterPreview");
+        mCamera->setComputeNearFarMode(osg::Camera::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
 
         mCamera->setNodeMask(Mask_RenderToTexture);
 
@@ -256,7 +257,8 @@ namespace MWRender
 
         // NB Camera::setViewport has threading issues
         osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
-        stateset->setAttributeAndModes(new osg::Viewport(0, mSizeY-sizeY, std::min(mSizeX, sizeX), std::min(mSizeY, sizeY)));
+        mViewport = new osg::Viewport(0, mSizeY-sizeY, std::min(mSizeX, sizeX), std::min(mSizeY, sizeY));
+        stateset->setAttributeAndModes(mViewport);
         mCamera->setStateSet(stateset);
 
         redraw();
@@ -334,8 +336,10 @@ namespace MWRender
 
     int InventoryPreview::getSlotSelected (int posX, int posY)
     {
-        float projX = (posX / mCamera->getViewport()->width()) * 2 - 1.f;
-        float projY = (posY / mCamera->getViewport()->height()) * 2 - 1.f;
+        if (!mViewport)
+            return -1;
+        float projX = (posX / mViewport->width()) * 2 - 1.f;
+        float projY = (posY / mViewport->height()) * 2 - 1.f;
         // With Intersector::WINDOW, the intersection ratios are slightly inaccurate. Seems to be a
         // precision issue - compiling with OSG_USE_FLOAT_MATRIX=0, Intersector::WINDOW works ok.
         // Using Intersector::PROJECTION results in better precision because the start/end points and the model matrices

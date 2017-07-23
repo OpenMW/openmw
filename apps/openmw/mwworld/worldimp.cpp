@@ -1843,8 +1843,6 @@ namespace MWWorld
         // inform the GUI about focused object
         MWWorld::Ptr object = getFacedObject ();
 
-        MWBase::Environment::get().getWindowManager()->setFocusObject(object);
-
         // retrieve object dimensions so we know where to place the floating label
         if (!object.isEmpty ())
         {
@@ -1853,6 +1851,8 @@ namespace MWWorld
             MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(
                 screenBounds.x(), screenBounds.y(), screenBounds.z(), screenBounds.w());
         }
+
+        MWBase::Environment::get().getWindowManager()->setFocusObject(object);
     }
 
     MWWorld::Ptr World::getFacedObject(float maxDistance, bool ignorePlayer)
