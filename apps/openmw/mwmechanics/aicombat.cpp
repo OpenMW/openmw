@@ -29,7 +29,7 @@ namespace
     std::string chooseBestAttack(const ESM::Weapon* weapon);
 
     osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const osg::Vec3f& vLastTargetPos,
-        float duration, int weapType, float strength);
+        float duration, float projSpeed);
 }
 
 namespace MWMechanics
@@ -310,7 +310,33 @@ namespace MWMechanics
             {
                 // rotate actor taking into account target movement direction and projectile speed
                 osg::Vec3f& lastTargetPos = storage.mLastTargetPos;
-                vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, AI_REACTION_TIME, (weapon ? weapon->mData.mType : 0), storage.mStrength);
+
+
+                float projSpeed;
+
+                // get projectile speed (depending on weapon type)
+                if ((weapon ? weapon->mData.mType : 0) == ESM::Weapon::MarksmanThrown)
+                {
+                    static float fThrownWeaponMinSpeed =
+                            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMinSpeed")->getFloat();
+                    static float fThrownWeaponMaxSpeed =
+                            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMaxSpeed")->getFloat();
+
+                    projSpeed =
+                            fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * storage.mStrength;
+                }
+                else
+                {
+                    static float fProjectileMinSpeed =
+                            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMinSpeed")->getFloat();
+                    static float fProjectileMaxSpeed =
+                            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMaxSpeed")->getFloat();
+
+                    projSpeed =
+                            fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * storage.mStrength;
+                }
+
+                vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, AI_REACTION_TIME, projSpeed);
                 lastTargetPos = vTargetPos;
 
                 storage.mMovement.mRotation[0] = getXAngleToDir(vAimDir);
@@ -663,31 +689,8 @@ std::string chooseBestAttack(const ESM::Weapon* weapon)
 }
 
 osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const osg::Vec3f& vLastTargetPos,
-    float duration, int weapType, float strength)
+    float duration, float projSpeed)
 {
-    float projSpeed;
-
-    // get projectile speed (depending on weapon type)
-    if (weapType == ESM::Weapon::MarksmanThrown)
-    {
-        static float fThrownWeaponMinSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMinSpeed")->getFloat();
-        static float fThrownWeaponMaxSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMaxSpeed")->getFloat();
-
-        projSpeed = 
-            fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * strength;
-    }
-    else
-    {
-        static float fProjectileMinSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMinSpeed")->getFloat();
-        static float fProjectileMaxSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMaxSpeed")->getFloat();
-
-        projSpeed = 
-            fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * strength;
-    }
 
     // idea: perpendicular to dir to target speed components of target move vector and projectile vector should be the same
 
