@@ -182,7 +182,8 @@ bool isActualAiPackage(int packageTypeId)
     return (packageTypeId != AiPackage::TypeIdCombat
                    && packageTypeId != AiPackage::TypeIdPursue
                    && packageTypeId != AiPackage::TypeIdAvoidDoor
-                   && packageTypeId != AiPackage::TypeIdFace);
+                   && packageTypeId != AiPackage::TypeIdFace
+                   && packageTypeId != AiPackage::TypeIdBreathe);
 }
 
 void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
