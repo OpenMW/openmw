@@ -75,7 +75,7 @@ Options:
 		Set the build platform, can also be set with environment variable PLATFORM.
 	-u
 		Configure for unity builds.
-	-v <2013/2015>
+	-v <2013/2015/2017>
 		Choose the Visual Studio version to use.
 	-V
 		Run verbosely
@@ -213,20 +213,28 @@ if [ -z $VS_VERSION ]; then
 fi
 
 case $VS_VERSION in
-	14|14.0|2015 )
-		GENERATOR="Visual Studio 14 2015"
-		XP_TOOLSET="v140_xp"
-		TOOLSET="v140"
+	15|15.0|2017 )
+		GENERATOR="Visual Studio 15 2017"
+		TOOLSET="vc140"
 		MSVC_VER="14"
 		MSVC_YEAR="2015"
+		MSVC_DISPLAY_YEAR="2017"
+		;;
+
+	14|14.0|2015 )
+		GENERATOR="Visual Studio 14 2015"
+		TOOLSET="vc140"
+		MSVC_VER="14"
+		MSVC_YEAR="2015"
+		MSVC_DISPLAY_YEAR="2015"
 		;;
 
 	12|12.0|2013 )
 		GENERATOR="Visual Studio 12 2013"
-		XP_TOOLSET="v120_xp"
-		TOOLSET="v120"
+		TOOLSET="vc120"
 		MSVC_VER="12"
 		MSVC_YEAR="2013"
+		MSVC_DISPLAY_YEAR="2013"
 		;;
 esac
 
@@ -278,7 +286,7 @@ fi
 
 echo
 echo "==================================="
-echo "Starting prebuild on MSVC${MSVC_YEAR} WIN${BITS}"
+echo "Starting prebuild on MSVC${MSVC_DISPLAY_YEAR} WIN${BITS}"
 echo "==================================="
 echo
 
@@ -350,7 +358,7 @@ fi
 cd .. #/..
 
 # Set up dependencies
-BUILD_DIR="MSVC${MSVC_YEAR}_${BITS}"
+BUILD_DIR="MSVC${MSVC_DISPLAY_YEAR}_${BITS}"
 if [ -z $KEEP ]; then
 	echo
 	echo "(Re)Creating build directory."
@@ -395,6 +403,7 @@ fi
 
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
 			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.0"
+		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
 
 		echo Done.
 	else
@@ -406,6 +415,7 @@ fi
 		fi
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
 			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.0"
+		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
 
 		echo Done.
 	fi
