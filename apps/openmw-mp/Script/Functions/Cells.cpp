@@ -55,6 +55,44 @@ const char *CellFunctions::GetCell(unsigned short pid) noexcept
     return tempCellDescription.c_str();
 }
 
+int CellFunctions::GetExteriorX(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+    return player->cell.mData.mX;
+}
+
+int CellFunctions::GetExteriorY(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+    return player->cell.mData.mY;
+}
+
+bool CellFunctions::IsInExterior(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, false);
+
+    return player->cell.isExterior();
+}
+
+const char *CellFunctions::GetRegion(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+
+    return player->cell.mRegion.c_str();
+}
+
+bool CellFunctions::IsChangingRegion(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, false);
+
+    return player->isChangingRegion;
+}
+
 void CellFunctions::SetCell(unsigned short pid, const char *cellDescription) noexcept
 {
     Player *player;
@@ -81,44 +119,6 @@ void CellFunctions::SetExteriorCell(unsigned short pid, int x, int y) noexcept
 
     player->cell.mData.mX = x;
     player->cell.mData.mY = y;
-}
-
-int CellFunctions::GetExteriorX(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,0);
-    return player->cell.mData.mX;
-}
-
-int CellFunctions::GetExteriorY(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,0);
-    return player->cell.mData.mY;
-}
-
-bool CellFunctions::IsInExterior(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, false);
-
-    return player->cell.isExterior();
-}
-
-const char *CellFunctions::GetRegion(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, 0);
-
-    return player->cell.mRegion.c_str();
-}
-
-bool CellFunctions::IsChangingRegion(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, false);
-
-    return player->isChangingRegion;
 }
 
 void CellFunctions::AddCellExplored(unsigned short pid, const char* cellDescription) noexcept

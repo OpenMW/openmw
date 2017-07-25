@@ -22,7 +22,7 @@ public:
     *
     * This is based on the last PlayerShapeshift packet received or sent for that player.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \return The werewolf state.
     */
     static bool IsWerewolf(unsigned short pid) noexcept;
@@ -33,7 +33,7 @@ public:
     * This changes the werewolf state recorded for that player in the server memory, but
     * does not by itself send a packet.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \param bool The new werewolf state.
     * \return void
     */
@@ -45,7 +45,7 @@ public:
     * This sends the packet to all players connected to the server. It is currently used
     * only to communicate werewolf states.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \return void
     */
     static void SendShapeshift(unsigned short pid);
@@ -59,7 +59,7 @@ public:
     * It is only sent to the player being jailed, as the other players will be informed of the
     * jailing's actual consequences via other packets sent by the affected client.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \param jailDays The number of days to spend jailed, where each day affects one skill point.
     * \param ignoreJailTeleportation Whether the player being teleported to the nearest jail
     *                                marker should be overridden.
@@ -78,7 +78,7 @@ public:
     *
     * This sends the packet to all players connected to the server.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \param type The type of resurrection (0 for REGULAR, 1 for IMPERIAL_SHRINE,
     *             2 for TRIBUNAL_TEMPLE).
     * \return void

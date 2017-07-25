@@ -10,13 +10,66 @@
 using namespace std;
 using namespace ESM;
 
-void CharClassFunctions::SendClass(unsigned short pid) noexcept
+const char *CharClassFunctions::GetDefaultClass(unsigned short pid) noexcept
 {
     Player *player;
-    GET_PLAYER(pid, player,);
+    GET_PLAYER(pid, player, "");
+    return player->charClass.mId.c_str();
+}
 
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_CHARCLASS)->setPlayer(player);
-    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_CHARCLASS)->Send(false);
+const char *CharClassFunctions::GetClassName(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, "");
+    return player->charClass.mName.c_str();
+}
+
+const char *CharClassFunctions::GetClassDesc(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, "");
+    return player->charClass.mDescription.c_str();
+}
+
+int CharClassFunctions::GetClassMajorAttribute(unsigned short pid, unsigned char slot) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+    if (slot > 1)
+        throw invalid_argument("Incorrect attribute slot id");
+    return player->charClass.mData.mAttribute[slot];
+}
+
+int CharClassFunctions::GetClassSpecialization(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+    return player->charClass.mData.mSpecialization;
+}
+
+int CharClassFunctions::GetClassMajorSkill(unsigned short pid, unsigned char slot) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+    if (slot > 4)
+        throw invalid_argument("Incorrect skill slot id");
+    return player->charClass.mData.mSkills[slot][1];
+}
+
+int CharClassFunctions::GetClassMinorSkill(unsigned short pid, unsigned char slot) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+    if (slot > 4)
+        throw invalid_argument("Incorrect skill slot id");
+    return player->charClass.mData.mSkills[slot][0];
+}
+
+int CharClassFunctions::IsClassDefault(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0);
+    return !player->charClass.mId.empty(); // true if default
 }
 
 void CharClassFunctions::SetDefaultClass(unsigned short pid, const char *id) noexcept
@@ -72,64 +125,11 @@ void CharClassFunctions::SetClassMinorSkill(unsigned short pid, unsigned char sl
     player->charClass.mData.mSkills[slot][0] = skillId;
 }
 
-int CharClassFunctions::IsClassDefault(unsigned short pid) noexcept
+void CharClassFunctions::SendClass(unsigned short pid) noexcept
 {
     Player *player;
-    GET_PLAYER(pid, player,0);
-    return !player->charClass.mId.empty(); // true if default
-}
+    GET_PLAYER(pid, player, );
 
-const char *CharClassFunctions::GetDefaultClass(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,"");
-    return player->charClass.mId.c_str();
-}
-
-const char *CharClassFunctions::GetClassName(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,"");
-    return player->charClass.mName.c_str();
-}
-
-const char *CharClassFunctions::GetClassDesc(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,"");
-    return player->charClass.mDescription.c_str();
-}
-
-int CharClassFunctions::GetClassMajorAttribute(unsigned short pid, unsigned char slot) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,0);
-    if (slot > 1)
-        throw invalid_argument("Incorrect attribute slot id");
-    return player->charClass.mData.mAttribute[slot];
-}
-
-int CharClassFunctions::GetClassSpecialization(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,0);
-    return player->charClass.mData.mSpecialization;
-}
-
-int CharClassFunctions::GetClassMajorSkill(unsigned short pid, unsigned char slot) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,0);
-    if (slot > 4)
-        throw invalid_argument("Incorrect skill slot id");
-    return player->charClass.mData.mSkills[slot][1];
-}
-
-int CharClassFunctions::GetClassMinorSkill(unsigned short pid, unsigned char slot) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player,0);
-    if (slot > 4)
-        throw invalid_argument("Incorrect skill slot id");
-    return player->charClass.mData.mSkills[slot][0];
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_CHARCLASS)->setPlayer(player);
+    mwmp::Networking::get().getPlayerPacketController()->GetPacket(ID_PLAYER_CHARCLASS)->Send(false);
 }

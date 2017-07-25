@@ -19,7 +19,7 @@ public:
     * This changes the console permission for that player in the server memory, but does not
     * by itself send a packet.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \param bool The console permission state.
     * \return void
     */
@@ -31,7 +31,7 @@ public:
     * This changes the difficulty for that player in the server memory, but does not by itself
     * send a packet.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \param bool The difficulty.
     * \return void
     */

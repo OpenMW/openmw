@@ -27,7 +27,7 @@ public:
     * \brief Assign the player's positional coordinate values to the variables passed as
     * parameters.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \param x The variable for the X position.
     * \param y The variable for the Y position.
     * \param z The variable for the Z position.
@@ -38,7 +38,7 @@ public:
     /**
     * \brief Get the X position of a player.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \return The X position.
     */
     static double GetPosX(unsigned short pid) noexcept;
@@ -46,7 +46,7 @@ public:
     /**
     * \brief Get the Y position of a player.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \return The Y position.
     */
     static double GetPosY(unsigned short pid) noexcept;
@@ -54,7 +54,7 @@ public:
     /**
     * \brief Get the Z position of a player.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \return The Z position.
     */
     static double GetPosZ(unsigned short pid) noexcept;
@@ -63,7 +63,7 @@ public:
     * \brief Assign the player's rotational coordinate values to the variables passed as
     * parameters.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \param x The variable for the X rotation.
     * \param y The variable for the Y rotation.
     * \param z The variable for the Z rotation.
@@ -74,7 +74,7 @@ public:
     /**
     * \brief Get the X rotation of a player.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \return The X rotation.
     */
     static double GetRotX(unsigned short pid) noexcept;
@@ -82,7 +82,7 @@ public:
     /**
     * \brief Get the Z rotation of a player.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \return The Z rotation.
     */
     static double GetRotZ(unsigned short pid) noexcept;
@@ -93,7 +93,7 @@ public:
     * This changes the positional coordinates recorded for that player in the server memory, but
     * does not by itself send a packet.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \param x The X position.
     * \param y The Y position.
     * \param z The Z position.
@@ -109,7 +109,7 @@ public:
     *
     * A player's Y rotation is always 0, which is why there is no Y rotation parameter.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \param x The X position.
     * \param z The Z position.
     * \return void
@@ -121,7 +121,7 @@ public:
     *
     * It is only sent to the affected player.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \return void
     */
     static void SendPos(unsigned short pid) noexcept;

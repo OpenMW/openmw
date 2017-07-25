@@ -86,7 +86,7 @@ public:
     *
     * This is used to initialize the sending of new Object packets.
     *
-    * \param pid The player ID to whom the event should later be sent.
+    * \param pid The player ID to whom the event should be attached.
     * \return void
     */
     static void InitializeEvent(unsigned short pid) noexcept;
@@ -300,7 +300,7 @@ public:
     * The cell is determined to be an exterior cell if it fits the pattern of a number followed
     * by a comma followed by another number.
     *
-    * \param cellDescription The cellDescription.
+    * \param cellDescription The description of the cell.
     * \return void
     */
     static void SetEventCell(const char* cellDescription) noexcept;
@@ -586,7 +586,7 @@ public:
     /**
     * \brief Set the game hour for a player and send a GameTime packet to that player.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \param hour The hour.
     * \return void
     */
@@ -595,7 +595,7 @@ public:
     /**
     * \brief Set the game month for a player and send a GameTime packet to that player.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \param month The month.
     * \return void
     */
@@ -604,7 +604,7 @@ public:
     /**
     * \brief Set the game day for a player and send a GameTime packet to that player.
     *
-    * \param pid The player id.
+    * \param pid The player ID.
     * \param day The day.
     * \return void
     */
