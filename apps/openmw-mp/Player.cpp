@@ -34,6 +34,7 @@ void Players::newPlayer(RakNet::RakNetGUID guid)
     players[guid]->npcStats.blank();
     players[guid]->creatureStats.blank();
     players[guid]->charClass.blank();
+    players[guid]->isWerewolf = false;
 
     for (unsigned int i = 0; i < mwmp::Networking::get().maxConnections(); i++)
     {
