@@ -64,6 +64,11 @@ QColor CSVWidget::ColorEditor::color() const
     return mColor;
 }
 
+int CSVWidget::ColorEditor::colorInt() const
+{
+    return (mColor.blue() << 16) | (mColor.green() << 8) | (mColor.red());
+}
+
 void CSVWidget::ColorEditor::setColor(const QColor &color)
 {
     mColor = color;

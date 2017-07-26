@@ -26,6 +26,10 @@ namespace CSVWidget
             ColorEditor(const int colorInt, QWidget *parent = 0, const bool popupOnStart = false);
 
             QColor color() const;
+
+            /// \return Color RGB value encoded in an int.
+            int colorInt() const;
+
             void setColor(const QColor &color);
 
             /// \brief Set color using given int value.

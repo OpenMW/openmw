@@ -133,8 +133,7 @@ void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemM
     CSVWidget::ColorEditor *colorEditor = qobject_cast<CSVWidget::ColorEditor *>(editor);
     if (colorEditor != NULL)
     {
-        QColor color = colorEditor->color();
-        variant = (color.blue() << 16) | (color.green() << 8) | (color.red());
+        variant = colorEditor->colorInt();
     }
     else
     {
