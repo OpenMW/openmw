@@ -5,6 +5,7 @@
 
     Include additional headers for multiplayer purposes
 */
+#include "../mwbase/windowmanager.hpp"
 #include "../mwmp/Main.hpp"
 #include "../mwmp/LocalPlayer.hpp"
 /*
@@ -178,7 +179,17 @@ namespace MWScript
                     if (!ptr.getRefData().isEnabled())
                         return;
 
-                    MWBase::Environment::get().getDialogueManager()->startDialogue (ptr);
+                    /*
+                        Start of tes3mp change (major)
+
+                        Don't start a dialogue if the target is already engaged in one, thus
+                        preventing infinite greeting loops
+                    */
+                    if (!MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Dialogue))
+                        MWBase::Environment::get().getDialogueManager()->startDialogue(ptr);
+                    /*
+                        End of tes3mp change (major)
+                    */
                 }
         };
 
