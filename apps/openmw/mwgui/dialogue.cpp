@@ -22,18 +22,9 @@
 
 #include "widgets.hpp"
 #include "bookpage.hpp"
+#include "textcolours.hpp"
 
 #include "journalbooks.hpp" // to_utf8_span
-
-namespace
-{
-
-    MyGUI::Colour getDialogueTextColour (const std::string& type)
-    {
-        return MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=" + type + "}"));
-    }
-
-}
 
 namespace MWGui
 {
@@ -116,7 +107,8 @@ namespace MWGui
 
         if (mTitle != "")
         {
-            BookTypesetter::Style* title = typesetter->createStyle("", getDialogueTextColour("header"));
+            const MyGUI::Colour& headerColour = MWBase::Environment::get().getWindowManager()->getTextColours().header;
+            BookTypesetter::Style* title = typesetter->createStyle("", headerColour);
             typesetter->write(title, to_utf8_span(mTitle.c_str()));
             typesetter->sectionBreak();
         }
@@ -159,15 +151,16 @@ namespace MWGui
 
         if (hyperLinks.size() && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
         {
-            BookTypesetter::Style* style = typesetter->createStyle("", getDialogueTextColour("normal"));
+            const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
+
+            BookTypesetter::Style* style = typesetter->createStyle("", textColours.normal);
             size_t formatted = 0; // points to the first character that is not laid out yet
             for (std::map<Range, intptr_t>::iterator it = hyperLinks.begin(); it != hyperLinks.end(); ++it)
             {
                 intptr_t topicId = it->second;
-                const MyGUI::Colour linkHot(getDialogueTextColour("link_over"));
-                const MyGUI::Colour linkNormal(getDialogueTextColour("link"));
-                const MyGUI::Colour linkActive(getDialogueTextColour("link_pressed"));
-                BookTypesetter::Style* hotStyle = typesetter->createHotStyle (style, linkNormal, linkHot, linkActive, topicId);
+                BookTypesetter::Style* hotStyle = typesetter->createHotStyle (style, textColours.link,
+                                                                              textColours.linkOver, textColours.linkPressed,
+                                                                              topicId);
                 if (formatted < it->first.first)
                     typesetter->write(style, formatted, it->first.first);
                 typesetter->write(hotStyle, it->first.first, it->first.second);
@@ -199,14 +192,13 @@ namespace MWGui
 
     void Response::addTopicLink(BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const
     {
-        BookTypesetter::Style* style = typesetter->createStyle("", getDialogueTextColour("normal"));
+        const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
 
-        const MyGUI::Colour linkHot(getDialogueTextColour("link_over"));
-        const MyGUI::Colour linkNormal(getDialogueTextColour("link"));
-        const MyGUI::Colour linkActive(getDialogueTextColour("link_pressed"));
+        BookTypesetter::Style* style = typesetter->createStyle("", textColours.normal);
+
 
         if (topicId)
-            style = typesetter->createHotStyle (style, linkNormal, linkHot, linkActive, topicId);
+            style = typesetter->createHotStyle (style, textColours.link, textColours.linkOver, textColours.linkPressed, topicId);
         typesetter->write (style, begin, end);
     }
 
@@ -217,7 +209,8 @@ namespace MWGui
 
     void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
-        BookTypesetter::Style* title = typesetter->createStyle("", getDialogueTextColour("notify"));
+        const MyGUI::Colour& textColour = MWBase::Environment::get().getWindowManager()->getTextColours().notify;
+        BookTypesetter::Style* title = typesetter->createStyle("", textColour);
         typesetter->sectionBreak(9);
         typesetter->write(title, to_utf8_span(mText.c_str()));
     }
@@ -300,8 +293,12 @@ namespace MWGui
 
     void DialogueWindow::onWindowResize(MyGUI::Window* _sender)
     {
+        // if the window has only been moved, not resized, we don't need to update
+        if (mCurrentWindowSize == _sender->getSize()) return;
+
         mTopicsList->adjustSize();
         updateHistory();
+        mCurrentWindowSize = _sender->getSize();
     }
 
     void DialogueWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
@@ -486,16 +483,15 @@ namespace MWGui
 
         typesetter->sectionBreak(9);
         // choices
-        const MyGUI::Colour linkHot(getDialogueTextColour("answer_over"));
-        const MyGUI::Colour linkNormal(getDialogueTextColour("answer"));
-        const MyGUI::Colour linkActive(getDialogueTextColour("answer_pressed"));
+        const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
         for (std::vector<std::pair<std::string, int> >::iterator it = mChoices.begin(); it != mChoices.end(); ++it)
         {
             Choice* link = new Choice(it->second);
             mLinks.push_back(link);
 
             typesetter->lineBreak();
-            BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, linkNormal, linkHot, linkActive,
+            BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, textColours.answer, textColours.answerOver,
+                                                                              textColours.answerPressed,
                                                                               TypesetBook::InteractiveId(link));
             typesetter->write(questionStyle, to_utf8_span(it->first.c_str()));
         }
@@ -505,7 +501,8 @@ namespace MWGui
             Goodbye* link = new Goodbye();
             mLinks.push_back(link);
             std::string goodbye = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->getString();
-            BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, linkNormal, linkHot, linkActive,
+            BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, textColours.answer, textColours.answerOver,
+                                                                              textColours.answerPressed,
                                                                               TypesetBook::InteractiveId(link));
             typesetter->lineBreak();
             typesetter->write(questionStyle, to_utf8_span(goodbye.c_str()));

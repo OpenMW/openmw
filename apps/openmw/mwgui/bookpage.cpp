@@ -35,22 +35,22 @@ struct TypesetBookImpl : TypesetBook
         MyGUI::Colour         mNormalColour;
         InteractiveId mInteractiveId;
 
-        bool match (MyGUI::IFont* tstFont, MyGUI::Colour tstHotColour, MyGUI::Colour tstActiveColour,
-                    MyGUI::Colour tstNormalColour, intptr_t tstInteractiveId)
+        bool match (MyGUI::IFont* tstFont, const MyGUI::Colour& tstHotColour, const MyGUI::Colour& tstActiveColour,
+                    const MyGUI::Colour& tstNormalColour, intptr_t tstInteractiveId)
         {
             return (mFont == tstFont) &&
                    partal_match (tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
         }
 
-        bool match (char const * tstFont, MyGUI::Colour tstHotColour, MyGUI::Colour tstActiveColour,
-                    MyGUI::Colour tstNormalColour, intptr_t tstInteractiveId)
+        bool match (char const * tstFont, const MyGUI::Colour& tstHotColour, const MyGUI::Colour& tstActiveColour,
+                    const MyGUI::Colour& tstNormalColour, intptr_t tstInteractiveId)
         {
             return (mFont->getResourceName ()   == tstFont) &&
                    partal_match (tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
         }
 
-        bool partal_match (MyGUI::Colour tstHotColour, MyGUI::Colour tstActiveColour,
-                           MyGUI::Colour tstNormalColour, intptr_t tstInteractiveId)
+        bool partal_match (const MyGUI::Colour& tstHotColour, const MyGUI::Colour& tstActiveColour,
+                           const MyGUI::Colour& tstNormalColour, intptr_t tstInteractiveId)
         {
             return
                 (mHotColour                  == tstHotColour     ) &&
@@ -261,7 +261,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
     {
     }
 
-    Style * createStyle (char const * fontName, Colour fontColour)
+    Style * createStyle (char const * fontName, const Colour& fontColour)
     {
         if (strcmp(fontName, "") == 0)
             return createStyle(MyGUI::FontManager::getInstance().getDefaultFont().c_str(), fontColour);
@@ -284,7 +284,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         return &style;
     }
 
-    Style* createHotStyle (Style* baseStyle, Colour normalColour, Colour hoverColour, Colour activeColour, InteractiveId id, bool unique)
+    Style* createHotStyle (Style* baseStyle, const Colour& normalColour, const Colour& hoverColour,
+                           const Colour& activeColour, InteractiveId id, bool unique)
     {
         StyleImpl* BaseStyle = static_cast <StyleImpl*> (baseStyle);
 

@@ -19,6 +19,7 @@
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "mapwindow.hpp"
+#include "textcolours.hpp"
 
 #include <MyGUI_KeyCode.h>
 #include <MyGUI_Types.h>
@@ -391,6 +392,8 @@ namespace MWGui
     void removeCell(MWWorld::CellStore* cell);
     void writeFog(MWWorld::CellStore* cell);
 
+    virtual const MWGui::TextColours& getTextColours();
+
   private:
     const MWWorld::ESMStore* mStore;
     Resource::ResourceSystem* mResourceSystem;
@@ -513,6 +516,8 @@ namespace MWGui
     int mShowOwned;
 
     std::string mVersionDescription;
+
+    MWGui::TextColours mTextColours;
 
     /**
      * Called when MyGUI tries to retrieve a tag's value. Tags must be denoted in #{tag} notation and will be replaced upon setting a user visible text/property.

@@ -72,6 +72,8 @@ namespace MWGui
         ShowInDialogueMode_Only,
         ShowInDialogueMode_Never
     };
+
+    struct TextColours;
 }
 
 namespace SFO
@@ -361,6 +363,8 @@ namespace MWBase
 
             virtual void removeCell(MWWorld::CellStore* cell) = 0;
             virtual void writeFog(MWWorld::CellStore* cell) = 0;
+
+            virtual const MWGui::TextColours& getTextColours() = 0;
     };
 }
 
