@@ -181,9 +181,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
     // (the third parameter of ColorEditor's constructor)
     else if (display == CSMWorld::ColumnBase::Display_Colour)
     {
-        int colorInt = index.data().toInt();
-        QColor color = QColor(colorInt & 0xff, (colorInt >> 8) & 0xff, (colorInt >> 16) & 0xff);
-        return new CSVWidget::ColorEditor(color, parent, true);
+        return new CSVWidget::ColorEditor(index.data().toInt(), parent, true);
     }
     return createEditor (parent, option, index, display);
 }
@@ -207,9 +205,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
     {
         case CSMWorld::ColumnBase::Display_Colour:
         {
-            int colorInt = variant.toInt();
-            QColor color = QColor(colorInt & 0xff, (colorInt >> 8) & 0xff, (colorInt >> 16) & 0xff);
-            return new CSVWidget::ColorEditor(color, parent);
+            return new CSVWidget::ColorEditor(variant.toInt(), parent);
         }
         case CSMWorld::ColumnBase::Display_Integer:
         {
@@ -322,9 +318,7 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
     CSVWidget::ColorEditor *colorEditor = qobject_cast<CSVWidget::ColorEditor *>(editor);
     if (colorEditor != NULL)
     {
-        int colorInt = variant.toInt();
-        QColor color = QColor(colorInt & 0xff, (colorInt >> 8) & 0xff, (colorInt >> 16) & 0xff);
-        colorEditor->setColor(color);
+        colorEditor->setColor(variant.toInt());
         return;
     }
 
