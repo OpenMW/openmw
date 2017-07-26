@@ -672,6 +672,7 @@ if (WIN32)
         4510 4512 # Unable to generate copy constructor/assignment operator as it's not public in the base
         4706 # Assignment in conditional expression
         4738 # Storing 32-bit float result in memory, possible loss of performance
+        4774 # Format string expected in argument is not a string literal
         4986 # Undocumented warning that occurs in the crtdbg.h file
         4987 # nonstandard extension used (triggered by setjmp.h)
         4996 # Function was declared deprecated
