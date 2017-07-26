@@ -161,11 +161,11 @@ void LocalActor::updateStatsDynamic(bool forceUpdate)
 
     auto needUpdate = [](MWMechanics::DynamicStat<float> &oldVal, MWMechanics::DynamicStat<float> &newVal, int limit) {
         return oldVal != newVal && (newVal.getCurrent() == 0 || oldVal.getCurrent() == 0
-                                     || abs(oldVal.getCurrent() - newVal.getCurrent()) > limit);
+                                    || abs(oldVal.getCurrent() - newVal.getCurrent()) >= limit);
     };
 
-    if (forceUpdate || needUpdate(oldHealth, health, 5) || needUpdate(oldMagicka, magicka, 10) ||
-        needUpdate(oldFatigue, fatigue, 10))
+    if (forceUpdate || needUpdate(oldHealth, health, 3) || needUpdate(oldMagicka, magicka, 7) ||
+        needUpdate(oldFatigue, fatigue, 7))
     {
         oldHealth = health;
         oldMagicka = magicka;
