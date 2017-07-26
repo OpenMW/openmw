@@ -81,6 +81,17 @@ namespace MWGui
         case MWMechanics::Alchemy::Result_Success:
             winMgr->messageBox("#{sPotionSuccess}");
             winMgr->playSound("potion success");
+
+            /*
+                Start of tes3mp addition
+
+                Include a messagebox notifying players that player-made potions are not synced yet
+            */
+            MWBase::Environment::get().getWindowManager()->messageBox("Player-made potions are not synchronized in multiplayer yet and they will not show up for other players.");
+            /*
+                End of tes3mp addition
+            */
+
             break;
         case MWMechanics::Alchemy::Result_NoEffects:
         case MWMechanics::Alchemy::Result_RandomFailure:

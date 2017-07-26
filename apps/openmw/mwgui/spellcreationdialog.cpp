@@ -428,7 +428,10 @@ namespace MWGui
 
             Send an ID_PLAYER_SPELLBOOK packet every time a player buys a custom spell from
             the Spellmaking screen
+
+            Include a messagebox notifying players that custom spells are not synced yet
         */
+        MWBase::Environment::get().getWindowManager()->messageBox("Custom spells are not synchronized in multiplayer yet and their effects cannot be seen by other players in most cases.");
         mwmp::Main::get().getLocalPlayer()->sendSpellAddition(*spell);
         /*
             End of tes3mp addition

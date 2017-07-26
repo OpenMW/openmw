@@ -375,6 +375,16 @@ namespace MWGui
         {
             MWBase::Environment::get().getWindowManager()->playSound("enchant success");
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu12}");
+
+            /*
+                Start of tes3mp addition
+
+                Include a messagebox notifying players that player-made enchantments are not synced yet
+            */
+            MWBase::Environment::get().getWindowManager()->messageBox("Player-made enchantments are not synchronized in multiplayer yet and they will not show up for other players.");
+            /*
+                End of tes3mp addition
+            */
         }
         else
         {

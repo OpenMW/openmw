@@ -238,6 +238,17 @@ namespace MWMechanics
             if (caster == getPlayer())
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
 
+            /*
+                Start of tes3mp addition
+
+                Include a messagebox notifying players that soul gems filled by players are not synced yet
+            */
+            if (caster == getPlayer())
+            MWBase::Environment::get().getWindowManager()->messageBox("Soul gems filled by players are not synchronized in multiplayer yet and they will not show up for other players.");
+            /*
+                End of tes3mp addition
+            */
+
             const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
                     .search("VFX_Soul_Trap");
             if (fx)
