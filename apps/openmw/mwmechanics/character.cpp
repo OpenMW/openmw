@@ -1761,9 +1761,10 @@ void CharacterController::update(float duration)
         static const float fFatigueSneakBase = gmst.find("fFatigueSneakBase")->getFloat();
         static const float fFatigueSneakMult = gmst.find("fFatigueSneakMult")->getFloat();
 
-        const float encumbrance = cls.getEncumbrance(mPtr) / cls.getCapacity(mPtr);
-        if (encumbrance < 1)
+        if (cls.getEncumbrance(mPtr) <= cls.getCapacity(mPtr))
         {
+            const float encumbrance = cls.getEncumbrance(mPtr) / cls.getCapacity(mPtr);
+
             if (sneak)
                 fatigueLoss = fFatigueSneakBase + encumbrance * fFatigueSneakMult;
             else
