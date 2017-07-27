@@ -11,6 +11,7 @@
 * Synchronization of kill counts checked in quest progression
 * Synchronization of trap states
 * Synchronization of object states (i.e. whether they are enabled or disabled)
+* Synchronization of player werewolf states
 * Synchronization of time of day
 * Saving & loading of read skill books
 * Fix to messagebox buttons for client scripts

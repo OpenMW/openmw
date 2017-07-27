@@ -5,7 +5,7 @@ TES3MP
 
 TES3MP is a project aiming to add multiplayer functionality to [OpenMW](https://github.com/OpenMW/openmw), a free and open source recreation of the popular Bethesda Softworks game "The Elder Scrolls III: Morrowind".
 
-* Version: 0.6-alpha
+* Version: 0.6.0
 * License: GPLv3 (see docs/license/GPL3.txt for more information)
 
 Font Licenses:
@@ -16,7 +16,9 @@ Project Status
 
 [Version changelog](https://github.com/TES3MP/openmw-tes3mp/blob/master/tes3mp-changelog.md)
 
-Our project is not yet in a playable state, though we are getting close. At the moment we have synchronization of character appearance, character skills, stats, attributes and death, movement in interiors and exteriors, melee and ranged combat, spell casting, picking up and dropping items in the world, using doors and levers, and adding and removing items from containers, as well as [serverside Lua scripts](https://github.com/TES3MP/PluginExamples) used to save and load the state of most of the aforementioned.
+TES3MP is now playable in most respects. Player and NPC movement, animations, combat and spell casting are properly synchronized with small exceptions, as is picking up and dropping items in the world, using doors and levers, and adding and removing items from containers. Journal entries, faction stats and dialogue topics are also synchronized, allowing the majority of quests to work fine.
+
+[Serverside Lua scripts](https://github.com/TES3MP/PluginExamples) are used to save and load the state of most of the aforementioned.
 
 Contributing
 --------------
@@ -39,4 +41,4 @@ Getting Started
 Donations
 ---------------
 
-You can benefit the project by supporting OpenMW and/or by [becoming Koncord's patron](https://www.patreon.com/Koncord).
+You can benefit the project by contributing to the Patreon pages of our two developers, [Koncord](https://www.patreon.com/Koncord) and [David Cernat](https://www.patreon.com/davidcernat), as well as by supporting [OpenMW](https://openmw.org).
