@@ -69,11 +69,14 @@ public:
     static void FreeTimer(int timerId) noexcept;
     static bool IsTimerElapsed(int timerId) noexcept;
 
-    static const char* GetIP(unsigned short pid) noexcept;
     static void Kick(unsigned short pid) noexcept;
+    static void BanAddress(const char *ipAddress) noexcept;
+    static void UnbanAddress(const char *ipAddress) noexcept;
+
     static const char *GetServerVersion() noexcept;
     static const char *GetProtocolVersion() noexcept;
     static int GetAvgPing(unsigned short pid) noexcept;
+    static const char* GetIP(unsigned short pid) noexcept;
     static void SetModname(const char* name) noexcept;
     static void SetHostname(const char* name) noexcept;
     static void SetServerPassword(const char *passw) noexcept;
@@ -95,7 +98,11 @@ public:
             {"StopServer",          ScriptFunctions::StopServer},
 
             {"SendMessage",         ScriptFunctions::SendMessage},
+
             {"Kick",                ScriptFunctions::Kick},
+            {"BanAddress",          ScriptFunctions::BanAddress},
+            {"UnbanAddress",        ScriptFunctions::UnbanAddress},
+
             {"GetServerVersion",    ScriptFunctions::GetServerVersion},
             {"GetProtocolVersion",  ScriptFunctions::GetProtocolVersion},
             {"GetAvgPing",          ScriptFunctions::GetAvgPing},

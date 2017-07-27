@@ -477,6 +477,16 @@ void Networking::kickPlayer(RakNet::RakNetGUID guid)
     peer->CloseConnection(guid, true);
 }
 
+void Networking::banAddress(const char *ipAddress)
+{
+    peer->AddToBanList(ipAddress);
+}
+
+void Networking::unbanAddress(const char *ipAddress)
+{
+    peer->RemoveFromBanList(ipAddress);
+}
+
 unsigned short Networking::numberOfConnections() const
 {
     return peer->NumberOfConnections();

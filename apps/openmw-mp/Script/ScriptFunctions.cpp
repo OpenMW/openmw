@@ -108,6 +108,16 @@ void ScriptFunctions::Kick(unsigned short pid) noexcept
     mwmp::Networking::getPtr()->kickPlayer(player->guid);
 }
 
+void ScriptFunctions::BanAddress(const char *ipAddress) noexcept
+{
+    mwmp::Networking::getPtr()->banAddress(ipAddress);
+}
+
+void ScriptFunctions::UnbanAddress(const char *ipAddress) noexcept
+{
+    mwmp::Networking::getPtr()->unbanAddress(ipAddress);
+}
+
 const char *ScriptFunctions::GetServerVersion() noexcept
 {
     return TES3MP_VERSION;
@@ -124,6 +134,14 @@ int ScriptFunctions::GetAvgPing(unsigned short pid) noexcept
     Player *player;
     GET_PLAYER(pid, player,-1);
     return mwmp::Networking::get().getAvgPing(player->guid);
+}
+
+const char *ScriptFunctions::GetIP(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, "");
+    RakNet::SystemAddress addr = mwmp::Networking::getPtr()->getSystemAddress(player->guid);
+    return addr.ToString(false);
 }
 
 void ScriptFunctions::SetModname(const char *name) noexcept
@@ -153,12 +171,4 @@ void ScriptFunctions::SetRuleValue(const char *key, double value) noexcept
     auto mc = mwmp::Networking::getPtr()->getMasterClient();
     if (mc)
         mc->SetRuleValue(key, value);
-}
-
-const char *ScriptFunctions::GetIP(unsigned short pid) noexcept
-{
-    Player *player;
-    GET_PLAYER(pid, player, "");
-    RakNet::SystemAddress addr = mwmp::Networking::getPtr()->getSystemAddress(player->guid);
-    return addr.ToString(false);
 }

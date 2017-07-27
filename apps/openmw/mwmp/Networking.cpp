@@ -295,7 +295,7 @@ void Networking::connect(const std::string &ip, unsigned short port, std::vector
                 case ID_DISCONNECTION_NOTIFICATION:
                     throw runtime_error("ID_DISCONNECTION_NOTIFICATION.\n");
                 case ID_CONNECTION_BANNED:
-                    throw runtime_error("ID_CONNECTION_BANNED.\n");
+                    throw runtime_error("You have been banned from this server.\n");
                 case ID_CONNECTION_LOST:
                     throw runtime_error("ID_CONNECTION_LOST.\n");
                 default:

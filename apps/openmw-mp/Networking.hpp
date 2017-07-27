@@ -23,6 +23,9 @@ namespace  mwmp
         void newPlayer(RakNet::RakNetGUID guid);
         void disconnectPlayer(RakNet::RakNetGUID guid);
         void kickPlayer(RakNet::RakNetGUID guid);
+        
+        void banAddress(const char *ipAddress);
+        void unbanAddress(const char *ipAddress);
         RakNet::SystemAddress getSystemAddress(RakNet::RakNetGUID guid);
 
         void processPlayerPacket(RakNet::Packet *packet);
