@@ -124,6 +124,16 @@
 #include "jailscreen.hpp"
 #include "itemchargeview.hpp"
 
+namespace
+{
+
+    MyGUI::Colour getTextColour(const std::string& type)
+    {
+        return MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=" + type + "}"));
+    }
+
+}
+
 namespace MWGui
 {
 
@@ -293,6 +303,27 @@ namespace MWGui
         // Get size info from the Gui object
         int w = MyGUI::RenderManager::getInstance().getViewSize().width;
         int h = MyGUI::RenderManager::getInstance().getViewSize().height;
+
+        mTextColours.header = getTextColour("header");
+        mTextColours.normal = getTextColour("normal");
+        mTextColours.notify = getTextColour("notify");
+
+        mTextColours.link = getTextColour("link");
+        mTextColours.linkOver = getTextColour("link_over");
+        mTextColours.linkPressed = getTextColour("link_pressed");
+
+        mTextColours.answer = getTextColour("answer");
+        mTextColours.answerOver = getTextColour("answer_over");
+        mTextColours.answerPressed = getTextColour("answer_pressed");
+
+        mTextColours.journalLink = getTextColour("journal_link");
+        mTextColours.journalLinkOver = getTextColour("journal_link_over");
+        mTextColours.journalLinkPressed = getTextColour("journal_link_pressed");
+
+        mTextColours.journalTopic = getTextColour("journal_topic");
+        mTextColours.journalTopicOver = getTextColour("journal_topic_over");
+        mTextColours.journalTopicPressed = getTextColour("journal_topic_pressed");
+
 
         mDragAndDrop = new DragAndDrop();
 
@@ -2174,6 +2205,11 @@ namespace MWGui
     void WindowManager::writeFog(MWWorld::CellStore *cell)
     {
         mLocalMapRender->saveFogOfWar(cell);
+    }
+
+    const MWGui::TextColours& WindowManager::getTextColours()
+    {
+        return mTextColours;
     }
 
 }

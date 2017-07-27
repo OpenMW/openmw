@@ -74,6 +74,7 @@ Programmers
     Jordan Ayers
     Jordan Milne
     Jules Blok (Armada651)
+    julianko
     Julien Voisin (jvoisin/ap0)
     Karl-Felix Glatzer (k1ll)
     Kevin Poitra (PuppyKevin)

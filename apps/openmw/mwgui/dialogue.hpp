@@ -171,6 +171,8 @@ namespace MWGui
         MyGUI::TextBox*     mDispositionText;
 
         PersuasionDialog mPersuasionDialog;
+
+        MyGUI::IntSize mCurrentWindowSize;
     };
 }
 #endif
