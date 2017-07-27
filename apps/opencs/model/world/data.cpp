@@ -327,7 +327,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mCells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_WaterLevel, ColumnBase::Display_Float));
     mCells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_MapColor, ColumnBase::Display_Integer));
+        new NestedChildColumn (Columns::ColumnId_MapColor, ColumnBase::Display_Colour));
 
     mEnchantments.addColumn (new StringIdColumn<ESM::Enchantment>);
     mEnchantments.addColumn (new RecordStateColumn<ESM::Enchantment>);

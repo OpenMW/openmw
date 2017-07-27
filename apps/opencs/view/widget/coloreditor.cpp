@@ -10,9 +10,20 @@
 
 #include "colorpickerpopup.hpp"
 
-CSVWidget::ColorEditor::ColorEditor(const QColor &color, QWidget *parent, bool popupOnStart)
+CSVWidget::ColorEditor::ColorEditor(const QColor &color, QWidget *parent, const bool popupOnStart)
+    : ColorEditor(parent, popupOnStart)
+{
+    setColor(color);
+}
+
+CSVWidget::ColorEditor::ColorEditor(const int colorInt, QWidget *parent, const bool popupOnStart)
+    : ColorEditor(parent, popupOnStart)
+{
+    setColor(colorInt);
+}
+
+CSVWidget::ColorEditor::ColorEditor(QWidget *parent, const bool popupOnStart)
     : QPushButton(parent),
-      mColor(color),
       mColorPicker(new ColorPickerPopup(this)),
       mPopupOnStart(popupOnStart)
 {
@@ -53,10 +64,23 @@ QColor CSVWidget::ColorEditor::color() const
     return mColor;
 }
 
+int CSVWidget::ColorEditor::colorInt() const
+{
+    return (mColor.blue() << 16) | (mColor.green() << 8) | (mColor.red());
+}
+
 void CSVWidget::ColorEditor::setColor(const QColor &color)
 {
     mColor = color;
     update();
+}
+
+void CSVWidget::ColorEditor::setColor(const int colorInt)
+{
+    // Color RGB values are stored in given integer.
+    // First byte is red, second byte is green, third byte is blue.
+    QColor color = QColor(colorInt & 0xff, (colorInt >> 8) & 0xff, (colorInt >> 16) & 0xff);
+    setColor(color);
 }
 
 void CSVWidget::ColorEditor::showPicker()
