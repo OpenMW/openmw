@@ -2001,7 +2001,7 @@ namespace MWGui
     void WindowManager::startSpellBuying(const MWWorld::Ptr &actor)
     {
         pushGuiMode(GM_SpellBuying);
-        mSpellBuyingWindow->startSpellBuying(actor);
+        mSpellBuyingWindow->startSpellBuying(actor, 0);
     }
 
     void WindowManager::startTrade(const MWWorld::Ptr &actor)
