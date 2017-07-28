@@ -9,8 +9,6 @@ Sections
 
     manuals/index
     reference/index
-    source/index
-
 
 Indices and Tables
 ==================
