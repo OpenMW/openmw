@@ -1447,6 +1447,11 @@ namespace MWMechanics
             calculateCreatureStatModifiers (iter->first, duration);
             if (iter->first.getClass().isNpc())
                 calculateNpcStatModifiers(iter->first, duration);
+
+            MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(iter->first);
+            if (animation)
+                animation->updateEffects(duration);
+
         }
 
         fastForwardAi();

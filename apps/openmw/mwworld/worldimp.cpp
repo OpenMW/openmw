@@ -823,7 +823,10 @@ namespace MWWorld
         mWeatherManager->advanceTime (hours, incremental);
 
         if (!incremental)
+        {
+            mRendering->notifyWorldSpaceChanged();
             mProjectileManager->clear();
+        }
 
         hours += mGameHour->getFloat();
 
