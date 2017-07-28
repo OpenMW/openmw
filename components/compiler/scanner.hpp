@@ -62,6 +62,7 @@ namespace Compiler
             enum special
             {
                 S_newline,
+                S_space, //only for triggering IfElseJunkState for else if case
                 S_open, S_close,
                 S_cmpEQ, S_cmpNE, S_cmpLT, S_cmpLE, S_cmpGT, S_cmpGE,
                 S_plus, S_minus, S_mult, S_div,

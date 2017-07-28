@@ -386,6 +386,8 @@ namespace Compiler
             special = S_open;
         else if (c==')' || c==']')  /// \todo option to disable the use of ] as alias for )
             special = S_close;
+        else if (c == ' ')  /// to handle else if
+            special = S_space;
         else if (c=='.')
         {
             // check, if this starts a float literal
