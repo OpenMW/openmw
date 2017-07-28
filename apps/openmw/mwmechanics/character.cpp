@@ -1038,8 +1038,38 @@ bool CharacterController::updateCreatureState()
                 const std::string spellid = stats.getSpells().getSelectedSpell();
                 if (!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
                 {
+                    /*
+                        Start of tes3mp addition
+
+                        If this mPtr belongs to a LocalPlayer or LocalActor, get their Attack and prepare
+                        it for sending
+                    */
+                    mwmp::Attack *localAttack = MechanicsHelper::getLocalAttack(mPtr);
+
+                    if (localAttack)
+                    {
+                        MechanicsHelper::resetAttack(localAttack);
+                        localAttack->type = mwmp::Attack::MAGIC;
+                        localAttack->pressed = true;
+                        localAttack->shouldSend = true;
+                    }
+                    /*
+                        End of tes3mp addition
+                    */
+
                     MWMechanics::CastSpell cast(mPtr, NULL);
                     cast.playSpellCastingEffects(spellid);
+
+                    /*
+                        Start of tes3mp addition
+
+                        Mark the attack as instant if there is no spellcast animation
+                    */
+                    if (!mAnimation->hasAnimation("spellcast"))
+                        localAttack->instant = true;
+                    /*
+                        End of tes3mp addition
+                    */
 
                     if (!mAnimation->hasAnimation("spellcast"))
                         MWBase::Environment::get().getWorld()->castSpell(mPtr); // No "release" text key to use, so cast immediately

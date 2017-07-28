@@ -50,6 +50,7 @@ namespace mwmp
         bool block;
         
         bool pressed;
+        bool instant;
         bool knockdown;
 
         bool shouldSend;

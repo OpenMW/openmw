@@ -46,6 +46,7 @@ DedicatedPlayer::DedicatedPlayer(RakNet::RakNetGUID guid) : BasePlayer(guid)
     attack.pressed = 0;
     creatureStats.mDead = false;
     movementFlags = 0;
+    attack.instant = false;
 }
 DedicatedPlayer::~DedicatedPlayer()
 {

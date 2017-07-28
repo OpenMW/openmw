@@ -201,8 +201,14 @@ void MechanicsHelper::processAttack(Attack attack, const MWWorld::Ptr& attacker)
                 attack.success);
         }
     }
-    else
+    else if (attack.type == attack.MAGIC)
     {
+        if (attack.instant)
+        {
+            MWBase::Environment::get().getWorld()->castSpell(attacker);
+            attack.instant = false;
+        }
+
         LOG_MESSAGE_SIMPLE(Log::LOG_VERBOSE, "SpellId: %s", attack.spellId.c_str());
         LOG_APPEND(Log::LOG_VERBOSE, " - success: %d", attack.success);
     }

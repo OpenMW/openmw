@@ -23,4 +23,6 @@ void PacketActorAttack::Actor(BaseActor &actor, bool send)
     RW(actor.attack.pressed, send);
     RW(actor.attack.knockdown, send);
     RW(actor.attack.block, send);
+
+    RW(actor.attack.instant, send);
 }
