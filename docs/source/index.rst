@@ -5,14 +5,7 @@ Sections
 --------
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
 
     manuals/index
     reference/index
-
-Indices and Tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
-
