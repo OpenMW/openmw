@@ -6,8 +6,13 @@
 #include "processors/ProcessorInitializer.hpp"
 #include <RakPeer.h>
 #include <Kbhit.h>
+
+#include <components/misc/stringops.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <components/openmw-mp/Log.hpp>
+#include <components/openmw-mp/Version.hpp>
+#include <components/openmw-mp/Packets/PacketPreInit.hpp>
+
 #include <iostream>
 #include <Script/Script.hpp>
 #include <Script/API/TimerAPI.hpp>
@@ -18,11 +23,9 @@
 #include "MasterClient.hpp"
 #include "Cell.hpp"
 #include "CellController.hpp"
-#include "apps/openmw-mp/processors/PlayerProcessor.hpp"
-#include "apps/openmw-mp/processors/ActorProcessor.hpp"
-#include "apps/openmw-mp/processors/WorldProcessor.hpp"
-#include <components/openmw-mp/Version.hpp>
-#include <components/openmw-mp/Packets/PacketPreInit.hpp>
+#include "processors/PlayerProcessor.hpp"
+#include "processors/ActorProcessor.hpp"
+#include "processors/WorldProcessor.hpp"
 
 using namespace mwmp;
 using namespace std;
@@ -208,13 +211,17 @@ void Networking::update(RakNet::Packet *packet)
                 for (int i = 0; plugin != plugins.end(); plugin++, i++)
                 {
                     LOG_APPEND(Log::LOG_VERBOSE, "- %X\t%s", plugin->second[0], plugin->first.c_str());
-                    if (samples[i].first == plugin->first) // if name is correct
+                    // Check if the filenames match, ignoring case
+                    if (Misc::StringUtils::ciEqual(samples[i].first, plugin->first))
                     {
                         auto &hashList = samples[i].second;
-                        if (hashList.empty()) // and server do not allow to have custom hash for plugin
+                        // Proceed if no checksums have been listed for this plugin on the server
+                        if (hashList.empty())
                             continue;
                         auto it = find(hashList.begin(), hashList.end(), plugin->second[0]);
-                        if (it == hashList.end()) // hash not found in sample
+                        // Break the loop if the client's checksum isn't among those accepted by
+                        // the server
+                        if (it == hashList.end())
                             break;
 
                     }
@@ -224,7 +231,9 @@ void Networking::update(RakNet::Packet *packet)
             }
             RakNet::BitStream bs;
             packetPreInit.SetSendStream(&bs);
-            if (plugin != plugins.end()) // if condition is true, then client have wrong plugin list
+
+            // If the loop above was broken, then the client's plugins do not match the server's
+            if (plugin != plugins.end())
             {
                 packetPreInit.setChecksums(&samples);
                 packetPreInit.Send(packet->systemAddress);
