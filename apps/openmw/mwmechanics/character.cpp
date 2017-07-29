@@ -2043,13 +2043,13 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
     }
     else
     {
-        // If the given animation is a looped animation, is already playing
-        // and has not yet reached its Loop Stop key, make it the only animation
-        // in the queue, and retain the loop count from the animation that was
-        // already playing. This emulates observed behavior from the original
-        // engine and allows banners to animate correctly.
+        // If this animation is a looped animation (has a "loop start" key) that is already playing
+        // and has not yet reached the end of the loop, allow it to continue animating with its existing loop count
+        // and remove any other animations that were queued.
+        // This emulates observed behavior from the original allows the script "OutsideBanner" to animate banners correctly.
         if (!mAnimQueue.empty() && mAnimQueue.front().mGroup == groupname &&
-            mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": loop start") >= 0)
+            mAnimation->getTextKeyTime(mAnimQueue.front().mGroup + ": loop start") >= 0 &&
+            mAnimation->isPlaying(groupname))
         {
             float endOfLoop = mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": loop stop");
 
@@ -2058,8 +2058,7 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
 
             if (endOfLoop > 0 && (mAnimation->getCurrentTime(mAnimQueue.front().mGroup) < endOfLoop))
             {
-                mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, true);
-                mAnimQueue.resize(1);                    
+                mAnimQueue.resize(1);
                 return true;
             }
         }
