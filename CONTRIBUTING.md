@@ -34,8 +34,8 @@ Furthermore, we advise to:
 * If you plan on contributing often, please read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference) on our wiki, especially the [Policies and Standards](https://wiki.openmw.org/index.php?title=Policies_and_Standards).
 * Make sure each of your changes has a clear objective. Unnecessary changes may lead to merge conflicts, clutter the commit history and slow down review. Code formatting 'fixes' should be avoided, unless you were already changing that particular line anyway.
 
-Policy on original engine "fixes"
-=============================
+Guidelines for original engine "fixes"
+=================================
 
 From time to time you may be tempted to "fix" what you think was a "bug" in the original game engine.
 
@@ -52,6 +52,4 @@ That said, we may sometimes evaluate such issues on an individual basis. Common 
 
 * Issues so glaring that they would severely limit the capabilities of the engine in the future (for example, the scripting engine not being allowed to access objects in remote cells)
 * Bugs where the intent is very obvious, and that have little to no balancing impact (e.g. the bug were being tired made it easier to repair items, instead of harder)
-* Bugs that were fixed in an official patch for Morrowind
-
-In the future, we may offer additional settings to turn each "bug" or exploit on/off, or allow modders to do so by means of scripting. 
+* Bugs that were fixed in an official patch for Morrowind 
