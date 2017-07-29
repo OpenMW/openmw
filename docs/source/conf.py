@@ -11,7 +11,6 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
-import glob
 import os
 import sys
 
@@ -20,12 +19,6 @@ import sys
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 project_root = os.path.abspath('../../')
 sys.path.insert(0, project_root)
-
-
-def insensitive_glob(pattern):
-    def either(c):
-        return '[%s%s]' % (c.lower(), c.upper()) if c.isalpha() else c
-    return glob.glob(''.join(map(either, pattern)))
 
 # -- General configuration ------------------------------------------------
 
@@ -43,37 +36,6 @@ extensions = [
     'sphinx.ext.viewcode',
 ]
 
-try:
-    import breathe
-    extensions.append('breathe')
-except ImportError:
-    print("WARNING: Unable to import breathe, code documentation won't be generated.")
-
-# Where breathe can find the source files
-openmw_path = os.path.join(project_root, "apps", "openmw")
-openmw_sub_dirs = os.walk(openmw_path).next()[1]
-openmw_headers = insensitive_glob(os.path.join(openmw_path, "*.hpp"))
-for dir in openmw_sub_dirs:
-    openmw_headers += insensitive_glob(os.path.join(openmw_path, dir, "*.hpp"))
-# massage the headers to get the relative path needed
-openmw_headers = [os.path.relpath(x, openmw_path) for x in openmw_headers]
-
-opencs_path = os.path.join(project_root, "apps", "opencs")
-opencs_sub_dirs = os.walk(opencs_path).next()[1]
-opencs_headers = insensitive_glob(os.path.join(opencs_path, "*.hpp"))
-opencs_sub_sub_dirs = []
-for dir in opencs_sub_dirs:
-    opencs_headers += insensitive_glob(os.path.join(opencs_path, dir, "*.hpp"))
-    opencs_sub_sub_dirs += os.walk(os.path.join(opencs_path, dir)).next()[1]
-    for sub_dir in opencs_sub_sub_dirs:
-        opencs_headers += insensitive_glob(os.path.join(opencs_path, dir, sub_dir, "*.hpp"))
-opencs_headers = [os.path.relpath(x, opencs_path) for x in opencs_headers]
-
-breathe_projects_source = {
-    "openmw": (openmw_path, openmw_headers),
-    "opencs": (opencs_path, opencs_headers),
-}
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -88,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'OpenMW'
-copyright = u'2016, OpenMW Team'
+copyright = u'2017, OpenMW Team'
 
 
 # The version info for the project you're documenting, acts as replacement for
