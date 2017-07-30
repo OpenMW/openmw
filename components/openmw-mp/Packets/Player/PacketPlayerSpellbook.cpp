@@ -31,6 +31,40 @@ void PacketPlayerSpellbook::Packet(RakNet::BitStream *bs, bool send)
 
         RW(spell.mId, send, 1);
 
+        if(spell.mId.find("$dynamic") != string::npos)
+        {
+            RW(spell.mName, send, 1);
+
+            RW(spell.mData.mType, send, 1);
+            RW(spell.mData.mCost, send, 1);
+            RW(spell.mData.mFlags, send, 1);
+
+            int effectCount = 0;
+            if (send)
+                effectCount = spell.mEffects.mList.size();
+
+            RW(effectCount, send, 1);
+
+            for (unsigned int j = 0; j < effectCount; j++)
+            {
+                ESM::ENAMstruct effect;
+                if (send)
+                    effect = spell.mEffects.mList.at(j);
+
+                RW(effect.mEffectID, send, 1);
+                RW(effect.mSkill, send, 1);
+                RW(effect.mAttribute, send, 1);
+                RW(effect.mRange, send, 1);
+                RW(effect.mArea, send, 1);
+                RW(effect.mDuration, send, 1);
+                RW(effect.mMagnMin, send, 1);
+                RW(effect.mMagnMax, send, 1);
+
+                if(!send)
+                    spell.mEffects.mList.push_back(effect);
+            }
+        }
+
         if (!send)
             player->spellbookChanges.spells.push_back(spell);
     }
