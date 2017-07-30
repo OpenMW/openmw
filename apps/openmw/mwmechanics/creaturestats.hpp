@@ -88,6 +88,9 @@ namespace MWMechanics
         DrawState_ getDrawState() const;
         void setDrawState(DrawState_ state);
 
+        /// Update abilities that impact attributes. Needs to be called after clearing all spells.
+        void updateAbilityAttributeState();
+
         bool needToRecalcDynamicStats();
         void setNeedRecalcDynamicStats(bool val);
 

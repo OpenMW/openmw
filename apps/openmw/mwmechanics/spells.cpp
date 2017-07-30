@@ -58,8 +58,16 @@ namespace MWMechanics
                         random = iter->second.mEffectRands.at(i);
 
                     float magnitude = it->mMagnMin + (it->mMagnMax - it->mMagnMin) * random;
-                    mEffects.add (*it, magnitude);
-                    mSourcedEffects[spell].add(MWMechanics::EffectKey(*it), magnitude);
+                    float sourcedMagnitude = magnitude;
+
+                    // Blank out ability effects that modify attributes
+                    if ((spell->mData.mType == ESM::Spell::ST_Ability) && (getSpecificAbilityAttributeState(spell) != ESM::Spell::AAS_Null))
+                    {
+                        magnitude = 0;
+                    }
+
+                    mEffects.add(*it, magnitude);
+                    mSourcedEffects[spell].add(MWMechanics::EffectKey(*it), sourcedMagnitude);
 
                     ++i;
                 }
@@ -83,9 +91,11 @@ namespace MWMechanics
         return mSpells.find(spell) != mSpells.end();
     }
 
-    void Spells::add (const ESM::Spell* spell)
+    void Spells::add(const ESM::Spell* spell)
     {
-        if (mSpells.find (spell)==mSpells.end())
+        bool spellAdded = (mSpells.find(spell) != mSpells.end());
+
+        if (!spellAdded)
         {
             std::map<int, float> random;
 
@@ -93,7 +103,7 @@ namespace MWMechanics
             // they will be determined when the spell is cast)
             if (spell->mData.mType != ESM::Spell::ST_Power && spell->mData.mType != ESM::Spell::ST_Spell)
             {
-                for (unsigned int i=0; i<spell->mEffects.mList.size();++i)
+                for (unsigned int i = 0; i<spell->mEffects.mList.size(); ++i)
                 {
                     if (spell->mEffects.mList[i].mMagnMin != spell->mEffects.mList[i].mMagnMax)
                         random[i] = Misc::Rng::rollClosedProbability();
@@ -111,8 +121,33 @@ namespace MWMechanics
 
             SpellParams params;
             params.mEffectRands = random;
-            mSpells.insert (std::make_pair (spell, params));
+            mSpells.insert(std::make_pair(spell, params));
             mSpellsChanged = true;
+        }
+
+        // mAbilityAttributeStates does not persist through save/load.
+        if (spell->mData.mType == ESM::Spell::ST_Ability)
+        {
+            std::map<SpellKey, int>::const_iterator it = mAbilityAttributeStates.find(spell);
+            if (it == mAbilityAttributeStates.end())
+            {
+                for (unsigned int i = 0; i < spell->mEffects.mList.size(); ++i)
+                {
+                    if (spell->mEffects.mList[i].mAttribute == -1)
+                        continue; // Only care about attributes.
+
+                    if (!spellAdded)
+                    {
+                        // Add to spells that can change base attributes if not already in map.
+                        mAbilityAttributeStates[spell] = ESM::Spell::AAS_Unchanged;
+                    }
+                    else
+                    {
+                        // Rebuilding list through a loaded game.
+                        mAbilityAttributeStates[spell] = ESM::Spell::AAS_Changed;
+                    }
+                }
+            }
         }
     }
 
@@ -127,6 +162,7 @@ namespace MWMechanics
         TContainer::iterator iter = mSpells.find (spell);
 
         std::map<SpellKey, CorprusStats>::iterator corprusIt = mCorprusSpells.find(spell);
+        std::map<SpellKey, int>::iterator attrIt = mAbilityAttributeStates.find(spell);
 
         // if it's corprus, remove negative and keep positive effects
         if (corprusIt != mCorprusSpells.end())
@@ -145,6 +181,20 @@ namespace MWMechanics
                 }
             }
             mCorprusSpells.erase(corprusIt);
+        }
+
+        if (attrIt != mAbilityAttributeStates.end())
+        {
+            if (getSpecificAbilityAttributeState(spell) == ESM::Spell::AAS_Changed)
+            {
+                // If an ability gets removed, allow caller to remove permanent benefits
+                setSpecificAbilityAttributeState(spell, ESM::Spell::AAS_Remove);
+            }
+            else if (getSpecificAbilityAttributeState(spell) != ESM::Spell::AAS_Remove)
+            {
+                // Unless it had no such benefits, then erase it
+                mAbilityAttributeStates.erase(attrIt);
+            }
         }
 
         if (iter!=mSpells.end())
@@ -168,6 +218,19 @@ namespace MWMechanics
 
     void Spells::clear()
     {
+        // Can not undo any attribute changes here, so caller must do so.
+        for (std::map<Spells::SpellKey, int>::iterator iter = mAbilityAttributeStates.begin(); iter != mAbilityAttributeStates.end(); ++iter)
+        {
+            if (iter->second == ESM::Spell::AAS_Changed)
+            {
+                iter->second = ESM::Spell::AAS_Remove;
+            }
+            else
+            {
+                mAbilityAttributeStates.erase(iter);
+            }
+        }
+
         mSpells.clear();
         mSpellsChanged = true;
     }
@@ -388,6 +451,40 @@ namespace MWMechanics
     void Spells::usePower(const ESM::Spell* spell)
     {
         mUsedPowers[spell] = MWBase::Environment::get().getWorld()->getTimeStamp();
+    }
+
+    int Spells::getSpecificAbilityAttributeState(const ESM::Spell* spell) const
+    {
+        std::map<SpellKey, int>::const_iterator it = mAbilityAttributeStates.find(spell);
+        if (it == mAbilityAttributeStates.end())
+        {
+            // Does not affect base attribute
+            return ESM::Spell::AAS_Null;
+        }
+        else
+        {
+            return it->second;
+        }
+    }
+
+    void Spells::setSpecificAbilityAttributeState(const ESM::Spell* spell, int state)
+    {
+        mAbilityAttributeStates[spell] = state;
+    }
+
+    void Spells::removeSpecificAbilityAttributeState(const ESM::Spell* spell)
+    {
+        std::map<SpellKey, int>::iterator attrIt = mAbilityAttributeStates.find(spell);
+
+        if (attrIt != mAbilityAttributeStates.end())
+        {
+            mAbilityAttributeStates.erase(attrIt);
+        }
+    }
+
+    const std::map<Spells::SpellKey, int>& Spells::getAllAbilityAttributeStates() const
+    {
+        return mAbilityAttributeStates;
     }
 
     void Spells::readState(const ESM::SpellState &state)

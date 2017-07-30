@@ -1749,6 +1749,7 @@ namespace MWMechanics
 
     void Actors::updateMagicEffects(const MWWorld::Ptr &ptr)
     {
+        ptr.getClass().getCreatureStats(ptr).updateAbilityAttributeState();
         adjustMagicEffects(ptr);
         calculateCreatureStatModifiers(ptr, 0.f);
         if (ptr.getClass().isNpc())

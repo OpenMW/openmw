@@ -668,4 +668,40 @@ namespace MWMechanics
     {
         return mSummonGraveyard;
     }
+
+    void CreatureStats::updateAbilityAttributeState()
+    {
+        // Make abilities affect base attribute.
+        const std::map<Spells::SpellKey, int> abilities = mSpells.getAllAbilityAttributeStates();
+
+        for (std::map<Spells::SpellKey, int>::const_iterator iter = abilities.begin(); iter != abilities.end(); ++iter)
+        {
+            const ESM::Spell *spell = iter->first;
+
+            if (mSpells.getSpecificAbilityAttributeState(spell) == ESM::Spell::AAS_Unchanged)
+            {
+                for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != spell->mEffects.mList.end(); ++it)
+                {
+                    if (it->mAttribute == -1)
+                        continue; // Only care about attributes.
+
+                    // Birthsigns do not have ranges for attributes.
+                    setAttribute(it->mAttribute, getAttribute(it->mAttribute).getBase() + it->mMagnMax);
+                }
+                mSpells.setSpecificAbilityAttributeState(spell, ESM::Spell::AAS_Changed);
+            }
+            else if (mSpells.getSpecificAbilityAttributeState(spell) == ESM::Spell::AAS_Remove)
+            {
+                for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != spell->mEffects.mList.end(); ++it)
+                {
+                    if (it->mAttribute == -1)
+                        continue; // Only care about attributes.
+
+                    // Birthsigns do not have ranges for attributes.
+                    setAttribute(it->mAttribute, getAttribute(it->mAttribute).getBase() - it->mMagnMax);
+                }
+                mSpells.removeSpecificAbilityAttributeState(spell);
+            }
+        }
+    }
 }

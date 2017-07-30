@@ -34,6 +34,14 @@ struct Spell
         F_Always = 4 // Casting always succeeds
     };
 
+    enum AbilityAttributeState
+    {
+        AAS_Null = 0,      // Not an ability that affects attributes
+        AAS_Unchanged = 1, // Ability has not yet affected attributes
+        AAS_Changed = 2,   // Ability has affected attributes
+        AAS_Remove = 3       // Ability has been disabled, undo changes and remove
+    };
+
     struct SPDTstruct
     {
         int mType; // SpellType
