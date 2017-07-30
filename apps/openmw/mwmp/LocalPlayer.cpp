@@ -648,8 +648,16 @@ void LocalPlayer::addSpells()
     MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
 
     for (const auto &spell : spellbookChanges.spells)
-        ptrSpells.add(spell.mId);
-
+    {
+        if(spell.mId.find("$dynamic") != string::npos)
+        {
+            //custom spell
+            MWBase::Environment::get().getWorld()->createRecord(spell);
+            ptrSpells.add(&spell);
+        }else{
+            ptrSpells.add(spell.mId);
+        }
+    }
 }
 
 void LocalPlayer::addJournalItems()
@@ -1130,12 +1138,24 @@ void LocalPlayer::sendSpellRemoval(std::string id)
 
 void LocalPlayer::sendSpellAddition(const ESM::Spell &spell)
 {
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Not implemented.");
+    spellbookChanges.spells.clear();
+
+    spellbookChanges.spells.push_back(spell);
+
+    spellbookChanges.action = SpellbookChanges::ADD;
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send();
 }
 
 void LocalPlayer::sendSpellRemoval(const ESM::Spell &spell)
 {
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Not implemented.");
+    spellbookChanges.spells.clear();
+
+    spellbookChanges.spells.push_back(spell);
+
+    spellbookChanges.action = SpellbookChanges::REMOVE;
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send();
 }
 
 void LocalPlayer::sendJournalEntry(const std::string& quest, int index, const MWWorld::Ptr& actor)
