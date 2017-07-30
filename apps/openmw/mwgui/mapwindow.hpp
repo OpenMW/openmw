@@ -230,6 +230,8 @@ namespace MWGui
         void write (ESM::ESMWriter& writer, Loading::Listener& progress);
         void readRecord (ESM::ESMReader& reader, uint32_t type);
 
+        void toggleMap();
+
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);

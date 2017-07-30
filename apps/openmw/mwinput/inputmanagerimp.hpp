@@ -224,6 +224,7 @@ namespace MWInput
         void toggleSpell();
         void toggleWeapon();
         void toggleInventory();
+        void toggleMap();
         void toggleConsole();
         void screenshot();
         void toggleJournal();
@@ -312,6 +313,8 @@ namespace MWInput
             A_LookLeftRight,
             A_MoveForwardBackward,
             A_MoveLeftRight,
+
+            A_ToggleMap,      // Toggle local/world map
 
             A_Last            // Marker for the last item
         };

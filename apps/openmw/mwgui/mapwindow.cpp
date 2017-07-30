@@ -917,17 +917,7 @@ namespace MWGui
 
     void MapWindow::onWorldButtonClicked(MyGUI::Widget* _sender)
     {
-        mGlobal = !mGlobal;
-        mGlobalMap->setVisible(mGlobal);
-        mLocalMap->setVisible(!mGlobal);
-
-        Settings::Manager::setBool("global", "Map", mGlobal);
-
-        mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" :
-                "#{sWorld}");
-
-        if (mGlobal)
-            globalMapUpdatePlayer ();
+        toggleMap();
     }
 
     void MapWindow::onPinToggled()
@@ -989,6 +979,21 @@ namespace MWGui
         rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
         float angle = std::atan2(x,y);
         rotatingSubskin->setAngle(angle);
+    }
+
+    void MapWindow::toggleMap()
+    {
+        mGlobal = !mGlobal;
+        mGlobalMap->setVisible(mGlobal);
+        mLocalMap->setVisible(!mGlobal);
+
+        Settings::Manager::setBool("global", "Map", mGlobal);
+
+        mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" :
+                "#{sWorld}");
+
+        if (mGlobal)
+            globalMapUpdatePlayer ();
     }
 
     void MapWindow::ensureGlobalMapLoaded()
