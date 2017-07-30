@@ -58,6 +58,7 @@ namespace
         Book mTopicIndexBook;
         bool mQuestMode;
         bool mOptionsMode;
+        bool mTopicsMode;
         bool mAllQuests;
 
         template <typename T>
@@ -196,6 +197,7 @@ namespace
             mQuestMode = false;
             mAllQuests = false;
             mOptionsMode = false;
+            mTopicsMode = false;
         }
 
         void adjustButton (char const * name)
@@ -259,6 +261,7 @@ namespace
         void setBookMode ()
         {
             mOptionsMode = false;
+            mTopicsMode = false;
             setVisible (OptionsBTN, true);
             setVisible (OptionsOverlay, false);
 
@@ -269,6 +272,7 @@ namespace
         void setOptionsMode ()
         {
             mOptionsMode = true;
+            mTopicsMode = false;
 
             setVisible (OptionsBTN, false);
             setVisible (OptionsOverlay, true);
@@ -372,6 +376,7 @@ namespace
             setVisible (JournalBTN, true);
 
             mOptionsMode = false;
+            mTopicsMode = false;
 
             MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
@@ -432,6 +437,8 @@ namespace
             setVisible (RightTopicIndex, false);
             setVisible (TopicsList, true);
 
+            mTopicsMode = true;
+
             Gui::MWList* list = getWidget<Gui::MWList>(TopicsList);
             list->clear();
 
@@ -447,6 +454,7 @@ namespace
         void notifyTopics(MyGUI::Widget* _sender)
         {
             mQuestMode = false;
+            mTopicsMode = false;
             setVisible (LeftTopicIndex, true);
             setVisible (RightTopicIndex, true);
             setVisible (TopicsList, false);
@@ -524,9 +532,16 @@ namespace
 
         void notifyCancel(MyGUI::Widget* _sender)
         {
-            setBookMode();
+            if (mTopicsMode)
+            {
+                notifyTopics(_sender);
+            }
+            else
+            {
+                setBookMode();
+                MWBase::Environment::get().getWindowManager()->playSound("book page");
+            }
 
-            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         void notifyClose(MyGUI::Widget* _sender)
