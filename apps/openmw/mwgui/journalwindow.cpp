@@ -292,6 +292,8 @@ namespace
             // If in quest mode, ensure the quest list is updated
             if (mQuestMode)
                 notifyQuests(getWidget<MyGUI::Widget>(QuestsList));
+            else
+                notifyTopics(getWidget<MyGUI::Widget>(TopicsList));
         }
 
         void pushBook (Book book, unsigned int page)
@@ -370,6 +372,8 @@ namespace
             setVisible (JournalBTN, true);
 
             mOptionsMode = false;
+
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         void notifyTopicSelected (const std::string& topic, int id)
@@ -399,6 +403,8 @@ namespace
             setVisible (JournalBTN, true);
 
             mOptionsMode = false;
+
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         void notifyOptions(MyGUI::Widget* _sender)
@@ -416,6 +422,8 @@ namespace
         {
             assert (mStates.size () > 1);
             popBook ();
+
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         void notifyIndexLinkClicked (MWGui::TypesetBook::InteractiveId character)
@@ -432,6 +440,8 @@ namespace
             mModel->visitTopicNamesStartingWith((char) character, add);
 
             list->adjustSize();
+
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         void notifyTopics(MyGUI::Widget* _sender)
@@ -443,6 +453,8 @@ namespace
             setVisible (QuestsList, false);
             setVisible (ShowAllBTN, false);
             setVisible (ShowActiveBTN, false);
+
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         struct AddNamesToList
@@ -494,6 +506,8 @@ namespace
                 SetNamesInactive setInactive(list);
                 mModel->visitQuestNames(!mAllQuests, setInactive);
             }
+
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         void notifyShowAll(MyGUI::Widget* _sender)
@@ -510,7 +524,9 @@ namespace
 
         void notifyCancel(MyGUI::Widget* _sender)
         {
-            setBookMode ();
+            setBookMode();
+
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         void notifyClose(MyGUI::Widget* _sender)
@@ -539,6 +555,8 @@ namespace
 
                 if (page+2 < book->pageCount())
                 {
+                    MWBase::Environment::get().getWindowManager()->playSound("book page");
+
                     page += 2;
                     updateShowingPages ();
                 }
@@ -555,6 +573,8 @@ namespace
 
                 if(page >= 2)
                 {
+                    MWBase::Environment::get().getWindowManager()->playSound("book page");
+
                     page -= 2;
                     updateShowingPages ();
                 }
