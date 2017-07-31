@@ -1460,6 +1460,7 @@ namespace MWWorld
     {
         osg::Vec3f a(x1,y1,z1);
         osg::Vec3f b(x2,y2,z2);
+
         MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), MWPhysics::CollisionType_World|MWPhysics::CollisionType_Door);
         return result.mHit;
     }
