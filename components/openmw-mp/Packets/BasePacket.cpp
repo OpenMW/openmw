@@ -48,26 +48,26 @@ void BasePacket::SetStreams(RakNet::BitStream *inStream, RakNet::BitStream *outS
         bsSend = outStream;
 }
 
-void BasePacket::RequestData(RakNet::RakNetGUID guid)
+uint32_t BasePacket::RequestData(RakNet::RakNetGUID guid)
 {
     bsSend->ResetWritePointer();
     bsSend->Write(packetID);
     bsSend->Write(guid);
-    peer->Send(bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, orderChannel, guid, false);
+    return peer->Send(bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, orderChannel, guid, false);
 }
 
-void BasePacket::Send(RakNet::AddressOrGUID destination)
+uint32_t BasePacket::Send(RakNet::AddressOrGUID destination)
 {
     bsSend->ResetWritePointer();
     Packet(bsSend, true);
-    peer->Send(bsSend, priority, reliability, orderChannel, destination, false);
+    return peer->Send(bsSend, priority, reliability, orderChannel, destination, false);
 }
 
-void BasePacket::Send(bool toOther)
+uint32_t BasePacket::Send(bool toOther)
 {
     bsSend->ResetWritePointer();
     Packet(bsSend, true);
-    peer->Send(bsSend, priority, reliability, orderChannel, guid, toOther);
+    return peer->Send(bsSend, priority, reliability, orderChannel, guid, toOther);
 }
 
 void BasePacket::Read()
