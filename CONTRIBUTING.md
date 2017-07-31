@@ -53,3 +53,18 @@ That said, we may sometimes evaluate such issues on an individual basis. Common 
 * Issues so glaring that they would severely limit the capabilities of the engine in the future (for example, the scripting engine not being allowed to access objects in remote cells)
 * Bugs where the intent is very obvious, and that have little to no balancing impact (e.g. the bug were being tired made it easier to repair items, instead of harder)
 * Bugs that were fixed in an official patch for Morrowind 
+
+Feature additions policy
+=====================
+
+We get it, you have waited so long for feature XYZ to be available in Morrowind and now that OpenMW is here you can not wait to implement your ingenious idea and share it with the world.
+
+Unfortunately, since maintaining features comes at a cost and our resources are limited, we have to be a little selective in what features we allow into the main repository. Generally:
+
+- Features should be as generic and non-redundant as possible.
+- Any feature that is also possible with modding should be done as a mod instead.
+- In the future, OpenMW plans to expand the scope of what is possible with modding, e.g. by moving certain game logic into editable scripts.
+- Currently, modders can edit OpenMW's GUI skins and layout XML files, although there are still a few missing hooks (e.g. scripting support) in order to make this into a powerful way of modding.
+- If a feature introduces new game UI strings, that reduces its chance of being accepted because we do not currently have any way of localizing these to the user's Morrowind installation language.
+
+If you are in doubt of your feature being within our scope, it is probably best to start a forum discussion first. See the [settings documentation](https://openmw.readthedocs.io/en/stable/reference/modding/settings/index.html) and [Features list](https://wiki.openmw.org/index.php?title=Features) for some examples of features that were deemed acceptable.
