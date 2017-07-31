@@ -48,6 +48,7 @@ private:
     RakNet::SocketDescriptor sockdescr;
     ServerMap servers;
     bool run;
+    std::map<RakNet::RakNetGUID, std::chrono::steady_clock::time_point> pendingACKs;
 };
 
 

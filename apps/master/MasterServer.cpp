@@ -16,6 +16,7 @@
 using namespace RakNet;
 using namespace std;
 using namespace mwmp;
+using namespace chrono;
 
 MasterServer::MasterServer(unsigned short maxConnections, unsigned short port)
 {
@@ -55,16 +56,27 @@ void MasterServer::Thread()
     {
         Packet *packet = peer->Receive();
 
-        auto now = chrono::steady_clock::now();
+        auto now = steady_clock::now();
         if (now - startTime >= 60s)
         {
-            startTime = chrono::steady_clock::now();
+            startTime = steady_clock::now();
             for (auto it = servers.begin(); it != servers.end();)
             {
 
                 if (it->second.lastUpdate + 60s <= now)
                     servers.erase(it++);
                 else ++it;
+            }
+            for(auto id = pendingACKs.begin(); id != pendingACKs.end();)
+            {
+                if(now - id->second >= 30s)
+                {
+                    cout << "timeout: " << peer->GetSystemAddressFromGuid(id->first).ToString() << endl;
+                    peer->CloseConnection(id->first, true);
+                    id = pendingACKs.erase(id);
+                }
+                else
+                    ++id;
             }
         }
 
@@ -90,10 +102,10 @@ void MasterServer::Thread()
                     {
                         pmq.SetServers(reinterpret_cast<map<SystemAddress, QueryData> *>(&servers));
                         pmq.Send(packet->systemAddress);
+                        pendingACKs[packet->guid] = steady_clock::now();
 
                         cout << "Sent info about all " << servers.size() << " servers to "
                              << packet->systemAddress.ToString() << endl;
-                        peer->CloseConnection(packet->systemAddress, true);
                         break;
                     }
                     case ID_MASTER_UPDATE:
@@ -107,10 +119,10 @@ void MasterServer::Thread()
                             pair<SystemAddress, QueryData> pairPtr(it->first, static_cast<QueryData>(it->second));
                             pmu.SetServer(&pairPtr);
                             pmu.Send(packet->systemAddress);
+                            pendingACKs[packet->guid] = steady_clock::now();
                             cout << "Sent info about " << addr.ToString() << " to " << packet->systemAddress.ToString()
                                  << endl;
                         }
-                        peer->CloseConnection(packet->systemAddress, true);
                         break;
                     }
                     case ID_MASTER_ANNOUNCE:
@@ -126,6 +138,7 @@ void MasterServer::Thread()
                             iter->second.lastUpdate = now;
                             pma.SetFunc(PacketMasterAnnounce::FUNCTION_KEEP);
                             pma.Send(packet->systemAddress);
+                            pendingACKs[packet->guid] = steady_clock::now();
                         };
 
                         if (iter != servers.end())
@@ -135,6 +148,7 @@ void MasterServer::Thread()
                                 servers.erase(iter);
                                 cout << "Deleted";
                                 pma.Send(packet->systemAddress);
+                                pendingACKs[packet->guid] = steady_clock::now();
                             }
                             else if (pma.GetFunc() == PacketMasterAnnounce::FUNCTION_ANNOUNCE)
                             {
@@ -159,14 +173,20 @@ void MasterServer::Thread()
                             cout << "Unknown";
                             pma.SetFunc(PacketMasterAnnounce::FUNCTION_DELETE);
                             pma.Send(packet->systemAddress);
+                            pendingACKs[packet->guid] = steady_clock::now();
                         }
                         cout << " server " << packet->systemAddress.ToString() << endl;
-
-                        peer->CloseConnection(packet->systemAddress, true);
                         break;
                     }
+                    case ID_SND_RECEIPT_ACKED:
+                        uint32_t num;
+                        memcpy(&num, packet->data+1, 4);
+                        cout << "Packet with id " << num << " was delivered." << endl;
+                        pendingACKs.erase(packet->guid);
+                        peer->CloseConnection(packet->systemAddress, true);
+                        break;
                     default:
-                        cout << "Wrong packet" << endl;
+                        cout << "Wrong packet. id " << (unsigned) packet->data[0] << " packet length " << packet->length << " from " << packet->systemAddress.ToString() << endl;
                         peer->CloseConnection(packet->systemAddress, true);
                 }
             }
