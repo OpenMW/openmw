@@ -43,21 +43,41 @@ QueryClient &QueryClient::Get()
 
 map<SystemAddress, QueryData> QueryClient::Query()
 {
-    status = -1;
     map<SystemAddress, QueryData> query;
-    if (Connect() == IS_NOT_CONNECTED)
-        return query;
-
     BitStream bs;
     bs.Write((unsigned char) (ID_MASTER_QUERY));
-    int code = peer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, CHANNEL_MASTER, masterAddr, false);
+    qDebug() << "Locking mutex in QueryClient::Query()";
+    mxServers.lock();
+    status = -1;
+    int attempts = 3;
+    do
+    {
+        if (Connect() == IS_NOT_CONNECTED)
+        {
+            qDebug() << "Unlocking mutex in QueryClient::Query()";
+            mxServers.unlock();
+            return query;
+        }
 
-    if (code == 0)
-        return query;
+        int code = peer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, CHANNEL_MASTER, masterAddr, false);
 
-    pmq->SetServers(&query);
-    status = GetAnswer();
+        if (code == 0)
+        {
+            qDebug() << "Unlocking mutex in QueryClient::Query()";
+            mxServers.unlock();
+            return query;
+        }
 
+        pmq->SetServers(&query);
+        status = GetAnswer(ID_MASTER_QUERY);
+        RakSleep(100);
+    }
+    while(status != ID_MASTER_QUERY && attempts-- > 0);
+    if(status != ID_MASTER_QUERY)
+        qDebug() << "Getting query was failed";
+    qDebug() << "Unlocking mutex in QueryClient::Query()";
+    peer->CloseConnection(masterAddr, true);
+    mxServers.unlock();
     qDebug() <<"Answer" << (status == ID_MASTER_QUERY ? "ok." : "wrong.");
 
     return query;
@@ -65,24 +85,40 @@ map<SystemAddress, QueryData> QueryClient::Query()
 
 pair<SystemAddress, QueryData> QueryClient::Update(RakNet::SystemAddress addr)
 {
+    qDebug() << "Locking mutex in QueryClient::Update(RakNet::SystemAddress addr)";
     pair<SystemAddress, QueryData> server;
-    if (Connect() == IS_NOT_CONNECTED)
-    {
-        status = -1;
-        return server;
-    }
-
     BitStream bs;
     bs.Write((unsigned char) (ID_MASTER_UPDATE));
     bs.Write(addr);
-    peer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, CHANNEL_MASTER, masterAddr, false);
 
+    mxServers.lock();
+    status = -1;
+    int attempts = 3;
     pmu->SetServer(&server);
-    status = GetAnswer();
+    do
+    {
+        if (Connect() == IS_NOT_CONNECTED)
+        {
+            qDebug() << IS_NOT_CONNECTED;
+            qDebug() << "Unlocking mutex in QueryClient::Update(RakNet::SystemAddress addr)";
+            mxServers.unlock();
+            return server;
+        }
+
+        peer->Send(&bs, HIGH_PRIORITY, RELIABLE_ORDERED, CHANNEL_MASTER, masterAddr, false);
+        status = GetAnswer(ID_MASTER_UPDATE);
+        RakSleep(100);
+    }
+    while(status != ID_MASTER_UPDATE && attempts-- > 0);
+    if(status != ID_MASTER_UPDATE)
+        qDebug() << "Getting update was failed";
+    peer->CloseConnection(masterAddr, true);
+    qDebug() << "Unlocking mutex in QueryClient::Update(RakNet::SystemAddress addr)";
+    mxServers.unlock();
     return server;
 }
 
-MASTER_PACKETS QueryClient::GetAnswer()
+MASTER_PACKETS QueryClient::GetAnswer(MASTER_PACKETS waitingPacket)
 {
     RakNet::Packet *packet;
     bool update = true;
@@ -105,20 +141,30 @@ MASTER_PACKETS QueryClient::GetAnswer()
                     update = false;
                     break;
                 case ID_MASTER_QUERY:
-                    pmq->Read();
+                    qDebug() << "ID_MASTER_QUERY";
+                    if (waitingPacket == ID_MASTER_QUERY)
+                        pmq->Read();
+                    else
+                        qDebug() << "Got wrong packet";
                     update = false;
                     id = pid;
                     break;
                 case ID_MASTER_UPDATE:
-                    pmu->Read();
+                    qDebug() << "ID_MASTER_UPDATE";
+                    if (waitingPacket == ID_MASTER_UPDATE)
+                        pmu->Read();
+                    else
+                        qDebug() << "Got wrong packet";
                     update = false;
                     id = pid;
                     break;
                 case ID_MASTER_ANNOUNCE:
+                    qDebug() << "ID_MASTER_ANNOUNCE";
                     update = false;
                     id = pid;
                     break;
                 case ID_CONNECTION_REQUEST_ACCEPTED:
+                    qDebug() << "ID_CONNECTION_REQUEST_ACCEPTED";
                     break;
                 default:
                     break;
@@ -148,8 +194,7 @@ ConnectionState QueryClient::Connect()
             case IS_SILENTLY_DISCONNECTING:
             case IS_DISCONNECTING:
             {
-                qDebug() << "Cannot connect to the master server "<< state;
-                //LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Cannot connect to master server: %d", masterAddr.ToString());
+                qDebug() << "Cannot connect to the master server. Code:"<< state;
                 return IS_NOT_CONNECTED;
             }
             case IS_PENDING:
