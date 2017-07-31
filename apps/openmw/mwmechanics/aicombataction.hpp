@@ -101,6 +101,7 @@ namespace MWMechanics
     float rateEffects (const ESM::EffectList& list, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
 
     std::shared_ptr<Action> prepareNextAction (const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
+    float getBestActionRating(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy);
 
     float getDistanceMinusHalfExtents(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool minusZDist=false);
     float getMaxAttackDistance(const MWWorld::Ptr& actor);
