@@ -1131,6 +1131,9 @@ namespace MWMechanics
                 receivedMagicDamage = true;
                 adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
             }
+
+            break;
+
         case ESM::MagicEffect::DamageMagicka:
         case ESM::MagicEffect::DamageFatigue:
             if (!godmode)
@@ -1147,6 +1150,9 @@ namespace MWMechanics
                     receivedMagicDamage = true;
                 adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
             }
+
+            break;
+
         case ESM::MagicEffect::AbsorbMagicka:
         case ESM::MagicEffect::AbsorbFatigue:
             if (!godmode)
