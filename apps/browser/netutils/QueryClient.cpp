@@ -7,6 +7,7 @@
 #include <components/openmw-mp/NetworkMessages.hpp>
 #include <iostream>
 #include <components/openmw-mp/Version.hpp>
+#include <qdebug.h>
 
 using namespace RakNet;
 using namespace std;
@@ -56,6 +57,9 @@ map<SystemAddress, QueryData> QueryClient::Query()
 
     pmq->SetServers(&query);
     status = GetAnswer();
+
+    qDebug() <<"Answer" << (status == ID_MASTER_QUERY ? "ok." : "wrong.");
+
     return query;
 }
 
@@ -83,7 +87,7 @@ MASTER_PACKETS QueryClient::GetAnswer()
     RakNet::Packet *packet;
     bool update = true;
     unsigned char pid = 0;
-    int id;
+    int id = -1;
     while (update)
     {
         for (packet = peer->Receive(); packet; peer->DeallocatePacket(packet), packet = peer->Receive())
@@ -94,8 +98,10 @@ MASTER_PACKETS QueryClient::GetAnswer()
             data.Read(pid);
             switch(pid)
             {
-                case ID_DISCONNECTION_NOTIFICATION:
                 case ID_CONNECTION_LOST:
+                    qDebug() << "ID_CONNECTION_LOST";
+                case ID_DISCONNECTION_NOTIFICATION:
+                    qDebug() << "Disconnected";
                     update = false;
                     break;
                 case ID_MASTER_QUERY:
@@ -125,6 +131,7 @@ MASTER_PACKETS QueryClient::GetAnswer()
 
 ConnectionState QueryClient::Connect()
 {
+
     ConnectionAttemptResult car = peer->Connect(masterAddr.ToString(false), masterAddr.GetPort(), TES3MP_MASTERSERVER_PASSW,
                                                 strlen(TES3MP_MASTERSERVER_PASSW), 0, 0, 5, 500);
 
@@ -134,17 +141,20 @@ ConnectionState QueryClient::Connect()
         switch (state)
         {
             case IS_CONNECTED:
+                qDebug() << "Connected";
                 return IS_CONNECTED;
             case IS_NOT_CONNECTED:
             case IS_DISCONNECTED:
             case IS_SILENTLY_DISCONNECTING:
             case IS_DISCONNECTING:
             {
+                qDebug() << "Cannot connect to the master server "<< state;
                 //LOG_MESSAGE_SIMPLE(Log::LOG_WARN, "Cannot connect to master server: %d", masterAddr.ToString());
                 return IS_NOT_CONNECTED;
             }
             case IS_PENDING:
             case IS_CONNECTING:
+                qDebug() << "Pending";
                 break;
         }
         RakSleep(500);
