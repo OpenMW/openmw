@@ -577,8 +577,6 @@ namespace MWMechanics
                 return 0.f;
         }
 
-        rating *= magicEffect->mData.mBaseCost;
-
         if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
         {
             rating *= -1.f;
@@ -613,13 +611,8 @@ namespace MWMechanics
                     return 0.f;
             }
         }
-        else
-        {
-            rating *= (effect.mMagnMin + effect.mMagnMax)/2.f;
-        }
 
-        if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
-            rating *= effect.mDuration;
+        rating *= calcEffectCost(effect);
 
         // Currently treating all "on target" or "on touch" effects to target the enemy actor.
         // Combat AI is egoistic, so doesn't consider applying positive effects to friendly actors.
@@ -636,6 +629,9 @@ namespace MWMechanics
         for (std::vector<ESM::ENAMstruct>::const_iterator it = list.mList.begin(); it != list.mList.end(); ++it)
         {
             rating += rateEffect(*it, actor, enemy);
+
+            if (it->mRange == ESM::RT_Target)
+                rating *= 1.5f;
         }
         return rating;
     }
