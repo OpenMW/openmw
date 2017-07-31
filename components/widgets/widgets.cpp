@@ -16,6 +16,7 @@ namespace Gui
     {
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::MWList>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::HBox>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::Spacer>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::VBox>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedTextBox>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedEditBox>("Widget");
