@@ -1,11 +1,9 @@
 #include "obstacle.hpp"
 
-#include <osg/Group>
-
 #include <components/esm/loadcell.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 
@@ -36,24 +34,39 @@ namespace MWMechanics
 
     MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minDist)
     {
-        osg::Vec3f origin = MWBase::Environment::get().getWorld()->getActorHeadTransform(actor).getTrans();
+        MWWorld::CellStore *cell = actor.getCell();
 
-        osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
-                * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
-
-        osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
-        osg::Vec3f dest = origin + direction * minDist;
-
+        // Check all the doors in this cell
+        const MWWorld::CellRefList<ESM::Door>& doors = cell->getReadOnlyDoors();
+        const MWWorld::CellRefList<ESM::Door>::List& refList = doors.mList;
+        MWWorld::CellRefList<ESM::Door>::List::const_iterator it = refList.begin();
         osg::Vec3f pos(actor.getRefData().getPosition().asVec3());
-        MWPhysics::PhysicsSystem::RayResult result = MWBase::Environment::get().getWorld()->castRayTest(pos.x(), pos.y(), pos.z(), dest.x(), dest.y(), dest.z());
+        pos.z() = 0;
 
-        if (!result.mHit || result.mHitObject.isEmpty())
-            return MWWorld::Ptr(); // none found
+        osg::Vec3f actorDir = (actor.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0));
 
-        if (result.mHitObject.getClass().getTypeName() == typeid(ESM::Door).name() && !result.mHitObject.getCellRef().getTeleport())
-            return result.mHitObject;
+        for (; it != refList.end(); ++it)
+        {
+            const MWWorld::LiveCellRef<ESM::Door>& ref = *it;
 
-        return MWWorld::Ptr();
+            osg::Vec3f doorPos(ref.mData.getPosition().asVec3());
+            doorPos.z() = 0;
+
+            float angle = std::acos(actorDir * (doorPos - pos) / (actorDir.length() * (doorPos - pos).length()));
+
+            // Allow 60 degrees angle between actor and door
+            if (angle < -osg::PI / 3 || angle > osg::PI / 3)
+                continue;
+
+            // Door is not close enough
+            if ((pos - doorPos).length2() > minDist*minDist)
+                continue;
+
+            // FIXME cast
+            return MWWorld::Ptr(&const_cast<MWWorld::LiveCellRef<ESM::Door> &>(ref), actor.getCell()); // found, stop searching
+        }
+
+        return MWWorld::Ptr(); // none found
     }
 
     ObstacleCheck::ObstacleCheck():
