@@ -1,3 +1,82 @@
+0.42.0
+------
+
+    Bug #1956: Duplicate objects after loading the game, when a mod was edited
+    Bug #2100: Falling leaves in Vurt's Leafy West Gash II not rendered correctly
+    Bug #2116: Cant fit through some doorways pressed against staircases
+    Bug #2289: Some modal dialogs are not centered on the screen when the window resizes
+    Bug #2409: Softlock when pressing weapon/magic switch keys during chargen, afterwards switches weapons even though a text field is selected
+    Bug #2483: Previous/Next Weapon hotkeys triggered while typing the name of game save
+    Bug #2629: centeroncell, coc causes death / fall damage time to time when teleporting from high
+    Bug #2645: Cycling weapons is possible while console/pause menu is open
+    Bug #2678: Combat with water creatures do not end upon exiting water
+    Bug #2759: Light Problems in Therana's Chamber in Tel Branora
+    Bug #2771: unhandled sdl event of type 0x302
+    Bug #2777: (constant/on cast) disintegrate armor/weapon on self is seemingly not working
+    Bug #2838: Editor: '.' in a record name should be allowed
+    Bug #2909: NPCs appear floating when standing on a slope
+    Bug #3093: Controller movement cannot be used while mouse is moving
+    Bug #3134: Crash possible when using console with open container
+    Bug #3254: AI enemies hit between them.
+    Bug #3344: Editor: Verification results sorting by Type is not alphabetical.
+    Bug #3345: Editor: Cloned and added pathgrids are lost after reopen of saved omwgame file
+    Bug #3355: [MGSO] Physics maxing out in south cornerclub Balmora
+    Bug #3484: Editor: camera position is not set when changing cell via drag&drop
+    Bug #3508: Slowfall kills Jump momentum
+    Bug #3580: Crash: Error ElementBufferObject::remove BufferData<0> out of range
+    Bug #3581: NPCs wander too much
+    Bug #3601: Menu Titles not centered vertically
+    Bug #3607: [Mac OS] Beginning of NPC speech cut off (same issue as closed bug #3453)
+    Bug #3613: Can not map "next weapon" or "next spell" to controller
+    Bug #3617: Enchanted arrows don't explode when hitting the ground
+    Bug #3645: Unable to use steps in Vivec, Palace of Vivec
+    Bug #3650: Tamriel Rebuilt 16.09.1 – Hist Cuirass GND nif is rendered inside a Pink Box
+    Bug #3652: Item icon shadows get stuck in the alchemy GUI
+    Bug #3653: Incorrect swish sounds
+    Bug #3666: NPC collision should not be disabled until death animation has finished
+    Bug #3669: Editor: Text field was missing from book object editing dialogue
+    Bug #3670: Unhandled SDL event of type 0x304
+    Bug #3671: Incorrect local variable value after picking up bittercup
+    Bug #3686: Travelling followers doesn't increase travel fee
+    Bug #3689: Problematic greetings from Antares Big Mod that override the appropriate ones.
+    Bug #3690: Certain summoned creatures do not engage in combat with underwater creatures
+    Bug #3691: Enemies do not initiate combat with player followers on sight
+    Bug #3695: [Regression] Dispel does not always dispel spell effects in 0.41
+    Bug #3699: Crash on MWWorld::ProjectileManager::moveMagicBolts
+    Bug #3700: Climbing on rocks and mountains
+    Bug #3704: Creatures don't auto-equip their shields on creation
+    Bug #3705: AI combat engagement logic differs from vanilla
+    Bug #3707: Animation playing does some very odd things if pc comes in contact with the animated mesh
+    Bug #3712: [Mod] Freeze upon entering Adanumuran with mod Adanumuran Reclaimed
+    Bug #3713: [Regression] Cancelling dialogue or using travel with creatures throws a (possibly game-breaking) exception
+    Bug #3719: Dropped identification papers can't be picked up again
+    Bug #3722: Command spell doesn't bring enemies out of combat
+    Bug #3727: Using "Activate" mid-script-execution invalidates interpreter context
+    Bug #3746: Editor: Book records show attribute IDs instead of skill IDs for teached skills entry.
+    Bug #3755: Followers stop following after loading from savegame
+    Bug #3772: ModStat lowers attribute to 100 if it was greater
+    Bug #3781: Guns in Clean Hunter Rifles mod use crossbow sounds
+    Bug #3797: NPC and creature names don't show up in combat when RMB windows are displayed
+    Bug #3800: Wrong tooltip maximum width
+    Bug #3801: Drowning widget is bugged
+    Bug #3802: BarterOffer shouldn't limit pcMercantile
+    Bug #3813: Some fatal error
+    Bug #3816: Expression parser thinks the -> token is unexpected when a given explicit refID clashes with a journal ID
+    Bug #3822: Custom added creatures are not animated
+    Feature #451: Water sounds
+    Feature #2691: Light particles sometimes not shown in inventory character preview
+    Feature #3523: Light source on magic projectiles
+    Feature #3644: Nif NiSphericalCollider Unknown Record Type
+    Feature #3675: ess-Importer: convert mark location
+    Feature #3693: ess-Importer: convert last known exterior cell
+    Feature #3748: Editor: Replace "Scroll" check box in Book records with "Book Type" combo box.
+    Feature #3751: Editor: Replace "Xyz Blood" check boxes in NPC and Creature records with "Blood Type" combo box
+    Feature #3752: Editor: Replace emitter check boxes in Light records with "Emitter Type" combo box
+    Feature #3756: Editor: Replace "Female" check box in NPC records with "Gender" combo box
+    Feature #3757: Editor: Replace "Female" check box in BodyPart records with "Gender" combo box
+    Task #3092: const version of ContainerStoreIterator
+    Task #3795: /deps folder not in .gitignore
+
 0.41.0
 ------
 
