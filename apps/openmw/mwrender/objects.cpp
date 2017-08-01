@@ -70,6 +70,9 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
 
 void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool animated, bool allowLight)
 {
+    if (mObjects.count(ptr))
+        return;
+
     insertBegin(ptr);
 
     osg::ref_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
@@ -79,6 +82,9 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
 
 void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, bool weaponsShields)
 {
+    if (mObjects.count(ptr))
+        return;
+
     insertBegin(ptr);
     ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
@@ -97,6 +103,9 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
 
 void Objects::insertNPC(const MWWorld::Ptr &ptr)
 {
+    if (mObjects.count(ptr))
+        return;
+
     insertBegin(ptr);
     ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
