@@ -10,7 +10,6 @@
 
 namespace MWMechanics
 {
-
     class Action
     {
     public:
@@ -88,18 +87,6 @@ namespace MWMechanics
         virtual const ESM::Weapon* getWeapon() const;
     };
 
-    float rateSpell (const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
-    float rateMagicItem (const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
-    float ratePotion (const MWWorld::Ptr& item, const MWWorld::Ptr &actor);
-    /// @param type Skip all weapons that are not of this type (i.e. return rating 0)
-    float rateWeapon (const MWWorld::Ptr& item, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy,
-                      int type=-1, float arrowRating=0.f, float boltRating=0.f);
-
-    /// @note target may be empty
-    float rateEffect (const ESM::ENAMstruct& effect, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
-    /// @note target may be empty
-    float rateEffects (const ESM::EffectList& list, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
-
     std::shared_ptr<Action> prepareNextAction (const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
     float getBestActionRating(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy);
 
@@ -107,8 +94,6 @@ namespace MWMechanics
     float getMaxAttackDistance(const MWWorld::Ptr& actor);
     bool canFight(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
 
-    float vanillaRateSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
-    float vanillaRateWeaponAndAmmo(const MWWorld::Ptr& weapon, const MWWorld::Ptr& ammo, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
     float vanillaRateFlee(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
     bool makeFleeDecision(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, float antiFleeRating);
 }
