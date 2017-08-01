@@ -54,7 +54,7 @@ namespace MWMechanics
         virtual float getCombatRange (bool& isRanged) const;
 
         /// Since this action has no animation, apply a small cool down for using it
-        virtual float getActionCooldown() { return 1.f; }
+        virtual float getActionCooldown() { return 0.75f; }
     };
 
     class ActionPotion : public Action
@@ -68,7 +68,7 @@ namespace MWMechanics
         virtual bool isAttackingOrSpell() const { return false; }
 
         /// Since this action has no animation, apply a small cool down for using it
-        virtual float getActionCooldown() { return 1.f; }
+        virtual float getActionCooldown() { return 0.75f; }
     };
 
     class ActionWeapon : public Action
