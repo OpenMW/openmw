@@ -54,6 +54,12 @@ namespace
     void addObject(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
                    MWRender::RenderingManager& rendering)
     {
+        if (ptr.getRefData().getBaseNode() || physics.getActor(ptr))
+        {
+            std::cerr << "Warning: Tried to add " << ptr.getCellRef().getRefId() << " to the scene twice" << std::endl;
+            return;
+        }
+
         bool useAnim = ptr.getClass().useAnim();
         std::string model = ptr.getClass().getModel(ptr);
         if (useAnim)
