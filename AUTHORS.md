@@ -146,6 +146,7 @@ Programmers
     t6
     terrorfisch
     Thomas Luppi (Digmaster)
+    Will Herrmann (Thunderforge)
     Tom Mason (wheybags)
     Torben Leif Carrington (TorbenC)
     viadanna
