@@ -50,6 +50,7 @@ Programmers
     Edmondo Tommasina (edmondo)
     Eduard Cot (trombonecot)
     Eli2
+    elsid
     Emanuel Guével (potatoesmaster)
     eroen
     escondida
