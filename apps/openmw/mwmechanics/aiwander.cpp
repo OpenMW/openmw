@@ -489,7 +489,7 @@ namespace MWMechanics
         float duration, AiWanderStorage& storage, ESM::Position& pos)
     {
         // Is there no destination or are we there yet?
-        if ((!mPathFinder.isPathConstructed()) || pathTo(actor, mPathFinder.getPath().back(), duration, DESTINATION_TOLERANCE))
+        if ((!mPathFinder.isPathConstructed()) || pathTo(actor, ESM::Pathgrid::Point(mPathFinder.getPath().back()), duration, DESTINATION_TOLERANCE))
         {
             stopWalking(actor, storage);
             storage.setState(Wander_ChooseAction);
