@@ -49,33 +49,33 @@
 
 
       <!-- text pages -->
-      <Widget type="BookPage" skin="MW_BookPage" position="30 22 240 300" name="LeftBookPage"/>
-      <Widget type="BookPage" skin="MW_BookPage" position="300 22 240 300" name="RightBookPage"/>
+      <Widget type="BookPage" skin="MW_BookPage" position="30 22 240 320" name="LeftBookPage"/>
+      <Widget type="BookPage" skin="MW_BookPage" position="295 22 240 320" name="RightBookPage"/>
 
       <!-- options overlay -->
     </Widget>
     </Widget>
 
     <!-- "options" -->
-    <Widget type="ImageBox" skin="ImageBox" position="300 0 224 350" name="OptionsOverlay">
+    <Widget type="ImageBox" skin="ImageBox" position="293 0 242 350" name="OptionsOverlay">
       <Property key="ImageTexture" value="textures\tx_menubook_bookmark.dds"/>
       <Property key="ImageCoord" value="0 0 164 256"/>
 
       <Widget type="BookPage" skin="MW_BookPage" position="20 15 92 250" name="LeftTopicIndex"/>
       <Widget type="BookPage" skin="MW_BookPage" position="112 15 92 250" name="RightTopicIndex"/>
 
-      <Widget type="ImageButton" skin="ImageBox" position="62 15 100 20" Align="Top|Left" name="ShowActiveBTN">
+      <Widget type="ImageButton" skin="ImageBox" position="71 15 100 20" Align="Top|Left" name="ShowActiveBTN">
         <!-- Image set at runtime since it may not be available in all versions of the game -->
       </Widget>
 
-      <Widget type="ImageButton" skin="ImageBox" position="76 15 72 20" Align="Top|Left" name="ShowAllBTN">
+      <Widget type="ImageButton" skin="ImageBox" position="85 15 72 20" Align="Top|Left" name="ShowAllBTN">
         <!-- Image set at runtime since it may not be available in all versions of the game -->
       </Widget>
 
-      <Widget type="MWList" skin="MW_QuestList" position="8 35 208 225" name="TopicsList" align="Right VStretch">
+      <Widget type="MWList" skin="MW_QuestList" position="8 40 226 212" name="TopicsList" align="Right VStretch">
       </Widget>
 
-      <Widget type="MWList" skin="MW_QuestList" position="8 35 208 225" name="QuestsList" align="Right VStretch">
+      <Widget type="MWList" skin="MW_QuestList" position="8 40 226 212" name="QuestsList" align="Right VStretch">
       </Widget>
 
       <Widget type="ImageButton" skin="ImageBox" position="20 265 56 32" Align="Top|Left" name="TopicsBTN">
@@ -88,7 +88,7 @@
         <!-- Image set at runtime since it may not be available in all versions of the game -->
       </Widget>
 
-      <Widget type="ImageButton" skin="ImageBox" position="85 290 56 32" Align="Top|Left" name="CancelBTN">
+      <Widget type="ImageButton" skin="ImageBox" position="92 290 56 32" Align="Top|Left" name="CancelBTN">
         <Property key="ImageHighlighted" value="textures\tx_menubook_cancel_over.dds"/>
         <Property key="ImageNormal" value="textures\tx_menubook_cancel_idle.dds"/>
         <Property key="ImagePushed" value="textures\tx_menubook_cancel_pressed.dds"/>
