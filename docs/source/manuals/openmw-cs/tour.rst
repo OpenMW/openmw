@@ -230,7 +230,7 @@ Adding to a chest
 Placing in plain sight
 =====================
 
-Let's hide the Ring of Night vision in the the cabin of the [Ancient Shipwreck]
+Let's hide the Ring of Night vision in the cabin of the [Ancient Shipwreck]
 (http://en.uesp.net/wiki/Morrowind:Ancient_Shipwreck), a derelict vessel
 southeast of Dagon Fel. Open the list of Cells (*World* → *Cells*) and find
 "Ancient Shipwreck, Cabin".
