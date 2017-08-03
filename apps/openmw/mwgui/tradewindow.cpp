@@ -122,8 +122,6 @@ namespace MWGui
         mCurrentBalance = 0;
         mCurrentMerchantOffer = 0;
 
-        restock();
-
         std::vector<MWWorld::Ptr> itemSources;
         MWBase::Environment::get().getWorld()->getContainersOwnedBy(actor, itemSources);
 
@@ -357,6 +355,8 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
+
+        restock();
     }
 
     void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
