@@ -42,6 +42,8 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 
+#include "../mwmechanics/aibreathe.hpp"
+
 #include "spellcasting.hpp"
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
@@ -863,6 +865,15 @@ namespace MWMechanics
         if (stats.getTimeToStartDrowning() == -1.f)
             stats.setTimeToStartDrowning(fHoldBreathTime);
 
+        if (ptr.getClass().isNpc() && stats.getTimeToStartDrowning() < fHoldBreathTime / 2)
+        {
+            if(ptr != MWMechanics::getPlayer() ) {
+                MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+                if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdBreathe) //Only add it once
+                    seq.stack(MWMechanics::AiBreathe(), ptr);
+            }
+        }
+
         MWBase::World *world = MWBase::Environment::get().getWorld();
         bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
         if((world->isSubmerged(ptr) || knockedOutUnderwater)
@@ -1625,6 +1636,11 @@ namespace MWMechanics
             calculateCreatureStatModifiers (iter->first, duration);
             if (iter->first.getClass().isNpc())
                 calculateNpcStatModifiers(iter->first, duration);
+
+            MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(iter->first);
+            if (animation)
+                animation->updateEffects(duration);
+
         }
 
         fastForwardAi();

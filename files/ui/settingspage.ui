@@ -53,7 +53,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,1">
       <item row="1" column="1">
-       <spacer name="horizontalSpacer">
+       <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -115,7 +115,7 @@
       <item>
        <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,1">
         <item row="2" column="1">
-         <spacer name="horizontalSpacer_2">
+         <spacer name="horizontalSpacer_3">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -134,14 +134,17 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QProgressBar" name="progressBar">
-          <property name="maximum">
-           <number>4</number>
-          </property>
-         </widget>
-        </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="progressBar">
+        <property name="maximum">
+         <number>4</number>
+        </property>
+        <property name="textVisible">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

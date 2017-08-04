@@ -33,7 +33,6 @@ namespace MWGui
 
     SpellBuyingWindow::SpellBuyingWindow() :
         WindowBase("openmw_spell_buying_window.layout")
-        , mLastPos(0)
         , mCurrentY(0)
     {
         getWidget(mCancelButton, "CancelButton");
@@ -48,13 +47,20 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_SpellBuying);
     }
 
-    void SpellBuyingWindow::addSpell(const std::string& spellId)
+    bool SpellBuyingWindow::sortSpells (const ESM::Spell* left, const ESM::Spell* right)
+    {
+        std::string leftName = Misc::StringUtils::lowerCase(left->mName);
+        std::string rightName = Misc::StringUtils::lowerCase(right->mName);
+
+        return leftName.compare(rightName) < 0;
+    }
+
+    void SpellBuyingWindow::addSpell(const ESM::Spell& spell)
     {
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-        int price = static_cast<int>(spell->mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->getFloat());
+        int price = static_cast<int>(spell.mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->getFloat());
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -75,13 +81,13 @@ namespace MWGui
         mCurrentY += sLineHeight;
 
         toAdd->setUserData(price);
-        toAdd->setCaptionWithReplacing(spell->mName+"   -   "+MyGUI::utility::toString(price)+"#{sgp}");
+        toAdd->setCaptionWithReplacing(spell.mName+"   -   "+MyGUI::utility::toString(price)+"#{sgp}");
         toAdd->setSize(mSpellsView->getWidth(),sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
-        toAdd->setUserString("Spell", spellId);
+        toAdd->setUserString("Spell", spell.mId);
         toAdd->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onSpellButtonClick);
-        mSpellsWidgetMap.insert(std::make_pair (toAdd, spellId));
+        mSpellsWidgetMap.insert(std::make_pair (toAdd, spell.mId));
     }
 
     void SpellBuyingWindow::clearSpells()
@@ -93,13 +99,15 @@ namespace MWGui
         mSpellsWidgetMap.clear();
     }
 
-    void SpellBuyingWindow::startSpellBuying(const MWWorld::Ptr& actor)
+    void SpellBuyingWindow::startSpellBuying(const MWWorld::Ptr& actor, int startOffset)
     {
         center();
         mPtr = actor;
         clearSpells();
 
         MWMechanics::Spells& merchantSpells = actor.getClass().getCreatureStats (actor).getSpells();
+
+        std::vector<const ESM::Spell*> spellsToSort;
 
         for (MWMechanics::Spells::TIterator iter = merchantSpells.begin(); iter!=merchantSpells.end(); ++iter)
         {
@@ -120,8 +128,17 @@ namespace MWGui
             if (playerHasSpell(iter->first->mId))
                 continue;
 
-            addSpell (iter->first->mId);
+            spellsToSort.push_back(iter->first);
         }
+
+        std::stable_sort(spellsToSort.begin(), spellsToSort.end(), sortSpells);
+
+        for (std::vector<const ESM::Spell*>::iterator it = spellsToSort.begin() ; it != spellsToSort.end(); ++it)
+        {
+            addSpell(**it);
+        }
+
+        spellsToSort.clear();
 
         updateLabels();
 
@@ -129,6 +146,7 @@ namespace MWGui
         mSpellsView->setVisibleVScroll(false);
         mSpellsView->setCanvasSize (MyGUI::IntSize(mSpellsView->getWidth(), std::max(mSpellsView->getHeight(), mCurrentY)));
         mSpellsView->setVisibleVScroll(true);
+        mSpellsView->setViewOffset(MyGUI::IntPoint(0, startOffset));
     }
 
     bool SpellBuyingWindow::playerHasSpell(const std::string &id)
@@ -165,7 +183,7 @@ namespace MWGui
         MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
-        startSpellBuying(mPtr);
+        startSpellBuying(mPtr, mSpellsView->getViewOffset().top);
 
         MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
     }

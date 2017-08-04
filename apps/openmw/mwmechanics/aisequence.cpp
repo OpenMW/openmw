@@ -16,6 +16,7 @@
 #include "aifollow.hpp"
 #include "aiactivate.hpp"
 #include "aicombat.hpp"
+#include "aicombataction.hpp"
 #include "aipursue.hpp"
 #include "actorutil.hpp"
 
@@ -182,7 +183,8 @@ bool isActualAiPackage(int packageTypeId)
     return (packageTypeId != AiPackage::TypeIdCombat
                    && packageTypeId != AiPackage::TypeIdPursue
                    && packageTypeId != AiPackage::TypeIdAvoidDoor
-                   && packageTypeId != AiPackage::TypeIdFace);
+                   && packageTypeId != AiPackage::TypeIdFace
+                   && packageTypeId != AiPackage::TypeIdBreathe);
 }
 
 void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
@@ -208,6 +210,8 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
             float nearestDist = std::numeric_limits<float>::max();
             osg::Vec3f vActorPos = actor.getRefData().getPosition().asVec3();
 
+            float bestRating = 0.f;
+
             for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end();)
             {
                 if ((*it)->getTypeId() != AiPackage::TypeIdCombat) break;
@@ -222,6 +226,8 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
                 }
                 else
                 {
+                    float rating = MWMechanics::getBestActionRating(actor, target);
+
                     const ESM::Position &targetPos = target.getRefData().getPosition();
 
                     float distTo = (targetPos.asVec3() - vActorPos).length();
@@ -230,10 +236,12 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
                     if (it == mPackages.begin())
                         distTo = std::max(0.f, distTo - 50.f);
 
-                    if (distTo < nearestDist)
+                    // if a target has higher priority than current target or has same priority but closer
+                    if (rating > bestRating || ((distTo < nearestDist) && rating == bestRating))
                     {
                         nearestDist = distTo;
                         itActualCombat = it;
+                        bestRating = rating;
                     }
                     ++it;
                 }

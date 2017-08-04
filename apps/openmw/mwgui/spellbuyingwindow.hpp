@@ -4,6 +4,8 @@
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
 
+#include "../mwworld/esmstore.hpp"
+
 namespace MyGUI
 {
   class Gui;
@@ -23,7 +25,7 @@ namespace MWGui
         public:
             SpellBuyingWindow();
 
-            void startSpellBuying(const MWWorld::Ptr& actor);
+            void startSpellBuying(const MWWorld::Ptr& actor, int startOffset);
 
             virtual void exit();
 
@@ -38,7 +40,7 @@ namespace MWGui
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onSpellButtonClick(MyGUI::Widget* _sender);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
-            void addSpell(const std::string& spellID);
+            void addSpell(const ESM::Spell& spell);
             void clearSpells();
             int mLastPos,mCurrentY;
 
@@ -49,6 +51,9 @@ namespace MWGui
             virtual void onReferenceUnavailable();
 
             bool playerHasSpell (const std::string& id);
+
+        private:
+            static bool sortSpells (const ESM::Spell* left, const ESM::Spell* right);
     };
 }
 

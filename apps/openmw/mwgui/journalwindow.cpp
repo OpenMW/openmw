@@ -58,6 +58,7 @@ namespace
         Book mTopicIndexBook;
         bool mQuestMode;
         bool mOptionsMode;
+        bool mTopicsMode;
         bool mAllQuests;
 
         template <typename T>
@@ -196,6 +197,7 @@ namespace
             mQuestMode = false;
             mAllQuests = false;
             mOptionsMode = false;
+            mTopicsMode = false;
         }
 
         void adjustButton (char const * name)
@@ -259,6 +261,7 @@ namespace
         void setBookMode ()
         {
             mOptionsMode = false;
+            mTopicsMode = false;
             setVisible (OptionsBTN, true);
             setVisible (OptionsOverlay, false);
 
@@ -269,6 +272,7 @@ namespace
         void setOptionsMode ()
         {
             mOptionsMode = true;
+            mTopicsMode = false;
 
             setVisible (OptionsBTN, false);
             setVisible (OptionsOverlay, true);
@@ -292,6 +296,8 @@ namespace
             // If in quest mode, ensure the quest list is updated
             if (mQuestMode)
                 notifyQuests(getWidget<MyGUI::Widget>(QuestsList));
+            else
+                notifyTopics(getWidget<MyGUI::Widget>(TopicsList));
         }
 
         void pushBook (Book book, unsigned int page)
@@ -370,6 +376,9 @@ namespace
             setVisible (JournalBTN, true);
 
             mOptionsMode = false;
+            mTopicsMode = false;
+
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         void notifyTopicSelected (const std::string& topic, int id)
@@ -399,6 +408,8 @@ namespace
             setVisible (JournalBTN, true);
 
             mOptionsMode = false;
+
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         void notifyOptions(MyGUI::Widget* _sender)
@@ -416,6 +427,8 @@ namespace
         {
             assert (mStates.size () > 1);
             popBook ();
+
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         void notifyIndexLinkClicked (MWGui::TypesetBook::InteractiveId character)
@@ -423,6 +436,8 @@ namespace
             setVisible (LeftTopicIndex, false);
             setVisible (RightTopicIndex, false);
             setVisible (TopicsList, true);
+
+            mTopicsMode = true;
 
             Gui::MWList* list = getWidget<Gui::MWList>(TopicsList);
             list->clear();
@@ -432,17 +447,22 @@ namespace
             mModel->visitTopicNamesStartingWith((char) character, add);
 
             list->adjustSize();
+
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         void notifyTopics(MyGUI::Widget* _sender)
         {
             mQuestMode = false;
+            mTopicsMode = false;
             setVisible (LeftTopicIndex, true);
             setVisible (RightTopicIndex, true);
             setVisible (TopicsList, false);
             setVisible (QuestsList, false);
             setVisible (ShowAllBTN, false);
             setVisible (ShowActiveBTN, false);
+
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         struct AddNamesToList
@@ -494,6 +514,8 @@ namespace
                 SetNamesInactive setInactive(list);
                 mModel->visitQuestNames(!mAllQuests, setInactive);
             }
+
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
         void notifyShowAll(MyGUI::Widget* _sender)
@@ -510,7 +532,16 @@ namespace
 
         void notifyCancel(MyGUI::Widget* _sender)
         {
-            setBookMode ();
+            if (mTopicsMode)
+            {
+                notifyTopics(_sender);
+            }
+            else
+            {
+                setBookMode();
+                MWBase::Environment::get().getWindowManager()->playSound("book page");
+            }
+
         }
 
         void notifyClose(MyGUI::Widget* _sender)
@@ -539,6 +570,8 @@ namespace
 
                 if (page+2 < book->pageCount())
                 {
+                    MWBase::Environment::get().getWindowManager()->playSound("book page");
+
                     page += 2;
                     updateShowingPages ();
                 }
@@ -555,6 +588,8 @@ namespace
 
                 if(page >= 2)
                 {
+                    MWBase::Environment::get().getWindowManager()->playSound("book page");
+
                     page -= 2;
                     updateShowingPages ();
                 }

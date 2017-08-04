@@ -334,7 +334,7 @@ namespace MWGui
     {
         ensureSelectedItemUnequipped(count);
         const ItemStack& item = mTradeModel->getItem(mSelectedItem);
-        std::string sound = item.mBase.getClass().getDownSoundId(item.mBase);
+        std::string sound = item.mBase.getClass().getUpSoundId(item.mBase);
         MWBase::Environment::get().getWindowManager()->playSound(sound);
 
         if (item.mType == ItemStack::Type_Barter)

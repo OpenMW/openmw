@@ -1,4 +1,5 @@
 #include "autocalcspell.hpp"
+#include "spellcasting.hpp"
 
 #include <climits>
 #include <limits>
@@ -255,26 +256,38 @@ namespace MWMechanics
 
     void calcWeakestSchool (const ESM::Spell* spell, const int* actorSkills, int& effectiveSchool, float& skillTerm)
     {
+        // Morrowind for some reason uses a formula slightly different from magicka cost calculation
         float minChance = std::numeric_limits<float>::max();
 
         const ESM::EffectList& effects = spell->mEffects;
         for (std::vector<ESM::ENAMstruct>::const_iterator it = effects.mList.begin(); it != effects.mList.end(); ++it)
         {
             const ESM::ENAMstruct& effect = *it;
-            float x = static_cast<float>(effect.mDuration);
-
             const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
-            if (!(magicEffect->mData.mFlags & ESM::MagicEffect::UncappedDamage))
-                x = std::max(1.f, x);
 
-            x *= 0.1f * magicEffect->mData.mBaseCost;
-            x *= 0.5f * (effect.mMagnMin + effect.mMagnMax);
-            x += effect.mArea * 0.05f * magicEffect->mData.mBaseCost;
+            int minMagn = 1;
+            int maxMagn = 1;
+            if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+            {
+                minMagn = effect.mMagnMin;
+                maxMagn = effect.mMagnMax;
+            }
+
+            int duration = 0;
+            if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
+                duration = effect.mDuration;
+
+            static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore()
+                .get<ESM::GameSetting>().find("fEffectCostMult")->getFloat();
+
+            float x = 0.5 * (std::max(1, minMagn) + std::max(1, maxMagn));
+            x *= 0.1 * magicEffect->mData.mBaseCost;
+            x *= 1 + duration;
+            x += 0.05 * std::max(1, effect.mArea) * magicEffect->mData.mBaseCost;
+            x *= fEffectCostMult;
+
             if (effect.mRange == ESM::RT_Target)
                 x *= 1.5f;
-
-            static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fEffectCostMult")->getFloat();
-            x *= fEffectCostMult;
 
             float s = 2.f * actorSkills[mapSchoolToSkill(magicEffect->mData.mSchool)];
             if (s - x < minChance)

@@ -81,6 +81,15 @@ namespace Gui
         bool mAutoResize; // auto resize the box so that it exactly fits all elements
     };
 
+    class Spacer : public AutoSizedWidget, public MyGUI::Widget
+    {
+        MYGUI_RTTI_DERIVED( Spacer )
+    public:
+        Spacer();
+
+        virtual MyGUI::IntSize getRequestedSize() { return MyGUI::IntSize(0,0); }
+    };
+
     class HBox : public Box, public MyGUI::Widget
     {
         MYGUI_RTTI_DERIVED( HBox )

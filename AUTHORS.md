@@ -50,6 +50,7 @@ Programmers
     Edmondo Tommasina (edmondo)
     Eduard Cot (trombonecot)
     Eli2
+    elsid
     Emanuel Guével (potatoesmaster)
     eroen
     escondida
@@ -145,6 +146,7 @@ Programmers
     t6
     terrorfisch
     Thomas Luppi (Digmaster)
+    Will Herrmann (Thunderforge)
     Tom Mason (wheybags)
     Torben Leif Carrington (TorbenC)
     viadanna
