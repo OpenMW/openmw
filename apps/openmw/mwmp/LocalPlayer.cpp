@@ -375,6 +375,7 @@ void LocalPlayer::updateCell(bool forceUpdate)
         }
 
         cell = *ptrCell;
+        previousCellPosition = position;
 
         // Make sure the position is updated before a cell packet is sent, or else
         // cell change events in server scripts will have the wrong player position

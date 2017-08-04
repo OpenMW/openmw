@@ -9,6 +9,10 @@
     {"GetPosY",             PositionFunctions::GetPosY},\
     {"GetPosZ",             PositionFunctions::GetPosZ},\
     \
+    {"GetPreviousCellPosX", PositionFunctions::GetPreviousCellPosX},\
+    {"GetPreviousCellPosY", PositionFunctions::GetPreviousCellPosY},\
+    {"GetPreviousCellPosZ", PositionFunctions::GetPreviousCellPosZ},\    
+    \
     {"GetRot",              PositionFunctions::GetRot},\
     {"GetRotX",             PositionFunctions::GetRotX},\
     {"GetRotZ",             PositionFunctions::GetRotZ},\
@@ -58,6 +62,30 @@ public:
     * \return The Z position.
     */
     static double GetPosZ(unsigned short pid) noexcept;
+
+    /**
+    * \brief Get the X position of a player from before their latest cell change.
+    *
+    * \param pid The player ID.
+    * \return The X position.
+    */
+    static double GetPreviousCellPosX(unsigned short pid) noexcept;
+
+    /**
+    * \brief Get the Y position of a player from before their latest cell change.
+    *
+    * \param pid The player ID.
+    * \return The Y position.
+    */
+    static double GetPreviousCellPosY(unsigned short pid) noexcept;
+
+    /**
+    * \brief Get the Z position of a player from before their latest cell change.
+    *
+    * \param pid The player ID.
+    * \return The Z position.
+    */
+    static double GetPreviousCellPosZ(unsigned short pid) noexcept;
 
     /**
     * \brief Assign the player's rotational coordinate values to the variables passed as

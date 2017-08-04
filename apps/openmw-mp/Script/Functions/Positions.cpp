@@ -45,6 +45,30 @@ double PositionFunctions::GetPosZ(unsigned short pid) noexcept
     return player->position.pos[2];
 }
 
+double PositionFunctions::GetPreviousCellPosX(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->previousCellPosition.pos[0];
+}
+
+double PositionFunctions::GetPreviousCellPosY(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->previousCellPosition.pos[1];
+}
+
+double PositionFunctions::GetPreviousCellPosZ(unsigned short pid) noexcept
+{
+    Player *player;
+    GET_PLAYER(pid, player, 0.0f);
+
+    return player->previousCellPosition.pos[2];
+}
+
 void PositionFunctions::GetRot(unsigned short pid, float *x, float *y, float *z) noexcept
 {
     *x = 0.00;
