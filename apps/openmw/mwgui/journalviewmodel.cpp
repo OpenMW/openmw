@@ -305,18 +305,36 @@ struct JournalViewModelImpl : JournalViewModel
         visitor (toUtf8Span (topic.getName()));
     }
 
-    void visitTopicNamesStartingWith (char character, std::function < void (const std::string&) > visitor) const
+    void visitTopicNamesStartingWith (int index, std::function < void (const std::string&) > visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
         for (MWBase::Journal::TTopicIter i = journal->topicBegin (); i != journal->topicEnd (); ++i)
         {
-            if (i->first [0] != Misc::StringUtils::toLower(character))
+            if (i->first.length() < 2)
+                continue;
+
+            unsigned char byte1 = i->first[0];
+            unsigned char byte2 = i->first[1];
+
+            // Upper case
+            if (byte1 == 0xd0 && byte2 >= 0xb0 && byte2 < 0xc0)
+                byte2 -= 32;
+
+            if (byte1 == 0xd1 && byte2 >= 0x80 && byte2 < 0x90)
+            {
+                byte1 -= 1;
+                byte2 += 32;
+            }
+
+            // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
+            // so we can use 0xd08f + index
+            // (index is a position of letter in alphabet, begins from 1)
+            if (byte1 != 0xd0 || byte2 != 0x8f + index)
                 continue;
 
             visitor (i->second.getName());
         }
-
     }
 
     struct TopicEntryImpl : BaseEntry <MWDialogue::Topic::TEntryIter, TopicEntry>

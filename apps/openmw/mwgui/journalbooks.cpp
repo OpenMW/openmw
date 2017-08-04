@@ -224,20 +224,22 @@ book JournalBooks::createTopicIndexBook ()
 
     BookTypesetter::Style* body   = typesetter->createStyle ("", MyGUI::Colour::Black);
 
-    for (int i = 0; i < 26; ++i)
+    for (int i = 0; i < 32; ++i)
     {
-        char ch = 'A' + i;
-
         char buffer [32];
 
-        sprintf (buffer, "( %c )", ch);
+        sprintf(buffer, "( %c%c )", 0xd0, 0x90 + i); // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
 
         const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
         BookTypesetter::Style* style = typesetter->createHotStyle (body, textColours.journalTopic,
                                                                    textColours.journalTopicOver,
-                                                                   textColours.journalTopicPressed, ch);
+                                                                   textColours.journalTopicPressed, i+1);
 
-        if (i == 13)
+        // Words can not be started with these characters
+        if (i == 26 || i == 28)
+            continue;
+
+        if (i == 15)
             typesetter->sectionBreak ();
 
         typesetter->write (style, to_utf8_span (buffer));

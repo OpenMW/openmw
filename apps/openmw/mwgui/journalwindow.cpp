@@ -431,7 +431,7 @@ namespace
             MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
-        void notifyIndexLinkClicked (MWGui::TypesetBook::InteractiveId character)
+        void notifyIndexLinkClicked (MWGui::TypesetBook::InteractiveId index)
         {
             setVisible (LeftTopicIndex, false);
             setVisible (RightTopicIndex, false);
@@ -444,7 +444,7 @@ namespace
 
             AddNamesToList add(list);
 
-            mModel->visitTopicNamesStartingWith((char) character, add);
+            mModel->visitTopicNamesStartingWith(index, add);
 
             list->adjustSize();
 
