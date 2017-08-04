@@ -297,6 +297,16 @@ namespace MWBase
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
+            /*
+                Start of tes3mp addition
+
+                Make it possible to set the inertial force of a Ptr directly
+            */
+            virtual void setInertialForce(const MWWorld::Ptr& ptr, const osg::Vec3f &force) = 0;
+            /*
+                End of tes3mp addition
+            */
+
             virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
             ///< cast a Ray and return true if there is an object in the ray path.
 

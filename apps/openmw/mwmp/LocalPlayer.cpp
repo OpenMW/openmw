@@ -801,8 +801,10 @@ void LocalPlayer::setPosition()
     else
     {
         world->getPlayer().setTeleported(true);
+
         world->moveObject(ptrPlayer, position.pos[0], position.pos[1], position.pos[2]);
         world->rotateObject(ptrPlayer, position.rot[0], position.rot[1], position.rot[2]);
+        world->setInertialForce(ptrPlayer, osg::Vec3f(0.f, 0.f, 0.f));
     }
 
     updatePosition(true);

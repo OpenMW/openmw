@@ -1512,6 +1512,19 @@ namespace MWWorld
         mPhysics->queueObjectMovement(ptr, velocity);
     }
 
+    /*
+        Start of tes3mp addition
+
+        Make it possible to set the inertial force of a Ptr directly
+    */
+    void World::setInertialForce(const Ptr& ptr, const osg::Vec3f &force)
+    {
+        mPhysics->getActor(ptr)->setInertialForce(force);
+    }
+    /*
+        End of tes3mp addition
+    */
+
     void World::doPhysics(float duration)
     {
         mPhysics->stepSimulation(duration);
