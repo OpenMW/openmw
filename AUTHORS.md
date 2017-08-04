@@ -62,8 +62,8 @@ Programmers
     Hallfaer Tuilinn
     hristoast
     Internecine
-    Jacob Essex (Yacoby)
-    Jannik Heller (scrawl)
+    Jacob Essex (Yacoby)    
+    Jake Westrip (16bitint)
     Jason Hooks (jhooks)
     jeaye
     Jeffrey Haines (Jyby)
@@ -132,6 +132,7 @@ Programmers
     Roman Proskuryakov (kpp)
     Sandy Carter (bwrsandman)
     Scott Howard
+    scrawl
     Sebastian Wick (swick)
     Sergey Shambir
     ShadowRadiance
