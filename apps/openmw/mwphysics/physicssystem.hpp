@@ -170,6 +170,8 @@ namespace MWPhysics
 
             bool isOnSolidGround (const MWWorld::Ptr& actor) const;
 
+            btCollisionWorld& getCollisionWorld() const;
+
         private:
 
             void updateWater();

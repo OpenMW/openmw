@@ -71,6 +71,11 @@ namespace Fallback
     class Map;
 }
 
+namespace MWPhysics
+{
+    class PhysicsSystem;
+}
+
 namespace MWBase
 {
     /// \brief Interface for the World (implemented in MWWorld)
@@ -574,6 +579,8 @@ namespace MWBase
 
             /// Preload VFX associated with this effect list
             virtual void preloadEffects(const ESM::EffectList* effectList) = 0;
+
+            virtual MWPhysics::PhysicsSystem& getPhysicsSystem() const = 0;
     };
 }
 

@@ -679,6 +679,8 @@ namespace MWWorld
 
             /// Preload VFX associated with this effect list
             void preloadEffects(const ESM::EffectList* effectList) override;
+
+            MWPhysics::PhysicsSystem& getPhysicsSystem() const override;
     };
 }
 
