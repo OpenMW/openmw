@@ -1152,7 +1152,19 @@ namespace MWMechanics
                 it->getClass().getNpcStats(*it).setCrimeId(id);
 
                 if (!it->getClass().getCreatureStats(*it).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                {
+                    // Player's followers should not try to arrest player
+                    if (it->getClass().getCreatureStats(*it).getAiSequence().hasPackage(AiPackage::TypeIdFollow))
+                    {
+                        std::set<MWWorld::Ptr> playerFollowers;
+                        getActorsSidingWith(player, playerFollowers);
+
+                        if (playerFollowers.find(*it) != playerFollowers.end())
+                            continue;
+                    }
+
                     it->getClass().getCreatureStats(*it).getAiSequence().stack(AiPursue(player), *it);
+                }
             }
             else
             {
