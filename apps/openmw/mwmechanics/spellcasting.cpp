@@ -917,14 +917,8 @@ namespace MWMechanics
                 /*
                     Start of tes3mp change (major)
                 
-                    Instead of checking whether the caster is a player or an NPC,
-                    first check whether it's the LocalPlayer or a DedicatedPlayer and calculate
-                    calculate the success chance in clients' LocalPlayer::prepareAttack()
-                
-                    TODO: Make this make sense for NPCs too
-                
-                    TODO: See if LocalPlayer being the target and having godmode on
-                    can be accounted for like it is in OpenMW's corresponding code
+                    Make spell casting fail based on the attack success rated determined
+                    in LocalPlayer and LocalActor's updateAttack()
                 */
                 mwmp::Attack *localAttack = NULL;
                 mwmp::Attack *dedicatedAttack = MechanicsHelper::getDedicatedAttack(mCaster);
@@ -944,19 +938,9 @@ namespace MWMechanics
                     }
                     fail = true;
                 }
-                else if (!(mCaster == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState()))
                 /*
                     End of tes3mp change (major)
                 */
-                {
-                    float successChance = getSpellSuccessChance(spell, mCaster);
-                    if (Misc::Rng::roll0to99() >= successChance)
-                    {
-                        if (mCaster == getPlayer())
-                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
-                        fail = true;
-                    }
-                }
 
                 if (fail)
                 {
