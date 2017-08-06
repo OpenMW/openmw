@@ -139,6 +139,7 @@ Programmers
     Siimacore
     sir_herrbatka
     smbas
+    spycrab
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)
     stil-t
