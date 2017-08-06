@@ -114,9 +114,15 @@ namespace MWSound
         MWBase::SoundStreamPtr playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal);
 
         void streamMusicFull(const std::string& filename);
+        void advanceMusic(const std::string& filename);
+
         void updateSounds(float duration);
         void updateRegionSound(float duration);
         void updateWaterSound(float duration);
+        void updateMusic(float duration);
+
+        float mMusicFader;
+        std::string mNextMusic;
 
         float volumeFromType(PlayType type) const;
 

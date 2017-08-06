@@ -34,7 +34,7 @@
 
 namespace MWSound
 {
-    SoundManager::SoundManager(const VFS::Manager* vfs, const std::map<std::string,std::string>& fallbackMap, bool useSound)
+    SoundManager::SoundManager(const VFS::Manager* vfs, const std::map<std::string, std::string>& fallbackMap, bool useSound)
         : mVFS(vfs)
         , mFallback(fallbackMap)
         , mOutput(new DEFAULT_OUTPUT(*this))
@@ -328,9 +328,23 @@ namespace MWSound
         }
     }
 
+    void SoundManager::advanceMusic(const std::string& filename)
+    {
+        if (!isMusicPlaying())
+        {
+            streamMusicFull(filename);
+            return;
+        }
+
+        mMusicFader = 0.5f;
+        mNextMusic = filename;
+
+        mMusic->setFadeout(mMusicFader);
+    }
+
     void SoundManager::streamMusic(const std::string& filename)
     {
-        streamMusicFull("Music/"+filename);
+        advanceMusic("Music/"+filename);
     }
 
     void SoundManager::startRandomTitle()
@@ -370,7 +384,7 @@ namespace MWSound
             i = (i+1) % filelist.size();
         }
 
-        streamMusicFull(filelist[i]);
+        advanceMusic(filelist[i]);
     }
 
     bool SoundManager::isMusicPlaying()
@@ -1029,6 +1043,25 @@ namespace MWSound
     }
 
 
+    void SoundManager::updateMusic(float duration)
+    {
+        if (!mNextMusic.empty())
+        {
+            mMusic->updateFade(duration);
+
+            mOutput->startUpdate();
+            mOutput->updateStream(mMusic);
+            mOutput->finishUpdate();
+            
+            if (mMusic->getRealVolume() <= 0.f)
+            {
+                streamMusicFull(mNextMusic);
+                mNextMusic.clear();
+            }
+        }
+    }
+
+
     void SoundManager::update(float duration)
     {
         if(!mOutput->isInitialized())
@@ -1040,6 +1073,7 @@ namespace MWSound
             updateSounds(duration);
             updateRegionSound(duration);
             updateWaterSound(duration);
+            updateMusic(duration);
         }
     }
 
