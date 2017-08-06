@@ -563,6 +563,9 @@ namespace MWBase
 
             virtual bool isPlayerInJail() const = 0;
 
+            virtual void setPlayerTraveling(bool traveling) = 0;
+            virtual bool isPlayerTraveling() const = 0;
+
             /// Return terrain height at \a worldPos position.
             virtual float getTerrainHeightAt(const osg::Vec3f& worldPos) const = 0;
 

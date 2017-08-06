@@ -166,6 +166,9 @@ namespace MWGui
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
+
+        MWBase::Environment::get().getWorld()->setPlayerTraveling(true);
+
         ESM::Position pos = *_sender->getUserData<ESM::Position>();
         std::string cellname = _sender->getUserString("Destination");
         bool interior = _sender->getUserString("interior") == "y";
@@ -187,6 +190,8 @@ namespace MWGui
         // Teleports any followers, too.
         MWWorld::ActionTeleport action(interior ? cellname : "", pos, true);
         action.execute(player);
+
+        MWBase::Environment::get().getWorld()->setPlayerTraveling(false);
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
