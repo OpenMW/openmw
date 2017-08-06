@@ -49,42 +49,17 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
 
         SDL_PumpEvents();
 
-        SDL_Event event;
+        SDL_Event evt;
 
         if (windowEventsOnly)
         {
             // During loading, just handle window events, and keep others for later
-            while (SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_WINDOWEVENT, SDL_WINDOWEVENT))
-                handleWindowEvent(event);
+            while (SDL_PeepEvents(&evt, 1, SDL_GETEVENT, SDL_WINDOWEVENT, SDL_WINDOWEVENT))
+                handleWindowEvent(evt);
             return;
         }
 
-        // Merge redundant events to avoid unnecessary listener calls
-        std::vector<SDL_Event> events;
-        while(SDL_PollEvent(&event)) {
-            if (events.empty() || events.back().type != event.type)
-            {
-                events.emplace_back(event);
-                continue;
-            }
-
-            SDL_Event& previousEvent = events.back();
-
-            switch (event.type)
-            {
-                case SDL_MOUSEMOTION:
-                    previousEvent.motion.x = event.motion.x;
-                    previousEvent.motion.y = event.motion.y;
-                    previousEvent.motion.xrel += event.motion.xrel;
-                    previousEvent.motion.yrel += event.motion.yrel;
-                    break;
-                default:
-                    events.emplace_back(event);
-            }
-        }
-
-
-        for (const SDL_Event& evt : events)
+        while(SDL_PollEvent(&evt))
         {
             switch(evt.type)
             {
