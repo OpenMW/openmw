@@ -187,12 +187,12 @@ namespace
             }
 
             adjustButton(TopicsBTN);
-            int width = getWidget<MyGUI::Widget>(TopicsBTN)->getSize().width + getWidget<MyGUI::Widget>(QuestsBTN)->getSize().width;
             int topicsWidth = getWidget<MyGUI::Widget>(TopicsBTN)->getSize().width;
-            int pageWidth = getWidget<MyGUI::Widget>(RightBookPage)->getSize().width;
+            int cancelLeft = getWidget<MyGUI::Widget>(CancelBTN)->getPosition().left;
+            int cancelRight = getWidget<MyGUI::Widget>(CancelBTN)->getPosition().left + getWidget<MyGUI::Widget>(CancelBTN)->getSize().width;
 
-            getWidget<MyGUI::Widget>(TopicsBTN)->setPosition((pageWidth - width)/2, getWidget<MyGUI::Widget>(TopicsBTN)->getPosition().top);
-            getWidget<MyGUI::Widget>(QuestsBTN)->setPosition((pageWidth - width)/2 + topicsWidth, getWidget<MyGUI::Widget>(QuestsBTN)->getPosition().top);
+            getWidget<MyGUI::Widget>(TopicsBTN)->setPosition(cancelLeft - topicsWidth, getWidget<MyGUI::Widget>(TopicsBTN)->getPosition().top);
+            getWidget<MyGUI::Widget>(QuestsBTN)->setPosition(cancelRight, getWidget<MyGUI::Widget>(QuestsBTN)->getPosition().top);
 
             mQuestMode = false;
             mAllQuests = false;
