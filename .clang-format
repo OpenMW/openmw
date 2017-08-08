@@ -1,0 +1,14 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+AccessModifierOffset: -4
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: true
+BreakBeforeBraces: Allman
+ColumnLimit: 0
+DerivePointerAlignment: true
+IndentCaseLabels: true
+IndentWidth: 4
+NamespaceIndentation: All
+SortIncludes: false
+...
