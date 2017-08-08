@@ -938,6 +938,8 @@ namespace MWSound
             env
         );
 
+        updateMusic(duration);
+
         // Check if any sounds are finished playing, and trash them
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
@@ -1048,9 +1050,7 @@ namespace MWSound
         {
             mMusic->updateFade(duration);
 
-            mOutput->startUpdate();
             mOutput->updateStream(mMusic);
-            mOutput->finishUpdate();
             
             if (mMusic->getRealVolume() <= 0.f)
             {
@@ -1072,7 +1072,6 @@ namespace MWSound
             updateSounds(duration);
             updateRegionSound(duration);
             updateWaterSound(duration);
-            updateMusic(duration);
         }
     }
 
