@@ -336,10 +336,9 @@ namespace MWSound
             return;
         }
 
-        mMusicFader = 0.5f;
         mNextMusic = filename;
 
-        mMusic->setFadeout(mMusicFader);
+        mMusic->setFadeout(0.5f);
     }
 
     void SoundManager::streamMusic(const std::string& filename)

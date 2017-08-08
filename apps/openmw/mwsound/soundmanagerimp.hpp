@@ -121,7 +121,6 @@ namespace MWSound
         void updateWaterSound(float duration);
         void updateMusic(float duration);
 
-        float mMusicFader;
         std::string mNextMusic;
 
         float volumeFromType(PlayType type) const;
