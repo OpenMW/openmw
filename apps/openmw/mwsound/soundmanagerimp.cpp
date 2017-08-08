@@ -34,7 +34,7 @@
 
 namespace MWSound
 {
-    SoundManager::SoundManager(const VFS::Manager* vfs, const std::map<std::string,std::string>& fallbackMap, bool useSound)
+    SoundManager::SoundManager(const VFS::Manager* vfs, const std::map<std::string, std::string>& fallbackMap, bool useSound)
         : mVFS(vfs)
         , mFallback(fallbackMap)
         , mOutput(new DEFAULT_OUTPUT(*this))
@@ -328,9 +328,22 @@ namespace MWSound
         }
     }
 
+    void SoundManager::advanceMusic(const std::string& filename)
+    {
+        if (!isMusicPlaying())
+        {
+            streamMusicFull(filename);
+            return;
+        }
+
+        mNextMusic = filename;
+
+        mMusic->setFadeout(0.5f);
+    }
+
     void SoundManager::streamMusic(const std::string& filename)
     {
-        streamMusicFull("Music/"+filename);
+        advanceMusic("Music/"+filename);
     }
 
     void SoundManager::startRandomTitle()
@@ -370,7 +383,7 @@ namespace MWSound
             i = (i+1) % filelist.size();
         }
 
-        streamMusicFull(filelist[i]);
+        advanceMusic(filelist[i]);
     }
 
     bool SoundManager::isMusicPlaying()
@@ -925,6 +938,8 @@ namespace MWSound
             env
         );
 
+        updateMusic(duration);
+
         // Check if any sounds are finished playing, and trash them
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
@@ -1026,6 +1041,23 @@ namespace MWSound
                 mUnderwaterSound = playSound("Underwater", 1.0f, 1.0f, Play_TypeSfx, Play_LoopNoEnv);
         }
         mOutput->finishUpdate();
+    }
+
+
+    void SoundManager::updateMusic(float duration)
+    {
+        if (!mNextMusic.empty())
+        {
+            mMusic->updateFade(duration);
+
+            mOutput->updateStream(mMusic);
+            
+            if (mMusic->getRealVolume() <= 0.f)
+            {
+                streamMusicFull(mNextMusic);
+                mNextMusic.clear();
+            }
+        }
     }
 
 
