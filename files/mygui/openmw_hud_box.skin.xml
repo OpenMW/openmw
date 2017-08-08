@@ -36,6 +36,18 @@
 
         <!-- The interior of the box -->
 
+        <Child type="Widget" skin="DialogBG_NoTransp_Owned" offset="0 0 40 40" align="Stretch" name="Client"/>
+
+        <!-- Borders -->
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch" name="Client"/>
+
+    </Resource>
+
+    <Resource type="ResourceSkin" name="HUD_Box_Owned" size="40 40">
+
+        <!-- The interior of the box -->
+
         <Child type="Widget" skin="DialogBG_Owned" offset="0 0 40 40" align="Stretch" name="Client"/>
 
         <!-- Borders -->

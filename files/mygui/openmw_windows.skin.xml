@@ -158,8 +158,15 @@
     </Resource>
     
     <!-- Defines a owned background -->
-    <Resource type="ResourceSkin" name="DialogBG_Owned" size="8 8" texture="white">
+    <Resource type="ResourceSkin" name="DialogBG_NoTransp_Owned" size="8 8" texture="white">
         <Property key="Colour" value="#{setting=GUI,color background owned}"/> 
+        <BasisSkin type="MainSkin" offset="0 0 8 8">
+            <State name="normal" offset="0 0 8 8"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="DialogBG_Owned" size="8 8" texture="transparent">
+        <Property key="Colour" value="#{setting=GUI,color background owned}"/>
         <BasisSkin type="MainSkin" offset="0 0 8 8">
             <State name="normal" offset="0 0 8 8"/>
         </BasisSkin>
