@@ -378,17 +378,11 @@ namespace MWGui
     {
         mDynamicToolTipBox->setVisible(true);
         
-        if(mShowOwned == 1 || mShowOwned == 3)
-        {
-            if(isFocusObject && checkOwned())
-            {
-                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp_Owned");
-            }
-            else
-            {
-                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp");
-            }
-        }
+        // TODO: apply alpha to "owned" background
+        if((mShowOwned == 1 || mShowOwned == 3) && isFocusObject && checkOwned())
+            mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp_Owned");
+        else
+            mDynamicToolTipBox->changeWidgetSkin(MWBase::Environment::get().getWindowManager()->isGuiMode() ? "HUD_Box_NoTransp" : "HUD_Box");
 
         std::string caption = info.caption;
         std::string image = info.icon;
