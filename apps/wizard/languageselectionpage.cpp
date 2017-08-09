@@ -30,7 +30,7 @@ void Wizard::LanguageSelectionPage::initializePage()
 
 int Wizard::LanguageSelectionPage::nextId() const
 {
-    if (field(QLatin1String("installation.new")).toBool() == true) {
+    if (field(QLatin1String("installation.retailDisc")).toBool() == true) {
         return MainWizard::Page_ComponentSelection;
     } else {
         QString path(field(QLatin1String("installation.path")).toString());
