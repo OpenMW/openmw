@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="ExposedWindow" skin="MW_Window_Pinnable" layer="Windows" position="0 0 300 300" name="_Main">
+        <Property key="MinSize" value="40 40"/>
+
+        <!-- Local map -->
+        <Widget type="ScrollView" skin="MW_MapView" position="0 0 284 264" align="Stretch" name="LocalMap">
+            <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="Top Left" name="CompassLocal">
+                <Property key="ImageTexture" value="textures\compass.dds"/>
+            </Widget>
+
+            <Widget type="Button" skin="" position_real="0 0 1 1" name="EventBoxLocal" align="Stretch">
+                <Property key="Depth" value="10"/>
+            </Widget>
+        </Widget>
+
+        <!-- Global map -->
+        <Widget type="ScrollView" skin="MW_MapView" position="0 0 284 264" align="Stretch" name="GlobalMap">
+            <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Stretch" name="GlobalMapImage">
+                <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Stretch" name="GlobalMapOverlay"/>
+            </Widget>
+
+            <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="Top Left" name="CompassGlobal">
+                <Property key="ImageTexture" value="textures\compass.dds"/>
+            </Widget>
+
+            <Widget type="Button" skin="" position_real="0 0 1 1" name="EventBoxGlobal" align="Stretch"/>
+        </Widget>
+
+        <!-- World button -->
+        <Widget type="AutoSizedButton" skin="MW_Button" position="213 233 61 22" align="Bottom Right" name="WorldButton">
+            <Property key="ExpandDirection" value="Left"/>
+        </Widget>
+
+    </Widget>
+</MyGUI>

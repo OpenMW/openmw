@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Resource" version="1.1">
+    <Resource type="ResourceSkin" name="LogEdit" size="512 20">
+        <Property key="WordWrap" value="true"/>
+        <Property key="MultiLine" value="true"/>
+        <Property key="FontName" value="MonoFont"/>
+        <Property key="TextAlign" value="Left Top"/>
+        <Property key="TextColour" value="1 1 1"/>
+        <Property key="MaxTextLength" value="10000000"/>
+        <Property key="InvertSelected" value="false"/>
+
+        <Child type="TextBox" skin="MW_TextEditClient" offset="2 2 490 18" align="Stretch" name="Client"/>
+
+        <Child type="MWScrollBar" skin="MW_VScroll" offset="494 3 14 14" align="Right VStretch" name="VScroll"/>
+    </Resource>
+</MyGUI>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 418 248" align="Center" name="_Main">
+        <Property key="Visible" value="false"/>
+
+        <Widget type="TextBox" skin="SandText" position="8 24 418 24" align="Right Top">
+            <Property key="TextAlign" value="Left"/>
+            <Property key="Caption" value="#{sRepairServiceTitle}"/>
+        </Widget>
+        <Widget type="TextBox" skin="NormalText" position="0 3 418 24" align="Right Top">
+            <Property key="TextAlign" value="Center"/>
+            <Property key="Caption" value="#{sServiceRepairTitle}"/>
+        </Widget>
+
+        <Widget type="Widget" skin="MW_Box" position="10 46 389 156" align="Left Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 381 145" align="Left Top Stretch" name="RepairView">
+                <Property key="CanvasAlign" value="Left"/>
+            </Widget>
+        </Widget>
+
+        <Widget type="TextBox" skin="SandText" position="10 208 300 24" name="PlayerGold" align="Right Top">
+            <Property key="TextAlign" value="Left"/>
+        </Widget>
+        <Widget type="AutoSizedButton" skin="MW_Button" position="343 209 56 24" name="OkButton" align="Right Top">
+            <Property key="ExpandDirection" value="Left"/>
+            <Property key="Caption" value="#{sOK}"/>
+        </Widget>
+
+    </Widget>
+
+</MyGUI>

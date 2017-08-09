@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 219 40" align="Center" name="_Main">
+
+        <Widget type="ProgressBar" skin="MW_Progress_Blue" position="5 6 199 20" name="ProgressBar">
+            <Widget type="TextBox" skin="ProgressText" position="0 0 199 16" name="ProgressText" align="Right VCenter">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Widget>
+</MyGUI>

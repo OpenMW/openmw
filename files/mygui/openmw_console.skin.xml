@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Resource" version="1.1">
+
+
+    <!-- Console Input -->
+
+    <Resource type="ResourceSkin" name="MW_EditClient" size="10 10">
+        <Property key="FontName" value="MonoFont"/>
+        <Property key="TextAlign" value="Left VCenter"/>
+        <Property key="TextColour" value="1 1 1"/>
+        <BasisSkin type="EditText" offset="0 0 10 10" align="Stretch"/>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_ConsoleCommand" size="29 28">
+        <Child type="Widget" skin="MW_Box" offset="0 0 29 26" align="Bottom Stretch"/>
+        <Child type="TextBox" skin="MW_EditClient" offset="4 2 19 22" align="Bottom Stretch" name="Client"/>
+    </Resource>
+
+</MyGUI>

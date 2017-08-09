@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_DialogNoTransp" position="0 0 16 154" layer="Windows" name="_Main">
+
+        <Widget type="TextBox" skin="SandText" position="8 8 0 18" name="Label">
+            <Property key="Caption" value="#{sQuickMenu1}"/>
+            <Property key="TextAlign" value="Center"/>
+        </Widget>
+
+        <Widget type="Button" skin="MW_Button" position="8 28 0 24" name="ItemButton">
+            <Property key="Caption" value="#{sQuickMenu2}"/>
+        </Widget>
+
+        <Widget type="Button" skin="MW_Button" position="8 56 0 24" name="MagicButton">
+            <Property key="Caption" value="#{sQuickMenu3}"/>
+        </Widget>
+
+        <Widget type="Button" skin="MW_Button" position="8 84 0 24" name="UnassignButton">
+            <Property key="Caption" value="#{sQuickMenu4}"/>
+        </Widget>
+
+
+        <Widget type="Button" skin="MW_Button" position="8 112 0 24" name="CancelButton">
+            <Property key="Caption" value="#{sCancel}"/>
+        </Widget>
+
+    </Widget>
+</MyGUI>

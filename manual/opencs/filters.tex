@@ -1,0 +1,202 @@
+\section{Record filters}
+\subsection{Introduction}
+Filters are the key element of \OCS{} use cases by allowing rapid and easy access to the searched records presented in all tables.
+Therefore: in order to use this application fully effective you should make sure that all concepts and instructions written in
+the this section of the manual are perfectly clear to you.
+
+Do not be afraid though, filters are fairly intuitive and easy to use.
+
+\subsubsection{Used Terms}
+
+\begin{description}
+ \item[Filter] is generally speaking a tool able to ``Filter'' (that is: select some elements, while discarding others) according
+ to the some criteria. In case of \OCS: records are being filtered according to the criteria of user choice. Criteria are written
+ down in language with simple syntax.
+ \item[Criteria] describes condition under with any any record is being select by the filter.
+ \item[Syntax] as you may noticed computers (in general) are rather strict, and expect only strictly formulated orders -- that is:
+ written with correct syntax.
+ \item[Expression] is way we are actually performing filtering. Filter can be treated as ``functions'': accepts arguments, and evaluates
+ either to the true or false for every column record at the time.
+ \item[N-ary] is any expression that expects one or more expressions as arguments. It is useful for grouping two (or more) other expressions
+ together in order to create filter that will check for criteria placed in two (again: or more) columns (logical \textit{or}, \textit{and}).
+ \item[unary] is any expression that expects one other expression. The example is \textit{not} expression. In fact \textit{not} is the only useful
+ unary expression in \OCS{} record filters.
+ \item[nullary] is expression that does not accepts other expressions. It accepts arguments specified later.
+\end{description}
+
+\subsubsection{Basics}
+In fact you do not need to learn everything about filters in order to use them. In fact all you need to know to achieve decent productivity
+with \OCS{} is inside basics section.
+
+\subsubsection{Interface}
+Above each table there is a field that is used to enter filter: either predefined by the \OMW{} developers or made by you, the user.
+You probably noticed it before. However there is also completely new element, although using familiar table layout. Go to the application
+menu view, and click filters. You should see set of default filters, made by the \OMW{} team in the table with the following columns: filter,
+description and modified.
+
+\begin{description}
+ \item[ID] contains the name of the filter.
+ \item[Modified] just like in all other tables you have seen so far modified indicates if a filter was added, modified or removed.
+ \item[Filter] column containing expression of the filter.
+ \item[Description] contains the short description of the filter function. Do not expect any surprises there.
+\end{description}
+
+So let's learn how to actually use those to speed up your work.
+\subsubsection{Using predefined filters}
+Using those filters is quite easy and involves typing inside the filter field above the table. For instance, try to open referencables
+table and type in the filters field the following: \mono{project::weapons}. As soon as you complete the text, table will magicly alter
+and will show only the weapons. As you could noticed \mono{project::weapons} is nothing else than a~ID of one of the predefined filters. That is it:
+in order to use the filter inside the table you simply type it is name inside the filter field.
+
+To make life easier filter IDs follow simple convention.
+
+\begin{itemize}
+ \item Filter ID filtering a specific record type contains usually the name of a specific group. For instance \mono{project::weapons} filter
+ contains the word weapons (did you noticed?). Plural form is always used.
+ \item When filtering specific subgroup the ID starts just like in the case of general filter. For instance \mono{project::weaponssilver} will
+ filter only silver weapons (new mechanic introduced by the \BM{}, silver weapons deal double damage against werewolfs) and
+ \mono{project::weaponsmagical} will filter only magical weapons (able to hurt ghosts and other supernatural creatures).
+ \item There are few exceptions from the above rule. For instance there is a \mono{project::added}, \mono{project::removed},
+       \mono{project::modyfied}, \mono{project::base}.
+ You would probably except something more like \mono{project::statusadded} but in this case typing this few extra characters would only
+ help to break your keyboard faster.
+\end{itemize}
+
+We strongly recommend to take a look at the filters table right now to see what you can filter with that. And try using it! It is very simple.
+
+\subsection{Advanced}
+Back to the manual? Great.
+
+If you want to create your own filter you have to know exactly what do you want to get in order to translate this into the expressions.
+Finally, you will have to write this with correct syntax. As a result table will show only desired rows.
+
+Advance subsection covers everything that you need to know in order to create any filter you may want to %TODO the filter part is actually wrong
+\subsubsection{Namespaces}
+Did you noticed that every default filter has \mono{project::} prefix? It is a \textit{namespace}, a~term borrowed from the \CPP{} language.
+In case of \OCS{} namespace always means scope of the said object\footnote{You are not supposed to understand this at the moment.}.
+But what does it mean in case of filters? Well, short explanation is actually simple.
+\begin{description}
+ \item[project::] namespace indicates that filter is used with the project, in multiple sessions. You can restart \OCS{} and filter
+ is still there.
+ \item[session::] namespace indicates that filter is not stored trough multiple sessions and once you will quit \OCS{} (close session)
+ the filter will be gone. Forever! Until then it can be found inside the filters table.
+\end{description}
+In addition to this two scopes, there is a third one; called one-shot. One-shot filters are not stored (even during single session)
+anywhere and as the name implies they are supposed to be created when needed only once. Good thing about the one-shot filters is that
+you do not need to open filters table in order to create it. Instead you just type it directly inside the filter field, starting with
+exclamation mark: ``!''.
+
+Still, you may wonder how you are supposed to write expressions, what expressions you should use, and what syntax looks like. Let's start
+with nullary expressions that will allow you to create a basic filter.
+
+\subsubsection{Nullary expressions}
+All nullary expressions are used in similar manner. First off: you have to write it is name (for instance: \mono{string}) and secondly:
+condition that will be checked inside brackets (for instance \mono{string(something, something)}). If conditions of your expression will be meet
+by a record (technical speaking: expression will evaluate to true) the record will show up in the table.
+
+It is clear that you need to know what are you checking, that is: what column of the table contains information that you are interested
+in and what should be inside specific cell inside this column to meet your requirements. In most cases first word inside brackets sets column
+you want to see, while the second one sets desired value inside of the cell. To separate column argument from the value argument use comma.
+
+\paragraph{String -- string(``column'', ``value'')}
+String in programmers language is often\footnote{Often, not always. There are different programming languages using slightly different terms.}
+just a word for anything composed of characters. In case of \OCS{} this is in fact true for every value inside the column that is not composed
+of the pure numbers. Even columns containing only ``true`` and ``false`` values can be targeted by the string expression\footnote{There is no
+Boolean (``true'' or ``false'') value in the \OCS. You should use string for those.}. String evaluates to true,
+when record contains in the specified column exactly the same value as specified.
+
+Since majority of the columns contain string values, string is among the most often used expressions. Examples:
+\begin{itemize}
+ \item \mono{string(``Record Type'', ``Weapon'')} -- will evaluate to true for all records containing \mono{Weapon} in the \mono{Record Type} column cell.
+ This group contains every weapon (including arrows and bolts) found in the game.
+ \item \mono{string(``Portable'', ``true'')} -- will evaluate to true for all records containing word true inside \mono{Portable} column cell.
+ This group contains every portable light sources (lanterns, torches etc.).
+\end{itemize}
+This is probably enough to create around 90 string filters you will eventually need. However, this expression is even more powerful
+-- it accepts regular expressions (also called regexps). Regular expressions is a way to create string criteria that will be matched
+by one than just one specific value in the column. For instance, you can display both left and right gauntlets with the following expression:
+\mono{string("armor type", ".* gauntlet"))} because \mono{.*} in regexps means just: ``anything''. This filter says: please, show me ``any'' gauntlet.
+There are left and right gauntlets in the \MW{} so this will evaluate to true for both. Simple, isn't it?
+
+Creating regexps can be a difficult and annoying -- especially when you need complex criteria. On the other hand, we are under impression that in reality complex expressions are needed only in sporadic cases. In fact, the truth is: that most of the time only already mentioned
+\mono{.*} is needed and therefore the following description of regexps can be skipped by vast majority of readers.
+
+Before working with Regular Expressions, you should understand what actually are regular expressions. Essentially, the idea is simple:
+when you are writing any word, you are using strictly defined letters -- that is: letters create a word. What you want to do with regular
+expression is to use set of rules that will match to many words. It is not that difficult to see what it's needed to do so: first,
+you will clearly need way to determinate what letters you want to match (word is composed by letters).
+
+Before introducing other ways to choose between characters, I want explain anchors. Anchors allows you to decide where to ``look'' in the string.
+You surely should know about \mono{\textasciicircum} anchor and \mono{\textdollar}. Putting \mono{\textasciicircum} will tell to \OCS{}
+to look on the beginning of string, while \mono{\textdollar} is used to mark the end of it. For instance, pattern
+\mono{\textasciicircum{}Pink.* elephant.\textdollar} will match any sentence beginning with the word \mono{Pink} and ending with
+\mono{ elephant.}. Pink fat elephant. Pink cute elephant. It does not matter what is in between because \mono{.*} is used.
+
+You have already seen the power of the simple \mono{.*}. But what if you want to chose between only two (or more) letters? Well, this is when
+\mono{[|]} comes in handy. If you write something like: \mono{\textasciicircum[a|k].*} you are simply telling \OCS{} to filter anything that
+starts with either \mono{a} or \mono{k}. Using \mono{\textasciicircum[a|k|l].*} will work in the same manner, that is; it will also cover strings starting with \mono{l} as well.
+
+What if you want to match more than just one latter? Just use \mono{(|)}. It is pretty similar to the above one letter as you see, but it is
+used to fit more than just one character. For instance: \mono{\textasciicircum(Pink|Green).* (elephant|crocodile).\textdollar} will be
+true for all sentences starting with \mono{Pink} or \mono{Green} and ending with either \mono{elephant.} or \mono{crocodile.}.
+
+Regular expressions are not the main topic of this manual. If you wish to learn more on this subject please, read the documentation on
+Qt regular expressions syntax, or TRE regexp syntax (it is almost like in Qt). Above is just enough to use \OCS{} effectively.
+
+\paragraph{Value -- value(``value'', (``open'', ``close''))}
+While string expression covers vast group of columns containing string values, there are in fact columns with just numerical values like
+``weight``. To filter those we need a value expression. This one works in similar manner to the string filter: first token name and criteria
+inside brackets. Clearly, conditions should hold column to test in. However in this case wanted value is specified as a range.
+As you would imagine the range can be specified as including a border value, or excluding. We are using two types of brackets for this:
+\begin{itemize}
+ \item To include value use [] brackets. For value equal 5, expression \mono{value(something, [5, 10])} will evaluate to true.
+ \item To exclude value use () brackets. For value equal 5, expression \mono{value(something, (5, 10))} will evaluate to false.
+ \item Mixing brackets is completely legal. For value equal 10, expression \mono{value(something, [5, 10)} will evaluate to true.
+ The same expression will evaluate to false for value equal 10.
+\end{itemize}
+
+\paragraph{``true'' and ``false''}
+Nullary \textit{true} and \textit{false} do not accept any arguments, and always evaluates to true (in case of \textit{true})
+and false (in case of \textit{false})  no matter what. The main usage of this expressions is the give users ability to quickly
+disable some part of the filter that makes heavy use of the logical expressions.
+
+\subsubsection{Logical expressions}
+This subsection takes care of two remaining groups of expressions: binary and unary. The only unary expression present in the \OCS{} is logical
+\textit{not}, while the remaining binary expressions are: \textit{or}, \textit{and}. This clearly makes them (from the user point of view)
+belonging to the same group of logical expressions.
+
+\paragraph{not -- not expression()}
+Sometimes you may be in need of reversing the output of the expression. This is where \textit{not} comes in handy. Adding \textit{not} before
+expression will revert it: if expression was returning true, it will return false; if it was returning false, it will return true. Parenthesis are not needed: \textit{not} will revert only the first expression following it.
+
+To show this on know example, let's consider the \mono{string("armor type", ".* gauntlet"))} filter. As we mentioned earlier this will return true
+for every gauntlet found in game. In order to show everything, but gauntlets we simply do \mono{not string("armor type", ".* gauntlet"))}.
+This is probably not the most useful filter on earth. The real value of \textit{not} expression shines when combined with
+\textit{or}, \textit{and} filters.
+
+\paragraph{or -- or(expression1(), expression2())}
+\textit{Or} is a expression that will return true if one of the arguments evaluates to true. You can use two or more arguments, separated by the comma.
+
+\textit{Or} expression is useful when showing two different group of records is needed. For instance the standard actor filter is using the following
+\mono{or(string(``record type'', npc), string(``record type'', creature))} and will show both npcs and creatures.
+
+\paragraph{and -- and(expression1(), expression2())}
+\textit{And} is a expression that will return true if all arguments evaluates to true. As in the case of ``or'' you can use two or more arguments,
+separated by a comma.
+As we mentioned earlier in the \textit{not} filter, combining \textit{not} with \textit{and} can be very useful. For instance to show all armor types,
+excluding gauntlets you can write the following: \mono{and (not string(``armor type'', ``.* gauntlet''), string(``Record Type'', ``Armor''))}.
+
+\subsubsection{Creating and saving filter}
+In order to create and save new filter, you should go to the filters table, right click and select option ``add record'' from the context menu.
+A horizontal widget group at the bottom of the table should show up. From there you should select a namespace responsible for scope of
+the filter (described earlier) and desired ID of the filter. After pressing OK button new entry will show up in the filters table. This filter
+does nothing at the moment, since it still lacks expressions. In order to add your formula simply double click the filter cell of the new entry
+and write it down there.
+Done! You are free to use your filter.
+
+\subsubsection{Replacing the default filters set}
+OpenCS allows you to substitute default filters set provided by us, with your own filters. In order to do so you should create a new project,
+add desired filters, remove undesired and save. Rename the file to the ``defaultfilters'' (do not forget to remove .omwaddon.project extension)
+and place it inside your configuration directory.
+
+The file acts as template for all new project files from now. If you wish to go back to the old default set, simply rename or remove the custom file.

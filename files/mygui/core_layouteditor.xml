@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI>
+    <MyGUI type="List">
+        <List file="OpenMWResourcePlugin.xml"/> <!-- Must be first -->
+        <List file="skins.xml"/>
+        <List file="openmw_settings.xml"/>
+    </MyGUI>
+</MyGUI>
+

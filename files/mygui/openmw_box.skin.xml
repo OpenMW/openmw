@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- This file defines the box you see around many GUI elements, such
+as around the sections of the stats window, or around popup info windows -->
+
+<MyGUI type="Resource" version="1.1">
+    <!-- Box borders -->
+    <Resource type="ResourceSkin" name="IB_T" size="512 2" texture="textures\menu_thin_border_top.dds">
+        <BasisSkin type="TileRect" offset="0 0 512 2" align="HStretch">
+            <State name="normal" offset="0 0 512 2">
+                <Property key="TileSize" value="512 2"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="IB_B" size="512 2" texture="textures\menu_thin_border_bottom.dds">
+        <BasisSkin type="TileRect" offset="0 0 512 2" align="HStretch">
+            <State name="normal" offset="0 0 512 2">
+                <Property key="TileSize" value="512 2"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="IB_L" size="2 512" texture="textures\menu_thin_border_left.dds">
+        <BasisSkin type="TileRect" offset="0 0 2 512" align="VStretch">
+            <State name="normal" offset="0 0 2 512">
+                <Property key="TileSize" value="2 512"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="IB_R" size="2 512" texture="textures\menu_thin_border_right.dds">
+        <BasisSkin type="TileRect" offset="0 0 2 512" align="VStretch">
+            <State name="normal" offset="0 0 2 512">
+                <Property key="TileSize" value="2 512"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="IB_TL" size="2 2" texture="textures\menu_thin_border_top_left_corner.dds">
+        <BasisSkin type="MainSkin" offset="0 0 2 2">
+            <State name="normal" offset="0 0 2 2"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="IB_TR" size="2 2" texture="textures\menu_thin_border_top_right_corner.dds">
+        <BasisSkin type="MainSkin" offset="0 0 2 2">
+            <State name="normal" offset="0 0 2 2"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="IB_BL" size="2 2" texture="textures\menu_thin_border_bottom_left_corner.dds">
+        <BasisSkin type="MainSkin" offset="0 0 2 2">
+            <State name="normal" offset="0 0 2 2"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="IB_BR" size="2 2" texture="textures\menu_thin_border_bottom_right_corner.dds">
+        <BasisSkin type="MainSkin" offset="0 0 2 2">
+            <State name="normal" offset="0 0 2 2"/>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Main box definition -->
+    <Resource type="ResourceSkin" name="MW_Box" size="516 516">
+        <Child type="Widget" skin="IB_T" offset="2 0 512 2" align="Top HStretch"/>
+        <Child type="Widget" skin="IB_B" offset="2 514 512 2" align="Bottom HStretch"/>
+        <Child type="Widget" skin="IB_L" offset="0 2 2 512" align="Left VStretch"/>
+        <Child type="Widget" skin="IB_R" offset="514 2 2 512" align="Right VStretch"/>
+        <Child type="Widget" skin="IB_TL" offset="0 0 2 2" align="Top Left"/>
+        <Child type="Widget" skin="IB_TR" offset="514 0 2 2" align="Top Right"/>
+        <Child type="Widget" skin="IB_BL" offset="0 514 2 2" align="Bottom Left"/>
+        <Child type="Widget" skin="IB_BR" offset="514 514 2 2" align="Bottom Right"/>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MW_Box_Overlay" size="516 516">
+        <Property key="NeedMouse" value="false"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
+    </Resource>
+</MyGUI>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Resource">
+    <Resource type="ResourceImageSetPointer" name="arrow">
+        <Property key="Point" value="7 0"/>
+        <Property key="Size" value="32 32"/>
+        <Property key="Resource" value="ArrowPointerImage"/>
+        <Property key="Rotation" value="0"/>
+    </Resource>
+    <Resource type="ResourceImageSetPointer" name="hresize">
+        <Property key="Point" value="16 14"/>
+        <Property key="Size" value="32 32"/>
+        <Property key="Resource" value="HResizePointerImage"/>
+        <Property key="Rotation" value="0"/>
+    </Resource>
+    <Resource type="ResourceImageSetPointer" name="vresize">
+        <Property key="Point" value="17 16"/>
+        <Property key="Size" value="32 32"/>
+        <Property key="Resource" value="HResizePointerImage"/>
+        <Property key="Rotation" value="90"/>
+    </Resource>
+    <Resource type="ResourceImageSetPointer" name="dresize">
+        <Property key="Point" value="17 15"/>
+        <Property key="Size" value="32 32"/>
+        <Property key="Resource" value="HResizePointerImage"/>
+        <Property key="Rotation" value="-45"/>
+    </Resource>
+    <Resource type="ResourceImageSetPointer" name="dresize2">
+        <Property key="Point" value="15 15"/>
+        <Property key="Size" value="32 32"/>
+        <Property key="Resource" value="HResizePointerImage"/>
+        <Property key="Rotation" value="45"/>
+    </Resource>
+    <Resource type="ResourceImageSetPointer" name="drop_ground">
+        <Property key="Point" value="0 24"/>
+        <Property key="Size" value="32 32"/>
+        <Property key="Resource" value="DropGroundPointerImage"/>
+    </Resource>
+</MyGUI>

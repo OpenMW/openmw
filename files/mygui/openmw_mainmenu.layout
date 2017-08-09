@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <!-- The entire screen -->
+    <Widget type="Widget" layer="Windows" position="0 0 300 300" name="_Main">
+        <Widget type="EditBox" skin="MW_TextBoxEdit" position="0 250 280 50" align="Bottom Right" name="VersionText">
+            <Property key="TextAlign" value="Right"/>
+            <Property key="TextShadow" value="true"/>
+            <Property key="TextShadowColour" value="0 0 0"/>
+            <Property key="ReadOnly" value="true"/>
+            <Property key="MultiLine" value="true"/>
+        </Widget>
+    </Widget>
+</MyGUI>

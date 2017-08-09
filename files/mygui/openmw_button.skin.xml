@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Resource" version="1.1">
+    <!-- Button graphics -->
+    <Resource type="ResourceSkin" name="BTN_Top" size="128 4" texture="textures\menu_button_frame_top.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="TileRect" offset="0 0 128 4" align="HStretch">
+            <State name="normal" offset="0 0 128 4">
+                <Property key="TileSize" value="128 4"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_Bottom" size="128 4" texture="textures\menu_button_frame_bottom.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="TileRect" offset="0 0 128 4" align="HStretch">
+            <State name="normal" offset="0 0 128 4">
+                <Property key="TileSize" value="128 4"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_Left" size="4 16" texture="textures\menu_button_frame_left.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="TileRect" offset="0 0 4 16" align="VStretch">
+            <State name="normal" offset="0 0 4 16">
+                <Property key="TileSize" value="4 16"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_Right" size="4 16" texture="textures\menu_button_frame_right.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="TileRect" offset="0 0 4 16" align="VStretch">
+            <State name="normal" offset="0 0 4 16">
+                <Property key="TileSize" value="4 16"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_TopLeft" size="4 4" texture="textures\menu_button_frame_top_left_corner.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin" offset="0 0 4 4">
+            <State name="normal" offset="0 0 4 4"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_TopRight" size="4 4" texture="textures\menu_button_frame_top_right_corner.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin" offset="0 0 4 4">
+            <State name="normal" offset="0 0 4 4"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_BottomLeft" size="4 4" texture="textures\menu_button_frame_bottom_left_corner.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin" offset="0 0 4 4">
+            <State name="normal" offset="0 0 4 4"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_BottomRight" size="4 4" texture="textures\menu_button_frame_bottom_right_corner.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin" offset="0 0 4 4">
+            <State name="normal" offset="0 0 4 4"/>
+        </BasisSkin>
+    </Resource>
+
+    <!-- Button widget -->
+    <Resource type="ResourceSkin" name="MW_Button" size="136 24" version="3.2.1">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Center"/>
+
+        <Child type="Widget" skin="BTN_Left" offset="0 4 4 16" align="VStretch Left"/>
+        <Child type="Widget" skin="BTN_Right" offset="132 4 4 16" align="VStretch Right"/>
+        <Child type="Widget" skin="BTN_Top" offset="4 0 128 4" align="HStretch Top"/>
+        <Child type="Widget" skin="BTN_Bottom" offset="4 20 128 4" align="HStretch Bottom"/>
+        <Child type="Widget" skin="BTN_TopLeft" offset="0 0 4 4" align="Top Left"/>
+        <Child type="Widget" skin="BTN_TopRight" offset="132 0 4 4" align="Top Right"/>
+        <Child type="Widget" skin="BTN_BottomLeft" offset="0 20 4 4" align="Bottom Left"/>
+        <Child type="Widget" skin="BTN_BottomRight" offset="132 20 4 4" align="Bottom Right"/>
+
+        <BasisSkin type="SimpleText" offset="4 3 128 16" align="Stretch">
+            <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
+            <State name="highlighted" colour="#{fontcolour=normal_over}" shift="0"/>
+            <State name="pushed" colour="#{fontcolour=normal_pressed}" shift="0"/>
+            <State name="disabled_checked" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal_checked" colour="#{fontcolour=active}" shift="0"/>
+            <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
+            <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
+        </BasisSkin>
+   </Resource>
+
+    <!-- Button widget, 4 px padding on the right -->
+    <Resource type="ResourceSkin" name="MW_Button_RightPadding" size="140 24" version="3.2.1">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Center"/>
+
+        <!-- padding -->
+        <Child type="Widget" skin="" offset="136 0 4 24" align="Right VStretch"/>
+
+        <Child type="Widget" skin="BTN_Left" offset="0 4 4 16" align="VStretch Left"/>
+        <Child type="Widget" skin="BTN_Right" offset="132 4 4 16" align="VStretch Right"/>
+        <Child type="Widget" skin="BTN_Top" offset="4 0 128 4" align="HStretch Top"/>
+        <Child type="Widget" skin="BTN_Bottom" offset="4 20 128 4" align="HStretch Bottom"/>
+        <Child type="Widget" skin="BTN_TopLeft" offset="0 0 4 4" align="Top Left"/>
+        <Child type="Widget" skin="BTN_TopRight" offset="132 0 4 4" align="Top Right"/>
+        <Child type="Widget" skin="BTN_BottomLeft" offset="0 20 4 4" align="Bottom Left"/>
+        <Child type="Widget" skin="BTN_BottomRight" offset="132 20 4 4" align="Bottom Right"/>
+        <Child type="Widget" skin="BTN_BottomRight" offset="132 20 4 4" align="Bottom Right"/>
+
+        <BasisSkin type="SimpleText" offset="4 3 128 16" align="Stretch">
+            <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
+            <State name="highlighted" colour="#{fontcolour=normal_over}" shift="0"/>
+            <State name="pushed" colour="#{fontcolour=normal_pressed}" shift="0"/>
+            <State name="disabled_checked" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal_checked" colour="#{fontcolour=active}" shift="0"/>
+            <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
+            <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
+        </BasisSkin>
+   </Resource>
+</MyGUI>

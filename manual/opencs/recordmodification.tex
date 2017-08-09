@@ -1,0 +1,26 @@
+\section{Records Modification}
+
+\subsection{Introduction}
+So far you learned how to browse trough records stored inside the content files, but not how to modify them using the \OCS{} editor. Although browsing is certainly a useful ability on it's own, You probably counted on doing actual editing with this editor. There are few ways user can alter records stored in the content files, each suited for certain class of a problem. In this section We will describe how to do change records using tables interface and edit panel.
+
+\subsubsection{Glossary}
+\begin{description}
+  \item[Edit Panel] Interface element used inside the \OCS{} to present records data for editing. Unlike table it shows only one record at the time. However it also presents fields that are not visible inside the table. It is also safe to say that Edit Panel presents data in way that is easier to read thanks to it's horizontal layout.
+\end{description}
+
+\subsection{Edit Panel Interface}
+Edit Panel is designed to aid you with record modification tasks. As It has been said, it uses vertical layout and presents some additional fields when compared with the table -- and some fields, even if they are actually displayed in the table, clearly ill-suited for modification inside of them (this applies to fields that holds long text strings -- like descriptions). It also displays visual difference between non-editable field and editable.\\
+To open edit panel, please open context menu on any record and choose edit action. This will open edit panel in the same window as your table and will present you the record fields. First data fields are actually not user editable and presented in the form of the text labels at the top of the edit panel. Lower data fields are presented in the form of actually user-editable widgets. Those includes spinboxes, text edits and text fields\footnote{Those are actually a valid terms used to describe classes of the user interface elements. If you don't understand those, don't worry -- those are very standard {GUI} elements present in almost every application since the rise of the desktop metaphor.}. Once you will finish editing one of those fields, data will be updated. There is no apply button of any sort -- simply use one of those widgets and be merry.\\
+In addition to that you probably noticed some icons in the bar located at the very bottom of the edit panel. Those can be used to perform the following actions:
+
+\begin{description}
+  \item[Preview] This will launch simple preview panel -- which will be described later.
+  \item[Next] This will switch edit panel to the next record. It is worth noticing that edit panel will skip deleted records.
+  \item[Prev] Do We really need to say what this button does? I guess we should! Well, this will switch edit panel to former record. Deleted records are skipped.
+\end{description}
+
+\subsection{Verification tool}
+As you could notice there is nothing that can stop you from breaking the game by violating record fields logic, and yet -- it is something that you are always trying to avoid. To address this problem \OCS{} utilizes so called verification tool (or verifer as many prefer to call it) that basically goes trough all records and checks if it contains any illogical fields. This includes for instance torch duration equal 0\footnote{Interestingly negative values are perfectly fine: they indicate that light source has no duration limit at all. There are records like this in the original game.} or characters without name, race or any other record with a mandatory field missing.\\
+This tool is even more useful than it seems. If you somehow delete race that is used by some of the characters, all those characters will be suddenly broken. As a rule of thumb it is a good idea to use verifer before saving your content file.\\
+To launch this useful tool %don't remember, todo...
+Results are presented as a yet another table with short (and hopefully descriptive enough) description of the identified problem. It is worth noticing that some records located in the \MW{} esm files are listed by the verification tool -- it is not fault of our tool: those records are just broken. For instance, you actually may find the 0 duration torch. However, those records are usually not placed in game world itself -- and that's good since \MW{} game engine will crash if player equip light source like this!\footnote{We would like to thanks \BS{} for such a useful testing material. It makes us feel special.}

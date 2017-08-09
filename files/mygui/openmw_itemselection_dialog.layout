@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_DialogNoTransp" position="0 0 380 285" layer="Windows" align="Center" name="_Main">
+
+        <Widget type="TextBox" skin="SandText" position="8 8 300 18" name="Label"/>
+
+        <Widget type="ItemView" skin="MW_ItemView" position="8 34 355 200" name="ItemView" align="Left Top Stretch">
+        </Widget>
+
+        <Widget type="AutoSizedButton" skin="MW_Button" position="340 240 24 24" name="CancelButton">
+            <Property key="ExpandDirection" value="Left"/>
+            <Property key="Caption" value="#{sCancel}"/>
+        </Widget>
+
+
+    </Widget>
+</MyGUI>

@@ -1,0 +1,37 @@
+\documentclass[american]{article}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage{txfonts}      % Public Times New Roman text & math font
+\usepackage[pdftex]{graphicx}
+\usepackage[final,colorlinks,pdftex,pdfpagelabels=true]{hyperref}
+\author{OpenMW Team}
+
+\def\pdfBorderAttrs{/Border [0 0 0] } % No border arround Links
+
+\def\CPP{{C\kern-.05em\raise.23ex\hbox{+\kern-.05em+}}}
+\hypersetup{%
+   pdfauthor={Copyright \textcopyright{} OpenMW Team },
+   pdftitle={OpenCS user manual}
+}
+\def\mono{\texttt}
+\def\MW{\textit{Morrowind\texttrademark{}}}
+\def\TB{\textit{Tribunal}}
+\def\BM{\textit{Bloodmon}}
+\def\BS{Bethesda Softworks}
+\def\OMW{\hbox{OpenMW}}
+\def\OCS{\hbox{OpenCS}}
+
+\begin{document}
+
+\title{OpenCS User Manual}
+\maketitle
+\newpage
+\tableofcontents{}
+\newpage
+\input{files_and_directories}
+\input{creating_file}
+\input{windows}
+\input{tables}
+\input{recordtypes}
+\input{filters}
+\end{document}

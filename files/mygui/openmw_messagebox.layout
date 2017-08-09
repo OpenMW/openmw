@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="VBox" skin="HUD_Box" layer="Notification" position="0 0 0 0" name="_Main">
+        <Property key="Padding" value="10"/>
+        <Property key="AutoResize" value="true"/>
+
+        <Widget type="AutoSizedEditBox" skin="MW_TextEditClient" position="0 0 300 0" name="message" align="Left Top">
+            <Property key="FontName" value="Default"/>
+            <Property key="TextAlign" value="Center"/>
+            <Property key="Static" value="true"/>
+            <Property key="WordWrap" value="true"/>
+            <Property key="MultiLine" value="1"/>
+            <Property key="VisibleVScroll" value="1"/>
+        </Widget>
+    </Widget>
+</MyGUI>

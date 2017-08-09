@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Resource">
+
+    <!-- Cursors -->
+    <Resource type="ResourceImageSet" name="ArrowPointerImage">
+        <Group name="Pointer" texture="textures\tx_cursor.dds" size="32 32">
+            <Index name="Pointer" >
+                <Frame point="0 0"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="HResizePointerImage">
+        <Group name="Pointer" texture="textures\tx_cursormove.dds" size="32 32">
+            <Index name="Pointer" >
+                <Frame point="0 0"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="DropGroundPointerImage">
+        <Group name="Pointer" texture="textures\cursor_drop_ground.dds" size="32 32">
+            <Index name="Pointer" >
+                <Frame point="0 0"/>
+            </Index>
+        </Group>
+    </Resource>
+
+    <Resource type="ResourceSkin" name="MarkerButton" size="8 8" texture="textures\door_icon.dds">
+        <BasisSkin type="MainSkin" offset="0 0 8 8" align="Stretch">
+            <State name="normal" offset="0 0 8 8"/>
+        </BasisSkin>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="CustomMarkerButton" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 16 16" name="Root">
+            <Widget type="ImageBox" skin="ImageBox" position="0 0 16 16" align="Stretch">
+                <Property key="ImageTexture" value="icons\map_marker_red.dds"/>
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="TabControl" version="3.2.0">
+        <Widget type="Widget" skin="" position="5 5 89 60" name="Root">
+            <UserString key="ButtonSkin" value="MW_Button_RightPadding"/>
+            <Widget type="Widget" skin="MW_Box" position="0 28 89 32" align="Left Top Stretch">
+                <Widget type="Widget" skin="" position="4 4 81 28" align="Left Top Stretch" name="TabItem"/>
+            </Widget>
+            <Widget type="Widget" skin="" position="0 0 89 23" align="HStretch Top" name="HeaderPlace">
+                <Widget type="Widget" skin="" position="52 0 37 23" name="Controls">
+                </Widget>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="TabControlInner" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 5 89 60" name="Root">
+            <UserString key="ButtonSkin" value="MW_Button_RightPadding"/>
+            <Widget type="Widget" skin="" position="0 28 89 32" align="Left Top Stretch" name="TabItem"/>
+
+            <Widget type="Widget" skin="" position="0 0 89 23" align="HStretch Top" name="HeaderPlace">
+                <Widget type="Widget" skin="" position="52 0 37 23" name="Controls">
+                </Widget>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_StatNameValue" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
+            <Property key="NeedMouse" value="true"/>
+            <Widget type="TextBox" skin="SandText" position="0 0 168 18" align="Left HStretch" name="StatName">
+                <Property key="NeedMouse" value="false"/>
+                <Property key="TextAlign" value="Left"/>
+            </Widget>
+            <Widget type="TextBox" skin="SandTextRight" position="168 0 32 18" align="Right Top" name="StatValue">
+                <Property key="NeedMouse" value="false"/>
+                <Property key="TextAlign" value="Right"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_StatName" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
+            <Property key="NeedMouse" value="true"/>
+            <Widget type="TextBox" skin="SandText" position="0 0 200 18" align="Left HStretch" name="StatName">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_StatNameButton" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
+            <Widget type="Button" skin="SandTextButton" position="0 0 200 18" align="Left HStretch" name="StatNameButton">
+                <Property key="NeedMouse" value="true"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_ComboBox" version="3.2.0">
+        <Widget type="Widget" skin="" position="65 10 100 26" name="Root">
+            <Property key="MaxListLength" value="200"/>
+            <Property key="SmoothShow" value="true"/>
+            <Property key="ModeDrop" value="true"/>
+
+            <Widget type="Widget" skin="MW_Box" position="0 0 100 26" align="Stretch">
+                <Widget type="TextBox" skin="SandText" position="6 3 71 20" align="Stretch" name="Client">
+                    <Property key="TextAlign" value="Left VCenter"/>
+                </Widget>
+                <Widget type="ListBox" skin="MW_PopupListNoTransp" position="65 38 100 200" style="Popup" layer="Popup" name="List">
+                    <Property key="Visible" value="false"/>
+                </Widget>
+                <Widget type="Button" skin="MW_ArrowDown" position="79 7 14 11" align="Right VCenter" name="Button"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_ItemIcon" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 42 42" name="Root">
+            <Widget type="ImageBox" skin="ImageBox" position="0 0 42 42" align="Stretch" name="Frame">
+                <Widget type="TextBox" skin="CountText" position="5 19 32 18" align="Right Bottom" name="Text">
+                    <Property key="TextAlign" value="Right"/>
+                    <Property key="TextShadow" value="true"/>
+                </Widget>
+                <Widget type="ImageBox" skin="ImageBox" position="5 5 32 32" align="Stretch" name="Item"/>
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" align="Stretch" name="ItemShadow">
+                    <Property key="Colour" value="0 0 0"/>
+                    <Property key="Alpha" value="0.5"/>
+                </Widget>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_ItemIconNoShadow" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 42 42" name="Root">
+            <Widget type="ImageBox" skin="ImageBox" position="0 0 42 42" align="Stretch" name="Frame">
+                <Widget type="TextBox" skin="CountText" position="5 19 32 18" align="Right Bottom" name="Text">
+                    <Property key="TextAlign" value="Right"/>
+                    <Property key="TextShadow" value="true"/>
+                </Widget>
+                <Widget type="ImageBox" skin="ImageBox" position="5 5 32 32" align="Stretch" name="Item"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_ItemIconSmall" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 32 32" name="Root">
+            <Widget type="ImageBox" skin="ImageBox" position="0 0 32 32" align="Stretch" name="Frame">
+                <Widget type="ImageBox" skin="ImageBox" position="0 0 32 32" align="Stretch" name="Item"/>
+                <Widget type="ImageBox" skin="ImageBox" position="4 4 32 32" align="Stretch" name="ItemShadow">
+                    <Property key="Colour" value="0 0 0"/>
+                    <Property key="Alpha" value="0.5"/>
+                </Widget>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_ItemIconBox" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 50 50" name="Root">
+            <Widget type="ImageBox" skin="ImageBox" position="4 4 42 42" align="Center" name="Frame">
+                <Widget type="TextBox" skin="CountText" position="5 19 32 18" align="Right Bottom" name="Text">
+                    <Property key="TextAlign" value="Right"/>
+                    <Property key="TextShadow" value="true"/>
+                </Widget>
+                <Widget type="ImageBox" skin="ImageBox" position="5 5 32 32" align="Center" name="Item"/>
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" align="Stretch" name="ItemShadow">
+                    <Property key="Colour" value="0 0 0"/>
+                    <Property key="Alpha" value="0.5"/>
+                </Widget>
+            </Widget>
+
+            <Widget type="Widget" skin="MW_Box_Overlay" position="0 0 50 50" align="Stretch"/>
+        </Widget>
+    </Resource>
+
+    <!-- Same as MW_Caption, but reserves some free space on the right for the Pin button -
+       i.e. not allowing the caption label to stretch there, but still showing the tiling background. -->
+    <Resource type="ResourceLayout" name="MW_Caption_Pin" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 88 20" name="Root">
+            <Widget type="Widget" skin="HB_ALL" position="0 0 30 20" align="Default" name="Left"/>
+            <Widget type="Widget" skin="" position="0 0 69 20" align="Stretch">
+                <Widget type="TextBox" skin="SandText" position="30 0 28 20" align="Left VStretch" name="Client">
+                    <Property key="FontName" value="Default"/>
+                    <Property key="TextAlign" value="Center"/>
+                </Widget>
+            </Widget>
+            <Widget type="Widget" skin="HB_ALL" position="0 0 30 20" align="Right" name="Right"/>
+        </Widget>
+    </Resource>
+
+</MyGUI>

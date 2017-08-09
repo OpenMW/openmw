@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI>
+    <MyGUI type="List">
+        <List file="skins.xml" />
+        <List file="openmw_layers.xml" />
+        <List file="openmw_pointer.xml" />
+        <List file="openmw_settings.xml" />
+    </MyGUI>
+</MyGUI>
+

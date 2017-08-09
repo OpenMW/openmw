@@ -1,0 +1,118 @@
+\section{Files and Directories}
+\subsection{Introduction}
+This section of the manual describes the directories and file types used by OpenCS. A file is a resource for storing data (e.g. .exe, .jpg, .txt), 
+whereas a directory is a folder or file system structure which points to these files (or other directories). You are most likely already familiar 
+with these concepts.
+
+\subsection{Used terms} %TODO
+
+\subsection{Basics}
+
+\paragraph{Directories}
+OpenMW and \OCS{} store their files in multiple directories. Firstly, there is the \textbf{user directory} that holds configuration
+files and several other folders. The location of the user directory is hard coded for each supported operating system.
+
+%TODO list paths.
+In addition to the user directory, both \OMW{} and \OCS{} need a place to store the game’s actual data files: for example, the
+textures, models, sounds and records of in-game objects. We support multiple paths to these files (termed \textbf{data paths}),
+as specified in the configuration. Usually, one data path points to the directory where \MW{} is installed; however, you are
+free to specify as many data paths as you would like. In addition, one particular data path, as described below, is used to store
+newly created content files.
+
+\paragraph{Content files}
+\BS{} \MW{} engine uses two file types: ESM (master) and ESP (plugin). The distinction between the two is often confusing.
+You would expect that the ESM (master) file is used to specify a single master which is modified by the ESP files (plugins), and indeed:
+this is the basic idea. However, the original expansions are also ESM files, even though they can be described as very large plugins.
+There were technical reasons behind this decision -- somewhat valid in the case of the original engine -- but a more logical file system is
+much preferable. \OMW{} achieves this through the creation of our own types of content file.
+
+We support both ESM and ESP files, but, in order to make use of \OMW{}'s new features, one should consider using new file types designed
+with our engine in mind: game files and addon files, collectively termed \textbf{content files}.
+
+\subparagraph{OpenMW content files}
+The distinction between game and addon files is similar to that between ESM and ESP, however their relationship to each other is
+strictly defined -– the former are always master files, and the latter are always plugins. If you want to make a new game using the \OMW{}
+engine (i.e. a ``total conversion''), you should create a game file. If you want to create an addon for an existing game file, simply
+create an addon file. Nothing else matters: the only distinction you should consider is whether your project involves changing another game, 
+or creating a new one. Simple as that.
+
+Furthermore, our content files’ extensions are .omwaddon for addon files and .omwgame for game files.
+
+%TODO describe what content files contains. and what not.
+\subparagraph{\MW{} content files}
+Using our content files is the recommended solution for projects that employ the \OMW{} engine. However, some players will wish to use 
+the original \MW{} engine, despite its large flaws and lacking features\footnote{If this is wrong, we are a very successful project. Yay!}. 
+In addition, since 2002, thousands of ESP/ESM files have been created, some with truly outstanding content. Because of this, \OCS{} 
+will support ESP/ESM files, although this will impose limitations on the user. If you do decide to use ESP/ESM files rather than our own content 
+files, you are most likely aiming for original engine compatibility. This subject is covered in the very last section of the manual. 
+%not finished TODO add the said section. Most likely when more features are present.
+
+The actual creation of new files is described in the next chapter. Here we are going to focus only on the essential information needed
+to create your first \OCS{} file. For now, let's jut remember that content files are stored in the user directory, in the \textbf{data}
+subfolder (the particular data directory mentioned above).
+
+\subparagraph{Dependencies}
+Since addons aim to modify an existing game, it is logical that they also depend on the said game: otherwise they will not function.
+For example, your modification changes the price of iron swords. But what if there are no iron swords in the game? That is right:
+it is nonsense. Therefore, it is necessary to make your addon a dependency of other content files. These can be either game files
+(e.g. an entirely new island), or other addon files (e.g. a house on the island). It is a good idea for addons to depend only on the
+content files they modify, but this is up to the end user to determine.
+
+Game files do not depend on any other content files, as they act as master files. A player can only use one game file at a time
+(although this does not apply to the original and dirty ESP/ESM system).
+
+%\subparagraph{Loading order} %TODO
+\paragraph{Project files}
+Project files contain data not used by the \OMW{} game engine but which are still needed by OpenCS. Good examples of this data type
+are the record filters (described below). As a mod author, you probably do not need and/or want to distribute project files at all, 
+as they are meant to be used only by you.
+
+Since project files govern how content files are used in OpenCS, they are always used in conjunction with your specific project.
+In fact, each time work commences on a content file that does not have a corresponding project file, a new project file will be created. 
+
+The project file extension is ``.project''. The name of the project file is the whole name of the content file with appended extensions. 
+For instance, a content file named swords.omwaddon is associated with the project file swords.omwaddon.project.
+
+%TODO where are they stored.
+Project files are stored inside the user directory, in the \textbf{projects} subfolder. This is both the location of newly created 
+project files, and the place where \OCS{} looks for already existing files.
+
+\paragraph{Resource files}
+%textures, sounds, whatever
+The vast majority of modern video games use what we shall term \textbf{resource files}: models, textures, icons, sounds and so on.
+ESPs, ESMs and \OMW{} content files do not contain these files, merely instructions on how they are used. It follows that the \OMW{}
+engine must be capable of supporting these resource files in order for them to function. Therefore this section covers ways to add 
+resource files to your content file, and outlines which formats are supported. Later, you will learn how to make use of these files 
+in your content.
+
+\subparagraph{Audio}
+OpenMW utilises {FFmpeg} for audio playback, so we support every audio type supported by this library. This is a huge list.
+Below is only a small sample of supported file types.
+
+\begin{description}
+ \item mp3 ({MPEG}-1 {Part 3 Layer 3}) A popular audio file format and the \textit{de facto} standard for storing audio. Used by 
+ the \MW{} game.
+ \item ogg Open source, multimedia container file which uses the high quality vorbis audio codec. Recommended.
+\end{description}
+
+\subparagraph{Video}
+As in the case of audio files, we use {FFmpeg} to decode video files. The list of supported files is long -– only the most 
+significant will be covered.
+
+\begin{description}
+ \item bik Format used by the original \MW{} game.
+ \item mp4 Multimedia container which use more advanced codecs ({MPEG-4 Parts 2,3,10}) with a better audio and video compression rate,
+ but which require more {CPU} intensive decoding -- this probably makes it less suited for storing sounds in computer games, but
+ good for videos.
+ \item webm A new, shiny and open source video format with excellent compression. It needs quite a lot of processing power to be decoded,
+ but since game logic is not running during cut scenes we can recommend it for use with \OMW.
+ \item ogv An alternative, open source container using theora codec for video and vorbis for audio.
+\end{description}
+
+\subparagraph{Textures and images}
+\MW{} uses {DDS} and {TGA} files for all kinds of two dimensional images and textures. In addition, the original engine supported BMP
+files (although {BMP} is a terrible format for a video game). We also support an extended set of image files -- including {JPEG} and {PNG}.
+JPEG and PNG files can be useful in some cases. For instance, a JPEG file is a valid option for a skybox texture and PNG can useful for masks.
+However, keep in mind that a JPEG can grow large quickly and so are not the best option with a {DirectX} rendering backend. DDS files
+are therefore recommended for textures. 
+%\subparagraph{Meshes} %TODO once we will support something more than just nifs

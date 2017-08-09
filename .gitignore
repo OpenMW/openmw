@@ -1,0 +1,84 @@
+## make
+CMakeFiles
+*/CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+makefile
+build*
+prebuilt
+
+##windows build process
+/deps
+/MSVC*
+
+## doxygen
+Doxygen
+
+## ides/editors
+*~
+*.kdev4
+*.swp
+*.swo
+*.kate-swp
+.cproject
+.project
+.settings
+.directory
+.idea
+## qt-creator
+CMakeLists.txt.user*
+
+## resources
+data
+resources
+/*.cfg
+/*.desktop
+/*.install
+
+## binaries
+/esmtool
+/openmw
+/opencs
+/niftest
+/bsatool
+/openmw-cs
+/openmw-essimporter
+/openmw-iniimporter
+/openmw-launcher
+/openmw-wizard
+
+## generated objects
+apps/openmw/config.hpp
+apps/launcher/ui_contentselector.h
+apps/launcher/ui_settingspage.h
+apps/opencs/ui_contentselector.h
+apps/opencs/ui_filedialog.h
+apps/wizard/qrc_wizard.cxx
+apps/wizard/ui_componentselectionpage.h
+apps/wizard/ui_conclusionpage.h
+apps/wizard/ui_existinginstallationpage.h
+apps/wizard/ui_importpage.h
+apps/wizard/ui_installationpage.h
+apps/wizard/ui_installationtargetpage.h
+apps/wizard/ui_intropage.h
+apps/wizard/ui_languageselectionpage.h
+apps/wizard/ui_methodselectionpage.h
+components/ui_contentselector.h
+docs/mainpage.hpp
+docs/Doxyfile
+docs/DoxyfilePages
+moc_*.cxx
+*.cxx_parameters
+*qrc_launcher.cxx
+*qrc_resources.cxx
+*__*
+*ui_datafilespage.h
+*ui_graphicspage.h
+*ui_mainwindow.h
+*ui_playpage.h
+*.[ao]
+*.so
+gamecontrollerdb.txt
+openmw.appdata.xml
+venv/

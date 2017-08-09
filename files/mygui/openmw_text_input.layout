@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 320 97" align="Center" name="_Main">
+
+        <!-- Appearance -->
+        <Widget type="TextBox" skin="ProgressText" position="6 6 300 18" name="LabelT" align="Left Top">
+            <Property key="TextAlign" value="Left Top"/>
+        </Widget>
+        <Widget type="EditBox" skin="MW_TextEdit" position="6 28 300 30" name="TextEdit" align="Left Top"/>
+
+        <!-- Dialog buttons -->
+        <Widget type="AutoSizedButton" skin="MW_Button" position="264 60 42 23" name="OKButton">
+            <Property key="ExpandDirection" value="Left"/>
+            <Property key="Caption" value="OK"/>
+        </Widget>
+    </Widget>
+</MyGUI>

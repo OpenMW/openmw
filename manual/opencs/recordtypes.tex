@@ -1,0 +1,18 @@
+\section{Record Types}
+
+\subsection{Introduction}
+A gameworld contains many items, such as chests, weapons and monsters. All these items are merely instances of templates that we call \textbf{Objects}. The OpenCS \textbf{Objects} table contains information about each of these template objects, eg. its value and weight in the case of items and an aggression level in the case of NPCs.
+
+Let's go through all Record Types and discuss what you can tell OpenCS about them.
+
+\begin{description}
+ \item[Activator:] When the player enters the same cell as this object, a script is started. Often it also has a \textbf{Script} attached to it, though it not mandatory. These scripts are small bits of code written in a special scripting language that OpenCS can read and interpret.
+ \item[Potion:] This is a potion that is not self-made. It has an \textbf{Icon} for your inventory, Aside from the self-explanatory \textbf{Weight} and \textbf{Coin Value}, it has an attribute called \textbf{Auto Calc} set to ``False''. This means that the effects of this potion are pre-configured. This does not happen when the player makes their own potion.
+ \item[Apparatus:] This is a tool to make potions. Again there's an icon for your inventory as well as a weight and a coin value. It also has a \textbf{Quality} value attached to it: higher the number, the better the effect on your potions will be. The \textbf{Apparatus Type} describes if the item is a Calcinator, Retort, Alembic or Mortar \& Pestle. Each has a different effect on the potion the player makes. For more information on this subject, please refer to the \href{http://www.uesp.net/wiki/Morrowind:Alchemy#Tools}{UESP page on Alchemy Tools}.
+ \item[Armor:] This type of item adds \textbf{Enchantment Points} to the mix. Every piece of clothing or armor has a ''pool'' of potential Magicka that gets unlocked when you enchant it. Strong enchantments consume more Magicka from this pool: the stronger the enchantment, the more Enchantment Points each cast will take up. For more information on this subject, please refer to the \href{http://www.uesp.net/wiki/Morrowind:Enchant}{Enchant page on UESP}. \textbf{Health} means the amount of hit points this piece of armor has. If it sustains enough damage, the armor will be destroyed. Finally, \textbf{Armor Value} tells the game how much points to add to the player character's Armor Rating.
+ \item[Book:] This includes scrolls and notes. For the game to make the distinction between books and scrolls, an extra property, \textbf{Scroll}, has been added. Under the \textbf{Skill} column a scroll or book can have an in-game skill listed. Reading this item will raise the player's level in that specific skill. For more information on this, please refer to the \href{http://www.uesp.net/wiki/Morrowind:Skill_Books}{Skill Books page on UESP}.
+ \item[Clothing:] These items work just like Armors, but confer no protective properties. Rather than ``Armor Type'', these items have a ``Clothing Type''.
+ \item[Container:] This is all the stuff that stores items, from chests to sacks to plants. Its \textbf{Capacity} shows how much stuff you can put in the container. You can compare it to the maximum allowed load a player character can carry (who will get over-encumbered and unable to move if he crosses this threshold). A container, however, will just refuse to take the item in question when it gets ''over-encumbered''. \textbf{Organic Container}s are containers such as plants. Containers that \textbf{Respawn} are not safe to store stuff in. After a certain amount of time they will reset to their default contents, meaning that everything in it is gone forever.
+ \item[Creature:] These can be monsters, animals and the like. 
+ 
+\end{description}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI>
+    <MyGUI type="List">
+        <List file="core.skin"/>
+        <List file="openmw_resources.xml"/>
+        <List file="openmw_font.xml"/>
+        <List file="openmw_text.skin.xml"/>
+        <List file="openmw_windows.skin.xml"/>
+        <List file="openmw_button.skin.xml"/>
+        <List file="openmw_list.skin.xml"/>
+        <List file="openmw_edit.skin.xml"/>
+        <List file="openmw_box.skin.xml"/>
+        <List file="openmw_progress.skin.xml"/>
+        <List file="openmw_hud_energybar.skin.xml"/>
+        <List file="openmw_hud_box.skin.xml"/>
+        <List file="openmw_mainmenu.skin.xml"/>
+        <List file="openmw_console.skin.xml"/>
+        <List file="openmw_journal.skin.xml"/>
+        <List file="openmw_map_window.skin.xml"/>
+        <List file="openmw_dialogue_window.skin.xml"/>
+        <List file="openmw_scroll.skin.xml"/>
+        <List file="openmw_debug_window.skin.xml" />
+    </MyGUI>
+</MyGUI>
+

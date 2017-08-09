@@ -1,0 +1,94 @@
+\section{Tables}
+
+\subsection{Introduction}
+If you have launched \OCS{} already and played around with it for a bit, you have probably gotten the impression that it contains lots of tables.
+You'd be spot on: \OCS{} is built around using tables. This does not mean it works just like Microsoft Excel or Libre Office Calc, though. 
+Due to the vast amounts of information involved with \MW, tables just made the most sense. You have to be able to spot information quickly
+and be able to change them on the fly.
+Let's browse through the various screens and see what all these tables show.
+
+\subsection{Used Terms}
+
+\subsubsection{Glossary}
+
+\begin{description}
+ \item[Record:] An entry in \OCS{} representing an item, location, sound, NPC or anything else.
+
+ \item[Instance, Object:] When an item is placed in the world, it isn't an isolated and unique object. For example, the game world might contain a lot of exquisite belts on different NPCs and in many crates, but they all refer to one specific record in the game's library: the Exquisite Belt record. In this case, all those belts in crates and on NPCs are \textbf{instances}. The central Exquisite Belt record is called a \textbf{object}. This allows modders to make changes to all items of the same type. For example, if you want all exquisite belts to have 4000 enchantment points rather than 400, you will only need to change the \textbf{object} Exquisite Belt rather than all exquisite belts \textbf{instances} individually.
+\end{description}
+
+\subsubsection{Recurring Terms}
+Some columns are recurring throughout \OCS. They show up in (nearly) every table in \OCS.
+
+\begin{description}
+\item[ID] Many items in the OpenCS database have a unique identifier in both OpenCS and Morrowind. This is usually a very self-explanatory name. For example, the ID for the (unique) black pants of Caius Cosades is ``Caius\_pants''. This allows you to manipulate the game in many ways. For example, you could add these pants to your inventory by simply opening the console and write: ``player->addItem Caius\_pants''. Either way, in both Morrowind and OpenCS, the ID is the primary way to identify all these different parts of the game.
+\item[Modified] This column shows what has happened (if something has happened) to this record. There are four possible states in which it can exist. 
+\item[Base] means that this record is part of the base game and is in its original state. Usually, if you create a mod, the base game is Morrowind with
+optionally the Bloodmoon and Tribunal expansions.
+\item[Added] means that this record was not in the base game and has been added by a~modder.
+\item[Modified] means that the record is part of the base game, but has been changed in some way.
+\item[Deleted] means that this record used to be part of the base game, but has been removed as an entry. This does not mean, however, that the occurrences
+in the game itself have been removed! For example, if you remove the CharGen\_Bed entry from morrowind.esm, it does not mean the bedroll in the basement
+of the Census and Excise Office in Seyda Neen is gone. You're going to have to delete that instance yourself or make sure that that object is replaced
+by something that still exists otherwise you will get crashes in the worst case scenario.
+\end{description}
+
+\subsection{World Screens}
+The contents of the game world can be changed by choosing one of the options in the appropriate menu at the top of the screen.
+
+\subsubsection{Regions}
+This describes the general areas of the gameworld. Each of these areas has different rules about things such as encounters and weather.
+
+\begin{description}
+ \item[Name:] This is how the game will show your location in-game.
+ \item[Map Colour:] This is a six-digit hexadecimal representation of the color used to identify the region on the map available in
+ World > Region Map. If you do not have an application with a color picker, you can use your favorite search engine to find a color picker on-line.
+ \item[Sleep Encounter:] These are the rules for what kind of enemies you might encounter when you sleep outside in the wild.
+\end{description}
+
+\subsubsection{Cells}
+Expansive worlds such as Vvardenfell, with all its items, NPCs, etc. have a lot going on simultaneously. But if you are in Balmora,
+why would the computer need to keep track the exact locations of NPCs walking through the corridors in a Vivec canton? All that work would
+be quite useless and bring your system to its knees! So the world has been divided up into squares we call "cells". Once your character enters a cell,
+the game will load everything that is going on in that cell so you can interact with it.
+
+In the original \MW{} this could be seen when you were traveling and you would see a small loading bar at the bottom of the screen;
+you had just entered a new cell and the game would have to load all the items and NPCs. The Cells screen in \OCS{} provides you with a list of cells
+in the game, both the interior cells (houses, dungeons, mines, etc.) and the exterior cells (the outside world).
+
+\begin{description}
+ \item[Sleep Forbidden:] Can the player sleep on the floor? In most cities it is forbidden to sleep outside. Sleeping in the wild carries its
+ own risks of attack, though, and this entry lets you decide if a player should be allowed to sleep on the floor in this cell or not.
+ 
+ \item[Interior Water:] Should water be rendered in this interior cell? The game world consists of an endless ocean at height 0. Then the landscape
+ is added. If part of the landscape goes below height 0, the player will see water. (See illustration.)
+ 
+ Setting the cell's Interior Water to true tells the game that this cell is both an interior cell (inside a building, for example, rather than
+ in the open air) but that there still needs to be water at height 0. This is useful for dungeons or mines that have water in them.
+ 
+ Setting the cell's Interior Water to false tells the game that the water at height 0 should not be used. Remember that cells that are in
+ the outside world are exterior cells and should thus \textit{always} be set to false!
+ 
+ \item[Interior Sky:] Should this interior cell have a sky? This is a rather unique case. The \TB{} expansion took place in a city on 
+ the mainland. Normally this would require the city to be composed of exterior cells so it has a sky, weather and the like. But if the player is
+ in an exterior cell and looks at his in-game map, he sees the map of the gameworld with an overview of all exterior cells. The player would have to see
+ the city's very own map, as if he was walking around in an interior cell.
+ 
+ So the developers decided to create a workaround and take a bit of both: The whole city would technically work exactly like an interior cell,
+ but it would need a sky as if it was an exterior cell. That is what this is. This is why the vast majority of the cells you will find in this screen
+ will have this option set to false: It is only meant for these "fake exteriors".
+ 
+ \item[Region:] To which Region does this cell belong? This has an impact on the way the game handles weather and encounters in this area.
+ It is also possible for a cell not to belong to any region.
+ 
+\end{description}
+
+\subsubsection{Objects}
+This is a library of all the items, triggers, containers, NPCs, etc. in the game. There are several kinds of Record Types. Depending on which type
+a record is, it will need specific information to function. For example, an NPC needs a value attached to its aggression level. A chest, of course,
+does not. All Record Types contain at least a~model. How else would the player see them? Usually they also have a Name, which is what you see
+when you hover your reticle  over the object.
+
+This is a library of all the items, triggers, containers, NPCs, etc. in the game. There are several kinds of Record Types. Depending on which type a record is, it will need specific information to function. For example, an NPC needs a value attached to its aggression level. A chest, of course, does not. All Record Types contain at least a model. How else would the player see them? Usually they also have a Name, which is what you see when you hover your reticle over the object.
+
+Please refer to the Record Types section for an overview of what each type of object does and what you can tell OpenCS about these objects.

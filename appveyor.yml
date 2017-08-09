@@ -1,0 +1,69 @@
+version: "{build}"
+
+branches:
+    only:
+        - master
+        - /openmw-.*$/
+        - appveyor
+
+environment:
+    matrix:
+        - msvc: 2013
+        - msvc: 2015
+
+platform:
+    - Win32
+#   - x64
+
+configuration:
+    - Debug
+#   - Release
+
+# For the Qt, Boost, CMake, etc installs
+os: Visual Studio 2015
+
+# We want the git revision for versioning,
+# so shallow clones don't work.
+clone_depth: 1
+
+cache:
+    - C:\projects\openmw\deps\Bullet-2.83.7-msvc2013-win32.7z
+    - C:\projects\openmw\deps\Bullet-2.83.7-msvc2013-win64.7z
+    - C:\projects\openmw\deps\Bullet-2.83.7-msvc2015-win32.7z
+    - C:\projects\openmw\deps\Bullet-2.83.7-msvc2015-win64.7z
+    - C:\projects\openmw\deps\MyGUI-3.2.3-git-msvc2013-win32.7z
+    - C:\projects\openmw\deps\MyGUI-3.2.3-git-msvc2013-win32.7z
+    - C:\projects\openmw\deps\MyGUI-3.2.3-git-msvc2015-win64.7z
+    - C:\projects\openmw\deps\MyGUI-3.2.3-git-msvc2015-win64.7z
+    - C:\projects\openmw\deps\OSG-3.4.0-scrawl-msvc2013-win32.7z
+    - C:\projects\openmw\deps\OSG-3.4.0-scrawl-msvc2013-win32.7z
+    - C:\projects\openmw\deps\OSG-3.4.0-scrawl-msvc2015-win64.7z
+    - C:\projects\openmw\deps\OSG-3.4.0-scrawl-msvc2015-win64.7z
+    - C:\projects\openmw\deps\ffmpeg-3.0.1-dev-win32.7z
+    - C:\projects\openmw\deps\ffmpeg-3.0.1-dev-win64.7z
+    - C:\projects\openmw\deps\ffmpeg-3.0.1-win32.7z
+    - C:\projects\openmw\deps\ffmpeg-3.0.1-win64.7z
+    - C:\projects\openmw\deps\OpenAL-Soft-1.17.2.zip
+    - C:\projects\openmw\deps\SDL2-2.0.4.zip
+
+clone_folder: C:\projects\openmw
+
+install:
+    - set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
+
+before_build:
+    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -u -p %PLATFORM% -v %msvc%
+
+build_script:
+    - cmd: if %PLATFORM%==Win32 set build=MSVC%msvc%_32
+    - cmd: if %PLATFORM%==x64 set build=MSVC%msvc%_64
+    - cmd: msbuild %build%\OpenMW.sln /t:Build /p:Configuration=%configuration% /m:2 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+
+test: off
+
+#notifications:
+#    - provider: Email
+#    to:
+#        -  
+#    on_build_failure: true
+#    on_build_status_changed: true

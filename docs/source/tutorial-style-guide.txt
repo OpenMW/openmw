@@ -1,0 +1,70 @@
+####################
+Tutorial Style Guide
+####################
+
+Please contact Ravenwing about any questions relating to this guide.
+
+Foreword
+--------
+
+I shall try to be as brief as possible without sacrificing clarity, just as you should be when writing documentation.
+The SCOPE of this guide is limited to all non-source code documentation.
+
+References
+----------
+
+-Syntax: reStructuredText (ReST): http://docutils.sourceforge.net/rst.html
+-Parser: Sphinx: http://www.sphinx-doc.org/en/stable/
+-British and English Spelling: https://www.spellzone.com/pages/british-american.cfm
+
+Language
+--------
+
+British English
+Sorry, I'm American and I'll probably have a million relapses,
+but this seems to have been decided and uniformity is key!
+
+Text Wrapping
+-------------
+
+After discussing the various benefits of manual and automatic linefeeds,
+we've come to the conclusion that we should use semantic linefeeds with a hard max at 120 characters.
+Basically this boils down manually inserting a line break where it makes sense within the phrasing.
+I prefer to keep it at commas and periods because those are universal places people pause,
+even while reading in their head.
+It may look a little funny in plain text, but it is readable,
+and none of this makes a difference in the final documentation.
+
+The reason this makes the most sense is GitHub won't text wrap automatically in RST documents,
+and it also compares files based on lines.
+This means you're less likely to run into conflicts and simply makes it easier to view changes.
+
+Indentations
+------------
+
+This isn't as important, especially since Sphinx converts tabs to spaces,
+but I find it much easier to keep large blocks of things aligned if you just tab.
+If you can edit your tab width, please set it to 4 spaces.
+
+Spaces
+------
+
+Use only one space after each sentence. Some people were taught two spaces, but this is a carry-over from typewriters.
+Even though your text editor is probably using monospaced characters like a typewriter,
+the formats Sphinx is converting into will make all the adjustments they need to be beautifully legible.
+
+Commas
+------
+
+Oxford comma. Use it. I know this goes against using British English, but this is technical writing.
+You cannot assume our audience will know from context if the last two items in a list are grouped or not.
+I also prefer parentheticals to commas around gerund phrases.
+
+Files and Extensions
+--------------------
+
+When referring to a filename or filepath use the double back quotes as for inline literals. (e.g. ``morrowind.exe``)
+When referring to a file extension by itself, use ``.lowerCaseExtension``. (e.g. ``.esm``)
+
+If referring to a folder or file by a general name, use *emphasis*
+If referring to a folder by its actual name, even without the path, use ``inline literal``

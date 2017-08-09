@@ -1,0 +1,54 @@
+\section{Windows}
+\subsection{Introduction}
+This section describes the multiple windows interface of the \OCS{} editor. This design principle was chosen in order
+to extend the flexibility of the editor, especially on the multiple screens setups and on environments providing advanced
+windows management features, like for instance: multiple desktops found commonly on many open source desktop environments.
+However, it is enough to have a single large screen to see the advantages of this concept.
+
+OpenCS windows interface is easy to describe and understand. In fact we decided to minimize use of many windows concepts
+applied commonly in various applications. For instance dialog windows are really hard to find in the \OCS. You are free to try,
+though.
+
+Because of this, and the fact that we expect that user is familiar with other applications using windows this section is mostly
+focused on practical ways of organizing work with the \OCS.
+
+\subsection{Basics}
+After starting \OCS{} and choosing content files to use a editor window should show up. It probably does not look surprising:
+there is a menubar at the top, and there is a~large empty area. That is it: a brand new \OCS{} window contains only menubar
+and statusbar. In order to make it a little bit more useful you probably want to enable some panels\footnote{Also known as widgets.}.
+You are free to do so, just try to explore the menubar.
+
+You probably founded out the way to enable and disable some interesting tables, but those will be described later. For now, let's
+just focus on the windows itself.
+
+\paragraph{Creating new windows}
+is easy! Just visit view menu, and use the ``New View'' item. Suddenly, out of the blue a new window will show up. As you would expect,
+it is also blank, and you are free to add any of the \OCS{} panels.
+
+\paragraph{Closing opened window}
+is also easy! Simply close that window decoration button. We suspect that you knew that already, but better to be sure. 
+Closing last \OCS{} window will also terminate application session.
+
+\paragraph{Multi-everything}
+is the main foundation of \OCS{} interface. You are free to create as many windows as you want to, free to populate it with 
+any panels you may want to, and move everything as you wish to -- even if it makes no sense at all. If you just got crazy idea and
+you are wonder if you are able to have one hundred \OCS{} windows showing panels of the same type, well most likely you are
+able to do so.
+
+The principle behind this design decision is easy to see for \BS{} made editor, but maybe not so clear for users who are
+just about to begin their wonderful journey of modding.
+
+\subsection{Advanced}
+So why? Why this is created in such manner. The answer is frankly simple: because it is effective. When creating a mod, you often
+have to work only with just one table. For instance you are just balancing weapons damage and other statistics. It makes sense
+to have all the space for just that one table. More often, you are required to work with two and switch them from time to time.
+All major graphical environments commonly present in operating systems comes with switcher feature, that is a key shortcut to change
+active window. It is very effective and fast when you have only two windows, each holding only one table. Sometimes you have to work
+with two at the time, and with one from time to time. Here, you can have one window holding two tables, and second holding just one.
+
+OpenCS is designed to simply make sense and do not slowdown users. It is as simple as possible (but not simpler), and uses one
+flexible approach in all cases.
+
+There is no point in digging deeper in the windows of \OCS. Let's explore panels, starting with tables.
+
+%We should write some tips and tricks here.

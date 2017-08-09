@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI>
+    <MyGUI type="Widgets">
+        <!-- New widget class definitions -->
+        <Widget name="ImageButton">
+            <Property key="DefaultSkin" value="ImageBox"/>
+            <Property key="Skin" value="ImageBox" group="Plugin" name="ImageButton"/>
+            <Property key="Parent" value="true"/>
+            <Property key="Child" value="true"/>
+            <Parameter key="ImageHighlighted" value="String"/>
+            <Parameter key="ImagePushed" value="String"/>
+            <Parameter key="ImageNormal" value="String"/>
+        </Widget>
+        <Widget name="VBox">
+            <Property key="DefaultSkin" value=""/>
+            <Property key="Skin" value="" group="Plugin" name="VBox"/>
+            <Property key="Parent" value="true"/>
+            <Property key="Child" value="true"/>
+            <Parameter key="Spacing" value="1 int"/>
+            <Parameter key="Padding" value="1 int"/>
+            <Parameter key="AutoResize" value="Bool"/>
+        </Widget>
+        <Widget name="HBox">
+            <Property key="DefaultSkin" value=""/>
+            <Property key="Skin" value="" group="Plugin" name="HBox"/>
+            <Property key="Parent" value="true"/>
+            <Property key="Child" value="true"/>
+            <Parameter key="Spacing" value="1 int"/>
+            <Parameter key="Padding" value="1 int"/>
+            <Parameter key="AutoResize" value="Bool"/>
+        </Widget>
+        <Widget name="AutoSizedButton">
+            <Property key="Base" value="Button"/>
+            <Property key="DefaultSkin" value="MW_Button"/>
+            <Property key="Skin" value="MW_Button" group="Plugin" name="AutoSizedButton"/>
+            <Property key="Parent" value="true"/>
+            <Property key="Child" value="true"/>
+            <Parameter key="ExpandDirection" value="Align"/>
+        </Widget>
+        <Widget name="AutoSizedTextBox">
+            <Property key="Base" value="TextBox"/>
+            <Property key="DefaultSkin" value="SandText"/>
+            <Property key="Skin" value="SandText" group="Plugin" name="AutoSizedTextBox"/>
+            <Property key="Parent" value="true"/>
+            <Property key="Child" value="true"/>
+            <Parameter key="ExpandDirection" value="Align"/>
+        </Widget>
+        <Widget name="AutoSizedEditBox">
+            <Property key="Base" value="EditBox"/>
+            <Property key="DefaultSkin" value="SandText"/>
+            <Property key="Skin" value="SandText" group="Plugin" name="AutoSizedEditBox"/>
+            <Property key="Parent" value="true"/>
+            <Property key="Child" value="true"/>
+            <Parameter key="ExpandDirection" value="Align"/>
+        </Widget>
+        <Widget name="MWList">
+            <Property key="DefaultSkin" value="MW_SimpleList"/>
+            <Property key="Skin" value="MW_SimpleList" group="Plugin" name="MWList"/>
+            <Property key="Parent" value="true"/>
+            <Property key="Child" value="true"/>
+            <Parameter key="ListItemSkin" value="Skin"/>
+        </Widget>
+    </MyGUI>
+    <MyGUI type="Plugin">
+        <Plugin>
+            <Source>./Plugin_MyGUI_OpenMW_Resources</Source>
+            <Source build="Debug">./Plugin_MyGUI_OpenMW_Resources_d</Source>
+        </Plugin>
+    </MyGUI>
+</MyGUI>

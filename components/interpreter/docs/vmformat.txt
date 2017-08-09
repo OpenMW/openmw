@@ -1,0 +1,138 @@
+Note: a word is considered to be 32 bit long.
+
+Header (4 words):
+word: number of words in code block
+word: number of words in integer literal block
+word: number of words in float literal block
+word: number of words in string literal block
+
+Body (variable length):
+code block
+integer literal block (contains a collection of 1 word long integers)
+float literal block (contains a collection of 1 word long floating point numbers)
+string literal block (contains a collection of strings of variable length, word-padded)
+
+Code bit-patterns:
+
+3322222222221111111111
+10987654321098765432109876543210
+00ccccccAAAAAAAAAAAAAAAAAAAAAAAA segment 0: 64 opcodes, 1 24-bit argument
+01ccccccAAAAAAAAAAAABBBBBBBBBBBB segment 1: 64 opcodes, 2 12-bit arguments
+10ccccccccccAAAAAAAAAAAAAAAAAAAA segment 2: 1024 opcodes, 1 20-bit argument
+110000ccccccccccccccccccAAAAAAAA segment 3: 262144 opcodes, 1 8-bit argument
+110001ccccccccccAAAAAAAABBBBBBBB segment 4: 1024 opcodes, 2 8-bit arguments
+110010cccccccccccccccccccccccccc segment 5: 67108864 opcodes, no arguments
+other bit-patterns reserved
+
+legent:
+c: code
+A: argument 0
+B: argument 1
+
+Segment 0:
+op  0: push arg0
+op  1: move pc ahead by arg0
+op  2: move pc back by arg0
+opcodes 3-31 unused
+opcodes 32-63 reserved for extensions
+
+Segment 1:
+opcodes 0-31 unused
+opcodes 32-63 reserved for extensions
+
+Segment 2:
+opcodes 0-511 unused
+opcodes 512-1023 reserved for extensions
+
+Segment 3:
+op    0: show message box with message string literal index in stack[0];
+         buttons (if any) in stack[arg0]..stack[1];
+         additional arguments (if any) in stack[arg0+n]..stack[arg0+1];
+         n is determined according to the message string
+         all arguments are removed from stack
+opcodes 1-131071 unused
+opcodes 131072-262143 reserved for extensions
+
+Segment 4:
+opcodes 0-511 unused
+opcodes 512-1023 reserved for extensions
+
+Segment 5:
+op   0: store stack[0] in local short stack[1] and pop twice
+op   1: store stack[0] in local long stack[1] and pop twice
+op   2: store stack[0] in local float stack[1] and pop twice
+op   3: convert stack[0] from integer to float
+op   4: replace stack[0] with integer literal index stack[0]
+op   5: replace stack[0] with float literal index stack[0]
+op   6: convert stack[0] from float to integer
+op   7: invert sign of int value stack[0]
+op   8: invert sign of float value stack[0]
+op   9: add (integer) stack[0] to stack[1], pop twice, push result
+op  10: add (float) stack[0] to stack[1], pop twice, push result
+op  11: sub (integer) stack[1] from stack[0], pop twice, push result
+op  12: sub (float) stack[1] from stack[0], pop twice, push result
+op  13: mul (integer) stack[0] with stack[1], pop twice, push result
+op  14: mul (float) stack[0] with stack[1], pop twice, push result
+op  15: div (integer) stack[1] by stack[0], pop twice, push result
+op  16: div (float) stack[1] by stack[0], pop twice, push result
+op  17: convert stack[1] from integer to float
+op  18: convert stack[1] from float to integer
+op  19: take square root of stack[0] (float)
+op  20: return
+op  21: replace stack[0] with local short stack[0]
+op  22: replace stack[0] with local long stack[0]
+op  23: replace stack[0] with local float stack[0]
+op  24: skip next instruction if stack[0]==0; pop
+op  25: skip next instruction if stack[0]!=0; pop
+op  26: compare (intger) stack[1] with stack[0]; pop twice; push 1 if equal, 0 else
+op  27: compare (intger) stack[1] with stack[0]; pop twice; push 1 if no equal, 0 else
+op  28: compare (intger) stack[1] with stack[0]; pop twice; push 1 if lesser than, 0 else
+op  29: compare (intger) stack[1] with stack[0]; pop twice; push 1 if lesser or equal, 0 else
+op  30: compare (intger) stack[1] with stack[0]; pop twice; push 1 if greater than, 0 else
+op  31: compare (intger) stack[1] with stack[0]; pop twice; push 1 if greater or equal, 0 else
+op  32: compare (float) stack[1] with stack[0]; pop twice; push 1 if equal, 0 else
+op  33: compare (float) stack[1] with stack[0]; pop twice; push 1 if no equal, 0 else
+op  34: compare (float) stack[1] with stack[0]; pop twice; push 1 if lesser than, 0 else
+op  35: compare (float) stack[1] with stack[0]; pop twice; push 1 if lesser or equal, 0 else
+op  36: compare (float) stack[1] with stack[0]; pop twice; push 1 if greater than, 0 else
+op  37: compare (float) stack[1] with stack[0]; pop twice; push 1 if greater or equal, 0 else
+op  38: push 1 if game is in menu mode, 0 else
+op  39: store stack[0] in global short stack[1] and pop twice
+op  40: store stack[0] in global long stack[1] and pop twice
+op  41: store stack[0] in global float stack[1] and pop twice
+op  42: replace stack[0] with global short stack[0]
+op  43: replace stack[0] with global long stack[0]
+op  44: replace stack[0] with global float stack[0]
+op  45: replace stack[0] with a random integer value in the range [0, stack[0]-1]
+op  46: replace stack[0] with 1, if global script stack[0] is running, 0 else
+op  47: start script stack[0] and pop
+op  48: stop script stack[0] and pop
+op  49: replace stack[0] with distance between implicit reference and a reference of ID stack[0]
+op  50: push frame duration (float)
+op  51: enable implicit reference
+op  52: disable implicit reference
+op  53: push 1, if implicit reference is disabled, 0 else
+op  54: explicit reference = stack[0]; pop; enable explicit reference
+op  55: explicit reference = stack[0]; pop; disable explicit reference
+op  56: explicit reference = stack[0]; pop; push 1, if explicit reference is disabled, 0 else
+op  57: explicit reference = stack[0]; pop;
+        replace stack[0] with distance between explicit reference and a reference of ID stack[0]
+op  58: report string literal index in stack[0];
+         additional arguments (if any) in stack[n]..stack[1];
+         n is determined according to the message string
+         all arguments are removed from stack
+op 59: store stack[0] in member short stack[2] of object with ID stack[1]
+op 60: store stack[0] in member long stack[2] of object with ID stack[1]
+op 61: store stack[0] in member float stack[2] of object with ID stack[1]
+op 62: replace stack[0] with member short stack[1] of object with ID stack[0]
+op 63: replace stack[0] with member short stack[1] of object with ID stack[0]
+op 64: replace stack[0] with member short stack[1] of object with ID stack[0]
+op 65: store stack[0] in member short stack[2] of global script with ID stack[1]
+op 66: store stack[0] in member long stack[2] of global script with ID stack[1]
+op 67: store stack[0] in member float stack[2] of global script with ID stack[1]
+op 68: replace stack[0] with member short stack[1] of global script with ID stack[0]
+op 69: replace stack[0] with member short stack[1] of global script with ID stack[0]
+op 70: replace stack[0] with member short stack[1] of global script with ID stack[0]
+op 71: explicit reference (target) = stack[0]; pop; start script stack[0] and pop
+opcodes 72-33554431 unused
+opcodes 33554432-67108863 reserved for extensions

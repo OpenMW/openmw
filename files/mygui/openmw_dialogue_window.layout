@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 588 433" name="_Main">
+        <Property key="MinSize" value="380 230"/>
+
+        <Widget type="Widget" skin="MW_Box" position="8 8 381 381" align="Stretch" name="Client"/>
+
+        <Widget type="Widget" position="15 15 364 370" align="Left Top Stretch">
+            <Widget type="BookPage" skin="MW_BookPage" position="0 0 364 370" name="History" align="Left Top Stretch">
+            </Widget>
+        </Widget>
+
+        <Widget type="MWScrollBar" skin="MW_VScroll" position="370 13 14 371" align="Right VStretch" name="VScroll">
+            <Property key="Visible" value="false"/>
+        </Widget>
+
+        <!-- The disposition bar-->
+        <Widget type="ProgressBar" skin="MW_Progress_Blue" position="398 8 166 18"
+            align="Right Top" name="Disposition">
+            <Widget type="TextBox" skin="ProgressText" position="0 0 166 14" name="DispositionText" align="Right VCenter">
+                <Property key="NeedMouse" value="false"/>
+             </Widget>
+        </Widget>
+        <!-- The list of topics -->
+        <Widget type="MWList" skin="MW_SimpleList" position="398 31 166 328" name="TopicsList" align="Right VStretch">
+        </Widget>
+
+        <!-- The Goodbye button -->
+        <Widget type="Button" skin="MW_Button" position="398 366 166 23" name="ByeButton" align="Right Bottom">
+            <Property key="Caption" value="#{sGoodbye}"/>
+        </Widget>
+    </Widget>
+</MyGUI>
