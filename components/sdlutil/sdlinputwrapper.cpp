@@ -1,7 +1,6 @@
 #include "sdlinputwrapper.hpp"
 
 #include <iostream>
-#include <stdexcept>
 
 #include <osgViewer/Viewer>
 
@@ -423,7 +422,6 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         mKeyMap.insert( KeyMap::value_type(SDLK_o, OIS::KC_O) );
         mKeyMap.insert( KeyMap::value_type(SDLK_p, OIS::KC_P) );
         mKeyMap.insert( KeyMap::value_type(SDLK_RETURN, OIS::KC_RETURN) );
-        mKeyMap.insert( KeyMap::value_type(SDLK_LCTRL, OIS::KC_LCONTROL));
         mKeyMap.insert( KeyMap::value_type(SDLK_a, OIS::KC_A) );
         mKeyMap.insert( KeyMap::value_type(SDLK_s, OIS::KC_S) );
         mKeyMap.insert( KeyMap::value_type(SDLK_d, OIS::KC_D) );
@@ -499,9 +497,19 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         mKeyMap.insert( KeyMap::value_type(SDLK_INSERT, OIS::KC_INSERT) );
         mKeyMap.insert( KeyMap::value_type(SDLK_DELETE, OIS::KC_DELETE) );
         mKeyMap.insert( KeyMap::value_type(SDLK_KP_ENTER, OIS::KC_NUMPADENTER) );
-        mKeyMap.insert( KeyMap::value_type(SDLK_RCTRL, OIS::KC_RCONTROL) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_APPLICATION, OIS::KC_APPS) );
+
+//Qt switches the Ctrl and Meta keys on macOS. See http://doc.qt.io/qt-5/qkeysequence.html
+#if defined(__APPLE__)
+        mKeyMap.insert( KeyMap::value_type(SDLK_LGUI, OIS::KC_LCONTROL) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_RGUI, OIS::KC_RCONTROL) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_LCTRL, OIS::KC_LWIN));
+        mKeyMap.insert( KeyMap::value_type(SDLK_RCTRL, OIS::KC_RWIN) );
+#else
         mKeyMap.insert( KeyMap::value_type(SDLK_LGUI, OIS::KC_LWIN) );
         mKeyMap.insert( KeyMap::value_type(SDLK_RGUI, OIS::KC_RWIN) );
-        mKeyMap.insert( KeyMap::value_type(SDLK_APPLICATION, OIS::KC_APPS) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_LCTRL, OIS::KC_LCONTROL));
+        mKeyMap.insert( KeyMap::value_type(SDLK_RCTRL, OIS::KC_RCONTROL) );
+#endif
     }
 }
