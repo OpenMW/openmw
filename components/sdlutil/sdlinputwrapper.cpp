@@ -499,7 +499,8 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         mKeyMap.insert( KeyMap::value_type(SDLK_KP_ENTER, OIS::KC_NUMPADENTER) );
         mKeyMap.insert( KeyMap::value_type(SDLK_APPLICATION, OIS::KC_APPS) );
 
-//Qt switches the Ctrl and Meta keys on macOS. See http://doc.qt.io/qt-5/qkeysequence.html
+//The function of the Ctrl and Meta keys are switched on macOS compared to other platforms.
+//For instance, Cmd+C versus Ctrl+C to copy from the system clipboard
 #if defined(__APPLE__)
         mKeyMap.insert( KeyMap::value_type(SDLK_LGUI, OIS::KC_LCONTROL) );
         mKeyMap.insert( KeyMap::value_type(SDLK_RGUI, OIS::KC_RCONTROL) );
