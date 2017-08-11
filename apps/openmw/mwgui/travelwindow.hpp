@@ -24,6 +24,8 @@ namespace MWGui
         public:
             TravelWindow();
 
+            virtual void onFrame();
+
             virtual void exit();
 
             void startTravel(const MWWorld::Ptr& actor);
@@ -36,8 +38,17 @@ namespace MWGui
 
             MyGUI::ScrollView* mDestinationsView;
 
+            struct TravelTarget
+            {
+                ESM::Position pos;
+                std::string cellname;
+                bool interior;
+            };
+            TravelTarget mTravelTarget;
+
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onTravelButtonClick(MyGUI::Widget* _sender);
+            void travel();
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
             void addDestination(const std::string& name, ESM::Position pos, bool interior);
             void clearDestinations();
