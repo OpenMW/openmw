@@ -72,7 +72,7 @@ add_openmw_dir (mwworld
     )
 
 add_openmw_dir (mwphysics
-    physicssystem trace collisiontype actor convert
+    physicssystem trace collisiontype actor convert closestcollision
     )
 
 add_openmw_dir (mwclass
