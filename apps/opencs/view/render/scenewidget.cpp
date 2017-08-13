@@ -393,6 +393,7 @@ void SceneWidget::selectNavigationMode (const std::string& mode)
         mCurrentCamControl->setCamera(NULL);
         mCurrentCamControl = mOrbitCamControl;
         mOrbitCamControl->setCamera(getCamera());
+        mOrbitCamControl->reset();
     }
 }
 
