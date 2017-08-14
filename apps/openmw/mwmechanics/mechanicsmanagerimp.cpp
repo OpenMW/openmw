@@ -907,6 +907,43 @@ namespace MWMechanics
         return ownerFound != owners.end();
     }
 
+    void MechanicsManager::confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count)
+    {
+        if (player != getPlayer())
+            return;
+
+        const std::string itemId = Misc::StringUtils::lowerCase(item.getCellRef().getRefId());
+
+        StolenItemsMap::iterator stolenIt = mStolenItems.find(itemId);
+        if (stolenIt == mStolenItems.end())
+            return;
+
+        Owner owner;
+        owner.first = victim.getCellRef().getRefId();
+        owner.second = false;
+
+        Misc::StringUtils::lowerCaseInPlace(owner.first);
+
+        // decrease count of stolen items
+        int toRemove = std::min(count, mStolenItems[itemId][owner]);
+        mStolenItems[itemId][owner] -= toRemove;
+        if (mStolenItems[itemId][owner] == 0)
+        {
+            // erase owner from stolen items owners
+            OwnerMap& owners = stolenIt->second;
+            OwnerMap::iterator ownersIt = owners.find(owner);
+            if (ownersIt != owners.end())
+                owners.erase(ownersIt);
+        }
+
+        MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
+
+        // move items from player to owner and report about theft
+        victim.getClass().getContainerStore(victim).add(item, toRemove, victim);
+        store.remove(item, toRemove, player);
+        commitCrime(player, victim, OT_Theft, item.getClass().getValue(item) * toRemove);
+    }
+
     void MechanicsManager::confiscateStolenItems(const MWWorld::Ptr &player, const MWWorld::Ptr &targetContainer)
     {
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);

@@ -206,6 +206,8 @@ namespace MWMechanics
 
             virtual void cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId);
 
+            virtual void confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count);
+
         private:
             void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0);
