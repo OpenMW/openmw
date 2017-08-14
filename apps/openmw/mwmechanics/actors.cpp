@@ -321,7 +321,7 @@ namespace MWMechanics
                 // Also set the same hit attempt actor. Otherwise, if fighting the player, they may stop combat
                 // if the player gets out of reach, while the ally would continue combat with the player
                 creatureStats1.setHitAttemptActorId(it->getClass().getCreatureStats(*it).getHitAttemptActorId());
-                return;             
+                return;
             }
 
             // If there's been no attack attempt yet but an ally of actor1 is in combat with actor2, become aggressive to actor2
@@ -335,7 +335,7 @@ namespace MWMechanics
         bool isPlayerFollowerOrEscorter = std::find(playerAllies.begin(), playerAllies.end(), actor1) != playerAllies.end();
 
         // If actor2 and at least one actor2 are in combat with actor1, actor1 and its allies start combat with them
-        // Doesn't apply for player followers/escorters        
+        // Doesn't apply for player followers/escorters
         if (!aggressive && !isPlayerFollowerOrEscorter)
         {
             // Check that actor2 is in combat with actor1
@@ -394,7 +394,7 @@ namespace MWMechanics
                     aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
             }
         }
-        
+
         // Make guards go aggressive with creatures that are in combat, unless the creature is a follower or escorter
         if (actor1.getClass().isClass(actor1, "Guard") && !actor2.getClass().isNpc())
         {
@@ -422,6 +422,15 @@ namespace MWMechanics
 
             if (LOS)
                 MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
+                if (!againstPlayer) // start combat between each other if engaging actor is not one of the player followers
+                {
+                    std::set<MWWorld::Ptr> playerFollowers;
+                    getActorsSidingWith(getPlayer(), playerFollowers);
+
+                    if (playerFollowers.find(actor1) == playerFollowers.end())
+                        MWBase::Environment::get().getMechanicsManager()->startCombat(actor2, actor1);
+                }
+            }
         }
     }
 
@@ -699,23 +708,26 @@ namespace MWMechanics
                         ESM::MagicEffect::SunDamage, ESM::MagicEffect::DamageHealth, ESM::MagicEffect::AbsorbHealth
                     };
 
-                    for (unsigned int i=0; i<sizeof(damageEffects)/sizeof(int); ++i)
+                    for (unsigned int i=0; i < sizeof(damageEffects) / sizeof(int); ++i)
                     {
                         if (damageEffects[i] == effectId)
                             isDamageEffect = true;
                     }
 
                     MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.mCasterActorId);
-                    if (isDamageEffect && caster == player)
-                        killedByPlayer = true;
+                    if (isDamageEffect)
+                    {
+                        if (caster == player)
+                            killedByPlayer = true;
+
+                        MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, caster);
+                    }
                 }
             }
-            if (killedByPlayer)
-            {
-                MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, player);
-                if (player.getClass().getNpcStats(player).isWerewolf())
-                    player.getClass().getNpcStats(player).addWerewolfKill();
-            }
+
+            // TODO: Should actors siding with the player or siding actor or player summon also add werewolf kill?
+            if (killedByPlayer && player.getClass().getNpcStats(player).isWerewolf())
+                player.getClass().getNpcStats(player).addWerewolfKill();
         }
 
         // TODO: dirty flag for magic effects to avoid some unnecessary work below?

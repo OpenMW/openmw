@@ -1016,13 +1016,18 @@ namespace MWMechanics
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
 
-
-    bool MechanicsManager::commitCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg, bool victimAware)
+    bool MechanicsManager::commitCrime(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, OffenseType type, int arg, bool victimAware)
     {
         // NOTE: victim may be empty
+        const MWWorld::Ptr& player = getPlayer();
 
-        // Only player can commit crime
-        if (player != getPlayer())
+        // Only player and his followers can commit crime
+        bool accusePlayer = attacker == player;
+
+        std::set<MWWorld::Ptr> playerFollowers;
+        getActorsSidingWith(player, playerFollowers);
+
+        if (!accusePlayer && playerFollowers.find(attacker) == playerFollowers.end())
             return false;
 
         // Find all the actors within the alarm radius
@@ -1038,17 +1043,15 @@ namespace MWMechanics
         if (!victim.isEmpty() && (from - victim.getRefData().getPosition().asVec3()).length2() > radius*radius)
             neighbors.push_back(victim);
 
-        // get the player's followers / allies (works recursively) that will not report crimes
-        std::set<MWWorld::Ptr> playerFollowers;
-        getActorsSidingWith(player, playerFollowers);
-
         // Did anyone see it?
         bool crimeSeen = false;
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
             if (*it == player)
                 continue; // skip player
-            if (it->getClass().getCreatureStats(*it).isDead())
+
+            // Skip if neighbor actor is dead or is one of the player followers
+            if (it->getClass().getCreatureStats(*it).isDead() || playerFollowers.find(*it) != playerFollowers.end())
                 continue;
 
             if ((*it == victim && victimAware)
@@ -1062,9 +1065,6 @@ namespace MWMechanics
                     continue;
 
                 if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
-                    continue;
-
-                if (playerFollowers.find(*it) != playerFollowers.end())
                     continue;
 
                 if (type == OT_Theft || type == OT_Pickpocket)
@@ -1127,6 +1127,7 @@ namespace MWMechanics
         }
 
         // Make surrounding actors within alarm distance respond to the crime
+        // TODO: Vanilla doesn't make neighbors attack player if one of his follower/summon attacks first (probably vanilla bug)
         std::vector<MWWorld::Ptr> neighbors;
 
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
@@ -1164,13 +1165,23 @@ namespace MWMechanics
 
         bool reported = false;
 
+        // Get player followers, summoned creatures, follower followers, and so on that will not react to player crime
+        std::set<MWWorld::Ptr> playerFollowers;
+        getActorsSidingWith(player, playerFollowers);
+
         // Tell everyone (including the original reporter) in alarm range
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
-            if (   *it == player
-                || !it->getClass().isNpc() || it->getClass().getCreatureStats(*it).isDead()) continue;
+            if (*it == player ||
+                    !it->getClass().isNpc() ||
+                    it->getClass().getCreatureStats(*it).isDead())
+                continue;
 
             if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
+                continue;
+
+            // Player followers should not stand against the player
+            if (playerFollowers.find(*it) != playerFollowers.end())
                 continue;
 
             // Will the witness report the crime?
@@ -1332,7 +1343,7 @@ namespace MWMechanics
 
     void MechanicsManager::actorKilled(const MWWorld::Ptr &victim, const MWWorld::Ptr &attacker)
     {
-        if (attacker.isEmpty() || attacker != getPlayer())
+        if (attacker.isEmpty())
             return;
 
         if (victim == attacker)
@@ -1348,7 +1359,6 @@ namespace MWMechanics
         // for bystanders it is not possible to tell who attacked first, anyway.
         if (victimStats.getCrimeId() != -1)
             commitCrime(attacker, victim, MWBase::MechanicsManager::OT_Murder);
-
     }
 
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)
