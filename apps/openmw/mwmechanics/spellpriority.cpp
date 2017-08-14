@@ -25,6 +25,14 @@ namespace
         const MWMechanics::ActiveSpells& activeSpells = actor.getClass().getCreatureStats(actor).getActiveSpells();
         for (MWMechanics::ActiveSpells::TIterator it = activeSpells.begin(); it != activeSpells.end(); ++it)
         {
+            // if the effect filter is not specified, take in account only spells effects. Leave potions, enchanted items etc.
+            if (effectFilter == -1)
+            {
+                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);
+                if (!spell || spell->mData.mType != ESM::Spell::ST_Spell)
+                    continue;
+            }
+
             const MWMechanics::ActiveSpells::ActiveSpellParams& params = it->second;
             for (std::vector<MWMechanics::ActiveSpells::ActiveEffect>::const_iterator effectIt = params.mEffects.begin();
                 effectIt != params.mEffects.end(); ++effectIt)
