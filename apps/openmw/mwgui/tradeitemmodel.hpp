@@ -16,6 +16,7 @@ namespace MWGui
         TradeItemModel (ItemModel* sourceModel, const MWWorld::Ptr& merchant);
 
         virtual ItemStack getItem (ModelIndex index);
+        virtual ModelIndex getIndex(ItemStack item);
         virtual size_t getItemCount();
 
         virtual void update();

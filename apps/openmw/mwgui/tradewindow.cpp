@@ -302,11 +302,14 @@ namespace MWGui
         }
 
         // check if the player is attempting to sell back an item stolen from this actor
+        bool crimeCommited = false;
         for (std::vector<ItemStack>::iterator it = merchantBought.begin(); it != merchantBought.end(); ++it)
         {
             if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(it->mBase.getCellRef().getRefId(),
                                                                                    mPtr.getCellRef().getRefId()))
             {
+                crimeCommited = true;
+
                 std::string msg = gmst.find("sNotifyMessage49")->getString();
                 if (msg.find("%s") != std::string::npos)
                     msg.replace(msg.find("%s"), 2, it->mBase.getClass().getName(it->mBase));
@@ -314,10 +317,34 @@ namespace MWGui
                 MWBase::Environment::get().getMechanicsManager()->commitCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
                                                                               it->mBase.getClass().getValue(it->mBase)
                                                                               * it->mCount, true);
-                onCancelButtonClicked(mCancelButton);
-                MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
-                return;
             }
+        }
+
+        if (crimeCommited)
+        {
+            //transfer all items that weren't stolen items back to player
+            int pew = 1;
+            for (std::vector<ItemStack>::iterator it = merchantBought.begin(); it != merchantBought.end(); ++it)
+            {
+                if (!MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(it->mBase.getCellRef().getRefId(),
+                    mPtr.getCellRef().getRefId()))
+                {
+                    ItemModel::ModelIndex index = mTradeModel->getIndex(*it);
+                    if (index == -1)
+                        continue;
+
+                    mTradeModel->returnItemBorrowedToUs(index, it->mCount);
+                    playerItemModel->returnItemBorrowedFromUs(index, mTradeModel, it->mCount);
+                } 
+            }
+
+            //Transfer only items that we stole to the merchant
+            mTradeModel->transferItems();
+            playerItemModel->transferItems();
+
+            onCancelButtonClicked(mCancelButton);
+            MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+            return;
         }
 
         bool offerAccepted = mTrading.haggle(player, mPtr, mCurrentBalance, mCurrentMerchantOffer);

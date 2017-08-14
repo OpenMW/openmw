@@ -24,6 +24,18 @@ namespace MWGui
         return mItems[index];
     }
 
+    ItemModel::ModelIndex TradeItemModel::getIndex(ItemStack item)
+    {
+        size_t i = 0;
+        for (std::vector<ItemStack>::iterator it = mItems.begin(); it != mItems.end(); ++it)
+        {
+            if (*it == item)
+                return i;
+            ++i;
+        }
+        return -1;
+    }
+
     size_t TradeItemModel::getItemCount()
     {
         return mItems.size();
@@ -78,6 +90,7 @@ namespace MWGui
     {
         ItemStack item = source->getItem(itemIndex);
         item.mCount = count;
+        item.mType = ItemStack::Type_Barter;
         borrowImpl(item, mBorrowedToUs);
     }
 
