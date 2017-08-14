@@ -1067,11 +1067,6 @@ namespace MWMechanics
                 if (playerFollowers.find(*it) != playerFollowers.end())
                     continue;
 
-                if (type == OT_Theft || type == OT_Pickpocket)
-                    MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
-                else if (type == OT_Trespassing)
-                    MWBase::Environment::get().getDialogueManager()->say(*it, "intruder");
-
                 crimeSeen = true;
             }
         }
@@ -1173,10 +1168,25 @@ namespace MWMechanics
             if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
                 continue;
 
+            // Player's followers should not attack player, or try to arrest him
+            if (it->getClass().getCreatureStats(*it).getAiSequence().hasPackage(AiPackage::TypeIdFollow))
+            {
+                std::set<MWWorld::Ptr> playerFollowers;
+                getActorsSidingWith(player, playerFollowers);
+
+                if (playerFollowers.find(*it) != playerFollowers.end())
+                    continue;
+            }
+
             // Will the witness report the crime?
             if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= 100)
             {
                 reported = true;
+
+                if (type == OT_Theft || type == OT_Pickpocket)
+                    MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
+                else if (type == OT_Trespassing)
+                    MWBase::Environment::get().getDialogueManager()->say(*it, "intruder");
             }
 
             if (it->getClass().isClass(*it, "guard"))
@@ -1190,16 +1200,6 @@ namespace MWMechanics
 
                 if (!it->getClass().getCreatureStats(*it).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
                 {
-                    // Player's followers should not try to arrest player
-                    if (it->getClass().getCreatureStats(*it).getAiSequence().hasPackage(AiPackage::TypeIdFollow))
-                    {
-                        std::set<MWWorld::Ptr> playerFollowers;
-                        getActorsSidingWith(player, playerFollowers);
-
-                        if (playerFollowers.find(*it) != playerFollowers.end())
-                            continue;
-                    }
-
                     it->getClass().getCreatureStats(*it).getAiSequence().stack(AiPursue(player), *it);
                 }
             }
