@@ -92,6 +92,7 @@ namespace Compiler
             extensions.registerInstruction ("coc", "S", opcodeCOC);
             extensions.registerInstruction ("centeroncell", "S", opcodeCOC);
             extensions.registerInstruction ("coe", "ll", opcodeCOE);
+            extensions.registerInstruction ("transport", "Sffff", opcodeTransport);
             extensions.registerInstruction ("centeronexterior", "ll", opcodeCOE);
             extensions.registerInstruction ("setwaterlevel", "f", opcodeSetWaterLevel);
             extensions.registerInstruction ("modwaterlevel", "f", opcodeModWaterLevel);

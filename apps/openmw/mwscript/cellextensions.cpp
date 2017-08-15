@@ -199,6 +199,36 @@ namespace MWScript
                 }
         };
 
+        /// A command to transport the player and all his followers to make nice teleport-rings possible
+        // args: 'cell' x y z orientation
+        class OpTransport : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    std::string cell = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    ESM::Position pos;
+                    pos.pos[0] = runtime[0].mFloat;
+                    runtime.pop();
+                    pos.pos[1] = runtime[0].mFloat;
+                    runtime.pop();
+                    pos.pos[2] = runtime[0].mFloat;
+                    runtime.pop();
+                    float zRot = runtime[0].mFloat;
+                    runtime.pop();
+
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    MWWorld::Ptr playerPtr = world->getPlayerPtr();
+                    MWWorld::ActionTeleport(cell, pos, true).execute(playerPtr);
+                    float ax = playerPtr.getRefData().getPosition().rot[0];
+                    float ay = playerPtr.getRefData().getPosition().rot[1];
+                    MWBase::Environment::get().getWorld()->rotateObject(playerPtr,ax,ay,osg::DegreesToRadians(zRot));
+                }
+        };
+
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -210,6 +240,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Cell::opcodeGetWaterLevel, new OpGetWaterLevel);
             interpreter.installSegment5 (Compiler::Cell::opcodeSetWaterLevel, new OpSetWaterLevel);
             interpreter.installSegment5 (Compiler::Cell::opcodeModWaterLevel, new OpModWaterLevel);
+            interpreter.installSegment5 (Compiler::Cell::opcodeTransport, new OpTransport);
         }
     }
 }
