@@ -77,6 +77,7 @@ namespace Compiler
         const int opcodeCellChanged = 0x2000000;
         const int opcodeCOC = 0x2000026;
         const int opcodeCOE = 0x2000226;
+        const int opcodeTransport = 0x2002226;
         const int opcodeGetInterior = 0x2000131;
         const int opcodeGetPCCell = 0x2000136;
         const int opcodeGetWaterLevel = 0x2000141;
