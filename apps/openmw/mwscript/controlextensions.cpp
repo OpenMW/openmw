@@ -9,12 +9,14 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/ptr.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/movement.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -167,7 +169,11 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-                    runtime.push (ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run));
+                    const MWWorld::Class &cls = ptr.getClass();
+
+                    bool isRunning = MWBase::Environment::get().getMechanicsManager()->isRunning(ptr);
+
+                    runtime.push (isRunning && cls.getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run));
                 }
         };
 
@@ -177,8 +183,12 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-                    runtime.push (ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Sneak));
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    const MWWorld::Class &cls = ptr.getClass();
+
+                    bool isSneaking = MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr);
+
+                    runtime.push (isSneaking && cls.getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Sneak));
                 }
         };
 

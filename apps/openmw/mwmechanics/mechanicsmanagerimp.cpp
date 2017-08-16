@@ -422,6 +422,16 @@ namespace MWMechanics
         mObjects.update(duration, paused);
     }
 
+    bool MechanicsManager::isRunning(const MWWorld::Ptr& ptr)
+    {
+        return mActors.isRunning(ptr);
+    }
+
+    bool MechanicsManager::isSneaking(const MWWorld::Ptr& ptr)
+    {
+        return mActors.isSneaking(ptr);
+    }
+
     void MechanicsManager::rest(bool sleep)
     {
         mActors.rest(sleep);
