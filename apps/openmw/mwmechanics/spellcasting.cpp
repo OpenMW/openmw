@@ -673,7 +673,7 @@ namespace MWMechanics
         }
         else if (target.getClass().isActor() && effectId == ESM::MagicEffect::Dispel)
         {
-            target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude);
+            target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude, true);
             return true;
         }
         else if (target.getClass().isActor() && target == getPlayer())
