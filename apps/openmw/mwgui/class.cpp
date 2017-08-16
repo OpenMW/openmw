@@ -483,7 +483,7 @@ namespace MWGui
 
     std::string CreateClassDialog::getName() const
     {
-        return mEditName->getCaption();
+        return mEditName->getOnlyText();
     }
 
     std::string CreateClassDialog::getDescription() const
