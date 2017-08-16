@@ -373,7 +373,7 @@ namespace MWGui
             return;
         }
 
-        if (mNameEdit->getCaption () == "")
+        if (mNameEdit->getOnlyText() == "")
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage10}");
             return;
@@ -394,7 +394,7 @@ namespace MWGui
             return;
         }
 
-        mSpell.mName = mNameEdit->getCaption();
+        mSpell.mName = mNameEdit->getOnlyText();
 
         int price = MyGUI::utility::parseInt(mPriceLabel->getCaption());
 
