@@ -271,7 +271,6 @@ namespace MWSound
         return sound;
     }
 
-
     // Gets the combined volume settings for the given sound type
     float SoundManager::volumeFromType(PlayType type) const
     {
@@ -298,7 +297,6 @@ namespace MWSound
         return volume;
     }
 
-
     void SoundManager::stopMusic()
     {
         if(mMusic)
@@ -311,6 +309,7 @@ namespace MWSound
         if(!mOutput->isInitialized())
             return;
         std::cout <<"Playing "<<filename<< std::endl;
+        mLastPlayedMusic = filename;
         try {
             stopMusic();
 
@@ -375,12 +374,17 @@ namespace MWSound
         if(filelist.empty())
             return;
 
-        //Do a Fisher-Yates shuffle
+        // Do a Fisher-Yates shuffle
         if(mMusicFiles.size() == 0)
             for(int it = 0; it < filelist.size(); it++)
                 mMusicToPlay.push_back(it);
 
         int i = Misc::Rng::rollDice(mMusicToPlay.size());
+
+        // Fix last played music being the same after another shuffle
+        if(filelist[mMusicToPlay[i]] == mLastPlayedMusic)
+            i = (i+1) % mMusicToPlay.size();
+
         advanceMusic(filelist[mMusicToPlay[i]]);
         mMusicToPlay.erase(mMusicToPlay.begin()+i);
     }
