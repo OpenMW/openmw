@@ -314,6 +314,8 @@ namespace MWWorld
         mTeleportEnabled = true;
         mLevitationEnabled = true;
 
+        setPlayerTraveling(false);
+
         fillGlobalVariables();
     }
 
