@@ -271,7 +271,6 @@ namespace MWSound
         return sound;
     }
 
-
     // Gets the combined volume settings for the given sound type
     float SoundManager::volumeFromType(PlayType type) const
     {
@@ -297,7 +296,6 @@ namespace MWSound
         }
         return volume;
     }
-
 
     void SoundManager::stopMusic()
     {
@@ -367,7 +365,8 @@ namespace MWSound
             }
 
             mMusicFiles[mCurrentPlaylist] = filelist;
-
+            for(int it = 0; it < filelist.size(); it++)
+                mMusicToPlay.push_back(it);
         }
         else
             filelist = mMusicFiles[mCurrentPlaylist];
@@ -375,15 +374,19 @@ namespace MWSound
         if(filelist.empty())
             return;
 
-        int i = Misc::Rng::rollDice(filelist.size());
+        // Do a Fisher-Yates shuffle
+        if(mMusicFiles.size() == 0)
+            for(int it = 0; it < filelist.size(); it++)
+                mMusicToPlay.push_back(it);
 
-        // Don't play the same music track twice in a row
-        if (filelist[i] == mLastPlayedMusic)
-        {
-            i = (i+1) % filelist.size();
-        }
+        int i = Misc::Rng::rollDice(mMusicToPlay.size());
 
-        advanceMusic(filelist[i]);
+        // Fix last played music being the same after another shuffle
+        if(filelist[mMusicToPlay[i]] == mLastPlayedMusic)
+            i = (i+1) % mMusicToPlay.size();
+
+        advanceMusic(filelist[mMusicToPlay[i]]);
+        mMusicToPlay.erase(mMusicToPlay.begin()+i);
     }
 
     bool SoundManager::isMusicPlaying()
