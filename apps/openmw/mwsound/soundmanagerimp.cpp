@@ -367,7 +367,7 @@ namespace MWSound
 
             mMusicFiles[mCurrentPlaylist] = filelist;
             for(int it = 0; it < filelist.size(); it++)
-                mLastPlayedMusic.push_back(it);
+                mMusicToPlay.push_back(it);
         }
         else
             filelist = mMusicFiles[mCurrentPlaylist];
@@ -378,11 +378,11 @@ namespace MWSound
         //Do a Fisher-Yates shuffle
         if(mMusicFiles.size() == 0)
             for(int it = 0; it < filelist.size(); it++)
-                mLastPlayedMusic.push_back(it);
+                mMusicToPlay.push_back(it);
 
-        int i = Misc::Rng::rollDice(mLastPlayedMusic.size());
-        advanceMusic(filelist[mLastPlayedMusic[i]]);
-        mLastPlayedMusic.erase(mLastPlayedMusic.begin()+i-1);
+        int i = Misc::Rng::rollDice(mMusicToPlay.size());
+        advanceMusic(filelist[mMusicToPlay[i]]);
+        mMusicToPlay.erase(mMusicToPlay.begin()+i);
     }
 
     bool SoundManager::isMusicPlaying()
