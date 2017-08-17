@@ -3216,6 +3216,35 @@ namespace MWWorld
         return mPlayerTraveling;
     }
 
+    void World::travel(TravelTarget destination)
+    {
+        if (!MWBase::Environment::get().getWorld()->isPlayerTraveling())
+            return;
+
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+
+        if (!destination.interior)
+        {
+            ESM::Position playerPos = player.getRefData().getPosition();
+            float d = (osg::Vec3f(destination.pos.pos[0], destination.pos.pos[1], 0) - osg::Vec3f(playerPos.pos[0], playerPos.pos[1], 0)).length();
+            int hours = static_cast<int>(d / MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->getFloat());
+            for (int i = 0; i < hours; i++)
+            {
+                MWBase::Environment::get().getMechanicsManager()->rest(true);
+            }
+            MWBase::Environment::get().getWorld()->advanceTime(hours);
+        }
+
+        // Teleports any followers, too.
+        MWWorld::ActionTeleport action(destination.interior ? destination.cellname : "", destination.pos, true);
+        action.execute(player);
+
+        MWBase::Environment::get().getWorld()->setPlayerTraveling(false);
+
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
+    }
+
     float World::getTerrainHeightAt(const osg::Vec3f& worldPos) const
     {
         return mRendering->getTerrainHeightAt(worldPos);

@@ -4,6 +4,7 @@
 
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MyGUI
 {
@@ -38,13 +39,7 @@ namespace MWGui
 
             MyGUI::ScrollView* mDestinationsView;
 
-            struct TravelTarget
-            {
-                ESM::Position pos;
-                std::string cellname;
-                bool interior;
-            };
-            TravelTarget mTravelTarget;
+            MWBase::World::TravelTarget mTravelTarget;
 
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onTravelButtonClick(MyGUI::Widget* _sender);

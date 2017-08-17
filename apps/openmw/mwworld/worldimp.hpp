@@ -674,6 +674,8 @@ namespace MWWorld
             virtual void setPlayerTraveling(bool traveling);
             virtual bool isPlayerTraveling() const;
 
+            virtual void travel(TravelTarget destination);
+
             /// Return terrain height at \a worldPos position.
             virtual float getTerrainHeightAt(const osg::Vec3f& worldPos) const;
 
