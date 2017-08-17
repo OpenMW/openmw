@@ -311,7 +311,6 @@ namespace MWSound
         if(!mOutput->isInitialized())
             return;
         std::cout <<"Playing "<<filename<< std::endl;
-        mLastPlayedMusic = filename;
         try {
             stopMusic();
 
@@ -367,7 +366,8 @@ namespace MWSound
             }
 
             mMusicFiles[mCurrentPlaylist] = filelist;
-
+            for(int it = 0; it < filelist.size(); it++)
+                mMusicToPlay.push_back(it);
         }
         else
             filelist = mMusicFiles[mCurrentPlaylist];
@@ -375,15 +375,14 @@ namespace MWSound
         if(filelist.empty())
             return;
 
-        int i = Misc::Rng::rollDice(filelist.size());
+        //Do a Fisher-Yates shuffle
+        if(mMusicFiles.size() == 0)
+            for(int it = 0; it < filelist.size(); it++)
+                mMusicToPlay.push_back(it);
 
-        // Don't play the same music track twice in a row
-        if (filelist[i] == mLastPlayedMusic)
-        {
-            i = (i+1) % filelist.size();
-        }
-
-        advanceMusic(filelist[i]);
+        int i = Misc::Rng::rollDice(mMusicToPlay.size());
+        advanceMusic(filelist[mMusicToPlay[i]]);
+        mMusicToPlay.erase(mMusicToPlay.begin()+i);
     }
 
     bool SoundManager::isMusicPlaying()
