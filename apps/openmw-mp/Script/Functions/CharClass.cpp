@@ -3,9 +3,11 @@
 //
 
 #include "CharClass.hpp"
+
+#include <components/openmw-mp/NetworkMessages.hpp>
+
 #include <apps/openmw-mp/Networking.hpp>
 #include <apps/openmw-mp/Script/ScriptFunctions.hpp>
-#include <components/openmw-mp/NetworkMessages.hpp>
 
 using namespace std;
 using namespace ESM;

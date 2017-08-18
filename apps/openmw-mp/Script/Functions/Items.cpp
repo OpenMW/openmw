@@ -3,11 +3,13 @@
 //
 
 #include "Items.hpp"
-#include <apps/openmw-mp/Script/ScriptFunctions.hpp>
+
+#include <components/misc/stringops.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
+
+#include <apps/openmw-mp/Script/ScriptFunctions.hpp>
 #include <apps/openmw-mp/Networking.hpp>
 #include <apps/openmw/mwworld/inventorystore.hpp>
-#include <components/misc/stringops.hpp>
 
 using namespace mwmp;
 

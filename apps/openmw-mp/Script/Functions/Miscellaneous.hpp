@@ -4,17 +4,30 @@
 #include "../Types.hpp"
 
 #define MISCELLANEOUSAPI \
-    {"GetLastPlayerId",  MiscellaneousFunctions::GetLastPlayerId},\
+    {"GetCaseInsensitiveFilename",  MiscellaneousFunctions::GetCaseInsensitiveFilename},\
     \
-    {"GetCurrentMpNum",  MiscellaneousFunctions::GetCurrentMpNum},\
-    {"SetCurrentMpNum",  MiscellaneousFunctions::SetCurrentMpNum},\
+    {"GetLastPlayerId",             MiscellaneousFunctions::GetLastPlayerId},\
     \
-    {"LogMessage",       MiscellaneousFunctions::LogMessage},\
-    {"LogAppend",        MiscellaneousFunctions::LogAppend}
+    {"GetCurrentMpNum",             MiscellaneousFunctions::GetCurrentMpNum},\
+    {"SetCurrentMpNum",             MiscellaneousFunctions::SetCurrentMpNum},\
+    \
+    {"LogMessage",                  MiscellaneousFunctions::LogMessage},\
+    {"LogAppend",                   MiscellaneousFunctions::LogAppend}
 
 class MiscellaneousFunctions
 {
 public:
+
+    /**
+    * \brief Get the first filename in a folder that has a case insensitive match with the filename
+    * argument.
+    *
+    * This is used to retain case insensitivity when opening data files on Linux.
+    *
+    * \return The filename that matches.
+    */
+    static const char *GetCaseInsensitiveFilename(const char *folderPath, const char *filename) noexcept;
+
     /**
     * \brief Get the last player ID currently connected to the server.
     *
