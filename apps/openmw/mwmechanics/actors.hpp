@@ -150,6 +150,7 @@ namespace MWMechanics
 
     private:
         PtrActorMap mActors;
+        float mTimerDisposeSummonsCorpses;
 
     };
 }
