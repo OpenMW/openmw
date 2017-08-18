@@ -42,6 +42,8 @@ namespace MWClass
 
             virtual bool useAnim() const;
             ///< Whether or not to use animated variant of model (default false)
+
+            virtual bool isActivator() const;
     };
 }
 
