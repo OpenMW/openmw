@@ -25,6 +25,7 @@
 #include "pathgrid.hpp"
 #include "terrainstorage.hpp"
 #include "object.hpp"
+#include "terraintextureselection.hpp"
 
 bool CSVRender::Cell::removeObject (const std::string& id)
 {
@@ -113,6 +114,8 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
 
                 mCellBorder.reset(new CellBorder(mCellNode, mCoordinates));
                 mCellBorder->buildShape(esmLand);
+
+                mTerrainTextureSelection.reset(new TerrainTextureSelection(mCellNode, mCoordinates, esmLand));
             }
         }
 
@@ -441,4 +444,15 @@ void CSVRender::Cell::reset (unsigned int elementMask)
             iter->second->reset();
     if (elementMask & Mask_Pathgrid)
         mPathgrid->resetIndicators();
+}
+
+CSVRender::TerrainSelection* CSVRender::Cell::getTerrainSelection(TerrainSelectionType type) const
+{
+    switch (type) {
+        case TerrainSelectionType::Texture:
+            return mTerrainTextureSelection.get();
+        // other types of terrain can go here
+        default:
+            return nullptr;
+    }
 }

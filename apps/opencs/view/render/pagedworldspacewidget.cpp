@@ -723,6 +723,34 @@ void CSVRender::PagedWorldspaceWidget::reset (unsigned int elementMask)
         iter->second->reset (elementMask);
 }
 
+void CSVRender::PagedWorldspaceWidget::selectTerrain(TerrainSelectionType type, const WorldspaceHitResult& hit)
+{
+    for (auto cell : mCells) {
+        cell.second->getTerrainSelection(type)->select(hit);
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::toggleSelectTerrain(TerrainSelectionType type, const WorldspaceHitResult& hit)
+{
+    for (auto cell : mCells) {
+        cell.second->getTerrainSelection(type)->select(hit);
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::activateTerrainSelection(TerrainSelectionType type)
+{
+    for (auto cell : mCells) {
+        cell.second->getTerrainSelection(type)->activate();
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::deactivateTerrainSelection(TerrainSelectionType type)
+{
+    for (auto cell : mCells) {
+        cell.second->getTerrainSelection(type)->deactivate();
+    }
+}
+
 CSVWidget::SceneToolToggle2 *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (
     CSVWidget::SceneToolbar *parent)
 {

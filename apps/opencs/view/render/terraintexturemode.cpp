@@ -9,26 +9,26 @@ CSVRender::TerrainTextureMode::TerrainTextureMode(WorldspaceWidget* worldspaceWi
 
 void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
-    // TODO
+    getPagedWorldspaceWidget().activateTerrainSelection(TerrainSelectionType::Texture);
 
     EditMode::activate(toolbar);
 }
 
 void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
 {
-    // TODO
+    getPagedWorldspaceWidget().deactivateTerrainSelection(TerrainSelectionType::Texture);
 
     EditMode::deactivate(toolbar);
 }
 
 void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResult& hit)
 {
-    // TODO
+    getPagedWorldspaceWidget().selectTerrain(TerrainSelectionType::Texture, hit);
 }
 
 void CSVRender::TerrainTextureMode::secondarySelectPressed(const WorldspaceHitResult& hit)
 {
-    // TODO
+    getPagedWorldspaceWidget().toggleSelectTerrain(TerrainSelectionType::Texture, hit);
 }
 
 CSVRender::PagedWorldspaceWidget& CSVRender::TerrainTextureMode::getPagedWorldspaceWidget()
