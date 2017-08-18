@@ -3,9 +3,11 @@
 //
 
 #include "GUI.hpp"
+
+#include <components/openmw-mp/NetworkMessages.hpp>
+
 #include <apps/openmw-mp/Script/ScriptFunctions.hpp>
 #include <apps/openmw-mp/Networking.hpp>
-#include <components/openmw-mp/NetworkMessages.hpp>
 
 void GUIFunctions::_MessageBox(unsigned short pid, int id, const char *label) noexcept
 {

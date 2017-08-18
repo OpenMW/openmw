@@ -1,9 +1,11 @@
 #include "Cells.hpp"
-#include <apps/openmw-mp/Script/ScriptFunctions.hpp>
+
+#include <components/openmw-mp/Log.hpp>
 #include <components/openmw-mp/NetworkMessages.hpp>
+
+#include <apps/openmw-mp/Script/ScriptFunctions.hpp>
 #include <apps/openmw-mp/Player.hpp>
 #include <apps/openmw-mp/Networking.hpp>
-#include <components/openmw-mp/Log.hpp>
 
 #include <iostream>
 using namespace std;

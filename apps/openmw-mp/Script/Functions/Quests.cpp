@@ -1,8 +1,10 @@
 #include "Quests.hpp"
-#include <apps/openmw-mp/Script/ScriptFunctions.hpp>
-#include <components/openmw-mp/NetworkMessages.hpp>
-#include <apps/openmw-mp/Networking.hpp>
+
 #include <components/misc/stringops.hpp>
+#include <components/openmw-mp/NetworkMessages.hpp>
+
+#include <apps/openmw-mp/Script/ScriptFunctions.hpp>
+#include <apps/openmw-mp/Networking.hpp>
 
 using namespace mwmp;
 
