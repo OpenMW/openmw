@@ -4,6 +4,7 @@
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -372,6 +373,9 @@ namespace MWClass
     {
         if (hasItemHealth(ptr) && ptr.getCellRef().getCharge() == 0)
             return std::make_pair(0, "#{sInventoryMessage1}");
+
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc))
+            return std::make_pair(0, "#{sCantEquipWeapWarning}");
 
         std::pair<std::vector<int>, bool> slots_ = ptr.getClass().getEquipmentSlots(ptr);
 

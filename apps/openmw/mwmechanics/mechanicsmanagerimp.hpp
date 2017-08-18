@@ -188,6 +188,8 @@ namespace MWMechanics
             virtual void keepPlayerAlive();
 
             virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const;
+            /// Is \a ptr casting spell or using weapon now?
+            virtual bool isAttackingOrSpell(const MWWorld::Ptr &ptr) const;
 
             virtual void confiscateStolenItems (const MWWorld::Ptr& player, const MWWorld::Ptr& targetContainer);
 

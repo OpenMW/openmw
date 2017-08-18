@@ -1784,6 +1784,16 @@ namespace MWMechanics
         return it->second->getCharacterController()->isReadyToBlock();
     }
 
+    bool Actors::isAttackingOrSpell(const MWWorld::Ptr& ptr) const
+    {
+        PtrActorMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+        CharacterController* ctrl = it->second->getCharacterController();
+
+        return ctrl->isAttackingOrSpell();
+    }
+
     void Actors::fastForwardAi()
     {
         if (!MWBase::Environment::get().getMechanicsManager()->isAIActive())
