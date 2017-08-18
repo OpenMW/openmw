@@ -7,6 +7,8 @@
 #include <set>
 #include <stdint.h>
 
+#include "../mwworld/ptr.hpp"
+
 namespace osg
 {
     class Vec3f;
@@ -231,7 +233,7 @@ namespace MWBase
             /// Has the player stolen this item from the given owner?
             virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid) = 0;
 
-            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim) = 0;
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::ConstPtr& item, MWWorld::Ptr& victim) = 0;
 
             /// Turn actor into werewolf or normal form.
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf) = 0;

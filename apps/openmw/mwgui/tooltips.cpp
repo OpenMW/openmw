@@ -359,12 +359,11 @@ namespace MWGui
     {
         if(!mFocusObject.isEmpty())
         {
-            const MWWorld::CellRef& cellref = mFocusObject.getCellRef();
             MWWorld::Ptr ptr = MWMechanics::getPlayer();
             MWWorld::Ptr victim;
             
             MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
-            bool allowed = mm->isAllowedToUse(ptr, cellref, victim); 
+            bool allowed = mm->isAllowedToUse(ptr, mFocusObject, victim); 
 
             return !allowed;
         }

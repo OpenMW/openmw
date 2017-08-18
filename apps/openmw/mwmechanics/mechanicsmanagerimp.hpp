@@ -199,7 +199,7 @@ namespace MWMechanics
             virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid);
 
             /// @return is \a ptr allowed to take/use \a cellref or is it a crime?
-            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim);
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::ConstPtr& item, MWWorld::Ptr& victim);
 
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
