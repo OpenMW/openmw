@@ -108,7 +108,7 @@ namespace CSMWorld
             RefCollection mRefs;
             IdCollection<ESM::Filter> mFilters;
             Collection<MetaData> mMetaData;
-            const ResourcesManager& mResourcesManager;
+            ResourcesManager& mResourcesManager;
             const Fallback::Map* mFallbackMap;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
@@ -140,7 +140,7 @@ namespace CSMWorld
 
         public:
 
-            Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir);
+            Data (ToUTF8::FromType encoding, ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir);
 
             virtual ~Data();
 
@@ -305,6 +305,8 @@ namespace CSMWorld
             void idListChanged();
 
         private slots:
+
+            void assetsChanged();
 
             void dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 

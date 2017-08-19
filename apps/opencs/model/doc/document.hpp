@@ -59,7 +59,7 @@ namespace CSMDoc
 
         private:
 
-            const VFS::Manager* mVFS;
+            VFS::Manager* mVFS;
             boost::filesystem::path mSavePath;
             std::vector<boost::filesystem::path> mContentFiles;
             bool mNew;
@@ -102,11 +102,11 @@ namespace CSMDoc
 
         public:
 
-            Document (const VFS::Manager* vfs, const Files::ConfigurationManager& configuration,
+            Document (VFS::Manager* vfs, const Files::ConfigurationManager& configuration,
                 const std::vector< boost::filesystem::path >& files, bool new_,
                 const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
                 const Fallback::Map* fallback,
-                ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
+                ToUTF8::FromType encoding, CSMWorld::ResourcesManager& resourcesManager,
                 const std::vector<std::string>& blacklistedScripts);
 
             ~Document();

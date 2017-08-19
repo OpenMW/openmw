@@ -33,6 +33,9 @@ namespace VFS
         /// Build the file index. Should be called when all archives have been registered.
         void buildIndex();
 
+        /// Rebuild the file index. New/deleted files (actual files, not bsa's) will be reflected.
+        void rebuildIndex();
+
         /// Does a file with this name exist?
         /// @note May be called from any thread once the index has been built.
         bool exists(const std::string& name) const;

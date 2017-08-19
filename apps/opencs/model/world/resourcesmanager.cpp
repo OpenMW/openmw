@@ -14,7 +14,7 @@ void CSMWorld::ResourcesManager::addResources (const Resources& resources)
         resources));
 }
 
-void CSMWorld::ResourcesManager::setVFS(const VFS::Manager *vfs)
+void CSMWorld::ResourcesManager::setVFS(VFS::Manager *vfs)
 {
     mVFS = vfs;
     mResources.clear();
@@ -31,9 +31,24 @@ void CSMWorld::ResourcesManager::setVFS(const VFS::Manager *vfs)
     addResources (Resources (vfs, "videos", UniversalId::Type_Video));
 }
 
-const VFS::Manager* CSMWorld::ResourcesManager::getVFS() const
+VFS::Manager* CSMWorld::ResourcesManager::getVFS() const
 {
     return mVFS;
+}
+
+void CSMWorld::ResourcesManager::recreateResources()
+{
+    // TODO make this shared with setVFS function
+    static const char * const sMeshTypes[] = { "nif", "osg", "osgt", "osgb", "osgx", "osg2", 0 };
+
+    std::map<UniversalId::Type, Resources>::iterator it = mResources.begin();
+    for ( ; it != mResources.end(); ++it)
+    {
+        if (it->first == UniversalId::Type_Mesh)
+            it->second.recreate(mVFS, sMeshTypes);
+        else
+            it->second.recreate(mVFS);
+    }
 }
 
 const CSMWorld::Resources& CSMWorld::ResourcesManager::get (UniversalId::Type type) const

@@ -57,6 +57,14 @@ namespace VFS
             (*it)->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
     }
 
+    void Manager::rebuildIndex()
+    {
+        for (std::vector<Archive*>::const_iterator it = mArchives.begin(); it != mArchives.end(); ++it)
+            (*it)->resetIfNotStatic();
+
+        buildIndex();
+    }
+
     Files::IStreamPtr Manager::get(const std::string &name) const
     {
         std::string normalized = name;

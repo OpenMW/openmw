@@ -16,7 +16,7 @@ namespace CSMWorld
     class ResourcesManager
     {
             std::map<UniversalId::Type, Resources> mResources;
-            const VFS::Manager* mVFS;
+            VFS::Manager* mVFS;
 
         private:
 
@@ -26,9 +26,11 @@ namespace CSMWorld
 
             ResourcesManager();
 
-            const VFS::Manager* getVFS() const;
+            VFS::Manager* getVFS() const;
 
-            void setVFS(const VFS::Manager* vfs);
+            void setVFS(VFS::Manager* vfs);
+
+            void recreateResources();
 
             const Resources& get (UniversalId::Type type) const;
     };

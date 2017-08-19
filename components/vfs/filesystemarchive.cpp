@@ -12,6 +12,12 @@ namespace VFS
 
     }
 
+    void FileSystemArchive::resetIfNotStatic()
+    {
+        mIndex.clear();
+        mBuiltIndex = false;
+    }
+
     void FileSystemArchive::listResources(std::map<std::string, File *> &out, char (*normalize_function)(char))
     {
         if (!mBuiltIndex)

@@ -12,6 +12,14 @@ CSMWorld::Resources::Resources (const VFS::Manager* vfs, const std::string& base
     const char * const *extensions)
 : mBaseDirectory (baseDirectory), mType (type)
 {
+    recreate(vfs, extensions);
+}
+
+void CSMWorld::Resources::recreate(const VFS::Manager* vfs, const char * const *extensions)
+{
+    mFiles.clear();
+    mIndex.clear();
+
     int baseSize = mBaseDirectory.size();
 
     const std::map<std::string, VFS::File*>& index = vfs->getIndex();

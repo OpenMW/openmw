@@ -11,6 +11,7 @@
 #include <components/esm/cellref.hpp>
 
 #include <components/resource/scenemanager.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "idtable.hpp"
 #include "idtree.hpp"
@@ -61,7 +62,7 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
     return number;
 }
 
-CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir)
+CSMWorld::Data::Data (ToUTF8::FromType encoding, ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
   mResourcesManager (resourcesManager), mFallbackMap(fallback),
   mReader (0), mDialogue (0), mReaderIndex(1), mResourceSystem(new Resource::ResourceSystem(resourcesManager.getVFS()))
@@ -1213,6 +1214,36 @@ std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
     std::sort (ids.begin(), ids.end());
 
     return ids;
+}
+
+void CSMWorld::Data::assetsChanged()
+{
+    VFS::Manager* vfs = mResourcesManager.getVFS();
+    vfs->rebuildIndex();
+
+    ResourceTable* meshTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_Meshes));
+    ResourceTable* iconTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_Icons));
+    ResourceTable* musicTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_Musics));
+    ResourceTable* soundResTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_SoundsRes));
+    ResourceTable* texTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_Textures));
+    ResourceTable* vidTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_Videos));
+
+    meshTable->beginReset();
+    iconTable->beginReset();
+    musicTable->beginReset();
+    soundResTable->beginReset();
+    texTable->beginReset();
+    vidTable->beginReset();
+
+    // Trigger recreation
+    mResourcesManager.recreateResources();
+
+    meshTable->endReset();
+    iconTable->endReset();
+    musicTable->endReset();
+    soundResTable->endReset();
+    texTable->endReset();
+    vidTable->endReset();
 }
 
 void CSMWorld::Data::dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)

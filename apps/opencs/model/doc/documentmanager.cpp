@@ -127,7 +127,7 @@ void CSMDoc::DocumentManager::documentNotLoaded (Document *document, const std::
         removeDocument (document);
 }
 
-void CSMDoc::DocumentManager::setVFS(const VFS::Manager *vfs)
+void CSMDoc::DocumentManager::setVFS(VFS::Manager *vfs)
 {
     mResourcesManager.setVFS(vfs);
     mVFS = vfs;

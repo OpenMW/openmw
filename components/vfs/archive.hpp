@@ -21,6 +21,9 @@ namespace VFS
     public:
         virtual ~Archive() {}
 
+        /// Clears cached data for archives that may change.
+        virtual void resetIfNotStatic(){};
+
         /// List all resources contained in this archive, and run the resource names through the given normalize function.
         virtual void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char)) = 0;
     };
