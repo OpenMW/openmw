@@ -41,6 +41,9 @@ namespace Resource
         /// @note May be called from any thread if you do not add or remove resource managers at that point.
         void updateCache(double referenceTime);
 
+        /// Indicates to each resource manager to clear the entire cache.
+        void clearCache();
+
         /// Add this ResourceManager to be handled by the ResourceSystem.
         /// @note Does not transfer ownership.
         void addResourceManager(ResourceManager* resourceMgr);

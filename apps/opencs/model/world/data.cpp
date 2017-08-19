@@ -1244,6 +1244,9 @@ void CSMWorld::Data::assetsChanged()
     soundResTable->endReset();
     texTable->endReset();
     vidTable->endReset();
+
+    // Get rid of potentially old cached assets
+    mResourceSystem->clearCache();
 }
 
 void CSMWorld::Data::dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
