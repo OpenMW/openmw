@@ -1247,6 +1247,8 @@ void CSMWorld::Data::assetsChanged()
 
     // Get rid of potentially old cached assets
     mResourceSystem->clearCache();
+
+    emit assetTablesChanged();
 }
 
 void CSMWorld::Data::dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)

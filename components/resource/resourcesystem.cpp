@@ -74,8 +74,6 @@ namespace Resource
     {
         for (std::vector<ResourceManager*>::iterator it = mResourceManagers.begin(); it != mResourceManagers.end(); ++it)
             (*it)->clearCache();
-
-        osgDB::Registry::instance()->clearObjectCache();
     }
 
     void ResourceSystem::addResourceManager(ResourceManager *resourceMgr)

@@ -304,6 +304,8 @@ namespace CSMWorld
 
             void idListChanged();
 
+            void assetTablesChanged();
+
         private slots:
 
             void assetsChanged();

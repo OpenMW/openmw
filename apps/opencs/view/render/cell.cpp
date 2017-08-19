@@ -283,6 +283,15 @@ void CSVRender::Cell::pathgridRemoved()
     mPathgrid->removeGeometry();
 }
 
+void CSVRender::Cell::reloadAssets()
+{
+    for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+        iter != mObjects.end(); ++iter)
+    {
+        iter->second->reloadAssets();
+    }
+}
+
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)
 {
     if (elementMask & Mask_Reference)

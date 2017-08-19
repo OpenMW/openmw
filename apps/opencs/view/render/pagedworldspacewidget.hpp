@@ -84,7 +84,7 @@ namespace CSVRender
             /// hint system.
 
             virtual ~PagedWorldspaceWidget();
-            
+
             /// Decodes the the hint string to set of cell that are rendered.
             void useViewHint (const std::string& hint);
 
@@ -154,6 +154,8 @@ namespace CSVRender
             virtual void cellRemoved (const QModelIndex& parent, int start, int end);
 
             virtual void cellAdded (const QModelIndex& index, int start, int end);
+
+            void assetTablesChanged ();
 
             void loadCameraCell();
 
