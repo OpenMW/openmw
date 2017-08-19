@@ -64,7 +64,7 @@ namespace MWGui
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
     {
-        MWMechanics::Alchemy::Result result = mAlchemy->create (mNameEdit->getOnlyText());
+        MWMechanics::Alchemy::Result result = mAlchemy->create (mNameEdit->getCaption ());
         MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
 
         switch (result)

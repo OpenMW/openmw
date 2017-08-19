@@ -248,7 +248,7 @@ namespace MWGui
                 dialog->eventCancelClicked.clear();
                 return;
             }
-            if (mSaveNameEdit->getOnlyText().empty())
+            if (mSaveNameEdit->getCaption().empty())
             {
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage65}");
                 return;
@@ -275,7 +275,7 @@ namespace MWGui
 
         if (mSaving)
         {
-            MWBase::Environment::get().getStateManager()->saveGame (mSaveNameEdit->getOnlyText(), mCurrentSlot);
+            MWBase::Environment::get().getStateManager()->saveGame (mSaveNameEdit->getCaption(), mCurrentSlot);
         }
         else
         {
