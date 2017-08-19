@@ -1983,12 +1983,8 @@ namespace MWGui
         char* text=0;
         text = SDL_GetClipboardText();
         if (text)
-        {
-            // MyGUI's clipboard might still have color information, to retain that information, only set the new text
-            // if it actually changed (clipboard inserted by an external application)
-            if (MyGUI::TextIterator::getOnlyText(_data) != text)
-                _data = text;
-        }
+            _data = MyGUI::TextIterator::toTagsString(text);
+
         SDL_free(text);
     }
 
