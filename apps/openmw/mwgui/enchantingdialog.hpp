@@ -58,7 +58,7 @@ namespace MWGui
         MyGUI::Button* mTypeButton;
         MyGUI::Button* mBuyButton;
 
-        MyGUI::EditBox* mName;
+        MyGUI::TextBox* mName;
         MyGUI::TextBox* mEnchantmentPoints;
         MyGUI::TextBox* mCastCost;
         MyGUI::TextBox* mCharge;

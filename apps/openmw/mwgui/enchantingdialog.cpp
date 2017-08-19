@@ -3,7 +3,6 @@
 #include <iomanip>
 
 #include <MyGUI_Button.h>
-#include <MyGUI_EditBox.h>
 #include <MyGUI_ScrollView.h>
 
 #include <components/widgets/list.hpp>
@@ -313,7 +312,7 @@ namespace MWGui
             return;
         }
 
-        if (mName->getOnlyText().empty())
+        if (mName->getCaption ().empty())
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage10}");
             return;
@@ -337,7 +336,7 @@ namespace MWGui
             return;
         }
 
-        mEnchanting.setNewItemName(mName->getOnlyText());
+        mEnchanting.setNewItemName(mName->getCaption());
         mEnchanting.setEffect(mEffectList);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();

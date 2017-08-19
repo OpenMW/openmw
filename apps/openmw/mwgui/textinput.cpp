@@ -53,7 +53,7 @@ namespace MWGui
 
     void TextInputDialog::onOkClicked(MyGUI::Widget* _sender)
     {
-        if (mTextEdit->getOnlyText() == "")
+        if (mTextEdit->getCaption() == "")
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage37}");
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget (mTextEdit);
@@ -69,7 +69,7 @@ namespace MWGui
 
     std::string TextInputDialog::getTextInput() const
     {
-        return mTextEdit->getOnlyText();
+        return mTextEdit->getCaption();
     }
 
     void TextInputDialog::setTextInput(const std::string &text)
