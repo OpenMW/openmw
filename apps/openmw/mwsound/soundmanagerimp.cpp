@@ -271,7 +271,6 @@ namespace MWSound
         return sound;
     }
 
-
     // Gets the combined volume settings for the given sound type
     float SoundManager::volumeFromType(PlayType type) const
     {
@@ -297,7 +296,6 @@ namespace MWSound
         }
         return volume;
     }
-
 
     void SoundManager::stopMusic()
     {
@@ -368,6 +366,12 @@ namespace MWSound
 
             mMusicFiles[mCurrentPlaylist] = filelist;
 
+            // Build mMusicToPlay for this playlist
+            std::vector<int> temp;
+            temp.reserve(filelist.size());
+            for(int it = 0; it < filelist.size(); it++)
+                temp.push_back(it);
+            mMusicToPlay.insert(std::make_pair(mCurrentPlaylist, temp));
         }
         else
             filelist = mMusicFiles[mCurrentPlaylist];
@@ -375,15 +379,26 @@ namespace MWSound
         if(filelist.empty())
             return;
 
-        int i = Misc::Rng::rollDice(filelist.size());
+        // Do a Fisher-Yates shuffle
+        std::vector<int>& tracklist = mMusicToPlay[mCurrentPlaylist];
+        int i = Misc::Rng::rollDice(tracklist.size());
 
-        // Don't play the same music track twice in a row
-        if (filelist[i] == mLastPlayedMusic)
+        // Repopulate if playlist is empty
+        if(tracklist.empty())
         {
-            i = (i+1) % filelist.size();
+            tracklist.reserve(filelist.size());
+            for (int it = 0; it < filelist.size(); it++)
+                tracklist.push_back(it);
         }
 
-        advanceMusic(filelist[i]);
+        // Reshuffle if last played music is the same after a repopulation
+        if(filelist[tracklist[i]] == mLastPlayedMusic)
+            i = (i+1) % tracklist.size();
+
+        // Remove music from list after advancing music
+        advanceMusic(filelist[tracklist[i]]);
+        tracklist[i] = tracklist.back();
+        tracklist.pop_back();
     }
 
     bool SoundManager::isMusicPlaying()

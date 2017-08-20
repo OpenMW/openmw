@@ -6,6 +6,7 @@
 #include <utility>
 #include <deque>
 #include <map>
+#include <unordered_map>
 
 #include <components/settings/settings.hpp>
 
@@ -49,6 +50,7 @@ namespace MWSound
 
         // Caches available music tracks by <playlist name, (sound files) >
         std::map<std::string, std::vector<std::string> > mMusicFiles;
+        std::unordered_map<std::string, std::vector<int>> mMusicToPlay; // A list with music files not yet played
         std::string mLastPlayedMusic; // The music file that was last played
 
         float mMasterVolume;
