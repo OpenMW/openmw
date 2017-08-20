@@ -2,8 +2,6 @@
 
 #include <algorithm>
 
-#include <osgDB/Registry>
-
 #include "scenemanager.hpp"
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"

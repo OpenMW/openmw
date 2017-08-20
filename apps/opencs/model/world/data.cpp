@@ -62,9 +62,9 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
     return number;
 }
 
-CSMWorld::Data::Data (ToUTF8::FromType encoding, ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir)
+CSMWorld::Data::Data (ToUTF8::FromType encoding, VFS::Manager* vfs, ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mResourcesManager (resourcesManager), mFallbackMap(fallback),
+  mVFS(vfs), mResourcesManager (resourcesManager), mFallbackMap(fallback),
   mReader (0), mDialogue (0), mReaderIndex(1), mResourceSystem(new Resource::ResourceSystem(resourcesManager.getVFS()))
 {
     mResourceSystem->getSceneManager()->setShaderPath((resDir / "shaders").string());
@@ -1218,8 +1218,7 @@ std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
 
 void CSMWorld::Data::assetsChanged()
 {
-    VFS::Manager* vfs = mResourcesManager.getVFS();
-    vfs->rebuildIndex();
+    mVFS->rebuildIndex();
 
     ResourceTable* meshTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_Meshes));
     ResourceTable* iconTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_Icons));
@@ -1264,7 +1263,7 @@ void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 
 const VFS::Manager* CSMWorld::Data::getVFS() const
 {
-    return mResourcesManager.getVFS();
+    return mVFS;
 }
 
 const Fallback::Map* CSMWorld::Data::getFallbackMap() const

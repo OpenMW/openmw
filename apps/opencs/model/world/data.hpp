@@ -108,6 +108,7 @@ namespace CSMWorld
             RefCollection mRefs;
             IdCollection<ESM::Filter> mFilters;
             Collection<MetaData> mMetaData;
+            VFS::Manager* mVFS;
             ResourcesManager& mResourcesManager;
             const Fallback::Map* mFallbackMap;
             std::vector<QAbstractItemModel *> mModels;
@@ -140,7 +141,7 @@ namespace CSMWorld
 
         public:
 
-            Data (ToUTF8::FromType encoding, ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir);
+            Data (ToUTF8::FromType encoding, VFS::Manager* vfs, ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir);
 
             virtual ~Data();
 

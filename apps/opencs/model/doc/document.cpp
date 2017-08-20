@@ -275,7 +275,7 @@ CSMDoc::Document::Document (VFS::Manager* vfs, const Files::ConfigurationManager
     const Fallback::Map* fallback,
     ToUTF8::FromType encoding, CSMWorld::ResourcesManager& resourcesManager,
     const std::vector<std::string>& blacklistedScripts)
-: mVFS(vfs), mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager, fallback, resDir),
+: mVFS(vfs), mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, vfs, resourcesManager, fallback, resDir),
   mTools (*this, encoding),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),

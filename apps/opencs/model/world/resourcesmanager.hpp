@@ -16,19 +16,21 @@ namespace CSMWorld
     class ResourcesManager
     {
             std::map<UniversalId::Type, Resources> mResources;
-            VFS::Manager* mVFS;
+            const VFS::Manager* mVFS;
 
         private:
 
             void addResources (const Resources& resources);
 
+            const char * const * getMeshExtensions();
+
         public:
 
             ResourcesManager();
 
-            VFS::Manager* getVFS() const;
+            const VFS::Manager* getVFS() const;
 
-            void setVFS(VFS::Manager* vfs);
+            void setVFS(const VFS::Manager* vfs);
 
             void recreateResources();
 
