@@ -365,7 +365,7 @@ namespace MWSound
             }
 
             mMusicFiles[mCurrentPlaylist] = filelist;
-            mMusicToPlay.reserve(mMusicToPlay.size() + filelist.size());
+            mMusicToPlay.reserve(filelist.size());
             for(int it = 0; it < filelist.size(); it++)
                 mMusicToPlay.push_back(it);
         }
