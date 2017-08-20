@@ -33,6 +33,7 @@
                 <Widget type="AutoSizedEditBox" skin="HeaderText" position="0 0 166 18" name="FavoriteAttributesT" align="Left Top">
                     <Property key="Caption" value="#{sChooseClassMenu2}"/>
                     <Property key="TextAlign" value="Left Top"/>
+                    <Property key="Static" value="true"/>
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="TextToolTip"/>
                     <UserString key="Caption_Text" value="#{sCreateClassMenuHelp2}"/>
