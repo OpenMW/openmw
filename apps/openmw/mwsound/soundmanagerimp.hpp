@@ -49,7 +49,6 @@ namespace MWSound
 
         // Caches available music tracks by <playlist name, (sound files) >
         std::map<std::string, std::vector<std::string> > mMusicFiles;
-        std::vector<int> mMusicToPlay; // The list of music files not played yet
         std::string mLastPlayedMusic; // The music file that was last played
 
         float mMasterVolume;
