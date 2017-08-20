@@ -60,7 +60,7 @@ namespace VFS
     void Manager::rebuildIndex()
     {
         for (std::vector<Archive*>::const_iterator it = mArchives.begin(); it != mArchives.end(); ++it)
-            (*it)->resetIfNotStatic();
+            (*it)->reset();
 
         buildIndex();
     }

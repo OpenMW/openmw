@@ -23,7 +23,7 @@ namespace VFS
     public:
         FileSystemArchive(const std::string& path);
 
-        virtual void resetIfNotStatic();
+        virtual void reset();
 
         virtual void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char));
 

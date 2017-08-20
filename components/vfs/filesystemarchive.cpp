@@ -12,7 +12,7 @@ namespace VFS
 
     }
 
-    void FileSystemArchive::resetIfNotStatic()
+    void FileSystemArchive::reset()
     {
         mIndex.clear();
         mBuiltIndex = false;
