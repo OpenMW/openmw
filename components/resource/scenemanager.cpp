@@ -721,9 +721,8 @@ namespace Resource
     {
         ResourceManager::clearCache();
 
-        mSharedStateMutex.lock();
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSharedStateMutex);
         mSharedStateManager->clearCache();
-        mSharedStateMutex.unlock();
     }
 
     void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
