@@ -896,7 +896,6 @@ void CSVDoc::View::addMetaDataSubView()
     addSubView (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_MetaData, "sys::meta"));
 }
 
-
 void CSVDoc::View::abortOperation (int type)
 {
     mDocument->abortOperation (type);

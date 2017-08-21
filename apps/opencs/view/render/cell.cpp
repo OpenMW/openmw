@@ -294,7 +294,6 @@ void CSVRender::Cell::reloadAssets()
     if (mTerrain)
     {
         mTerrain->unloadCell(mCoordinates.getX(), mCoordinates.getY());
-        mTerrain->clearCache();
         mTerrain->loadCell(mCoordinates.getX(), mCoordinates.getY());
     }
 

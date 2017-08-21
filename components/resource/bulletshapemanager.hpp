@@ -42,6 +42,8 @@ namespace Resource
         /// @see ResourceManager::updateCache
         virtual void updateCache(double referenceTime);
 
+        virtual void clearCache();
+
         void reportStats(unsigned int frameNumber, osg::Stats *stats) const;
 
     private:

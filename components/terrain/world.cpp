@@ -70,12 +70,6 @@ float World::getHeightAt(const osg::Vec3f &worldPos)
     return mStorage->getHeightAt(worldPos);
 }
 
-void World::clearCache()
-{
-    mTextureManager->clearCache();
-    mChunkManager->clearCache();
-}
-
 void World::updateTextureFiltering()
 {
     mTextureManager->updateTextureFiltering();

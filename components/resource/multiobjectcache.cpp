@@ -43,6 +43,12 @@ namespace Resource
         objectsToRemove.clear();
     }
 
+    void MultiObjectCache::clear()
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_objectCacheMutex);
+        _objectCache.clear();
+    }
+
     void MultiObjectCache::addEntryToObjectCache(const std::string &filename, osg::Object *object)
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_objectCacheMutex);

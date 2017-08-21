@@ -67,9 +67,6 @@ namespace Terrain
         /// @note Thread safe.
         virtual void cacheCell(View* view, int x, int y) {}
 
-        /// Clears cached texture and chunk data.
-        virtual void clearCache();
-
         /// Load the cell into the scene graph.
         /// @note Not thread safe.
         /// @note May be ignored by derived implementations that don't organize the terrain into cells.

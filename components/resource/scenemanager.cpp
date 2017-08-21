@@ -723,6 +723,7 @@ namespace Resource
 
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSharedStateMutex);
         mSharedStateManager->clearCache();
+        mInstanceCache->clear();
     }
 
     void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const

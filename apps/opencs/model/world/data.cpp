@@ -1220,29 +1220,31 @@ void CSMWorld::Data::assetsChanged()
 {
     mVFS->rebuildIndex();
 
-    ResourceTable* meshTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_Meshes));
-    ResourceTable* iconTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_Icons));
-    ResourceTable* musicTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_Musics));
-    ResourceTable* soundResTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_SoundsRes));
-    ResourceTable* texTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_Textures));
-    ResourceTable* vidTable = static_cast<ResourceTable*>(getTableModel(UniversalId::Type_Videos));
+    const UniversalId assetTableIds[] = {
+        UniversalId::Type_Meshes,
+        UniversalId::Type_Icons,
+        UniversalId::Type_Musics,
+        UniversalId::Type_SoundsRes,
+        UniversalId::Type_Textures,
+        UniversalId::Type_Videos
+    };
 
-    meshTable->beginReset();
-    iconTable->beginReset();
-    musicTable->beginReset();
-    soundResTable->beginReset();
-    texTable->beginReset();
-    vidTable->beginReset();
+    size_t numAssetTables = sizeof(assetTableIds) / sizeof(UniversalId);
+
+    for (size_t i = 0; i < numAssetTables; ++i)
+    {
+        ResourceTable* table = static_cast<ResourceTable*>(getTableModel(assetTableIds[i]));
+        table->beginReset();
+    }
 
     // Trigger recreation
     mResourcesManager.recreateResources();
 
-    meshTable->endReset();
-    iconTable->endReset();
-    musicTable->endReset();
-    soundResTable->endReset();
-    texTable->endReset();
-    vidTable->endReset();
+    for (size_t i = 0; i < numAssetTables; ++i)
+    {
+        ResourceTable* table = static_cast<ResourceTable*>(getTableModel(assetTableIds[i]));
+        table->endReset();
+    }
 
     // Get rid of potentially old cached assets
     mResourceSystem->clearCache();
