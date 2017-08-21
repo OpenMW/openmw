@@ -290,6 +290,8 @@ void CSVRender::Cell::reloadAssets()
     {
         iter->second->reloadAssets();
     }
+
+    mCellWater->reloadAssets();
 }
 
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)
