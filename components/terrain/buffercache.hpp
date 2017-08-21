@@ -22,6 +22,8 @@ namespace Terrain
         /// @note Thread safe.
         osg::ref_ptr<osg::Vec2Array> getUVBuffer(unsigned int numVerts);
 
+        void clearCache();
+
         // TODO: add releaseGLObjects() for our vertex/element buffer objects
 
     private:

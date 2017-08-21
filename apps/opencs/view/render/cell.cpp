@@ -291,6 +291,13 @@ void CSVRender::Cell::reloadAssets()
         iter->second->reloadAssets();
     }
 
+    if (mTerrain)
+    {
+        mTerrain->unloadCell(mCoordinates.getX(), mCoordinates.getY());
+        mTerrain->clearCache();
+        mTerrain->loadCell(mCoordinates.getX(), mCoordinates.getY());
+    }
+
     mCellWater->reloadAssets();
 }
 

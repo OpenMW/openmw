@@ -231,4 +231,16 @@ namespace Terrain
         return buffer;
     }
 
+    void BufferCache::clearCache()
+    {
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mIndexBufferMutex);
+            mIndexBufferMap.clear();
+        }
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mUvBufferMutex);
+            mUvBufferMap.clear();
+        }
+    }
+
 }
