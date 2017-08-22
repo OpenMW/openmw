@@ -1,7 +1,5 @@
 #include "loadingscreen.hpp"
 
-#include <boost/algorithm/string/replace.hpp>
-
 #include <osgViewer/Viewer>
 
 #include <osg/Texture2D>
@@ -90,8 +88,7 @@ namespace MWGui
     {
         mImportantLabel = important;
 
-        std::string escaped = boost::replace_all_copy(label, "#", "##");
-        mLoadingText->setCaptionWithReplacing(escaped);
+        mLoadingText->setCaptionWithReplacing(label);
         int padding = mLoadingBox->getWidth() - mLoadingText->getWidth();
         MyGUI::IntSize size(mLoadingText->getTextSize().width+padding, mLoadingBox->getHeight());
         size.width = std::max(300, size.width);
