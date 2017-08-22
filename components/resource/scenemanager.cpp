@@ -122,6 +122,13 @@ namespace Resource
         {
             return _sharedStateSetList.size();
         }
+
+        void clearCache()
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_listMutex);
+            _sharedTextureList.clear();
+            _sharedStateSetList.clear();
+        }
     };
 
     /// Set texture filtering settings on textures contained in a FlipController.
@@ -708,6 +715,15 @@ namespace Resource
         mSharedStateMutex.lock();
         mSharedStateManager->prune();
         mSharedStateMutex.unlock();
+    }
+
+    void SceneManager::clearCache()
+    {
+        ResourceManager::clearCache();
+
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSharedStateMutex);
+        mSharedStateManager->clearCache();
+        mInstanceCache->clear();
     }
 
     void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const

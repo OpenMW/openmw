@@ -68,6 +68,12 @@ namespace Resource
             (*it)->updateCache(referenceTime);
     }
 
+    void ResourceSystem::clearCache()
+    {
+        for (std::vector<ResourceManager*>::iterator it = mResourceManagers.begin(); it != mResourceManagers.end(); ++it)
+            (*it)->clearCache();
+    }
+
     void ResourceSystem::addResourceManager(ResourceManager *resourceMgr)
     {
         mResourceManagers.push_back(resourceMgr);

@@ -26,6 +26,9 @@ namespace VFS
 
         ~Manager();
 
+        // Empty the file index and unregister archives.
+        void reset();
+
         /// Register the given archive. All files contained in it will be added to the index on the next buildIndex() call.
         /// @note Takes ownership of the given pointer.
         void addArchive(Archive* archive);

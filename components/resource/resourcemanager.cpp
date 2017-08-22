@@ -23,6 +23,11 @@ namespace Resource
         mCache->removeExpiredObjectsInCache(referenceTime - mExpiryDelay);
     }
 
+    void ResourceManager::clearCache()
+    {
+        mCache->clear();
+    }
+
     void ResourceManager::setExpiryDelay(double expiryDelay)
     {
         mExpiryDelay = expiryDelay;

@@ -151,6 +151,9 @@ namespace CSVRender
             /// this object?
             bool referenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
+            /// Reloads the underlying asset
+            void reloadAssets();
+
             /// Returns an empty string if this is a refereceable-type object.
             std::string getReferenceId() const;
 

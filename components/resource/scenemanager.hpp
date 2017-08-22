@@ -143,6 +143,8 @@ namespace Resource
         /// @see ResourceManager::updateCache
         virtual void updateCache(double referenceTime);
 
+        virtual void clearCache();
+
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
 
     private:
