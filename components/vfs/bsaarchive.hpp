@@ -24,8 +24,6 @@ namespace VFS
     public:
         BsaArchive(const std::string& filename);
 
-        virtual void reset();
-
         virtual void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char));
 
     private:

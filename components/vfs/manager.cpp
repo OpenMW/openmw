@@ -39,6 +39,12 @@ namespace VFS
 
     Manager::~Manager()
     {
+        reset();
+    }
+
+    void Manager::reset()
+    {
+        mIndex.clear();
         for (std::vector<Archive*>::iterator it = mArchives.begin(); it != mArchives.end(); ++it)
             delete *it;
         mArchives.clear();
@@ -55,14 +61,6 @@ namespace VFS
 
         for (std::vector<Archive*>::const_iterator it = mArchives.begin(); it != mArchives.end(); ++it)
             (*it)->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
-    }
-
-    void Manager::rebuildIndex()
-    {
-        for (std::vector<Archive*>::const_iterator it = mArchives.begin(); it != mArchives.end(); ++it)
-            (*it)->reset();
-
-        buildIndex();
     }
 
     Files::IStreamPtr Manager::get(const std::string &name) const

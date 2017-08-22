@@ -10,12 +10,6 @@ BsaArchive::BsaArchive(const std::string &filename)
     load();
 }
 
-void BsaArchive::reset()
-{
-    mResources.clear();
-    load();
-}
-
 void BsaArchive::listResources(std::map<std::string, File *> &out, char (*normalize_function)(char))
 {
     for (std::vector<BsaArchiveFile>::iterator it = mResources.begin(); it != mResources.end(); ++it)

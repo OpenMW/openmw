@@ -26,15 +26,15 @@ namespace VFS
 
         ~Manager();
 
+        // Empty the file index and unregister archives.
+        void reset();
+
         /// Register the given archive. All files contained in it will be added to the index on the next buildIndex() call.
         /// @note Takes ownership of the given pointer.
         void addArchive(Archive* archive);
 
         /// Build the file index. Should be called when all archives have been registered.
         void buildIndex();
-
-        /// Rebuild the file index. New/deleted files (actual files, not bsa's) will be reflected.
-        void rebuildIndex();
 
         /// Does a file with this name exist?
         /// @note May be called from any thread once the index has been built.

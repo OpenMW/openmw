@@ -12,6 +12,7 @@
 
 #include <components/resource/scenemanager.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/vfs/registerarchives.hpp>
 
 #include "idtable.hpp"
 #include "idtree.hpp"
@@ -62,11 +63,18 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
     return number;
 }
 
-CSMWorld::Data::Data (ToUTF8::FromType encoding, VFS::Manager* vfs, ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir)
+CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
+    const std::vector<std::string>& archives, const Fallback::Map* fallback, const boost::filesystem::path& resDir)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mVFS(vfs), mResourcesManager (resourcesManager), mFallbackMap(fallback),
-  mReader (0), mDialogue (0), mReaderIndex(1), mResourceSystem(new Resource::ResourceSystem(resourcesManager.getVFS()))
+  mFallbackMap(fallback), mReader (0), mDialogue (0), mReaderIndex(1),
+  mFsStrict(fsStrict), mDataPaths(dataPaths), mArchives(archives)
 {
+    mVFS.reset(new VFS::Manager(mFsStrict));
+    VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths, !mFsStrict), mArchives, true);
+
+    mResourcesManager.setVFS(mVFS.get());
+    mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
+
     mResourceSystem->getSceneManager()->setShaderPath((resDir / "shaders").string());
 
     int index = 0;
@@ -1218,7 +1226,8 @@ std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
 
 void CSMWorld::Data::assetsChanged()
 {
-    mVFS->rebuildIndex();
+    mVFS.get()->reset();
+    VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths, !mFsStrict), mArchives, true);
 
     const UniversalId assetTableIds[] = {
         UniversalId::Type_Meshes,
@@ -1265,7 +1274,7 @@ void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 
 const VFS::Manager* CSMWorld::Data::getVFS() const
 {
-    return mVFS;
+    return mVFS.get();
 }
 
 const Fallback::Map* CSMWorld::Data::getFallbackMap() const
