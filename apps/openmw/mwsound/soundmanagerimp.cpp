@@ -379,7 +379,6 @@ namespace MWSound
             return;
 
         // Do a Fisher-Yates shuffle
-        int i = Misc::Rng::rollDice(tracklist.size());
 
         // Repopulate if playlist is empty
         if(tracklist.empty())
@@ -387,6 +386,8 @@ namespace MWSound
             tracklist.resize(filelist.size());
             std::iota(tracklist.begin(), tracklist.end(), 0);
         }
+
+        int i = Misc::Rng::rollDice(tracklist.size());
 
         // Reshuffle if last played music is the same after a repopulation
         if(filelist[tracklist[i]] == mLastPlayedMusic)
