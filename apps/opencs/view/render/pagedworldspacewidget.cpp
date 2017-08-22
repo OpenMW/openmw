@@ -726,28 +726,40 @@ void CSVRender::PagedWorldspaceWidget::reset (unsigned int elementMask)
 void CSVRender::PagedWorldspaceWidget::selectTerrain(TerrainSelectionType type, const WorldspaceHitResult& hit)
 {
     for (auto cell : mCells) {
-        cell.second->getTerrainSelection(type)->select(hit);
+        auto terrainSelection = cell.second->getTerrainSelection(type);
+        if (terrainSelection) {
+            terrainSelection->select(hit);
+        }
     }
 }
 
 void CSVRender::PagedWorldspaceWidget::toggleSelectTerrain(TerrainSelectionType type, const WorldspaceHitResult& hit)
 {
     for (auto cell : mCells) {
-        cell.second->getTerrainSelection(type)->toggleSelect(hit);
+        auto terrainSelection = cell.second->getTerrainSelection(type);
+        if (terrainSelection) {
+            terrainSelection->toggleSelect(hit);
+        }
     }
 }
 
 void CSVRender::PagedWorldspaceWidget::activateTerrainSelection(TerrainSelectionType type)
 {
     for (auto cell : mCells) {
-        cell.second->getTerrainSelection(type)->activate();
+        auto terrainSelection = cell.second->getTerrainSelection(type);
+        if (terrainSelection) {
+            terrainSelection->activate();
+        }
     }
 }
 
 void CSVRender::PagedWorldspaceWidget::deactivateTerrainSelection(TerrainSelectionType type)
 {
     for (auto cell : mCells) {
-        cell.second->getTerrainSelection(type)->deactivate();
+        auto terrainSelection = cell.second->getTerrainSelection(type);
+        if (terrainSelection) {
+            terrainSelection->deactivate();
+        }
     }
 }
 

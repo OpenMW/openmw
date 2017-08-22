@@ -14,29 +14,34 @@ namespace
 }
 
 CSVRender::TerrainSelection::TerrainSelection(const CSMWorld::CellCoordinates& coords, const ESM::Land& esmLand, osg::Group* parentNode)
-    :mCoords {coords}, mEsmLand {esmLand}, mParentNode {parentNode}, mBaseNode {new osg::PositionAttitudeTransform()}
+    :mCoords {coords}, mEsmLand {esmLand}, mParentNode {parentNode}
 {
-    mBaseNode->setPosition(osg::Vec3f(coords.getX() * cellSize, coords.getY() * cellSize, 10));
+    mBaseNode = new osg::PositionAttitudeTransform{};
+    mBaseNode->setPosition(osg::Vec3d(coords.getX() * cellSize, coords.getY() * cellSize, 10.0));
     activate();
 }
 
 CSVRender::TerrainSelection::~TerrainSelection()
 {
-    deactivate(); // maybe not needed
+    deactivate();
 }
 
 void CSVRender::TerrainSelection::select(const WorldspaceHitResult& hit)
 {
     deselect();
 
-    if (isInCell(hit))
+    if (isInCell(hit)) {
         addToSelection(hit.worldPos);
+    }
+    update();
 }
 
 void CSVRender::TerrainSelection::toggleSelect(const WorldspaceHitResult& hit)
 {
-    if (isInCell(hit))
+    if (isInCell(hit)) {
         toggleSelection(hit.worldPos);
+        update();
+    }
 }
 
 void CSVRender::TerrainSelection::activate()
