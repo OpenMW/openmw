@@ -435,9 +435,15 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             }
             else
             {
+                // The section won't completely fit on the current page. Finish the current page and start a new one.
+                mBook->mPages.push_back (Page (curPageStart, curPageStop));
+
+                curPageStart = i->mRect.top;
+                curPageStop = i->mRect.bottom;
+
                 //split section
                 int sectionHeightLeft = sectionHeight;
-                while (sectionHeightLeft > mPageHeight)
+                while (sectionHeightLeft >= mPageHeight)
                 {
                     // Adjust to the top of the first line that does not fit on the current page anymore
                     int splitPos = curPageStop;
