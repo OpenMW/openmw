@@ -5,9 +5,14 @@ namespace VFS
 
 
 BsaArchive::BsaArchive(const std::string &filename)
-    : mFileName(filename)
 {
-    load();
+    mFile.open(filename);
+
+    const Bsa::BSAFile::FileList &filelist = mFile.getList();
+    for(Bsa::BSAFile::FileList::const_iterator it = filelist.begin();it != filelist.end();++it)
+    {
+        mResources.push_back(BsaArchiveFile(&*it, &mFile));
+    }
 }
 
 void BsaArchive::listResources(std::map<std::string, File *> &out, char (*normalize_function)(char))
@@ -18,17 +23,6 @@ void BsaArchive::listResources(std::map<std::string, File *> &out, char (*normal
         std::transform(ent.begin(), ent.end(), ent.begin(), normalize_function);
 
         out[ent] = &*it;
-    }
-}
-
-void BsaArchive::load()
-{
-    mFile.open(mFileName);
-
-    const Bsa::BSAFile::FileList &filelist = mFile.getList();
-    for(Bsa::BSAFile::FileList::const_iterator it = filelist.begin();it != filelist.end();++it)
-    {
-        mResources.push_back(BsaArchiveFile(&*it, &mFile));
     }
 }
 

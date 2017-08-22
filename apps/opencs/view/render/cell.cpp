@@ -297,7 +297,8 @@ void CSVRender::Cell::reloadAssets()
         mTerrain->loadCell(mCoordinates.getX(), mCoordinates.getY());
     }
 
-    mCellWater->reloadAssets();
+    if (mCellWater)
+        mCellWater->reloadAssets();
 }
 
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)
