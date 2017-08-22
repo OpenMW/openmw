@@ -496,6 +496,15 @@ namespace MWMechanics
             break;
         }
 
+        // Allow only one summoned creature at time
+        if (isSummoningEffect(effect.mEffectID))
+        {
+            MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
+
+            if (!creatureStats.getSummonedCreatureMap().empty())
+                return 0.f;
+        }
+
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
 
         // Underwater casting not possible
