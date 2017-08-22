@@ -60,6 +60,7 @@ Programmers
     Gašper Sedej
     gugus/gus
     Hallfaer Tuilinn
+    Haoda Wang (h313)
     hristoast
     Internecine
     Jacob Essex (Yacoby)    

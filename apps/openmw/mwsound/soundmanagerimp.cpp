@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <map>
+#include <numeric>
 
 #include <osg/Matrixf>
 
@@ -347,6 +348,7 @@ namespace MWSound
     void SoundManager::startRandomTitle()
     {
         std::vector<std::string> filelist;
+        auto &tracklist = mMusicToPlay[mCurrentPlaylist];
         if (mMusicFiles.find(mCurrentPlaylist) == mMusicFiles.end())
         {
             const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
@@ -367,11 +369,8 @@ namespace MWSound
             mMusicFiles[mCurrentPlaylist] = filelist;
 
             // Build mMusicToPlay for this playlist
-            std::vector<int> temp;
-            temp.reserve(filelist.size());
-            for(int it = 0; it < filelist.size(); it++)
-                temp.push_back(it);
-            mMusicToPlay.insert(std::make_pair(mCurrentPlaylist, temp));
+            tracklist.resize(filelist.size());
+            std::iota(tracklist.begin(), tracklist.end(), 0);
         }
         else
             filelist = mMusicFiles[mCurrentPlaylist];
@@ -380,15 +379,13 @@ namespace MWSound
             return;
 
         // Do a Fisher-Yates shuffle
-        std::vector<int>& tracklist = mMusicToPlay[mCurrentPlaylist];
         int i = Misc::Rng::rollDice(tracklist.size());
 
         // Repopulate if playlist is empty
         if(tracklist.empty())
         {
-            tracklist.reserve(filelist.size());
-            for (int it = 0; it < filelist.size(); it++)
-                tracklist.push_back(it);
+            tracklist.resize(filelist.size());
+            std::iota(tracklist.begin(), tracklist.end(), 0);
         }
 
         // Reshuffle if last played music is the same after a repopulation
