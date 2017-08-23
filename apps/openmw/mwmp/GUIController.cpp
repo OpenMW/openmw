@@ -214,8 +214,6 @@ void mwmp::GUIController::update(float dt)
         Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->setPlayer(Main::get().getLocalPlayer());
         Main::get().getNetworking()->getPlayerPacket(ID_GUI_MESSAGEBOX)->Send();
     }
-
-    blockConsole();
 }
 
 void mwmp::GUIController::WM_UpdateVisible(MWGui::GuiMode mode)
@@ -382,14 +380,4 @@ void mwmp::GUIController::updateGlobalMapMarkerTooltips(MWGui::MapWindow *mapWin
         const int y = widget.first.second;
         setGlobalMapMarkerTooltip(mapWindow, widget.second, x, y);
     }
-}
-
-void mwmp::GUIController::blockConsole()
-{
-    if (Main::get().getLocalPlayer()->consoleAllowed)
-        return;
-
-    if (MWBase::Environment::get().getWindowManager()->isGuiMode())
-        if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Console)
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
 }

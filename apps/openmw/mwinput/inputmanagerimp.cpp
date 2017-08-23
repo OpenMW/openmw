@@ -13,7 +13,16 @@
 #include <components/sdlutil/sdlinputwrapper.hpp>
 #include <components/sdlutil/sdlvideowrapper.hpp>
 
+/*
+    Start of tes3mp addition
+
+    Include additional headers for multiplayer purposes
+*/
 #include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
+/*
+    End of tes3mp addition
+*/
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/esmreader.hpp>
@@ -1026,6 +1035,17 @@ namespace MWInput
 
     void InputManager::toggleConsole()
     {
+        /*
+            Start of tes3mp addition
+
+            If a player's console is disabled by the server, go no further
+        */
+        if (!mwmp::Main::get().getLocalPlayer()->consoleAllowed)
+            return;
+        /*
+            End of tes3mp addition
+        */
+
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 

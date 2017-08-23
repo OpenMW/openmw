@@ -1,6 +1,9 @@
 #ifndef OPENMW_PROCESSORGAMESETTINGS_HPP
 #define OPENMW_PROCESSORGAMESETTINGS_HPP
 
+#include "apps/openmw/mwbase/environment.hpp"
+#include "apps/openmw/mwgui/windowmanagerimp.hpp"
+
 #include "../PlayerProcessor.hpp"
 
 namespace mwmp
@@ -15,7 +18,16 @@ namespace mwmp
 
         virtual void Do(PlayerPacket &packet, BasePlayer *player)
         {
-
+            if (isLocal())
+            {
+                if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+                {
+                    if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Console && !player->consoleAllowed)
+                    {
+                        MWBase::Environment::get().getWindowManager()->popGuiMode();
+                    }
+                }
+            }
         }
     };
 }

@@ -128,18 +128,19 @@ namespace MWScript
                     std::string topic = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWBase::Environment::get().getDialogueManager()->addTopic(topic);
-
                     /*
                         Start of tes3mp addition
 
-                        Send an ID_PLAYER_TOPIC packet every time a topic is added
+                        Send an ID_PLAYER_TOPIC packet every time a new topic is added
                         through a script
                     */
-                    mwmp::Main::get().getLocalPlayer()->sendTopic(topic);
+                    if (MWBase::Environment::get().getDialogueManager()->isNewTopic(Misc::StringUtils::lowerCase(topic)))
+                        mwmp::Main::get().getLocalPlayer()->sendTopic(Misc::StringUtils::lowerCase(topic));
                     /*
                         End of tes3mp addition
                     */
+
+                    MWBase::Environment::get().getDialogueManager()->addTopic(topic);
                 }
         };
 

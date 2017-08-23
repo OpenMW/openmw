@@ -592,7 +592,7 @@ namespace MWScript
         */
         if (mwmp::Main::get().getLocalPlayer()->hasFinishedCharGen())
         {
-            if (!ref.getRefData().isEnabled() && ref.getCell() != nullptr)
+            if (ref.isInCell() && !ref.getRefData().isEnabled())
             {
                 mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                 worldEvent->reset();
@@ -620,7 +620,7 @@ namespace MWScript
         */
         if (mwmp::Main::get().getLocalPlayer()->hasFinishedCharGen())
         {
-            if (ref.getRefData().isEnabled() && ref.getCell() != nullptr)
+            if (ref.isInCell() && ref.getRefData().isEnabled())
             {
                 mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
                 worldEvent->reset();

@@ -60,10 +60,13 @@ namespace MWScript
                         Send an ID_OBJECT_SCALE every time an object's scale is changed
                         through a script
                     */
-                    mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
-                    worldEvent->reset();
-                    worldEvent->addObjectScale(ptr, scale);
-                    worldEvent->sendObjectScale();
+                    if (ptr.isInCell())
+                    {
+                        mwmp::WorldEvent *worldEvent = mwmp::Main::get().getNetworking()->getWorldEvent();
+                        worldEvent->reset();
+                        worldEvent->addObjectScale(ptr, scale);
+                        worldEvent->sendObjectScale();
+                    }
                     /*
                         End of tes3mp addition
                     */

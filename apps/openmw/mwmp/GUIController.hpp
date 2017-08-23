@@ -74,7 +74,6 @@ namespace mwmp
         GUIDialogList *mListBox;
         void onInputBoxDone(MWGui::WindowBase* parWindow);
         //MyGUI::Widget *oldFocusWidget, *currentFocusWidget;
-        void blockConsole();
     };
 }
 
