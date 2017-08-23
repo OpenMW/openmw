@@ -31,7 +31,7 @@ void CSMWorld::ResourcesManager::setVFS(const VFS::Manager *vfs)
     addResources (Resources (vfs, "music", UniversalId::Type_Music));
     addResources (Resources (vfs, "sound", UniversalId::Type_SoundRes));
     addResources (Resources (vfs, "textures", UniversalId::Type_Texture));
-    addResources (Resources (vfs, "videos", UniversalId::Type_Video));
+    addResources (Resources (vfs, "video", UniversalId::Type_Video));
 }
 
 const VFS::Manager* CSMWorld::ResourcesManager::getVFS() const
