@@ -72,12 +72,15 @@ namespace CSVRender
         }
         else if (Cell* cell = getWorldspaceWidget().getCell (hitResult.worldPos))
         {
-            // Add node
-            QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
-            QString description = "Add node";
+            if (cell->getPathgrid())
+            {
+                // Add node
+                QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
+                QString description = "Add node";
 
-            CSMWorld::CommandMacro macro(undoStack, description);
-            cell->getPathgrid()->applyPoint(macro, hitResult.worldPos);
+                CSMWorld::CommandMacro macro(undoStack, description);
+                cell->getPathgrid()->applyPoint(macro, hitResult.worldPos);
+            }
         }
     }
 
@@ -205,7 +208,7 @@ namespace CSVRender
             WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
 
             Cell* cell = getWorldspaceWidget().getCell(hit.worldPos);
-            if (cell)
+            if (cell && cell->getPathgrid())
             {
                 PathgridTag* tag = 0;
                 if (hit.tag && (tag = dynamic_cast<PathgridTag*>(hit.tag.get())) && tag->getPathgrid()->getId() == mEdgeId)
