@@ -4,6 +4,8 @@
 #include <osg/Geometry>
 #include <osg/PositionAttitudeTransform>
 
+#include <algorithm>
+
 CSVRender::TerrainTextureSelection::TerrainTextureSelection(osg::Group* parentNode, const CSMWorld::CellCoordinates& coords, const ESM::Land& esmLand)
     :TerrainSelection {coords, esmLand, parentNode}
 {
