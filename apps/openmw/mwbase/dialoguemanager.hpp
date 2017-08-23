@@ -46,6 +46,17 @@ namespace MWBase
 
             virtual void addTopic (const std::string& topic) = 0;
 
+            /*
+                Start of tes3mp addition
+
+                Make it possible to check whether a topic is known by the player from elsewhere
+                in the code
+            */
+            virtual bool isNewTopic(const std::string& topic) = 0;
+            /*
+                End of tes3mp addition
+            */
+
             virtual void askQuestion (const std::string& question,int choice) = 0;
 
             virtual void goodbye() = 0;

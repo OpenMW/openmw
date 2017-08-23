@@ -97,6 +97,20 @@ namespace MWDialogue
         mKnownTopics.insert( Misc::StringUtils::lowerCase(topic) );
     }
 
+    /*
+        Start of tes3mp addition
+
+        Make it possible to check whether a topic is known by the player from elsewhere
+        in the code
+    */
+    bool DialogueManager::isNewTopic(const std::string& topic)
+    {
+        return (!mKnownTopics.count(topic));
+    }
+    /*
+        End of tes3mp addition
+    */
+
     void DialogueManager::parseText (const std::string& text)
     {
         std::vector<HyperTextParser::Token> hypertext = HyperTextParser::parseHyperText(text);
@@ -120,7 +134,7 @@ namespace MWDialogue
 
                 Send an ID_PLAYER_TOPIC packet every time a new topic becomes known
             */
-            if (mActorKnownTopics.count(topicId) && !mKnownTopics.count(topicId))
+            if (mActorKnownTopics.count(topicId) && isNewTopic(topicId))
                 mwmp::Main::get().getLocalPlayer()->sendTopic(topicId);
             /*
                 End of tes3mp addition
