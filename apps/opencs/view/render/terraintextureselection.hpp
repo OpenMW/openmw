@@ -23,8 +23,7 @@ namespace CSVRender
 
         private:
 
-            osg::ref_ptr<osg::Vec3Array> mVertices;
-            osg::ref_ptr<osg::DrawArrays> mDrawArrays;
+            osg::ref_ptr<osg::Geode> mGeode;
             Container mSelection;
     };
 }

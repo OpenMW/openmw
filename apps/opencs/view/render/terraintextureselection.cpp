@@ -9,10 +9,6 @@ CSVRender::TerrainTextureSelection::TerrainTextureSelection(osg::Group* parentNo
 {
     osg::ref_ptr<osg::Geometry> geometry {new osg::Geometry{}};
 
-    // Vertices
-    mVertices = new osg::Vec3Array{};
-    geometry->setVertexArray(mVertices);
-
     // Color
     osg::ref_ptr<osg::Vec4Array> colors {new osg::Vec4Array{}};
     colors->push_back(osg::Vec4f(0.f, 0.5f, 0.f, 1.f));
@@ -20,14 +16,14 @@ CSVRender::TerrainTextureSelection::TerrainTextureSelection(osg::Group* parentNo
     geometry->setColorArray(colors, osg::Array::Binding::BIND_OVERALL);
 
     // Primitive
-    mDrawArrays = new osg::DrawArrays{osg::PrimitiveSet::Mode::LINES};
+    osg::ref_ptr<osg::DrawArrays> drawArrays {new osg::DrawArrays{osg::PrimitiveSet::Mode::LINES}};
 
-    geometry->addPrimitiveSet(mDrawArrays);
+    geometry->addPrimitiveSet(drawArrays);
     geometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::Values::OFF);
 
-    osg::ref_ptr<osg::Geode> geode {new osg::Geode{}};
-    geode->addDrawable(geometry);
-    getBaseNode()->addChild(geode);
+    mGeode = new osg::Geode{};
+    mGeode->addDrawable(geometry);
+    getBaseNode()->addChild(mGeode);
 }
 
 void CSVRender::TerrainTextureSelection::addToSelection(osg::Vec3d worldPos)
@@ -63,7 +59,13 @@ void CSVRender::TerrainTextureSelection::update()
     if (!landData)
         return;
 
-    mVertices->clear();
+    const auto geometry = static_cast<const osg::Geometry*>(mGeode->getDrawable(0));
+    const osg::ref_ptr<osg::Geometry> newGeometry {
+        geometry
+        ? new osg::Geometry{*geometry, osg::CopyOp::SHALLOW_COPY}
+        : new osg::Geometry{}};
+
+    const osg::ref_ptr<osg::Vec3Array> vertices {new osg::Vec3Array{}};
 
     for (TerrainPos localPos : mSelection) {
         const int x {localPos.first};
@@ -76,26 +78,32 @@ void CSVRender::TerrainTextureSelection::update()
         const auto west = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x - 1, y));
 
         if (north == mSelection.end()) {
-            mVertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y + 1), landData->mHeights[landIndex(x, y + 1)]));
-            mVertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y + 1), landData->mHeights[landIndex(x + 1, y + 1)]));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y + 1), landData->mHeights[landIndex(x, y + 1)]));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y + 1), landData->mHeights[landIndex(x + 1, y + 1)]));
         }
 
         if (south == mSelection.end()) {
-            mVertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y), landData->mHeights[landIndex(x, y)]));
-            mVertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y), landData->mHeights[landIndex(x + 1, y)]));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y), landData->mHeights[landIndex(x, y)]));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y), landData->mHeights[landIndex(x + 1, y)]));
         }
 
         if (east == mSelection.end()) {
-            mVertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y), landData->mHeights[landIndex(x + 1, y)]));
-            mVertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y + 1), landData->mHeights[landIndex(x + 1, y + 1)]));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y), landData->mHeights[landIndex(x + 1, y)]));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y + 1), landData->mHeights[landIndex(x + 1, y + 1)]));
         }
 
         if (west == mSelection.end()) {
-            mVertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y), landData->mHeights[landIndex(x, y)]));
-            mVertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y + 1), landData->mHeights[landIndex(x, y + 1)]));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y), landData->mHeights[landIndex(x, y)]));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y + 1), landData->mHeights[landIndex(x, y + 1)]));
         }
     }
 
-    mDrawArrays->setCount(mVertices->size());
-    mDrawArrays->dirty();
+    newGeometry->setVertexArray(vertices);
+
+    const auto drawArrays = static_cast<osg::DrawArrays*>(newGeometry->getPrimitiveSet(0));
+
+    drawArrays->setCount(vertices->size());
+    drawArrays->dirty();
+
+    mGeode->setDrawable(0, newGeometry);
 }
