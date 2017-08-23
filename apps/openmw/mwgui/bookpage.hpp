@@ -6,8 +6,6 @@
 
 #include <functional>
 #include <stdint.h>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
 
 namespace MWGui
 {
@@ -15,7 +13,7 @@ namespace MWGui
     /// the book page widget.
     struct TypesetBook
     {
-        typedef boost::shared_ptr <TypesetBook> Ptr;
+        typedef std::shared_ptr <TypesetBook> Ptr;
         typedef intptr_t InteractiveId;
 
         /// Returns the number of pages in the document.
@@ -33,11 +31,14 @@ namespace MWGui
     /// A factory class for creating a typeset book instance.
     struct BookTypesetter
     {
-        typedef boost::shared_ptr <BookTypesetter> Ptr;
+        typedef std::shared_ptr <BookTypesetter> Ptr;
         typedef TypesetBook::InteractiveId InteractiveId;
         typedef MyGUI::Colour Colour;
         typedef uint8_t const * Utf8Point;
         typedef std::pair <Utf8Point, Utf8Point> Utf8Span;
+
+
+
 
         enum Alignment {
             AlignLeft   = -1,
@@ -55,12 +56,13 @@ namespace MWGui
         static Ptr create (int pageWidth, int pageHeight);
 
         /// Create a simple text style consisting of a font and a text color.
-        virtual Style* createStyle (char const * Font, Colour Colour) = 0;
+        virtual Style* createStyle (char const * Font, const Colour& Colour) = 0;
 
         /// Create a hyper-link style with a user-defined identifier based on an
         /// existing style. The unique flag forces a new instance of this style
         /// to be created even if an existing instance is present.
-        virtual Style* createHotStyle (Style * BaseStyle, Colour NormalColour, Colour HoverColour, Colour ActiveColour, InteractiveId Id, bool Unique = true) = 0;
+        virtual Style* createHotStyle (Style * BaseStyle, const Colour& NormalColour, const Colour& HoverColour,
+                                       const Colour& ActiveColour, InteractiveId Id, bool Unique = true) = 0;
 
         /// Insert a line break into the document. Newline characters in the input
         /// text have the same affect. The margin parameter adds additional space
@@ -102,7 +104,7 @@ namespace MWGui
     public:
 
         typedef TypesetBook::InteractiveId InteractiveId;
-        typedef boost::function <void (InteractiveId)> ClickCallback;
+        typedef std::function <void (InteractiveId)> ClickCallback;
 
         /// Make the widget display the specified page from the specified book.
         virtual void showPage (TypesetBook::Ptr Book, size_t Page) = 0;

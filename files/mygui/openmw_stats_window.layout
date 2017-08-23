@@ -87,12 +87,12 @@
                     <Widget type="AutoSizedTextBox" skin="NormalText" position="0 0 95 18" name="Race_str" align="Left Top">
                         <Property key="Caption" value="#{sRace}"/>
                         <UserString key="ToolTipType" value="Layout"/>
-                        <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
+                        <UserString key="ToolTipLayout" value="RaceToolTip"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandTextRight" position="104 0 200 18" name="RaceText" align="Left Top">
                         <Property key="TextAlign" value="Right Top"/>
                         <UserString key="ToolTipType" value="Layout"/>
-                        <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
+                        <UserString key="ToolTipLayout" value="RaceToolTip"/>
                         <UserString key="HStretch" value="true"/>
                     </Widget>
                 </Widget>

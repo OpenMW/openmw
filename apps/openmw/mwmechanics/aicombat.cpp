@@ -47,7 +47,7 @@ namespace MWMechanics
         bool mCombatMove;
         osg::Vec3f mLastTargetPos;
         const MWWorld::CellStore* mCell;
-        boost::shared_ptr<Action> mCurrentAction;
+        std::shared_ptr<Action> mCurrentAction;
         float mActionCooldown;
         float mStrength;
         bool mForceNoShortcut;
@@ -249,7 +249,7 @@ namespace MWMechanics
         actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
         float& actionCooldown = storage.mActionCooldown;
-        boost::shared_ptr<Action>& currentAction = storage.mCurrentAction;
+        std::shared_ptr<Action>& currentAction = storage.mCurrentAction;
 
         if (!forceFlee)
         {
@@ -479,7 +479,7 @@ namespace MWMechanics
 
     void AiCombat::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
-        std::auto_ptr<ESM::AiSequence::AiCombat> combat(new ESM::AiSequence::AiCombat());
+        std::unique_ptr<ESM::AiSequence::AiCombat> combat(new ESM::AiSequence::AiCombat());
         combat->mTargetActorId = mTargetActorId;
 
         ESM::AiSequence::AiPackageContainer package;
@@ -500,8 +500,7 @@ namespace MWMechanics
         {
             // get the range of the target's weapon
             float rangeAttackOfTarget = 0.f;
-            bool isRangedCombat = false;
-            MWWorld::Ptr targetWeapon = MWWorld::Ptr();         
+            MWWorld::Ptr targetWeapon = MWWorld::Ptr();
             const MWWorld::Class& targetClass = target.getClass();
 
             if (targetClass.hasInventoryStore(target))
@@ -513,10 +512,13 @@ namespace MWMechanics
                     targetWeapon = *weaponSlot;
             }
 
-            boost::shared_ptr<Action> targetWeaponAction (new ActionWeapon(targetWeapon));
+            std::shared_ptr<Action> targetWeaponAction (new ActionWeapon(targetWeapon));
 
             if (targetWeaponAction.get())
+            {
+                bool isRangedCombat = false;
                 rangeAttackOfTarget = targetWeaponAction->getCombatRange(isRangedCombat);
+            }
               
             // apply sideway movement (kind of dodging) with some probability
             // if actor is within range of target's weapon
@@ -533,6 +535,10 @@ namespace MWMechanics
         // opponent's weapon range, or not backing up if opponent is also using a ranged weapon
         if (isDistantCombat && distToTarget < rangeAttack / 4)
         {
+            // actor should not back up into water
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(actor), 0.5f))
+                return;
+
             mMovement.mPosition[1] = -1;
         }
     }

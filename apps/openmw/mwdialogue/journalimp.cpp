@@ -85,13 +85,15 @@ namespace MWDialogue
 
         StampedJournalEntry entry = StampedJournalEntry::makeFromQuest (id, index, actor);
 
-        mJournal.push_back (entry);
-
         Quest& quest = getQuest (id);
-
         quest.addEntry (entry); // we are doing slicing on purpose here
 
-        MWBase::Environment::get().getWindowManager()->messageBox ("#{sJournalEntry}");
+        // there is no need to show empty entries in journal
+        if (!entry.getText().empty())
+        {
+            mJournal.push_back (entry);
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sJournalEntry}");
+        }
     }
 
     void Journal::setJournalIndex (const std::string& id, int index)

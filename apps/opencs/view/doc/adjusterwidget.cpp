@@ -1,8 +1,5 @@
 #include "adjusterwidget.hpp"
 
-#include <stdexcept>
-#include <string>
-
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 

@@ -1,6 +1,5 @@
 #include "engine.hpp"
 
-#include <stdexcept>
 #include <iomanip>
 
 #include <boost/filesystem/fstream.hpp>
@@ -28,7 +27,6 @@
 #include <components/sceneutil/workqueue.hpp>
 
 #include <components/files/configurationmanager.hpp>
-#include <components/translation/translation.hpp>
 
 #include <components/version/version.hpp>
 
@@ -280,8 +278,7 @@ void OMW::Engine::setResourceDir (const boost::filesystem::path& parResDir)
     mResDir = parResDir;
 }
 
-// Set start cell name (only interiors for now)
-
+// Set start cell name
 void OMW::Engine::setCell (const std::string& cellName)
 {
     mCellName = cellName;
@@ -526,7 +523,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     window->setStore(mEnvironment.getWorld()->getStore());
     window->initUI();
-    window->renderWorldMap();
 
     //Load translation data
     mTranslationDataStorage.setEncoder(mEncoder);
@@ -712,6 +708,9 @@ void OMW::Engine::go()
         {
             mViewer->eventTraversal();
             mViewer->updateTraversal();
+
+            mEnvironment.getWorld()->updateWindowManager();
+
             mViewer->renderingTraversals();
         }
 

@@ -17,16 +17,16 @@
    <string>Select Installation Method</string>
   </property>
   <property name="subTitle">
-   <string>Select how OpenMW should get the required Morrowind installation files.</string>
+   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select how you would like to install &lt;i&gt;The Elder Scrolls III: Morrowind&lt;/i&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QRadioButton" name="newLocationRadioButton">
+    <widget class="QRadioButton" name="retailDiscRadioButton">
      <property name="styleSheet">
       <string notr="true">font-weight:bold;</string>
      </property>
      <property name="text">
-      <string>Install Morrowind to a new location</string>
+      <string>Retail CD/DVD</string>
      </property>
      <property name="checked">
       <bool>true</bool>
@@ -34,7 +34,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="newLocationLayout">
+    <layout class="QHBoxLayout" name="retailDiscLayout">
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -72,14 +72,14 @@
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
        </property>
        <property name="buddy">
-        <cstring>newLocationRadioButton</cstring>
+        <cstring>retailDiscRadioButton</cstring>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="newLocationLabel">
+      <widget class="QLabel" name="retailDiscLabel">
        <property name="text">
-        <string>Install Morrowind from a retail disk to a new location for OpenMW to use.</string>
+        <string>Install from a retail disc to a new location.</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -94,7 +94,7 @@
       <string notr="true">font-weight:bold</string>
      </property>
      <property name="text">
-      <string>Select an existing Morrowind installation</string>
+      <string>Existing Installation</string>
      </property>
     </widget>
    </item>
@@ -138,7 +138,7 @@
      <item>
       <widget class="QLabel" name="existingLocationLabel">
        <property name="text">
-        <string>Select an existing Morrowind installation for OpenMW to use.</string>
+        <string>Select an existing installation.</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>

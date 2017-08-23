@@ -7,6 +7,7 @@
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/npcstate.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -303,7 +304,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<NpcCustomData> data(new NpcCustomData);
+            std::unique_ptr<NpcCustomData> data(new NpcCustomData);
 
             MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
@@ -844,12 +845,12 @@ namespace MWClass
         }
     }
 
-    boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         // player got activated by another NPC
         if(ptr == MWMechanics::getPlayer())
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
 
         // Werewolfs can't activate NPCs
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
@@ -857,23 +858,42 @@ namespace MWClass
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfNPC");
 
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
 
-        if(getCreatureStats(ptr).isDead())
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
-        if(ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat())
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("#{sActorInCombat}"));
+        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+
+        if(stats.isDead())
+        {
+            bool canLoot = Settings::Manager::getBool ("can loot during death animation", "Game");
+
+            // by default user can loot friendly actors during death animation
+            if (canLoot && !stats.getAiSequence().isInCombat())
+                return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
+
+            // otherwise wait until death animation
+            if(stats.isDeathAnimationFinished())
+                return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
+
+            // death animation is not finished, do nothing
+            return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
+        }
+
+        if(stats.getAiSequence().isInCombat())
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
+
         if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak)
-                || ptr.getClass().getCreatureStats(ptr).getKnockedDown())
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
+            || ptr.getClass().getCreatureStats(ptr).getKnockedDown())
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
+
         // Can't talk to werewolfs
         if(ptr.getClass().isNpc() && ptr.getClass().getNpcStats(ptr).isWerewolf())
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
-        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
+            return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
+
+        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
     MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)
@@ -1009,7 +1029,7 @@ namespace MWClass
 
     void Npc::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Npc);
+        std::shared_ptr<Class> instance (new Npc);
         registerClass (typeid (ESM::NPC).name(), instance);
     }
 
@@ -1019,7 +1039,11 @@ namespace MWClass
             return true;
 
         const NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
-        return !customData.mNpcStats.getAiSequence().isInCombat() || customData.mNpcStats.isDead();
+
+        if (customData.mNpcStats.isDead() && customData.mNpcStats.isDeathAnimationFinished())
+            return true;
+
+        return !customData.mNpcStats.getAiSequence().isInCombat();
     }
 
     MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
@@ -1259,7 +1283,7 @@ namespace MWClass
             if (!ptr.getRefData().getCustomData())
             {
                 // Create a CustomData, but don't fill it from ESM records (not needed)
-                std::auto_ptr<NpcCustomData> data (new NpcCustomData);
+                std::unique_ptr<NpcCustomData> data (new NpcCustomData);
                 ptr.getRefData().setCustomData (data.release());
             }
         }

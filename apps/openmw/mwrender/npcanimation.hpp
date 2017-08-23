@@ -64,8 +64,8 @@ private:
     // Field of view to use when rendering first person meshes
     float mFirstPersonFieldOfView;
 
-    boost::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
-    boost::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
+    std::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
+    std::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
 
     bool mSoundsDisabled;
 
@@ -89,6 +89,9 @@ private:
     virtual void setRenderBin();
 
     osg::ref_ptr<NeckController> mFirstPersonNeckController;
+
+    static bool isFirstPersonPart(const ESM::BodyPart* bodypart);
+    static bool isFemalePart(const ESM::BodyPart* bodypart);
 
 protected:
     virtual void addControllers();

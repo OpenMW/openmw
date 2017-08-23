@@ -222,8 +222,6 @@ namespace MWWorld
         renderPlayer();
         mRendering->resetCamera();
 
-        MWBase::Environment::get().getWindowManager()->updatePlayer();
-
         // we don't want old weather to persist on a new game
         // Note that if reset later, the initial ChangeWeather that the chargen script calls will be lost.
         delete mWeatherManager;
@@ -283,6 +281,8 @@ namespace MWWorld
 
         if (!mStartupScript.empty())
             MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);
+
+        MWBase::Environment::get().getWindowManager()->updatePlayer();
     }
 
     void World::clear()
@@ -309,6 +309,7 @@ namespace MWWorld
 
         mDoorStates.clear();
 
+        mGoToJail = false;
         mTeleportEnabled = true;
         mLevitationEnabled = true;
 
@@ -378,8 +379,11 @@ namespace MWWorld
                 return;
             case ESM::REC_PLAY:
                 mPlayer->readRecord(reader, type);
-                mWorldScene->preloadCell(getPlayerPtr().getCell(), true);
-                mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3());
+                if (getPlayerPtr().isInCell())
+                {
+                    mWorldScene->preloadCell(getPlayerPtr().getCell(), true);
+                    mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3());
+                }
                 break;
             default:
                 if (!mStore.readRecord (reader, type) &&
@@ -819,7 +823,10 @@ namespace MWWorld
         mWeatherManager->advanceTime (hours, incremental);
 
         if (!incremental)
+        {
+            mRendering->notifyWorldSpaceChanged();
             mProjectileManager->clear();
+        }
 
         hours += mGameHour->getFloat();
 
@@ -1453,6 +1460,7 @@ namespace MWWorld
     {
         osg::Vec3f a(x1,y1,z1);
         osg::Vec3f b(x2,y2,z2);
+
         MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), MWPhysics::CollisionType_World|MWPhysics::CollisionType_Door);
         return result.mHit;
     }
@@ -1620,15 +1628,13 @@ namespace MWWorld
         if (!paused)
             doPhysics (duration);
 
+        updatePlayer(paused);
+
         mPhysics->debugDraw();
 
         mWorldScene->update (duration, paused);
 
-        updateWindowManager ();
-
         updateSoundListener();
-
-        updatePlayer(paused);
 
         mSpellPreloadTimer -= duration;
         if (mSpellPreloadTimer <= 0.f)
@@ -1754,8 +1760,6 @@ namespace MWWorld
         // inform the GUI about focused object
         MWWorld::Ptr object = getFacedObject ();
 
-        MWBase::Environment::get().getWindowManager()->setFocusObject(object);
-
         // retrieve object dimensions so we know where to place the floating label
         if (!object.isEmpty ())
         {
@@ -1764,6 +1768,8 @@ namespace MWWorld
             MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(
                 screenBounds.x(), screenBounds.y(), screenBounds.z(), screenBounds.w());
         }
+
+        MWBase::Environment::get().getWindowManager()->setFocusObject(object);
     }
 
     MWWorld::Ptr World::getFacedObject(float maxDistance, bool ignorePlayer)
@@ -2576,7 +2582,25 @@ namespace MWWorld
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-        if (const ESM::Cell *ext = getExterior(name)) {
+        const ESM::Cell *ext = getExterior(name);
+
+        if (!ext && name.find(',') != std::string::npos) {
+            try {
+                int x = std::stoi(name.substr(0, name.find(',')));
+                int y = std::stoi(name.substr(name.find(',')+1));
+                ext = getExterior(x, y)->getCell();
+            }
+            catch (std::invalid_argument)
+            {
+                // This exception can be ignored, as this means that name probably refers to a interior cell instead of comma separated coordinates
+            }
+            catch (std::out_of_range)
+            {
+                throw std::runtime_error("Cell coordinates out of range.");
+            }
+        }
+
+        if (ext) {
             int x = ext->getGridX();
             int y = ext->getGridY();
             indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
@@ -2586,6 +2610,7 @@ namespace MWWorld
 
             return true;
         }
+
         return false;
     }
 
@@ -2989,7 +3014,7 @@ namespace MWWorld
 
     struct AddDetectedReferenceVisitor
     {
-        AddDetectedReferenceVisitor(std::vector<Ptr>& out, Ptr detector, World::DetectionType type, float squaredDist)
+        AddDetectedReferenceVisitor(std::vector<Ptr>& out, const Ptr& detector, World::DetectionType type, float squaredDist)
             : mOut(out), mDetector(detector), mSquaredDist(squaredDist), mType(type)
         {
         }
@@ -3358,7 +3383,7 @@ namespace MWWorld
 
         if (object.getRefData().activate())
         {
-            boost::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
+            std::shared_ptr<MWWorld::Action> action = (object.getClass().activate(object, actor));
             action->execute (actor);
         }
     }

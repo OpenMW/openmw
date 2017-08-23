@@ -16,6 +16,7 @@
 #include "aifollow.hpp"
 #include "aiactivate.hpp"
 #include "aicombat.hpp"
+#include "aicombataction.hpp"
 #include "aipursue.hpp"
 #include "actorutil.hpp"
 
@@ -96,16 +97,16 @@ std::list<AiPackage*>::const_iterator AiSequence::end() const
     return mPackages.end();
 }
 
-std::list<AiPackage*>::const_iterator AiSequence::erase(std::list<AiPackage*>::const_iterator package)
+void AiSequence::erase(std::list<AiPackage*>::const_iterator package)
 {
     // Not sure if manually terminated packages should trigger mDone, probably not?
     for(std::list<AiPackage*>::iterator it = mPackages.begin(); it != mPackages.end(); ++it)
     {
         if (package == it)
         {
-            AiPackage* packagePtr = *it;
-            delete packagePtr;
-            return mPackages.erase(it);
+            delete *it;
+            mPackages.erase(it);
+            return;
         }
     }
     throw std::runtime_error("can't find package to erase");
@@ -116,6 +117,16 @@ bool AiSequence::isInCombat() const
     for(std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
     {
         if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+            return true;
+    }
+    return false;
+}
+
+bool AiSequence::hasPackage(int typeId) const
+{
+    for (std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+    {
+        if ((*it)->getTypeId() == typeId)
             return true;
     }
     return false;
@@ -172,7 +183,8 @@ bool isActualAiPackage(int packageTypeId)
     return (packageTypeId != AiPackage::TypeIdCombat
                    && packageTypeId != AiPackage::TypeIdPursue
                    && packageTypeId != AiPackage::TypeIdAvoidDoor
-                   && packageTypeId != AiPackage::TypeIdFace);
+                   && packageTypeId != AiPackage::TypeIdFace
+                   && packageTypeId != AiPackage::TypeIdBreathe);
 }
 
 void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
@@ -198,6 +210,8 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
             float nearestDist = std::numeric_limits<float>::max();
             osg::Vec3f vActorPos = actor.getRefData().getPosition().asVec3();
 
+            float bestRating = 0.f;
+
             for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end();)
             {
                 if ((*it)->getTypeId() != AiPackage::TypeIdCombat) break;
@@ -212,6 +226,8 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
                 }
                 else
                 {
+                    float rating = MWMechanics::getBestActionRating(actor, target);
+
                     const ESM::Position &targetPos = target.getRefData().getPosition();
 
                     float distTo = (targetPos.asVec3() - vActorPos).length();
@@ -220,10 +236,12 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
                     if (it == mPackages.begin())
                         distTo = std::max(0.f, distTo - 50.f);
 
-                    if (distTo < nearestDist)
+                    // if a target has higher priority than current target or has same priority but closer
+                    if (rating > bestRating || ((distTo < nearestDist) && rating == bestRating))
                     {
                         nearestDist = distTo;
                         itActualCombat = it;
+                        bestRating = rating;
                     }
                     ++it;
                 }
@@ -284,21 +302,6 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
 {
     if (actor == getPlayer())
         throw std::runtime_error("Can't add AI packages to player");
-
-    if (package.getTypeId() == AiPackage::TypeIdCombat || package.getTypeId() == AiPackage::TypeIdPursue)
-    {
-        // Notify AiWander of our current position so we can return to it after combat finished
-        for (std::list<AiPackage *>::const_iterator iter (mPackages.begin()); iter!=mPackages.end(); ++iter)
-        {
-            if((*iter)->getTypeId() == AiPackage::TypeIdCombat && package.getTypeId() == AiPackage::TypeIdCombat
-                && (*iter)->getTarget() == (&package)->getTarget())
-            {
-                return; // already in combat with this actor
-            }
-            else if ((*iter)->getTypeId() == AiPackage::TypeIdWander)
-                static_cast<AiWander*>(*iter)->setReturnPosition(actor.getRefData().getPosition().asVec3());
-        }
-    }
 
     // Stop combat when a non-combat AI package is added
     if (isActualAiPackage(package.getTypeId()))
@@ -412,7 +415,7 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
     for (std::vector<ESM::AiSequence::AiPackageContainer>::const_iterator it = sequence.mPackages.begin();
          it != sequence.mPackages.end(); ++it)
     {
-        std::auto_ptr<MWMechanics::AiPackage> package (NULL);
+        std::unique_ptr<MWMechanics::AiPackage> package (nullptr);
         switch (it->mType)
         {
         case ESM::AiSequence::Ai_Wander:

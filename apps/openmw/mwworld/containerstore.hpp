@@ -162,8 +162,12 @@ namespace MWWorld
             /// If a compatible stack is found, the item's count is added to that stack, then the original is deleted.
             /// @return If the item was stacked, return the stack, otherwise return the old (untouched) item.
 
-            /// @return How many items with refID \a id are in this container?
             int count (const std::string& id);
+            ///< @return How many items with refID \a id are in this container?
+
+            int restockCount (const std::string& id);
+            ///< Item count with restock adjustments (such as ignoring filled soul gems).
+            ///  @return How many items with refID \a id are in this container?
 
             ContainerStoreListener* getContListener() const;
             void setContListener(ContainerStoreListener* listener);

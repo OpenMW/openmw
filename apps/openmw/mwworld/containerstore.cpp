@@ -156,6 +156,16 @@ int MWWorld::ContainerStore::count(const std::string &id)
     return total;
 }
 
+int MWWorld::ContainerStore::restockCount(const std::string &id)
+{
+    int total=0;
+    for (MWWorld::ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), id))
+            if (iter->getCellRef().getSoul().empty())
+                total += iter->getRefData().getCount();
+    return total;
+}
+
 MWWorld::ContainerStoreListener* MWWorld::ContainerStore::getContListener() const
 {
     return mListener;
@@ -512,7 +522,7 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
     for (std::map<std::pair<std::string, std::string>, int>::iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end();)
     {
         int spawnedCount = it->second; //How many items should be in shop originally
-        int itemCount = count(it->first.first); //How many items are there in shop now
+        int itemCount = restockCount(it->first.first); //How many items are there in shop now
         //If something was not sold
         if(itemCount >= spawnedCount)
         {
@@ -578,7 +588,7 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
         else
         {
             //Restocking static item - just restock to the max count
-            int currentCount = count(itemOrList);
+            int currentCount = restockCount(itemOrList);
             if (currentCount < std::abs(it->mCount))
                 addInitialItem(itemOrList, owner, -(std::abs(it->mCount) - currentCount), true);
         }

@@ -127,22 +127,23 @@ void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemM
     if (!mCommandDispatcher)
         return;
 
-    QVariant new_;
-    // Color columns use a custom editor, so we need explicitly extract a data from it
+    QVariant variant;
+
+    // Color columns use a custom editor, so we need to fetch selected color from it.
     CSVWidget::ColorEditor *colorEditor = qobject_cast<CSVWidget::ColorEditor *>(editor);
     if (colorEditor != NULL)
     {
-        new_ = colorEditor->color();
+        variant = colorEditor->colorInt();
     }
     else
     {
         NastyTableModelHack hack (*model);
         QStyledItemDelegate::setModelData (editor, &hack, index);
-        new_ = hack.getData();
+        variant = hack.getData();
     }
 
-    if ((model->data (index)!=new_) && (model->flags(index) & Qt::ItemIsEditable))
-        mCommandDispatcher->executeModify (model, index, new_);
+    if ((model->data (index)!=variant) && (model->flags(index) & Qt::ItemIsEditable))
+        mCommandDispatcher->executeModify (model, index, variant);
 }
 
 CSVWorld::CommandDelegate::CommandDelegate (CSMWorld::CommandDispatcher *commandDispatcher,
@@ -179,7 +180,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
     // (the third parameter of ColorEditor's constructor)
     else if (display == CSMWorld::ColumnBase::Display_Colour)
     {
-        return new CSVWidget::ColorEditor(index.data().value<QColor>(), parent, true);
+        return new CSVWidget::ColorEditor(index.data().toInt(), parent, true);
     }
     return createEditor (parent, option, index, display);
 }
@@ -202,9 +203,9 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
     switch (display)
     {
         case CSMWorld::ColumnBase::Display_Colour:
-
-            return new CSVWidget::ColorEditor(index.data().value<QColor>(), parent);
-
+        {
+            return new CSVWidget::ColorEditor(variant.toInt(), parent);
+        }
         case CSMWorld::ColumnBase::Display_Integer:
         {
             DialogueSpinBox *sb = new DialogueSpinBox(parent);
@@ -291,13 +292,13 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
 
 void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const
 {
-    QVariant v = index.data(Qt::EditRole);
+    QVariant variant = index.data(Qt::EditRole);
     if (tryDisplay)
     {
-        if (!v.isValid())
+        if (!variant.isValid())
         {
-            v = index.data(Qt::DisplayRole);
-            if (!v.isValid())
+            variant = index.data(Qt::DisplayRole);
+            if (!variant.isValid())
             {
                 return;
             }
@@ -305,7 +306,7 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
         QPlainTextEdit* plainTextEdit = qobject_cast<QPlainTextEdit*>(editor);
         if(plainTextEdit) //for some reason it is easier to brake the loop here
         {
-            if(plainTextEdit->toPlainText() == v.toString())
+            if (plainTextEdit->toPlainText() == variant.toString())
             {
                 return;
             }
@@ -316,23 +317,25 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
     CSVWidget::ColorEditor *colorEditor = qobject_cast<CSVWidget::ColorEditor *>(editor);
     if (colorEditor != NULL)
     {
-        colorEditor->setColor(index.data().value<QColor>());
+        colorEditor->setColor(variant.toInt());
         return;
     }
 
     QByteArray n = editor->metaObject()->userProperty().name();
 
-    if (n == "dateTime") {
+    if (n == "dateTime")
+    {
         if (editor->inherits("QTimeEdit"))
             n = "time";
         else if (editor->inherits("QDateEdit"))
             n = "date";
     }
 
-    if (!n.isEmpty()) {
-        if (!v.isValid())
-            v = QVariant(editor->property(n).userType(), (const void *)0);
-        editor->setProperty(n, v);
+    if (!n.isEmpty())
+    {
+        if (!variant.isValid())
+            variant = QVariant(editor->property(n).userType(), (const void *)0);
+        editor->setProperty(n, variant);
     }
 
 }

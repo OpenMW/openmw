@@ -55,6 +55,13 @@ void ChunkManager::reportStats(unsigned int frameNumber, osg::Stats *stats) cons
     stats->setAttribute(frameNumber, "Terrain Chunk", mCache->getCacheSize());
 }
 
+void ChunkManager::clearCache()
+{
+    ResourceManager::clearCache();
+
+    mBufferCache.clearCache();
+}
+
 void ChunkManager::setCullingActive(bool active)
 {
     mCullingActive = active;

@@ -3,6 +3,8 @@
 
 #include "setting.hpp"
 
+class QSpinBox;
+
 namespace CSMPrefs
 {
     class IntSetting : public Setting
@@ -13,6 +15,7 @@ namespace CSMPrefs
             int mMax;
             std::string mTooltip;
             int mDefault;
+            QSpinBox* mWidget;
 
         public:
 
@@ -30,6 +33,8 @@ namespace CSMPrefs
 
             /// Return label, input widget.
             virtual std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent);
+
+            virtual void updateWidget();
 
         private slots:
 

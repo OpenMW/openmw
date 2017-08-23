@@ -138,7 +138,7 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
     if (mLocked)
         return;
 
-    std::auto_ptr<CSMWorld::UpdateCellCommand> modifyCell;
+    std::unique_ptr<CSMWorld::UpdateCellCommand> modifyCell;
 
     int columnId = model->data (index, ColumnBase::Role_ColumnId).toInt();
 
@@ -167,7 +167,7 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
         }
     }
 
-    std::auto_ptr<CSMWorld::ModifyCommand> modifyData (
+    std::unique_ptr<CSMWorld::ModifyCommand> modifyData (
         new CSMWorld::ModifyCommand (*model, index, new_));
 
     if (modifyCell.get())

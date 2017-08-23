@@ -282,7 +282,7 @@ namespace MWRender
     class GlowUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        GlowUpdater(int texUnit, osg::Vec4f color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures,
+        GlowUpdater(int texUnit, const osg::Vec4f& color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures,
             osg::Node* node, float duration, Resource::ResourceSystem* resourcesystem)
             : mTexUnit(texUnit)
             , mColor(color)
@@ -383,7 +383,7 @@ namespace MWRender
             return mDone;
         }
 
-        void setColor(osg::Vec4f color)
+        void setColor(const osg::Vec4f& color)
         {
             mColor = color;
             mColorChanged = true;
@@ -546,7 +546,7 @@ namespace MWRender
         if(!mResourceSystem->getVFS()->exists(kfname))
             return;
 
-        boost::shared_ptr<AnimSource> animsrc;
+        std::shared_ptr<AnimSource> animsrc;
         animsrc.reset(new AnimSource);
         animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(kfname);
 
@@ -598,7 +598,7 @@ namespace MWRender
         mStates.clear();
 
         for(size_t i = 0;i < sNumBlendMasks;i++)
-            mAnimationTimePtr[i]->setTimePtr(boost::shared_ptr<float>());
+            mAnimationTimePtr[i]->setTimePtr(std::shared_ptr<float>());
 
         mAccumCtrl = NULL;
 
@@ -881,12 +881,12 @@ namespace MWRender
                     active = state;
             }
 
-            mAnimationTimePtr[blendMask]->setTimePtr(active == mStates.end() ? boost::shared_ptr<float>() : active->second.mTime);
+            mAnimationTimePtr[blendMask]->setTimePtr(active == mStates.end() ? std::shared_ptr<float>() : active->second.mTime);
 
             // add external controllers for the AnimSource active in this blend mask
             if (active != mStates.end())
             {
-                boost::shared_ptr<AnimSource> animsrc = active->second.mSource;
+                std::shared_ptr<AnimSource> animsrc = active->second.mSource;
 
                 for (AnimSource::ControllerMap::iterator it = animsrc->mControllerMap[blendMask].begin(); it != animsrc->mControllerMap[blendMask].end(); ++it)
                 {
@@ -1058,11 +1058,9 @@ namespace MWRender
             float timepassed = duration * state.mSpeedMult;
             while(state.mPlaying)
             {
-                float targetTime;
-
                 if (!state.shouldLoop())
                 {
-                    targetTime = state.getTime() + timepassed;
+                    float targetTime = state.getTime() + timepassed;
                     if(textkey == textkeys.end() || textkey->first > targetTime)
                     {
                         if(mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
@@ -1364,7 +1362,7 @@ namespace MWRender
                             useQuadratic, quadraticValue, quadraticRadiusMult, useLinear, linearRadiusMult, linearValue);
     }
 
-    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, std::string texture)
+    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture)
     {
         if (!mObjectRoot.get())
             return;
@@ -1408,9 +1406,9 @@ namespace MWRender
         params.mEffectId = effectId;
         params.mBoneName = bonename;
 
-        params.mAnimTime = boost::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
+        params.mAnimTime = std::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
 
-        SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
+        SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
         node->accept(assignVisitor);
 
         overrideFirstRootTexture(texture, mResourceSystem, node);

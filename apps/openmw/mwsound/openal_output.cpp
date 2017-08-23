@@ -217,7 +217,7 @@ private:
 
     DecoderPtr mDecoder;
 
-    std::auto_ptr<Sound_Loudness> mLoudnessAnalyzer;
+    std::unique_ptr<Sound_Loudness> mLoudnessAnalyzer;
 
     volatile bool mIsFinished;
 

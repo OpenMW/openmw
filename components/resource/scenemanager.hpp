@@ -143,11 +143,13 @@ namespace Resource
         /// @see ResourceManager::updateCache
         virtual void updateCache(double referenceTime);
 
+        virtual void clearCache();
+
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
 
     private:
 
-        std::auto_ptr<Shader::ShaderManager> mShaderManager;
+        std::unique_ptr<Shader::ShaderManager> mShaderManager;
         bool mForceShaders;
         bool mClampLighting;
         bool mForcePerPixelLighting;

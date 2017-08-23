@@ -1650,7 +1650,7 @@ void CharacterController::update(float duration)
                     mSecondsOfSwimming -= 1;
                 }
             }
-            else if(isrunning)
+            else if(isrunning && !sneak)
             {
                 mSecondsOfRunning += duration;
                 while(mSecondsOfRunning > 1)
@@ -1673,9 +1673,10 @@ void CharacterController::update(float duration)
         static const float fFatigueSneakBase = gmst.find("fFatigueSneakBase")->getFloat();
         static const float fFatigueSneakMult = gmst.find("fFatigueSneakMult")->getFloat();
 
-        const float encumbrance = cls.getEncumbrance(mPtr) / cls.getCapacity(mPtr);
-        if (encumbrance < 1)
+        if (cls.getEncumbrance(mPtr) <= cls.getCapacity(mPtr))
         {
+            const float encumbrance = cls.getEncumbrance(mPtr) / cls.getCapacity(mPtr);
+
             if (sneak)
                 fatigueLoss = fFatigueSneakBase + encumbrance * fFatigueSneakMult;
             else
@@ -1687,7 +1688,7 @@ void CharacterController::update(float duration)
                     else
                         fatigueLoss = fFatigueSwimRunBase + encumbrance * fFatigueSwimRunMult;
                 }
-                if (isrunning)
+                else if (isrunning)
                     fatigueLoss = fFatigueRunBase + encumbrance * fFatigueRunMult;
             }
         }
@@ -1753,7 +1754,7 @@ void CharacterController::update(float duration)
                 float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
                 if (normalizedEncumbrance > 1)
                     normalizedEncumbrance = 1;
-                const float fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
+                const float fatigueDecrease = fatigueJumpBase + normalizedEncumbrance * fatigueJumpMult;
 
                 if (!godmode)
                 {
@@ -2042,13 +2043,13 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
     }
     else
     {
-        // If the given animation is a looped animation, is already playing
-        // and has not yet reached its Loop Stop key, make it the only animation
-        // in the queue, and retain the loop count from the animation that was
-        // already playing. This emulates observed behavior from the original
-        // engine and allows banners to animate correctly.
+        // If this animation is a looped animation (has a "loop start" key) that is already playing
+        // and has not yet reached the end of the loop, allow it to continue animating with its existing loop count
+        // and remove any other animations that were queued.
+        // This emulates observed behavior from the original allows the script "OutsideBanner" to animate banners correctly.
         if (!mAnimQueue.empty() && mAnimQueue.front().mGroup == groupname &&
-            mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": loop start") >= 0)
+            mAnimation->getTextKeyTime(mAnimQueue.front().mGroup + ": loop start") >= 0 &&
+            mAnimation->isPlaying(groupname))
         {
             float endOfLoop = mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": loop stop");
 
@@ -2057,8 +2058,7 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
 
             if (endOfLoop > 0 && (mAnimation->getCurrentTime(mAnimQueue.front().mGroup) < endOfLoop))
             {
-                mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, true);
-                mAnimQueue.resize(1);                    
+                mAnimQueue.resize(1);
                 return true;
             }
         }
@@ -2237,12 +2237,24 @@ bool CharacterController::isSneaking() const
             mMovementState == CharState_SneakRight;
 }
 
+bool CharacterController::isRunning() const
+{
+    return mMovementState == CharState_RunForward ||
+            mMovementState == CharState_RunBack ||
+            mMovementState == CharState_RunLeft ||
+            mMovementState == CharState_RunRight ||
+            mMovementState == CharState_SwimRunForward ||
+            mMovementState == CharState_SwimRunBack ||
+            mMovementState == CharState_SwimRunLeft ||
+            mMovementState == CharState_SwimRunRight;
+}
+
 void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
 {
     mAttackingOrSpell = attackingOrSpell;
 }
 
-void CharacterController::setAIAttackType(std::string attackType)
+void CharacterController::setAIAttackType(const std::string& attackType)
 {
     mAttackType = attackType;
 }

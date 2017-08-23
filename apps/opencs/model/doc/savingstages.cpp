@@ -1,20 +1,15 @@
 #include "savingstages.hpp"
 
-#include <fstream>
-
 #include <boost/filesystem.hpp>
 
 #include <QUndoStack>
 
 #include <components/esm/loaddial.hpp>
 
-#include <components/misc/stringops.hpp>
-
 #include "../world/infocollection.hpp"
 #include "../world/cellcoordinates.hpp"
 
 #include "document.hpp"
-#include "savingstate.hpp"
 
 CSMDoc::OpenSaveStage::OpenSaveStage (Document& document, SavingState& state, bool projectFile)
 : mDocument (document), mState (state), mProjectFile (projectFile)

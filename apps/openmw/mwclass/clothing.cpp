@@ -53,7 +53,7 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    boost::shared_ptr<MWWorld::Action> Clothing::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Clothing::activate (const MWWorld::Ptr& ptr,
             const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -124,7 +124,7 @@ namespace MWClass
 
     void Clothing::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Clothing);
+        std::shared_ptr<Class> instance (new Clothing);
 
         registerClass (typeid (ESM::Clothing).name(), instance);
     }
@@ -243,9 +243,9 @@ namespace MWClass
         return std::make_pair (1, "");
     }
 
-    boost::shared_ptr<MWWorld::Action> Clothing::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Clothing::use (const MWWorld::Ptr& ptr) const
     {
-        boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
+        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
 
         action->setSound(getUpSoundId(ptr));
 

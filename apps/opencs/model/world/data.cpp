@@ -11,6 +11,8 @@
 #include <components/esm/cellref.hpp>
 
 #include <components/resource/scenemanager.hpp>
+#include <components/vfs/manager.hpp>
+#include <components/vfs/registerarchives.hpp>
 
 #include "idtable.hpp"
 #include "idtree.hpp"
@@ -61,11 +63,18 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
     return number;
 }
 
-CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager, const Fallback::Map* fallback, const boost::filesystem::path& resDir)
+CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
+    const std::vector<std::string>& archives, const Fallback::Map* fallback, const boost::filesystem::path& resDir)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mResourcesManager (resourcesManager), mFallbackMap(fallback),
-  mReader (0), mDialogue (0), mReaderIndex(1), mResourceSystem(new Resource::ResourceSystem(resourcesManager.getVFS()))
+  mFallbackMap(fallback), mReader (0), mDialogue (0), mReaderIndex(1),
+  mFsStrict(fsStrict), mDataPaths(dataPaths), mArchives(archives)
 {
+    mVFS.reset(new VFS::Manager(mFsStrict));
+    VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths, !mFsStrict), mArchives, true);
+
+    mResourcesManager.setVFS(mVFS.get());
+    mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
+
     mResourceSystem->getSceneManager()->setShaderPath((resDir / "shaders").string());
 
     int index = 0;
@@ -327,7 +336,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mCells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_WaterLevel, ColumnBase::Display_Float));
     mCells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_MapColor, ColumnBase::Display_Integer));
+        new NestedChildColumn (Columns::ColumnId_MapColor, ColumnBase::Display_Colour));
 
     mEnchantments.addColumn (new StringIdColumn<ESM::Enchantment>);
     mEnchantments.addColumn (new RecordStateColumn<ESM::Enchantment>);
@@ -554,12 +563,12 @@ CSMWorld::Data::~Data()
     delete mReader;
 }
 
-boost::shared_ptr<Resource::ResourceSystem> CSMWorld::Data::getResourceSystem()
+std::shared_ptr<Resource::ResourceSystem> CSMWorld::Data::getResourceSystem()
 {
     return mResourceSystem;
 }
 
-boost::shared_ptr<const Resource::ResourceSystem> CSMWorld::Data::getResourceSystem() const
+std::shared_ptr<const Resource::ResourceSystem> CSMWorld::Data::getResourceSystem() const
 {
     return mResourceSystem;
 }
@@ -891,7 +900,7 @@ void CSMWorld::Data::merge()
 int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base, bool project)
 {
     // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading
-    boost::shared_ptr<ESM::ESMReader> ptr(mReader);
+    std::shared_ptr<ESM::ESMReader> ptr(mReader);
     mReaders.push_back(ptr);
     mReader = 0;
 
@@ -945,7 +954,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading.
             // We don't store non-base reader, because everything going into modified will be
             // fully loaded during the initial loading process.
-            boost::shared_ptr<ESM::ESMReader> ptr(mReader);
+            std::shared_ptr<ESM::ESMReader> ptr(mReader);
             mReaders.push_back(ptr);
         }
         else
@@ -1215,6 +1224,43 @@ std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
     return ids;
 }
 
+void CSMWorld::Data::assetsChanged()
+{
+    mVFS.get()->reset();
+    VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths, !mFsStrict), mArchives, true);
+
+    const UniversalId assetTableIds[] = {
+        UniversalId::Type_Meshes,
+        UniversalId::Type_Icons,
+        UniversalId::Type_Musics,
+        UniversalId::Type_SoundsRes,
+        UniversalId::Type_Textures,
+        UniversalId::Type_Videos
+    };
+
+    size_t numAssetTables = sizeof(assetTableIds) / sizeof(UniversalId);
+
+    for (size_t i = 0; i < numAssetTables; ++i)
+    {
+        ResourceTable* table = static_cast<ResourceTable*>(getTableModel(assetTableIds[i]));
+        table->beginReset();
+    }
+
+    // Trigger recreation
+    mResourcesManager.recreateResources();
+
+    for (size_t i = 0; i < numAssetTables; ++i)
+    {
+        ResourceTable* table = static_cast<ResourceTable*>(getTableModel(assetTableIds[i]));
+        table->endReset();
+    }
+
+    // Get rid of potentially old cached assets
+    mResourceSystem->clearCache();
+
+    emit assetTablesChanged();
+}
+
 void CSMWorld::Data::dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
     if (topLeft.column()<=0)
@@ -1228,7 +1274,7 @@ void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 
 const VFS::Manager* CSMWorld::Data::getVFS() const
 {
-    return mResourcesManager.getVFS();
+    return mVFS.get();
 }
 
 const Fallback::Map* CSMWorld::Data::getFallbackMap() const

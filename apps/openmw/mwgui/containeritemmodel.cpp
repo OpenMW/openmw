@@ -1,5 +1,7 @@
 #include "containeritemmodel.hpp"
 
+#include <algorithm>
+
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 

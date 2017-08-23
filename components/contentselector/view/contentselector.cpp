@@ -11,7 +11,6 @@
 #include <QMessageBox>
 #include <QModelIndex>
 #include <QDir>
-#include <assert.h>
 
 ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
     QObject(parent)

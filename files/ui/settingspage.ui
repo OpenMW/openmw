@@ -17,20 +17,10 @@
    <item>
     <widget class="QGroupBox" name="generalGroup">
      <property name="title">
-      <string>General</string>
+      <string>Morrowind Content Language</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QLabel" name="languageLabel">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The language of the original Morrowind installation files (used for the character encoding)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string>Morrowind content language:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
        <widget class="QComboBox" name="languageComboBox">
         <property name="minimumSize">
          <size>
@@ -39,6 +29,19 @@
          </size>
         </property>
        </widget>
+      </item>
+      <item row="0" column="1">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </widget>
@@ -50,7 +53,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,1">
       <item row="1" column="1">
-       <spacer name="horizontalSpacer">
+       <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -112,7 +115,7 @@
       <item>
        <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,1">
         <item row="2" column="1">
-         <spacer name="horizontalSpacer_2">
+         <spacer name="horizontalSpacer_3">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -131,14 +134,17 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QProgressBar" name="progressBar">
-          <property name="maximum">
-           <number>4</number>
-          </property>
-         </widget>
-        </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="progressBar">
+        <property name="maximum">
+         <number>4</number>
+        </property>
+        <property name="textVisible">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

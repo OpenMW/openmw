@@ -2,7 +2,6 @@
 
 #include <QDebug>
 #include <QPushButton>
-#include <QAbstractButton>
 #include <QMessageBox>
 
 #include "mainwizard.hpp"
@@ -26,7 +25,7 @@ Wizard::ComponentSelectionPage::ComponentSelectionPage(QWidget *parent) :
 
 void Wizard::ComponentSelectionPage::updateButton(QListWidgetItem*)
 {
-    if (field(QLatin1String("installation.new")).toBool() == true)
+    if (field(QLatin1String("installation.retailDisc")).toBool() == true)
         return; // Morrowind is always checked here
 
     bool unchecked = true;
@@ -60,7 +59,7 @@ void Wizard::ComponentSelectionPage::initializePage()
     QListWidgetItem *tribunalItem = new QListWidgetItem(QLatin1String("Tribunal"));
     QListWidgetItem *bloodmoonItem = new QListWidgetItem(QLatin1String("Bloodmoon"));
 
-    if (field(QLatin1String("installation.new")).toBool() == true)
+    if (field(QLatin1String("installation.retailDisc")).toBool() == true)
     {
         morrowindItem->setFlags((morrowindItem->flags() & ~Qt::ItemIsEnabled) | Qt::ItemIsUserCheckable);
         morrowindItem->setData(Qt::CheckStateRole, Qt::Checked);
@@ -117,7 +116,7 @@ bool Wizard::ComponentSelectionPage::validatePage()
 
 //    qDebug() << components << path << mWizard->mInstallations[path];
 
-    if (field(QLatin1String("installation.new")).toBool() == false) {
+    if (field(QLatin1String("installation.retailDisc")).toBool() == false) {
         if (components.contains(QLatin1String("Tribunal")) && !components.contains(QLatin1String("Bloodmoon")))
         {
             if (mWizard->mInstallations[path].hasBloodmoon)

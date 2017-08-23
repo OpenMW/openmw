@@ -5,8 +5,6 @@
 #include <memory>
 #include <functional>
 #include <stdint.h>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
 
 namespace MWGui
 {
@@ -18,7 +16,7 @@ namespace MWGui
     /// game data store.
     struct JournalViewModel
     {
-        typedef boost::shared_ptr <JournalViewModel> Ptr;
+        typedef std::shared_ptr <JournalViewModel> Ptr;
 
         typedef intptr_t QuestId;
         typedef intptr_t TopicId;
@@ -38,7 +36,7 @@ namespace MWGui
             /// Visits each subset of text in the body, delivering the beginning
             /// and end of the span relative to the body, and a valid topic ID if
             /// the span represents a keyword, or zero if not.
-            virtual void visitSpans (boost::function <void (TopicId, size_t, size_t)> visitor) const = 0;
+            virtual void visitSpans (std::function <void (TopicId, size_t, size_t)> visitor) const = 0;
         };
 
         /// An interface to topic data.
@@ -68,20 +66,20 @@ namespace MWGui
         virtual bool isEmpty () const = 0;
 
         /// walks the active and optionally completed, quests providing the name and completed status
-        virtual void visitQuestNames (bool active_only, boost::function <void (const std::string&, bool)> visitor) const = 0;
+        virtual void visitQuestNames (bool active_only, std::function <void (const std::string&, bool)> visitor) const = 0;
 
         /// walks over the journal entries related to all quests with the given name
         /// If \a questName is empty, simply visits all journal entries
-        virtual void visitJournalEntries (const std::string& questName, boost::function <void (JournalEntry const &)> visitor) const = 0;
+        virtual void visitJournalEntries (const std::string& questName, std::function <void (JournalEntry const &)> visitor) const = 0;
 
         /// provides the name of the topic specified by its id
-        virtual void visitTopicName (TopicId topicId, boost::function <void (Utf8Span)> visitor) const = 0;
+        virtual void visitTopicName (TopicId topicId, std::function <void (Utf8Span)> visitor) const = 0;
 
         /// walks over the topics whose names start with the specified character providing the topics name
-        virtual void visitTopicNamesStartingWith (char character, boost::function < void (const std::string&) > visitor) const = 0;
+        virtual void visitTopicNamesStartingWith (char character, std::function < void (const std::string&) > visitor) const = 0;
 
         /// walks over the topic entries for the topic specified by its identifier
-        virtual void visitTopicEntries (TopicId topicId, boost::function <void (TopicEntry const &)> visitor) const = 0;
+        virtual void visitTopicEntries (TopicId topicId, std::function <void (TopicEntry const &)> visitor) const = 0;
 
         // create an instance of the default journal view model implementation
         static Ptr create ();

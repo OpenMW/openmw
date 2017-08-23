@@ -57,7 +57,7 @@
         <Widget type="TextBox" skin="HeaderText" position="261 16 132 18" name="RaceT" align="Left Top">
             <Property key="TextAlign" value="Left Top"/>
         </Widget>
-        <Widget type="ListBox" skin="MW_List" position="264 39 132 161" name="RaceList">
+        <Widget type="ListBox" skin="MW_List" position="264 39 132 150" name="RaceList">
         </Widget>
 
         <!-- Spell powers -->
@@ -84,7 +84,7 @@
                 <Property key="Caption" value="#{sBack}"/>
             </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" position="532 397 42 23" name="OKButton">
-                <Property key="Caption" value="#{sOK]"/>
+                <Property key="Caption" value="#{sOK}"/>
             </Widget>
         </Widget>
     </Widget>

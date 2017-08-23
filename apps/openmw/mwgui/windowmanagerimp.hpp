@@ -19,6 +19,7 @@
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "mapwindow.hpp"
+#include "textcolours.hpp"
 
 #include <MyGUI_KeyCode.h>
 #include <MyGUI_Types.h>
@@ -137,7 +138,6 @@ namespace MWGui
     void setStore (const MWWorld::ESMStore& store);
 
     void initUI();
-    void renderWorldMap();
 
     virtual Loading::Listener* getLoadingScreen();
 
@@ -381,6 +381,8 @@ namespace MWGui
     /// Cycle to next or previous weapon
     virtual void cycleWeapon(bool next);
 
+    virtual void playSound(const std::string& soundId, float volume = 1.f, float pitch = 1.f);
+
     // In WindowManager for now since there isn't a VFS singleton
     virtual std::string correctIconPath(const std::string& path);
     virtual std::string correctBookartPath(const std::string& path, int width, int height);
@@ -390,6 +392,8 @@ namespace MWGui
     void removeCell(MWWorld::CellStore* cell);
     void writeFog(MWWorld::CellStore* cell);
 
+    virtual const MWGui::TextColours& getTextColours();
+
   private:
     const MWWorld::ESMStore* mStore;
     Resource::ResourceSystem* mResourceSystem;
@@ -398,7 +402,7 @@ namespace MWGui
     osgMyGUI::Platform* mGuiPlatform;
     osgViewer::Viewer* mViewer;
 
-    std::auto_ptr<Gui::FontLoader> mFontLoader;
+    std::unique_ptr<Gui::FontLoader> mFontLoader;
 
     bool mConsoleOnlyScripts;
 
@@ -513,6 +517,8 @@ namespace MWGui
 
     std::string mVersionDescription;
 
+    MWGui::TextColours mTextColours;
+
     /**
      * Called when MyGUI tries to retrieve a tag's value. Tags must be denoted in #{tag} notation and will be replaced upon setting a user visible text/property.
      * Supported syntax:
@@ -540,6 +546,8 @@ namespace MWGui
     void createTextures();
     void createCursors();
     void setMenuTransparency(float value);
+
+    void updatePinnedWindows();
   };
 }
 

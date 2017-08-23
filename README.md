@@ -7,7 +7,7 @@ OpenMW is a recreation of the engine for the popular role-playing game Morrowind
 
 OpenMW also comes with OpenMW-CS, a replacement for Morrowind's TES Construction Set.
 
-* Version: 0.41.0
+* Version: 0.42.0
 * License: GPLv3 (see [docs/license/GPL3.txt](https://github.com/OpenMW/openmw/blob/master/docs/license/GPL3.txt) for more information)
 * Website: http://www.openmw.org
 * IRC: #openmw on irc.freenode.net
@@ -18,7 +18,7 @@ Font Licenses:
 Current Status
 --------------
 
-The main quests in Morrowind, Tribunal and Bloodmoon are all completable. Some issues with side quests are to be expected (but rare). Check the [bug tracker](https://bugs.openmw.org/versions/21) for a list of issues we need to resolve before the "1.0" release. Even before the "1.0" release however, OpenMW boasts some new [features](https://wiki.openmw.org/index.php?title=Features), such as improved graphics and user interfaces. 
+The main quests in Morrowind, Tribunal and Bloodmoon are all completable. Some issues with side quests are to be expected (but rare). Check the [bug tracker](https://bugs.openmw.org/) for a list of issues we need to resolve before the "1.0" release. Even before the "1.0" release however, OpenMW boasts some new [features](https://wiki.openmw.org/index.php?title=Features), such as improved graphics and user interfaces. 
 
 Pre-existing modifications created for the original Morrowind engine can be hit-and-miss. The OpenMW script compiler performs more thorough error-checking than Morrowind does, meaning that a mod created for Morrowind may not necessarily run in OpenMW. Some mods also rely on quirky behaviour or engine bugs in order to work. We are considering such compatibility issues on a case-by-case basis - in some cases adding a workaround to OpenMW may be feasible, in other cases fixing the mod will be the only option. If you know of any mods that work or don't work, feel free to add them to the [Mod status](https://wiki.openmw.org/index.php?title=Mod_status) wiki page.
 

@@ -11,7 +11,6 @@
 #include <components/esm/loadrace.hpp>
 #include <components/esm/loadspel.hpp>
 #include <components/esm/loadweap.hpp>
-#include <components/esm/aipackage.hpp>
 
 #include <boost/format.hpp>
 

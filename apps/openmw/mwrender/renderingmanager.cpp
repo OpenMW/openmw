@@ -258,6 +258,7 @@ namespace MWRender
             mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
         else
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
+        mTerrain->setDefaultViewer(mViewer->getCamera());
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 

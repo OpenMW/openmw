@@ -38,6 +38,7 @@ set(MYGUI_FILES
     openmw_hud.layout
     openmw_infobox.layout
     openmw_interactive_messagebox.layout
+    openmw_interactive_messagebox_notransp.layout
     openmw_inventory_window.layout
     openmw_journal.layout
     openmw_journal.skin.xml

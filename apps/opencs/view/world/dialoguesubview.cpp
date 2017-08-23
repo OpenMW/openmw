@@ -120,7 +120,7 @@ mIndex(index)
 CSVWorld::DialogueDelegateDispatcherProxy::DialogueDelegateDispatcherProxy(QWidget* editor, CSMWorld::ColumnBase::Display display) :
 mEditor(editor),
 mDisplay(display),
-mIndexWrapper(NULL)
+mIndexWrapper(nullptr)
 {
 }
 

@@ -50,6 +50,7 @@ Programmers
     Edmondo Tommasina (edmondo)
     Eduard Cot (trombonecot)
     Eli2
+    elsid
     Emanuel Guével (potatoesmaster)
     eroen
     escondida
@@ -61,8 +62,8 @@ Programmers
     Hallfaer Tuilinn
     hristoast
     Internecine
-    Jacob Essex (Yacoby)
-    Jannik Heller (scrawl)
+    Jacob Essex (Yacoby)    
+    Jake Westrip (16bitint)
     Jason Hooks (jhooks)
     jeaye
     Jeffrey Haines (Jyby)
@@ -74,6 +75,7 @@ Programmers
     Jordan Ayers
     Jordan Milne
     Jules Blok (Armada651)
+    julianko
     Julien Voisin (jvoisin/ap0)
     Karl-Felix Glatzer (k1ll)
     Kevin Poitra (PuppyKevin)
@@ -108,6 +110,7 @@ Programmers
     Narmo
     Nathan Jeffords (blunted2night)
     NeveHanter
+    Nialsy
     Nikolay Kasyanov (corristo)
     nobrakal
     Nolan Poe (nopoe)
@@ -117,6 +120,7 @@ Programmers
     Pi03k
     Pieter van der Kloet (pvdk)
     pkubik
+    PlutonicOverkill
     Radu-Marius Popovici (rpopovici)
     Rafael Moura (dhustkoder)
     rdimesio
@@ -128,11 +132,14 @@ Programmers
     Roman Proskuryakov (kpp)
     Sandy Carter (bwrsandman)
     Scott Howard
+    scrawl
     Sebastian Wick (swick)
     Sergey Shambir
     ShadowRadiance
+    Siimacore
     sir_herrbatka
     smbas
+    spycrab
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)
     stil-t
@@ -141,6 +148,7 @@ Programmers
     t6
     terrorfisch
     Thomas Luppi (Digmaster)
+    Will Herrmann (Thunderforge)
     Tom Mason (wheybags)
     Torben Leif Carrington (TorbenC)
     viadanna

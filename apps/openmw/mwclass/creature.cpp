@@ -4,6 +4,7 @@
 
 #include <components/esm/loadcrea.hpp>
 #include <components/esm/creaturestate.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
@@ -108,7 +109,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<CreatureCustomData> data (new CreatureCustomData);
+            std::unique_ptr<CreatureCustomData> data (new CreatureCustomData);
 
             MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
@@ -434,7 +435,7 @@ namespace MWClass
         }
     }
 
-    boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
@@ -442,17 +443,34 @@ namespace MWClass
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfCreature");
 
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
             if(sound) action->setSound(sound->mId);
 
             return action;
         }
 
-        if(getCreatureStats(ptr).isDead())
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
-        if(ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat())
-            return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
-        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
+        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+
+        if(stats.isDead())
+        {
+            bool canLoot = Settings::Manager::getBool ("can loot during death animation", "Game");
+
+            // by default user can loot friendly actors during death animation
+            if (canLoot && !stats.getAiSequence().isInCombat())
+                return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
+
+            // otherwise wait until death animation
+            if(stats.isDeathAnimationFinished())
+                return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
+
+            // death animation is not finished, do nothing
+            return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
+        }
+
+        if(stats.getAiSequence().isInCombat())
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
+
+        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
     MWWorld::ContainerStore& Creature::getContainerStore (const MWWorld::Ptr& ptr) const
@@ -489,7 +507,7 @@ namespace MWClass
 
     void Creature::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Creature);
+        std::shared_ptr<Class> instance (new Creature);
 
         registerClass (typeid (ESM::Creature).name(), instance);
     }
@@ -558,7 +576,11 @@ namespace MWClass
             return true;
 
         const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
-        return !customData.mCreatureStats.getAiSequence().isInCombat() || customData.mCreatureStats.isDead();
+
+        if (customData.mCreatureStats.isDead() && customData.mCreatureStats.isDeathAnimationFinished())
+            return true;
+
+        return !customData.mCreatureStats.getAiSequence().isInCombat();
     }
 
     MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
@@ -742,7 +764,7 @@ namespace MWClass
             if (!ptr.getRefData().getCustomData())
             {
                 // Create a CustomData, but don't fill it from ESM records (not needed)
-                std::auto_ptr<CreatureCustomData> data (new CreatureCustomData);
+                std::unique_ptr<CreatureCustomData> data (new CreatureCustomData);
 
                 if (hasInventoryStore(ptr))
                     data->mContainerStore = new MWWorld::InventoryStore();

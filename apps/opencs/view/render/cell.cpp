@@ -62,7 +62,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
         {
             std::string id = Misc::StringUtils::lowerCase (collection.getRecord (i).get().mId);
 
-            std::auto_ptr<Object> object (new Object (mData, mCellNode, id, false));
+            std::unique_ptr<Object> object (new Object (mData, mCellNode, id, false));
 
             if (mSubModeElementMask & Mask_Reference)
                 object->setSubMode (mSubMode);
@@ -281,6 +281,24 @@ void CSVRender::Cell::pathgridModified()
 void CSVRender::Cell::pathgridRemoved()
 {
     mPathgrid->removeGeometry();
+}
+
+void CSVRender::Cell::reloadAssets()
+{
+    for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+        iter != mObjects.end(); ++iter)
+    {
+        iter->second->reloadAssets();
+    }
+
+    if (mTerrain)
+    {
+        mTerrain->unloadCell(mCoordinates.getX(), mCoordinates.getY());
+        mTerrain->loadCell(mCoordinates.getX(), mCoordinates.getY());
+    }
+
+    if (mCellWater)
+        mCellWater->reloadAssets();
 }
 
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)

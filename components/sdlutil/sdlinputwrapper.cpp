@@ -1,7 +1,6 @@
 #include "sdlinputwrapper.hpp"
 
 #include <iostream>
-#include <stdexcept>
 
 #include <osgViewer/Viewer>
 
@@ -221,10 +220,12 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
             case SDL_WINDOWEVENT_CLOSE:
                 break;
             case SDL_WINDOWEVENT_SHOWN:
+            case SDL_WINDOWEVENT_RESTORED:
                 if (mWindowListener)
                     mWindowListener->windowVisibilityChange(true);
                 break;
             case SDL_WINDOWEVENT_HIDDEN:
+            case SDL_WINDOWEVENT_MINIMIZED:
                 if (mWindowListener)
                     mWindowListener->windowVisibilityChange(false);
                 break;
@@ -421,7 +422,6 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         mKeyMap.insert( KeyMap::value_type(SDLK_o, OIS::KC_O) );
         mKeyMap.insert( KeyMap::value_type(SDLK_p, OIS::KC_P) );
         mKeyMap.insert( KeyMap::value_type(SDLK_RETURN, OIS::KC_RETURN) );
-        mKeyMap.insert( KeyMap::value_type(SDLK_LCTRL, OIS::KC_LCONTROL));
         mKeyMap.insert( KeyMap::value_type(SDLK_a, OIS::KC_A) );
         mKeyMap.insert( KeyMap::value_type(SDLK_s, OIS::KC_S) );
         mKeyMap.insert( KeyMap::value_type(SDLK_d, OIS::KC_D) );
@@ -497,9 +497,20 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         mKeyMap.insert( KeyMap::value_type(SDLK_INSERT, OIS::KC_INSERT) );
         mKeyMap.insert( KeyMap::value_type(SDLK_DELETE, OIS::KC_DELETE) );
         mKeyMap.insert( KeyMap::value_type(SDLK_KP_ENTER, OIS::KC_NUMPADENTER) );
-        mKeyMap.insert( KeyMap::value_type(SDLK_RCTRL, OIS::KC_RCONTROL) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_APPLICATION, OIS::KC_APPS) );
+
+//The function of the Ctrl and Meta keys are switched on macOS compared to other platforms.
+//For instance, Cmd+C versus Ctrl+C to copy from the system clipboard
+#if defined(__APPLE__)
+        mKeyMap.insert( KeyMap::value_type(SDLK_LGUI, OIS::KC_LCONTROL) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_RGUI, OIS::KC_RCONTROL) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_LCTRL, OIS::KC_LWIN));
+        mKeyMap.insert( KeyMap::value_type(SDLK_RCTRL, OIS::KC_RWIN) );
+#else
         mKeyMap.insert( KeyMap::value_type(SDLK_LGUI, OIS::KC_LWIN) );
         mKeyMap.insert( KeyMap::value_type(SDLK_RGUI, OIS::KC_RWIN) );
-        mKeyMap.insert( KeyMap::value_type(SDLK_APPLICATION, OIS::KC_APPS) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_LCTRL, OIS::KC_LCONTROL));
+        mKeyMap.insert( KeyMap::value_type(SDLK_RCTRL, OIS::KC_RCONTROL) );
+#endif
     }
 }

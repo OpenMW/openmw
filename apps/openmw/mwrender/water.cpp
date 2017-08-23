@@ -10,8 +10,6 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/ClipNode>
 #include <osg/FrontFace>
-#include <osg/Shader>
-#include <osg/GLExtensions>
 
 #include <osgDB/ReadFile>
 
@@ -28,11 +26,9 @@
 #include <components/sceneutil/waterutil.hpp>
 
 #include <components/nifosg/controller.hpp>
-#include <components/sceneutil/controller.hpp>
 
 #include <components/shader/shadermanager.hpp>
 
-#include <components/settings/settings.hpp>
 
 #include <components/esm/loadcell.hpp>
 
@@ -488,7 +484,7 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
     float fps = mFallback->getFallbackFloat("Water_SurfaceFPS");
 
     osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 1.f/fps, textures));
-    controller->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
+    controller->setSource(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
     node->setUpdateCallback(controller);
 
     stateset->setTextureAttributeAndModes(0, textures[0], osg::StateAttribute::ON);

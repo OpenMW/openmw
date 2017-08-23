@@ -40,6 +40,7 @@ namespace MWGui
         , mEnabled(true)
         , mFullHelp(false)
         , mShowOwned(0)
+        , mFrameDuration(0.f)
     {
         getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
@@ -67,6 +68,11 @@ namespace MWGui
     }
 
     void ToolTips::onFrame(float frameDuration)
+    {
+        mFrameDuration = frameDuration;
+    }
+
+    void ToolTips::update(float frameDuration)
     {
 
         while (mDynamicToolTipBox->getChildCount())
@@ -320,6 +326,8 @@ namespace MWGui
     void ToolTips::setFocusObject(const MWWorld::ConstPtr& focus)
     {
         mFocusObject = focus;
+
+        update(mFrameDuration);
     }
 
     MyGUI::IntSize ToolTips::getToolTipViaPtr (int count, bool image)
@@ -351,12 +359,11 @@ namespace MWGui
     {
         if(!mFocusObject.isEmpty())
         {
-            const MWWorld::CellRef& cellref = mFocusObject.getCellRef();
             MWWorld::Ptr ptr = MWMechanics::getPlayer();
             MWWorld::Ptr victim;
             
             MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
-            bool allowed = mm->isAllowedToUse(ptr, cellref, victim); 
+            bool allowed = mm->isAllowedToUse(ptr, mFocusObject, victim); 
 
             return !allowed;
         }
@@ -370,17 +377,10 @@ namespace MWGui
     {
         mDynamicToolTipBox->setVisible(true);
         
-        if(mShowOwned == 1 || mShowOwned == 3)
-        {
-            if(isFocusObject && checkOwned())
-            {
-                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp_Owned");
-            }
-            else
-            {
-                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp");
-            }
-        }
+        if((mShowOwned == 1 || mShowOwned == 3) && isFocusObject && checkOwned())
+            mDynamicToolTipBox->changeWidgetSkin(MWBase::Environment::get().getWindowManager()->isGuiMode() ? "HUD_Box_NoTransp_Owned" : "HUD_Box_Owned");
+        else
+            mDynamicToolTipBox->changeWidgetSkin(MWBase::Environment::get().getWindowManager()->isGuiMode() ? "HUD_Box_NoTransp" : "HUD_Box");
 
         std::string caption = info.caption;
         std::string image = info.icon;
@@ -594,6 +594,14 @@ namespace MWGui
             return "\n" + prefix + ": " + toString(weight);
     }
 
+    std::string ToolTips::getPercentString(const float value, const std::string& prefix)
+    {
+        if (value == 0)
+            return "";
+        else
+            return "\n" + prefix + ": " + toString(value*100) +"%";
+    }
+
     std::string ToolTips::getValueString(const int value, const std::string& prefix)
     {
         if (value == 0)
@@ -701,20 +709,28 @@ namespace MWGui
 
     void ToolTips::createSpecializationToolTip(MyGUI::Widget* widget, const std::string& name, int specId)
     {
-        widget->setUserString("Caption_CenteredCaption", name);
+        widget->setUserString("Caption_Caption", name);
         std::string specText;
         // get all skills of this specialisation
         const MWWorld::Store<ESM::Skill> &skills =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
 
+        bool isFirst = true;
         MWWorld::Store<ESM::Skill>::iterator it = skills.begin();
         for (; it != skills.end(); ++it)
         {
             if (it->second.mData.mSpecialization == specId)
-                specText += std::string("\n#{") + ESM::Skill::sSkillNameIds[it->first] + "}";
+            {
+                if (isFirst)
+                    isFirst = false;
+                else
+                    specText += "\n";
+
+                specText += std::string("#{") + ESM::Skill::sSkillNameIds[it->first] + "}";
+            }
         }
-        widget->setUserString("Caption_CenteredCaptionText", specText);
-        widget->setUserString("ToolTipLayout", "TextWithCenteredCaptionToolTip");
+        widget->setUserString("Caption_ColumnText", specText);
+        widget->setUserString("ToolTipLayout", "SpecializationToolTip");
         widget->setUserString("ToolTipType", "Layout");
     }
 
@@ -769,7 +785,7 @@ namespace MWGui
             {
                 if (it == categories[category].spells.begin())
                 {
-                    text += std::string("\n#{fontcolourhtml=header}") + std::string("#{") + categories[category].label + "}";
+                    text += std::string("\n\n#{fontcolourhtml=header}") + std::string("#{") + categories[category].label + "}";
                 }
 
                 const std::string &spellId = *it;
@@ -787,7 +803,7 @@ namespace MWGui
         widget->setUserString("Caption_CenteredCaption", playerRace->mName);
         widget->setUserString("Caption_CenteredCaptionText", playerRace->mDescription);
         widget->setUserString("ToolTipType", "Layout");
-        widget->setUserString("ToolTipLayout", "TextWithCenteredCaptionToolTip");
+        widget->setUserString("ToolTipLayout", "RaceToolTip");
     }
 
     void ToolTips::createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass)

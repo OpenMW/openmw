@@ -824,7 +824,7 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
 
         int i=0;
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
-            effectIt!=enchantment.mEffects.mList.end(); ++effectIt)
+            effectIt!=enchantment.mEffects.mList.end(); ++effectIt, ++i)
         {
             // Don't get spell icon display information for enchantments that weren't actually applied
             if (mMagicEffects.get(MWMechanics::EffectKey(*effectIt)).getMagnitude() == 0)
@@ -834,8 +834,6 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
             magnitude *= params.mMultiplier;
             if (magnitude > 0)
                 visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), (**iter).getCellRef().getRefId(), -1, magnitude);
-
-            ++i;
         }
     }
 }
@@ -940,7 +938,6 @@ void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sou
                     mMagicEffects.add (*effectIt, -magnitude);
 
                 params[i].mMultiplier = 0;
-                break;
             }
         }
     }

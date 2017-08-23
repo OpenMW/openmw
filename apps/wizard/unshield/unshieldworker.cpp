@@ -46,6 +46,7 @@ Wizard::UnshieldWorker::~UnshieldWorker()
 void Wizard::UnshieldWorker::stopWorker()
 {
     mStopped = true;
+    mWait.wakeOne();
 }
 
 void Wizard::UnshieldWorker::setInstallComponent(Wizard::Component component, bool install)
@@ -448,6 +449,10 @@ bool Wizard::UnshieldWorker::setupComponent(Component component)
             QReadLocker readLock(&mLock);
             emit requestFileDialog(component);
             mWait.wait(&mLock);
+            if(mStopped) {
+                qDebug() << "We are asked to stop !!";
+                break;
+            }
             disk.setPath(getDiskPath());
         } else {
             disk.setPath(getDiskPath());

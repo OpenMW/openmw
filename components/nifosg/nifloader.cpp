@@ -334,7 +334,7 @@ namespace NifOsg
                     continue;
 
                 osg::ref_ptr<NifOsg::KeyframeController> callback(new NifOsg::KeyframeController(key->data.getPtr()));
-                callback->setFunction(boost::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key)));
+                callback->setFunction(std::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key)));
 
                 if (target.mKeyframeControllers.find(strdata->string) != target.mKeyframeControllers.end())
                     std::cerr << "Warning: controller " << strdata->string << " present more than once in " << nif->getFilename() << ", ignoring later version" << std::endl;
@@ -411,9 +411,9 @@ namespace NifOsg
         {
             bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
             if (autoPlay)
-                toSetup->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
+                toSetup->setSource(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
 
-            toSetup->setFunction(boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl)));
+            toSetup->setFunction(std::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl)));
         }
 
         osg::ref_ptr<osg::LOD> handleLodNode(const Nif::NiLODNode* niLodNode)
@@ -623,11 +623,6 @@ namespace NifOsg
                 node->setNodeMask(0x1);
             }
 
-            if (skipMeshes && isAnimated) // make sure the empty node is not optimized away so the physicssystem can find it.
-            {
-                node->setDataVariance(osg::Object::DYNAMIC);
-            }
-
             // We can skip creating meshes for hidden nodes if they don't have a VisController that
             // might make them visible later
             if (nifNode->flags & Nif::NiNode::Flag_Hidden)
@@ -641,6 +636,11 @@ namespace NifOsg
 
                 // now hide this node, but leave the mask for UpdateVisitor enabled so that KeyframeController works
                 node->setNodeMask(0x1);
+            }
+
+            if (skipMeshes && isAnimated) // make sure the empty node is not optimized away so the physicssystem can find it.
+            {
+                node->setDataVariance(osg::Object::DYNAMIC);
             }
 
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
@@ -1773,8 +1773,10 @@ namespace NifOsg
             }
 
             if (!hasMatCtrl && mat->getColorMode() == osg::Material::OFF
+                    && mat->getEmission(osg::Material::FRONT_AND_BACK) == osg::Vec4f(0,0,0,1)
                     && mat->getDiffuse(osg::Material::FRONT_AND_BACK) == osg::Vec4f(1,1,1,1)
                     && mat->getAmbient(osg::Material::FRONT_AND_BACK) == osg::Vec4f(1,1,1,1)
+                    && mat->getShininess(osg::Material::FRONT_AND_BACK) == 0
                     && mat->getSpecular(osg::Material::FRONT_AND_BACK) == osg::Vec4f(0.f, 0.f, 0.f, 0.f))
             {
                 // default state, skip

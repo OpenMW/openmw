@@ -456,5 +456,10 @@ void QuadTreeWorld::reportStats(unsigned int frameNumber, osg::Stats *stats)
     stats->setAttribute(frameNumber, "Composite", mCompositeMapRenderer->getCompileSetSize());
 }
 
+void QuadTreeWorld::setDefaultViewer(osg::Object *obj)
+{
+    mViewDataMap->setDefaultViewer(obj);
+}
+
 
 }

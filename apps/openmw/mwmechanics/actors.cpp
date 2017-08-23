@@ -25,6 +25,8 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 
+#include "../mwmechanics/aibreathe.hpp"
+
 #include "spellcasting.hpp"
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
@@ -78,7 +80,7 @@ class CheckActorCommanded : public MWMechanics::EffectSourceVisitor
     MWWorld::Ptr mActor;
 public:
     bool mCommanded;
-    CheckActorCommanded(MWWorld::Ptr actor)
+    CheckActorCommanded(const MWWorld::Ptr& actor)
         : mActor(actor)
     , mCommanded(false){}
 
@@ -114,9 +116,7 @@ void adjustCommandedActor (const MWWorld::Ptr& actor)
     }
 
     if (!check.mCommanded && hasCommandPackage)
-    {
         stats.getAiSequence().erase(it);
-    }
 }
 
 void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float& magicka)
@@ -151,7 +151,7 @@ namespace MWMechanics
         MWWorld::Ptr mActor;
         bool mTrapped;
     public:
-        SoulTrap(MWWorld::Ptr trappedCreature)
+        SoulTrap(const MWWorld::Ptr& trappedCreature)
             : mCreature(trappedCreature)
             , mTrapped(false)
         {
@@ -596,6 +596,21 @@ namespace MWMechanics
             }
         }
 
+        // purge levitate effect if levitation is disabled
+        // check only modifier, because base value can be setted from SetFlying console command.
+        if (MWBase::Environment::get().getWorld()->isLevitationEnabled() == false && effects.get(ESM::MagicEffect::Levitate).getModifier() > 0)
+        {
+            creatureStats.getSpells().purgeEffect(ESM::MagicEffect::Levitate);
+            creatureStats.getActiveSpells().purgeEffect(ESM::MagicEffect::Levitate);
+            if (ptr.getClass().hasInventoryStore(ptr))
+                ptr.getClass().getInventoryStore(ptr).purgeEffect(ESM::MagicEffect::Levitate);
+
+            if (ptr == getPlayer())
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox ("#{sLevitateDisabled}");
+            }
+        }
+
         // attributes
         for(int i = 0;i < ESM::Attribute::Length;++i)
         {
@@ -707,16 +722,8 @@ namespace MWMechanics
 
         // any value of calm > 0 will stop the actor from fighting
         if ((effects.get(ESM::MagicEffect::CalmHumanoid).getMagnitude() > 0 && ptr.getClass().isNpc())
-                || (effects.get(ESM::MagicEffect::CalmCreature).getMagnitude() > 0 && !ptr.getClass().isNpc()))
-        {
-            for (std::list<AiPackage*>::const_iterator it = creatureStats.getAiSequence().begin(); it != creatureStats.getAiSequence().end(); )
-            {
-                if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
-                    it = creatureStats.getAiSequence().erase(it);
-                else
-                    ++it;
-            }
-        }
+            || (effects.get(ESM::MagicEffect::CalmCreature).getMagnitude() > 0 && !ptr.getClass().isNpc()))
+            creatureStats.getAiSequence().stopCombat();
 
         // Update bound effects
         // Note: in vanilla MW multiple bound items of the same type can be created by different spells.
@@ -776,7 +783,7 @@ namespace MWMechanics
             creatureStats.getActiveSpells().visitEffectSources(updateSummonedCreatures);
             if (ptr.getClass().hasInventoryStore(ptr))
                 ptr.getClass().getInventoryStore(ptr).visitEffectSources(updateSummonedCreatures);
-            updateSummonedCreatures.process();
+            updateSummonedCreatures.process(mTimerDisposeSummonsCorpses == 0.f);
         }
     }
 
@@ -795,6 +802,26 @@ namespace MWMechanics
         }
     }
 
+    bool Actors::isRunning(const MWWorld::Ptr& ptr)
+    {
+        PtrActorMap::iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+        CharacterController* ctrl = it->second->getCharacterController();
+
+        return ctrl->isRunning();
+    }
+
+    bool Actors::isSneaking(const MWWorld::Ptr& ptr)
+    {
+        PtrActorMap::iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+        CharacterController* ctrl = it->second->getCharacterController();
+
+        return ctrl->isSneaking();
+    }
+
     void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
     {
         PtrActorMap::iterator it = mActors.find(ptr);
@@ -803,6 +830,21 @@ namespace MWMechanics
         CharacterController* ctrl = it->second->getCharacterController();
 
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
+
+        // When npc stats are just initialized, mTimeToStartDrowning == -1 and we should get value from GMST
+        static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->getFloat();
+        if (stats.getTimeToStartDrowning() == -1.f)
+            stats.setTimeToStartDrowning(fHoldBreathTime);
+
+        if (ptr.getClass().isNpc() && stats.getTimeToStartDrowning() < fHoldBreathTime / 2)
+        {
+            if(ptr != MWMechanics::getPlayer() ) {
+                MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+                if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdBreathe) //Only add it once
+                    seq.stack(MWMechanics::AiBreathe(), ptr);
+            }
+        }
+
         MWBase::World *world = MWBase::Environment::get().getWorld();
         bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
         if((world->isSubmerged(ptr) || knockedOutUnderwater)
@@ -839,10 +881,7 @@ namespace MWMechanics
             }
         }
         else
-        {
-            static const float fHoldBreathTime = world->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->getFloat();
             stats.setTimeToStartDrowning(fHoldBreathTime);
-        }
     }
 
     void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
@@ -1001,7 +1040,9 @@ namespace MWMechanics
         }
     }
 
-    Actors::Actors() {}
+    Actors::Actors() {
+        mTimerDisposeSummonsCorpses = 0.2f; // We should add a delay between summoned creature death and its corpse despawning
+    }
 
     Actors::~Actors()
     {
@@ -1070,6 +1111,7 @@ namespace MWMechanics
             // target lists get updated once every 1.0 sec
             if (timerUpdateAITargets >= 1.0f) timerUpdateAITargets = 0;
             if (timerUpdateHeadTrack >= 0.3f) timerUpdateHeadTrack = 0;
+            if (mTimerDisposeSummonsCorpses >= 0.2f) mTimerDisposeSummonsCorpses = 0;
             if (timerUpdateEquippedLight >= updateEquippedLightInterval) timerUpdateEquippedLight = 0;
 
             MWWorld::Ptr player = getPlayer();
@@ -1174,6 +1216,7 @@ namespace MWMechanics
             timerUpdateAITargets += duration;
             timerUpdateHeadTrack += duration;
             timerUpdateEquippedLight += duration;
+            mTimerDisposeSummonsCorpses += duration;
 
             // Looping magic VFX update
             // Note: we need to do this before any of the animations are updated.
@@ -1439,6 +1482,11 @@ namespace MWMechanics
             calculateCreatureStatModifiers (iter->first, duration);
             if (iter->first.getClass().isNpc())
                 calculateNpcStatModifiers(iter->first, duration);
+
+            MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(iter->first);
+            if (animation)
+                animation->updateEffects(duration);
+
         }
 
         fastForwardAi();

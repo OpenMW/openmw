@@ -183,7 +183,7 @@ namespace MWGui
         int modified = static_cast<int>(value.getModified());
 
         MyGUI::Widget* w;
-        std::string valStr = MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(modified);
+        std::string valStr = MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         if (id == "HBar")
         {
             mHealth->setProgressRange(modified);

@@ -230,13 +230,6 @@ namespace MWPhysics
             return direction - project(direction, planeNormal);
         }
 
-        static inline osg::Vec3f reflect(const osg::Vec3& velocity, const osg::Vec3f& normal)
-        {
-            return velocity - (normal * (normal * velocity)) * 2;
-            //                                  ^ dot product
-        }
-
-
     public:
         static osg::Vec3f traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, Actor* actor, btCollisionWorld* collisionWorld, float maxHeight)
         {
@@ -674,7 +667,7 @@ namespace MWPhysics
         }
 
     private:
-        std::auto_ptr<btCollisionObject> mCollisionObject;
+        std::unique_ptr<btCollisionObject> mCollisionObject;
         osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
         std::map<int, osg::NodePath> mRecIndexToNodePath;
         bool mSolid;
@@ -801,7 +794,7 @@ namespace MWPhysics
         btVector3 mContactPoint;
         btScalar mLeastDistSqr;
 
-        DeepestNotMeContactTestResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*> targets, const btVector3 &origin)
+        DeepestNotMeContactTestResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*>& targets, const btVector3 &origin)
           : mMe(me), mTargets(targets), mOrigin(origin), mObject(NULL), mContactPoint(0,0,0),
             mLeastDistSqr(std::numeric_limits<float>::max())
         { }
@@ -919,7 +912,7 @@ namespace MWPhysics
     class ClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
     {
     public:
-        ClosestNotMeRayResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*> targets, const btVector3& from, const btVector3& to)
+        ClosestNotMeRayResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*>& targets, const btVector3& from, const btVector3& to)
             : btCollisionWorld::ClosestRayResultCallback(from, to)
             , mMe(me), mTargets(targets)
         {
@@ -945,7 +938,7 @@ namespace MWPhysics
         const std::vector<const btCollisionObject*> mTargets;
     };
 
-    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::ConstPtr ignore, std::vector<MWWorld::Ptr> targets, int mask, int group) const
+    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group) const
     {
         btVector3 btFrom = toBullet(from);
         btVector3 btTo = toBullet(to);

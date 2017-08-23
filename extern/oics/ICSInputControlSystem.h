@@ -32,8 +32,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "ICSControl.h"
 #include "ICSChannel.h"
 
-#include "boost/lexical_cast.hpp"
-
 #define ICS_LOG(text) if(mLog) mLog->logMessage( ("ICS: " + std::string(text)).c_str() );
 #define ICS_MAX_JOYSTICK_AXIS 16
 #define ICS_MOUSE_BINDING_MARGIN 30
@@ -122,6 +120,8 @@ namespace ICS
         bool isMouseButtonBound(unsigned int button) const;
         void addJoystickAxisBinding(Control* control, int deviceID, int axis, Control::ControlChangingDirection direction);
 		void addJoystickButtonBinding(Control* control, int deviceID, unsigned int button, Control::ControlChangingDirection direction);
+		bool isJoystickButtonBound(int deviceID, unsigned int button) const;
+		bool isJoystickAxisBound(int deviceID, unsigned int axis) const;
         void removeKeyBinding(SDL_Scancode key);
 		void removeMouseAxisBinding(NamedAxis axis);
 		void removeMouseButtonBinding(unsigned int button);
@@ -236,7 +236,7 @@ namespace ICS
 
 	};
 
-	static const float ICS_MAX = std::numeric_limits<float>::max();
+	extern const float ICS_MAX;
 }
 
 

@@ -1,5 +1,7 @@
 #include "tradewindow.hpp"
 
+#include <climits>
+
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_ControllerManager.h>
@@ -8,7 +10,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
@@ -121,8 +122,6 @@ namespace MWGui
         mCurrentBalance = 0;
         mCurrentMerchantOffer = 0;
 
-        restock();
-
         std::vector<MWWorld::Ptr> itemSources;
         MWBase::Environment::get().getWorld()->getContainersOwnedBy(actor, itemSources);
 
@@ -208,8 +207,8 @@ namespace MWGui
     void TradeWindow::sellItem(MyGUI::Widget* sender, int count)
     {
         const ItemStack& item = mTradeModel->getItem(mItemToSell);
-        std::string sound = item.mBase.getClass().getDownSoundId(item.mBase);
-        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+        std::string sound = item.mBase.getClass().getUpSoundId(item.mBase);
+        MWBase::Environment::get().getWindowManager()->playSound(sound);
 
         TradeItemModel* playerTradeModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
 
@@ -312,9 +311,9 @@ namespace MWGui
                 if (msg.find("%s") != std::string::npos)
                     msg.replace(msg.find("%s"), 2, it->mBase.getClass().getName(it->mBase));
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
-                MWBase::Environment::get().getMechanicsManager()->commitCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
-                                                                              it->mBase.getClass().getValue(it->mBase)
-                                                                              * it->mCount, true);
+
+                MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(player, it->mBase, mPtr, it->mCount);
+
                 onCancelButtonClicked(mCancelButton);
                 MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
                 return;
@@ -354,10 +353,10 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addResponse(
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sBarterDialog5")->getString());
 
-        std::string sound = "Item Gold Up";
-        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
-
+        MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
+
+        restock();
     }
 
     void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)

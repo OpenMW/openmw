@@ -50,6 +50,7 @@ namespace MWGui
         ToolTips();
 
         void onFrame(float frameDuration);
+        void update(float frameDuration);
 
         void setEnabled(bool enabled);
 
@@ -63,6 +64,7 @@ namespace MWGui
         ///< set the screen-space position of the tooltip for focused object
 
         static std::string getWeightString(const float weight, const std::string& prefix);
+        static std::string getPercentString(const float value, const std::string& prefix);
         static std::string getValueString(const int value, const std::string& prefix);
         ///< @return "prefix: value" or "" if value is 0
 
@@ -125,6 +127,8 @@ namespace MWGui
         bool mFullHelp;
         
         int mShowOwned;
+
+        float mFrameDuration;
     };
 }
 #endif

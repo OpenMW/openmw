@@ -122,6 +122,13 @@ namespace Resource
         {
             return _sharedStateSetList.size();
         }
+
+        void clearCache()
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_listMutex);
+            _sharedTextureList.clear();
+            _sharedStateSetList.clear();
+        }
     };
 
     /// Set texture filtering settings on textures contained in a FlipController.
@@ -383,18 +390,25 @@ namespace Resource
     public:
         bool isReservedName(const std::string& name) const
         {
-            static std::set<std::string, Misc::StringUtils::CiComp> reservedNames;
+            if (name.empty())
+                return false;
+
+            static std::vector<std::string> reservedNames;
             if (reservedNames.empty())
             {
                 const char* reserved[] = {"Head", "Neck", "Chest", "Groin", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist", "Shield Bone", "Right Forearm", "Left Forearm", "Right Upper Arm", "Left Upper Arm", "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee", "Left Knee", "Right Upper Leg", "Left Upper Leg", "Right Clavicle", "Left Clavicle", "Weapon Bone", "Tail",
                                          "Bip01 L Hand", "Bip01 R Hand", "Bip01 Head", "Bip01 Spine1", "Bip01 Spine2", "Bip01 L Clavicle", "Bip01 R Clavicle", "bip01", "Root Bone", "Bip01 Neck",
                                          "BoneOffset", "AttachLight", "ArrowBone", "Camera"};
-                reservedNames = std::set<std::string, Misc::StringUtils::CiComp>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
+                reservedNames = std::vector<std::string>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
 
                 for (unsigned int i=0; i<sizeof(reserved)/sizeof(reserved[0]); ++i)
-                    reservedNames.insert(std::string("Tri ") + reserved[i]);
+                    reservedNames.push_back(std::string("Tri ") + reserved[i]);
+
+                std::sort(reservedNames.begin(), reservedNames.end(), Misc::StringUtils::ciLess);
             }
-            return reservedNames.find(name) != reservedNames.end();
+
+            std::vector<std::string>::iterator it = Misc::StringUtils::partialBinarySearch(reservedNames.begin(), reservedNames.end(), name);
+            return it != reservedNames.end();
         }
 
         virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Drawable* node,unsigned int option) const
@@ -445,7 +459,7 @@ namespace Resource
         {
             std::string str(env);
 
-            if(str.find("OFF")!=std::string::npos) options = 0;
+            if(str.find("OFF")!=std::string::npos || str.find("0")!= std::string::npos) options = 0;
 
             if(str.find("~FLATTEN_STATIC_TRANSFORMS")!=std::string::npos) options ^= Optimizer::FLATTEN_STATIC_TRANSFORMS;
             else if(str.find("FLATTEN_STATIC_TRANSFORMS")!=std::string::npos) options |= Optimizer::FLATTEN_STATIC_TRANSFORMS;
@@ -701,6 +715,15 @@ namespace Resource
         mSharedStateMutex.lock();
         mSharedStateManager->prune();
         mSharedStateMutex.unlock();
+    }
+
+    void SceneManager::clearCache()
+    {
+        ResourceManager::clearCache();
+
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSharedStateMutex);
+        mSharedStateManager->clearCache();
+        mInstanceCache->clear();
     }
 
     void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const

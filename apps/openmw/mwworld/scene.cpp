@@ -54,6 +54,12 @@ namespace
     void addObject(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
                    MWRender::RenderingManager& rendering)
     {
+        if (ptr.getRefData().getBaseNode() || physics.getActor(ptr))
+        {
+            std::cerr << "Warning: Tried to add " << ptr.getCellRef().getRefId() << " to the scene twice" << std::endl;
+            return;
+        }
+
         bool useAnim = ptr.getClass().useAnim();
         std::string model = ptr.getClass().getModel(ptr);
         if (useAnim)
@@ -461,6 +467,8 @@ namespace MWWorld
         mechMgr->updateCell(old, player);
         mechMgr->watchActor(player);
 
+        mPhysics->updatePtr(old, player);
+
         MWBase::Environment::get().getWorld()->adjustSky();
 
         mLastPlayerPos = pos.asVec3();
@@ -476,6 +484,7 @@ namespace MWWorld
     , mPreloadExteriorGrid(Settings::Manager::getBool("preload exterior grid", "Cells"))
     , mPreloadDoors(Settings::Manager::getBool("preload doors", "Cells"))
     , mPreloadFastTravel(Settings::Manager::getBool("preload fast travel", "Cells"))
+    , mPredictionTime(Settings::Manager::getFloat("prediction time", "Cells"))
     {
         mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager(), rendering.getTerrain(), rendering.getLandManager()));
         mPreloader->setWorkQueue(mRendering.getWorkQueue());
@@ -538,13 +547,9 @@ namespace MWWorld
         std::cout << "Changing to interior\n";
 
         // unload
-        int current = 0;
         CellStoreCollection::iterator active = mActiveCells.begin();
         while (active!=mActiveCells.end())
-        {
             unloadCell (active++);
-            ++current;
-        }
 
         int refsToLoad = cell->count();
         loadingListener->setProgressRange(refsToLoad);
@@ -687,7 +692,7 @@ namespace MWWorld
         const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
         osg::Vec3f moved = playerPos - mLastPlayerPos;
-        osg::Vec3f predictedPos = playerPos + moved / dt;
+        osg::Vec3f predictedPos = playerPos + moved / dt * mPredictionTime;
 
         if (mCurrentCell->isExterior())
             exteriorPositions.push_back(predictedPos);

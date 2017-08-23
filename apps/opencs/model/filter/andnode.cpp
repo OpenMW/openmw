@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-CSMFilter::AndNode::AndNode (const std::vector<boost::shared_ptr<Node> >& nodes)
+CSMFilter::AndNode::AndNode (const std::vector<std::shared_ptr<Node> >& nodes)
 : NAryNode (nodes, "and")
 {}
 

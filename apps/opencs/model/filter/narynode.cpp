@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-CSMFilter::NAryNode::NAryNode (const std::vector<boost::shared_ptr<Node> >& nodes,
+CSMFilter::NAryNode::NAryNode (const std::vector<std::shared_ptr<Node> >& nodes,
     const std::string& name)
 : mNodes (nodes), mName (name)
 {}
@@ -21,7 +21,7 @@ std::vector<int> CSMFilter::NAryNode::getReferencedColumns() const
 {
     std::vector<int> columns;
 
-    for (std::vector<boost::shared_ptr<Node> >::const_iterator iter (mNodes.begin());
+    for (std::vector<std::shared_ptr<Node> >::const_iterator iter (mNodes.begin());
          iter!=mNodes.end(); ++iter)
     {
         std::vector<int> columns2 = (*iter)->getReferencedColumns();

@@ -6,11 +6,6 @@
 #include "MyGUI_TextureUtility.h"
 #include "MyGUI_FactoryManager.h"
 
-#include <stdint.h>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-
 #include <components/misc/utf8stream.hpp>
 
 namespace MWGui
@@ -40,22 +35,22 @@ struct TypesetBookImpl : TypesetBook
         MyGUI::Colour         mNormalColour;
         InteractiveId mInteractiveId;
 
-        bool match (MyGUI::IFont* tstFont, MyGUI::Colour tstHotColour, MyGUI::Colour tstActiveColour,
-                    MyGUI::Colour tstNormalColour, intptr_t tstInteractiveId)
+        bool match (MyGUI::IFont* tstFont, const MyGUI::Colour& tstHotColour, const MyGUI::Colour& tstActiveColour,
+                    const MyGUI::Colour& tstNormalColour, intptr_t tstInteractiveId)
         {
             return (mFont == tstFont) &&
                    partal_match (tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
         }
 
-        bool match (char const * tstFont, MyGUI::Colour tstHotColour, MyGUI::Colour tstActiveColour,
-                    MyGUI::Colour tstNormalColour, intptr_t tstInteractiveId)
+        bool match (char const * tstFont, const MyGUI::Colour& tstHotColour, const MyGUI::Colour& tstActiveColour,
+                    const MyGUI::Colour& tstNormalColour, intptr_t tstInteractiveId)
         {
             return (mFont->getResourceName ()   == tstFont) &&
                    partal_match (tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
         }
 
-        bool partal_match (MyGUI::Colour tstHotColour, MyGUI::Colour tstActiveColour,
-                           MyGUI::Colour tstNormalColour, intptr_t tstInteractiveId)
+        bool partal_match (const MyGUI::Colour& tstHotColour, const MyGUI::Colour& tstActiveColour,
+                           const MyGUI::Colour& tstNormalColour, intptr_t tstInteractiveId)
         {
             return
                 (mHotColour                  == tstHotColour     ) &&
@@ -235,7 +230,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
     };
 
     typedef TypesetBookImpl Book;
-    typedef boost::shared_ptr <Book> BookPtr;
+    typedef std::shared_ptr <Book> BookPtr;
     typedef std::vector<PartialText>::const_iterator PartialTextConstIterator;
 
     int mPageWidth;
@@ -259,14 +254,14 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         mCurrentContent (NULL),
         mCurrentAlignment (AlignLeft)
     {
-        mBook = boost::make_shared <Book> ();
+        mBook = std::make_shared <Book> ();
     }
 
     virtual ~Typesetter ()
     {
     }
 
-    Style * createStyle (char const * fontName, Colour fontColour)
+    Style * createStyle (char const * fontName, const Colour& fontColour)
     {
         if (strcmp(fontName, "") == 0)
             return createStyle(MyGUI::FontManager::getInstance().getDefaultFont().c_str(), fontColour);
@@ -289,7 +284,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         return &style;
     }
 
-    Style* createHotStyle (Style* baseStyle, Colour normalColour, Colour hoverColour, Colour activeColour, InteractiveId id, bool unique)
+    Style* createHotStyle (Style* baseStyle, const Colour& normalColour, const Colour& hoverColour,
+                           const Colour& activeColour, InteractiveId id, bool unique)
     {
         StyleImpl* BaseStyle = static_cast <StyleImpl*> (baseStyle);
 
@@ -439,9 +435,15 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             }
             else
             {
+                // The section won't completely fit on the current page. Finish the current page and start a new one.
+                mBook->mPages.push_back (Page (curPageStart, curPageStop));
+
+                curPageStart = i->mRect.top;
+                curPageStop = i->mRect.bottom;
+
                 //split section
                 int sectionHeightLeft = sectionHeight;
-                while (sectionHeightLeft > mPageHeight)
+                while (sectionHeightLeft >= mPageHeight)
                 {
                     // Adjust to the top of the first line that does not fit on the current page anymore
                     int splitPos = curPageStop;
@@ -628,7 +630,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
 BookTypesetter::Ptr BookTypesetter::create (int pageWidth, int pageHeight)
 {
-    return boost::make_shared <TypesetBookImpl::Typesetter> (pageWidth, pageHeight);
+    return std::make_shared <TypesetBookImpl::Typesetter> (pageWidth, pageHeight);
 }
 
 namespace
@@ -897,10 +899,10 @@ public:
     Style* mFocusItem;
     bool mItemActive;
     MyGUI::MouseButton mLastDown;
-    boost::function <void (intptr_t)> mLinkClicked;
+    std::function <void (intptr_t)> mLinkClicked;
 
 
-    boost::shared_ptr <TypesetBookImpl> mBook;
+    std::shared_ptr <TypesetBookImpl> mBook;
 
     MyGUI::ILayerNode* mNode;
     ActiveTextFormats mActiveTextFormats;
@@ -1034,7 +1036,7 @@ public:
 
     void showPage (TypesetBook::Ptr book, size_t newPage)
     {
-        boost::shared_ptr <TypesetBookImpl> newBook = boost::dynamic_pointer_cast <TypesetBookImpl> (book);
+        std::shared_ptr <TypesetBookImpl> newBook = std::dynamic_pointer_cast <TypesetBookImpl> (book);
 
         if (mBook != newBook)
         {
@@ -1050,7 +1052,7 @@ public:
 
             mActiveTextFormats.clear ();
 
-            if (newBook != NULL)
+            if (newBook != nullptr)
             {
                 createActiveFormats (newBook);
 
@@ -1123,7 +1125,7 @@ public:
         }
     };
 
-    void createActiveFormats (boost::shared_ptr <TypesetBookImpl> newBook)
+    void createActiveFormats (std::shared_ptr <TypesetBookImpl> newBook)
     {
         newBook->visitRuns (0, 0x7FFFFFFF, CreateActiveFormat (this));
 
@@ -1265,14 +1267,14 @@ public:
         mPageDisplay->showPage (book, page);
     }
 
-    void adviseLinkClicked (boost::function <void (InteractiveId)> linkClicked)
+    void adviseLinkClicked (std::function <void (InteractiveId)> linkClicked)
     {
         mPageDisplay->mLinkClicked = linkClicked;
     }
 
     void unadviseLinkClicked ()
     {
-        mPageDisplay->mLinkClicked = boost::function <void (InteractiveId)> ();
+        mPageDisplay->mLinkClicked = std::function <void (InteractiveId)> ();
     }
 
 protected:

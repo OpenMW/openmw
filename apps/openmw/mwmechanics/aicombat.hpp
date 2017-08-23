@@ -3,8 +3,6 @@
 
 #include "aipackage.hpp"
 
-#include <boost/shared_ptr.hpp>
-
 #include "../mwworld/cellstore.hpp" // for Doors
 
 #include "../mwbase/world.hpp"

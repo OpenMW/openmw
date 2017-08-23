@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -61,8 +59,8 @@ namespace MWGui
             if (spell->mData.mType == ESM::Spell::ST_Spell)
             {
                 newSpell.mType = Spell::Type_Spell;
-                std::string cost = boost::lexical_cast<std::string>(spell->mData.mCost);
-                std::string chance = boost::lexical_cast<std::string>(int(MWMechanics::getSpellSuccessChance(spell, mActor)));
+                std::string cost = std::to_string(spell->mData.mCost);
+                std::string chance = std::to_string(int(MWMechanics::getSpellSuccessChance(spell, mActor)));
                 newSpell.mCostColumn = cost + "/" + chance;
             }
             else
@@ -112,11 +110,11 @@ namespace MWGui
 
                 int castCost = MWMechanics::getEffectiveEnchantmentCastCost(static_cast<float>(enchant->mData.mCost), mActor);
 
-                std::string cost = boost::lexical_cast<std::string>(castCost);
+                std::string cost = std::to_string(castCost);
                 int currentCharge = int(item.getCellRef().getEnchantmentCharge());
                 if (currentCharge ==  -1)
                     currentCharge = enchant->mData.mCharge;
-                std::string charge = boost::lexical_cast<std::string>(currentCharge);
+                std::string charge = std::to_string(currentCharge);
                 newSpell.mCostColumn = cost + "/" + charge;
 
                 newSpell.mActive = invStore.isEquipped(item);

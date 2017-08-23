@@ -358,6 +358,8 @@ namespace MWBase
 
             virtual void update (float duration, bool paused) = 0;
 
+            virtual void updateWindowManager () = 0;
+
             virtual MWWorld::Ptr placeObject (const MWWorld::ConstPtr& object, float cursorX, float cursorY, int amount) = 0;
             ///< copy and place an object into the gameworld at the specified cursor position
             /// @param object
@@ -383,6 +385,7 @@ namespace MWBase
             ///Is the head of the creature underwater?
             virtual bool isSubmerged(const MWWorld::ConstPtr &object) const = 0;
             virtual bool isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const = 0;
+            virtual bool isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const = 0;
             virtual bool isWaterWalkingCastableOnTarget(const MWWorld::ConstPtr &target) const = 0;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
 

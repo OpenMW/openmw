@@ -6,6 +6,8 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -152,7 +154,7 @@ namespace MWGui
 
         // health, magicka, fatigue tooltip
         MyGUI::Widget* w;
-        std::string valStr =  MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(modified);
+        std::string valStr =  MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         if (id == "HBar")
         {
             getWidget(w, "Health");
@@ -616,13 +618,13 @@ namespace MWGui
                         if (rankData.mSkill1 > 0)
                             text += "\n#{sNeedOneSkill} " + MyGUI::utility::toString(rankData.mSkill1);
                         if (rankData.mSkill2 > 0)
-                            text += "\n#{sNeedTwoSkills} " + MyGUI::utility::toString(rankData.mSkill2);
+                            text += " #{sand} #{sNeedTwoSkills} " + MyGUI::utility::toString(rankData.mSkill2);
                     }
                 }
 
                 w->setUserString("ToolTipType", "Layout");
-                w->setUserString("ToolTipLayout", "TextToolTip");
-                w->setUserString("Caption_Text", text);
+                w->setUserString("ToolTipLayout", "FactionToolTip");
+                w->setUserString("Caption_FactionText", text);
             }
         }
 
@@ -672,6 +674,8 @@ namespace MWGui
 
     void StatsWindow::onPinToggled()
     {
+        Settings::Manager::setBool("stats pin", "Windows", mPinned);
+
         MWBase::Environment::get().getWindowManager()->setHMSVisibility(!mPinned);
     }
 

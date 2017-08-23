@@ -71,8 +71,8 @@ namespace OMW
     class Engine
     {
             SDL_Window* mWindow;
-            std::auto_ptr<VFS::Manager> mVFS;
-            std::auto_ptr<Resource::ResourceSystem> mResourceSystem;
+            std::unique_ptr<VFS::Manager> mVFS;
+            std::unique_ptr<Resource::ResourceSystem> mResourceSystem;
             osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
             MWBase::Environment mEnvironment;
             ToUTF8::FromType mEncoding;
@@ -148,7 +148,7 @@ namespace OMW
             /// Set resource dir
             void setResourceDir(const boost::filesystem::path& parResDir);
 
-            /// Set start cell name (only interiors for now)
+            /// Set start cell name
             void setCell(const std::string& cellName);
 
             /**

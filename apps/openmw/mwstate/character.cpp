@@ -1,17 +1,11 @@
 #include "character.hpp"
 
-#include <ctime>
-
 #include <sstream>
-#include <algorithm>
-#include <stdexcept>
 
 #include <boost/filesystem.hpp>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/defs.hpp>
-
-#include <components/misc/stringops.hpp>
 
 bool MWState::operator< (const Slot& left, const Slot& right)
 {

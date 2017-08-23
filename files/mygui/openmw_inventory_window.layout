@@ -12,7 +12,7 @@
 
             <!-- Avatar -->
             <Widget type="Widget" skin="MW_Box" position="8 38 212 185" name="Avatar" align="Left Top Stretch">
-                <Widget type="ImageBox" skin="ImageBox" position="0 0 212 161" align="Stretch" name="AvatarImage">
+                <Widget type="ImageBox" skin="ImageBox" position="3 3 206 158" align="Stretch" name="AvatarImage">
                     <UserString key="ToolTipType" value="AvatarItemSelection"/>
                 </Widget>
                 <Widget type="TextBox" skin="ProgressText" position="0 161 212 24" align="HStretch Bottom" name="ArmorRating">

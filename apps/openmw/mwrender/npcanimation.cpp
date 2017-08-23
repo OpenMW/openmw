@@ -99,7 +99,7 @@ private:
 private:
     void resetBlinkTimer();
 public:
-    HeadAnimationTime(MWWorld::Ptr reference);
+    HeadAnimationTime(const MWWorld::Ptr& reference);
 
     void updatePtr(const MWWorld::Ptr& updated);
 
@@ -128,7 +128,7 @@ public:
     {
     }
 
-    void setOffset(osg::Vec3f offset)
+    void setOffset(const osg::Vec3f& offset)
     {
         mOffset = offset;
     }
@@ -155,7 +155,7 @@ private:
 
 // --------------------------------------------------------------------------------------------------------------
 
-HeadAnimationTime::HeadAnimationTime(MWWorld::Ptr reference)
+HeadAnimationTime::HeadAnimationTime(const MWWorld::Ptr& reference)
     : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0), mEnabled(true), mValue(0)
 {
     resetBlinkTimer();
@@ -286,8 +286,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
-    mHeadAnimationTime = boost::shared_ptr<HeadAnimationTime>(new HeadAnimationTime(mPtr));
-    mWeaponAnimationTime = boost::shared_ptr<WeaponAnimationTime>(new WeaponAnimationTime(this));
+    mHeadAnimationTime = std::shared_ptr<HeadAnimationTime>(new HeadAnimationTime(mPtr));
+    mWeaponAnimationTime = std::shared_ptr<WeaponAnimationTime>(new WeaponAnimationTime(this));
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
@@ -726,6 +726,19 @@ void NpcAnimation::removePartGroup(int group)
     }
 }
 
+bool NpcAnimation::isFirstPersonPart(const ESM::BodyPart* bodypart)
+{
+    return (bodypart->mId.size() >= 3)
+        && bodypart->mId[bodypart->mId.size()-3] == '1'
+        && bodypart->mId[bodypart->mId.size()-2] == 's'
+        && bodypart->mId[bodypart->mId.size()-1] == 't';
+}
+
+bool NpcAnimation::isFemalePart(const ESM::BodyPart* bodypart)
+{
+    return bodypart->mData.mFlags & ESM::BodyPart::BPF_Female;
+}
+
 bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh, bool enchantedGlow, osg::Vec4f* glowColor)
 {
     if(priority <= mPartPriorities[type])
@@ -765,7 +778,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     osg::Node* node = mObjectParts[type]->getNode();
     if (node->getNumChildrenRequiringUpdateTraversal() > 0)
     {
-        boost::shared_ptr<SceneUtil::ControllerSource> src;
+        std::shared_ptr<SceneUtil::ControllerSource> src;
         if (type == ESM::PRT_Head)
         {
             src = mHeadAnimationTime;
@@ -1096,46 +1109,79 @@ const std::vector<const ESM::BodyPart *>& NpcAnimation::getBodyParts(const std::
             if (!Misc::StringUtils::ciEqual(bodypart.mRace, race))
                 continue;
 
-            bool partFirstPerson = (bodypart.mId.size() >= 3)
-                    && bodypart.mId[bodypart.mId.size()-3] == '1'
-                    && bodypart.mId[bodypart.mId.size()-2] == 's'
-                    && bodypart.mId[bodypart.mId.size()-1] == 't';
-            if(partFirstPerson != (firstPerson))
-            {
-                if(firstPerson && (bodypart.mData.mPart == ESM::BodyPart::MP_Hand ||
-                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Wrist ||
-                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Forearm ||
-                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Upperarm))
-                {
-                    /* Allow 3rd person skins as a fallback for the arms if 1st person is missing. */
-                    BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
-                    while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
-                    {
-                        if(!parts[bIt->second])
-                            parts[bIt->second] = &*it;
-                        ++bIt;
-                    }
-                }
-                continue;
-            }
+            bool partFirstPerson = isFirstPersonPart(&bodypart);
 
-            if ((female) != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
+            bool isHand = bodypart.mData.mPart == ESM::BodyPart::MP_Hand ||
+                                    bodypart.mData.mPart == ESM::BodyPart::MP_Wrist ||
+                                    bodypart.mData.mPart == ESM::BodyPart::MP_Forearm ||
+                                    bodypart.mData.mPart == ESM::BodyPart::MP_Upperarm;
+
+            bool isSameGender = isFemalePart(&bodypart) == female;
+
+            /* A fallback for the arms if 1st person is missing:
+             1. Try to use 3d person skin for same gender
+             2. Try to use 1st person skin for male, if female == true
+             3. Try to use 3d person skin for male, if female == true
+
+             A fallback in another cases: allow to use male bodyparts, if female == true
+            */
+            if (firstPerson && isHand && !partFirstPerson)
             {
-                // Allow opposite gender's parts as fallback if parts for our gender are missing
+                // Allow 3rd person skins as a fallback for the arms if 1st person is missing
                 BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
                 while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
                 {
-                    if(!parts[bIt->second])
-                        parts[bIt->second] = &*it;
+                    // If we have no fallback bodypart now and bodypart is for same gender (1)
+                    if(!parts[bIt->second] && isSameGender)
+                       parts[bIt->second] = &bodypart;
+
+                    // If we have fallback bodypart for other gender and found fallback for current gender (1)
+                    else if(isSameGender && isFemalePart(parts[bIt->second]) != female)
+                       parts[bIt->second] = &bodypart;
+
+                    // If we have no fallback bodypart and searching for female bodyparts (3)
+                    else if(!parts[bIt->second] && female)
+                       parts[bIt->second] = &bodypart;
+
                     ++bIt;
                 }
+
                 continue;
             }
 
+            // Don't allow to use podyparts for a different view
+            if (partFirstPerson != firstPerson)
+                continue;
+
+            if (female && !isFemalePart(&bodypart))
+            {
+                // Allow male parts as fallback for females if female parts are missing
+                BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
+                while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
+                {
+                    // If we have no fallback bodypart now
+                    if(!parts[bIt->second])
+                        parts[bIt->second] = &bodypart;
+
+                    // If we have 3d person fallback bodypart for hand and 1st person fallback found (2)
+                    else if(isHand && !isFirstPersonPart(parts[bIt->second]) && partFirstPerson)
+                        parts[bIt->second] = &bodypart;
+
+                    ++bIt;
+                }
+
+                continue;
+            }
+
+            // Don't allow to use podyparts for another gender
+            if (female != isFemalePart(&bodypart))
+                continue;
+
+            // Use properly found bodypart, replacing fallbacks
             BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
             while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
             {
-                parts[bIt->second] = &*it;
+                parts[bIt->second] = &bodypart;
                 ++bIt;
             }
         }

@@ -75,7 +75,7 @@ Options:
 		Set the build platform, can also be set with environment variable PLATFORM.
 	-u
 		Configure for unity builds.
-	-v <2013/2015>
+	-v <2013/2015/2017>
 		Choose the Visual Studio version to use.
 	-V
 		Run verbosely
@@ -213,20 +213,28 @@ if [ -z $VS_VERSION ]; then
 fi
 
 case $VS_VERSION in
-	14|14.0|2015 )
-		GENERATOR="Visual Studio 14 2015"
-		XP_TOOLSET="v140_xp"
-		TOOLSET="v140"
+	15|15.0|2017 )
+		GENERATOR="Visual Studio 15 2017"
+		TOOLSET="vc140"
 		MSVC_VER="14"
 		MSVC_YEAR="2015"
+		MSVC_DISPLAY_YEAR="2017"
+		;;
+
+	14|14.0|2015 )
+		GENERATOR="Visual Studio 14 2015"
+		TOOLSET="vc140"
+		MSVC_VER="14"
+		MSVC_YEAR="2015"
+		MSVC_DISPLAY_YEAR="2015"
 		;;
 
 	12|12.0|2013 )
 		GENERATOR="Visual Studio 12 2013"
-		XP_TOOLSET="v120_xp"
-		TOOLSET="v120"
+		TOOLSET="vc120"
 		MSVC_VER="12"
 		MSVC_YEAR="2013"
+		MSVC_DISPLAY_YEAR="2013"
 		;;
 esac
 
@@ -278,7 +286,7 @@ fi
 
 echo
 echo "==================================="
-echo "Starting prebuild on MSVC${MSVC_YEAR} WIN${BITS}"
+echo "Starting prebuild on MSVC${MSVC_DISPLAY_YEAR} WIN${BITS}"
 echo "==================================="
 echo
 
@@ -305,11 +313,11 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}.7z"
 
 	# FFmpeg
-	download "FFmpeg 3.0.1" \
-		"http://ffmpeg.zeranoe.com/builds/win${BITS}/shared/ffmpeg-3.0.1-win${BITS}-shared.7z" \
-		"ffmpeg-3.0.1-win${BITS}.7z" \
-		"http://ffmpeg.zeranoe.com/builds/win${BITS}/dev/ffmpeg-3.0.1-win${BITS}-dev.7z" \
-		"ffmpeg-3.0.1-dev-win${BITS}.7z"
+	download "FFmpeg 3.2.4" \
+		"http://ffmpeg.zeranoe.com/builds/win${BITS}/shared/ffmpeg-3.2.4-win${BITS}-shared.zip" \
+		"ffmpeg-3.2.4-win${BITS}.zip" \
+		"http://ffmpeg.zeranoe.com/builds/win${BITS}/dev/ffmpeg-3.2.4-win${BITS}-dev.zip" \
+		"ffmpeg-3.2.4-dev-win${BITS}.zip"
 
 	# MyGUI
 	download "MyGUI 3.2.3-git" \
@@ -350,7 +358,7 @@ fi
 cd .. #/..
 
 # Set up dependencies
-BUILD_DIR="MSVC${MSVC_YEAR}_${BITS}"
+BUILD_DIR="MSVC${MSVC_DISPLAY_YEAR}_${BITS}"
 if [ -z $KEEP ]; then
 	echo
 	echo "(Re)Creating build directory."
@@ -395,6 +403,7 @@ fi
 
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
 			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.0"
+		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
 
 		echo Done.
 	else
@@ -406,6 +415,7 @@ fi
 		fi
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
 			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.0"
+		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
 
 		echo Done.
 	fi
@@ -434,21 +444,21 @@ cd $DEPS
 echo
 
 # FFmpeg
-printf "FFmpeg 3.0.1... "
+printf "FFmpeg 3.2.4... "
 {
 	cd $DEPS_INSTALL
 
-	if [ -d FFmpeg ] && grep "FFmpeg version: 3.0.1" FFmpeg/README.txt > /dev/null; then
+	if [ -d FFmpeg ] && grep "FFmpeg version: 3.2.4" FFmpeg/README.txt > /dev/null; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf FFmpeg
 
-		eval 7z x -y "${DEPS}/ffmpeg-3.0.1-win${BITS}.7z" $STRIP
-		eval 7z x -y "${DEPS}/ffmpeg-3.0.1-dev-win${BITS}.7z" $STRIP
+		eval 7z x -y "${DEPS}/ffmpeg-3.2.4-win${BITS}.zip" $STRIP
+		eval 7z x -y "${DEPS}/ffmpeg-3.2.4-dev-win${BITS}.zip" $STRIP
 
-		mv "ffmpeg-3.0.1-win${BITS}-shared" FFmpeg
-		cp -r "ffmpeg-3.0.1-win${BITS}-dev/"* FFmpeg/
-		rm -rf "ffmpeg-3.0.1-win${BITS}-dev"
+		mv "ffmpeg-3.2.4-win${BITS}-shared" FFmpeg
+		cp -r "ffmpeg-3.2.4-win${BITS}-dev/"* FFmpeg/
+		rm -rf "ffmpeg-3.2.4-win${BITS}-dev"
 	fi
 
 	export FFMPEG_HOME="$(real_pwd)/FFmpeg"

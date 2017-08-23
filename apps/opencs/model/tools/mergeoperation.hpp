@@ -27,7 +27,7 @@ namespace CSMTools
             MergeOperation (CSMDoc::Document& document, ToUTF8::FromType encoding);
 
             /// \attention Do not call this function while a merge is running.
-            void setTarget (std::auto_ptr<CSMDoc::Document> document);
+            void setTarget (std::unique_ptr<CSMDoc::Document> document);
 
         protected slots:
 

@@ -59,7 +59,7 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const 
         updateParts();
     }
 
-    mWeaponAnimationTime = boost::shared_ptr<WeaponAnimationTime>(new WeaponAnimationTime(this));
+    mWeaponAnimationTime = std::shared_ptr<WeaponAnimationTime>(new WeaponAnimationTime(this));
 }
 
 void CreatureWeaponAnimation::showWeapons(bool showWeapon)
@@ -143,7 +143,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         else
             mAmmunition.reset();
 
-        boost::shared_ptr<SceneUtil::ControllerSource> source;
+        std::shared_ptr<SceneUtil::ControllerSource> source;
 
         if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
             source = mWeaponAnimationTime;
