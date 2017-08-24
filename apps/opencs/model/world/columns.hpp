@@ -329,6 +329,9 @@ namespace CSMWorld
 
             ColumnId_Text = 297,
 
+            ColumnId_PluginIndex = 298,
+            ColumnId_TextureIndex = 299,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,

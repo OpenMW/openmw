@@ -15,6 +15,9 @@
 #include "columns.hpp"
 #include "info.hpp"
 
+#include "land.hpp"
+#include "landtexture.hpp"
+
 namespace CSMWorld
 {
     /// \note Shares ID with VarValueColumn. A table can not have both.
@@ -1499,9 +1502,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct TopicColumn : public Column<ESXRecordT>
     {
-        TopicColumn (bool journal) 
+        TopicColumn (bool journal)
         : Column<ESXRecordT> (journal ? Columns::ColumnId_Journal : Columns::ColumnId_Topic,
-                              journal ? ColumnBase::Display_Journal : ColumnBase::Display_Topic) 
+                              journal ? ColumnBase::Display_Journal : ColumnBase::Display_Topic)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -1755,7 +1758,7 @@ namespace CSMWorld
             return true;
         }
     };
-    
+
     template<typename ESXRecordT>
     struct GenderNpcColumn : public Column<ESXRecordT>
     {
@@ -2198,8 +2201,8 @@ namespace CSMWorld
     struct EffectTextureColumn : public Column<ESXRecordT>
     {
         EffectTextureColumn (Columns::ColumnId columnId)
-        : Column<ESXRecordT> (columnId, 
-                              columnId == Columns::ColumnId_Particle ? ColumnBase::Display_Texture 
+        : Column<ESXRecordT> (columnId,
+                              columnId == Columns::ColumnId_Particle ? ColumnBase::Display_Texture
                                                                      : ColumnBase::Display_Icon)
         {
             assert (this->mColumnId==Columns::ColumnId_Icon ||
@@ -2417,7 +2420,56 @@ namespace CSMWorld
             return true;
         }
     };
-    
+
+    template<typename ESXRecordT>
+    struct TextureIndexColumn : public Column<ESXRecordT>
+    {
+        TextureIndexColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_TextureIndex, ColumnBase::Display_Integer)
+        {}
+
+        QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mIndex;
+        }
+
+        virtual bool isEditable() const
+        {
+            return false;
+        }
+    };
+
+    // TODO remove
+    template<typename ESXRecordT>
+    struct PluginIndexColumn : public Column<ESXRecordT>
+    {
+        PluginIndexColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_PluginIndex, ColumnBase::Display_Integer)
+        {}
+
+        QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return -1;
+        }
+
+        virtual bool isEditable() const
+        {
+            return false;
+        }
+    };
+
+    template<>
+    inline QVariant PluginIndexColumn<Land>::get (const Record<Land>& record) const
+    {
+        return record.get().mPlugin;
+    }
+
+    template<>
+    inline QVariant PluginIndexColumn<LandTexture>::get (const Record<LandTexture>& record) const
+    {
+        return record.get().mPluginIndex;
+    }
+
     struct BodyPartRaceColumn : public RaceColumn<ESM::BodyPart>
     {
         const MeshTypeColumn<ESM::BodyPart> *mMeshType;

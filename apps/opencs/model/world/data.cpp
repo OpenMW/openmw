@@ -412,6 +412,18 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
         Columns::ColumnId_NegativeLight, ESM::MagicEffect::NegativeLight));
     mMagicEffects.addColumn (new DescriptionColumn<ESM::MagicEffect>);
 
+    mLand.addColumn (new StringIdColumn<Land>);
+    mLand.addColumn (new RecordStateColumn<Land>);
+    mLand.addColumn (new FixedRecordTypeColumn<Land>(UniversalId::Type_Land));
+    mLand.addColumn (new PluginIndexColumn<Land>);
+
+    mLandTextures.addColumn (new StringIdColumn<LandTexture>);
+    mLandTextures.addColumn (new RecordStateColumn<LandTexture>);
+    mLandTextures.addColumn (new FixedRecordTypeColumn<LandTexture>(UniversalId::Type_LandTexture));
+    mLandTextures.addColumn (new PluginIndexColumn<LandTexture>);
+    mLandTextures.addColumn (new TextureIndexColumn<LandTexture>);
+    mLandTextures.addColumn (new TextureColumn<LandTexture>);
+
     mPathgrids.addColumn (new StringIdColumn<Pathgrid>);
     mPathgrids.addColumn (new RecordStateColumn<Pathgrid>);
     mPathgrids.addColumn (new FixedRecordTypeColumn<Pathgrid> (UniversalId::Type_Pathgrid));
@@ -531,6 +543,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     addModel (new IdTable (&mBodyParts), UniversalId::Type_BodyPart);
     addModel (new IdTable (&mSoundGens), UniversalId::Type_SoundGen);
     addModel (new IdTable (&mMagicEffects), UniversalId::Type_MagicEffect);
+    addModel (new IdTable (&mLand), UniversalId::Type_Land);
+    addModel (new IdTable (&mLandTextures), UniversalId::Type_LandTexture);
     addModel (new IdTree (&mPathgrids, &mPathgrids), UniversalId::Type_Pathgrid);
     addModel (new IdTable (&mStartScripts), UniversalId::Type_StartScript);
     addModel (new IdTree (&mReferenceables, &mReferenceables, IdTable::Feature_Preview),
