@@ -367,10 +367,6 @@ namespace MWSound
             }
 
             mMusicFiles[mCurrentPlaylist] = filelist;
-
-            // Build mMusicToPlay for this playlist
-            tracklist.resize(filelist.size());
-            std::iota(tracklist.begin(), tracklist.end(), 0);
         }
         else
             filelist = mMusicFiles[mCurrentPlaylist];
