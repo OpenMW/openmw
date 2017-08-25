@@ -63,6 +63,13 @@ namespace CSMWorld
         }
     };
 
+    template<>
+    inline QVariant StringIdColumn<LandTexture>::get(const Record<LandTexture>& record) const
+    {
+        const LandTexture& ltex = record.get();
+        return QString::fromUtf8(std::string('L' + std::to_string(ltex.mPluginIndex) + '#' + std::to_string(ltex.mIndex)).c_str());
+    }
+
     template<typename ESXRecordT>
     struct RecordStateColumn : public Column<ESXRecordT>
     {
@@ -2422,37 +2429,61 @@ namespace CSMWorld
     };
 
     template<typename ESXRecordT>
+    struct TextureHandleColumn : public Column<ESXRecordT>
+    {
+        TextureHandleColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_TextureHandle, ColumnBase::Display_String)
+        {}
+
+        QVariant get(const Record<ESXRecordT>& record) const override
+        {
+            return QString::fromUtf8(record.get().mId.c_str());
+        }
+
+        void set(Record<ESXRecordT>& record, const QVariant& data) override
+        {
+            ESXRecordT copy = record.get();
+            copy.mId = data.toString().toUtf8().constData();
+            record.setModified(copy);
+        }
+
+        bool isEditable() const override
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
     struct TextureIndexColumn : public Column<ESXRecordT>
     {
         TextureIndexColumn()
         : Column<ESXRecordT> (Columns::ColumnId_TextureIndex, ColumnBase::Display_Integer)
         {}
 
-        QVariant get (const Record<ESXRecordT>& record) const
+        QVariant get(const Record<ESXRecordT>& record) const override
         {
             return record.get().mIndex;
         }
 
-        virtual bool isEditable() const
+        bool isEditable() const override
         {
             return false;
         }
     };
 
-    // TODO remove
     template<typename ESXRecordT>
     struct PluginIndexColumn : public Column<ESXRecordT>
     {
         PluginIndexColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_PluginIndex, ColumnBase::Display_Integer)
+        : Column<ESXRecordT> (Columns::ColumnId_PluginIndex, ColumnBase::Display_Integer,0)
         {}
 
-        QVariant get (const Record<ESXRecordT>& record) const
+        QVariant get(const Record<ESXRecordT>& record) const override
         {
             return -1;
         }
 
-        virtual bool isEditable() const
+        virtual bool isEditable() const override
         {
             return false;
         }

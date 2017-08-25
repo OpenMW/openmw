@@ -281,3 +281,34 @@ CSMWorld::CollectionBase *CSMWorld::IdTable::idCollection() const
 {
     return mIdCollection;
 }
+
+CSMWorld::LandTextureIdTable::LandTextureIdTable(CollectionBase* idCollection, unsigned int features)
+    : IdTable(idCollection, features)
+{
+}
+
+QVariant CSMWorld::LandTextureIdTable::data(const QModelIndex& index, int role) const
+{
+    if (role==Qt::EditRole && !idCollection()->getRecord(index.row()).isModified())
+        return QVariant();
+
+    return IdTable::data(index, role);
+}
+
+bool CSMWorld::LandTextureIdTable::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    if (!idCollection()->getRecord(index.row()).isModified())
+        return false;
+    else
+        return IdTable::setData(index, value, role);
+}
+
+Qt::ItemFlags CSMWorld::LandTextureIdTable::flags(const QModelIndex& index) const
+{
+    Qt::ItemFlags flags = IdTable::flags(index);
+
+    if (!idCollection()->getRecord(index.row()).isModified())
+        flags &= ~Qt::ItemIsEditable;
+
+    return flags;
+}

@@ -18,6 +18,7 @@
 #include "pathgridcreator.hpp"
 #include "previewsubview.hpp"
 #include "bodypartcreator.hpp"
+#include "landtexturecreator.hpp"
 
 void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 {
@@ -43,8 +44,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Spells,
         CSMWorld::UniversalId::Type_Enchantments,
         CSMWorld::UniversalId::Type_SoundGens,
-        CSMWorld::UniversalId::Type_Lands,
-        CSMWorld::UniversalId::Type_LandTextures,
 
         CSMWorld::UniversalId::Type_None // end marker
     };
@@ -82,6 +81,12 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add (CSMWorld::UniversalId::Type_Pathgrids,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, PathgridCreatorFactory>);
+
+    manager.add (CSMWorld::UniversalId::Type_Lands,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GenericCreator> >);
+
+    manager.add (CSMWorld::UniversalId::Type_LandTextures,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<LandTextureCreator> >);
 
     manager.add (CSMWorld::UniversalId::Type_Globals,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GlobalCreator> >);
@@ -182,6 +187,12 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add (CSMWorld::UniversalId::Type_Pathgrid,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, PathgridCreatorFactory> (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Land,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> >(false));
+
+    manager.add (CSMWorld::UniversalId::Type_LandTexture,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<LandTextureCreator> >(false));
 
     manager.add (CSMWorld::UniversalId::Type_DebugProfile,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> > (false));

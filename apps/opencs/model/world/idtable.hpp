@@ -93,6 +93,21 @@ namespace CSMWorld
 
             virtual CollectionBase *idCollection() const;
     };
+
+    /// An IdTable customized to handle the more unique needs of LandTextureId's which behave
+    /// differently from other records.
+    class LandTextureIdTable : public IdTable
+    {
+        public:
+
+            LandTextureIdTable(CollectionBase* idCollection, unsigned int features=0);
+
+            QVariant data(const QModelIndex& index, int role=Qt::DisplayRole) const override;
+
+            bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+
+            Qt::ItemFlags flags (const QModelIndex & index) const override;
+    };
 }
 
 #endif

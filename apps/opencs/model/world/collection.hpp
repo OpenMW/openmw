@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cctype>
 #include <stdexcept>
+#include <string>
 #include <functional>
 
 #include <QVariant>
@@ -13,8 +14,8 @@
 #include <components/misc/stringops.hpp>
 
 #include "columnbase.hpp"
-
 #include "collectionbase.hpp"
+#include "landtexture.hpp"
 
 namespace CSMWorld
 {
@@ -22,21 +23,37 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct IdAccessor
     {
-        std::string& getId (ESXRecordT& record);
-
+        void setId(ESXRecordT& record, const std::string& id) const;
         const std::string getId (const ESXRecordT& record) const;
     };
 
     template<typename ESXRecordT>
-    std::string& IdAccessor<ESXRecordT>::getId (ESXRecordT& record)
+    void IdAccessor<ESXRecordT>::setId(ESXRecordT& record, const std::string& id) const
     {
-        return record.mId;
+        record.mId = id;
     }
 
     template<typename ESXRecordT>
     const std::string IdAccessor<ESXRecordT>::getId (const ESXRecordT& record) const
     {
         return record.mId;
+    }
+
+    template<>
+    inline void IdAccessor<LandTexture>::setId (LandTexture& record, const std::string& id) const
+    {
+        int plugin = 0;
+        int index = 0;
+
+        LandTexture::parseUniqueRecordId(id, plugin, index);
+        record.mPluginIndex = plugin;
+        record.mIndex = index;
+    }
+
+    template<>
+    inline const std::string IdAccessor<LandTexture>::getId (const LandTexture& record) const
+    {
+        return LandTexture::createUniqueRecordId(record.mPluginIndex, record.mIndex);
     }
 
     /// \brief Single-type record collection
@@ -213,7 +230,7 @@ namespace CSMWorld
        Record<ESXRecordT> copy;
        copy.mModified = getRecord(origin).get();
        copy.mState = RecordBase::State_ModifiedOnly;
-       copy.get().mId = destination;
+       IdAccessorT().setId(copy.get(), destination);
 
        insertRecord(copy, getAppendIndex(destination, type));
     }
@@ -366,7 +383,7 @@ namespace CSMWorld
         UniversalId::Type type)
     {
         ESXRecordT record;
-        IdAccessorT().getId (record) = id;
+        IdAccessorT().setId(record, id);
         record.blank();
 
         Record<ESXRecordT> record2;
