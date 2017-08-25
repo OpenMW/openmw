@@ -8,9 +8,9 @@
 
 namespace
 {
-    constexpr int cellSize {ESM::Land::REAL_SIZE};
-    constexpr int landSize {ESM::Land::LAND_SIZE};
-    constexpr int landTextureSize {ESM::Land::LAND_TEXTURE_SIZE};
+    const int cellSize {ESM::Land::REAL_SIZE};
+    const int landSize {ESM::Land::LAND_SIZE};
+    const int landTextureSize {ESM::Land::LAND_TEXTURE_SIZE};
 }
 
 CSVRender::TerrainSelection::TerrainSelection(const CSMWorld::CellCoordinates& coords, const ESM::Land& esmLand, osg::Group* parentNode)
