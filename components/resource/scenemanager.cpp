@@ -628,6 +628,11 @@ namespace Resource
     {
         mCache->releaseGLObjects(state);
         mInstanceCache->releaseGLObjects(state);
+
+        mShaderManager->releaseGLObjects(state);
+
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSharedStateMutex);
+        mSharedStateManager->releaseGLObjects(state);
     }
 
     void SceneManager::setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation *ico)

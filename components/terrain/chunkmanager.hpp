@@ -36,6 +36,8 @@ namespace Terrain
 
         virtual void clearCache();
 
+        void releaseGLObjects(osg::State* state) override;
+
         void setCullingActive(bool active);
 
     private:

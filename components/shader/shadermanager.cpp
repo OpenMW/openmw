@@ -158,4 +158,13 @@ namespace Shader
         return found->second;
     }
 
+    void ShaderManager::releaseGLObjects(osg::State *state)
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        for (auto shader : mShaders)
+            shader.second->releaseGLObjects(state);
+        for (auto program : mPrograms)
+            program.second->releaseGLObjects(state);
+    }
+
 }

@@ -73,8 +73,6 @@ namespace MWGui
 
         std::vector<std::string> mSplashScreens;
 
-        // TODO: add releaseGLObjects() for mTexture
-
         osg::ref_ptr<osg::Texture2D> mTexture;
         std::unique_ptr<MyGUI::ITexture> mGuiTexture;
 

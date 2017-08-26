@@ -221,8 +221,8 @@ SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSyste
 
 SceneWidget::~SceneWidget()
 {
-    // Since we're holding on to the scene templates past the existence of this graphics context, we'll need to manually release the created objects
-    mResourceSystem->getSceneManager()->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
+    // Since we're holding on to the resources past the existence of this graphics context, we'll need to manually release the created objects
+    mResourceSystem->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
 }
 
 void SceneWidget::setLighting(Lighting *lighting)
