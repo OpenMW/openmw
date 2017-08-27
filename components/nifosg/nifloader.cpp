@@ -1710,10 +1710,8 @@ namespace NifOsg
                     const Nif::NiVertexColorProperty* vertprop = static_cast<const Nif::NiVertexColorProperty*>(property);
                     lightmode = vertprop->data.lightmode;
 
-                    if (hasVertexColors)
+                    switch (vertprop->data.vertmode)
                     {
-                        switch (vertprop->data.vertmode)
-                        {
                         case 0:
                             mat->setColorMode(osg::Material::OFF);
                             break;
@@ -1726,7 +1724,6 @@ namespace NifOsg
                             else
                                 mat->setColorMode(osg::Material::OFF);
                             break;
-                        }
                     }
                     break;
                 }
@@ -1786,6 +1783,27 @@ namespace NifOsg
                 diffuse = osg::Vec4f(0,0,0,diffuse.a());
                 mat->setDiffuse(osg::Material::FRONT_AND_BACK, diffuse);
                 mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f());
+            }
+
+            // If we're told to use vertex colors but there are none to use, use a default color instead.
+            if (!hasVertexColors)
+            {
+                switch (mat->getColorMode())
+                {
+                case osg::Material::AMBIENT:
+                    mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+                    break;
+                case osg::Material::AMBIENT_AND_DIFFUSE:
+                    mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+                    mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+                    break;
+                case osg::Material::EMISSION:
+                    mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+                    break;
+                default:
+                    break;
+                }
+                mat->setColorMode(osg::Material::OFF);
             }
 
             if (!hasMatCtrl && mat->getColorMode() == osg::Material::OFF
