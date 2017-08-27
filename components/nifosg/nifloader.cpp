@@ -1674,6 +1674,8 @@ namespace NifOsg
 
             bool hasMatCtrl = false;
 
+            int lightmode = 1;
+
             for (std::vector<const Nif::Property*>::const_reverse_iterator it = properties.rbegin(); it != properties.rend(); ++it)
             {
                 const Nif::Property* property = *it;
@@ -1706,19 +1708,25 @@ namespace NifOsg
                 case Nif::RC_NiVertexColorProperty:
                 {
                     const Nif::NiVertexColorProperty* vertprop = static_cast<const Nif::NiVertexColorProperty*>(property);
-                    if (!hasVertexColors)
-                        break;
-                    switch (vertprop->flags)
+                    lightmode = vertprop->data.lightmode;
+
+                    if (hasVertexColors)
                     {
-                    case 0:
-                        mat->setColorMode(osg::Material::OFF);
-                        break;
-                    case 1:
-                        mat->setColorMode(osg::Material::EMISSION);
-                        break;
-                    case 2:
-                        mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-                        break;
+                        switch (vertprop->data.vertmode)
+                        {
+                        case 0:
+                            mat->setColorMode(osg::Material::OFF);
+                            break;
+                        case 1:
+                            mat->setColorMode(osg::Material::EMISSION);
+                            break;
+                        case 2:
+                            if (lightmode != 0)
+                                mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+                            else
+                                mat->setColorMode(osg::Material::OFF);
+                            break;
+                        }
                     }
                     break;
                 }
@@ -1770,6 +1778,14 @@ namespace NifOsg
                 // NB ignoring diffuse.a()
                 mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
                 mat->setColorMode(osg::Material::AMBIENT);
+            }
+
+            if (lightmode == 0)
+            {
+                osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
+                diffuse = osg::Vec4f(0,0,0,diffuse.a());
+                mat->setDiffuse(osg::Material::FRONT_AND_BACK, diffuse);
+                mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f());
             }
 
             if (!hasMatCtrl && mat->getColorMode() == osg::Material::OFF
