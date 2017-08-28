@@ -20,7 +20,7 @@ different sub-directories. The location of the user directory is hard-coded
 into the CS and depends on your operating system.
 
 ================  =========================================
-Operating System  User Dircetory
+Operating System  User Directory
 ================  =========================================
 GNU/Linux         ``~/.config/openmw/``
 OS X              ``~/Library/Application Support/openmw/``
