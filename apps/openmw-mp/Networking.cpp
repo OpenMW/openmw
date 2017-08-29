@@ -71,7 +71,6 @@ Networking::~Networking()
     delete playerPacketController;
     delete actorPacketController;
     delete worldPacketController;
-    LOG_QUIT();
 }
 
 void Networking::setServerPassword(std::string passw) noexcept
