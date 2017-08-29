@@ -14,22 +14,22 @@ Basics
 Directories
 ===========
 
-OpenMW and OpenMW CS us multiple directories on the file system. First of all
+OpenMW and OpenMW CS use multiple directories on the file system. First of all
 there is a *user directory* that holds configuration files and a number of
 different sub-directories. The location of the user directory is hard-coded
 into the CS and depends on your operating system.
 
 ================  =========================================
-Operating System  User Dircetory
+Operating System  User Directory
 ================  =========================================
-GNU/Linux         ``<whatever>``
+GNU/Linux         ``~/.config/openmw/``
 OS X              ``~/Library/Application Support/openmw/``
-Windows           ``<whatever>``
+Windows           ``C:\Users\ *Username* \Documents\my games\OpenMW``
 ================  =========================================
 
 In addition to to this single hard-coded directory both OpenMW and OpenMW CS
-need a place to seek for a actuals data files of the game: textures, 3D models,
-sounds and record files that store objects in game; dialogues an so one. These
+need a place to search for actual data files of the game: textures, 3D models,
+sounds and record files that store objects in game; dialogues and so on. These
 files are called *content files*. We support multiple such paths (we call them
 *data paths*) as specified in the configuration. Usually one data path points
 to the directory where the original Morrowind game is either installed or
@@ -42,12 +42,12 @@ Content files
 =============
 
 The original Morrowind engine by Bethesda Softworks uses two types of content
-files: `esm` (master) and `esp` (plugin). The distinction between those two is
-not clear, and often confusing. One would expect the `esm` (master) file to be
-used to specify one master, which is then modified by the `esp` plugins. And
+files: `ESM` (master) and `ESP` (plugin). The distinction between those two is
+not clear, and often confusing. One would expect the `ESM` (master) file to be
+used to specify one master, which is then modified by the `ESP` plugins. And
 indeed: this is the basic idea. However, the official expansions were also made
 as ESM files, even though they could essentially be described as really large
-plugins, and therefore would rather use `esp` files. There were technical
+plugins, and therefore should have been `ESP` files. There were technical
 reasons behind this decision – somewhat valid in the case of the original
 engine, but clearly it is better to create a system that can be used in a more
 sensible way.  OpenMW achieves this with our own content file types.
@@ -62,7 +62,7 @@ OpenMW content files
 
 The concepts of *Game* and *Addon* files are somewhat similar to the old
 concept of *ESM* and *ESP*, but more strictly enforced. It is quite
-straight-formward: If you want to make new game using OpenMW as the engine (a
+straight-forward: If you want to make new game using OpenMW as the engine (a
 so called *total conversion*) you should create a game file. If you want to
 create an addon for an existing game file create an addon file. Nothing else
 matters; the only distinction you should consider is if your project is about
@@ -75,21 +75,21 @@ Another simple thing about content files are the extensions: we are using
 Morrowind content files
 -----------------------
 
-Using our content files is recommended for projects that are intended to used
-with the OpenMW engine. However, some players might wish to still use the
+Using our content files is recommended for projects that are intended to use
+the OpenMW engine. However, some players might wish to still use the
 original Morrowind engine. In addition thousands of *ESP*/*ESM* files were
 created since 2002, some of them with really outstanding content. Because of
 this OpenMW CS simply has no other choice but to support *ESP*/*ESM* files. If
-you decid to choose *ESP*/*ESM* file instead of using our own content file
-types you are most likely aimng at compatibility with the original engine. This
-subject is covered in it own chapter of this manual.
+you decide to choose *ESP*/*ESM* file instead of using our own content file
+types you are most likely aiming at compatibility with the original engine. This
+subject is covered in its own chapter of this manual.
 
 
 .. TODO This paragraph sounds weird
 
 The actual creation of new files is described in the next chapter. Here we are
 going to focus only on the details you need to know in order to create your
-first OpenMW CS file while fully understanding your needs. For now let’s jut
+first OpenMW CS file while fully understanding your needs. For now let’s just
 remember that content files are created inside the user directory in the the
 ``data`` subdirectory (that is the one special data directory mentioned
 earlier).
@@ -99,8 +99,8 @@ Dependencies
 ------------
 
 Since an addon is supposed to change the game it follows that it also depends
-on the said game to work. We can conceptualise this with an examples: your
-modification is the changing prize of an iron sword, but what if there is no
+on the said game to work. We can conceptualise this with an example: your
+modification is changing the price of an iron sword, but what if there is no
 iron sword in game? That's right: we get nonsense. What you want to do is tie
 your addon to the files you are changing. Those can be either game files (for
 example when making an expansion island for a game) or other addon files
@@ -112,9 +112,9 @@ files – it is only a theoretical introduction to the subject. For now just kee
 in mind that dependencies exist, and is up to you to decide whether your
 content file should depend on other content files.
 
-Game files are not intend to have any dependencies for a very simple reasons:
+Game files are not intended to have any dependencies for a very simple reasons:
 the player is using only one game file (excluding original and the dirty
-ESP/ESM system) at a time and therefore no game file can depend on other game
+ESP/ESM system) at a time and therefore no game file can depend on another game
 file, and since a game file makes the base for addon files it can not depend on
 addon files.
 
@@ -123,7 +123,7 @@ Project files
 -------------
 
 Project files act as containers for data not used by the OpenMW game engine
-itself, but still useful for OpenMW CS. The shining example of this data
+itself, but still useful for OpenMW CS. The shining examples of this data
 category are without doubt record filters (described in a later chapter of the
 manual). As a mod author you probably do not need or want to distribute project
 files at all, they are meant to be used only by you and your team.
@@ -132,7 +132,7 @@ files at all, they are meant to be used only by you and your team.
 
 As you would imagine, project files make sense only in combination with actual
 content files. In fact, each time you start to work on new content file and a
-project file was not found, one will be created. The extensio of project files
+project file was not found, one will be created. The extension of project files
 is ``.project``. The whole name of the project file is the whole name of the
 content file with appended extension. For instance a ``swords.omwaddon`` file
 is associated with a ``swords.omwaddon.project`` file.
