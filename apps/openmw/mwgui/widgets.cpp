@@ -502,10 +502,9 @@ namespace MWGui
 
             if (mBarWidget)
             {
-                mBarWidget->setProgressRange(mMax);
-                mBarWidget->setProgressPosition(mValue);
+                mBarWidget->setProgressRange(std::max(0, mMax));
+                mBarWidget->setProgressPosition(std::max(0, mValue));
             }
-
 
             if (mBarTextWidget)
             {
