@@ -267,6 +267,7 @@ public:
     bool isKnockedOut() const;
     bool isSneaking() const;
     bool isRunning() const;
+    bool isAttackingOrSpell() const;
 
     void setAttackingOrSpell(bool attackingOrSpell);
     void setAIAttackType(const std::string& attackType);

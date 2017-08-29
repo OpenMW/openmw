@@ -36,6 +36,7 @@ namespace MWGui
         void onAssignMagicCancel ();
 
         void activateQuickKey(int index);
+        void updateActivatedQuickKey();
 
         /// @note This enum is serialized, so don't move the items around!
         enum QuickKeyType
@@ -64,7 +65,7 @@ namespace MWGui
         MagicSelectionDialog* mMagicSelectionDialog;
 
         int mSelectedIndex;
-
+        int mActivatedIndex;
 
         void onQuickKeyButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);

@@ -223,6 +223,7 @@ namespace MWBase
             virtual void keepPlayerAlive() = 0;
 
             virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const = 0;
+            virtual bool isAttackingOrSpell(const MWWorld::Ptr &ptr) const = 0;
 
             virtual void confiscateStolenItems (const MWWorld::Ptr& player, const MWWorld::Ptr& targetContainer) = 0;
 
