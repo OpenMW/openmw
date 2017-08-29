@@ -13,6 +13,7 @@
 #include "combat.hpp"
 #include "aicombataction.hpp"
 #include "spellpriority.hpp"
+#include "spellcasting.hpp"
 
 namespace MWMechanics
 {
@@ -90,10 +91,13 @@ namespace MWMechanics
         if (!weapon->mEnchant.empty())
         {
             const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(weapon->mEnchant);
-            if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes
-                    && (item.getCellRef().getEnchantmentCharge() == -1
-                        || item.getCellRef().getEnchantmentCharge() >= enchantment->mData.mCost))
-                rating += rateEffects(enchantment->mEffects, actor, enemy);
+            if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
+            {
+                int castCost = getEffectiveEnchantmentCastCost(static_cast<float>(enchantment->mData.mCost), actor);
+
+                if (item.getCellRef().getEnchantmentCharge() == -1 || item.getCellRef().getEnchantmentCharge() >= castCost)
+                    rating += rateEffects(enchantment->mEffects, actor, enemy);
+            }
         }
 
         int skill = item.getClass().getEquipmentSkill(item);
