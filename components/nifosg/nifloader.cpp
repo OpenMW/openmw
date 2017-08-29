@@ -1130,6 +1130,8 @@ namespace NifOsg
                 triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
             }
 
+            geometry->setName(triShape->name);
+
             if (geometry->getDataVariance() == osg::Object::DYNAMIC)
             {
                 // Add a copy, we will alternate between the two copies every other frame using the FrameSwitch
@@ -1219,6 +1221,7 @@ namespace NifOsg
 
             osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
             rig->setSourceGeometry(geometry);
+            rig->setName(triShape->name);
 
             const Nif::NiSkinInstance *skin = triShape->skin.getPtr();
 
