@@ -32,29 +32,29 @@ namespace SceneUtil
 
         virtual void apply(osg::MatrixTransform& node)
         {
-            traverse(node);
+            applyNode(node);
+        }
+        virtual void apply(osg::Geometry& node)
+        {
+            applyNode(node);
         }
         virtual void apply(osg::Node& node)
         {
-            traverse(node);
+            applyNode(node);
         }
         virtual void apply(osg::Group& node)
         {
-            traverse(node);
+            applyNode(node);
         }
 
-        virtual void apply(osg::Geometry& geom)
+        void applyNode(osg::Node& node)
         {
-            std::string lowerName = Misc::StringUtils::lowerCase(geom.getName());
+            std::string lowerName = Misc::StringUtils::lowerCase(node.getName());
             if ((lowerName.size() >= mFilter.size() && lowerName.compare(0, mFilter.size(), mFilter) == 0)
                     || (lowerName.size() >= mFilter2.size() && lowerName.compare(0, mFilter2.size(), mFilter2) == 0))
-            {
-                osg::Node* node = &geom;
-                while (node && node->getNumParents() && !node->getStateSet())
-                    node = node->getParent(0);
-                if (node)
-                    mToCopy.push_back(node);
-            }
+                mToCopy.push_back(&node);
+            else
+                traverse(node);
         }
 
         void doCopy()
