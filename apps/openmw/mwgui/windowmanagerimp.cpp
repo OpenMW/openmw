@@ -518,6 +518,8 @@ namespace MWGui
         cleanupGarbage();
 
         mHud->update();
+
+        updateActivatedQuickKey ();
     }
 
     void WindowManager::updateVisible()
@@ -1526,6 +1528,11 @@ namespace MWGui
     {
         if (mHud)
             mHud->setCrosshairVisible (show && mCrosshairEnabled);
+    }
+
+    void WindowManager::updateActivatedQuickKey ()
+    {
+        mQuickKeysMenu->updateActivatedQuickKey();
     }
 
     void WindowManager::activateQuickKey (int index)

@@ -180,7 +180,7 @@ namespace MWGui
 
     void ReviewDialog::setFatigue(const MWMechanics::DynamicStat<float>& value)
     {
-        int current = std::max(0, static_cast<int>(value.getCurrent()));
+        int current = static_cast<int>(value.getCurrent());
         int modified = static_cast<int>(value.getModified());
 
         mFatigue->setValue(current, modified);
