@@ -906,19 +906,30 @@ namespace MWGui
 
         if (block)
         {
+            osg::Timer frameTimer;
             while (mMessageBoxManager->readPressedButton(false) == -1
                    && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
             {
-                mMessageBoxManager->onFrame(0.f);
-                MWBase::Environment::get().getInputManager()->update(0, true, false);
+                double dt = frameTimer.time_s();
+                frameTimer.setStartTick();
 
+                mMessageBoxManager->onFrame(dt);
+                MWBase::Environment::get().getInputManager()->update(dt, true, false);
+
+                if (!MWBase::Environment::get().getInputManager()->isWindowVisible())
+                    OpenThreads::Thread::microSleep(5000);
+                else
+                {
+                    mViewer->eventTraversal();
+                    mViewer->updateTraversal();
+                    mViewer->renderingTraversals();
+                }
                 // at the time this function is called we are in the middle of a frame,
                 // so out of order calls are necessary to get a correct frameNumber for the next frame.
                 // refer to the advance() and frame() order in Engine::go()
-                mViewer->eventTraversal();
-                mViewer->updateTraversal();
-                mViewer->renderingTraversals();
                 mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
+
+                MWBase::Environment::get().limitFrameRate(frameTimer.time_s());
             }
         }
     }
@@ -1838,18 +1849,28 @@ namespace MWGui
         if (mVideoWidget->hasAudioStream())
             MWBase::Environment::get().getSoundManager()->pauseSounds(
                         MWBase::SoundManager::Play_TypeMask&(~MWBase::SoundManager::Play_TypeMovie));
-
+        osg::Timer frameTimer;
         while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
-            MWBase::Environment::get().getInputManager()->update(0, true, false);
+            double dt = frameTimer.time_s();
+            frameTimer.setStartTick();
 
+            MWBase::Environment::get().getInputManager()->update(dt, true, false);
+
+            if (!MWBase::Environment::get().getInputManager()->isWindowVisible())
+                OpenThreads::Thread::microSleep(5000);
+            else
+            {
+                mViewer->eventTraversal();
+                mViewer->updateTraversal();
+                mViewer->renderingTraversals();
+            }
             // at the time this function is called we are in the middle of a frame,
             // so out of order calls are necessary to get a correct frameNumber for the next frame.
             // refer to the advance() and frame() order in Engine::go()
-            mViewer->eventTraversal();
-            mViewer->updateTraversal();
-            mViewer->renderingTraversals();
             mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
+
+            MWBase::Environment::get().limitFrameRate(frameTimer.time_s());
         }
         mVideoWidget->stop();
 

@@ -33,6 +33,7 @@ namespace MWBase
             InputManager *mInputManager;
             StateManager *mStateManager;
             float mFrameDuration;
+            float mFrameRateLimit;
 
             Environment (const Environment&);
             ///< not implemented
@@ -66,6 +67,10 @@ namespace MWBase
 
             void setFrameDuration (float duration);
             ///< Set length of current frame in seconds.
+
+            void setFrameRateLimit(float frameRateLimit);
+            float getFrameRateLimit() const;
+            void limitFrameRate(double dt) const;
 
             World *getWorld() const;
 
