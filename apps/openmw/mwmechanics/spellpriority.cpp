@@ -25,6 +25,14 @@ namespace
         const MWMechanics::ActiveSpells& activeSpells = actor.getClass().getCreatureStats(actor).getActiveSpells();
         for (MWMechanics::ActiveSpells::TIterator it = activeSpells.begin(); it != activeSpells.end(); ++it)
         {
+            // if the effect filter is not specified, take in account only spells effects. Leave potions, enchanted items etc.
+            if (effectFilter == -1)
+            {
+                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);
+                if (!spell || spell->mData.mType != ESM::Spell::ST_Spell)
+                    continue;
+            }
+
             const MWMechanics::ActiveSpells::ActiveSpellParams& params = it->second;
             for (std::vector<MWMechanics::ActiveSpells::ActiveEffect>::const_iterator effectIt = params.mEffects.begin();
                 effectIt != params.mEffects.end(); ++effectIt)
@@ -45,6 +53,26 @@ namespace
             }
         }
         return toCure;
+    }
+
+    float getSpellDuration (const MWWorld::Ptr& actor, const std::string& spellId)
+    {
+        float duration = 0;
+        const MWMechanics::ActiveSpells& activeSpells = actor.getClass().getCreatureStats(actor).getActiveSpells();
+        for (MWMechanics::ActiveSpells::TIterator it = activeSpells.begin(); it != activeSpells.end(); ++it)
+        {
+            if (it->first != spellId)
+                continue;
+
+            const MWMechanics::ActiveSpells::ActiveSpellParams& params = it->second;
+            for (std::vector<MWMechanics::ActiveSpells::ActiveEffect>::const_iterator effectIt = params.mEffects.begin();
+                effectIt != params.mEffects.end(); ++effectIt)
+            {
+                if (effectIt->mDuration > duration)
+                    duration = effectIt->mDuration;
+            }
+        }
+        return duration;
     }
 }
 
@@ -114,15 +142,39 @@ namespace MWMechanics
 
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(ptr.getClass().getEnchantment(ptr));
 
+        // Spells don't stack, so early out if the spell is still active on the target
+        int types = getRangeTypes(enchantment->mEffects);
+        if ((types & Self) && actor.getClass().getCreatureStats(actor).getActiveSpells().isSpellActive(ptr.getCellRef().getRefId()))
+            return 0.f;
+
+        if (types & (Touch|Target) && getSpellDuration(enemy, ptr.getCellRef().getRefId()) > 3)
+            return 0.f;
+
         if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
         {
             return rateEffects(enchantment->mEffects, actor, enemy);
         }
-        else
+        else if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
         {
-            //if (!ptr.getClass().canBeEquipped(ptr, actor))
-            return 0.f;
+            MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
+
+            // Creatures can not wear armor/clothing, so allow creatures to use non-equipped items, 
+            if (actor.getClass().isNpc() && !store.isEquipped(ptr))
+                return 0.f;
+
+            int castCost = getEffectiveEnchantmentCastCost(static_cast<float>(enchantment->mData.mCost), actor);
+
+            if (ptr.getCellRef().getEnchantmentCharge() != -1
+               && ptr.getCellRef().getEnchantmentCharge() < castCost)
+                return 0.f;
+
+            float rating = rateEffects(enchantment->mEffects, actor, enemy);
+
+            rating *= 2; // prefer rechargable magic items over spells
+            return rating;
         }
+
+        return 0.f;
     }
 
     float rateEffect(const ESM::ENAMstruct &effect, const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
@@ -442,6 +494,15 @@ namespace MWMechanics
 
         default:
             break;
+        }
+
+        // Allow only one summoned creature at time
+        if (isSummoningEffect(effect.mEffectID))
+        {
+            MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
+
+            if (!creatureStats.getSummonedCreatureMap().empty())
+                return 0.f;
         }
 
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);

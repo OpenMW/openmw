@@ -136,7 +136,7 @@ namespace MWGui
             */
                 value.setBase(std::min(100, value.getBase()+1));
             else
-                value.setBase(value.getBase()-1);
+                value.setBase(std::max(0, value.getBase()-1));
         }
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();

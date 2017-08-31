@@ -89,7 +89,7 @@ namespace MWMechanics
             void purgeEffect (short effectId, const std::string& sourceId);
 
             /// Remove all active effects, if roll succeeds (for each effect)
-            void purgeAll (float chance);
+            void purgeAll(float chance, bool spellOnly = false);
 
             /// Remove all effects with CASTER_LINKED flag that were cast by \a casterActorId
             void purge (int casterActorId);

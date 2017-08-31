@@ -26,6 +26,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/ptr.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -433,6 +434,16 @@ namespace MWMechanics
 
         mActors.update(duration, paused);
         mObjects.update(duration, paused);
+    }
+
+    bool MechanicsManager::isRunning(const MWWorld::Ptr& ptr)
+    {
+        return mActors.isRunning(ptr);
+    }
+
+    bool MechanicsManager::isSneaking(const MWWorld::Ptr& ptr)
+    {
+        return mActors.isSneaking(ptr);
     }
 
     void MechanicsManager::rest(bool sleep)
@@ -845,8 +856,17 @@ namespace MWMechanics
         mAI = true;
     }
 
-    bool MechanicsManager::isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim)
+    bool MechanicsManager::isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::ConstPtr& item, MWWorld::Ptr& victim)
     {
+        const MWWorld::CellRef& cellref = item.getCellRef();
+        // there is no harm to use unlocked doors
+        if (item.getClass().isDoor() && cellref.getLockLevel() <= 0 && ptr.getCellRef().getTrap().empty())
+            return true;
+
+        // TODO: implement a better check to check if item is owned bed
+        if (item.getClass().isActivator() && item.getClass().getScript(item).compare(0, 3, "Bed") != 0)
+            return true;
+
         const std::string& owner = cellref.getOwner();
         bool isOwned = !owner.empty() && owner != "player";
 
@@ -888,7 +908,7 @@ namespace MWMechanics
         }
 
         MWWorld::Ptr victim;
-        if (isAllowedToUse(ptr, bed.getCellRef(), victim))
+        if (isAllowedToUse(ptr, bed, victim))
             return false;
 
         if(commitCrime(ptr, victim, OT_SleepingInOwnedBed))
@@ -903,7 +923,7 @@ namespace MWMechanics
     void MechanicsManager::objectOpened(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item)
     {
         MWWorld::Ptr victim;
-        if (isAllowedToUse(ptr, item.getCellRef(), victim))
+        if (isAllowedToUse(ptr, item, victim))
             return;
         commitCrime(ptr, victim, OT_Trespassing);
     }
@@ -931,6 +951,43 @@ namespace MWMechanics
         const OwnerMap& owners = it->second;
         OwnerMap::const_iterator ownerFound = owners.find(std::make_pair(Misc::StringUtils::lowerCase(ownerid), false));
         return ownerFound != owners.end();
+    }
+
+    void MechanicsManager::confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count)
+    {
+        if (player != getPlayer())
+            return;
+
+        const std::string itemId = Misc::StringUtils::lowerCase(item.getCellRef().getRefId());
+
+        StolenItemsMap::iterator stolenIt = mStolenItems.find(itemId);
+        if (stolenIt == mStolenItems.end())
+            return;
+
+        Owner owner;
+        owner.first = victim.getCellRef().getRefId();
+        owner.second = false;
+
+        Misc::StringUtils::lowerCaseInPlace(owner.first);
+
+        // decrease count of stolen items
+        int toRemove = std::min(count, mStolenItems[itemId][owner]);
+        mStolenItems[itemId][owner] -= toRemove;
+        if (mStolenItems[itemId][owner] == 0)
+        {
+            // erase owner from stolen items owners
+            OwnerMap& owners = stolenIt->second;
+            OwnerMap::iterator ownersIt = owners.find(owner);
+            if (ownersIt != owners.end())
+                owners.erase(ownersIt);
+        }
+
+        MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
+
+        // move items from player to owner and report about theft
+        victim.getClass().getContainerStore(victim).add(item, toRemove, victim);
+        store.remove(item, toRemove, player);
+        commitCrime(player, victim, OT_Theft, item.getClass().getValue(item) * toRemove);
     }
 
     void MechanicsManager::confiscateStolenItems(const MWWorld::Ptr &player, const MWWorld::Ptr &targetContainer)
@@ -986,7 +1043,7 @@ namespace MWMechanics
             }
         }
 
-        if (isAllowedToUse(ptr, *ownerCellRef, victim))
+        if (isAllowedToUse(ptr, item, victim))
             return;
 
         Owner owner;
@@ -1066,11 +1123,6 @@ namespace MWMechanics
                 /*
                     End of tes3mp addition
                 */
-
-                if (type == OT_Theft || type == OT_Pickpocket)
-                    MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
-                else if (type == OT_Trespassing)
-                    MWBase::Environment::get().getDialogueManager()->say(*it, "intruder");
 
                 crimeSeen = true;
             }
@@ -1173,10 +1225,25 @@ namespace MWMechanics
             if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
                 continue;
 
+            // Player's followers should not attack player, or try to arrest him
+            if (it->getClass().getCreatureStats(*it).getAiSequence().hasPackage(AiPackage::TypeIdFollow))
+            {
+                std::set<MWWorld::Ptr> playerFollowers;
+                getActorsSidingWith(player, playerFollowers);
+
+                if (playerFollowers.find(*it) != playerFollowers.end())
+                    continue;
+            }
+
             // Will the witness report the crime?
             if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= 100)
             {
                 reported = true;
+
+                if (type == OT_Theft || type == OT_Pickpocket)
+                    MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
+                else if (type == OT_Trespassing)
+                    MWBase::Environment::get().getDialogueManager()->say(*it, "intruder");
             }
 
             if (it->getClass().isClass(*it, "guard"))
@@ -1189,7 +1256,9 @@ namespace MWMechanics
                 it->getClass().getNpcStats(*it).setCrimeId(id);
 
                 if (!it->getClass().getCreatureStats(*it).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                {
                     it->getClass().getCreatureStats(*it).getAiSequence().stack(AiPursue(player), *it);
+                }
             }
             else
             {
@@ -1577,6 +1646,11 @@ namespace MWMechanics
     bool MechanicsManager::isReadyToBlock(const MWWorld::Ptr &ptr) const
     {
         return mActors.isReadyToBlock(ptr);
+    }
+
+    bool MechanicsManager::isAttackingOrSpell(const MWWorld::Ptr &ptr) const
+    {
+        return mActors.isAttackingOrSpell(ptr);
     }
 
     void MechanicsManager::setWerewolf(const MWWorld::Ptr& actor, bool werewolf)

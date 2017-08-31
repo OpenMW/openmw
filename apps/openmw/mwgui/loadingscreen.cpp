@@ -102,6 +102,15 @@ namespace MWGui
         mBackgroundImage->setVisible(visible);
     }
 
+    double LoadingScreen::getTargetFrameRate() const
+    {
+        double frameRateLimit = MWBase::Environment::get().getFrameRateLimit();
+        if (frameRateLimit > 0)
+            return std::min(frameRateLimit, mTargetFrameRate);
+        else
+            return mTargetFrameRate;
+    }
+
     class CopyFramebufferToTextureCallback : public osg::Camera::DrawCallback
     {
     public:
@@ -141,7 +150,7 @@ namespace MWGui
         if (mViewer->getIncrementalCompileOperation())
         {
             mViewer->getIncrementalCompileOperation()->setMaximumNumOfObjectsToCompilePerFrame(100);
-            mViewer->getIncrementalCompileOperation()->setTargetFrameRate(mTargetFrameRate);
+            mViewer->getIncrementalCompileOperation()->setTargetFrameRate(getTargetFrameRate());
         }
 
         // Assign dummy bounding sphere callback to avoid the bounding sphere of the entire scene being recomputed after each frame of loading
@@ -210,7 +219,7 @@ namespace MWGui
     void LoadingScreen::setProgress (size_t value)
     {
         // skip expensive update if there isn't enough visible progress
-        if (value - mProgress < mProgressBar->getScrollRange()/200.f)
+        if (mProgressBar->getWidth() <= 0 || value - mProgress < mProgressBar->getScrollRange()/mProgressBar->getWidth())
             return;
         value = std::min(value, mProgressBar->getScrollRange()-1);
         mProgress = value;
@@ -231,7 +240,7 @@ namespace MWGui
 
     bool LoadingScreen::needToDrawLoadingScreen()
     {
-        if ( mTimer.time_m() <= mLastRenderTime + (1.0/mTargetFrameRate) * 1000.0)
+        if ( mTimer.time_m() <= mLastRenderTime + (1.0/getTargetFrameRate()) * 1000.0)
             return false;
 
         // the minimal delay before a loading screen shows

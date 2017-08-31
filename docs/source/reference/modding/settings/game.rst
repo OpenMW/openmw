@@ -65,6 +65,22 @@ the type of attack is determined by the direction that the character is moving a
 The default value is false.
 This setting can be toggled with the Always Use Best Attack button in the Prefs panel of the Options menu.
 
+can loot during death animation
+-------------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+If this setting is true, the player is allowed to loot actors (e.g. summoned creatures) during death animation, if they are not in combat.
+However disposing corpses during death animation is not recommended - death counter may not be incremented, and this behaviour can break quests.
+This is how original Morrowind behaves.
+
+If this setting is false, player has to wait until end of death animation in all cases.
+This case is more safe, but makes using of summoned creatures exploit (looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder.
+
+The default value is true. This setting can only be configured by editing the settings configuration file.
+
 difficulty
 ----------
 

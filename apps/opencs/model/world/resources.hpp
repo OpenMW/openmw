@@ -27,6 +27,8 @@ namespace CSMWorld
             Resources (const VFS::Manager* vfs, const std::string& baseDirectory, UniversalId::Type type,
                 const char * const *extensions = 0);
 
+            void recreate(const VFS::Manager* vfs, const char * const *extensions = 0);
+
             int getSize() const;
 
             std::string getId (int index) const;

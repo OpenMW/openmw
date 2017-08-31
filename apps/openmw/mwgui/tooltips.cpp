@@ -359,12 +359,11 @@ namespace MWGui
     {
         if(!mFocusObject.isEmpty())
         {
-            const MWWorld::CellRef& cellref = mFocusObject.getCellRef();
             MWWorld::Ptr ptr = MWMechanics::getPlayer();
             MWWorld::Ptr victim;
             
             MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
-            bool allowed = mm->isAllowedToUse(ptr, cellref, victim); 
+            bool allowed = mm->isAllowedToUse(ptr, mFocusObject, victim); 
 
             return !allowed;
         }
@@ -378,17 +377,10 @@ namespace MWGui
     {
         mDynamicToolTipBox->setVisible(true);
         
-        if(mShowOwned == 1 || mShowOwned == 3)
-        {
-            if(isFocusObject && checkOwned())
-            {
-                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp_Owned");
-            }
-            else
-            {
-                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp");
-            }
-        }
+        if((mShowOwned == 1 || mShowOwned == 3) && isFocusObject && checkOwned())
+            mDynamicToolTipBox->changeWidgetSkin(MWBase::Environment::get().getWindowManager()->isGuiMode() ? "HUD_Box_NoTransp_Owned" : "HUD_Box_Owned");
+        else
+            mDynamicToolTipBox->changeWidgetSkin(MWBase::Environment::get().getWindowManager()->isGuiMode() ? "HUD_Box_NoTransp" : "HUD_Box");
 
         std::string caption = info.caption;
         std::string image = info.icon;

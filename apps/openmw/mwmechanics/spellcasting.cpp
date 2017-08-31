@@ -137,6 +137,11 @@ namespace MWMechanics
 
         CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
+        float castBonus = -stats.getMagicEffects().get(ESM::MagicEffect::Sound).getMagnitude();
+
+        float castChance = calcSpellBaseSuccessChance(spell, actor, effectiveSchool) + castBonus;
+        castChance *= stats.getFatigueTerm();
+
         if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude()&& !godmode)
             return 0;
 
@@ -153,11 +158,6 @@ namespace MWMechanics
         {
             return 100;
         }
-
-        float castBonus = -stats.getMagicEffects().get(ESM::MagicEffect::Sound).getMagnitude();
-
-        float castChance = calcSpellBaseSuccessChance(spell, actor, effectiveSchool) + castBonus;
-        castChance *= stats.getFatigueTerm();
 
         if (!cap)
             return std::max(0.f, castChance);
@@ -715,7 +715,7 @@ namespace MWMechanics
         }
         else if (target.getClass().isActor() && effectId == ESM::MagicEffect::Dispel)
         {
-            target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude);
+            target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude, true);
             return true;
         }
         else if (target.getClass().isActor() && target == getPlayer())

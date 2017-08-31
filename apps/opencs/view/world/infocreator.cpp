@@ -32,13 +32,19 @@ std::string CSVWorld::InfoCreator::getId() const
 
 void CSVWorld::InfoCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const
 {
-    int index =
-        dynamic_cast<CSMWorld::IdTable&> (*getData().getTableModel (getCollectionId())).
-        findColumnIndex (
-        getCollectionId().getType()==CSMWorld::UniversalId::Type_TopicInfos ?
-        CSMWorld::Columns::ColumnId_Topic : CSMWorld::Columns::ColumnId_Journal);
+    CSMWorld::IdTable& table = dynamic_cast<CSMWorld::IdTable&> (*getData().getTableModel (getCollectionId()));
 
-    command.addValue (index, mTopic->text());
+    if (getCollectionId() == CSMWorld::UniversalId::Type_TopicInfos)
+    {
+        command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Topic), mTopic->text());
+        command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Rank), -1);
+        command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Gender), -1);
+        command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_PcRank), -1);
+    }
+    else
+    {
+        command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Journal), mTopic->text());
+    }
 }
 
 CSVWorld::InfoCreator::InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,

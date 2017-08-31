@@ -472,6 +472,9 @@ CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc
     connect (cells, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (cellAdded (const QModelIndex&, int, int)));
 
+    connect (&document.getData(), SIGNAL (assetTablesChanged ()),
+        this, SLOT (assetTablesChanged ()));
+
     // Shortcuts
     CSMPrefs::Shortcut* loadCameraCellShortcut = new CSMPrefs::Shortcut("scene-load-cam-cell", this);
     connect(loadCameraCellShortcut, SIGNAL(activated()), this, SLOT(loadCameraCell()));
@@ -520,7 +523,7 @@ void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
                 // Loop through all the coordinates to add them to selection
                 while (stream >> ignore1 >> ignore2 >> x >> y)
                     selection.add (CSMWorld::CellCoordinates (x, y));
-                               
+
                 // Mark that camera needs setup
                 mCamPositionSet=false;
             }
@@ -761,6 +764,15 @@ void CSVRender::PagedWorldspaceWidget::cellAdded (const QModelIndex& index, int 
     /// \todo check if no selected cell is affected and do not update, if that is the case
     if (adjustCells())
         flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::assetTablesChanged()
+{
+    std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.begin();
+    for ( ; iter != mCells.end(); ++iter)
+    {
+        iter->second->reloadAssets();
+    }
 }
 
 void CSVRender::PagedWorldspaceWidget::loadCameraCell()

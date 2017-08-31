@@ -108,6 +108,8 @@ namespace CSVRender
 
             void cellRowsAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
+            void assetTablesChanged ();
+
         signals:
 
             void cellChanged(const CSMWorld::UniversalId& id);

@@ -60,10 +60,11 @@ Programmers
     Gašper Sedej
     gugus/gus
     Hallfaer Tuilinn
+    Haoda Wang (h313)
     hristoast
     Internecine
-    Jacob Essex (Yacoby)
-    Jannik Heller (scrawl)
+    Jacob Essex (Yacoby)    
+    Jake Westrip (16bitint)
     Jason Hooks (jhooks)
     jeaye
     Jeffrey Haines (Jyby)
@@ -132,12 +133,14 @@ Programmers
     Roman Proskuryakov (kpp)
     Sandy Carter (bwrsandman)
     Scott Howard
+    scrawl
     Sebastian Wick (swick)
     Sergey Shambir
     ShadowRadiance
     Siimacore
     sir_herrbatka
     smbas
+    spycrab
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)
     stil-t

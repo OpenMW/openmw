@@ -832,7 +832,7 @@ namespace MWMechanics
             creatureStats.getActiveSpells().visitEffectSources(updateSummonedCreatures);
             if (ptr.getClass().hasInventoryStore(ptr))
                 ptr.getClass().getInventoryStore(ptr).visitEffectSources(updateSummonedCreatures);
-            updateSummonedCreatures.process();
+            updateSummonedCreatures.process(mTimerDisposeSummonsCorpses == 0.f);
         }
     }
 
@@ -849,6 +849,26 @@ namespace MWMechanics
                              effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).getMagnitude() -
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).getMagnitude()));
         }
+    }
+
+    bool Actors::isRunning(const MWWorld::Ptr& ptr)
+    {
+        PtrActorMap::iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+        CharacterController* ctrl = it->second->getCharacterController();
+
+        return ctrl->isRunning();
+    }
+
+    bool Actors::isSneaking(const MWWorld::Ptr& ptr)
+    {
+        PtrActorMap::iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+        CharacterController* ctrl = it->second->getCharacterController();
+
+        return ctrl->isSneaking();
     }
 
     void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
@@ -1080,7 +1100,9 @@ namespace MWMechanics
         }
     }
 
-    Actors::Actors() {}
+    Actors::Actors() {
+        mTimerDisposeSummonsCorpses = 0.2f; // We should add a delay between summoned creature death and its corpse despawning
+    }
 
     Actors::~Actors()
     {
@@ -1149,6 +1171,7 @@ namespace MWMechanics
             // target lists get updated once every 1.0 sec
             if (timerUpdateAITargets >= 1.0f) timerUpdateAITargets = 0;
             if (timerUpdateHeadTrack >= 0.3f) timerUpdateHeadTrack = 0;
+            if (mTimerDisposeSummonsCorpses >= 0.2f) mTimerDisposeSummonsCorpses = 0;
             if (timerUpdateEquippedLight >= updateEquippedLightInterval) timerUpdateEquippedLight = 0;
 
             MWWorld::Ptr player = getPlayer();
@@ -1318,6 +1341,7 @@ namespace MWMechanics
             timerUpdateAITargets += duration;
             timerUpdateHeadTrack += duration;
             timerUpdateEquippedLight += duration;
+            mTimerDisposeSummonsCorpses += duration;
 
             // Looping magic VFX update
             // Note: we need to do this before any of the animations are updated.
@@ -1953,6 +1977,16 @@ namespace MWMechanics
             return false;
 
         return it->second->getCharacterController()->isReadyToBlock();
+    }
+
+    bool Actors::isAttackingOrSpell(const MWWorld::Ptr& ptr) const
+    {
+        PtrActorMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+        CharacterController* ctrl = it->second->getCharacterController();
+
+        return ctrl->isAttackingOrSpell();
     }
 
     void Actors::fastForwardAi()

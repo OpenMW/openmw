@@ -154,3 +154,13 @@ int CSMWorld::ResourceTable::getColumnId (int column) const
 
     return -1;
 }
+
+void CSMWorld::ResourceTable::beginReset()
+{
+    beginResetModel();
+}
+
+void CSMWorld::ResourceTable::endReset()
+{
+    endResetModel();
+}

@@ -1768,7 +1768,7 @@ void CharacterController::update(float duration)
                     mSecondsOfSwimming -= 1;
                 }
             }
-            else if(isrunning)
+            else if(isrunning && !sneak)
             {
                 mSecondsOfRunning += duration;
                 while(mSecondsOfRunning > 1)
@@ -1806,7 +1806,7 @@ void CharacterController::update(float duration)
                     else
                         fatigueLoss = fFatigueSwimRunBase + encumbrance * fFatigueSwimRunMult;
                 }
-                if (isrunning)
+                else if (isrunning)
                     fatigueLoss = fFatigueRunBase + encumbrance * fFatigueRunMult;
             }
         }
@@ -2367,6 +2367,12 @@ bool CharacterController::isKnockedOut() const
     return mHitState == CharState_KnockOut;
 }
 
+bool CharacterController::isAttackingOrSpell() const
+{
+    return mUpperBodyState != UpperCharState_Nothing &&
+            mUpperBodyState != UpperCharState_WeapEquiped;
+}
+
 bool CharacterController::isSneaking() const
 {
     return mIdleState == CharState_IdleSneak ||
@@ -2374,6 +2380,18 @@ bool CharacterController::isSneaking() const
             mMovementState == CharState_SneakBack ||
             mMovementState == CharState_SneakLeft ||
             mMovementState == CharState_SneakRight;
+}
+
+bool CharacterController::isRunning() const
+{
+    return mMovementState == CharState_RunForward ||
+            mMovementState == CharState_RunBack ||
+            mMovementState == CharState_RunLeft ||
+            mMovementState == CharState_RunRight ||
+            mMovementState == CharState_SwimRunForward ||
+            mMovementState == CharState_SwimRunBack ||
+            mMovementState == CharState_SwimRunLeft ||
+            mMovementState == CharState_SwimRunRight;
 }
 
 void CharacterController::setAttackingOrSpell(bool attackingOrSpell)

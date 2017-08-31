@@ -48,7 +48,7 @@ Once the addon has been created you will be presented with a table. If you see
 a blank window rather than a table choose *World* → *Objects* from the menu.
 
 .. figure:: _static/images/chapter-1/objects.png
-   :alt: The table showing all objet records in the game.
+   :alt: The table showing all object records in the game.
 
 Let's talk about the interface for a second. Every window in OpenMW CS has
 *panels*, these are often but not always tables. You can close a panel by
@@ -139,7 +139,7 @@ the first character. Type the following into the field:
 
 A filter is defined by a number of *queries* which can be logically linked. For
 now all that matters is that the `string(<property>, <pattern>)` query will check
-whether `<propery>` matches `<pattern>`. The pattern is a regular expression,
+whether `<property>` matches `<pattern>`. The pattern is a regular expression,
 if you don't know about them you should learn their syntax. For now all that
 matters is that `.` stands for any character and `*` stands for any amount,
 even zero. In other words, we are looking for all entries which have an ID that

@@ -251,7 +251,10 @@ namespace MWGui
     virtual void setSpellVisibility(bool visible);
     virtual void setSneakVisibility(bool visible);
 
-    virtual void activateQuickKey  (int index);
+    /// activate selected quick key
+    virtual void activateQuickKey (int index);
+    /// update activated quick key state (if action executing was delayed for some reason)
+    virtual void updateActivatedQuickKey ();
 
     virtual std::string getSelectedSpell() { return mSelectedSpell; }
     virtual void setSelectedSpell(const std::string& spellId, int successChancePercent);

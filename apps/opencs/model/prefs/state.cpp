@@ -259,6 +259,7 @@ void CSMPrefs::State::declare()
     declareShortcut ("document-character-topicinfos", "Open Topic Info List", QKeySequence());
     declareShortcut ("document-character-journalinfos", "Open Journal Info List", QKeySequence());
     declareShortcut ("document-character-bodyparts", "Open Body Part List", QKeySequence());
+    declareShortcut ("document-assets-reload", "Reload Assets", QKeySequence(Qt::Key_F5));
     declareShortcut ("document-assets-sounds", "Open Sound Asset List", QKeySequence());
     declareShortcut ("document-assets-soundgens", "Open Sound Generator List", QKeySequence());
     declareShortcut ("document-assets-meshes", "Open Mesh Asset List", QKeySequence());

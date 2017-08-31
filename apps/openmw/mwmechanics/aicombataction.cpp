@@ -71,6 +71,8 @@ namespace MWMechanics
     {
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(mItem->getClass().getEnchantment(*mItem));
         int types = getRangeTypes(enchantment->mEffects);
+
+        isRanged = (types & RangeTypes::Target) | (types & RangeTypes::Self);
         return suggestCombatRange(types);
     }
 

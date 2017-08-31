@@ -231,4 +231,30 @@ namespace Terrain
         return buffer;
     }
 
+    void BufferCache::clearCache()
+    {
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mIndexBufferMutex);
+            mIndexBufferMap.clear();
+        }
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mUvBufferMutex);
+            mUvBufferMap.clear();
+        }
+    }
+
+    void BufferCache::releaseGLObjects(osg::State *state)
+    {
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mIndexBufferMutex);
+            for (auto indexbuffer : mIndexBufferMap)
+                indexbuffer.second->releaseGLObjects(state);
+        }
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mUvBufferMutex);
+            for (auto uvbuffer : mUvBufferMap)
+                uvbuffer.second->releaseGLObjects(state);
+        }
+    }
+
 }

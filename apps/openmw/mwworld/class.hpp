@@ -301,11 +301,19 @@ namespace MWWorld
 
             virtual Ptr copyToCell(const ConstPtr &ptr, CellStore &cell, const ESM::Position &pos, int count) const;
 
+            virtual bool isActivator() const {
+                return false;
+            }
+
             virtual bool isActor() const {
                 return false;
             }
 
             virtual bool isNpc() const {
+                return false;
+            }
+
+            virtual bool isDoor() const {
                 return false;
             }
 
