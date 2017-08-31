@@ -26,6 +26,7 @@ namespace Shader
         , mMaterialOverridden(false)
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
+        , mNode(NULL)
     {
     }
 
@@ -69,7 +70,7 @@ namespace Shader
     {
         if (node.getStateSet())
         {
-            pushRequirements();
+            pushRequirements(node);
             applyStateSet(node.getStateSet(), node);
             traverse(node);
             popRequirements();
@@ -234,9 +235,10 @@ namespace Shader
         }
     }
 
-    void ShaderVisitor::pushRequirements()
+    void ShaderVisitor::pushRequirements(osg::Node& node)
     {
         mRequirements.push_back(mRequirements.back());
+        mRequirements.back().mNode = &node;
     }
 
     void ShaderVisitor::popRequirements()
@@ -244,8 +246,9 @@ namespace Shader
         mRequirements.pop_back();
     }
 
-    void ShaderVisitor::createProgram(const ShaderRequirements &reqs, osg::Node& node)
+    void ShaderVisitor::createProgram(const ShaderRequirements &reqs)
     {
+        osg::Node& node = *reqs.mNode;
         osg::StateSet* writableStateSet = NULL;
         if (mAllowedToModifyStateSets)
             writableStateSet = node.getOrCreateStateSet();
@@ -305,9 +308,9 @@ namespace Shader
     void ShaderVisitor::apply(osg::Geometry& geometry)
     {
         bool needPop = (geometry.getStateSet() != NULL);
-        if (geometry.getStateSet())
+        if (geometry.getStateSet()) // TODO: check if stateset affects shader permutation before pushing it
         {
-            pushRequirements();
+            pushRequirements(geometry);
             applyStateSet(geometry.getStateSet(), geometry);
         }
 
@@ -350,9 +353,8 @@ namespace Shader
                     rig->setSourceGeometry(sourceGeometry);
             }
 
-            // TODO: find a better place for the stateset
             if (useShader)
-                createProgram(reqs, geometry);
+                createProgram(reqs);
         }
 
         if (needPop)
@@ -366,16 +368,15 @@ namespace Shader
 
         if (drawable.getStateSet())
         {
-            pushRequirements();
+            pushRequirements(drawable);
             applyStateSet(drawable.getStateSet(), drawable);
         }
 
         if (!mRequirements.empty())
         {
             const ShaderRequirements& reqs = mRequirements.back();
-            // TODO: find a better place for the stateset
             if (reqs.mShaderRequired || mForceShaders)
-                createProgram(reqs, drawable);
+                createProgram(reqs);
         }
 
         if (needPop)
