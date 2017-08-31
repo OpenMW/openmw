@@ -113,6 +113,16 @@
                         <Property key="Caption" value="#{sCursorOff}"/>
                     </Widget>
                 </Widget>
+                <Widget type="HBox" skin="" position="4 320 260 24">
+                    <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
+                        <UserString key="SettingCategory" value="Input"/>
+                        <UserString key="SettingName" value="third person over shoulder"/>
+                        <UserString key="SettingType" value="CheckButton"/>
+                    </Widget>
+                    <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 80 40" align="Left Top">
+                        <Property key="Caption" value="Over The Shoulder Camera"/>
+                    </Widget>
+                </Widget>
             </Widget>
             <Widget type="TabItem" skin="" position="4 32 360 308">
                 <Property key="Caption" value="  #{sAudio}  "/>

@@ -18,11 +18,22 @@ namespace osg
 
 namespace MWRender
 {
+
+    enum CameraView {
+        CameraView_FirstPerson,
+        CameraView_ThirdPersonCenter,
+        CameraView_ThirdPersonOverShoulder,
+        CameraView_NumCameraViews
+    };
     class NpcAnimation;
 
     /// \brief Camera control
     class Camera
     {
+        // The reset camera distances for the various views
+        static const float sResetThirdPersonCameraDistance;
+        static const float sResetThirdPersonOverShoulderCameraDistance;
+
         struct CamData {
             float pitch, yaw, offset;
         };
@@ -35,7 +46,8 @@ namespace MWRender
 
         NpcAnimation *mAnimation;
 
-        bool mFirstPersonView;
+        CameraView mCameraView;
+        CameraView mActiveThirdPersonView;
         bool mPreviewMode;
         bool mFreeLook;
         float mNearest;
@@ -47,13 +59,17 @@ namespace MWRender
         } mVanity;
 
         float mHeight, mMaxCameraDistance;
+
         CamData mMainCam, mPreviewCam;
 
         bool mVanityToggleQueued;
         bool mVanityToggleQueuedValue;
         bool mViewModeToggleQueued;
 
+        /// FIXME: Make this into a 3d vector?
         float mCameraDistance;
+        float mCameraXOffsetFromCenter;
+        float mCameraZOffsetFromCenter;
 
         osg::ref_ptr<osg::NodeCallback> mUpdateCallback;
 
@@ -84,6 +100,7 @@ namespace MWRender
 
         /// @param Force view mode switch, even if currently not allowed by the animation.
         void toggleViewMode(bool force=false);
+        void cycleViewMode(bool force = false);
 
         bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
@@ -95,7 +112,7 @@ namespace MWRender
         void setSneakOffset(float offset);
 
         bool isFirstPerson() const
-        { return !(mVanity.enabled || mPreviewMode || !mFirstPersonView); }
+        { return !(mVanity.enabled || mPreviewMode || (mCameraView != CameraView_FirstPerson)); }
 
         void processViewChange();
 

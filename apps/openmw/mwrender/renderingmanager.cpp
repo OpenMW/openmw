@@ -1014,7 +1014,7 @@ namespace MWRender
 
     void RenderingManager::togglePOV()
     {
-        mCamera->toggleViewMode();
+        mCamera->cycleViewMode();
     }
 
     void RenderingManager::togglePreviewMode(bool enable)
