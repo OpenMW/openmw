@@ -666,17 +666,27 @@ void LocalPlayer::addJournalItems()
 {
     for (const auto &journalItem : journalChanges.journalItems)
     {
+        MWWorld::Ptr ptrFound;
+
         if (journalItem.type == JournalItem::ENTRY)
         {
-            MWWorld::Ptr ptrFound = MWBase::Environment::get().getWorld()->searchPtr(journalItem.actorRefId, false);
+            ptrFound = MWBase::Environment::get().getWorld()->searchPtr(journalItem.actorRefId, false);
 
             if (!ptrFound)
                 ptrFound = getPlayerPtr();
-
-            MWBase::Environment::get().getJournal()->addEntry(journalItem.quest, journalItem.index, ptrFound);
         }
-        else
-            MWBase::Environment::get().getJournal()->setJournalIndex(journalItem.quest, journalItem.index);
+
+        try
+        {
+            if (journalItem.type == JournalItem::ENTRY)
+                MWBase::Environment::get().getJournal()->addEntry(journalItem.quest, journalItem.index, ptrFound);
+            else
+                MWBase::Environment::get().getJournal()->setJournalIndex(journalItem.quest, journalItem.index);
+        }
+        catch (std::exception&)
+        {
+            LOG_APPEND(Log::LOG_INFO, "- Ignored addition of invalid journal quest %s", journalItem.quest.c_str());
+        }
     }
 }
 
