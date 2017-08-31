@@ -80,7 +80,7 @@ namespace mwmp
         {
             if (write)
             {
-                RakNet::RakString rstr(str.c_str());
+                RakNet::RakString rstr("%s", str.c_str());
                 if (compress)
                     rstr.SerializeCompressed(bs);
                 else

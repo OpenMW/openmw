@@ -123,7 +123,7 @@ namespace mwmp
         else
         {
             mHistory->addText(color + msg);
-            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, msg.c_str());
+            LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "%s", msg.c_str());
         }
     }
 
