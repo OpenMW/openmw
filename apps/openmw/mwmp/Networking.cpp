@@ -328,7 +328,7 @@ void Networking::preInit(std::vector<std::string> &content, Files::Collections &
         if (col.doesExist(*it))
         {
             PacketPreInit::HashList hashList;
-            unsigned crc32 = Utils::crc32checksum(col.getPath(*it).string());
+            unsigned crc32 = Utils::crc32Checksum(col.getPath(*it).string());
             hashList.push_back(crc32);
             checksums.push_back(make_pair(*it, hashList));
 

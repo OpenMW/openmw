@@ -526,6 +526,10 @@ namespace MWWorld
     */
     Ptr CellStore::searchExact (unsigned int refNumIndex, unsigned int mpNum)
     {
+        // Ensure that all objects searched for have a valid reference number
+        if (refNumIndex == 0 && mpNum == 0)
+            return 0;
+
         SearchExactVisitor<MWWorld::Ptr> searchVisitor;
         searchVisitor.mRefNumIndexToFind = refNumIndex;
         searchVisitor.mMpNumToFind = mpNum;
