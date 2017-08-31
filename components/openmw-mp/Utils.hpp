@@ -22,19 +22,19 @@ namespace Utils
 
     void timestamp();
 
-    int progress_func(double TotalToDownload, double NowDownloaded);
+    int progressFunc(double TotalToDownload, double NowDownloaded);
 
-    bool DoubleCompare(double a, double b, double epsilon);
+    bool compareDoubles(double a, double b, double epsilon);
 
-    std::string str_replace(const std::string &source, const char *find, const char *replace);
+    std::string replaceString(const std::string &source, const char *find, const char *replace);
 
     std::string toString(int num);
 
-    std::string &RemoveExtension(std::string &file);
+    std::string &removeExtension(std::string &file);
 
-    long int FileLength(const char *file);
+    long int getFileLength(const char *file);
 
-    unsigned int crc32checksum(const std::string &file);
+    unsigned int crc32Checksum(const std::string &file);
 
 
     void printWithWidth(std::ostringstream &sstr, std::string str, size_t width);

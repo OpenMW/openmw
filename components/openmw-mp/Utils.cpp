@@ -54,7 +54,7 @@ void Utils::timestamp()
 }
 
 // http://stackoverflow.com/questions/1637587/c-libcurl-console-progress-bar
-int Utils::progress_func(double TotalToDownload, double NowDownloaded)
+int Utils::progressFunc(double TotalToDownload, double NowDownloaded)
 {
     // how wide you want the progress meter to be
     int totaldotz=40;
@@ -79,7 +79,7 @@ int Utils::progress_func(double TotalToDownload, double NowDownloaded)
     return 1;
 }
 
-bool Utils::DoubleCompare(double a, double b, double epsilon)
+bool Utils::compareDoubles(double a, double b, double epsilon)
 {
     return fabs(a - b) < epsilon;
 }
@@ -91,7 +91,7 @@ std::string Utils::toString(int num)
     return stream.str();
 }
 
-string Utils::str_replace(const string& source, const char* find, const char* replace)
+string Utils::replaceString(const string& source, const char* find, const char* replace)
 {
     unsigned int find_len = strlen(find);
     unsigned int replace_len = strlen(replace);
@@ -108,7 +108,7 @@ string Utils::str_replace(const string& source, const char* find, const char* re
     return dest;
 }
 
-string& Utils::RemoveExtension(string& file)
+string& Utils::removeExtension(string& file)
 {
     size_t pos = file.find_last_of('.');
 
@@ -118,7 +118,7 @@ string& Utils::RemoveExtension(string& file)
     return file;
 }
 
-long int Utils::FileLength(const char* file)
+long int Utils::getFileLength(const char* file)
 {
     FILE* _file = fopen(file, "rb");
 
@@ -132,7 +132,7 @@ long int Utils::FileLength(const char* file)
     return size;
 }
 
-unsigned int ::Utils::crc32checksum(const std::string &file)
+unsigned int ::Utils::crc32Checksum(const std::string &file)
 {
     boost::crc_32_type  crc32;
     boost::filesystem::ifstream  ifs(file, std::ios_base::binary);
