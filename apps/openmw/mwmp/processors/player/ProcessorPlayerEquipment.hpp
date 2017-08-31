@@ -22,6 +22,8 @@ namespace mwmp
         {
             if (isLocal())
             {
+                LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Received ID_PLAYER_EQUIPMENT about LocalPlayer from server");
+
                 if (isRequest())
                     static_cast<LocalPlayer*>(player)->updateEquipment(true);
                 else

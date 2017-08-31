@@ -636,9 +636,16 @@ void LocalPlayer::addItems()
 
     for (const auto &item : inventoryChanges.items)
     {
-        MWWorld::Ptr itemPtr = *ptrStore.add(item.refId, item.count, ptrPlayer);
-        if (item.charge != -1)
-            itemPtr.getCellRef().setCharge(item.charge);
+        try
+        {
+            MWWorld::Ptr itemPtr = *ptrStore.add(item.refId, item.count, ptrPlayer);
+            if (item.charge != -1)
+                itemPtr.getCellRef().setCharge(item.charge);
+        }
+        catch (std::exception&)
+        {
+            LOG_APPEND(Log::LOG_INFO, "- Ignored addition of invalid inventory item %s", item.refId.c_str());
+        }
     }
 }
 
@@ -651,6 +658,8 @@ void LocalPlayer::addSpells()
         // Only add spells that are ensured to exist
         if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spell.mId))
             ptrSpells.add(spell.mId);
+        else
+            LOG_APPEND(Log::LOG_INFO, "- Ignored addition of invalid spell %s", spell.mId.c_str());
 }
 
 void LocalPlayer::addJournalItems()
@@ -891,11 +900,19 @@ void LocalPlayer::setEquipment()
                 return Misc::StringUtils::ciEqual(a.getCellRef().getRefId(), currentItem.refId);
             });
 
-            if (it == ptrInventory.end()) // if not exists add item
+            if (it == ptrInventory.end()) // If the item is not in our inventory, add it
             {
                 auto equipped = equipedItems[slot];
-                auto addIter = ptrInventory.ContainerStore::add(equipped.refId.c_str(), equipped.count, ptrPlayer);
-                ptrInventory.equip(slot, addIter, ptrPlayer);
+
+                try
+                {
+                    auto addIter = ptrInventory.ContainerStore::add(equipped.refId.c_str(), equipped.count, ptrPlayer);
+                    ptrInventory.equip(slot, addIter, ptrPlayer);
+                }
+                catch (std::exception&)
+                {
+                    LOG_APPEND(Log::LOG_INFO, "- Ignored addition of invalid equipment item %s", equipped.refId.c_str());
+                }
             }
             else
                 ptrInventory.equip(slot, it, ptrPlayer);
