@@ -397,6 +397,18 @@ namespace MWGui
         if (mNameDialog)
         {
             mPlayerName = mNameDialog->getTextInput();
+
+            /*
+                Start of tes3mp change (major)
+
+                Ensure names are not longer than the original game's 31 character maximum
+            */
+            if (mPlayerName.length() > 31)
+                mPlayerName = mPlayerName.substr(0, 31);
+            /*
+                End of tes3mp change (major)
+            */
+
             MWBase::Environment::get().getWindowManager()->setValue("name", mPlayerName);
             MWBase::Environment::get().getMechanicsManager()->setPlayerName(mPlayerName);
             MWBase::Environment::get().getWindowManager()->removeDialog(mNameDialog);
