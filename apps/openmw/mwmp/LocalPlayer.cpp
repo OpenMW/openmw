@@ -648,8 +648,9 @@ void LocalPlayer::addSpells()
     MWMechanics::Spells &ptrSpells = ptrPlayer.getClass().getCreatureStats(ptrPlayer).getSpells();
 
     for (const auto &spell : spellbookChanges.spells)
-        ptrSpells.add(spell.mId);
-
+        // Only add spells that are ensured to exist
+        if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spell.mId))
+            ptrSpells.add(spell.mId);
 }
 
 void LocalPlayer::addJournalItems()
