@@ -93,8 +93,15 @@ void LocalPlayer::update()
         updateDeadState();
         updateEquipment();
         updateStatsDynamic();
-        updateAttributes();
-        updateSkills();
+
+        // Only send attributes and skills if we are not a werewolf, or they will be
+        // overwritten by the werewolf ones
+        if (!isWerewolf)
+        {
+            updateAttributes();
+            updateSkills();
+        }
+
         updateLevel();
         updateBounty();
     }
