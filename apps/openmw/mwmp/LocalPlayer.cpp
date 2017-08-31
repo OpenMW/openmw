@@ -1163,6 +1163,7 @@ void LocalPlayer::sendSpellRemoval(std::string id)
 
 void LocalPlayer::sendSpellAddition(const ESM::Spell &spell)
 {
+    /*
     spellbookChanges.spells.clear();
 
     spellbookChanges.spells.push_back(spell);
@@ -1170,10 +1171,12 @@ void LocalPlayer::sendSpellAddition(const ESM::Spell &spell)
     spellbookChanges.action = SpellbookChanges::ADD;
     getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->setPlayer(this);
     getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send();
+    */
 }
 
 void LocalPlayer::sendSpellRemoval(const ESM::Spell &spell)
 {
+    /*
     spellbookChanges.spells.clear();
 
     spellbookChanges.spells.push_back(spell);
@@ -1181,6 +1184,7 @@ void LocalPlayer::sendSpellRemoval(const ESM::Spell &spell)
     spellbookChanges.action = SpellbookChanges::REMOVE;
     getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->setPlayer(this);
     getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send();
+    */
 }
 
 void LocalPlayer::sendJournalEntry(const std::string& quest, int index, const MWWorld::Ptr& actor)
