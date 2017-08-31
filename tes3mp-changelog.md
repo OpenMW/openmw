@@ -1,3 +1,15 @@
+0.6.1
+-----
+
+* Record player positions before their last cell change
+* Remove inertia from players who are teleported via a packet
+* Fix data loss caused by server packets attempting to add invalid items, spells and quests
+* Fix client crashes caused by items with state disabling scripts, as well as their side effects of making players disappear to others
+* Fix server crashes caused by improper interior initialization when exterior 0, 0 is loaded
+* Fix server freezes caused by infinite topic packet spam from local scripts
+* Fix spell casting probability synchronization
+* Prevent players from using excessively long names
+
 0.6.0
 -----
 
@@ -5,6 +17,7 @@
 * Reworked server browser with major stability fixes and additional information about servers
 * Synchronization of client & server plugins (non-automated)
 * Synchronization of leveled & summoned creature spawns
+* Synchronization of rotation animations
 * Synchronization of journal entries
 * Synchronization of faction ranks, reputation and expulsion states
 * Synchronization of dialogue topics
