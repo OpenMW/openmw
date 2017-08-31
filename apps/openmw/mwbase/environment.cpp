@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#include <OpenThreads/Thread>
+
 #include "world.hpp"
 #include "scriptmanager.hpp"
 #include "dialoguemanager.hpp"
@@ -17,7 +19,7 @@ MWBase::Environment *MWBase::Environment::sThis = 0;
 MWBase::Environment::Environment()
 : mWorld (0), mSoundManager (0), mScriptManager (0), mWindowManager (0),
   mMechanicsManager (0),  mDialogueManager (0), mJournal (0), mInputManager (0), mStateManager (0),
-  mFrameDuration (0)
+  mFrameDuration (0), mFrameRateLimit(0.f)
 {
     assert (!sThis);
     sThis = this;
@@ -77,6 +79,29 @@ void MWBase::Environment::setStateManager (StateManager *stateManager)
 void MWBase::Environment::setFrameDuration (float duration)
 {
     mFrameDuration = duration;
+}
+
+void MWBase::Environment::setFrameRateLimit(float limit)
+{
+    mFrameRateLimit = limit;
+}
+
+float MWBase::Environment::getFrameRateLimit() const
+{
+    return mFrameRateLimit;
+}
+
+void MWBase::Environment::limitFrameRate(double dt) const
+{
+    if (mFrameRateLimit > 0.f)
+    {
+        double thisFrameTime = dt;
+        double minFrameTime = 1.0 / static_cast<double>(mFrameRateLimit);
+        if (thisFrameTime < minFrameTime)
+        {
+            OpenThreads::Thread::microSleep(1000*1000*(minFrameTime-thisFrameTime));
+        }
+    }
 }
 
 MWBase::World *MWBase::Environment::getWorld() const

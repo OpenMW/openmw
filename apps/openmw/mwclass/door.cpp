@@ -88,6 +88,11 @@ namespace MWClass
         }
     }
 
+    bool Door::isDoor() const
+    {
+        return true;
+    }
+
     bool Door::useAnim() const
     {
         return true;

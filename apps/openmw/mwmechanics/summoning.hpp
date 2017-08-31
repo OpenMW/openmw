@@ -22,7 +22,7 @@ namespace MWMechanics
                             float magnitude, float remainingTime = -1, float totalTime = -1);
 
         /// To call after all effect sources have been visited
-        void process();
+        void process(bool cleanup);
 
     private:
         MWWorld::Ptr mActor;

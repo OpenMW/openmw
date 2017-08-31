@@ -219,29 +219,33 @@ namespace MWGui
 
     void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
     {
-        int current = std::max(0, static_cast<int>(value.getCurrent()));
+        int current = static_cast<int>(value.getCurrent());
         int modified = static_cast<int>(value.getModified());
+
+        // Fatigue can be negative
+        if (id != "FBar")
+            current = std::max(0, current);
 
         MyGUI::Widget* w;
         std::string valStr = MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         if (id == "HBar")
         {
-            mHealth->setProgressRange(modified);
-            mHealth->setProgressPosition(current);
+            mHealth->setProgressRange(std::max(0, modified));
+            mHealth->setProgressPosition(std::max(0, current));
             getWidget(w, "HealthFrame");
             w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
         }
         else if (id == "MBar")
         {
-            mMagicka->setProgressRange (modified);
-            mMagicka->setProgressPosition (current);
+            mMagicka->setProgressRange(std::max(0, modified));
+            mMagicka->setProgressPosition(std::max(0, current));
             getWidget(w, "MagickaFrame");
             w->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
         }
         else if (id == "FBar")
         {
-            mStamina->setProgressRange (modified);
-            mStamina->setProgressPosition (current);
+            mStamina->setProgressRange(std::max(0, modified));
+            mStamina->setProgressPosition(std::max(0, current));
             getWidget(w, "FatigueFrame");
             w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
         }

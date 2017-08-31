@@ -172,7 +172,10 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
         }
     }
 
-    return setup() ? FirstRunDialogResultContinue : FirstRunDialogResultFailure;
+    if (!setup() || !setupGameData()) {
+        return FirstRunDialogResultFailure;
+    }
+    return FirstRunDialogResultContinue;
 }
 
 void Launcher::MainDialog::setVersionLabel()
@@ -344,6 +347,11 @@ bool Launcher::MainDialog::setupGameSettings()
         file.close();
     }
 
+    return true;
+}
+
+bool Launcher::MainDialog::setupGameData()
+{
     QStringList dataDirs;
 
     // Check if the paths actually contain data files

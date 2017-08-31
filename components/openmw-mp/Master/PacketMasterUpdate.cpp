@@ -14,6 +14,7 @@ PacketMasterUpdate::PacketMasterUpdate(RakNet::RakPeerInterface *peer) : BasePac
 {
     packetID = ID_MASTER_UPDATE;
     orderChannel = CHANNEL_MASTER;
+    reliability = RELIABLE_ORDERED_WITH_ACK_RECEIPT;
 }
 
 void PacketMasterUpdate::Packet(RakNet::BitStream *bs, bool send)

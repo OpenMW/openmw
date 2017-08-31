@@ -10,6 +10,7 @@
 #include <components/openmw-mp/Master/PacketMasterQuery.hpp>
 #include <components/openmw-mp/Master/PacketMasterUpdate.hpp>
 #include <apps/browser/ServerModel.hpp>
+#include <mutex>
 
 class QueryClient
 {
@@ -26,7 +27,7 @@ public:
     int Status();
 private:
     RakNet::ConnectionState Connect();
-    MASTER_PACKETS GetAnswer();
+    MASTER_PACKETS GetAnswer(MASTER_PACKETS packet);
 protected:
     QueryClient();
     ~QueryClient();
@@ -37,6 +38,7 @@ private:
     mwmp::PacketMasterQuery *pmq;
     mwmp::PacketMasterUpdate *pmu;
     std::pair<RakNet::SystemAddress, ServerData> server;
+    std::mutex mxServers;
 
 };
 

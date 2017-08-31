@@ -38,6 +38,8 @@ Objects::~Objects()
 
 void Objects::insertBegin(const MWWorld::Ptr& ptr)
 {
+    assert(mObjects.find(ptr) == mObjects.end());
+
     osg::ref_ptr<osg::Group> cellnode;
 
     CellMap::iterator found = mCellSceneNodes.find(ptr.getCell());
@@ -90,9 +92,8 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
     else
         anim = new CreatureAnimation(ptr, mesh, mResourceSystem);
 
-    ptr.getClass().getContainerStore(ptr).setContListener(static_cast<ActorAnimation*>(anim.get()));
-
-    mObjects.insert(std::make_pair(ptr, anim));
+    if (mObjects.insert(std::make_pair(ptr, anim)).second)
+        ptr.getClass().getContainerStore(ptr).setContListener(static_cast<ActorAnimation*>(anim.get()));
 }
 
 void Objects::insertNPC(const MWWorld::Ptr &ptr)
@@ -102,10 +103,11 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
 
     osg::ref_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
 
-    ptr.getClass().getInventoryStore(ptr).setInvListener(anim.get(), ptr);
-    ptr.getClass().getInventoryStore(ptr).setContListener(anim.get());
-
-    mObjects.insert(std::make_pair(ptr, anim));
+    if (mObjects.insert(std::make_pair(ptr, anim)).second)
+    {
+        ptr.getClass().getInventoryStore(ptr).setInvListener(anim.get(), ptr);
+        ptr.getClass().getInventoryStore(ptr).setContListener(anim.get());
+    }
 }
 
 bool Objects::removeObject (const MWWorld::Ptr& ptr)

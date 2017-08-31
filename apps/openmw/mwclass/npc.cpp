@@ -7,6 +7,7 @@
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/npcstate.hpp>
+#include <components/settings/settings.hpp>
 
 /*
     Start of tes3mp addition
@@ -999,16 +1000,35 @@ namespace MWClass
             return action;
         }
 
-        if(getCreatureStats(ptr).isDead())
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
-        if(ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat())
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("#{sActorInCombat}"));
+        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+
+        if(stats.isDead())
+        {
+            bool canLoot = Settings::Manager::getBool ("can loot during death animation", "Game");
+
+            // by default user can loot friendly actors during death animation
+            if (canLoot && !stats.getAiSequence().isInCombat())
+                return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
+
+            // otherwise wait until death animation
+            if(stats.isDeathAnimationFinished())
+                return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
+
+            // death animation is not finished, do nothing
+            return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
+        }
+
+        if(stats.getAiSequence().isInCombat())
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
+
         if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak)
-                || ptr.getClass().getCreatureStats(ptr).getKnockedDown())
+            || ptr.getClass().getCreatureStats(ptr).getKnockedDown())
             return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
+
         // Can't talk to werewolfs
         if(ptr.getClass().isNpc() && ptr.getClass().getNpcStats(ptr).isWerewolf())
             return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
+
         return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
@@ -1155,7 +1175,11 @@ namespace MWClass
             return true;
 
         const NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
-        return !customData.mNpcStats.getAiSequence().isInCombat() || customData.mNpcStats.isDead();
+
+        if (customData.mNpcStats.isDead() && customData.mNpcStats.isDeathAnimationFinished())
+            return true;
+
+        return !customData.mNpcStats.getAiSequence().isInCombat();
     }
 
     MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const

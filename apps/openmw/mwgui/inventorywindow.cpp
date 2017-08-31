@@ -43,6 +43,7 @@
 #include "../mwrender/characterpreview.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "itemview.hpp"
 #include "inventoryitemmodel.hpp"
@@ -334,7 +335,7 @@ namespace MWGui
     {
         ensureSelectedItemUnequipped(count);
         const ItemStack& item = mTradeModel->getItem(mSelectedItem);
-        std::string sound = item.mBase.getClass().getDownSoundId(item.mBase);
+        std::string sound = item.mBase.getClass().getUpSoundId(item.mBase);
         MWBase::Environment::get().getWindowManager()->playSound(sound);
 
         if (item.mType == ItemStack::Type_Barter)
@@ -693,9 +694,18 @@ namespace MWGui
 
     void InventoryWindow::cycle(bool next)
     {
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(player))
+            return;
+
+        const MWMechanics::CreatureStats &stats = player.getClass().getCreatureStats(player);
+        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead() || stats.getHitRecovery())
+            return;
+
         ItemModel::ModelIndex selected = -1;
         // not using mSortFilterModel as we only need sorting, not filtering
-        SortFilterItemModel model(new InventoryItemModel(MWMechanics::getPlayer()));
+        SortFilterItemModel model(new InventoryItemModel(player));
         model.setSortByType(false);
         model.update();
         if (model.getItemCount() == 0)

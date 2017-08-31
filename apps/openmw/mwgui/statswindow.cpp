@@ -102,12 +102,13 @@ namespace MWGui
     {
         MyGUI::ProgressBar* pt;
         getWidget(pt, name);
-        pt->setProgressRange(max);
-        pt->setProgressPosition(val);
 
         std::stringstream out;
         out << val << "/" << max;
         setText(tname, out.str().c_str());
+
+        pt->setProgressRange(std::max(0, max));
+        pt->setProgressPosition(std::max(0, val));
     }
 
     void StatsWindow::setPlayerName(const std::string& playerName)
@@ -147,8 +148,12 @@ namespace MWGui
 
     void StatsWindow::setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value)
     {
-        int current = std::max(0, static_cast<int>(value.getCurrent()));
+        int current = static_cast<int>(value.getCurrent());
         int modified = static_cast<int>(value.getModified());
+
+        // Fatigue can be negative
+        if (id != "FBar")
+            current = std::max(0, current);
 
         setBar (id, id + "T", current, modified);
 

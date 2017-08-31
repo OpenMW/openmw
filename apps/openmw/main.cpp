@@ -30,6 +30,9 @@
 #include <cstdlib>
 #endif
 
+#if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
+#include <unistd.h>
+#endif
 
 #if (defined(__APPLE__) || (defined(__linux)  &&  !defined(ANDROID)) || (defined(__unix) &&  !defined(ANDROID)) || defined(__posix))
     #define USE_CRASH_CATCHER 1

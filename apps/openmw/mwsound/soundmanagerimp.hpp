@@ -6,6 +6,7 @@
 #include <utility>
 #include <deque>
 #include <map>
+#include <unordered_map>
 
 #include <components/settings/settings.hpp>
 
@@ -49,6 +50,7 @@ namespace MWSound
 
         // Caches available music tracks by <playlist name, (sound files) >
         std::map<std::string, std::vector<std::string> > mMusicFiles;
+        std::unordered_map<std::string, std::vector<int>> mMusicToPlay; // A list with music files not yet played
         std::string mLastPlayedMusic; // The music file that was last played
 
         float mMasterVolume;
@@ -114,9 +116,14 @@ namespace MWSound
         MWBase::SoundStreamPtr playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal);
 
         void streamMusicFull(const std::string& filename);
+        void advanceMusic(const std::string& filename);
+
         void updateSounds(float duration);
         void updateRegionSound(float duration);
         void updateWaterSound(float duration);
+        void updateMusic(float duration);
+
+        std::string mNextMusic;
 
         float volumeFromType(PlayType type) const;
 

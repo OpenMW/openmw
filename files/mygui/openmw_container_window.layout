@@ -10,9 +10,7 @@
         </Widget>
 
         <Widget type="HBox" position="0 235 580 24" align="Right Bottom">
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
+            <Widget type="Spacer"/>
             <Widget type="AutoSizedButton" skin="MW_Button" name="DisposeCorpseButton" align="Right Bottom">
                 <Property key="Caption" value="#{sDisposeofCorpse}"/>
                 <Property key="Visible" value="false"/>

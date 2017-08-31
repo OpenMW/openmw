@@ -375,6 +375,7 @@ void LocalPlayer::updateCell(bool forceUpdate)
         }
 
         cell = *ptrCell;
+        previousCellPosition = position;
 
         // Make sure the position is updated before a cell packet is sent, or else
         // cell change events in server scripts will have the wrong player position
@@ -524,7 +525,9 @@ void LocalPlayer::updateAttack()
         if (attack.type == Attack::MAGIC)
         {
             attack.spellId = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
-            attack.success = MechanicsHelper::getSpellSuccess(attack.spellId, getPlayerPtr());
+
+            if (attack.pressed)
+                attack.success = MechanicsHelper::getSpellSuccess(attack.spellId, getPlayerPtr());
         }
 
         getNetworking()->getPlayerPacket(ID_PLAYER_ATTACK)->setPlayer(this);
@@ -813,8 +816,10 @@ void LocalPlayer::setPosition()
     else
     {
         world->getPlayer().setTeleported(true);
+
         world->moveObject(ptrPlayer, position.pos[0], position.pos[1], position.pos[2]);
         world->rotateObject(ptrPlayer, position.rot[0], position.rot[1], position.rot[2]);
+        world->setInertialForce(ptrPlayer, osg::Vec3f(0.f, 0.f, 0.f));
     }
 
     updatePosition(true);
@@ -1158,12 +1163,24 @@ void LocalPlayer::sendSpellRemoval(std::string id)
 
 void LocalPlayer::sendSpellAddition(const ESM::Spell &spell)
 {
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Not implemented.");
+    spellbookChanges.spells.clear();
+
+    spellbookChanges.spells.push_back(spell);
+
+    spellbookChanges.action = SpellbookChanges::ADD;
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send();
 }
 
 void LocalPlayer::sendSpellRemoval(const ESM::Spell &spell)
 {
-    LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "Not implemented.");
+    spellbookChanges.spells.clear();
+
+    spellbookChanges.spells.push_back(spell);
+
+    spellbookChanges.action = SpellbookChanges::REMOVE;
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->setPlayer(this);
+    getNetworking()->getPlayerPacket(ID_PLAYER_SPELLBOOK)->Send();
 }
 
 void LocalPlayer::sendJournalEntry(const std::string& quest, int index, const MWWorld::Ptr& actor)

@@ -235,6 +235,7 @@ namespace mwmp
 
         ESM::Position position;
         ESM::Position direction;
+        ESM::Position previousCellPosition;
         ESM::Cell cell;
         ESM::NPC npc;
         ESM::NpcStats npcStats;

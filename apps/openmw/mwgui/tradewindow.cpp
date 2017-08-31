@@ -122,8 +122,6 @@ namespace MWGui
         mCurrentBalance = 0;
         mCurrentMerchantOffer = 0;
 
-        restock();
-
         std::vector<MWWorld::Ptr> itemSources;
         MWBase::Environment::get().getWorld()->getContainersOwnedBy(actor, itemSources);
 
@@ -209,7 +207,7 @@ namespace MWGui
     void TradeWindow::sellItem(MyGUI::Widget* sender, int count)
     {
         const ItemStack& item = mTradeModel->getItem(mItemToSell);
-        std::string sound = item.mBase.getClass().getDownSoundId(item.mBase);
+        std::string sound = item.mBase.getClass().getUpSoundId(item.mBase);
         MWBase::Environment::get().getWindowManager()->playSound(sound);
 
         TradeItemModel* playerTradeModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
@@ -313,9 +311,9 @@ namespace MWGui
                 if (msg.find("%s") != std::string::npos)
                     msg.replace(msg.find("%s"), 2, it->mBase.getClass().getName(it->mBase));
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
-                MWBase::Environment::get().getMechanicsManager()->commitCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
-                                                                              it->mBase.getClass().getValue(it->mBase)
-                                                                              * it->mCount, true);
+
+                MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(player, it->mBase, mPtr, it->mCount);
+
                 onCancelButtonClicked(mCancelButton);
                 MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
                 return;
@@ -357,6 +355,8 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
+
+        restock();
     }
 
     void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)

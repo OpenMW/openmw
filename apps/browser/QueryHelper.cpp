@@ -27,9 +27,11 @@ QueryHelper::QueryHelper(QAbstractItemModel *model)
 void QueryHelper::refresh()
 {
     if (!queryThread->isRunning())
+    {
         _model->removeRows(0, _model->rowCount());
-    queryThread->start();
-    emit started();
+        queryThread->start();
+        emit started();
+    }
 }
 
 void QueryHelper::terminate()

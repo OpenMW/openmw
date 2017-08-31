@@ -15,6 +15,7 @@ PacketMasterAnnounce::PacketMasterAnnounce(RakNet::RakPeerInterface *peer) : Bas
 {
     packetID = ID_MASTER_ANNOUNCE;
     orderChannel = CHANNEL_MASTER;
+    reliability = RELIABLE_ORDERED_WITH_ACK_RECEIPT;
 }
 
 void PacketMasterAnnounce::Packet(BitStream *bs, bool send)

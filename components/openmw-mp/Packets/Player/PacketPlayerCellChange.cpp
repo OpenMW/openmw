@@ -20,6 +20,8 @@ void mwmp::PacketPlayerCellChange::Packet(RakNet::BitStream *bs, bool send)
     RW(player->cell.mData, send, 1);
     RW(player->cell.mName, send, 1);
 
+    RW(player->previousCellPosition.pos, send, 1);
+
     RW(player->isChangingRegion, send);
 
     if (player->isChangingRegion)

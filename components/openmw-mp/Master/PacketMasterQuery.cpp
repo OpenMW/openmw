@@ -17,6 +17,7 @@ PacketMasterQuery::PacketMasterQuery(RakNet::RakPeerInterface *peer) : BasePacke
 {
     packetID = ID_MASTER_QUERY;
     orderChannel = CHANNEL_MASTER;
+    reliability = RELIABLE_ORDERED_WITH_ACK_RECEIPT;
 }
 
 void PacketMasterQuery::Packet(RakNet::BitStream *bs, bool send)

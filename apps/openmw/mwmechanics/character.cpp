@@ -1768,7 +1768,7 @@ void CharacterController::update(float duration)
                     mSecondsOfSwimming -= 1;
                 }
             }
-            else if(isrunning)
+            else if(isrunning && !sneak)
             {
                 mSecondsOfRunning += duration;
                 while(mSecondsOfRunning > 1)
@@ -1806,7 +1806,7 @@ void CharacterController::update(float duration)
                     else
                         fatigueLoss = fFatigueSwimRunBase + encumbrance * fFatigueSwimRunMult;
                 }
-                if (isrunning)
+                else if (isrunning)
                     fatigueLoss = fFatigueRunBase + encumbrance * fFatigueRunMult;
             }
         }
@@ -2164,13 +2164,13 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
     }
     else
     {
-        // If the given animation is a looped animation, is already playing
-        // and has not yet reached its Loop Stop key, make it the only animation
-        // in the queue, and retain the loop count from the animation that was
-        // already playing. This emulates observed behavior from the original
-        // engine and allows banners to animate correctly.
+        // If this animation is a looped animation (has a "loop start" key) that is already playing
+        // and has not yet reached the end of the loop, allow it to continue animating with its existing loop count
+        // and remove any other animations that were queued.
+        // This emulates observed behavior from the original allows the script "OutsideBanner" to animate banners correctly.
         if (!mAnimQueue.empty() && mAnimQueue.front().mGroup == groupname &&
-            mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": loop start") >= 0)
+            mAnimation->getTextKeyTime(mAnimQueue.front().mGroup + ": loop start") >= 0 &&
+            mAnimation->isPlaying(groupname))
         {
             float endOfLoop = mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": loop stop");
 
@@ -2179,8 +2179,7 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
 
             if (endOfLoop > 0 && (mAnimation->getCurrentTime(mAnimQueue.front().mGroup) < endOfLoop))
             {
-                mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, true);
-                mAnimQueue.resize(1);                    
+                mAnimQueue.resize(1);
                 return true;
             }
         }
@@ -2368,6 +2367,12 @@ bool CharacterController::isKnockedOut() const
     return mHitState == CharState_KnockOut;
 }
 
+bool CharacterController::isAttackingOrSpell() const
+{
+    return mUpperBodyState != UpperCharState_Nothing &&
+            mUpperBodyState != UpperCharState_WeapEquiped;
+}
+
 bool CharacterController::isSneaking() const
 {
     return mIdleState == CharState_IdleSneak ||
@@ -2375,6 +2380,18 @@ bool CharacterController::isSneaking() const
             mMovementState == CharState_SneakBack ||
             mMovementState == CharState_SneakLeft ||
             mMovementState == CharState_SneakRight;
+}
+
+bool CharacterController::isRunning() const
+{
+    return mMovementState == CharState_RunForward ||
+            mMovementState == CharState_RunBack ||
+            mMovementState == CharState_RunLeft ||
+            mMovementState == CharState_RunRight ||
+            mMovementState == CharState_SwimRunForward ||
+            mMovementState == CharState_SwimRunBack ||
+            mMovementState == CharState_SwimRunLeft ||
+            mMovementState == CharState_SwimRunRight;
 }
 
 void CharacterController::setAttackingOrSpell(bool attackingOrSpell)

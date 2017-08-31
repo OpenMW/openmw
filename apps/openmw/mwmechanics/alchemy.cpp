@@ -457,7 +457,9 @@ bool MWMechanics::Alchemy::knownEffect(unsigned int potionEffectIndex, const MWW
     static const float fWortChanceValue =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->getFloat();
     return (potionEffectIndex <= 1 && alchemySkill >= fWortChanceValue)
-            || (potionEffectIndex <= 3 && alchemySkill >= fWortChanceValue*2);
+            || (potionEffectIndex <= 3 && alchemySkill >= fWortChanceValue*2)
+            || (potionEffectIndex <= 5 && alchemySkill >= fWortChanceValue*3)
+            || (potionEffectIndex <= 7 && alchemySkill >= fWortChanceValue*4);
 }
 
 MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& name)

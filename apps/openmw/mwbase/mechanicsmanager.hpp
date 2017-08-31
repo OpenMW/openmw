@@ -7,6 +7,8 @@
 #include <set>
 #include <stdint.h>
 
+#include "../mwworld/ptr.hpp"
+
 namespace osg
 {
     class Vec3f;
@@ -231,6 +233,7 @@ namespace MWBase
             virtual void keepPlayerAlive() = 0;
 
             virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const = 0;
+            virtual bool isAttackingOrSpell(const MWWorld::Ptr &ptr) const = 0;
 
             virtual void confiscateStolenItems (const MWWorld::Ptr& player, const MWWorld::Ptr& targetContainer) = 0;
 
@@ -240,8 +243,8 @@ namespace MWBase
 
             /// Has the player stolen this item from the given owner?
             virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid) = 0;
-            
-            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim) = 0;
+
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::ConstPtr& item, MWWorld::Ptr& victim) = 0;
 
             /// Turn actor into werewolf or normal form.
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf) = 0;
@@ -251,6 +254,11 @@ namespace MWBase
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor) = 0;
 
             virtual void cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId) = 0;
+
+            virtual void confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count) = 0;
+
+            virtual bool isRunning(const MWWorld::Ptr& ptr) = 0;
+            virtual bool isSneaking(const MWWorld::Ptr& ptr) = 0;
     };
 }
 

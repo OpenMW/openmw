@@ -164,11 +164,11 @@ void RestServer::start()
     httpServer.resource["/api/servers/info"]["GET"] = [this](auto response, auto /*request*/) {
         stringstream ss;
         ss << '{';
-        ss << "servers: " << serverMap->size();
+        ss << "\"servers\": " << serverMap->size();
         unsigned int players = 0;
         for (auto s : *serverMap)
             players += s.second.GetPlayers();
-        ss << ", players: " << players;
+        ss << ", \"players\": " << players;
         ss << "}";
 
         ResponseStr(*response, ss.str(), "application/json");

@@ -422,4 +422,10 @@ namespace Gui
         align();
     }
 
+    Spacer::Spacer()
+    {
+        setUserString("HStretch", "true");
+        setUserString("VStretch", "true");
+    }
+
 }

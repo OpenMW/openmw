@@ -275,12 +275,32 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
 
 void CSVRender::Cell::pathgridModified()
 {
-    mPathgrid->recreateGeometry();
+    if (mPathgrid)
+        mPathgrid->recreateGeometry();
 }
 
 void CSVRender::Cell::pathgridRemoved()
 {
-    mPathgrid->removeGeometry();
+    if (mPathgrid)
+        mPathgrid->removeGeometry();
+}
+
+void CSVRender::Cell::reloadAssets()
+{
+    for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+        iter != mObjects.end(); ++iter)
+    {
+        iter->second->reloadAssets();
+    }
+
+    if (mTerrain)
+    {
+        mTerrain->unloadCell(mCoordinates.getX(), mCoordinates.getY());
+        mTerrain->loadCell(mCoordinates.getX(), mCoordinates.getY());
+    }
+
+    if (mCellWater)
+        mCellWater->reloadAssets();
 }
 
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)
@@ -302,7 +322,7 @@ void CSVRender::Cell::setSelection (int elementMask, Selection mode)
             iter->second->setSelected (selected);
         }
     }
-    if (elementMask & Mask_Pathgrid)
+    if (mPathgrid && elementMask & Mask_Pathgrid)
     {
         // Only one pathgrid may be selected, so some operations will only have an effect
         // if the pathgrid is already focused
@@ -402,7 +422,7 @@ std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::Cell::getSelection (un
             iter!=mObjects.end(); ++iter)
             if (iter->second->getSelected())
                 result.push_back (iter->second->getTag());
-    if (elementMask & Mask_Pathgrid)
+    if (mPathgrid && elementMask & Mask_Pathgrid)
         if (mPathgrid->isSelected())
             result.push_back(mPathgrid->getTag());
 
@@ -439,6 +459,6 @@ void CSVRender::Cell::reset (unsigned int elementMask)
         for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
             iter!=mObjects.end(); ++iter)
             iter->second->reset();
-    if (elementMask & Mask_Pathgrid)
+    if (mPathgrid && elementMask & Mask_Pathgrid)
         mPathgrid->resetIndicators();
 }

@@ -26,6 +26,7 @@ Doxygen
 .settings
 .directory
 .idea
+files/windows/*.aps
 cmake-build-*
 ## qt-creator
 CMakeLists.txt.user*

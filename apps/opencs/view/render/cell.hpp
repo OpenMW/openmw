@@ -118,6 +118,8 @@ namespace CSVRender
 
             void pathgridRemoved();
 
+            void reloadAssets();
+
             void setSelection (int elementMask, Selection mode);
 
             // Select everything that references the same ID as at least one of the elements

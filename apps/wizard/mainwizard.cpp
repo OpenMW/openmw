@@ -3,7 +3,6 @@
 #include <QDebug>
 
 #include <QTime>
-#include <QDateTime>
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QTextCodec>
@@ -258,7 +257,7 @@ void Wizard::MainWizard::runSettingsImporter()
     QStringList arguments;
 
     // Import plugin selection?
-    if (field(QLatin1String("installation.new")).toBool() == true
+    if (field(QLatin1String("installation.retailDisc")).toBool() == true
             || field(QLatin1String("installation.import-addons")).toBool() == true)
         arguments.append(QLatin1String("--game-files"));
 
@@ -278,7 +277,7 @@ void Wizard::MainWizard::runSettingsImporter()
     // Now the paths
     arguments.append(QLatin1String("--ini"));
 
-    if (field(QLatin1String("installation.new")).toBool() == true) {
+    if (field(QLatin1String("installation.retailDisc")).toBool() == true) {
         arguments.append(path + QDir::separator() + QLatin1String("Morrowind.ini"));
     } else {
         arguments.append(mInstallations[path].iniPath);

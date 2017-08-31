@@ -42,6 +42,8 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 
+#include "../mwmechanics/aibreathe.hpp"
+
 #include "spellcasting.hpp"
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
@@ -830,7 +832,7 @@ namespace MWMechanics
             creatureStats.getActiveSpells().visitEffectSources(updateSummonedCreatures);
             if (ptr.getClass().hasInventoryStore(ptr))
                 ptr.getClass().getInventoryStore(ptr).visitEffectSources(updateSummonedCreatures);
-            updateSummonedCreatures.process();
+            updateSummonedCreatures.process(mTimerDisposeSummonsCorpses == 0.f);
         }
     }
 
@@ -849,6 +851,26 @@ namespace MWMechanics
         }
     }
 
+    bool Actors::isRunning(const MWWorld::Ptr& ptr)
+    {
+        PtrActorMap::iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+        CharacterController* ctrl = it->second->getCharacterController();
+
+        return ctrl->isRunning();
+    }
+
+    bool Actors::isSneaking(const MWWorld::Ptr& ptr)
+    {
+        PtrActorMap::iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+        CharacterController* ctrl = it->second->getCharacterController();
+
+        return ctrl->isSneaking();
+    }
+
     void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
     {
         PtrActorMap::iterator it = mActors.find(ptr);
@@ -862,6 +884,15 @@ namespace MWMechanics
         static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->getFloat();
         if (stats.getTimeToStartDrowning() == -1.f)
             stats.setTimeToStartDrowning(fHoldBreathTime);
+
+        if (ptr.getClass().isNpc() && stats.getTimeToStartDrowning() < fHoldBreathTime / 2)
+        {
+            if(ptr != MWMechanics::getPlayer() ) {
+                MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+                if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdBreathe) //Only add it once
+                    seq.stack(MWMechanics::AiBreathe(), ptr);
+            }
+        }
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
@@ -1069,7 +1100,9 @@ namespace MWMechanics
         }
     }
 
-    Actors::Actors() {}
+    Actors::Actors() {
+        mTimerDisposeSummonsCorpses = 0.2f; // We should add a delay between summoned creature death and its corpse despawning
+    }
 
     Actors::~Actors()
     {
@@ -1138,6 +1171,7 @@ namespace MWMechanics
             // target lists get updated once every 1.0 sec
             if (timerUpdateAITargets >= 1.0f) timerUpdateAITargets = 0;
             if (timerUpdateHeadTrack >= 0.3f) timerUpdateHeadTrack = 0;
+            if (mTimerDisposeSummonsCorpses >= 0.2f) mTimerDisposeSummonsCorpses = 0;
             if (timerUpdateEquippedLight >= updateEquippedLightInterval) timerUpdateEquippedLight = 0;
 
             MWWorld::Ptr player = getPlayer();
@@ -1307,6 +1341,7 @@ namespace MWMechanics
             timerUpdateAITargets += duration;
             timerUpdateHeadTrack += duration;
             timerUpdateEquippedLight += duration;
+            mTimerDisposeSummonsCorpses += duration;
 
             // Looping magic VFX update
             // Note: we need to do this before any of the animations are updated.
@@ -1625,6 +1660,11 @@ namespace MWMechanics
             calculateCreatureStatModifiers (iter->first, duration);
             if (iter->first.getClass().isNpc())
                 calculateNpcStatModifiers(iter->first, duration);
+
+            MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(iter->first);
+            if (animation)
+                animation->updateEffects(duration);
+
         }
 
         fastForwardAi();
@@ -1937,6 +1977,16 @@ namespace MWMechanics
             return false;
 
         return it->second->getCharacterController()->isReadyToBlock();
+    }
+
+    bool Actors::isAttackingOrSpell(const MWWorld::Ptr& ptr) const
+    {
+        PtrActorMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+        CharacterController* ctrl = it->second->getCharacterController();
+
+        return ctrl->isAttackingOrSpell();
     }
 
     void Actors::fastForwardAi()

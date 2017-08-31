@@ -241,7 +241,9 @@ void LocalActor::updateAttack()
         {
             MWMechanics::CreatureStats &attackerStats = ptr.getClass().getCreatureStats(ptr);
             attack.spellId = attackerStats.getSpells().getSelectedSpell();
-            attack.success = MechanicsHelper::getSpellSuccess(attack.spellId, ptr);
+
+            if (attack.pressed)
+                attack.success = MechanicsHelper::getSpellSuccess(attack.spellId, ptr);
         }
 
         mwmp::Main::get().getNetworking()->getActorList()->addAttackActor(*this);
