@@ -344,16 +344,17 @@ namespace MWGui
         {
             MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
             bool isWeapon = item.getTypeName() == typeid(ESM::Weapon).name();
+            bool isTool = item.getTypeName() == typeid(ESM::Probe).name() || item.getTypeName() == typeid(ESM::Lockpick).name();
 
             // delay weapon switching if player is busy
-            if (isDelayNeeded && isWeapon)
+            if (isDelayNeeded && (isWeapon || isTool))
             {
                 mActivatedIndex = index;
                 return;
             }
 
             // disable weapon switching if player is dead or paralyzed
-            if (isReturnNeeded && isWeapon)
+            if (isReturnNeeded && (isWeapon || isTool))
             {
                 return;
             }
