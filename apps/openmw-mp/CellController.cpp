@@ -86,8 +86,15 @@ Cell *CellController::addCell(ESM::Cell cellData)
     auto it = find_if(cells.begin(), cells.end(), [cellData](const Cell *c) {
         // Currently we cannot compare because plugin lists can be loaded in different order
         //return c->cell.sRecordId == cellData.sRecordId;
-        return c->cell.isExterior() ? (c->cell.mData.mX == cellData.mData.mX && c->cell.mData.mY == cellData.mData.mY) :
-               (c->cell.mName == cellData.mName);
+        if (c->cell.isExterior() && cellData.isExterior())
+        {
+            if (c->cell.mData.mX == cellData.mData.mX && c->cell.mData.mY == cellData.mData.mY)
+                return true;
+        }
+        else if (c->cell.mName == cellData.mName)
+            return true;
+
+        return false;
     });
 
     Cell *cell;
