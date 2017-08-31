@@ -579,6 +579,9 @@ namespace MWSound
             if((mode&Play_RemoveAtDistance) && (mListenerPos-objpos).length2() > 2000*2000)
                 return MWBase::SoundPtr();
 
+            // Only one copy of given sound can be played at time on ptr, so stop previous copy
+            stopSound3D(ptr, soundId);
+
             if(!(mode&Play_NoPlayerLocal) && ptr == MWMechanics::getPlayer())
             {
                 sound.reset(new Sound(volume * sfx->mVolume, basevol, pitch, mode|type|Play_2D));
