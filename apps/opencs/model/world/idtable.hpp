@@ -61,6 +61,11 @@ namespace CSMWorld
                              const std::string& destination,
                              UniversalId::Type type = UniversalId::Type_None);
 
+            bool touchRecord(const std::string& id);
+            ///< Will change the record state to modified, if it is not already.
+
+            std::string getId(int row) const;
+
             virtual QModelIndex getModelIndex (const std::string& id, int column) const;
 
             void setRecord (const std::string& id, const RecordBase& record,

@@ -5,6 +5,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 #include <vector>
 
 #include <QVariant>
@@ -23,6 +24,24 @@ namespace CSMWorld
     class IdTree;
     struct RecordBase;
     struct NestedTableWrapperBase;
+
+    class TouchCommand : public QUndoCommand
+    {
+        public:
+
+            TouchCommand(IdTable& model, const std::string& id, QUndoCommand* parent=nullptr);
+
+            virtual void redo();
+            virtual void undo();
+
+        private:
+
+            IdTable& mTable;
+            std::string mId;
+            std::unique_ptr<RecordBase> mOld;
+
+            bool mChanged;
+    };
 
     class ModifyCommand : public QUndoCommand
     {

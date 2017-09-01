@@ -67,7 +67,7 @@ namespace CSMWorld
     inline QVariant StringIdColumn<LandTexture>::get(const Record<LandTexture>& record) const
     {
         const LandTexture& ltex = record.get();
-        return QString::fromUtf8(std::string('L' + std::to_string(ltex.mPluginIndex) + '#' + std::to_string(ltex.mIndex)).c_str());
+        return QString(LandTexture::createUniqueRecordId(ltex.mPluginIndex, ltex.mIndex).c_str());
     }
 
     template<typename ESXRecordT>

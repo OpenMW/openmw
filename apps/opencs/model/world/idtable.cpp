@@ -179,6 +179,26 @@ void CSMWorld::IdTable::cloneRecord(const std::string& origin,
     endInsertRows();
 }
 
+bool CSMWorld::IdTable::touchRecord(const std::string& id)
+{
+    bool changed = mIdCollection->touchRecord(id);
+
+    int row = mIdCollection->getIndex(id);
+    int column = mIdCollection->searchColumnIndex(Columns::ColumnId_RecordType);
+    if (changed && column != -1)
+    {
+        QModelIndex modelIndex = index(row, column);
+        emit dataChanged(modelIndex, modelIndex);
+    }
+
+    return changed;
+}
+
+std::string CSMWorld::IdTable::getId(int row) const
+{
+    return mIdCollection->getId(row);
+}
+
 ///This method can return only indexes to the top level table cells
 QModelIndex CSMWorld::IdTable::getModelIndex (const std::string& id, int column) const
 {

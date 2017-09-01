@@ -15,6 +15,31 @@
 #include "nestedtablewrapper.hpp"
 #include "pathgrid.hpp"
 
+CSMWorld::TouchCommand::TouchCommand(IdTable& table, const std::string& id, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , mTable(table)
+    , mId(id)
+    , mOld(nullptr)
+    , mChanged(false)
+{
+    setText(("Touch " + mId).c_str());
+    mOld.reset(mTable.getRecord(mId).clone());
+}
+
+void CSMWorld::TouchCommand::redo()
+{
+    mChanged = mTable.touchRecord(mId);
+}
+
+void CSMWorld::TouchCommand::undo()
+{
+    if (mChanged)
+    {
+        mTable.setRecord(mId, *mOld);
+        mChanged = false;
+    }
+}
+
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
                                         const QVariant& new_, QUndoCommand* parent)
     : QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_), mHasRecordState(false), mOldRecordState(CSMWorld::RecordBase::State_BaseOnly)

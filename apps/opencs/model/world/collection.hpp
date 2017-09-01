@@ -125,6 +125,10 @@ namespace CSMWorld
                                      const std::string& destination,
                                      const UniversalId::Type type);
 
+            virtual bool touchRecord(const std::string& id);
+            ///< Change the state of a record from base to modified, if it is not already.
+            ///  \return True if the record was changed.
+
             virtual int searchId (const std::string& id) const;
             ////< Search record with \a id.
             /// \return index of record (if found) or -1 (not found)
@@ -233,6 +237,25 @@ namespace CSMWorld
        IdAccessorT().setId(copy.get(), destination);
 
        insertRecord(copy, getAppendIndex(destination, type));
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    bool Collection<ESXRecordT, IdAccessorT>::touchRecord(const std::string& id)
+    {
+        int index = getIndex(id);
+        Record<ESXRecordT>& record = mRecords.at(index);
+        if (record.isDeleted())
+        {
+            throw std::runtime_error("attempt to touch deleted record");
+        }
+
+        if (!record.isModified() && !record.isDeleted() && !record.isErased())
+        {
+            record.setModified(record.get());
+            return true;
+        }
+        else
+            return false;
     }
 
     template<typename ESXRecordT, typename IdAccessorT>

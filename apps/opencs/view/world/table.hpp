@@ -56,6 +56,7 @@ namespace CSVWorld
             QAction *mEditAction;
             QAction *mCreateAction;
             QAction *mCloneAction;
+            QAction *mTouchAction;
             QAction *mRevertAction;
             QAction *mDeleteAction;
             QAction *mMoveUpAction;
@@ -128,6 +129,8 @@ namespace CSVWorld
             void editRecord();
 
             void cloneRecord();
+
+            void touchRecord();
 
             void moveUpRecord();
 

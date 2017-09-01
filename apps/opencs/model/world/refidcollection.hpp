@@ -80,6 +80,8 @@ namespace CSMWorld
                                      const std::string& destination,
                                      const UniversalId::Type type);
 
+            virtual bool touchRecord(const std::string& id);
+
             virtual void appendBlankRecord (const std::string& id, UniversalId::Type type);
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
