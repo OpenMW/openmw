@@ -1192,6 +1192,9 @@ namespace MWRender
                 mObjectRoot->addChild(created);
                 mInsert->addChild(mObjectRoot);
             }
+            osg::ref_ptr<SceneUtil::Skeleton> skel = dynamic_cast<SceneUtil::Skeleton*>(mObjectRoot.get());
+            if (skel)
+                mSkeleton = skel.get();
         }
         else
         {
