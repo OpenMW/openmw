@@ -182,7 +182,10 @@ namespace
         void remove()
         {
             for (RemoveVec::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
-                it->second->removeChild(it->first);
+            {
+                if (!it->second->removeChild(it->first))
+                    std::cerr << "error removing " << it->first->getName() << std::endl;
+            }
         }
 
     protected:
