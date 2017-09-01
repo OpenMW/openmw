@@ -13,6 +13,7 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/sceneutil/riggeometry.hpp>
+#include <components/sceneutil/morphgeometry.hpp>
 
 #include "shadermanager.hpp"
 
@@ -376,11 +377,17 @@ namespace Shader
             const ShaderRequirements& reqs = mRequirements.back();
             createProgram(reqs);
 
-            if (SceneUtil::RigGeometry* rig = dynamic_cast<SceneUtil::RigGeometry*>(&drawable))
+            if (auto rig = dynamic_cast<SceneUtil::RigGeometry*>(&drawable))
             {
                 osg::ref_ptr<osg::Geometry> sourceGeometry = rig->getSourceGeometry();
                 if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
                     rig->setSourceGeometry(sourceGeometry);
+            }
+            else if (auto morph = dynamic_cast<SceneUtil::MorphGeometry*>(&drawable))
+            {
+                osg::ref_ptr<osg::Geometry> sourceGeometry = morph->getSourceGeometry();
+                if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
+                    morph->setSourceGeometry(sourceGeometry);
             }
         }
 
