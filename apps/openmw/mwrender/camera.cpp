@@ -56,7 +56,7 @@ namespace MWRender
       mFurthest(800.f),
       mIsNearest(false),
       mHeight(124.f),
-      mMaxCameraDistance(sResetThirdPersonCameraDistance),
+      mMaxCameraDistance(Settings::Manager::getBool("third person over shoulder", "Input") ? Settings::Manager::getFloat("third person over shoulder camera distance", "Input") : sResetThirdPersonCameraDistance),
       mVanityToggleQueued(false),
       mVanityToggleQueuedValue(false),
       mViewModeToggleQueued(false),
@@ -172,7 +172,13 @@ namespace MWRender
 
         // only show the crosshair in game mode and in first person mode.
         MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
-        wm->showCrosshair(!wm->isGuiMode() && ((mCameraView == CameraView_FirstPerson) && !mVanity.enabled && !mPreviewMode));
+        wm->showCrosshair(
+            !wm->isGuiMode() && 
+            (
+                ((mCameraView == CameraView_FirstPerson) || (mCameraView == CameraView_ThirdPersonOverShoulder)) &&
+                !mVanity.enabled && !mPreviewMode
+            )
+        );
 
         if(mVanity.enabled)
         {
@@ -362,9 +368,7 @@ namespace MWRender
                 mCameraDistance = mMaxCameraDistance;
             }
             else if (mCameraView == CameraView_ThirdPersonOverShoulder) {
-                mCameraDistance = mMaxCameraDistance - 100.0f;
-                if(mCameraDistance < 0.0f)
-                    mCameraDistance = Settings::Manager::getFloat("third person over shoulder camera distance","Input");
+                mCameraDistance = mMaxCameraDistance;
             }
         }
     }
@@ -398,7 +402,7 @@ namespace MWRender
                 mHeightScale = transform->getScale().z();
             else
                 mHeightScale = 1.f;
-            if ((mCameraView == CameraView_ThirdPersonOverShoulder) && !mPreviewMode) {
+            if ((mCameraView == CameraView_ThirdPersonOverShoulder) && !mPreviewMode && !mVanity.enabled) {
                 mCameraZOffsetFromCenter = Settings::Manager::getFloat("third person over shoulder z offset", "Input");
                 mCameraXOffsetFromCenter = Settings::Manager::getFloat("third person over shoulder x offset", "Input");
             }
