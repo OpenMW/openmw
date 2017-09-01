@@ -35,7 +35,7 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
 
     for (unsigned int i=0; i<2; ++i)
     {
-        osg::Geometry& from = *sourceGeometry;
+        const osg::Geometry& from = *sourceGeometry;
         mGeometry[i] = new osg::Geometry(from, osg::CopyOp::SHALLOW_COPY);
         osg::Geometry& to = *mGeometry[i];
         to.setSupportsDisplayList(false);
@@ -54,7 +54,7 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
             to.setVertexArray(vertexArray);
         }
 
-        if (osg::Array* normals = from.getNormalArray())
+        if (const osg::Array* normals = from.getNormalArray())
         {
             osg::ref_ptr<osg::Array> normalArray = osg::clone(normals, osg::CopyOp::DEEP_COPY_ALL);
             if (normalArray)
@@ -64,7 +64,7 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
             }
         }
 
-        if (osg::Vec4Array* tangents = dynamic_cast<osg::Vec4Array*>(from.getTexCoordArray(7)))
+        if (const osg::Vec4Array* tangents = dynamic_cast<const osg::Vec4Array*>(from.getTexCoordArray(7)))
         {
             mSourceTangents = tangents;
             osg::ref_ptr<osg::Array> tangentArray = osg::clone(tangents, osg::CopyOp::DEEP_COPY_ALL);

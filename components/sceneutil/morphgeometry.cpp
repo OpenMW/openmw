@@ -31,7 +31,7 @@ void MorphGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom)
     {
         mGeometry[i] = new osg::Geometry(*mSourceGeometry, osg::CopyOp::SHALLOW_COPY);
 
-        osg::Geometry& from = *mSourceGeometry;
+        const osg::Geometry& from = *mSourceGeometry;
         osg::Geometry& to = *mGeometry[i];
         to.setSupportsDisplayList(false);
         to.setUseVertexBufferObjects(true);

@@ -57,7 +57,7 @@ namespace SceneUtil
         osg::Geometry* getGeometry(unsigned int frame) const;
 
         osg::ref_ptr<osg::Geometry> mSourceGeometry;
-        osg::ref_ptr<osg::Vec4Array> mSourceTangents;
+        osg::ref_ptr<const osg::Vec4Array> mSourceTangents;
         Skeleton* mSkeleton;
 
         osg::ref_ptr<osg::RefMatrix> mGeomToSkelMatrix;
