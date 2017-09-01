@@ -174,7 +174,10 @@ void RigGeometry::cull(osg::NodeVisitor* nv)
 
     if ((!mSkeleton->getActive() && mLastFrameNumber != 0) || mLastFrameNumber == nv->getTraversalNumber())
     {
-        nv->apply(*getGeometry(mLastFrameNumber));
+        osg::Geometry& geom = *getGeometry(mLastFrameNumber);
+        nv->pushOntoNodePath(&geom);
+        nv->apply(geom);
+        nv->popFromNodePath();
         return;
     }
     mLastFrameNumber = nv->getTraversalNumber();
