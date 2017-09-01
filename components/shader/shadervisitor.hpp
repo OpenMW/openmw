@@ -99,6 +99,7 @@ namespace Shader
         std::string mDefaultFsTemplate;
 
         void createProgram(const ShaderRequirements& reqs);
+        bool adjustGeometry(osg::Geometry& sourceGeometry, const ShaderRequirements& reqs);
     };
 
 }

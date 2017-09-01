@@ -248,6 +248,9 @@ namespace Shader
 
     void ShaderVisitor::createProgram(const ShaderRequirements &reqs)
     {
+        if (!reqs.mShaderRequired && !mForceShaders)
+            return;
+
         osg::Node& node = *reqs.mNode;
         osg::StateSet* writableStateSet = NULL;
         if (mAllowedToModifyStateSets)
@@ -305,6 +308,36 @@ namespace Shader
         }
     }
 
+    bool ShaderVisitor::adjustGeometry(osg::Geometry& sourceGeometry, const ShaderRequirements& reqs)
+    {
+        bool useShader = reqs.mShaderRequired || mForceShaders;
+        bool generateTangents = reqs.mTexStageRequiringTangents != -1;
+        bool changed = false;
+
+        if (mAllowedToModifyStateSets && (useShader || generateTangents))
+        {
+            // make sure that all UV sets are there
+            for (std::map<int, std::string>::const_iterator it = reqs.mTextures.begin(); it != reqs.mTextures.end(); ++it)
+            {
+                if (sourceGeometry.getTexCoordArray(it->first) == NULL)
+                {
+                    sourceGeometry.setTexCoordArray(it->first, sourceGeometry.getTexCoordArray(0));
+                    changed = true;
+                }
+            }
+
+            if (generateTangents)
+            {
+                osg::ref_ptr<osgUtil::TangentSpaceGenerator> generator (new osgUtil::TangentSpaceGenerator);
+                generator->generate(&sourceGeometry, reqs.mTexStageRequiringTangents);
+
+                sourceGeometry.setTexCoordArray(7, generator->getTangentArray(), osg::Array::BIND_PER_VERTEX);
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
     void ShaderVisitor::apply(osg::Geometry& geometry)
     {
         bool needPop = (geometry.getStateSet() != NULL);
@@ -318,43 +351,9 @@ namespace Shader
         {
             const ShaderRequirements& reqs = mRequirements.back();
 
-            bool useShader = reqs.mShaderRequired || mForceShaders;
-            bool generateTangents = reqs.mTexStageRequiringTangents != -1;
+            adjustGeometry(geometry, reqs);
 
-            if (mAllowedToModifyStateSets && (useShader || generateTangents))
-            {
-                osg::ref_ptr<osg::Geometry> sourceGeometry = &geometry;
-                SceneUtil::RigGeometry* rig = dynamic_cast<SceneUtil::RigGeometry*>(&geometry);
-                if (rig)
-                    sourceGeometry = rig->getSourceGeometry();
-
-                bool requiresSetGeometry = false;
-
-                // make sure that all UV sets are there
-                for (std::map<int, std::string>::const_iterator it = reqs.mTextures.begin(); it != reqs.mTextures.end(); ++it)
-                {
-                    if (sourceGeometry->getTexCoordArray(it->first) == NULL)
-                    {
-                        sourceGeometry->setTexCoordArray(it->first, sourceGeometry->getTexCoordArray(0));
-                        requiresSetGeometry = true;
-                    }
-                }
-
-                if (generateTangents)
-                {
-                    osg::ref_ptr<osgUtil::TangentSpaceGenerator> generator (new osgUtil::TangentSpaceGenerator);
-                    generator->generate(sourceGeometry, reqs.mTexStageRequiringTangents);
-
-                    sourceGeometry->setTexCoordArray(7, generator->getTangentArray(), osg::Array::BIND_PER_VERTEX);
-                    requiresSetGeometry = true;
-                }
-
-                if (rig && requiresSetGeometry)
-                    rig->setSourceGeometry(sourceGeometry);
-            }
-
-            if (useShader)
-                createProgram(reqs);
+            createProgram(reqs);
         }
 
         if (needPop)
@@ -375,8 +374,14 @@ namespace Shader
         if (!mRequirements.empty())
         {
             const ShaderRequirements& reqs = mRequirements.back();
-            if (reqs.mShaderRequired || mForceShaders)
-                createProgram(reqs);
+            createProgram(reqs);
+
+            if (SceneUtil::RigGeometry* rig = dynamic_cast<SceneUtil::RigGeometry*>(&drawable))
+            {
+                osg::ref_ptr<osg::Geometry> sourceGeometry = rig->getSourceGeometry();
+                if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
+                    rig->setSourceGeometry(sourceGeometry);
+            }
         }
 
         if (needPop)
