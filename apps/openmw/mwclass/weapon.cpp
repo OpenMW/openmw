@@ -374,7 +374,9 @@ namespace MWClass
         if (hasItemHealth(ptr) && ptr.getCellRef().getCharge() == 0)
             return std::make_pair(0, "#{sInventoryMessage1}");
 
-        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc))
+        // Do not allow equip weapons from inventory during attack
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc)
+            && MWBase::Environment::get().getWindowManager()->isGuiMode())
             return std::make_pair(0, "#{sCantEquipWeapWarning}");
 
         std::pair<std::vector<int>, bool> slots_ = ptr.getClass().getEquipmentSlots(ptr);

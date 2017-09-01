@@ -263,6 +263,7 @@ public:
 
     void forceStateUpdate();
     
+    bool isAttackPrepairing() const;
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
     bool isSneaking() const;
