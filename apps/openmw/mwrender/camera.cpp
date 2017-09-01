@@ -43,7 +43,6 @@ namespace MWRender
 {
 
     const float Camera::sResetThirdPersonCameraDistance = 192.f;
-    const float Camera::sResetThirdPersonOverShoulderCameraDistance = 92.f;
 
     Camera::Camera (osg::Camera* camera)
     : mHeightScale(1.f),
@@ -58,12 +57,12 @@ namespace MWRender
       mIsNearest(false),
       mHeight(124.f),
       mMaxCameraDistance(sResetThirdPersonCameraDistance),
-      mCameraXOffsetFromCenter(0.0f),
-      mCameraZOffsetFromCenter(0.0f),
       mVanityToggleQueued(false),
       mVanityToggleQueuedValue(false),
       mViewModeToggleQueued(false),
-      mCameraDistance(0.f)
+      mCameraDistance(0.f),
+      mCameraXOffsetFromCenter(0.0f),
+      mCameraZOffsetFromCenter(0.0f)
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
@@ -181,30 +180,6 @@ namespace MWRender
         }
     }
 
-    void Camera::cycleViewMode(bool force)
-    {
-        // Changing the view will stop all playing animations, so if we are playing
-        // anything important, queue the view change for later
-        if (!mAnimation->upperBodyReady() && !force)
-        {
-            mViewModeToggleQueued = true;
-            return;
-        }
-        else
-            mViewModeToggleQueued = false;
-
-
-        mCameraView = (CameraView)(mCameraView + 1);
-        // Skip over if Over The Shoulder is not enabled
-        if ((mCameraView == CameraView_ThirdPersonOverShoulder) && !Settings::Manager::getBool("third person over shoulder", "Input"))
-            mCameraView = (CameraView)(mCameraView + 1);
-        if (mCameraView == CameraView_NumCameraViews)
-            mCameraView = CameraView_FirstPerson;
-        // Record the current active 3rd person view
-        if (mCameraView != CameraView_FirstPerson)
-            mActiveThirdPersonView = mCameraView;
-        processViewChange();
-    }
     void Camera::toggleViewMode(bool force)
     {
         // Changing the view will stop all playing animations, so if we are playing
@@ -218,6 +193,7 @@ namespace MWRender
             mViewModeToggleQueued = false;
 
         // Cycle between our active Third Person View and First Person
+        mActiveThirdPersonView = Settings::Manager::getBool("third person over shoulder", "Input") ? CameraView_ThirdPersonOverShoulder : CameraView_ThirdPersonCenter;
         mCameraView = (mCameraView == CameraView_FirstPerson) ? mActiveThirdPersonView : CameraView_FirstPerson;
 
         processViewChange();
@@ -388,7 +364,7 @@ namespace MWRender
             else if (mCameraView == CameraView_ThirdPersonOverShoulder) {
                 mCameraDistance = mMaxCameraDistance - 100.0f;
                 if(mCameraDistance < 0.0f)
-                    mCameraDistance = sResetThirdPersonOverShoulderCameraDistance;
+                    mCameraDistance = Settings::Manager::getFloat("third person over shoulder camera distance","Input");
             }
         }
     }
@@ -422,9 +398,9 @@ namespace MWRender
                 mHeightScale = transform->getScale().z();
             else
                 mHeightScale = 1.f;
-            if (mCameraView == CameraView_ThirdPersonOverShoulder) {
-                mCameraZOffsetFromCenter = -15.0f;
-                mCameraXOffsetFromCenter = 40.0f;
+            if ((mCameraView == CameraView_ThirdPersonOverShoulder) && !mPreviewMode) {
+                mCameraZOffsetFromCenter = Settings::Manager::getFloat("third person over shoulder z offset", "Input");
+                mCameraXOffsetFromCenter = Settings::Manager::getFloat("third person over shoulder x offset", "Input");
             }
         }
         rotateCamera(getPitch(), getYaw(), false);

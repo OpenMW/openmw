@@ -32,7 +32,6 @@ namespace MWRender
     {
         // The reset camera distances for the various views
         static const float sResetThirdPersonCameraDistance;
-        static const float sResetThirdPersonOverShoulderCameraDistance;
 
         struct CamData {
             float pitch, yaw, offset;
@@ -100,7 +99,6 @@ namespace MWRender
 
         /// @param Force view mode switch, even if currently not allowed by the animation.
         void toggleViewMode(bool force=false);
-        void cycleViewMode(bool force = false);
 
         bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
