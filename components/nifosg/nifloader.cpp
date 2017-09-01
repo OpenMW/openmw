@@ -1236,7 +1236,6 @@ namespace NifOsg
 
                 SceneUtil::RigGeometry::BoneInfluence influence;
                 const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[i].weights;
-                //influence.mWeights.reserve(weights.size());
                 for(size_t j = 0;j < weights.size();j++)
                 {
                     std::pair<unsigned short, float> indexWeight = std::make_pair(weights[j].vertex, weights[j].weight);
@@ -1249,17 +1248,7 @@ namespace NifOsg
             }
             rig->setInfluenceMap(map);
 
-            // Add a copy, we will alternate between the two copies every other frame using the FrameSwitch
-            // This is so we can set the DataVariance as STATIC, giving a huge performance boost
-            rig->setDataVariance(osg::Object::STATIC);
-
-            osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
-
-            SceneUtil::RigGeometry* rig2 = osg::clone(rig.get(), osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES);
-            frameswitch->addChild(rig);
-            frameswitch->addChild(rig2);
-
-            parentNode->addChild(frameswitch);
+            parentNode->addChild(rig);
         }
 
         osg::BlendFunc::BlendFuncMode getBlendMode(int mode)

@@ -50,7 +50,7 @@ class RigGeometrySerializer : public osgDB::ObjectWrapper
 {
 public:
     RigGeometrySerializer()
-        : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::RigGeometry>, "SceneUtil::RigGeometry", "osg::Object osg::Node osg::Drawable osg::Geometry SceneUtil::RigGeometry")
+        : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::RigGeometry>, "SceneUtil::RigGeometry", "osg::Object osg::Node osg::Drawable SceneUtil::RigGeometry")
     {
     }
 };

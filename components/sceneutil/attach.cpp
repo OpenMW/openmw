@@ -43,13 +43,13 @@ namespace SceneUtil
             traverse(node);
         }
 
-        virtual void apply(osg::Geometry& geom)
+        virtual void apply(osg::Drawable& drawable)
         {
-            std::string lowerName = Misc::StringUtils::lowerCase(geom.getName());
+            std::string lowerName = Misc::StringUtils::lowerCase(drawable.getName());
             if ((lowerName.size() >= mFilter.size() && lowerName.compare(0, mFilter.size(), mFilter) == 0)
                     || (lowerName.size() >= mFilter2.size() && lowerName.compare(0, mFilter2.size(), mFilter2) == 0))
             {
-                osg::Node* node = &geom;
+                osg::Node* node = &drawable;
                 while (node && node->getNumParents() && !node->getStateSet())
                     node = node->getParent(0);
                 if (node)
