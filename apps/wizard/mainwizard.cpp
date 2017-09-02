@@ -16,10 +16,10 @@
 #include "componentselectionpage.hpp"
 #include "importpage.hpp"
 #include "conclusionpage.hpp"
+#include "buypage.hpp"
 
 #ifdef OPENMW_USE_UNSHIELD
 #include "installationpage.hpp"
-#include "buypage.hpp"
 
 #endif
 
