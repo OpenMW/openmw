@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=TES3MP Server Browser
+GenericName=Server Browser
+Comment=Multiplayer extension for TES3.
+Keywords=Morrowind;Multiplayer;Server Browser;TES;openmw;
+TryExec=tes3mp-browser
+Exec=tes3mp-browser
+Icon=openmw
+Categories=Game;RolePlaying;
