@@ -1,9 +1,23 @@
 <RCC>
+  <qresource prefix="icons/gnome">
+    <file alias="index.theme">icons/gnome/index.theme</file>
+    <file alias="48x48/basket.png">icons/gnome/48x48/basket.png</file>
+  </qresource>
   <qresource prefix="icons/tango">
     <file alias="48x48/preferences-desktop-locale.png">icons/tango/48x48/preferences-desktop-locale.png</file>
     <file alias="index.theme">icons/tango/index.theme</file>
     <file alias="48x48/folder.png">icons/tango/48x48/folder.png</file>
     <file alias="48x48/system-installer.png">icons/tango/48x48/system-installer.png</file>
+  </qresource>
+  <qresource prefix="icons/retailers">
+    <file alias="index.theme">icons/retailers/index.theme</file>
+    <file alias="48x48/dlgamer.png">icons/retailers/48x48/dlgamer.png</file>
+    <file alias="48x48/gamesplanet.png">icons/retailers/48x48/gamesplanet.png</file>
+    <file alias="48x48/gamestop.png">icons/retailers/48x48/gamestop.png</file>
+    <file alias="48x48/gog.png">icons/retailers/48x48/gog.png</file>
+    <file alias="48x48/humble-bundle.png">icons/retailers/48x48/humble-bundle.png</file>
+    <file alias="48x48/nuuvem.png">icons/retailers/48x48/nuuvem.png</file>
+    <file alias="48x48/steam.png">icons/retailers/48x48/steam.png</file>
   </qresource>
   <qresource prefix="images">
     <file alias="intropage-background.png">images/intropage-background.png</file>    

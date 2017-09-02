@@ -37,6 +37,7 @@ namespace Wizard
             Page_ComponentSelection,
             Page_Installation,
             Page_Import,
+            Page_Buy,
             Page_Conclusion
         };
 

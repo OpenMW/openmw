@@ -11,6 +11,7 @@ set(WIZARD
     main.cpp
     mainwizard.cpp
     methodselectionpage.cpp
+    buypage.cpp
 
     utils/componentlistwidget.cpp
 )
@@ -30,6 +31,7 @@ set(WIZARD_HEADER
     languageselectionpage.hpp
     mainwizard.hpp
     methodselectionpage.hpp
+    buypage.hpp
 
     utils/componentlistwidget.hpp
 )
@@ -45,6 +47,7 @@ set(WIZARD_HEADER_MOC
     languageselectionpage.hpp
     mainwizard.hpp
     methodselectionpage.hpp
+    buypage.hpp
 
     utils/componentlistwidget.hpp
 )
@@ -58,6 +61,7 @@ set(WIZARD_UI
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/intropage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/languageselectionpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/methodselectionpage.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/wizard/buypage.ui
 )
 
 if (OPENMW_USE_UNSHIELD)

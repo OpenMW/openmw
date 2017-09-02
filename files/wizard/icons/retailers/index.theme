@@ -1,0 +1,8 @@
+[Icon Theme]
+Name=Retailers
+Comment=Retailer icons, either in public domain due to being letters or under SIL Open Font License
+Inherits=default
+Directories=48x48
+
+[48x48]
+Size=48
