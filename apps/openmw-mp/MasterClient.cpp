@@ -123,6 +123,7 @@ bool MasterClient::Process(RakNet::Packet *packet)
     rs.Read(pid);
     switch (pid)
     {
+        case ID_SND_RECEIPT_ACKED:
         case ID_CONNECTION_ATTEMPT_FAILED:
         case ID_CONNECTION_REQUEST_ACCEPTED:
         case ID_DISCONNECTION_NOTIFICATION:
