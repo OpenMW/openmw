@@ -318,12 +318,15 @@ void RigGeometry::accept(osg::NodeVisitor &nv)
         cull(&nv);
     else if (nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR)
         updateBounds(&nv);
-    else if (nv.getVisitorType() == osg::NodeVisitor::INTERSECTION_VISITOR)
-        nv.apply(*getGeometry(mLastFrameNumber));
     else
         nv.apply(*this);
 
     nv.popFromNodePath();
+}
+
+void RigGeometry::accept(osg::PrimitiveFunctor& func) const
+{
+    getGeometry(mLastFrameNumber)->accept(func);
 }
 
 osg::Geometry* RigGeometry::getGeometry(unsigned int frame) const

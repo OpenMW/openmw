@@ -82,12 +82,15 @@ void MorphGeometry::accept(osg::NodeVisitor &nv)
 
     if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
         cull(&nv);
-    else if (nv.getVisitorType() == osg::NodeVisitor::INTERSECTION_VISITOR)
-        nv.apply(*getGeometry(mLastFrameNumber));
     else
         nv.apply(*this);
 
     nv.popFromNodePath();
+}
+
+void MorphGeometry::accept(osg::PrimitiveFunctor& func) const
+{
+    getGeometry(mLastFrameNumber)->accept(func);
 }
 
 osg::BoundingBox MorphGeometry::computeBoundingBox() const

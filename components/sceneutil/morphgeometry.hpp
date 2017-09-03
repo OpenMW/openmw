@@ -57,6 +57,8 @@ namespace SceneUtil
         osg::ref_ptr<osg::Geometry> getSourceGeometry() const;
 
         virtual void accept(osg::NodeVisitor &nv);
+        virtual bool supports(const osg::PrimitiveFunctor&) const { return true; }
+        virtual void accept(osg::PrimitiveFunctor&) const;
 
         virtual osg::BoundingBox computeBoundingBox() const;
 
