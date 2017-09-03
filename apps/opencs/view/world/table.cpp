@@ -458,23 +458,15 @@ void CSVWorld::Table::touchRecord()
 {
     if (!mEditLock && mModel->getFeatures() & CSMWorld::IdTableBase::Feature_AllowTouch)
     {
-        if (CSMWorld::IdTable* table = dynamic_cast<CSMWorld::IdTable*>(mModel))
+        std::vector<CSMWorld::UniversalId> touchIds;
+
+        QModelIndexList selectedRows = selectionModel()->selectedRows();
+        for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
         {
-            QUndoCommand* touchRecords = new QUndoCommand();
-            touchRecords->setText("Touch records");
-
-            QModelIndexList selectedRows = selectionModel()->selectedRows();
-            for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
-            {
-                QModelIndex index = mProxyModel->mapToSource(mProxyModel->index(it->row(),0));
-                std::string id = table->getId(index.row());
-
-                // command is a child of touchRecords
-                QUndoCommand* command = new CSMWorld::TouchCommand(*table, id, touchRecords);
-            }
-
-            mDocument.getUndoStack().push(touchRecords);
+            touchIds.push_back(getUniversalId(it->row()));
         }
+
+        emit touchRequest(touchIds);
     }
 }
 

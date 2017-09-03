@@ -103,6 +103,8 @@ namespace CSVWorld
             virtual void cloneMode(const std::string& originId,
                                    const CSMWorld::UniversalId::Type type);
 
+            virtual void touch(const std::vector<CSMWorld::UniversalId>& ids);
+
             virtual std::string getErrors() const;
             ///< Return formatted error descriptions for the current state of the creator. if an empty
             /// string is returned, there is no error.

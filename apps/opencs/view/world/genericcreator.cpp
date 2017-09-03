@@ -254,6 +254,23 @@ void CSVWorld::GenericCreator::cloneMode(const std::string& originId,
     mClonedType = type;
 }
 
+void CSVWorld::GenericCreator::touch(const std::vector<CSMWorld::UniversalId>& ids)
+{
+    // Combine multiple touch commands into one "macro" command
+    std::unique_ptr<QUndoCommand> macro(new QUndoCommand());
+    macro->setText("Touch records");
+
+    CSMWorld::IdTable& table = dynamic_cast<CSMWorld::IdTable&>(*mData.getTableModel(mListId));
+    for (const CSMWorld::UniversalId& uid : ids)
+    {
+        // This is not leaked, touchCmd is a child of macro and managed by Qt
+        CSMWorld::TouchCommand* touchCmd = new CSMWorld::TouchCommand(table, uid.getId(), macro.get());
+    }
+
+    // Execute
+    mUndoStack.push(macro.release());
+}
+
 void CSVWorld::GenericCreator::toggleWidgets(bool active)
 {
 }
