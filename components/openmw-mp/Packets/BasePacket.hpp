@@ -81,10 +81,7 @@ namespace mwmp
             if (write)
             {
                 if (compress)
-                {
-                    if (!str.empty())
-                        RakNet::RakString::SerializeCompressed(str.c_str(), bs);
-                }
+                    RakNet::RakString::SerializeCompressed(str.c_str(), bs);
                 else
                 {
                     RakNet::RakString rstr;
