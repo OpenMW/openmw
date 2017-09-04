@@ -62,6 +62,8 @@ LocalPlayer::LocalPlayer()
     jailProgressText = "";
     jailEndText = "";
 
+    isWerewolf = false;
+
     diedSinceArrestAttempt = false;
 }
 
