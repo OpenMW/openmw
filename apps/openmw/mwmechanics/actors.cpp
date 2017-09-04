@@ -1065,7 +1065,18 @@ namespace MWMechanics
                     && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr))
                 {
                     static const int iCrimeThresholdMultiplier = esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->getInt();
-                    if (player.getClass().getNpcStats(player).getBounty() >= cutoff * iCrimeThresholdMultiplier)
+
+                    /*
+                        Start of tes3mp change (major)
+
+                        Only attack players based on their high bounty if they haven't died since the last
+                        time an attempt was made to arrest them
+                    */
+                    if (player.getClass().getNpcStats(player).getBounty() >= cutoff * iCrimeThresholdMultiplier
+                        && !mwmp::Main::get().getLocalPlayer()->diedSinceArrestAttempt)
+                    /*
+                        End of tes3mp change (major)
+                    */
                     {
                         MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
                         creatureStats.setHitAttemptActorId(player.getClass().getCreatureStats(player).getActorId()); // Stops the guard from quitting combat if player is unreachable
@@ -1096,6 +1107,24 @@ namespace MWMechanics
                     // Update witness crime id
                     npcStats.setCrimeId(-1);
                 }
+                /*
+                    Start of tes3mp addition
+
+                    If the player has died, stop combat with them as though they had
+                    paid their bounty
+                */
+                else if (mwmp::Main::get().getLocalPlayer()->diedSinceArrestAttempt)
+                {
+                    if (creatureStats.getAiSequence().isInCombat(player))
+                    {
+                        creatureStats.getAiSequence().stopCombat();
+                        creatureStats.setAttacked(false);
+                        creatureStats.setAlarmed(false);
+                    }
+                }
+                /*
+                    End of tes3mp addition
+                */
             }
         }
     }

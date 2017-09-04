@@ -263,6 +263,8 @@ namespace mwmp
         std::string jailEndText;
 
         unsigned int resurrectType;
+
+        bool diedSinceArrestAttempt;
     };
 }
 

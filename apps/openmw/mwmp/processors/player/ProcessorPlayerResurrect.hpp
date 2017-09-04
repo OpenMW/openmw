@@ -52,6 +52,12 @@ namespace mwmp
                 // readied but be unable to use it unless we clear it here
                 playerPtr.getClass().getNpcStats(playerPtr).setDrawState(MWMechanics::DrawState_Nothing);
 
+                // Record that the player has died since the last attempt was made to arrest them,
+                // used to make guards lenient enough to attempt an arrest again
+                player->diedSinceArrestAttempt = true;
+
+                LOG_APPEND(Log::LOG_INFO, "- diedSinceArrestAttempt is now true");
+
                 packet.setPlayer(player);
                 packet.Send(serverAddr);
 

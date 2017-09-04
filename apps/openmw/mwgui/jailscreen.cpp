@@ -129,7 +129,7 @@ namespace MWGui
                 Disable increases for Security and Sneak when using ignoreJailSkillIncreases
             */
             if (mwmp::Main::get().getLocalPlayer()->ignoreJailSkillIncreases)
-                value.setBase(value.getBase() - 1);
+                value.setBase(std::max(0, value.getBase()-1));
             else if (skill == ESM::Skill::Security || skill == ESM::Skill::Sneak)
             /*
                 End of tes3mp change (minor)

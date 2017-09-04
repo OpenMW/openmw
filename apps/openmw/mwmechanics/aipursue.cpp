@@ -13,7 +13,10 @@
 
     Include additional headers for multiplayer purposes
 */
+#include <components/openmw-mp/Log.hpp>
 #include "../mwgui/windowmanagerimp.hpp"
+#include "../mwmp/Main.hpp"
+#include "../mwmp/LocalPlayer.hpp"
 /*
     End of tes3mp addition
 */
@@ -81,6 +84,18 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
 
     if (pathTo(actor, dest, duration, 100)) {
         target.getClass().activate(target,actor).get()->execute(actor); //Arrest player when reached
+
+        /*
+            Start of tes3mp addition
+
+            Record that the player has not died since the last attempt to arrest them
+        */
+        LOG_MESSAGE_SIMPLE(Log::LOG_INFO, "After being pursued by %s, diedSinceArrestAttempt is now false", actor.getCellRef().getRefId().c_str());
+        mwmp::Main::get().getLocalPlayer()->diedSinceArrestAttempt = false;
+        /*
+            End of tes3mp addition
+        */
+
         return true;
     }
 

@@ -61,6 +61,8 @@ LocalPlayer::LocalPlayer()
 
     jailProgressText = "";
     jailEndText = "";
+
+    diedSinceArrestAttempt = false;
 }
 
 LocalPlayer::~LocalPlayer()
