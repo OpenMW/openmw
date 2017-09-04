@@ -97,15 +97,8 @@ void LocalPlayer::update()
         updateDeadState();
         updateEquipment();
         updateStatsDynamic();
-
-        // Only send attributes and skills if we are not a werewolf, or they will be
-        // overwritten by the werewolf ones
-        if (!isWerewolf)
-        {
-            updateAttributes();
-            updateSkills();
-        }
-
+        updateAttributes();
+        updateSkills();
         updateLevel();
         updateBounty();
     }
@@ -234,6 +227,10 @@ void LocalPlayer::updateStatsDynamic(bool forceUpdate)
 
 void LocalPlayer::updateAttributes(bool forceUpdate)
 {
+    // Only send attributes if we are not a werewolf, or they will be
+    // overwritten by the werewolf ones
+    if (isWerewolf) return;
+
     MWWorld::Ptr ptrPlayer = getPlayerPtr();
     const MWMechanics::NpcStats &ptrNpcStats = ptrPlayer.getClass().getNpcStats(ptrPlayer);
     bool attributesChanged = false;
@@ -256,6 +253,10 @@ void LocalPlayer::updateAttributes(bool forceUpdate)
 
 void LocalPlayer::updateSkills(bool forceUpdate)
 {
+    // Only send skills if we are not a werewolf, or they will be
+    // overwritten by the werewolf ones
+    if (isWerewolf) return;
+
     MWWorld::Ptr ptrPlayer = getPlayerPtr();
     const MWMechanics::NpcStats &ptrNpcStats = ptrPlayer.getClass().getNpcStats(ptrPlayer);
 
