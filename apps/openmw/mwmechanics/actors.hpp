@@ -117,6 +117,7 @@ namespace MWMechanics
                 End of tes3mp addition
             */
 
+            bool isAttackPrepairing(const MWWorld::Ptr& ptr);
             bool isRunning(const MWWorld::Ptr& ptr);
             bool isSneaking(const MWWorld::Ptr& ptr);
 

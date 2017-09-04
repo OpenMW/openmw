@@ -182,7 +182,10 @@ namespace
         void remove()
         {
             for (RemoveVec::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
-                it->second->removeChild(it->first);
+            {
+                if (!it->second->removeChild(it->first))
+                    std::cerr << "error removing " << it->first->getName() << std::endl;
+            }
         }
 
     protected:
@@ -1192,6 +1195,9 @@ namespace MWRender
                 mObjectRoot->addChild(created);
                 mInsert->addChild(mObjectRoot);
             }
+            osg::ref_ptr<SceneUtil::Skeleton> skel = dynamic_cast<SceneUtil::Skeleton*>(mObjectRoot.get());
+            if (skel)
+                mSkeleton = skel.get();
         }
         else
         {

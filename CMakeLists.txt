@@ -217,7 +217,8 @@ endif()
 
 IF(BUILD_OPENMW OR BUILD_OPENCS)
 
-    find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgUtil osgFX)
+    find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX)
+    include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
     set(USED_OSG_PLUGINS
                     osgdb_bmp
@@ -260,8 +261,6 @@ IF(BUILD_OPENMW OR BUILD_OPENCS)
     find_package(Bullet ${REQUIRED_BULLET_VERSION} REQUIRED COMPONENTS BulletCollision LinearMath)
 
 ENDIF(BUILD_OPENMW OR BUILD_OPENCS)
-
-include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 
 set(BOOST_COMPONENTS system filesystem program_options)

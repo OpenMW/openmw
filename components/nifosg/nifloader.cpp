@@ -13,9 +13,6 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
 
-// skel
-#include <osgAnimation/MorphGeometry>
-
 // particle
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
@@ -39,6 +36,7 @@
 #include <components/nif/effect.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/riggeometry.hpp>
+#include <components/sceneutil/morphgeometry.hpp>
 
 #include "particle.hpp"
 #include "userdata.hpp"
@@ -83,35 +81,6 @@ namespace
             collectDrawableProperties(nifNode->parent, out);
     }
 
-    class FrameSwitch : public osg::Group
-    {
-    public:
-        FrameSwitch()
-        {
-        }
-
-        FrameSwitch(const FrameSwitch& copy, const osg::CopyOp& copyop)
-            : osg::Group(copy, copyop)
-        {
-        }
-
-        META_Object(NifOsg, FrameSwitch)
-
-        virtual void traverse(osg::NodeVisitor& nv)
-        {
-            if (nv.getTraversalMode() != osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN && nv.getVisitorType() != osg::NodeVisitor::UPDATE_VISITOR)
-                osg::Group::traverse(nv);
-            else
-            {
-                for (unsigned int i=0; i<getNumChildren(); ++i)
-                {
-                    if (i%2 == nv.getTraversalNumber()%2)
-                        getChild(i)->accept(nv);
-                }
-            }
-        }
-    };
-
     // NodeCallback used to have a node always oriented towards the camera. The node can have translation and scale
     // set just like a regular MatrixTransform, but the rotation set will be overridden in order to face the camera.
     // Must be set as a cull callback.
@@ -152,70 +121,6 @@ namespace
 
             cv->popModelViewMatrix();
         }
-    };
-
-    struct UpdateMorphGeometry : public osg::Drawable::CullCallback
-    {
-        UpdateMorphGeometry()
-            : mLastFrameNumber(0)
-        {
-        }
-
-        UpdateMorphGeometry(const UpdateMorphGeometry& copy, const osg::CopyOp& copyop)
-            : osg::Drawable::CullCallback(copy, copyop)
-            , mLastFrameNumber(0)
-        {
-        }
-
-        META_Object(NifOsg, UpdateMorphGeometry)
-
-        virtual bool cull(osg::NodeVisitor* nv, osg::Drawable * drw, osg::State *) const
-        {
-            osgAnimation::MorphGeometry* geom = static_cast<osgAnimation::MorphGeometry*>(drw);
-            if (!geom)
-                return false;
-
-            if (mLastFrameNumber == nv->getTraversalNumber())
-                return false;
-            mLastFrameNumber = nv->getTraversalNumber();
-
-            geom->transformSoftwareMethod();
-            return false;
-        }
-
-    private:
-        mutable unsigned int mLastFrameNumber;
-    };
-
-    // Callback to return a static bounding box for a MorphGeometry. The idea is to not recalculate the bounding box
-    // every time the morph weights change. To do so we return a maximum containing box that is big enough for all possible combinations of morph targets.
-    class StaticBoundingBoxCallback : public osg::Drawable::ComputeBoundingBoxCallback
-    {
-    public:
-        StaticBoundingBoxCallback()
-        {
-        }
-
-        StaticBoundingBoxCallback(const osg::BoundingBox& bounds)
-            : mBoundingBox(bounds)
-        {
-        }
-
-        StaticBoundingBoxCallback(const StaticBoundingBoxCallback& copy, const osg::CopyOp& copyop)
-            : osg::Drawable::ComputeBoundingBoxCallback(copy, copyop)
-            , mBoundingBox(copy.mBoundingBox)
-        {
-        }
-
-        META_Object(NifOsg, StaticBoundingBoxCallback)
-
-        virtual osg::BoundingBox computeBound(const osg::Drawable&) const
-        {
-            return mBoundingBox;
-        }
-
-    private:
-        osg::BoundingBox mBoundingBox;
     };
 
     void extractTextKeys(const Nif::NiTextKeyExtraData *tk, NifOsg::TextKeyMap &textkeys)
@@ -1107,106 +1012,49 @@ namespace NifOsg
 
         void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
-            osg::ref_ptr<osg::Geometry> geometry;
+            osg::ref_ptr<osg::Drawable> drawable;
             for (Nif::ControllerPtr ctrl = triShape->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
                 if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
                     continue;
                 if(ctrl->recType == Nif::RC_NiGeomMorpherController)
                 {
-                    geometry = handleMorphGeometry(static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr()), triShape, parentNode, composite, boundTextures, animflags);
+                    drawable = handleMorphGeometry(static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr()), triShape, parentNode, composite, boundTextures, animflags);
 
                     osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(
                                 static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr())->data.getPtr());
                     setupController(ctrl.getPtr(), morphctrl, animflags);
-                    geometry->setUpdateCallback(morphctrl);
+                    drawable->setUpdateCallback(morphctrl);
                     break;
                 }
             }
 
-            if (!geometry.get())
+            if (!drawable.get())
             {
-                geometry = new osg::Geometry;
-                triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
+                osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
+                drawable = geom;
+                triShapeToGeometry(triShape, geom, parentNode, composite, boundTextures, animflags);
             }
 
-            if (geometry->getDataVariance() == osg::Object::DYNAMIC)
-            {
-                // Add a copy, we will alternate between the two copies every other frame using the FrameSwitch
-                // This is so we can set the DataVariance as STATIC, giving a huge performance boost
-                geometry->setDataVariance(osg::Object::STATIC);
-                osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
+            drawable->setName(triShape->name);
 
-                osg::ref_ptr<osg::Geometry> geom2 = osg::clone(geometry.get(), osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES);
-                frameswitch->addChild(geometry);
-                frameswitch->addChild(geom2);
-
-                parentNode->addChild(frameswitch);
-            }
-            else
-                parentNode->addChild(geometry);
+            parentNode->addChild(drawable);
         }
 
-        osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher, const Nif::NiTriShape *triShape, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
+        osg::ref_ptr<osg::Drawable> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher, const Nif::NiTriShape *triShape, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
-            osg::ref_ptr<osgAnimation::MorphGeometry> morphGeom = new osgAnimation::MorphGeometry;
-            morphGeom->setMethod(osgAnimation::MorphGeometry::RELATIVE);
-            // No normals available in the MorphData
-            morphGeom->setMorphNormals(false);
+            osg::ref_ptr<SceneUtil::MorphGeometry> morphGeom = new SceneUtil::MorphGeometry;
 
-            morphGeom->setUpdateCallback(NULL);
-            morphGeom->setCullCallback(new UpdateMorphGeometry);
-            morphGeom->setUseVertexBufferObjects(true);
-
-            triShapeToGeometry(triShape, morphGeom, parentNode, composite, boundTextures, animflags);
-
-            morphGeom->getOrCreateVertexBufferObject()->setUsage(GL_DYNAMIC_DRAW_ARB);
+            osg::ref_ptr<osg::Geometry> sourceGeometry (new osg::Geometry);
+            triShapeToGeometry(triShape, sourceGeometry, parentNode, composite, boundTextures, animflags);
+            morphGeom->setSourceGeometry(sourceGeometry);
 
             const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
             if (morphs.empty())
                 return morphGeom;
             // Note we are not interested in morph 0, which just contains the original vertices
             for (unsigned int i = 1; i < morphs.size(); ++i)
-            {
-                osg::ref_ptr<osg::Geometry> morphTarget = new osg::Geometry;
-                morphTarget->setVertexArray(new osg::Vec3Array(morphs[i].mVertices.size(), &morphs[i].mVertices[0]));
-                morphGeom->addMorphTarget(morphTarget, 0.f);
-            }
-
-            // build the bounding box containing all possible morph combinations
-
-            std::vector<osg::BoundingBox> vertBounds(morphs[0].mVertices.size());
-
-            // Since we don't know what combinations of morphs are being applied we need to keep track of a bounding box for each vertex.
-            // The minimum/maximum of the box is the minimum/maximum offset the vertex can have from its starting position.
-
-            // Start with zero offsets which will happen when no morphs are applied.
-            for (unsigned int i=0; i<vertBounds.size(); ++i)
-                vertBounds[i].set(osg::Vec3f(0,0,0), osg::Vec3f(0,0,0));
-
-            for (unsigned int i = 1; i < morphs.size(); ++i)
-            {
-                for (unsigned int j=0; j<morphs[i].mVertices.size() && vertBounds.size(); ++j)
-                {
-                    osg::BoundingBox& bounds = vertBounds[j];
-                    bounds.expandBy(bounds._max + morphs[i].mVertices[j]);
-                    bounds.expandBy(bounds._min + morphs[i].mVertices[j]);
-                }
-            }
-
-            osg::BoundingBox box;
-            for (unsigned int i=0; i<vertBounds.size(); ++i)
-            {
-                vertBounds[i]._max += morphs[0].mVertices[i];
-                vertBounds[i]._min += morphs[0].mVertices[i];
-                box.expandBy(vertBounds[i]);
-            }
-
-            // For the initial bounding box (used for object placement) use the default pose, fire off a bounding compute to set this initial box
-            morphGeom->getBound();
-
-            // Now set up the callback so that we get properly enlarged bounds if/when the mesh starts animating
-            morphGeom->setComputeBoundingBoxCallback(new StaticBoundingBoxCallback(box));
+                morphGeom->addMorphTarget(new osg::Vec3Array(morphs[i].mVertices.size(), &morphs[i].mVertices[0]), 0.f);
 
             return morphGeom;
         }
@@ -1219,6 +1067,7 @@ namespace NifOsg
 
             osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
             rig->setSourceGeometry(geometry);
+            rig->setName(triShape->name);
 
             const Nif::NiSkinInstance *skin = triShape->skin.getPtr();
 
@@ -1233,7 +1082,6 @@ namespace NifOsg
 
                 SceneUtil::RigGeometry::BoneInfluence influence;
                 const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[i].weights;
-                //influence.mWeights.reserve(weights.size());
                 for(size_t j = 0;j < weights.size();j++)
                 {
                     std::pair<unsigned short, float> indexWeight = std::make_pair(weights[j].vertex, weights[j].weight);
@@ -1246,17 +1094,7 @@ namespace NifOsg
             }
             rig->setInfluenceMap(map);
 
-            // Add a copy, we will alternate between the two copies every other frame using the FrameSwitch
-            // This is so we can set the DataVariance as STATIC, giving a huge performance boost
-            rig->setDataVariance(osg::Object::STATIC);
-
-            osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
-
-            SceneUtil::RigGeometry* rig2 = osg::clone(rig.get(), osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES);
-            frameswitch->addChild(rig);
-            frameswitch->addChild(rig2);
-
-            parentNode->addChild(frameswitch);
+            parentNode->addChild(rig);
         }
 
         osg::BlendFunc::BlendFuncMode getBlendMode(int mode)

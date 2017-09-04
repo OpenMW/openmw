@@ -851,6 +851,16 @@ namespace MWMechanics
         }
     }
 
+    bool Actors::isAttackPrepairing(const MWWorld::Ptr& ptr)
+    {
+        PtrActorMap::iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+        CharacterController* ctrl = it->second->getCharacterController();
+
+        return ctrl->isAttackPrepairing();
+    }
+
     bool Actors::isRunning(const MWWorld::Ptr& ptr)
     {
         PtrActorMap::iterator it = mActors.find(ptr);

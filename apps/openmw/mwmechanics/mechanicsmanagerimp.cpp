@@ -436,6 +436,11 @@ namespace MWMechanics
         mObjects.update(duration, paused);
     }
 
+    bool MechanicsManager::isAttackPrepairing(const MWWorld::Ptr& ptr)
+    {
+        return mActors.isAttackPrepairing(ptr);
+    }
+
     bool MechanicsManager::isRunning(const MWWorld::Ptr& ptr)
     {
         return mActors.isRunning(ptr);

@@ -985,7 +985,11 @@ namespace MWInput
         if (!mControlSwitch["playerfighting"] || !mControlSwitch["playercontrols"])
             return;
 
-        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPlayer->getPlayer()))
+        // We want to interrupt animation only if attack is prepairing, but still is not triggered
+        // Otherwise we will get a "speedshooting" exploit, when player can skip reload animation by hitting "Toggle Weapon" key twice
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackPrepairing(mPlayer->getPlayer()))
+            mPlayer->setAttackingOrSpell(false);
+        else if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPlayer->getPlayer()))
             return;
 
         MWMechanics::DrawState_ state = mPlayer->getDrawState();

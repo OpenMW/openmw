@@ -38,8 +38,6 @@ Skeleton::Skeleton()
     , mNeedToUpdateBoneMatrices(true)
     , mActive(true)
     , mLastFrameNumber(0)
-    , mTraversedEvenFrame(false)
-    , mTraversedOddFrame(false)
 {
 
 }
@@ -50,8 +48,6 @@ Skeleton::Skeleton(const Skeleton &copy, const osg::CopyOp &copyop)
     , mNeedToUpdateBoneMatrices(true)
     , mActive(copy.mActive)
     , mLastFrameNumber(0)
-    , mTraversedEvenFrame(false)
-    , mTraversedOddFrame(false)
 {
 
 }
@@ -115,11 +111,6 @@ void Skeleton::updateBoneMatrices(unsigned int traversalNumber)
 
     mLastFrameNumber = traversalNumber;
 
-    if (mLastFrameNumber % 2 == 0)
-        mTraversedEvenFrame = true;
-    else
-        mTraversedOddFrame = true;
-
     if (mNeedToUpdateBoneMatrices)
     {
         if (mRootBone.get())
@@ -144,18 +135,14 @@ bool Skeleton::getActive() const
 
 void Skeleton::markDirty()
 {
-    mTraversedEvenFrame = false;
-    mTraversedOddFrame = false;
+    mLastFrameNumber = 0;
     mBoneCache.clear();
     mBoneCacheInit = false;
 }
 
 void Skeleton::traverse(osg::NodeVisitor& nv)
 {
-    if (!getActive() && nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR
-            // need to process at least 2 frames before shutting off update, since we need to have both frame-alternating RigGeometries initialized
-            // this would be more naturally handled if the double-buffering was implemented in RigGeometry itself rather than in a FrameSwitch decorator node
-            && mLastFrameNumber != 0 && mTraversedEvenFrame && mTraversedOddFrame)
+    if (!getActive() && nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR && mLastFrameNumber != 0)
         return;
     osg::Group::traverse(nv);
 }

@@ -220,8 +220,10 @@ namespace MWMechanics
 
             virtual void confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count);
 
+            virtual bool isAttackPrepairing(const MWWorld::Ptr& ptr);
             virtual bool isRunning(const MWWorld::Ptr& ptr);
             virtual bool isSneaking(const MWWorld::Ptr& ptr);
+
         private:
             void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0);

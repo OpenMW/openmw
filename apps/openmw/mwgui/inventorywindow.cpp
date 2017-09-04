@@ -269,6 +269,19 @@ namespace MWGui
             }
         }
 
+        // If we unequip weapon during attack, it can lead to unexpected behaviour
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPtr))
+        {
+            bool isWeapon = item.mBase.getTypeName() == typeid(ESM::Weapon).name();
+            MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
+
+            if (isWeapon && invStore.isEquipped(item.mBase))
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sCantEquipWeapWarning}");
+                return;
+            }
+        }
+
         if (count > 1 && !shift)
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();

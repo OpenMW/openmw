@@ -2357,6 +2357,12 @@ void CharacterController::setAttackTypeBasedOnMovement()
         mAttackType = "chop";
 }
 
+bool CharacterController::isAttackPrepairing() const
+{
+    return mUpperBodyState == UpperCharState_StartToMinAttack ||
+            mUpperBodyState == UpperCharState_MinAttackToMaxAttack;
+}
+
 bool CharacterController::isReadyToBlock() const
 {
     return updateCarriedLeftVisible(mWeaponType);
