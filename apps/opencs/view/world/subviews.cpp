@@ -18,6 +18,7 @@
 #include "pathgridcreator.hpp"
 #include "previewsubview.hpp"
 #include "bodypartcreator.hpp"
+#include "landcreator.hpp"
 #include "landtexturecreator.hpp"
 
 void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
@@ -83,7 +84,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, PathgridCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_Lands,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GenericCreator> >);
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<LandCreator> >);
 
     manager.add (CSMWorld::UniversalId::Type_LandTextures,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<LandTextureCreator> >);
@@ -189,7 +190,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, PathgridCreatorFactory> (false));
 
     manager.add (CSMWorld::UniversalId::Type_Land,
-        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator> >(false));
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<LandCreator> >(false));
 
     manager.add (CSMWorld::UniversalId::Type_LandTexture,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<LandTextureCreator> >(false));

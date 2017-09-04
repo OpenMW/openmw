@@ -15,6 +15,7 @@
 
 #include "columnbase.hpp"
 #include "collectionbase.hpp"
+#include "land.hpp"
 #include "landtexture.hpp"
 
 namespace CSMWorld
@@ -40,6 +41,18 @@ namespace CSMWorld
     }
 
     template<>
+    inline void IdAccessor<Land>::setId (Land& record, const std::string& id) const
+    {
+        int x=0, y=0;
+
+        Land::parseUniqueRecordId(id, x, y);
+        record.mX = x;
+        record.mY = y;
+        // TODO check for uses of mId and remove them
+        record.mId = id;
+    }
+
+    template<>
     inline void IdAccessor<LandTexture>::setId (LandTexture& record, const std::string& id) const
     {
         int plugin = 0;
@@ -48,6 +61,12 @@ namespace CSMWorld
         LandTexture::parseUniqueRecordId(id, plugin, index);
         record.mPluginIndex = plugin;
         record.mIndex = index;
+    }
+
+    template<>
+    inline const std::string IdAccessor<Land>::getId (const Land& record) const
+    {
+        return Land::createUniqueRecordId(record.mX, record.mY);
     }
 
     template<>
@@ -85,6 +104,13 @@ namespace CSMWorld
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
             ///
             /// \return Success?
+
+            int cloneRecordImp (const std::string& origin, const std::string& dest,
+                UniversalId::Type type);
+            ///< Returns the index of the clone.
+
+            int touchRecordImp (const std::string& id);
+            ///< Returns the index of the record on success, -1 on failure.
 
         public:
 
@@ -227,20 +253,22 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void Collection<ESXRecordT, IdAccessorT>::cloneRecord(const std::string& origin,
-                                                          const std::string& destination,
-                                                          const UniversalId::Type type)
+    int Collection<ESXRecordT, IdAccessorT>::cloneRecordImp(const std::string& origin,
+        const std::string& destination, UniversalId::Type type)
     {
-       Record<ESXRecordT> copy;
-       copy.mModified = getRecord(origin).get();
-       copy.mState = RecordBase::State_ModifiedOnly;
-       IdAccessorT().setId(copy.get(), destination);
+        Record<ESXRecordT> copy;
+        copy.mModified = getRecord(origin).get();
+        copy.mState = RecordBase::State_ModifiedOnly;
+        IdAccessorT().setId(copy.get(), destination);
 
-       insertRecord(copy, getAppendIndex(destination, type));
+        int index = getAppendIndex(destination, type);
+        insertRecord(copy, getAppendIndex(destination, type));
+
+        return index;
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    bool Collection<ESXRecordT, IdAccessorT>::touchRecord(const std::string& id)
+    int Collection<ESXRecordT, IdAccessorT>::touchRecordImp(const std::string& id)
     {
         int index = getIndex(id);
         Record<ESXRecordT>& record = mRecords.at(index);
@@ -249,13 +277,47 @@ namespace CSMWorld
             throw std::runtime_error("attempt to touch deleted record");
         }
 
-        if (!record.isModified() && !record.isDeleted() && !record.isErased())
+        if (!record.isModified())
         {
             record.setModified(record.get());
+            return index;
+        }
+
+        return -1;
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    void Collection<ESXRecordT, IdAccessorT>::cloneRecord(const std::string& origin,
+        const std::string& destination, const UniversalId::Type type)
+    {
+        cloneRecordImp(origin, destination, type);
+    }
+
+    template<>
+    inline void Collection<Land, IdAccessor<Land> >::cloneRecord(const std::string& origin,
+        const std::string& destination, const UniversalId::Type type)
+    {
+        int index = cloneRecordImp(origin, destination, type);
+        mRecords.at(index).get().mPlugin = 0;
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    bool Collection<ESXRecordT, IdAccessorT>::touchRecord(const std::string& id)
+    {
+        return touchRecordImp(id) != -1;
+    }
+
+    template<>
+    inline bool Collection<Land, IdAccessor<Land> >::touchRecord(const std::string& id)
+    {
+        int index = touchRecordImp(id);
+        if (index >= 0)
+        {
+            mRecords.at(index).get().mPlugin = 0;
             return true;
         }
-        else
-            return false;
+
+        return false;
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
