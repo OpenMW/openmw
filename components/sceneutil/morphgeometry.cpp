@@ -62,10 +62,7 @@ void MorphGeometry::dirty()
 {
     mDirty = true;
     if (!mMorphedBoundingBox)
-    {
-        _boundingBoxComputed = false;
         dirtyBound();
-    }
 }
 
 osg::ref_ptr<osg::Geometry> MorphGeometry::getSourceGeometry() const
