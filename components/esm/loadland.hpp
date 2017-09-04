@@ -33,6 +33,10 @@ struct Land
     // location later when we are ready to load the full data set.
     ESM_Context mContext;
 
+    // In the editor, a new Land is not associated with a file, thus mContext should not be accessed
+    // when land data is being requested. Instead simply copy over the data.
+    bool mNoFile;
+
     int mDataTypes;
 
     enum
@@ -116,7 +120,7 @@ struct Land
     void load(ESMReader &esm, bool &isDeleted);
     void save(ESMWriter &esm, bool isDeleted = false) const;
 
-    void blank() {}
+    void blank();
 
     /**
      * Actually loads data into target
