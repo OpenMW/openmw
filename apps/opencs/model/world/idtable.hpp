@@ -100,10 +100,21 @@ namespace CSMWorld
     };
 
     /// An IdTable customized to handle the more unique needs of LandTextureId's which behave
-    /// differently from other records.
+    /// differently from other records. The major difference is that base records cannot be
+    /// modified.
     class LandTextureIdTable : public IdTable
     {
         public:
+
+            struct ImportResults
+            {
+                using StringPair = std::pair<std::string,std::string>;
+
+                /// The newly added records
+                std::vector<std::string> createdRecords;
+                /// The 1st string is the original id, the 2nd is the mapped id
+                std::vector<StringPair> recordMapping;
+            };
 
             LandTextureIdTable(CollectionBase* idCollection, unsigned int features=0);
 
@@ -112,6 +123,9 @@ namespace CSMWorld
             bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
             Qt::ItemFlags flags (const QModelIndex & index) const override;
+
+            /// Finds and maps/recreates the specified ids.
+            ImportResults importTextures(const std::vector<std::string>& ids);
     };
 }
 

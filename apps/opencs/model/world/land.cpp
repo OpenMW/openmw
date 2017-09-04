@@ -1,7 +1,7 @@
 #include "land.hpp"
 
 #include <sstream>
-#include <exception>
+#include <stdexcept>
 
 namespace CSMWorld
 {

@@ -23,6 +23,8 @@ namespace CSVWorld
 
             void cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type) override;
 
+            void touch(const std::vector<CSMWorld::UniversalId>& ids) override;
+
             void focus() override;
 
             void reset() override;

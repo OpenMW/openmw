@@ -2,6 +2,8 @@
 
 #include <limits>
 
+#include "../../model/world/commands.hpp"
+#include "../../model/world/idtable.hpp"
 #include "../../model/world/land.hpp"
 
 namespace CSVWorld
@@ -45,6 +47,24 @@ namespace CSVWorld
 
         mX->setValue(x);
         mY->setValue(y);
+    }
+
+    void LandCreator::touch(const std::vector<CSMWorld::UniversalId>& ids)
+    {
+        // Combine multiple touch commands into one "macro" command
+        std::unique_ptr<QUndoCommand> macro(new QUndoCommand());
+        macro->setText("Touch records");
+
+        CSMWorld::IdTable& lands = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(CSMWorld::UniversalId::Type_Lands));
+        CSMWorld::IdTable& ltexs = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
+        for (const CSMWorld::UniversalId& uid : ids)
+        {
+            // This is not leaked, touchCmd is a child of macro and managed by Qt
+            CSMWorld::TouchLandCommand* touchCmd = new CSMWorld::TouchLandCommand(lands, ltexs, uid.getId(), macro.get());
+        }
+
+        // Execute
+        getUndoStack().push(macro.release());
     }
 
     void LandCreator::focus()

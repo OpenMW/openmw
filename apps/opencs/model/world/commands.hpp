@@ -31,14 +31,35 @@ namespace CSMWorld
 
             TouchCommand(IdTable& model, const std::string& id, QUndoCommand* parent=nullptr);
 
-            virtual void redo();
-            virtual void undo();
+            void redo() override;
+            void undo() override;
 
         private:
 
             IdTable& mTable;
             std::string mId;
             std::unique_ptr<RecordBase> mOld;
+
+            bool mChanged;
+    };
+
+    class TouchLandCommand : public QUndoCommand
+    {
+        public:
+
+            TouchLandCommand(IdTable& landTable, IdTable& ltexTable, const std::string& id,
+                QUndoCommand* parent = nullptr);
+
+            void redo() override;
+            void undo() override;
+
+        private:
+
+            IdTable& mLands;
+            IdTable& mLtexs;
+            std::string mId;
+            std::unique_ptr<RecordBase> mOld;
+            std::vector<std::string> mCreatedTextures;
 
             bool mChanged;
     };

@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <sstream>
+#include <unordered_set>
 
 #include <components/misc/stringops.hpp>
 
@@ -37,6 +38,90 @@ void CSMWorld::TouchCommand::undo()
     {
         mTable.setRecord(mId, *mOld);
         mChanged = false;
+    }
+}
+
+CSMWorld::TouchLandCommand::TouchLandCommand(IdTable& landTable, IdTable& ltexTable, const std::string& id, QUndoCommand* parent)
+    : QUndoCommand(parent)
+    , mLands(landTable)
+    , mLtexs(ltexTable)
+    , mId(id)
+    , mOld(nullptr)
+    , mChanged(false)
+{
+    setText(("Touch " + mId).c_str());
+    mOld.reset(mLands.getRecord(mId).clone());
+}
+
+void CSMWorld::TouchLandCommand::redo()
+{
+    int pluginColumn = mLands.findColumnIndex(Columns::ColumnId_PluginIndex);
+    int oldPlugin = mLands.data(mLands.getModelIndex(mId, pluginColumn)).toInt();
+
+    mChanged = mLands.touchRecord(mId);
+    if (mChanged)
+    {
+        // Original data
+        int textureColumn = mLands.findColumnIndex(Columns::ColumnId_LandTexturesIndex);
+        QByteArray textureByteArray = mLands.data(mLands.getModelIndex(mId, textureColumn)).toByteArray();
+        const uint16_t* textureData = reinterpret_cast<uint16_t*>(textureByteArray.data());
+
+        // Need to make a copy so the old values can be looked up
+        QByteArray newTextureByteArray(textureByteArray.data(), textureByteArray.size());
+        uint16_t* newTextureData = reinterpret_cast<uint16_t*>(newTextureByteArray.data());
+
+        // Find all indices used
+        std::unordered_set<int> texIndices;
+        for (int i = 0; i < Land::LAND_NUM_TEXTURES; ++i)
+        {
+            // All indices are offset by 1 for a default texture
+            if (textureData[i] > 0)
+                texIndices.insert(textureData[i] - 1);
+        }
+
+        std::vector<std::string> oldTextures;
+        for (int index : texIndices)
+        {
+            oldTextures.push_back(LandTexture::createUniqueRecordId(oldPlugin, index));
+        }
+
+        // Import the textures, replace old values
+        LandTextureIdTable::ImportResults results = dynamic_cast<LandTextureIdTable&>(mLtexs).importTextures(oldTextures);
+        mCreatedTextures = std::move(results.createdRecords);
+        for (const auto& it : results.recordMapping)
+        {
+            int plugin = 0, newIndex = 0, oldIndex = 0;
+            LandTexture::parseUniqueRecordId(it.first, plugin, oldIndex);
+            LandTexture::parseUniqueRecordId(it.second, plugin, newIndex);
+
+            if (newIndex != oldIndex)
+            {
+                for (int i = 0; i < Land::LAND_NUM_TEXTURES; ++i)
+                {
+                    // All indices are offset by 1 for a default texture
+                    if (textureData[i] == oldIndex)
+                        newTextureData[i] = newIndex + 1;
+                }
+            }
+        }
+
+        mLands.setData(mLands.getModelIndex(mId, textureColumn), newTextureByteArray);
+    }
+}
+
+void CSMWorld::TouchLandCommand::undo()
+{
+    if (mChanged)
+    {
+        mLands.setRecord(mId, *mOld);
+        mChanged = false;
+
+        for (const std::string& id : mCreatedTextures)
+        {
+            int row = mLtexs.getModelIndex(id, 0).row();
+            mLtexs.removeRows(row, 1);
+        }
+        mCreatedTextures.clear();
     }
 }
 

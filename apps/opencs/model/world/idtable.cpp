@@ -1,11 +1,13 @@
 #include "idtable.hpp"
 
+#include <limits>
 #include <stdexcept>
 
 #include <components/esm/cellid.hpp>
 
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
+#include "landtexture.hpp"
 
 CSMWorld::IdTable::IdTable (CollectionBase *idCollection, unsigned int features)
 : IdTableBase (features), mIdCollection (idCollection)
@@ -331,4 +333,59 @@ Qt::ItemFlags CSMWorld::LandTextureIdTable::flags(const QModelIndex& index) cons
         flags &= ~Qt::ItemIsEditable;
 
     return flags;
+}
+
+CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::importTextures(const std::vector<std::string>& ids)
+{
+    ImportResults results;
+
+    for (const std::string& id : ids)
+    {
+        int plugin, index;
+
+        LandTexture::parseUniqueRecordId(id, plugin, index);
+        int oldRow = idCollection()->searchId(id);
+
+        // If it does not exist or it is in the current plugin, it can be skipped.
+        if (oldRow <= 0 || plugin == 0)
+        {
+            results.recordMapping.push_back(std::make_pair(id, id));
+            continue;
+        }
+
+        // Try a direct mapping to the current plugin first. Otherwise iterate until one is found.
+        // Iteration is deterministic to avoid duplicates.
+        do {
+            std::string newId = LandTexture::createUniqueRecordId(0, index);
+            int newRow = idCollection()->searchId(newId);
+
+            if (newRow < 0)
+            {
+                // Id not taken, clone it
+                cloneRecord(id, newId, UniversalId::Type_LandTexture);
+                results.createdRecords.push_back(newId);
+                results.recordMapping.push_back(std::make_pair(id, newId));
+                break;
+            }
+
+            // Id is taken, check if same handle and texture. Note that mId is the handle.
+            const LandTexture& oldLtex = dynamic_cast<const Record<LandTexture>&>(idCollection()->getRecord(oldRow)).get();
+            const LandTexture& newLtex = dynamic_cast<const Record<LandTexture>&>(idCollection()->getRecord(newRow)).get();
+            if (oldLtex.mId == newLtex.mId && oldLtex.mTexture == newLtex.mTexture)
+            {
+                // It's a match
+                results.recordMapping.push_back(std::make_pair(id, newId));
+                break;
+            }
+
+            // Determine next index. Spread out the indices to reduce conflicts.
+            size_t MaxIndex = std::numeric_limits<uint16_t>::max();
+            size_t Prime = (1 << 19) - 1; // A mersenne prime
+            size_t K = 2154;
+
+            index = ((K * index) % Prime) % MaxIndex;
+        } while (true);
+    }
+
+    return results;
 }
