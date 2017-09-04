@@ -1,6 +1,7 @@
 #include "landtexture.hpp"
 
 #include <string>
+#include <exception>
 
 #include <components/esm/esmreader.hpp>
 
