@@ -2501,6 +2501,51 @@ namespace CSMWorld
         return record.get().mPluginIndex;
     }
 
+    struct LandMapLodColumn : public Column<Land>
+    {
+        LandMapLodColumn();
+
+        QVariant get(const Record<Land>& record) const override;
+        void set(Record<Land>& record, const QVariant& data) override;
+        bool isEditable() const override;
+    };
+
+    struct LandNormalsColumn : public Column<Land>
+    {
+        LandNormalsColumn();
+
+        QVariant get(const Record<Land>& record) const override;
+        void set(Record<Land>& record, const QVariant& data) override;
+        bool isEditable() const override;
+    };
+
+    struct LandHeightsColumn : public Column<Land>
+    {
+        LandHeightsColumn();
+
+        QVariant get(const Record<Land>& record) const override;
+        void set(Record<Land>& record, const QVariant& data) override;
+        bool isEditable() const override;
+    };
+
+    struct LandColoursColumn : public Column<Land>
+    {
+        LandColoursColumn();
+
+        QVariant get(const Record<Land>& record) const override;
+        void set(Record<Land>& record, const QVariant& data) override;
+        bool isEditable() const override;
+    };
+
+    struct LandTexturesColumn : public Column<Land>
+    {
+        LandTexturesColumn();
+
+        QVariant get(const Record<Land>& record) const override;
+        void set(Record<Land>& record, const QVariant& data) override;
+        bool isEditable() const override;
+    };
+
     struct BodyPartRaceColumn : public RaceColumn<ESM::BodyPart>
     {
         const MeshTypeColumn<ESM::BodyPart> *mMeshType;

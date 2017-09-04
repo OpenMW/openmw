@@ -64,6 +64,8 @@ struct Land
     //total number of textures per land
     static const int LAND_NUM_TEXTURES = LAND_TEXTURE_SIZE * LAND_TEXTURE_SIZE;
 
+    static const int LAND_GLOBAL_MAP_LOD_SIZE = 81;
+
 #pragma pack(push,1)
     struct VHGT
     {
@@ -109,7 +111,7 @@ struct Land
     };
 
     // low-LOD heightmap (used for rendering the global map)
-    signed char mWnam[81];
+    signed char mWnam[LAND_GLOBAL_MAP_LOD_SIZE];
 
     void load(ESMReader &esm, bool &isDeleted);
     void save(ESMWriter &esm, bool isDeleted = false) const;

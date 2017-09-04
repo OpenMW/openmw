@@ -332,6 +332,11 @@ namespace CSMWorld
             ColumnId_TextureHandle = 298,
             ColumnId_PluginIndex = 299,
             ColumnId_TextureIndex = 300,
+            ColumnId_LandMapLodIndex = 301,
+            ColumnId_LandNormalsIndex = 302,
+            ColumnId_LandHeightsIndex = 303,
+            ColumnId_LandColoursIndex = 304,
+            ColumnId_LandTexturesIndex = 305,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
