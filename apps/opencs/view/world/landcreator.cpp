@@ -2,6 +2,9 @@
 
 #include <limits>
 
+#include <QLabel>
+#include <QSpinBox>
+
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/land.hpp"

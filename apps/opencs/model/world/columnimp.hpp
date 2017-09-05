@@ -64,6 +64,13 @@ namespace CSMWorld
     };
 
     template<>
+    inline QVariant StringIdColumn<Land>::get(const Record<Land>& record) const
+    {
+        const Land& land = record.get();
+        return QString(Land::createUniqueRecordId(land.mX, land.mY).c_str());
+    }
+
+    template<>
     inline QVariant StringIdColumn<LandTexture>::get(const Record<LandTexture>& record) const
     {
         const LandTexture& ltex = record.get();
@@ -2483,7 +2490,7 @@ namespace CSMWorld
             return -1;
         }
 
-        virtual bool isEditable() const override
+        bool isEditable() const override
         {
             return false;
         }

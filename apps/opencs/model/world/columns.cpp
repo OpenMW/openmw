@@ -333,6 +333,11 @@ namespace CSMWorld
             { ColumnId_TextureHandle, "Texture Handle" },
             { ColumnId_PluginIndex, "Plugin Index" },
             { ColumnId_TextureIndex, "Texture Index" },
+            { ColumnId_LandMapLodIndex, "Land map height LOD" },
+            { ColumnId_LandNormalsIndex, "Land normals" },
+            { ColumnId_LandHeightsIndex, "Land heights" },
+            { ColumnId_LandColoursIndex, "Land colors" },
+            { ColumnId_LandTexturesIndex, "Land textures" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },

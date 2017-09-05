@@ -3,9 +3,9 @@
 #include <cstdint>
 #include <limits>
 
-#include <QIntValidator>
 #include <QLabel>
 #include <QLineEdit>
+#include <QSpinBox>
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
@@ -30,14 +30,13 @@ namespace CSVWorld
         QLabel* indexLabel = new QLabel("Index");
         insertBeforeButtons(indexLabel, false);
 
-        QIntValidator* indexValidator = new QIntValidator(0, MaxIndex, this);
-
-        mIndexEdit = new QLineEdit(this);
-        mIndexEdit->setValidator(indexValidator);
-        insertBeforeButtons(mIndexEdit, true);
+        mIndexBox = new QSpinBox(this);
+        mIndexBox->setMinimum(0);
+        mIndexBox->setMaximum(MaxIndex);
+        insertBeforeButtons(mIndexBox, true);
 
         connect(mNameEdit, SIGNAL(textChanged(const QString&)), this, SLOT(nameChanged(const QString&)));
-        connect(mIndexEdit, SIGNAL(textChanged(const QString&)), this, SLOT(indexChanged(const QString&)));
+        connect(mIndexBox, SIGNAL(valueChanged(int)), this, SLOT(indexChanged(int)));
     }
 
     void LandTextureCreator::cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type)
@@ -50,26 +49,23 @@ namespace CSVWorld
         mNameEdit->setText((table.data(table.getModelIndex(originId, column)).toString()));
 
         column = table.findColumnIndex(CSMWorld::Columns::ColumnId_TextureIndex);
-        mIndexEdit->setText((table.data(table.getModelIndex(originId, column)).toString()));
+        mIndexBox->setValue((table.data(table.getModelIndex(originId, column)).toInt()));
     }
 
     void LandTextureCreator::focus()
     {
-        mIndexEdit->setFocus();
+        mIndexBox->setFocus();
     }
 
     void LandTextureCreator::reset()
     {
         GenericCreator::reset();
         mNameEdit->setText("");
-        mIndexEdit->setText("");
+        mIndexBox->setValue(0);
     }
 
     std::string LandTextureCreator::getErrors() const
     {
-        std::string id = getId();
-
-        // TODO empty index edit?
         if (getData().getLandTextures().searchId(getId()) >= 0)
         {
             return "Index is already in use";
@@ -89,7 +85,7 @@ namespace CSVWorld
 
     std::string LandTextureCreator::getId() const
     {
-        return CSMWorld::LandTexture::createUniqueRecordId(0, mIndex);
+        return CSMWorld::LandTexture::createUniqueRecordId(0, mIndexBox->value());
     }
 
     void LandTextureCreator::nameChanged(const QString& value)
@@ -98,9 +94,8 @@ namespace CSVWorld
         update();
     }
 
-    void LandTextureCreator::indexChanged(const QString& value)
+    void LandTextureCreator::indexChanged(int value)
     {
-        mIndex = value.toInt();
         update();
     }
 }

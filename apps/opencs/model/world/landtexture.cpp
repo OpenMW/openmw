@@ -1,6 +1,6 @@
 #include "landtexture.hpp"
 
-#include <string>
+#include <sstream>
 #include <stdexcept>
 
 #include <components/esm/esmreader.hpp>
@@ -16,7 +16,9 @@ namespace CSMWorld
 
     std::string LandTexture::createUniqueRecordId(int plugin, int index)
     {
-        return 'L' + std::to_string(plugin) + '#' + std::to_string(index);
+        std::stringstream ss;
+        ss << 'L' << plugin << '#' << index;
+        return ss.str();
     }
 
     void LandTexture::parseUniqueRecordId(const std::string& id, int& plugin, int& index)

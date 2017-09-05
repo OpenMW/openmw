@@ -12,8 +12,6 @@ namespace CSMWorld
     /// \todo Add worldspace support to the Land record.
     struct Land : public ESM::Land
     {
-        std::string mId;
-
         /// Loads the metadata and ID
         void load (ESM::ESMReader &esm, bool &isDeleted);
 

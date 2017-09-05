@@ -6,6 +6,7 @@
 #include "genericcreator.hpp"
 
 class QLineEdit;
+class QSpinBox;
 
 namespace CSVWorld
 {
@@ -34,15 +35,14 @@ namespace CSVWorld
         private slots:
 
             void nameChanged(const QString& val);
-            void indexChanged(const QString& val);
+            void indexChanged(int val);
 
         private:
 
             QLineEdit* mNameEdit;
-            QLineEdit* mIndexEdit;
+            QSpinBox* mIndexBox;
 
             std::string mName;
-            int mIndex;
     };
 }
 

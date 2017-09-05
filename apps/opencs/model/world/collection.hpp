@@ -48,8 +48,6 @@ namespace CSMWorld
         Land::parseUniqueRecordId(id, x, y);
         record.mX = x;
         record.mY = y;
-        // TODO check for uses of mId and remove them
-        record.mId = id;
     }
 
     template<>

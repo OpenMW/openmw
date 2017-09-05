@@ -1,10 +1,10 @@
 #ifndef CSV_WORLD_LANDCREATOR_H
 #define CSV_WORLD_LANDCREATOR_H
 
-#include <QLabel>
-#include <QSpinBox>
-
 #include "genericcreator.hpp"
+
+class QLabel;
+class QSpinBox;
 
 namespace CSVWorld
 {

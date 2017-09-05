@@ -8,8 +8,6 @@ namespace CSMWorld
     void Land::load(ESM::ESMReader &esm, bool &isDeleted)
     {
         ESM::Land::load(esm, isDeleted);
-
-        mId = createUniqueRecordId(mX, mY);
     }
 
     std::string Land::createUniqueRecordId(int x, int y)

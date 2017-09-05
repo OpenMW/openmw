@@ -1,5 +1,6 @@
 #include "idtable.hpp"
 
+#include <cstdint>
 #include <limits>
 #include <stdexcept>
 
@@ -379,11 +380,10 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
             }
 
             // Determine next index. Spread out the indices to reduce conflicts.
-            size_t MaxIndex = std::numeric_limits<uint16_t>::max();
-            size_t Prime = (1 << 19) - 1; // A mersenne prime
-            size_t K = 2154;
+            size_t MaxIndex = std::numeric_limits<uint16_t>::max() - 1;
+            size_t Prime = (1 << 13) - 1; // A mersenne prime
 
-            index = ((K * index) % Prime) % MaxIndex;
+            index = (index + Prime) % MaxIndex;
         } while (true);
     }
 
