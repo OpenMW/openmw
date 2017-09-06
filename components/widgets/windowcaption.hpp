@@ -23,6 +23,7 @@ namespace Gui
     private:
         MyGUI::Widget* mLeft;
         MyGUI::Widget* mRight;
+        MyGUI::Widget* mClient;
 
         void align();
     };
