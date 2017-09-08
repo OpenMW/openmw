@@ -21,20 +21,20 @@ namespace MWRender
 
     enum CameraView {
         // individual Views
-        CameraView_FirstPerson                        = 0b0001, 
-        CameraView_ThirdPersonCenter                  = 0b0010,
-        CameraView_ThirdPersonOverShoulder            = 0b0100,
-        CameraView_ThirdPersonOverTheShoulderRanged   = 0b1000,
+        CameraView_FirstPerson                        = 0x1, // 0b0001
+        CameraView_ThirdPersonCenter                  = 0x2, // 0b0010
+        CameraView_ThirdPersonOverShoulder            = 0x4, // 0b0100
+        CameraView_ThirdPersonOverTheShoulderRanged   = 0x8, // 0b1000
         CameraView_NumCameraViews                     = 4,
         // ViewSets
         // Match any of ThirdPersonCenter and ThirdPersonOverShoulder
-        CameraView_AnyThirdPersonNonCombat            = 0b0110,
+        CameraView_AnyThirdPersonNonCombat            = 0x6, // 0b0110
         // Only ThirdPersonOverTheShoulderRanged right now
-        CameraView_AnyThirdPersonCombat               = 0b1000,
+        CameraView_AnyThirdPersonCombat               = 0x8, // 0b1000
         // Any CameraView_ThirdPerson* option
-        CameraView_AnyThirdPerson                     = 0b1110,
+        CameraView_AnyThirdPerson                     = 0xe, // 0b1110
         // Any CameraView that should allow crosshair to be visibile
-        CameraView_ShowCrosshair                      = 0b1101,
+        CameraView_ShowCrosshair                      = 0xd, // 0b1101
     };
     class NpcAnimation;
 
