@@ -77,27 +77,55 @@ bool CSVRender::Cell::addObjects (int start, int end)
 
 void CSVRender::Cell::createLand()
 {
+    // Cell is deleted
     if (mDeleted)
     {
-        mTerrain.reset();
+        unloadLand();
         return;
     }
 
+    // Setup land if available
     const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
     int landIndex = land.searchId(mId);
-    if (landIndex != -1)
+    if (landIndex != -1 && !land.getRecord(mId).isDeleted())
     {
         const ESM::Land& esmLand = land.getRecord(mId).get();
 
         if (esmLand.getLandData (ESM::Land::DATA_VHGT))
         {
-            mTerrain.reset(new Terrain::TerrainGrid(mCellNode, mCellNode, mData.getResourceSystem().get(), new TerrainStorage(mData), Mask_Terrain));
+            if (mTerrain)
+            {
+                mTerrain->unloadCell(mCoordinates.getX(), mCoordinates.getY());
+                mTerrain->clearAssociatedCaches();
+            }
+            else
+            {
+                mTerrain.reset(new Terrain::TerrainGrid(mCellNode, mCellNode,
+                    mData.getResourceSystem().get(), new TerrainStorage(mData), Mask_Terrain));
+            }
+
             mTerrain->loadCell(esmLand.mX, esmLand.mY);
 
-            mCellBorder.reset(new CellBorder(mCellNode, mCoordinates));
+            if (!mCellBorder)
+                mCellBorder.reset(new CellBorder(mCellNode, mCoordinates));
+
             mCellBorder->buildShape(esmLand);
+
+            return;
         }
     }
+
+    // No land data
+    unloadLand();
+}
+
+void  CSVRender::Cell::unloadLand()
+{
+    if (mTerrain)
+        mTerrain->unloadCell(mCoordinates.getX(), mCoordinates.getY());
+
+    if (mCellBorder)
+        mCellBorder.reset();
 }
 
 CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,

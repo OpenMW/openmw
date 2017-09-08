@@ -73,6 +73,7 @@ namespace CSVRender
             bool addObjects (int start, int end);
 
             void createLand();
+            void unloadLand();
 
         public:
 

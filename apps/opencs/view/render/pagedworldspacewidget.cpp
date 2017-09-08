@@ -400,18 +400,21 @@ void CSVRender::PagedWorldspaceWidget::landTextureDataChanged (const QModelIndex
 {
     for (auto cellIt : mCells)
         cellIt.second->landTextureChanged(topLeft, bottomRight);
+    flagAsModified();
 }
 
 void CSVRender::PagedWorldspaceWidget::landTextureAboutToBeRemoved (const QModelIndex& parent, int start, int end)
 {
     for (auto cellIt : mCells)
         cellIt.second->landTextureAboutToBeRemoved(parent, start, end);
+    flagAsModified();
 }
 
 void CSVRender::PagedWorldspaceWidget::landTextureAdded (const QModelIndex& parent, int start, int end)
 {
     for (auto cellIt : mCells)
         cellIt.second->landTextureAdded(parent, start, end);
+    flagAsModified();
 }
 
 
