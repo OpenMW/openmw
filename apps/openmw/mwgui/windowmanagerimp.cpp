@@ -2090,9 +2090,12 @@ namespace MWGui
         return Misc::ResourceHelpers::correctIconPath(path, mResourceSystem->getVFS());
     }
 
-    std::string WindowManager::correctBookartPath(const std::string& path, int width, int height)
+    std::string WindowManager::correctBookartPath(const std::string& path, int width, int height, bool* exists)
     {
-        return Misc::ResourceHelpers::correctBookartPath(path, width, height, mResourceSystem->getVFS());
+        std::string corrected = Misc::ResourceHelpers::correctBookartPath(path, width, height, mResourceSystem->getVFS());
+        if (exists)
+            *exists = mResourceSystem->getVFS()->exists(corrected);
+        return corrected;
     }
 
     std::string WindowManager::correctTexturePath(const std::string& path)
