@@ -215,6 +215,10 @@ if (MSVC)
     if (CMAKE_CL_64)
         set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
     endif (CMAKE_CL_64)
+	
+	if (CMAKE_VERSION VERSION_GREATER 3.8)
+		set_target_properties(openmw PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(TargetDir)")
+	endif (CMAKE_VERSION VERSION_GREATER 3.8)
 endif (MSVC)
 
 if (WIN32)

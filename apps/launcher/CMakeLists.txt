@@ -110,4 +110,8 @@ if (BUILD_WITH_CODE_COVERAGE)
   target_link_libraries(openmw-launcher gcov)
 endif()
 
-
+if (MSVC)
+	if (CMAKE_VERSION VERSION_GREATER 3.8)
+		set_target_properties(openmw-launcher PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(TargetDir)")
+	endif (CMAKE_VERSION VERSION_GREATER 3.8)
+endif (MSVC)
