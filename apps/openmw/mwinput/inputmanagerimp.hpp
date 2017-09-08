@@ -313,6 +313,7 @@ namespace MWInput
             A_MoveForwardBackward,
             A_MoveLeftRight,
 
+            A_Aim,       // Aim with a ranged attack
             A_Last            // Marker for the last item
         };
     };

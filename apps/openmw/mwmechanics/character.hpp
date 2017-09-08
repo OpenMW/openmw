@@ -285,6 +285,8 @@ public:
     void setHeadTrackTarget(const MWWorld::ConstPtr& target);
 
     void playSwishSound(float attackStrength);
+    protected:
+        void setActiveWeaponIsRanged(WeaponType weaponType, MWWorld::Ptr ptr);
 };
 
     MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype);

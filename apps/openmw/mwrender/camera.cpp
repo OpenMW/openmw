@@ -3,6 +3,7 @@
 #include <osg/Camera>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <osg/PositionAttitudeTransform>
 #include <components/settings/settings.hpp>
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -62,7 +63,8 @@ namespace MWRender
       mViewModeToggleQueued(false),
       mCameraDistance(0.f),
       mCameraXOffsetFromCenter(0.0f),
-      mCameraZOffsetFromCenter(0.0f)
+      mCameraZOffsetFromCenter(0.0f),
+      mCameraRotationDisjoint(false)
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
@@ -78,6 +80,7 @@ namespace MWRender
 
         mUpdateCallback = new UpdateRenderCameraCallback(this);
         mCamera->addUpdateCallback(mUpdateCallback);
+        //mCamera->asPositionAttitudeTransform()->getAttitude();
     }
 
     Camera::~Camera()
@@ -175,7 +178,7 @@ namespace MWRender
         wm->showCrosshair(
             !wm->isGuiMode() && 
             (
-                ((mCameraView == CameraView_FirstPerson) || (mCameraView == CameraView_ThirdPersonOverShoulder)) &&
+                (mCameraView & CameraView_ShowCrosshair) &&
                 !mVanity.enabled && !mPreviewMode
             )
         );
@@ -200,11 +203,32 @@ namespace MWRender
 
         // Cycle between our active Third Person View and First Person
         mActiveThirdPersonView = Settings::Manager::getBool("third person over shoulder", "Input") ? CameraView_ThirdPersonOverShoulder : CameraView_ThirdPersonCenter;
-        mCameraView = (mCameraView == CameraView_FirstPerson) ? mActiveThirdPersonView : CameraView_FirstPerson;
+        changeToViewMode((mCameraView == CameraView_FirstPerson) ? mActiveThirdPersonView : CameraView_FirstPerson);
+       
+    }
+
+    void Camera::changeToViewMode(CameraView newCameraView)
+    {
+        mCameraView = newCameraView;
+        // On toggle set the max distance based on the type of third person camera view.  
+        if ((mCameraView & CameraView_AnyThirdPersonNonCombat) && !Settings::Manager::getBool("allow third person zoom", "Input"))
+            mMaxCameraDistance = (mCameraView == CameraView_ThirdPersonOverShoulder) ? Settings::Manager::getFloat("third person over shoulder camera distance", "Input") : sResetThirdPersonCameraDistance;
 
         processViewChange();
     }
     
+    void Camera::toggleThirdPersonOverShouldRangedCamera() {
+        changeToViewMode(
+            (mCameraView == CameraView_ThirdPersonOverTheShoulderRanged) ? mActiveThirdPersonView : CameraView_ThirdPersonOverTheShoulderRanged
+        );
+    }
+
+    void Camera::setThirdPersonOverShouldRangedCamera(bool set) {
+        changeToViewMode(
+            !set ? mActiveThirdPersonView : CameraView_ThirdPersonOverTheShoulderRanged
+        );
+    }
+
     void Camera::allowVanityMode(bool allow)
     {
         if (!allow && mVanity.enabled)
@@ -370,6 +394,9 @@ namespace MWRender
             else if (mCameraView == CameraView_ThirdPersonOverShoulder) {
                 mCameraDistance = mMaxCameraDistance;
             }
+            else if (mCameraView == CameraView_ThirdPersonOverTheShoulderRanged) {
+                mCameraDistance = 60.0f;
+            }
         }
     }
 
@@ -402,9 +429,15 @@ namespace MWRender
                 mHeightScale = transform->getScale().z();
             else
                 mHeightScale = 1.f;
-            if ((mCameraView == CameraView_ThirdPersonOverShoulder) && !mPreviewMode && !mVanity.enabled) {
-                mCameraZOffsetFromCenter = Settings::Manager::getFloat("third person over shoulder z offset", "Input");
-                mCameraXOffsetFromCenter = Settings::Manager::getFloat("third person over shoulder x offset", "Input");
+            if (!mPreviewMode && !mVanity.enabled) {
+                if (mCameraView == CameraView_ThirdPersonOverShoulder) {
+                    mCameraZOffsetFromCenter = Settings::Manager::getFloat("third person over shoulder z offset", "Input");
+                    mCameraXOffsetFromCenter = Settings::Manager::getFloat("third person over shoulder x offset", "Input");
+                }
+                else if(mCameraView == CameraView_ThirdPersonOverTheShoulderRanged){
+                    mCameraZOffsetFromCenter = 0.0f;
+                    mCameraXOffsetFromCenter = 40.0f;
+                }
             }
         }
         rotateCamera(getPitch(), getYaw(), false);

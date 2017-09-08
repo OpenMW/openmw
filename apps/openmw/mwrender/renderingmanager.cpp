@@ -542,12 +542,6 @@ namespace MWRender
 
     void RenderingManager::rotateObject(const MWWorld::Ptr &ptr, const osg::Quat& rot)
     {
-        if(ptr == mCamera->getTrackingPtr() &&
-           !mCamera->isVanityOrPreviewModeEnabled())
-        {
-            mCamera->rotateCamera(-ptr.getRefData().getPosition().rot[0], -ptr.getRefData().getPosition().rot[2], false);
-        }
-
         ptr.getRefData().getBaseNode()->setAttitude(rot);
     }
 

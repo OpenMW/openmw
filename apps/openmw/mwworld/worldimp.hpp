@@ -134,8 +134,6 @@ namespace MWWorld
 
             void preloadSpells();
 
-            MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer=true);
-
     public: // FIXME
             void removeContainerScripts(const Ptr& reference);
     private:
@@ -352,6 +350,9 @@ namespace MWWorld
             virtual MWWorld::Ptr getFacedObject();
             ///< Return pointer to the object the player is looking at, if it is within activation range
 
+            virtual MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer = true);
+            ///< Return pointer to the object the player is looking at, if it is within a provided range
+
             virtual float getDistanceToFacedObject();
 
             /// Returns a pointer to the object the provided object would hit (if within the
@@ -509,6 +510,11 @@ namespace MWWorld
 
             virtual bool vanityRotateCamera(float * rot);
             virtual void setCameraDistance(float dist, bool adjust = false, bool override = true);
+            virtual void setThirdPersonOverShouldRangedCamera(bool set);
+            virtual void toggleThirdPersonOverShouldRangedCamera();
+            virtual float getCameraYaw();
+            virtual osg::Vec3f getCameraPosition();
+            virtual void rotateCameraIfAttachedToPtr(const MWWorld::Ptr &ptr, float pitch, float yaw, bool adjust);
 
             virtual void setupPlayer();
             virtual void renderPlayer();

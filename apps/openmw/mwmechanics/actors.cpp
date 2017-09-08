@@ -1180,12 +1180,14 @@ namespace MWMechanics
                         {
                             float sqrHeadTrackDistance = std::numeric_limits<float>::max();
                             MWWorld::Ptr headTrackTarget;
-
-                            for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
+                            if (!((iter->first == player) && MWBase::Environment::get().getWorld()->getPlayer().getThirdPersonOverShoulderRanged()))
                             {
-                                if (it->first == iter->first)
-                                    continue;
-                                updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
+                                for (PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
+                                {
+                                    if (it->first == iter->first)
+                                        continue;
+                                    updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
+                                }
                             }
                             iter->second->getCharacterController()->setHeadTrackTarget(headTrackTarget);
                         }

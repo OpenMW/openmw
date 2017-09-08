@@ -2197,6 +2197,38 @@ namespace MWWorld
         mRendering->setCameraDistance(dist, adjust, override_);
     }
 
+    float World::getCameraYaw()
+    {
+        return mRendering->getCamera()->getYaw();
+    }
+
+    osg::Vec3 World::getCameraPosition()
+    {
+        osg::Vec3 focal, pos;
+        mRendering->getCamera()->getPosition(focal,pos);
+        return pos;
+    }
+
+    void World::toggleThirdPersonOverShouldRangedCamera() 
+    {
+        mRendering->getCamera()->toggleThirdPersonOverShouldRangedCamera();
+    }
+
+    void World::setThirdPersonOverShouldRangedCamera(bool set)
+    {
+        mRendering->getCamera()->setThirdPersonOverShouldRangedCamera(set);
+    }
+
+    void World::rotateCameraIfAttachedToPtr(const MWWorld::Ptr &ptr, float pitch, float yaw, bool adjust)
+    {
+        MWRender::Camera* camera = mRendering->getCamera();
+        if (ptr == camera->getTrackingPtr() &&
+            !camera->isVanityOrPreviewModeEnabled())
+        {
+            camera->rotateCamera(-pitch, -yaw, adjust);
+        }
+    }
+
     void World::setupPlayer()
     {
         const ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
@@ -2230,6 +2262,7 @@ namespace MWWorld
         scaleObject(getPlayerPtr(), 1.f); // apply race height
 
         rotateObject(getPlayerPtr(), 0.f, 0.f, 0.f, true);
+        rotateCameraIfAttachedToPtr(getPlayerPtr(), getPlayerPtr().getRefData().getPosition().rot[0], getPlayerPtr().getRefData().getPosition().rot[2], false);
 
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
         MWBase::Environment::get().getMechanicsManager()->watchActor(getPlayerPtr());

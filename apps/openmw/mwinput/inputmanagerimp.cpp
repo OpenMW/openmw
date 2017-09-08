@@ -162,12 +162,12 @@ namespace MWInput
 
     void InputManager::setPlayerControlsEnabled(bool enabled)
     {
-        int nPlayerChannels = 18;
+        int nPlayerChannels = 19;
         int playerChannels[] = {A_Activate, A_AutoMove, A_AlwaysRun, A_ToggleWeapon,
                                 A_ToggleSpell, A_Rest, A_QuickKey1, A_QuickKey2,
                                 A_QuickKey3, A_QuickKey4, A_QuickKey5, A_QuickKey6,
                                 A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10,
-                                A_Use, A_Journal};
+                                A_Use, A_Journal, A_Aim};
 
         for(int i = 0; i < nPlayerChannels; i++) {
             int pc = playerChannels[i];
@@ -207,11 +207,26 @@ namespace MWInput
 
         if (mControlSwitch["playercontrols"])
         {
-            if (action == A_Use)
-                mPlayer->setAttackingOrSpell(currentValue != 0);
-            else if (action == A_Jump)
+            if (action == A_Use) {
+                if (
+                    // We don't have third person over the shoulder enabled
+                    !Settings::Manager::getBool("third person over shoulder", "Input") ||
+                    // or we are third person over the shoulder and
+                    (
+                        // our active weapon is not ranged 
+                        !mPlayer->getActiveWeaponisRanged() ||
+                        // or it is and we are in over the shoulder ranged view
+                        mPlayer->getThirdPersonOverShoulderRanged()
+                        )
+                    )
+                    mPlayer->setAttackingOrSpell(currentValue != 0);
+            }
+            else if (action == A_Jump) {
                 mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
+            }
         }
+
+        bool currentGuiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
 
         if (currentValue == 1)
         {
@@ -219,41 +234,41 @@ namespace MWInput
             switch (action)
             {
             case A_GameMenu:
-                if(!(MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running
+                if (!(MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running
                     && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_MainMenu))
-                        toggleMainMenu ();
+                    toggleMainMenu();
                 break;
             case A_Screenshot:
                 screenshot();
                 break;
             case A_Inventory:
-                toggleInventory ();
+                toggleInventory();
                 break;
             case A_Console:
-                toggleConsole ();
+                toggleConsole();
                 break;
             case A_Activate:
                 resetIdleTime();
-                if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
+                if (!currentGuiMode)
                     activate();
                 break;
             case A_Journal:
-                toggleJournal ();
+                toggleJournal();
                 break;
             case A_AutoMove:
-                toggleAutoMove ();
+                toggleAutoMove();
                 break;
             case A_AlwaysRun:
-                toggleWalking ();
+                toggleWalking();
                 break;
             case A_ToggleWeapon:
-                toggleWeapon ();
+                toggleWeapon();
                 break;
             case A_Rest:
                 rest();
                 break;
             case A_ToggleSpell:
-                toggleSpell ();
+                toggleSpell();
                 break;
             case A_QuickKey1:
                 quickKey(1);
@@ -322,6 +337,45 @@ namespace MWInput
                     toggleSneaking();
                 }
                 break;
+            case A_Aim:
+                if (
+                    !MWBase::Environment::get().getWorld()->isFirstPerson() &&
+                    Settings::Manager::getBool("third person over shoulder", "Input") &&
+                    !currentGuiMode &&
+                    mPlayer->getActiveWeaponisRanged()
+                    )
+                    mPlayer->setThirdPersonOverShoulderRanged(true);
+                break;
+            }
+
+        }
+        else if (currentValue == 0) {
+            // trigger action de-activated
+            switch (action)
+            {
+            case A_Aim:
+                if (
+                    !MWBase::Environment::get().getWorld()->isFirstPerson() &&
+                    Settings::Manager::getBool("third person over shoulder", "Input") &&
+                    !currentGuiMode &&
+                    mPlayer->getActiveWeaponisRanged()
+                    )
+                {
+                    mPlayer->setThirdPersonOverShoulderRanged(false);
+                    mPlayer->reAlignPlayerToCamera();
+                }
+                break;
+            }
+        }
+
+        // Actions to take as a result of transitioning out of GUI Mode
+        if (currentGuiMode && !MWBase::Environment::get().getWindowManager()->isGuiMode())
+        {
+            // clear out being in ranged mode (as if we de-activated A_Aim) if it was set
+            if (mPlayer->getThirdPersonOverShoulderRanged())
+            {
+                mPlayer->setThirdPersonOverShoulderRanged(false);
+                mPlayer->reAlignPlayerToCamera();
             }
         }
     }
@@ -514,6 +568,9 @@ namespace MWInput
                 {
                     mPlayer->setSneak(actionIsActive(A_Sneak));
                 }
+
+                if (mPlayer->getThirdPersonOverShoulderRanged())
+                    mPlayer->orientTowardsCrosshair();
 
                 if (mAttemptJump && mControlSwitch["playerjumping"])
                 {
@@ -1148,6 +1205,9 @@ namespace MWInput
         defaultKeyBindings[A_Console] = SDL_SCANCODE_GRAVE;
         defaultKeyBindings[A_Run] = SDL_SCANCODE_LSHIFT;
         defaultKeyBindings[A_Sneak] = SDL_SCANCODE_LCTRL;
+
+        // Button mapping for non-vanilla third person aim option
+        defaultKeyBindings[A_Aim] = SDL_SCANCODE_G;
         defaultKeyBindings[A_AutoMove] = SDL_SCANCODE_Q;
         defaultKeyBindings[A_Jump] = SDL_SCANCODE_E;
         defaultKeyBindings[A_Journal] = SDL_SCANCODE_J;
@@ -1242,6 +1302,7 @@ namespace MWInput
         defaultAxisBindings[A_LookUpDown] = SDL_CONTROLLER_AXIS_RIGHTY;
         defaultAxisBindings[A_LookLeftRight] = SDL_CONTROLLER_AXIS_RIGHTX;
         defaultAxisBindings[A_Use] = SDL_CONTROLLER_AXIS_TRIGGERRIGHT;
+        defaultAxisBindings[A_Aim] = SDL_CONTROLLER_AXIS_TRIGGERLEFT;
 
         for (int i = 0; i < A_Last; i++)
         {
@@ -1288,6 +1349,9 @@ namespace MWInput
 
         if (action == A_Screenshot)
             return "Screenshot";
+
+        if (action == A_Aim)
+            return "Aim";
 
         descriptions[A_Use] = "sUse";
         descriptions[A_Activate] = "sActivate";
@@ -1433,6 +1497,7 @@ namespace MWInput
         ret.push_back(A_Run);
         ret.push_back(A_AlwaysRun);
         ret.push_back(A_Sneak);
+        ret.push_back(A_Aim);
         ret.push_back(A_Activate);
         ret.push_back(A_Use);
         ret.push_back(A_ToggleWeapon);
@@ -1469,6 +1534,7 @@ namespace MWInput
         std::vector<int> ret;
         ret.push_back(A_TogglePOV);
         ret.push_back(A_Sneak);
+        ret.push_back(A_Aim);
         ret.push_back(A_Activate);
         ret.push_back(A_Use);
         ret.push_back(A_ToggleWeapon);

@@ -28,6 +28,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwrender/animation.hpp"
+#include "../mwrender/camera.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -744,6 +745,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 
             mAnimation->showCarriedLeft(updateCarriedLeftVisible(mWeaponType));
         }
+        setActiveWeaponIsRanged(mWeaponType, mPtr);
 
         if(!cls.getCreatureStats(mPtr).isDead())
             mIdleState = CharState_Idle;
@@ -991,6 +993,7 @@ bool CharacterController::updateCreatureState()
     if (weapType != mWeaponType)
     {
         mWeaponType = weapType;
+        setActiveWeaponIsRanged(mWeaponType, mPtr);
         if (mAnimation->isPlaying(mCurrentWeapon))
             mAnimation->disable(mCurrentWeapon);
     }
@@ -1087,6 +1090,18 @@ bool CharacterController::updateCarriedLeftVisible(WeaponType weaptype) const
     }
 }
 
+void CharacterController::setActiveWeaponIsRanged(WeaponType weaponType, MWWorld::Ptr ptr)
+{
+    if (ptr == getPlayer())
+    {
+        MWBase::Environment::get().getWorld()->getPlayer().setActiveWeaponisRanged(
+            ((mWeaponType == WeapType_Crossbow) ||
+            (mWeaponType == WeapType_BowAndArrow) ||
+                (mWeaponType == WeapType_Thrown)) ? true : false
+        );
+    }
+}
+
 bool CharacterController::updateWeaponState()
 {
     const MWWorld::Class &cls = mPtr.getClass();
@@ -1165,7 +1180,9 @@ bool CharacterController::updateWeaponState()
         }
 
         mWeaponType = weaptype;
+        setActiveWeaponIsRanged(mWeaponType,mPtr);
         getWeaponGroup(mWeaponType, mCurrentWeapon);
+
     }
 
     if(isWerewolf)
@@ -1193,7 +1210,7 @@ bool CharacterController::updateWeaponState()
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
         MWWorld::ConstContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
         isWeapon = (weapon != inv.end() && weapon->getTypeName() == typeid(ESM::Weapon).name());
-        if(isWeapon)
+        if (isWeapon)
             weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
 
         MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
@@ -1317,7 +1334,9 @@ bool CharacterController::updateWeaponState()
             {
                 if(mWeaponType == WeapType_Crossbow || mWeaponType == WeapType_BowAndArrow ||
                    mWeaponType == WeapType_Thrown)
+                {
                     mAttackType = "shoot";
+                }
                 else
                 {
                     if(mPtr == getPlayer())
@@ -1889,13 +1908,19 @@ void CharacterController::update(float duration)
         {
             if(mHitState != CharState_KnockDown && mHitState != CharState_KnockOut)
             {
-                if (rot != osg::Vec3f())
+                if (rot != osg::Vec3f()) {
                     world->rotateObject(mPtr, rot.x(), rot.y(), rot.z(), true);
+                    //MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
+                    world->rotateCameraIfAttachedToPtr(mPtr, rot.x(), rot.z(), true);
+                    //player.setPitchDelta(0.0f); player.setYawDelta(0.0f);
+                }
             }
             else //avoid z-rotating for knockdown
             {
-                if (rot.x() != 0 && rot.y() != 0)
+                if (rot.x() != 0 && rot.y() != 0) {
                     world->rotateObject(mPtr, rot.x(), rot.y(), 0.0f, true);
+                    world->rotateCameraIfAttachedToPtr(mPtr, mPtr.getRefData().getPosition().rot[0], mPtr.getRefData().getPosition().rot[2], false);
+                }
             }
 
             if (!mMovementAnimationControlled)

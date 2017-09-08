@@ -456,6 +456,7 @@ namespace MWWorld
             float y = pos.rot[1];
             float z = pos.rot[2];
             world->rotateObject(player, x, y, z);
+            world->rotateCameraIfAttachedToPtr(player, x, z, false);
 
             if (adjustPlayerPos)
                 player.getClass().adjustPosition(player, true);

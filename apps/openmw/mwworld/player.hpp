@@ -50,7 +50,14 @@ namespace MWWorld
         MWMechanics::SkillValue mSaveSkills[ESM::Skill::Length];
         MWMechanics::AttributeValue mSaveAttributes[ESM::Attribute::Length];
 
-        bool mAttackingOrSpell;
+        bool                    mAttackingOrSpell;
+        bool                    mActiveWeaponIsRanged;
+
+        float                   mYawDelta;
+        float                   mPitchDelta;
+        float                   mRollDelta;
+
+        bool                    mThirdPersonOverShoulderRanged;
 
     public:
 
@@ -99,12 +106,30 @@ namespace MWWorld
         void yaw(float yaw);
         void pitch(float pitch);
         void roll(float roll);
+        void setYawDelta(float yaw) { mYawDelta = yaw; }
+        void setPitchDelta(float pitch) { mPitchDelta = pitch; }
+        void setRollDelta(float roll) { mRollDelta = roll; }
+        float yawDelta() { return mYawDelta; }
+        float pitchDelta() { return mPitchDelta; }
+        float rollDelta() { return mRollDelta; }
+
+        /// This will orient the player towards the oject under center screen (crosshair)
+        /// This is useful for modes such as third person over the shoulder ranged aiming
+        void orientTowardsCrosshair();
+        void reAlignPlayerToCamera();
+
+        void setThirdPersonOverShoulderRanged(bool set);
+        bool getThirdPersonOverShoulderRanged() { return mThirdPersonOverShoulderRanged; }
 
         bool wasTeleported() const;
         void setTeleported(bool teleported);
 
         void setAttackingOrSpell(bool attackingOrSpell);
         bool getAttackingOrSpell() const;
+
+        /// Returns true if the player's current active weapon is ranged
+        bool getActiveWeaponisRanged() { return mActiveWeaponIsRanged; }
+        void setActiveWeaponisRanged(bool activeWeaponIsRanged) { mActiveWeaponIsRanged = activeWeaponIsRanged; }
 
         ///Checks all nearby actors to see if anyone has an aipackage against you
         bool isInCombat();

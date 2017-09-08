@@ -8,6 +8,7 @@
 #include <components/esm/player.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/loadbsgn.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -35,7 +36,8 @@ namespace MWWorld
         mTeleported(false),
         mCurrentCrimeId(-1),
         mPaidCrimeId(-1),
-        mAttackingOrSpell(false)
+        mAttackingOrSpell(false),
+        mThirdPersonOverShoulderRanged(false)
     {
         ESM::CellRef cellRef;
         cellRef.blank();
@@ -186,17 +188,66 @@ namespace MWWorld
     void Player::yaw(float yaw)
     {
         MWWorld::Ptr ptr = getPlayer();
+        mYawDelta += yaw;
         ptr.getClass().getMovementSettings(ptr).mRotation[2] += yaw;
     }
     void Player::pitch(float pitch)
     {
         MWWorld::Ptr ptr = getPlayer();
+        mPitchDelta += pitch;
         ptr.getClass().getMovementSettings(ptr).mRotation[0] += pitch;
     }
     void Player::roll(float roll)
     {
         MWWorld::Ptr ptr = getPlayer();
+        mRollDelta += roll;
         ptr.getClass().getMovementSettings(ptr).mRotation[1] += roll;
+    }
+
+    // Wraps a value to (-PI, PI]
+    void wrap(float& rad)
+    {
+        if (rad>0)
+            rad = std::fmod(rad + osg::PI, 2.0f*osg::PI) - osg::PI;
+        else
+            rad = std::fmod(rad - osg::PI, 2.0f*osg::PI) + osg::PI;
+    }
+
+    void Player::setThirdPersonOverShoulderRanged(bool set) {
+        mThirdPersonOverShoulderRanged = set;
+        MWBase::Environment::get().getWorld()->setThirdPersonOverShouldRangedCamera(set);
+    }
+
+    void Player::orientTowardsCrosshair() {
+        float zAngleRadians = 0.f;
+        MWWorld::Ptr playerPtr = getPlayer();
+        osg::Vec3f playerPos = playerPtr.getRefData().getPosition().asVec3();
+        osg::Vec3f direction;
+        MWWorld::Ptr facedObject = MWBase::Environment::get().getWorld()->getFacedObject(2000.0f);
+        // We found an object under the crosshair
+        if (!facedObject.isEmpty() && facedObject.getClass().isActor()) {
+            osg::Vec3f facedObjectPos = facedObject.getRefData().getPosition().asVec3();
+            direction = playerPos - facedObjectPos;
+            direction.normalize();
+            if (playerPtr.getRefData().getBaseNode()) {
+                const osg::Vec3f playerDirection = playerPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0, 1, 0);
+                zAngleRadians = osg::PI - (std::atan2(direction.x(), direction.y()) - std::atan2(playerDirection.x(), playerDirection.y()));
+                wrap(zAngleRadians);
+            }
+            if (
+                (std::abs(zAngleRadians) > osg::DegreesToRadians(0.01f)) 
+                ) {
+                MWBase::Environment::get().getWorld()->rotateObject(playerPtr, 0.0f, 0.0f, -zAngleRadians*0.3, true);
+            }
+        }
+        else {
+            // Default crosshair aim orientation goes here
+        }
+    }
+
+    void Player::reAlignPlayerToCamera() {
+        MWWorld::Ptr playerPtr = getPlayer();
+        MWBase::Environment::get().getWorld()->rotateObject(playerPtr, playerPtr.getRefData().getPosition().rot[0], playerPtr.getRefData().getPosition().rot[1], -MWBase::Environment::get().getWorld()->getCameraYaw(), false);
     }
 
     MWMechanics::DrawState_ Player::getDrawState()

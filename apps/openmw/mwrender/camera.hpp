@@ -20,10 +20,21 @@ namespace MWRender
 {
 
     enum CameraView {
-        CameraView_FirstPerson,
-        CameraView_ThirdPersonCenter,
-        CameraView_ThirdPersonOverShoulder,
-        CameraView_NumCameraViews
+        // individual Views
+        CameraView_FirstPerson                        = 0b0001, 
+        CameraView_ThirdPersonCenter                  = 0b0010,
+        CameraView_ThirdPersonOverShoulder            = 0b0100,
+        CameraView_ThirdPersonOverTheShoulderRanged   = 0b1000,
+        CameraView_NumCameraViews                     = 4,
+        // ViewSets
+        // Match any of ThirdPersonCenter and ThirdPersonOverShoulder
+        CameraView_AnyThirdPersonNonCombat            = 0b0110,
+        // Only ThirdPersonOverTheShoulderRanged right now
+        CameraView_AnyThirdPersonCombat               = 0b1000,
+        // Any CameraView_ThirdPerson* option
+        CameraView_AnyThirdPerson                     = 0b1110,
+        // Any CameraView that should allow crosshair to be visibile
+        CameraView_ShowCrosshair                      = 0b1101,
     };
     class NpcAnimation;
 
@@ -70,6 +81,8 @@ namespace MWRender
         float mCameraXOffsetFromCenter;
         float mCameraZOffsetFromCenter;
 
+        bool mCameraRotationDisjoint;
+
         osg::ref_ptr<osg::NodeCallback> mUpdateCallback;
 
     public:
@@ -100,11 +113,20 @@ namespace MWRender
         /// @param Force view mode switch, even if currently not allowed by the animation.
         void toggleViewMode(bool force=false);
 
+        /// Change to Camera View Mode specified.
+        /// @param newCameraView The camera view to switch to.
+        void changeToViewMode(CameraView newCameraView);
+
         bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
 
         /// @note this may be ignored if an important animation is currently playing
         void togglePreviewMode(bool enable);
+
+        /// This will toggle between current active third person view and archery/spell third person view
+        /// when over the shoulder third person is enabled.
+        void toggleThirdPersonOverShouldRangedCamera();
+        void setThirdPersonOverShouldRangedCamera(bool set);
 
         /// \brief Lowers the camera for sneak.
         void setSneakOffset(float offset);
