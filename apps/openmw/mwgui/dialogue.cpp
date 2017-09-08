@@ -634,7 +634,7 @@ namespace MWGui
 
     void DialogueWindow::onFrame()
     {
-        if(mMainWidget->getVisible() && mEnabled && mPtr.getTypeName() == typeid(ESM::NPC).name())
+        if(mMainWidget->getVisible() && mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
             int disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr);
             mDispositionBar->setProgressRange(100);
