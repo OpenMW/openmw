@@ -51,6 +51,11 @@ std::string CSVWorld::GenericCreator::getId() const
     return mId->text().toUtf8().constData();
 }
 
+std::string CSVWorld::GenericCreator::getClonedId() const
+{
+    return mClonedId;
+}
+
 std::string CSVWorld::GenericCreator::getIdValidatorResult() const
 {
     std::string errors;

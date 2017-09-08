@@ -43,23 +43,67 @@ namespace CSMWorld
             bool mChanged;
     };
 
-    class TouchLandCommand : public QUndoCommand
+    class ImportLandTexturesCommand : public QUndoCommand
     {
         public:
 
-            TouchLandCommand(IdTable& landTable, IdTable& ltexTable, const std::string& id,
-                QUndoCommand* parent = nullptr);
+            ImportLandTexturesCommand(IdTable& landTable, IdTable& ltexTable,
+                QUndoCommand* parent);
 
             void redo() override;
             void undo() override;
 
-        private:
+        protected:
+
+            virtual const std::string& getOriginId() const = 0;
+            virtual const std::string& getDestinationId() const = 0;
+
+            virtual void onRedo() = 0;
+            virtual void onUndo() = 0;
 
             IdTable& mLands;
             IdTable& mLtexs;
+            QByteArray mOld;
+            int mOldState;
+            std::vector<std::string> mCreatedTextures;
+    };
+
+    class CopyLandTexturesCommand : public ImportLandTexturesCommand
+    {
+        public:
+
+            CopyLandTexturesCommand(IdTable& landTable, IdTable& ltexTable, const std::string& origin,
+                const std::string& dest, QUndoCommand* parent = nullptr);
+
+        private:
+
+            const std::string& getOriginId() const override;
+            const std::string& getDestinationId() const override;
+
+            void onRedo() override {}
+            void onUndo() override {}
+
+            std::string mOriginId;
+            std::string mDestId;
+    };
+
+    class TouchLandCommand : public ImportLandTexturesCommand
+    {
+        public:
+
+            TouchLandCommand(IdTable& landTable, IdTable& ltexTable,
+                const std::string& id, QUndoCommand* parent = nullptr);
+
+        private:
+
+            const std::string& getOriginId() const override;
+            const std::string& getDestinationId() const override;
+
+            void onRedo() override;
+            void onUndo() override;
+
             std::string mId;
             std::unique_ptr<RecordBase> mOld;
-            std::vector<std::string> mCreatedTextures;
 
             bool mChanged;
     };

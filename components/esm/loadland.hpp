@@ -31,11 +31,9 @@ struct Land
 
     // File context. This allows the ESM reader to be 'reset' to this
     // location later when we are ready to load the full data set.
+    // In the editor, there may not be a file associated with the Land,
+    // in which case the filename will be empty.
     ESM_Context mContext;
-
-    // In the editor, a new Land is not associated with a file, thus mContext should not be accessed
-    // when land data is being requested. Instead simply copy over the data.
-    bool mNoFile;
 
     int mDataTypes;
 

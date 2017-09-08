@@ -15,7 +15,6 @@ namespace ESM
         , mX(0)
         , mY(0)
         , mPlugin(0)
-        , mNoFile(false)
         , mDataTypes(0)
         , mLandData(NULL)
     {
@@ -214,7 +213,8 @@ namespace ESM
             Land::DATA_VCLR | Land::DATA_VTEX;
         mDataTypes = mLandData->mDataLoaded;
 
-        mNoFile = true;
+        // No file associated with the land now
+        mContext.filename.clear();
     }
 
     void Land::loadData(int flags, LandData* target) const
@@ -236,7 +236,7 @@ namespace ESM
         }
 
         // Copy data to target if no file
-        if (mNoFile)
+        if (mContext.filename.empty())
         {
             *target = *mLandData;
             return;
@@ -320,7 +320,7 @@ namespace ESM
 
     Land::Land (const Land& land)
     : mFlags (land.mFlags), mX (land.mX), mY (land.mY), mPlugin (land.mPlugin),
-      mContext (land.mContext), mNoFile(land.mNoFile), mDataTypes (land.mDataTypes),
+      mContext (land.mContext), mDataTypes (land.mDataTypes),
       mLandData (land.mLandData ? new LandData (*land.mLandData) : 0)
     {}
 
@@ -337,7 +337,6 @@ namespace ESM
         std::swap (mY, land.mY);
         std::swap (mPlugin, land.mPlugin);
         std::swap (mContext, land.mContext);
-        std::swap (mNoFile, land.mNoFile);
         std::swap (mDataTypes, land.mDataTypes);
         std::swap (mLandData, land.mLandData);
     }

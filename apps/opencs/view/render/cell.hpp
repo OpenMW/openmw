@@ -72,6 +72,8 @@ namespace CSVRender
             /// \return Have any objects been added?
             bool addObjects (int start, int end);
 
+            void createLand();
+
         public:
 
             enum Selection
@@ -117,6 +119,18 @@ namespace CSVRender
             void pathgridModified();
 
             void pathgridRemoved();
+
+            void landDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void landAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+            void landAdded (const QModelIndex& parent, int start, int end);
+
+            void landTextureChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void landTextureAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+            void landTextureAdded (const QModelIndex& parent, int start, int end);
 
             void reloadAssets();
 

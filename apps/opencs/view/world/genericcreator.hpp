@@ -64,6 +64,8 @@ namespace CSVWorld
 
             virtual std::string getId() const;
 
+            std::string getClonedId() const;
+
             virtual std::string getIdValidatorResult() const;
 
             /// Allow subclasses to add additional data to \a command.

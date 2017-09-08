@@ -31,13 +31,16 @@ namespace CSVWorld
 
             std::string getErrors() const override;
 
-        private slots:
-
-            void coordChanged(int value);
-
         protected:
 
             std::string getId() const override;
+
+            void pushCommand(std::unique_ptr<CSMWorld::CreateCommand> command,
+                const std::string& id) override;
+
+        private slots:
+
+            void coordChanged(int value);
     };
 }
 

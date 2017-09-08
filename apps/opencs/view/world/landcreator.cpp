@@ -95,6 +95,25 @@ namespace CSVWorld
         return CSMWorld::Land::createUniqueRecordId(mX->value(), mY->value());
     }
 
+    void LandCreator::pushCommand(std::unique_ptr<CSMWorld::CreateCommand> command, const std::string& id)
+    {
+        if (mCloneMode)
+        {
+            CSMWorld::IdTable& lands = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(CSMWorld::UniversalId::Type_Lands));
+            CSMWorld::IdTable& ltexs = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
+
+            getUndoStack().beginMacro(("Clone " + id).c_str());
+            getUndoStack().push(command.release());
+
+            CSMWorld::CopyLandTexturesCommand* ltexCopy = new CSMWorld::CopyLandTexturesCommand(lands, ltexs, getClonedId(), getId());
+            getUndoStack().push(ltexCopy);
+
+            getUndoStack().endMacro();
+        }
+        else
+            getUndoStack().push (command.release());
+    }
+
     void LandCreator::coordChanged(int value)
     {
         update();

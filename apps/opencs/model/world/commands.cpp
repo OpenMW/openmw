@@ -41,10 +41,116 @@ void CSMWorld::TouchCommand::undo()
     }
 }
 
-CSMWorld::TouchLandCommand::TouchLandCommand(IdTable& landTable, IdTable& ltexTable, const std::string& id, QUndoCommand* parent)
+CSMWorld::ImportLandTexturesCommand::ImportLandTexturesCommand(IdTable& landTable,
+    IdTable& ltexTable, QUndoCommand* parent)
     : QUndoCommand(parent)
     , mLands(landTable)
     , mLtexs(ltexTable)
+    , mOldState(0)
+{
+    setText("Import land textures");
+}
+
+void CSMWorld::ImportLandTexturesCommand::redo()
+{
+    int pluginColumn = mLands.findColumnIndex(Columns::ColumnId_PluginIndex);
+    int oldPlugin = mLands.data(mLands.getModelIndex(getOriginId(), pluginColumn)).toInt();
+
+    // Original data
+    int textureColumn = mLands.findColumnIndex(Columns::ColumnId_LandTexturesIndex);
+    mOld = mLands.data(mLands.getModelIndex(getOriginId(), textureColumn)).toByteArray();
+    const uint16_t* textureData = reinterpret_cast<uint16_t*>(mOld.data());
+
+    // Need to make a copy so the old values can be looked up
+    QByteArray newTextureByteArray(mOld.data(), mOld.size());
+    uint16_t* newTextureData = reinterpret_cast<uint16_t*>(newTextureByteArray.data());
+
+    // Perform touch/copy/etc...
+    onRedo();
+
+    // Find all indices used
+    std::unordered_set<int> texIndices;
+    for (int i = 0; i < Land::LAND_NUM_TEXTURES; ++i)
+    {
+        // All indices are offset by 1 for a default texture
+        if (textureData[i] > 0)
+            texIndices.insert(textureData[i] - 1);
+    }
+
+    std::vector<std::string> oldTextures;
+    for (int index : texIndices)
+    {
+        oldTextures.push_back(LandTexture::createUniqueRecordId(oldPlugin, index));
+    }
+
+    // Import the textures, replace old values
+    LandTextureIdTable::ImportResults results = dynamic_cast<LandTextureIdTable&>(mLtexs).importTextures(oldTextures);
+    mCreatedTextures = std::move(results.createdRecords);
+    for (const auto& it : results.recordMapping)
+    {
+        int plugin = 0, newIndex = 0, oldIndex = 0;
+        LandTexture::parseUniqueRecordId(it.first, plugin, oldIndex);
+        LandTexture::parseUniqueRecordId(it.second, plugin, newIndex);
+
+        if (newIndex != oldIndex)
+        {
+            for (int i = 0; i < Land::LAND_NUM_TEXTURES; ++i)
+            {
+                // All indices are offset by 1 for a default texture
+                if (textureData[i] == oldIndex + 1)
+                    newTextureData[i] = newIndex + 1;
+            }
+        }
+    }
+
+    // Apply modification
+    int stateColumn = mLands.findColumnIndex(Columns::ColumnId_Modification);
+    mOldState = mLands.data(mLands.getModelIndex(getDestinationId(), stateColumn)).toInt();
+
+    mLands.setData(mLands.getModelIndex(getDestinationId(), textureColumn), newTextureByteArray);
+}
+
+void CSMWorld::ImportLandTexturesCommand::undo()
+{
+    // Restore to previous
+    int textureColumn = mLands.findColumnIndex(Columns::ColumnId_LandTexturesIndex);
+    mLands.setData(mLands.getModelIndex(getDestinationId(), textureColumn), mOld);
+
+    int stateColumn = mLands.findColumnIndex(Columns::ColumnId_Modification);
+    mLands.setData(mLands.getModelIndex(getDestinationId(), stateColumn), mOldState);
+
+    // Undo copy/touch/etc...
+    onUndo();
+
+    for (const std::string& id : mCreatedTextures)
+    {
+        int row = mLtexs.getModelIndex(id, 0).row();
+        mLtexs.removeRows(row, 1);
+    }
+    mCreatedTextures.clear();
+}
+
+CSMWorld::CopyLandTexturesCommand::CopyLandTexturesCommand(IdTable& landTable, IdTable& ltexTable,
+    const std::string& origin, const std::string& dest, QUndoCommand* parent)
+    : ImportLandTexturesCommand(landTable, ltexTable, parent)
+    , mOriginId(origin)
+    , mDestId(dest)
+{
+}
+
+const std::string& CSMWorld::CopyLandTexturesCommand::getOriginId() const
+{
+    return mOriginId;
+}
+
+const std::string& CSMWorld::CopyLandTexturesCommand::getDestinationId() const
+{
+    return mDestId;
+}
+
+CSMWorld::TouchLandCommand::TouchLandCommand(IdTable& landTable, IdTable& ltexTable,
+    const std::string& id, QUndoCommand* parent)
+    : ImportLandTexturesCommand(landTable, ltexTable, parent)
     , mId(id)
     , mOld(nullptr)
     , mChanged(false)
@@ -53,75 +159,27 @@ CSMWorld::TouchLandCommand::TouchLandCommand(IdTable& landTable, IdTable& ltexTa
     mOld.reset(mLands.getRecord(mId).clone());
 }
 
-void CSMWorld::TouchLandCommand::redo()
+const std::string& CSMWorld::TouchLandCommand::getOriginId() const
 {
-    int pluginColumn = mLands.findColumnIndex(Columns::ColumnId_PluginIndex);
-    int oldPlugin = mLands.data(mLands.getModelIndex(mId, pluginColumn)).toInt();
-
-    mChanged = mLands.touchRecord(mId);
-    if (mChanged)
-    {
-        // Original data
-        int textureColumn = mLands.findColumnIndex(Columns::ColumnId_LandTexturesIndex);
-        QByteArray textureByteArray = mLands.data(mLands.getModelIndex(mId, textureColumn)).toByteArray();
-        const uint16_t* textureData = reinterpret_cast<uint16_t*>(textureByteArray.data());
-
-        // Need to make a copy so the old values can be looked up
-        QByteArray newTextureByteArray(textureByteArray.data(), textureByteArray.size());
-        uint16_t* newTextureData = reinterpret_cast<uint16_t*>(newTextureByteArray.data());
-
-        // Find all indices used
-        std::unordered_set<int> texIndices;
-        for (int i = 0; i < Land::LAND_NUM_TEXTURES; ++i)
-        {
-            // All indices are offset by 1 for a default texture
-            if (textureData[i] > 0)
-                texIndices.insert(textureData[i] - 1);
-        }
-
-        std::vector<std::string> oldTextures;
-        for (int index : texIndices)
-        {
-            oldTextures.push_back(LandTexture::createUniqueRecordId(oldPlugin, index));
-        }
-
-        // Import the textures, replace old values
-        LandTextureIdTable::ImportResults results = dynamic_cast<LandTextureIdTable&>(mLtexs).importTextures(oldTextures);
-        mCreatedTextures = std::move(results.createdRecords);
-        for (const auto& it : results.recordMapping)
-        {
-            int plugin = 0, newIndex = 0, oldIndex = 0;
-            LandTexture::parseUniqueRecordId(it.first, plugin, oldIndex);
-            LandTexture::parseUniqueRecordId(it.second, plugin, newIndex);
-
-            if (newIndex != oldIndex)
-            {
-                for (int i = 0; i < Land::LAND_NUM_TEXTURES; ++i)
-                {
-                    // All indices are offset by 1 for a default texture
-                    if (textureData[i] == oldIndex)
-                        newTextureData[i] = newIndex + 1;
-                }
-            }
-        }
-
-        mLands.setData(mLands.getModelIndex(mId, textureColumn), newTextureByteArray);
-    }
+    return mId;
 }
 
-void CSMWorld::TouchLandCommand::undo()
+const std::string& CSMWorld::TouchLandCommand::getDestinationId() const
+{
+    return mId;
+}
+
+void CSMWorld::TouchLandCommand::onRedo()
+{
+    mChanged = mLands.touchRecord(mId);
+}
+
+void CSMWorld::TouchLandCommand::onUndo()
 {
     if (mChanged)
     {
         mLands.setRecord(mId, *mOld);
         mChanged = false;
-
-        for (const std::string& id : mCreatedTextures)
-        {
-            int row = mLtexs.getModelIndex(id, 0).row();
-            mLtexs.removeRows(row, 1);
-        }
-        mCreatedTextures.clear();
     }
 }
 
