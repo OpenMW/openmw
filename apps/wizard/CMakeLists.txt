@@ -96,7 +96,7 @@ if (OPENMW_USE_UNSHIELD)
     include_directories(${LIBUNSHIELD_INCLUDE_DIRS})
 endif()
 
-add_executable(openmw-wizard
+openmw_add_executable(openmw-wizard
     ${GUI_TYPE}
     ${WIZARD}
     ${WIZARD_HEADER}
@@ -143,9 +143,3 @@ endif()
 if (WIN32)
     INSTALL(TARGETS openmw-wizard RUNTIME DESTINATION ".")
 endif(WIN32)
-
-if (MSVC)
-	if (CMAKE_VERSION VERSION_GREATER 3.8)
-		set_target_properties(openmw-wizard PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(TargetDir)")
-	endif (CMAKE_VERSION VERSION_GREATER 3.8)
-endif (MSVC)

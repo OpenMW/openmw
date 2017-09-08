@@ -17,19 +17,13 @@ if (GTEST_FOUND)
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
 
-    add_executable(openmw_test_suite openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
+    openmw_add_executable(openmw_test_suite openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
 
     target_link_libraries(openmw_test_suite ${GTEST_BOTH_LIBRARIES} components)
     # Fix for not visible pthreads functions for linker with glibc 2.15
     if (UNIX AND NOT APPLE)
         target_link_libraries(openmw_test_suite ${CMAKE_THREAD_LIBS_INIT})
     endif()
-	
-	if (MSVC)
-		if (CMAKE_VERSION VERSION_GREATER 3.8)
-			set_target_properties(openmw_test_suite PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(TargetDir)")
-		endif (CMAKE_VERSION VERSION_GREATER 3.8)
-	endif (MSVC)
 endif()
 
 

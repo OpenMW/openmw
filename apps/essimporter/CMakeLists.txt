@@ -28,7 +28,7 @@ set(ESSIMPORTER_FILES
     convertplayer.cpp
 )
 
-add_executable(openmw-essimporter
+openmw_add_executable(openmw-essimporter
     ${ESSIMPORTER_FILES}
 )
 
@@ -46,9 +46,3 @@ endif()
 if (WIN32)
   INSTALL(TARGETS openmw-essimporter RUNTIME DESTINATION ".")
 endif(WIN32)
-
-if (MSVC)
-	if (CMAKE_VERSION VERSION_GREATER 3.8)
-		set_target_properties(openmw-essimporter PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(TargetDir)")
-	endif (CMAKE_VERSION VERSION_GREATER 3.8)
-endif (MSVC)
