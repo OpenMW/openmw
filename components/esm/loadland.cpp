@@ -196,8 +196,8 @@ namespace ESM
         for (int i = 0; i < LAND_NUM_VERTS; ++i)
         {
             mLandData->mNormals[i*3+0] = 0;
-            mLandData->mNormals[i*3+1] = -1;
-            mLandData->mNormals[i*3+2] = 0;
+            mLandData->mNormals[i*3+1] = 0;
+            mLandData->mNormals[i*3+2] = 127;
         }
         for (int i = 0; i < LAND_NUM_TEXTURES; ++i)
             mLandData->mTextures[i] = 0;

@@ -1013,19 +1013,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
         case ESM::REC_LTEX: mLandTextures.load (*mReader, mBase); break;
 
-        case ESM::REC_LAND:
-        {
-            int index = mLand.load(*mReader, mBase);
-
-            // Load all land data for now. A future optimisation may only load non-base data
-            // if a suitable mechanism for avoiding race conditions can be established.
-            if (index!=-1/* && !mBase*/)
-                mLand.getRecord (index).get().loadData (
-                    ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR |
-                    ESM::Land::DATA_VTEX);
-
-            break;
-        }
+        case ESM::REC_LAND: mLand.load(*mReader, mBase); break;
 
         case ESM::REC_CELL:
         {

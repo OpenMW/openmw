@@ -103,7 +103,8 @@ namespace CSMWorld
 
         assert (array.count() == Land::LAND_NUM_VERTS * sizeof(float));
 
-        for (int i = 0; i < array.count(); ++i)
+        int count = array.count() / sizeof(float);
+        for (int i = 0; i < count; ++i)
         {
             landData->mHeights[i] = rawData[i];
         }
@@ -183,7 +184,8 @@ namespace CSMWorld
 
         assert (array.count() == Land::LAND_NUM_TEXTURES * sizeof(uint16_t));
 
-        for (int i = 0; i < array.count(); ++i)
+        int count = array.count() / sizeof(uint16_t);
+        for (int i = 0; i < count; ++i)
         {
             landData->mTextures[i] = rawData[i];
         }
