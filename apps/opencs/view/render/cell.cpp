@@ -75,7 +75,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
     return modified;
 }
 
-void CSVRender::Cell::createLand()
+void CSVRender::Cell::updateLand()
 {
     // Cell is deleted
     if (mDeleted)
@@ -152,7 +152,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
 
         addObjects (0, rows-1);
 
-        createLand();
+        updateLand();
 
         mPathgrid.reset(new Pathgrid(mData, mCellNode, mId, mCoordinates));
         mCellWater.reset(new CellWater(mData, mCellNode, mId, mCoordinates));
@@ -325,32 +325,32 @@ void CSVRender::Cell::pathgridRemoved()
 
 void CSVRender::Cell::landDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
-    createLand();
+    updateLand();
 }
 
 void CSVRender::Cell::landAboutToBeRemoved (const QModelIndex& parent, int start, int end)
 {
-    createLand();
+    updateLand();
 }
 
 void CSVRender::Cell::landAdded (const QModelIndex& parent, int start, int end)
 {
-    createLand();
+    updateLand();
 }
 
 void CSVRender::Cell::landTextureChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
-    createLand();
+    updateLand();
 }
 
 void CSVRender::Cell::landTextureAboutToBeRemoved (const QModelIndex& parent, int start, int end)
 {
-    createLand();
+    updateLand();
 }
 
 void CSVRender::Cell::landTextureAdded (const QModelIndex& parent, int start, int end)
 {
-    createLand();
+    updateLand();
 }
 
 void CSVRender::Cell::reloadAssets()

@@ -297,7 +297,6 @@ namespace CSMWorld
     {
         int index = cloneRecordImp(origin, destination, type);
         mRecords.at(index).get().mPlugin = 0;
-        mRecords.at(index).get().mContext.filename.clear();
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -313,7 +312,6 @@ namespace CSMWorld
         if (index >= 0)
         {
             mRecords.at(index).get().mPlugin = 0;
-            mRecords.at(index).get().mContext.filename.clear();
             return true;
         }
 

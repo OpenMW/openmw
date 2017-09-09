@@ -72,7 +72,7 @@ namespace CSVRender
             /// \return Have any objects been added?
             bool addObjects (int start, int end);
 
-            void createLand();
+            void updateLand();
             void unloadLand();
 
         public:
