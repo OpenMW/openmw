@@ -57,6 +57,7 @@ namespace CSVRender
             bool mDeleted;
             int mSubMode;
             unsigned int mSubModeElementMask;
+            bool mUpdateLand, mLandDeleted;
 
             /// Ignored if cell does not have an object with the given ID.
             ///
@@ -160,6 +161,8 @@ namespace CSVRender
             /// Erase all overrides and restore the visual representation of the cell to its
             /// true state.
             void reset (unsigned int elementMask);
+
+            friend class CellNodeCallback;
     };
 }
 

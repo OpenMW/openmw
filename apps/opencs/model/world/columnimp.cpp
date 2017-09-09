@@ -10,18 +10,30 @@ namespace CSMWorld
 
     QVariant LandMapLodColumn::get(const Record<Land>& record) const
     {
-        // Note: original data is signed
-        const char* rawData = reinterpret_cast<const char*>(&record.get().mWnam[0]);
-        return QByteArray(rawData, Land::LAND_GLOBAL_MAP_LOD_SIZE);
+        const int Size = Land::LAND_GLOBAL_MAP_LOD_SIZE;
+        const Land& land = record.get();
+
+        if (land.isDataLoaded(Land::DATA_WNAM))
+        {
+            // Note: original data is signed
+            const char* rawData = reinterpret_cast<const char*>(&land.mWnam[0]);
+            return QByteArray(rawData, Size);
+        }
+        else
+        {
+            // Return a blank array
+            return QByteArray(Size, 0);
+        }
     }
 
     void LandMapLodColumn::set(Record<Land>& record, const QVariant& data)
     {
-        Land copy = record.get();
         QByteArray array = data.toByteArray();
         const signed char* rawData = reinterpret_cast<const signed char*>(array.data());
-
         assert (array.count() == Land::LAND_GLOBAL_MAP_LOD_SIZE);
+
+        Land copy = record.get();
+        copy.setDataLoaded(Land::DATA_WNAM);
 
         for (int i = 0; i < array.count(); ++i)
         {
@@ -44,28 +56,34 @@ namespace CSMWorld
 
     QVariant LandNormalsColumn::get(const Record<Land>& record) const
     {
-        const Land::LandData* landData = record.get().getLandData();
-        assert(landData);
+        const int Size = Land::LAND_NUM_VERTS * 3;
+        const Land& land = record.get();
 
-        // Note: original data is signed
-        const char* rawData = reinterpret_cast<const char*>(&landData->mNormals[0]);
-        return QByteArray(rawData, Land::LAND_NUM_VERTS * 3);
+        if (land.isDataLoaded(Land::DATA_VNML))
+        {
+            // Note: original data is signed
+            const char* rawData = reinterpret_cast<const char*>(&land.getLandData()->mNormals[0]);
+            return QByteArray(rawData, Size);
+        }
+        else
+        {
+            // Return a blank array
+            return QByteArray(Size, 0);
+        }
     }
 
     void LandNormalsColumn::set(Record<Land>& record, const QVariant& data)
     {
-        Land copy = record.get();
-        Land::LandData* landData = copy.getLandData();
-        assert (landData);
-
         QByteArray array = data.toByteArray();
         const signed char* rawData = reinterpret_cast<const signed char*>(array.data());
-
         assert (array.count() == Land::LAND_NUM_VERTS * 3);
+
+        Land copy = record.get();
+        copy.setDataLoaded(Land::DATA_VNML);
 
         for (int i = 0; i < array.count(); ++i)
         {
-            landData->mNormals[i] = rawData[i];
+            copy.getLandData()->mNormals[i] = rawData[i];
         }
 
         record.setModified(copy);
@@ -84,29 +102,34 @@ namespace CSMWorld
 
     QVariant LandHeightsColumn::get(const Record<Land>& record) const
     {
-        const Land::LandData* landData = record.get().getLandData();
-        assert(landData);
+        const int Size = Land::LAND_NUM_VERTS * sizeof(float);
+        const Land& land = record.get();
 
-        // Note: original data is float
-        const char* rawData = reinterpret_cast<const char*>(&landData->mHeights[0]);
-        return QByteArray(rawData, Land::LAND_NUM_VERTS * sizeof(float));
+        if (land.isDataLoaded(Land::DATA_VHGT))
+        {
+            // Note: original data is float
+            const char* rawData = reinterpret_cast<const char*>(&land.getLandData()->mHeights[0]);
+            return QByteArray(rawData, Size);
+        }
+        else
+        {
+            return QByteArray(Size, 0);
+        }
     }
 
     void LandHeightsColumn::set(Record<Land>& record, const QVariant& data)
     {
-        Land copy = record.get();
-        Land::LandData* landData = copy.getLandData();
-        assert (landData);
-
         QByteArray array = data.toByteArray();
         const float* rawData = reinterpret_cast<const float*>(array.data());
-
         assert (array.count() == Land::LAND_NUM_VERTS * sizeof(float));
+
+        Land copy = record.get();
+        copy.setDataLoaded(Land::DATA_VHGT);
 
         int count = array.count() / sizeof(float);
         for (int i = 0; i < count; ++i)
         {
-            landData->mHeights[i] = rawData[i];
+            copy.getLandData()->mHeights[i] = rawData[i];
         }
 
         record.setModified(copy);
@@ -125,28 +148,33 @@ namespace CSMWorld
 
     QVariant LandColoursColumn::get(const Record<Land>& record) const
     {
-        const Land::LandData* landData = record.get().getLandData();
-        assert(landData);
+        const int Size = Land::LAND_NUM_VERTS * 3;
+        const Land& land = record.get();
 
-        // Note: original data is unsigned char
-        const char* rawData = reinterpret_cast<const char*>(&landData->mColours[0]);
-        return QByteArray(rawData, Land::LAND_NUM_VERTS * 3);
+        if (land.isDataLoaded(Land::DATA_VCLR))
+        {
+            // Note: original data is unsigned char
+            const char* rawData = reinterpret_cast<const char*>(&land.getLandData()->mColours[0]);
+            return QByteArray(rawData, Size);
+        }
+        else
+        {
+            return QByteArray(Size, 0);
+        }
     }
 
     void LandColoursColumn::set(Record<Land>& record, const QVariant& data)
     {
-        Land copy = record.get();
-        Land::LandData* landData = copy.getLandData();
-        assert (landData);
-
         QByteArray array = data.toByteArray();
         const unsigned char* rawData = reinterpret_cast<const unsigned char*>(array.data());
-
         assert (array.count() == Land::LAND_NUM_VERTS * 3);
+
+        Land copy = record.get();
+        copy.setDataLoaded(Land::DATA_VCLR);
 
         for (int i = 0; i < array.count(); ++i)
         {
-            landData->mColours[i] = rawData[i];
+            copy.getLandData()->mColours[i] = rawData[i];
         }
 
         record.setModified(copy);
@@ -165,29 +193,34 @@ namespace CSMWorld
 
     QVariant LandTexturesColumn::get(const Record<Land>& record) const
     {
-        const Land::LandData* landData = record.get().getLandData();
-        assert(landData);
+        const int Size = Land::LAND_NUM_TEXTURES * sizeof(uint16_t);
+        const Land& land = record.get();
 
-        // Note: original data is uint16_t
-        const char* rawData = reinterpret_cast<const char*>(&landData->mTextures[0]);
-        return QByteArray(rawData, Land::LAND_NUM_TEXTURES * sizeof(uint16_t));
+        if (land.isDataLoaded(Land::DATA_VTEX))
+        {
+            // Note: original data is uint16_t
+            const char* rawData = reinterpret_cast<const char*>(&land.getLandData()->mTextures[0]);
+            return QByteArray(rawData, Size);
+        }
+        else
+        {
+            return QByteArray(Size, 0);
+        }
     }
 
     void LandTexturesColumn::set(Record<Land>& record, const QVariant& data)
     {
-        Land copy = record.get();
-        Land::LandData* landData = copy.getLandData();
-        assert (landData);
-
         QByteArray array = data.toByteArray();
         const uint16_t* rawData = reinterpret_cast<const uint16_t*>(array.data());
-
         assert (array.count() == Land::LAND_NUM_TEXTURES * sizeof(uint16_t));
+
+        Land copy = record.get();
+        copy.setDataLoaded(Land::DATA_VTEX);
 
         int count = array.count() / sizeof(uint16_t);
         for (int i = 0; i < count; ++i)
         {
-            landData->mTextures[i] = rawData[i];
+            copy.getLandData()->mTextures[i] = rawData[i];
         }
 
         record.setModified(copy);

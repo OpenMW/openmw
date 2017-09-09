@@ -135,6 +135,9 @@ struct Land
     /// @note We only check data types that *can* be loaded (present in mDataTypes)
     bool isDataLoaded(int flags) const;
 
+    /// Sets the flags and creates a LandData if needed
+    void setDataLoaded(int flags);
+
         Land (const Land& land);
 
         Land& operator= (Land land);

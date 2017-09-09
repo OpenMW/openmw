@@ -356,6 +356,7 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
 
         // Try a direct mapping to the current plugin first. Otherwise iterate until one is found.
         // Iteration is deterministic to avoid duplicates.
+        int startIndex = index;
         do {
             std::string newId = LandTexture::createUniqueRecordId(0, index);
             int newRow = idCollection()->searchId(newId);
@@ -384,7 +385,7 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
             size_t Prime = (1 << 13) - 1; // A mersenne prime
 
             index = (index + Prime) % MaxIndex;
-        } while (true);
+        } while (index != startIndex);
     }
 
     return results;

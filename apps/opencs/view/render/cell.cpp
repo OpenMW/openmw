@@ -26,6 +26,33 @@
 #include "terrainstorage.hpp"
 #include "object.hpp"
 
+namespace CSVRender
+{
+    class CellNodeContainer : public osg::Referenced
+    {
+        public:
+
+            CellNodeContainer(Cell* cell) : mCell(cell) {}
+
+            Cell* getCell(){ return mCell; }
+
+        private:
+
+            Cell* mCell;
+    };
+
+    class CellNodeCallback : public osg::NodeCallback
+    {
+        public:
+
+            virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+            {
+                CellNodeContainer* container = static_cast<CellNodeContainer*>(node->getUserData());
+                container->getCell()->updateLand();
+            }
+    };
+}
+
 bool CSVRender::Cell::removeObject (const std::string& id)
 {
     std::map<std::string, Object *>::iterator iter =
@@ -77,6 +104,11 @@ bool CSVRender::Cell::addObjects (int start, int end)
 
 void CSVRender::Cell::updateLand()
 {
+    if (!mUpdateLand || mLandDeleted)
+        return;
+
+    mUpdateLand = false;
+
     // Cell is deleted
     if (mDeleted)
     {
@@ -116,6 +148,7 @@ void CSVRender::Cell::updateLand()
     }
 
     // No land data
+    mLandDeleted = true;
     unloadLand();
 }
 
@@ -131,7 +164,7 @@ void  CSVRender::Cell::unloadLand()
 CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
     bool deleted)
 : mData (data), mId (Misc::StringUtils::lowerCase (id)), mDeleted (deleted), mSubMode (0),
-  mSubModeElementMask (0)
+  mSubModeElementMask (0), mUpdateLand(true), mLandDeleted(false)
 {
     std::pair<CSMWorld::CellCoordinates, bool> result = CSMWorld::CellCoordinates::fromId (id);
 
@@ -139,6 +172,8 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
         mCoordinates = result.first;
 
     mCellNode = new osg::Group;
+    mCellNode->setUserData(new CellNodeContainer(this));
+    mCellNode->setUpdateCallback(new CellNodeCallback);
     rootNode->addChild(mCellNode);
 
     setCellMarker();
@@ -325,32 +360,34 @@ void CSVRender::Cell::pathgridRemoved()
 
 void CSVRender::Cell::landDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
-    updateLand();
+    mUpdateLand = true;
 }
 
 void CSVRender::Cell::landAboutToBeRemoved (const QModelIndex& parent, int start, int end)
 {
-    updateLand();
+    mLandDeleted = true;
+    unloadLand();
 }
 
 void CSVRender::Cell::landAdded (const QModelIndex& parent, int start, int end)
 {
-    updateLand();
+    mUpdateLand = true;
+    mLandDeleted = false;
 }
 
 void CSVRender::Cell::landTextureChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
-    updateLand();
+    mUpdateLand = true;
 }
 
 void CSVRender::Cell::landTextureAboutToBeRemoved (const QModelIndex& parent, int start, int end)
 {
-    updateLand();
+    mUpdateLand = true;
 }
 
 void CSVRender::Cell::landTextureAdded (const QModelIndex& parent, int start, int end)
 {
-    updateLand();
+    mUpdateLand = true;
 }
 
 void CSVRender::Cell::reloadAssets()

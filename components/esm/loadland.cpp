@@ -322,6 +322,15 @@ namespace ESM
         return mLandData && (mLandData->mDataLoaded & flags) == (flags & mDataTypes);
     }
 
+    void Land::setDataLoaded(int flags)
+    {
+        if (!mLandData)
+            mLandData = new LandData;
+
+        mDataTypes |= flags;
+        mLandData->mDataLoaded |= flags;
+    }
+
     Land::Land (const Land& land)
     : mFlags (land.mFlags), mX (land.mX), mY (land.mY), mPlugin (land.mPlugin),
       mContext (land.mContext), mDataTypes (land.mDataTypes),
