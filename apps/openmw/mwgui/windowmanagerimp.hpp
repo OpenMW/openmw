@@ -388,7 +388,7 @@ namespace MWGui
 
     // In WindowManager for now since there isn't a VFS singleton
     virtual std::string correctIconPath(const std::string& path);
-    virtual std::string correctBookartPath(const std::string& path, int width, int height);
+    virtual std::string correctBookartPath(const std::string& path, int width, int height, bool* exists = nullptr);
     virtual std::string correctTexturePath(const std::string& path);
     virtual bool textureExists(const std::string& path);
 
