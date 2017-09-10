@@ -4,9 +4,12 @@
 
 #include <MyGUI_InputManager.h>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
@@ -48,6 +51,8 @@ namespace MWGui
 
     void SpellWindow::onPinToggled()
     {
+        Settings::Manager::setBool("spells pin", "Windows", mPinned);
+
         MWBase::Environment::get().getWindowManager()->setSpellVisibility(!mPinned);
     }
 
@@ -191,6 +196,15 @@ namespace MWGui
 
     void SpellWindow::cycle(bool next)
     {
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(player))
+            return;
+
+        const MWMechanics::CreatureStats &stats = player.getClass().getCreatureStats(player);
+        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead() || stats.getHitRecovery())
+            return;
+
         mSpellView->setModel(new SpellModel(MWMechanics::getPlayer()));
 
         SpellModel::ModelIndex selected = 0;

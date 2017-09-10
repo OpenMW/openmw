@@ -142,12 +142,12 @@ namespace MWWorld
             ContainerStoreIterator add(const std::string& id, int count, const Ptr& actorPtr);
             ///< Utility to construct a ManualRef and call add(ptr, count, actorPtr, true)
 
-            int remove(const std::string& itemId, int count, const Ptr& actor);
+            int remove(const std::string& itemId, int count, const Ptr& actor, bool equipReplacement = true);
             ///< Remove \a count item(s) designated by \a itemId from this container.
             ///
             /// @return the number of items actually removed
 
-            virtual int remove(const Ptr& item, int count, const Ptr& actor);
+            virtual int remove(const Ptr& item, int count, const Ptr& actor, bool equipReplacement = true);
             ///< Remove \a count item(s) designated by \a item from this inventory.
             ///
             /// @return the number of items actually removed
@@ -162,8 +162,12 @@ namespace MWWorld
             /// If a compatible stack is found, the item's count is added to that stack, then the original is deleted.
             /// @return If the item was stacked, return the stack, otherwise return the old (untouched) item.
 
-            /// @return How many items with refID \a id are in this container?
             int count (const std::string& id);
+            ///< @return How many items with refID \a id are in this container?
+
+            int restockCount (const std::string& id);
+            ///< Item count with restock adjustments (such as ignoring filled soul gems).
+            ///  @return How many items with refID \a id are in this container?
 
             ContainerStoreListener* getContListener() const;
             void setContListener(ContainerStoreListener* listener);

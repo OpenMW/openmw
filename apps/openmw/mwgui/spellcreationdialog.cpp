@@ -7,7 +7,6 @@
 #include <components/widgets/list.hpp>
 
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -171,11 +170,20 @@ namespace MWGui
         mAreaSlider->setScrollPosition (effect.mArea);
         mDurationSlider->setScrollPosition (effect.mDuration-1);
 
+        if (mEffect.mRange == ESM::RT_Self)
+            mRangeButton->setCaptionWithReplacing ("#{sRangeSelf}");
+        else if (mEffect.mRange == ESM::RT_Target)
+            mRangeButton->setCaptionWithReplacing ("#{sRangeTarget}");
+        else if (mEffect.mRange == ESM::RT_Touch)
+            mRangeButton->setCaptionWithReplacing ("#{sRangeTouch}");
+
         onMagnitudeMinChanged (mMagnitudeMinSlider, effect.mMagnMin-1);
         onMagnitudeMaxChanged (mMagnitudeMinSlider, effect.mMagnMax-1);
         onAreaChanged (mAreaSlider, effect.mArea);
         onDurationChanged (mDurationSlider, effect.mDuration-1);
         eventEffectModified(mEffect);
+
+        updateBoxes();
     }
 
     void EditEffectDialog::setMagicEffect (const ESM::MagicEffect *effect)
@@ -396,7 +404,7 @@ namespace MWGui
         MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
-        MWBase::Environment::get().getSoundManager()->playSound ("Mysticism Hit", 1.0, 1.0);
+        MWBase::Environment::get().getWindowManager()->playSound ("Mysticism Hit");
 
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->createRecord(mSpell);
 
@@ -440,22 +448,11 @@ namespace MWGui
 
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
-            float x = 0.5f * (it->mMagnMin + it->mMagnMax);
+            const ESM::ENAMstruct& effect = *it;
 
-            const ESM::MagicEffect* effect =
-                store.get<ESM::MagicEffect>().find(it->mEffectID);
+            y += std::max(1.f, MWMechanics::calcEffectCost(effect));
 
-            x *= 0.1f * effect->mData.mBaseCost;
-            x *= 1 + it->mDuration;
-            x += 0.05f * std::max(1, it->mArea) * effect->mData.mBaseCost;
-
-            float fEffectCostMult =
-                store.get<ESM::GameSetting>().find("fEffectCostMult")->getFloat();
-
-            y += x * fEffectCostMult;
-            y = std::max(1.f,y);
-
-            if (it->mRange == ESM::RT_Target)
+            if (effect.mRange == ESM::RT_Target)
                 y *= 1.5;
         }
 
@@ -475,8 +472,10 @@ namespace MWGui
 
         mPriceLabel->setCaption(MyGUI::utility::toString(int(price)));
 
-        float chance = MWMechanics::getSpellSuccessChance(&mSpell, MWMechanics::getPlayer());
-        mSuccessChance->setCaption(MyGUI::utility::toString(int(chance)));
+        float chance = MWMechanics::calcSpellBaseSuccessChance(&mSpell, MWMechanics::getPlayer(), NULL);
+
+        int intChance = std::min(100, int(chance));
+        mSuccessChance->setCaption(MyGUI::utility::toString(intChance));
     }
 
     // ------------------------------------------------------------------------------------------------

@@ -113,6 +113,16 @@
 #include "jailscreen.hpp"
 #include "itemchargeview.hpp"
 
+namespace
+{
+
+    MyGUI::Colour getTextColour(const std::string& type)
+    {
+        return MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=" + type + "}"));
+    }
+
+}
+
 namespace MWGui
 {
 
@@ -283,12 +293,34 @@ namespace MWGui
         int w = MyGUI::RenderManager::getInstance().getViewSize().width;
         int h = MyGUI::RenderManager::getInstance().getViewSize().height;
 
+        mTextColours.header = getTextColour("header");
+        mTextColours.normal = getTextColour("normal");
+        mTextColours.notify = getTextColour("notify");
+
+        mTextColours.link = getTextColour("link");
+        mTextColours.linkOver = getTextColour("link_over");
+        mTextColours.linkPressed = getTextColour("link_pressed");
+
+        mTextColours.answer = getTextColour("answer");
+        mTextColours.answerOver = getTextColour("answer_over");
+        mTextColours.answerPressed = getTextColour("answer_pressed");
+
+        mTextColours.journalLink = getTextColour("journal_link");
+        mTextColours.journalLinkOver = getTextColour("journal_link_over");
+        mTextColours.journalLinkPressed = getTextColour("journal_link_pressed");
+
+        mTextColours.journalTopic = getTextColour("journal_topic");
+        mTextColours.journalTopicOver = getTextColour("journal_topic_over");
+        mTextColours.journalTopicPressed = getTextColour("journal_topic_pressed");
+
+
         mDragAndDrop = new DragAndDrop();
 
         mRecharge = new Recharge();
         mMenu = new MainMenu(w, h, mResourceSystem->getVFS(), mVersionDescription);
         mLocalMapRender = new MWRender::LocalMap(mViewer->getSceneData()->asGroup());
         mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender, mWorkQueue);
+        mMap->renderGlobalMap();
         trackWindow(mMap, "map");
         mStatsWindow = new StatsWindow(mDragAndDrop);
         trackWindow(mStatsWindow, "stats");
@@ -368,15 +400,12 @@ namespace MWGui
             mPlayerSkillValues.insert(std::make_pair(ESM::Skill::sSkillIds[i], MWMechanics::SkillValue()));
         }
 
+        updatePinnedWindows();
+
         // Set up visibility
         updateVisible();
 
         MWBase::Environment::get().getInputManager()->changeInputMode(false);
-    }
-
-    void WindowManager::renderWorldMap()
-    {
-        mMap->renderGlobalMap();
     }
 
     void WindowManager::setNewGame(bool newgame)
@@ -489,6 +518,8 @@ namespace MWGui
         cleanupGarbage();
 
         mHud->update();
+
+        updateActivatedQuickKey ();
     }
 
     void WindowManager::updateVisible()
@@ -550,14 +581,14 @@ namespace MWGui
         setSpellVisibility((mAllowed & GW_Magic) && (!mSpellWindow->pinned() || (mForceHidden & GW_Magic)));
         setHMSVisibility((mAllowed & GW_Stats) && (!mStatsWindow->pinned() || (mForceHidden & GW_Stats)));
 
-        // If in game mode, show only the pinned windows
-        if (gameMode)
+        // If in game mode (or interactive messagebox), show only the pinned windows
+        if (mGuiModes.empty())
         {
             mInventoryWindow->setGuiMode(GM_None);
-            mMap->setVisible(mMap->pinned() && !(mForceHidden & GW_Map));
-            mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats));
-            mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory));
-            mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic));
+            mMap->setVisible(mMap->pinned() && !(mForceHidden & GW_Map) && (mAllowed & GW_Map));
+            mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats) && (mAllowed & GW_Stats));
+            mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory) && (mAllowed & GW_Inventory));
+            mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic) && (mAllowed & GW_Magic));
 
             return;
         }
@@ -858,7 +889,7 @@ namespace MWGui
                 mRepair->exit();
                 break;
             case GM_Journal:
-                MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
+                playSound("book close");
                 removeGuiMode(GM_Journal); //Simple way to remove it
                 break;
             default:
@@ -875,19 +906,30 @@ namespace MWGui
 
         if (block)
         {
+            osg::Timer frameTimer;
             while (mMessageBoxManager->readPressedButton(false) == -1
                    && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
             {
-                mMessageBoxManager->onFrame(0.f);
-                MWBase::Environment::get().getInputManager()->update(0, true, false);
+                double dt = frameTimer.time_s();
+                frameTimer.setStartTick();
 
+                mMessageBoxManager->onFrame(dt);
+                MWBase::Environment::get().getInputManager()->update(dt, true, false);
+
+                if (!MWBase::Environment::get().getInputManager()->isWindowVisible())
+                    OpenThreads::Thread::microSleep(5000);
+                else
+                {
+                    mViewer->eventTraversal();
+                    mViewer->updateTraversal();
+                    mViewer->renderingTraversals();
+                }
                 // at the time this function is called we are in the middle of a frame,
                 // so out of order calls are necessary to get a correct frameNumber for the next frame.
                 // refer to the advance() and frame() order in Engine::go()
-                mViewer->eventTraversal();
-                mViewer->updateTraversal();
-                mViewer->renderingTraversals();
                 mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
+
+                MWBase::Environment::get().limitFrameRate(frameTimer.time_s());
             }
         }
     }
@@ -1499,6 +1541,11 @@ namespace MWGui
             mHud->setCrosshairVisible (show && mCrosshairEnabled);
     }
 
+    void WindowManager::updateActivatedQuickKey ()
+    {
+        mQuickKeysMenu->updateActivatedQuickKey();
+    }
+
     void WindowManager::activateQuickKey (int index)
     {
         mQuickKeysMenu->activateQuickKey(index);
@@ -1696,6 +1743,10 @@ namespace MWGui
         mCompanionWindow->resetReference();
         mConsole->resetReference();
 
+        mToolTips->setFocusObject(MWWorld::ConstPtr());
+
+        mInventoryWindow->clear();
+
         mSelectedSpell.clear();
 
         mCustomMarkers.clear();
@@ -1798,18 +1849,28 @@ namespace MWGui
         if (mVideoWidget->hasAudioStream())
             MWBase::Environment::get().getSoundManager()->pauseSounds(
                         MWBase::SoundManager::Play_TypeMask&(~MWBase::SoundManager::Play_TypeMovie));
-
+        osg::Timer frameTimer;
         while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
-            MWBase::Environment::get().getInputManager()->update(0, true, false);
+            double dt = frameTimer.time_s();
+            frameTimer.setStartTick();
 
+            MWBase::Environment::get().getInputManager()->update(dt, true, false);
+
+            if (!MWBase::Environment::get().getInputManager()->isWindowVisible())
+                OpenThreads::Thread::microSleep(5000);
+            else
+            {
+                mViewer->eventTraversal();
+                mViewer->updateTraversal();
+                mViewer->renderingTraversals();
+            }
             // at the time this function is called we are in the middle of a frame,
             // so out of order calls are necessary to get a correct frameNumber for the next frame.
             // refer to the advance() and frame() order in Engine::go()
-            mViewer->eventTraversal();
-            mViewer->updateTraversal();
-            mViewer->renderingTraversals();
             mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
+
+            MWBase::Environment::get().limitFrameRate(frameTimer.time_s());
         }
         mVideoWidget->stop();
 
@@ -1853,6 +1914,17 @@ namespace MWGui
     {
         if (_key == MyGUI::KeyCode::Escape)
             mVideoWidget->stop();
+    }
+
+    void WindowManager::updatePinnedWindows()
+    {
+        mInventoryWindow->setPinned(Settings::Manager::getBool("inventory pin", "Windows"));
+
+        mMap->setPinned(Settings::Manager::getBool("map pin", "Windows"));
+
+        mSpellWindow->setPinned(Settings::Manager::getBool("spells pin", "Windows"));
+
+        mStatsWindow->setPinned(Settings::Manager::getBool("stats pin", "Windows"));
     }
 
     void WindowManager::pinWindow(GuiWindow window)
@@ -1939,12 +2011,8 @@ namespace MWGui
         char* text=0;
         text = SDL_GetClipboardText();
         if (text)
-        {
-            // MyGUI's clipboard might still have color information, to retain that information, only set the new text
-            // if it actually changed (clipboard inserted by an external application)
-            if (MyGUI::TextIterator::getOnlyText(_data) != text)
-                _data = text;
-        }
+            _data = MyGUI::TextIterator::toTagsString(text);
+
         SDL_free(text);
     }
 
@@ -1963,6 +2031,11 @@ namespace MWGui
     {
         if (!isGuiMode())
             mInventoryWindow->cycle(next);
+    }
+
+    void WindowManager::playSound(const std::string& soundId, float volume, float pitch)
+    {
+        MWBase::Environment::get().getSoundManager()->playSound(soundId, volume, pitch, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoEnv);
     }
 
     void WindowManager::setConsoleSelectedObject(const MWWorld::Ptr &object)
@@ -1985,7 +2058,7 @@ namespace MWGui
     void WindowManager::startSpellBuying(const MWWorld::Ptr &actor)
     {
         pushGuiMode(GM_SpellBuying);
-        mSpellBuyingWindow->startSpellBuying(actor);
+        mSpellBuyingWindow->startSpellBuying(actor, 0);
     }
 
     void WindowManager::startTrade(const MWWorld::Ptr &actor)
@@ -2118,6 +2191,11 @@ namespace MWGui
     void WindowManager::writeFog(MWWorld::CellStore *cell)
     {
         mLocalMapRender->saveFogOfWar(cell);
+    }
+
+    const MWGui::TextColours& WindowManager::getTextColours()
+    {
+        return mTextColours;
     }
 
 }

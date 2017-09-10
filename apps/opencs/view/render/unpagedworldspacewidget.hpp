@@ -29,7 +29,7 @@ namespace CSVRender
             std::string mCellId;
             CSMWorld::IdTable *mCellsModel;
             CSMWorld::IdTable *mReferenceablesModel;
-            std::auto_ptr<Cell> mCell;
+            std::unique_ptr<Cell> mCell;
 
             void update();
 
@@ -107,6 +107,8 @@ namespace CSVRender
             void cellDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
             void cellRowsAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+            void assetTablesChanged ();
 
         signals:
 

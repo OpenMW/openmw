@@ -69,7 +69,7 @@ namespace MWGui
             typedef std::vector<Line> Lines;
             Lines mLines;
 
-            std::auto_ptr<ItemModel> mModel;
+            std::unique_ptr<ItemModel> mModel;
             MyGUI::ScrollView* mScrollView;
             DisplayMode mDisplayMode;
     };

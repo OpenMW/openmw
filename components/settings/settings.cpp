@@ -1,13 +1,11 @@
 #include "settings.hpp"
 
-#include <stdexcept>
 #include <sstream>
 #include <iostream>
 
 #include <components/misc/stringops.hpp>
 
 #include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string.hpp>
 
 namespace

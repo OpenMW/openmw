@@ -1,7 +1,5 @@
 #include "referencecheck.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 CSMTools::ReferenceCheckStage::ReferenceCheckStage(
     const CSMWorld::RefCollection& references,
     const CSMWorld::RefIdCollection& referencables,
@@ -40,9 +38,9 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
             if ((isLight && cellRef.mChargeFloat < -1) || (!isLight && cellRef.mChargeInt < -1)) {
                 std::string str = " has invalid charge ";
                 if (localIndex.second == CSMWorld::UniversalId::Type_Light)
-                    str += boost::lexical_cast<std::string>(cellRef.mChargeFloat);
+                    str += std::to_string(cellRef.mChargeFloat);
                 else
-                    str += boost::lexical_cast<std::string>(cellRef.mChargeInt);
+                    str += std::to_string(cellRef.mChargeInt);
                 messages.push_back(std::make_pair(id, id.getId() + str));
             }
         }
@@ -66,9 +64,9 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
 
     // Check item's faction rank
     if (hasFaction && cellRef.mFactionRank < -1)
-        messages.push_back(std::make_pair(id, " has faction set but has invalid faction rank " + boost::lexical_cast<std::string>(cellRef.mFactionRank)));
+        messages.push_back(std::make_pair(id, " has faction set but has invalid faction rank " + std::to_string(cellRef.mFactionRank)));
     else if (!hasFaction && cellRef.mFactionRank != -2)
-        messages.push_back(std::make_pair(id, " has invalid faction rank " + boost::lexical_cast<std::string>(cellRef.mFactionRank)));
+        messages.push_back(std::make_pair(id, " has invalid faction rank " + std::to_string(cellRef.mFactionRank)));
 
     // If door have destination cell, check if that reference is valid
     if (!cellRef.mDestCell.empty())
@@ -79,7 +77,7 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
     if (cellRef.mScale < 0)
     {
         std::string str = " has negative scale ";
-        str += boost::lexical_cast<std::string>(cellRef.mScale);
+        str += std::to_string(cellRef.mScale);
         messages.push_back(std::make_pair(id, id.getId() + str));
     }
 
@@ -87,7 +85,7 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
     if (cellRef.mEnchantmentCharge < 0 && cellRef.mEnchantmentCharge != -1)
     {
         std::string str = " has negative enchantment points ";
-        str += boost::lexical_cast<std::string>(cellRef.mEnchantmentCharge);
+        str += std::to_string(cellRef.mEnchantmentCharge);
         messages.push_back(std::make_pair(id, id.getId() + str));
     }
 

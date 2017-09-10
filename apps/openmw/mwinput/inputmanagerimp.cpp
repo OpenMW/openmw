@@ -1,9 +1,5 @@
 #include "inputmanagerimp.hpp"
 
-#include <cmath>
-
-#include <boost/lexical_cast.hpp>
-
 #include <osgViewer/ViewerEventHandlers>
 
 #include <MyGUI_InputManager.h>
@@ -22,9 +18,9 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -717,9 +713,9 @@ namespace MWInput
             if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
             {
                 MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
-                if (b && b->getEnabled())
+                if (b && b->getEnabled() && id == SDL_BUTTON_LEFT)
                 {
-                    MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+                    MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
                 }
             }
         }
@@ -814,7 +810,7 @@ namespace MWInput
                     MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
                     if (b && b->getEnabled())
                     {
-                        MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+                        MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
                     }
                 }
             }
@@ -934,6 +930,9 @@ namespace MWInput
             inventory.getSelectedEnchantItem() == inventory.end())
             return;
 
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPlayer->getPlayer()))
+            return;
+
         MWMechanics::DrawState_ state = mPlayer->getDrawState();
         if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
             mPlayer->setDrawState(MWMechanics::DrawState_Spell);
@@ -947,6 +946,13 @@ namespace MWInput
 
         // Not allowed before the inventory window is accessible
         if (!mControlSwitch["playerfighting"] || !mControlSwitch["playercontrols"])
+            return;
+
+        // We want to interrupt animation only if attack is prepairing, but still is not triggered
+        // Otherwise we will get a "speedshooting" exploit, when player can skip reload animation by hitting "Toggle Weapon" key twice
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackPrepairing(mPlayer->getPlayer()))
+            mPlayer->setAttackingOrSpell(false);
+        else if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPlayer->getPlayer()))
             return;
 
         MWMechanics::DrawState_ state = mPlayer->getDrawState();
@@ -1027,14 +1033,15 @@ namespace MWInput
             return;
 
         if(MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Journal
+                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_MainMenu
                 && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
         {
-            MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
+            MWBase::Environment::get().getWindowManager()->playSound ("book open");
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Journal);
         }
         else if(MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Journal))
         {
-            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
+            MWBase::Environment::get().getWindowManager()->playSound ("book close");
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Journal);
         }
     }
@@ -1178,7 +1185,7 @@ namespace MWInput
             bool controlExists = mInputBinder->getChannel(i)->getControlsCount () != 0;
             if (!controlExists)
             {
-                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, 0, ICS::ICS_MAX, ICS::ICS_MAX);
+                control = new ICS::Control(std::to_string(i), false, true, 0, ICS::ICS_MAX, ICS::ICS_MAX);
                 mInputBinder->addControl(control);
                 control->attachChannel(mInputBinder->getChannel(i), ICS::Channel::DIRECT);
             }
@@ -1247,10 +1254,10 @@ namespace MWInput
             if (!controlExists)
             {
                 float initial;
-                if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
+                if (defaultAxisBindings.find(i) == defaultAxisBindings.end())
                     initial = 0.0f;
                 else initial = 0.5f;
-                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, initial, ICS::ICS_MAX, ICS::ICS_MAX);
+                control = new ICS::Control(std::to_string(i), false, true, initial, ICS::ICS_MAX, ICS::ICS_MAX);
                 mInputBinder->addControl(control);
                 control->attachChannel(mInputBinder->getChannel(i), ICS::Channel::DIRECT);
             }
@@ -1263,12 +1270,13 @@ namespace MWInput
             {
                 clearAllControllerBindings(control);
 
-                if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
+                if (defaultButtonBindings.find(i) != defaultButtonBindings.end()
+                        && !mInputBinder->isJoystickButtonBound(mFakeDeviceID, defaultButtonBindings[i]))
                 {
                     control->setInitialValue(0.0f);
                     mInputBinder->addJoystickButtonBinding(control, mFakeDeviceID, defaultButtonBindings[i], ICS::Control::INCREASE);
                 }
-                else if (defaultAxisBindings.find(i) != defaultAxisBindings.end())
+                else if (defaultAxisBindings.find(i) != defaultAxisBindings.end() && !mInputBinder->isJoystickAxisBound(mFakeDeviceID, defaultAxisBindings[i]))
                 {
                     control->setValue(0.5f);
                     control->setInitialValue(0.5f);
@@ -1339,7 +1347,7 @@ namespace MWInput
         if (key != SDL_SCANCODE_UNKNOWN)
             return MyGUI::TextIterator::toTagsString(mInputBinder->scancodeToString (key));
         else if (mouse != ICS_MAX_DEVICE_BUTTONS)
-            return "#{sMouse} " + boost::lexical_cast<std::string>(mouse);
+            return "#{sMouse} " + std::to_string(mouse);
         else
             return "#{sNone}";
     }
@@ -1394,7 +1402,7 @@ namespace MWInput
             case SDL_CONTROLLER_BUTTON_Y:
                 return "Y Button";
             default:
-                return "Button " + boost::lexical_cast<std::string>(button);
+                return "Button " + std::to_string(button);
         }
     }
     std::string InputManager::sdlControllerAxisToString(int axis)
@@ -1414,7 +1422,7 @@ namespace MWInput
             case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
                 return "Right Trigger";
             default:
-                return "Axis " + boost::lexical_cast<std::string>(axis);
+                return "Axis " + std::to_string(axis);
         }
      }
 

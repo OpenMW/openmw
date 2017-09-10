@@ -1,8 +1,10 @@
 #include "weapon.hpp"
 
 #include <components/esm/loadweap.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -53,7 +55,7 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    boost::shared_ptr<MWWorld::Action> Weapon::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Weapon::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -142,7 +144,7 @@ namespace MWClass
 
     void Weapon::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Weapon);
+        std::shared_ptr<Class> instance (new Weapon);
 
         registerClass (typeid (ESM::Weapon).name(), instance);
     }
@@ -261,8 +263,8 @@ namespace MWClass
 
         std::string text;
 
-        // weapon type & damage. arrows / bolts don't have his info.
-        if (ref->mBase->mData.mType < 12)
+        // weapon type & damage
+        if ((ref->mBase->mData.mType < 12 || Settings::Manager::getBool("show projectile damage", "Game")) && ref->mBase->mData.mType < 14)
         {
             text += "\n#{sType} ";
 
@@ -279,6 +281,8 @@ namespace MWClass
             mapping[ESM::Weapon::MarksmanBow] = std::make_pair("sSkillMarksman", "");
             mapping[ESM::Weapon::MarksmanCrossbow] = std::make_pair("sSkillMarksman", "");
             mapping[ESM::Weapon::MarksmanThrown] = std::make_pair("sSkillMarksman", "");
+            mapping[ESM::Weapon::Arrow] = std::make_pair("sSkillMarksman", "");
+            mapping[ESM::Weapon::Bolt] = std::make_pair("sSkillMarksman", "");
 
             std::string type = mapping[ref->mBase->mData.mType].first;
             std::string oneOrTwoHanded = mapping[ref->mBase->mData.mType].second;
@@ -316,6 +320,14 @@ namespace MWClass
             int remainingHealth = getItemHealth(ptr);
             text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
                     + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
+        }
+
+        // add reach and attack speed for melee weapon
+        if (ref->mBase->mData.mType < 9 && Settings::Manager::getBool("show melee info", "Game"))
+        {
+            text += MWGui::ToolTips::getPercentString(ref->mBase->mData.mReach, "#{sRange}");
+
+            text += MWGui::ToolTips::getPercentString(ref->mBase->mData.mSpeed, "#{sAttributeSpeed}");
         }
 
         text += MWGui::ToolTips::getWeightString(ref->mBase->mData.mWeight, "#{sWeight}");
@@ -362,6 +374,11 @@ namespace MWClass
         if (hasItemHealth(ptr) && ptr.getCellRef().getCharge() == 0)
             return std::make_pair(0, "#{sInventoryMessage1}");
 
+        // Do not allow equip weapons from inventory during attack
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc)
+            && MWBase::Environment::get().getWindowManager()->isGuiMode())
+            return std::make_pair(0, "#{sCantEquipWeapWarning}");
+
         std::pair<std::vector<int>, bool> slots_ = ptr.getClass().getEquipmentSlots(ptr);
 
         if (slots_.first.empty())
@@ -381,9 +398,9 @@ namespace MWClass
         return std::make_pair(1, "");
     }
 
-    boost::shared_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr) const
     {
-        boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
+        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
 
         action->setSound(getUpSoundId(ptr));
 

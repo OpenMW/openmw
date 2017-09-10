@@ -37,7 +37,7 @@ namespace MWWorld
             virtual bool isNullAction() { return false; }
             ///< Is running this action a no-op? (default false)
 
-            void execute (const Ptr& actor);
+            void execute (const Ptr& actor, bool noSound = false);
 
             void setSound (const std::string& id);
             void setSoundOffset(float offset);

@@ -13,6 +13,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "textinput.hpp"
 #include "race.hpp"
@@ -230,14 +231,23 @@ namespace MWGui
                     MWBase::Environment::get().getWindowManager()->removeDialog(mReviewDialog);
                     mReviewDialog = 0;
                     mReviewDialog = new ReviewDialog();
-                    mReviewDialog->setPlayerName(mPlayerName);
-                    mReviewDialog->setRace(mPlayerRaceId);
-                    mReviewDialog->setClass(mPlayerClass);
-                    mReviewDialog->setBirthSign(mPlayerBirthSignId);
+
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+
+                    const ESM::NPC *playerNpc = world->getPlayerPtr().get<ESM::NPC>()->mBase;
+
+                    const MWWorld::Player player = world->getPlayer();
+
+                    const ESM::Class *playerClass = world->getStore().get<ESM::Class>().find(playerNpc->mClass);
+
+                    mReviewDialog->setPlayerName(playerNpc->mName);
+                    mReviewDialog->setRace(playerNpc->mRace);
+                    mReviewDialog->setClass(*playerClass);
+                    mReviewDialog->setBirthSign(player.getBirthSign());
 
                     {
-                        MWWorld::Ptr player = MWMechanics::getPlayer();
-                        const MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
+                        MWWorld::Ptr playerPtr = MWMechanics::getPlayer();
+                        const MWMechanics::CreatureStats& stats = playerPtr.getClass().getCreatureStats(playerPtr);
 
                         mReviewDialog->setHealth ( stats.getHealth()  );
                         mReviewDialog->setMagicka( stats.getMagicka() );

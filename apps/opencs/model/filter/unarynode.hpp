@@ -1,20 +1,18 @@
 #ifndef CSM_FILTER_UNARYNODE_H
 #define CSM_FILTER_UNARYNODE_H
 
-#include <boost/shared_ptr.hpp>
-
 #include "node.hpp"
 
 namespace CSMFilter
 {
     class UnaryNode : public Node
     {
-            boost::shared_ptr<Node> mChild;
+            std::shared_ptr<Node> mChild;
             std::string mName;
 
         public:
 
-            UnaryNode (boost::shared_ptr<Node> child, const std::string& name);
+            UnaryNode (std::shared_ptr<Node> child, const std::string& name);
 
             const Node& getChild() const;
 

@@ -114,7 +114,7 @@ namespace MWPhysics
             };
 
             /// @param me Optional, a Ptr to ignore in the list of results. targets are actors to filter for, ignoring all other actors.
-            RayResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::ConstPtr ignore = MWWorld::ConstPtr(),
+            RayResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore = MWWorld::ConstPtr(),
                     std::vector<MWWorld::Ptr> targets = std::vector<MWWorld::Ptr>(),
                     int mask = CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff) const;
 
@@ -181,7 +181,7 @@ namespace MWPhysics
             btCollisionDispatcher* mDispatcher;
             btCollisionWorld* mCollisionWorld;
 
-            std::auto_ptr<Resource::BulletShapeManager> mShapeManager;
+            std::unique_ptr<Resource::BulletShapeManager> mShapeManager;
             Resource::ResourceSystem* mResourceSystem;
 
             typedef std::map<MWWorld::ConstPtr, Object*> ObjectMap;
@@ -211,12 +211,12 @@ namespace MWPhysics
             float mTimeAccum;
 
             float mWaterHeight;
-            float mWaterEnabled;
+            bool mWaterEnabled;
 
-            std::auto_ptr<btCollisionObject> mWaterCollisionObject;
-            std::auto_ptr<btCollisionShape> mWaterCollisionShape;
+            std::unique_ptr<btCollisionObject> mWaterCollisionObject;
+            std::unique_ptr<btCollisionShape> mWaterCollisionShape;
 
-            std::auto_ptr<MWRender::DebugDrawer> mDebugDrawer;
+            std::unique_ptr<MWRender::DebugDrawer> mDebugDrawer;
 
             osg::ref_ptr<osg::Group> mParentNode;
 

@@ -9,8 +9,6 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 #include <set> //UVController
 
 // FlipController
@@ -33,11 +31,6 @@ namespace osgParticle
     class Emitter;
 }
 
-namespace osgAnimation
-{
-    class MorphGeometry;
-}
-
 namespace NifOsg
 {
 
@@ -53,7 +46,7 @@ namespace NifOsg
         {
         }
 
-        ValueInterpolator(boost::shared_ptr<const MapT> keys, ValueT defaultVal = ValueT())
+        ValueInterpolator(std::shared_ptr<const MapT> keys, ValueT defaultVal = ValueT())
             : mKeys(keys)
             , mDefaultVal(defaultVal)
         {
@@ -101,8 +94,6 @@ namespace NifOsg
                 // cache for next time
                 mLastHighKey = it;
 
-                assert (it != keys.begin()); // Shouldn't happen, was checked at beginning of this function
-
                 typename MapT::MapType::const_iterator last = --it;
                 mLastLowKey = last;
                 float aLastTime = last->first;
@@ -125,7 +116,7 @@ namespace NifOsg
         mutable typename MapT::MapType::const_iterator mLastLowKey;
         mutable typename MapT::MapType::const_iterator mLastHighKey;
 
-        boost::shared_ptr<const MapT> mKeys;
+        std::shared_ptr<const MapT> mKeys;
 
         ValueT mDefaultVal;
     };
@@ -176,7 +167,7 @@ namespace NifOsg
         virtual float getMaximum() const;
     };
 
-    /// Must be set on an osgAnimation::MorphGeometry.
+    /// Must be set on a SceneUtil::MorphGeometry.
     class GeomMorpherController : public osg::Drawable::UpdateCallback, public SceneUtil::Controller
     {
     public:
@@ -223,7 +214,7 @@ namespace NifOsg
     public:
         UVController();
         UVController(const UVController&,const osg::CopyOp&);
-        UVController(const Nif::NiUVData *data, std::set<int> textureUnits);
+        UVController(const Nif::NiUVData *data, const std::set<int>& textureUnits);
 
         META_Object(NifOsg,UVController)
 
@@ -297,8 +288,8 @@ namespace NifOsg
         std::vector<osg::ref_ptr<osg::Texture2D> > mTextures;
 
     public:
-        FlipController(const Nif::NiFlipController* ctrl, std::vector<osg::ref_ptr<osg::Texture2D> > textures);
-        FlipController(int texSlot, float delta, std::vector<osg::ref_ptr<osg::Texture2D> > textures);
+        FlipController(const Nif::NiFlipController* ctrl, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures);
+        FlipController(int texSlot, float delta, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures);
         FlipController();
         FlipController(const FlipController& copy, const osg::CopyOp& copyop);
 

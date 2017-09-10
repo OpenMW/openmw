@@ -3,7 +3,7 @@ OpenMW CS Starting Dialog
 
 In this chapter we will cover starting up OpenMW CS and the starting interface.
 Start the CS the way intended for your operating system and you will be
-presented with window and three main buttons and a small button with a
+presented with a window and three main buttons and a small button with a
 wrench-icon. The wrench will open the configuration dialog which we will cover
 later. The three main buttons are the following:
 
@@ -32,7 +32,7 @@ choose exactly one game and you can choose an arbitrary amount of addon
 dependencies.  For the sake of simplicity and maintainability choose only the
 addons you actually want to depend on. Also keep in mind that your dependencies
 might have dependencies of their own, you have to depend on those as well. If
-one of your dependencies nees something it will be indicated by a warning sign
+one of your dependencies needs something it will be indicated by a warning sign
 and automatically include its dependencies when you choose it.
 
 If you want to edit an existing content file you will be presented with a

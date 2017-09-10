@@ -3,6 +3,8 @@
 
 #include "setting.hpp"
 
+class QCheckBox;
+
 namespace CSMPrefs
 {
     class BoolSetting : public Setting
@@ -11,6 +13,7 @@ namespace CSMPrefs
 
             std::string mTooltip;
             bool mDefault;
+            QCheckBox* mWidget;
 
         public:
 
@@ -21,6 +24,8 @@ namespace CSMPrefs
 
             /// Return label, input widget.
             virtual std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent);
+
+            virtual void updateWidget();
 
         private slots:
 

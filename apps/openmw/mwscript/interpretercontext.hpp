@@ -1,8 +1,6 @@
 #ifndef GAME_SCRIPT_INTERPRETERCONTEXT_H
 #define GAME_SCRIPT_INTERPRETERCONTEXT_H
 
-#include <boost/shared_ptr.hpp>
-
 #include <components/interpreter/context.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -51,7 +49,7 @@ namespace MWScript
 
         public:
 
-            InterpreterContext (MWScript::Locals *locals, MWWorld::Ptr reference,
+            InterpreterContext (MWScript::Locals *locals, const MWWorld::Ptr& reference,
                 const std::string& targetId = "");
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
 

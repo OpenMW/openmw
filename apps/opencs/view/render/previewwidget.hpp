@@ -47,6 +47,8 @@ namespace CSVRender
             void referenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
             void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+            void assetTablesChanged ();
     };
 }
 

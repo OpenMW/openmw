@@ -7,7 +7,6 @@
 #include <QMessageBox>
 
 #include "mainwizard.hpp"
-#include "inisettings.hpp"
 
 Wizard::InstallationPage::InstallationPage(QWidget *parent) :
     QWizardPage(parent)
@@ -76,7 +75,7 @@ void Wizard::InstallationPage::initializePage()
     // That way installing all three components would yield 300%
     // When one component is done the bar will be filled by 33%
 
-    if (field(QLatin1String("installation.new")).toBool() == true) {
+    if (field(QLatin1String("installation.retailDisc")).toBool() == true) {
         installProgressBar->setMaximum((components.count() * 100));
     } else {
         if (components.contains(QLatin1String("Tribunal"))
@@ -96,7 +95,7 @@ void Wizard::InstallationPage::startInstallation()
     QStringList components(field(QLatin1String("installation.components")).toStringList());
     QString path(field(QLatin1String("installation.path")).toString());
 
-    if (field(QLatin1String("installation.new")).toBool() == true)
+    if (field(QLatin1String("installation.retailDisc")).toBool() == true)
     {
         // Always install Morrowind
         mUnshield->setInstallComponent(Wizard::Component_Morrowind, true);
@@ -227,7 +226,7 @@ bool Wizard::InstallationPage::isComplete() const
 
 int Wizard::InstallationPage::nextId() const
 {
-    if (field(QLatin1String("installation.new")).toBool() == true) {
+    if (field(QLatin1String("installation.retailDisc")).toBool() == true) {
         return MainWizard::Page_Conclusion;
     } else {
         if (!mWizard->mError) {

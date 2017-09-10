@@ -1,8 +1,5 @@
 #include "documentmanager.hpp"
 
-#include <algorithm>
-#include <stdexcept>
-
 #include <boost/filesystem.hpp>
 
 #ifndef Q_MOC_RUN
@@ -12,7 +9,7 @@
 #include "document.hpp"
 
 CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& configuration)
-: mConfiguration (configuration), mEncoding (ToUTF8::WINDOWS_1252), mVFS(NULL)
+: mConfiguration (configuration), mEncoding (ToUTF8::WINDOWS_1252)
 {
     boost::filesystem::path projectPath = configuration.getUserDataPath() / "projects";
 
@@ -65,7 +62,7 @@ CSMDoc::Document *CSMDoc::DocumentManager::makeDocument (
     const std::vector< boost::filesystem::path >& files,
     const boost::filesystem::path& savePath, bool new_)
 {
-    return new Document (mVFS, mConfiguration, files, new_, savePath, mResDir, &mFallbackMap, mEncoding, mResourcesManager, mBlacklistedScripts);
+    return new Document (mConfiguration, files, new_, savePath, mResDir, &mFallbackMap, mEncoding, mBlacklistedScripts, mFsStrict, mDataPaths, mArchives);
 }
 
 void CSMDoc::DocumentManager::insertDocument (CSMDoc::Document *document)
@@ -130,8 +127,9 @@ void CSMDoc::DocumentManager::documentNotLoaded (Document *document, const std::
         removeDocument (document);
 }
 
-void CSMDoc::DocumentManager::setVFS(const VFS::Manager *vfs)
+void CSMDoc::DocumentManager::setFileData(bool strict, const Files::PathContainer& dataPaths, const std::vector<std::string>& archives)
 {
-    mResourcesManager.setVFS(vfs);
-    mVFS = vfs;
+    mFsStrict = strict;
+    mDataPaths = dataPaths;
+    mArchives = archives;
 }

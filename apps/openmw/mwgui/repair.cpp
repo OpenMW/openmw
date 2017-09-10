@@ -11,7 +11,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
@@ -30,6 +29,7 @@ namespace MWGui
 
 Repair::Repair()
     : WindowBase("openmw_repair.layout")
+    , mItemSelectionDialog(NULL)
 {
     getWidget(mRepairBox, "RepairBox");
     getWidget(mToolBox, "ToolBox");
@@ -39,9 +39,11 @@ Repair::Repair()
     getWidget(mCancelButton, "CancelButton");
 
     mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &Repair::onCancel);
-    mRepairBox->eventItemClicked += MyGUI::newDelegate(this, &Repair::onRepairItem);
 
+    mRepairBox->eventItemClicked += MyGUI::newDelegate(this, &Repair::onRepairItem);
     mRepairBox->setDisplayMode(ItemChargeView::DisplayMode_Health);
+
+    mToolIcon->eventMouseButtonClick += MyGUI::newDelegate(this, &Repair::onSelectItem);
 }
 
 void Repair::open()
@@ -63,7 +65,7 @@ void Repair::exit()
 
 void Repair::startRepairItem(const MWWorld::Ptr &item)
 {
-    MWBase::Environment::get().getSoundManager()->playSound("Item Repair Up",1,1);
+    MWBase::Environment::get().getWindowManager()->playSound("Item Repair Up");
 
     mRepair.setTool(item);
 
@@ -83,6 +85,8 @@ void Repair::updateRepairView()
 
     float quality = ref->mBase->mData.mQuality;
 
+    mToolIcon->setUserData(mRepair.getTool());
+
     std::stringstream qualityStr;
     qualityStr << std::setprecision(3) << quality;
 
@@ -93,6 +97,12 @@ void Repair::updateRepairView()
     mToolBox->setVisible(toolBoxVisible);
     mToolBox->setUserString("Hidden", toolBoxVisible ? "false" : "true");
 
+    if (!toolBoxVisible)
+    {
+        mToolIcon->setItem(MWWorld::Ptr());
+        mToolIcon->clearUserStrings();
+    }
+
     mRepairBox->update();
 
     Gui::Box* box = dynamic_cast<Gui::Box*>(mMainWidget);
@@ -101,6 +111,36 @@ void Repair::updateRepairView()
 
     box->notifyChildrenSizeChanged();
     center();
+}
+
+void Repair::onSelectItem(MyGUI::Widget *sender)
+{
+    delete mItemSelectionDialog;
+    mItemSelectionDialog = new ItemSelectionDialog("#{sRepair}");
+    mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &Repair::onItemSelected);
+    mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &Repair::onItemCancel);
+    mItemSelectionDialog->setVisible(true);
+    mItemSelectionDialog->openContainer(MWMechanics::getPlayer());
+    mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyRepairTools);
+}
+
+void Repair::onItemSelected(MWWorld::Ptr item)
+{
+    mItemSelectionDialog->setVisible(false);
+
+    mToolIcon->setItem(item);
+    mToolIcon->setUserString ("ToolTipType", "ItemPtr");
+    mToolIcon->setUserData(item);
+
+    mRepair.setTool(item);
+
+    MWBase::Environment::get().getWindowManager()->playSound(item.getClass().getDownSoundId(item));
+    updateRepairView();
+}
+
+void Repair::onItemCancel()
+{
+    mItemSelectionDialog->setVisible(false);
 }
 
 void Repair::onCancel(MyGUI::Widget* /*sender*/)

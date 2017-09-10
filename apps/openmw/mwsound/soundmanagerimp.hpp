@@ -6,8 +6,7 @@
 #include <utility>
 #include <deque>
 #include <map>
-
-#include <boost/shared_ptr.hpp>
+#include <unordered_map>
 
 #include <components/settings/settings.hpp>
 
@@ -47,11 +46,11 @@ namespace MWSound
         const VFS::Manager* mVFS;
 
         Fallback::Map mFallback;
-
-        std::auto_ptr<Sound_Output> mOutput;
+        std::unique_ptr<Sound_Output> mOutput;
 
         // Caches available music tracks by <playlist name, (sound files) >
         std::map<std::string, std::vector<std::string> > mMusicFiles;
+        std::unordered_map<std::string, std::vector<int>> mMusicToPlay; // A list with music files not yet played
         std::string mLastPlayedMusic; // The music file that was last played
 
         float mMasterVolume;
@@ -66,8 +65,7 @@ namespace MWSound
         float mNearWaterOutdoorTolerance;
         std::string mNearWaterIndoorID;
         std::string mNearWaterOutdoorID;
-
-        typedef std::auto_ptr<std::deque<Sound_Buffer> > SoundBufferList;
+        typedef std::unique_ptr<std::deque<Sound_Buffer> > SoundBufferList;
         // List of sound buffers, grown as needed. New enties are added to the
         // back, allowing existing Sound_Buffer references/pointers to remain
         // valid.
@@ -118,9 +116,14 @@ namespace MWSound
         MWBase::SoundStreamPtr playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal);
 
         void streamMusicFull(const std::string& filename);
+        void advanceMusic(const std::string& filename);
+
         void updateSounds(float duration);
         void updateRegionSound(float duration);
         void updateWaterSound(float duration);
+        void updateMusic(float duration);
+
+        std::string mNextMusic;
 
         float volumeFromType(PlayType type) const;
 

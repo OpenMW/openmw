@@ -110,7 +110,7 @@ opencs_units_noqt (view/tools
     )
 
 opencs_units (view/prefs
-    dialogue pagebase page keybindingpage
+    dialogue pagebase page keybindingpage contextmenulist
     )
 
 opencs_units (model/prefs
@@ -199,7 +199,7 @@ if(APPLE)
         RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}"
         OUTPUT_NAME ${OPENCS_BUNDLE_NAME}
         MACOSX_BUNDLE_ICON_FILE "openmw-cs.icns"
-        MACOSX_BUNDLE_BUNDLE_NAME "OpenCS"
+        MACOSX_BUNDLE_BUNDLE_NAME "OpenMW-CS"
         MACOSX_BUNDLE_GUI_IDENTIFIER "org.openmw.opencs"
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${OPENMW_VERSION}
         MACOSX_BUNDLE_BUNDLE_VERSION ${OPENMW_VERSION}

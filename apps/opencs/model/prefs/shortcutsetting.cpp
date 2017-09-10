@@ -6,6 +6,7 @@
 #include <QMouseEvent>
 #include <QPushButton>
 #include <QWidget>
+#include <QString>
 
 #include "state.hpp"
 #include "shortcutmanager.hpp"
@@ -39,11 +40,28 @@ namespace CSMPrefs
 
         widget->setCheckable(true);
         widget->installEventFilter(this);
+
+        // right clicking on button sets shortcut to RMB, so context menu should not appear
+        widget->setContextMenuPolicy(Qt::PreventContextMenu);
+
         mButton = widget;
 
         connect(widget, SIGNAL(toggled(bool)), this, SLOT(buttonToggled(bool)));
 
         return std::make_pair(label, widget);
+    }
+
+    void ShortcutSetting::updateWidget()
+    {
+        if (mButton)
+        {
+            std::string shortcut = getValues().getString(getKey(), getParent()->getKey());
+
+            QKeySequence sequence;
+            State::get().getShortcutManager().convertFromString(shortcut, sequence);
+            State::get().getShortcutManager().setSequence(getKey(), sequence);
+            resetState();
+        }
     }
 
     bool ShortcutSetting::eventFilter(QObject* target, QEvent* event)

@@ -82,7 +82,7 @@ namespace MWScript
                     std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+                    MWBase::Environment::get().getSoundManager()->playSound(sound, 1.0, 1.0, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoEnv);
                 }
         };
 
@@ -101,7 +101,7 @@ namespace MWScript
                     Interpreter::Type_Float pitch = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getSoundManager()->playSound (sound, volume, pitch);
+                    MWBase::Environment::get().getSoundManager()->playSound(sound, volume, pitch, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoEnv);
                 }
         };
 

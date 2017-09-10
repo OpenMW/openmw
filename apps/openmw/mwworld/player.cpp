@@ -255,7 +255,7 @@ namespace MWWorld
         return MWBase::Environment::get().getMechanicsManager()->getEnemiesNearby(getPlayer()).size() != 0;
     }
 
-    void Player::markPosition(CellStore *markedCell, ESM::Position markedPosition)
+    void Player::markPosition(CellStore *markedCell, const ESM::Position& markedPosition)
     {
         mMarkedCell = markedCell;
         mMarkedPosition = markedPosition;

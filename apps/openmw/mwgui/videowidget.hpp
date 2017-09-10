@@ -51,8 +51,8 @@ namespace MWGui
 
     private:
         const VFS::Manager* mVFS;
-        std::auto_ptr<MyGUI::ITexture> mTexture;
-        std::auto_ptr<Video::VideoPlayer> mPlayer;
+        std::unique_ptr<MyGUI::ITexture> mTexture;
+        std::unique_ptr<Video::VideoPlayer> mPlayer;
     };
 
 }

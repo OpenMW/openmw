@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstdio>
 
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
@@ -7,11 +6,8 @@
 #include <components/fallback/validate.hpp>
 
 #include <SDL_messagebox.h>
-#include <SDL_main.h>
 #include "engine.hpp"
 
-#include <boost/iostreams/concepts.hpp>
-#include <boost/iostreams/stream_buffer.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 #if defined(_WIN32)
@@ -24,6 +20,9 @@
 #include <cstdlib>
 #endif
 
+#if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
+#include <unistd.h>
+#endif
 
 #if (defined(__APPLE__) || (defined(__linux)  &&  !defined(ANDROID)) || (defined(__unix) &&  !defined(ANDROID)) || defined(__posix))
     #define USE_CRASH_CATCHER 1
@@ -37,7 +36,6 @@ extern int cc_install_handlers(int argc, char **argv, int num_signals, int *sigs
 extern int is_debugger_attached(void);
 #endif
 
-#include <boost/version.hpp>
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */
@@ -310,7 +308,7 @@ int main(int argc, char**argv)
 
     boost::filesystem::ofstream logfile;
 
-    std::auto_ptr<OMW::Engine> engine;
+    std::unique_ptr<OMW::Engine> engine;
 
     int ret = 0;
     try

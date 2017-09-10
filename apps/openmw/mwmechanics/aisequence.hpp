@@ -64,7 +64,7 @@ namespace MWMechanics
             std::list<AiPackage*>::const_iterator begin() const;
             std::list<AiPackage*>::const_iterator end() const;
 
-            std::list<AiPackage*>::const_iterator erase (std::list<AiPackage*>::const_iterator package);
+            void erase (std::list<AiPackage*>::const_iterator package);
 
             /// Returns currently executing AiPackage type
             /** \see enum AiPackage::TypeId **/
@@ -84,6 +84,9 @@ namespace MWMechanics
 
             /// Is there any combat package?
             bool isInCombat () const;
+
+            /// Does this AI sequence have the given package type?
+            bool hasPackage(int typeId) const;
 
             /// Are we in combat with this particular actor?
             bool isInCombat (const MWWorld::Ptr& actor) const;

@@ -160,22 +160,31 @@ namespace MWGui
 
     void ReviewDialog::setHealth(const MWMechanics::DynamicStat<float>& value)
     {
-        mHealth->setValue(static_cast<int>(value.getCurrent()), static_cast<int>(value.getModified()));
-        std::string valStr =  MyGUI::utility::toString(value.getCurrent()) + "/" + MyGUI::utility::toString(value.getModified());
+        int current = std::max(0, static_cast<int>(value.getCurrent()));
+        int modified = static_cast<int>(value.getModified());
+
+        mHealth->setValue(current, modified);
+        std::string valStr =  MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         mHealth->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
     }
 
     void ReviewDialog::setMagicka(const MWMechanics::DynamicStat<float>& value)
     {
-        mMagicka->setValue(static_cast<int>(value.getCurrent()), static_cast<int>(value.getModified()));
-        std::string valStr =  MyGUI::utility::toString(value.getCurrent()) + "/" + MyGUI::utility::toString(value.getModified());
+        int current = std::max(0, static_cast<int>(value.getCurrent()));
+        int modified = static_cast<int>(value.getModified());
+
+        mMagicka->setValue(current, modified);
+        std::string valStr =  MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         mMagicka->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
     }
 
     void ReviewDialog::setFatigue(const MWMechanics::DynamicStat<float>& value)
     {
-        mFatigue->setValue(static_cast<int>(value.getCurrent()), static_cast<int>(value.getModified()));
-        std::string valStr =  MyGUI::utility::toString(value.getCurrent()) + "/" + MyGUI::utility::toString(value.getModified());
+        int current = static_cast<int>(value.getCurrent());
+        int modified = static_cast<int>(value.getModified());
+
+        mFatigue->setValue(current, modified);
+        std::string valStr =  MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         mFatigue->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
     }
 

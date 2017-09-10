@@ -10,19 +10,14 @@ namespace MWMechanics
 {
     struct Movement;
 
-    /// NOTE: determined empirically based on in-game behaviour
-    static const float MIN_DIST_TO_DOOR_SQUARED = 128*128;
-
     static const int NUM_EVADE_DIRECTIONS = 4;
 
     /// tests actor's proximity to a closed door by default
-    bool proximityToDoor(const MWWorld::Ptr& actor,
-                         float minSqr = MIN_DIST_TO_DOOR_SQUARED);
+    bool proximityToDoor(const MWWorld::Ptr& actor, float minDist);
 
     /// Returns door pointer within range. No guarantee is given as to which one
     /** \return Pointer to the door, or NULL if none exists **/
-    MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor,
-                         float minSqr = MIN_DIST_TO_DOOR_SQUARED);
+    MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minDist);
 
     class ObstacleCheck
     {

@@ -5,9 +5,6 @@
 #include <QLocalSocket>
 #include <QMessageBox>
 
-#include <components/vfs/manager.hpp>
-#include <components/vfs/registerarchives.hpp>
-
 #include <components/fallback/validate.hpp>
 
 #include <components/nifosg/nifloader.hpp>
@@ -33,11 +30,7 @@ CS::Editor::Editor ()
 
     NifOsg::Loader::setShowMarkers(true);
 
-    mVFS.reset(new VFS::Manager(mFsStrict));
-
-    VFS::registerArchives(mVFS.get(), Files::Collections(config.first, !mFsStrict), config.second, true);
-
-    mDocumentManager.setVFS(mVFS.get());
+    mDocumentManager.setFileData(mFsStrict, config.first, config.second);
 
     mNewGame.setLocalData (mLocal);
     mFileDialog.setLocalData (mLocal);

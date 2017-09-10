@@ -116,7 +116,7 @@ namespace Resource
 
         /// Manually release created OpenGL objects for the given graphics context. This may be required
         /// in cases where multiple contexts are used over the lifetime of the application.
-        void releaseGLObjects(osg::State* state);
+        void releaseGLObjects(osg::State* state) override;
 
         /// Set up an IncrementalCompileOperation for background compiling of loaded scenes.
         void setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation* ico);
@@ -143,11 +143,13 @@ namespace Resource
         /// @see ResourceManager::updateCache
         virtual void updateCache(double referenceTime);
 
+        virtual void clearCache();
+
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
 
     private:
 
-        std::auto_ptr<Shader::ShaderManager> mShaderManager;
+        std::unique_ptr<Shader::ShaderManager> mShaderManager;
         bool mForceShaders;
         bool mClampLighting;
         bool mForcePerPixelLighting;

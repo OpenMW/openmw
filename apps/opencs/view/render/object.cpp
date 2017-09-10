@@ -532,6 +532,12 @@ bool CSVRender::Object::referenceDataChanged (const QModelIndex& topLeft,
     return false;
 }
 
+void CSVRender::Object::reloadAssets()
+{
+    update();
+    updateMarker();
+}
+
 std::string CSVRender::Object::getReferenceId() const
 {
     return mReferenceId;

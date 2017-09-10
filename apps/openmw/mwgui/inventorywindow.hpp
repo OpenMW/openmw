@@ -5,6 +5,7 @@
 #include "mode.hpp"
 
 #include "../mwworld/ptr.hpp"
+#include "../mwrender/characterpreview.hpp"
 
 namespace osg
 {
@@ -14,11 +15,6 @@ namespace osg
 namespace Resource
 {
     class ResourceSystem;
-}
-
-namespace MWRender
-{
-    class InventoryPreview;
 }
 
 namespace MWGui
@@ -60,6 +56,8 @@ namespace MWGui
 
             void updatePlayer();
 
+            void clear();
+
             void useItem(const MWWorld::Ptr& ptr);
 
             void setGuiMode(GuiMode mode);
@@ -99,8 +97,8 @@ namespace MWGui
             int mLastXSize;
             int mLastYSize;
 
-            std::auto_ptr<MyGUI::ITexture> mPreviewTexture;
-            std::auto_ptr<MWRender::InventoryPreview> mPreview;
+            std::unique_ptr<MyGUI::ITexture> mPreviewTexture;
+            std::unique_ptr<MWRender::InventoryPreview> mPreview;
 
             bool mTrading;
 

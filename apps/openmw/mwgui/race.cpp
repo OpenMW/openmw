@@ -2,12 +2,9 @@
 
 #include <MyGUI_ListBox.h>
 #include <MyGUI_ImageBox.h>
-#include <MyGUI_RenderManager.h>
 #include <MyGUI_Gui.h>
 
 #include <osg/Texture2D>
-
-#include <boost/format.hpp>
 
 #include <components/myguiplatform/myguitexture.hpp>
 
@@ -146,6 +143,7 @@ namespace MWGui
 
         const ESM::NPC& proto = mPreview->getPrototype();
         setRaceId(proto.mRace);
+        setGender(proto.isMale() ? GM_Male : GM_Female);
         recountParts();
 
         for (unsigned int i=0; i<mAvailableHeads.size(); ++i)

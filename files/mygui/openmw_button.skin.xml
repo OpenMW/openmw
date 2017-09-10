@@ -111,7 +111,7 @@
         <Child type="Widget" skin="BTN_BottomRight" offset="132 20 4 4" align="Bottom Right"/>
         <Child type="Widget" skin="BTN_BottomRight" offset="132 20 4 4" align="Bottom Right"/>
 
-        <BasisSkin type="SimpleText" offset="4 4 128 16" align="Stretch">
+        <BasisSkin type="SimpleText" offset="4 3 128 16" align="Stretch">
             <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
             <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
             <State name="highlighted" colour="#{fontcolour=normal_over}" shift="0"/>

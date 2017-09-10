@@ -14,6 +14,7 @@ namespace osg
     class Group;
     class Stats;
     class Node;
+    class Object;
 }
 
 namespace Resource
@@ -87,6 +88,9 @@ namespace Terrain
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
 
+        /// Set the default viewer (usually a Camera), used as viewpoint for any viewers that don't use their own viewpoint.
+        virtual void setDefaultViewer(osg::Object* obj) {}
+
         Storage* getStorage() { return mStorage; }
 
     protected:
@@ -100,8 +104,8 @@ namespace Terrain
 
         Resource::ResourceSystem* mResourceSystem;
 
-        std::auto_ptr<TextureManager> mTextureManager;
-        std::auto_ptr<ChunkManager> mChunkManager;
+        std::unique_ptr<TextureManager> mTextureManager;
+        std::unique_ptr<ChunkManager> mChunkManager;
     };
 
 }

@@ -18,7 +18,6 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
@@ -30,6 +29,7 @@
 #include "../mwrender/characterpreview.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "itemview.hpp"
 #include "inventoryitemmodel.hpp"
@@ -136,6 +136,18 @@ namespace MWGui
         dirtyPreview();
 
         updatePreviewSize();
+
+        updateEncumbranceBar();
+        mItemView->update();
+        notifyContentChanged();
+    }
+
+    void InventoryWindow::clear()
+    {
+        mPtr = MWWorld::Ptr();
+        mTradeModel = NULL;
+        mSortModel = NULL;
+        mItemView->setModel(NULL);
     }
 
     void InventoryWindow::setGuiMode(GuiMode mode)
@@ -227,7 +239,7 @@ namespace MWGui
             // Can't give conjured items to a merchant
             if (item.mFlags & ItemStack::Flag_Bound)
             {
-                MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+                MWBase::Environment::get().getWindowManager()->playSound(sound);
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog9}");
                 return;
             }
@@ -236,9 +248,22 @@ namespace MWGui
             int services = MWBase::Environment::get().getWindowManager()->getTradeWindow()->getMerchantServices();
             if (!object.getClass().canSell(object, services))
             {
-                MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+                MWBase::Environment::get().getWindowManager()->playSound(sound);
                 MWBase::Environment::get().getWindowManager()->
                         messageBox("#{sBarterDialog4}");
+                return;
+            }
+        }
+
+        // If we unequip weapon during attack, it can lead to unexpected behaviour
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPtr))
+        {
+            bool isWeapon = item.mBase.getTypeName() == typeid(ESM::Weapon).name();
+            MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
+
+            if (isWeapon && invStore.isEquipped(item.mBase))
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sCantEquipWeapWarning}");
                 return;
             }
         }
@@ -309,8 +334,8 @@ namespace MWGui
     {
         ensureSelectedItemUnequipped(count);
         const ItemStack& item = mTradeModel->getItem(mSelectedItem);
-        std::string sound = item.mBase.getClass().getDownSoundId(item.mBase);
-        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+        std::string sound = item.mBase.getClass().getUpSoundId(item.mBase);
+        MWBase::Environment::get().getWindowManager()->playSound(sound);
 
         if (item.mType == ItemStack::Type_Barter)
         {
@@ -340,13 +365,12 @@ namespace MWGui
 
     void InventoryWindow::open()
     {
-        mPtr = MWMechanics::getPlayer();
-
-        updateEncumbranceBar();
-
-        mItemView->update();
-
-        notifyContentChanged();
+        if (!mPtr.isEmpty())
+        {
+            updateEncumbranceBar();
+            mItemView->update();
+            notifyContentChanged();
+        }
         adjustPanes();
     }
 
@@ -433,6 +457,8 @@ namespace MWGui
 
     void InventoryWindow::onPinToggled()
     {
+        Settings::Manager::setBool("inventory pin", "Windows", mPinned);
+
         MWBase::Environment::get().getWindowManager()->setWeaponVisibility(!mPinned);
     }
 
@@ -480,7 +506,7 @@ namespace MWGui
         {
             if (script.empty() || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 0)
             {
-                boost::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
+                std::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
 
                 action->execute (player);
             }
@@ -648,9 +674,18 @@ namespace MWGui
 
     void InventoryWindow::cycle(bool next)
     {
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(player))
+            return;
+
+        const MWMechanics::CreatureStats &stats = player.getClass().getCreatureStats(player);
+        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead() || stats.getHitRecovery())
+            return;
+
         ItemModel::ModelIndex selected = -1;
         // not using mSortFilterModel as we only need sorting, not filtering
-        SortFilterItemModel model(new InventoryItemModel(MWMechanics::getPlayer()));
+        SortFilterItemModel model(new InventoryItemModel(player));
         model.setSortByType(false);
         model.update();
         if (model.getItemCount() == 0)

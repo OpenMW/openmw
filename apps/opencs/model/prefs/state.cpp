@@ -152,6 +152,8 @@ void CSMPrefs::State::declare()
         setRange (0, 10000);
     declareInt ("error-height", "Initial height of the error panel", 100).
         setRange (100, 10000);
+    declareBool ("highlight-occurrences", "Highlight other occurrences of selected names", true);
+    declareColour ("colour-highlight", "Colour of highlighted occurrences", QColor("lightcyan"));
     declareSeparator();
     declareColour ("colour-int", "Highlight Colour: Integer Literals", QColor ("darkmagenta"));
     declareColour ("colour-float", "Highlight Colour: Float Literals", QColor ("magenta"));
@@ -257,6 +259,7 @@ void CSMPrefs::State::declare()
     declareShortcut ("document-character-topicinfos", "Open Topic Info List", QKeySequence());
     declareShortcut ("document-character-journalinfos", "Open Journal Info List", QKeySequence());
     declareShortcut ("document-character-bodyparts", "Open Body Part List", QKeySequence());
+    declareShortcut ("document-assets-reload", "Reload Assets", QKeySequence(Qt::Key_F5));
     declareShortcut ("document-assets-sounds", "Open Sound Asset List", QKeySequence());
     declareShortcut ("document-assets-soundgens", "Open Sound Generator List", QKeySequence());
     declareShortcut ("document-assets-meshes", "Open Mesh Asset List", QKeySequence());
@@ -326,6 +329,10 @@ void CSMPrefs::State::declare()
     declareShortcut ("orbit-roll-right", "Roll Right", QKeySequence(Qt::Key_E));
     declareShortcut ("orbit-speed-mode", "Toggle Speed Mode", QKeySequence(Qt::Key_F));
     declareShortcut ("orbit-center-selection", "Center On Selected", QKeySequence(Qt::Key_C));
+
+    declareSubcategory ("Script Editor");
+    declareShortcut ("script-editor-comment", "Comment Selection", QKeySequence());
+    declareShortcut ("script-editor-uncomment", "Uncomment Selection", QKeySequence());
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)
@@ -579,6 +586,41 @@ CSMPrefs::State& CSMPrefs::State::get()
         throw std::logic_error ("No instance of CSMPrefs::State");
 
     return *sThis;
+}
+
+void CSMPrefs::State::resetCategory(const std::string& category)
+{
+    for (Settings::CategorySettingValueMap::iterator i = mSettings.mUserSettings.begin();
+         i != mSettings.mUserSettings.end(); ++i)
+    {
+        // if the category matches
+        if (i->first.first == category)
+        {
+            // mark the setting as changed
+            mSettings.mChangedSettings.insert(std::make_pair(i->first.first, i->first.second));
+            // reset the value to the default
+            i->second = mSettings.mDefaultSettings[i->first];
+        }
+    }
+
+    Collection::iterator container = mCategories.find(category);
+    if (container != mCategories.end())
+    {
+        Category settings = container->second;
+        for (Category::Iterator i = settings.begin(); i != settings.end(); ++i)
+        {
+            (*i)->updateWidget();
+            update(**i);
+        }
+    }
+}
+
+void CSMPrefs::State::resetAll()
+{
+    for (Collection::iterator iter = mCategories.begin(); iter != mCategories.end(); ++iter)
+    {
+        resetCategory(iter->first);
+    }
 }
 
 

@@ -50,7 +50,7 @@ namespace MWBase
 
             virtual void goodbye() = 0;
 
-            virtual void say(const MWWorld::Ptr &actor, const std::string &topic) const = 0;
+            virtual void say(const MWWorld::Ptr &actor, const std::string &topic) = 0;
 
             //calbacks for the GUI
             virtual void keywordSelected (const std::string& keyword) = 0;

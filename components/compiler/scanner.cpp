@@ -408,6 +408,11 @@ namespace Compiler
                     special = S_cmpEQ;
                 else if (c=='=')
                     special = S_cmpEQ;
+                else if (c == '>' || c == '<')  // Treat => and =< as ==
+                {
+                    special = S_cmpEQ;
+                    mErrorHandler.warning (std::string("invalid operator =") + c + ", treating it as ==", mLoc);
+                }
                 else
                 {
                     special = S_cmpEQ;

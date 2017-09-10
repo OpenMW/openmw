@@ -216,7 +216,7 @@ void CSMTools::Tools::runSearch (const CSMWorld::UniversalId& searchId, const Se
     mSearch.start();
 }
 
-void CSMTools::Tools::runMerge (std::auto_ptr<CSMDoc::Document> target)
+void CSMTools::Tools::runMerge (std::unique_ptr<CSMDoc::Document> target)
 {
     // not setting an active report, because merge does not produce messages
 
@@ -230,7 +230,7 @@ void CSMTools::Tools::runMerge (std::auto_ptr<CSMDoc::Document> target)
 
     target->flagAsDirty();
 
-    mMergeOperation->setTarget (target);
+    mMergeOperation->setTarget (std::move(target));
 
     mMerge.start();
 }

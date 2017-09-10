@@ -1,7 +1,6 @@
 #include "escape.hpp"
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/program_options.hpp>
 
 namespace Files
 {

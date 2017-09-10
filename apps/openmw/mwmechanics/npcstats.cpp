@@ -1,15 +1,9 @@
 #include "npcstats.hpp"
 
-#include <cmath>
-#include <stdexcept>
-#include <vector>
-#include <algorithm>
-
 #include <iomanip>
 
 #include <boost/format.hpp>
 
-#include <components/esm/loadskil.hpp>
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadfact.hpp>
@@ -21,7 +15,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
     : mDisposition (0)
@@ -30,7 +23,7 @@ MWMechanics::NpcStats::NpcStats()
 , mBounty(0)
 , mWerewolfKills (0)
 , mLevelProgress(0)
-, mTimeToStartDrowning(20.0)
+, mTimeToStartDrowning(-1.0) // set breath to special value, it will be replaced during actor update
     , mIsWerewolf(false)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
@@ -260,7 +253,7 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
 
     // Play sound & skill progress notification
     /// \todo check if character is the player, if levelling is ever implemented for NPCs
-    MWBase::Environment::get().getSoundManager ()->playSound ("skillraise", 1, 1);
+    MWBase::Environment::get().getWindowManager()->playSound("skillraise");
 
     std::stringstream message;
     message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
@@ -387,7 +380,7 @@ bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int 
     for (int i=0; i<7; ++i)
     {
         if (faction.mData.mSkills[i] != -1)
-            skills.push_back (static_cast<int> (getSkill (faction.mData.mSkills[i]).getModified()));
+            skills.push_back (static_cast<int> (getSkill (faction.mData.mSkills[i]).getBase()));
     }
 
     if (skills.empty())

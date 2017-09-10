@@ -8,7 +8,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
@@ -28,8 +27,6 @@ namespace MWGui
         WindowBase("openmw_travel_window.layout")
         , mCurrentY(0)
     {
-        setCoord(0, 0, 450, 300);
-
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
         getWidget(mSelect, "Select");
@@ -96,7 +93,7 @@ namespace MWGui
         toAdd->setUserString("price",oss.str());
 
         toAdd->setCaptionWithReplacing("#{sCell=" + name + "}   -   " + MyGUI::utility::toString(price)+"#{sgp}");
-        toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
+        toAdd->setSize(mDestinationsView->getWidth(),sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &TravelWindow::onMouseWheel);
         toAdd->setUserString("Destination", name);
         toAdd->setUserData(pos);
@@ -160,7 +157,7 @@ namespace MWGui
 
         if (!mPtr.getCell()->isExterior())
             // Interior cell -> mages guild transport
-            MWBase::Environment::get().getSoundManager()->playSound("mysticism cast", 1, 1);
+            MWBase::Environment::get().getWindowManager()->playSound("mysticism cast");
 
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 

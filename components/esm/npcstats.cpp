@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "npcstats.hpp"
 
 #include "esmreader.hpp"

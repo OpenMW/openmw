@@ -21,6 +21,8 @@ namespace CSMPrefs
 
             virtual std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent);
 
+            virtual void updateWidget();
+
         protected:
 
             bool eventFilter(QObject* target, QEvent* event);

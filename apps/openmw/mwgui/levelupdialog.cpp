@@ -89,7 +89,7 @@ namespace MWGui
 
     void LevelupDialog::resetCoins()
     {
-        const int coinSpacing = 10;
+        const int coinSpacing = 33;
         int curX = mCoinBox->getWidth()/2 - (coinSpacing*(mCoinCount - 1) + 16*mCoinCount)/2;
         for (unsigned int i=0; i<sMaxCoins; ++i)
         {

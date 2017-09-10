@@ -284,6 +284,13 @@ void CSVDoc::View::setupAssetsMenu()
 {
     QMenu *assets = menuBar()->addMenu (tr ("Assets"));
 
+    QAction *reload = new QAction (tr ("Reload"), this);
+    connect (reload, SIGNAL (triggered()), &mDocument->getData(), SLOT (assetsChanged()));
+    setupShortcut("document-assets-reload", reload);
+    assets->addAction (reload);
+
+    assets->addSeparator();
+
     QAction *sounds = new QAction (tr ("Sounds"), this);
     connect (sounds, SIGNAL (triggered()), this, SLOT (addSoundsSubView()));
     setupShortcut("document-assets-sounds", sounds);

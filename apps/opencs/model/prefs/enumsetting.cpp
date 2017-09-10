@@ -4,6 +4,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QMutexLocker>
+#include <QString>
 
 #include <components/settings/settings.hpp>
 
@@ -41,7 +42,7 @@ CSMPrefs::EnumValues& CSMPrefs::EnumValues::add (const std::string& value, const
 
 CSMPrefs::EnumSetting::EnumSetting (Category *parent, Settings::Manager *values,
   QMutex *mutex, const std::string& key, const std::string& label, const EnumValue& default_)
-: Setting (parent, values, mutex, key, label), mDefault (default_)
+: Setting (parent, values, mutex, key, label), mDefault (default_), mWidget(0)
 {}
 
 CSMPrefs::EnumSetting& CSMPrefs::EnumSetting::setTooltip (const std::string& tooltip)
@@ -72,7 +73,7 @@ std::pair<QWidget *, QWidget *> CSMPrefs::EnumSetting::makeWidgets (QWidget *par
 {
     QLabel *label = new QLabel (QString::fromUtf8 (getLabel().c_str()), parent);
 
-    QComboBox *widget = new QComboBox (parent);
+    mWidget = new QComboBox (parent);
 
     int index = 0;
 
@@ -81,14 +82,14 @@ std::pair<QWidget *, QWidget *> CSMPrefs::EnumSetting::makeWidgets (QWidget *par
         if (mDefault.mValue==mValues.mValues[i].mValue)
             index = i;
 
-        widget->addItem (QString::fromUtf8 (mValues.mValues[i].mValue.c_str()));
+        mWidget->addItem (QString::fromUtf8 (mValues.mValues[i].mValue.c_str()));
 
         if (!mValues.mValues[i].mTooltip.empty())
-            widget->setItemData (i, QString::fromUtf8 (mValues.mValues[i].mTooltip.c_str()),
+            mWidget->setItemData (i, QString::fromUtf8 (mValues.mValues[i].mTooltip.c_str()),
                 Qt::ToolTipRole);
     }
 
-    widget->setCurrentIndex (index);
+    mWidget->setCurrentIndex (index);
 
     if (!mTooltip.empty())
     {
@@ -96,9 +97,20 @@ std::pair<QWidget *, QWidget *> CSMPrefs::EnumSetting::makeWidgets (QWidget *par
         label->setToolTip (tooltip);
     }
 
-    connect (widget, SIGNAL (currentIndexChanged (int)), this, SLOT (valueChanged (int)));
+    connect (mWidget, SIGNAL (currentIndexChanged (int)), this, SLOT (valueChanged (int)));
 
-    return std::make_pair (label, widget);
+    return std::make_pair (label, mWidget);
+}
+
+void CSMPrefs::EnumSetting::updateWidget()
+{
+    if (mWidget)
+    {
+        int index = mWidget->findText(QString::fromStdString
+            (getValues().getString(getKey(), getParent()->getKey())));
+
+        mWidget->setCurrentIndex(index);
+    }
 }
 
 void CSMPrefs::EnumSetting::valueChanged (int value)

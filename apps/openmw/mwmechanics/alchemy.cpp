@@ -171,10 +171,10 @@ void MWMechanics::Alchemy::updateEffects()
         if (fPotionT1DurMult<=0)
             throw std::runtime_error ("invalid gmst: fPotionT1DurMult");
 
-        float magnitude = magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude ?
-            1 : (x / fPotionT1MagMul) / magicEffect->mData.mBaseCost;
-        float duration = magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration ?
-            1 : (x / fPotionT1DurMult) / magicEffect->mData.mBaseCost;
+        float magnitude = (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude) ?
+            1.0f : (x / fPotionT1MagMul) / magicEffect->mData.mBaseCost;
+        float duration = (magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration) ?
+            1.0f : (x / fPotionT1DurMult) / magicEffect->mData.mBaseCost;
 
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
             applyTools (magicEffect->mData.mFlags, magnitude);
@@ -262,22 +262,16 @@ const ESM::Potion *MWMechanics::Alchemy::getRecord(const ESM::Potion& toFind) co
 
 void MWMechanics::Alchemy::removeIngredients()
 {
-    bool needsUpdate = false;
-
     for (TIngredientsContainer::iterator iter (mIngredients.begin()); iter!=mIngredients.end(); ++iter)
         if (!iter->isEmpty())
         {
             iter->getContainerStore()->remove(*iter, 1, mAlchemist);
 
             if (iter->getRefData().getCount()<1)
-            {
-                needsUpdate = true;
                 *iter = MWWorld::Ptr();
-            }
         }
 
-    if (needsUpdate)
-        updateEffects();
+    updateEffects();
 }
 
 void MWMechanics::Alchemy::addPotion (const std::string& name)
@@ -457,7 +451,9 @@ bool MWMechanics::Alchemy::knownEffect(unsigned int potionEffectIndex, const MWW
     static const float fWortChanceValue =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->getFloat();
     return (potionEffectIndex <= 1 && alchemySkill >= fWortChanceValue)
-            || (potionEffectIndex <= 3 && alchemySkill >= fWortChanceValue*2);
+            || (potionEffectIndex <= 3 && alchemySkill >= fWortChanceValue*2)
+            || (potionEffectIndex <= 5 && alchemySkill >= fWortChanceValue*3)
+            || (potionEffectIndex <= 7 && alchemySkill >= fWortChanceValue*4);
 }
 
 MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& name)

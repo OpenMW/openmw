@@ -32,29 +32,29 @@ namespace SceneUtil
 
         virtual void apply(osg::MatrixTransform& node)
         {
-            applyNode(node);
-        }
-        virtual void apply(osg::Geometry& node)
-        {
-            applyNode(node);
+            traverse(node);
         }
         virtual void apply(osg::Node& node)
         {
-            applyNode(node);
+            traverse(node);
         }
         virtual void apply(osg::Group& node)
         {
-            applyNode(node);
+            traverse(node);
         }
 
-        void applyNode(osg::Node& node)
+        virtual void apply(osg::Drawable& drawable)
         {
-            std::string lowerName = Misc::StringUtils::lowerCase(node.getName());
+            std::string lowerName = Misc::StringUtils::lowerCase(drawable.getName());
             if ((lowerName.size() >= mFilter.size() && lowerName.compare(0, mFilter.size(), mFilter) == 0)
                     || (lowerName.size() >= mFilter2.size() && lowerName.compare(0, mFilter2.size(), mFilter2) == 0))
-                mToCopy.push_back(&node);
-            else
-                traverse(node);
+            {
+                osg::Node* node = &drawable;
+                while (node && node->getNumParents() && !node->getStateSet())
+                    node = node->getParent(0);
+                if (node)
+                    mToCopy.push_back(node);
+            }
         }
 
         void doCopy()
@@ -81,6 +81,17 @@ namespace SceneUtil
         std::string mFilter2;
     };
 
+    void mergeUserData(osg::UserDataContainer* source, osg::Object* target)
+    {
+        if (!target->getUserDataContainer())
+            target->setUserDataContainer(source);
+        else
+        {
+            for (unsigned int i=0; i<source->getNumUserObjects(); ++i)
+                target->getUserDataContainer()->addUserObject(source->getUserObject(i));
+        }
+    }
+
     osg::ref_ptr<osg::Node> attach(osg::ref_ptr<osg::Node> toAttach, osg::Node *master, const std::string &filter, osg::Group* attachNode)
     {
         if (dynamic_cast<SceneUtil::Skeleton*>(toAttach.get()))
@@ -96,11 +107,13 @@ namespace SceneUtil
                 osg::ref_ptr<osg::Node> newHandle = handle->getChild(0);
                 handle->removeChild(newHandle);
                 master->asGroup()->addChild(newHandle);
+                mergeUserData(toAttach->getUserDataContainer(), newHandle);
                 return newHandle;
             }
             else
             {
                 master->asGroup()->addChild(handle);
+                handle->setUserDataContainer(toAttach->getUserDataContainer());
                 return handle;
             }
         }

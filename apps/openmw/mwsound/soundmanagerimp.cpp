@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <map>
+#include <numeric>
 
 #include <osg/Matrixf>
 
@@ -34,7 +35,7 @@
 
 namespace MWSound
 {
-    SoundManager::SoundManager(const VFS::Manager* vfs, const std::map<std::string,std::string>& fallbackMap, bool useSound)
+    SoundManager::SoundManager(const VFS::Manager* vfs, const std::map<std::string, std::string>& fallbackMap, bool useSound)
         : mVFS(vfs)
         , mFallback(fallbackMap)
         , mOutput(new DEFAULT_OUTPUT(*this))
@@ -259,7 +260,7 @@ namespace MWSound
         float basevol = volumeFromType(Play_TypeVoice);
         if(playlocal)
         {
-            sound.reset(new Stream(1.0f, basevol, 1.0f, Play_Normal|Play_TypeVoice|Play_2D));
+            sound.reset(new Stream(1.0f, basevol, 1.0f, Play_NoEnv|Play_TypeVoice|Play_2D));
             mOutput->streamSound(decoder, sound);
         }
         else
@@ -270,7 +271,6 @@ namespace MWSound
         }
         return sound;
     }
-
 
     // Gets the combined volume settings for the given sound type
     float SoundManager::volumeFromType(PlayType type) const
@@ -297,7 +297,6 @@ namespace MWSound
         }
         return volume;
     }
-
 
     void SoundManager::stopMusic()
     {
@@ -328,14 +327,28 @@ namespace MWSound
         }
     }
 
+    void SoundManager::advanceMusic(const std::string& filename)
+    {
+        if (!isMusicPlaying())
+        {
+            streamMusicFull(filename);
+            return;
+        }
+
+        mNextMusic = filename;
+
+        mMusic->setFadeout(0.5f);
+    }
+
     void SoundManager::streamMusic(const std::string& filename)
     {
-        streamMusicFull("Music/"+filename);
+        advanceMusic("Music/"+filename);
     }
 
     void SoundManager::startRandomTitle()
     {
         std::vector<std::string> filelist;
+        auto &tracklist = mMusicToPlay[mCurrentPlaylist];
         if (mMusicFiles.find(mCurrentPlaylist) == mMusicFiles.end())
         {
             const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
@@ -354,7 +367,6 @@ namespace MWSound
             }
 
             mMusicFiles[mCurrentPlaylist] = filelist;
-
         }
         else
             filelist = mMusicFiles[mCurrentPlaylist];
@@ -362,15 +374,25 @@ namespace MWSound
         if(filelist.empty())
             return;
 
-        int i = Misc::Rng::rollDice(filelist.size());
+        // Do a Fisher-Yates shuffle
 
-        // Don't play the same music track twice in a row
-        if (filelist[i] == mLastPlayedMusic)
+        // Repopulate if playlist is empty
+        if(tracklist.empty())
         {
-            i = (i+1) % filelist.size();
+            tracklist.resize(filelist.size());
+            std::iota(tracklist.begin(), tracklist.end(), 0);
         }
 
-        streamMusicFull(filelist[i]);
+        int i = Misc::Rng::rollDice(tracklist.size());
+
+        // Reshuffle if last played music is the same after a repopulation
+        if(filelist[tracklist[i]] == mLastPlayedMusic)
+            i = (i+1) % tracklist.size();
+
+        // Remove music from list after advancing music
+        advanceMusic(filelist[tracklist[i]]);
+        tracklist[i] = tracklist.back();
+        tracklist.pop_back();
     }
 
     bool SoundManager::isMusicPlaying()
@@ -556,6 +578,9 @@ namespace MWSound
 
             if((mode&Play_RemoveAtDistance) && (mListenerPos-objpos).length2() > 2000*2000)
                 return MWBase::SoundPtr();
+
+            // Only one copy of given sound can be played at time on ptr, so stop previous copy
+            stopSound3D(ptr, soundId);
 
             if(!(mode&Play_NoPlayerLocal) && ptr == MWMechanics::getPlayer())
             {
@@ -925,6 +950,8 @@ namespace MWSound
             env
         );
 
+        updateMusic(duration);
+
         // Check if any sounds are finished playing, and trash them
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
@@ -1026,6 +1053,23 @@ namespace MWSound
                 mUnderwaterSound = playSound("Underwater", 1.0f, 1.0f, Play_TypeSfx, Play_LoopNoEnv);
         }
         mOutput->finishUpdate();
+    }
+
+
+    void SoundManager::updateMusic(float duration)
+    {
+        if (!mNextMusic.empty())
+        {
+            mMusic->updateFade(duration);
+
+            mOutput->updateStream(mMusic);
+            
+            if (mMusic->getRealVolume() <= 0.f)
+            {
+                streamMusicFull(mNextMusic);
+                mNextMusic.clear();
+            }
+        }
     }
 
 

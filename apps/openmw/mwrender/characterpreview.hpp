@@ -17,6 +17,7 @@ namespace osg
     class Texture2D;
     class Camera;
     class Group;
+    class Viewport;
 }
 
 namespace MWRender
@@ -28,7 +29,7 @@ namespace MWRender
     class CharacterPreview
     {
     public:
-        CharacterPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, MWWorld::Ptr character, int sizeX, int sizeY,
+        CharacterPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, const MWWorld::Ptr& character, int sizeX, int sizeY,
                          const osg::Vec3f& position, const osg::Vec3f& lookAt);
         virtual ~CharacterPreview();
 
@@ -73,7 +74,7 @@ namespace MWRender
     {
     public:
 
-        InventoryPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, MWWorld::Ptr character);
+        InventoryPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem, const MWWorld::Ptr& character);
 
         void updatePtr(const MWWorld::Ptr& ptr);
 
@@ -83,6 +84,8 @@ namespace MWRender
         int getSlotSelected(int posX, int posY);
 
     protected:
+        osg::ref_ptr<osg::Viewport> mViewport;
+
         virtual void onSetup();
     };
 

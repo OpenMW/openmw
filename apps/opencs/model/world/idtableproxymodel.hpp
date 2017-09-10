@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-
 #include <map>
 
 #include <QSortFilterProxyModel>
@@ -19,7 +17,7 @@ namespace CSMWorld
     {
             Q_OBJECT
 
-            boost::shared_ptr<CSMFilter::Node> mFilter;
+            std::shared_ptr<CSMFilter::Node> mFilter;
             std::map<int, int> mColumnMap; // column ID, column index in this model (or -1)
 
             // Cache of enum values for enum columns (e.g. Modified, Record Type).
@@ -43,7 +41,7 @@ namespace CSMWorld
 
             virtual void setSourceModel(QAbstractItemModel *model);
 
-            void setFilter (const boost::shared_ptr<CSMFilter::Node>& filter);
+            void setFilter (const std::shared_ptr<CSMFilter::Node>& filter);
 
             void refreshFilter();
 

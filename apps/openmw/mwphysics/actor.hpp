@@ -162,10 +162,10 @@ namespace MWPhysics
 
         bool mRotationallyInvariant;
 
-        std::auto_ptr<btCollisionShape> mShape;
+        std::unique_ptr<btCollisionShape> mShape;
         btConvexShape* mConvexShape;
 
-        std::auto_ptr<btCollisionObject> mCollisionObject;
+        std::unique_ptr<btCollisionObject> mCollisionObject;
 
         osg::Vec3f mMeshTranslation;
         osg::Vec3f mHalfExtents;

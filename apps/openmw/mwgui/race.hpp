@@ -2,6 +2,7 @@
 #define MWGUI_RACE_H
 
 #include "windowbase.hpp"
+#include <MyGUI_RenderManager.h>
 
 
 namespace MWGui
@@ -115,8 +116,8 @@ namespace MWGui
 
         float mCurrentAngle;
 
-        std::auto_ptr<MWRender::RaceSelectionPreview> mPreview;
-        std::auto_ptr<MyGUI::ITexture> mPreviewTexture;
+        std::unique_ptr<MWRender::RaceSelectionPreview> mPreview;
+        std::unique_ptr<MyGUI::ITexture> mPreviewTexture;
 
         bool mPreviewDirty;
     };

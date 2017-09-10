@@ -263,12 +263,15 @@ public:
 
     void forceStateUpdate();
     
+    bool isAttackPrepairing() const;
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
     bool isSneaking() const;
+    bool isRunning() const;
+    bool isAttackingOrSpell() const;
 
     void setAttackingOrSpell(bool attackingOrSpell);
-    void setAIAttackType(std::string attackType); // set and used by AiCombat
+    void setAIAttackType(const std::string& attackType);
     static void setAttackTypeRandomly(std::string& attackType);
 
     bool readyToPrepareAttack() const;

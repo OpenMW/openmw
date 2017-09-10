@@ -2,13 +2,14 @@
 
 #include <MyGUI_LanguageManager.h>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
+
+#include "textcolours.hpp"
+
+
 namespace
 {
-    MyGUI::Colour getTextColour (const std::string& type)
-    {
-        return MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=" + type + "}"));
-    }
-
     struct AddContent
     {
         MWGui::BookTypesetter::Ptr mTypesetter;
@@ -31,12 +32,10 @@ namespace
         {
             MWGui::BookTypesetter::Style* style = mBodyStyle;
 
-            static const MyGUI::Colour linkHot    (getTextColour("journal_link_over"));
-            static const MyGUI::Colour linkNormal (getTextColour("journal_link"));
-            static const MyGUI::Colour linkActive (getTextColour("journal_link_pressed"));
-
+            const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
             if (topicId)
-                style = mTypesetter->createHotStyle (mBodyStyle, linkNormal, linkHot, linkActive, topicId);
+                style = mTypesetter->createHotStyle (mBodyStyle, textColours.journalLink, textColours.journalLinkOver,
+                                                     textColours.journalLinkPressed, topicId);
 
             mTypesetter->write (style, begin, end);
         }
@@ -83,7 +82,7 @@ namespace
 
             AddEntry::operator () (entry);
 
-            mTypesetter->sectionBreak (10);
+            mTypesetter->sectionBreak (30);
         }
     };
 
@@ -108,7 +107,7 @@ namespace
             mTypesetter->selectContent (mContentId);
             mTypesetter->write (mBodyStyle, 2, 3);// end quote
 
-            mTypesetter->sectionBreak (10);
+            mTypesetter->sectionBreak (30);
         }
     };
 
@@ -122,7 +121,7 @@ namespace
         void operator () (MWGui::JournalViewModel::Utf8Span topicName)
         {
             mTypesetter->write (mBodyStyle, topicName);
-            mTypesetter->sectionBreak (10);
+            mTypesetter->sectionBreak ();
         }
     };
 
@@ -136,7 +135,7 @@ namespace
         void operator () (MWGui::JournalViewModel::Utf8Span topicName)
         {
             mTypesetter->write (mBodyStyle, topicName);
-            mTypesetter->sectionBreak (10);
+            mTypesetter->sectionBreak ();
         }
     };
 }
@@ -233,11 +232,10 @@ book JournalBooks::createTopicIndexBook ()
 
         sprintf (buffer, "( %c )", ch);
 
-        MyGUI::Colour linkHot (getTextColour("journal_topic_over"));
-        MyGUI::Colour linkActive (getTextColour("journal_topic_pressed"));
-        MyGUI::Colour linkNormal (getTextColour("journal_topic"));
-
-        BookTypesetter::Style* style = typesetter->createHotStyle (body, linkNormal, linkHot, linkActive, ch);
+        const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
+        BookTypesetter::Style* style = typesetter->createHotStyle (body, textColours.journalTopic,
+                                                                   textColours.journalTopicOver,
+                                                                   textColours.journalTopicPressed, ch);
 
         if (i == 13)
             typesetter->sectionBreak ();
@@ -252,7 +250,7 @@ book JournalBooks::createTopicIndexBook ()
 BookTypesetter::Ptr JournalBooks::createTypesetter ()
 {
     //TODO: determine page size from layout...
-    return BookTypesetter::create (240, 300);
+    return BookTypesetter::create (240, 320);
 }
 
 }

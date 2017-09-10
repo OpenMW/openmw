@@ -1,10 +1,10 @@
 #include "ffmpeg_decoder.hpp"
 
-// auto_ptr
 #include <memory>
 
 #include <stdexcept>
 #include <sstream>
+#include <algorithm>
 
 #include <components/vfs/manager.hpp>
 

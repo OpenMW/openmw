@@ -170,8 +170,8 @@ namespace MWDialogue
                     parseText (info->mResponse);
 
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
-                    win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
-                    executeScript (info->mResultScript);
+                    win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext), "", false);
+                    executeScript (info->mResultScript, mActor);
                     mLastTopic = Misc::StringUtils::lowerCase(it->mId);
 
                     // update topics again to accommodate changes resulting from executeScript
@@ -190,7 +190,7 @@ namespace MWDialogue
             MWBase::Environment::get().getWindowManager()->showCompanionWindow(mActor);
     }
 
-    bool DialogueManager::compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code)
+    bool DialogueManager::compile (const std::string& cmd, std::vector<Interpreter::Type_Code>& code, const MWWorld::Ptr& actor)
     {
         bool success = true;
 
@@ -206,7 +206,7 @@ namespace MWDialogue
 
             Compiler::Locals locals;
 
-            std::string actorScript = mActor.getClass().getScript (mActor);
+            std::string actorScript = actor.getClass().getScript (actor);
 
             if (!actorScript.empty())
             {
@@ -246,14 +246,14 @@ namespace MWDialogue
         return success;
     }
 
-    void DialogueManager::executeScript (const std::string& script)
+    void DialogueManager::executeScript (const std::string& script, const MWWorld::Ptr& actor)
     {
         std::vector<Interpreter::Type_Code> code;
-        if(compile(script,code))
+        if(compile(script, code, actor))
         {
             try
             {
-                MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
+                MWScript::InterpreterContext interpreterContext(&actor.getRefData().getLocals(), actor);
                 Interpreter::Interpreter interpreter;
                 MWScript::installOpcodes (interpreter);
                 interpreter.run (&code[0], code.size(), interpreterContext);
@@ -317,7 +317,7 @@ namespace MWDialogue
                 }
             }
 
-            executeScript (info->mResultScript);
+            executeScript (info->mResultScript, mActor);
 
             mLastTopic = topic;
         }
@@ -500,7 +500,7 @@ namespace MWDialogue
                         }
                     }
 
-                    executeScript (info->mResultScript);
+                    executeScript (info->mResultScript, mActor);
                 }
                 else
                 {
@@ -618,18 +618,24 @@ namespace MWDialogue
             win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext),
                               gmsts.find ("sServiceRefusal")->getString());
 
-            executeScript (info->mResultScript);
+            executeScript (info->mResultScript, mActor);
             return true;
         }
         return false;
     }
 
-    void DialogueManager::say(const MWWorld::Ptr &actor, const std::string &topic) const
+    void DialogueManager::say(const MWWorld::Ptr &actor, const std::string &topic)
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         if(!sndMgr->sayDone(actor))
         {
             // Actor is already saying something.
+            return;
+        }
+
+        if (actor.getClass().isNpc() && MWBase::Environment::get().getWorld()->isSwimming(actor))
+        {
+            // NPCs don't talk while submerged
             return;
         }
 
@@ -646,6 +652,8 @@ namespace MWDialogue
                 winMgr->messageBox(info->mResponse);
             if (!info->mSound.empty())
                 sndMgr->say(actor, info->mSound);
+            if (!info->mResultScript.empty())
+                executeScript(info->mResultScript, actor);
         }
     }
 

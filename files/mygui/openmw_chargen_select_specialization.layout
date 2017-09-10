@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout">
     <!-- correct size is 247 144, adjust when skin is changed to a dialog -->
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 247 144" align="Center" name="_Main">
+    <Widget type="Window" skin="MW_DialogNoTransp" layer="Windows" position="0 0 247 144" align="Center" name="_Main">
         <Widget type="Widget" skin="" position="14 14 216 113" align="Stretch">
 
             <!-- Label -->
-            <Widget type="TextBox" skin="HeaderText" position="0 0 216 18" name="LabelT" align="Left Top">
+            <Widget type="TextBox" skin="HeaderText" position="0 0 216 18" name="LabelT" align="Center Top">
                 <Property key="Caption" value="#{sSpecializationMenu1}"/>
-                <Property key="TextAlign" value="Left Top"/>
+                <Property key="TextAlign" value="Center Top"/>
             </Widget>
 
             <!-- Specialization list -->

@@ -1,9 +1,9 @@
 #ifndef GAME_MWBASE_SOUNDMANAGER_H
 #define GAME_MWBASE_SOUNDMANAGER_H
 
+#include <memory>
 #include <string>
 #include <set>
-#include <boost/shared_ptr.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -17,13 +17,13 @@ namespace MWSound
     class Sound;
     class Stream;
     struct Sound_Decoder;
-    typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
+    typedef std::shared_ptr<Sound_Decoder> DecoderPtr;
 }
 
 namespace MWBase
 {
-    typedef boost::shared_ptr<MWSound::Sound> SoundPtr;
-    typedef boost::shared_ptr<MWSound::Stream> SoundStreamPtr;
+    typedef std::shared_ptr<MWSound::Sound> SoundPtr;
+    typedef std::shared_ptr<MWSound::Stream> SoundStreamPtr;
 
     /// \brief Interface for sound manager (implemented in MWSound)
     class SoundManager
