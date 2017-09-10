@@ -30,10 +30,7 @@
 #include "mask.hpp"
 
 
-const float CSVRender::Object::MarkerShaftWidth = 30;
 const float CSVRender::Object::MarkerShaftBaseLength = 70;
-const float CSVRender::Object::MarkerHeadWidth = 50;
-const float CSVRender::Object::MarkerHeadLength = 50;
 
 
 namespace
@@ -215,6 +212,10 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeMoveOrScaleMarker (int axis)
 
     float shaftLength = MarkerShaftBaseLength + mBaseNode->getBound().radius();
 
+    const float MarkerShaftWidth = mBaseNode->getBound().radius() * 0.05;
+    const float MarkerHeadWidth = MarkerShaftWidth * (5.0 / 3.0);
+    const float MarkerHeadLength = MarkerHeadWidth * 1.5;
+
     // shaft
     osg::Vec3Array *vertices = new osg::Vec3Array;
 
@@ -305,6 +306,7 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
 {
     const float Pi = 3.14159265f;
 
+    const float MarkerShaftWidth = mBaseNode->getBound().radius() * 0.05;
     const float InnerRadius = mBaseNode->getBound().radius();
     const float OuterRadius = InnerRadius + MarkerShaftWidth;
 
