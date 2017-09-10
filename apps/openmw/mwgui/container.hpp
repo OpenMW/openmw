@@ -34,6 +34,7 @@ namespace MWGui
         ContainerWindow(DragAndDrop* dragAndDrop);
 
         void openContainer(const MWWorld::Ptr& container, bool loot=false);
+        virtual void takeAll();
         virtual void close();
 
         virtual void resetReference();
