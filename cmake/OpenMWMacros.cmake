@@ -163,13 +163,11 @@ macro (openmw_add_executable target)
 		set(OMW_ADD_EXE_EXCLUDE_FROM_ALL_VALUE EXCLUDE_FROM_ALL)
 	endif (OMW_ADD_EXE_EXCLUDE_FROM_ALL)
 	
-	message("Target: " ${target})
-	message("WIN32: ${OMW_ADD_EXE_WIN32_VALUE}")
-	message("MACOSX_BUNDLE: ${OMW_ADD_EXE_MACOSX_BUNDLE_VALUE}")
-	message("EXCLUDE_FROM_ALL: ${OMW_ADD_EXE_EXCLUDE_FROM_ALL_VALUE}")
-	message("Unparsed: ${OMW_ADD_EXE_UNPARSED_ARGUMENTS}")
+	# AnyOldName3 says: I have no idea why or if it's even supposed to happen, but somehow entering this macro confuses CMake about which policies should be set. They are restored here.
+	cmake_policy(SET CMP0003 NEW)
+	cmake_policy(SET CMP0020 NEW)
 	
-	add_executable(${target} ${OMW_ADD_EXE_WIN32_VALUE} ${OMW_ADD_EXE_MACOSX_BUNDLE_VALUE} ${OMW_ADD_EXE_EXCLUDE_FROM_ALL_VALUE} "${OMW_ADD_EXE_UNPARSED_ARGUMENTS}")
+	add_executable(${target} ${OMW_ADD_EXE_WIN32_VALUE} ${OMW_ADD_EXE_MACOSX_BUNDLE_VALUE} ${OMW_ADD_EXE_EXCLUDE_FROM_ALL_VALUE} ${OMW_ADD_EXE_UNPARSED_ARGUMENTS})
 	
 	if (MSVC)
 		if (CMAKE_VERSION VERSION_GREATER 3.8 OR CMAKE_VERSION VERSION_EQUAL 3.8)
