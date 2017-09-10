@@ -238,10 +238,9 @@ namespace ESM
         // Copy data to target if no file
         if (mContext.filename.empty())
         {
-            if (mLandData)
+            // Make sure there is data, and that it doesn't point to the same object.
+            if (mLandData && mLandData != target)
                 *target = *mLandData;
-            else
-                target = new LandData;
 
             return;
         }
