@@ -394,10 +394,15 @@ namespace MWMechanics
                     aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
             }
         }
-        
+
         // Make guards go aggressive with creatures that are in combat, unless the creature is a follower or escorter
         if (actor1.getClass().isClass(actor1, "Guard") && !actor2.getClass().isNpc())
         {
+            // Check if the creature is too far
+            static const float fAlarmRadius = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
+            if (sqrDist > fAlarmRadius * fAlarmRadius)
+                return;
+
             bool followerOrEscorter = false;
             for (std::list<MWMechanics::AiPackage*>::const_iterator it = creatureStats2.getAiSequence().begin(); it != creatureStats2.getAiSequence().end(); ++it)
             {
@@ -800,6 +805,16 @@ namespace MWMechanics
                              effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).getMagnitude() -
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).getMagnitude()));
         }
+    }
+
+    bool Actors::isAttackPrepairing(const MWWorld::Ptr& ptr)
+    {
+        PtrActorMap::iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+        CharacterController* ctrl = it->second->getCharacterController();
+
+        return ctrl->isAttackPrepairing();
     }
 
     bool Actors::isRunning(const MWWorld::Ptr& ptr)

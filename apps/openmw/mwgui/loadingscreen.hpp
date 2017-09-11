@@ -43,6 +43,8 @@ namespace MWGui
 
         virtual void setVisible(bool visible);
 
+        double getTargetFrameRate() const;
+
     private:
         void findSplashScreens();
         bool needToDrawLoadingScreen();

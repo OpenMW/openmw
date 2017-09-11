@@ -23,6 +23,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
@@ -919,6 +920,9 @@ void NpcAnimation::showWeapons(bool showWeapon)
     else
     {
         removeIndividualPart(ESM::PRT_Weapon);
+        // If we remove/hide weapon from player, we should reset attack animation as well
+        if (mPtr == MWMechanics::getPlayer())
+            MWBase::Environment::get().getWorld()->getPlayer().setAttackingOrSpell(false);
     }
 }
 
