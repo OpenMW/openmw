@@ -654,6 +654,11 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSelectedEnchantItem(
     return mSelectedEnchantItem;
 }
 
+int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor)
+{
+    return remove(item, count, actor, false);
+}
+
 int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor, bool equipReplacement)
 {
     int retCount = ContainerStore::remove(item, count, actor);

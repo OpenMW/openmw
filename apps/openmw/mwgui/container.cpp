@@ -11,6 +11,7 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/pickpocket.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -211,31 +212,48 @@ namespace MWGui
 
     void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
     {
-        if(mDragAndDrop == NULL || !mDragAndDrop->mIsOnDragAndDrop)
+        if(mDragAndDrop != NULL && mDragAndDrop->mIsOnDragAndDrop)
+            return;
+
+        // transfer everything into the player's inventory
+        ItemModel* playerModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getModel();
+        mModel->update();
+
+        // unequip all items to avoid unequipping/reequipping
+        if (mPtr.getClass().hasInventoryStore(mPtr))
         {
-            // transfer everything into the player's inventory
-            ItemModel* playerModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getModel();
-            mModel->update();
+            MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
             for (size_t i=0; i<mModel->getItemCount(); ++i)
             {
-                if (i==0)
-                {
-                    // play the sound of the first object
-                    MWWorld::Ptr item = mModel->getItem(i).mBase;
-                    std::string sound = item.getClass().getUpSoundId(item);
-                    MWBase::Environment::get().getWindowManager()->playSound(sound);
-                }
-
                 const ItemStack& item = mModel->getItem(i);
+                if (invStore.isEquipped(item.mBase) == false)
+                    continue;
 
-                if (!onTakeItem(item, item.mCount))
-                    break;
+                invStore.unequipItem(item.mBase, mPtr);
+            }
+        }
 
-                mModel->moveItem(item, item.mCount, playerModel);
+        mModel->update();
+
+        for (size_t i=0; i<mModel->getItemCount(); ++i)
+        {
+            if (i==0)
+            {
+                // play the sound of the first object
+                MWWorld::Ptr item = mModel->getItem(i).mBase;
+                std::string sound = item.getClass().getUpSoundId(item);
+                MWBase::Environment::get().getWindowManager()->playSound(sound);
             }
 
-            MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
+            const ItemStack& item = mModel->getItem(i);
+
+            if (!onTakeItem(item, item.mCount))
+                break;
+
+            mModel->moveItem(item, item.mCount, playerModel);
         }
+
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
     }
 
     void ContainerWindow::onDisposeCorpseButtonClicked(MyGUI::Widget *sender)
