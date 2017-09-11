@@ -24,7 +24,7 @@ namespace Terrain
 
         void clearCache();
 
-        // TODO: add releaseGLObjects() for our vertex/element buffer objects
+        void releaseGLObjects(osg::State* state);
 
     private:
         // Index buffers are shared across terrain batches where possible. There is one index buffer for each

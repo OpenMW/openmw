@@ -56,7 +56,7 @@ Enabling this feature results in better visuals, and a marginally lower frame ra
 
 This setting has no effect if the shader setting is false.
 
-This setting can be toggled with the Refraction button in the Water tab of the Video panel of the Options menu.
+This setting can be toggled with the 'Refraction' button in the Water tab of the Video panel of the Options menu.
 
 reflect actors
 --------------
@@ -67,6 +67,8 @@ reflect actors
 
 This setting controls whether or not NPCs and creatures are drawn in water reflections.
 Setting this to true will enable actors in reflections and increase realism with a likely decrease in performance.
+
+This setting can be toggled with the 'Reflect actors' button in the Water tab of the Video panel of the Options menu.
 
 small feature culling pixel size
 --------------------------------

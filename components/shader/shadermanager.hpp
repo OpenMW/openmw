@@ -32,6 +32,7 @@ namespace Shader
 
         osg::ref_ptr<osg::Program> getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader);
 
+        void releaseGLObjects(osg::State* state);
 
     private:
         std::string mPath;

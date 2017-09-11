@@ -11,6 +11,7 @@ namespace VFS
 namespace osg
 {
     class Stats;
+    class State;
 }
 
 namespace Resource
@@ -37,6 +38,8 @@ namespace Resource
         const VFS::Manager* getVFS() const;
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const {}
+
+        virtual void releaseGLObjects(osg::State* state);
 
     protected:
         const VFS::Manager* mVFS;

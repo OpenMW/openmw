@@ -12,6 +12,7 @@ namespace VFS
 namespace osg
 {
     class Stats;
+    class State;
 }
 
 namespace Resource
@@ -59,6 +60,9 @@ namespace Resource
         const VFS::Manager* getVFS() const;
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
+
+        /// Call releaseGLObjects for each resource manager.
+        void releaseGLObjects(osg::State* state);
 
     private:
         std::unique_ptr<SceneManager> mSceneManager;

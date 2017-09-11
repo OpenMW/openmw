@@ -31,11 +31,6 @@ namespace osgParticle
     class Emitter;
 }
 
-namespace osgAnimation
-{
-    class MorphGeometry;
-}
-
 namespace NifOsg
 {
 
@@ -172,7 +167,7 @@ namespace NifOsg
         virtual float getMaximum() const;
     };
 
-    /// Must be set on an osgAnimation::MorphGeometry.
+    /// Must be set on a SceneUtil::MorphGeometry.
     class GeomMorpherController : public osg::Drawable::UpdateCallback, public SceneUtil::Controller
     {
     public:

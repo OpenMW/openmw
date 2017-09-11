@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <map>
+#include <numeric>
 
 #include <osg/Matrixf>
 
@@ -271,7 +272,6 @@ namespace MWSound
         return sound;
     }
 
-
     // Gets the combined volume settings for the given sound type
     float SoundManager::volumeFromType(PlayType type) const
     {
@@ -297,7 +297,6 @@ namespace MWSound
         }
         return volume;
     }
-
 
     void SoundManager::stopMusic()
     {
@@ -349,6 +348,7 @@ namespace MWSound
     void SoundManager::startRandomTitle()
     {
         std::vector<std::string> filelist;
+        auto &tracklist = mMusicToPlay[mCurrentPlaylist];
         if (mMusicFiles.find(mCurrentPlaylist) == mMusicFiles.end())
         {
             const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
@@ -367,7 +367,6 @@ namespace MWSound
             }
 
             mMusicFiles[mCurrentPlaylist] = filelist;
-
         }
         else
             filelist = mMusicFiles[mCurrentPlaylist];
@@ -375,15 +374,25 @@ namespace MWSound
         if(filelist.empty())
             return;
 
-        int i = Misc::Rng::rollDice(filelist.size());
+        // Do a Fisher-Yates shuffle
 
-        // Don't play the same music track twice in a row
-        if (filelist[i] == mLastPlayedMusic)
+        // Repopulate if playlist is empty
+        if(tracklist.empty())
         {
-            i = (i+1) % filelist.size();
+            tracklist.resize(filelist.size());
+            std::iota(tracklist.begin(), tracklist.end(), 0);
         }
 
-        advanceMusic(filelist[i]);
+        int i = Misc::Rng::rollDice(tracklist.size());
+
+        // Reshuffle if last played music is the same after a repopulation
+        if(filelist[tracklist[i]] == mLastPlayedMusic)
+            i = (i+1) % tracklist.size();
+
+        // Remove music from list after advancing music
+        advanceMusic(filelist[tracklist[i]]);
+        tracklist[i] = tracklist.back();
+        tracklist.pop_back();
     }
 
     bool SoundManager::isMusicPlaying()
@@ -569,6 +578,9 @@ namespace MWSound
 
             if((mode&Play_RemoveAtDistance) && (mListenerPos-objpos).length2() > 2000*2000)
                 return MWBase::SoundPtr();
+
+            // Only one copy of given sound can be played at time on ptr, so stop previous copy
+            stopSound3D(ptr, soundId);
 
             if(!(mode&Play_NoPlayerLocal) && ptr == MWMechanics::getPlayer())
             {

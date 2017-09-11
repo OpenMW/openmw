@@ -97,4 +97,10 @@ namespace Resource
             (*it)->reportStats(frameNumber, stats);
     }
 
+    void ResourceSystem::releaseGLObjects(osg::State *state)
+    {
+        for (std::vector<ResourceManager*>::const_iterator it = mResourceManagers.begin(); it != mResourceManagers.end(); ++it)
+            (*it)->releaseGLObjects(state);
+    }
+
 }

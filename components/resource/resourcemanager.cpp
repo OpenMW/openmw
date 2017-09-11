@@ -38,4 +38,9 @@ namespace Resource
         return mVFS;
     }
 
+    void ResourceManager::releaseGLObjects(osg::State *state)
+    {
+        mCache->releaseGLObjects(state);
+    }
+
 }

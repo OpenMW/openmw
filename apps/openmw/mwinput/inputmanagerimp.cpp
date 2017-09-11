@@ -20,6 +20,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -929,6 +930,9 @@ namespace MWInput
             inventory.getSelectedEnchantItem() == inventory.end())
             return;
 
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPlayer->getPlayer()))
+            return;
+
         MWMechanics::DrawState_ state = mPlayer->getDrawState();
         if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
             mPlayer->setDrawState(MWMechanics::DrawState_Spell);
@@ -942,6 +946,13 @@ namespace MWInput
 
         // Not allowed before the inventory window is accessible
         if (!mControlSwitch["playerfighting"] || !mControlSwitch["playercontrols"])
+            return;
+
+        // We want to interrupt animation only if attack is prepairing, but still is not triggered
+        // Otherwise we will get a "speedshooting" exploit, when player can skip reload animation by hitting "Toggle Weapon" key twice
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackPrepairing(mPlayer->getPlayer()))
+            mPlayer->setAttackingOrSpell(false);
+        else if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPlayer->getPlayer()))
             return;
 
         MWMechanics::DrawState_ state = mPlayer->getDrawState();

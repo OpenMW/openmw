@@ -6,11 +6,10 @@
 #include <osg/Texture2D>
 #include <osg/UserDataContainer>
 
-#include <osgAnimation/MorphGeometry>
-
 #include <osgParticle/Emitter>
 
 #include <components/nif/data.hpp>
+#include <components/sceneutil/morphgeometry.hpp>
 
 #include "userdata.hpp"
 
@@ -188,7 +187,7 @@ GeomMorpherController::GeomMorpherController(const Nif::NiMorphData *data)
 
 void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable)
 {
-    osgAnimation::MorphGeometry* morphGeom = static_cast<osgAnimation::MorphGeometry*>(drawable);
+    SceneUtil::MorphGeometry* morphGeom = static_cast<SceneUtil::MorphGeometry*>(drawable);
     if (hasInput())
     {
         if (mKeyFrames.size() <= 1)
@@ -202,7 +201,7 @@ void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable
                 val = it->interpKey(input);
             val = std::max(0.f, std::min(1.f, val));
 
-            osgAnimation::MorphGeometry::MorphTarget& target = morphGeom->getMorphTarget(i);
+            SceneUtil::MorphGeometry::MorphTarget& target = morphGeom->getMorphTarget(i);
             if (target.getWeight() != val)
             {
                 target.setWeight(val);
@@ -210,8 +209,6 @@ void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable
             }
         }
     }
-
-    // morphGeometry::transformSoftwareMethod() done in cull callback i.e. only for visible morph geometries
 }
 
 UVController::UVController()

@@ -62,6 +62,12 @@ void ChunkManager::clearCache()
     mBufferCache.clearCache();
 }
 
+void ChunkManager::releaseGLObjects(osg::State *state)
+{
+    ResourceManager::releaseGLObjects(state);
+    mBufferCache.releaseGLObjects(state);
+}
+
 void ChunkManager::setCullingActive(bool active)
 {
     mCullingActive = active;

@@ -241,7 +241,10 @@ namespace MWGui
     virtual void setSpellVisibility(bool visible);
     virtual void setSneakVisibility(bool visible);
 
-    virtual void activateQuickKey  (int index);
+    /// activate selected quick key
+    virtual void activateQuickKey (int index);
+    /// update activated quick key state (if action executing was delayed for some reason)
+    virtual void updateActivatedQuickKey ();
 
     virtual std::string getSelectedSpell() { return mSelectedSpell; }
     virtual void setSelectedSpell(const std::string& spellId, int successChancePercent);
@@ -385,7 +388,7 @@ namespace MWGui
 
     // In WindowManager for now since there isn't a VFS singleton
     virtual std::string correctIconPath(const std::string& path);
-    virtual std::string correctBookartPath(const std::string& path, int width, int height);
+    virtual std::string correctBookartPath(const std::string& path, int width, int height, bool* exists = nullptr);
     virtual std::string correctTexturePath(const std::string& path);
     virtual bool textureExists(const std::string& path);
 

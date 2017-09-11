@@ -52,7 +52,7 @@ namespace Shader
 
         void applyStateSet(osg::ref_ptr<osg::StateSet> stateset, osg::Node& node);
 
-        void pushRequirements();
+        void pushRequirements(osg::Node& node);
         void popRequirements();
 
     private:
@@ -89,13 +89,17 @@ namespace Shader
 
             // -1 == no tangents required
             int mTexStageRequiringTangents;
+
+            // the Node that requested these requirements
+            osg::Node* mNode;
         };
         std::vector<ShaderRequirements> mRequirements;
 
         std::string mDefaultVsTemplate;
         std::string mDefaultFsTemplate;
 
-        void createProgram(const ShaderRequirements& reqs, osg::Node& node);
+        void createProgram(const ShaderRequirements& reqs);
+        bool adjustGeometry(osg::Geometry& sourceGeometry, const ShaderRequirements& reqs);
     };
 
 }

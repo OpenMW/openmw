@@ -423,6 +423,11 @@ namespace MWMechanics
         mObjects.update(duration, paused);
     }
 
+    bool MechanicsManager::isAttackPrepairing(const MWWorld::Ptr& ptr)
+    {
+        return mActors.isAttackPrepairing(ptr);
+    }
+
     bool MechanicsManager::isRunning(const MWWorld::Ptr& ptr)
     {
         return mActors.isRunning(ptr);
@@ -1589,6 +1594,11 @@ namespace MWMechanics
     bool MechanicsManager::isReadyToBlock(const MWWorld::Ptr &ptr) const
     {
         return mActors.isReadyToBlock(ptr);
+    }
+
+    bool MechanicsManager::isAttackingOrSpell(const MWWorld::Ptr &ptr) const
+    {
+        return mActors.isAttackingOrSpell(ptr);
     }
 
     void MechanicsManager::setWerewolf(const MWWorld::Ptr& actor, bool werewolf)

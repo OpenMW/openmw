@@ -99,7 +99,7 @@ add_openmw_dir (mwbase
 # Main executable
 
 if (NOT ANDROID)
-    add_executable(openmw
+    openmw_add_executable(openmw
         ${OPENMW_FILES}
         ${GAME} ${GAME_HEADER}
         ${APPLE_BUNDLE_RESOURCES}

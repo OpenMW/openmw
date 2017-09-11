@@ -29,6 +29,7 @@
 #include "../mwrender/characterpreview.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "itemview.hpp"
 #include "inventoryitemmodel.hpp"
@@ -250,6 +251,19 @@ namespace MWGui
                 MWBase::Environment::get().getWindowManager()->playSound(sound);
                 MWBase::Environment::get().getWindowManager()->
                         messageBox("#{sBarterDialog4}");
+                return;
+            }
+        }
+
+        // If we unequip weapon during attack, it can lead to unexpected behaviour
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPtr))
+        {
+            bool isWeapon = item.mBase.getTypeName() == typeid(ESM::Weapon).name();
+            MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
+
+            if (isWeapon && invStore.isEquipped(item.mBase))
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sCantEquipWeapWarning}");
                 return;
             }
         }
@@ -660,9 +674,18 @@ namespace MWGui
 
     void InventoryWindow::cycle(bool next)
     {
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(player))
+            return;
+
+        const MWMechanics::CreatureStats &stats = player.getClass().getCreatureStats(player);
+        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead() || stats.getHitRecovery())
+            return;
+
         ItemModel::ModelIndex selected = -1;
         // not using mSortFilterModel as we only need sorting, not filtering
-        SortFilterItemModel model(new InventoryItemModel(MWMechanics::getPlayer()));
+        SortFilterItemModel model(new InventoryItemModel(player));
         model.setSortByType(false);
         model.update();
         if (model.getItemCount() == 0)

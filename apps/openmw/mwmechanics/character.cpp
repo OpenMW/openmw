@@ -2218,6 +2218,12 @@ void CharacterController::setAttackTypeBasedOnMovement()
         mAttackType = "chop";
 }
 
+bool CharacterController::isAttackPrepairing() const
+{
+    return mUpperBodyState == UpperCharState_StartToMinAttack ||
+            mUpperBodyState == UpperCharState_MinAttackToMaxAttack;
+}
+
 bool CharacterController::isReadyToBlock() const
 {
     return updateCarriedLeftVisible(mWeaponType);
@@ -2226,6 +2232,12 @@ bool CharacterController::isReadyToBlock() const
 bool CharacterController::isKnockedOut() const
 {
     return mHitState == CharState_KnockOut;
+}
+
+bool CharacterController::isAttackingOrSpell() const
+{
+    return mUpperBodyState != UpperCharState_Nothing &&
+            mUpperBodyState != UpperCharState_WeapEquiped;
 }
 
 bool CharacterController::isSneaking() const

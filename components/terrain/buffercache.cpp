@@ -243,4 +243,18 @@ namespace Terrain
         }
     }
 
+    void BufferCache::releaseGLObjects(osg::State *state)
+    {
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mIndexBufferMutex);
+            for (auto indexbuffer : mIndexBufferMap)
+                indexbuffer.second->releaseGLObjects(state);
+        }
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mUvBufferMutex);
+            for (auto uvbuffer : mUvBufferMap)
+                uvbuffer.second->releaseGLObjects(state);
+        }
+    }
+
 }
