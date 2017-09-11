@@ -22,19 +22,14 @@
 #include "../../model/world/commandmacro.hpp"
 #include "../../model/world/cellcoordinates.hpp"
 
+#include "../../model/prefs/state.hpp"
+
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/fallback/fallback.hpp>
 
 #include "mask.hpp"
-
-
-const float CSVRender::Object::MarkerShaftWidth = 30;
-const float CSVRender::Object::MarkerShaftBaseLength = 70;
-const float CSVRender::Object::MarkerHeadWidth = 50;
-const float CSVRender::Object::MarkerHeadLength = 50;
-
 
 namespace
 {
@@ -213,6 +208,11 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeMoveOrScaleMarker (int axis)
 {
     osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
 
+    // marker size
+    float MarkerShaftWidth = CSMPrefs::get()["Marker Size"]["MarkerShaftWidth"].toDouble();
+    float MarkerShaftBaseLength = CSMPrefs::get()["Marker Size"]["MarkerShaftBaseLength"].toDouble();
+    float MarkerHeadWidth = CSMPrefs::get()["Marker Size"]["MarkerHeadWidth"].toDouble();
+    float MarkerHeadLength = CSMPrefs::get()["Marker Size"]["MarkerHeadLength"].toDouble();
     float shaftLength = MarkerShaftBaseLength + mBaseNode->getBound().radius();
 
     // shaft
@@ -305,6 +305,7 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
 {
     const float Pi = 3.14159265f;
 
+    float MarkerShaftWidth = CSMPrefs::get()["Marker Size"]["MarkerShaftWidth"].toDouble();
     const float InnerRadius = mBaseNode->getBound().radius();
     const float OuterRadius = InnerRadius + MarkerShaftWidth;
 
