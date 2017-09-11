@@ -28,7 +28,7 @@ set(ESSIMPORTER_FILES
     convertplayer.cpp
 )
 
-add_executable(openmw-essimporter
+openmw_add_executable(openmw-essimporter
     ${ESSIMPORTER_FILES}
 )
 

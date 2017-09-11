@@ -96,7 +96,7 @@ if (OPENMW_USE_UNSHIELD)
     include_directories(${LIBUNSHIELD_INCLUDE_DIRS})
 endif()
 
-add_executable(openmw-wizard
+openmw_add_executable(openmw-wizard
     ${GUI_TYPE}
     ${WIZARD}
     ${WIZARD_HEADER}

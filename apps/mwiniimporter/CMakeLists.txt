@@ -9,7 +9,7 @@ set(MWINIIMPORT_HEADER
 
 source_group(launcher FILES ${MWINIIMPORT} ${MWINIIMPORT_HEADER})
 
-add_executable(openmw-iniimporter
+openmw_add_executable(openmw-iniimporter
     ${MWINIIMPORT}
 )
 
