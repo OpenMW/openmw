@@ -20,6 +20,8 @@
 #include "soundmanagerimp.hpp"
 #include "loudness.hpp"
 
+#include "efx-presets.h"
+
 #ifndef ALC_ALL_DEVICES_SPECIFIER
 #define ALC_ALL_DEVICES_SPECIFIER 0x1013
 #endif
@@ -90,6 +92,56 @@ LPALGETAUXILIARYEFFECTSLOTI alGetAuxiliaryEffectSloti;
 LPALGETAUXILIARYEFFECTSLOTIV alGetAuxiliaryEffectSlotiv;
 LPALGETAUXILIARYEFFECTSLOTF alGetAuxiliaryEffectSlotf;
 LPALGETAUXILIARYEFFECTSLOTFV alGetAuxiliaryEffectSlotfv;
+
+
+void LoadEffect(ALuint effect, const EFXEAXREVERBPROPERTIES &props)
+{
+    ALint type = AL_NONE;
+    alGetEffecti(effect, AL_EFFECT_TYPE, &type);
+    if(type == AL_EFFECT_EAXREVERB)
+    {
+        alEffectf(effect, AL_EAXREVERB_DIFFUSION, props.flDiffusion);
+        alEffectf(effect, AL_EAXREVERB_DENSITY, props.flDensity);
+        alEffectf(effect, AL_EAXREVERB_GAIN, props.flGain);
+        alEffectf(effect, AL_EAXREVERB_GAINHF, props.flGainHF);
+        alEffectf(effect, AL_EAXREVERB_GAINLF, props.flGainLF);
+        alEffectf(effect, AL_EAXREVERB_DECAY_TIME, props.flDecayTime);
+        alEffectf(effect, AL_EAXREVERB_DECAY_HFRATIO, props.flDecayHFRatio);
+        alEffectf(effect, AL_EAXREVERB_DECAY_LFRATIO, props.flDecayLFRatio);
+        alEffectf(effect, AL_EAXREVERB_REFLECTIONS_GAIN, props.flReflectionsGain);
+        alEffectf(effect, AL_EAXREVERB_REFLECTIONS_DELAY, props.flReflectionsDelay);
+        alEffectfv(effect, AL_EAXREVERB_REFLECTIONS_PAN, props.flReflectionsPan);
+        alEffectf(effect, AL_EAXREVERB_LATE_REVERB_GAIN, props.flLateReverbGain);
+        alEffectf(effect, AL_EAXREVERB_LATE_REVERB_DELAY, props.flLateReverbDelay);
+        alEffectfv(effect, AL_EAXREVERB_LATE_REVERB_PAN, props.flLateReverbPan);
+        alEffectf(effect, AL_EAXREVERB_ECHO_TIME, props.flEchoTime);
+        alEffectf(effect, AL_EAXREVERB_ECHO_DEPTH, props.flEchoDepth);
+        alEffectf(effect, AL_EAXREVERB_MODULATION_TIME, props.flModulationTime);
+        alEffectf(effect, AL_EAXREVERB_MODULATION_DEPTH, props.flModulationDepth);
+        alEffectf(effect, AL_EAXREVERB_AIR_ABSORPTION_GAINHF, props.flAirAbsorptionGainHF);
+        alEffectf(effect, AL_EAXREVERB_HFREFERENCE, props.flHFReference);
+        alEffectf(effect, AL_EAXREVERB_LFREFERENCE, props.flLFReference);
+        alEffectf(effect, AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, props.flRoomRolloffFactor);
+        alEffecti(effect, AL_EAXREVERB_DECAY_HFLIMIT, props.iDecayHFLimit ? AL_TRUE : AL_FALSE);
+    }
+    else if(type == AL_EFFECT_REVERB)
+    {
+        alEffectf(effect, AL_REVERB_DIFFUSION, props.flDiffusion);
+        alEffectf(effect, AL_REVERB_DENSITY, props.flDensity);
+        alEffectf(effect, AL_REVERB_GAIN, props.flGain);
+        alEffectf(effect, AL_REVERB_GAINHF, props.flGainHF);
+        alEffectf(effect, AL_REVERB_DECAY_TIME, props.flDecayTime);
+        alEffectf(effect, AL_REVERB_DECAY_HFRATIO, props.flDecayHFRatio);
+        alEffectf(effect, AL_REVERB_REFLECTIONS_GAIN, props.flReflectionsGain);
+        alEffectf(effect, AL_REVERB_REFLECTIONS_DELAY, props.flReflectionsDelay);
+        alEffectf(effect, AL_REVERB_LATE_REVERB_GAIN, props.flLateReverbGain);
+        alEffectf(effect, AL_REVERB_LATE_REVERB_DELAY, props.flLateReverbDelay);
+        alEffectf(effect, AL_REVERB_AIR_ABSORPTION_GAINHF, props.flAirAbsorptionGainHF);
+        alEffectf(effect, AL_REVERB_ROOM_ROLLOFF_FACTOR, props.flRoomRolloffFactor);
+        alEffecti(effect, AL_REVERB_DECAY_HFLIMIT, props.iDecayHFLimit ? AL_TRUE : AL_FALSE);
+    }
+    alGetError();
+}
 
 }
 
@@ -565,6 +617,8 @@ void OpenAL_Output::init(const std::string &devname)
         fail(std::string("Failed to setup context: ")+alcGetString(mDevice, alcGetError(mDevice)));
     }
 
+    ALC.EXT_EFX = !!alcIsExtensionPresent(mDevice, "ALC_EXT_EFX");
+
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
     throwALerror();
 
@@ -593,7 +647,7 @@ void OpenAL_Output::init(const std::string &devname)
     if(mFreeSources.empty())
         fail("Could not allocate any sources");
 
-    if(alcIsExtensionPresent(mDevice, "ALC_EXT_EFX"))
+    if(ALC.EXT_EFX)
     {
 #define LOAD_FUNC(x) getALFunc(x, #x)
         LOAD_FUNC(alGenEffects);
@@ -630,6 +684,41 @@ void OpenAL_Output::init(const std::string &devname)
         LOAD_FUNC(alGetAuxiliaryEffectSlotf);
         LOAD_FUNC(alGetAuxiliaryEffectSlotfv);
 #undef LOAD_FUNC
+        throwALerror();
+
+        alGenFilters(1, &mWaterFilter);
+        if(alGetError() == AL_NO_ERROR)
+        {
+            alFilteri(mWaterFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
+            if(alGetError() == AL_NO_ERROR)
+            {
+                std::cout<< "Low-pass filter supported" <<std::endl;
+                alFilterf(mWaterFilter, AL_LOWPASS_GAIN, 0.9f);
+                alFilterf(mWaterFilter, AL_LOWPASS_GAINHF, 0.01f);
+            }
+            else
+            {
+                alDeleteFilters(1, &mWaterFilter);
+                mWaterFilter = 0;
+            }
+            alGetError();
+        }
+
+        alGenAuxiliaryEffectSlots(1, &mEffectSlot);
+        alGenEffects(1, &mWaterEffect);
+        if(alGetError() == AL_NO_ERROR)
+        {
+            alEffecti(mWaterEffect, AL_EFFECT_TYPE, AL_EFFECT_EAXREVERB);
+            if(alGetError() == AL_NO_ERROR)
+                std::cout<< "EAX Reverb supported" <<std::endl;
+            else
+            {
+                alEffecti(mWaterEffect, AL_EFFECT_TYPE, AL_EFFECT_REVERB);
+                if(alGetError() == AL_NO_ERROR)
+                    std::cout<< "Standard Reverb supported" <<std::endl;
+            }
+            LoadEffect(mWaterEffect, EFX_REVERB_PRESET_UNDERWATER);
+        }
     }
 
     mInitialized = true;
@@ -642,6 +731,16 @@ void OpenAL_Output::deinit()
     for(size_t i = 0;i < mFreeSources.size();i++)
         alDeleteSources(1, &mFreeSources[i]);
     mFreeSources.clear();
+
+    if(mEffectSlot)
+        alDeleteAuxiliaryEffectSlots(1, &mEffectSlot);
+    mEffectSlot = 0;
+    if(mWaterEffect)
+        alDeleteEffects(1, &mWaterEffect);
+    mWaterEffect = 0;
+    if(mWaterFilter)
+        alDeleteFilters(1, &mWaterFilter);
+    mWaterFilter = 0;
 
     alcMakeContextCurrent(0);
     if(mContext)
@@ -1209,6 +1308,7 @@ void OpenAL_Output::resumeSounds(int types)
 OpenAL_Output::OpenAL_Output(SoundManager &mgr)
   : Sound_Output(mgr), mDevice(0), mContext(0)
   , mListenerPos(0.0f, 0.0f, 0.0f), mListenerEnv(Env_Normal)
+  , mWaterFilter(0), mWaterEffect(0), mEffectSlot(0)
   , mStreamThread(new StreamThread)
 {
 }

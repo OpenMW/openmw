@@ -23,6 +23,10 @@ namespace MWSound
         ALCdevice *mDevice;
         ALCcontext *mContext;
 
+        struct {
+            int EXT_EFX : 1;
+        } ALC;
+
         typedef std::deque<ALuint> IDDq;
         IDDq mFreeSources;
 
@@ -33,6 +37,10 @@ namespace MWSound
 
         osg::Vec3f mListenerPos;
         Environment mListenerEnv;
+
+        ALuint mWaterFilter;
+        ALuint mWaterEffect;
+        ALuint mEffectSlot;
 
         struct StreamThread;
         std::unique_ptr<StreamThread> mStreamThread;
