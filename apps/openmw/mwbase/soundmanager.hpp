@@ -107,7 +107,8 @@ namespace MWBase
             /// If the actor is not saying anything, returns 0.
 
             virtual SoundStream *playTrack(const MWSound::DecoderPtr& decoder, PlayType type) = 0;
-            ///< Play a 2D audio track, using a custom decoder
+            ///< Play a 2D audio track, using a custom decoder. The caller is expected to call
+            /// stopTrack with the returned handle when done.
 
             virtual void stopTrack(SoundStream *stream) = 0;
             ///< Stop the given audio track from playing

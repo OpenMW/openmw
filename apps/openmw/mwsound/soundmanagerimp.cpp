@@ -1083,7 +1083,6 @@ namespace MWSound
             if(!mOutput->isStreamPlaying(sound))
             {
                 mOutput->finishStream(sound);
-                mUnusedStreams.push_back(sound);
                 trkiter = mActiveTracks.erase(trkiter);
             }
             else
