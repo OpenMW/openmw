@@ -72,8 +72,8 @@ namespace MWSound
         mNearWaterPoints = mFallback.getFallbackInt("Water_NearWaterPoints");
         mNearWaterIndoorTolerance = mFallback.getFallbackFloat("Water_NearWaterIndoorTolerance");
         mNearWaterOutdoorTolerance = mFallback.getFallbackFloat("Water_NearWaterOutdoorTolerance");
-        mNearWaterIndoorID = mFallback.getFallbackString("Water_NearWaterIndoorID");
-        mNearWaterOutdoorID = mFallback.getFallbackString("Water_NearWaterOutdoorID");
+        mNearWaterIndoorID = Misc::StringUtils::lowerCase(mFallback.getFallbackString("Water_NearWaterIndoorID"));
+        mNearWaterOutdoorID = Misc::StringUtils::lowerCase(mFallback.getFallbackString("Water_NearWaterOutdoorID"));
 
         mBufferCacheMin = std::max(Settings::Manager::getInt("buffer cache min", "Sound"), 1);
         mBufferCacheMax = std::max(Settings::Manager::getInt("buffer cache max", "Sound"), 1);
@@ -873,16 +873,18 @@ namespace MWSound
 
     void SoundManager::updateWaterSound(float /*duration*/)
     {
+        static const ESM::Cell *LastCell;
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::ConstPtr player = world->getPlayerPtr();
         osg::Vec3f pos = player.getRefData().getPosition().asVec3();
+        const ESM::Cell *curcell = player.getCell()->getCell();
 
         float volume = 0.0f;
         const std::string& soundId = player.getCell()->isExterior() ? mNearWaterOutdoorID : mNearWaterIndoorID;
 
         if (!mListenerUnderwater)
         {
-            if (player.getCell()->getCell()->hasWater())
+            if (curcell->hasWater())
             {
                 float dist = std::abs(player.getCell()->getWaterLevel() - pos.z());
 
@@ -929,25 +931,24 @@ namespace MWSound
                 mOutput->finishSound(mNearWaterSound);
                 mNearWaterSound = nullptr;
             }
-            else
+            else if(LastCell != curcell)
             {
                 bool soundIdChanged = false;
 
-                Sound_Buffer* sfx = lookupSound(Misc::StringUtils::lowerCase(soundId));
-
-                for (SoundMap::const_iterator snditer = mActiveSounds.begin(); snditer != mActiveSounds.end(); ++snditer)
+                Sound_Buffer* sfx = lookupSound(soundId);
+                SoundMap::const_iterator snditer = mActiveSounds.find(MWWorld::Ptr());
+                if(snditer != mActiveSounds.end())
                 {
-                    for (SoundBufferRefPairList::const_iterator pairiter = snditer->second.begin(); pairiter != snditer->second.end(); ++pairiter)
-                    {
-                        if (pairiter->first == mNearWaterSound)
-                        {
-                            if (pairiter->second != sfx)
-                                soundIdChanged = true;
-                            break;
-                        }
-                    }
+                    SoundBufferRefPairList::const_iterator pairiter = std::find_if(
+                        snditer->second.begin(), snditer->second.end(),
+                        [this](const SoundBufferRefPairList::value_type &item) -> bool
+                        { return mNearWaterSound == item.first; }
+                    );
+                    if (pairiter != snditer->second.end() && pairiter->second != sfx)
+                        soundIdChanged = true;
                 }
 
+                LastCell = curcell;
                 if (soundIdChanged)
                 {
                     mOutput->finishSound(mNearWaterSound);
@@ -958,7 +959,10 @@ namespace MWSound
             }
         }
         else if (volume > 0.0f)
+        {
+            LastCell = curcell;
             mNearWaterSound = playSound(soundId, volume, 1.0f, Play_TypeSfx, Play_Loop);
+        }
     }
 
     void SoundManager::updateSounds(float duration)
