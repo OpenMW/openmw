@@ -283,7 +283,7 @@ namespace MWWorld
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         for (size_t it = 0; it != state.mSoundIds.size(); it++)
         {
-            MWBase::SoundPtr sound = sndMgr->playSound3D(pos, state.mSoundIds.at(it), 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
+            MWBase::Sound *sound = sndMgr->playSound3D(pos, state.mSoundIds.at(it), 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
             if (sound)
                 state.mSounds.push_back(sound);
         }
@@ -584,8 +584,8 @@ namespace MWWorld
             
             for (size_t soundIter = 0; soundIter != state.mSoundIds.size(); soundIter++)
             {
-                MWBase::SoundPtr sound = sndMgr->playSound3D(esm.mPosition, state.mSoundIds.at(soundIter), 1.0f, 1.0f,
-                                                             MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
+                MWBase::Sound *sound = sndMgr->playSound3D(esm.mPosition, state.mSoundIds.at(soundIter), 1.0f, 1.0f,
+                                                           MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
                 if (sound)
                     state.mSounds.push_back(sound);
             }

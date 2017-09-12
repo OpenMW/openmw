@@ -15,6 +15,7 @@ namespace MWSound
 {
     class SoundManager;
     class Sound;
+    class Stream;
 
     class OpenAL_Output : public Sound_Output
     {
@@ -24,9 +25,9 @@ namespace MWSound
         typedef std::deque<ALuint> IDDq;
         IDDq mFreeSources;
 
-        typedef std::vector<MWBase::SoundPtr> SoundVec;
+        typedef std::vector<Sound*> SoundVec;
         SoundVec mActiveSounds;
-        typedef std::vector<MWBase::SoundStreamPtr> StreamVec;
+        typedef std::vector<Stream*> StreamVec;
         StreamVec mActiveStreams;
 
         osg::Vec3f mListenerPos;
@@ -56,20 +57,20 @@ namespace MWSound
         virtual void unloadSound(Sound_Handle data);
         virtual size_t getSoundDataSize(Sound_Handle data) const;
 
-        virtual void playSound(MWBase::SoundPtr sound, Sound_Handle data, float offset);
-        virtual void playSound3D(MWBase::SoundPtr sound, Sound_Handle data, float offset);
-        virtual void finishSound(MWBase::SoundPtr sound);
-        virtual bool isSoundPlaying(MWBase::SoundPtr sound);
-        virtual void updateSound(MWBase::SoundPtr sound);
+        virtual void playSound(Sound *sound, Sound_Handle data, float offset);
+        virtual void playSound3D(Sound *sound, Sound_Handle data, float offset);
+        virtual void finishSound(Sound *sound);
+        virtual bool isSoundPlaying(Sound *sound);
+        virtual void updateSound(Sound *sound);
 
-        virtual void streamSound(DecoderPtr decoder, MWBase::SoundStreamPtr sound);
-        virtual void streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound, bool getLoudnessData);
-        virtual void finishStream(MWBase::SoundStreamPtr sound);
-        virtual double getStreamDelay(MWBase::SoundStreamPtr sound);
-        virtual double getStreamOffset(MWBase::SoundStreamPtr sound);
-        virtual float getStreamLoudness(MWBase::SoundStreamPtr sound);
-        virtual bool isStreamPlaying(MWBase::SoundStreamPtr sound);
-        virtual void updateStream(MWBase::SoundStreamPtr sound);
+        virtual void streamSound(DecoderPtr decoder, Stream *sound);
+        virtual void streamSound3D(DecoderPtr decoder, Stream *sound, bool getLoudnessData);
+        virtual void finishStream(Stream *sound);
+        virtual double getStreamDelay(Stream *sound);
+        virtual double getStreamOffset(Stream *sound);
+        virtual float getStreamLoudness(Stream *sound);
+        virtual bool isStreamPlaying(Stream *sound);
+        virtual void updateStream(Stream *sound);
 
         virtual void startUpdate();
         virtual void finishUpdate();

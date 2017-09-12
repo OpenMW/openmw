@@ -841,7 +841,7 @@ void OpenAL_Output::updateCommon(ALuint source, const osg::Vec3f& pos, ALfloat m
 }
 
 
-void OpenAL_Output::playSound(MWBase::SoundPtr sound, Sound_Handle data, float offset)
+void OpenAL_Output::playSound(Sound *sound, Sound_Handle data, float offset)
 {
     ALuint source;
 
@@ -871,7 +871,7 @@ void OpenAL_Output::playSound(MWBase::SoundPtr sound, Sound_Handle data, float o
     sound->mHandle = MAKE_PTRID(source);
 }
 
-void OpenAL_Output::playSound3D(MWBase::SoundPtr sound, Sound_Handle data, float offset)
+void OpenAL_Output::playSound3D(Sound *sound, Sound_Handle data, float offset)
 {
     ALuint source;
 
@@ -902,7 +902,7 @@ void OpenAL_Output::playSound3D(MWBase::SoundPtr sound, Sound_Handle data, float
     sound->mHandle = MAKE_PTRID(source);
 }
 
-void OpenAL_Output::finishSound(MWBase::SoundPtr sound)
+void OpenAL_Output::finishSound(Sound *sound)
 {
     if(!sound->mHandle) return;
     ALuint source = GET_PTRID(sound->mHandle);
@@ -918,7 +918,7 @@ void OpenAL_Output::finishSound(MWBase::SoundPtr sound)
     mActiveSounds.erase(std::find(mActiveSounds.begin(), mActiveSounds.end(), sound));
 }
 
-bool OpenAL_Output::isSoundPlaying(MWBase::SoundPtr sound)
+bool OpenAL_Output::isSoundPlaying(Sound *sound)
 {
     if(!sound->mHandle) return false;
     ALuint source = GET_PTRID(sound->mHandle);
@@ -930,7 +930,7 @@ bool OpenAL_Output::isSoundPlaying(MWBase::SoundPtr sound)
     return state == AL_PLAYING || state == AL_PAUSED;
 }
 
-void OpenAL_Output::updateSound(MWBase::SoundPtr sound)
+void OpenAL_Output::updateSound(Sound *sound)
 {
     if(!sound->mHandle) return;
     ALuint source = GET_PTRID(sound->mHandle);
@@ -940,7 +940,7 @@ void OpenAL_Output::updateSound(MWBase::SoundPtr sound)
 }
 
 
-void OpenAL_Output::streamSound(DecoderPtr decoder, MWBase::SoundStreamPtr sound)
+void OpenAL_Output::streamSound(DecoderPtr decoder, Stream *sound)
 {
     OpenAL_SoundStream *stream = 0;
     ALuint source;
@@ -971,7 +971,7 @@ void OpenAL_Output::streamSound(DecoderPtr decoder, MWBase::SoundStreamPtr sound
     sound->mHandle = stream;
 }
 
-void OpenAL_Output::streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound, bool getLoudnessData)
+void OpenAL_Output::streamSound3D(DecoderPtr decoder, Stream *sound, bool getLoudnessData)
 {
     OpenAL_SoundStream *stream = 0;
     ALuint source;
@@ -1002,7 +1002,7 @@ void OpenAL_Output::streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sou
     sound->mHandle = stream;
 }
 
-void OpenAL_Output::finishStream(MWBase::SoundStreamPtr sound)
+void OpenAL_Output::finishStream(Stream *sound)
 {
     if(!sound->mHandle) return;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
@@ -1023,14 +1023,14 @@ void OpenAL_Output::finishStream(MWBase::SoundStreamPtr sound)
     delete stream;
 }
 
-double OpenAL_Output::getStreamDelay(MWBase::SoundStreamPtr sound)
+double OpenAL_Output::getStreamDelay(Stream *sound)
 {
     if(!sound->mHandle) return 0.0;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
     return stream->getStreamDelay();
 }
 
-double OpenAL_Output::getStreamOffset(MWBase::SoundStreamPtr sound)
+double OpenAL_Output::getStreamOffset(Stream *sound)
 {
     if(!sound->mHandle) return 0.0;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
@@ -1038,7 +1038,7 @@ double OpenAL_Output::getStreamOffset(MWBase::SoundStreamPtr sound)
     return stream->getStreamOffset();
 }
 
-float OpenAL_Output::getStreamLoudness(MWBase::SoundStreamPtr sound)
+float OpenAL_Output::getStreamLoudness(Stream *sound)
 {
     if(!sound->mHandle) return 0.0;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
@@ -1046,7 +1046,7 @@ float OpenAL_Output::getStreamLoudness(MWBase::SoundStreamPtr sound)
     return stream->getCurrentLoudness();
 }
 
-bool OpenAL_Output::isStreamPlaying(MWBase::SoundStreamPtr sound)
+bool OpenAL_Output::isStreamPlaying(Stream *sound)
 {
     if(!sound->mHandle) return false;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
@@ -1054,7 +1054,7 @@ bool OpenAL_Output::isStreamPlaying(MWBase::SoundStreamPtr sound)
     return stream->isPlaying();
 }
 
-void OpenAL_Output::updateStream(MWBase::SoundStreamPtr sound)
+void OpenAL_Output::updateStream(Stream *sound)
 {
     if(!sound->mHandle) return;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);

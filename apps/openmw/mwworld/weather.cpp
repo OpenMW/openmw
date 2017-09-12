@@ -531,7 +531,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const Fall
     , mQueuedWeather(0)
     , mRegions()
     , mResult()
-    , mAmbientSound()
+    , mAmbientSound(nullptr)
     , mPlayingSoundID()
 {
     mTimeSettings.mNightStart = mSunsetTime + mSunsetDuration;
@@ -735,15 +735,15 @@ void WeatherManager::update(float duration, bool paused)
 
         mPlayingSoundID = mResult.mAmbientLoopSoundID;
     }
-    if (mAmbientSound.get())
+    else if (mAmbientSound)
         mAmbientSound->setVolume(mResult.mAmbientSoundVolume);
 }
 
 void WeatherManager::stopSounds()
 {
-    if (mAmbientSound.get())
+    if (mAmbientSound)
         MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
-    mAmbientSound.reset();
+    mAmbientSound = nullptr;
     mPlayingSoundID.clear();
 }
 
