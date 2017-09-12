@@ -33,6 +33,10 @@
 namespace
 {
 
+// The game uses 64 units per yard, or approximately 69.99125109 units per meter.
+// Should this be defined publically somewhere?
+const float UnitsPerMeter = 69.99125109f;
+
 const int sLoudnessFPS = 20; // loudness values per second of audio
 
 // Helper to get an OpenAL extension function
@@ -719,7 +723,13 @@ void OpenAL_Output::init(const std::string &devname)
             }
             LoadEffect(mWaterEffect, EFX_REVERB_PRESET_UNDERWATER);
         }
+
+        alListenerf(AL_METERS_PER_UNIT, 1.0f / UnitsPerMeter);
     }
+    // Speed of sound is in units per second. Given the default speed of sound is 343.3 (assumed
+    // meters per second), multiply by the units per meter to get the speed in u/s.
+    alSpeedOfSound(343.3f * UnitsPerMeter);
+    alGetError();
 
     mInitialized = true;
 }
@@ -1246,6 +1256,11 @@ void OpenAL_Output::updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdi
         };
         alListenerfv(AL_POSITION, pos.ptr());
         alListenerfv(AL_ORIENTATION, orient);
+        if(env != mListenerEnv)
+        {
+            // Speed of sound in water is 1484m/s, and in air is 343.3m/s (roughly)
+            alSpeedOfSound(((env == Env_Underwater) ? 1484.0f : 343.3f) * UnitsPerMeter);
+        }
         throwALerror();
     }
 
