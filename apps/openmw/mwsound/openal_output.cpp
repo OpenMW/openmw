@@ -41,11 +41,55 @@ void convertPointer(T& dest, R src)
 }
 
 template<typename T>
-void getFunc(T& func, ALCdevice *device, const char *name)
+void getALCFunc(T& func, ALCdevice *device, const char *name)
 {
     void* funcPtr = alcGetProcAddress(device, name);
     convertPointer(func, funcPtr);
 }
+
+template<typename T>
+void getALFunc(T& func, const char *name)
+{
+    void* funcPtr = alGetProcAddress(name);
+    convertPointer(func, funcPtr);
+}
+
+// Effect objects
+LPALGENEFFECTS alGenEffects;
+LPALDELETEEFFECTS alDeleteEffects;
+LPALISEFFECT alIsEffect;
+LPALEFFECTI alEffecti;
+LPALEFFECTIV alEffectiv;
+LPALEFFECTF alEffectf;
+LPALEFFECTFV alEffectfv;
+LPALGETEFFECTI alGetEffecti;
+LPALGETEFFECTIV alGetEffectiv;
+LPALGETEFFECTF alGetEffectf;
+LPALGETEFFECTFV alGetEffectfv;
+// Filter objects
+LPALGENFILTERS alGenFilters;
+LPALDELETEFILTERS alDeleteFilters;
+LPALISFILTER alIsFilter;
+LPALFILTERI alFilteri;
+LPALFILTERIV alFilteriv;
+LPALFILTERF alFilterf;
+LPALFILTERFV alFilterfv;
+LPALGETFILTERI alGetFilteri;
+LPALGETFILTERIV alGetFilteriv;
+LPALGETFILTERF alGetFilterf;
+LPALGETFILTERFV alGetFilterfv;
+// Auxiliary slot objects
+LPALGENAUXILIARYEFFECTSLOTS alGenAuxiliaryEffectSlots;
+LPALDELETEAUXILIARYEFFECTSLOTS alDeleteAuxiliaryEffectSlots;
+LPALISAUXILIARYEFFECTSLOT alIsAuxiliaryEffectSlot;
+LPALAUXILIARYEFFECTSLOTI alAuxiliaryEffectSloti;
+LPALAUXILIARYEFFECTSLOTIV alAuxiliaryEffectSlotiv;
+LPALAUXILIARYEFFECTSLOTF alAuxiliaryEffectSlotf;
+LPALAUXILIARYEFFECTSLOTFV alAuxiliaryEffectSlotfv;
+LPALGETAUXILIARYEFFECTSLOTI alGetAuxiliaryEffectSloti;
+LPALGETAUXILIARYEFFECTSLOTIV alGetAuxiliaryEffectSlotiv;
+LPALGETAUXILIARYEFFECTSLOTF alGetAuxiliaryEffectSlotf;
+LPALGETAUXILIARYEFFECTSLOTFV alGetAuxiliaryEffectSlotfv;
 
 }
 
@@ -549,6 +593,45 @@ void OpenAL_Output::init(const std::string &devname)
     if(mFreeSources.empty())
         fail("Could not allocate any sources");
 
+    if(alcIsExtensionPresent(mDevice, "ALC_EXT_EFX"))
+    {
+#define LOAD_FUNC(x) getALFunc(x, #x)
+        LOAD_FUNC(alGenEffects);
+        LOAD_FUNC(alDeleteEffects);
+        LOAD_FUNC(alIsEffect);
+        LOAD_FUNC(alEffecti);
+        LOAD_FUNC(alEffectiv);
+        LOAD_FUNC(alEffectf);
+        LOAD_FUNC(alEffectfv);
+        LOAD_FUNC(alGetEffecti);
+        LOAD_FUNC(alGetEffectiv);
+        LOAD_FUNC(alGetEffectf);
+        LOAD_FUNC(alGetEffectfv);
+        LOAD_FUNC(alGenFilters);
+        LOAD_FUNC(alDeleteFilters);
+        LOAD_FUNC(alIsFilter);
+        LOAD_FUNC(alFilteri);
+        LOAD_FUNC(alFilteriv);
+        LOAD_FUNC(alFilterf);
+        LOAD_FUNC(alFilterfv);
+        LOAD_FUNC(alGetFilteri);
+        LOAD_FUNC(alGetFilteriv);
+        LOAD_FUNC(alGetFilterf);
+        LOAD_FUNC(alGetFilterfv);
+        LOAD_FUNC(alGenAuxiliaryEffectSlots);
+        LOAD_FUNC(alDeleteAuxiliaryEffectSlots);
+        LOAD_FUNC(alIsAuxiliaryEffectSlot);
+        LOAD_FUNC(alAuxiliaryEffectSloti);
+        LOAD_FUNC(alAuxiliaryEffectSlotiv);
+        LOAD_FUNC(alAuxiliaryEffectSlotf);
+        LOAD_FUNC(alAuxiliaryEffectSlotfv);
+        LOAD_FUNC(alGetAuxiliaryEffectSloti);
+        LOAD_FUNC(alGetAuxiliaryEffectSlotiv);
+        LOAD_FUNC(alGetAuxiliaryEffectSlotf);
+        LOAD_FUNC(alGetAuxiliaryEffectSlotfv);
+#undef LOAD_FUNC
+    }
+
     mInitialized = true;
 }
 
@@ -582,7 +665,7 @@ std::vector<std::string> OpenAL_Output::enumerateHrtf()
         return ret;
 
     LPALCGETSTRINGISOFT alcGetStringiSOFT = 0;
-    getFunc(alcGetStringiSOFT, mDevice, "alcGetStringiSOFT");
+    getALCFunc(alcGetStringiSOFT, mDevice, "alcGetStringiSOFT");
 
     ALCint num_hrtf;
     alcGetIntegerv(mDevice, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &num_hrtf);
@@ -606,10 +689,10 @@ void OpenAL_Output::enableHrtf(const std::string &hrtfname, bool auto_enable)
 
 
     LPALCGETSTRINGISOFT alcGetStringiSOFT = 0;
-    getFunc(alcGetStringiSOFT, mDevice, "alcGetStringiSOFT");
+    getALCFunc(alcGetStringiSOFT, mDevice, "alcGetStringiSOFT");
 
     LPALCRESETDEVICESOFT alcResetDeviceSOFT = 0;
-    getFunc(alcResetDeviceSOFT, mDevice, "alcResetDeviceSOFT");
+    getALCFunc(alcResetDeviceSOFT, mDevice, "alcResetDeviceSOFT");
 
     std::vector<ALCint> attrs;
     attrs.push_back(ALC_HRTF_SOFT);
@@ -660,7 +743,7 @@ void OpenAL_Output::disableHrtf()
     }
 
     LPALCRESETDEVICESOFT alcResetDeviceSOFT = 0;
-    getFunc(alcResetDeviceSOFT, mDevice, "alcResetDeviceSOFT");
+    getALCFunc(alcResetDeviceSOFT, mDevice, "alcResetDeviceSOFT");
 
     std::vector<ALCint> attrs;
     attrs.push_back(ALC_HRTF_SOFT);
