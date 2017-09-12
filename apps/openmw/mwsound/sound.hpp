@@ -7,9 +7,10 @@
 
 namespace MWSound
 {
-    class Sound {
-        Sound& operator=(const Sound &rhs);
-        Sound(const Sound &rhs);
+    class SoundBase {
+        SoundBase& operator=(const SoundBase&) = delete;
+        SoundBase(const SoundBase&) = delete;
+        SoundBase(SoundBase&&) = delete;
 
         osg::Vec3f mPos;
         float mVolume; /* NOTE: Real volume = mVolume*mBaseVolume */
@@ -80,17 +81,26 @@ namespace MWSound
             mHandle = nullptr;
         }
 
-        Sound()
+        SoundBase()
           : mPos(0.0f, 0.0f, 0.0f), mVolume(1.0f), mBaseVolume(1.0f), mPitch(1.0f)
           , mMinDistance(1.0f), mMaxDistance(1000.0f), mFlags(0), mFadeOutTime(0.0f)
-          , mHandle(0)
+          , mHandle(nullptr)
         { }
     };
 
-    // Same as above, but it's a different type since the output handles them differently
-    class Stream : public Sound {
-        Stream& operator=(const Stream &rhs);
-        Stream(const Stream &rhs);
+    class Sound : public SoundBase {
+        Sound& operator=(const Sound&) = delete;
+        Sound(const Sound&) = delete;
+        Sound(Sound&&) = delete;
+
+    public:
+        Sound() { }
+    };
+
+    class Stream : public SoundBase {
+        Stream& operator=(const Stream&) = delete;
+        Stream(const Stream&) = delete;
+        Stream(Stream&&) = delete;
 
     public:
         Stream() { }
