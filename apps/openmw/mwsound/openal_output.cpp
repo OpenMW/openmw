@@ -622,6 +622,7 @@ void OpenAL_Output::init(const std::string &devname)
     }
 
     ALC.EXT_EFX = !!alcIsExtensionPresent(mDevice, "ALC_EXT_EFX");
+    AL.SOFT_source_spatialize = !!alIsExtensionPresent("AL_SOFT_source_spatialize");
 
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
     throwALerror();
@@ -972,6 +973,8 @@ void OpenAL_Output::initCommon2D(ALuint source, const osg::Vec3f &pos, ALfloat g
     alSourcef(source, AL_ROLLOFF_FACTOR, 0.0f);
     alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
     alSourcei(source, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
+    if(AL.SOFT_source_spatialize)
+        alSourcei(source, AL_SOURCE_SPATIALIZE_SOFT, AL_FALSE);
 
     if(useenv)
     {
@@ -1009,6 +1012,8 @@ void OpenAL_Output::initCommon3D(ALuint source, const osg::Vec3f &pos, ALfloat m
     alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f);
     alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
     alSourcei(source, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
+    if(AL.SOFT_source_spatialize)
+        alSourcei(source, AL_SOURCE_SPATIALIZE_SOFT, AL_TRUE);
 
     if((pos - mListenerPos).length2() > maxdist*maxdist)
         gain = 0.0f;
