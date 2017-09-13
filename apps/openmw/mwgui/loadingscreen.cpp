@@ -65,7 +65,9 @@ namespace MWGui
         const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
         std::string pattern = "Splash/";
         mVFS->normalizeFilename(pattern);
-        std::list<std::string> supported_extensions = {".tga", ".png", ".dds"}; /* priority given to the left */
+
+        /* priority given to the left */
+        std::list<std::string> supported_extensions = {".tga", ".dds", ".png", ".bmp", ".jpeg", ".jpg"};
 
         auto found = index.lower_bound(pattern);
         while (found != index.end())
