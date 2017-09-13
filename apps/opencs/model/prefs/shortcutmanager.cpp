@@ -132,7 +132,7 @@ namespace CSMPrefs
                     if (mods && i == 0)
                     {
                         if (mods & Qt::ControlModifier)
-                            result.append("Ctl+");
+                            result.append("Ctrl+");
                         if (mods & Qt::ShiftModifier)
                             result.append("Shift+");
                         if (mods & Qt::AltModifier)
@@ -196,7 +196,7 @@ namespace CSMPrefs
 
             std::string name = value.substr(start, end - start);
 
-            if (name == "Ctl")
+            if (name == "Ctrl")
             {
                 mods |= Qt::ControlModifier;
             }

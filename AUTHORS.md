@@ -34,6 +34,7 @@ Programmers
     Ben Shealy (bentsherman)
     Bret Curtis (psi29a)
     Britt Mathis (galdor557)
+    Capostrophic
     cc9cii
     Chris Boyce (slothlife)
     Chris Robinson (KittyCat)

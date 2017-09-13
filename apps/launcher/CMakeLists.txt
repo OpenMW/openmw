@@ -78,7 +78,7 @@ if(NOT WIN32)
 endif(NOT WIN32)
 
 # Main executable
-add_executable(openmw-launcher
+openmw_add_executable(openmw-launcher
     ${GUI_TYPE}
     ${LAUNCHER}
     ${LAUNCHER_HEADER}

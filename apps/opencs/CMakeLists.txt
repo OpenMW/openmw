@@ -174,7 +174,7 @@ else()
     set (OPENCS_OPENMW_CFG "")
 endif(APPLE)
 
-add_executable(openmw-cs
+openmw_add_executable(openmw-cs
     MACOSX_BUNDLE
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
