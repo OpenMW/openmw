@@ -40,6 +40,7 @@ namespace MWSound
 
         ALuint mWaterFilter;
         ALuint mWaterEffect;
+        ALuint mDefaultEffect;
         ALuint mEffectSlot;
 
         struct StreamThread;

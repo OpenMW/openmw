@@ -698,7 +698,7 @@ void OpenAL_Output::init(const std::string &devname)
             {
                 std::cout<< "Low-pass filter supported" <<std::endl;
                 alFilterf(mWaterFilter, AL_LOWPASS_GAIN, 0.9f);
-                alFilterf(mWaterFilter, AL_LOWPASS_GAINHF, 0.01f);
+                alFilterf(mWaterFilter, AL_LOWPASS_GAINHF, 0.125f);
             }
             else
             {
@@ -709,17 +709,33 @@ void OpenAL_Output::init(const std::string &devname)
         }
 
         alGenAuxiliaryEffectSlots(1, &mEffectSlot);
-        alGenEffects(1, &mWaterEffect);
+        alGetError();
+
+        alGenEffects(1, &mDefaultEffect);
         if(alGetError() == AL_NO_ERROR)
         {
-            alEffecti(mWaterEffect, AL_EFFECT_TYPE, AL_EFFECT_EAXREVERB);
+            alEffecti(mDefaultEffect, AL_EFFECT_TYPE, AL_EFFECT_EAXREVERB);
             if(alGetError() == AL_NO_ERROR)
                 std::cout<< "EAX Reverb supported" <<std::endl;
             else
             {
-                alEffecti(mWaterEffect, AL_EFFECT_TYPE, AL_EFFECT_REVERB);
+                alEffecti(mDefaultEffect, AL_EFFECT_TYPE, AL_EFFECT_REVERB);
                 if(alGetError() == AL_NO_ERROR)
                     std::cout<< "Standard Reverb supported" <<std::endl;
+            }
+            EFXEAXREVERBPROPERTIES props = EFX_REVERB_PRESET_GENERIC;
+            props.flGain = 0.0f;
+            LoadEffect(mDefaultEffect, props);
+        }
+
+        alGenEffects(1, &mWaterEffect);
+        if(alGetError() == AL_NO_ERROR)
+        {
+            alEffecti(mWaterEffect, AL_EFFECT_TYPE, AL_EFFECT_EAXREVERB);
+            if(alGetError() != AL_NO_ERROR)
+            {
+                alEffecti(mWaterEffect, AL_EFFECT_TYPE, AL_EFFECT_REVERB);
+                alGetError();
             }
             LoadEffect(mWaterEffect, EFX_REVERB_PRESET_UNDERWATER);
         }
@@ -745,6 +761,9 @@ void OpenAL_Output::deinit()
     if(mEffectSlot)
         alDeleteAuxiliaryEffectSlots(1, &mEffectSlot);
     mEffectSlot = 0;
+    if(mDefaultEffect)
+        alDeleteEffects(1, &mDefaultEffect);
+    mDefaultEffect = 0;
     if(mWaterEffect)
         alDeleteEffects(1, &mWaterEffect);
     mWaterEffect = 0;
@@ -954,10 +973,26 @@ void OpenAL_Output::initCommon2D(ALuint source, const osg::Vec3f &pos, ALfloat g
     alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
     alSourcei(source, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
 
-    if(useenv && mListenerEnv == Env_Underwater)
+    if(useenv)
     {
-        gain *= 0.9f;
-        pitch *= 0.7f;
+        if(mWaterFilter)
+            alSourcei(source, AL_DIRECT_FILTER,
+                (mListenerEnv == Env_Underwater) ? mWaterFilter : AL_FILTER_NULL
+            );
+        else if(mListenerEnv == Env_Underwater)
+        {
+            gain *= 0.9f;
+            pitch *= 0.7f;
+        }
+        if(mEffectSlot)
+            alSource3i(source, AL_AUXILIARY_SEND_FILTER, mEffectSlot, 0, AL_FILTER_NULL);
+    }
+    else
+    {
+        if(mWaterFilter)
+            alSourcei(source, AL_DIRECT_FILTER, AL_FILTER_NULL);
+        if(mEffectSlot)
+            alSource3i(source, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
     }
 
     alSourcef(source, AL_GAIN, gain);
@@ -977,10 +1012,26 @@ void OpenAL_Output::initCommon3D(ALuint source, const osg::Vec3f &pos, ALfloat m
 
     if((pos - mListenerPos).length2() > maxdist*maxdist)
         gain = 0.0f;
-    if(useenv && mListenerEnv == Env_Underwater)
+    if(useenv)
     {
-        gain *= 0.9f;
-        pitch *= 0.7f;
+        if(mWaterFilter)
+            alSourcei(source, AL_DIRECT_FILTER,
+                (mListenerEnv == Env_Underwater) ? mWaterFilter : AL_FILTER_NULL
+            );
+        else if(mListenerEnv == Env_Underwater)
+        {
+            gain *= 0.9f;
+            pitch *= 0.7f;
+        }
+        if(mEffectSlot)
+            alSource3i(source, AL_AUXILIARY_SEND_FILTER, mEffectSlot, 0, AL_FILTER_NULL);
+    }
+    else
+    {
+        if(mWaterFilter)
+            alSourcei(source, AL_DIRECT_FILTER, AL_FILTER_NULL);
+        if(mEffectSlot)
+            alSource3i(source, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
     }
 
     alSourcef(source, AL_GAIN, gain);
@@ -997,7 +1048,7 @@ void OpenAL_Output::updateCommon(ALuint source, const osg::Vec3f& pos, ALfloat m
         if((pos - mListenerPos).length2() > maxdist*maxdist)
             gain = 0.0f;
     }
-    if(useenv && mListenerEnv == Env_Underwater)
+    if(useenv && mListenerEnv == Env_Underwater && !mWaterFilter)
     {
         gain *= 0.9f;
         pitch *= 0.7f;
@@ -1256,10 +1307,39 @@ void OpenAL_Output::updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdi
         };
         alListenerfv(AL_POSITION, pos.ptr());
         alListenerfv(AL_ORIENTATION, orient);
+
         if(env != mListenerEnv)
         {
             // Speed of sound in water is 1484m/s, and in air is 343.3m/s (roughly)
             alSpeedOfSound(((env == Env_Underwater) ? 1484.0f : 343.3f) * UnitsPerMeter);
+
+            // Update active sources with the environment's direct filter
+            if(mWaterFilter)
+            {
+                ALuint filter = (env == Env_Underwater) ? mWaterFilter : AL_FILTER_NULL;
+                std::for_each(mActiveSounds.cbegin(), mActiveSounds.cend(),
+                    [filter](const SoundVec::value_type &item) -> void
+                    {
+                        if(item->getUseEnv())
+                            alSourcei(GET_PTRID(item->mHandle), AL_DIRECT_FILTER, filter);
+                    }
+                );
+                std::for_each(mActiveStreams.cbegin(), mActiveStreams.cend(),
+                    [filter](const StreamVec::value_type &item) -> void
+                    {
+                        if(item->getUseEnv())
+                            alSourcei(
+                                reinterpret_cast<OpenAL_SoundStream*>(item->mHandle)->mSource,
+                                AL_DIRECT_FILTER, filter
+                            );
+                    }
+                );
+            }
+            // Update the environment effect
+            if(mEffectSlot)
+                alAuxiliaryEffectSloti(mEffectSlot, AL_EFFECTSLOT_EFFECT,
+                    (env == Env_Underwater) ? mWaterEffect : mDefaultEffect
+                );
         }
         throwALerror();
     }
@@ -1323,7 +1403,7 @@ void OpenAL_Output::resumeSounds(int types)
 OpenAL_Output::OpenAL_Output(SoundManager &mgr)
   : Sound_Output(mgr), mDevice(0), mContext(0)
   , mListenerPos(0.0f, 0.0f, 0.0f), mListenerEnv(Env_Normal)
-  , mWaterFilter(0), mWaterEffect(0), mEffectSlot(0)
+  , mWaterFilter(0), mWaterEffect(0), mDefaultEffect(0), mEffectSlot(0)
   , mStreamThread(new StreamThread)
 {
 }
