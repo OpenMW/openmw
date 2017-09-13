@@ -1005,11 +1005,14 @@ namespace MWSound
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
         {
+            MWWorld::ConstPtr ptr = snditer->first;
             SoundBufferRefPairList::iterator sndidx = snditer->second.begin();
             while(sndidx != snditer->second.end())
             {
-                MWWorld::ConstPtr ptr = snditer->first;
-                Sound *sound = sndidx->first;
+                Sound *sound;
+                Sound_Buffer *sfx;
+
+                std::tie(sound, sfx) = *sndidx;
                 if(!ptr.isEmpty() && sound->getIs3D())
                 {
                     const ESM::Position &pos = ptr.getRefData().getPosition();
@@ -1031,7 +1034,6 @@ namespace MWSound
                         mUnderwaterSound = nullptr;
                     if(sound == mNearWaterSound)
                         mNearWaterSound = nullptr;
-                    Sound_Buffer *sfx = sndidx->second;
                     if(sfx->mUses-- == 1)
                         mUnusedBuffers.push_front(sfx);
                     sndidx = snditer->second.erase(sndidx);
@@ -1045,7 +1047,7 @@ namespace MWSound
                 }
             }
             if(snditer->second.empty())
-                mActiveSounds.erase(snditer++);
+                snditer = mActiveSounds.erase(snditer);
             else
                 ++snditer;
         }
