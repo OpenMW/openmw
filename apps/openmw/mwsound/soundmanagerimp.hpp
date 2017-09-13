@@ -50,7 +50,7 @@ namespace MWSound
         std::unique_ptr<Sound_Output> mOutput;
 
         // Caches available music tracks by <playlist name, (sound files) >
-        std::map<std::string, std::vector<std::string> > mMusicFiles;
+        std::unordered_map<std::string, std::vector<std::string>> mMusicFiles;
         std::unordered_map<std::string, std::vector<int>> mMusicToPlay; // A list with music files not yet played
         std::string mLastPlayedMusic; // The music file that was last played
 
@@ -75,7 +75,7 @@ namespace MWSound
         size_t mBufferCacheMax;
         size_t mBufferCacheSize;
 
-        typedef std::map<std::string,Sound_Buffer*> NameBufferMap;
+        typedef std::unordered_map<std::string,Sound_Buffer*> NameBufferMap;
         NameBufferMap mBufferNameMap;
 
         // NOTE: unused buffers are stored in front-newest order.
