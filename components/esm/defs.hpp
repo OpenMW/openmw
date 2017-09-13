@@ -128,6 +128,7 @@ enum RecNameInts
     REC_CAM_ = FourCC<'C','A','M','_'>::value,
     REC_STLN = FourCC<'S','T','L','N'>::value,
     REC_INPU = FourCC<'I','N','P','U'>::value,
+    REC_RCHG = FourCC<'R','C','H','G'>::value,
 
     // format 1
     REC_FILT = FourCC<'F','I','L','T'>::value,

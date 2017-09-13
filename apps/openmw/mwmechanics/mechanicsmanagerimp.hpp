@@ -10,6 +10,8 @@
 #include "objects.hpp"
 #include "actors.hpp"
 
+#include "components\esm\rechargeitems.hpp"
+
 namespace MWWorld
 {
     class CellStore;
@@ -44,6 +46,8 @@ namespace MWMechanics
             typedef std::map<std::string, OwnerMap> StolenItemsMap;
             StolenItemsMap mStolenItems;
 
+            std::vector<ESM::RechargeItem> mRechargeItems;
+
         public:
 
             void buildPlayer();
@@ -75,6 +79,8 @@ namespace MWMechanics
             /// component is up).
 
             virtual void advanceTime (float duration);
+
+			virtual void rechargeItems(float duration);
 
             virtual void setPlayerName (const std::string& name);
             ///< Set player name.
