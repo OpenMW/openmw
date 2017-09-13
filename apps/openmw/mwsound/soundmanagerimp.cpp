@@ -931,25 +931,28 @@ namespace MWSound
                 mOutput->finishSound(mNearWaterSound);
                 mNearWaterSound = nullptr;
             }
-            else if(LastCell != curcell)
+            else
             {
                 bool soundIdChanged = false;
 
-                Sound_Buffer* sfx = lookupSound(soundId);
-                SoundMap::const_iterator snditer = mActiveSounds.find(MWWorld::Ptr());
-                if(snditer != mActiveSounds.end())
+                Sound_Buffer *sfx = lookupSound(soundId);
+                if(LastCell != curcell)
                 {
-                    SoundBufferRefPairList::const_iterator pairiter = std::find_if(
-                        snditer->second.begin(), snditer->second.end(),
-                        [this](const SoundBufferRefPairList::value_type &item) -> bool
-                        { return mNearWaterSound == item.first; }
-                    );
-                    if (pairiter != snditer->second.end() && pairiter->second != sfx)
-                        soundIdChanged = true;
+                    LastCell = curcell;
+                    SoundMap::const_iterator snditer = mActiveSounds.find(MWWorld::Ptr());
+                    if(snditer != mActiveSounds.end())
+                    {
+                        SoundBufferRefPairList::const_iterator pairiter = std::find_if(
+                            snditer->second.begin(), snditer->second.end(),
+                            [this](const SoundBufferRefPairList::value_type &item) -> bool
+                            { return mNearWaterSound == item.first; }
+                        );
+                        if (pairiter != snditer->second.end() && pairiter->second != sfx)
+                            soundIdChanged = true;
+                    }
                 }
 
-                LastCell = curcell;
-                if (soundIdChanged)
+                if(soundIdChanged)
                 {
                     mOutput->finishSound(mNearWaterSound);
                     mNearWaterSound = playSound(soundId, volume, 1.0f, Play_TypeSfx, Play_Loop);
