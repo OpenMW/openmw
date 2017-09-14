@@ -115,8 +115,10 @@ namespace MWWorld
 
         /// This will orient the player towards the oject under center screen (crosshair)
         /// This is useful for modes such as third person over the shoulder ranged aiming
-        void orientTowardsCrosshair();
+        void orientPlayerTowardsCameraCrosshair();
+        void realignCameraTowardsPlayerCrosshair();
         void reAlignPlayerToCamera();
+        void reAlignCameraToPlayer();
 
         void setThirdPersonOverShoulderRanged(bool set);
         bool getThirdPersonOverShoulderRanged() { return mThirdPersonOverShoulderRanged; }

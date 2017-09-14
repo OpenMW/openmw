@@ -208,7 +208,7 @@ namespace MWInput
         if (mControlSwitch["playercontrols"])
         {
             if (action == A_Use) {
-                if (
+                /*if (
                     // We don't have third person over the shoulder enabled
                     !Settings::Manager::getBool("third person over shoulder", "Input") ||
                     // or we are third person over the shoulder and
@@ -218,7 +218,7 @@ namespace MWInput
                         // or it is and we are in over the shoulder ranged view
                         mPlayer->getThirdPersonOverShoulderRanged()
                         )
-                    )
+                    )*/
                     mPlayer->setAttackingOrSpell(currentValue != 0);
             }
             else if (action == A_Jump) {
@@ -570,7 +570,7 @@ namespace MWInput
                 }
 
                 if (mPlayer->getThirdPersonOverShoulderRanged())
-                    mPlayer->orientTowardsCrosshair();
+                    mPlayer->orientPlayerTowardsCameraCrosshair();
 
                 if (mAttemptJump && mControlSwitch["playerjumping"])
                 {

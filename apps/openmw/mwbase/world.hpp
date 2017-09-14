@@ -251,6 +251,9 @@ namespace MWBase
             virtual MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer = true) = 0;
             ///< Return pointer to the object the player is looking at, if it is within a provided range
 
+            virtual MWWorld::Ptr getPlayerFacedObject(float maxDistance, bool ignorePlayer = true) = 0;
+            ///< Return pointer to the object the player model is looking at, if it is within a provided range
+
             virtual float getDistanceToFacedObject() = 0;
 
             virtual float getMaxActivationDistance() = 0;
@@ -405,6 +408,7 @@ namespace MWBase
             virtual void setCameraDistance(float dist, bool adjust = false, bool override = true)=0;
             virtual float getCameraYaw() = 0;
             virtual osg::Vec3f getCameraPosition() = 0;
+            virtual osg::Quat getCameraOrientation() = 0;
             virtual void rotateCameraIfAttachedToPtr(const MWWorld::Ptr &ptr, float pitch, float yaw, bool adjust) = 0;
 
             /// This will toggle between current active third person view and archery/spell third person view

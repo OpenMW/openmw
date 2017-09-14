@@ -218,7 +218,28 @@ namespace MWWorld
         MWBase::Environment::get().getWorld()->setThirdPersonOverShouldRangedCamera(set);
     }
 
-    void Player::orientTowardsCrosshair() {
+    /*
+    * orientPlayerTowardsCameraCrosshair
+    * Ascii art for algorithm when looking down from above:
+    *
+    *                      ^           |
+    *                      |         -- --  <-------- Target under crosshair
+    *                      |      ---  |
+    *      default------>  |       / | ^
+    *  3rd pers over       |      /    |
+    *  shoulder orient     |     /^    |
+    *                      |    / |    |
+    *                      |   / new   |
+    *                      |  / player |
+    *                      | / orient  |
+    *                  ----------      |
+    *                  | Player |      |
+    *                  ----------      |
+    *                              -----------
+    *                              | cam pos |
+    *                              -----------
+    */     
+    void Player::orientPlayerTowardsCameraCrosshair() {
         float zAngleRadians = 0.f;
         MWWorld::Ptr playerPtr = getPlayer();
         osg::Vec3f playerPos = playerPtr.getRefData().getPosition().asVec3();
@@ -242,12 +263,127 @@ namespace MWWorld
         }
         else {
             // Default crosshair aim orientation goes here
+            reAlignPlayerToCamera();
         }
     }
 
-    void Player::reAlignPlayerToCamera() {
+    /*
+    * realignCameraTowardsPlayerCrosshair
+    * Ascii art for algorithm when looking down from above:
+    *
+    *   target player is   |           |
+    *   looking at --->  -- --       -- --  <-------- normal crosshair
+    *                      | ---       |
+    *      default------>  ^| \        ^
+    *  3rd pers over       |   \       |
+    *  shoulder orient     |    \      | <------ default 3rd pers over shoulder
+    *                      |    ^\     |            camera orientation
+    *                      |    | \    |
+    *                      |new cam\   |
+    *                      | orient \  |
+    *                  ----------    \ |
+    *                  | Player |     \|
+    *                  ----------      |
+    *                              -----------
+    *                              | cam pos |
+    *                              -----------
+    */
+    void Player::realignCameraTowardsPlayerCrosshair() {
+        float zAngleRadians = 0.f;
         MWWorld::Ptr playerPtr = getPlayer();
-        MWBase::Environment::get().getWorld()->rotateObject(playerPtr, playerPtr.getRefData().getPosition().rot[0], playerPtr.getRefData().getPosition().rot[1], -MWBase::Environment::get().getWorld()->getCameraYaw(), false);
+        osg::Vec3f playerPos = playerPtr.getRefData().getPosition().asVec3();
+        osg::Vec3f direction;
+        MWWorld::Ptr playerFacedObject = MWBase::Environment::get().getWorld()->getPlayerFacedObject(2000.0f);
+        // We found an object under the crosshair
+        if (!playerFacedObject.isEmpty() && playerFacedObject.getClass().isActor()) {
+            osg::Vec3f playerFacedObjectPos = playerFacedObject.getRefData().getPosition().asVec3();
+            direction = MWBase::Environment::get().getWorld()->getCameraPosition() - playerFacedObjectPos;
+            direction.normalize();
+            const osg::Vec3f cameraDirection = MWBase::Environment::get().getWorld()->getCameraOrientation() * osg::Vec3f(0, 1, 0);
+            zAngleRadians = osg::PI - (std::atan2(direction.x(), direction.y()) - std::atan2(cameraDirection.x(), cameraDirection.y()));
+            wrap(zAngleRadians);
+            //printf("realignCameraTowardsPlayerCrosshair: Camera Angle from player faced object: %f\n", osg::RadiansToDegrees(zAngleRadians));
+            if (
+                (std::abs(zAngleRadians) > osg::DegreesToRadians(0.01f))
+                ) {
+                // Rotate the camera towards what the player is looking at
+                MWBase::Environment::get().getWorld()->rotateCameraIfAttachedToPtr(playerPtr, 0.0f, -zAngleRadians*0.3, true);
+            }
+        }
+        else {
+            reAlignCameraToPlayer();
+            // Pan back towards parallel with the player
+        }
+    }
+
+
+    void Player::reAlignPlayerToCamera() 
+    {
+        osg::Quat orient = osg::Quat(getPlayer().getRefData().getPosition().rot[0], osg::Vec3f(-1, 0, 0))
+            * osg::Quat(getPlayer().getRefData().getPosition().rot[2], osg::Vec3f(0, 0, -1));
+
+        osg::Vec3f playerDirection = orient * osg::Vec3f(0, 1, 0);
+        playerDirection.normalize();
+        osg::Vec3f cameraDirection = MWBase::Environment::get().getWorld()->getCameraOrientation() * osg::Vec3f(0, 1, 0);
+        cameraDirection.normalize();
+
+        float zAngleRadians = std::acos(cameraDirection*playerDirection);
+        wrap(zAngleRadians);
+        //printf("reAlignPlayerToCamera: Camera Angle from player: %f\n", osg::RadiansToDegrees(zAngleRadians));
+        if (
+            (std::abs(zAngleRadians) > osg::DegreesToRadians(0.04f))
+            ) {
+            // Rotate the camera towards parallel with the player
+            MWBase::Environment::get().getWorld()->rotateObject(getPlayer(), 0.0f, 0.0f,-zAngleRadians*0.3, true);
+        }
+       
+        /*MWWorld::Ptr playerPtr = getPlayer();
+        MWBase::Environment::get().getWorld()->rotateObject(playerPtr, playerPtr.getRefData().getPosition().rot[0], playerPtr.getRefData().getPosition().rot[1], -MWBase::Environment::get().getWorld()->getCameraYaw(), false);*/
+    }
+
+    /*
+    * realignCameraToPlayer
+    * Ascii art for algorithm when looking down from above:
+    *
+    *                      |           |
+    *                    -- --       -- --
+    *                      | ---       |
+    *      default------>  ^| \        ^
+    *  3rd pers over       |   \       |
+    *  shoulder orient     |    \      | <------ new camera orientation after
+    *                      |    ^\     |           calling realignCameraToPlayer
+    *                      |    | \    |
+    *                      |   cam \   |
+    *                      | orient \  |
+    *                  ----------    \ |
+    *                  | Player |     \|
+    *                  ----------      |
+    *                              -----------
+    *                              | cam pos |
+    *                              -----------
+    */
+    void Player::reAlignCameraToPlayer() 
+    {
+        osg::Quat orient = osg::Quat(getPlayer().getRefData().getPosition().rot[0], osg::Vec3f(-1, 0, 0))
+            * osg::Quat(getPlayer().getRefData().getPosition().rot[2], osg::Vec3f(0, 0, -1));
+
+        osg::Vec3f playerDirection = orient * osg::Vec3f(0, 1, 0);
+        playerDirection.normalize();
+        osg::Vec3f cameraDirection = MWBase::Environment::get().getWorld()->getCameraOrientation() * osg::Vec3f(0, 1, 0);
+        cameraDirection.normalize();
+
+        float zAngleRadians = std::acos(playerDirection*cameraDirection);
+        wrap(zAngleRadians);
+        //printf("reAlignCameraToPlayer: Camera Angle from player: %f\n", osg::RadiansToDegrees(zAngleRadians));
+        if (
+            (std::abs(zAngleRadians) > osg::DegreesToRadians(0.04f)) &&
+            (zAngleRadians > 0.0f)
+            ) {
+            // Rotate the camera towards parallel with the player
+            MWBase::Environment::get().getWorld()->rotateCameraIfAttachedToPtr(getPlayer(), 0.0f, zAngleRadians*0.3, true);
+        }
+        /*MWWorld::Ptr playerPtr = getPlayer();
+        MWBase::Environment::get().getWorld()->rotateCameraIfAttachedToPtr(playerPtr, 0.0f, -zAngleRadians*0.3, true);*/
     }
 
     MWMechanics::DrawState_ Player::getDrawState()

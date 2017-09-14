@@ -447,9 +447,7 @@ namespace MWRender
     {
         focal = getFocalPoint();
 
-        osg::Quat orient =  osg::Quat(getPitch(), osg::Vec3d(1,0,0)) * osg::Quat(getYaw(), osg::Vec3d(0,0,1));
-
-        osg::Vec3d offset = orient * osg::Vec3d(mCameraXOffsetFromCenter, isFirstPerson() ? 0 : -mCameraDistance, mCameraZOffsetFromCenter);
+        osg::Vec3d offset = getOrientation() * osg::Vec3d(mCameraXOffsetFromCenter, isFirstPerson() ? 0 : -mCameraDistance, mCameraZOffsetFromCenter);
         camera = focal + offset;
     }
 

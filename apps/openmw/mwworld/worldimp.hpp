@@ -353,6 +353,8 @@ namespace MWWorld
             virtual MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer = true);
             ///< Return pointer to the object the player is looking at, if it is within a provided range
 
+            virtual MWWorld::Ptr getPlayerFacedObject(float maxDistance, bool ignorePlayer = true);
+
             virtual float getDistanceToFacedObject();
 
             /// Returns a pointer to the object the provided object would hit (if within the
@@ -514,6 +516,7 @@ namespace MWWorld
             virtual void toggleThirdPersonOverShouldRangedCamera();
             virtual float getCameraYaw();
             virtual osg::Vec3f getCameraPosition();
+            virtual osg::Quat getCameraOrientation();
             virtual void rotateCameraIfAttachedToPtr(const MWWorld::Ptr &ptr, float pitch, float yaw, bool adjust);
 
             virtual void setupPlayer();

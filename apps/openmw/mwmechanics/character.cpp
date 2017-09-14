@@ -1903,7 +1903,10 @@ void CharacterController::update(float duration)
             float speedmult = speed / mMovementAnimSpeed;
             mAnimation->adjustSpeedMult(mCurrentMovement, speedmult);
         }
-
+        if(mPtr == getPlayer())
+            MWBase::Environment::get().getWorld()->getPlayer().realignCameraTowardsPlayerCrosshair();
+        /*if (mPtr == getPlayer())
+            MWBase::Environment::get().getWorld()->getPlayer().orientPlayerTowardsCameraCrosshair();*/
         if (!mSkipAnim)
         {
             if(mHitState != CharState_KnockDown && mHitState != CharState_KnockOut)

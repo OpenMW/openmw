@@ -6,6 +6,7 @@
 #include <osg/ref_ptr>
 #include <osg/Vec3>
 #include <osg/Vec3d>
+#include <osg/Quat>
 
 #include "../mwworld/ptr.hpp"
 
@@ -106,6 +107,9 @@ namespace MWRender
 
         float getPitch();
         void setPitch(float angle);
+
+        /// Return the orientation of the camera
+        osg::Quat getOrientation() { return osg::Quat(getPitch(), osg::Vec3d(1, 0, 0)) * osg::Quat(getYaw(), osg::Vec3d(0, 0, 1)); }
 
         /// Attach camera to object
         void attachTo(const MWWorld::Ptr &);

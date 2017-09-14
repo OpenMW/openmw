@@ -1772,6 +1772,39 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->setFocusObject(object);
     }
 
+    MWWorld::Ptr World::getPlayerFacedObject(float maxDistance, bool ignorePlayer)
+    {
+        osg::Vec3f hitPosition = mPlayer->getPlayer().getRefData().getPosition().asVec3();
+        osg::Vec3f origin = getActorHeadTransform(mPlayer->getPlayer()).getTrans();
+
+        osg::Quat orient = osg::Quat(mPlayer->getPlayer().getRefData().getPosition().rot[0], osg::Vec3f(-1, 0, 0))
+            * osg::Quat(mPlayer->getPlayer().getRefData().getPosition().rot[2], osg::Vec3f(0, 0, -1));
+
+        osg::Vec3f direction = orient * osg::Vec3f(0, 1, 0);
+        osg::Vec3f dest = origin + direction * maxDistance;
+
+        // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+        std::vector<MWWorld::Ptr> targetActors;
+        if (!mPlayer->getPlayer().isEmpty())
+            mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getAiSequence().getCombatTargets(targetActors);
+
+        MWPhysics::PhysicsSystem::RayResult result1 = mPhysics->castRay(origin, dest, mPlayer->getPlayer(), targetActors, MWPhysics::CollisionType_Actor);
+        MWRender::RenderingManager::RayResult result2 = mRendering->castRay(origin, dest, true, true);
+
+        if (result1.mHit)
+        {
+            return result1.mHitObject;
+        }
+        else if (result2.mHit)
+        {
+            return result2.mHitObject;
+        }
+        else {
+            return MWWorld::Ptr();
+        }
+
+    }
+
     MWWorld::Ptr World::getFacedObject(float maxDistance, bool ignorePlayer)
     {
         const float camDist = mRendering->getCameraDistance();
@@ -2207,6 +2240,11 @@ namespace MWWorld
         osg::Vec3 focal, pos;
         mRendering->getCamera()->getPosition(focal,pos);
         return pos;
+    }
+
+    osg::Quat World::getCameraOrientation()
+    {
+        return mRendering->getCamera()->getOrientation();
     }
 
     void World::toggleThirdPersonOverShouldRangedCamera() 
