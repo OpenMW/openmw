@@ -24,10 +24,11 @@ namespace MWSound
         ALCcontext *mContext;
 
         struct {
-            int EXT_EFX : 1;
+            bool EXT_EFX : 1;
+            bool SOFT_HRTF : 1;
         } ALC;
         struct {
-            int SOFT_source_spatialize : 1;
+            bool SOFT_source_spatialize : 1;
         } AL;
 
         typedef std::deque<ALuint> IDDq;
@@ -59,12 +60,11 @@ namespace MWSound
 
     public:
         virtual std::vector<std::string> enumerate();
-        virtual bool init(const std::string &devname=std::string());
+        virtual bool init(const std::string &devname, const std::string &hrtfname, HrtfMode hrtfmode);
         virtual void deinit();
 
         virtual std::vector<std::string> enumerateHrtf();
-        virtual void enableHrtf(const std::string &hrtfname, bool auto_enable);
-        virtual void disableHrtf();
+        virtual void setHrtf(const std::string &hrtfname, HrtfMode hrtfmode);
 
         virtual Sound_Handle loadSound(const std::string &fname);
         virtual void unloadSound(Sound_Handle data);

@@ -592,7 +592,7 @@ std::vector<std::string> OpenAL_Output::enumerate()
     return devlist;
 }
 
-bool OpenAL_Output::init(const std::string &devname)
+bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname, HrtfMode hrtfmode)
 {
     deinit();
 
@@ -615,7 +615,47 @@ bool OpenAL_Output::init(const std::string &devname)
         std::cout << "Opened \""<<name<<"\"" << std::endl;
     }
 
-    mContext = alcCreateContext(mDevice, NULL);
+    ALC.EXT_EFX = alcIsExtensionPresent(mDevice, "ALC_EXT_EFX");
+    ALC.SOFT_HRTF = alcIsExtensionPresent(mDevice, "ALC_SOFT_HRTF");
+
+    std::vector<ALCint> attrs;
+    attrs.reserve(15);
+    if(ALC.SOFT_HRTF)
+    {
+        LPALCGETSTRINGISOFT alcGetStringiSOFT = 0;
+        getALCFunc(alcGetStringiSOFT, mDevice, "alcGetStringiSOFT");
+
+        attrs.push_back(ALC_HRTF_SOFT);
+        attrs.push_back(hrtfmode == HrtfMode::Disable ? ALC_FALSE :
+                        hrtfmode == HrtfMode::Enable ? ALC_TRUE :
+                        /*hrtfmode == HrtfMode::Auto ?*/ ALC_DONT_CARE_SOFT);
+        if(!hrtfname.empty())
+        {
+            ALCint index = -1;
+            ALCint num_hrtf;
+            alcGetIntegerv(mDevice, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &num_hrtf);
+            for(ALCint i = 0;i < num_hrtf;++i)
+            {
+                const ALCchar *entry = alcGetStringiSOFT(mDevice, ALC_HRTF_SPECIFIER_SOFT, i);
+                if(hrtfname == entry)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            if(index < 0)
+                std::cerr<< "Failed to find HRTF name \""<<hrtfname<<"\", using default" <<std::endl;
+            else
+            {
+                attrs.push_back(ALC_HRTF_ID_SOFT);
+                attrs.push_back(index);
+            }
+        }
+    }
+    attrs.push_back(0);
+
+    mContext = alcCreateContext(mDevice, attrs.data());
     if(!mContext || alcMakeContextCurrent(mContext) == ALC_FALSE)
     {
         std::cerr<< "Failed to setup audio context: "<<alcGetString(mDevice, alcGetError(mDevice)) <<std::endl;
@@ -627,8 +667,22 @@ bool OpenAL_Output::init(const std::string &devname)
         return false;
     }
 
-    ALC.EXT_EFX = !!alcIsExtensionPresent(mDevice, "ALC_EXT_EFX");
-    AL.SOFT_source_spatialize = !!alIsExtensionPresent("AL_SOFT_source_spatialize");
+    if(!ALC.SOFT_HRTF)
+        std::cout<< "HRTF status unavailable" <<std::endl;
+    else
+    {
+        ALCint hrtf_state;
+        alcGetIntegerv(mDevice, ALC_HRTF_SOFT, 1, &hrtf_state);
+        if(!hrtf_state)
+            std::cout<< "HRTF disabled" <<std::endl;
+        else
+        {
+            const ALCchar *hrtf = alcGetString(mDevice, ALC_HRTF_SPECIFIER_SOFT);
+            std::cout<< "Enabled HRTF "<<hrtf <<std::endl;
+        }
+    }
+
+    AL.SOFT_source_spatialize = alIsExtensionPresent("AL_SOFT_source_spatialize");
 
     ALCuint maxtotal;
     ALCint maxmono = 0, maxstereo = 0;
@@ -805,7 +859,7 @@ std::vector<std::string> OpenAL_Output::enumerateHrtf()
 {
     std::vector<std::string> ret;
 
-    if(!mDevice || !alcIsExtensionPresent(mDevice, "ALC_SOFT_HRTF"))
+    if(!mDevice || !ALC.SOFT_HRTF)
         return ret;
 
     LPALCGETSTRINGISOFT alcGetStringiSOFT = 0;
@@ -823,9 +877,9 @@ std::vector<std::string> OpenAL_Output::enumerateHrtf()
     return ret;
 }
 
-void OpenAL_Output::enableHrtf(const std::string &hrtfname, bool auto_enable)
+void OpenAL_Output::setHrtf(const std::string &hrtfname, HrtfMode hrtfmode)
 {
-    if(!alcIsExtensionPresent(mDevice, "ALC_SOFT_HRTF"))
+    if(!mDevice || !ALC.SOFT_HRTF)
     {
         std::cerr<< "HRTF extension not present" <<std::endl;
         return;
@@ -838,8 +892,12 @@ void OpenAL_Output::enableHrtf(const std::string &hrtfname, bool auto_enable)
     getALCFunc(alcResetDeviceSOFT, mDevice, "alcResetDeviceSOFT");
 
     std::vector<ALCint> attrs;
+    attrs.reserve(15);
+
     attrs.push_back(ALC_HRTF_SOFT);
-    attrs.push_back(auto_enable ? ALC_DONT_CARE_SOFT : ALC_TRUE);
+    attrs.push_back(hrtfmode == HrtfMode::Disable ? ALC_FALSE :
+                    hrtfmode == HrtfMode::Enable ? ALC_TRUE :
+                    /*hrtfmode == HrtfMode::Auto ?*/ ALC_DONT_CARE_SOFT);
     if(!hrtfname.empty())
     {
         ALCint index = -1;
@@ -864,42 +922,17 @@ void OpenAL_Output::enableHrtf(const std::string &hrtfname, bool auto_enable)
         }
     }
     attrs.push_back(0);
-    alcResetDeviceSOFT(mDevice, &attrs[0]);
+    alcResetDeviceSOFT(mDevice, attrs.data());
 
     ALCint hrtf_state;
     alcGetIntegerv(mDevice, ALC_HRTF_SOFT, 1, &hrtf_state);
     if(!hrtf_state)
-        std::cerr<< "Failed to enable HRTF" <<std::endl;
+        std::cout<< "HRTF disabled" <<std::endl;
     else
     {
         const ALCchar *hrtf = alcGetString(mDevice, ALC_HRTF_SPECIFIER_SOFT);
         std::cout<< "Enabled HRTF "<<hrtf <<std::endl;
     }
-}
-
-void OpenAL_Output::disableHrtf()
-{
-    if(!alcIsExtensionPresent(mDevice, "ALC_SOFT_HRTF"))
-    {
-        std::cerr<< "HRTF extension not present" <<std::endl;
-        return;
-    }
-
-    LPALCRESETDEVICESOFT alcResetDeviceSOFT = 0;
-    getALCFunc(alcResetDeviceSOFT, mDevice, "alcResetDeviceSOFT");
-
-    std::vector<ALCint> attrs;
-    attrs.push_back(ALC_HRTF_SOFT);
-    attrs.push_back(ALC_FALSE);
-    attrs.push_back(0);
-    alcResetDeviceSOFT(mDevice, &attrs[0]);
-
-    ALCint hrtf_state;
-    alcGetIntegerv(mDevice, ALC_HRTF_SOFT, 1, &hrtf_state);
-    if(hrtf_state)
-        std::cerr<< "Failed to disable HRTF" <<std::endl;
-    else
-        std::cout<< "Disabled HRTF" <<std::endl;
 }
 
 

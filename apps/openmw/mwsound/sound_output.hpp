@@ -19,17 +19,22 @@ namespace MWSound
     // An opaque handle for the implementation's sound instances.
     typedef void *Sound_Instance;
 
+    enum class HrtfMode {
+        Disable,
+        Enable,
+        Auto
+    };
+
     class Sound_Output
     {
         SoundManager &mManager;
 
         virtual std::vector<std::string> enumerate() = 0;
-        virtual bool init(const std::string &devname=std::string()) = 0;
+        virtual bool init(const std::string &devname, const std::string &hrtfname, HrtfMode hrtfmode) = 0;
         virtual void deinit() = 0;
 
         virtual std::vector<std::string> enumerateHrtf() = 0;
-        virtual void enableHrtf(const std::string &hrtfname, bool auto_enable) = 0;
-        virtual void disableHrtf() = 0;
+        virtual void setHrtf(const std::string &hrtfname, HrtfMode hrtfmode) = 0;
 
         virtual Sound_Handle loadSound(const std::string &fname) = 0;
         virtual void unloadSound(Sound_Handle data) = 0;

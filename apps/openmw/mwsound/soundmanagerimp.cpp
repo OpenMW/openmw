@@ -85,6 +85,8 @@ namespace MWSound
 
         std::string hrtfname = Settings::Manager::getString("hrtf", "Sound");
         int hrtfstate = Settings::Manager::getInt("hrtf enable", "Sound");
+        HrtfMode hrtfmode = hrtfstate < 0 ? HrtfMode::Auto :
+                            hrtfstate > 0 ? HrtfMode::Enable : HrtfMode::Disable;
 
         std::cout << "Sound output: " << SOUND_OUT << std::endl;
         std::cout << "Sound decoder: " << SOUND_IN << std::endl;
@@ -98,11 +100,11 @@ namespace MWSound
         std::cout.flush();
 
         std::string devname = Settings::Manager::getString("device", "Sound");
-        bool inited = mOutput->init(devname);
+        bool inited = mOutput->init(devname, hrtfname, hrtfmode);
         if(!inited && !devname.empty())
         {
             std::cerr<< "Failed to initialize device \""<<devname<<"\", trying default" <<std::endl;
-            inited = mOutput->init();
+            inited = mOutput->init(std::string(), hrtfname, hrtfmode);
         }
         if(!inited)
         {
@@ -120,11 +122,6 @@ namespace MWSound
             );
             std::cout.flush();
         }
-
-        if(hrtfstate == 0)
-            mOutput->disableHrtf();
-        else if(!hrtfname.empty())
-            mOutput->enableHrtf(hrtfname, hrtfstate<0);
     }
 
     SoundManager::~SoundManager()
