@@ -89,40 +89,42 @@ namespace MWSound
         std::cout << "Sound output: " << SOUND_OUT << std::endl;
         std::cout << "Sound decoder: " << SOUND_IN << std::endl;
 
-        try {
-            std::vector<std::string> names = mOutput->enumerate();
-            std::cout <<"Enumerated output devices:"<< std::endl;
-            for(size_t i = 0;i < names.size();i++)
-                std::cout <<"  "<<names[i]<< std::endl;
+        std::vector<std::string> names = mOutput->enumerate();
+        std::cout <<"Enumerated output devices:\n";
+        std::for_each(names.cbegin(), names.cend(),
+            [](const std::string &name) -> void
+            { std::cout <<"  "<<name<<"\n"; }
+        );
+        std::cout.flush();
 
-            std::string devname = Settings::Manager::getString("device", "Sound");
-            try {
-                mOutput->init(devname);
-            }
-            catch(std::exception &e) {
-                if(devname.empty())
-                    throw;
-                std::cerr <<"Failed to open device \""<<devname<<"\": " << e.what() << std::endl;
-                mOutput->init();
-                Settings::Manager::setString("device", "Sound", "");
-            }
-
-            names = mOutput->enumerateHrtf();
-            if(!names.empty())
-            {
-                std::cout <<"Enumerated HRTF names:"<< std::endl;
-                for(size_t i = 0;i < names.size();i++)
-                    std::cout <<"  "<<names[i]<< std::endl;
-            }
-
-            if(hrtfstate == 0)
-                mOutput->disableHrtf();
-            else if(!hrtfname.empty())
-                mOutput->enableHrtf(hrtfname, hrtfstate<0);
+        std::string devname = Settings::Manager::getString("device", "Sound");
+        bool inited = mOutput->init(devname);
+        if(!inited && !devname.empty())
+        {
+            std::cerr<< "Failed to initialize device \""<<devname<<"\", trying default" <<std::endl;
+            inited = mOutput->init();
         }
-        catch(std::exception &e) {
-            std::cout <<"Sound init failed: "<<e.what()<< std::endl;
+        if(!inited)
+        {
+            std::cerr<< "Failed to initialize default audio device, sound disabled" <<std::endl;
+            return;
         }
+
+        names = mOutput->enumerateHrtf();
+        if(!names.empty())
+        {
+            std::cout<< "Enumerated HRTF names:\n";
+            std::for_each(names.cbegin(), names.cend(),
+                [](const std::string &name) -> void
+                { std::cout<< "  "<<name<<"\n"; }
+            );
+            std::cout.flush();
+        }
+
+        if(hrtfstate == 0)
+            mOutput->disableHrtf();
+        else if(!hrtfname.empty())
+            mOutput->enableHrtf(hrtfname, hrtfstate<0);
     }
 
     SoundManager::~SoundManager()
@@ -186,8 +188,12 @@ namespace MWSound
     Sound_Buffer *SoundManager::lookupSound(const std::string &soundId) const
     {
         NameBufferMap::const_iterator snd = mBufferNameMap.find(soundId);
-        if(snd != mBufferNameMap.end()) return snd->second;
-        return 0;
+        if(snd != mBufferNameMap.end())
+        {
+            Sound_Buffer *sfx = snd->second;
+            if(sfx->mHandle) return sfx;
+        }
+        return nullptr;
     }
 
     // Lookup a soundId for its sound data (resource name, local volume,
@@ -201,15 +207,17 @@ namespace MWSound
         else
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
-            const ESM::Sound *sound = world->getStore().get<ESM::Sound>().find(soundId);
+            const ESM::Sound *sound = world->getStore().get<ESM::Sound>().search(soundId);
+            if(!sound) return nullptr;
             sfx = insertSound(soundId, sound);
         }
 
         if(!sfx->mHandle)
         {
             sfx->mHandle = mOutput->loadSound(sfx->mResourceName);
-            mBufferCacheSize += mOutput->getSoundDataSize(sfx->mHandle);
+            if(!sfx->mHandle) return nullptr;
 
+            mBufferCacheSize += mOutput->getSoundDataSize(sfx->mHandle);
             if(mBufferCacheSize > mBufferCacheMax)
             {
                 do {
@@ -293,18 +301,24 @@ namespace MWSound
         static float minDistance = std::max(fAudioVoiceDefaultMinDistance * fAudioMinDistanceMult, 1.0f);
         static float maxDistance = std::max(fAudioVoiceDefaultMaxDistance * fAudioMaxDistanceMult, minDistance);
 
+        bool played;
         float basevol = volumeFromType(Play_TypeVoice);
         Stream *sound = getStreamRef();
         if(playlocal)
         {
             sound->init(1.0f, basevol, 1.0f, Play_NoEnv|Play_TypeVoice|Play_2D);
-            mOutput->streamSound(decoder, sound);
+            played = mOutput->streamSound(decoder, sound);
         }
         else
         {
             sound->init(pos, 1.0f, basevol, 1.0f, minDistance, maxDistance,
                         Play_Normal|Play_TypeVoice|Play_3D);
-            mOutput->streamSound3D(decoder, sound, true);
+            played = mOutput->streamSound3D(decoder, sound, true);
+        }
+        if(!played)
+        {
+            mUnusedStreams.push_back(sound);
+            return nullptr;
         }
         return sound;
     }
@@ -351,23 +365,16 @@ namespace MWSound
             return;
         std::cout <<"Playing "<<filename<< std::endl;
         mLastPlayedMusic = filename;
-        try {
-            stopMusic();
 
-            DecoderPtr decoder = getDecoder();
-            decoder->open(filename);
+        stopMusic();
 
-            mMusic = getStreamRef();
-            mMusic->init(1.0f, volumeFromType(Play_TypeMusic), 1.0f,
-                         Play_NoEnv|Play_TypeMusic|Play_2D);
-            mOutput->streamSound(decoder, mMusic);
-        }
-        catch(std::exception &e) {
-            std::cout << "Music Error: " << e.what() << "\n";
-            if(mMusic)
-                mUnusedStreams.push_back(mMusic);
-            mMusic = nullptr;
-        }
+        DecoderPtr decoder = getDecoder();
+        decoder->open(filename);
+
+        mMusic = getStreamRef();
+        mMusic->init(1.0f, volumeFromType(Play_TypeMusic), 1.0f,
+                     Play_NoEnv|Play_TypeMusic|Play_2D);
+        mOutput->streamSound(decoder, mMusic);
     }
 
     void SoundManager::advanceMusic(const std::string& filename)
@@ -454,24 +461,20 @@ namespace MWSound
     {
         if(!mOutput->isInitialized())
             return;
-        try
-        {
-            std::string voicefile = "Sound/"+filename;
 
-            mVFS->normalizeFilename(voicefile);
-            DecoderPtr decoder = loadVoice(voicefile);
+        std::string voicefile = "Sound/"+filename;
 
-            MWBase::World *world = MWBase::Environment::get().getWorld();
-            const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
+        mVFS->normalizeFilename(voicefile);
+        DecoderPtr decoder = loadVoice(voicefile);
 
-            stopSay(ptr);
-            Stream *sound = playVoice(decoder, pos, (ptr == MWMechanics::getPlayer()));
-            mActiveSaySounds.insert(std::make_pair(ptr, sound));
-        }
-        catch(std::exception &e)
-        {
-            std::cout <<"Sound Error: "<<e.what()<< std::endl;
-        }
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
+
+        stopSay(ptr);
+        Stream *sound = playVoice(decoder, pos, (ptr == MWMechanics::getPlayer()));
+        if(!sound) return;
+
+        mActiveSaySounds.insert(std::make_pair(ptr, sound));
     }
 
     float SoundManager::getSaySoundLoudness(const MWWorld::ConstPtr &ptr) const
@@ -490,21 +493,17 @@ namespace MWSound
     {
         if(!mOutput->isInitialized())
             return;
-        try
-        {
-            std::string voicefile = "Sound/"+filename;
 
-            mVFS->normalizeFilename(voicefile);
-            DecoderPtr decoder = loadVoice(voicefile);
+        std::string voicefile = "Sound/"+filename;
 
-            stopSay(MWWorld::ConstPtr());
-            mActiveSaySounds.insert(std::make_pair(MWWorld::ConstPtr(),
-                                                   playVoice(decoder, osg::Vec3f(), true)));
-        }
-        catch(std::exception &e)
-        {
-            std::cout <<"Sound Error: "<<e.what()<< std::endl;
-        }
+        mVFS->normalizeFilename(voicefile);
+        DecoderPtr decoder = loadVoice(voicefile);
+
+        stopSay(MWWorld::ConstPtr());
+        Stream *sound = playVoice(decoder, osg::Vec3f(), true);
+        if(!sound) return;
+
+        mActiveSaySounds.insert(std::make_pair(MWWorld::ConstPtr(), sound));
     }
 
     bool SoundManager::sayDone(const MWWorld::ConstPtr &ptr) const
@@ -535,22 +534,18 @@ namespace MWSound
     {
         if(!mOutput->isInitialized())
             return nullptr;
-        Stream *track = getStreamRef();
-        try
-        {
-            track->init(1.0f, volumeFromType(type), 1.0f, Play_NoEnv|type|Play_2D);
-            mOutput->streamSound(decoder, track);
 
-            TrackList::iterator iter = std::lower_bound(mActiveTracks.begin(), mActiveTracks.end(), track);
-            mActiveTracks.insert(iter, track);
-        }
-        catch(std::exception &e)
+        Stream *track = getStreamRef();
+        track->init(1.0f, volumeFromType(type), 1.0f, Play_NoEnv|type|Play_2D);
+        if(!mOutput->streamSound(decoder, track))
         {
-            std::cout <<"Sound Error: "<<e.what()<< std::endl;
-            if(track)
-                mUnusedStreams.push_back(track);
-            track = nullptr;
+            mUnusedStreams.push_back(track);
+            return nullptr;
         }
+
+        mActiveTracks.insert(
+            std::lower_bound(mActiveTracks.begin(), mActiveTracks.end(), track), track
+        );
         return track;
     }
 
@@ -573,30 +568,25 @@ namespace MWSound
     {
         if(!mOutput->isInitialized())
             return nullptr;
-        Sound *sound = nullptr;
-        try
-        {
-            Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
-            float basevol = volumeFromType(type);
 
-            sound = getSoundRef();
-            sound->init(volume * sfx->mVolume, basevol, pitch, mode|type|Play_2D);
-            mOutput->playSound(sound, sfx->mHandle, offset);
-            if(sfx->mUses++ == 0)
-            {
-                SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfx);
-                if(iter != mUnusedBuffers.end())
-                    mUnusedBuffers.erase(iter);
-            }
-            mActiveSounds[MWWorld::ConstPtr()].push_back(std::make_pair(sound, sfx));
-        }
-        catch(std::exception&)
+        Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
+        if(!sfx) return nullptr;
+
+        Sound *sound = getSoundRef();
+        sound->init(volume * sfx->mVolume, volumeFromType(type), pitch, mode|type|Play_2D);
+        if(!mOutput->playSound(sound, sfx->mHandle, offset))
         {
-            //std::cout <<"Sound Error: "<<e.what()<< std::endl;
-            if(sound)
-                mUnusedSounds.push_back(sound);
-            sound = nullptr;
+            mUnusedSounds.push_back(sound);
+            return nullptr;
         }
+
+        if(sfx->mUses++ == 0)
+        {
+            SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfx);
+            if(iter != mUnusedBuffers.end())
+                mUnusedBuffers.erase(iter);
+        }
+        mActiveSounds[MWWorld::ConstPtr()].push_back(std::make_pair(sound, sfx));
         return sound;
     }
 
@@ -606,48 +596,44 @@ namespace MWSound
     {
         if(!mOutput->isInitialized())
             return nullptr;
-        Sound *sound = nullptr;
-        try
+
+        // Look up the sound in the ESM data
+        Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
+        if(!sfx) return nullptr;
+
+        const osg::Vec3f objpos(ptr.getRefData().getPosition().asVec3());
+        if((mode&Play_RemoveAtDistance) && (mListenerPos-objpos).length2() > 2000*2000)
+            return nullptr;
+
+        // Only one copy of given sound can be played at time on ptr, so stop previous copy
+        stopSound3D(ptr, soundId);
+
+        bool played;
+        Sound *sound = getSoundRef();
+        if(!(mode&Play_NoPlayerLocal) && ptr == MWMechanics::getPlayer())
         {
-            // Look up the sound in the ESM data
-            Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
-            float basevol = volumeFromType(type);
-            const ESM::Position &pos = ptr.getRefData().getPosition();
-            const osg::Vec3f objpos(pos.asVec3());
-
-            if((mode&Play_RemoveAtDistance) && (mListenerPos-objpos).length2() > 2000*2000)
-                return nullptr;
-
-            // Only one copy of given sound can be played at time on ptr, so stop previous copy
-            stopSound3D(ptr, soundId);
-
-            sound = getSoundRef();
-            if(!(mode&Play_NoPlayerLocal) && ptr == MWMechanics::getPlayer())
-            {
-                sound->init(volume * sfx->mVolume, basevol, pitch, mode|type|Play_2D);
-                mOutput->playSound(sound, sfx->mHandle, offset);
-            }
-            else
-            {
-                sound->init(objpos, volume * sfx->mVolume, basevol, pitch,
-                            sfx->mMinDist, sfx->mMaxDist, mode|type|Play_3D);
-                mOutput->playSound3D(sound, sfx->mHandle, offset);
-            }
-            if(sfx->mUses++ == 0)
-            {
-                SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfx);
-                if(iter != mUnusedBuffers.end())
-                    mUnusedBuffers.erase(iter);
-            }
-            mActiveSounds[ptr].push_back(std::make_pair(sound, sfx));
+            sound->init(volume * sfx->mVolume, volumeFromType(type), pitch, mode|type|Play_2D);
+            played = mOutput->playSound(sound, sfx->mHandle, offset);
         }
-        catch(std::exception&)
+        else
         {
-            //std::cout <<"Sound Error: "<<e.what()<< std::endl;
-            if(sound)
-                mUnusedSounds.push_back(sound);
-            sound = nullptr;
+            sound->init(objpos, volume * sfx->mVolume, volumeFromType(type), pitch,
+                        sfx->mMinDist, sfx->mMaxDist, mode|type|Play_3D);
+            played = mOutput->playSound3D(sound, sfx->mHandle, offset);
         }
+        if(!played)
+        {
+            mUnusedSounds.push_back(sound);
+            return nullptr;
+        }
+
+        if(sfx->mUses++ == 0)
+        {
+            SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfx);
+            if(iter != mUnusedBuffers.end())
+                mUnusedBuffers.erase(iter);
+        }
+        mActiveSounds[ptr].push_back(std::make_pair(sound, sfx));
         return sound;
     }
 
@@ -657,32 +643,27 @@ namespace MWSound
     {
         if(!mOutput->isInitialized())
             return nullptr;
-        Sound *sound = nullptr;
-        try
-        {
-            // Look up the sound in the ESM data
-            Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
-            float basevol = volumeFromType(type);
 
-            sound = getSoundRef();
-            sound->init(initialPos, volume * sfx->mVolume, basevol, pitch,
-                        sfx->mMinDist, sfx->mMaxDist, mode|type|Play_3D);
-            mOutput->playSound3D(sound, sfx->mHandle, offset);
-            if(sfx->mUses++ == 0)
-            {
-                SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfx);
-                if(iter != mUnusedBuffers.end())
-                    mUnusedBuffers.erase(iter);
-            }
-            mActiveSounds[MWWorld::ConstPtr()].push_back(std::make_pair(sound, sfx));
-        }
-        catch(std::exception &)
+        // Look up the sound in the ESM data
+        Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
+        if(!sfx) return nullptr;
+
+        Sound *sound = getSoundRef();
+        sound->init(initialPos, volume * sfx->mVolume, volumeFromType(type), pitch,
+                    sfx->mMinDist, sfx->mMaxDist, mode|type|Play_3D);
+        if(!mOutput->playSound3D(sound, sfx->mHandle, offset))
         {
-            //std::cout <<"Sound Error: "<<e.what()<< std::endl;
-            if(sound)
-                mUnusedSounds.push_back(sound);
-            sound = nullptr;
+            mUnusedSounds.push_back(sound);
+            return nullptr;
         }
+
+        if(sfx->mUses++ == 0)
+        {
+            SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfx);
+            if(iter != mUnusedBuffers.end())
+                mUnusedBuffers.erase(iter);
+        }
+        mActiveSounds[MWWorld::ConstPtr()].push_back(std::make_pair(sound, sfx));
         return sound;
     }
 

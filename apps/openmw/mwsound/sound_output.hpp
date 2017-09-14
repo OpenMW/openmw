@@ -24,7 +24,7 @@ namespace MWSound
         SoundManager &mManager;
 
         virtual std::vector<std::string> enumerate() = 0;
-        virtual void init(const std::string &devname=std::string()) = 0;
+        virtual bool init(const std::string &devname=std::string()) = 0;
         virtual void deinit() = 0;
 
         virtual std::vector<std::string> enumerateHrtf() = 0;
@@ -35,14 +35,14 @@ namespace MWSound
         virtual void unloadSound(Sound_Handle data) = 0;
         virtual size_t getSoundDataSize(Sound_Handle data) const = 0;
 
-        virtual void playSound(Sound *sound, Sound_Handle data, float offset) = 0;
-        virtual void playSound3D(Sound *sound, Sound_Handle data, float offset) = 0;
+        virtual bool playSound(Sound *sound, Sound_Handle data, float offset) = 0;
+        virtual bool playSound3D(Sound *sound, Sound_Handle data, float offset) = 0;
         virtual void finishSound(Sound *sound) = 0;
         virtual bool isSoundPlaying(Sound *sound) = 0;
         virtual void updateSound(Sound *sound) = 0;
 
-        virtual void streamSound(DecoderPtr decoder, Stream *sound) = 0;
-        virtual void streamSound3D(DecoderPtr decoder, Stream *sound, bool getLoudnessData) = 0;
+        virtual bool streamSound(DecoderPtr decoder, Stream *sound) = 0;
+        virtual bool streamSound3D(DecoderPtr decoder, Stream *sound, bool getLoudnessData) = 0;
         virtual void finishStream(Stream *sound) = 0;
         virtual double getStreamDelay(Stream *sound) = 0;
         virtual double getStreamOffset(Stream *sound) = 0;

@@ -59,7 +59,7 @@ namespace MWSound
 
     public:
         virtual std::vector<std::string> enumerate();
-        virtual void init(const std::string &devname=std::string());
+        virtual bool init(const std::string &devname=std::string());
         virtual void deinit();
 
         virtual std::vector<std::string> enumerateHrtf();
@@ -70,14 +70,14 @@ namespace MWSound
         virtual void unloadSound(Sound_Handle data);
         virtual size_t getSoundDataSize(Sound_Handle data) const;
 
-        virtual void playSound(Sound *sound, Sound_Handle data, float offset);
-        virtual void playSound3D(Sound *sound, Sound_Handle data, float offset);
+        virtual bool playSound(Sound *sound, Sound_Handle data, float offset);
+        virtual bool playSound3D(Sound *sound, Sound_Handle data, float offset);
         virtual void finishSound(Sound *sound);
         virtual bool isSoundPlaying(Sound *sound);
         virtual void updateSound(Sound *sound);
 
-        virtual void streamSound(DecoderPtr decoder, Stream *sound);
-        virtual void streamSound3D(DecoderPtr decoder, Stream *sound, bool getLoudnessData);
+        virtual bool streamSound(DecoderPtr decoder, Stream *sound);
+        virtual bool streamSound3D(DecoderPtr decoder, Stream *sound, bool getLoudnessData);
         virtual void finishStream(Stream *sound);
         virtual double getStreamDelay(Stream *sound);
         virtual double getStreamOffset(Stream *sound);
