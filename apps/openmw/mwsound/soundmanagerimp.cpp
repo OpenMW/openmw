@@ -819,15 +819,12 @@ namespace MWSound
         if(regn == NULL)
             return;
 
-        std::vector<ESM::Region::SoundRef>::const_iterator soundIter;
         if(total == 0)
         {
-            soundIter = regn->mSoundList.begin();
-            while(soundIter != regn->mSoundList.end())
-            {
-                total += (int)soundIter->mChance;
-                ++soundIter;
-            }
+            std::for_each(regn->mSoundList.cbegin(), regn->mSoundList.cend(),
+                [](const ESM::Region::SoundRef &sndref) -> void
+                { total += (int)sndref.mChance; }
+            );
             if(total == 0)
                 return;
         }
@@ -835,18 +832,20 @@ namespace MWSound
         int r = Misc::Rng::rollDice(total);
         int pos = 0;
 
-        soundIter = regn->mSoundList.begin();
-        while(soundIter != regn->mSoundList.end())
-        {
-            if(r - pos < soundIter->mChance)
+        std::find_if_not(regn->mSoundList.cbegin(), regn->mSoundList.cend(),
+            [&pos, r, this](const ESM::Region::SoundRef &sndref) -> bool
             {
-                playSound(soundIter->mSound.toString(), 1.0f, 1.0f);
-                break;
+                if(r - pos < sndref.mChance)
+                {
+                    playSound(sndref.mSound.toString(), 1.0f, 1.0f);
+                    // Played this sound, stop iterating
+                    return false;
+                }
+                pos += sndref.mChance;
+                // Not this sound, keep iterating
+                return true;
             }
-            pos += soundIter->mChance;
-
-            ++soundIter;
-        }
+        );
     }
 
     void SoundManager::updateWaterSound(float /*duration*/)
