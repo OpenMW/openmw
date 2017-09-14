@@ -71,7 +71,8 @@ namespace ESSImport
                 = mPlayer.mLastKnownExteriorPosition[2]
                 = 0.0f;
             mPlayer.mHasMark = 0;
-            mPlayer.mCurrentCrimeId = 0; // TODO
+            mPlayer.mCurrentCrimeId = -1; // TODO
+            mPlayer.mPaidCrimeId = -1;
             mPlayer.mObject.blank();
             mPlayer.mObject.mEnabled = true;
             mPlayer.mObject.mRef.mRefID = "player"; // REFR.mRefID would be PlayerSaveGame
