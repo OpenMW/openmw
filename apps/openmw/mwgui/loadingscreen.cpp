@@ -67,7 +67,7 @@ namespace MWGui
         mVFS->normalizeFilename(pattern);
 
         /* priority given to the left */
-        std::list<std::string> supported_extensions = {".tga", ".dds", ".png", ".bmp", ".jpeg", ".jpg"};
+        std::list<std::string> supported_extensions = {".tga", ".dds", ".ktx", ".png", ".bmp", ".jpeg", ".jpg"};
 
         auto found = index.lower_bound(pattern);
         while (found != index.end())
