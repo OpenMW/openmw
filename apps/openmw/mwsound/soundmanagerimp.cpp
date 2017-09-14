@@ -1203,16 +1203,16 @@ namespace MWSound
         SoundMap::iterator snditer = mActiveSounds.find(old);
         if(snditer != mActiveSounds.end())
         {
-            SoundBufferRefPairList sndlist = snditer->second;
+            SoundBufferRefPairList sndlist = std::move(snditer->second);
             mActiveSounds.erase(snditer);
-            mActiveSounds[updated] = sndlist;
+            mActiveSounds.emplace(updated, std::move(sndlist));
         }
         SaySoundMap::iterator sayiter = mActiveSaySounds.find(old);
         if(sayiter != mActiveSaySounds.end())
         {
             Stream *stream = sayiter->second;
             mActiveSaySounds.erase(sayiter);
-            mActiveSaySounds[updated] = stream;
+            mActiveSaySounds.emplace(updated, stream);
         }
     }
 
