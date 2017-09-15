@@ -1403,21 +1403,23 @@ void OpenAL_Output::updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdi
 void OpenAL_Output::pauseSounds(int types)
 {
     std::vector<ALuint> sources;
-    SoundVec::const_iterator sound = mActiveSounds.begin();
-    for(;sound != mActiveSounds.end();++sound)
-    {
-        if(*sound && (*sound)->mHandle && ((*sound)->getPlayType()&types))
-            sources.push_back(GET_PTRID((*sound)->mHandle));
-    }
-    StreamVec::const_iterator stream = mActiveStreams.begin();
-    for(;stream != mActiveStreams.end();++stream)
-    {
-        if(*stream && (*stream)->mHandle && ((*stream)->getPlayType()&types))
+    std::for_each(mActiveSounds.cbegin(), mActiveSounds.cend(),
+        [types,&sources](const SoundVec::value_type &sound) -> void
         {
-            OpenAL_SoundStream *strm = reinterpret_cast<OpenAL_SoundStream*>((*stream)->mHandle);
-            sources.push_back(strm->mSource);
+            if(sound && sound->mHandle && (types&sound->getPlayType()))
+                sources.push_back(GET_PTRID(sound->mHandle));
         }
-    }
+    );
+    std::for_each(mActiveStreams.cbegin(), mActiveStreams.cend(),
+        [types,&sources](const StreamVec::value_type &stream) -> void
+        {
+            if(stream && stream->mHandle && (types&stream->getPlayType()))
+            {
+                OpenAL_SoundStream *strm = reinterpret_cast<OpenAL_SoundStream*>(stream->mHandle);
+                sources.push_back(strm->mSource);
+            }
+        }
+    );
     if(!sources.empty())
     {
         alSourcePausev(sources.size(), sources.data());
@@ -1428,21 +1430,23 @@ void OpenAL_Output::pauseSounds(int types)
 void OpenAL_Output::resumeSounds(int types)
 {
     std::vector<ALuint> sources;
-    SoundVec::const_iterator sound = mActiveSounds.begin();
-    for(;sound != mActiveSounds.end();++sound)
-    {
-        if(*sound && (*sound)->mHandle && ((*sound)->getPlayType()&types))
-            sources.push_back(GET_PTRID((*sound)->mHandle));
-    }
-    StreamVec::const_iterator stream = mActiveStreams.begin();
-    for(;stream != mActiveStreams.end();++stream)
-    {
-        if(*stream && (*stream)->mHandle && ((*stream)->getPlayType()&types))
+    std::for_each(mActiveSounds.cbegin(), mActiveSounds.cend(),
+        [types,&sources](const SoundVec::value_type &sound) -> void
         {
-            OpenAL_SoundStream *strm = reinterpret_cast<OpenAL_SoundStream*>((*stream)->mHandle);
-            sources.push_back(strm->mSource);
+            if(sound && sound->mHandle && (types&sound->getPlayType()))
+                sources.push_back(GET_PTRID(sound->mHandle));
         }
-    }
+    );
+    std::for_each(mActiveStreams.cbegin(), mActiveStreams.cend(),
+        [types,&sources](const StreamVec::value_type &stream) -> void
+        {
+            if(stream && stream->mHandle && (types&stream->getPlayType()))
+            {
+                OpenAL_SoundStream *strm = reinterpret_cast<OpenAL_SoundStream*>(stream->mHandle);
+                sources.push_back(strm->mSource);
+            }
+        }
+    );
     if(!sources.empty())
     {
         alSourcePlayv(sources.size(), sources.data());

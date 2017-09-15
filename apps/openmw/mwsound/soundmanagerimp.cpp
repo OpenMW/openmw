@@ -35,6 +35,9 @@
 
 namespace MWSound
 {
+    // For combining PlayMode and Type flags
+    inline int operator|(PlayMode a, Type b) { return static_cast<int>(a) | static_cast<int>(b); }
+
     SoundManager::SoundManager(const VFS::Manager* vfs, const std::map<std::string, std::string>& fallbackMap, bool useSound)
         : mVFS(vfs)
         , mFallback(fallbackMap)
@@ -299,17 +302,17 @@ namespace MWSound
         static float maxDistance = std::max(fAudioVoiceDefaultMaxDistance * fAudioMaxDistanceMult, minDistance);
 
         bool played;
-        float basevol = volumeFromType(Play_TypeVoice);
+        float basevol = volumeFromType(Type::Voice);
         Stream *sound = getStreamRef();
         if(playlocal)
         {
-            sound->init(1.0f, basevol, 1.0f, Play_NoEnv|Play_TypeVoice|Play_2D);
+            sound->init(1.0f, basevol, 1.0f, PlayMode::NoEnv|Type::Voice|Play_2D);
             played = mOutput->streamSound(decoder, sound);
         }
         else
         {
             sound->init(pos, 1.0f, basevol, 1.0f, minDistance, maxDistance,
-                        Play_Normal|Play_TypeVoice|Play_3D);
+                        PlayMode::Normal|Type::Voice|Play_3D);
             played = mOutput->streamSound3D(decoder, sound, true);
         }
         if(!played)
@@ -321,26 +324,25 @@ namespace MWSound
     }
 
     // Gets the combined volume settings for the given sound type
-    float SoundManager::volumeFromType(PlayType type) const
+    float SoundManager::volumeFromType(Type type) const
     {
         float volume = mMasterVolume;
         switch(type)
         {
-            case Play_TypeSfx:
+            case Type::Sfx:
                 volume *= mSFXVolume;
                 break;
-            case Play_TypeVoice:
+            case Type::Voice:
                 volume *= mVoiceVolume;
                 break;
-            case Play_TypeFoot:
+            case Type::Foot:
                 volume *= mFootstepsVolume;
                 break;
-            case Play_TypeMusic:
+            case Type::Music:
                 volume *= mMusicVolume;
                 break;
-            case Play_TypeMask:
-                break;
-            default:
+            case Type::Movie:
+            case Type::Mask:
                 break;
         }
         return volume;
@@ -369,8 +371,8 @@ namespace MWSound
         decoder->open(filename);
 
         mMusic = getStreamRef();
-        mMusic->init(1.0f, volumeFromType(Play_TypeMusic), 1.0f,
-                     Play_NoEnv|Play_TypeMusic|Play_2D);
+        mMusic->init(1.0f, volumeFromType(Type::Music), 1.0f,
+                     PlayMode::NoEnv|Type::Music|Play_2D);
         mOutput->streamSound(decoder, mMusic);
     }
 
@@ -527,13 +529,13 @@ namespace MWSound
     }
 
 
-    Stream *SoundManager::playTrack(const DecoderPtr& decoder, PlayType type)
+    Stream *SoundManager::playTrack(const DecoderPtr& decoder, Type type)
     {
         if(!mOutput->isInitialized())
             return nullptr;
 
         Stream *track = getStreamRef();
-        track->init(1.0f, volumeFromType(type), 1.0f, Play_NoEnv|type|Play_2D);
+        track->init(1.0f, volumeFromType(type), 1.0f, PlayMode::NoEnv|type|Play_2D);
         if(!mOutput->streamSound(decoder, track))
         {
             mUnusedStreams.push_back(track);
@@ -561,7 +563,7 @@ namespace MWSound
     }
 
 
-    Sound *SoundManager::playSound(const std::string& soundId, float volume, float pitch, PlayType type, PlayMode mode, float offset)
+    Sound *SoundManager::playSound(const std::string& soundId, float volume, float pitch, Type type, PlayMode mode, float offset)
     {
         if(!mOutput->isInitialized())
             return nullptr;
@@ -588,7 +590,7 @@ namespace MWSound
     }
 
     Sound *SoundManager::playSound3D(const MWWorld::ConstPtr &ptr, const std::string& soundId,
-                                     float volume, float pitch, PlayType type, PlayMode mode,
+                                     float volume, float pitch, Type type, PlayMode mode,
                                      float offset)
     {
         if(!mOutput->isInitialized())
@@ -599,7 +601,7 @@ namespace MWSound
         if(!sfx) return nullptr;
 
         const osg::Vec3f objpos(ptr.getRefData().getPosition().asVec3());
-        if((mode&Play_RemoveAtDistance) && (mListenerPos-objpos).length2() > 2000*2000)
+        if((mode&PlayMode::RemoveAtDistance) && (mListenerPos-objpos).length2() > 2000*2000)
             return nullptr;
 
         // Only one copy of given sound can be played at time on ptr, so stop previous copy
@@ -607,7 +609,7 @@ namespace MWSound
 
         bool played;
         Sound *sound = getSoundRef();
-        if(!(mode&Play_NoPlayerLocal) && ptr == MWMechanics::getPlayer())
+        if(!(mode&PlayMode::NoPlayerLocal) && ptr == MWMechanics::getPlayer())
         {
             sound->init(volume * sfx->mVolume, volumeFromType(type), pitch, mode|type|Play_2D);
             played = mOutput->playSound(sound, sfx->mHandle, offset);
@@ -635,7 +637,7 @@ namespace MWSound
     }
 
     Sound *SoundManager::playSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
-                                     float volume, float pitch, PlayType type, PlayMode mode,
+                                     float volume, float pitch, Type type, PlayMode mode,
                                      float offset)
     {
         if(!mOutput->isInitialized())
@@ -772,7 +774,7 @@ namespace MWSound
     {
         if(mOutput->isInitialized())
         {
-            types &= Play_TypeMask;
+            types = types & Type::Mask;
             mOutput->pauseSounds(types);
             mPausedSoundTypes |= types;
         }
@@ -782,7 +784,7 @@ namespace MWSound
     {
         if(mOutput->isInitialized())
         {
-            types &= types&Play_TypeMask&mPausedSoundTypes;
+            types = types & Type::Mask & mPausedSoundTypes;
             mOutput->resumeSounds(types);
             mPausedSoundTypes &= ~types;
         }
@@ -932,7 +934,7 @@ namespace MWSound
                 if(soundIdChanged)
                 {
                     mOutput->finishSound(mNearWaterSound);
-                    mNearWaterSound = playSound(soundId, volume, 1.0f, Play_TypeSfx, Play_Loop);
+                    mNearWaterSound = playSound(soundId, volume, 1.0f, Type::Sfx, PlayMode::Loop);
                 }
                 else if (sfx)
                     mNearWaterSound->setVolume(volume * sfx->mVolume);
@@ -941,7 +943,7 @@ namespace MWSound
         else if (volume > 0.0f)
         {
             LastCell = curcell;
-            mNearWaterSound = playSound(soundId, volume, 1.0f, Play_TypeSfx, Play_Loop);
+            mNearWaterSound = playSound(soundId, volume, 1.0f, Type::Sfx, PlayMode::Loop);
         }
     }
 
@@ -1084,7 +1086,7 @@ namespace MWSound
         {
             // Play underwater sound (after updating sounds)
             if(!mUnderwaterSound)
-                mUnderwaterSound = playSound("Underwater", 1.0f, 1.0f, Play_TypeSfx, Play_LoopNoEnv);
+                mUnderwaterSound = playSound("Underwater", 1.0f, 1.0f, Type::Sfx, PlayMode::LoopNoEnv);
         }
         mOutput->finishUpdate();
     }

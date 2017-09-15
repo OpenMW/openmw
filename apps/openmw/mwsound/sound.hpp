@@ -7,6 +7,10 @@
 
 namespace MWSound
 {
+    // For testing individual PlayMode flags
+    inline int operator&(int a, PlayMode b) { return a & static_cast<int>(b); }
+    inline int operator&(PlayMode a, PlayMode b) { return static_cast<int>(a) & static_cast<int>(b); }
+
     class SoundBase {
         SoundBase& operator=(const SoundBase&) = delete;
         SoundBase(const SoundBase&) = delete;
@@ -48,11 +52,11 @@ namespace MWSound
         float getMinDistance() const { return mMinDistance; }
         float getMaxDistance() const { return mMaxDistance; }
 
-        MWBase::SoundManager::PlayType getPlayType() const
-        { return (MWBase::SoundManager::PlayType)(mFlags&MWBase::SoundManager::Play_TypeMask); }
-        bool getUseEnv() const { return !(mFlags&MWBase::SoundManager::Play_NoEnv); }
-        bool getIsLooping() const { return mFlags&MWBase::SoundManager::Play_Loop; }
-        bool getDistanceCull() const { return mFlags&MWBase::SoundManager::Play_RemoveAtDistance; }
+        MWSound::Type getPlayType() const
+        { return static_cast<MWSound::Type>(mFlags&MWSound::Type::Mask); }
+        bool getUseEnv() const { return !(mFlags&MWSound::PlayMode::NoEnv); }
+        bool getIsLooping() const { return mFlags&MWSound::PlayMode::Loop; }
+        bool getDistanceCull() const { return mFlags&MWSound::PlayMode::RemoveAtDistance; }
         bool getIs3D() const { return mFlags&Play_3D; }
 
         void init(const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)

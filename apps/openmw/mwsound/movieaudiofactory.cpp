@@ -162,7 +162,7 @@ namespace MWSound
         decoder->setupFormat();
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        MWBase::SoundStream *sound = sndMgr->playTrack(decoder->mDecoderBridge, MWBase::SoundManager::Play_TypeMovie);
+        MWBase::SoundStream *sound = sndMgr->playTrack(decoder->mDecoderBridge, MWSound::Type::Movie);
         if (!sound)
         {
             decoder.reset();
