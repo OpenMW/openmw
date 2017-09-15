@@ -1,9 +1,10 @@
 #include <algorithm>
 #include <stdexcept>
 #include <iostream>
+#include <cstring>
 #include <vector>
 #include <memory>
-#include <cstring>
+#include <array>
 
 #include <stdint.h>
 
@@ -174,93 +175,90 @@ namespace MWSound
 
 static ALenum getALFormat(ChannelConfig chans, SampleType type)
 {
-    static const struct {
+    struct FormatEntry {
         ALenum format;
         ChannelConfig chans;
         SampleType type;
-    } fmtlist[] = {
+    };
+    struct FormatEntryExt {
+        const char name[32];
+        ChannelConfig chans;
+        SampleType type;
+    };
+    static const std::array<FormatEntry,4> fmtlist{{
         { AL_FORMAT_MONO16,   ChannelConfig_Mono,   SampleType_Int16 },
         { AL_FORMAT_MONO8,    ChannelConfig_Mono,   SampleType_UInt8 },
         { AL_FORMAT_STEREO16, ChannelConfig_Stereo, SampleType_Int16 },
         { AL_FORMAT_STEREO8,  ChannelConfig_Stereo, SampleType_UInt8 },
-    };
-    static const size_t fmtlistsize = sizeof(fmtlist)/sizeof(fmtlist[0]);
+    }};
 
-    for(size_t i = 0;i < fmtlistsize;i++)
-    {
-        if(fmtlist[i].chans == chans && fmtlist[i].type == type)
-            return fmtlist[i].format;
-    }
+    auto fmt = std::find_if(fmtlist.cbegin(), fmtlist.cend(),
+        [chans,type](const FormatEntry &fmt) -> bool
+        { return fmt.chans == chans && fmt.type == type; }
+    );
+    if(fmt != fmtlist.cend())
+        return fmt->format;
 
     if(alIsExtensionPresent("AL_EXT_MCFORMATS"))
     {
-        static const struct {
-            char name[32];
-            ChannelConfig chans;
-            SampleType type;
-        } mcfmtlist[] = {
+        static const std::array<FormatEntryExt,6> mcfmtlist{{
             { "AL_FORMAT_QUAD16",   ChannelConfig_Quad,    SampleType_Int16 },
             { "AL_FORMAT_QUAD8",    ChannelConfig_Quad,    SampleType_UInt8 },
             { "AL_FORMAT_51CHN16",  ChannelConfig_5point1, SampleType_Int16 },
             { "AL_FORMAT_51CHN8",   ChannelConfig_5point1, SampleType_UInt8 },
             { "AL_FORMAT_71CHN16",  ChannelConfig_7point1, SampleType_Int16 },
             { "AL_FORMAT_71CHN8",   ChannelConfig_7point1, SampleType_UInt8 },
-        };
-        static const size_t mcfmtlistsize = sizeof(mcfmtlist)/sizeof(mcfmtlist[0]);
+        }};
+        ALenum format = AL_NONE;
 
-        for(size_t i = 0;i < mcfmtlistsize;i++)
-        {
-            if(mcfmtlist[i].chans == chans && mcfmtlist[i].type == type)
+        std::find_if(mcfmtlist.cbegin(), mcfmtlist.cend(),
+            [&format,chans,type](const FormatEntryExt &fmt) -> bool
             {
-                ALenum format = alGetEnumValue(mcfmtlist[i].name);
-                if(format != 0 && format != -1)
-                    return format;
+                if(fmt.chans == chans && fmt.type == type)
+                    format = alGetEnumValue(fmt.name);
+                return format != 0 && format != -1;
             }
-        }
+        );
+        if(format != 0 && format != -1)
+            return format;
     }
     if(alIsExtensionPresent("AL_EXT_FLOAT32"))
     {
-        static const struct {
-            char name[32];
-            ChannelConfig chans;
-            SampleType type;
-        } fltfmtlist[] = {
+        static const std::array<FormatEntryExt,2> fltfmtlist{{
             { "AL_FORMAT_MONO_FLOAT32",   ChannelConfig_Mono,   SampleType_Float32 },
             { "AL_FORMAT_STEREO_FLOAT32", ChannelConfig_Stereo, SampleType_Float32 },
-        };
-        static const size_t fltfmtlistsize = sizeof(fltfmtlist)/sizeof(fltfmtlist[0]);
+        }};
+        ALenum format = AL_NONE;
 
-        for(size_t i = 0;i < fltfmtlistsize;i++)
-        {
-            if(fltfmtlist[i].chans == chans && fltfmtlist[i].type == type)
+        std::find_if(fltfmtlist.cbegin(), fltfmtlist.cend(),
+            [&format,chans,type](const FormatEntryExt &fmt) -> bool
             {
-                ALenum format = alGetEnumValue(fltfmtlist[i].name);
-                if(format != 0 && format != -1)
-                    return format;
+                if(fmt.chans == chans && fmt.type == type)
+                    format = alGetEnumValue(fmt.name);
+                return format != 0 && format != -1;
             }
-        }
+        );
+        if(format != 0 && format != -1)
+            return format;
+
         if(alIsExtensionPresent("AL_EXT_MCFORMATS"))
         {
-            static const struct {
-                char name[32];
-                ChannelConfig chans;
-                SampleType type;
-            } fltmcfmtlist[] = {
+            static const std::array<FormatEntryExt,3> fltmcfmtlist{{
                 { "AL_FORMAT_QUAD32",  ChannelConfig_Quad,    SampleType_Float32 },
                 { "AL_FORMAT_51CHN32", ChannelConfig_5point1, SampleType_Float32 },
                 { "AL_FORMAT_71CHN32", ChannelConfig_7point1, SampleType_Float32 },
-            };
-            static const size_t fltmcfmtlistsize = sizeof(fltmcfmtlist)/sizeof(fltmcfmtlist[0]);
+            }};
 
-            for(size_t i = 0;i < fltmcfmtlistsize;i++)
-            {
-                if(fltmcfmtlist[i].chans == chans && fltmcfmtlist[i].type == type)
+            std::find_if(fltmcfmtlist.cbegin(), fltmcfmtlist.cend(),
+                [&format,chans,type](const FormatEntryExt &fmt) -> bool
                 {
-                    ALenum format = alGetEnumValue(fltmcfmtlist[i].name);
-                    if(format != 0 && format != -1)
-                        return format;
+                    if(fmt.chans == chans && fmt.type == type)
+                        format = alGetEnumValue(fmt.name);
+                    return format != 0 && format != -1;
                 }
-            }
+            );
+            if(format != 0 && format != -1)
+                return format;
         }
     }
 
