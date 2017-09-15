@@ -273,13 +273,12 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
 //
 class OpenAL_SoundStream
 {
-    static const ALuint sNumBuffers = 6;
     static const ALfloat sBufferLength;
 
 private:
     ALuint mSource;
 
-    ALuint mBuffers[sNumBuffers];
+    std::array<ALuint,6> mBuffers;
     ALint mCurrentBufIdx;
 
     ALenum mFormat;
@@ -392,16 +391,17 @@ private:
 
 
 OpenAL_SoundStream::OpenAL_SoundStream(ALuint src, DecoderPtr decoder)
-  : mSource(src), mBuffers{0}, mCurrentBufIdx(0), mFormat(AL_NONE), mSampleRate(0)
+  : mSource(src), mCurrentBufIdx(0), mFormat(AL_NONE), mSampleRate(0)
   , mBufferSize(0), mFrameSize(0), mSilence(0), mDecoder(std::move(decoder))
   , mLoudnessAnalyzer(nullptr)
 {
+    mBuffers.fill(0);
 }
 
 OpenAL_SoundStream::~OpenAL_SoundStream()
 {
     if(mBuffers[0] && alIsBuffer(mBuffers[0]))
-        alDeleteBuffers(sNumBuffers, mBuffers);
+        alDeleteBuffers(mBuffers.size(), mBuffers.data());
     alGetError();
 
     mDecoder->close();
@@ -409,7 +409,7 @@ OpenAL_SoundStream::~OpenAL_SoundStream()
 
 bool OpenAL_SoundStream::init(bool getLoudnessData)
 {
-    alGenBuffers(sNumBuffers, mBuffers);
+    alGenBuffers(mBuffers.size(), mBuffers.data());
     ALenum err = getALError();
     if(err != AL_NO_ERROR)
         return false;
@@ -542,10 +542,10 @@ ALint OpenAL_SoundStream::refillQueue()
 
     ALint queued;
     alGetSourcei(mSource, AL_BUFFERS_QUEUED, &queued);
-    if(!mIsFinished && (ALuint)queued < sNumBuffers)
+    if(!mIsFinished && (ALuint)queued < mBuffers.size())
     {
         std::vector<char> data(mBufferSize);
-        for(;!mIsFinished && (ALuint)queued < sNumBuffers;++queued)
+        for(;!mIsFinished && (ALuint)queued < mBuffers.size();++queued)
         {
             size_t got = mDecoder->read(&data[0], data.size());
             if(got < data.size())
@@ -561,7 +561,7 @@ ALint OpenAL_SoundStream::refillQueue()
                 ALuint bufid = mBuffers[mCurrentBufIdx];
                 alBufferData(bufid, mFormat, &data[0], data.size(), mSampleRate);
                 alSourceQueueBuffers(mSource, 1, &bufid);
-                mCurrentBufIdx = (mCurrentBufIdx+1) % sNumBuffers;
+                mCurrentBufIdx = (mCurrentBufIdx+1) % mBuffers.size();
             }
         }
     }
