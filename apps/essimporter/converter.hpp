@@ -35,6 +35,7 @@
 #include "importques.hpp"
 #include "importjour.hpp"
 #include "importscpt.hpp"
+#include "importproj.h"
 
 #include "convertacdt.hpp"
 #include "convertnpcc.hpp"
@@ -591,6 +592,17 @@ public:
     }
 private:
     std::vector<ESM::GlobalScript> mScripts;
+};
+
+/// Projectile converter
+class ConvertPROJ : public Converter
+{
+public:
+    virtual int getStage() override { return 2; }
+    virtual void read(ESM::ESMReader& esm) override;
+    virtual void write(ESM::ESMWriter& esm) override;
+private:
+    PROJ mProj;
 };
 
 }

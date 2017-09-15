@@ -48,6 +48,9 @@ namespace ESSImport
         std::map<std::pair<int, std::string>, NPCC> mNpcChanges;
         std::map<std::pair<int, std::string>, CNTC> mContainerChanges;
 
+        std::map<std::pair<int, std::string>, int> mActorIdMap;
+        int mNextActorId;
+
         std::map<std::string, ESM::Creature> mCreatures;
         std::map<std::string, ESM::NPC> mNpcs;
 
@@ -56,6 +59,7 @@ namespace ESSImport
             , mMonth(0)
             , mYear(0)
             , mHour(0.f)
+            , mNextActorId(0)
         {
             mPlayer.mAutoMove = 0;
             ESM::CellId playerCellId;
@@ -67,15 +71,22 @@ namespace ESSImport
                 = mPlayer.mLastKnownExteriorPosition[2]
                 = 0.0f;
             mPlayer.mHasMark = 0;
-            mPlayer.mCurrentCrimeId = 0; // TODO
+            mPlayer.mCurrentCrimeId = -1; // TODO
+            mPlayer.mPaidCrimeId = -1;
             mPlayer.mObject.blank();
             mPlayer.mObject.mEnabled = true;
             mPlayer.mObject.mRef.mRefID = "player"; // REFR.mRefID would be PlayerSaveGame
+            mPlayer.mObject.mCreatureStats.mActorId = generateActorId();
 
             mGlobalMapState.mBounds.mMinX = 0;
             mGlobalMapState.mBounds.mMaxX = 0;
             mGlobalMapState.mBounds.mMinY = 0;
             mGlobalMapState.mBounds.mMaxY = 0;
+        }
+
+        int generateActorId()
+        {
+            return mNextActorId++;
         }
     };
 
