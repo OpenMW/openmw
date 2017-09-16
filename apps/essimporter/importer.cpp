@@ -303,6 +303,7 @@ namespace ESSImport
         converters[ESM::REC_QUES] = std::shared_ptr<Converter>(new ConvertQUES());
         converters[recJOUR      ] = std::shared_ptr<Converter>(new ConvertJOUR());
         converters[ESM::REC_SCPT] = std::shared_ptr<Converter>(new ConvertSCPT());
+        converters[ESM::REC_PROJ] = std::shared_ptr<Converter>(new ConvertPROJ());
 
         // TODO:
         // - REGN (weather in certain regions?)
@@ -419,6 +420,19 @@ namespace ESSImport
         }
         context.mPlayer.save(writer);
         writer.endRecord(ESM::REC_PLAY);
+
+        writer.startRecord(ESM::REC_ACTC);
+        writer.writeHNT("COUN", context.mNextActorId);
+        writer.endRecord(ESM::REC_ACTC);
+
+        // Stage 2 requires cell references to be written / actors IDs assigned
+        for (std::map<unsigned int, std::shared_ptr<Converter> >::const_iterator it = converters.begin();
+             it != converters.end(); ++it)
+        {
+            if (it->second->getStage() != 2)
+                continue;
+            it->second->write(writer);
+        }
 
         writer.startRecord (ESM::REC_DIAS);
         context.mDialogueState.save(writer);

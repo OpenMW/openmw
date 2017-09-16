@@ -66,15 +66,27 @@ namespace MWGui
         std::string pattern = "Splash/";
         mVFS->normalizeFilename(pattern);
 
-        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(pattern);
+        /* priority given to the left */
+        std::list<std::string> supported_extensions = {".tga", ".dds", ".ktx", ".png", ".bmp", ".jpeg", ".jpg"};
+
+        auto found = index.lower_bound(pattern);
         while (found != index.end())
         {
             const std::string& name = found->first;
             if (name.size() >= pattern.size() && name.substr(0, pattern.size()) == pattern)
             {
                 size_t pos = name.find_last_of('.');
-                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".tga") == 0)
-                    mSplashScreens.push_back(found->first);
+                if (pos != std::string::npos)
+                {
+                    for(auto const extension: supported_extensions)
+                    {
+                        if (name.compare(pos, name.size() - pos, extension) == 0)
+                        {
+                            mSplashScreens.push_back(found->first);
+                            break;  /* based on priority */
+                        }
+                    }
+                }
             }
             else
                 break;
