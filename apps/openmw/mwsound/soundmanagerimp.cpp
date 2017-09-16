@@ -185,9 +185,23 @@ namespace MWSound
     // minRange, and maxRange), and ensure it's ready for use.
     Sound_Buffer *SoundManager::loadSound(const std::string &soundId)
     {
+#ifdef __GNUC__
+#define LIKELY(x) __builtin_expect((bool)(x), true)
+#define UNLIKELY(x) __builtin_expect((bool)(x), false)
+#else
+#define LIKELY(x) (bool)(x)
+#define UNLIKELY(x) (bool)(x)
+#endif
+        if(UNLIKELY(mBufferNameMap.empty()))
+        {
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            for(const ESM::Sound &sound : world->getStore().get<ESM::Sound>())
+                insertSound(Misc::StringUtils::lowerCase(sound.mId), &sound);
+        }
+
         Sound_Buffer *sfx;
         NameBufferMap::const_iterator snd = mBufferNameMap.find(soundId);
-        if(snd != mBufferNameMap.end())
+        if(LIKELY(snd != mBufferNameMap.end()))
             sfx = snd->second;
         else
         {
@@ -196,6 +210,8 @@ namespace MWSound
             if(!sound) return nullptr;
             sfx = insertSound(soundId, sound);
         }
+#undef LIKELY
+#undef UNLIKELY
 
         if(!sfx->mHandle)
         {
