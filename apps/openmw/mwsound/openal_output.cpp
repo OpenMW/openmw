@@ -595,23 +595,23 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
     deinit();
 
     mDevice = alcOpenDevice(devname.c_str());
+    if(!mDevice && !devname.empty())
+    {
+        std::cerr<< "Failed to open \""<<devname<<"\", trying default" <<std::endl;
+        mDevice = alcOpenDevice(nullptr);
+    }
     if(!mDevice)
     {
-        if(devname.empty())
-            std::cerr<< "Failed to open default audio device" <<std::endl;
-        else
-            std::cerr<< "Failed to open \""<<devname<<"\"" <<std::endl;
+        std::cerr<< "Failed to open default audio device" <<std::endl;
         return false;
     }
-    else
-    {
-        const ALCchar *name = NULL;
-        if(alcIsExtensionPresent(mDevice, "ALC_ENUMERATE_ALL_EXT"))
-            name = alcGetString(mDevice, ALC_ALL_DEVICES_SPECIFIER);
-        if(alcGetError(mDevice) != AL_NO_ERROR || !name)
-            name = alcGetString(mDevice, ALC_DEVICE_SPECIFIER);
-        std::cout << "Opened \""<<name<<"\"" << std::endl;
-    }
+
+    const ALCchar *name = nullptr;
+    if(alcIsExtensionPresent(mDevice, "ALC_ENUMERATE_ALL_EXT"))
+        name = alcGetString(mDevice, ALC_ALL_DEVICES_SPECIFIER);
+    if(alcGetError(mDevice) != AL_NO_ERROR || !name)
+        name = alcGetString(mDevice, ALC_DEVICE_SPECIFIER);
+    std::cout<< "Opened \""<<name<<"\"" <<std::endl;
 
     ALC.EXT_EFX = alcIsExtensionPresent(mDevice, "ALC_EXT_EFX");
     ALC.SOFT_HRTF = alcIsExtensionPresent(mDevice, "ALC_SOFT_HRTF");
@@ -643,7 +643,7 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
             }
 
             if(index < 0)
-                std::cerr<< "Failed to find HRTF name \""<<hrtfname<<"\", using default" <<std::endl;
+                std::cerr<< "Failed to find HRTF \""<<hrtfname<<"\", using default" <<std::endl;
             else
             {
                 attrs.push_back(ALC_HRTF_ID_SOFT);
@@ -698,7 +698,7 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
     {
         ALuint src = 0;
         alGenSources(1, &src);
-        if(getALError() != AL_NO_ERROR)
+        if(alGetError() != AL_NO_ERROR)
             break;
         mFreeSources.push_back(src);
     }
@@ -824,8 +824,10 @@ void OpenAL_Output::deinit()
 {
     mStreamThread->removeAll();
 
-    for(size_t i = 0;i < mFreeSources.size();i++)
-        alDeleteSources(1, &mFreeSources[i]);
+    std::for_each(mFreeSources.cbegin(), mFreeSources.cend(),
+        [](ALuint source) -> void
+        { alDeleteSources(1, &source); }
+    );
     mFreeSources.clear();
 
     if(mEffectSlot)

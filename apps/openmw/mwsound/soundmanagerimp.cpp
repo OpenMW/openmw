@@ -26,11 +26,7 @@
 #include "sound.hpp"
 
 #include "openal_output.hpp"
-#define SOUND_OUT "OpenAL"
 #include "ffmpeg_decoder.hpp"
-#ifndef SOUND_IN
-#define SOUND_IN "FFmpeg"
-#endif
 
 
 namespace MWSound
@@ -60,6 +56,8 @@ namespace MWSound
         , mUnderwaterSound(nullptr)
         , mNearWaterSound(nullptr)
     {
+        std::cout<< "Initializing sound..." <<std::endl;
+
         mMasterVolume = Settings::Manager::getFloat("master volume", "Sound");
         mMasterVolume = std::min(std::max(mMasterVolume, 0.0f), 1.0f);
         mSFXVolume = Settings::Manager::getFloat("sfx volume", "Sound");
@@ -91,9 +89,6 @@ namespace MWSound
         HrtfMode hrtfmode = hrtfstate < 0 ? HrtfMode::Auto :
                             hrtfstate > 0 ? HrtfMode::Enable : HrtfMode::Disable;
 
-        std::cout << "Sound output: " << SOUND_OUT << std::endl;
-        std::cout << "Sound decoder: " << SOUND_IN << std::endl;
-
         std::vector<std::string> names = mOutput->enumerate();
         std::cout <<"Enumerated output devices:\n";
         std::for_each(names.cbegin(), names.cend(),
@@ -103,15 +98,9 @@ namespace MWSound
         std::cout.flush();
 
         std::string devname = Settings::Manager::getString("device", "Sound");
-        bool inited = mOutput->init(devname, hrtfname, hrtfmode);
-        if(!inited && !devname.empty())
+        if(!mOutput->init(devname, hrtfname, hrtfmode))
         {
-            std::cerr<< "Failed to initialize device \""<<devname<<"\", trying default" <<std::endl;
-            inited = mOutput->init(std::string(), hrtfname, hrtfmode);
-        }
-        if(!inited)
-        {
-            std::cerr<< "Failed to initialize default audio device, sound disabled" <<std::endl;
+            std::cerr<< "Failed to initialize audio output, sound disabled" <<std::endl;
             return;
         }
 
