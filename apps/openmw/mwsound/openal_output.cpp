@@ -594,6 +594,8 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
 {
     deinit();
 
+    std::cout<< "Initializing OpenAL..." <<std::endl;
+
     mDevice = alcOpenDevice(devname.c_str());
     if(!mDevice && !devname.empty())
     {
@@ -612,6 +614,12 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
     if(alcGetError(mDevice) != AL_NO_ERROR || !name)
         name = alcGetString(mDevice, ALC_DEVICE_SPECIFIER);
     std::cout<< "Opened \""<<name<<"\"" <<std::endl;
+
+    ALCint major=0, minor=0;
+    alcGetIntegerv(mDevice, ALC_MAJOR_VERSION, 1, &major);
+    alcGetIntegerv(mDevice, ALC_MINOR_VERSION, 1, &minor);
+    std::cout<< "  ALC Version: "<<major<<"."<<minor<<"\n"<<
+                "  ALC Extensions: "<<alcGetString(mDevice, ALC_EXTENSIONS) <<std::endl;
 
     ALC.EXT_EFX = alcIsExtensionPresent(mDevice, "ALC_EXT_EFX");
     ALC.SOFT_HRTF = alcIsExtensionPresent(mDevice, "ALC_SOFT_HRTF");
@@ -664,6 +672,11 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
         mDevice = nullptr;
         return false;
     }
+
+    std::cout<< "  Vendor: "<<alGetString(AL_VENDOR)<<"\n"<<
+                "  Renderer: "<<alGetString(AL_RENDERER)<<"\n"<<
+                "  Version: "<<alGetString(AL_VERSION)<<"\n"<<
+                "  Extensions: "<<alGetString(AL_EXTENSIONS)<<std::endl;
 
     if(!ALC.SOFT_HRTF)
         std::cout<< "HRTF status unavailable" <<std::endl;

@@ -56,8 +56,6 @@ namespace MWSound
         , mUnderwaterSound(nullptr)
         , mNearWaterSound(nullptr)
     {
-        std::cout<< "Initializing sound..." <<std::endl;
-
         mMasterVolume = Settings::Manager::getFloat("master volume", "Sound");
         mMasterVolume = std::min(std::max(mMasterVolume, 0.0f), 1.0f);
         mSFXVolume = Settings::Manager::getFloat("sfx volume", "Sound");
@@ -82,12 +80,22 @@ namespace MWSound
         mBufferCacheMin = std::min(mBufferCacheMin*1024*1024, mBufferCacheMax);
 
         if(!useSound)
+        {
+            std::cout<< "Sound disabled." <<std::endl;
             return;
+        }
 
         std::string hrtfname = Settings::Manager::getString("hrtf", "Sound");
         int hrtfstate = Settings::Manager::getInt("hrtf enable", "Sound");
         HrtfMode hrtfmode = hrtfstate < 0 ? HrtfMode::Auto :
                             hrtfstate > 0 ? HrtfMode::Enable : HrtfMode::Disable;
+
+        std::string devname = Settings::Manager::getString("device", "Sound");
+        if(!mOutput->init(devname, hrtfname, hrtfmode))
+        {
+            std::cerr<< "Failed to initialize audio output, sound disabled" <<std::endl;
+            return;
+        }
 
         std::vector<std::string> names = mOutput->enumerate();
         std::cout <<"Enumerated output devices:\n";
@@ -96,13 +104,6 @@ namespace MWSound
             { std::cout <<"  "<<name<<"\n"; }
         );
         std::cout.flush();
-
-        std::string devname = Settings::Manager::getString("device", "Sound");
-        if(!mOutput->init(devname, hrtfname, hrtfmode))
-        {
-            std::cerr<< "Failed to initialize audio output, sound disabled" <<std::endl;
-            return;
-        }
 
         names = mOutput->enumerateHrtf();
         if(!names.empty())
