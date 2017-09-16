@@ -1216,6 +1216,7 @@ bool CharacterController::updateWeaponState()
         if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
+            mAttackStrength = 0;
             if(mWeaponType == WeapType_Spell)
             {
                 // Unset casting flag, otherwise pressing the mouse button down would
