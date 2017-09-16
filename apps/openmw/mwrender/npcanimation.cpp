@@ -770,8 +770,9 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
             mSoundIds[type] = csi->getClass().getSound(*csi);
             if (!mSoundIds[type].empty())
             {
-                MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, mSoundIds[type], 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
-                    MWBase::SoundManager::Play_Loop);
+                MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, mSoundIds[type],
+                    1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Loop
+                );
             }
         }
     }
