@@ -215,10 +215,11 @@ namespace MWSound
 
         if(!sfx->mHandle)
         {
-            sfx->mHandle = mOutput->loadSound(sfx->mResourceName);
+            size_t size;
+            std::tie(sfx->mHandle, size) = mOutput->loadSound(sfx->mResourceName);
             if(!sfx->mHandle) return nullptr;
 
-            mBufferCacheSize += mOutput->getSoundDataSize(sfx->mHandle);
+            mBufferCacheSize += size;
             if(mBufferCacheSize > mBufferCacheMax)
             {
                 do {
@@ -229,8 +230,8 @@ namespace MWSound
                     }
                     Sound_Buffer *unused = mUnusedBuffers.back();
 
-                    mBufferCacheSize -= mOutput->getSoundDataSize(unused->mHandle);
-                    mOutput->unloadSound(unused->mHandle);
+                    size = mOutput->unloadSound(unused->mHandle);
+                    mBufferCacheSize -= size;
                     unused->mHandle = 0;
 
                     mUnusedBuffers.pop_back();

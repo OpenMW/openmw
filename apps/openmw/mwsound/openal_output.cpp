@@ -941,7 +941,7 @@ void OpenAL_Output::setHrtf(const std::string &hrtfname, HrtfMode hrtfmode)
 }
 
 
-Sound_Handle OpenAL_Output::loadSound(const std::string &fname)
+std::pair<Sound_Handle,size_t> OpenAL_Output::loadSound(const std::string &fname)
 {
     getALError();
 
@@ -966,27 +966,31 @@ Sound_Handle OpenAL_Output::loadSound(const std::string &fname)
 
     decoder->getInfo(&srate, &chans, &type);
     format = getALFormat(chans, type);
-    if(!format) return nullptr;
+    if(!format) return std::make_pair(nullptr, 0);
 
     decoder->readAll(data);
     decoder->close();
 
+    ALint size;
     ALuint buf = 0;
     alGenBuffers(1, &buf);
-    alBufferData(buf, format, &data[0], data.size(), srate);
+    alBufferData(buf, format, data.data(), data.size(), srate);
+    alGetBufferi(buf, AL_SIZE, &size);
     if(getALError() != AL_NO_ERROR)
     {
         if(buf && alIsBuffer(buf))
             alDeleteBuffers(1, &buf);
         getALError();
-        return nullptr;
+        return std::make_pair(nullptr, 0);
     }
-    return MAKE_PTRID(buf);
+    return std::make_pair(MAKE_PTRID(buf), size);
 }
 
-void OpenAL_Output::unloadSound(Sound_Handle data)
+size_t OpenAL_Output::unloadSound(Sound_Handle data)
 {
     ALuint buffer = GET_PTRID(data);
+    if(!buffer) return 0;
+
     // Make sure no sources are playing this buffer before unloading it.
     SoundVec::const_iterator iter = mActiveSounds.begin();
     for(;iter != mActiveSounds.end();++iter)
@@ -1003,19 +1007,11 @@ void OpenAL_Output::unloadSound(Sound_Handle data)
             alSourcei(source, AL_BUFFER, 0);
         }
     }
+    ALint size = 0;
+    alGetBufferi(buffer, AL_SIZE, &size);
     alDeleteBuffers(1, &buffer);
     getALError();
-}
-
-size_t OpenAL_Output::getSoundDataSize(Sound_Handle data) const
-{
-    ALuint buffer = GET_PTRID(data);
-    ALint size = 0;
-
-    alGetBufferi(buffer, AL_SIZE, &size);
-    getALError();
-
-    return (ALuint)size;
+    return size;
 }
 
 
