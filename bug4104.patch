@@ -1,0 +1,89 @@
+diff --git a/apps/openmw/mwclass/weapon.cpp b/apps/openmw/mwclass/weapon.cpp
+index 9fb4a97678..ddb020f901 100644
+--- a/apps/openmw/mwclass/weapon.cpp
++++ b/apps/openmw/mwclass/weapon.cpp
+@@ -68,6 +68,16 @@ namespace MWClass
+         return (ref->mBase->mData.mType < 11); // thrown weapons and arrows/bolts don't have health, only quantity
+     }
+ 
++    int Weapon::getItemHealth(const MWWorld::ConstPtr& ptr)
++    {
++        const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
++
++        if (mHealth == -1)
++            mHealth = ref->mBase->mData.mHealth;
++
++        return mHealth;
++    }
++
+     int Weapon::getItemMaxHealth (const MWWorld::ConstPtr& ptr) const
+     {
+         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
+@@ -317,8 +327,7 @@ namespace MWClass
+ 
+         if (ref->mBase->mData.mType < 11) // thrown weapons and arrows/bolts don't have health, only quantity
+         {
+-            int remainingHealth = getItemHealth(ptr);
+-            text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
++            text += "\n#{sCondition}: " + MWGui::ToolTips::toString(ref->mClass->getItemHealth(ptr)) + "/"
+                     + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
+         }
+ 
+diff --git a/apps/openmw/mwclass/weapon.hpp b/apps/openmw/mwclass/weapon.hpp
+index c148473635..dd91059431 100644
+--- a/apps/openmw/mwclass/weapon.hpp
++++ b/apps/openmw/mwclass/weapon.hpp
+@@ -7,11 +7,12 @@ namespace MWClass
+ {
+     class Weapon : public MWWorld::Class
+     {
++            int mHealth = -1;
++            
+             virtual MWWorld::Ptr
+             copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const;
+ 
+         public:
+-
+             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
+             ///< Add reference into a cell for rendering
+ 
+@@ -34,6 +35,8 @@ namespace MWClass
+             virtual bool hasItemHealth (const MWWorld::ConstPtr& ptr) const;
+             ///< \return Item health data available?
+ 
++            virtual int getItemHealth(const MWWorld::ConstPtr & ptr);
++
+             virtual int getItemMaxHealth (const MWWorld::ConstPtr& ptr) const;
+             ///< Return item max health or throw an exception, if class does not have item health
+ 
+@@ -49,6 +52,7 @@ namespace MWClass
+             /// no such skill.
+ 
+             virtual int getValue (const MWWorld::ConstPtr& ptr) const;
++            
+             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
+ 
+             static void registerSelf();
+diff --git a/apps/openmw/mwgui/inventorywindow.cpp b/apps/openmw/mwgui/inventorywindow.cpp
+index 6a2d3ff83a..774bf8088e 100644
+--- a/apps/openmw/mwgui/inventorywindow.cpp
++++ b/apps/openmw/mwgui/inventorywindow.cpp
+@@ -694,7 +694,7 @@ namespace MWGui
+         for (ItemModel::ModelIndex i=0; i<int(model.getItemCount()); ++i)
+         {
+             MWWorld::Ptr item = model.getItem(i).mBase;
+-            if (model.getItem(i).mType & ItemStack::Type_Equipped && isRightHandWeapon(item))
++            if (model.getItem(i).mType & ItemStack::Type_Equipped && isRightHandWeapon(item) && item.getClass().getItemHealth(item) > 0)
+                 selected = i;
+         }
+ 
+@@ -717,7 +717,8 @@ namespace MWGui
+ 
+             lastId = item.getCellRef().getRefId();
+ 
+-            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() && isRightHandWeapon(item))
++            // Cycling through weapons does skip broken ones.
++            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() && isRightHandWeapon(item) && item.getClass().getItemHealth(item) > 0)
+             {
+                 found = true;
+                 break;
