@@ -288,7 +288,7 @@ namespace MWWorld
         std::map<std::string, RegionWeather> mRegions;
         MWRender::WeatherResult mResult;
 
-        MWBase::SoundPtr mAmbientSound;
+        MWBase::Sound *mAmbientSound;
         std::string mPlayingSoundID;
 
         void addWeather(const std::string& name,

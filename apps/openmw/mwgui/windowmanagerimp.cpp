@@ -1848,7 +1848,8 @@ namespace MWGui
 
         if (mVideoWidget->hasAudioStream())
             MWBase::Environment::get().getSoundManager()->pauseSounds(
-                        MWBase::SoundManager::Play_TypeMask&(~MWBase::SoundManager::Play_TypeMovie));
+                ~MWSound::Type::Movie & MWSound::Type::Mask
+            );
         osg::Timer frameTimer;
         while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
@@ -2035,7 +2036,7 @@ namespace MWGui
 
     void WindowManager::playSound(const std::string& soundId, float volume, float pitch)
     {
-        MWBase::Environment::get().getSoundManager()->playSound(soundId, volume, pitch, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoEnv);
+        MWBase::Environment::get().getSoundManager()->playSound(soundId, volume, pitch, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
     }
 
     void WindowManager::setConsoleSelectedObject(const MWWorld::Ptr &object)
