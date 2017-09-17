@@ -530,8 +530,10 @@ namespace MWRender
     void RenderingManager::updatePlayerPtr(const MWWorld::Ptr &ptr)
     {
         if(mPlayerAnimation.get())
+        {
+            setupPlayer(ptr);
             mPlayerAnimation->updatePtr(ptr);
-
+        }
         mCamera->attachTo(ptr);
     }
 
@@ -834,6 +836,7 @@ namespace MWRender
 
         player.getRefData().setBaseNode(mPlayerNode);
 
+        mWater->removeEmitter(player);
         mWater->addEmitter(player);
     }
 
