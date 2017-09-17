@@ -311,7 +311,7 @@ Placing in a chest
 For this example we will use the small chest intended for lockpick practice, 
 located in the Census and Excise Office in Seyda Neen.
 
-FIrst we need the ID of the chest - this can be obtained either by clicking on it in the console
+First we need the ID of the chest - this can be obtained either by clicking on it in the console
 in the game, or by applying a similar process in the CS - 
 
 World/Cells
@@ -320,7 +320,7 @@ Select "Seyda Neen, Census and Excise Office"
 
 Right-click and select "View"
 
-Use mouse wheel to zoon in/out, and mouse plus WASD keys to navigate
+Use mouse wheel to zoom in/out, and mouse plus WASD keys to navigate
 
 Click on the small chest
 
