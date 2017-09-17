@@ -1754,7 +1754,7 @@ void CharacterController::update(float duration)
                 }
             }
         }
-        else if(mJumpState == JumpState_InAir && !inwater)
+        else if(mJumpState == JumpState_InAir && !inwater && !flying)
         {
             forcestateupdate = true;
             jumpstate = JumpState_Landing;
