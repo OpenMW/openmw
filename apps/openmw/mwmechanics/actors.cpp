@@ -1767,9 +1767,12 @@ namespace MWMechanics
             while (reader.isNextSub("ID__"))
             {
                 std::string id = reader.getHString();
-                int count;
-                reader.getHNT (count, "COUN");
-                mDeathCount[id] = count;
+                if (MWBase::Environment::get().getWorld()->getStore().find(id))
+                {
+                    int count;
+                    reader.getHNT(count, "COUN");
+                    mDeathCount[id] = count;
+                }
             }
         }
     }
