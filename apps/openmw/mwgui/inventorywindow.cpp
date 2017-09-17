@@ -717,7 +717,9 @@ namespace MWGui
 
             lastId = item.getCellRef().getRefId();
 
-            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() && isRightHandWeapon(item))
+            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() &&
+                isRightHandWeapon(item) &&
+                item.getClass().canBeEquipped(item, player).first)
             {
                 found = true;
                 break;
