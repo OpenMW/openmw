@@ -437,9 +437,9 @@ printf "Bullet 2.86... "
 		mv "Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}" Bullet
 	fi
 
-	export BULLET_ROOT="D:/WORKSPACE/tmp/MSVC2017_64/deps/Bullet"
-	add_cmake_opts -DBullet_INCLUDE_DIR="D:/WORKSPACE/tmp/MSVC2017_64/deps/Bullet/include/bullet" \
-					-DBullet_INCLUDE_DIRS="D:/WORKSPACE/tmp/MSVC2017_64/deps/Bullet/include/bullet"
+	export BULLET_ROOT="D:/WORKSPACE/joslan/MSVC2017_64/deps/Bullet"
+	add_cmake_opts -DBullet_INCLUDE_DIR="D:/WORKSPACE/joslan/MSVC2017_64/deps/Bullet/include/bullet" \
+					-DBullet_INCLUDE_DIRS="D:/WORKSPACE/joslan/MSVC2017_64/deps/Bullet/include/bullet"
 
 	echo Done.
 }
@@ -648,7 +648,7 @@ printf "SDL 2.0.4... "
 
 	add_runtime_dlls "$(pwd)/SDL2-2.0.4/lib/x${ARCHSUFFIX}/SDL2.dll"
 
-	add_cmake_opts -DSDL_INCLUDE_DIR="D:/WORKSPACE/tmp/MSVC2017_64/deps/SDL2/include"
+	add_cmake_opts -DSDL_INCLUDE_DIR="D:/WORKSPACE/joslan/MSVC2017_64/deps/SDL2/include"
 	echo Done.
 }
 echo
@@ -743,7 +743,7 @@ else
 	echo "- cmake . $CMAKE_OPTS"
 fi
 
-cd /d/workspace/tmp/MSVC2017_64
+cd /d/workspace/joslan/MSVC2017_64
 run_cmd cmake ../openmw $CMAKE_OPTS
 RET=$?
 
