@@ -293,32 +293,30 @@ namespace MWMechanics
         duration /= MWBase::Environment::get().getWorld()->getTimeScaleFactor();
         MWWorld::Ptr player = getPlayer();
         player.getClass().getInventoryStore(player).rechargeItems(duration);
-        rechargeItems(duration);
+        rechargeItems();
     }
 
-    void MechanicsManager::rechargeItems(float duration)
+    void MechanicsManager::rechargeItems()
     {
-        int index = 0;
-        for (std::vector<ESM::RechargeItem>::const_iterator it = mRechargeItems.begin(); it != mRechargeItems.end(); ++it)
+        ESM::TimeStamp curTime = MWBase::Environment::get().getWorld()->getTimeStamp().toEsm();
+        for (std::vector<ESM::RechargeItem>::iterator it = mRechargeItems.begin(); it != mRechargeItems.end();)
         {
             ESM::RechargeItem rItem = *it;
             MWWorld::Ptr item;
             MWBase::Environment::get().getWorld()->getItemById(rItem.key, item);
+            if (!item) {
+                it++;
+                continue;
+            }
 
             MWWorld::Ptr player = getPlayer();
-            //MWWorld::InventoryStore& inv = player.getClass().getInventoryStore(player);
-            //MWWorld::ContainerStore& store = item.getContainerStore(store);
-            //if (inv.hasRechargedItem( item.getContainerStore()))
-            //    continue;
 
             std::string enchantmentId = item.getClass().getEnchantment(item);
             const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(
                 enchantmentId);
             if (!enchantment)
             {
-                // TODO includer cer's library.
-                //std::cerr << "Warning: Can't find enchantment '" << enchantmentId << "' on item " << item.getCellRef().getRefId() << std::endl;
-                mRechargeItems.erase(mRechargeItems.begin() + index);
+                it = mRechargeItems.erase(it);
                 continue;
             }
 
@@ -327,22 +325,32 @@ namespace MWMechanics
             if (item.getCellRef().getEnchantmentCharge() == -1 ||
                 item.getCellRef().getEnchantmentCharge() == maxCharge)
             {
-                mRechargeItems.erase(mRechargeItems.begin() + index);
+                it = mRechargeItems.erase(it);
                 continue;
             }
             static float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                 "fMagicItemRechargePerSecond")->getFloat();
 
+            int durationDay = (curTime.mDay - rItem.mTimeStamp.mDay);
+            float durationHour = (curTime.mHour - rItem.mTimeStamp.mHour);
+            float durationElapsedHours = durationDay * 24 + durationHour;
+            rItem.mTimeStamp = curTime;
             if (item.getCellRef().getEnchantmentCharge() <= maxCharge)
             {
-                item.getCellRef().setEnchantmentCharge(std::min(item.getCellRef().getEnchantmentCharge() + fMagicItemRechargePerSecond * duration,
+                item.getCellRef().setEnchantmentCharge(std::min(item.getCellRef().getEnchantmentCharge() + (fMagicItemRechargePerSecond * durationElapsedHours), // game-time.
                     maxCharge));
+
             }
-            index++;
+            ++it;
         }
     }
 
-
+    bool MechanicsManager::isRechargeItemInStack(ESM::RechargeItem rItem)
+    {
+        std::vector<ESM::RechargeItem>::iterator fItem;
+        fItem = std::find_if(mRechargeItems.begin(), mRechargeItems.end(), [rItem](ESM::RechargeItem o) { return o.key == rItem.key; });
+        return (fItem != mRechargeItems.end());
+    }
 
     void MechanicsManager::update(float duration, bool paused)
     {
@@ -1089,7 +1097,7 @@ namespace MWMechanics
         }
         Misc::StringUtils::lowerCaseInPlace(owner.first);
 
-        std::string enchantmentId = item.getClass().getEnchantment(item);
+        /*std::string enchantmentId = item.getClass().getEnchantment(item);
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(
             enchantmentId);
         if (enchantment)
@@ -1098,8 +1106,10 @@ namespace MWMechanics
             rItem.key = item.getCellRef().getRefId();
             rItem.curCharge = item.getCellRef().getCharge();
             rItem.maxCharge = enchantment->mData.mCharge;
+            rItem.mTimeStamp = MWBase::Environment::get().getWorld()->getTimeStamp().toEsm();
             mRechargeItems.push_back(rItem);
-        }
+        }*/
+
         if (!Misc::StringUtils::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
             mStolenItems[Misc::StringUtils::lowerCase(item.getCellRef().getRefId())][owner] += count;
 

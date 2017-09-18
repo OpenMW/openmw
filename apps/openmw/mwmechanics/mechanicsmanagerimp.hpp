@@ -80,7 +80,11 @@ namespace MWMechanics
 
             virtual void advanceTime (float duration);
 
-			virtual void rechargeItems(float duration);
+			virtual void rechargeItems();
+
+            virtual bool isRechargeItemInStack(ESM::RechargeItem rItem);
+            
+            virtual void addRechargeItem(ESM::RechargeItem rItem) { mRechargeItems.push_back(rItem); }
 
             virtual void setPlayerName (const std::string& name);
             ///< Set player name.

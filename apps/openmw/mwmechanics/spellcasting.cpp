@@ -791,6 +791,16 @@ namespace MWMechanics
             }
             // Reduce charge
             item.getCellRef().setEnchantmentCharge(item.getCellRef().getEnchantmentCharge() - castCost);
+
+            // Add Enchanted Item to recharge.
+            ESM::RechargeItem rechargeItem;
+            rechargeItem.key = item.getCellRef().getRefId();
+            rechargeItem.curCharge = item.getCellRef().getEnchantmentCharge();
+            rechargeItem.maxCharge = enchantment->mData.mCost;
+            rechargeItem.mTimeStamp = MWBase::Environment::get().getWorld()->getTimeStamp().toEsm();
+
+            if (!MWBase::Environment::get().getMechanicsManager()->isRechargeItemInStack(rechargeItem))
+                MWBase::Environment::get().getMechanicsManager()->addRechargeItem(rechargeItem);   
         }
 
         if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)

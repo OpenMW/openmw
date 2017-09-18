@@ -2490,7 +2490,7 @@ namespace MWWorld
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
         {
             MWWorld::CellStore* cellStore = (*cellIt);
-            out = cellStore->searchInContainer(id);
+            out = cellStore->search(id);
         }
     }
 

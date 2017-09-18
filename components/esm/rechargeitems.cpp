@@ -1,5 +1,7 @@
 #include "rechargeitems.hpp"
 
+#include "defs.hpp"
+
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 
@@ -12,9 +14,10 @@ namespace ESM
         for (std::vector<RechargeItem>::const_iterator it = mRechargeItems.begin(); it != mRechargeItems.end(); ++it)
         {
             RechargeItem item = *it;
-            esm.writeHNString("KEY", item.key);
-            esm.writeHNT("C", item.curCharge);
+            esm.writeHNString("KEYR", item.key);
+            esm.writeHNT("CCUR", item.curCharge);
             esm.writeHNT("CMAX", item.maxCharge);
+            esm.writeHNT("TIME", item.mTimeStamp);
         }
     }
 
@@ -24,9 +27,10 @@ namespace ESM
         while (esm.isNextSub("ITEM"))
         {
             RechargeItem rItem;
-            rItem.key = esm.getHNString("KEY");
-            esm.getHNT(rItem.curCharge, "C");
+            rItem.key = esm.getHNString("KEYR");
+            esm.getHNT(rItem.curCharge, "CCUR");
             esm.getHNT(rItem.maxCharge, "CMAX");
+            esm.getHNT(rItem.mTimeStamp, "TIME");
             tRechageItems.push_back(rItem);
         }
     }

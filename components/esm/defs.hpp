@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include <osg/Vec3f>
+#include "../../apps/openmw/mwworld/timestamp.hpp"
 
 namespace ESM
 {
@@ -12,6 +13,12 @@ struct TimeStamp
 {
     float mHour;
     int mDay;
+
+    /*static public implicit operator TimeStamp(MWWorld::TimeStamp value)
+    {
+        mHour = value.mHour;
+        mDay = value.mDay;
+    };*/
 };
 
 // Pixel color value. Standard four-byte rr,gg,bb,aa format.

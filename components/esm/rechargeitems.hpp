@@ -4,6 +4,9 @@
 #include <vector>
 #include <string>
 
+#include "defs.hpp"
+#include "../../apps/openmw/mwworld/timestamp.hpp"
+
 namespace ESM
 {
     class ESMReader;
@@ -13,6 +16,7 @@ namespace ESM
         std::string key;
         int curCharge;
         int maxCharge;
+        TimeStamp mTimeStamp;
     };
 
     // format 0, saved games only

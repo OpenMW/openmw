@@ -2,6 +2,7 @@
 #define OPENMW_MWWORLD_CELLREF_H
 
 #include <components/esm/cellref.hpp>
+#include <components/esm/rechargeitems.hpp>
 
 namespace ESM
 {
@@ -55,6 +56,9 @@ namespace MWWorld
 
         // Remaining enchantment charge. This could be -1 if the charge was not touched yet (i.e. full).
         float getEnchantmentCharge() const;
+
+        ESM::RechargeItem mRechargeItem;
+        ESM::RechargeItem getRechargeItem() { return mRechargeItem; };
 
         void setEnchantmentCharge(float charge);
 
