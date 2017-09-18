@@ -1,7 +1,80 @@
 #include "columnimp.hpp"
 
+#include <stdexcept>
+
 namespace CSMWorld
 {
+    /* LandTextureNicknameColumn */
+    LandTextureNicknameColumn::LandTextureNicknameColumn()
+        : Column<LandTexture>(Columns::ColumnId_TextureNickname, ColumnBase::Display_String)
+    {
+    }
+
+    QVariant LandTextureNicknameColumn::get(const Record<LandTexture>& record) const
+    {
+        return QString::fromUtf8(record.get().mId.c_str());
+    }
+
+    void LandTextureNicknameColumn::set(Record<LandTexture>& record, const QVariant& data)
+    {
+        LandTexture copy = record.get();
+        copy.mId = data.toString().toUtf8().constData();
+        record.setModified(copy);
+    }
+
+    bool LandTextureNicknameColumn::isEditable() const
+    {
+        return true;
+    }
+
+    /* LandTextureIndexColumn */
+    LandTextureIndexColumn::LandTextureIndexColumn()
+        : Column<LandTexture>(Columns::ColumnId_TextureIndex, ColumnBase::Display_Integer)
+    {
+    }
+
+    QVariant LandTextureIndexColumn::get(const Record<LandTexture>& record) const
+    {
+        return record.get().mIndex;
+    }
+
+    bool LandTextureIndexColumn::isEditable() const
+    {
+        return false;
+    }
+
+    /* LandPluginIndexColumn */
+    LandPluginIndexColumn::LandPluginIndexColumn()
+        : Column<Land>(Columns::ColumnId_PluginIndex, ColumnBase::Display_Integer, 0)
+    {
+    }
+
+    QVariant LandPluginIndexColumn::get(const Record<Land>& record) const
+    {
+        return record.get().mPlugin;
+    }
+
+    bool LandPluginIndexColumn::isEditable() const
+    {
+        return false;
+    }
+
+    /* LandTexturePluginIndexColumn */
+    LandTexturePluginIndexColumn::LandTexturePluginIndexColumn()
+        : Column<LandTexture>(Columns::ColumnId_PluginIndex, ColumnBase::Display_Integer, 0)
+    {
+    }
+
+    QVariant LandTexturePluginIndexColumn::get(const Record<LandTexture>& record) const
+    {
+        return record.get().mPluginIndex;
+    }
+
+    bool LandTexturePluginIndexColumn::isEditable() const
+    {
+        return false;
+    }
+
     /* LandMapLodColumn */
     LandMapLodColumn::LandMapLodColumn()
         : Column<Land>(Columns::ColumnId_LandMapLodIndex, ColumnBase::Display_String, 0)
@@ -30,7 +103,9 @@ namespace CSMWorld
     {
         QByteArray array = data.toByteArray();
         const signed char* rawData = reinterpret_cast<const signed char*>(array.data());
-        assert (array.count() == Land::LAND_GLOBAL_MAP_LOD_SIZE);
+
+        if (array.count() != Land::LAND_GLOBAL_MAP_LOD_SIZE)
+            throw std::runtime_error("invalid land map LOD data");
 
         Land copy = record.get();
         copy.setDataLoaded(Land::DATA_WNAM);
@@ -76,7 +151,9 @@ namespace CSMWorld
     {
         QByteArray array = data.toByteArray();
         const signed char* rawData = reinterpret_cast<const signed char*>(array.data());
-        assert (array.count() == Land::LAND_NUM_VERTS * 3);
+
+        if (array.count() != Land::LAND_NUM_VERTS * 3)
+            throw std::runtime_error("invalid land normals data");
 
         Land copy = record.get();
         copy.setDataLoaded(Land::DATA_VNML);
@@ -121,7 +198,9 @@ namespace CSMWorld
     {
         QByteArray array = data.toByteArray();
         const float* rawData = reinterpret_cast<const float*>(array.data());
-        assert (array.count() == Land::LAND_NUM_VERTS * sizeof(float));
+
+        if (array.count() != Land::LAND_NUM_VERTS * sizeof(float))
+            throw std::runtime_error("invalid land heights data");
 
         Land copy = record.get();
         copy.setDataLoaded(Land::DATA_VHGT);
@@ -167,7 +246,9 @@ namespace CSMWorld
     {
         QByteArray array = data.toByteArray();
         const unsigned char* rawData = reinterpret_cast<const unsigned char*>(array.data());
-        assert (array.count() == Land::LAND_NUM_VERTS * 3);
+
+        if (array.count() != Land::LAND_NUM_VERTS * 3)
+            throw std::runtime_error("invalid land colours data");
 
         Land copy = record.get();
         copy.setDataLoaded(Land::DATA_VCLR);
@@ -212,7 +293,9 @@ namespace CSMWorld
     {
         QByteArray array = data.toByteArray();
         const uint16_t* rawData = reinterpret_cast<const uint16_t*>(array.data());
-        assert (array.count() == Land::LAND_NUM_TEXTURES * sizeof(uint16_t));
+
+        if (array.count() != Land::LAND_NUM_TEXTURES * sizeof(uint16_t))
+            throw std::runtime_error("invalid land textures data");
 
         Land copy = record.get();
         copy.setDataLoaded(Land::DATA_VTEX);

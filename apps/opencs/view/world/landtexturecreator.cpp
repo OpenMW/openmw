@@ -45,7 +45,7 @@ namespace CSVWorld
 
         CSMWorld::IdTable& table = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(getCollectionId()));
 
-        int column = table.findColumnIndex(CSMWorld::Columns::ColumnId_TextureHandle);
+        int column = table.findColumnIndex(CSMWorld::Columns::ColumnId_TextureNickname);
         mNameEdit->setText((table.data(table.getModelIndex(originId, column)).toString()));
 
         column = table.findColumnIndex(CSMWorld::Columns::ColumnId_TextureIndex);
@@ -79,7 +79,7 @@ namespace CSVWorld
         GenericCreator::configureCreateCommand(command);
 
         CSMWorld::IdTable& table = dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(getCollectionId()));
-        int column = table.findColumnIndex(CSMWorld::Columns::ColumnId_TextureHandle);
+        int column = table.findColumnIndex(CSMWorld::Columns::ColumnId_TextureNickname);
         command.addValue(column, mName.c_str());
     }
 

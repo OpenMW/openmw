@@ -177,17 +177,14 @@ namespace ESM
 
     void Land::blank()
     {
-        if (mLandData)
-        {
-            delete mLandData;
-        }
-
         mPlugin = 0;
 
         for (int i = 0; i < LAND_GLOBAL_MAP_LOD_SIZE; ++i)
             mWnam[0] = 0;
 
-        mLandData = new LandData;
+        if (!mLandData)
+            mLandData = new LandData;
+
         mLandData->mHeightOffset = 0;
         for (int i = 0; i < LAND_NUM_VERTS; ++i)
             mLandData->mHeights[i] = 0;

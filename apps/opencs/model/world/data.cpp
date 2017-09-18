@@ -415,7 +415,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mLand.addColumn (new StringIdColumn<Land>);
     mLand.addColumn (new RecordStateColumn<Land>);
     mLand.addColumn (new FixedRecordTypeColumn<Land>(UniversalId::Type_Land));
-    mLand.addColumn (new PluginIndexColumn<Land>);
+    mLand.addColumn (new LandPluginIndexColumn);
     mLand.addColumn (new LandMapLodColumn);
     mLand.addColumn (new LandNormalsColumn);
     mLand.addColumn (new LandHeightsColumn);
@@ -425,9 +425,9 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mLandTextures.addColumn (new StringIdColumn<LandTexture>(true));
     mLandTextures.addColumn (new RecordStateColumn<LandTexture>);
     mLandTextures.addColumn (new FixedRecordTypeColumn<LandTexture>(UniversalId::Type_LandTexture));
-    mLandTextures.addColumn (new TextureHandleColumn<LandTexture>);
-    mLandTextures.addColumn (new PluginIndexColumn<LandTexture>);
-    mLandTextures.addColumn (new TextureIndexColumn<LandTexture>);
+    mLandTextures.addColumn (new LandTextureNicknameColumn);
+    mLandTextures.addColumn (new LandTexturePluginIndexColumn);
+    mLandTextures.addColumn (new LandTextureIndexColumn);
     mLandTextures.addColumn (new TextureColumn<LandTexture>);
 
     mPathgrids.addColumn (new StringIdColumn<Pathgrid>);

@@ -330,7 +330,7 @@ namespace CSMWorld
             { ColumnId_WeatherChance, "Percent Chance" },
 
             { ColumnId_Text, "Text" },
-            { ColumnId_TextureHandle, "Texture Handle" },
+            { ColumnId_TextureNickname, "Texture Nickname" },
             { ColumnId_PluginIndex, "Plugin Index" },
             { ColumnId_TextureIndex, "Texture Index" },
             { ColumnId_LandMapLodIndex, "Land map height LOD" },

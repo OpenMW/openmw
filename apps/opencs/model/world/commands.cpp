@@ -48,7 +48,7 @@ CSMWorld::ImportLandTexturesCommand::ImportLandTexturesCommand(IdTable& landTabl
     , mLtexs(ltexTable)
     , mOldState(0)
 {
-    setText("Import land textures");
+    setText("Copy land textures to current plugin");
 }
 
 void CSMWorld::ImportLandTexturesCommand::redo()

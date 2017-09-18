@@ -329,7 +329,7 @@ namespace CSMWorld
 
             ColumnId_Text = 297,
 
-            ColumnId_TextureHandle = 298,
+            ColumnId_TextureNickname = 298,
             ColumnId_PluginIndex = 299,
             ColumnId_TextureIndex = 300,
             ColumnId_LandMapLodIndex = 301,

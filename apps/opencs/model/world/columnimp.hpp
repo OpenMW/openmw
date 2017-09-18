@@ -67,14 +67,14 @@ namespace CSMWorld
     inline QVariant StringIdColumn<Land>::get(const Record<Land>& record) const
     {
         const Land& land = record.get();
-        return QString(Land::createUniqueRecordId(land.mX, land.mY).c_str());
+        return QString::fromUtf8(Land::createUniqueRecordId(land.mX, land.mY).c_str());
     }
 
     template<>
     inline QVariant StringIdColumn<LandTexture>::get(const Record<LandTexture>& record) const
     {
         const LandTexture& ltex = record.get();
-        return QString(LandTexture::createUniqueRecordId(ltex.mPluginIndex, ltex.mIndex).c_str());
+        return QString::fromUtf8(LandTexture::createUniqueRecordId(ltex.mPluginIndex, ltex.mIndex).c_str());
     }
 
     template<typename ESXRecordT>
@@ -2435,78 +2435,38 @@ namespace CSMWorld
         }
     };
 
-    template<typename ESXRecordT>
-    struct TextureHandleColumn : public Column<ESXRecordT>
+    struct LandTextureNicknameColumn : public Column<LandTexture>
     {
-        TextureHandleColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_TextureHandle, ColumnBase::Display_String)
-        {}
+        LandTextureNicknameColumn();
 
-        QVariant get(const Record<ESXRecordT>& record) const override
-        {
-            return QString::fromUtf8(record.get().mId.c_str());
-        }
-
-        void set(Record<ESXRecordT>& record, const QVariant& data) override
-        {
-            ESXRecordT copy = record.get();
-            copy.mId = data.toString().toUtf8().constData();
-            record.setModified(copy);
-        }
-
-        bool isEditable() const override
-        {
-            return true;
-        }
+        QVariant get(const Record<LandTexture>& record) const override;
+        void set(Record<LandTexture>& record, const QVariant& data) override;
+        bool isEditable() const override;
     };
 
-    template<typename ESXRecordT>
-    struct TextureIndexColumn : public Column<ESXRecordT>
+    struct LandTextureIndexColumn : public Column<LandTexture>
     {
-        TextureIndexColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_TextureIndex, ColumnBase::Display_Integer)
-        {}
+        LandTextureIndexColumn();
 
-        QVariant get(const Record<ESXRecordT>& record) const override
-        {
-            return record.get().mIndex;
-        }
-
-        bool isEditable() const override
-        {
-            return false;
-        }
+        QVariant get(const Record<LandTexture>& record) const override;
+        bool isEditable() const override;
     };
 
-    template<typename ESXRecordT>
-    struct PluginIndexColumn : public Column<ESXRecordT>
+    struct LandPluginIndexColumn : public Column<Land>
     {
-        PluginIndexColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_PluginIndex, ColumnBase::Display_Integer,0)
-        {}
+        LandPluginIndexColumn();
 
-        QVariant get(const Record<ESXRecordT>& record) const override
-        {
-            return -1;
-        }
-
-        bool isEditable() const override
-        {
-            return false;
-        }
+        QVariant get(const Record<Land>& record) const override;
+        bool isEditable() const override;
     };
 
-    template<>
-    inline QVariant PluginIndexColumn<Land>::get (const Record<Land>& record) const
+    struct LandTexturePluginIndexColumn : public Column<LandTexture>
     {
-        return record.get().mPlugin;
-    }
+        LandTexturePluginIndexColumn();
 
-    template<>
-    inline QVariant PluginIndexColumn<LandTexture>::get (const Record<LandTexture>& record) const
-    {
-        return record.get().mPluginIndex;
-    }
+        QVariant get(const Record<LandTexture>& record) const override;
+        bool isEditable() const override;
+    };
 
     struct LandMapLodColumn : public Column<Land>
     {
