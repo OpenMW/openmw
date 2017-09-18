@@ -694,7 +694,7 @@ namespace MWGui
         for (ItemModel::ModelIndex i=0; i<int(model.getItemCount()); ++i)
         {
             MWWorld::Ptr item = model.getItem(i).mBase;
-            if (model.getItem(i).mType & ItemStack::Type_Equipped && isRightHandWeapon(item) && item.getClass().getItemHealth(item) > 0)
+            if (model.getItem(i).mType & ItemStack::Type_Equipped && isRightHandWeapon(item))
                 selected = i;
         }
 
@@ -718,7 +718,7 @@ namespace MWGui
             lastId = item.getCellRef().getRefId();
 
             // Cycling through weapons does skip broken ones.
-            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() && isRightHandWeapon(item) && item.getClass().getItemHealth(item) > 0)
+            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() && isRightHandWeapon(item) && item.getClass().canBeEquipped(item, player).first)
             {
                 found = true;
                 break;

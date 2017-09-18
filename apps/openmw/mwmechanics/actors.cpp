@@ -991,7 +991,7 @@ namespace MWMechanics
                 // ...But, only the player makes a sound.
                 if(isPlayer)
                     MWBase::Environment::get().getSoundManager()->playSound("torch out",
-                            1.0, 1.0, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoEnv);
+                            1.0, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
             }
         }
     }
@@ -1768,8 +1768,9 @@ namespace MWMechanics
             {
                 std::string id = reader.getHString();
                 int count;
-                reader.getHNT (count, "COUN");
-                mDeathCount[id] = count;
+                reader.getHNT(count, "COUN");
+                if (MWBase::Environment::get().getWorld()->getStore().find(id))
+                    mDeathCount[id] = count;
             }
         }
     }

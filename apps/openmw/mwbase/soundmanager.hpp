@@ -18,54 +18,59 @@ namespace MWSound
     class Stream;
     struct Sound_Decoder;
     typedef std::shared_ptr<Sound_Decoder> DecoderPtr;
+
+    /* These must all fit together */
+    enum class PlayMode {
+        Normal  = 0, /* non-looping, affected by environment */
+        Loop    = 1<<0, /* Sound will continually loop until explicitly stopped */
+        NoEnv   = 1<<1, /* Do not apply environment effects (eg, underwater filters) */
+        RemoveAtDistance = 1<<2, /* (3D only) If the listener gets further than 2000 units away
+                                  * from the sound source, the sound is removed.
+                                  * This is weird stuff but apparently how vanilla works for sounds
+                                  * played by the PlayLoopSound family of script functions. Perhaps
+                                  * we can make this cut off a more subtle fade later, but have to
+                                  * be careful to not change the overall volume of areas by too
+                                  * much. */
+        NoPlayerLocal = 1<<3, /* (3D only) Don't play the sound local to the listener even if the
+                               * player is making it. */
+        LoopNoEnv = Loop | NoEnv,
+        LoopRemoveAtDistance = Loop | RemoveAtDistance
+    };
+    enum class Type {
+        Sfx   = 1<<4, /* Normal SFX sound */
+        Voice = 1<<5, /* Voice sound */
+        Foot  = 1<<6, /* Footstep sound */
+        Music = 1<<7, /* Music track */
+        Movie = 1<<8, /* Movie audio track */
+        Mask  = Sfx | Voice | Foot | Music | Movie
+    };
+    // Used for creating a type mask for SoundManager::pauseSounds and resumeSounds
+    inline int operator~(Type a) { return ~static_cast<int>(a); }
+    inline int operator&(Type a, Type b) { return static_cast<int>(a) & static_cast<int>(b); }
+    inline int operator&(int a, Type b) { return a & static_cast<int>(b); }
+    inline int operator|(Type a, Type b) { return static_cast<int>(a) | static_cast<int>(b); }
 }
 
 namespace MWBase
 {
-    typedef std::shared_ptr<MWSound::Sound> SoundPtr;
-    typedef std::shared_ptr<MWSound::Stream> SoundStreamPtr;
+    using Sound = MWSound::Sound;
+    using SoundStream = MWSound::Stream;
 
     /// \brief Interface for sound manager (implemented in MWSound)
     class SoundManager
     {
-        public:
-            /* These must all fit together */
-            enum PlayMode {
-                Play_Normal  = 0, /* non-looping, affected by environment */
-                Play_Loop    = 1<<0, /* Sound will continually loop until explicitly stopped */
-                Play_NoEnv   = 1<<1, /* Do not apply environment effects (eg, underwater filters) */
-                Play_RemoveAtDistance = 1<<2, /* (3D only) If the listener gets further than 2000 units away
-                                                from the sound source, the sound is removed.
-                                                This is weird stuff but apparently how vanilla works for sounds
-                                                played by the PlayLoopSound family of script functions. Perhaps we
-                                                can make this cut off a more subtle fade later, but have to
-                                                be careful to not change the overall volume of areas by too much. */
-                Play_NoPlayerLocal = 1<<3, /* (3D only) Don't play the sound local to the listener even if the
-                                              player is making it. */
-                Play_LoopNoEnv = Play_Loop | Play_NoEnv,
-                Play_LoopRemoveAtDistance = Play_Loop | Play_RemoveAtDistance
-            };
-            enum PlayType {
-                Play_TypeSfx   = 1<<4, /* Normal SFX sound */
-                Play_TypeVoice = 1<<5, /* Voice sound */
-                Play_TypeFoot  = 1<<6, /* Footstep sound */
-                Play_TypeMusic = 1<<7, /* Music track */
-                Play_TypeMovie = 1<<8, /* Movie audio track */
-                Play_TypeMask  = Play_TypeSfx|Play_TypeVoice|Play_TypeFoot|Play_TypeMusic|Play_TypeMovie
-            };
-
-        private:
-
             SoundManager (const SoundManager&);
             ///< not implemented
 
             SoundManager& operator= (const SoundManager&);
             ///< not implemented
 
+        protected:
+            using PlayMode = MWSound::PlayMode;
+            using Type = MWSound::Type;
+
         public:
-
             SoundManager() {}
-
             virtual ~SoundManager() {}
 
             virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& settings) = 0;
@@ -106,34 +111,36 @@ namespace MWBase
             /// and get an average loudness value (scale [0,1]) at the current time position.
             /// If the actor is not saying anything, returns 0.
 
-            virtual SoundStreamPtr playTrack(const MWSound::DecoderPtr& decoder, PlayType type) = 0;
-            ///< Play a 2D audio track, using a custom decoder
+            virtual SoundStream *playTrack(const MWSound::DecoderPtr& decoder, Type type) = 0;
+            ///< Play a 2D audio track, using a custom decoder. The caller is expected to call
+            /// stopTrack with the returned handle when done.
 
-            virtual void stopTrack(SoundStreamPtr stream) = 0;
+            virtual void stopTrack(SoundStream *stream) = 0;
             ///< Stop the given audio track from playing
 
-            virtual double getTrackTimeDelay(SoundStreamPtr stream) = 0;
+            virtual double getTrackTimeDelay(SoundStream *stream) = 0;
             ///< Retives the time delay, in seconds, of the audio track (must be a sound
             /// returned by \ref playTrack). Only intended to be called by the track
             /// decoder's read method.
 
-            virtual SoundPtr playSound(const std::string& soundId, float volume, float pitch,
-                                       PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal,
-                                       float offset=0) = 0;
+            virtual Sound *playSound(const std::string& soundId, float volume, float pitch,
+                                     Type type=Type::Sfx, PlayMode mode=PlayMode::Normal,
+                                     float offset=0) = 0;
             ///< Play a sound, independently of 3D-position
             ///< @param offset Number of seconds into the sound to start playback.
 
-            virtual MWBase::SoundPtr playSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId,
-                                                 float volume, float pitch, PlayType type=Play_TypeSfx,
-                                                 PlayMode mode=Play_Normal, float offset=0) = 0;
+            virtual Sound *playSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId,
+                                       float volume, float pitch, Type type=Type::Sfx,
+                                       PlayMode mode=PlayMode::Normal, float offset=0) = 0;
             ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless Play_NoTrack is specified.
             ///< @param offset Number of seconds into the sound to start playback.
 
-            virtual MWBase::SoundPtr playSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
-                                                 float volume, float pitch, PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal, float offset=0) = 0;
+            virtual Sound *playSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
+                                       float volume, float pitch, Type type=Type::Sfx,
+                                       PlayMode mode=PlayMode::Normal, float offset=0) = 0;
             ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated using Sound::setPosition.
 
-            virtual void stopSound(SoundPtr sound) = 0;
+            virtual void stopSound(Sound *sound) = 0;
             ///< Stop the given sound from playing
 
             virtual void stopSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId) = 0;
@@ -158,10 +165,10 @@ namespace MWBase
             ///< Is the given sound currently playing on the given object?
             ///  If you want to check if sound played with playSound is playing, use empty Ptr
 
-            virtual void pauseSounds(int types=Play_TypeMask) = 0;
+            virtual void pauseSounds(int types=static_cast<int>(Type::Mask)) = 0;
             ///< Pauses all currently playing sounds, including music.
 
-            virtual void resumeSounds(int types=Play_TypeMask) = 0;
+            virtual void resumeSounds(int types=static_cast<int>(Type::Mask)) = 0;
             ///< Resumes all previously paused sounds.
 
             virtual void update(float duration) = 0;

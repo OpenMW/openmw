@@ -1404,14 +1404,16 @@ namespace MWPhysics
             // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
             float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
 
+            bool flying = world->isFlying(iter->first);
+
+            bool wasOnGround = physicActor->getOnGround();
             osg::Vec3f position = physicActor->getPosition();
             float oldHeight = position.z();
             bool positionChanged = false;
             for (int i=0; i<numSteps; ++i)
             {
                 position = MovementSolver::move(position, physicActor->getPtr(), physicActor, iter->second, physicsDt,
-                                                world->isFlying(iter->first),
-                                                waterlevel, slowFall, mCollisionWorld, mStandingCollisions);
+                                                flying, waterlevel, slowFall, mCollisionWorld, mStandingCollisions);
                 if (position != physicActor->getPosition())
                     positionChanged = true;
                 physicActor->setPosition(position); // always set even if unchanged to make sure interpolation is correct
@@ -1424,8 +1426,11 @@ namespace MWPhysics
 
             float heightDiff = position.z() - oldHeight;
 
-            if (heightDiff < 0)
-                iter->first.getClass().getCreatureStats(iter->first).addToFallHeight(-heightDiff);
+            MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
+            if ((wasOnGround && physicActor->getOnGround()) || flying || world->isSwimming(iter->first) || slowFall < 1)
+                stats.land();
+            else if (heightDiff < 0)
+                stats.addToFallHeight(-heightDiff);
 
             mMovementResults.push_back(std::make_pair(iter->first, interpolated));
         }
