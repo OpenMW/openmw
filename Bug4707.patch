@@ -1,0 +1,295 @@
+diff --git a/components/esm/rechargeitems.cpp b/components/esm/rechargeitems.cpp
+new file mode 100644
+index 0000000000..d8cbf7d3ab
+--- /dev/null
++++ b/components/esm/rechargeitems.cpp
+@@ -0,0 +1,34 @@
++#include "rechargeitems.hpp"
++
++#include <components/esm/esmreader.hpp>
++#include <components/esm/esmwriter.hpp>
++
++namespace ESM
++{
++
++
++    void RechargeItems::write(ESMWriter &esm) const
++    {
++        for (std::vector<RechargeItem>::const_iterator it = mRechargeItems.begin(); it != mRechargeItems.end(); ++it)
++        {
++            RechargeItem item = *it;
++            esm.writeHNString("KEY", item.key);
++            esm.writeHNT("C", item.curCharge);
++            esm.writeHNT("CMAX", item.maxCharge);
++        }
++    }
++
++    void RechargeItems::load(ESMReader &esm)
++    {
++        std::vector<RechargeItem> tRechageItems;
++        while (esm.isNextSub("ITEM"))
++        {
++            RechargeItem rItem;
++            rItem.key = esm.getHNString("KEY");
++            esm.getHNT(rItem.curCharge, "C");
++            esm.getHNT(rItem.maxCharge, "CMAX");
++            tRechageItems.push_back(rItem);
++        }
++    }
++
++}
+diff --git a/components/esm/rechargeitems.hpp b/components/esm/rechargeitems.hpp
+new file mode 100644
+index 0000000000..db4831f4c9
+--- /dev/null
++++ b/components/esm/rechargeitems.hpp
+@@ -0,0 +1,29 @@
++#ifndef OPENMW_COMPONENTS_ESM_RECHARGEITEMS_H
++#define OPENMW_COMPONENTS_ESM_RECHARGEITEMS_H
++
++#include <vector>
++#include <string>
++
++namespace ESM
++{
++    class ESMReader;
++    class ESMWriter;
++
++    struct RechargeItem {
++        std::string key;
++        int curCharge;
++        int maxCharge;
++    };
++
++    // format 0, saved games only
++    struct RechargeItems
++    {
++        std::vector<RechargeItem> mRechargeItems;
++
++        void load(ESM::ESMReader& esm);
++        void write(ESM::ESMWriter& esm) const;
++    };
++
++}
++
++#endif
+index 82182b7fae..fc5fae72ed 100644
+--- a/apps/essimporter/CMakeLists.txt
++++ b/apps/essimporter/CMakeLists.txt
+@@ -16,6 +16,7 @@ set(ESSIMPORTER_FILES
+     importjour.cpp
+     importscri.cpp
+     importscpt.cpp
++    importproj.cpp
+     importercontext.cpp
+     converter.cpp
+     convertacdt.cpp
+diff --git a/apps/openmw/mwbase/mechanicsmanager.hpp b/apps/openmw/mwbase/mechanicsmanager.hpp
+index 84d43156e1..ca835b4db3 100644
+--- a/apps/openmw/mwbase/mechanicsmanager.hpp
++++ b/apps/openmw/mwbase/mechanicsmanager.hpp
+@@ -75,6 +75,10 @@ namespace MWBase
+ 
+             virtual void advanceTime (float duration) = 0;
+ 
++            virtual void addRechargeItem(ESM::RechargeItem rItem) = 0;
++
++            virtual bool isRechargeItemInStack(ESM::RechargeItem rItem) = 0;
++
+             virtual void setPlayerName (const std::string& name) = 0;
+             ///< Set player name.
+ 
+diff --git a/apps/openmw/mwmechanics/mechanicsmanagerimp.cpp b/apps/openmw/mwmechanics/mechanicsmanagerimp.cpp
+index 8eece2f419..30f1a39654 100644
+--- a/apps/openmw/mwmechanics/mechanicsmanagerimp.cpp
++++ b/apps/openmw/mwmechanics/mechanicsmanagerimp.cpp
+@@ -293,32 +293,30 @@ namespace MWMechanics
+         duration /= MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+         MWWorld::Ptr player = getPlayer();
+         player.getClass().getInventoryStore(player).rechargeItems(duration);
+-        rechargeItems(duration);
++        rechargeItems();
+     }
+ 
+-    void MechanicsManager::rechargeItems(float duration)
++    void MechanicsManager::rechargeItems()
+     {
+-        int index = 0;
+-        for (std::vector<ESM::RechargeItem>::const_iterator it = mRechargeItems.begin(); it != mRechargeItems.end(); ++it)
++        ESM::TimeStamp curTime = MWBase::Environment::get().getWorld()->getTimeStamp().toEsm();
++        for (std::vector<ESM::RechargeItem>::iterator it = mRechargeItems.begin(); it != mRechargeItems.end();)
+         {
+             ESM::RechargeItem rItem = *it;
+             MWWorld::Ptr item;
+             MWBase::Environment::get().getWorld()->getItemById(rItem.key, item);
++            if (!item) {
++                it++;
++                continue;
++            }
+ 
+             MWWorld::Ptr player = getPlayer();
+-            //MWWorld::InventoryStore& inv = player.getClass().getInventoryStore(player);
+-            //MWWorld::ContainerStore& store = item.getContainerStore(store);
+-            //if (inv.hasRechargedItem( item.getContainerStore()))
+-            //    continue;
+ 
+             std::string enchantmentId = item.getClass().getEnchantment(item);
+             const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(
+                 enchantmentId);
+             if (!enchantment)
+             {
+-                // TODO includer cer's library.
+-                //std::cerr << "Warning: Can't find enchantment '" << enchantmentId << "' on item " << item.getCellRef().getRefId() << std::endl;
+-                mRechargeItems.erase(mRechargeItems.begin() + index);
++                it = mRechargeItems.erase(it);
+                 continue;
+             }
+ 
+@@ -327,22 +325,32 @@ namespace MWMechanics
+             if (item.getCellRef().getEnchantmentCharge() == -1 ||
+                 item.getCellRef().getEnchantmentCharge() == maxCharge)
+             {
+-                mRechargeItems.erase(mRechargeItems.begin() + index);
++                it = mRechargeItems.erase(it);
+                 continue;
+             }
+             static float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                 "fMagicItemRechargePerSecond")->getFloat();
+ 
++            int durationDay = (curTime.mDay - rItem.mTimeStamp.mDay);
++            float durationHour = (curTime.mHour - rItem.mTimeStamp.mHour);
++            float durationElapsedHours = durationDay * 24 + durationHour;
++            rItem.mTimeStamp = curTime;
+             if (item.getCellRef().getEnchantmentCharge() <= maxCharge)
+             {
+-                item.getCellRef().setEnchantmentCharge(std::min(item.getCellRef().getEnchantmentCharge() + fMagicItemRechargePerSecond * duration,
++                item.getCellRef().setEnchantmentCharge(std::min(item.getCellRef().getEnchantmentCharge() + (fMagicItemRechargePerSecond * durationElapsedHours), // game-time.
+                     maxCharge));
++
+             }
+-            index++;
++            ++it;
+         }
+     }
+ 
+-
++    bool MechanicsManager::isRechargeItemInStack(ESM::RechargeItem rItem)
++    {
++        std::vector<ESM::RechargeItem>::iterator fItem;
++        fItem = std::find_if(mRechargeItems.begin(), mRechargeItems.end(), [rItem](ESM::RechargeItem o) { return o.key == rItem.key; });
++        return (fItem != mRechargeItems.end());
++    }
+ 
+     void MechanicsManager::update(float duration, bool paused)
+     {
+diff --git a/apps/openmw/mwmechanics/mechanicsmanagerimp.hpp b/apps/openmw/mwmechanics/mechanicsmanagerimp.hpp
+index 0a0c51a146..4ce50b76fe 100644
+--- a/apps/openmw/mwmechanics/mechanicsmanagerimp.hpp
++++ b/apps/openmw/mwmechanics/mechanicsmanagerimp.hpp
+@@ -80,7 +80,11 @@ namespace MWMechanics
+ 
+             virtual void advanceTime (float duration);
+ 
+-			virtual void rechargeItems(float duration);
++			virtual void rechargeItems();
++
++            virtual bool isRechargeItemInStack(ESM::RechargeItem rItem);
++            
++            virtual void addRechargeItem(ESM::RechargeItem rItem) { mRechargeItems.push_back(rItem); }
+ 
+             virtual void setPlayerName (const std::string& name);
+             ///< Set player name.
+diff --git a/apps/openmw/mwmechanics/spellcasting.cpp b/apps/openmw/mwmechanics/spellcasting.cpp
+index f7ee15bf44..7bf9756f18 100644
+--- a/apps/openmw/mwmechanics/spellcasting.cpp
++++ b/apps/openmw/mwmechanics/spellcasting.cpp
+@@ -791,6 +791,16 @@ namespace MWMechanics
+             }
+             // Reduce charge
+             item.getCellRef().setEnchantmentCharge(item.getCellRef().getEnchantmentCharge() - castCost);
++
++            // Add Enchanted Item to recharge.
++            ESM::RechargeItem rechargeItem;
++            rechargeItem.key = item.getCellRef().getRefId();
++            rechargeItem.curCharge = item.getCellRef().getEnchantmentCharge();
++            rechargeItem.maxCharge = enchantment->mData.mCost;
++            rechargeItem.mTimeStamp = MWBase::Environment::get().getWorld()->getTimeStamp().toEsm();
++
++            if (!MWBase::Environment::get().getMechanicsManager()->isRechargeItemInStack(rechargeItem))
++                MWBase::Environment::get().getMechanicsManager()->addRechargeItem(rechargeItem);   
+         }
+ 
+         if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
+diff --git a/apps/openmw/mwworld/worldimp.cpp b/apps/openmw/mwworld/worldimp.cpp
+index 90299aa907..8f879c8fd4 100644
+--- a/apps/openmw/mwworld/worldimp.cpp
++++ b/apps/openmw/mwworld/worldimp.cpp
+@@ -2490,7 +2490,7 @@ namespace MWWorld
+         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
+         {
+             MWWorld::CellStore* cellStore = (*cellIt);
+-            out = cellStore->searchInContainer(id);
++            out = cellStore->search(id);
+         }
+     }
+ 
+diff --git a/components/esm/rechargeitems.cpp b/components/esm/rechargeitems.cpp
+index d8cbf7d3ab..d57259f984 100644
+--- a/components/esm/rechargeitems.cpp
++++ b/components/esm/rechargeitems.cpp
+@@ -1,5 +1,7 @@
+ #include "rechargeitems.hpp"
+ 
++#include "defs.hpp"
++
+ #include <components/esm/esmreader.hpp>
+ #include <components/esm/esmwriter.hpp>
+ 
+@@ -12,9 +14,10 @@ namespace ESM
+         for (std::vector<RechargeItem>::const_iterator it = mRechargeItems.begin(); it != mRechargeItems.end(); ++it)
+         {
+             RechargeItem item = *it;
+-            esm.writeHNString("KEY", item.key);
+-            esm.writeHNT("C", item.curCharge);
++            esm.writeHNString("KEYR", item.key);
++            esm.writeHNT("CCUR", item.curCharge);
+             esm.writeHNT("CMAX", item.maxCharge);
++            esm.writeHNT("TIME", item.mTimeStamp);
+         }
+     }
+ 
+@@ -24,9 +27,10 @@ namespace ESM
+         while (esm.isNextSub("ITEM"))
+         {
+             RechargeItem rItem;
+-            rItem.key = esm.getHNString("KEY");
+-            esm.getHNT(rItem.curCharge, "C");
++            rItem.key = esm.getHNString("KEYR");
++            esm.getHNT(rItem.curCharge, "CCUR");
+             esm.getHNT(rItem.maxCharge, "CMAX");
++            esm.getHNT(rItem.mTimeStamp, "TIME");
+             tRechageItems.push_back(rItem);
+         }
+     }
+diff --git a/components/esm/rechargeitems.hpp b/components/esm/rechargeitems.hpp
+index db4831f4c9..165c4d7a67 100644
+--- a/components/esm/rechargeitems.hpp
++++ b/components/esm/rechargeitems.hpp
+@@ -4,6 +4,9 @@
+ #include <vector>
+ #include <string>
+ 
++#include "defs.hpp"
++#include "../../apps/openmw/mwworld/timestamp.hpp"
++
+ namespace ESM
+ {
+     class ESMReader;
+@@ -13,6 +16,7 @@ namespace ESM
+         std::string key;
+         int curCharge;
+         int maxCharge;
++        TimeStamp mTimeStamp;
+     };
+ 
+     // format 0, saved games only
