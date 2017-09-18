@@ -113,12 +113,15 @@ namespace MWMechanics
         bool enemyMelee = false;
         MWWorld::InventoryStore& inv = enemy.getClass().getInventoryStore(enemy);
         MWWorld::ConstContainerStoreIterator enemyCSI = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        const ESM::Weapon* enemyWeapon = enemyCSI->get<ESM::Weapon>()->mBase;
-        if (enemyWeapon->mData.mType >= ESM::Weapon::ShortBladeOneHand || enemyWeapon->mData.mType <= ESM::Weapon::AxeTwoHand)
+        if (enemyCSI.getType())
         {
-            enemyMelee = true;
-            float distanceToEnemy = MWBase::Environment::get().getWorld()->getHitDistance(actor, enemy);
-            rating *= distanceToEnemy / 50;
+            const ESM::Weapon* enemyWeapon = enemyCSI->get<ESM::Weapon>()->mBase;
+            if (enemyWeapon && (enemyWeapon->mData.mType >= ESM::Weapon::ShortBladeOneHand || enemyWeapon->mData.mType <= ESM::Weapon::AxeTwoHand))
+            {
+                enemyMelee = true;
+                float distanceToEnemy = MWBase::Environment::get().getWorld()->getHitDistance(actor, enemy);
+                rating *= distanceToEnemy / 50;
+            }
         }
 
         return rating + bonus;

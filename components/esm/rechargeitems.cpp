@@ -24,7 +24,7 @@ namespace ESM
     void RechargeItems::load(ESMReader &esm)
     {
         std::vector<RechargeItem> tRechageItems;
-        while (esm.isNextSub("ITEM"))
+        while (esm.isNextSub("RCHG"))
         {
             RechargeItem rItem;
             rItem.key = esm.getHNString("KEYR");
