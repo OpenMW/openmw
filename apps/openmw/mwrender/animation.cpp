@@ -757,8 +757,6 @@ namespace MWRender
                 break;
             }
         }
-        if(iter == mAnimSources.rend())
-            std::cerr<< "Failed to find animation "<<groupname<<" for "<<mPtr.getCellRef().getRefId() <<std::endl;
 
         resetActiveGroups();
     }
