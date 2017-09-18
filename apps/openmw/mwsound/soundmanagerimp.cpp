@@ -391,11 +391,6 @@ namespace MWSound
         mMusic->setFadeout(0.5f);
     }
 
-    void SoundManager::streamMusic(const std::string& filename)
-    {
-        advanceMusic("Music/"+filename);
-    }
-
     void SoundManager::startRandomTitle()
     {
         std::vector<std::string> filelist;
@@ -444,6 +439,12 @@ namespace MWSound
         advanceMusic(filelist[tracklist[i]]);
         tracklist[i] = tracklist.back();
         tracklist.pop_back();
+    }
+
+
+    void SoundManager::streamMusic(const std::string& filename)
+    {
+        advanceMusic("Music/"+filename);
     }
 
     bool SoundManager::isMusicPlaying()

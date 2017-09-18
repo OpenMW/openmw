@@ -127,6 +127,7 @@ namespace MWSound
 
         void streamMusicFull(const std::string& filename);
         void advanceMusic(const std::string& filename);
+        void startRandomTitle();
 
         void updateSounds(float duration);
         void updateRegionSound(float duration);
@@ -156,9 +157,6 @@ namespace MWSound
         virtual void streamMusic(const std::string& filename);
         ///< Play a soundifle
         /// \param filename name of a sound file in "Music/" in the data directory.
-
-        virtual void startRandomTitle();
-        ///< Starts a random track from the current playlist
 
         virtual bool isMusicPlaying();
         ///< Returns true if music is playing
