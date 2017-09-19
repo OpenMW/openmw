@@ -82,9 +82,6 @@ namespace MWBase
             ///< Play a soundifle
             /// \param filename name of a sound file in "Music/" in the data directory.
 
-            virtual void startRandomTitle() = 0;
-            ///< Starts a random track from the current playlist
-
             virtual bool isMusicPlaying() = 0;
             ///< Returns true if music is playing
 
