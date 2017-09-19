@@ -206,7 +206,8 @@ namespace MWGui
         int textButtonPadding = 10; // padding between the text-widget und the button-widget
         int buttonLeftPadding = 10; // padding between the buttons if horizontal
         int buttonTopPadding = 10; // ^-- if vertical
-        int buttonPadding = 5; // padding between button label and button itself
+        int buttonLabelLeftPadding = 12; // padding between button label and button itself, from left
+        int buttonLabelTopPadding = 4; // padding between button label and button itself, from top
         int buttonMainPadding = 10; // padding between buttons and bottom of the main widget
 
         mMarkedToDelete = false;
@@ -245,10 +246,10 @@ namespace MWGui
             if (buttonsWidth != 0)
                 buttonsWidth += buttonLeftPadding;
 
-            int buttonWidth = button->getTextSize().width + 2*buttonPadding;
+            int buttonWidth = button->getTextSize().width + 2*buttonLabelLeftPadding;
             buttonsWidth += buttonWidth;
 
-            buttonHeight = button->getTextSize().height + 2*buttonPadding;
+            buttonHeight = button->getTextSize().height + 2*buttonLabelTopPadding;
 
             if (buttonsHeight != 0)
                 buttonsHeight += buttonTopPadding;
@@ -295,8 +296,8 @@ namespace MWGui
                 buttonCord.left = left;
                 buttonCord.top = messageWidgetCoord.top + textSize.height + textButtonPadding;
 
-                buttonSize.width = (*button)->getTextSize().width + 2*buttonPadding;
-                buttonSize.height = (*button)->getTextSize().height + 2*buttonPadding;
+                buttonSize.width = (*button)->getTextSize().width + 2*buttonLabelLeftPadding;
+                buttonSize.height = (*button)->getTextSize().height + 2*buttonLabelTopPadding;
 
                 (*button)->setCoord(buttonCord);
                 (*button)->setSize(buttonSize);
@@ -322,8 +323,8 @@ namespace MWGui
             std::vector<MyGUI::Button*>::const_iterator button;
             for(button = mButtons.begin(); button != mButtons.end(); ++button)
             {
-                buttonSize.width = (*button)->getTextSize().width + buttonPadding*2;
-                buttonSize.height = (*button)->getTextSize().height + buttonPadding*2;
+                buttonSize.width = (*button)->getTextSize().width + buttonLabelLeftPadding*2;
+                buttonSize.height = (*button)->getTextSize().height + buttonLabelTopPadding*2;
 
                 buttonCord.top = top;
                 buttonCord.left = (mainWidgetSize.width - buttonSize.width)/2;
