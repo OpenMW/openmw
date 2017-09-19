@@ -213,23 +213,30 @@ namespace MWRender
         settings->setCastsShadowTraversalMask(Mask_Scene|Mask_Actor|Mask_Player);
         settings->setReceivesShadowTraversalMask(~0u);
 
-        settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::PERSPECTIVE_SHADOW_MAP);
-        settings->setBaseShadowTextureUnit(1);
-        settings->setMinimumShadowMapNearFarRatio(0);
-        settings->setNumShadowMapsPerLight(1);
+        //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::PERSPECTIVE_SHADOW_MAP);
+        //settings->setBaseShadowTextureUnit(1);
+        //settings->setMinimumShadowMapNearFarRatio(0);
+        //settings->setNumShadowMapsPerLight(1);
         //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::ORTHOGRAPHIC_SHADOW_MAP);
         //settings->setMultipleShadowMapHint(osgShadow::ShadowSettings::PARALLEL_SPLIT); // ignored
         //settings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
         //settings->setDebugDraw(true);
 
-        settings->setPerspectiveShadowMapCutOffAngle(0);
-        settings->setShaderHint(osgShadow::ShadowSettings::PROVIDE_VERTEX_AND_FRAGMENT_SHADER);
+        //settings->setPerspectiveShadowMapCutOffAngle(0);
+        //settings->setShaderHint(osgShadow::ShadowSettings::PROVIDE_VERTEX_AND_FRAGMENT_SHADER);
 
         int mapres = 2048;
         settings->setTextureSize(osg::Vec2s(mapres,mapres));
 
-        osgShadow::ShadowTechnique* tech = new osgShadow::ViewDependentShadowMap;
+        osgShadow::MinimalShadowMap* tech = new osgShadow::LightSpacePerspectiveShadowMapDB();
         shadowedScene->setShadowTechnique(tech);
+
+        tech->setMaxFarPlane(0);
+        tech->setTextureSize(osg::Vec2s(mapres, mapres));
+        tech->setShadowTextureCoordIndex(1);
+        tech->setShadowTextureUnit(1);
+        tech->setBaseTextureCoordIndex(0);
+        tech->setBaseTextureUnit(0);
 
         //mRootNode->addChild(sceneRoot);
         shadowedScene->addChild(sceneRoot);
