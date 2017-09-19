@@ -24,10 +24,10 @@ namespace ESM
     void RechargeItems::load(ESMReader &esm)
     {
         std::vector<RechargeItem> tRechageItems;
-        while (esm.isNextSub("RCHG"))
+        while (esm.isNextSub("KEYR"))
         {
             RechargeItem rItem;
-            rItem.key = esm.getHNString("KEYR");
+            rItem.key = esm.getHString();
             esm.getHNT(rItem.curCharge, "CCUR");
             esm.getHNT(rItem.maxCharge, "CMAX");
             esm.getHNT(rItem.mTimeStamp, "TIME");
