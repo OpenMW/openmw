@@ -59,15 +59,91 @@ namespace
             if (mSortByType && left.mType != right.mType)
                 return left.mType < right.mType;
 
-            if (left.mBase.getTypeName() == right.mBase.getTypeName())
-            {
-                std::string leftName = Misc::StringUtils::lowerCase(left.mBase.getClass().getName(left.mBase));
-                std::string rightName = Misc::StringUtils::lowerCase(right.mBase.getClass().getName(right.mBase));
+            float result = 0;
 
-                return leftName.compare(rightName) < 0;
+            // compare items by type
+            std::string leftName = left.mBase.getTypeName();
+            std::string rightName = right.mBase.getTypeName();
+
+            if (leftName != rightName)
+                return compareType(leftName, rightName);
+
+            // compare items by name
+            leftName = Misc::StringUtils::lowerCase(left.mBase.getClass().getName(left.mBase));
+            rightName = Misc::StringUtils::lowerCase(right.mBase.getClass().getName(right.mBase));
+
+            result = leftName.compare(rightName);
+            if (result != 0)
+                return result < 0;
+
+            // compare items by enchantment:
+            // 1. enchanted items showed before non-enchanted
+            // 2. item with lesser charge percent comes after items with more charge percent
+            // 3. item with constant effect comes before items with non-constant effects
+            int leftChargePercent = -1;
+            int rightChargePercent = -1;
+            leftName = left.mBase.getClass().getEnchantment(left.mBase);
+            rightName = right.mBase.getClass().getEnchantment(right.mBase);
+
+            if (!leftName.empty())
+            {
+                const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(leftName);
+                if (ench)
+                {
+                    if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
+                        leftChargePercent = 101;
+                    else
+                        leftChargePercent = (left.mBase.getCellRef().getEnchantmentCharge() == -1) ? 100
+                            : static_cast<int>(left.mBase.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
+                }
             }
-            else
-                return compareType(left.mBase.getTypeName(), right.mBase.getTypeName());
+
+            if (!rightName.empty())
+            {
+                const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(rightName);
+                if (ench)
+                {
+                    if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
+                        rightChargePercent = 101;
+                    else
+                        rightChargePercent = (right.mBase.getCellRef().getEnchantmentCharge() == -1) ? 100
+                            : static_cast<int>(right.mBase.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
+                }
+            }
+
+            result = leftChargePercent - rightChargePercent;
+            if (result != 0)
+                return result > 0;
+
+            // compare items by condition
+            if (left.mBase.getClass().hasItemHealth(left.mBase) && right.mBase.getClass().hasItemHealth(right.mBase))
+            {
+                result = left.mBase.getClass().getItemHealth(left.mBase) - right.mBase.getClass().getItemHealth(right.mBase);
+                if (result != 0)
+                    return result > 0;
+            }
+
+            // compare items by remaining usage time
+            result = left.mBase.getClass().getRemainingUsageTime(left.mBase) - right.mBase.getClass().getRemainingUsageTime(right.mBase);
+            if (result != 0)
+                return result > 0;
+
+            // compare items by value
+            result = left.mBase.getClass().getValue(left.mBase) - right.mBase.getClass().getValue(right.mBase);
+            if (result != 0)
+                return result > 0;
+
+            // compare items by weight
+            result = left.mBase.getClass().getWeight(left.mBase) - right.mBase.getClass().getWeight(right.mBase);
+            if (result != 0)
+                return result > 0;
+
+            // compare items by Id
+            leftName = left.mBase.getCellRef().getRefId();
+            rightName = right.mBase.getCellRef().getRefId();
+
+            result = leftName.compare(rightName);
+            return result < 0;
         }
     };
 }
