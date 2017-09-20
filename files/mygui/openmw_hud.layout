@@ -32,19 +32,19 @@
         </Widget>
 
         <!-- Drowning bar -->
-        <Widget type="Widget" skin="MW_Dialog" position="0 36 230 58" align="Center Top" name="DrowningFrame">
+        <Widget type="Window" skin="MW_Dialog" position="0 36 230 58" align="Center Top" name="DrowningFrame">
             <Property key="Visible" value="false"/>
-            <Widget type="TextBox" skin="SandText" position="2 7 226 24" name="DrowningTitle" align="Center Top HStretch">
+            <Widget type="TextBox" skin="SandText" position="0 3 222 24" name="DrowningTitle" align="Center Top HStretch">
                 <Property key="Caption" value="#{sBreath}"/>
                 <Property key="TextAlign" value="Center"/>
                 <Property key="TextShadow" value="true"/>
                 <Property key="TextShadowColour" value="0 0 0"/>
             </Widget>
-            <Widget type="Widget" skin="MW_Box" position="15 33 200 10" align="Stretch" name="BoundingBox"/>
-            <Widget type="ProgressBar" skin="MW_Progress_Drowning_Full" position="17 35 196 6" align="Center Top" name="Drowning">
+            <Widget type="Widget" skin="MW_Box" position="11 29 200 10" align="Stretch" name="BoundingBox"/>
+            <Widget type="ProgressBar" skin="MW_Progress_Drowning_Full" position="13 31 196 6" align="Center Top" name="Drowning">
                 <Property key="NeedMouse" value="false"/>
             </Widget>
-            <Widget type="Widget" skin="MW_Progress_Drowning_Small" position="19 37 192 2" align="Center Top" name="Flash"/>
+            <Widget type="Widget" skin="MW_Progress_Drowning_Small" position="15 33 192 2" align="Center Top" name="Flash"/>
         </Widget>
 
         <!-- Equipped weapon/selected spell name display for a few seconds after it changes -->
