@@ -4,13 +4,13 @@
     <!-- The entire screen -->
     <Widget type="Widget" layer="LoadingScreen" position="0 0 300 300" name="_Main" align="Stretch">
 
-        <Widget type="Widget" skin="MW_Dialog" position="0 245 300 48" align="Bottom HCenter" name="LoadingBox">
+        <Widget type="Window" skin="MW_Dialog" position="0 245 300 48" align="Bottom HCenter" name="LoadingBox">
 
-            <Widget type="TextBox" skin="SandText" position="20 9 260 18" align="Stretch" name="LoadingText">
+            <Widget type="TextBox" skin="SandText" position="16 5 260 18" align="Stretch" name="LoadingText">
                 <Property key="TextAlign" value="Center"/>
             </Widget>
 
-            <Widget type="ScrollBar" skin="MW_ProgressScroll_Loading" position="20 30 260 6" align="Top HCenter" name="ProgressBar">
+            <Widget type="ScrollBar" skin="MW_ProgressScroll_Loading" position="16 26 260 6" align="Top HCenter" name="ProgressBar">
             </Widget>
 
         </Widget>
