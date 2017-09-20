@@ -329,7 +329,7 @@ namespace MWMechanics
     {
     }
 
-    void CastSpell::launchMagicBolt (const ESM::EffectList& effects)
+    void CastSpell::launchMagicBolt ()
     {        
         osg::Vec3f fallbackDirection (0,1,0);     
 
@@ -340,8 +340,7 @@ namespace MWMechanics
                 osg::Vec3f(mTarget.getRefData().getPosition().asVec3())-
                 osg::Vec3f(mCaster.getRefData().getPosition().asVec3());
             
-        MWBase::Environment::get().getWorld()->launchMagicBolt(mId, false, effects,
-                                                   mCaster, mSourceName, fallbackDirection);
+        MWBase::Environment::get().getWorld()->launchMagicBolt(mId, mCaster, fallbackDirection);
     }
 
     void CastSpell::inflict(const MWWorld::Ptr &target, const MWWorld::Ptr &caster,
@@ -823,7 +822,7 @@ namespace MWMechanics
             inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Touch);
 
         if (launchProjectile)
-            launchMagicBolt(enchantment->mEffects);
+            launchMagicBolt();
         else if (isProjectile || !mTarget.isEmpty())
             inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Target);
 
@@ -915,7 +914,7 @@ namespace MWMechanics
         if (!mTarget.isEmpty())
             inflict(mTarget, mCaster, spell->mEffects, ESM::RT_Touch);
 
-        launchMagicBolt(spell->mEffects);
+        launchMagicBolt();
 
         return true;
     }
