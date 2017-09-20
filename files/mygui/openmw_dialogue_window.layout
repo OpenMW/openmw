@@ -4,7 +4,7 @@
     <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 588 433" name="_Main">
         <Property key="MinSize" value="380 230"/>
 
-        <Widget type="Widget" skin="MW_Box" position="8 8 381 381" align="Stretch" name="Client"/>
+        <Widget type="Widget" skin="MW_Box" position="8 8 381 381" align="Stretch"/>
 
         <Widget type="Widget" position="15 15 364 370" align="Left Top Stretch">
             <Widget type="BookPage" skin="MW_BookPage" position="0 0 364 370" name="History" align="Left Top Stretch">
