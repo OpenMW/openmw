@@ -209,6 +209,9 @@ namespace MWMechanics
             gem->getContainerStore()->unstack(*gem, caster);
             gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
 
+            // Restack the gem with other gems with the same soul
+            gem->getContainerStore()->restack(*gem);
+
             mTrapped = true;
 
             if (caster == getPlayer())
@@ -1084,6 +1087,39 @@ namespace MWMechanics
             delete iter->second;
             mActors.erase(iter);
         }
+    }
+
+    bool Actors::isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer)
+    {
+        if (!actor.getClass().isActor())
+            return false;
+
+        // If an observer is NPC, check if he detected an actor
+        if (!observer.isEmpty() && observer.getClass().isNpc())
+        {
+            return
+                MWBase::Environment::get().getWorld()->getLOS(observer, actor) &&
+                MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, observer);
+        }
+
+        // Otherwise check if any actor in AI processing range sees the target actor
+        std::vector<MWWorld::Ptr> actors;
+        osg::Vec3f position (actor.getRefData().getPosition().asVec3());
+        getObjectsInRange(position, aiProcessingDistance, actors);
+        for(std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); ++it)
+        {
+            if (*it == actor)
+                continue;
+
+            bool result =
+                MWBase::Environment::get().getWorld()->getLOS(*it, actor) &&
+                MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, *it);
+
+            if (result)
+                return true;
+        }
+
+        return false;
     }
 
     void Actors::updateActor(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)

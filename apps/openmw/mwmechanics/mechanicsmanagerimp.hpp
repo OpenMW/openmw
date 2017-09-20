@@ -191,6 +191,10 @@ namespace MWMechanics
             /// Is \a ptr casting spell or using weapon now?
             virtual bool isAttackingOrSpell(const MWWorld::Ptr &ptr) const;
 
+            /// Check if the target actor was detected by an observer
+            /// If the observer is a non-NPC, check all actors in AI processing distance as observers
+            virtual bool isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer);
+
             virtual void confiscateStolenItems (const MWWorld::Ptr& player, const MWWorld::Ptr& targetContainer);
 
             /// List the owners that the player has stolen this item from (the owner can be an NPC or a faction).

@@ -2025,58 +2025,53 @@ void CharacterController::unpersistAnimationState()
 bool CharacterController::playGroup(const std::string &groupname, int mode, int count, bool persist)
 {
     if(!mAnimation || !mAnimation->hasAnimation(groupname))
-    {
-        std::cerr<< "Animation "<<groupname<<" not found for " << mPtr.getCellRef().getRefId() << std::endl;
         return false;
-    }
-    else
+
+    // If this animation is a looped animation (has a "loop start" key) that is already playing
+    // and has not yet reached the end of the loop, allow it to continue animating with its existing loop count
+    // and remove any other animations that were queued.
+    // This emulates observed behavior from the original allows the script "OutsideBanner" to animate banners correctly.
+    if (!mAnimQueue.empty() && mAnimQueue.front().mGroup == groupname &&
+        mAnimation->getTextKeyTime(mAnimQueue.front().mGroup + ": loop start") >= 0 &&
+        mAnimation->isPlaying(groupname))
     {
-        // If this animation is a looped animation (has a "loop start" key) that is already playing
-        // and has not yet reached the end of the loop, allow it to continue animating with its existing loop count
-        // and remove any other animations that were queued.
-        // This emulates observed behavior from the original allows the script "OutsideBanner" to animate banners correctly.
-        if (!mAnimQueue.empty() && mAnimQueue.front().mGroup == groupname &&
-            mAnimation->getTextKeyTime(mAnimQueue.front().mGroup + ": loop start") >= 0 &&
-            mAnimation->isPlaying(groupname))
-        {
-            float endOfLoop = mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": loop stop");
+        float endOfLoop = mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": loop stop");
 
-            if (endOfLoop < 0) // if no Loop Stop key was found, use the Stop key
-                endOfLoop = mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": stop");
+        if (endOfLoop < 0) // if no Loop Stop key was found, use the Stop key
+            endOfLoop = mAnimation->getTextKeyTime(mAnimQueue.front().mGroup+": stop");
 
-            if (endOfLoop > 0 && (mAnimation->getCurrentTime(mAnimQueue.front().mGroup) < endOfLoop))
-            {
-                mAnimQueue.resize(1);
-                return true;
-            }
-        }
-
-        count = std::max(count, 1);
-
-        AnimationQueueEntry entry;
-        entry.mGroup = groupname;
-        entry.mLoopCount = count-1;
-        entry.mPersist = persist;
-
-        if(mode != 0 || mAnimQueue.empty() || !isAnimPlaying(mAnimQueue.front().mGroup))
-        {
-            clearAnimQueue();
-            mAnimQueue.push_back(entry);
-
-            mAnimation->disable(mCurrentIdle);
-            mCurrentIdle.clear();
-
-            mIdleState = CharState_SpecialIdle;
-            bool loopfallback = (entry.mGroup.compare(0,4,"idle") == 0);
-            mAnimation->play(groupname, Priority_Default,
-                             MWRender::Animation::BlendMask_All, false, 1.0f,
-                             ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1, loopfallback);
-        }
-        else if(mode == 0)
+        if (endOfLoop > 0 && (mAnimation->getCurrentTime(mAnimQueue.front().mGroup) < endOfLoop))
         {
             mAnimQueue.resize(1);
-            mAnimQueue.push_back(entry);
+            return true;
         }
+    }
+
+    count = std::max(count, 1);
+
+    AnimationQueueEntry entry;
+    entry.mGroup = groupname;
+    entry.mLoopCount = count-1;
+    entry.mPersist = persist;
+
+    if(mode != 0 || mAnimQueue.empty() || !isAnimPlaying(mAnimQueue.front().mGroup))
+    {
+        clearAnimQueue();
+        mAnimQueue.push_back(entry);
+
+        mAnimation->disable(mCurrentIdle);
+        mCurrentIdle.clear();
+
+        mIdleState = CharState_SpecialIdle;
+        bool loopfallback = (entry.mGroup.compare(0,4,"idle") == 0);
+        mAnimation->play(groupname, Priority_Default,
+                            MWRender::Animation::BlendMask_All, false, 1.0f,
+                            ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1, loopfallback);
+    }
+    else if(mode == 0)
+    {
+        mAnimQueue.resize(1);
+        mAnimQueue.push_back(entry);
     }
     return true;
 }

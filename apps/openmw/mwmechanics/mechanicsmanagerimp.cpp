@@ -423,6 +423,11 @@ namespace MWMechanics
         mObjects.update(duration, paused);
     }
 
+    bool MechanicsManager::isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer)
+    {
+        return mActors.isActorDetected(actor, observer);
+    }
+
     bool MechanicsManager::isAttackPrepairing(const MWWorld::Ptr& ptr)
     {
         return mActors.isAttackPrepairing(ptr);
