@@ -1,6 +1,6 @@
 #define MAX_LIGHTS 8
 
-vec3 perLight(int lightIndex, vec3 viewPos, vec3 viewNormal, vec4 diffuse, vec3 ambient)
+vec3 perLight(int lightIndex, vec3 viewPos, vec3 viewNormal, vec4 diffuse, vec3 ambient, float shadowing)
 {
     vec3 lightDir;
     float d;
@@ -9,7 +9,7 @@ vec3 perLight(int lightIndex, vec3 viewPos, vec3 viewNormal, vec4 diffuse, vec3 
     d = length(lightDir);
     lightDir = normalize(lightDir);
 
-    return (ambient * gl_LightSource[lightIndex].ambient.xyz + diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0)) * clamp(1.0 / (gl_LightSource[lightIndex].constantAttenuation + gl_LightSource[lightIndex].linearAttenuation * d + gl_LightSource[lightIndex].quadraticAttenuation * d * d), 0.0, 1.0);
+    return (ambient * gl_LightSource[lightIndex].ambient.xyz + diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0)) * clamp(1.0 / (gl_LightSource[lightIndex].constantAttenuation + gl_LightSource[lightIndex].linearAttenuation * d + gl_LightSource[lightIndex].quadraticAttenuation * d * d), 0.0, 1.0) * shadowing;
 }
 
 #ifdef FRAGMENT
@@ -31,13 +31,13 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor)
     vec4 lightResult = vec4(0.0, 0.0, 0.0, diffuse.a);
 
 #ifdef FRAGMENT
-	lightResult.xyz += perLight(0, viewPos, viewNormal, diffuse, ambient) * shadowing;
+	lightResult.xyz += perLight(0, viewPos, viewNormal, diffuse, ambient, shadowing);
 #else
-	lightResult.xyz += perLight(0, viewPos, viewNormal, diffuse, ambient);
+	lightResult.xyz += perLight(0, viewPos, viewNormal, diffuse, ambient, 1.0);
 #endif
     for (int i=1; i<MAX_LIGHTS; ++i)
     {
-        lightResult.xyz += perLight(i, viewPos, viewNormal, diffuse, ambient);
+        lightResult.xyz += perLight(i, viewPos, viewNormal, diffuse, ambient, 1.0);
     }
 
     lightResult.xyz += gl_LightModel.ambient.xyz * ambient;
