@@ -60,7 +60,7 @@ libfind_pkg_detect(Bullet bullet
         HINTS $ENV{BULLET_ROOT}
         PATH_SUFFIXES include/bullet
 )
-#set(Bullet_INCLUDE_DIRS ${Bullet_INCLUDE_DIR}\\include\\bullet)
+set(Bullet_INCLUDE_DIRS ${Bullet_INCLUDE_DIR})
 libfind_version_header(Bullet LinearMath/btScalar.h BT_BULLET_VERSION)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Bullet

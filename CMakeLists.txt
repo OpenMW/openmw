@@ -364,19 +364,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-parameter")
     endif()
 elseif (MSVC)
-	file( WRITE "D:/workspace/joslan/MSVC2017_64/apps/openmw/openmw.vcxproj.user" 
-		"<?xml version=\"1.0\" encoding=\"utf-8\"?>     \
-		<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">
-		<PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\">
-			<LocalDebuggerWorkingDirectory>D:/workspace/joslan/MSVC2017_64/Debug</LocalDebuggerWorkingDirectory>
-			<DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-		</PropertyGroup>
-		<PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\">
-			<LocalDebuggerWorkingDirectory>D:/workspace/joslan/MSVC2017_64/Release</LocalDebuggerWorkingDirectory>
-			<DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-		</PropertyGroup>
-		</Project>")
-	
     # Enable link-time code generation globally for all linking
     if (OPENMW_LTO_BUILD)
         set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")

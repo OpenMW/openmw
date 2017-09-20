@@ -1097,19 +1097,6 @@ namespace MWMechanics
         }
         Misc::StringUtils::lowerCaseInPlace(owner.first);
 
-        /*std::string enchantmentId = item.getClass().getEnchantment(item);
-        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(
-            enchantmentId);
-        if (enchantment)
-        {
-            ESM::RechargeItem rItem;
-            rItem.key = item.getCellRef().getRefId();
-            rItem.curCharge = item.getCellRef().getCharge();
-            rItem.maxCharge = enchantment->mData.mCharge;
-            rItem.mTimeStamp = MWBase::Environment::get().getWorld()->getTimeStamp().toEsm();
-            mRechargeItems.push_back(rItem);
-        }*/
-
         if (!Misc::StringUtils::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
             mStolenItems[Misc::StringUtils::lowerCase(item.getCellRef().getRefId())][owner] += count;
 

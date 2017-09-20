@@ -65,22 +65,13 @@ namespace MWMechanics
         for (MWWorld::Store<ESM::Spell>::iterator iter = spells.begin(); iter != spells.end(); ++iter)
         {
             const ESM::Spell* spell = &*iter;
-            
-            /// Get the min cost of the spell.
-            const ESM::EffectList& effects = spell->mEffects;
-            float minCost = 0;
-            for (std::vector<ESM::ENAMstruct>::const_iterator it = effects.mList.begin(); it != effects.mList.end(); ++it)
-            {
-                const ESM::ENAMstruct& effect = *it;
-                minCost += calcEffectCost(effect);
-            }
 
             if (spell->mData.mType != ESM::Spell::ST_Spell)
                 continue;
             if (!(spell->mData.mFlags & ESM::Spell::F_Autocalc))
                 continue;
             static const int iAutoSpellTimesCanCast = gmst.find("iAutoSpellTimesCanCast")->getInt();
-            if (baseMagicka < iAutoSpellTimesCanCast * minCost)
+            if (baseMagicka < iAutoSpellTimesCanCast * spell->mData.mCost)
                 continue;
 
             if (race && race->mPowers.exists(spell->mId))
@@ -95,7 +86,7 @@ namespace MWMechanics
             assert(school >= 0 && school < 6);
             SchoolCaps& cap = schoolCaps[school];
 
-            if (cap.mReachedLimit && minCost <= cap.mMinCost)
+            if (cap.mReachedLimit && spell->mData.mCost <= cap.mMinCost)
                 continue;
 
             static const float fAutoSpellChance = gmst.find("fAutoSpellChance")->getFloat();
@@ -140,10 +131,10 @@ namespace MWMechanics
                 if (cap.mCount == cap.mLimit)
                     cap.mReachedLimit = true;
 
-                if (minCost < cap.mMinCost)
+                if (spell->mData.mCost < cap.mMinCost)
                 {
                     cap.mWeakestSpell = spell->mId;
-                    cap.mMinCost = minCost;
+                    cap.mMinCost = spell->mData.mCost;
                 }
             }
         }

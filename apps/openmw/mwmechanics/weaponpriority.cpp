@@ -8,7 +8,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/inventorystore.hpp"
 
 #include "npcstats.hpp"
 #include "combat.hpp"
@@ -44,8 +43,7 @@ namespace MWMechanics
             if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(enemy), 0.75f))
                 return 0.f;
 
-            //bonus+=1.5f;
-
+            bonus+=1.5f;
         }
 
         if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
@@ -109,20 +107,6 @@ namespace MWMechanics
         // There is no need to apply bonus if weapon rating == 0
         if (rating == 0.f)
             return 0.f;
-
-        bool enemyMelee = false;
-        MWWorld::InventoryStore& inv = enemy.getClass().getInventoryStore(enemy);
-        MWWorld::ConstContainerStoreIterator enemyCSI = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        if (enemyCSI.getType())
-        {
-            const ESM::Weapon* enemyWeapon = enemyCSI->get<ESM::Weapon>()->mBase;
-            if (enemyWeapon && (enemyWeapon->mData.mType >= ESM::Weapon::ShortBladeOneHand || enemyWeapon->mData.mType <= ESM::Weapon::AxeTwoHand))
-            {
-                enemyMelee = true;
-                float distanceToEnemy = MWBase::Environment::get().getWorld()->getHitDistance(actor, enemy);
-                rating *= distanceToEnemy / 50;
-            }
-        }
 
         return rating + bonus;
     }

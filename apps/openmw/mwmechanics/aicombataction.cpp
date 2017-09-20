@@ -2,12 +2,10 @@
 
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadmgef.hpp>
-#include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -20,7 +18,6 @@
 #include "combat.hpp"
 #include "weaponpriority.hpp"
 #include "spellpriority.hpp"
-
 
 namespace MWMechanics
 {
@@ -233,48 +230,18 @@ namespace MWMechanics
             }
         }
 
-
-        // New Spell Random Priority Generator.
-        int totalRatings = 0;
-        struct spellPriority {
-            const ESM::Spell* spell;
-            int rating;
-
-            spellPriority(const ESM::Spell* spell, int rating)
-            {
-                this->spell = spell;
-                this->rating = rating;
-            }
-        };
-        std::vector<spellPriority> spellPriorities;
-
-        // Negative ratings are ignored.
         for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
             const ESM::Spell* spell = it->first;
-            int rating = rateSpell(spell, actor, enemy);
-            if (rating <= 0)
-                continue;
-            spellPriorities.push_back( spellPriority(spell, rating));
-            totalRatings += rating;
-        }
 
-        int random = round(Misc::Rng::rollProbability() * totalRatings);
-        int currentRating = 0;
-        int index = 0;
-        for (std::vector<spellPriority>::iterator it = spellPriorities.begin(); it != spellPriorities.end(); ++it)
-        {
-            const ESM::Spell* spell = it->spell;
-            if (currentRating >= random && random < (currentRating + it->rating))
+            float rating = rateSpell(spell, actor, enemy);
+            if (rating > bestActionRating)
             {
+                bestActionRating = rating;
                 bestAction.reset(new ActionSpell(spell->mId));
                 antiFleeRating = vanillaRateSpell(spell, actor, enemy);
-                break;
             }
-            currentRating += it->rating;
-            index++;
         }
-        // End Spell Random Priority Generator.
 
         if (makeFleeDecision(actor, enemy, antiFleeRating))
             bestAction.reset(new ActionFlee());

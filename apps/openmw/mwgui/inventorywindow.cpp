@@ -717,8 +717,9 @@ namespace MWGui
 
             lastId = item.getCellRef().getRefId();
 
-            // Cycling through weapons does skip broken ones.
-            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() && isRightHandWeapon(item) && item.getClass().canBeEquipped(item, player).first)
+            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() &&
+                isRightHandWeapon(item) &&
+                item.getClass().canBeEquipped(item, player).first)
             {
                 found = true;
                 break;

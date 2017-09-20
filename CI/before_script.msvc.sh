@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euox pipefail
+set -euo pipefail
 
 APPVEYOR=${APPVEYOR:-}
 CI=${CI:-}
@@ -98,9 +98,8 @@ fi
 if [ -z $APPVEYOR ]; then
 	echo "Running prebuild outside of Appveyor."
 
-	#DIR=$(echo "$0" | sed "s,\\\\,/,g" | sed "s,\(.\):,/\\1,")
-	#cd $(dirname "$DIR")/..
-	cd ..
+	DIR=$(echo "$0" | sed "s,\\\\,/,g" | sed "s,\(.\):,/\\1,")
+	cd $(dirname "$DIR")/..
 else
 	echo "Running prebuild in Appveyor."
 
@@ -437,9 +436,7 @@ printf "Bullet 2.86... "
 		mv "Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}" Bullet
 	fi
 
-	export BULLET_ROOT="D:/WORKSPACE/joslan/MSVC2017_64/deps/Bullet"
-	add_cmake_opts -DBullet_INCLUDE_DIR="D:/WORKSPACE/joslan/MSVC2017_64/deps/Bullet/include/bullet" \
-					-DBullet_INCLUDE_DIRS="D:/WORKSPACE/joslan/MSVC2017_64/deps/Bullet/include/bullet"
+	export BULLET_ROOT="$(real_pwd)/Bullet"
 
 	echo Done.
 }
@@ -648,7 +645,6 @@ printf "SDL 2.0.4... "
 
 	add_runtime_dlls "$(pwd)/SDL2-2.0.4/lib/x${ARCHSUFFIX}/SDL2.dll"
 
-	add_cmake_opts -DSDL_INCLUDE_DIR="D:/WORKSPACE/joslan/MSVC2017_64/deps/SDL2/include"
 	echo Done.
 }
 echo
@@ -740,11 +736,10 @@ fi
 if [ -z $VERBOSE ]; then
 	printf -- "- Configuring... "
 else
-	echo "- cmake . $CMAKE_OPTS"
+	echo "- cmake .. $CMAKE_OPTS"
 fi
 
-cd /d/workspace/joslan/MSVC2017_64
-run_cmd cmake ../openmw $CMAKE_OPTS
+run_cmd cmake .. $CMAKE_OPTS
 RET=$?
 
 if [ -z $VERBOSE ]; then

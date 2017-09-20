@@ -205,9 +205,6 @@ namespace MWMechanics
         storage.mActionCooldown -= duration;
 
         float& timerReact = storage.mTimerReact;
-        if (duration == 0) {
-            storage.mTimerReact -= AI_REACTION_TIME;
-        }
         if (timerReact < AI_REACTION_TIME)
         {
             timerReact += duration;
