@@ -761,7 +761,7 @@ if [ -z $CI ]; then
 	echo "    settings-default.cfg"
 	cp settings-default.cfg $BUILD_CONFIG/settings-default.cfg
 	echo "    resources/"
-	cp -r resources $BUILD_CONFIG/resources
+	cp -r resources $BUILD_CONFIG
 	echo
 fi
 

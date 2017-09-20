@@ -1,10 +1,23 @@
 #define MAX_LIGHTS 8
 
-vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor)
+vec3 perLight(int lightIndex, vec3 viewPos, vec3 viewNormal, vec4 diffuse, vec3 ambient)
 {
     vec3 lightDir;
     float d;
 
+	lightDir = gl_LightSource[lightIndex].position.xyz - (viewPos.xyz * gl_LightSource[lightIndex].position.w);
+    d = length(lightDir);
+    lightDir = normalize(lightDir);
+
+    return (ambient * gl_LightSource[lightIndex].ambient.xyz + diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0)) * clamp(1.0 / (gl_LightSource[lightIndex].constantAttenuation + gl_LightSource[lightIndex].linearAttenuation * d + gl_LightSource[lightIndex].quadraticAttenuation * d * d), 0.0, 1.0);
+}
+
+#ifdef FRAGMENT
+vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, float shadowing)
+#else
+vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor)
+#endif
+{
 #if @colorMode == 3
     vec4 diffuse = gl_FrontMaterial.diffuse;
     vec3 ambient = vertexColor.xyz;
@@ -17,13 +30,14 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor)
 #endif
     vec4 lightResult = vec4(0.0, 0.0, 0.0, diffuse.a);
 
-    for (int i=0; i<MAX_LIGHTS; ++i)
+#ifdef FRAGMENT
+	lightResult.xyz += perLight(0, viewPos, viewNormal, diffuse, ambient) * shadowing;
+#else
+	lightResult.xyz += perLight(0, viewPos, viewNormal, diffuse, ambient);
+#endif
+    for (int i=1; i<MAX_LIGHTS; ++i)
     {
-        lightDir = gl_LightSource[i].position.xyz - (viewPos.xyz * gl_LightSource[i].position.w);
-        d = length(lightDir);
-        lightDir = normalize(lightDir);
-
-        lightResult.xyz += (ambient * gl_LightSource[i].ambient.xyz + diffuse.xyz * gl_LightSource[i].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0)) * clamp(1.0 / (gl_LightSource[i].constantAttenuation + gl_LightSource[i].linearAttenuation * d + gl_LightSource[i].quadraticAttenuation * d * d), 0.0, 1.0);
+        lightResult.xyz += perLight(i, viewPos, viewNormal, diffuse, ambient);
     }
 
     lightResult.xyz += gl_LightModel.ambient.xyz * ambient;
