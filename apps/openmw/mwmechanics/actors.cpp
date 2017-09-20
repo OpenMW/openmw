@@ -209,6 +209,9 @@ namespace MWMechanics
             gem->getContainerStore()->unstack(*gem, caster);
             gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
 
+            // Restack the gem with other gems with the same soul
+            gem->getContainerStore()->restack(*gem);
+
             mTrapped = true;
 
             if (caster == getPlayer())
