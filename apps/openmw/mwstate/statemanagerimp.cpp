@@ -463,7 +463,9 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
                     MWBase::Environment::get().getMechanicsManager()->readRecord(reader, n.intval);
                     break;
-
+                case ESM::REC_RCHG:
+                    MWBase::Environment::get().getMechanicsManager()->readRecord(reader, n.intval);
+                    break;
                 case ESM::REC_INPU:
                     MWBase::Environment::get().getInputManager()->readRecord(reader, n.intval);
                     break;

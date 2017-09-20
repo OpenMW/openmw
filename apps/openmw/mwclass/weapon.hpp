@@ -7,11 +7,12 @@ namespace MWClass
 {
     class Weapon : public MWWorld::Class
     {
+            int mHealth = -1;
+            
             virtual MWWorld::Ptr
             copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const;
 
         public:
-
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
@@ -34,6 +35,8 @@ namespace MWClass
             virtual bool hasItemHealth (const MWWorld::ConstPtr& ptr) const;
             ///< \return Item health data available?
 
+            virtual int getItemHealth(const MWWorld::ConstPtr & ptr);
+
             virtual int getItemMaxHealth (const MWWorld::ConstPtr& ptr) const;
             ///< Return item max health or throw an exception, if class does not have item health
 
@@ -49,6 +52,7 @@ namespace MWClass
             /// no such skill.
 
             virtual int getValue (const MWWorld::ConstPtr& ptr) const;
+            
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
             static void registerSelf();

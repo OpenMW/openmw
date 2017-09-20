@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include <osg/Vec3f>
+#include "../../apps/openmw/mwworld/timestamp.hpp"
 
 namespace ESM
 {
@@ -12,6 +13,12 @@ struct TimeStamp
 {
     float mHour;
     int mDay;
+
+    /*static public implicit operator TimeStamp(MWWorld::TimeStamp value)
+    {
+        mHour = value.mHour;
+        mDay = value.mDay;
+    };*/
 };
 
 // Pixel color value. Standard four-byte rr,gg,bb,aa format.
@@ -128,6 +135,7 @@ enum RecNameInts
     REC_CAM_ = FourCC<'C','A','M','_'>::value,
     REC_STLN = FourCC<'S','T','L','N'>::value,
     REC_INPU = FourCC<'I','N','P','U'>::value,
+    REC_RCHG = FourCC<'R','C','H','G'>::value,
 
     // format 1
     REC_FILT = FourCC<'F','I','L','T'>::value,

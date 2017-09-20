@@ -68,6 +68,16 @@ namespace MWClass
         return (ref->mBase->mData.mType < 11); // thrown weapons and arrows/bolts don't have health, only quantity
     }
 
+    int Weapon::getItemHealth(const MWWorld::ConstPtr& ptr)
+    {
+        const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
+
+        if (mHealth == -1)
+            mHealth = ref->mBase->mData.mHealth;
+
+        return mHealth;
+    }
+
     int Weapon::getItemMaxHealth (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
@@ -317,8 +327,7 @@ namespace MWClass
 
         if (ref->mBase->mData.mType < 11) // thrown weapons and arrows/bolts don't have health, only quantity
         {
-            int remainingHealth = getItemHealth(ptr);
-            text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
+            text += "\n#{sCondition}: " + MWGui::ToolTips::toString(ref->mClass->getItemHealth(ptr)) + "/"
                     + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
         }
 

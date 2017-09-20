@@ -415,6 +415,7 @@ namespace MWRender
         if (store->getCell()->isExterior())
             mTerrain->loadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
     }
+
     void RenderingManager::removeCell(const MWWorld::CellStore *store)
     {
         mPathgrid->removeCell(store);
