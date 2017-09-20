@@ -75,6 +75,10 @@ namespace MWBase
 
             virtual void advanceTime (float duration) = 0;
 
+            virtual void addRechargeItem(ESM::RechargeItem rItem) = 0;
+
+            virtual bool isRechargeItemInStack(ESM::RechargeItem rItem) = 0;
+
             virtual void setPlayerName (const std::string& name) = 0;
             ///< Set player name.
 

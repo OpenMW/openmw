@@ -1,11 +1,14 @@
 #include "mechanicsmanagerimp.hpp"
 
+#include <ostream>
+
 #include <limits.h>
 
 #include <components/misc/rng.hpp>
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/stolenitems.hpp>
+#include <components/esm/rechargeitems.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -290,6 +293,63 @@ namespace MWMechanics
         duration /= MWBase::Environment::get().getWorld()->getTimeScaleFactor();
         MWWorld::Ptr player = getPlayer();
         player.getClass().getInventoryStore(player).rechargeItems(duration);
+        rechargeItems();
+    }
+
+    void MechanicsManager::rechargeItems()
+    {
+        ESM::TimeStamp curTime = MWBase::Environment::get().getWorld()->getTimeStamp().toEsm();
+        for (std::vector<ESM::RechargeItem>::iterator it = mRechargeItems.begin(); it != mRechargeItems.end();)
+        {
+            ESM::RechargeItem rItem = *it;
+            MWWorld::Ptr item;
+            MWBase::Environment::get().getWorld()->getItemById(rItem.key, item);
+            if (!item) {
+                it++;
+                continue;
+            }
+
+            MWWorld::Ptr player = getPlayer();
+
+            std::string enchantmentId = item.getClass().getEnchantment(item);
+            const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(
+                enchantmentId);
+            if (!enchantment)
+            {
+                it = mRechargeItems.erase(it);
+                continue;
+            }
+
+            // Find the applicable Enchaments charge.
+            const float maxCharge = static_cast<float>(enchantment->mData.mCharge);
+            if (item.getCellRef().getEnchantmentCharge() == -1 ||
+                item.getCellRef().getEnchantmentCharge() == maxCharge)
+            {
+                it = mRechargeItems.erase(it);
+                continue;
+            }
+            static float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                "fMagicItemRechargePerSecond")->getFloat();
+
+            int durationDay = (curTime.mDay - rItem.mTimeStamp.mDay);
+            float durationHour = (curTime.mHour - rItem.mTimeStamp.mHour);
+            float durationElapsedHours = durationDay * 24 + durationHour;
+            rItem.mTimeStamp = curTime;
+            if (item.getCellRef().getEnchantmentCharge() <= maxCharge)
+            {
+                item.getCellRef().setEnchantmentCharge(std::min(item.getCellRef().getEnchantmentCharge() + (fMagicItemRechargePerSecond * durationElapsedHours), // game-time.
+                    maxCharge));
+
+            }
+            ++it;
+        }
+    }
+
+    bool MechanicsManager::isRechargeItemInStack(ESM::RechargeItem rItem)
+    {
+        std::vector<ESM::RechargeItem>::iterator fItem;
+        fItem = std::find_if(mRechargeItems.begin(), mRechargeItems.end(), [rItem](ESM::RechargeItem o) { return o.key == rItem.key; });
+        return (fItem != mRechargeItems.end());
     }
 
     void MechanicsManager::update(float duration, bool paused)
@@ -1027,6 +1087,8 @@ namespace MWMechanics
             }
         }
 
+        
+
         if (isAllowedToUse(ptr, item, victim))
             return;
 
@@ -1531,7 +1593,8 @@ namespace MWMechanics
     int MechanicsManager::countSavedGameRecords() const
     {
         return 1 // Death counter
-                +1; // Stolen items
+            + 1, // Stolen items
+            + 1; // Used Items
     }
 
     void MechanicsManager::write(ESM::ESMWriter &writer, Loading::Listener &listener) const
@@ -1543,6 +1606,12 @@ namespace MWMechanics
         writer.startRecord(ESM::REC_STLN);
         items.write(writer);
         writer.endRecord(ESM::REC_STLN);
+
+        ESM::RechargeItems ritems;
+        ritems.mRechargeItems = mRechargeItems;
+        writer.startRecord(ESM::REC_RCHG);
+        ritems.write(writer);
+        writer.endRecord(ESM::REC_RCHG);       
     }
 
     void MechanicsManager::readRecord(ESM::ESMReader &reader, uint32_t type)
@@ -1553,6 +1622,12 @@ namespace MWMechanics
             items.load(reader);
             mStolenItems = items.mStolenItems;
         }
+        else if (type == ESM::REC_RCHG)
+        {
+            ESM::RechargeItems rItems;
+            rItems.load(reader);
+            mRechargeItems = rItems.mRechargeItems;
+        }
         else
             mActors.readRecord(reader, type);
     }
@@ -1561,6 +1636,7 @@ namespace MWMechanics
     {
         mActors.clear();
         mStolenItems.clear();
+        mRechargeItems.clear();
         mClassSelected = false;
         mRaceSelected = false;
     }

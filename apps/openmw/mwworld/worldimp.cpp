@@ -2484,6 +2484,16 @@ namespace MWWorld
         }
     }
 
+    void World::getItemById(const std::string id, MWWorld::Ptr& out)
+    {
+        const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
+        for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
+        {
+            MWWorld::CellStore* cellStore = (*cellIt);
+            out = cellStore->search(id);
+        }
+    }
+
     bool World::getLOS(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& targetActor)
     {
         if (!targetActor.getRefData().isEnabled() || !actor.getRefData().isEnabled())
