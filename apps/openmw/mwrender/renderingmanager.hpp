@@ -252,9 +252,11 @@ namespace MWRender
         float mNightEyeFactor;
 
         float mNearClip;
+        float mFarClip;
         float mViewDistance;
+        bool mDistantTerrain : 1;
+        bool mFieldOfViewOverridden : 1;
         float mFieldOfViewOverride;
-        bool mFieldOfViewOverridden;
         float mFieldOfView;
         float mFirstPersonFieldOfView;
 

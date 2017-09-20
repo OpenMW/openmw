@@ -179,8 +179,9 @@ namespace MWRender
         , mUnderwaterFog(0.f)
         , mUnderwaterIndoorFog(fallback->getFallbackFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
-        , mFieldOfViewOverride(0.f)
+        , mDistantTerrain(false)
         , mFieldOfViewOverridden(false)
+        , mFieldOfViewOverride(0.f)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
@@ -216,12 +217,12 @@ namespace MWRender
 
         mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
 
-        const bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
+        mDistantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
         mTerrainStorage = new TerrainStorage(mResourceSystem, Settings::Manager::getString("normal map pattern", "Shaders"), Settings::Manager::getString("normal height map pattern", "Shaders"),
-                                            Settings::Manager::getBool("auto use terrain normal maps", "Shaders"), Settings::Manager::getString("terrain specular map pattern", "Shaders"),
+                                             Settings::Manager::getBool("auto use terrain normal maps", "Shaders"), Settings::Manager::getString("terrain specular map pattern", "Shaders"),
                                              Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
 
-        if (distantTerrain)
+        if (mDistantTerrain)
             mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
         else
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
@@ -288,8 +289,10 @@ namespace MWRender
         mFirstPersonFieldOfView = Settings::Manager::getFloat("first person field of view", "Camera");
         mStateUpdater->setFogEnd(mViewDistance);
 
+        mFarClip = mDistantTerrain ? 8192.0f*5.0f : mViewDistance;
+
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
-        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
+        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mFarClip));
 
         mUniformNear = mRootNode->getOrCreateStateSet()->getUniform("near");
         mUniformFar = mRootNode->getOrCreateStateSet()->getUniform("far");
@@ -632,7 +635,7 @@ namespace MWRender
         rttCamera->setRenderOrder(osg::Camera::PRE_RENDER);
         rttCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         rttCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
-        rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
+        rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mFarClip);
         rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix());
         rttCamera->setViewport(0, 0, w, h);
 
@@ -897,10 +900,10 @@ namespace MWRender
         float fov = mFieldOfView;
         if (mFieldOfViewOverridden)
             fov = mFieldOfViewOverride;
-        mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance);
+        mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mFarClip);
 
         mUniformNear->set(mNearClip);
-        mUniformFar->set(mViewDistance);
+        mUniformFar->set(mFarClip);
     }
 
     void RenderingManager::updateTextureFiltering()
@@ -960,6 +963,7 @@ namespace MWRender
             else if (it->first == "Camera" && it->second == "viewing distance")
             {
                 mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
+                mFarClip = mDistantTerrain ? 8192.0f*5.0f : mViewDistance;
                 mStateUpdater->setFogEnd(mViewDistance);
                 updateProjectionMatrix();
             }
