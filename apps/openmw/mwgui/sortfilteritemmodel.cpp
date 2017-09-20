@@ -96,8 +96,6 @@ namespace
                         leftChargePercent = (left.mBase.getCellRef().getEnchantmentCharge() == -1) ? 100
                             : static_cast<int>(left.mBase.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
                 }
-                else
-                    std::cerr << "Warning: Can't find enchantment '" << leftName << "' on item " << left.mBase.getCellRef().getRefId() << std::endl;
             }
 
             if (!rightName.empty())
@@ -111,8 +109,6 @@ namespace
                         rightChargePercent = (right.mBase.getCellRef().getEnchantmentCharge() == -1) ? 100
                             : static_cast<int>(right.mBase.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
                 }
-                else
-                    std::cerr << "Warning: Can't find enchantment '" << rightName << "' on item " << right.mBase.getCellRef().getRefId() << std::endl;
             }
 
             result = leftChargePercent - rightChargePercent;
