@@ -1002,6 +1002,9 @@ namespace MWGui
             mGlobalMapOverlayTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getOverlayTexture()));
             mGlobalMapOverlay->setRenderItemTexture(mGlobalMapOverlayTexture.get());
             mGlobalMapOverlay->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+
+            // Redraw children in proper order
+            mGlobalMap->getParent()->_updateChilds();
         }
     }
 
