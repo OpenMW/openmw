@@ -1,15 +1,5 @@
 #define MAX_LIGHTS 8
 
-vec3 lightAmbient(int lightIndex, vec3 ambient)
-{
-    return ambient * gl_LightSource[lightIndex].ambient.xyz;
-}
-
-vec3 lightDiffuse(int lightIndex, vec4 diffuse, vec3 viewNormal, vec3 lightDir)
-{
-    return diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0);
-}
-
 void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 viewPos, vec3 viewNormal, vec4 diffuse, vec3 ambient)
 {
     vec3 lightDir;
@@ -20,8 +10,8 @@ void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 vie
     lightDir = normalize(lightDir);
 	float illumination = clamp(1.0 / (gl_LightSource[lightIndex].constantAttenuation + gl_LightSource[lightIndex].linearAttenuation * lightDistance + gl_LightSource[lightIndex].quadraticAttenuation * lightDistance * lightDistance), 0.0, 1.0);
 
-    ambientOut = lightAmbient(lightIndex, ambient) * illumination;
-    diffuseOut = lightDiffuse(lightIndex, diffuse, viewNormal, lightDir) * illumination;
+    ambientOut = ambient * gl_LightSource[lightIndex].ambient.xyz * illumination;
+    diffuseOut = diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0) * illumination;
 }
 
 #ifdef FRAGMENT
