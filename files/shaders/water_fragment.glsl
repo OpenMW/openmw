@@ -31,7 +31,7 @@ const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       //sunlight extinction
 
 const float SPEC_HARDNESS = 256.0;                 // specular highlights hardness
 
-const float REFLECTION_BUMP_SUPRESS_DEPTH = 150.0; // at what water depth bump map will be supressed for reflections (prevents artifacts at shores)
+const float REFLECTION_BUMP_SUPPRESS_DEPTH = 150;  // at what water depth bump map will be supressed for reflections (prevents artifacts at shores)
 
 const vec2 WIND_DIR = vec2(0.5f, -0.8f);
 const float WIND_SPEED = 0.2f;
@@ -158,7 +158,7 @@ void main(void)
 
     float realWaterDepth = transformDepth(texture2D(refractionDepthMap, screenCoords).x);
 
-    float shore = clamp(realWaterDepth / REFLECTION_BUMP_SUPRESS_DEPTH,0,1);
+    float shore = clamp(realWaterDepth / REFLECTION_BUMP_SUPPRESS_DEPTH,0,1);
 
     // reflection
     vec3 reflection = texture2D(reflectionMap, screenCoords+(normal.xy*REFL_BUMP*shore)).rgb;
