@@ -31,6 +31,8 @@ const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       //sunlight extinction
 
 const float SPEC_HARDNESS = 256.0;                 // specular highlights hardness
 
+const float REFLECTION_BUMP_SUPRESS_DEPTH = 150.0; // at what water depth bump map will be supressed for reflections (prevents artifacts at shores)
+
 const vec2 WIND_DIR = vec2(0.5f, -0.8f);
 const float WIND_SPEED = 0.2f;
 
@@ -73,6 +75,13 @@ uniform float osg_SimulationTime;
 uniform float near;
 uniform float far;
 uniform vec3 nodePosition;
+
+float transformDepth(float depth)  // helper for transforming refraction depth
+  {
+    float z_n = 2.0 * depth - 1.0;
+    depth = 2.0 * near * far / (far + near - z_n * (far - near));
+    return depth - depthPassthrough;
+  }
 
 void main(void)
 {
@@ -147,8 +156,12 @@ void main(void)
 
     fresnel = clamp(fresnel, 0.0, 1.0);
 
+    float realWaterDepth = transformDepth(texture2D(refractionDepthMap, screenCoords).x);
+
+    float shore = clamp(realWaterDepth / REFLECTION_BUMP_SUPRESS_DEPTH,0,1);
+
     // reflection
-    vec3 reflection = texture2D(reflectionMap,  screenCoords+(normal.xy*REFL_BUMP)).rgb;
+    vec3 reflection = texture2D(reflectionMap, screenCoords+(normal.xy*REFL_BUMP*shore)).rgb;
 
     // refraction
 #if REFRACTION
@@ -165,10 +178,7 @@ void main(void)
     vec3 waterColor = WATER_COLOR;
     waterColor = waterColor * length(gl_LightModel.ambient.xyz);
 #if REFRACTION
-    float refractionDepth = texture2D(refractionDepthMap, screenCoords-(normal.xy*REFR_BUMP)).x;
-    float z_n = 2.0 * refractionDepth - 1.0;
-    refractionDepth = 2.0 * near * far / (far + near - z_n * (far - near));
-    
+    float refractionDepth = transformDepth(texture2D(refractionDepthMap, screenCoords-(normal.xy*REFR_BUMP)).x); 
     float waterDepth = refractionDepth - depthPassthrough;
 
     if (cameraPos.z > 0.0)
@@ -185,6 +195,15 @@ void main(void)
 
 #if REFRACTION
     gl_FragData[0].w = 1.0;
+
+/*float nonRefractionDepth = texture2D(refractionDepthMap, screenCoords).x;
+z_n = 2.0 * nonRefractionDepth - 1.0;
+nonRefractionDepth = 2.0 * near * far / (far + near - z_n * (far - near));
+
+float realWaterDepth = nonRefractionDepth - depthPassthrough;
+*/
+//gl_FragData[0] = vec4(refractionSuppressor,0,0,0);
+
 #else
     gl_FragData[0].w = clamp(fresnel*2.0 + specular, 0.0, 1.0);
 #endif
