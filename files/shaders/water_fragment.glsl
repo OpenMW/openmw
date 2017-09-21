@@ -195,15 +195,6 @@ void main(void)
 
 #if REFRACTION
     gl_FragData[0].w = 1.0;
-
-/*float nonRefractionDepth = texture2D(refractionDepthMap, screenCoords).x;
-z_n = 2.0 * nonRefractionDepth - 1.0;
-nonRefractionDepth = 2.0 * near * far / (far + near - z_n * (far - near));
-
-float realWaterDepth = nonRefractionDepth - depthPassthrough;
-*/
-//gl_FragData[0] = vec4(refractionSuppressor,0,0,0);
-
 #else
     gl_FragData[0].w = clamp(fresnel*2.0 + specular, 0.0, 1.0);
 #endif
