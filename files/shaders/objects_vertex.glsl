@@ -39,6 +39,7 @@ varying float depth;
 
 #if !PER_PIXEL_LIGHTING
 varying vec4 lighting;
+varying vec3 shadowDiffuseLighting;
 #else
 varying vec4 passColor;
 #endif
@@ -95,7 +96,7 @@ void main(void)
 #endif
 
 #if !PER_PIXEL_LIGHTING
-    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color);
+    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color, shadowDiffuseLighting);
 #else
     passColor = gl_Color;
 #endif

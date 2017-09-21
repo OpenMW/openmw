@@ -50,6 +50,7 @@ varying float depth;
 
 #if !PER_PIXEL_LIGHTING
 varying vec4 lighting;
+varying vec3 shadowDiffuseLighting;
 #else
 varying vec4 passColor;
 #endif
@@ -120,7 +121,7 @@ void main()
 	float shadowing = shadow2DProj(shadowTexture, shadowSpaceCoords).r;
 
 #if !PER_PIXEL_LIGHTING
-    gl_FragData[0] *= lighting * shadowing;
+    gl_FragData[0] *= lighting + vec4(shadowDiffuseLighting * shadowing, 0);
 #else
     gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor, shadowing);
 #endif
