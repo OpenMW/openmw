@@ -106,7 +106,7 @@ namespace MWRender
 
         void configureAmbient(const ESM::Cell* cell);
         void configureFog(const ESM::Cell* cell);
-        void configureFog(float fogDepth, float underwaterFog, const osg::Vec4f& colour);
+        void configureFog(float fogDepth, float underwaterFog, float dlFactor, float dlOffset, const osg::Vec4f& colour);
 
         void addCell(const MWWorld::CellStore* store);
         void removeCell(const MWWorld::CellStore* store);
@@ -241,10 +241,12 @@ namespace MWRender
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
 
-        float mFogDepth;
+        float mLandFogStart;
+        float mLandFogEnd;
+        float mUnderwaterFogStart;
+        float mUnderwaterFogEnd;
         osg::Vec4f mUnderwaterColor;
         float mUnderwaterWeight;
-        float mUnderwaterFog;
         float mUnderwaterIndoorFog;
         osg::Vec4f mFogColor;
 

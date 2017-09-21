@@ -103,6 +103,8 @@ Weather::Weather(const std::string& name,
                  const Fallback::Map& fallback,
                  float stormWindSpeed,
                  float rainSpeed,
+                 float dlFactor,
+                 float dlOffset,
                  const std::string& particleEffect)
     : mCloudTexture(fallback.getFallbackString("Weather_" + name + "_Cloud_Texture"))
     , mSkyColor(fallback.getFallbackColour("Weather_" + name +"_Sky_Sunrise_Color"),
@@ -129,6 +131,7 @@ Weather::Weather(const std::string& name,
     , mWindSpeed(fallback.getFallbackFloat("Weather_" + name + "_Wind_Speed"))
     , mCloudSpeed(fallback.getFallbackFloat("Weather_" + name + "_Cloud_Speed"))
     , mGlareView(fallback.getFallbackFloat("Weather_" + name + "_Glare_View"))
+    , mDL{dlFactor, dlOffset}
     , mIsStorm(mWindSpeed > stormWindSpeed)
     , mRainSpeed(rainSpeed)
     , mRainFrequency(fallback.getFallbackFloat("Weather_" + name + "_Rain_Entrance_Speed"))
@@ -541,16 +544,18 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const Fall
     mTimeSettings.mSunriseTime = mSunriseTime;
 
     mWeatherSettings.reserve(10);
-    addWeather("Clear", fallback); // 0
-    addWeather("Cloudy", fallback); // 1
-    addWeather("Foggy", fallback); // 2
-    addWeather("Overcast", fallback); // 3
-    addWeather("Rain", fallback); // 4
-    addWeather("Thunderstorm", fallback); // 5
-    addWeather("Ashstorm", fallback, "meshes\\ashcloud.nif"); // 6
-    addWeather("Blight", fallback, "meshes\\blightcloud.nif"); // 7
-    addWeather("Snow", fallback, "meshes\\snow.nif"); // 8
-    addWeather("Blizzard", fallback, "meshes\\blizzard.nif"); // 9
+    // These distant land fog factor and offset values are the defaults MGE XE provides. Should be
+    // provided by settings somewhere?
+    addWeather("Clear", fallback, 1.0f, 0.0f); // 0
+    addWeather("Cloudy", fallback, 0.9f, 0.0f); // 1
+    addWeather("Foggy", fallback, 0.2f, 30.0f); // 2
+    addWeather("Overcast", fallback, 0.7f, 0.0f); // 3
+    addWeather("Rain", fallback, 0.5f, 10.0f); // 4
+    addWeather("Thunderstorm", fallback, 0.5f, 20.0f); // 5
+    addWeather("Ashstorm", fallback, 0.2f, 50.0f, "meshes\\ashcloud.nif"); // 6
+    addWeather("Blight", fallback, 0.2f, 60.0f, "meshes\\blightcloud.nif"); // 7
+    addWeather("Snow", fallback, 0.5f, 40.0f, "meshes\\snow.nif"); // 8
+    addWeather("Blizzard", fallback, 0.16f, 70.0f, "meshes\\blizzard.nif"); // 9
 
     Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
     for(; it != store.get<ESM::Region>().end(); ++it)
@@ -720,7 +725,8 @@ void WeatherManager::update(float duration, bool paused)
     mRendering.getSkyManager()->setMasserState(mMasser.calculateState(time));
     mRendering.getSkyManager()->setSecundaState(mSecunda.calculateState(time));
 
-    mRendering.configureFog(mResult.mFogDepth, underwaterFog, mResult.mFogColor);
+    mRendering.configureFog(mResult.mFogDepth, underwaterFog, mResult.mDLFogFactor,
+                            mResult.mDLFogOffset/100.0f, mResult.mFogColor);
     mRendering.setAmbientColour(mResult.mAmbientColor);
     mRendering.setSunColour(mResult.mSunColor, mResult.mSunColor * mResult.mGlareView);
 
@@ -866,11 +872,12 @@ void WeatherManager::clear()
 
 inline void WeatherManager::addWeather(const std::string& name,
                                        const Fallback::Map& fallback,
+                                       float dlFactor, float dlOffset,
                                        const std::string& particleEffect)
 {
     static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->getFloat();
 
-    Weather weather(name, fallback, fStromWindSpeed, mRainSpeed, particleEffect);
+    Weather weather(name, fallback, fStromWindSpeed, mRainSpeed, dlFactor, dlOffset, particleEffect);
 
     mWeatherSettings.push_back(weather);
 }
@@ -1058,6 +1065,8 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
     mResult.mNight = (gameHour < mSunriseTime || gameHour > mTimeSettings.mNightStart - 1);
 
     mResult.mFogDepth = current.mLandFogDepth.getValue(gameHour, mTimeSettings);
+    mResult.mDLFogFactor = current.mDL.FogFactor;
+    mResult.mDLFogOffset = current.mDL.FogOffset;
     mResult.mFogColor = current.mFogColor.getValue(gameHour, mTimeSettings);
     mResult.mAmbientColor = current.mAmbientColor.getValue(gameHour, mTimeSettings);
     mResult.mSunColor = current.mSunColor.getValue(gameHour, mTimeSettings);
@@ -1113,6 +1122,8 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
     mResult.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor, factor);
     mResult.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor, factor);
     mResult.mFogDepth = lerp(current.mFogDepth, other.mFogDepth, factor);
+    mResult.mDLFogFactor = lerp(current.mDLFogFactor, other.mDLFogFactor, factor);
+    mResult.mDLFogOffset = lerp(current.mDLFogOffset, other.mDLFogOffset, factor);
     mResult.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed, factor);
     mResult.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed, factor);
     mResult.mGlareView = lerp(current.mGlareView, other.mGlareView, factor);

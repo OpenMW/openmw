@@ -51,6 +51,20 @@
 #include "terrainstorage.hpp"
 #include "util.hpp"
 
+namespace
+{
+    // These values are what MGE XE uses by default when distant land is enabled, and are specified
+    // in cells (8192 units each). Should make them settings somewhere? Or wait to expose them
+    // "properly"?
+    const float DLRenderDistance = 5.0f;
+    const float DLLandFogStart = 2.0f;
+    const float DLLandFogEnd = 5.0f;
+    const float DLUnderwaterFogStart = -0.5f;
+    const float DLUnderwaterFogEnd = 0.3f;
+    const float DLInteriorFogStart = 0.0f;
+    const float DLInteriorFogEnd = 2.0f;
+}
+
 namespace MWRender
 {
 
@@ -173,10 +187,12 @@ namespace MWRender
         , mResourceSystem(resourceSystem)
         , mWorkQueue(workQueue)
         , mUnrefQueue(new SceneUtil::UnrefQueue)
-        , mFogDepth(0.f)
+        , mLandFogStart(0.f)
+        , mLandFogEnd(std::numeric_limits<float>::max())
+        , mUnderwaterFogStart(0.f)
+        , mUnderwaterFogEnd(std::numeric_limits<float>::max())
         , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
         , mUnderwaterWeight(fallback->getFallbackFloat("Water_UnderwaterColorWeight"))
-        , mUnderwaterFog(0.f)
         , mUnderwaterIndoorFog(fallback->getFallbackFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
         , mDistantTerrain(false)
@@ -289,7 +305,7 @@ namespace MWRender
         mFirstPersonFieldOfView = Settings::Manager::getFloat("first person field of view", "Camera");
         mStateUpdater->setFogEnd(mViewDistance);
 
-        mFarClip = mDistantTerrain ? 8192.0f*5.0f : mViewDistance;
+        mFarClip = mDistantTerrain ? DLRenderDistance*8192.0f : mViewDistance;
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mFarClip));
@@ -482,14 +498,44 @@ namespace MWRender
     {
         osg::Vec4f color = SceneUtil::colourFromRGB(cell->mAmbi.mFog);
 
-        configureFog (cell->mAmbi.mFogDensity, mUnderwaterIndoorFog, color);
+        if(mDistantTerrain)
+        {
+            float density = std::max(0.2f, cell->mAmbi.mFogDensity);
+            mLandFogStart = (DLInteriorFogEnd*(1.0f-density) + DLInteriorFogStart*density) * 8192.0f;
+            mLandFogEnd = DLInteriorFogEnd * 8192.0f;
+            mUnderwaterFogStart = DLUnderwaterFogStart * 8192.0f;
+            mUnderwaterFogEnd = DLUnderwaterFogEnd * 8192.0f;
+            mFogColor = color;
+        }
+        else
+            configureFog(cell->mAmbi.mFogDensity, mUnderwaterIndoorFog, 1.0f, 0.0f, color);
     }
 
-    void RenderingManager::configureFog(float fogDepth, float underwaterFog, const osg::Vec4f &color)
+    void RenderingManager::configureFog(float fogDepth, float underwaterFog, float dlFactor, float dlOffset, const osg::Vec4f &color)
     {
-        mFogDepth = fogDepth;
+        if(mDistantTerrain)
+        {
+            mLandFogStart = dlFactor * (DLLandFogStart - dlOffset*DLLandFogEnd) * 8192.0f;
+            mLandFogEnd = dlFactor * (1.0f-dlOffset) * DLLandFogEnd * 8192.0f;
+            mUnderwaterFogStart = DLUnderwaterFogStart * 8192.0f;
+            mUnderwaterFogEnd = DLUnderwaterFogEnd * 8192.0f;
+        }
+        else
+        {
+            if(fogDepth == 0.0)
+            {
+                mLandFogStart = 0.0f;
+                mLandFogEnd = std::numeric_limits<float>::max();
+            }
+            else
+            {
+                mLandFogStart = mViewDistance * (1 - fogDepth);
+                mLandFogEnd = mViewDistance;
+            }
+            mUnderwaterFogStart = mViewDistance * (1 - underwaterFog);
+            mUnderwaterFogEnd = mViewDistance;
+        }
         mFogColor = color;
-        mUnderwaterFog = underwaterFog;
     }
 
     SkyManager* RenderingManager::getSkyManager()
@@ -520,23 +566,15 @@ namespace MWRender
             float viewDistance = mViewDistance;
             viewDistance = std::min(viewDistance, 6666.f);
             setFogColor(mUnderwaterColor * mUnderwaterWeight + mFogColor * (1.f-mUnderwaterWeight));
-            mStateUpdater->setFogStart(viewDistance * (1 - mUnderwaterFog));
-            mStateUpdater->setFogEnd(viewDistance);
+            mStateUpdater->setFogStart(mUnderwaterFogStart);
+            mStateUpdater->setFogEnd(mUnderwaterFogEnd);
         }
         else
         {
             setFogColor(mFogColor);
 
-            if (mFogDepth == 0.f)
-            {
-                mStateUpdater->setFogStart(0.f);
-                mStateUpdater->setFogEnd(std::numeric_limits<float>::max());
-            }
-            else
-            {
-                mStateUpdater->setFogStart(mViewDistance * (1 - mFogDepth));
-                mStateUpdater->setFogEnd(mViewDistance);
-            }
+            mStateUpdater->setFogStart(mLandFogStart);
+            mStateUpdater->setFogEnd(mLandFogEnd);
         }
     }
 
@@ -963,9 +1001,12 @@ namespace MWRender
             else if (it->first == "Camera" && it->second == "viewing distance")
             {
                 mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
-                mFarClip = mDistantTerrain ? 8192.0f*5.0f : mViewDistance;
-                mStateUpdater->setFogEnd(mViewDistance);
-                updateProjectionMatrix();
+                if(!mDistantTerrain)
+                {
+                    mFarClip = mViewDistance;
+                    mStateUpdater->setFogEnd(mViewDistance);
+                    updateProjectionMatrix();
+                }
             }
             else if (it->first == "General" && (it->second == "texture filter" ||
                                                 it->second == "texture mipmap" ||
