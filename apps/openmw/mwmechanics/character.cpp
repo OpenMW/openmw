@@ -1116,6 +1116,11 @@ bool CharacterController::updateWeaponState()
     priorityWeapon[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
 
     bool forcestateupdate = false;
+
+    // We should not play equipping animation and sound during weapon->weapon transition
+    bool isStillWeapon = weaptype > WeapType_HandToHand && weaptype < WeapType_Spell &&
+                            mWeaponType > WeapType_HandToHand && mWeaponType < WeapType_Spell;
+
     if(weaptype != mWeaponType && mHitState != CharState_KnockDown && mHitState != CharState_KnockOut
                                 && mHitState != CharState_Hit)
     {
@@ -1138,13 +1143,16 @@ bool CharacterController::updateWeaponState()
         else
         {
             getWeaponGroup(weaptype, weapgroup);
-            mAnimation->showWeapons(false);
             mAnimation->setWeaponGroup(weapgroup);
 
-            mAnimation->play(weapgroup, priorityWeapon,
-                             MWRender::Animation::BlendMask_All, true,
-                             1.0f, "equip start", "equip stop", 0.0f, 0);
-            mUpperBodyState = UpperCharState_EquipingWeap;
+            if (!isStillWeapon)
+            {
+                mAnimation->showWeapons(false);
+                mAnimation->play(weapgroup, priorityWeapon,
+                                 MWRender::Animation::BlendMask_All, true,
+                                 1.0f, "equip start", "equip stop", 0.0f, 0);
+                mUpperBodyState = UpperCharState_EquipingWeap;
+            }
 
             if(isWerewolf)
             {
@@ -1158,7 +1166,7 @@ bool CharacterController::updateWeaponState()
             }
         }
 
-        if(!soundid.empty())
+        if(!soundid.empty() && !isStillWeapon)
         {
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             sndMgr->playSound3D(mPtr, soundid, 1.0f, 1.0f);
