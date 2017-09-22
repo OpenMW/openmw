@@ -41,6 +41,25 @@ template <uint32_t numInstances, typename T> inline void readLittleEndianBufferO
 #endif
 }
 
+template <typename T> inline void readLittleEndianDynamicBufferOfType(Files::IStreamPtr &pIStream, T* dest, uint32_t numInstances)
+{
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
+    pIStream->read((char*)dest, numInstances * sizeof(T));
+#else
+    char buffer[numInstances * sizeof(T)];
+    pIStream->read((char*)buffer, numInstances * sizeof(T));
+    /*
+    Due to the loop iterations being known at compile time,
+    this nested loop will most likely be unrolled
+    */
+    for (uint32_t i = 0; i < numInstances; i++)
+    {
+        dest[i] = 0;
+        for (uint32_t byte = 0; byte < sizeof(T); byte++)
+            dest[i] |= ((T)buffer[i * sizeof(T) + byte]) << (byte * 8);
+    }
+#endif
+}
 template<typename type> type inline readLittleEndianType(Files::IStreamPtr &pIStream)
 {
     type val;
@@ -146,28 +165,23 @@ public:
 
     void getUShorts(std::vector<unsigned short> &vec, size_t size) {
         vec.resize(size);
-        for (size_t i = 0;i < vec.size();i++)
-            vec[i] = getUShort();
+        readLittleEndianDynamicBufferOfType<unsigned short>(inp, &vec.front(), size);
     }
     void getFloats(std::vector<float> &vec, size_t size) {
         vec.resize(size);
-        for (size_t i = 0;i < vec.size();i++)
-            vec[i] = getFloat();
+        readLittleEndianDynamicBufferOfType<float>(inp, &vec.front(), size);
     }
     void getVector2s(std::vector<osg::Vec2f> &vec, size_t size) {
         vec.resize(size);
-        for (size_t i = 0;i < vec.size();i++)
-            vec[i] = getVector2();
+        readLittleEndianDynamicBufferOfType<osg::Vec2f>(inp, &vec.front(), size);
     }
     void getVector3s(std::vector<osg::Vec3f> &vec, size_t size) {
         vec.resize(size);
-        for (size_t i = 0;i < vec.size();i++)
-            vec[i] = getVector3();
+        readLittleEndianDynamicBufferOfType<osg::Vec3f>(inp, &vec.front(), size);
     }
     void getVector4s(std::vector<osg::Vec4f> &vec, size_t size) {
         vec.resize(size);
-        for (size_t i = 0;i < vec.size();i++)
-            vec[i] = getVector4();
+        readLittleEndianDynamicBufferOfType<osg::Vec4f>(inp, &vec.front(), size);
     }
     void getQuaternions(std::vector<osg::Quat> &quat, size_t size) {
         quat.resize(size);
