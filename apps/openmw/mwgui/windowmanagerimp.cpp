@@ -112,6 +112,7 @@
 #include "controllers.hpp"
 #include "jailscreen.hpp"
 #include "itemchargeview.hpp"
+#include "keyboardnavigation.hpp"
 
 namespace
 {
@@ -247,6 +248,8 @@ namespace MWGui
 
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::ResourceManager::getInstance().load("core.xml");
+
+        mKeyboardNavigation.reset(new KeyboardNavigation());
 
         mLoadingScreen = new LoadingScreen(mResourceSystem->getVFS(), mViewer);
 
@@ -433,6 +436,8 @@ namespace MWGui
 
     WindowManager::~WindowManager()
     {
+        mKeyboardNavigation.reset();
+
         MyGUI::LanguageManager::getInstance().eventRequestTag.clear();
         MyGUI::PointerManager::getInstance().eventChangeMousePointer.clear();
         MyGUI::InputManager::getInstance().eventChangeKeyFocus.clear();
@@ -2202,4 +2207,11 @@ namespace MWGui
         return mTextColours;
     }
 
+    bool WindowManager::injectKeyPress(MyGUI::KeyCode key, unsigned int text)
+    {
+        if (!mKeyboardNavigation->injectKeyPress(key, text))
+            return MyGUI::InputManager::getInstance().injectKeyPress(key, text);
+        else
+            return true;
+    }
 }

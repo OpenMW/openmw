@@ -7,6 +7,8 @@
 #include <map>
 #include <set>
 
+#include <MyGUI_KeyCode.h>
+
 #include "../mwgui/mode.hpp"
 
 namespace Loading
@@ -368,6 +370,8 @@ namespace MWBase
             virtual void writeFog(MWWorld::CellStore* cell) = 0;
 
             virtual const MWGui::TextColours& getTextColours() = 0;
+
+            virtual bool injectKeyPress(MyGUI::KeyCode key, unsigned int text) = 0;
     };
 }
 

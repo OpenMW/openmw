@@ -122,6 +122,7 @@ namespace MWGui
   class ScreenFader;
   class DebugWindow;
   class JailScreen;
+  class KeyboardNavigation;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -397,6 +398,8 @@ namespace MWGui
 
     virtual const MWGui::TextColours& getTextColours();
 
+    virtual bool injectKeyPress(MyGUI::KeyCode key, unsigned int text);
+
   private:
     const MWWorld::ESMStore* mStore;
     Resource::ResourceSystem* mResourceSystem;
@@ -521,6 +524,8 @@ namespace MWGui
     std::string mVersionDescription;
 
     MWGui::TextColours mTextColours;
+
+    std::unique_ptr<KeyboardNavigation> mKeyboardNavigation;
 
     /**
      * Called when MyGUI tries to retrieve a tag's value. Tags must be denoted in #{tag} notation and will be replaced upon setting a user visible text/property.

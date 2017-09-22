@@ -676,7 +676,7 @@ namespace MWInput
         {
             consumed = SDL_IsTextInputActive() &&
                     ( !(SDLK_SCANCODE_MASK & arg.keysym.sym) && std::isprint(arg.keysym.sym)); // Little trick to check if key is printable
-            bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+            bool guiFocus = MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
             setPlayerControlsEnabled(!guiFocus);
         }
         if (arg.repeat)
