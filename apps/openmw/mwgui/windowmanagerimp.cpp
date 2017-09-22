@@ -1207,24 +1207,31 @@ namespace MWGui
 
     void WindowManager::pushGuiMode(GuiMode mode)
     {
+        pushGuiMode(mode, MWWorld::Ptr());
+    }
+
+    void WindowManager::pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg)
+    {
         if (mode==GM_Inventory && mAllowed==GW_None)
             return;
 
-        if (!mGuiModes.empty() && mGuiModes.back() == mode)
-            return;
-
-        // If this mode already exists somewhere in the stack, just bring it to the front.
-        if (std::find(mGuiModes.begin(), mGuiModes.end(), mode) != mGuiModes.end())
+        if (mGuiModes.empty() || mGuiModes.back() != mode)
         {
-            mGuiModes.erase(std::find(mGuiModes.begin(), mGuiModes.end(), mode));
+            // If this mode already exists somewhere in the stack, just bring it to the front.
+            if (std::find(mGuiModes.begin(), mGuiModes.end(), mode) != mGuiModes.end())
+            {
+                mGuiModes.erase(std::find(mGuiModes.begin(), mGuiModes.end(), mode));
+            }
+
+            if (!mGuiModes.empty())
+                mGuiModeStates[mGuiModes.back()].update(false);
+
+            mGuiModes.push_back(mode);
+
+            mGuiModeStates[mode].update(true);
         }
-
-        if (!mGuiModes.empty())
-            mGuiModeStates[mGuiModes.back()].update(false);
-
-        mGuiModes.push_back(mode);
-
-        mGuiModeStates[mode].update(true);
+        for (WindowBase* window : mGuiModeStates[mode].mWindows)
+            window->setPtr(arg);
 
         bool gameMode = !isGuiMode();
         MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
@@ -1543,50 +1550,9 @@ namespace MWGui
         mMap->addVisitedLocation (name, x, y);
     }
 
-    void WindowManager::startSpellMaking(MWWorld::Ptr actor)
-    {
-        pushGuiMode(GM_SpellCreation);
-        mSpellCreationDialog->startSpellMaking (actor);
-    }
-
-    void WindowManager::startEnchanting (MWWorld::Ptr actor)
-    {
-        pushGuiMode(GM_Enchanting);
-        mEnchantingDialog->startEnchanting (actor);
-    }
-
-    void WindowManager::startSelfEnchanting(MWWorld::Ptr soulgem)
-    {
-        mEnchantingDialog->startSelfEnchanting(soulgem);
-    }
-
-    void WindowManager::startTraining(MWWorld::Ptr actor)
-    {
-        pushGuiMode(GM_Training);
-        mTrainingWindow->startTraining(actor);
-    }
-
-    void WindowManager::startRepair(MWWorld::Ptr actor)
-    {
-        pushGuiMode(GM_MerchantRepair);
-        mMerchantRepair->startRepair(actor);
-    }
-
-    void WindowManager::startRepairItem(MWWorld::Ptr item)
-    {
-        pushGuiMode(MWGui::GM_Repair);
-        mRepair->startRepairItem(item);
-    }
-
     const Translation::Storage& WindowManager::getTranslationDataStorage() const
     {
         return mTranslationDataStorage;
-    }
-
-    void WindowManager::showCompanionWindow(MWWorld::Ptr actor)
-    {
-        pushGuiMode(MWGui::GM_Companion);
-        mCompanionWindow->openCompanion(actor);
     }
 
     void WindowManager::changePointer(const std::string &name)
@@ -1640,11 +1606,6 @@ namespace MWGui
     Loading::Listener* WindowManager::getLoadingScreen()
     {
         return mLoadingScreen;
-    }
-
-    void WindowManager::startRecharge(MWWorld::Ptr soulgem)
-    {
-        mRecharge->start(soulgem);
     }
 
     bool WindowManager::getCursorVisible()
@@ -1996,51 +1957,10 @@ namespace MWGui
         MWBase::Environment::get().getSoundManager()->playSound(soundId, volume, pitch, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
     }
 
-    void WindowManager::setConsoleSelectedObject(const MWWorld::Ptr &object)
-    {
-        mConsole->setSelectedObject(object);
-    }
-
     void WindowManager::updateSpellWindow()
     {
         if (mSpellWindow)
             mSpellWindow->updateSpells();
-    }
-
-    void WindowManager::startTravel(const MWWorld::Ptr &actor)
-    {
-        pushGuiMode(GM_Travel);
-        mTravelWindow->startTravel(actor);
-    }
-
-    void WindowManager::startSpellBuying(const MWWorld::Ptr &actor)
-    {
-        pushGuiMode(GM_SpellBuying);
-        mSpellBuyingWindow->startSpellBuying(actor, 0);
-    }
-
-    void WindowManager::startTrade(const MWWorld::Ptr &actor)
-    {
-        pushGuiMode(GM_Barter);
-        mTradeWindow->startTrade(actor);
-    }
-
-    void WindowManager::openContainer(const MWWorld::Ptr &container, bool loot)
-    {
-        pushGuiMode(GM_Container);
-        mContainerWindow->openContainer(container, loot);
-    }
-
-    void WindowManager::showBook(const MWWorld::Ptr &item, bool showTakeButton)
-    {
-        pushGuiMode(GM_Book);
-        mBookWindow->openBook(item, showTakeButton);
-    }
-
-    void WindowManager::showScroll(const MWWorld::Ptr &item, bool showTakeButton)
-    {
-        pushGuiMode(GM_Scroll);
-        mScrollWindow->openScroll(item, showTakeButton);
     }
 
     std::string WindowManager::correctIconPath(const std::string& path)

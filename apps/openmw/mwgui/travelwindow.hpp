@@ -26,7 +26,7 @@ namespace MWGui
 
             virtual void exit();
 
-            void startTravel(const MWWorld::Ptr& actor);
+            void setPtr (const MWWorld::Ptr& actor);
 
         protected:
             MyGUI::Button* mCancelButton;

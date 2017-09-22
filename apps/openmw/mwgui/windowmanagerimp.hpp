@@ -158,7 +158,8 @@ namespace MWGui
 
     virtual void setNewGame(bool newgame);
 
-    virtual void pushGuiMode(GuiMode mode);
+    virtual void pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg);
+    virtual void pushGuiMode (GuiMode mode);
     virtual void popGuiMode();
     virtual void removeGuiMode(GuiMode mode); ///< can be anywhere in the stack
 
@@ -195,8 +196,6 @@ namespace MWGui
     virtual void useItem(const MWWorld::Ptr& item);
 
     virtual void updateSpellWindow();
-
-    virtual void setConsoleSelectedObject(const MWWorld::Ptr& object);
 
     ///< Set value for the given ID.
     virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value);
@@ -314,21 +313,6 @@ namespace MWGui
     virtual void wakeUpPlayer();
 
     virtual void updatePlayer();
-
-    virtual void showCompanionWindow(MWWorld::Ptr actor);
-    virtual void startSpellMaking(MWWorld::Ptr actor);
-    virtual void startEnchanting(MWWorld::Ptr actor);
-    virtual void startSelfEnchanting(MWWorld::Ptr soulgem);
-    virtual void startTraining(MWWorld::Ptr actor);
-    virtual void startRepair(MWWorld::Ptr actor);
-    virtual void startRepairItem(MWWorld::Ptr item);
-    virtual void startRecharge(MWWorld::Ptr soulgem);
-    virtual void startTravel(const MWWorld::Ptr& actor);
-    virtual void startSpellBuying(const MWWorld::Ptr &actor);
-    virtual void startTrade(const MWWorld::Ptr &actor);
-    virtual void openContainer(const MWWorld::Ptr &container, bool loot);
-    virtual void showBook(const MWWorld::Ptr& item, bool showTakeButton);
-    virtual void showScroll(const MWWorld::Ptr& item, bool showTakeButton);
 
     virtual void showSoulgemDialog (MWWorld::Ptr item);
 

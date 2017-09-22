@@ -26,8 +26,9 @@ namespace MWGui
         void setSoulGem (const MWWorld::Ptr& gem);
         void setItem (const MWWorld::Ptr& item);
 
-        void startEnchanting(MWWorld::Ptr actor);
-        void startSelfEnchanting(MWWorld::Ptr soulgem);
+        /// Actor Ptr: buy enchantment from this actor
+        /// Soulgem Ptr: player self-enchant
+        void setPtr(const MWWorld::Ptr& ptr);
 
         virtual void resetReference();
 

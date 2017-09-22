@@ -88,7 +88,12 @@ namespace MWGui
         mSpellsWidgetMap.clear();
     }
 
-    void SpellBuyingWindow::startSpellBuying(const MWWorld::Ptr& actor, int startOffset)
+    void SpellBuyingWindow::setPtr(const MWWorld::Ptr &actor)
+    {
+        setPtr(actor, 0);
+    }
+
+    void SpellBuyingWindow::setPtr(const MWWorld::Ptr& actor, int startOffset)
     {
         center();
         mPtr = actor;
@@ -161,7 +166,7 @@ namespace MWGui
         MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
-        startSpellBuying(mPtr, mSpellsView->getViewOffset().top);
+        setPtr(mPtr, mSpellsView->getViewOffset().top);
 
         MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
     }

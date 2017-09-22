@@ -336,23 +336,23 @@ namespace MWGui
             if (topic == gmst.find("sPersuasion")->getString())
                 mPersuasionDialog.setVisible(true);
             else if (topic == gmst.find("sCompanionShare")->getString())
-                MWBase::Environment::get().getWindowManager()->showCompanionWindow(mPtr);
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Companion, mPtr);
             else if (!MWBase::Environment::get().getDialogueManager()->checkServiceRefused())
             {
                 if (topic == gmst.find("sBarter")->getString())
-                    MWBase::Environment::get().getWindowManager()->startTrade(mPtr);
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Barter, mPtr);
                 else if (topic == gmst.find("sSpells")->getString())
-                    MWBase::Environment::get().getWindowManager()->startSpellBuying(mPtr);
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellBuying, mPtr);
                 else if (topic == gmst.find("sTravel")->getString())
-                    MWBase::Environment::get().getWindowManager()->startTravel(mPtr);
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Travel, mPtr);
                 else if (topic == gmst.find("sSpellMakingMenuTitle")->getString())
-                    MWBase::Environment::get().getWindowManager()->startSpellMaking (mPtr);
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellCreation, mPtr);
                 else if (topic == gmst.find("sEnchanting")->getString())
-                    MWBase::Environment::get().getWindowManager()->startEnchanting (mPtr);
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Enchanting, mPtr);
                 else if (topic == gmst.find("sServiceTrainingTitle")->getString())
-                    MWBase::Environment::get().getWindowManager()->startTraining (mPtr);
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Training, mPtr);
                 else if (topic == gmst.find("sRepair")->getString())
-                    MWBase::Environment::get().getWindowManager()->startRepair (mPtr);
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_MerchantRepair, mPtr);
             }
         }
     }

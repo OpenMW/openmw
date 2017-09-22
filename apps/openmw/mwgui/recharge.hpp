@@ -26,7 +26,7 @@ public:
 
     virtual void exit();
 
-    void start (const MWWorld::Ptr& gem);
+    void setPtr (const MWWorld::Ptr& gem);
 
 protected:
     ItemChargeView* mBox;

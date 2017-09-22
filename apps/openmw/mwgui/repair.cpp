@@ -63,7 +63,7 @@ void Repair::exit()
     MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Repair);
 }
 
-void Repair::startRepairItem(const MWWorld::Ptr &item)
+void Repair::setPtr(const MWWorld::Ptr &item)
 {
     MWBase::Environment::get().getWindowManager()->playSound("Item Repair Up");
 

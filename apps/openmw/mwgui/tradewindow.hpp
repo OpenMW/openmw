@@ -27,7 +27,7 @@ namespace MWGui
         public:
             TradeWindow();
 
-            void startTrade(const MWWorld::Ptr& actor);
+            void setPtr(const MWWorld::Ptr& actor);
 
             void borrowItem (int index, size_t count);
             void returnItem (int index, size_t count);

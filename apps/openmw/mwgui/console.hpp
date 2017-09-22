@@ -25,7 +25,7 @@ namespace MWGui
     {
         public:
             /// Set the implicit object for script execution
-            void setSelectedObject(const MWWorld::Ptr& object);
+            void setPtr(const MWWorld::Ptr& object);
 
             MyGUI::EditBox* mCommandLine;
             MyGUI::EditBox* mHistory;

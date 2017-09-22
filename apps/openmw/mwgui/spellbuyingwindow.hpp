@@ -25,7 +25,8 @@ namespace MWGui
         public:
             SpellBuyingWindow();
 
-            void startSpellBuying(const MWWorld::Ptr& actor, int startOffset);
+            void setPtr(const MWWorld::Ptr& actor);
+            void setPtr(const MWWorld::Ptr& actor, int startOffset);
 
             virtual void exit();
 

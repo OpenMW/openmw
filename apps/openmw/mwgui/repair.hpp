@@ -23,7 +23,7 @@ public:
 
     virtual void exit();
 
-    void startRepairItem (const MWWorld::Ptr& item);
+    void setPtr (const MWWorld::Ptr& item);
 
 protected:
     ItemChargeView* mRepairBox;

@@ -115,7 +115,7 @@ namespace MWGui
         }
     }
 
-    void TradeWindow::startTrade(const MWWorld::Ptr& actor)
+    void TradeWindow::setPtr(const MWWorld::Ptr& actor)
     {
         mPtr = actor;
 

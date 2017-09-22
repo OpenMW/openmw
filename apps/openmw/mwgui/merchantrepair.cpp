@@ -32,7 +32,7 @@ MerchantRepair::MerchantRepair()
     mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onOkButtonClick);
 }
 
-void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
+void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
 {
     mActor = actor;
 
@@ -145,7 +145,7 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
     MWMechanics::CreatureStats& actorStats = mActor.getClass().getCreatureStats(mActor);
     actorStats.setGoldPool(actorStats.getGoldPool() + price);
 
-    startRepair(mActor);
+    setPtr(mActor);
 }
 
 void MerchantRepair::onOkButtonClick(MyGUI::Widget *sender)

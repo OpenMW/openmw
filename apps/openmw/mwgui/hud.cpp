@@ -260,7 +260,7 @@ namespace MWGui
             MWWorld::Ptr object = MWBase::Environment::get().getWorld()->getFacedObject();
 
             if (mode == GM_Console)
-                MWBase::Environment::get().getWindowManager()->setConsoleSelectedObject(object);
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Console, object);
             else if ((mode == GM_Container) || (mode == GM_Inventory))
             {
                 // pick up object

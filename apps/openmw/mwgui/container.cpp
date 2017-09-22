@@ -129,10 +129,12 @@ namespace MWGui
             dropItem();
     }
 
-    void ContainerWindow::openContainer(const MWWorld::Ptr& container, bool loot)
+    void ContainerWindow::setPtr(const MWWorld::Ptr& container)
     {
         mPickpocketDetected = false;
         mPtr = container;
+
+        bool loot = mPtr.getClass().isActor() && mPtr.getClass().getCreatureStats(mPtr).isDead();
 
         if (mPtr.getTypeName() == typeid(ESM::NPC).name() && !loot)
         {

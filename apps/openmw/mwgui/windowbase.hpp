@@ -8,6 +8,11 @@ namespace MWBase
     class WindowManager;
 }
 
+namespace MWWorld
+{
+    class Ptr;
+}
+
 namespace MWGui
 {
     class WindowManager;
@@ -20,6 +25,9 @@ namespace MWGui
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
+
+        /// Open this object in the GUI, for windows that support it
+        virtual void setPtr(const MWWorld::Ptr& ptr) {}
 
         /// Notify that window has been made visible
         virtual void onOpen() {}

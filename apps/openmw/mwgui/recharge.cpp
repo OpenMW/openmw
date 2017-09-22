@@ -67,7 +67,7 @@ void Recharge::exit()
     MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Recharge);
 }
 
-void Recharge::start (const MWWorld::Ptr &item)
+void Recharge::setPtr (const MWWorld::Ptr &item)
 {
     mGemIcon->setItem(item);
     mGemIcon->setUserString("ToolTipType", "ItemPtr");

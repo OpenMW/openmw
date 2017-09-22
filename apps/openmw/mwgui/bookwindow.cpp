@@ -11,6 +11,7 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/class.hpp"
 
 #include "formatting.hpp"
 
@@ -74,9 +75,12 @@ namespace MWGui
         mPages.clear();
     }
 
-    void BookWindow::openBook (MWWorld::Ptr book, bool showTakeButton)
+    void BookWindow::setPtr (const MWWorld::Ptr& book)
     {
         mBook = book;
+
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        bool showTakeButton = book.getContainerStore() != &player.getClass().getContainerStore(player);
 
         clearPages();
         mCurrentPage = 0;

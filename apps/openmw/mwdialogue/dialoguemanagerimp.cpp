@@ -186,7 +186,7 @@ namespace MWDialogue
         bool isCompanion = !mActor.getClass().getScript(mActor).empty()
                 && mActor.getRefData().getLocals().getIntVar(mActor.getClass().getScript(mActor), "companion");
         if (isCompanion)
-            MWBase::Environment::get().getWindowManager()->showCompanionWindow(mActor);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Companion, mActor);
     }
 
     bool DialogueManager::compile (const std::string& cmd, std::vector<Interpreter::Type_Code>& code, const MWWorld::Ptr& actor)

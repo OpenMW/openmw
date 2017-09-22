@@ -16,7 +16,7 @@ public:
 
     virtual void exit();
 
-    void startRepair(const MWWorld::Ptr& actor);
+    void setPtr(const MWWorld::Ptr& actor);
 
 private:
     MyGUI::ScrollView* mList;

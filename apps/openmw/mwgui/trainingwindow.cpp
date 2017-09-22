@@ -65,7 +65,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
     }
 
-    void TrainingWindow::startTraining (MWWorld::Ptr actor)
+    void TrainingWindow::setPtr (const MWWorld::Ptr& actor)
     {
         mPtr = actor;
 

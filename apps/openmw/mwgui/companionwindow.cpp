@@ -103,7 +103,7 @@ void CompanionWindow::onBackgroundSelected()
     }
 }
 
-void CompanionWindow::openCompanion(const MWWorld::Ptr& npc)
+void CompanionWindow::setPtr(const MWWorld::Ptr& npc)
 {
     mPtr = npc;
     updateEncumbranceBar();

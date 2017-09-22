@@ -143,51 +143,36 @@ namespace MWGui
         }
     }
 
-    void EnchantingDialog::startEnchanting (MWWorld::Ptr actor)
+    void EnchantingDialog::setPtr (const MWWorld::Ptr& ptr)
     {
         mName->setCaption("");
 
-        mEnchanting.setSelfEnchanting(false);
-        mEnchanting.setEnchanter(actor);
+        if (ptr.getClass().isActor())
+        {
+            mEnchanting.setSelfEnchanting(false);
+            mEnchanting.setEnchanter(ptr);
+            mBuyButton->setCaptionWithReplacing("#{sBuy}");
+            mChanceLayout->setVisible(false);
+            mPtr = ptr;
+            setSoulGem(MWWorld::Ptr());
+            mPrice->setVisible(true);
+            mPriceText->setVisible(true);
+        }
+        else
+        {
+            mEnchanting.setSelfEnchanting(true);
+            mEnchanting.setEnchanter(MWMechanics::getPlayer());
+            mBuyButton->setCaptionWithReplacing("#{sCreate}");
+            bool enabled = Settings::Manager::getBool("show enchant chance","Game");
+            mChanceLayout->setVisible(enabled);
+            mPtr = MWMechanics::getPlayer();
+            setSoulGem(ptr);
+            mPrice->setVisible(false);
+            mPriceText->setVisible(false);
+        }
 
-        mBuyButton->setCaptionWithReplacing("#{sBuy}");
-
-        mChanceLayout->setVisible(false);
-
-        mPtr = actor;
-
-        setSoulGem(MWWorld::Ptr());
         setItem(MWWorld::Ptr());
-
         startEditing ();
-        mPrice->setVisible(true);
-        mPriceText->setVisible(true);
-        updateLabels();
-    }
-
-    void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
-    {
-        mName->setCaption("");
-
-        MWWorld::Ptr player = MWMechanics::getPlayer();
-
-        mEnchanting.setSelfEnchanting(true);
-        mEnchanting.setEnchanter(player);
-
-        mBuyButton->setCaptionWithReplacing("#{sCreate}");
-
-        bool enabled = Settings::Manager::getBool("show enchant chance","Game");
-
-        mChanceLayout->setVisible(enabled);
-
-        mPtr = player;
-        startEditing();
-
-        setSoulGem(soulgem);
-        setItem(MWWorld::Ptr());
-
-        mPrice->setVisible(false);
-        mPriceText->setVisible(false);
         updateLabels();
     }
 

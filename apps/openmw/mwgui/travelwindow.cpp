@@ -108,7 +108,7 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(mDestinationsView->getChildAt(0));
     }
 
-    void TravelWindow::startTravel(const MWWorld::Ptr& actor)
+    void TravelWindow::setPtr(const MWWorld::Ptr& actor)
     {
         center();
         mPtr = actor;

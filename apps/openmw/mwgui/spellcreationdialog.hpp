@@ -153,7 +153,7 @@ namespace MWGui
         virtual void onOpen();
         virtual void exit();
 
-        void startSpellMaking(MWWorld::Ptr actor);
+        void setPtr(const MWWorld::Ptr& actor);
 
     protected:
         virtual void onReferenceUnavailable ();
