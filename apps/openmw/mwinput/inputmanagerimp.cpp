@@ -679,6 +679,9 @@ namespace MWInput
             bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
             setPlayerControlsEnabled(!guiFocus);
         }
+        if (arg.repeat)
+            return;
+
         if (!mControlsDisabled && !consumed)
             mInputBinder->keyPressed (arg);
         mJoystickLastUsed = false;
