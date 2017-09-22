@@ -22,7 +22,7 @@ namespace MWGui
 {
 
     MainMenu::MainMenu(int w, int h, const VFS::Manager* vfs, const std::string& versionDescription)
-        : Layout("openmw_mainmenu.layout")
+        : WindowBase("openmw_mainmenu.layout")
         , mWidth (w), mHeight (h)
         , mVFS(vfs), mButtonBox(0)
         , mBackground(NULL)

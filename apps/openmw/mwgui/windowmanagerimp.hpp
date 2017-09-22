@@ -494,6 +494,25 @@ namespace MWGui
     std::map<int, MWMechanics::SkillValue > mPlayerSkillValues;
 
     MyGUI::Gui *mGui; // Gui
+
+    struct GuiModeState
+    {
+        GuiModeState(WindowBase* window)
+        {
+            mWindows.push_back(window);
+        }
+        GuiModeState(const std::vector<WindowBase*>& windows)
+            : mWindows(windows) {}
+        GuiModeState() {}
+
+        void update(bool visible);
+
+        std::vector<WindowBase*> mWindows;
+        std::vector<bool> mVisibilityMask; // optional, may be used to temporarily exclude windows from this mode.
+    };
+    // Defines the windows that should be shown in a particular GUI mode.
+    std::map<GuiMode, GuiModeState> mGuiModeStates;
+    // The currently active stack of GUI modes (top mode is the one we are in).
     std::vector<GuiMode> mGuiModes;
 
     SDLUtil::SDLCursorManager* mCursorManager;

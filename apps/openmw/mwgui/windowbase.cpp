@@ -15,6 +15,7 @@ using namespace MWGui;
 WindowBase::WindowBase(const std::string& parLayout)
   : Layout(parLayout)
 {
+    mMainWidget->setVisible(false);
 }
 
 void WindowBase::setVisible(bool visible)

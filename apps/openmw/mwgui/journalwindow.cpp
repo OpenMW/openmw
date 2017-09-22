@@ -44,7 +44,7 @@ namespace
     static char const LeftTopicIndex [] = "LeftTopicIndex";
     static char const RightTopicIndex [] = "RightTopicIndex";
 
-    struct JournalWindowImpl : MWGui::WindowBase, MWGui::JournalBooks, MWGui::JournalWindow
+    struct JournalWindowImpl : MWGui::JournalBooks, MWGui::JournalWindow
     {
         struct DisplayState
         {
@@ -94,7 +94,7 @@ namespace
         }
 
         JournalWindowImpl (MWGui::JournalViewModel::Ptr Model, bool questList)
-            : WindowBase("openmw_journal.layout"), JournalBooks (Model)
+            : JournalBooks (Model), JournalWindow()
         {
             mMainWidget->setVisible(false);
             center();
@@ -602,4 +602,10 @@ namespace
 MWGui::JournalWindow * MWGui::JournalWindow::create (JournalViewModel::Ptr Model, bool questList)
 {
     return new JournalWindowImpl (Model, questList);
+}
+
+MWGui::JournalWindow::JournalWindow()
+    :WindowBase("openmw_journal.layout")
+{
+
 }

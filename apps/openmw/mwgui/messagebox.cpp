@@ -77,6 +77,7 @@ namespace MWGui
 
         if(mInterMessageBoxe != NULL && mInterMessageBoxe->mMarkedToDelete) {
             mLastButtonPressed = mInterMessageBoxe->readPressedButton();
+            mInterMessageBoxe->setVisible(false);
             delete mInterMessageBoxe;
             mInterMessageBoxe = NULL;
             MWBase::Environment::get().getInputManager()->changeInputMode(
@@ -200,7 +201,7 @@ namespace MWGui
       , mMessageBoxManager(parMessageBoxManager)
       , mButtonPressed(-1)
     {
-        WindowModal::onOpen();
+        setVisible(true);
 
         int textPadding = 10; // padding between text-widget and main-widget
         int textButtonPadding = 10; // padding between the text-widget und the button-widget
