@@ -16,6 +16,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ClipboardManager.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_WidgetManager.h>
 
 #include <SDL_keyboard.h>
 #include <SDL_clipboard.h>
@@ -136,6 +137,7 @@ namespace MWGui
       , mWorkQueue(workQueue)
       , mViewer(viewer)
       , mConsoleOnlyScripts(consoleOnlyScripts)
+      , mSaveKeyFocus(NULL)
       , mCurrentModals()
       , mHud(NULL)
       , mMap(NULL)
@@ -259,6 +261,8 @@ namespace MWGui
         MyGUI::PointerManager::getInstance().eventChangeMousePointer += MyGUI::newDelegate(this, &WindowManager::onCursorChange);
 
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
+
+        MyGUI::WidgetManager::getInstance().registerUnlinker(this);
 
         // Create all cursors in advance
         createCursors();
@@ -495,6 +499,8 @@ namespace MWGui
         MyGUI::InputManager::getInstance().eventChangeKeyFocus.clear();
         MyGUI::ClipboardManager::getInstance().eventClipboardChanged.clear();
         MyGUI::ClipboardManager::getInstance().eventClipboardRequested.clear();
+
+        MyGUI::WidgetManager::getInstance().unregisterUnlinker(this);
 
         delete mConsole;
         delete mMessageBoxManager;
@@ -1608,6 +1614,12 @@ namespace MWGui
         return mLoadingScreen;
     }
 
+    void WindowManager::_unlinkWidget(MyGUI::Widget *widget)
+    {
+        if (widget == mSaveKeyFocus)
+            mSaveKeyFocus = NULL;
+    }
+
     bool WindowManager::getCursorVisible()
     {
         return mCursorVisible;
@@ -1818,6 +1830,17 @@ namespace MWGui
     {
         if (!mCurrentModals.empty())
             mCurrentModals.top()->exit();
+
+        if (mCurrentModals.empty())
+            MyGUI::InputManager::getInstance().setKeyFocusWidget(mSaveKeyFocus);
+    }
+
+    void WindowManager::addCurrentModal(WindowModal *input)
+    {
+        if (mCurrentModals.empty())
+            mSaveKeyFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+
+        mCurrentModals.push(input);
     }
 
     void WindowManager::removeCurrentModal(WindowModal* input)
@@ -1827,6 +1850,9 @@ namespace MWGui
         if(!mCurrentModals.empty())
             if(input == mCurrentModals.top())
                 mCurrentModals.pop();
+
+        if (mCurrentModals.empty())
+            MyGUI::InputManager::getInstance().setKeyFocusWidget(mSaveKeyFocus);
     }
 
     void WindowManager::onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)

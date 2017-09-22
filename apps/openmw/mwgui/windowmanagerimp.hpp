@@ -124,7 +124,7 @@ namespace MWGui
   class JailScreen;
   class KeyboardNavigation;
 
-  class WindowManager : public MWBase::WindowManager
+  class WindowManager : public MWBase::WindowManager, MyGUI::IUnlinkWidget
   {
   public:
     typedef std::pair<std::string, int> Faction;
@@ -141,6 +141,8 @@ namespace MWGui
     void initUI();
 
     virtual Loading::Listener* getLoadingScreen();
+
+    void _unlinkWidget(MyGUI::Widget* widget);
 
     /// @note This method will block until the video finishes playing
     /// (and will continually update the window while doing so)
@@ -341,7 +343,7 @@ namespace MWGui
 
     /// Sets the current Modal
     /** Used to send exit command to active Modal when Esc is pressed **/
-    virtual void addCurrentModal(WindowModal* input) {mCurrentModals.push(input);}
+    virtual void addCurrentModal(WindowModal* input);
 
     /// Removes the top Modal
     /** Used when one Modal adds another Modal
@@ -403,6 +405,8 @@ namespace MWGui
     std::string mSelectedSpell;
     MWWorld::Ptr mSelectedEnchantItem;
     MWWorld::Ptr mSelectedWeapon;
+
+    MyGUI::Widget* mSaveKeyFocus;
 
     std::stack<WindowModal*> mCurrentModals;
 
