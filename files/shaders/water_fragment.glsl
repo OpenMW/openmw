@@ -198,5 +198,5 @@ void main(void)
     gl_FragData[0].w = 1.0;
 #else
     gl_FragData[0].w = clamp(fresnel*2.0 + specular, 0.0, 1.0);
-#endi
+#endif
 }
