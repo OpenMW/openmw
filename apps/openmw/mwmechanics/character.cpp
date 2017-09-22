@@ -621,6 +621,12 @@ void CharacterController::playDeath(float startpoint, CharacterState death)
     case CharState_SwimDeath:
         mCurrentDeath = "swimdeath";
         break;
+    case CharState_SwimDeathKnockDown:
+        mCurrentDeath = "swimdeathknockdown";
+        break;
+    case CharState_SwimDeathKnockOut:
+        mCurrentDeath = "swimdeathknockout";
+        break;
     case CharState_DeathKnockDown:
         mCurrentDeath = "deathknockdown";
         break;
@@ -674,7 +680,16 @@ void CharacterController::playRandomDeath(float startpoint)
         MWBase::Environment::get().getWorld()->useDeathCamera();
     }
 
-    if(MWBase::Environment::get().getWorld()->isSwimming(mPtr) && mAnimation->hasAnimation("swimdeath"))
+    bool isSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
+    if(isSwimming && mAnimation->hasAnimation("swimdeathknockdown") && mHitState == CharState_KnockDown)
+    {
+        mDeathState = CharState_SwimDeathKnockDown;
+    }
+    else if(isSwimming && mAnimation->hasAnimation("swimdeathknockout") && mHitState == CharState_KnockOut)
+    {
+        mDeathState = CharState_SwimDeathKnockOut;
+    }
+    else if(isSwimming && mAnimation->hasAnimation("swimdeath"))
     {
         mDeathState = CharState_SwimDeath;
     }
@@ -876,16 +891,17 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
         mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
     else if(evt.compare(off, len, "hit") == 0)
     {
-        if (groupname == "attack1")
+        if (groupname == "attack1" || groupname == "swimattack1")
             mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
-        else if (groupname == "attack2")
+        else if (groupname == "attack2" || groupname == "swimattack2")
             mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
-        else if (groupname == "attack3")
+        else if (groupname == "attack3" || groupname == "swimattack1")
             mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
         else
             mPtr.getClass().hit(mPtr, mAttackStrength);
     }
-    else if (!groupname.empty() && groupname.compare(0, groupname.size()-1, "attack") == 0
+    else if (!groupname.empty()
+             && (groupname.compare(0, groupname.size()-1, "attack") == 0 || groupname.compare(0, groupname.size()-1, "swimattack") == 0)
              && evt.compare(off, len, "start") == 0)
     {
         std::multimap<float, std::string>::const_iterator hitKey = key;
@@ -905,11 +921,11 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
         }
         if (!hasHitKey)
         {
-            if (groupname == "attack1")
+            if (groupname == "attack1" || groupname == "swimattack1")
                 mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
-            else if (groupname == "attack2")
+            else if (groupname == "attack2" || groupname == "swimattack2")
                 mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
-            else if (groupname == "attack3")
+            else if (groupname == "attack3" || groupname == "swimattack3")
                 mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
         }
     }
@@ -1035,13 +1051,14 @@ bool CharacterController::updateCreatureState()
             }
             if (weapType != WeapType_Spell || !mAnimation->hasAnimation("spellcast")) // Not all creatures have a dedicated spellcast animation
             {
+                bool isSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
                 int roll = Misc::Rng::rollDice(3); // [0, 2]
                 if (roll == 0)
-                    mCurrentWeapon = "attack1";
+                    mCurrentWeapon = isSwimming && mAnimation->hasAnimation("swimattack1") ? "swimattack1" : "attack1";
                 else if (roll == 1)
-                    mCurrentWeapon = "attack2";
+                    mCurrentWeapon = isSwimming && mAnimation->hasAnimation("swimattack2") ? "swimattack2" : "attack2";
                 else
-                    mCurrentWeapon = "attack3";
+                    mCurrentWeapon = isSwimming && mAnimation->hasAnimation("swimattack3") ? "swimattack3" : "attack3";
             }
 
             if (!mCurrentWeapon.empty())

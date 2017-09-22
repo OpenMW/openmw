@@ -97,6 +97,8 @@ enum CharacterState {
     CharState_Death4,
     CharState_Death5,
     CharState_SwimDeath,
+    CharState_SwimDeathKnockDown,
+    CharState_SwimDeathKnockOut,
     CharState_DeathKnockDown,
     CharState_DeathKnockOut,
 
