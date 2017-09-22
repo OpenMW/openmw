@@ -125,6 +125,8 @@ void DragAndDrop::finish()
 {
     mIsOnDragAndDrop = false;
     mSourceSortModel->clearDragItems();
+    // since mSourceView doesn't get updated in drag()
+    MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
 
     MyGUI::Gui::getInstance().destroyWidget(mDraggedWidget);
     mDraggedWidget = 0;

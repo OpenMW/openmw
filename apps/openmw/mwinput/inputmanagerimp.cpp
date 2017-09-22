@@ -177,12 +177,12 @@ namespace MWInput
 
     void InputManager::channelChanged(ICS::Channel* channel, float currentValue, float previousValue)
     {
-        if (mDragDrop)
-            return;
-
         resetIdleTime ();
 
         int action = channel->getNumber();
+
+        if (mDragDrop && action != A_GameMenu && action != A_Inventory)
+            return;
 
         if((previousValue == 1 || previousValue == 0) && (currentValue==1 || currentValue==0))
         {

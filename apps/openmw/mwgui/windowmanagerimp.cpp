@@ -755,7 +755,14 @@ namespace MWGui
         mGarbageDialogs.push_back(dialog);
     }
 
-    void WindowManager::exitCurrentGuiMode() {
+    void WindowManager::exitCurrentGuiMode()
+    {
+        if (mDragAndDrop && mDragAndDrop->mIsOnDragAndDrop)
+        {
+            mDragAndDrop->finish();
+            return;
+        }
+
         switch(mGuiModes.back()) {
             case GM_QuickKeysMenu:
                 mQuickKeysMenu->exit();
@@ -1247,6 +1254,11 @@ namespace MWGui
 
     void WindowManager::popGuiMode()
     {
+        if (mDragAndDrop && mDragAndDrop->mIsOnDragAndDrop)
+        {
+            mDragAndDrop->finish();
+        }
+
         if (!mGuiModes.empty())
         {
             mGuiModeStates[mGuiModes.back()].update(false);
