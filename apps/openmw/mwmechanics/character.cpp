@@ -186,6 +186,8 @@ static const StateInfo sMovementList[] = {
 
     { CharState_TurnLeft, "turnleft" },
     { CharState_TurnRight, "turnright" },
+    { CharState_SwimTurnLeft, "swimturnleft" },
+    { CharState_SwimTurnRight, "swimturnright" },
 };
 static const StateInfo *sMovementListEnd = &sMovementList[sizeof(sMovementList)/sizeof(sMovementList[0])];
 
@@ -564,7 +566,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     // FIXME: if one of the below states is close to their last animation frame (i.e. will be disabled in the coming update),
     // the idle animation should be displayed
     if ((mUpperBodyState != UpperCharState_Nothing
-            || (mMovementState != CharState_None && mMovementState != CharState_TurnLeft && mMovementState != CharState_TurnRight)
+            || (mMovementState != CharState_None && !isTurning())
             || mHitState != CharState_None)
             && !mPtr.getClass().isBipedal(mPtr))
         idle = CharState_None;
@@ -1875,22 +1877,22 @@ void CharacterController::update(float duration)
             else if(rot.z() != 0.0f && !inwater && !sneak && !(mPtr == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson()))
             {
                 if(rot.z() > 0.0f)
-                    movestate = CharState_TurnRight;
+                    movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
                 else if(rot.z() < 0.0f)
-                    movestate = CharState_TurnLeft;
+                    movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
             }
         }
 
         mTurnAnimationThreshold -= duration;
-        if (movestate == CharState_TurnRight || movestate == CharState_TurnLeft)
+        if (isTurning())
             mTurnAnimationThreshold = 0.05f;
-        else if (movestate == CharState_None && (mMovementState == CharState_TurnRight || mMovementState == CharState_TurnLeft)
+        else if (movestate == CharState_None && isTurning()
                  && mTurnAnimationThreshold > 0)
         {
             movestate = mMovementState;
         }
 
-        if(movestate != CharState_None && movestate != CharState_TurnLeft && movestate != CharState_TurnRight)
+        if(!isTurning())
             clearAnimQueue();
 
         if(mAnimQueue.empty() || inwater || sneak)
@@ -1915,7 +1917,7 @@ void CharacterController::update(float duration)
         if (inJump)
             mMovementAnimationControlled = false;
 
-        if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
+        if (isTurning())
         {
             if (duration > 0)
                 mAnimation->adjustSpeedMult(mCurrentMovement, std::min(1.5f, std::abs(rot.z()) / duration / static_cast<float>(osg::PI)));
@@ -2275,6 +2277,14 @@ bool CharacterController::isKnockedOut() const
 {
     return mHitState == CharState_KnockOut ||
             mHitState == CharState_SwimKnockOut;
+}
+
+bool CharacterController::isTurning() const
+{
+    return mMovementState == CharState_TurnLeft ||
+            mMovementState == CharState_TurnRight ||
+            mMovementState == CharState_SwimTurnLeft ||
+            mMovementState == CharState_SwimTurnRight;
 }
 
 bool CharacterController::isRecovery() const

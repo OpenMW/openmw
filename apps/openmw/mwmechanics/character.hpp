@@ -88,6 +88,8 @@ enum CharacterState {
 
     CharState_TurnLeft,
     CharState_TurnRight,
+    CharState_SwimTurnLeft,
+    CharState_SwimTurnRight,
 
     CharState_Jump,
 
@@ -275,6 +277,7 @@ public:
     bool isRecovery() const;
     bool isSneaking() const;
     bool isRunning() const;
+    bool isTurning() const;
     bool isAttackingOrSpell() const;
 
     void setAttackingOrSpell(bool attackingOrSpell);
