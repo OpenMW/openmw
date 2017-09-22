@@ -112,7 +112,7 @@ class ClipCullNode : public osg::Group
             }
 
             // move the plane back along its normal a little bit to prevent bleeding at the water shore
-            const float clipFudge = -5;
+            const float clipFudge = -6;
             modelViewMatrix->preMultTranslate(mCullPlane->getNormal() * clipFudge);
 
             cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
