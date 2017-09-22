@@ -82,6 +82,9 @@ bool KeyboardNavigation::switchFocus(int direction, bool wrap)
     if (!isButtonFocus() && direction != D_Prev && direction != D_Next)
         return false;
 
+    if ((direction == D_Prev || direction == D_Next) && focus->getUserString("AcceptTab") == "true")
+        return false;
+
     MyGUI::Widget* window = MyGUI::InputManager::getInstance().getKeyFocusWidget();
     while (window->getParent())
         window = window->getParent();
