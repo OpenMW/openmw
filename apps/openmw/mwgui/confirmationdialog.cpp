@@ -3,6 +3,9 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 namespace MWGui
 {
     ConfirmationDialog::ConfirmationDialog() :
@@ -37,6 +40,8 @@ namespace MWGui
         mMainWidget->setSize(width, height);
 
         mMessage->setSize(mMessage->getWidth(), mMessage->getTextSize().height + 24);
+
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mOkButton);
 
         center();
     }

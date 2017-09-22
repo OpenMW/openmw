@@ -259,9 +259,8 @@ namespace MWGui
         getWidget(mTopicsList, "TopicsList");
         mTopicsList->eventItemSelected += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
 
-        MyGUI::Button* byeButton;
-        getWidget(byeButton, "ByeButton");
-        byeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
+        getWidget(mGoodbyeButton, "ByeButton");
+        mGoodbyeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
 
         getWidget(mDispositionBar, "Disposition");
         getWidget(mDispositionText,"DispositionText");
@@ -360,6 +359,8 @@ namespace MWGui
 
     void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName, bool resetHistory)
     {
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
+
         mGoodbye = false;
         mEnabled = true;
         bool sameActor = (mPtr == actor);
@@ -528,10 +529,8 @@ namespace MWGui
             onScrollbarMoved(mScrollBar, 0);
         }
 
-        MyGUI::Button* byeButton;
-        getWidget(byeButton, "ByeButton");
         bool goodbyeEnabled = !MWBase::Environment::get().getDialogueManager()->isInChoice() || mGoodbye;
-        byeButton->setEnabled(goodbyeEnabled);
+        mGoodbyeButton->setEnabled(goodbyeEnabled);
 
         bool topicsEnabled = !MWBase::Environment::get().getDialogueManager()->isInChoice() && !mGoodbye;
         mTopicsList->setEnabled(topicsEnabled);
