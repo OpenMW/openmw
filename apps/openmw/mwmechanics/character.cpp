@@ -283,12 +283,22 @@ void CharacterController::refreshHitRecoilAnims()
         }
         else if (recovery)
         {
-            std::string anim = chooseRandomGroup("hit");
-            if (mAnimation->hasAnimation(anim))
+            std::string anim = isSwimming ? chooseRandomGroup("swimhit") : chooseRandomGroup("hit");
+            if (isSwimming && mAnimation->hasAnimation(anim))
             {
-                mHitState = CharState_Hit;
+                mHitState = CharState_SwimHit;
                 mCurrentHit = anim;
                 mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
+            }
+            else
+            {
+                anim = chooseRandomGroup("hit");
+                if (mAnimation->hasAnimation(anim))
+                {
+                    mHitState = CharState_Hit;
+                    mCurrentHit = anim;
+                    mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
+                }
             }
         }
         else if (block && mAnimation->hasAnimation("shield"))
@@ -1157,7 +1167,7 @@ bool CharacterController::updateWeaponState()
                             mWeaponType > WeapType_HandToHand && mWeaponType < WeapType_Spell;
 
     if(weaptype != mWeaponType && !isKnockedOut() &&
-        !isKnockedDown() && mHitState != CharState_Hit)
+        !isKnockedDown() && !isRecovery())
     {
         forcestateupdate = true;
 
@@ -2265,6 +2275,12 @@ bool CharacterController::isKnockedOut() const
 {
     return mHitState == CharState_KnockOut ||
             mHitState == CharState_SwimKnockOut;
+}
+
+bool CharacterController::isRecovery() const
+{
+    return mHitState == CharState_Hit ||
+            mHitState == CharState_SwimHit;
 }
 
 bool CharacterController::isAttackingOrSpell() const
