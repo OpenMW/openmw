@@ -81,7 +81,6 @@ namespace MWGui
 
         private:
             void buttonActivated (MyGUI::Widget* _widget);
-            void onKeyPressed(MyGUI::Widget* _sender, MyGUI::KeyCode _key, MyGUI::Char _char);
 
             MessageBoxManager& mMessageBoxManager;
             MyGUI::EditBox* mMessageWidget;

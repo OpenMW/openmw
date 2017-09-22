@@ -228,8 +228,7 @@ namespace MWGui
         int buttonHeight = 0;
         MyGUI::IntCoord dummyCoord(0, 0, 0, 0);
 
-        std::vector<std::string>::const_iterator it;
-        for(it = buttons.begin(); it != buttons.end(); ++it)
+        for(std::vector<std::string>::const_iterator it = buttons.begin(); it != buttons.end(); ++it)
         {
             MyGUI::Button* button = mButtonsWidget->createWidget<MyGUI::Button>(
                 MyGUI::WidgetStyle::Child,
@@ -289,8 +288,7 @@ namespace MWGui
             MyGUI::IntSize buttonSize(0, buttonHeight);
             int left = (mainWidgetSize.width - buttonsWidth)/2;
 
-            std::vector<MyGUI::Button*>::const_iterator button;
-            for(button = mButtons.begin(); button != mButtons.end(); ++button)
+            for(std::vector<MyGUI::Button*>::const_iterator button = mButtons.begin(); button != mButtons.end(); ++button)
             {
                 buttonCord.left = left;
                 buttonCord.top = messageWidgetCoord.top + textSize.height + textButtonPadding;
@@ -319,8 +317,7 @@ namespace MWGui
 
             int top = textPadding + textSize.height + textButtonPadding;
 
-            std::vector<MyGUI::Button*>::const_iterator button;
-            for(button = mButtons.begin(); button != mButtons.end(); ++button)
+            for(std::vector<MyGUI::Button*>::const_iterator button = mButtons.begin(); button != mButtons.end(); ++button)
             {
                 buttonSize.width = (*button)->getTextSize().width + buttonPadding*2;
                 buttonSize.height = (*button)->getTextSize().height + buttonPadding*2;
@@ -354,23 +351,18 @@ namespace MWGui
         }
 
         // Set key focus to "Ok" button
-        std::string ok = Misc::StringUtils::lowerCase(MyGUI::LanguageManager::getInstance().replaceTags("#{sOK}"));
-        std::vector<MyGUI::Button*>::const_iterator button;
-        for(button = mButtons.begin(); button != mButtons.end(); ++button)
+        std::vector<std::string> keywords { "sOk", "sYes" };
+        for(std::vector<MyGUI::Button*>::const_iterator button = mButtons.begin(); button != mButtons.end(); ++button)
         {
-            if(Misc::StringUtils::ciEqual((*button)->getCaption(), ok))
+            for (const std::string& keyword : keywords)
             {
-                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(*button);
-                (*button)->eventKeyButtonPressed += MyGUI::newDelegate(this, &InteractiveMessageBox::onKeyPressed);
-                break;
+                if(Misc::StringUtils::ciEqual(MyGUI::LanguageManager::getInstance().replaceTags("#{" + keyword + "}"), (*button)->getCaption()))
+                {
+                    MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(*button);
+                    return;
+                }
             }
         }
-    }
-
-    void InteractiveMessageBox::onKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)
-    {
-        if (_key == MyGUI::KeyCode::Return || _key == MyGUI::KeyCode::NumpadEnter || _key == MyGUI::KeyCode::Space)
-            buttonActivated(_sender);
     }
 
     void InteractiveMessageBox::mousePressed (MyGUI::Widget* pressed)
