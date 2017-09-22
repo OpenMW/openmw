@@ -31,7 +31,7 @@ const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       //sunlight extinction
 
 const float SPEC_HARDNESS = 256.0;                 // specular highlights hardness
 
-const float REFLECTION_BUMP_SUPPRESS_DEPTH = 150;  // at what water depth bump map will be supressed for reflections (prevents artifacts at shores)
+const float REFLECTION_BUMP_SUPPRESS_DEPTH = 0.03;    // at what water depth bump map will be supressed for reflections (prevents artifacts at shores)
 
 const vec2 WIND_DIR = vec2(0.5f, -0.8f);
 const float WIND_SPEED = 0.2f;
@@ -76,7 +76,7 @@ uniform float near;
 uniform float far;
 uniform vec3 nodePosition;
 
-float transformDepth(float depth)  // helper for transforming water depth
+float linearizeDepth(float depth)  // helper for transforming water depth
   {
     float z_n = 2.0 * depth - 1.0;
     depth = 2.0 * near * far / (far + near - z_n * (far - near));
@@ -157,12 +157,11 @@ void main(void)
     fresnel = clamp(fresnel, 0.0, 1.0);
 
 #if REFRACTION
-    float realWaterDepth = transformDepth(texture2D(refractionDepthMap, screenCoords).x);
-    float shore = clamp(realWaterDepth / REFLECTION_BUMP_SUPPRESS_DEPTH,0,1);
+    float realWaterDepth = linearizeDepth(texture2D(refractionDepthMap, screenCoords).x);
+    float shore = clamp(realWaterDepth / (REFLECTION_BUMP_SUPPRESS_DEPTH * (far - near)),0,1);
 #else
     float shore = 1.0;
 #endif
-
     // reflection
     vec3 reflection = texture2D(reflectionMap, screenCoords+(normal.xy*REFL_BUMP*shore)).rgb;
 
@@ -181,8 +180,7 @@ void main(void)
     waterColor = waterColor * length(gl_LightModel.ambient.xyz);
 
 #if REFRACTION
-    float refractionDepth = transformDepth(texture2D(refractionDepthMap, screenCoords-(normal.xy*REFR_BUMP)).x); 
-    float waterDepth = refractionDepth - depthPassthrough;
+    float waterDepth = linearizeDepth(texture2D(refractionDepthMap, screenCoords-(normal.xy*REFR_BUMP)).x); 
 
     if (cameraPos.z > 0.0)
         refraction = mix(refraction, waterColor, clamp(waterDepth/VISIBILITY, 0.0, 1.0));
@@ -200,5 +198,5 @@ void main(void)
     gl_FragData[0].w = 1.0;
 #else
     gl_FragData[0].w = clamp(fresnel*2.0 + specular, 0.0, 1.0);
-#endif
+#endi
 }
