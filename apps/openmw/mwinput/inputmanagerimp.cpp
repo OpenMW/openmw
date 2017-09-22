@@ -1039,12 +1039,10 @@ namespace MWInput
                 && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_MainMenu
                 && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
         {
-            MWBase::Environment::get().getWindowManager()->playSound ("book open");
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Journal);
         }
         else if(MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Journal))
         {
-            MWBase::Environment::get().getWindowManager()->playSound ("book close");
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Journal);
         }
     }

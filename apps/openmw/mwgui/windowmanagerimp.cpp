@@ -354,6 +354,8 @@ namespace MWGui
         bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
         mJournal = JournalWindow::create(JournalViewModel::create (), questList);
         mGuiModeStates[GM_Journal] = GuiModeState(mJournal);
+        mGuiModeStates[GM_Journal].mCloseSound = "book close";
+        mGuiModeStates[GM_Journal].mOpenSound = "book open";
 
         mMessageBoxManager = new MessageBoxManager(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
         mSpellBuyingWindow = new SpellBuyingWindow();
@@ -374,9 +376,13 @@ namespace MWGui
         mToolTips = new ToolTips();
         mScrollWindow = new ScrollWindow();
         mGuiModeStates[GM_Scroll] = GuiModeState(mScrollWindow);
+        mGuiModeStates[GM_Scroll].mOpenSound = "scroll";
+        mGuiModeStates[GM_Scroll].mCloseSound = "scroll";
 
         mBookWindow = new BookWindow();
         mGuiModeStates[GM_Book] = GuiModeState(mBookWindow);
+        mGuiModeStates[GM_Book].mOpenSound = "book open";
+        mGuiModeStates[GM_Book].mCloseSound = "book close";
 
         mCountDialog = new CountDialog();
         mSettingsWindow = new SettingsWindow();
@@ -840,7 +846,6 @@ namespace MWGui
                 mRepair->exit();
                 break;
             case GM_Journal:
-                playSound("book close");
                 removeGuiMode(GM_Journal); //Simple way to remove it
                 break;
             default:
@@ -1242,6 +1247,7 @@ namespace MWGui
             mGuiModes.push_back(mode);
 
             mGuiModeStates[mode].update(true);
+            playSound(mGuiModeStates[mode].mOpenSound);
         }
         for (WindowBase* window : mGuiModeStates[mode].mWindows)
             window->setPtr(arg);
@@ -1252,7 +1258,7 @@ namespace MWGui
         updateVisible();
     }
 
-    void WindowManager::popGuiMode()
+    void WindowManager::popGuiMode(bool noSound)
     {
         if (mDragAndDrop && mDragAndDrop->mIsOnDragAndDrop)
         {
@@ -1262,6 +1268,8 @@ namespace MWGui
         if (!mGuiModes.empty())
         {
             mGuiModeStates[mGuiModes.back()].update(false);
+            if (!noSound)
+                playSound(mGuiModeStates[mGuiModes.back()].mCloseSound);
             mGuiModes.pop_back();
         }
 
@@ -1274,11 +1282,11 @@ namespace MWGui
         updateVisible();
     }
 
-    void WindowManager::removeGuiMode(GuiMode mode)
+    void WindowManager::removeGuiMode(GuiMode mode, bool noSound)
     {
         if (!mGuiModes.empty() && mGuiModes.back() == mode)
         {
-            popGuiMode();
+            popGuiMode(noSound);
             return;
         }
 
@@ -1992,6 +2000,8 @@ namespace MWGui
 
     void WindowManager::playSound(const std::string& soundId, float volume, float pitch)
     {
+        if (soundId.empty())
+            return;
         MWBase::Environment::get().getSoundManager()->playSound(soundId, volume, pitch, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
     }
 

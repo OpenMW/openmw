@@ -162,8 +162,8 @@ namespace MWGui
 
     virtual void pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg);
     virtual void pushGuiMode (GuiMode mode);
-    virtual void popGuiMode();
-    virtual void removeGuiMode(GuiMode mode); ///< can be anywhere in the stack
+    virtual void popGuiMode(bool noSound=false);
+    virtual void removeGuiMode(GuiMode mode, bool noSound=false); ///< can be anywhere in the stack
 
     virtual void goToJail(int days);
 
@@ -497,6 +497,9 @@ namespace MWGui
 
         std::vector<WindowBase*> mWindows;
         std::vector<bool> mVisibilityMask; // optional, may be used to temporarily exclude windows from this mode.
+
+        std::string mCloseSound;
+        std::string mOpenSound;
     };
     // Defines the windows that should be shown in a particular GUI mode.
     std::map<GuiMode, GuiModeState> mGuiModeStates;

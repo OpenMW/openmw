@@ -85,8 +85,6 @@ namespace MWGui
         clearPages();
         mCurrentPage = 0;
 
-        MWBase::Environment::get().getWindowManager()->playSound("book open");
-
         MWWorld::LiveCellRef<ESM::Book> *ref = mBook.get<ESM::Book>();
 
         Formatting::BookFormatter formatter;
@@ -100,9 +98,6 @@ namespace MWGui
 
     void BookWindow::exit()
     {
-        // no 3d sounds because the object could be in a container.
-        MWBase::Environment::get().getWindowManager()->playSound("book close");
-
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
     }
 

@@ -52,9 +52,6 @@ namespace MWGui
 
     void ScrollWindow::setPtr (const MWWorld::Ptr& scroll)
     {
-        // no 3d sounds because the object could be in a container.
-        MWBase::Environment::get().getWindowManager()->playSound("scroll");
-
         mScroll = scroll;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -81,8 +78,6 @@ namespace MWGui
 
     void ScrollWindow::exit()
     {
-        MWBase::Environment::get().getWindowManager()->playSound("scroll");
-
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
     }
 
@@ -110,6 +105,6 @@ namespace MWGui
         MWWorld::ActionTake take(mScroll);
         take.execute (MWMechanics::getPlayer());
 
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll, true);
     }
 }
