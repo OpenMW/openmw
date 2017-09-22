@@ -943,7 +943,7 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Map);
     }
 
-    void MapWindow::open()
+    void MapWindow::onOpen()
     {
         ensureGlobalMapLoaded();
 
@@ -1107,9 +1107,9 @@ namespace MWGui
         return MyGUI::TextIterator::getOnlyText(mTextEdit->getCaption());
     }
 
-    void EditNoteDialog::open()
+    void EditNoteDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
         center();
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);
     }

@@ -73,9 +73,9 @@ namespace MWGui
         setVisible(false);
     }
 
-    void PersuasionDialog::open()
+    void PersuasionDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
         center();
 
         MWWorld::Ptr player = MWMechanics::getPlayer();

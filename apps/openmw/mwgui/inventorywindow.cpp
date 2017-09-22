@@ -363,7 +363,7 @@ namespace MWGui
         dirtyPreview();
     }
 
-    void InventoryWindow::open()
+    void InventoryWindow::onOpen()
     {
         if (!mPtr.isEmpty())
         {

@@ -101,7 +101,7 @@ namespace MWGui
         update();
     }
 
-    void AlchemyWindow::open()
+    void AlchemyWindow::onOpen()
     {
         mAlchemy->setAlchemist (MWMechanics::getPlayer());
 

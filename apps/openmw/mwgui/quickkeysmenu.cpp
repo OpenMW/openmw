@@ -590,9 +590,9 @@ namespace MWGui
         mParent->onAssignMagicCancel();
     }
 
-    void MagicSelectionDialog::open ()
+    void MagicSelectionDialog::onOpen ()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
 
         mMagicList->setModel(new SpellModel(MWMechanics::getPlayer()));
         mMagicList->resetScrollbars();

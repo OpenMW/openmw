@@ -125,9 +125,9 @@ namespace MWGui
             okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
     }
 
-    void PickClassDialog::open()
+    void PickClassDialog::onOpen()
     {
-        WindowModal::open ();
+        WindowModal::onOpen ();
         updateClasses();
         updateStats();
     }
@@ -341,9 +341,9 @@ namespace MWGui
         }
     }
 
-    void InfoBoxDialog::open()
+    void InfoBoxDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
         // Fix layout
         layoutVertically(mTextBox, 4);
         layoutVertically(mButtonBar, 6);

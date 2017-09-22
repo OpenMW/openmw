@@ -62,7 +62,7 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Magic);
     }
 
-    void SpellWindow::open()
+    void SpellWindow::onOpen()
     {
         updateSpells();
     }

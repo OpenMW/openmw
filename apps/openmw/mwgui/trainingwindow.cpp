@@ -55,7 +55,7 @@ namespace MWGui
         mProgressBar.setVisible(false);
     }
 
-    void TrainingWindow::open()
+    void TrainingWindow::onOpen()
     {
         center();
     }

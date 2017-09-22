@@ -96,9 +96,9 @@ namespace MWGui
         mConstantEffect = constant;
     }
 
-    void EditEffectDialog::open()
+    void EditEffectDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
         center();
     }
 
@@ -415,7 +415,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_SpellCreation);
     }
 
-    void SpellCreationDialog::open()
+    void SpellCreationDialog::onOpen()
     {
         center();
     }

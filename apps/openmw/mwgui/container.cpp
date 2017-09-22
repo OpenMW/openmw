@@ -172,9 +172,9 @@ namespace MWGui
         mSortModel = NULL;
     }
 
-    void ContainerWindow::close()
+    void ContainerWindow::onClose()
     {
-        WindowBase::close();
+        WindowBase::onClose();
 
         if (dynamic_cast<PickpocketItemModel*>(mModel)
                 // Make sure we were actually closed, rather than just temporarily hidden (e.g. console or main menu opened)

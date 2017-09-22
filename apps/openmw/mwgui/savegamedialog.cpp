@@ -118,9 +118,9 @@ namespace MWGui
         accept();
     }
 
-    void SaveGameDialog::open()
+    void SaveGameDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
 
         mSaveNameEdit->setCaption ("");
         if (mSaving)

@@ -50,7 +50,7 @@ Recharge::Recharge()
     setVisible(false);
 }
 
-void Recharge::open()
+void Recharge::onOpen()
 {
     center();
 

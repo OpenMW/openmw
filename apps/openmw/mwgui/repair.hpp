@@ -19,7 +19,7 @@ class Repair : public WindowBase
 public:
     Repair();
 
-    virtual void open();
+    virtual void onOpen();
 
     virtual void exit();
 

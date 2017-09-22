@@ -14,7 +14,7 @@ namespace MWGui
     public:
         TrainingWindow();
 
-        virtual void open();
+        virtual void onOpen();
 
         virtual void exit();
 

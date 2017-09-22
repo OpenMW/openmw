@@ -13,7 +13,7 @@ namespace MWGui
     public:
         WaitDialogProgressBar();
 
-        virtual void open();
+        virtual void onOpen();
 
         void setProgress(int cur, int total);
 
@@ -27,7 +27,7 @@ namespace MWGui
     public:
         WaitDialog();
 
-        virtual void open();
+        virtual void onOpen();
 
         virtual void exit();
 

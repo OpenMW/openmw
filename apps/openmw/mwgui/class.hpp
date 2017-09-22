@@ -21,7 +21,7 @@ namespace MWGui
         std::string getText() const;
         void setButtons(ButtonList &buttons);
 
-        virtual void open();
+        virtual void onOpen();
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
@@ -100,7 +100,7 @@ namespace MWGui
         void setClassId(const std::string &classId);
 
         void setNextButtonShow(bool shown);
-        virtual void open();
+        virtual void onOpen();
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;

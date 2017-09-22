@@ -169,7 +169,7 @@ namespace MWGui
     public:
         EditNoteDialog();
 
-        virtual void open();
+        virtual void onOpen();
         virtual void exit();
 
         void showDeleteButton(bool show);
@@ -218,7 +218,7 @@ namespace MWGui
 
         void ensureGlobalMapLoaded();
 
-        virtual void open();
+        virtual void onOpen();
 
         void onFrame(float dt);
 

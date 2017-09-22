@@ -46,7 +46,7 @@ Repair::Repair()
     mToolIcon->eventMouseButtonClick += MyGUI::newDelegate(this, &Repair::onSelectItem);
 }
 
-void Repair::open()
+void Repair::onOpen()
 {
     center();
 

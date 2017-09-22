@@ -120,9 +120,9 @@ namespace MWGui
             okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
     }
 
-    void RaceDialog::open()
+    void RaceDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
 
         updateRaces();
         updateSkills();
@@ -183,7 +183,7 @@ namespace MWGui
         updateSpellPowers();
     }
 
-    void RaceDialog::close()
+    void RaceDialog::onClose()
     {
         mPreviewImage->setRenderItemTexture(NULL);
 

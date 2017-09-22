@@ -12,7 +12,7 @@ class MerchantRepair : public WindowBase
 public:
     MerchantRepair();
 
-    virtual void open();
+    virtual void onOpen();
 
     virtual void exit();
 

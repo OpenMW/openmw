@@ -22,7 +22,7 @@ class Recharge : public WindowBase
 public:
     Recharge();
 
-    virtual void open();
+    virtual void onOpen();
 
     virtual void exit();
 

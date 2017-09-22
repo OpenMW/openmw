@@ -15,7 +15,7 @@ namespace MWGui
         public:
             SettingsWindow();
 
-            virtual void open();
+            virtual void onOpen();
 
             virtual void exit();
 

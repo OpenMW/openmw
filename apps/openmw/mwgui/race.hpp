@@ -51,8 +51,8 @@ namespace MWGui
         void setGender(Gender gender) { mGenderIndex = gender == GM_Male ? 0 : 1; }
 
         void setNextButtonShow(bool shown);
-        virtual void open();
-        virtual void close();
+        virtual void onOpen();
+        virtual void onClose();
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;

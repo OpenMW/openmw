@@ -128,7 +128,7 @@ namespace MWGui
         setAttributeValues();
     }
 
-    void LevelupDialog::open()
+    void LevelupDialog::onOpen()
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();

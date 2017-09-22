@@ -145,14 +145,14 @@ namespace MWGui
         mCompilerContext.setExtensions (&mExtensions);
     }
 
-    void Console::open()
+    void Console::onOpen()
     {
         // Give keyboard focus to the combo box whenever the console is
         // turned on
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
     }
 
-    void Console::close()
+    void Console::onClose()
     {
         // Apparently, hidden widgets can retain key focus
         // Remove for MyGUI 3.2.2

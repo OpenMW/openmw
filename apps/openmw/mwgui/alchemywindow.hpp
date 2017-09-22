@@ -24,7 +24,7 @@ namespace MWGui
     public:
         AlchemyWindow();
 
-        virtual void open();
+        virtual void onOpen();
         virtual void exit();
 
     private:

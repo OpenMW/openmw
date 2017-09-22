@@ -94,7 +94,7 @@ namespace MWGui
     public:
         MagicSelectionDialog(QuickKeysMenu* parent);
 
-        virtual void open();
+        virtual void onOpen();
         virtual void exit();
 
     private:

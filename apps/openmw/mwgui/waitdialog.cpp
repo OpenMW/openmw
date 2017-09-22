@@ -35,7 +35,7 @@ namespace MWGui
         getWidget(mProgressText, "ProgressText");
     }
 
-    void WaitDialogProgressBar::open()
+    void WaitDialogProgressBar::onOpen()
     {
         center();
     }
@@ -85,7 +85,7 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->popGuiMode();
     }
 
-    void WaitDialog::open()
+    void WaitDialog::onOpen()
     {
         if (!MWBase::Environment::get().getWindowManager ()->getRestEnabled ())
         {

@@ -19,7 +19,7 @@ namespace MWGui
         EnchantingDialog();
         virtual ~EnchantingDialog();
 
-        virtual void open();
+        virtual void onOpen();
 
         virtual void exit();
 

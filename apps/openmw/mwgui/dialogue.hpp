@@ -28,7 +28,7 @@ namespace MWGui
     public:
         PersuasionDialog();
 
-        virtual void open();
+        virtual void onOpen();
         virtual void exit();
 
     private:

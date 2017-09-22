@@ -23,7 +23,7 @@ namespace MWGui
     public:
         EditEffectDialog();
 
-        virtual void open();
+        virtual void onOpen();
         virtual void exit();
 
         void setConstantEffect(bool constant);
@@ -150,7 +150,7 @@ namespace MWGui
     public:
         SpellCreationDialog();
 
-        virtual void open();
+        virtual void onOpen();
         virtual void exit();
 
         void startSpellMaking(MWWorld::Ptr actor);

@@ -22,9 +22,9 @@ namespace MWGui
         typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
 
         /// Notify that window has been made visible
-        virtual void open() {}
+        virtual void onOpen() {}
         /// Notify that window has been hidden
-        virtual void close () {}
+        virtual void onClose () {}
         /// Gracefully exits the window
         virtual void exit() {}
         /// Sets the visibility of the window
@@ -42,8 +42,8 @@ namespace MWGui
     {
     public:
         WindowModal(const std::string& parLayout);
-        virtual void open();
-        virtual void close();
+        virtual void onOpen();
+        virtual void onClose();
         virtual void exit() {}
     };
 

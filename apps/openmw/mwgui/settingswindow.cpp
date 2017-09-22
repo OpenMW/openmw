@@ -553,7 +553,7 @@ namespace MWGui
         updateControlsBox ();
     }
 
-    void SettingsWindow::open()
+    void SettingsWindow::onOpen()
     {
         updateControlsBox ();
         resetScrollbars();

@@ -17,7 +17,7 @@ namespace MWGui
     public:
         SaveGameDialog();
 
-        virtual void open();
+        virtual void onOpen();
 
         virtual void exit();
 

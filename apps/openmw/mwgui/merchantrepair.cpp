@@ -111,7 +111,7 @@ void MerchantRepair::onMouseWheel(MyGUI::Widget* _sender, int _rel)
         mList->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mList->getViewOffset().top + _rel*0.3f)));
 }
 
-void MerchantRepair::open()
+void MerchantRepair::onOpen()
 {
     center();
     // Reset scrollbars

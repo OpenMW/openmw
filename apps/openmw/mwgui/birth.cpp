@@ -64,9 +64,9 @@ namespace MWGui
             okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
     }
 
-    void BirthDialog::open()
+    void BirthDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
         updateBirths();
         updateSpells();
     }

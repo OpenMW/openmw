@@ -211,7 +211,7 @@ namespace
                 button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
         }
 
-        void open()
+        void onOpen()
         {
             if (!MWBase::Environment::get().getWindowManager ()->getJournalAllowed ())
             {
@@ -240,7 +240,7 @@ namespace
             updateShowingPages();
         }
 
-        void close()
+        void onClose()
         {
             mModel->unload ();
 

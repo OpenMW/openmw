@@ -23,9 +23,9 @@ void WindowBase::setVisible(bool visible)
     mMainWidget->setVisible(visible);
 
     if (visible)
-        open();
+        onOpen();
     else if (wasVisible && !visible)
-        close();
+        onClose();
 
     // This is needed as invisible widgets can retain key focus.
     // Remove for MyGUI 3.2.2
@@ -64,13 +64,13 @@ WindowModal::WindowModal(const std::string& parLayout)
 {
 }
 
-void WindowModal::open()
+void WindowModal::onOpen()
 {
     MyGUI::InputManager::getInstance ().addWidgetModal (mMainWidget);
     MWBase::Environment::get().getWindowManager()->addCurrentModal(this); //Set so we can escape it if needed
 }
 
-void WindowModal::close()
+void WindowModal::onClose()
 {
     MyGUI::InputManager::getInstance ().removeWidgetModal (mMainWidget);
     MWBase::Environment::get().getWindowManager()->removeCurrentModal(this);

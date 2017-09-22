@@ -200,7 +200,7 @@ namespace MWGui
       , mMessageBoxManager(parMessageBoxManager)
       , mButtonPressed(-1)
     {
-        WindowModal::open();
+        WindowModal::onOpen();
 
         int textPadding = 10; // padding between text-widget and main-widget
         int textButtonPadding = 10; // padding between the text-widget und the button-widget

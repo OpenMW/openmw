@@ -39,8 +39,8 @@ namespace MWGui
 
             Console(int w, int h, bool consoleOnlyScripts);
 
-            virtual void open();
-            virtual void close();
+            virtual void onOpen();
+            virtual void onClose();
 
             virtual void exit();
 

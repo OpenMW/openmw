@@ -60,7 +60,7 @@ namespace MWGui
         delete mItemSelectionDialog;
     }
 
-    void EnchantingDialog::open()
+    void EnchantingDialog::onOpen()
     {
         center();
     }
