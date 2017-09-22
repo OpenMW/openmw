@@ -2,7 +2,7 @@
 
 #ifndef OPENMW_COMPONENTS_NIF_NIFSTREAM_HPP
 #define OPENMW_COMPONENTS_NIF_NIFSTREAM_HPP
-#include <xmmintrin.h>
+
 #include <cassert>
 #include <stdint.h>
 #include <stdexcept>
@@ -21,49 +21,37 @@ namespace Nif
 
 class NIFFile;
 
+template <uint32_t numInstances, typename T> inline void readLittleEndianBufferOfType(Files::IStreamPtr &pIStream, T* dest)
+{
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
+    pIStream->read((char*)dest, numInstances * sizeof(T));
+#else
+    char buffer[numInstances * sizeof(T)];
+    pIStream->read((char*)buffer, numInstances * sizeof(T));
+    /*
+        Due to the loop iterations being known at compile time,
+        this nested loop will most likely be unrolled
+    */
+    for (uint32_t i = 0; i < numInstances; i++)
+    {
+        dest[i] = 0;
+        for (uint32_t byte = 0; byte < sizeof(T); byte++)
+            dest[i] |= ((T)buffer[i * sizeof(T) + byte]) << (byte * 8);
+    }
+#endif
+}
+
+template<typename type> type inline readLittleEndianType(Files::IStreamPtr &pIStream)
+{
+    type val;
+    readLittleEndianBufferOfType<1,type>(pIStream, (type*)&val);
+    return val;
+}
+
 class NIFStream {
 
     /// Input stream
     Files::IStreamPtr inp;
-
-    uint8_t read_byte() {
-        uint8_t byte;
-        inp->read((char*)&byte, 1);
-        return byte;
-    }
-
-    uint16_t read_le16() {
-        alignas(2) uint8_t buffer[2];
-        inp->read((char*)buffer, 2);
-        return static_cast<uint16_t>(*((uint16_t*)buffer));
-    }
-    uint32_t read_le32() {
-        alignas(4) uint8_t buffer[4];
-        inp->read((char*)buffer, 4);
-        return static_cast<uint32_t>(*((uint32_t*)buffer));
-    }
-    uint64_t read_le64() {
-        alignas(8) uint8_t buffer[8];
-        inp->read((char*)buffer, 8);
-        return static_cast<uint64_t>(*((uint64_t*)buffer));
-    }
-    __m128 read_le96() {
-        alignas(8) uint8_t buffer[16];
-        inp->read((char*)buffer, 12);
-        return static_cast<__m128>(*((__m128*)buffer));
-    }
-    __m128 read_le128() {
-        alignas(16) uint8_t buffer[16];
-        inp->read((char*)buffer, 16);
-        return static_cast<__m128>(*((__m128*)buffer));
-    }
-    float read_le32f() {
-        union {
-            uint32_t i;
-            float f;
-        } u = { read_le32() };
-        return u.f;
-    }
 
 public:
 
@@ -73,67 +61,59 @@ public:
 
     void skip(size_t size) { inp->ignore(size); }
 
-    char getChar() { return read_byte(); }
-    short getShort() { return read_le16(); }
-    unsigned short getUShort() { return read_le16(); }
-    int getInt() { return read_le32(); }
-    unsigned int getUInt() { return read_le32(); }
-    float getFloat() { return read_le32f(); }
+    char getChar() 
+    {
+        return readLittleEndianType<char>(inp); 
+    }
+    short getShort() 
+    { 
+        return readLittleEndianType<short>(inp);
+    }
+    unsigned short getUShort() 
+    { 
+        return readLittleEndianType<unsigned short>(inp);
+    }
+    int getInt() 
+    {
+        return readLittleEndianType<int>(inp);
+    }
+    unsigned int getUInt() 
+    { 
+        return readLittleEndianType<unsigned int>(inp);
+    }
+    float getFloat() 
+    { 
+        return readLittleEndianType<float>(inp);
+    }
 
     osg::Vec2f getVector2() {
-        union {
-            uint64_t i;
-            float f[2];
-        } u = { read_le64() };
         osg::Vec2f vec;
-        for (size_t i = 0;i < 2;i++)
-            vec._v[i] = u.f[i];
+        readLittleEndianBufferOfType<2,float>(inp, (float*)&vec._v[0]);
         return vec;
     }
     osg::Vec3f getVector3() {
-        union {
-            __m128 i;
-            float f[4];
-        } u = { read_le96() };
         osg::Vec3f vec;
-        for (size_t i = 0;i < 3;i++)
-            vec._v[i] = u.f[i];
+        readLittleEndianBufferOfType<3, float>(inp, (float*)&vec._v[0]);
         return vec;
     }
     osg::Vec4f getVector4() {
-        union {
-            __m128 i;
-            float f[4];
-        } u = { read_le128() };
         osg::Vec4f vec;
-        for (size_t i = 0;i < 4;i++)
-            vec._v[i] = u.f[i];
+        readLittleEndianBufferOfType<4, float>(inp, (float*)&vec._v[0]);
         return vec;
     }
     Matrix3 getMatrix3() {
         Matrix3 mat;
-        alignas(16) union {
-            float f[9];
-            uint8_t buffer[36];
-        } u;
-        inp->read((char*)u.buffer, 36);
-        for (size_t i = 0;i < 3;i++)
-        {
-            for (size_t j = 0;j < 3;j++)
-                mat.mValues[i][j] = u.f[3*i+j];
-        }
+        readLittleEndianBufferOfType<9, float>(inp, (float*)&mat.mValues);
         return mat;
     }
     osg::Quat getQuaternion() {
-        union {
-            __m128 i;
-            float f[4];
-        } u = { read_le128() };
+        float f[4];
+        readLittleEndianBufferOfType<4, float>(inp, (float*)&f);
         osg::Quat quat;
-        quat.w() = u.f[0];
-        quat.x() = u.f[1];
-        quat.y() = u.f[2];
-        quat.z() = u.f[3];
+        quat.w() = f[0];
+        quat.x() = f[1];
+        quat.y() = f[2];
+        quat.z() = f[3];
         return quat;
     }
     Transformation getTrafo() {
@@ -154,7 +134,7 @@ public:
     }
     ///Read in a string of the length specified in the file
     std::string getString() {
-        size_t size = read_le32();
+        size_t size = readLittleEndianType<uint32_t>(inp);
         return getString(size);
     }
     ///This is special since the version string doesn't start with a number, and ends with "\n"
