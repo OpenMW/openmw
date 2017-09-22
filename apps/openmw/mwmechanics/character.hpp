@@ -105,6 +105,8 @@ enum CharacterState {
     CharState_Hit,
     CharState_KnockDown,
     CharState_KnockOut,
+    CharState_SwimKnockDown,
+    CharState_SwimKnockOut,
     CharState_Block
 };
 
@@ -267,6 +269,7 @@ public:
     
     bool isAttackPrepairing() const;
     bool isReadyToBlock() const;
+    bool isKnockedDown() const;
     bool isKnockedOut() const;
     bool isSneaking() const;
     bool isRunning() const;
