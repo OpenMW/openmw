@@ -581,15 +581,6 @@ namespace MWGui
         }
     }
 
-    void WindowManager::update()
-    {
-        cleanupGarbage();
-
-        mHud->update();
-
-        updateActivatedQuickKey ();
-    }
-
     void WindowManager::updateVisible()
     {
         if (!mMap)
@@ -926,6 +917,10 @@ namespace MWGui
 
         if (mCharGen)
             mCharGen->onFrame(frameDuration);
+
+        updateActivatedQuickKey ();
+
+        cleanupGarbage();
     }
 
     void WindowManager::changeCell(const MWWorld::CellStore* cell)

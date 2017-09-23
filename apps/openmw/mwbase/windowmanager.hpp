@@ -102,13 +102,6 @@ namespace MWBase
 
             virtual ~WindowManager() {}
 
-            /**
-             * Should be called each frame to update windows/gui elements.
-             * This could mean updating sizes of gui elements or opening
-             * new dialogs.
-             */
-            virtual void update() = 0;
-
             /// @note This method will block until the video finishes playing
             /// (and will continually update the window while doing so)
             virtual void playVideo(const std::string& name, bool allowSkipping) = 0;

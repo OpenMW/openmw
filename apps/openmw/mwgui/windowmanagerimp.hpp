@@ -146,13 +146,6 @@ namespace MWGui
     /// (and will continually update the window while doing so)
     virtual void playVideo(const std::string& name, bool allowSkipping);
 
-    /**
-     * Should be called each frame to update windows/gui elements.
-     * This could mean updating sizes of gui elements or opening
-     * new dialogs.
-     */
-    virtual void update();
-
     /// Warning: do not use MyGUI::InputManager::setKeyFocusWidget directly. Instead use this.
     virtual void setKeyFocusWidget (MyGUI::Widget* widget);
 

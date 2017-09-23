@@ -371,6 +371,20 @@ namespace MWGui
 
         if (mIsDrowning)
             mDrowningFlashTheta += dt * osg::PI*2;
+
+        mSpellIcons->updateWidgets(mEffectBox, true);
+
+        if (mEnemyActorId != -1 && mEnemyHealth->getVisible())
+        {
+            updateEnemyHealthBar();
+        }
+
+        if (mIsDrowning)
+        {
+            float intensity = (cos(mDrowningFlashTheta) + 2.0f) / 3.0f;
+
+            mDrowningFlash->setAlpha(intensity);
+        }
     }
 
     void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
@@ -600,23 +614,6 @@ namespace MWGui
         if (fNPCHealthBarFade > 0.f)
             mEnemyHealth->setAlpha(std::max(0.f, std::min(1.f, mEnemyHealthTimer/fNPCHealthBarFade)));
 
-    }
-
-    void HUD::update()
-    {
-        mSpellIcons->updateWidgets(mEffectBox, true);
-
-        if (mEnemyActorId != -1 && mEnemyHealth->getVisible())
-        {
-            updateEnemyHealthBar();
-        }
-
-        if (mIsDrowning)
-        {
-            float intensity = (cos(mDrowningFlashTheta) + 2.0f) / 3.0f;
-
-            mDrowningFlash->setAlpha(intensity);
-        }
     }
 
     void HUD::setEnemy(const MWWorld::Ptr &enemy)
