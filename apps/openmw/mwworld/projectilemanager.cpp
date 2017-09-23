@@ -149,6 +149,7 @@ namespace MWWorld
         , mResourceSystem(resourceSystem)
         , mRendering(rendering)
         , mPhysics(physics)
+        , mCleanupTimer(0.0f)
     {
 
     }
@@ -326,8 +327,47 @@ namespace MWWorld
 
     void ProjectileManager::update(float dt)
     {
+        periodicCleanup(dt);
         moveProjectiles(dt);
         moveMagicBolts(dt);
+    }
+
+    void ProjectileManager::periodicCleanup(float dt)
+    {
+        mCleanupTimer -= dt;
+        if (mCleanupTimer <= 0.0f)
+        {
+            mCleanupTimer = 2.0f;
+
+            auto isCleanable = [](const ProjectileManager::State& state) -> bool
+            {
+                const float farawayThreshold = 72000.0f;
+                osg::Vec3 playerPos = MWMechanics::getPlayer().getRefData().getPosition().asVec3();
+                return (state.mNode->getPosition() - playerPos).length2() >= farawayThreshold*farawayThreshold;
+            };
+
+            for (std::vector<ProjectileState>::iterator it = mProjectiles.begin(); it != mProjectiles.end();)
+            {
+                if (isCleanable(*it))
+                {
+                    cleanupProjectile(*it);
+                    it = mProjectiles.erase(it);
+                }
+                else
+                    ++it;
+            }
+
+            for (std::vector<MagicBoltState>::iterator it = mMagicBolts.begin(); it != mMagicBolts.end();)
+            {
+                if (isCleanable(*it))
+                {
+                    cleanupMagicBolt(*it);
+                    it = mMagicBolts.erase(it);
+                }
+                else
+                    ++it;
+            }
+        }
     }
 
     void ProjectileManager::moveMagicBolts(float duration)
@@ -468,20 +508,30 @@ namespace MWWorld
         }
     }
 
+    void ProjectileManager::cleanupProjectile(ProjectileManager::ProjectileState& state)
+    {
+        mParent->removeChild(state.mNode);
+    }
+
+    void ProjectileManager::cleanupMagicBolt(ProjectileManager::MagicBoltState& state)
+    {
+        mParent->removeChild(state.mNode);
+        for (size_t soundIter = 0; soundIter != state.mSounds.size(); soundIter++)
+        {
+            MWBase::Environment::get().getSoundManager()->stopSound(state.mSounds.at(soundIter));
+        }
+    }
+
     void ProjectileManager::clear()
     {
         for (std::vector<ProjectileState>::iterator it = mProjectiles.begin(); it != mProjectiles.end(); ++it)
         {
-            mParent->removeChild(it->mNode);
+            cleanupProjectile(*it);
         }
         mProjectiles.clear();
         for (std::vector<MagicBoltState>::iterator it = mMagicBolts.begin(); it != mMagicBolts.end(); ++it)
         {
-            mParent->removeChild(it->mNode);
-            for (size_t soundIter = 0; soundIter != it->mSounds.size(); soundIter++)
-            {
-                MWBase::Environment::get().getSoundManager()->stopSound(it->mSounds.at(soundIter));
-            }
+            cleanupMagicBolt(*it);
         }
         mMagicBolts.clear();
     }

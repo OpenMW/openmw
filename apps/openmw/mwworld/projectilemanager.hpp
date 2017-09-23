@@ -68,6 +68,7 @@ namespace MWWorld
         Resource::ResourceSystem* mResourceSystem;
         MWRender::RenderingManager* mRendering;
         MWPhysics::PhysicsSystem* mPhysics;
+        float mCleanupTimer;
 
         struct State
         {
@@ -115,6 +116,10 @@ namespace MWWorld
 
         std::vector<MagicBoltState> mMagicBolts;
         std::vector<ProjectileState> mProjectiles;
+
+        void cleanupProjectile(ProjectileState& state);
+        void cleanupMagicBolt(MagicBoltState& state);
+        void periodicCleanup(float dt);
 
         void moveProjectiles(float dt);
         void moveMagicBolts(float dt);
