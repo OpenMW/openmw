@@ -30,6 +30,8 @@ namespace MWGui
 
             void onFrame(float dt) { checkReferenceAvailable(); }
 
+            void onResChange(int, int) { center(); }
+
         protected:
             MyGUI::Button* mCancelButton;
             MyGUI::TextBox* mPlayerGold;

@@ -17,6 +17,8 @@ namespace MWGui
             void setPtr(const MWWorld::Ptr& book);
             void setInventoryAllowed(bool allowed);
 
+            void onResChange(int, int) { center(); }
+
         protected:
             void onNextPageButtonClicked (MyGUI::Widget* sender);
             void onPrevPageButtonClicked (MyGUI::Widget* sender);

@@ -22,6 +22,8 @@ namespace MWGui
         QuickKeysMenu();
         ~QuickKeysMenu();
 
+        void onResChange(int, int) { center(); }
+
         void onItemButtonClicked(MyGUI::Widget* sender);
         void onMagicButtonClicked(MyGUI::Widget* sender);
         void onUnassignButtonClicked(MyGUI::Widget* sender);

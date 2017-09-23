@@ -1128,14 +1128,10 @@ namespace MWGui
             it->first->setSize(size);
         }
 
-        mConsole->onResChange(x, y);
-        mMenu->onResChange(x, y);
-        mSettingsWindow->center();
-        mAlchemyWindow->center();
-        mScrollWindow->center();
-        mBookWindow->center();
-        mQuickKeysMenu->center();
-        mSpellBuyingWindow->center();
+        for (WindowBase* window : mWindows)
+            window->onResChange(x, y);
+
+        // TODO: check if any windows are now off-screen and move them back if so
     }
 
     void WindowManager::onCursorChange(const std::string &name)

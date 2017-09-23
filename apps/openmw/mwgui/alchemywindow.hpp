@@ -26,6 +26,8 @@ namespace MWGui
 
         virtual void onOpen();
 
+        void onResChange(int, int) { center(); }
+
     private:
         std::string mSuggestedPotionName;
 

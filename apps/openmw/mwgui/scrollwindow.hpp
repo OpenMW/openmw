@@ -20,6 +20,8 @@ namespace MWGui
             void setPtr (const MWWorld::Ptr& scroll);
             void setInventoryAllowed(bool allowed);
 
+            void onResChange(int, int) { center(); }
+
         protected:
             void onCloseButtonClicked (MyGUI::Widget* _sender);
             void onTakeButtonClicked (MyGUI::Widget* _sender);

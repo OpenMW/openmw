@@ -42,7 +42,11 @@ namespace MWGui
         virtual void setVisible(bool visible);
         /// Returns the visibility state of the window
         bool isVisible();
+
         void center();
+
+        /// Called when GUI viewport changes size
+        virtual void onResChange(int width, int height) {}
     };
 
 

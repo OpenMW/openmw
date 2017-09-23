@@ -19,6 +19,8 @@ namespace MWGui
 
             void updateControlsBox();
 
+            void onResChange(int, int) { center(); }
+
     protected:
             MyGUI::TabControl* mSettingsTab;
             MyGUI::Button* mOkButton;
