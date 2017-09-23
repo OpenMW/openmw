@@ -29,7 +29,7 @@ namespace MWGui
 
         virtual void onOpen();
 
-        virtual void exit();
+        virtual bool exit();
 
         void onFrame(float dt);
 

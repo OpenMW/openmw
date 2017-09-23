@@ -23,6 +23,8 @@ namespace MWGui
 
         virtual void onOpen();
 
+        bool exit() { return false; }
+
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
 
@@ -67,6 +69,8 @@ namespace MWGui
         std::string getClassId() const;
         void setClassId(const std::string &classId);
 
+        bool exit() { return false; }
+
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
@@ -101,6 +105,8 @@ namespace MWGui
 
         void setNextButtonShow(bool shown);
         virtual void onOpen();
+
+        bool exit() { return false; }
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
@@ -142,7 +148,7 @@ namespace MWGui
         SelectSpecializationDialog();
         ~SelectSpecializationDialog();
 
-        virtual void exit();
+        virtual bool exit();
 
         ESM::Class::Specialization getSpecializationId() const { return mSpecializationId; }
 
@@ -175,7 +181,7 @@ namespace MWGui
         SelectAttributeDialog();
         ~SelectAttributeDialog();
 
-        virtual void exit();
+        virtual bool exit();
 
         ESM::Attribute::AttributeID getAttributeId() const { return mAttributeId; }
 
@@ -206,7 +212,7 @@ namespace MWGui
         SelectSkillDialog();
         ~SelectSkillDialog();
 
-        virtual void exit();
+        virtual bool exit();
 
         ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
 
@@ -261,6 +267,8 @@ namespace MWGui
     public:
         CreateClassDialog();
         virtual ~CreateClassDialog();
+
+        bool exit() { return false; }
 
         std::string getName() const;
         std::string getDescription() const;

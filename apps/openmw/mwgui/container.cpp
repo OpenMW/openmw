@@ -198,17 +198,9 @@ namespace MWGui
         }
     }
 
-    void ContainerWindow::exit()
-    {
-        if(mDragAndDrop == NULL || !mDragAndDrop->mIsOnDragAndDrop)
-        {
-            MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
-        }
-    }
-
     void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
     }
 
     void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)

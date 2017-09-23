@@ -96,11 +96,6 @@ namespace MWGui
         setTakeButtonShow(showTakeButton);
     }
 
-    void BookWindow::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
-    }
-
     void BookWindow::setTakeButtonShow(bool show)
     {
         mTakeButtonShow = show;
@@ -115,7 +110,7 @@ namespace MWGui
 
     void BookWindow::onCloseButtonClicked (MyGUI::Widget* sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
     }
 
     void BookWindow::onTakeButtonClicked (MyGUI::Widget* sender)

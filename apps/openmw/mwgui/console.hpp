@@ -42,8 +42,6 @@ namespace MWGui
             virtual void onOpen();
             virtual void onClose();
 
-            virtual void exit();
-
             void setFont(const std::string &fntName);
 
             void onResChange(int width, int height);

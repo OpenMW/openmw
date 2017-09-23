@@ -730,9 +730,10 @@ namespace MWGui
         exit();
     }
 
-    void SelectSpecializationDialog::exit()
+    bool SelectSpecializationDialog::exit()
     {
         eventCancel();
+        return true;
     }
 
     /* SelectAttributeDialog */
@@ -778,9 +779,10 @@ namespace MWGui
         exit();
     }
 
-    void SelectAttributeDialog::exit()
+    bool SelectAttributeDialog::exit()
     {
         eventCancel();
+        return true;
     }
 
 
@@ -869,9 +871,10 @@ namespace MWGui
         exit();
     }
 
-    void SelectSkillDialog::exit()
+    bool SelectSkillDialog::exit()
     {
         eventCancel();
+        return true;
     }
 
     /* DescriptionDialog */

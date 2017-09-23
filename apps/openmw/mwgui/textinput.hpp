@@ -22,6 +22,8 @@ namespace MWGui
         void setTextLabel(const std::string &label);
         virtual void onOpen();
 
+        bool exit() { return false; }
+
         /** Event : Dialog finished, OK button clicked.\n
             signature : void method()\n
         */

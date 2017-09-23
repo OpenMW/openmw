@@ -76,11 +76,6 @@ namespace MWGui
         setTakeButtonShow(showTakeButton);
     }
 
-    void ScrollWindow::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
-    }
-
     void ScrollWindow::setTakeButtonShow(bool show)
     {
         mTakeButtonShow = show;
@@ -95,7 +90,7 @@ namespace MWGui
 
     void ScrollWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
     }
 
     void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)

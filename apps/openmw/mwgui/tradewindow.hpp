@@ -34,7 +34,7 @@ namespace MWGui
 
             int getMerchantServices();
 
-            virtual void exit();
+            virtual bool exit();
 
             virtual void resetReference();
 

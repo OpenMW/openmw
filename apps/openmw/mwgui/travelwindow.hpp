@@ -24,8 +24,6 @@ namespace MWGui
         public:
             TravelWindow();
 
-            virtual void exit();
-
             void setPtr (const MWWorld::Ptr& actor);
 
         protected:

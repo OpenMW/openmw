@@ -34,7 +34,7 @@ namespace MWGui
         /// Notify that window has been hidden
         virtual void onClose () {}
         /// Gracefully exits the window
-        virtual void exit() {}
+        virtual bool exit() {return true;}
         /// Sets the visibility of the window
         virtual void setVisible(bool visible);
         /// Returns the visibility state of the window
@@ -52,7 +52,7 @@ namespace MWGui
         WindowModal(const std::string& parLayout);
         virtual void onOpen();
         virtual void onClose();
-        virtual void exit() {}
+        virtual bool exit() {return true;}
     };
 
     /// A window that cannot be the target of a drag&drop action.

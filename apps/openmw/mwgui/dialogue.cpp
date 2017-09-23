@@ -52,7 +52,7 @@ namespace MWGui
 
     void PersuasionDialog::onCancel(MyGUI::Widget *sender)
     {
-        exit();
+        setVisible(false);
     }
 
     void PersuasionDialog::onPersuade(MyGUI::Widget *sender)
@@ -86,11 +86,6 @@ namespace MWGui
         mBribe1000Button->setEnabled (playerGold >= 1000);
 
         mGoldLabel->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
-    }
-
-    void PersuasionDialog::exit()
-    {
-        setVisible(false);
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -275,18 +270,18 @@ namespace MWGui
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
     }
 
-    void DialogueWindow::exit()
+    bool DialogueWindow::exit()
     {
         if ((!mEnabled || MWBase::Environment::get().getDialogueManager()->isInChoice())
                 && !mGoodbye)
         {
-            // in choice, not allowed to escape, but give access to main menu to allow loading other saves
-            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+            return false;
         }
         else
         {
             MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
             mTopicsList->scrollToTop();
+            return true;
         }
     }
 
@@ -311,7 +306,8 @@ namespace MWGui
 
     void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
     {
-        exit();
+        if (exit())
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
     }
 
     void DialogueWindow::onSelectTopic(const std::string& topic, int id)

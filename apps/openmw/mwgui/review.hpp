@@ -31,6 +31,8 @@ namespace MWGui
 
         ReviewDialog();
 
+        bool exit() { return false; }
+
         void setPlayerName(const std::string &name);
         void setRace(const std::string &raceId);
         void setClass(const ESM::Class& class_);

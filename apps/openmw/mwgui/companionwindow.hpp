@@ -18,7 +18,7 @@ namespace MWGui
     public:
         CompanionWindow(DragAndDrop* dragAndDrop, MessageBoxManager* manager);
 
-        virtual void exit();
+        virtual bool exit();
 
         virtual void resetReference();
 

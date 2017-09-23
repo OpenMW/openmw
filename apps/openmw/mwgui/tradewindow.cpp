@@ -171,11 +171,11 @@ namespace MWGui
         return mPtr.getClass().getServices(mPtr);
     }
 
-    void TradeWindow::exit()
+    bool TradeWindow::exit()
     {
         mTradeModel->abort();
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel()->abort();
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
+        return true;
     }
 
     void TradeWindow::onItemSelected (int index)
@@ -362,6 +362,7 @@ namespace MWGui
     void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
         exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
     }
 
     void TradeWindow::onMaxSaleButtonClicked(MyGUI::Widget* _sender)

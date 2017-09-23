@@ -139,10 +139,11 @@ void CompanionWindow::updateEncumbranceBar()
 
 void CompanionWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
 {
-    exit();
+    if (exit())
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);
 }
 
-void CompanionWindow::exit()
+bool CompanionWindow::exit()
 {
     if (mModel && mModel->hasProfit(mPtr) && getProfit(mPtr) < 0)
     {
@@ -151,9 +152,9 @@ void CompanionWindow::exit()
         buttons.push_back("#{sCompanionWarningButtonTwo}");
         mMessageBoxManager->createInteractiveMessageBox("#{sCompanionWarningMessage}", buttons);
         mMessageBoxManager->eventButtonPressed += MyGUI::newDelegate(this, &CompanionWindow::onMessageBoxButtonClicked);
+        return false;
     }
-    else
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);
+    return true;
 }
 
 void CompanionWindow::onMessageBoxButtonClicked(int button)

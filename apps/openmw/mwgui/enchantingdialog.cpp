@@ -100,11 +100,6 @@ namespace MWGui
         }
     }
 
-    void EnchantingDialog::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
-    }
-
     void EnchantingDialog::updateLabels()
     {
         std::stringstream enchantCost;
@@ -194,7 +189,7 @@ namespace MWGui
 
     void EnchantingDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Enchanting);
     }
 
     void EnchantingDialog::onSelectItem(MyGUI::Widget *sender)

@@ -16,8 +16,6 @@ namespace MWGui
 
         virtual void onOpen();
 
-        virtual void exit();
-
         void setPtr(const MWWorld::Ptr& actor);
 
         void onFrame(float dt);

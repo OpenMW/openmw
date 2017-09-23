@@ -102,13 +102,13 @@ namespace MWGui
         center();
     }
 
-    void EditEffectDialog::exit()
+    bool EditEffectDialog::exit()
     {
-        setVisible(false);
         if(mEditing)
             eventEffectModified(mOldEffect);
         else
             eventEffectRemoved(mEffect);
+        return true;
     }
 
     void EditEffectDialog::newEffect (const ESM::MagicEffect *effect)
@@ -275,6 +275,7 @@ namespace MWGui
 
     void EditEffectDialog::onCancelButtonClicked (MyGUI::Widget* sender)
     {
+        setVisible(false);
         exit();
     }
 
@@ -362,7 +363,7 @@ namespace MWGui
 
     void SpellCreationDialog::onCancelButtonClicked (MyGUI::Widget* sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_SpellCreation);
     }
 
     void SpellCreationDialog::onBuyButtonClicked (MyGUI::Widget* sender)
@@ -418,11 +419,6 @@ namespace MWGui
     void SpellCreationDialog::onOpen()
     {
         center();
-    }
-
-    void SpellCreationDialog::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_SpellCreation);
     }
 
     void SpellCreationDialog::onReferenceUnavailable ()

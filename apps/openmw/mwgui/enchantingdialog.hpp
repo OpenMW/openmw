@@ -21,8 +21,6 @@ namespace MWGui
 
         virtual void onOpen();
 
-        virtual void exit();
-
         void setSoulGem (const MWWorld::Ptr& gem);
         void setItem (const MWWorld::Ptr& item);
 

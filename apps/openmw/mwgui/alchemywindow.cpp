@@ -59,7 +59,7 @@ namespace MWGui
 
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Alchemy);
     }
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
@@ -103,6 +103,7 @@ namespace MWGui
 
     void AlchemyWindow::onOpen()
     {
+        mAlchemy->clear();
         mAlchemy->setAlchemist (MWMechanics::getPlayer());
 
         InventoryItemModel* model = new InventoryItemModel(MWMechanics::getPlayer());
@@ -127,12 +128,6 @@ namespace MWGui
         }
 
         update();
-    }
-
-    void AlchemyWindow::exit() {
-        mAlchemy->clear();
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Alchemy);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Inventory);
     }
 
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)

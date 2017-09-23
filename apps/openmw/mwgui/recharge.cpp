@@ -62,11 +62,6 @@ void Recharge::onOpen()
     mBox->resetScrollbars();
 }
 
-void Recharge::exit()
-{
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Recharge);
-}
-
 void Recharge::setPtr (const MWWorld::Ptr &item)
 {
     mGemIcon->setItem(item);
@@ -107,7 +102,7 @@ void Recharge::updateView()
 
 void Recharge::onCancel(MyGUI::Widget *sender)
 {
-    exit();
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Recharge);
 }
 
 void Recharge::onSelectItem(MyGUI::Widget *sender)

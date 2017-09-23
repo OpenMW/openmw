@@ -258,7 +258,7 @@ namespace MWGui
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
     }
 
     void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
@@ -557,11 +557,6 @@ namespace MWGui
     {
         updateControlsBox ();
         resetScrollbars();
-    }
-
-    void SettingsWindow::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
     }
 
     void SettingsWindow::onWindowResize(MyGUI::Window *_sender)

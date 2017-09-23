@@ -31,11 +31,6 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onCancelButtonClicked);
     }
 
-    void SpellBuyingWindow::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_SpellBuying);
-    }
-
     bool SpellBuyingWindow::sortSpells (const ESM::Spell* left, const ESM::Spell* right)
     {
         std::string leftName = Misc::StringUtils::lowerCase(left->mName);
@@ -173,7 +168,7 @@ namespace MWGui
 
     void SpellBuyingWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_SpellBuying);
     }
 
     void SpellBuyingWindow::updateLabels()

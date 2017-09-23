@@ -170,7 +170,6 @@ namespace MWGui
         EditNoteDialog();
 
         virtual void onOpen();
-        virtual void exit();
 
         void showDeleteButton(bool show);
         bool getDeleteButtonShown();

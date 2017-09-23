@@ -21,8 +21,6 @@ public:
 
     virtual void onOpen();
 
-    virtual void exit();
-
     void setPtr (const MWWorld::Ptr& item);
 
 protected:

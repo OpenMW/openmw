@@ -14,8 +14,6 @@ namespace MWGui
         public:
             BookWindow();
 
-            virtual void exit();
-
             void setPtr(const MWWorld::Ptr& book);
             void setInventoryAllowed(bool allowed);
 

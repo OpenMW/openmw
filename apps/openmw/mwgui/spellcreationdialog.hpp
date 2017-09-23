@@ -24,7 +24,7 @@ namespace MWGui
         EditEffectDialog();
 
         virtual void onOpen();
-        virtual void exit();
+        virtual bool exit();
 
         void setConstantEffect(bool constant);
 
@@ -151,7 +151,6 @@ namespace MWGui
         SpellCreationDialog();
 
         virtual void onOpen();
-        virtual void exit();
 
         void setPtr(const MWWorld::Ptr& actor);
 

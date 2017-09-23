@@ -45,11 +45,6 @@ namespace MWGui
                           mSelect->getHeight());
     }
 
-    void TravelWindow::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
-    }
-
     void TravelWindow::addDestination(const std::string& name,ESM::Position pos,bool interior)
     {
         int price;
@@ -194,7 +189,7 @@ namespace MWGui
 
     void TravelWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
     }
 
     void TravelWindow::updateLabels()

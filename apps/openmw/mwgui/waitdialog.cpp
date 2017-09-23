@@ -79,10 +79,9 @@ namespace MWGui
         mProgressBar.setVisible (false);
     }
 
-    void WaitDialog::exit()
+    bool WaitDialog::exit()
     {
-        if(!mProgressBar.isVisible()) //Only exit if not currently waiting
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
+        return (!mProgressBar.isVisible()); //Only exit if not currently waiting
     }
 
     void WaitDialog::onOpen()

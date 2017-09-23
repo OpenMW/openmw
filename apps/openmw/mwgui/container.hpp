@@ -38,8 +38,6 @@ namespace MWGui
 
         virtual void resetReference();
 
-        virtual void exit();
-
     private:
         DragAndDrop* mDragAndDrop;
 

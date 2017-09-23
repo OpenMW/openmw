@@ -58,11 +58,6 @@ void Repair::onOpen()
     mRepairBox->resetScrollbars();
 }
 
-void Repair::exit()
-{
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Repair);
-}
-
 void Repair::setPtr(const MWWorld::Ptr &item)
 {
     MWBase::Environment::get().getWindowManager()->playSound("Item Repair Up");
@@ -145,7 +140,7 @@ void Repair::onItemCancel()
 
 void Repair::onCancel(MyGUI::Widget* /*sender*/)
 {
-    exit();
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Repair);
 }
 
 void Repair::onRepairItem(MyGUI::Widget* /*sender*/, const MWWorld::Ptr& ptr)

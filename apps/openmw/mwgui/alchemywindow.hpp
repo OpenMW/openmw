@@ -25,7 +25,6 @@ namespace MWGui
         AlchemyWindow();
 
         virtual void onOpen();
-        virtual void exit();
 
     private:
         std::string mSuggestedPotionName;

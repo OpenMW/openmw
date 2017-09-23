@@ -769,89 +769,19 @@ namespace MWGui
             return;
         }
 
-        switch(mGuiModes.back()) {
-            case GM_QuickKeysMenu:
-                mQuickKeysMenu->exit();
-                break;
-            case GM_MainMenu:
-                removeGuiMode(GM_MainMenu); //Simple way to remove it
-                break;
-            case GM_Settings:
-                mSettingsWindow->exit();
-                break;
-            case GM_Console:
-                mConsole->exit();
-                break;
-            case GM_Scroll:
-                mScrollWindow->exit();
-                break;
-            case GM_Book:
-                mBookWindow->exit();
-                break;
-            case GM_Alchemy:
-                mAlchemyWindow->exit();
-                break;
-            case GM_Rest:
-                mWaitDialog->exit();
-                break;
-            case GM_RestBed:
-                mWaitDialog->exit();
-                break;
-            case GM_Name:
-            case GM_Race:
-            case GM_Class:
-            case GM_ClassPick:
-            case GM_ClassCreate:
-            case GM_Birth:
-            case GM_ClassGenerate:
-            case GM_Review:
-                break;
-            case GM_Inventory:
-                removeGuiMode(GM_Inventory); //Simple way to remove it
-                break;
-            case GM_Container:
-                mContainerWindow->exit();
-                break;
-            case GM_Companion:
-                mCompanionWindow->exit();
-                break;
-            case GM_Dialogue:
-                mDialogueWindow->exit();
-                break;
-            case GM_Barter:
-                mTradeWindow->exit();
-                break;
-            case GM_SpellBuying:
-                mSpellBuyingWindow->exit();
-                break;
-            case GM_Travel:
-                mTravelWindow->exit();
-                break;
-            case GM_SpellCreation:
-                mSpellCreationDialog->exit();
-                break;
-            case GM_Recharge:
-                mRecharge->exit();
-                break;
-            case GM_Enchanting:
-                mEnchantingDialog->exit();
-                break;
-            case GM_Training:
-                mTrainingWindow->exit();
-                break;
-            case GM_MerchantRepair:
-                mMerchantRepair->exit();
-                break;
-            case GM_Repair:
-                mRepair->exit();
-                break;
-            case GM_Journal:
-                removeGuiMode(GM_Journal); //Simple way to remove it
-                break;
-            default:
-                // Unsupported mode, switch back to game
-                break;
+        GuiModeState& state = mGuiModeStates[mGuiModes.back()];
+        for (WindowBase* window : state.mWindows)
+        {
+            if (!window->exit())
+            {
+                // unable to exit window, but give access to main menu
+                if (!MyGUI::InputManager::getInstance().isModalAny())
+                    pushGuiMode (MWGui::GM_MainMenu);
+                return;
+            }
         }
+
+        popGuiMode();
     }
 
     void WindowManager::interactiveMessageBox(const std::string &message, const std::vector<std::string> &buttons, bool block)
@@ -1267,10 +1197,11 @@ namespace MWGui
 
         if (!mGuiModes.empty())
         {
-            mGuiModeStates[mGuiModes.back()].update(false);
-            if (!noSound)
-                playSound(mGuiModeStates[mGuiModes.back()].mCloseSound);
+            const GuiMode mode = mGuiModes.back();
             mGuiModes.pop_back();
+            mGuiModeStates[mode].update(false);
+            if (!noSound)
+                playSound(mGuiModeStates[mode].mCloseSound);
         }
 
         if (!mGuiModes.empty())
@@ -1849,10 +1780,11 @@ namespace MWGui
     void WindowManager::exitCurrentModal()
     {
         if (!mCurrentModals.empty())
-            mCurrentModals.top()->exit();
-
-        if (mCurrentModals.empty())
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(mSaveKeyFocus);
+        {
+            if (!mCurrentModals.top()->exit())
+                return;
+            mCurrentModals.top()->setVisible(false);
+        }
     }
 
     void WindowManager::addCurrentModal(WindowModal *input)

@@ -118,11 +118,6 @@ void MerchantRepair::onOpen()
     mList->setViewOffset(MyGUI::IntPoint(0, 0));
 }
 
-void MerchantRepair::exit()
-{
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_MerchantRepair);
-}
-
 void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 {
     MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -150,7 +145,7 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 
 void MerchantRepair::onOkButtonClick(MyGUI::Widget *sender)
 {
-    exit();
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_MerchantRepair);
 }
 
 }

@@ -60,11 +60,6 @@ namespace MWGui
         center();
     }
 
-    void TrainingWindow::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
-    }
-
     void TrainingWindow::setPtr (const MWWorld::Ptr& actor)
     {
         mPtr = actor;
@@ -124,7 +119,7 @@ namespace MWGui
 
     void TrainingWindow::onCancelButtonClicked (MyGUI::Widget *sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Training);
     }
 
     void TrainingWindow::onTrainingSelected (MyGUI::Widget *sender)

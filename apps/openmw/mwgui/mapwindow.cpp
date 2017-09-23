@@ -1114,11 +1114,6 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);
     }
 
-    void EditNoteDialog::exit()
-    {
-        setVisible(false);
-    }
-
     void EditNoteDialog::onCancelButtonClicked(MyGUI::Widget *sender)
     {
         setVisible(false);
