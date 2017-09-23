@@ -1589,8 +1589,6 @@ namespace MWGui
 
         mForceHidden = GW_None;
 
-        setWerewolfOverlay(false);
-
         while (!mGuiModes.empty())
             popGuiMode();
 

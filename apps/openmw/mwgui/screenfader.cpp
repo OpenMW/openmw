@@ -119,6 +119,12 @@ namespace MWGui
         queue(time, percent/100.f);
     }
 
+    void ScreenFader::clear()
+    {
+        clearQueue();
+        notifyAlphaChanged(0.f);
+    }
+
     void ScreenFader::setFactor(float factor)
     {
         mFactor = factor;
