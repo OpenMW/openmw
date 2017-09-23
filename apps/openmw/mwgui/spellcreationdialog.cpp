@@ -419,6 +419,7 @@ namespace MWGui
     void SpellCreationDialog::onOpen()
     {
         center();
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit);
     }
 
     void SpellCreationDialog::onReferenceUnavailable ()

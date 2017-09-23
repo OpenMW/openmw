@@ -526,7 +526,10 @@ namespace MWGui
         }
 
         bool goodbyeEnabled = !MWBase::Environment::get().getDialogueManager()->isInChoice() || mGoodbye;
+        bool goodbyeWasEnabled = mGoodbyeButton->getEnabled();
         mGoodbyeButton->setEnabled(goodbyeEnabled);
+        if (goodbyeEnabled && !goodbyeWasEnabled)
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
 
         bool topicsEnabled = !MWBase::Environment::get().getDialogueManager()->isInChoice() && !mGoodbye;
         mTopicsList->setEnabled(topicsEnabled);

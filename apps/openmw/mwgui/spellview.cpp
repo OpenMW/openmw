@@ -106,6 +106,7 @@ namespace MWGui
 
             Gui::SharedStateButton* t = mScrollView->createWidget<Gui::SharedStateButton>(skin,
                 MyGUI::IntCoord(0, 0, 0, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
+            t->setNeedKeyFocus(true);
             t->setCaption(spell.mName);
             t->setTextAlign(MyGUI::Align::Left);
             adjustSpellWidget(spell, i, t);

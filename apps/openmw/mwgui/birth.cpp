@@ -69,6 +69,7 @@ namespace MWGui
         WindowModal::onOpen();
         updateBirths();
         updateSpells();
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mBirthList);
     }
 
 

@@ -130,6 +130,7 @@ namespace MWGui
         WindowModal::onOpen ();
         updateClasses();
         updateStats();
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mClassList);
     }
 
 
