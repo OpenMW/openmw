@@ -14,8 +14,6 @@
 #include <osg/Vec4f>
 #include <osg/Quat>
 
-#include <iostream>
-
 #include "niftypes.hpp"
 
 namespace Nif
