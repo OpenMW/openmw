@@ -49,8 +49,7 @@ namespace MWWorld
                 MWRender::RenderingManager* rendering, MWPhysics::PhysicsSystem* physics);
 
         /// If caster is an actor, the actor's facing orientation is used. Otherwise fallbackDirection is used.
-        void launchMagicBolt (const std::string &spellId, bool stack, const ESM::EffectList& effects,
-                              const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection);
+        void launchMagicBolt (const std::string &spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection);
 
         void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
                                        const osg::Vec3f& pos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength);
@@ -69,6 +68,7 @@ namespace MWWorld
         Resource::ResourceSystem* mResourceSystem;
         MWRender::RenderingManager* mRendering;
         MWPhysics::PhysicsSystem* mPhysics;
+        float mCleanupTimer;
 
         struct State
         {
@@ -101,8 +101,6 @@ namespace MWWorld
 
             float mSpeed;
 
-            bool mStack;
-
             std::vector<MWBase::Sound*> mSounds;
             std::vector<std::string> mSoundIds;
         };
@@ -118,6 +116,10 @@ namespace MWWorld
 
         std::vector<MagicBoltState> mMagicBolts;
         std::vector<ProjectileState> mProjectiles;
+
+        void cleanupProjectile(ProjectileState& state);
+        void cleanupMagicBolt(MagicBoltState& state);
+        void periodicCleanup(float dt);
 
         void moveProjectiles(float dt);
         void moveMagicBolts(float dt);

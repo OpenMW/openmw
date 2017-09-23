@@ -1,6 +1,7 @@
 #include "projectilemanager.hpp"
 
 #include <iomanip>
+#include <iostream>
 
 #include <osg/PositionAttitudeTransform>
 
@@ -41,13 +42,29 @@
 
 namespace
 {
-    ESM::EffectList getMagicBoltData(std::vector<std::string>& projectileIDs, std::vector<std::string>& sounds, float& speed, std::string& texture, const ESM::EffectList& effects)
+    ESM::EffectList getMagicBoltData(std::vector<std::string>& projectileIDs, std::vector<std::string>& sounds, float& speed, std::string& texture, std::string& sourceName, const std::string& id)
     {
+        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const ESM::EffectList* effects;
+        if (const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(id)) // check if it's a spell
+        {
+            sourceName = spell->mName;
+            effects = &spell->mEffects;
+        }
+        else // check if it's an enchanted item
+        {
+            MWWorld::ManualRef ref(esmStore, id);
+            MWWorld::Ptr ptr = ref.getPtr();
+            const ESM::Enchantment* ench = esmStore.get<ESM::Enchantment>().find(ptr.getClass().getEnchantment(ptr));
+            sourceName = ptr.getClass().getName(ptr);
+            effects = &ench->mEffects;
+        }
+
         int count = 0;
         speed = 0.0f;
         ESM::EffectList projectileEffects;
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
-            iter!=effects.mList.end(); ++iter)
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects->mList.begin());
+            iter!=effects->mList.end(); ++iter)
         {
             const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 iter->mEffectID);
@@ -82,14 +99,14 @@ namespace
         if (projectileEffects.mList.size() == 1) 
         {
             const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                effects.mList.begin()->mEffectID);
+                effects->mList.begin()->mEffectID);
             texture = magicEffect->mParticle;
         }
         
         if (projectileEffects.mList.size() > 1) // insert a VFX_Multiple projectile if there are multiple projectile effects
         {
             std::ostringstream ID;
-            ID << "VFX_Multiple" << effects.mList.size();
+            ID << "VFX_Multiple" << effects->mList.size();
             std::vector<std::string>::iterator it;
             it = projectileIDs.begin();
             it = projectileIDs.insert(it, ID.str());
@@ -132,6 +149,7 @@ namespace MWWorld
         , mResourceSystem(resourceSystem)
         , mRendering(rendering)
         , mPhysics(physics)
+        , mCleanupTimer(0.0f)
     {
 
     }
@@ -235,8 +253,7 @@ namespace MWWorld
         state.mEffectAnimationTime->addTime(duration);
     }
 
-    void ProjectileManager::launchMagicBolt(const std::string &spellId, bool stack, const ESM::EffectList &effects, const Ptr &caster,
-                                             const std::string &sourceName, const osg::Vec3f& fallbackDirection)
+    void ProjectileManager::launchMagicBolt(const std::string &spellId, const Ptr &caster, const osg::Vec3f& fallbackDirection)
     {
         osg::Vec3f pos = caster.getRefData().getPosition().asVec3();
         if (caster.getClass().isActor())
@@ -257,18 +274,16 @@ namespace MWWorld
             orient.makeRotate(osg::Vec3f(0,1,0), osg::Vec3f(fallbackDirection));
 
         MagicBoltState state;
-        state.mSourceName = sourceName;
         state.mSpellId = spellId;
         state.mCasterHandle = caster;
         if (caster.getClass().isActor())
             state.mActorId = caster.getClass().getCreatureStats(caster).getActorId();
         else
             state.mActorId = -1;
-        state.mStack = stack;
 
         std::string texture = "";
 
-        state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, texture, effects);
+        state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, texture, state.mSourceName, state.mSpellId);
 
         // Non-projectile should have been removed by getMagicBoltData
         if (state.mEffects.mList.empty())
@@ -277,7 +292,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), state.mIdMagic.at(0));
         MWWorld::Ptr ptr = ref.getPtr();
 
-        osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(effects);
+        osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(state.mEffects);
         createModel(state, ptr.getClass().getModel(ptr), pos, orient, true, true, lightDiffuseColor, texture);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -312,8 +327,47 @@ namespace MWWorld
 
     void ProjectileManager::update(float dt)
     {
+        periodicCleanup(dt);
         moveProjectiles(dt);
         moveMagicBolts(dt);
+    }
+
+    void ProjectileManager::periodicCleanup(float dt)
+    {
+        mCleanupTimer -= dt;
+        if (mCleanupTimer <= 0.0f)
+        {
+            mCleanupTimer = 2.0f;
+
+            auto isCleanable = [](const ProjectileManager::State& state) -> bool
+            {
+                const float farawayThreshold = 72000.0f;
+                osg::Vec3 playerPos = MWMechanics::getPlayer().getRefData().getPosition().asVec3();
+                return (state.mNode->getPosition() - playerPos).length2() >= farawayThreshold*farawayThreshold;
+            };
+
+            for (std::vector<ProjectileState>::iterator it = mProjectiles.begin(); it != mProjectiles.end();)
+            {
+                if (isCleanable(*it))
+                {
+                    cleanupProjectile(*it);
+                    it = mProjectiles.erase(it);
+                }
+                else
+                    ++it;
+            }
+
+            for (std::vector<MagicBoltState>::iterator it = mMagicBolts.begin(); it != mMagicBolts.end();)
+            {
+                if (isCleanable(*it))
+                {
+                    cleanupMagicBolt(*it);
+                    it = mMagicBolts.erase(it);
+                }
+                else
+                    ++it;
+            }
+        }
     }
 
     void ProjectileManager::moveMagicBolts(float duration)
@@ -364,7 +418,7 @@ namespace MWWorld
                     cast.mHitPosition = pos;
                     cast.mId = it->mSpellId;
                     cast.mSourceName = it->mSourceName;
-                    cast.mStack = it->mStack;
+                    cast.mStack = false;
                     cast.inflict(result.mHitObject, caster, it->mEffects, ESM::RT_Target, false, true);
                 }
             }
@@ -454,20 +508,30 @@ namespace MWWorld
         }
     }
 
+    void ProjectileManager::cleanupProjectile(ProjectileManager::ProjectileState& state)
+    {
+        mParent->removeChild(state.mNode);
+    }
+
+    void ProjectileManager::cleanupMagicBolt(ProjectileManager::MagicBoltState& state)
+    {
+        mParent->removeChild(state.mNode);
+        for (size_t soundIter = 0; soundIter != state.mSounds.size(); soundIter++)
+        {
+            MWBase::Environment::get().getSoundManager()->stopSound(state.mSounds.at(soundIter));
+        }
+    }
+
     void ProjectileManager::clear()
     {
         for (std::vector<ProjectileState>::iterator it = mProjectiles.begin(); it != mProjectiles.end(); ++it)
         {
-            mParent->removeChild(it->mNode);
+            cleanupProjectile(*it);
         }
         mProjectiles.clear();
         for (std::vector<MagicBoltState>::iterator it = mMagicBolts.begin(); it != mMagicBolts.end(); ++it)
         {
-            mParent->removeChild(it->mNode);
-            for (size_t soundIter = 0; soundIter != it->mSounds.size(); soundIter++)
-            {
-                MWBase::Environment::get().getSoundManager()->stopSound(it->mSounds.at(soundIter));
-            }
+            cleanupMagicBolt(*it);
         }
         mMagicBolts.clear();
     }
@@ -504,11 +568,7 @@ namespace MWWorld
             state.mActorId = it->mActorId;
 
             state.mSpellId = it->mSpellId;
-            state.mEffects = it->mEffects;
-            state.mSound = it->mSoundIds.at(0);
-            state.mSourceName = it->mSourceName;
             state.mSpeed = it->mSpeed;
-            state.mStack = it->mStack;
 
             state.save(writer);
 
@@ -553,13 +613,21 @@ namespace MWWorld
             esm.load(reader);
 
             MagicBoltState state;
-            state.mSourceName = esm.mSourceName;
             state.mIdMagic.push_back(esm.mId);
             state.mSpellId = esm.mSpellId;
             state.mActorId = esm.mActorId;
-            state.mStack = esm.mStack;
             std::string texture = "";
-            state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, texture, esm.mEffects);
+
+            try
+            {
+                state.mEffects = getMagicBoltData(state.mIdMagic, state.mSoundIds, state.mSpeed, texture, state.mSourceName, state.mSpellId);
+            }
+            catch(...)
+            {
+                std::cerr << "Warning: Failed to recreate magic projectile from saved data (id \"" << state.mSpellId << "\" no longer exists?)" << std::endl;
+                return true;
+            }
+
             state.mSpeed = esm.mSpeed; // speed is derived from non-projectile effects as well as
                                        // projectile effects, so we can't calculate it from the save
                                        // file's effect list, which is already trimmed of non-projectile
@@ -577,7 +645,7 @@ namespace MWWorld
                 return true;
             }
 
-            osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(esm.mEffects);
+            osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(state.mEffects);
             createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true, true, lightDiffuseColor, texture);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
