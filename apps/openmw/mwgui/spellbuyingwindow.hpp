@@ -29,6 +29,7 @@ namespace MWGui
             void setPtr(const MWWorld::Ptr& actor, int startOffset);
 
             void onFrame(float dt) { checkReferenceAvailable(); }
+            void clear() { resetReference(); }
 
             void onResChange(int, int) { center(); }
 

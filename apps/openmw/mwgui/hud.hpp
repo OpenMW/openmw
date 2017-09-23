@@ -60,6 +60,8 @@ namespace MWGui
         void setEnemy(const MWWorld::Ptr& enemy);
         void resetEnemy();
 
+        void clear() { resetEnemy(); }
+
     private:
         MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth, *mDrowning;
         MyGUI::Widget* mHealthFrame;

@@ -47,6 +47,7 @@ namespace MWGui
             void setFont(const std::string &fntName);
 
             void onResChange(int width, int height);
+            void clear() { resetReference(); }
 
             // Print a message to the console, in specified color.
             void print(const std::string &msg, const std::string& color = "#FFFFFF");

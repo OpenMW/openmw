@@ -151,6 +151,7 @@ namespace MWGui
         SpellCreationDialog();
 
         virtual void onOpen();
+        void clear() { resetReference(); }
 
         void onFrame(float dt) { checkReferenceAvailable(); }
 

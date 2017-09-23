@@ -45,6 +45,9 @@ namespace MWGui
 
         void center();
 
+        /// Clear any state specific to the running game
+        virtual void clear() {}
+
         /// Called when GUI viewport changes size
         virtual void onResChange(int width, int height) {}
     };

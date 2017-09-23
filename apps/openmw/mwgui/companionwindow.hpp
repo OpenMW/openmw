@@ -24,6 +24,7 @@ namespace MWGui
 
         void setPtr(const MWWorld::Ptr& npc);
         void onFrame (float dt);
+        void clear() { resetReference(); }
 
     private:
         ItemView* mItemView;

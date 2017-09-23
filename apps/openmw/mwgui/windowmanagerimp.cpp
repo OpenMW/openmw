@@ -514,10 +514,6 @@ namespace MWGui
 
     void WindowManager::setNewGame(bool newgame)
     {
-        // This method will always be called after loading a savegame or starting a new game
-        // Reset enemy, it could be a dangling pointer from a previous game
-        mHud->resetEnemy();
-
         if (newgame)
         {
             disallowAll();
@@ -1596,36 +1592,26 @@ namespace MWGui
 
     void WindowManager::clear()
     {
+        for (WindowBase* window : mWindows)
+            window->clear();
+
         if (mLocalMapRender)
             mLocalMapRender->clear();
 
-        mMap->clear();
-        mQuickKeysMenu->clear();
         mMessageBoxManager->clear();
-
-        mTrainingWindow->resetReference();
-        mDialogueWindow->resetReference();
-        mTradeWindow->resetReference();
-        mSpellBuyingWindow->resetReference();
-        mSpellCreationDialog->resetReference();
-        mEnchantingDialog->resetReference();
-        mContainerWindow->resetReference();
-        mCompanionWindow->resetReference();
-        mConsole->resetReference();
 
         mToolTips->setFocusObject(MWWorld::ConstPtr());
 
-        mInventoryWindow->clear();
-
         mSelectedSpell.clear();
-
         mCustomMarkers.clear();
 
         mForceHidden = GW_None;
 
         setWerewolfOverlay(false);
 
-        mGuiModes.clear();
+        while (!mGuiModes.empty())
+            popGuiMode();
+
         MWBase::Environment::get().getInputManager()->changeInputMode(false);
         updateVisible();
     }

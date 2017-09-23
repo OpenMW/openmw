@@ -262,6 +262,11 @@ namespace MWGui
         }
     }
 
+    void WaitDialog::clear()
+    {
+        mProgressBar.setVisible(false);
+    }
+
     void WaitDialog::stopWaiting ()
     {
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.2f);

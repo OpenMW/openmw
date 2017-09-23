@@ -35,6 +35,7 @@ namespace MWGui
 
         void setPtr(const MWWorld::Ptr& container);
         virtual void onClose();
+        void clear() { resetReference(); }
 
         void onFrame(float dt) { checkReferenceAvailable(); }
 

@@ -20,6 +20,8 @@ namespace MWGui
 
         void onFrame(float dt);
 
+        void clear() { resetReference(); }
+
     protected:
         virtual void onReferenceUnavailable ();
 

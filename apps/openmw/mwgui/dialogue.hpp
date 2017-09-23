@@ -118,6 +118,7 @@ namespace MWGui
 
         void goodbye();
         void onFrame(float dt);
+        void clear() { resetReference(); }
 
         // make sure to call these before setKeywords()
         void setServices(int services) { mServices = services; }
