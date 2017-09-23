@@ -398,7 +398,6 @@ namespace MWGui
 
         mWaitDialog = new WaitDialog();
         mGuiModeStates[GM_Rest] = GuiModeState(mWaitDialog);
-        mGuiModeStates[GM_RestBed] = GuiModeState(mWaitDialog);
 
         mSpellCreationDialog = new SpellCreationDialog();
         mGuiModeStates[GM_SpellCreation] = GuiModeState(mSpellCreationDialog);
@@ -661,10 +660,6 @@ namespace MWGui
         case GM_ClassGenerate:
         case GM_Review:
             mCharGen->spawnDialog(mode);
-            break;
-        case GM_RestBed:
-            // FIXME: use GM_Rest and push the 'bed' argument in some other way
-            mWaitDialog->bedActivated();
             break;
         default:
             break;
@@ -1700,7 +1695,7 @@ namespace MWGui
     {
         return !MyGUI::InputManager::getInstance().isModalAny()
                 // TODO: remove this, once we have properly serialized the state of open windows
-                && (!isGuiMode() || (mGuiModes.size() == 1 && (getMode() == GM_MainMenu || getMode() == GM_Rest || getMode() == GM_RestBed)));
+                && (!isGuiMode() || (mGuiModes.size() == 1 && (getMode() == GM_MainMenu || getMode() == GM_Rest)));
     }
 
     void WindowManager::playVideo(const std::string &name, bool allowSkipping)

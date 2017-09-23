@@ -57,7 +57,7 @@ namespace MWScript
 
                 if (bed.isEmpty() || !MWBase::Environment::get().getMechanicsManager()->sleepInBed(MWMechanics::getPlayer(),
                                                                              bed))
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_RestBed);
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Rest, bed);
             }
         };
 

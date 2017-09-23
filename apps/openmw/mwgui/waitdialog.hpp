@@ -27,13 +27,13 @@ namespace MWGui
     public:
         WaitDialog();
 
+        void setPtr(const MWWorld::Ptr &ptr);
+
         virtual void onOpen();
 
         virtual bool exit();
 
         void onFrame(float dt);
-
-        void bedActivated() { setCanRest(true); }
 
         bool getSleeping() { return mTimeAdvancer.isRunning() && mSleeping; }
         void wakeUp();

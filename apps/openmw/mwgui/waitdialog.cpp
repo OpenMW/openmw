@@ -79,6 +79,11 @@ namespace MWGui
         mProgressBar.setVisible (false);
     }
 
+    void WaitDialog::setPtr(const MWWorld::Ptr &ptr)
+    {
+        setCanRest(!ptr.isEmpty() || MWBase::Environment::get().getWorld ()->canRest () == 0);
+    }
+
     bool WaitDialog::exit()
     {
         return (!mProgressBar.isVisible()); //Only exit if not currently waiting
@@ -99,8 +104,6 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage1}");
             MWBase::Environment::get().getWindowManager()->popGuiMode ();
         }
-
-        setCanRest(canRest == 0);
 
         onHourSliderChangedPosition(mHourSlider, 0);
         mHourSlider->setScrollPosition (0);
@@ -176,7 +179,7 @@ namespace MWGui
 
     void WaitDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Rest);
     }
 
     void WaitDialog::onHourSliderChangedPosition(MyGUI::ScrollBar* sender, size_t position)
@@ -264,7 +267,6 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.2f);
         mProgressBar.setVisible (false);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Rest);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_RestBed);
         mTimeAdvancer.stop();
     }
 
