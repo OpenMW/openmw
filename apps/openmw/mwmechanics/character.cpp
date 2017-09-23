@@ -186,6 +186,8 @@ static const StateInfo sMovementList[] = {
 
     { CharState_TurnLeft, "turnleft" },
     { CharState_TurnRight, "turnright" },
+    { CharState_SwimTurnLeft, "swimturnleft" },
+    { CharState_SwimTurnRight, "swimturnright" },
 };
 static const StateInfo *sMovementListEnd = &sMovementList[sizeof(sMovementList)/sizeof(sMovementList[0])];
 
@@ -245,31 +247,60 @@ void CharacterController::refreshHitRecoilAnims()
     bool recovery = mPtr.getClass().getCreatureStats(mPtr).getHitRecovery();
     bool knockdown = mPtr.getClass().getCreatureStats(mPtr).getKnockedDown();
     bool block = mPtr.getClass().getCreatureStats(mPtr).getBlock();
+    bool isSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
     if(mHitState == CharState_None)
     {
         if ((mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() < 0
                 || mPtr.getClass().getCreatureStats(mPtr).getFatigue().getBase() == 0)
                 && mAnimation->hasAnimation("knockout"))
         {
-            mHitState = CharState_KnockOut;
-            mCurrentHit = "knockout";
+            if (isSwimming && mAnimation->hasAnimation("swimknockout"))
+            {
+                mHitState = CharState_SwimKnockOut;
+                mCurrentHit = "swimknockout";
+            }
+            else
+            {
+                mHitState = CharState_KnockOut;
+                mCurrentHit = "knockout";
+            }
+
             mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, false, 1, "start", "stop", 0.0f, ~0ul);
             mPtr.getClass().getCreatureStats(mPtr).setKnockedDown(true);
         }
         else if(knockdown && mAnimation->hasAnimation("knockdown"))
         {
-            mHitState = CharState_KnockDown;
-            mCurrentHit = "knockdown";
+            if (isSwimming && mAnimation->hasAnimation("swimknockdown"))
+            {
+                mHitState = CharState_SwimKnockDown;
+                mCurrentHit = "swimknockdown";
+            }
+            else
+            {
+                mHitState = CharState_KnockDown;
+                mCurrentHit = "knockdown";
+            }
+
             mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
         }
         else if (recovery)
         {
-            std::string anim = chooseRandomGroup("hit");
-            if (mAnimation->hasAnimation(anim))
+            std::string anim = isSwimming ? chooseRandomGroup("swimhit") : chooseRandomGroup("hit");
+            if (isSwimming && mAnimation->hasAnimation(anim))
             {
-                mHitState = CharState_Hit;
+                mHitState = CharState_SwimHit;
                 mCurrentHit = anim;
                 mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
+            }
+            else
+            {
+                anim = chooseRandomGroup("hit");
+                if (mAnimation->hasAnimation(anim))
+                {
+                    mHitState = CharState_Hit;
+                    mCurrentHit = anim;
+                    mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
+                }
             }
         }
         else if (block && mAnimation->hasAnimation("shield"))
@@ -282,7 +313,7 @@ void CharacterController::refreshHitRecoilAnims()
         }
 
         // Cancel upper body animations
-        if (mHitState == CharState_KnockDown || mHitState == CharState_KnockOut)
+        if (isKnockedOut() || isKnockedDown())
         {
             if (mUpperBodyState > UpperCharState_WeapEquiped)
             {
@@ -307,9 +338,9 @@ void CharacterController::refreshHitRecoilAnims()
             mPtr.getClass().getCreatureStats(mPtr).setBlock(false);
         mHitState = CharState_None;
     }
-    else if (mHitState == CharState_KnockOut && mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() > 0)
+    else if (isKnockedOut() && mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() > 0)
     {
-        mHitState = CharState_KnockDown;
+        mHitState = isSwimming ? CharState_SwimKnockDown : CharState_KnockDown;
         mAnimation->disable(mCurrentHit);
         mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "loop stop", "stop", 0.0f, 0);
     }
@@ -535,7 +566,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     // FIXME: if one of the below states is close to their last animation frame (i.e. will be disabled in the coming update),
     // the idle animation should be displayed
     if ((mUpperBodyState != UpperCharState_Nothing
-            || (mMovementState != CharState_None && mMovementState != CharState_TurnLeft && mMovementState != CharState_TurnRight)
+            || (mMovementState != CharState_None && !isTurning())
             || mHitState != CharState_None)
             && !mPtr.getClass().isBipedal(mPtr))
         idle = CharState_None;
@@ -621,6 +652,12 @@ void CharacterController::playDeath(float startpoint, CharacterState death)
     case CharState_SwimDeath:
         mCurrentDeath = "swimdeath";
         break;
+    case CharState_SwimDeathKnockDown:
+        mCurrentDeath = "swimdeathknockdown";
+        break;
+    case CharState_SwimDeathKnockOut:
+        mCurrentDeath = "swimdeathknockout";
+        break;
     case CharState_DeathKnockDown:
         mCurrentDeath = "deathknockdown";
         break;
@@ -674,7 +711,15 @@ void CharacterController::playRandomDeath(float startpoint)
         MWBase::Environment::get().getWorld()->useDeathCamera();
     }
 
-    if(MWBase::Environment::get().getWorld()->isSwimming(mPtr) && mAnimation->hasAnimation("swimdeath"))
+    if(mHitState == CharState_SwimKnockDown && mAnimation->hasAnimation("swimdeathknockdown"))
+    {
+        mDeathState = CharState_SwimDeathKnockDown;
+    }
+    else if(mHitState == CharState_SwimKnockOut && mAnimation->hasAnimation("swimdeathknockout"))
+    {
+        mDeathState = CharState_SwimDeathKnockOut;
+    }
+    else if(MWBase::Environment::get().getWorld()->isSwimming(mPtr) && mAnimation->hasAnimation("swimdeath"))
     {
         mDeathState = CharState_SwimDeath;
     }
@@ -876,16 +921,17 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
         mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
     else if(evt.compare(off, len, "hit") == 0)
     {
-        if (groupname == "attack1")
+        if (groupname == "attack1" || groupname == "swimattack1")
             mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
-        else if (groupname == "attack2")
+        else if (groupname == "attack2" || groupname == "swimattack2")
             mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
-        else if (groupname == "attack3")
+        else if (groupname == "attack3" || groupname == "swimattack3")
             mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
         else
             mPtr.getClass().hit(mPtr, mAttackStrength);
     }
-    else if (!groupname.empty() && groupname.compare(0, groupname.size()-1, "attack") == 0
+    else if (!groupname.empty()
+             && (groupname.compare(0, groupname.size()-1, "attack") == 0 || groupname.compare(0, groupname.size()-1, "swimattack") == 0)
              && evt.compare(off, len, "start") == 0)
     {
         std::multimap<float, std::string>::const_iterator hitKey = key;
@@ -905,11 +951,11 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
         }
         if (!hasHitKey)
         {
-            if (groupname == "attack1")
+            if (groupname == "attack1" || groupname == "swimattack1")
                 mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
-            else if (groupname == "attack2")
+            else if (groupname == "attack2" || groupname == "swimattack2")
                 mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
-            else if (groupname == "attack3")
+            else if (groupname == "attack3" || groupname == "swimattack3")
                 mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
         }
     }
@@ -1035,13 +1081,14 @@ bool CharacterController::updateCreatureState()
             }
             if (weapType != WeapType_Spell || !mAnimation->hasAnimation("spellcast")) // Not all creatures have a dedicated spellcast animation
             {
+                bool isSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
                 int roll = Misc::Rng::rollDice(3); // [0, 2]
                 if (roll == 0)
-                    mCurrentWeapon = "attack1";
+                    mCurrentWeapon = isSwimming && mAnimation->hasAnimation("swimattack1") ? "swimattack1" : "attack1";
                 else if (roll == 1)
-                    mCurrentWeapon = "attack2";
+                    mCurrentWeapon = isSwimming && mAnimation->hasAnimation("swimattack2") ? "swimattack2" : "attack2";
                 else
-                    mCurrentWeapon = "attack3";
+                    mCurrentWeapon = isSwimming && mAnimation->hasAnimation("swimattack3") ? "swimattack3" : "attack3";
             }
 
             if (!mCurrentWeapon.empty())
@@ -1121,8 +1168,8 @@ bool CharacterController::updateWeaponState()
     bool isStillWeapon = weaptype > WeapType_HandToHand && weaptype < WeapType_Spell &&
                             mWeaponType > WeapType_HandToHand && mWeaponType < WeapType_Spell;
 
-    if(weaptype != mWeaponType && mHitState != CharState_KnockDown && mHitState != CharState_KnockOut
-                                && mHitState != CharState_Hit)
+    if(weaptype != mWeaponType && !isKnockedOut() &&
+        !isKnockedDown() && !isRecovery())
     {
         forcestateupdate = true;
 
@@ -1355,13 +1402,13 @@ bool CharacterController::updateWeaponState()
         }
 
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
-        if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && mHitState != CharState_KnockDown)
+        if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && !isKnockedDown())
             mAttackStrength = complete;
     }
     else
     {
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
-        if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && mHitState != CharState_KnockDown)
+        if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && !isKnockedDown())
         {
             float attackStrength = complete;
             if (!mPtr.getClass().isNpc())
@@ -1399,7 +1446,7 @@ bool CharacterController::updateWeaponState()
             complete = 0.f;
             mUpperBodyState = UpperCharState_MaxAttackToMinHit;
         }
-        else if (mHitState == CharState_KnockDown)
+        else if (isKnockedDown())
         {
             if (mUpperBodyState > UpperCharState_WeapEquiped)
                 mUpperBodyState = UpperCharState_WeapEquiped;
@@ -1830,22 +1877,22 @@ void CharacterController::update(float duration)
             else if(rot.z() != 0.0f && !inwater && !sneak && !(mPtr == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson()))
             {
                 if(rot.z() > 0.0f)
-                    movestate = CharState_TurnRight;
+                    movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
                 else if(rot.z() < 0.0f)
-                    movestate = CharState_TurnLeft;
+                    movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
             }
         }
 
         mTurnAnimationThreshold -= duration;
-        if (movestate == CharState_TurnRight || movestate == CharState_TurnLeft)
+        if (isTurning())
             mTurnAnimationThreshold = 0.05f;
-        else if (movestate == CharState_None && (mMovementState == CharState_TurnRight || mMovementState == CharState_TurnLeft)
+        else if (movestate == CharState_None && isTurning()
                  && mTurnAnimationThreshold > 0)
         {
             movestate = mMovementState;
         }
 
-        if(movestate != CharState_None && movestate != CharState_TurnLeft && movestate != CharState_TurnRight)
+        if(!isTurning())
             clearAnimQueue();
 
         if(mAnimQueue.empty() || inwater || sneak)
@@ -1870,7 +1917,7 @@ void CharacterController::update(float duration)
         if (inJump)
             mMovementAnimationControlled = false;
 
-        if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
+        if (isTurning())
         {
             if (duration > 0)
                 mAnimation->adjustSpeedMult(mCurrentMovement, std::min(1.5f, std::abs(rot.z()) / duration / static_cast<float>(osg::PI)));
@@ -1883,7 +1930,7 @@ void CharacterController::update(float duration)
 
         if (!mSkipAnim)
         {
-            if(mHitState != CharState_KnockDown && mHitState != CharState_KnockOut)
+            if(!isKnockedDown() && !isKnockedOut())
             {
                 if (rot != osg::Vec3f())
                     world->rotateObject(mPtr, rot.x(), rot.y(), rot.z(), true);
@@ -2220,9 +2267,30 @@ bool CharacterController::isReadyToBlock() const
     return updateCarriedLeftVisible(mWeaponType);
 }
 
+bool CharacterController::isKnockedDown() const
+{
+    return mHitState == CharState_KnockDown ||
+            mHitState == CharState_SwimKnockDown;
+}
+
 bool CharacterController::isKnockedOut() const
 {
-    return mHitState == CharState_KnockOut;
+    return mHitState == CharState_KnockOut ||
+            mHitState == CharState_SwimKnockOut;
+}
+
+bool CharacterController::isTurning() const
+{
+    return mMovementState == CharState_TurnLeft ||
+            mMovementState == CharState_TurnRight ||
+            mMovementState == CharState_SwimTurnLeft ||
+            mMovementState == CharState_SwimTurnRight;
+}
+
+bool CharacterController::isRecovery() const
+{
+    return mHitState == CharState_Hit ||
+            mHitState == CharState_SwimHit;
 }
 
 bool CharacterController::isAttackingOrSpell() const

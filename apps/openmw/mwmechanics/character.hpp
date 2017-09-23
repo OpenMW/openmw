@@ -88,6 +88,8 @@ enum CharacterState {
 
     CharState_TurnLeft,
     CharState_TurnRight,
+    CharState_SwimTurnLeft,
+    CharState_SwimTurnRight,
 
     CharState_Jump,
 
@@ -97,12 +99,17 @@ enum CharacterState {
     CharState_Death4,
     CharState_Death5,
     CharState_SwimDeath,
+    CharState_SwimDeathKnockDown,
+    CharState_SwimDeathKnockOut,
     CharState_DeathKnockDown,
     CharState_DeathKnockOut,
 
     CharState_Hit,
+    CharState_SwimHit,
     CharState_KnockDown,
     CharState_KnockOut,
+    CharState_SwimKnockDown,
+    CharState_SwimKnockOut,
     CharState_Block
 };
 
@@ -265,9 +272,12 @@ public:
     
     bool isAttackPrepairing() const;
     bool isReadyToBlock() const;
+    bool isKnockedDown() const;
     bool isKnockedOut() const;
+    bool isRecovery() const;
     bool isSneaking() const;
     bool isRunning() const;
+    bool isTurning() const;
     bool isAttackingOrSpell() const;
 
     void setAttackingOrSpell(bool attackingOrSpell);
