@@ -2537,4 +2537,11 @@ namespace CSMWorld
     };
 }
 
+// This is required to access the type as a QVariant.
+Q_DECLARE_METATYPE(CSMWorld::LandMapLodColumn::DataType)
+//Q_DECLARE_METATYPE(CSMWorld::LandNormalsColumn::DataType) // Same as LandMapLodColumn::DataType
+Q_DECLARE_METATYPE(CSMWorld::LandHeightsColumn::DataType)
+Q_DECLARE_METATYPE(CSMWorld::LandColoursColumn::DataType)
+Q_DECLARE_METATYPE(CSMWorld::LandTexturesColumn::DataType)
+
 #endif
