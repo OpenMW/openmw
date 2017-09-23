@@ -332,7 +332,7 @@ Qt::ItemFlags CSMWorld::LandTextureIdTable::flags(const QModelIndex& index) cons
     Qt::ItemFlags flags = IdTable::flags(index);
 
     if (!idCollection()->getRecord(index.row()).isModified())
-        flags &= ~Qt::ItemIsEditable;
+        flags &= ~Qt::ItemIsEnabled;
 
     return flags;
 }
