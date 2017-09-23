@@ -209,7 +209,7 @@ namespace MWScript
         public:
             virtual void execute(Interpreter::Runtime &runtime)
             {
-                bool state = MWBase::Environment::get().getWindowManager()->toggleGui();
+                bool state = MWBase::Environment::get().getWindowManager()->toggleHud();
                 runtime.getContext().report(state ? "GUI -> On" : "GUI -> Off");
 
                 if (!state)

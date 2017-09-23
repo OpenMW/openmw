@@ -229,7 +229,7 @@ namespace MWBase
 
             virtual void showCrosshair(bool show) = 0;
             virtual bool getSubtitlesEnabled() = 0;
-            virtual bool toggleGui() = 0;
+            virtual bool toggleHud() = 0;
 
             virtual void disallowMouse() = 0;
             virtual void allowMouse() = 0;

@@ -190,7 +190,6 @@ namespace MWGui
       , mHitFaderEnabled(Settings::Manager::getBool ("hit fader", "GUI"))
       , mWerewolfOverlayEnabled(Settings::Manager::getBool ("werewolf overlay", "GUI"))
       , mHudEnabled(true)
-      , mGuiEnabled(true)
       , mCursorVisible(true)
       , mPlayerName()
       , mPlayerRaceId()
@@ -450,7 +449,7 @@ namespace MWGui
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"InputBlocker");
 
-        mHud->setVisible(mHudEnabled);
+        mHud->setVisible(true);
 
         mCharGen = new CharacterCreation(mViewer->getSceneData()->asGroup(), mResourceSystem);
 
@@ -598,8 +597,8 @@ namespace MWGui
 
         bool loading = (getMode() == GM_Loading || getMode() == GM_LoadingWallpaper);
 
-        mHud->setVisible(mHudEnabled && mGuiEnabled && !loading);
-        mToolTips->setVisible(mGuiEnabled && !loading);
+        mHud->setVisible(mHudEnabled && !loading);
+        mToolTips->setVisible(mHudEnabled && !loading);
 
         bool gameMode = !isGuiMode();
 
@@ -1477,11 +1476,11 @@ namespace MWGui
         return mSubtitlesEnabled;
     }
 
-    bool WindowManager::toggleGui()
+    bool WindowManager::toggleHud()
     {
-        mGuiEnabled = !mGuiEnabled;
+        mHudEnabled = !mHudEnabled;
         updateVisible();
-        return mGuiEnabled;
+        return mHudEnabled;
     }
 
     bool WindowManager::getRestEnabled()

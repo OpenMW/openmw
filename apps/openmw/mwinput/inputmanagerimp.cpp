@@ -289,7 +289,7 @@ namespace MWInput
                 showQuickKeysMenu();
                 break;
             case A_ToggleHUD:
-                MWBase::Environment::get().getWindowManager()->toggleGui();
+                MWBase::Environment::get().getWindowManager()->toggleHud();
                 break;
             case A_ToggleDebug:
                 MWBase::Environment::get().getWindowManager()->toggleDebugWindow();
