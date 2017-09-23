@@ -925,7 +925,7 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
             mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
         else if (groupname == "attack2" || groupname == "swimattack2")
             mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
-        else if (groupname == "attack3" || groupname == "swimattack1")
+        else if (groupname == "attack3" || groupname == "swimattack3")
             mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
         else
             mPtr.getClass().hit(mPtr, mAttackStrength);
