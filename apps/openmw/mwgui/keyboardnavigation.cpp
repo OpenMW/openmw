@@ -3,6 +3,7 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_WidgetManager.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_Gui.h>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -13,6 +14,9 @@ namespace MWGui
 /// Recursively get all child widgets that accept keyboard input
 void getKeyFocusWidgets(MyGUI::Widget* parent, std::vector<MyGUI::Widget*>& results)
 {
+    if (!parent->getVisible() || !parent->getEnabled())
+        return;
+
     MyGUI::EnumeratorWidgetPtr enumerator = parent->getEnumerator();
     while (enumerator.next())
     {
@@ -101,6 +105,22 @@ bool KeyboardNavigation::injectKeyPress(MyGUI::KeyCode key, unsigned int text)
 bool KeyboardNavigation::switchFocus(int direction, bool wrap)
 {
     MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+
+    if (!focus && (direction == D_Next || direction == D_Prev))
+    {
+        // if nothing is selected, select the first widget
+        MyGUI::VectorWidgetPtr keyFocusList;
+        MyGUI::EnumeratorWidgetPtr enumerator = MyGUI::Gui::getInstance().getEnumerator();
+        while (enumerator.next())
+            getKeyFocusWidgets(enumerator.current(), keyFocusList);
+
+        if (!keyFocusList.empty())
+        {
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(keyFocusList[0]);
+            return true;
+        }
+    }
+
     if (!focus)
         return false;
 
