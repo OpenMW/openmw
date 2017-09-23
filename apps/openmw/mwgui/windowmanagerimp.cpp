@@ -141,37 +141,24 @@ namespace MWGui
       , mHud(NULL)
       , mMap(NULL)
       , mLocalMapRender(NULL)
-      , mMenu(NULL)
       , mToolTips(NULL)
       , mStatsWindow(NULL)
       , mMessageBoxManager(NULL)
       , mConsole(NULL)
       , mDialogueWindow(NULL)
-      , mContainerWindow(NULL)
       , mDragAndDrop(NULL)
       , mInventoryWindow(NULL)
       , mScrollWindow(NULL)
       , mBookWindow(NULL)
       , mCountDialog(NULL)
       , mTradeWindow(NULL)
-      , mSpellBuyingWindow(NULL)
-      , mTravelWindow(NULL)
       , mSettingsWindow(NULL)
       , mConfirmationDialog(NULL)
-      , mAlchemyWindow(NULL)
       , mSpellWindow(NULL)
       , mQuickKeysMenu(NULL)
       , mLoadingScreen(NULL)
-      , mLevelupDialog(NULL)
       , mWaitDialog(NULL)
-      , mSpellCreationDialog(NULL)
-      , mEnchantingDialog(NULL)
-      , mTrainingWindow(NULL)
-      , mMerchantRepair(NULL)
       , mSoulgemDialog(NULL)
-      , mRepair(NULL)
-      , mRecharge(NULL)
-      , mCompanionWindow(NULL)
       , mVideoBackground(NULL)
       , mVideoWidget(NULL)
       , mWerewolfFader(NULL)
@@ -319,13 +306,13 @@ namespace MWGui
 
         mDragAndDrop = new DragAndDrop();
 
-        mRecharge = new Recharge();
-        mGuiModeStates[GM_Recharge] = GuiModeState(mRecharge);
-        mWindows.push_back(mRecharge);
+        Recharge* recharge = new Recharge();
+        mGuiModeStates[GM_Recharge] = GuiModeState(recharge);
+        mWindows.push_back(recharge);
 
-        mMenu = new MainMenu(w, h, mResourceSystem->getVFS(), mVersionDescription);
-        mGuiModeStates[GM_MainMenu] = GuiModeState(mMenu);
-        mWindows.push_back(mMenu);
+        MainMenu* menu = new MainMenu(w, h, mResourceSystem->getVFS(), mVersionDescription);
+        mGuiModeStates[GM_MainMenu] = GuiModeState(menu);
+        mWindows.push_back(menu);
 
         mLocalMapRender = new MWRender::LocalMap(mViewer->getSceneData()->asGroup());
         mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender, mWorkQueue);
@@ -367,23 +354,23 @@ namespace MWGui
 
         mMessageBoxManager = new MessageBoxManager(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
 
-        mSpellBuyingWindow = new SpellBuyingWindow();
-        mWindows.push_back(mSpellBuyingWindow);
-        mGuiModeStates[GM_SpellBuying] = GuiModeState(mSpellBuyingWindow);
+        SpellBuyingWindow* spellBuyingWindow = new SpellBuyingWindow();
+        mWindows.push_back(spellBuyingWindow);
+        mGuiModeStates[GM_SpellBuying] = GuiModeState(spellBuyingWindow);
 
-        mTravelWindow = new TravelWindow();
-        mWindows.push_back(mTravelWindow);
-        mGuiModeStates[GM_Travel] = GuiModeState(mTravelWindow);
+        TravelWindow* travelWindow = new TravelWindow();
+        mWindows.push_back(travelWindow);
+        mGuiModeStates[GM_Travel] = GuiModeState(travelWindow);
 
         mDialogueWindow = new DialogueWindow();
         mWindows.push_back(mDialogueWindow);
         trackWindow(mDialogueWindow, "dialogue");
         mGuiModeStates[GM_Dialogue] = GuiModeState(mDialogueWindow);
 
-        mContainerWindow = new ContainerWindow(mDragAndDrop);
-        mWindows.push_back(mContainerWindow);
-        trackWindow(mContainerWindow, "container");
-        mGuiModeStates[GM_Container] = GuiModeState({mContainerWindow, mInventoryWindow});
+        ContainerWindow* containerWindow = new ContainerWindow(mDragAndDrop);
+        mWindows.push_back(containerWindow);
+        trackWindow(containerWindow, "container");
+        mGuiModeStates[GM_Container] = GuiModeState({containerWindow, mInventoryWindow});
 
         mHud = new HUD(mCustomMarkers, mDragAndDrop, mLocalMapRender);
         mWindows.push_back(mHud);
@@ -412,49 +399,49 @@ namespace MWGui
         mConfirmationDialog = new ConfirmationDialog();
         mWindows.push_back(mConfirmationDialog);
 
-        mAlchemyWindow = new AlchemyWindow();
-        mWindows.push_back(mAlchemyWindow);
-        trackWindow(mAlchemyWindow, "alchemy");
-        mGuiModeStates[GM_Alchemy] = GuiModeState(mAlchemyWindow);
+        AlchemyWindow* alchemyWindow = new AlchemyWindow();
+        mWindows.push_back(alchemyWindow);
+        trackWindow(alchemyWindow, "alchemy");
+        mGuiModeStates[GM_Alchemy] = GuiModeState(alchemyWindow);
 
         mQuickKeysMenu = new QuickKeysMenu();
         mWindows.push_back(mQuickKeysMenu);
         mGuiModeStates[GM_QuickKeysMenu] = GuiModeState(mQuickKeysMenu);
 
-        mLevelupDialog = new LevelupDialog();
-        mWindows.push_back(mLevelupDialog);
-        mGuiModeStates[GM_Levelup] = GuiModeState(mLevelupDialog);
+        LevelupDialog* levelupDialog = new LevelupDialog();
+        mWindows.push_back(levelupDialog);
+        mGuiModeStates[GM_Levelup] = GuiModeState(levelupDialog);
 
         mWaitDialog = new WaitDialog();
         mWindows.push_back(mWaitDialog);
         mGuiModeStates[GM_Rest] = GuiModeState(mWaitDialog);
 
-        mSpellCreationDialog = new SpellCreationDialog();
-        mWindows.push_back(mSpellCreationDialog);
-        mGuiModeStates[GM_SpellCreation] = GuiModeState(mSpellCreationDialog);
+        SpellCreationDialog* spellCreationDialog = new SpellCreationDialog();
+        mWindows.push_back(spellCreationDialog);
+        mGuiModeStates[GM_SpellCreation] = GuiModeState(spellCreationDialog);
 
-        mEnchantingDialog = new EnchantingDialog();
-        mWindows.push_back(mEnchantingDialog);
-        mGuiModeStates[GM_Enchanting] = GuiModeState(mEnchantingDialog);
+        EnchantingDialog* enchantingDialog = new EnchantingDialog();
+        mWindows.push_back(enchantingDialog);
+        mGuiModeStates[GM_Enchanting] = GuiModeState(enchantingDialog);
 
-        mTrainingWindow = new TrainingWindow();
-        mWindows.push_back(mTrainingWindow);
-        mGuiModeStates[GM_Training] = GuiModeState(mTrainingWindow);
+        TrainingWindow* trainingWindow = new TrainingWindow();
+        mWindows.push_back(trainingWindow);
+        mGuiModeStates[GM_Training] = GuiModeState(trainingWindow);
 
-        mMerchantRepair = new MerchantRepair();
-        mWindows.push_back(mMerchantRepair);
-        mGuiModeStates[GM_MerchantRepair] = GuiModeState(mMerchantRepair);
+        MerchantRepair* merchantRepair = new MerchantRepair();
+        mWindows.push_back(merchantRepair);
+        mGuiModeStates[GM_MerchantRepair] = GuiModeState(merchantRepair);
 
-        mRepair = new Repair();
-        mWindows.push_back(mRepair);
-        mGuiModeStates[GM_Repair] = GuiModeState(mRepair);
+        Repair* repair = new Repair();
+        mWindows.push_back(repair);
+        mGuiModeStates[GM_Repair] = GuiModeState(repair);
 
         mSoulgemDialog = new SoulgemDialog(mMessageBoxManager);
 
-        mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
-        mWindows.push_back(mCompanionWindow);
-        trackWindow(mCompanionWindow, "companion");
-        mGuiModeStates[GM_Companion] = GuiModeState({mInventoryWindow, mCompanionWindow});
+        CompanionWindow* companionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
+        mWindows.push_back(companionWindow);
+        trackWindow(companionWindow, "companion");
+        mGuiModeStates[GM_Companion] = GuiModeState({mInventoryWindow, companionWindow});
 
         mJailScreen = new JailScreen();
         mWindows.push_back(mJailScreen);
