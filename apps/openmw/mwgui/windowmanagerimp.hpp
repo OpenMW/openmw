@@ -124,7 +124,7 @@ namespace MWGui
   class JailScreen;
   class KeyboardNavigation;
 
-  class WindowManager : public MWBase::WindowManager, MyGUI::IUnlinkWidget
+  class WindowManager : public MWBase::WindowManager
   {
   public:
     typedef std::pair<std::string, int> Faction;
@@ -141,8 +141,6 @@ namespace MWGui
     void initUI();
 
     virtual Loading::Listener* getLoadingScreen();
-
-    void _unlinkWidget(MyGUI::Widget* widget);
 
     /// @note This method will block until the video finishes playing
     /// (and will continually update the window while doing so)
@@ -405,8 +403,6 @@ namespace MWGui
     std::string mSelectedSpell;
     MWWorld::Ptr mSelectedEnchantItem;
     MWWorld::Ptr mSelectedWeapon;
-
-    MyGUI::Widget* mSaveKeyFocus;
 
     std::stack<WindowModal*> mCurrentModals;
 

@@ -28,10 +28,35 @@ void getKeyFocusWidgets(MyGUI::Widget* parent, std::vector<MyGUI::Widget*>& resu
 
 KeyboardNavigation::KeyboardNavigation()
 {
+    MyGUI::WidgetManager::getInstance().registerUnlinker(this);
 }
 
 KeyboardNavigation::~KeyboardNavigation()
 {
+    MyGUI::WidgetManager::getInstance().unregisterUnlinker(this);
+}
+
+void KeyboardNavigation::saveFocus(int mode)
+{
+    mKeyFocus[mode] = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+}
+
+void KeyboardNavigation::restoreFocus(int mode)
+{
+    std::map<int, MyGUI::Widget*>::const_iterator found = mKeyFocus.find(mode);
+    if (found != mKeyFocus.end())
+    {
+        MyGUI::Widget* w = found->second;
+        if (w && w->getVisible() && w->getEnabled())
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(found->second);
+    }
+}
+
+void KeyboardNavigation::_unlinkWidget(MyGUI::Widget *widget)
+{
+    for (std::pair<const int, MyGUI::Widget*>& w : mKeyFocus)
+        if (w.second == widget)
+            w.second = nullptr;
 }
 
 bool isButtonFocus()

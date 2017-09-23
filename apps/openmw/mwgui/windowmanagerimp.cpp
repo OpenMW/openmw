@@ -137,7 +137,6 @@ namespace MWGui
       , mWorkQueue(workQueue)
       , mViewer(viewer)
       , mConsoleOnlyScripts(consoleOnlyScripts)
-      , mSaveKeyFocus(NULL)
       , mCurrentModals()
       , mHud(NULL)
       , mMap(NULL)
@@ -260,8 +259,6 @@ namespace MWGui
         MyGUI::PointerManager::getInstance().eventChangeMousePointer += MyGUI::newDelegate(this, &WindowManager::onCursorChange);
 
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
-
-        MyGUI::WidgetManager::getInstance().registerUnlinker(this);
 
         // Create all cursors in advance
         createCursors();
@@ -504,8 +501,6 @@ namespace MWGui
         MyGUI::InputManager::getInstance().eventChangeKeyFocus.clear();
         MyGUI::ClipboardManager::getInstance().eventClipboardChanged.clear();
         MyGUI::ClipboardManager::getInstance().eventClipboardRequested.clear();
-
-        MyGUI::WidgetManager::getInstance().unregisterUnlinker(this);
 
         delete mConsole;
         delete mMessageBoxManager;
@@ -1171,8 +1166,10 @@ namespace MWGui
             }
 
             if (!mGuiModes.empty())
+            {
+                mKeyboardNavigation->saveFocus(mGuiModes.back());
                 mGuiModeStates[mGuiModes.back()].update(false);
-
+            }
             mGuiModes.push_back(mode);
 
             mGuiModeStates[mode].update(true);
@@ -1180,6 +1177,8 @@ namespace MWGui
         }
         for (WindowBase* window : mGuiModeStates[mode].mWindows)
             window->setPtr(arg);
+
+        mKeyboardNavigation->restoreFocus(mode);
 
         bool gameMode = !isGuiMode();
         MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
@@ -1197,6 +1196,7 @@ namespace MWGui
         if (!mGuiModes.empty())
         {
             const GuiMode mode = mGuiModes.back();
+            mKeyboardNavigation->saveFocus(mode);
             mGuiModes.pop_back();
             mGuiModeStates[mode].update(false);
             if (!noSound)
@@ -1204,7 +1204,11 @@ namespace MWGui
         }
 
         if (!mGuiModes.empty())
-            mGuiModeStates[mGuiModes.back()].update(true);
+        {
+            const GuiMode mode = mGuiModes.back();
+            mGuiModeStates[mode].update(true);
+            mKeyboardNavigation->restoreFocus(mode);
+        }
 
         bool gameMode = !isGuiMode();
         MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
@@ -1564,12 +1568,6 @@ namespace MWGui
         return mLoadingScreen;
     }
 
-    void WindowManager::_unlinkWidget(MyGUI::Widget *widget)
-    {
-        if (widget == mSaveKeyFocus)
-            mSaveKeyFocus = NULL;
-    }
-
     bool WindowManager::getCursorVisible()
     {
         return mCursorVisible;
@@ -1789,7 +1787,7 @@ namespace MWGui
     void WindowManager::addCurrentModal(WindowModal *input)
     {
         if (mCurrentModals.empty())
-            mSaveKeyFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+            mKeyboardNavigation->saveFocus(getMode());
 
         mCurrentModals.push(input);
     }
@@ -1803,7 +1801,7 @@ namespace MWGui
                 mCurrentModals.pop();
 
         if (mCurrentModals.empty())
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(mSaveKeyFocus);
+            mKeyboardNavigation->restoreFocus(getMode());
     }
 
     void WindowManager::onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)
