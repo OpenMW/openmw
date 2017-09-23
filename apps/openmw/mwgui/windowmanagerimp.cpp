@@ -613,6 +613,8 @@ namespace MWGui
         setSpellVisibility((mAllowed & GW_Magic) && (!mSpellWindow->pinned() || (mForceHidden & GW_Magic)));
         setHMSVisibility((mAllowed & GW_Stats) && (!mStatsWindow->pinned() || (mForceHidden & GW_Stats)));
 
+        mInventoryWindow->setGuiMode(getMode());
+
         // If in game mode (or interactive messagebox), show the pinned windows
         if (mGuiModes.empty())
         {
@@ -622,11 +624,17 @@ namespace MWGui
             mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic) && (mAllowed & GW_Magic));
             return;
         }
+        else if (getMode() != GM_Inventory)
+        {
+            mMap->setVisible(false);
+            mStatsWindow->setVisible(false);
+            mSpellWindow->setVisible(false);
+            mInventoryWindow->setVisible(getMode() == GM_Container || getMode() == GM_Barter);
+        }
 
         GuiMode mode = mGuiModes.back();
 
         mInventoryWindow->setTrading(mode == GM_Barter);
-        mInventoryWindow->setGuiMode(mode);
 
         // For the inventory mode, compute the effective set of windows to show.
         // This is controlled both by what windows the
