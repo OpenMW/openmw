@@ -495,8 +495,6 @@ namespace MWGui
 
         // Set up visibility
         updateVisible();
-
-        MWBase::Environment::get().getInputManager()->changeInputMode(false);
     }
 
     void WindowManager::setNewGame(bool newgame)
@@ -572,6 +570,8 @@ namespace MWGui
         mToolTips->setVisible(mHudEnabled && !loading);
 
         bool gameMode = !isGuiMode();
+
+        MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
 
         mInputBlocker->setVisible (gameMode);
 
@@ -761,7 +761,6 @@ namespace MWGui
     void WindowManager::interactiveMessageBox(const std::string &message, const std::vector<std::string> &buttons, bool block)
     {
         mMessageBoxManager->createInteractiveMessageBox(message, buttons);
-        MWBase::Environment::get().getInputManager()->changeInputMode(isGuiMode());
         updateVisible();
 
         if (block)
@@ -1143,9 +1142,6 @@ namespace MWGui
 
         mKeyboardNavigation->restoreFocus(mode);
 
-        bool gameMode = !isGuiMode();
-        MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
-
         updateVisible();
     }
 
@@ -1173,9 +1169,6 @@ namespace MWGui
             mKeyboardNavigation->restoreFocus(mode);
         }
 
-        bool gameMode = !isGuiMode();
-        MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
-
         updateVisible();
     }
 
@@ -1195,9 +1188,6 @@ namespace MWGui
             else
                 ++it;
         }
-
-        bool gameMode = !isGuiMode();
-        MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
 
         updateVisible();
     }
@@ -1488,7 +1478,6 @@ namespace MWGui
     void WindowManager::showSoulgemDialog(MWWorld::Ptr item)
     {
         mSoulgemDialog->show(item);
-        MWBase::Environment::get().getInputManager()->changeInputMode(isGuiMode());
         updateVisible();
     }
 
@@ -1587,7 +1576,6 @@ namespace MWGui
         while (!mGuiModes.empty())
             popGuiMode();
 
-        MWBase::Environment::get().getInputManager()->changeInputMode(false);
         updateVisible();
     }
 
