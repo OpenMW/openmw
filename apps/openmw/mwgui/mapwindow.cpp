@@ -701,7 +701,7 @@ namespace MWGui
     void MapWindow::onNoteEditDelete()
     {
         ConfirmationDialog* confirmation = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-        confirmation->askForConfirmation("#{sDeleteNote}", "#{sYes}", "#{sNo}");
+        confirmation->askForConfirmation("#{sDeleteNote}");
         confirmation->eventCancelClicked.clear();
         confirmation->eventOkClicked.clear();
         confirmation->eventOkClicked += MyGUI::newDelegate(this, &MapWindow::onNoteEditDeleteConfirm);

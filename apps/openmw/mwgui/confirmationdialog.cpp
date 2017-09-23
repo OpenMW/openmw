@@ -19,14 +19,6 @@ namespace MWGui
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ConfirmationDialog::onOkButtonClicked);
     }
 
-    void ConfirmationDialog::askForConfirmation(const std::string& message, const std::string& confirmMessage, const std::string& cancelMessage)
-    {
-        mCancelButton->setCaptionWithReplacing(cancelMessage);
-        mOkButton->setCaptionWithReplacing(confirmMessage);
-
-        askForConfirmation(message);
-    }
-
     void ConfirmationDialog::askForConfirmation(const std::string& message)
     {
         setVisible(true);
