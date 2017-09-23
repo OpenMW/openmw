@@ -146,7 +146,6 @@ namespace MWGui
       , mStatsWindow(NULL)
       , mMessageBoxManager(NULL)
       , mConsole(NULL)
-      , mJournal(NULL)
       , mDialogueWindow(NULL)
       , mContainerWindow(NULL)
       , mDragAndDrop(NULL)
@@ -252,6 +251,7 @@ namespace MWGui
         mKeyboardNavigation.reset(new KeyboardNavigation());
 
         mLoadingScreen = new LoadingScreen(mResourceSystem->getVFS(), mViewer);
+        mWindows.push_back(mLoadingScreen);
 
         //set up the hardware cursor manager
         mCursorManager = new SDLUtil::SDLCursorManager();
@@ -321,112 +321,153 @@ namespace MWGui
 
         mRecharge = new Recharge();
         mGuiModeStates[GM_Recharge] = GuiModeState(mRecharge);
+        mWindows.push_back(mRecharge);
 
         mMenu = new MainMenu(w, h, mResourceSystem->getVFS(), mVersionDescription);
         mGuiModeStates[GM_MainMenu] = GuiModeState(mMenu);
+        mWindows.push_back(mMenu);
 
         mLocalMapRender = new MWRender::LocalMap(mViewer->getSceneData()->asGroup());
         mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender, mWorkQueue);
+        mWindows.push_back(mMap);
         mMap->renderGlobalMap();
         trackWindow(mMap, "map");
+
         mStatsWindow = new StatsWindow(mDragAndDrop);
+        mWindows.push_back(mStatsWindow);
         trackWindow(mStatsWindow, "stats");
+
         mInventoryWindow = new InventoryWindow(mDragAndDrop, mViewer->getSceneData()->asGroup(), mResourceSystem);
+        mWindows.push_back(mInventoryWindow);
+
         mSpellWindow = new SpellWindow(mDragAndDrop);
+        mWindows.push_back(mSpellWindow);
         trackWindow(mSpellWindow, "spells");
 
         mGuiModeStates[GM_Inventory] = GuiModeState({mMap, mInventoryWindow, mSpellWindow, mStatsWindow});
         mGuiModeStates[GM_None] = GuiModeState({mMap, mInventoryWindow, mSpellWindow, mStatsWindow});
 
         mTradeWindow = new TradeWindow();
+        mWindows.push_back(mTradeWindow);
         trackWindow(mTradeWindow, "barter");
 
         mGuiModeStates[GM_Barter] = GuiModeState({mInventoryWindow, mTradeWindow});
 
         mConsole = new Console(w,h, mConsoleOnlyScripts);
+        mWindows.push_back(mConsole);
         trackWindow(mConsole, "console");
         mGuiModeStates[GM_Console] = GuiModeState(mConsole);
 
         bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
-        mJournal = JournalWindow::create(JournalViewModel::create (), questList);
-        mGuiModeStates[GM_Journal] = GuiModeState(mJournal);
+        JournalWindow* journal = JournalWindow::create(JournalViewModel::create (), questList);
+        mWindows.push_back(journal);
+        mGuiModeStates[GM_Journal] = GuiModeState(journal);
         mGuiModeStates[GM_Journal].mCloseSound = "book close";
         mGuiModeStates[GM_Journal].mOpenSound = "book open";
 
         mMessageBoxManager = new MessageBoxManager(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
+
         mSpellBuyingWindow = new SpellBuyingWindow();
+        mWindows.push_back(mSpellBuyingWindow);
         mGuiModeStates[GM_SpellBuying] = GuiModeState(mSpellBuyingWindow);
 
         mTravelWindow = new TravelWindow();
+        mWindows.push_back(mTravelWindow);
         mGuiModeStates[GM_Travel] = GuiModeState(mTravelWindow);
 
         mDialogueWindow = new DialogueWindow();
+        mWindows.push_back(mDialogueWindow);
         trackWindow(mDialogueWindow, "dialogue");
         mGuiModeStates[GM_Dialogue] = GuiModeState(mDialogueWindow);
 
         mContainerWindow = new ContainerWindow(mDragAndDrop);
+        mWindows.push_back(mContainerWindow);
         trackWindow(mContainerWindow, "container");
         mGuiModeStates[GM_Container] = GuiModeState({mContainerWindow, mInventoryWindow});
 
         mHud = new HUD(mCustomMarkers, mDragAndDrop, mLocalMapRender);
+        mWindows.push_back(mHud);
+
         mToolTips = new ToolTips();
+
         mScrollWindow = new ScrollWindow();
+        mWindows.push_back(mScrollWindow);
         mGuiModeStates[GM_Scroll] = GuiModeState(mScrollWindow);
         mGuiModeStates[GM_Scroll].mOpenSound = "scroll";
         mGuiModeStates[GM_Scroll].mCloseSound = "scroll";
 
         mBookWindow = new BookWindow();
+        mWindows.push_back(mBookWindow);
         mGuiModeStates[GM_Book] = GuiModeState(mBookWindow);
         mGuiModeStates[GM_Book].mOpenSound = "book open";
         mGuiModeStates[GM_Book].mCloseSound = "book close";
 
         mCountDialog = new CountDialog();
+        mWindows.push_back(mCountDialog);
+
         mSettingsWindow = new SettingsWindow();
+        mWindows.push_back(mSettingsWindow);
         mGuiModeStates[GM_Settings] = GuiModeState(mSettingsWindow);
 
         mConfirmationDialog = new ConfirmationDialog();
+        mWindows.push_back(mConfirmationDialog);
 
         mAlchemyWindow = new AlchemyWindow();
+        mWindows.push_back(mAlchemyWindow);
         trackWindow(mAlchemyWindow, "alchemy");
         mGuiModeStates[GM_Alchemy] = GuiModeState(mAlchemyWindow);
 
         mQuickKeysMenu = new QuickKeysMenu();
+        mWindows.push_back(mQuickKeysMenu);
         mGuiModeStates[GM_QuickKeysMenu] = GuiModeState(mQuickKeysMenu);
 
         mLevelupDialog = new LevelupDialog();
+        mWindows.push_back(mLevelupDialog);
         mGuiModeStates[GM_Levelup] = GuiModeState(mLevelupDialog);
 
         mWaitDialog = new WaitDialog();
+        mWindows.push_back(mWaitDialog);
         mGuiModeStates[GM_Rest] = GuiModeState(mWaitDialog);
 
         mSpellCreationDialog = new SpellCreationDialog();
+        mWindows.push_back(mSpellCreationDialog);
         mGuiModeStates[GM_SpellCreation] = GuiModeState(mSpellCreationDialog);
 
         mEnchantingDialog = new EnchantingDialog();
+        mWindows.push_back(mEnchantingDialog);
         mGuiModeStates[GM_Enchanting] = GuiModeState(mEnchantingDialog);
 
         mTrainingWindow = new TrainingWindow();
+        mWindows.push_back(mTrainingWindow);
         mGuiModeStates[GM_Training] = GuiModeState(mTrainingWindow);
 
         mMerchantRepair = new MerchantRepair();
+        mWindows.push_back(mMerchantRepair);
         mGuiModeStates[GM_MerchantRepair] = GuiModeState(mMerchantRepair);
 
         mRepair = new Repair();
+        mWindows.push_back(mRepair);
         mGuiModeStates[GM_Repair] = GuiModeState(mRepair);
 
         mSoulgemDialog = new SoulgemDialog(mMessageBoxManager);
 
         mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
+        mWindows.push_back(mCompanionWindow);
         trackWindow(mCompanionWindow, "companion");
         mGuiModeStates[GM_Companion] = GuiModeState({mInventoryWindow, mCompanionWindow});
 
         mJailScreen = new JailScreen();
+        mWindows.push_back(mJailScreen);
         mGuiModeStates[GM_Jail] = GuiModeState(mJailScreen);
 
         std::string werewolfFaderTex = "textures\\werewolfoverlay.dds";
         if (mResourceSystem->getVFS()->exists(werewolfFaderTex))
+        {
             mWerewolfFader = new ScreenFader(werewolfFaderTex);
+            mWindows.push_back(mWerewolfFader);
+        }
         mBlindnessFader = new ScreenFader("black");
+        mWindows.push_back(mBlindnessFader);
 
         // fall back to player_hit_01.dds if bm_player_hit_01.dds is not available
         std::string hitFaderTexture = "textures\\bm_player_hit_01.dds";
@@ -438,10 +479,13 @@ namespace MWGui
             hitFaderCoord = MyGUI::FloatCoord(0.2, 0.25, 0.6, 0.5);
         }
         mHitFader = new ScreenFader(hitFaderTexture, hitFaderLayout, hitFaderCoord);
+        mWindows.push_back(mHitFader);
 
         mScreenFader = new ScreenFader("black");
+        mWindows.push_back(mScreenFader);
 
         mDebugWindow = new DebugWindow();
+        mWindows.push_back(mDebugWindow);
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"InputBlocker");
 
@@ -501,49 +545,15 @@ namespace MWGui
         MyGUI::ClipboardManager::getInstance().eventClipboardChanged.clear();
         MyGUI::ClipboardManager::getInstance().eventClipboardRequested.clear();
 
-        delete mConsole;
+        for (WindowBase* window : mWindows)
+            delete window;
+        mWindows.clear();
+
         delete mMessageBoxManager;
-        delete mHud;
-        delete mMap;
         delete mLocalMapRender;
-        delete mMenu;
-        delete mStatsWindow;
-        delete mJournal;
-        delete mDialogueWindow;
-        delete mContainerWindow;
-        delete mInventoryWindow;
-        delete mToolTips;
         delete mCharGen;
         delete mDragAndDrop;
-        delete mBookWindow;
-        delete mScrollWindow;
-        delete mTradeWindow;
-        delete mSpellBuyingWindow;
-        delete mTravelWindow;
-        delete mSettingsWindow;
-        delete mConfirmationDialog;
-        delete mAlchemyWindow;
-        delete mSpellWindow;
-        delete mLoadingScreen;
-        delete mLevelupDialog;
-        delete mWaitDialog;
-        delete mSpellCreationDialog;
-        delete mEnchantingDialog;
-        delete mTrainingWindow;
-        delete mCountDialog;
-        delete mQuickKeysMenu;
-        delete mMerchantRepair;
-        delete mRepair;
         delete mSoulgemDialog;
-        delete mRecharge;
-        delete mCompanionWindow;
-        delete mHitFader;
-        delete mWerewolfFader;
-        delete mScreenFader;
-        delete mBlindnessFader;
-        delete mDebugWindow;
-        delete mJailScreen;
-
         delete mCursorManager;
 
         cleanupGarbage();

@@ -417,7 +417,6 @@ namespace MWGui
     StatsWindow *mStatsWindow;
     MessageBoxManager *mMessageBoxManager;
     Console *mConsole;
-    JournalWindow* mJournal;
     DialogueWindow *mDialogueWindow;
     ContainerWindow *mContainerWindow;
     DragAndDrop* mDragAndDrop;
@@ -452,6 +451,8 @@ namespace MWGui
     ScreenFader* mScreenFader;
     DebugWindow* mDebugWindow;
     JailScreen* mJailScreen;
+
+    std::vector<WindowBase*> mWindows;
 
     Translation::Storage& mTranslationDataStorage;
 

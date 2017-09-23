@@ -16,7 +16,7 @@ namespace MWGui
     class SpellIcons;
     class ItemWidget;
 
-    class HUD : public Layout, public LocalMapBase
+    class HUD : public WindowBase, public LocalMapBase
     {
     public:
         HUD(CustomMarkerCollection& customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender);
