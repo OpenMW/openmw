@@ -632,6 +632,13 @@ namespace MWGui
         mEnemyHealthTimer = -1;
     }
 
+    void HUD::clear()
+    {
+        unsetSelectedSpell();
+        unsetSelectedWeapon();
+        resetEnemy();
+    }
+
     void HUD::customMarkerCreated(MyGUI::Widget *marker)
     {
         marker->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);

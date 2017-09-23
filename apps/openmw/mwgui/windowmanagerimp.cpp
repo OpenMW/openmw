@@ -506,16 +506,9 @@ namespace MWGui
             disallowAll();
             delete mCharGen;
             mCharGen = new CharacterCreation(mViewer->getSceneData()->asGroup(), mResourceSystem);
-            mGuiModes.clear();
-            MWBase::Environment::get().getInputManager()->changeInputMode(false);
-            mHud->unsetSelectedWeapon();
-            mHud->unsetSelectedSpell();
-            unsetForceHide(GW_ALL);
         }
         else
             allow(GW_ALL);
-
-        mRestAllowed = !newgame;
     }
 
     WindowManager::~WindowManager()
@@ -1338,6 +1331,7 @@ namespace MWGui
     void WindowManager::disallowAll()
     {
         mAllowed = GW_None;
+        mRestAllowed = false;
 
         mBookWindow->setInventoryAllowed (false);
         mScrollWindow->setInventoryAllowed (false);
@@ -1588,6 +1582,7 @@ namespace MWGui
         mCustomMarkers.clear();
 
         mForceHidden = GW_None;
+        mRestAllowed = true;
 
         while (!mGuiModes.empty())
             popGuiMode();
