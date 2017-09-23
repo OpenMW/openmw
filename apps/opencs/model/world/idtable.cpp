@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <map>
 #include <stdexcept>
 
 #include <components/esm/cellid.hpp>
@@ -340,6 +341,15 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
 {
     ImportResults results;
 
+    // Map existing textures to ids
+    std::map<std::string, std::string> reverseLookupMap;
+    for (int i = 0; i < idCollection()->getSize(); ++i)
+    {
+        auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(i));
+        if (record.isModified())
+            reverseLookupMap.emplace(record.get().mTexture, idCollection()->getId(i));
+    }
+
     for (const std::string& id : ids)
     {
         int plugin, index;
@@ -354,8 +364,16 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
             continue;
         }
 
-        // Try a direct mapping to the current plugin first. Otherwise iterate until one is found.
-        // Iteration is deterministic to avoid duplicates.
+        // Look for a pre-existing record
+        auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(oldRow));
+        auto searchIt = reverseLookupMap.find(record.get().mTexture);
+        if (searchIt != reverseLookupMap.end())
+        {
+            results.recordMapping.push_back(std::make_pair(id, searchIt->second));
+            continue;
+        }
+
+        // Iterate until an unused index or found, or the index has completely wrapped around.
         int startIndex = index;
         do {
             std::string newId = LandTexture::createUniqueRecordId(0, index);
@@ -370,21 +388,8 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
                 break;
             }
 
-            // Id is taken, check if same handle and texture. Note that mId is the handle.
-            const LandTexture& oldLtex = dynamic_cast<const Record<LandTexture>&>(idCollection()->getRecord(oldRow)).get();
-            const LandTexture& newLtex = dynamic_cast<const Record<LandTexture>&>(idCollection()->getRecord(newRow)).get();
-            if (oldLtex.mId == newLtex.mId && oldLtex.mTexture == newLtex.mTexture)
-            {
-                // It's a match
-                results.recordMapping.push_back(std::make_pair(id, newId));
-                break;
-            }
-
-            // Determine next index. Spread out the indices to reduce conflicts.
-            size_t MaxIndex = std::numeric_limits<uint16_t>::max() - 1;
-            size_t Prime = (1 << 13) - 1; // A mersenne prime
-
-            index = (index + Prime) % MaxIndex;
+            const size_t MaxIndex = std::numeric_limits<uint16_t>::max() - 1;
+            index = (index + 1) % MaxIndex;
         } while (index != startIndex);
     }
 
