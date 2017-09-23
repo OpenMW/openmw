@@ -42,6 +42,8 @@ namespace MWGui
             virtual void onOpen();
             virtual void onClose();
 
+            void onFrame(float dt) { checkReferenceAvailable(); }
+
             void setFont(const std::string &fntName);
 
             void onResChange(int width, int height);

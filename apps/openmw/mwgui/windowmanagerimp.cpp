@@ -890,11 +890,18 @@ namespace MWGui
 
     void WindowManager::onFrame (float frameDuration)
     {
+        if (!mGuiModes.empty())
+        {
+            GuiModeState& state = mGuiModeStates[mGuiModes.back()];
+            for (WindowBase* window : state.mWindows)
+                window->onFrame(frameDuration);
+        }
+        if (!mCurrentModals.empty())
+            mCurrentModals.top()->onFrame(frameDuration);
+
         mMessageBoxManager->onFrame(frameDuration);
 
         mToolTips->onFrame(frameDuration);
-
-        mMenu->update(frameDuration);
 
         if (mLocalMapRender)
             mLocalMapRender->cleanupCameras();
@@ -909,33 +916,9 @@ namespace MWGui
             mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
         }
 
-        mDialogueWindow->onFrame();
-
-        mInventoryWindow->onFrame();
-
         updateMap();
 
-        mStatsWindow->onFrame(frameDuration);
-        mMap->onFrame(frameDuration);
-        mSpellWindow->onFrame(frameDuration);
-
-        mWaitDialog->onFrame(frameDuration);
-
         mHud->onFrame(frameDuration);
-
-        mTrainingWindow->onFrame (frameDuration);
-
-        mTrainingWindow->checkReferenceAvailable();
-        mDialogueWindow->checkReferenceAvailable();
-        mTradeWindow->checkReferenceAvailable();
-        mSpellBuyingWindow->checkReferenceAvailable();
-        mSpellCreationDialog->checkReferenceAvailable();
-        mEnchantingDialog->checkReferenceAvailable();
-        mContainerWindow->checkReferenceAvailable();
-        mCompanionWindow->checkReferenceAvailable();
-        mConsole->checkReferenceAvailable();
-        mCompanionWindow->onFrame();
-        mJailScreen->onFrame(frameDuration);
 
         if (mWerewolfFader)
             mWerewolfFader->update(frameDuration);

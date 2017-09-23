@@ -68,16 +68,13 @@ namespace MWGui
     }
 
     void SpellWindow::onFrame(float dt) 
-    { 
-        if (mMainWidget->getVisible())
+    {
+        NoDrop::onFrame(dt);
+        mUpdateTimer += dt;
+        if (0.5f < mUpdateTimer)
         {
-            NoDrop::onFrame(dt);
-            mUpdateTimer += dt;
-            if (0.5f < mUpdateTimer)
-            {
-                mUpdateTimer = 0;
-                mSpellView->incrementalUpdate();
-            }
+            mUpdateTimer = 0;
+            mSpellView->incrementalUpdate();
         }
     }
 

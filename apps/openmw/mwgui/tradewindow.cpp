@@ -142,6 +142,11 @@ namespace MWGui
         onFilterChanged(mFilterAll);
     }
 
+    void TradeWindow::onFrame(float dt)
+    {
+        checkReferenceAvailable();
+    }
+
     void TradeWindow::onFilterChanged(MyGUI::Widget* _sender)
     {
         if (_sender == mFilterAll)

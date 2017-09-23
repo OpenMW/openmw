@@ -630,9 +630,10 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
     }
 
-    void DialogueWindow::onFrame()
+    void DialogueWindow::onFrame(float dt)
     {
-        if(mMainWidget->getVisible() && mPtr.getTypeName() == typeid(ESM::NPC).name())
+        checkReferenceAvailable();
+        if(mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
             int disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr);
             mDispositionBar->setProgressRange(100);

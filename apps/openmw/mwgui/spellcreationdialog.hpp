@@ -152,6 +152,8 @@ namespace MWGui
 
         virtual void onOpen();
 
+        void onFrame(float dt) { checkReferenceAvailable(); }
+
         void setPtr(const MWWorld::Ptr& actor);
 
     protected:

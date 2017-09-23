@@ -197,7 +197,7 @@ namespace MWGui
         }
     }
 
-    void MainMenu::update(float dt)
+    void MainMenu::onFrame(float dt)
     {
         if (mVideo)
         {

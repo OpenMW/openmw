@@ -116,8 +116,9 @@ void CompanionWindow::setPtr(const MWWorld::Ptr& npc)
     setTitle(npc.getClass().getName(npc));
 }
 
-void CompanionWindow::onFrame()
+void CompanionWindow::onFrame(float dt)
 {
+    checkReferenceAvailable();
     updateEncumbranceBar();
 }
 

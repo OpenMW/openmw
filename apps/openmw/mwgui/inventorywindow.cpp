@@ -589,11 +589,8 @@ namespace MWGui
         mEncumbranceBar->setValue(static_cast<int>(encumbrance), static_cast<int>(capacity));
     }
 
-    void InventoryWindow::onFrame()
+    void InventoryWindow::onFrame(float dt)
     {
-        if (!mMainWidget->getVisible())
-            return;
-
         updateEncumbranceBar();
     }
 

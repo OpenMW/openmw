@@ -195,6 +195,7 @@ namespace MWGui
 
     void TrainingWindow::onFrame(float dt)
     {
+        checkReferenceAvailable();
         mTimeAdvancer.onFrame(dt);
 
         if (mFadeTimeRemaining <= 0)

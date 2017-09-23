@@ -117,7 +117,7 @@ namespace MWGui
         void clearChoices();
 
         void goodbye();
-        void onFrame();
+        void onFrame(float dt);
 
         // make sure to call these before setKeywords()
         void setServices(int services) { mServices = services; }

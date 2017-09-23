@@ -40,7 +40,7 @@ namespace MWGui
             /// start trading, disables item drag&drop
             void setTrading(bool trading);
 
-            void onFrame();
+            void onFrame(float dt);
 
             void pickUpObject (MWWorld::Ptr object);
 

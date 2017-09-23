@@ -36,7 +36,7 @@ namespace MWGui
 
             virtual void setVisible (bool visible);
 
-            void update(float dt);
+            void onFrame(float dt);
 
         private:
             const VFS::Manager* mVFS;

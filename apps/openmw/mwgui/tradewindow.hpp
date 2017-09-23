@@ -29,6 +29,8 @@ namespace MWGui
 
             void setPtr(const MWWorld::Ptr& actor);
 
+            void onFrame(float dt);
+
             void borrowItem (int index, size_t count);
             void returnItem (int index, size_t count);
 

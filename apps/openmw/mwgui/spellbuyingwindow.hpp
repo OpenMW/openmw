@@ -28,6 +28,8 @@ namespace MWGui
             void setPtr(const MWWorld::Ptr& actor);
             void setPtr(const MWWorld::Ptr& actor, int startOffset);
 
+            void onFrame(float dt) { checkReferenceAvailable(); }
+
         protected:
             MyGUI::Button* mCancelButton;
             MyGUI::TextBox* mPlayerGold;

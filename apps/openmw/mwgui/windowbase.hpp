@@ -29,6 +29,9 @@ namespace MWGui
         /// Open this object in the GUI, for windows that support it
         virtual void setPtr(const MWWorld::Ptr& ptr) {}
 
+        /// Called every frame if the window is in an active GUI mode
+        virtual void onFrame(float duration) {}
+
         /// Notify that window has been made visible
         virtual void onOpen() {}
         /// Notify that window has been hidden

@@ -23,7 +23,7 @@ namespace MWGui
         virtual void resetReference();
 
         void setPtr(const MWWorld::Ptr& npc);
-        void onFrame ();
+        void onFrame (float dt);
 
     private:
         ItemView* mItemView;

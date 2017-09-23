@@ -21,6 +21,8 @@ namespace MWGui
 
         virtual void onOpen();
 
+        void onFrame(float dt) { checkReferenceAvailable(); }
+
         void setSoulGem (const MWWorld::Ptr& gem);
         void setItem (const MWWorld::Ptr& item);
 
