@@ -26,6 +26,7 @@ namespace MWGui
             void onCloseButtonClicked (MyGUI::Widget* _sender);
             void onTakeButtonClicked (MyGUI::Widget* _sender);
             void setTakeButtonShow(bool show);
+            void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
 
         private:
             Gui::ImageButton* mCloseButton;

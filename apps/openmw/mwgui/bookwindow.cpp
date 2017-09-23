@@ -52,6 +52,11 @@ namespace MWGui
         mRightPage->setNeedMouseFocus(true);
         mRightPage->eventMouseWheel += MyGUI::newDelegate(this, &BookWindow::onMouseWheel);
 
+        mNextPageButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &BookWindow::onKeyButtonPressed);
+        mPrevPageButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &BookWindow::onKeyButtonPressed);
+        mTakeButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &BookWindow::onKeyButtonPressed);
+        mCloseButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &BookWindow::onKeyButtonPressed);
+
         if (mNextPageButton->getSize().width == 64)
         {
             // english button has a 7 pixel wide strip of garbage on its right edge
@@ -94,12 +99,22 @@ namespace MWGui
         updatePages();
 
         setTakeButtonShow(showTakeButton);
+
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
     }
 
     void BookWindow::setTakeButtonShow(bool show)
     {
         mTakeButtonShow = show;
         mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
+    }
+
+    void BookWindow::onKeyButtonPressed(MyGUI::Widget *sender, MyGUI::KeyCode key, MyGUI::Char character)
+    {
+        if (key == MyGUI::KeyCode::ArrowUp)
+            prevPage();
+        else if (key == MyGUI::KeyCode::ArrowDown)
+            nextPage();
     }
 
     void BookWindow::setInventoryAllowed(bool allowed)

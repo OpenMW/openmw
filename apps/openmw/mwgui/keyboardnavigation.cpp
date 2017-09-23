@@ -156,13 +156,14 @@ bool KeyboardNavigation::switchFocus(int direction, bool wrap)
     MyGUI::Widget* next = keyFocusList[index];
     int vertdiff = next->getTop() - focus->getTop();
     int horizdiff = next->getLeft() - focus->getLeft();
-    if (direction == D_Right && horizdiff <= 0)
+    bool isVertical = std::abs(vertdiff) > std::abs(horizdiff);
+    if (direction == D_Right && (horizdiff <= 0 || isVertical))
         return false;
-    else if (direction == D_Left && horizdiff >= 0)
+    else if (direction == D_Left && (horizdiff >= 0 || isVertical))
         return false;
-    else if (direction == D_Down && vertdiff <= 0)
+    else if (direction == D_Down && (vertdiff <= 0 || !isVertical))
         return false;
-    else if (direction == D_Up && vertdiff >= 0)
+    else if (direction == D_Up && (vertdiff >= 0 || !isVertical))
         return false;
 
     MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(keyFocusList[index]);

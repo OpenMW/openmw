@@ -27,6 +27,8 @@ namespace MWGui
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
             void setTakeButtonShow(bool show);
 
+            void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
+
             void nextPage();
             void prevPage();
 
