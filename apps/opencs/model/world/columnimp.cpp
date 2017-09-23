@@ -1,6 +1,7 @@
 #include "columnimp.hpp"
 
 #include <stdexcept>
+#include <QVector>
 
 namespace CSMWorld
 {
@@ -86,33 +87,32 @@ namespace CSMWorld
         const int Size = Land::LAND_GLOBAL_MAP_LOD_SIZE;
         const Land& land = record.get();
 
+        DataType values(Size, 0);
+
         if (land.isDataLoaded(Land::DATA_WNAM))
         {
-            // Note: original data is signed
-            const char* rawData = reinterpret_cast<const char*>(&land.mWnam[0]);
-            return QByteArray(rawData, Size);
+            for (int i = 0; i < Size; ++i)
+                values[i] = land.mWnam[i];
         }
-        else
-        {
-            // Return a blank array
-            return QByteArray(Size, 0);
-        }
+
+        QVariant variant;
+        variant.setValue(values);
+        return variant;
     }
 
     void LandMapLodColumn::set(Record<Land>& record, const QVariant& data)
     {
-        QByteArray array = data.toByteArray();
-        const signed char* rawData = reinterpret_cast<const signed char*>(array.data());
+        DataType values = data.value<DataType>();
 
-        if (array.count() != Land::LAND_GLOBAL_MAP_LOD_SIZE)
+        if (values.size() != Land::LAND_GLOBAL_MAP_LOD_SIZE)
             throw std::runtime_error("invalid land map LOD data");
 
         Land copy = record.get();
         copy.setDataLoaded(Land::DATA_WNAM);
 
-        for (int i = 0; i < array.count(); ++i)
+        for (int i = 0; i < values.size(); ++i)
         {
-            copy.mWnam[i] = rawData[i];
+            copy.mWnam[i] = values[i];
         }
 
         record.setModified(copy);
@@ -134,33 +134,32 @@ namespace CSMWorld
         const int Size = Land::LAND_NUM_VERTS * 3;
         const Land& land = record.get();
 
+        DataType values(Size, 0);
+
         if (land.isDataLoaded(Land::DATA_VNML))
         {
-            // Note: original data is signed
-            const char* rawData = reinterpret_cast<const char*>(&land.getLandData()->mNormals[0]);
-            return QByteArray(rawData, Size);
+            for (int i = 0; i < Size; ++i)
+                values[i] = land.getLandData()->mNormals[i];
         }
-        else
-        {
-            // Return a blank array
-            return QByteArray(Size, 0);
-        }
+
+        QVariant variant;
+        variant.setValue(values);
+        return variant;
     }
 
     void LandNormalsColumn::set(Record<Land>& record, const QVariant& data)
     {
-        QByteArray array = data.toByteArray();
-        const signed char* rawData = reinterpret_cast<const signed char*>(array.data());
+        DataType values = data.value<DataType>();
 
-        if (array.count() != Land::LAND_NUM_VERTS * 3)
+        if (values.size() != Land::LAND_NUM_VERTS * 3)
             throw std::runtime_error("invalid land normals data");
 
         Land copy = record.get();
         copy.setDataLoaded(Land::DATA_VNML);
 
-        for (int i = 0; i < array.count(); ++i)
+        for (int i = 0; i < values.size(); ++i)
         {
-            copy.getLandData()->mNormals[i] = rawData[i];
+            copy.getLandData()->mNormals[i] = values[i];
         }
 
         record.setModified(copy);
@@ -179,36 +178,35 @@ namespace CSMWorld
 
     QVariant LandHeightsColumn::get(const Record<Land>& record) const
     {
-        const int Size = Land::LAND_NUM_VERTS * sizeof(float);
+        const int Size = Land::LAND_NUM_VERTS;
         const Land& land = record.get();
+
+        DataType values(Size, 0);
 
         if (land.isDataLoaded(Land::DATA_VHGT))
         {
-            // Note: original data is float
-            const char* rawData = reinterpret_cast<const char*>(&land.getLandData()->mHeights[0]);
-            return QByteArray(rawData, Size);
+            for (int i = 0; i < Size; ++i)
+                values[i] = land.getLandData()->mHeights[i];
         }
-        else
-        {
-            return QByteArray(Size, 0);
-        }
+
+        QVariant variant;
+        variant.setValue(values);
+        return variant;
     }
 
     void LandHeightsColumn::set(Record<Land>& record, const QVariant& data)
     {
-        QByteArray array = data.toByteArray();
-        const float* rawData = reinterpret_cast<const float*>(array.data());
+        DataType values = data.value<DataType>();
 
-        if (array.count() != Land::LAND_NUM_VERTS * sizeof(float))
+        if (values.size() != Land::LAND_NUM_VERTS)
             throw std::runtime_error("invalid land heights data");
 
         Land copy = record.get();
         copy.setDataLoaded(Land::DATA_VHGT);
 
-        int count = array.count() / sizeof(float);
-        for (int i = 0; i < count; ++i)
+        for (int i = 0; i < values.size(); ++i)
         {
-            copy.getLandData()->mHeights[i] = rawData[i];
+            copy.getLandData()->mHeights[i] = values[i];
         }
 
         record.setModified(copy);
@@ -230,32 +228,32 @@ namespace CSMWorld
         const int Size = Land::LAND_NUM_VERTS * 3;
         const Land& land = record.get();
 
+        DataType values(Size, 0);
+
         if (land.isDataLoaded(Land::DATA_VCLR))
         {
-            // Note: original data is unsigned char
-            const char* rawData = reinterpret_cast<const char*>(&land.getLandData()->mColours[0]);
-            return QByteArray(rawData, Size);
+            for (int i = 0; i < Size; ++i)
+                values[i] = land.getLandData()->mColours[i];
         }
-        else
-        {
-            return QByteArray(Size, 0);
-        }
+
+        QVariant variant;
+        variant.setValue(values);
+        return variant;
     }
 
     void LandColoursColumn::set(Record<Land>& record, const QVariant& data)
     {
-        QByteArray array = data.toByteArray();
-        const unsigned char* rawData = reinterpret_cast<const unsigned char*>(array.data());
+        DataType values = data.value<DataType>();
 
-        if (array.count() != Land::LAND_NUM_VERTS * 3)
+        if (values.size() != Land::LAND_NUM_VERTS * 3)
             throw std::runtime_error("invalid land colours data");
 
         Land copy = record.get();
         copy.setDataLoaded(Land::DATA_VCLR);
 
-        for (int i = 0; i < array.count(); ++i)
+        for (int i = 0; i < values.size(); ++i)
         {
-            copy.getLandData()->mColours[i] = rawData[i];
+            copy.getLandData()->mColours[i] = values[i];
         }
 
         record.setModified(copy);
@@ -274,36 +272,35 @@ namespace CSMWorld
 
     QVariant LandTexturesColumn::get(const Record<Land>& record) const
     {
-        const int Size = Land::LAND_NUM_TEXTURES * sizeof(uint16_t);
+        const int Size = Land::LAND_NUM_TEXTURES;
         const Land& land = record.get();
+
+        DataType values(Size, 0);
 
         if (land.isDataLoaded(Land::DATA_VTEX))
         {
-            // Note: original data is uint16_t
-            const char* rawData = reinterpret_cast<const char*>(&land.getLandData()->mTextures[0]);
-            return QByteArray(rawData, Size);
+            for (int i = 0; i < Size; ++i)
+                values[i] = land.getLandData()->mTextures[i];
         }
-        else
-        {
-            return QByteArray(Size, 0);
-        }
+
+        QVariant variant;
+        variant.setValue(values);
+        return variant;
     }
 
     void LandTexturesColumn::set(Record<Land>& record, const QVariant& data)
     {
-        QByteArray array = data.toByteArray();
-        const uint16_t* rawData = reinterpret_cast<const uint16_t*>(array.data());
+        DataType values = data.value<DataType>();
 
-        if (array.count() != Land::LAND_NUM_TEXTURES * sizeof(uint16_t))
+        if (values.size() != Land::LAND_NUM_TEXTURES)
             throw std::runtime_error("invalid land textures data");
 
         Land copy = record.get();
         copy.setDataLoaded(Land::DATA_VTEX);
 
-        int count = array.count() / sizeof(uint16_t);
-        for (int i = 0; i < count; ++i)
+        for (int i = 0; i < values.size(); ++i)
         {
-            copy.getLandData()->mTextures[i] = rawData[i];
+            copy.getLandData()->mTextures[i] = values[i];
         }
 
         record.setModified(copy);

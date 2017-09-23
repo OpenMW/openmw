@@ -58,23 +58,21 @@ void CSMWorld::ImportLandTexturesCommand::redo()
 
     // Original data
     int textureColumn = mLands.findColumnIndex(Columns::ColumnId_LandTexturesIndex);
-    mOld = mLands.data(mLands.getModelIndex(getOriginId(), textureColumn)).toByteArray();
-    const uint16_t* textureData = reinterpret_cast<uint16_t*>(mOld.data());
+    mOld = mLands.data(mLands.getModelIndex(getOriginId(), textureColumn)).value<DataType>();
 
     // Need to make a copy so the old values can be looked up
-    QByteArray newTextureByteArray(mOld.data(), mOld.size());
-    uint16_t* newTextureData = reinterpret_cast<uint16_t*>(newTextureByteArray.data());
+    DataType copy(mOld);
 
     // Perform touch/copy/etc...
     onRedo();
 
     // Find all indices used
     std::unordered_set<int> texIndices;
-    for (int i = 0; i < Land::LAND_NUM_TEXTURES; ++i)
+    for (int i = 0; i < mOld.size(); ++i)
     {
         // All indices are offset by 1 for a default texture
-        if (textureData[i] > 0)
-            texIndices.insert(textureData[i] - 1);
+        if (mOld[i] > 0)
+            texIndices.insert(mOld[i] - 1);
     }
 
     std::vector<std::string> oldTextures;
@@ -97,8 +95,8 @@ void CSMWorld::ImportLandTexturesCommand::redo()
             for (int i = 0; i < Land::LAND_NUM_TEXTURES; ++i)
             {
                 // All indices are offset by 1 for a default texture
-                if (textureData[i] == oldIndex + 1)
-                    newTextureData[i] = newIndex + 1;
+                if (mOld[i] == oldIndex + 1)
+                    copy[i] = newIndex + 1;
             }
         }
     }
@@ -107,14 +105,18 @@ void CSMWorld::ImportLandTexturesCommand::redo()
     int stateColumn = mLands.findColumnIndex(Columns::ColumnId_Modification);
     mOldState = mLands.data(mLands.getModelIndex(getDestinationId(), stateColumn)).toInt();
 
-    mLands.setData(mLands.getModelIndex(getDestinationId(), textureColumn), newTextureByteArray);
+    QVariant variant;
+    variant.setValue(copy);
+    mLands.setData(mLands.getModelIndex(getDestinationId(), textureColumn), variant);
 }
 
 void CSMWorld::ImportLandTexturesCommand::undo()
 {
     // Restore to previous
     int textureColumn = mLands.findColumnIndex(Columns::ColumnId_LandTexturesIndex);
-    mLands.setData(mLands.getModelIndex(getDestinationId(), textureColumn), mOld);
+    QVariant variant;
+    variant.setValue(mOld);
+    mLands.setData(mLands.getModelIndex(getDestinationId(), textureColumn), variant);
 
     int stateColumn = mLands.findColumnIndex(Columns::ColumnId_Modification);
     mLands.setData(mLands.getModelIndex(getDestinationId(), stateColumn), mOldState);

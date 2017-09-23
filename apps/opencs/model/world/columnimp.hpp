@@ -2,10 +2,12 @@
 #define CSM_WOLRD_COLUMNIMP_H
 
 #include <cassert>
+#include <cstdint>
 #include <sstream>
 #include <stdexcept>
 
 #include <QColor>
+#include <QVector>
 
 #include <components/esm/loadbody.hpp>
 #include <components/esm/loadskil.hpp>
@@ -2470,6 +2472,8 @@ namespace CSMWorld
 
     struct LandMapLodColumn : public Column<Land>
     {
+        using DataType = QVector<signed char>;
+
         LandMapLodColumn();
 
         QVariant get(const Record<Land>& record) const override;
@@ -2479,6 +2483,8 @@ namespace CSMWorld
 
     struct LandNormalsColumn : public Column<Land>
     {
+        using DataType = QVector<signed char>;
+
         LandNormalsColumn();
 
         QVariant get(const Record<Land>& record) const override;
@@ -2488,6 +2494,8 @@ namespace CSMWorld
 
     struct LandHeightsColumn : public Column<Land>
     {
+        using DataType = QVector<float>;
+
         LandHeightsColumn();
 
         QVariant get(const Record<Land>& record) const override;
@@ -2497,6 +2505,8 @@ namespace CSMWorld
 
     struct LandColoursColumn : public Column<Land>
     {
+        using DataType = QVector<unsigned char>;
+
         LandColoursColumn();
 
         QVariant get(const Record<Land>& record) const override;
@@ -2506,6 +2516,8 @@ namespace CSMWorld
 
     struct LandTexturesColumn : public Column<Land>
     {
+        using DataType = QVector<uint16_t>;
+
         LandTexturesColumn();
 
         QVariant get(const Record<Land>& record) const override;
