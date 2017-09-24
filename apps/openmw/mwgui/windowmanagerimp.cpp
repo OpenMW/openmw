@@ -1738,9 +1738,12 @@ namespace MWGui
         // Only remove the top if it matches the current pointer. A lot of things hide their visibility before showing it,
         //so just popping the top would cause massive issues.
         if(!mCurrentModals.empty())
+        {
             if(input == mCurrentModals.top())
                 mCurrentModals.pop();
-
+            else
+                std::cout << " warning: modal widget " << input << " " << typeid(input).name() << " not found " << std::endl;
+        }
         if (mCurrentModals.empty())
             mKeyboardNavigation->restoreFocus(getMode());
     }

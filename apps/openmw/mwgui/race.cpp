@@ -187,6 +187,8 @@ namespace MWGui
 
     void RaceDialog::onClose()
     {
+        WindowModal::onClose();
+
         mPreviewImage->setRenderItemTexture(NULL);
 
         mPreviewTexture.reset(NULL);
