@@ -51,12 +51,18 @@ namespace MWGui
 
         mTimeAdvancer.eventProgressChanged += MyGUI::newDelegate(this, &TrainingWindow::onTrainingProgressChanged);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &TrainingWindow::onTrainingFinished);
-
-        mProgressBar.setVisible(false);
     }
 
     void TrainingWindow::onOpen()
     {
+        if (mTimeAdvancer.isRunning())
+        {
+            mProgressBar.setVisible(true);
+            setVisible(false);
+        }
+        else
+            mProgressBar.setVisible(false);
+
         center();
     }
 
@@ -166,15 +172,12 @@ namespace MWGui
         // add gold to NPC trading gold pool
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
-        // go back to game mode
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
-        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
-
         // advance time
         MWBase::Environment::get().getMechanicsManager()->rest(false);
         MWBase::Environment::get().getMechanicsManager()->rest(false);
         MWBase::Environment::get().getWorld ()->advanceTime (2);
 
+        setVisible(false);
         mProgressBar.setVisible(true);
         mProgressBar.setProgress(0, 2);
         mTimeAdvancer.run(2);
@@ -191,6 +194,10 @@ namespace MWGui
     void TrainingWindow::onTrainingFinished()
     {
         mProgressBar.setVisible(false);
+
+        // go back to game mode
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
+        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
     }
 
     void TrainingWindow::onFrame(float dt)

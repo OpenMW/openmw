@@ -16,9 +16,13 @@ namespace MWGui
 
         virtual void onOpen();
 
+        bool exit() { return false; }
+
         void setPtr(const MWWorld::Ptr& actor);
 
         void onFrame(float dt);
+
+        WindowBase* getProgressBar() { return &mProgressBar; }
 
         void clear() { resetReference(); }
 

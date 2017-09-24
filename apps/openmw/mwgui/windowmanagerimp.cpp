@@ -414,7 +414,7 @@ namespace MWGui
 
         mWaitDialog = new WaitDialog();
         mWindows.push_back(mWaitDialog);
-        mGuiModeStates[GM_Rest] = GuiModeState(mWaitDialog);
+        mGuiModeStates[GM_Rest] = GuiModeState({mWaitDialog->getProgressBar(), mWaitDialog});
 
         SpellCreationDialog* spellCreationDialog = new SpellCreationDialog();
         mWindows.push_back(spellCreationDialog);
@@ -426,7 +426,7 @@ namespace MWGui
 
         TrainingWindow* trainingWindow = new TrainingWindow();
         mWindows.push_back(trainingWindow);
-        mGuiModeStates[GM_Training] = GuiModeState(trainingWindow);
+        mGuiModeStates[GM_Training] = GuiModeState({trainingWindow->getProgressBar(), trainingWindow});
 
         MerchantRepair* merchantRepair = new MerchantRepair();
         mWindows.push_back(merchantRepair);

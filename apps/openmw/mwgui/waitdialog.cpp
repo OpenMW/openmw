@@ -75,8 +75,6 @@ namespace MWGui
         mTimeAdvancer.eventProgressChanged += MyGUI::newDelegate(this, &WaitDialog::onWaitingProgressChanged);
         mTimeAdvancer.eventInterrupted += MyGUI::newDelegate(this, &WaitDialog::onWaitingInterrupted);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &WaitDialog::onWaitingFinished);
-
-        mProgressBar.setVisible (false);
     }
 
     void WaitDialog::setPtr(const MWWorld::Ptr &ptr)
@@ -86,11 +84,22 @@ namespace MWGui
 
     bool WaitDialog::exit()
     {
-        return (!mProgressBar.isVisible()); //Only exit if not currently waiting
+        return (!mTimeAdvancer.isRunning()); //Only exit if not currently waiting
     }
 
     void WaitDialog::onOpen()
     {
+        if (mTimeAdvancer.isRunning())
+        {
+            mProgressBar.setVisible(true);
+            setVisible(false);
+            return;
+        }
+        else
+        {
+            mProgressBar.setVisible(false);
+        }
+
         if (!MWBase::Environment::get().getWindowManager ()->getRestEnabled ())
         {
             MWBase::Environment::get().getWindowManager()->popGuiMode ();
@@ -260,11 +269,6 @@ namespace MWGui
             mProgressBar.setVisible(true);
             mTimeAdvancer.run(mHours, mInterruptAt);
         }
-    }
-
-    void WaitDialog::clear()
-    {
-        mProgressBar.setVisible(false);
     }
 
     void WaitDialog::stopWaiting ()
