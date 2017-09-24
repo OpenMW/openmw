@@ -96,6 +96,7 @@ namespace MWGui
         mDecreaseButton->eventMouseButtonReleased += MyGUI::newDelegate(this, &TradeWindow::onBalanceButtonReleased);
 
         mTotalBalance->eventValueChanged += MyGUI::newDelegate(this, &TradeWindow::onBalanceValueChanged);
+        mTotalBalance->eventEditSelectAccept += MyGUI::newDelegate(this, &TradeWindow::onAccept);
         mTotalBalance->setMinValue(INT_MIN+1); // disallow INT_MIN since abs(INT_MIN) is undefined
 
         setCoord(400, 0, 400, 300);
@@ -140,6 +141,8 @@ namespace MWGui
         setTitle(actor.getClass().getName(actor));
 
         onFilterChanged(mFilterAll);
+
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTotalBalance);
     }
 
     void TradeWindow::onFrame(float dt)
@@ -362,6 +365,11 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
 
         restock();
+    }
+
+    void TradeWindow::onAccept(MyGUI::EditBox *sender)
+    {
+        onOfferButtonClicked(sender);
     }
 
     void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)

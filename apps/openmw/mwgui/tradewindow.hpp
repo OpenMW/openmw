@@ -84,6 +84,7 @@ namespace MWGui
 
             void onFilterChanged(MyGUI::Widget* _sender);
             void onOfferButtonClicked(MyGUI::Widget* _sender);
+            void onAccept(MyGUI::EditBox* sender);
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onMaxSaleButtonClicked(MyGUI::Widget* _sender);
             void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
