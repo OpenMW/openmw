@@ -1788,25 +1788,25 @@ namespace MWGui
         updateVisible();
     }
 
-    void WindowManager::fadeScreenIn(const float time, bool clearQueue)
+    void WindowManager::fadeScreenIn(const float time, bool clearQueue, float delay)
     {
         if (clearQueue)
             mScreenFader->clearQueue();
-        mScreenFader->fadeOut(time);
+        mScreenFader->fadeOut(time, delay);
     }
 
-    void WindowManager::fadeScreenOut(const float time, bool clearQueue)
+    void WindowManager::fadeScreenOut(const float time, bool clearQueue, float delay)
     {
         if (clearQueue)
             mScreenFader->clearQueue();
-        mScreenFader->fadeIn(time);
+        mScreenFader->fadeIn(time, delay);
     }
 
-    void WindowManager::fadeScreenTo(const int percent, const float time, bool clearQueue)
+    void WindowManager::fadeScreenTo(const int percent, const float time, bool clearQueue, float delay)
     {
         if (clearQueue)
             mScreenFader->clearQueue();
-        mScreenFader->fadeTo(percent, time);
+        mScreenFader->fadeTo(percent, time, delay);
     }
 
     void WindowManager::setBlindness(const int percent)

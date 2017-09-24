@@ -39,8 +39,6 @@ namespace MWGui
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPlayerGold;
 
-        float mFadeTimeRemaining;
-
         WaitDialogProgressBar mProgressBar;
         TimeAdvancer mTimeAdvancer;
     };

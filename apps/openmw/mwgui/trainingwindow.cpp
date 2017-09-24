@@ -40,7 +40,6 @@ namespace MWGui
 
     TrainingWindow::TrainingWindow()
         : WindowBase("openmw_trainingwindow.layout")
-        , mFadeTimeRemaining(0)
         , mTimeAdvancer(0.05f)
     {
         getWidget(mTrainingOptions, "TrainingOptions");
@@ -183,7 +182,7 @@ namespace MWGui
         mTimeAdvancer.run(2);
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.25);
-        mFadeTimeRemaining = 0.5;
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.25, false, 0.25);
     }
 
     void TrainingWindow::onTrainingProgressChanged(int cur, int total)
@@ -204,13 +203,5 @@ namespace MWGui
     {
         checkReferenceAvailable();
         mTimeAdvancer.onFrame(dt);
-
-        if (mFadeTimeRemaining <= 0)
-            return;
-
-        mFadeTimeRemaining -= dt;
-
-        if (mFadeTimeRemaining <= 0)
-            MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.25);
     }
 }

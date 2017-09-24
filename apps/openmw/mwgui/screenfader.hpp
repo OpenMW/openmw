@@ -14,7 +14,7 @@ namespace MWGui
     public:
         typedef std::shared_ptr<FadeOp> Ptr;
 
-        FadeOp(ScreenFader * fader, float time, float targetAlpha);
+        FadeOp(ScreenFader * fader, float time, float targetAlpha, float delay);
 
         bool isRunning();
 
@@ -28,6 +28,7 @@ namespace MWGui
         float mTargetTime;
         float mTargetAlpha;
         float mStartAlpha;
+        float mDelay;
         bool mRunning;
     };
 
@@ -38,16 +39,16 @@ namespace MWGui
 
         void update(float dt);
 
-        void fadeIn(const float time);
-        void fadeOut(const float time);
-        void fadeTo(const int percent, const float time);
+        void fadeIn(const float time, float delay=0);
+        void fadeOut(const float time, float delay=0);
+        void fadeTo(const int percent, const float time, float delay=0);
 
         void clear();
 
         void setFactor (float factor);
         void setRepeat(bool repeat);
 
-        void queue(float time, float targetAlpha);
+        void queue(float time, float targetAlpha, float delay);
         bool isEmpty();
         void clearQueue();
 
