@@ -2000,7 +2000,30 @@ namespace MWGui
     bool WindowManager::injectKeyPress(MyGUI::KeyCode key, unsigned int text)
     {
         if (!mKeyboardNavigation->injectKeyPress(key, text))
-            return MyGUI::InputManager::getInstance().injectKeyPress(key, text);
+        {
+            MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+            bool widgetActive = MyGUI::InputManager::getInstance().injectKeyPress(key, text);
+            if (!widgetActive || !focus)
+                return false;
+            // FIXME: MyGUI doesn't allow widgets to state if a given key was actually used, so make a guess
+            if (focus->getTypeName().find("Button") != std::string::npos)
+            {
+                switch (key.getValue())
+                {
+                case MyGUI::KeyCode::ArrowDown:
+                case MyGUI::KeyCode::ArrowUp:
+                case MyGUI::KeyCode::ArrowLeft:
+                case MyGUI::KeyCode::ArrowRight:
+                case MyGUI::KeyCode::Return:
+                case MyGUI::KeyCode::NumpadEnter:
+                case MyGUI::KeyCode::Space:
+                    return true;
+                default:
+                    return false;
+                }
+            }
+            return false;
+        }
         else
             return true;
     }

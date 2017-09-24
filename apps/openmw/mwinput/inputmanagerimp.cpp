@@ -674,10 +674,11 @@ namespace MWInput
         bool consumed = false;
         if (kc != OIS::KC_UNASSIGNED)
         {
-            consumed = SDL_IsTextInputActive() &&
-                    ( !(SDLK_SCANCODE_MASK & arg.keysym.sym) && std::isprint(arg.keysym.sym)); // Little trick to check if key is printable
-            bool guiFocus = MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
-            setPlayerControlsEnabled(!guiFocus);
+            consumed = MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+            if (SDL_IsTextInputActive() &&  // Little trick to check if key is printable
+                                    ( !(SDLK_SCANCODE_MASK & arg.keysym.sym) && std::isprint(arg.keysym.sym)))
+                consumed = true;
+            setPlayerControlsEnabled(!consumed);
         }
         if (arg.repeat)
             return;
