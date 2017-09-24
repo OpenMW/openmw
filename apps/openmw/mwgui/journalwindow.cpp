@@ -96,7 +96,6 @@ namespace
         JournalWindowImpl (MWGui::JournalViewModel::Ptr Model, bool questList)
             : JournalBooks (Model), JournalWindow()
         {
-            mMainWidget->setVisible(false);
             center();
 
             adviseButtonClick (OptionsBTN,    &JournalWindowImpl::notifyOptions   );

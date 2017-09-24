@@ -46,8 +46,6 @@ Recharge::Recharge()
     mBox->setDisplayMode(ItemChargeView::DisplayMode_EnchantmentCharge);
 
     mGemIcon->eventMouseButtonClick += MyGUI::newDelegate(this, &Recharge::onSelectItem);
-
-    setVisible(false);
 }
 
 void Recharge::onOpen()

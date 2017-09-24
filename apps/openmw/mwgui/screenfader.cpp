@@ -74,7 +74,6 @@ namespace MWGui
         , mRepeat(false)
     {
         mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
-        setVisible(false);
 
         MyGUI::ImageBox* imageBox = mMainWidget->castType<MyGUI::ImageBox>(false);
         if (imageBox)
