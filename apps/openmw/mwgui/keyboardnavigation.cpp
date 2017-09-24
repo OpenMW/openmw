@@ -63,12 +63,6 @@ void KeyboardNavigation::_unlinkWidget(MyGUI::Widget *widget)
             w.second = nullptr;
 }
 
-bool isButtonFocus()
-{
-    MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-    return focus->getTypeName().find("Button") != std::string::npos;
-}
-
 enum Direction
 {
     D_Left,
@@ -106,7 +100,13 @@ bool KeyboardNavigation::switchFocus(int direction, bool wrap)
 {
     MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
 
-    if (!focus && (direction == D_Next || direction == D_Prev))
+    if ((focus && focus->getTypeName().find("Button") == std::string::npos) && direction != D_Prev && direction != D_Next)
+        return false;
+
+    if (focus && (direction == D_Prev || direction == D_Next) && focus->getUserString("AcceptTab") == "true")
+        return false;
+
+    if ((!focus || !focus->getNeedKeyFocus()) && (direction == D_Next || direction == D_Prev))
     {
         // if nothing is selected, select the first widget
         MyGUI::VectorWidgetPtr keyFocusList;
@@ -120,20 +120,12 @@ bool KeyboardNavigation::switchFocus(int direction, bool wrap)
             return true;
         }
     }
-
     if (!focus)
         return false;
 
-    if (!isButtonFocus() && direction != D_Prev && direction != D_Next)
-        return false;
-
-    if ((direction == D_Prev || direction == D_Next) && focus->getUserString("AcceptTab") == "true")
-        return false;
-
-    MyGUI::Widget* window = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-    while (window->getParent())
+    MyGUI::Widget* window = focus;
+    while (window && window->getParent())
         window = window->getParent();
-
     MyGUI::VectorWidgetPtr keyFocusList;
     getKeyFocusWidgets(window, keyFocusList);
 
