@@ -162,6 +162,7 @@ namespace MWGui
 
         void onCancelButtonClicked (MyGUI::Widget* sender);
         void onBuyButtonClicked (MyGUI::Widget* sender);
+        void onAccept(MyGUI::EditBox* sender);
 
         virtual void notifyEffectsChanged ();
 

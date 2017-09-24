@@ -44,6 +44,7 @@ namespace MWGui
         void onCancelButtonClicked(MyGUI::Widget* _sender);
         void onCreateButtonClicked(MyGUI::Widget* _sender);
         void onIngredientSelected(MyGUI::Widget* _sender);
+        void onAccept(MyGUI::EditBox*);
 
         void onSelectedItem(int index);
 

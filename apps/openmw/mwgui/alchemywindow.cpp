@@ -54,7 +54,14 @@ namespace MWGui
         mCreateButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCreateButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCancelButtonClicked);
 
+        mNameEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &AlchemyWindow::onAccept);
+
         center();
+    }
+
+    void AlchemyWindow::onAccept(MyGUI::EditBox* sender)
+    {
+        onCreateButtonClicked(sender);
     }
 
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
@@ -128,6 +135,8 @@ namespace MWGui
         }
 
         update();
+
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit);
     }
 
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)

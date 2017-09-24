@@ -4,6 +4,7 @@
 
 #include <MyGUI_Button.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_EditBox.h>
 
 #include <components/widgets/list.hpp>
 #include <components/settings/settings.hpp>
@@ -53,6 +54,7 @@ namespace MWGui
         mSoulBox->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onSelectSoul);
         mBuyButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onBuyButtonClicked);
         mTypeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onTypeButtonClicked);
+        mName->eventEditSelectAccept += MyGUI::newDelegate(this, &EnchantingDialog::onAccept);
     }
 
     EnchantingDialog::~EnchantingDialog()
@@ -63,6 +65,7 @@ namespace MWGui
     void EnchantingDialog::onOpen()
     {
         center();
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mName);
     }
 
     void EnchantingDialog::setSoulGem(const MWWorld::Ptr &gem)
@@ -282,6 +285,11 @@ namespace MWGui
         mEnchanting.nextCastStyle();
         updateLabels();
         updateEffectsView();
+    }
+
+    void EnchantingDialog::onAccept(MyGUI::EditBox *sender)
+    {
+        onBuyButtonClicked(sender);
     }
 
     void EnchantingDialog::onBuyButtonClicked(MyGUI::Widget* sender)

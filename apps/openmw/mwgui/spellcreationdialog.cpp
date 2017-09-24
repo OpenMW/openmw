@@ -349,6 +349,7 @@ namespace MWGui
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellCreationDialog::onCancelButtonClicked);
         mBuyButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellCreationDialog::onBuyButtonClicked);
+        mNameEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &SpellCreationDialog::onAccept);
 
         setWidgets(mAvailableEffectsList, mUsedEffectsView);
     }
@@ -414,6 +415,11 @@ namespace MWGui
         spells.add (spell->mId);
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_SpellCreation);
+    }
+
+    void SpellCreationDialog::onAccept(MyGUI::EditBox *sender)
+    {
+        onBuyButtonClicked(sender);
     }
 
     void SpellCreationDialog::onOpen()
