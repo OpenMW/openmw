@@ -162,14 +162,13 @@ namespace MWInput
 
     void InputManager::setPlayerControlsEnabled(bool enabled)
     {
-        int nPlayerChannels = 18;
-        int playerChannels[] = {A_Activate, A_AutoMove, A_AlwaysRun, A_ToggleWeapon,
+        int playerChannels[] = {A_AutoMove, A_AlwaysRun, A_ToggleWeapon,
                                 A_ToggleSpell, A_Rest, A_QuickKey1, A_QuickKey2,
                                 A_QuickKey3, A_QuickKey4, A_QuickKey5, A_QuickKey6,
                                 A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10,
                                 A_Use, A_Journal};
 
-        for(int i = 0; i < nPlayerChannels; i++) {
+        for(size_t i = 0; i < sizeof(playerChannels)/sizeof(playerChannels[0]); i++) {
             int pc = playerChannels[i];
             mInputBinder->getChannel(pc)->setEnabled(enabled);
         }
@@ -234,8 +233,7 @@ namespace MWInput
                 break;
             case A_Activate:
                 resetIdleTime();
-                if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-                    activate();
+                activate();
                 break;
             case A_Journal:
                 toggleJournal ();
@@ -1080,7 +1078,9 @@ namespace MWInput
 
     void InputManager::activate()
     {
-        if (mControlSwitch["playercontrols"])
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Return, 0);
+        else if (mControlSwitch["playercontrols"])
             mPlayer->activate();
     }
 
