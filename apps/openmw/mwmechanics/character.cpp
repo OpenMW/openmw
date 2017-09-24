@@ -1892,7 +1892,7 @@ void CharacterController::update(float duration)
             movestate = mMovementState;
         }
 
-        if(!isTurning())
+        if(movestate != CharState_None && !isTurning())
             clearAnimQueue();
 
         if(mAnimQueue.empty() || inwater || sneak)

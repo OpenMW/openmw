@@ -2123,6 +2123,9 @@ namespace MWWorld
 
     bool World::isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const
     {
+        if (!cell)
+            return false;
+
         if (!(cell->getCell()->hasWater())) {
             return false;
         }
