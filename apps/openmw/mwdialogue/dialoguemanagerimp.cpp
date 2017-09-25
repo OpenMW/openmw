@@ -127,9 +127,6 @@ namespace MWDialogue
 
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
-        // If the dialogue window was already open, keep the existing history
-        bool resetHistory = (!MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Dialogue));
-
         //greeting
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
@@ -145,7 +142,7 @@ namespace MWDialogue
                 {
                     //initialise the GUI
                     MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue);
-                    win->startDialogue(actor, actor.getClass().getName (actor), resetHistory);
+                    win->startDialogue(actor, actor.getClass().getName (actor));
 
                     creatureStats.talkedToPlayer();
 

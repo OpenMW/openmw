@@ -283,6 +283,7 @@ namespace MWGui
         }
         else
         {
+            resetReference();
             MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
             mTopicsList->scrollToTop();
             return true;
@@ -357,7 +358,7 @@ namespace MWGui
         }
     }
 
-    void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName, bool resetHistory)
+    void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
     {
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
 
@@ -372,7 +373,7 @@ namespace MWGui
 
         mTopicsList->clear();
 
-        if (resetHistory || !sameActor)
+        if (!sameActor)
         {
             for (std::vector<DialogueText*>::iterator it = mHistoryContents.begin(); it != mHistoryContents.end(); ++it)
                 delete (*it);
