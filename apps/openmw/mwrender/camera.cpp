@@ -1,8 +1,11 @@
 #include "camera.hpp"
 
 #include <osg/Camera>
+#include <osg/PositionAttitudeTransform>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -364,10 +367,20 @@ namespace MWRender
     {
         if(isFirstPerson())
         {
-            mAnimation->setViewMode(NpcAnimation::VM_FirstPerson);
             mTrackingNode = mAnimation->getNode("Camera");
             if (!mTrackingNode)
                 mTrackingNode = mAnimation->getNode("Head");
+            if (!Settings::Manager::getBool("use third person animations in first person view","Camera"))
+            {
+                mAnimation->setViewMode(NpcAnimation::VM_FirstPerson);
+            }
+            else
+            {
+                osg::ref_ptr<osg::PositionAttitudeTransform> node2 = new osg::PositionAttitudeTransform;
+                const_cast<osg::Node*>(mTrackingNode.get())->asGroup()->addChild(node2);
+                node2->setPosition(osg::Vec3f(0,-10,0));
+                mTrackingNode = node2;
+            }
             mHeightScale = 1.f;
         }
         else
