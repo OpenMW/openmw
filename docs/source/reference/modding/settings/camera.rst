@@ -121,3 +121,14 @@ because the Bethesda provided Morrowind assets do not adapt well to large values
 while small values can result in the hands not being visible.
 
 The default value is 55.0. This setting can only be configured by editing the settings configuration file.
+
+use third person animations in first person view
+------------------------------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true, first person camera uses third person animations. This results in the body of player character being shown in first person view and added head bobbing, because the camera is attached to the head of the character.
+
+The default value is false. This setting can only be configured by editing the settings configuration file.
