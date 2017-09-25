@@ -223,7 +223,7 @@ namespace MWGui
     {
 
         MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
-        MWBase::Environment::get().getDialogueManager()->keywordSelected(Misc::StringUtils::lowerCase(mTopicId));
+        MWBase::Environment::get().getDialogueManager()->keywordSelected(mTopicId);
     }
 
     void Goodbye::activated()
@@ -328,7 +328,7 @@ namespace MWGui
         }
 
         if (id >= separatorPos)
-            MWBase::Environment::get().getDialogueManager()->keywordSelected(Misc::StringUtils::lowerCase(topic));
+            MWBase::Environment::get().getDialogueManager()->keywordSelected(topic);
         else
         {
             const MWWorld::Store<ESM::GameSetting> &gmst =
@@ -552,24 +552,7 @@ namespace MWGui
 
     void DialogueWindow::addResponse(const std::string &text, const std::string &title, bool needMargin)
     {
-        // This is called from the dialogue manager, so text is
-        // case-smashed - thus we have to retrieve the correct case
-        // of the title through the topic list.
-        std::string realTitle = title;
-        if (realTitle != "")
-        {
-            for (size_t i=0; i<mTopicsList->getItemCount(); ++i)
-            {
-                std::string item = mTopicsList->getItemNameAt(i);
-                if (Misc::StringUtils::ciEqual(item, title))
-                {
-                    realTitle = item;
-                    break;
-                }
-            }
-        }
-
-        mHistoryContents.push_back(new Response(text, realTitle, needMargin));
+        mHistoryContents.push_back(new Response(text, title, needMargin));
         updateHistory();
     }
 

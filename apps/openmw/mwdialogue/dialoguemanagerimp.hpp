@@ -22,7 +22,6 @@ namespace MWDialogue
 {
     class DialogueManager : public MWBase::DialogueManager
     {
-            std::map<std::string, ESM::Dialogue> mDialogueMap;
             std::set<std::string> mKnownTopics;// Those are the topics the player knows.
 
             // Modified faction reactions. <Faction1, <Faction2, Difference> >
@@ -55,6 +54,8 @@ namespace MWDialogue
             void executeScript (const std::string& script, const MWWorld::Ptr& actor);
 
             void executeTopic (const std::string& topic);
+
+            const ESM::Dialogue* searchDialogue(const std::string& id);
 
         public:
 

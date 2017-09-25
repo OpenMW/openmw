@@ -60,15 +60,6 @@ namespace MWDialogue
         mChoice = -1;
         mIsInChoice = false;
         mCompilerContext.setExtensions (&extensions);
-
-        const MWWorld::Store<ESM::Dialogue> &dialogs =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
-
-        MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
-        for (; it != dialogs.end(); ++it)
-        {
-            mDialogueMap[Misc::StringUtils::lowerCase(it->mId)] = *it;
-        }
     }
 
     void DialogueManager::clear()
@@ -171,7 +162,7 @@ namespace MWDialogue
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                     win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext), "", false);
                     executeScript (info->mResultScript, mActor);
-                    mLastTopic = Misc::StringUtils::lowerCase(it->mId);
+                    mLastTopic = it->mId;
 
                     // update topics again to accommodate changes resulting from executeScript
                     updateTopics();
@@ -310,7 +301,7 @@ namespace MWDialogue
                 {
                     if (iter->mId == info->mId)
                     {
-                        MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor);
+                        MWBase::Environment::get().getJournal()->addTopic (Misc::StringUtils::lowerCase(topic), info->mId, mActor);
                         break;
                     }
                 }
@@ -325,6 +316,11 @@ namespace MWDialogue
             // no response found, print a fallback text
             win->addResponse ("…", topic);
         }
+    }
+
+    const ESM::Dialogue *DialogueManager::searchDialogue(const std::string& id)
+    {
+        return MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().search(id);
     }
 
     void DialogueManager::updateGlobals()
@@ -416,12 +412,10 @@ namespace MWDialogue
     {
         if(!mIsInChoice)
         {
-            if(mDialogueMap.find(keyword) != mDialogueMap.end())
+            const ESM::Dialogue* dialogue = searchDialogue(keyword);
+            if (dialogue && dialogue->mType == ESM::Dialogue::Topic)
             {
-                if (mDialogueMap[keyword].mType == ESM::Dialogue::Topic)
-                {
-                    executeTopic (keyword);
-                }
+                executeTopic (keyword);
             }
         }
 
@@ -456,14 +450,14 @@ namespace MWDialogue
     {
         mChoice = answer;
 
-        if (mDialogueMap.find(mLastTopic) != mDialogueMap.end())
+        const ESM::Dialogue* dialogue = searchDialogue(mLastTopic);
+        if (dialogue)
         {
             Filter filter (mActor, mChoice, mTalkedTo);
 
-            if (mDialogueMap[mLastTopic].mType == ESM::Dialogue::Topic
-                    || mDialogueMap[mLastTopic].mType == ESM::Dialogue::Greeting)
+            if (dialogue->mType == ESM::Dialogue::Topic || dialogue->mType  == ESM::Dialogue::Greeting)
             {
-                if (const ESM::DialInfo *info = filter.search (mDialogueMap[mLastTopic], true))
+                if (const ESM::DialInfo *info = filter.search (*dialogue, true))
                 {
                     std::string text = info->mResponse;
                     parseText (text);
@@ -477,12 +471,12 @@ namespace MWDialogue
 
                     // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
                     // in which case it should not be added to the journal.
-                    for (ESM::Dialogue::InfoContainer::const_iterator iter = mDialogueMap[mLastTopic].mInfo.begin();
-                        iter!=mDialogueMap[mLastTopic].mInfo.end(); ++iter)
+                    for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue->mInfo.begin();
+                        iter!=dialogue->mInfo.end(); ++iter)
                     {
                         if (iter->mId == info->mId)
                         {
-                            MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId, mActor);
+                            MWBase::Environment::get().getJournal()->addTopic (Misc::StringUtils::lowerCase(mLastTopic), info->mId, mActor);
                             break;
                         }
                     }
@@ -737,7 +731,7 @@ namespace MWDialogue
         if (actor == mActor && !mLastTopic.empty())
         {
             MWBase::Environment::get().getJournal()->removeLastAddedTopicResponse(
-                        mLastTopic, actor.getClass().getName(actor));
+                        Misc::StringUtils::lowerCase(mLastTopic), actor.getClass().getName(actor));
         }
     }
 }
