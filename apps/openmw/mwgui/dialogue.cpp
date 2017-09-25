@@ -625,7 +625,7 @@ namespace MWGui
     void DialogueWindow::onFrame(float dt)
     {
         checkReferenceAvailable();
-        if(mPtr.getTypeName() == typeid(ESM::NPC).name())
+        if(!mPtr.isEmpty() && mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
             int disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr);
             mDispositionBar->setProgressRange(100);
