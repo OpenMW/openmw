@@ -46,7 +46,7 @@ struct NPC
       // Other services
       Spells        = 0x00800,
       MagicItems    = 0x01000,
-      Training      = 0x04000, // What skills?
+      Training      = 0x04000,
       Spellmaking   = 0x08000,
       Enchanting    = 0x10000,
       Repair        = 0x20000

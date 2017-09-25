@@ -365,19 +365,7 @@ namespace MWDialogue
         }
 
         // check the available services of this actor
-        int services = 0;
-        if (mActor.getTypeName() == typeid(ESM::NPC).name())
-        {
-            MWWorld::LiveCellRef<ESM::NPC>* ref = mActor.get<ESM::NPC>();
-            if (ref->mBase->mHasAI)
-                services = ref->mBase->mAiData.mServices;
-        }
-        else if (mActor.getTypeName() == typeid(ESM::Creature).name())
-        {
-            MWWorld::LiveCellRef<ESM::Creature>* ref = mActor.get<ESM::Creature>();
-            if (ref->mBase->mHasAI)
-                services = ref->mBase->mAiData.mServices;
-        }
+        int services = mActor.getClass().getServices(mActor);
 
         int windowServices = 0;
 
