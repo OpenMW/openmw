@@ -384,7 +384,7 @@ namespace MWGui
             delete (*it);
         mLinks.clear();
 
-        updateOptions();
+        updateDisposition();
 
         restock();
     }
@@ -579,13 +579,10 @@ namespace MWGui
         updateHistory();
     }
 
-    void DialogueWindow::updateOptions()
+    void DialogueWindow::updateDisposition()
     {
-        //Clear the list of topics
-        mTopicsList->clear();
-
         bool dispositionVisible = false;
-        if (mPtr.getClass().isNpc())
+        if (!mPtr.isEmpty() && mPtr.getClass().isNpc())
         {
             dispositionVisible = true;
             mDispositionBar->setProgressRange(100);
@@ -626,12 +623,6 @@ namespace MWGui
     void DialogueWindow::onFrame(float dt)
     {
         checkReferenceAvailable();
-        if(!mPtr.isEmpty() && mPtr.getTypeName() == typeid(ESM::NPC).name())
-        {
-            int disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr);
-            mDispositionBar->setProgressRange(100);
-            mDispositionBar->setProgressPosition(disp);
-            mDispositionText->setCaption(MyGUI::utility::toString(disp)+std::string("/100"));
-        }
+        updateDisposition();
     }
 }

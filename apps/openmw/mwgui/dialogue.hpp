@@ -135,7 +135,7 @@ namespace MWGui
         virtual void onReferenceUnavailable();
 
     private:
-        void updateOptions();
+        void updateDisposition();
         void restock();
 
         bool mEnabled;
