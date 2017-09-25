@@ -1884,6 +1884,11 @@ namespace MWGui
             mSpellWindow->updateSpells();
     }
 
+    void WindowManager::setConsoleSelectedObject(const MWWorld::Ptr &object)
+    {
+        mConsole->setSelectedObject(object);
+    }
+
     std::string WindowManager::correctIconPath(const std::string& path)
     {
         return Misc::ResourceHelpers::correctIconPath(path, mResourceSystem->getVFS());

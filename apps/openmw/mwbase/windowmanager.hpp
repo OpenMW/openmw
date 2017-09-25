@@ -151,6 +151,8 @@ namespace MWBase
 
             virtual void updateSpellWindow() = 0;
 
+            virtual void setConsoleSelectedObject(const MWWorld::Ptr& object) = 0;
+
             /// Set value for the given ID.
             virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value) = 0;
             virtual void setValue (int parSkill, const MWMechanics::SkillValue& value) = 0;

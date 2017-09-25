@@ -417,7 +417,7 @@ namespace MWGui
         setCoord(10,10, width-10, height/2);
     }
 
-    void Console::setPtr(const MWWorld::Ptr& object)
+    void Console::setSelectedObject(const MWWorld::Ptr& object)
     {
         if (!object.isEmpty())
         {
@@ -443,12 +443,12 @@ namespace MWGui
 
     void Console::onReferenceUnavailable()
     {
-        setPtr(MWWorld::Ptr());
+        setSelectedObject(MWWorld::Ptr());
     }
 
     void Console::resetReference()
     {
         ReferenceInterface::resetReference();
-        setPtr(MWWorld::Ptr());
+        setSelectedObject(MWWorld::Ptr());
     }
 }

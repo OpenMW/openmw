@@ -190,6 +190,8 @@ namespace MWGui
 
     virtual void updateSpellWindow();
 
+    virtual void setConsoleSelectedObject(const MWWorld::Ptr& object);
+
     ///< Set value for the given ID.
     virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value);
     virtual void setValue (int parSkill, const MWMechanics::SkillValue& value);
