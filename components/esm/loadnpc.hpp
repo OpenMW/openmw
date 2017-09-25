@@ -43,6 +43,8 @@ struct NPC
       Misc          = 0x00400,
       Potions       = 0x02000,
 
+      AllItems = Weapon|Armor|Clothing|Books|Ingredients|Picks|Probes|Lights|Apparatus|RepairItem|Misc|Potions,
+
       // Other services
       Spells        = 0x00800,
       MagicItems    = 0x01000,

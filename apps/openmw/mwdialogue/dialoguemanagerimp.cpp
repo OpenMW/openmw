@@ -360,46 +360,7 @@ namespace MWDialogue
             }
         }
 
-        // check the available services of this actor
-        int services = mActor.getClass().getServices(mActor);
-
-        int windowServices = 0;
-
-        if (services & ESM::NPC::Weapon
-            || services & ESM::NPC::Armor
-            || services & ESM::NPC::Clothing
-            || services & ESM::NPC::Books
-            || services & ESM::NPC::Ingredients
-            || services & ESM::NPC::Picks
-            || services & ESM::NPC::Probes
-            || services & ESM::NPC::Lights
-            || services & ESM::NPC::Apparatus
-            || services & ESM::NPC::RepairItem
-            || services & ESM::NPC::Misc)
-            windowServices |= MWGui::DialogueWindow::Service_Trade;
-
-        if((mActor.getTypeName() == typeid(ESM::NPC).name() && !mActor.get<ESM::NPC>()->mBase->getTransport().empty())
-                || (mActor.getTypeName() == typeid(ESM::Creature).name() && !mActor.get<ESM::Creature>()->mBase->getTransport().empty()))
-            windowServices |= MWGui::DialogueWindow::Service_Travel;
-
-        if (services & ESM::NPC::Spells)
-            windowServices |= MWGui::DialogueWindow::Service_BuySpells;
-
-        if (services & ESM::NPC::Spellmaking)
-            windowServices |= MWGui::DialogueWindow::Service_CreateSpells;
-
-        if (services & ESM::NPC::Training)
-            windowServices |= MWGui::DialogueWindow::Service_Training;
-
-        if (services & ESM::NPC::Enchanting)
-            windowServices |= MWGui::DialogueWindow::Service_Enchant;
-
-        if (services & ESM::NPC::Repair)
-            windowServices |= MWGui::DialogueWindow::Service_Repair;
-
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-
-        win->setServices (windowServices);
 
         // sort again, because the previous sort was case-sensitive
         keywordList.sort(Misc::StringUtils::ciLess);

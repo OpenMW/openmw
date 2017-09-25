@@ -237,7 +237,6 @@ namespace MWGui
 
     DialogueWindow::DialogueWindow()
         : WindowBase("openmw_dialogue_window.layout")
-        , mServices(0)
         , mEnabled(false)
         , mGoodbye(false)
         , mPersuasionDialog()
@@ -411,6 +410,11 @@ namespace MWGui
         mTopicLinks.clear();
         mKeywordSearch.clear();
 
+        int services = mPtr.getClass().getServices(mPtr);
+
+        bool travel = (mPtr.getTypeName() == typeid(ESM::NPC).name() && !mPtr.get<ESM::NPC>()->mBase->getTransport().empty())
+                || (mPtr.getTypeName() == typeid(ESM::Creature).name() && !mPtr.get<ESM::Creature>()->mBase->getTransport().empty());
+
         bool isCompanion = !mPtr.getClass().getScript(mPtr).empty()
                 && mPtr.getRefData().getLocals().getIntVar(mPtr.getClass().getScript(mPtr), "companion");
 
@@ -420,25 +424,25 @@ namespace MWGui
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
             mTopicsList->addItem(gmst.find("sPersuasion")->getString());
 
-        if (mServices & Service_Trade)
+        if (services & ESM::NPC::AllItems)
             mTopicsList->addItem(gmst.find("sBarter")->getString());
 
-        if (mServices & Service_BuySpells)
+        if (services & ESM::NPC::Spells)
             mTopicsList->addItem(gmst.find("sSpells")->getString());
 
-        if (mServices & Service_Travel)
+        if (services & travel)
             mTopicsList->addItem(gmst.find("sTravel")->getString());
 
-        if (mServices & Service_CreateSpells)
+        if (services & ESM::NPC::Spellmaking)
             mTopicsList->addItem(gmst.find("sSpellmakingMenuTitle")->getString());
 
-        if (mServices & Service_Enchant)
+        if (services & ESM::NPC::Enchanting)
             mTopicsList->addItem(gmst.find("sEnchanting")->getString());
 
-        if (mServices & Service_Training)
+        if (services & ESM::NPC::Training)
             mTopicsList->addItem(gmst.find("sServiceTrainingTitle")->getString());
 
-        if (mServices & Service_Repair)
+        if (services & ESM::NPC::Repair)
             mTopicsList->addItem(gmst.find("sRepair")->getString());
 
         if (isCompanion)

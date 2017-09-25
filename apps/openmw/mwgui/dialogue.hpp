@@ -122,20 +122,6 @@ namespace MWGui
         void onFrame(float dt);
         void clear() { resetReference(); }
 
-        // make sure to call these before setKeywords()
-        void setServices(int services) { mServices = services; }
-
-        enum Services
-        {
-            Service_Trade = 0x01,
-            Service_BuySpells = 0x02,
-            Service_CreateSpells = 0x04,
-            Service_Enchant = 0x08,
-            Service_Training = 0x10,
-            Service_Travel = 0x20,
-            Service_Repair = 0x40
-        };
-
     protected:
         void onSelectTopic(const std::string& topic, int id);
         void onByeClicked(MyGUI::Widget* _sender);
@@ -151,8 +137,6 @@ namespace MWGui
     private:
         void updateOptions();
         void restock();
-
-        int mServices;
 
         bool mEnabled;
 
