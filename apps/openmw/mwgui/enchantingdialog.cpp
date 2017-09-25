@@ -353,6 +353,7 @@ namespace MWGui
 
                     MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
                     MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+                    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
                     return;
                 }
             }

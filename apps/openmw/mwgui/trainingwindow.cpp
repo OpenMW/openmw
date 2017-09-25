@@ -197,6 +197,7 @@ namespace MWGui
         // go back to game mode
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
         MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
     }
 
     void TrainingWindow::onFrame(float dt)

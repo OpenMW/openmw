@@ -68,7 +68,9 @@ namespace MWGui
         else /*if (sender == mBribe1000Button)*/
             type = MWBase::MechanicsManager::PT_Bribe1000;
 
-        MWBase::Environment::get().getDialogueManager()->persuade(type);
+        MWBase::DialogueManager::Response response = MWBase::Environment::get().getDialogueManager()->persuade(type);
+
+        eventPersuadeMsg(response.first, response.second);
 
         setVisible(false);
     }
@@ -214,30 +216,26 @@ namespace MWGui
 
     void Choice::activated()
     {
-
         MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
-        MWBase::Environment::get().getDialogueManager()->questionAnswered(mChoiceId);
+        eventChoiceActivated(mChoiceId);
     }
 
     void Topic::activated()
     {
-
         MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
-        MWBase::Environment::get().getDialogueManager()->keywordSelected(mTopicId);
+        eventTopicActivated(mTopicId);
     }
 
     void Goodbye::activated()
     {
-
         MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
-        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+        eventActivated();
     }
 
     // --------------------------------------------------------------------------------------------------
 
     DialogueWindow::DialogueWindow()
         : WindowBase("openmw_dialogue_window.layout")
-        , mEnabled(false)
         , mGoodbye(false)
         , mPersuasionDialog()
     {
@@ -245,13 +243,14 @@ namespace MWGui
         center();
 
         mPersuasionDialog.setVisible(false);
+        mPersuasionDialog.eventPersuadeMsg += MyGUI::newDelegate(this, &DialogueWindow::onPersuadeResult);
 
         //History view
         getWidget(mHistory, "History");
 
         //Topics list
         getWidget(mTopicsList, "TopicsList");
-        mTopicsList->eventItemSelected += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
+        mTopicsList->eventItemSelected += MyGUI::newDelegate(this, &DialogueWindow::onSelectListItem);
 
         getWidget(mGoodbyeButton, "ByeButton");
         mGoodbyeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
@@ -269,15 +268,27 @@ namespace MWGui
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
     }
 
+    DialogueWindow::~DialogueWindow()
+    {
+        mPersuasionDialog.eventPersuadeMsg.clear();
+
+        deleteLater();
+        for (Link* link : mLinks)
+            delete link;
+        for (auto link : mTopicLinks)
+            delete link.second;
+        for (auto history : mHistoryContents)
+            delete history;
+    }
+
     void DialogueWindow::onTradeComplete()
     {
-        addResponse(MyGUI::LanguageManager::getInstance().replaceTags("#{sBarterDialog5}"));
+        addResponse("", MyGUI::LanguageManager::getInstance().replaceTags("#{sBarterDialog5}"));
     }
 
     bool DialogueWindow::exit()
     {
-        if ((!mEnabled || MWBase::Environment::get().getDialogueManager()->isInChoice())
-                && !mGoodbye)
+        if ((MWBase::Environment::get().getDialogueManager()->isInChoice()))
         {
             return false;
         }
@@ -315,9 +326,9 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
     }
 
-    void DialogueWindow::onSelectTopic(const std::string& topic, int id)
+    void DialogueWindow::onSelectListItem(const std::string& topic, int id)
     {
-        if (!mEnabled || MWBase::Environment::get().getDialogueManager()->isInChoice())
+        if (mGoodbye ||  MWBase::Environment::get().getDialogueManager()->isInChoice())
             return;
 
         int separatorPos = 0;
@@ -328,17 +339,18 @@ namespace MWGui
         }
 
         if (id >= separatorPos)
-            MWBase::Environment::get().getDialogueManager()->keywordSelected(topic);
+            onTopicActivated(topic);
         else
         {
             const MWWorld::Store<ESM::GameSetting> &gmst =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
+            MWBase::DialogueManager::Response response;
             if (topic == gmst.find("sPersuasion")->getString())
                 mPersuasionDialog.setVisible(true);
             else if (topic == gmst.find("sCompanionShare")->getString())
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Companion, mPtr);
-            else if (!MWBase::Environment::get().getDialogueManager()->checkServiceRefused())
+            else if (!MWBase::Environment::get().getDialogueManager()->checkServiceRefused(response))
             {
                 if (topic == gmst.find("sBarter")->getString())
                     MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Barter, mPtr);
@@ -355,21 +367,30 @@ namespace MWGui
                 else if (topic == gmst.find("sRepair")->getString())
                     MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_MerchantRepair, mPtr);
             }
+            else
+                addResponse(response.first, response.second);
         }
     }
 
-    void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
+    void DialogueWindow::setPtr(const MWWorld::Ptr& actor)
     {
+        MWBase::DialogueManager::Response response;
+        if (!MWBase::Environment::get().getDialogueManager()->startDialogue(actor, response))
+        {
+            // No greetings found. The dialogue window should not be shown.
+            // If this is a companion, we must show the companion window directly (used by BM_bear_be_unique).
+            if (isCompanion())
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Companion, mPtr);
+            return;
+        }
+
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
 
         mGoodbye = false;
-        mEnabled = true;
         bool sameActor = (mPtr == actor);
         mPtr = actor;
         mTopicsList->setEnabled(true);
-        setTitle(npcName);
-
-        clearChoices();
+        setTitle(mPtr.getClass().getName(mPtr));
 
         mTopicsList->clear();
 
@@ -381,12 +402,13 @@ namespace MWGui
         }
 
         for (std::vector<Link*>::iterator it = mLinks.begin(); it != mLinks.end(); ++it)
-            delete (*it);
+            mDeleteLater.push_back(*it); // Links are not deleted right away to prevent issues with event handlers
         mLinks.clear();
 
         updateDisposition();
-
         restock();
+
+        addResponse(response.first, response.second, false);
     }
 
     void DialogueWindow::restock()
@@ -403,11 +425,18 @@ namespace MWGui
         }
     }
 
+    void DialogueWindow::deleteLater()
+    {
+        for (Link* link : mDeleteLater)
+            delete link;
+        mDeleteLater.clear();
+    }
+
     void DialogueWindow::setKeywords(std::list<std::string> keyWords)
     {
         mTopicsList->clear();
         for (std::map<std::string, Link*>::iterator it = mTopicLinks.begin(); it != mTopicLinks.end(); ++it)
-            delete it->second;
+            mDeleteLater.push_back(it->second);
         mTopicLinks.clear();
         mKeywordSearch.clear();
 
@@ -415,9 +444,6 @@ namespace MWGui
 
         bool travel = (mPtr.getTypeName() == typeid(ESM::NPC).name() && !mPtr.get<ESM::NPC>()->mBase->getTransport().empty())
                 || (mPtr.getTypeName() == typeid(ESM::Creature).name() && !mPtr.get<ESM::Creature>()->mBase->getTransport().empty());
-
-        bool isCompanion = !mPtr.getClass().getScript(mPtr).empty()
-                && mPtr.getRefData().getLocals().getIntVar(mPtr.getClass().getScript(mPtr), "companion");
 
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -446,7 +472,7 @@ namespace MWGui
         if (services & ESM::NPC::Repair)
             mTopicsList->addItem(gmst.find("sRepair")->getString());
 
-        if (isCompanion)
+        if (isCompanion())
             mTopicsList->addItem(gmst.find("sCompanionShare")->getString());
 
         if (mTopicsList->getItemCount() > 0)
@@ -458,6 +484,7 @@ namespace MWGui
             mTopicsList->addItem(*it);
 
             Topic* t = new Topic(*it);
+            t->eventTopicActivated += MyGUI::newDelegate(this, &DialogueWindow::onTopicActivated);
             mTopicLinks[Misc::StringUtils::lowerCase(*it)] = t;
 
             mKeywordSearch.seed(Misc::StringUtils::lowerCase(*it), intptr_t(t));
@@ -491,9 +518,11 @@ namespace MWGui
         typesetter->sectionBreak(9);
         // choices
         const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
-        for (std::vector<std::pair<std::string, int> >::iterator it = mChoices.begin(); it != mChoices.end(); ++it)
+        mChoices = MWBase::Environment::get().getDialogueManager()->getChoices();
+        for (std::vector<std::pair<std::string, int> >::const_iterator it = mChoices.begin(); it != mChoices.end(); ++it)
         {
             Choice* link = new Choice(it->second);
+            link->eventChoiceActivated += MyGUI::newDelegate(this, &DialogueWindow::onChoiceActivated);
             mLinks.push_back(link);
 
             typesetter->lineBreak();
@@ -503,9 +532,11 @@ namespace MWGui
             typesetter->write(questionStyle, to_utf8_span(it->first.c_str()));
         }
 
+        mGoodbye = MWBase::Environment::get().getDialogueManager()->isGoodbye();
         if (mGoodbye)
         {
             Goodbye* link = new Goodbye();
+            link->eventActivated += MyGUI::newDelegate(this, &DialogueWindow::onGoodbyeActivated);
             mLinks.push_back(link);
             std::string goodbye = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->getString();
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, textColours.answer, textColours.answerOver,
@@ -550,32 +581,40 @@ namespace MWGui
         reinterpret_cast<Link*>(link)->activated();
     }
 
+    void DialogueWindow::onTopicActivated(const std::string &topicId)
+    {
+        MWBase::DialogueManager::Response response = MWBase::Environment::get().getDialogueManager()->keywordSelected(topicId);
+        addResponse(response.first, response.second);
+    }
+
+    void DialogueWindow::onChoiceActivated(int id)
+    {
+        MWBase::DialogueManager::Response response = MWBase::Environment::get().getDialogueManager()->questionAnswered(id);
+        addResponse(response.first, response.second);
+    }
+
+    void DialogueWindow::onGoodbyeActivated()
+    {
+        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
+        resetReference();
+    }
+
     void DialogueWindow::onScrollbarMoved(MyGUI::ScrollBar *sender, size_t pos)
     {
         mHistory->setPosition(0, static_cast<int>(pos) * -1);
     }
 
-    void DialogueWindow::addResponse(const std::string &text, const std::string &title, bool needMargin)
+    void DialogueWindow::addResponse(const std::string &title, const std::string &text, bool needMargin)
     {
         mHistoryContents.push_back(new Response(text, title, needMargin));
         updateHistory();
+        updateTopics();
     }
 
     void DialogueWindow::addMessageBox(const std::string& text)
     {
         mHistoryContents.push_back(new Message(text));
-        updateHistory();
-    }
-
-    void DialogueWindow::addChoice(const std::string& choice, int id)
-    {
-        mChoices.push_back(std::make_pair(choice, id));
-        updateHistory();
-    }
-
-    void DialogueWindow::clearChoices()
-    {
-        mChoices.clear();
         updateHistory();
     }
 
@@ -608,13 +647,6 @@ namespace MWGui
         }
     }
 
-    void DialogueWindow::goodbye()
-    {
-        mGoodbye = true;
-        mEnabled = false;
-        updateHistory();
-    }
-
     void DialogueWindow::onReferenceUnavailable()
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
@@ -623,6 +655,30 @@ namespace MWGui
     void DialogueWindow::onFrame(float dt)
     {
         checkReferenceAvailable();
+        if (mPtr.isEmpty())
+            return;
+
         updateDisposition();
+        deleteLater();
+
+        if (mChoices != MWBase::Environment::get().getDialogueManager()->getChoices()
+                || mGoodbye != MWBase::Environment::get().getDialogueManager()->isGoodbye())
+            updateHistory();
+    }
+
+    void DialogueWindow::updateTopics()
+    {
+        setKeywords(MWBase::Environment::get().getDialogueManager()->getAvailableTopics());
+    }
+
+    bool DialogueWindow::isCompanion()
+    {
+        return !mPtr.getClass().getScript(mPtr).empty()
+                && mPtr.getRefData().getLocals().getIntVar(mPtr.getClass().getScript(mPtr), "companion");
+    }
+
+    void DialogueWindow::onPersuadeResult(const std::string &title, const std::string &text)
+    {
+        addResponse(title, text);
     }
 }

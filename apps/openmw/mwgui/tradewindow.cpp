@@ -323,6 +323,7 @@ namespace MWGui
 
                 onCancelButtonClicked(mCancelButton);
                 MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+                MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
                 return;
             }
         }

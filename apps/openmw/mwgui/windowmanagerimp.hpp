@@ -179,7 +179,6 @@ namespace MWGui
     virtual bool isAllowed(GuiWindow wnd) const;
 
     /// \todo investigate, if we really need to expose every single lousy UI element to the outside world
-    virtual MWGui::DialogueWindow* getDialogueWindow();
     virtual MWGui::InventoryWindow* getInventoryWindow();
     virtual MWGui::CountDialog* getCountDialog();
     virtual MWGui::ConfirmationDialog* getConfirmationDialog();

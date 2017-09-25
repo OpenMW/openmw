@@ -178,6 +178,7 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
         MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
 
         // Teleports any followers, too.
         MWWorld::ActionTeleport action(interior ? cellname : "", pos, true);

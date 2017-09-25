@@ -41,19 +41,22 @@ namespace MWDialogue
             int mChoice;
             std::string mLastTopic; // last topic ID, lowercase
             bool mIsInChoice;
+            bool mGoodbye;
+
+            std::vector<std::pair<std::string, int> > mChoices;
 
             float mTemporaryDispositionChange;
             float mPermanentDispositionChange;
 
             void parseText (const std::string& text);
 
-            void updateTopics();
+            void updateActorKnownTopics();
             void updateGlobals();
 
             bool compile (const std::string& cmd, std::vector<Interpreter::Type_Code>& code, const MWWorld::Ptr& actor);
             void executeScript (const std::string& script, const MWWorld::Ptr& actor);
 
-            void executeTopic (const std::string& topic);
+            Response executeTopic (const std::string& topic);
 
             const ESM::Dialogue* searchDialogue(const std::string& id);
 
@@ -65,24 +68,29 @@ namespace MWDialogue
 
             virtual bool isInChoice() const;
 
-            virtual void startDialogue (const MWWorld::Ptr& actor);
+            virtual bool startDialogue (const MWWorld::Ptr& actor, Response& response);
+
+            std::list<std::string> getAvailableTopics();
 
             virtual void addTopic (const std::string& topic);
 
-            virtual void askQuestion (const std::string& question,int choice);
+            virtual void addChoice (const std::string& text,int choice);
+            const std::vector<std::pair<std::string, int> >& getChoices();
+
+            virtual bool isGoodbye();
 
             virtual void goodbye();
 
-            virtual bool checkServiceRefused ();
+            virtual bool checkServiceRefused (Response& response);
 
             virtual void say(const MWWorld::Ptr &actor, const std::string &topic);
 
             //calbacks for the GUI
-            virtual void keywordSelected (const std::string& keyword);
+            virtual Response keywordSelected (const std::string& keyword);
             virtual void goodbyeSelected();
-            virtual void questionAnswered (int answer);
+            virtual Response questionAnswered (int answer);
 
-            virtual void persuade (int type);
+            virtual Response persuade (int type);
             virtual int getTemporaryDispositionChange () const;
 
             /// @note This change is temporary and gets discarded when dialogue ends.
