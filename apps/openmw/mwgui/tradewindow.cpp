@@ -27,7 +27,6 @@
 #include "containeritemmodel.hpp"
 #include "tradeitemmodel.hpp"
 #include "countdialog.hpp"
-#include "dialogue.hpp"
 #include "controllers.hpp"
 
 namespace
@@ -358,8 +357,7 @@ namespace MWGui
                         mPtr.getClass().getCreatureStats(mPtr).getGoldPool() - mCurrentBalance );
         }
 
-        MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addResponse(
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sBarterDialog5")->getString());
+        eventTradeDone();
 
         MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);

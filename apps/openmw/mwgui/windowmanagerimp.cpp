@@ -337,7 +337,6 @@ namespace MWGui
         mTradeWindow = new TradeWindow();
         mWindows.push_back(mTradeWindow);
         trackWindow(mTradeWindow, "barter");
-
         mGuiModeStates[GM_Barter] = GuiModeState({mInventoryWindow, mTradeWindow});
 
         mConsole = new Console(w,h, mConsoleOnlyScripts);
@@ -366,6 +365,7 @@ namespace MWGui
         mWindows.push_back(mDialogueWindow);
         trackWindow(mDialogueWindow, "dialogue");
         mGuiModeStates[GM_Dialogue] = GuiModeState(mDialogueWindow);
+        mTradeWindow->eventTradeDone += MyGUI::newDelegate(mDialogueWindow, &DialogueWindow::onTradeComplete);
 
         ContainerWindow* containerWindow = new ContainerWindow(mDragAndDrop);
         mWindows.push_back(containerWindow);

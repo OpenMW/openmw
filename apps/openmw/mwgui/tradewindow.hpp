@@ -41,6 +41,9 @@ namespace MWGui
 
             virtual void resetReference();
 
+            typedef MyGUI::delegates::CMultiDelegate0 EventHandle_TradeDone;
+            EventHandle_TradeDone eventTradeDone;
+
         private:
             ItemView* mItemView;
             SortFilterItemModel* mSortModel;

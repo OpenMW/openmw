@@ -99,6 +99,8 @@ namespace MWGui
     public:
         DialogueWindow();
 
+        void onTradeComplete();
+
         virtual bool exit();
 
         // Events

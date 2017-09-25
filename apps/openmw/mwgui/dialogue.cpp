@@ -270,6 +270,11 @@ namespace MWGui
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
     }
 
+    void DialogueWindow::onTradeComplete()
+    {
+        addResponse(MyGUI::LanguageManager::getInstance().replaceTags("#{sBarterDialog5}"));
+    }
+
     bool DialogueWindow::exit()
     {
         if ((!mEnabled || MWBase::Environment::get().getDialogueManager()->isInChoice())
