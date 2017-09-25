@@ -330,14 +330,12 @@ namespace MWDialogue
         updateGlobals();
 
         std::list<std::string> keywordList;
-        int choice = mChoice;
-        mChoice = -1;
         mActorKnownTopics.clear();
 
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
-        Filter filter (mActor, mChoice, mTalkedTo);
+        Filter filter (mActor, -1, mTalkedTo);
 
         for (MWWorld::Store<ESM::Dialogue>::iterator iter = dialogs.begin(); iter != dialogs.end(); ++iter)
         {
@@ -362,8 +360,6 @@ namespace MWDialogue
         // sort again, because the previous sort was case-sensitive
         keywordList.sort(Misc::StringUtils::ciLess);
         win->setKeywords(keywordList);
-
-        mChoice = choice;
     }
 
     void DialogueManager::keywordSelected (const std::string& keyword)
