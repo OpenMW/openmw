@@ -422,18 +422,20 @@ namespace MWGui
         std::string realImage = MWBase::Environment::get().getWindowManager()->correctIconPath(image);
 
         MyGUI::EditBox* captionWidget = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("NormalText", MyGUI::IntCoord(0, 0, 300, 300), MyGUI::Align::Left | MyGUI::Align::Top, "ToolTipCaption");
-        captionWidget->setProperty("Static", "true");
+        captionWidget->setEditStatic(true);
+        captionWidget->setNeedKeyFocus(false);
         captionWidget->setCaptionWithReplacing(caption);
         MyGUI::IntSize captionSize = captionWidget->getTextSize();
 
         int captionHeight = std::max(caption != "" ? captionSize.height : 0, imageSize);
 
         MyGUI::EditBox* textWidget = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("SandText", MyGUI::IntCoord(0, captionHeight+imageCaptionVPadding, 300, 300-captionHeight-imageCaptionVPadding), MyGUI::Align::Stretch, "ToolTipText");
-        textWidget->setProperty("Static", "true");
-        textWidget->setProperty("MultiLine", "true");
-        textWidget->setProperty("WordWrap", info.wordWrap ? "true" : "false");
+        textWidget->setEditStatic(true);
+        textWidget->setEditMultiLine(true);
+        textWidget->setEditWordWrap(info.wordWrap);
         textWidget->setCaptionWithReplacing(text);
         textWidget->setTextAlign(MyGUI::Align::HCenter | MyGUI::Align::Top);
+        textWidget->setNeedKeyFocus(false);
         MyGUI::IntSize textSize = textWidget->getTextSize();
 
         captionSize += MyGUI::IntSize(imageSize, 0); // adjust for image
