@@ -4,6 +4,7 @@
 #include <MyGUI_WidgetManager.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_Window.h>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -30,7 +31,13 @@ void getKeyFocusWidgets(MyGUI::Widget* parent, std::vector<MyGUI::Widget*>& resu
     }
 }
 
+bool shouldAcceptKeyFocus(MyGUI::Widget* w)
+{
+    return w && !w->castType<MyGUI::Window>(false) && w->getInheritedEnabled() && w->getInheritedVisible() && w->getVisible() && w->getEnabled();
+}
+
 KeyboardNavigation::KeyboardNavigation()
+    : mCurrentFocus(nullptr)
 {
     MyGUI::WidgetManager::getInstance().registerUnlinker(this);
 }
@@ -42,7 +49,11 @@ KeyboardNavigation::~KeyboardNavigation()
 
 void KeyboardNavigation::saveFocus(int mode)
 {
-    mKeyFocus[mode] = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+    MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+    if (shouldAcceptKeyFocus(focus))
+        mKeyFocus[mode] = focus;
+    else
+        mKeyFocus[mode] = mCurrentFocus;
 }
 
 void KeyboardNavigation::restoreFocus(int mode)
@@ -61,6 +72,51 @@ void KeyboardNavigation::_unlinkWidget(MyGUI::Widget *widget)
     for (std::pair<const int, MyGUI::Widget*>& w : mKeyFocus)
         if (w.second == widget)
             w.second = nullptr;
+    if (widget == mCurrentFocus)
+        mCurrentFocus = nullptr;
+}
+
+void styleFocusedButton(MyGUI::Widget* w)
+{
+    if (w)
+    {
+        if (MyGUI::Button* b = w->castType<MyGUI::Button>(false))
+        {
+            b->_setWidgetState("highlighted");
+        }
+    }
+}
+
+void KeyboardNavigation::onFrame()
+{
+    MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+
+    if (focus == mCurrentFocus)
+    {
+        styleFocusedButton(mCurrentFocus);
+        return;
+    }
+
+    // workaround incorrect key focus resets (fix in MyGUI TBD)
+    if (!shouldAcceptKeyFocus(focus) && shouldAcceptKeyFocus(mCurrentFocus))
+    {
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mCurrentFocus);
+        focus = mCurrentFocus;
+    }
+
+    // style highlighted button (won't be needed for MyGUI 3.2.3)
+    if (focus != mCurrentFocus)
+    {
+        if (mCurrentFocus)
+        {
+            if (MyGUI::Button* b = mCurrentFocus->castType<MyGUI::Button>(false))
+                b->_setWidgetState("normal");
+        }
+
+        mCurrentFocus = focus;
+    }
+
+    styleFocusedButton(mCurrentFocus);
 }
 
 enum Direction

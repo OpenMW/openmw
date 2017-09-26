@@ -21,6 +21,8 @@ namespace MWGui
 
         void _unlinkWidget(MyGUI::Widget* widget);
 
+        void onFrame();
+
     private:
         bool switchFocus(int direction, bool wrap);
 
@@ -28,6 +30,8 @@ namespace MWGui
         bool accept();
 
         std::map<int, MyGUI::Widget*> mKeyFocus;
+
+        MyGUI::Widget* mCurrentFocus;
     };
 
 }

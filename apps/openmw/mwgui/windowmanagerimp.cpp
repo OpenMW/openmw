@@ -866,6 +866,8 @@ namespace MWGui
         if (!mCurrentModals.empty())
             mCurrentModals.top()->onFrame(frameDuration);
 
+        mKeyboardNavigation->onFrame();
+
         mMessageBoxManager->onFrame(frameDuration);
 
         mToolTips->onFrame(frameDuration);
