@@ -152,6 +152,21 @@ bool KeyboardNavigation::injectKeyPress(MyGUI::KeyCode key, unsigned int text)
     }
 }
 
+bool selectFirstWidget()
+{
+    MyGUI::VectorWidgetPtr keyFocusList;
+    MyGUI::EnumeratorWidgetPtr enumerator = MyGUI::Gui::getInstance().getEnumerator();
+    while (enumerator.next())
+        getKeyFocusWidgets(enumerator.current(), keyFocusList);
+
+    if (!keyFocusList.empty())
+    {
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(keyFocusList[0]);
+        return true;
+    }
+    return false;
+}
+
 bool KeyboardNavigation::switchFocus(int direction, bool wrap)
 {
     MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
@@ -159,22 +174,14 @@ bool KeyboardNavigation::switchFocus(int direction, bool wrap)
     if ((focus && focus->getTypeName().find("Button") == std::string::npos) && direction != D_Prev && direction != D_Next)
         return false;
 
-    if (focus && (direction == D_Prev || direction == D_Next) && focus->getUserString("AcceptTab") == "true")
+    bool isCycle = (direction == D_Prev || direction == D_Next);
+    if (focus && isCycle && focus->getUserString("AcceptTab") == "true")
         return false;
 
-    if ((!focus || !focus->getNeedKeyFocus()) && (direction == D_Next || direction == D_Prev))
+    if ((!focus || !focus->getNeedKeyFocus()) && isCycle)
     {
         // if nothing is selected, select the first widget
-        MyGUI::VectorWidgetPtr keyFocusList;
-        MyGUI::EnumeratorWidgetPtr enumerator = MyGUI::Gui::getInstance().getEnumerator();
-        while (enumerator.next())
-            getKeyFocusWidgets(enumerator.current(), keyFocusList);
-
-        if (!keyFocusList.empty())
-        {
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(keyFocusList[0]);
-            return true;
-        }
+        return selectFirstWidget();
     }
     if (!focus)
         return false;
@@ -190,7 +197,12 @@ bool KeyboardNavigation::switchFocus(int direction, bool wrap)
 
     MyGUI::VectorWidgetPtr::iterator found = std::find(keyFocusList.begin(), keyFocusList.end(), focus);
     if (found == keyFocusList.end())
-        return false;
+    {
+        if (isCycle)
+            return selectFirstWidget();
+        else
+            return false;
+    }
 
     bool forward = (direction == D_Next || direction == D_Right || direction == D_Down);
 
