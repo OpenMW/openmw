@@ -366,8 +366,6 @@ namespace MWInput
         mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
 
         mInputManager->capture(disableEvents);
-        // inject some fake mouse movement to force updating MyGUI's widget states
-        MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
 
         if (mControlsDisabled)
         {
@@ -763,6 +761,8 @@ namespace MWInput
 
             mMouseWheel = int(arg.z);
 
+            MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
+            // FIXME: inject twice to force updating focused widget states (tooltips) resulting from changing the viewport by scroll wheel
             MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
         }
 
