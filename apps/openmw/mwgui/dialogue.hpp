@@ -132,6 +132,7 @@ namespace MWGui
 
     protected:
         void updateTopics();
+        void updateTopicsPane();
         bool isCompanion();
 
         void onPersuadeResult(const std::string& title, const std::string& text);
@@ -155,6 +156,9 @@ namespace MWGui
         void deleteLater();
 
         bool mEnabled;
+
+        bool mIsCompanion;
+        std::list<std::string> mKeywords;
 
         std::vector<DialogueText*> mHistoryContents;
         std::vector<std::pair<std::string, int> > mChoices;

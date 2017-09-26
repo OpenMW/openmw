@@ -241,6 +241,7 @@ namespace MWGui
 
     DialogueWindow::DialogueWindow()
         : WindowBase("openmw_dialogue_window.layout")
+        , mIsCompanion(false)
         , mGoodbye(false)
         , mPersuasionDialog()
     {
@@ -404,6 +405,9 @@ namespace MWGui
             for (std::vector<DialogueText*>::iterator it = mHistoryContents.begin(); it != mHistoryContents.end(); ++it)
                 delete (*it);
             mHistoryContents.clear();
+
+            mKeywords.clear();
+            updateTopicsPane();
         }
 
         for (std::vector<Link*>::iterator it = mLinks.begin(); it != mLinks.end(); ++it)
@@ -438,6 +442,16 @@ namespace MWGui
     }
 
     void DialogueWindow::setKeywords(std::list<std::string> keyWords)
+    {
+        if (mKeywords == keyWords && isCompanion() == mIsCompanion)
+            return;
+        mIsCompanion = isCompanion();
+        mKeywords = keyWords;
+
+        updateTopicsPane();
+    }
+
+    void DialogueWindow::updateTopicsPane()
     {
         mTopicsList->clear();
         for (std::map<std::string, Link*>::iterator it = mTopicLinks.begin(); it != mTopicLinks.end(); ++it)
@@ -484,7 +498,7 @@ namespace MWGui
             mTopicsList->addSeparator();
 
 
-        for(std::list<std::string>::iterator it = keyWords.begin(); it != keyWords.end(); ++it)
+        for(std::list<std::string>::iterator it = mKeywords.begin(); it != mKeywords.end(); ++it)
         {
             mTopicsList->addItem(*it);
 
