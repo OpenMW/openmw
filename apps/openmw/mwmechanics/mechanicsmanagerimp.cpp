@@ -1,5 +1,6 @@
 #include "mechanicsmanagerimp.hpp"
 
+
 #include <limits.h>
 
 #include <components/misc/rng.hpp>
@@ -27,6 +28,7 @@
 #include "npcstats.hpp"
 #include "actorutil.hpp"
 #include "combat.hpp"
+#include "actor.hpp"
 
 namespace
 {
@@ -269,6 +271,7 @@ namespace MWMechanics
             mActors.updateActor(old, ptr);
         else
             mObjects.updateObject(old, ptr);
+
     }
 
 
@@ -290,6 +293,78 @@ namespace MWMechanics
         duration /= MWBase::Environment::get().getWorld()->getTimeScaleFactor();
         MWWorld::Ptr player = getPlayer();
         player.getClass().getInventoryStore(player).rechargeItems(duration);
+    }
+
+    void MechanicsManager::regenCreatures()
+    {
+        ESM::TimeStamp curTime = MWBase::Environment::get().getWorld()->getTimeStamp().toEsm();
+        for (std::vector<ESM::RegenCreature>::iterator it = mRegenCreatures.begin(); it != mRegenCreatures.end();)
+        {
+            ESM::RegenCreature &rCreature = *it;
+            MWWorld::Ptr ptr;
+            MWBase::Environment::get().getWorld()->getCreatureById(rCreature.mId, ptr);
+            if (ptr.isEmpty()) {
+                it++;
+                continue;
+            }
+
+            bool isNPC = ptr.getTypeName() == typeid (ESM::NPC).name();
+            bool isCreature = ptr.getTypeName() == typeid (ESM::Creature).name();
+            if (isNPC)
+            {
+                MWMechanics::NpcStats& stats = ptr.getClass().getNpcStats(ptr);
+                if (stats.isDead())
+                {
+                    it = mRegenCreatures.erase(it);
+                    continue;
+                }
+                stats.setKnockedDown(false);
+
+                if (stats.getHealth().getCurrent() == stats.getHealth().getModified() && stats.getMagicka().getCurrent() == stats.getMagicka().getModified() &&
+                    stats.getFatigue().getCurrent() == stats.getFatigue().getModified())
+                {
+                    it = mRegenCreatures.erase(it);
+                    continue;
+                }
+            }
+            else if (isCreature)
+            {
+                MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+                if (stats.isDead())
+                {
+                    it = mRegenCreatures.erase(it);
+                    continue;
+                }
+
+                stats.setKnockedDown(false);
+
+                if (stats.getHealth().getCurrent() == stats.getHealth().getModified() && stats.getMagicka().getCurrent() == stats.getMagicka().getModified() &&
+                    stats.getFatigue().getCurrent() == stats.getFatigue().getModified())
+                {
+                    it = mRegenCreatures.erase(it);
+                     continue;
+                }
+            }
+       
+            int durationElapsedHours = std::floor((curTime.mDay*24 + curTime.mHour) - (rCreature.mTimeStamp.mDay*24 + rCreature.mTimeStamp.mHour));
+            rCreature.mTimeStamp = curTime;
+            for (int i = 0; i < durationElapsedHours; ++i)
+            {
+                if (isNPC)
+                    mActors.restoreDynamicStatsNPC(ptr, true);
+                else if (isCreature)
+                    mActors.restoreDynamicStats(ptr, true);
+            }
+            ++it;
+        }
+    }
+
+
+    bool MechanicsManager::isRegenCreatureInStack(ESM::RegenCreature rCreature)
+    {
+        std::vector<ESM::RegenCreature>::iterator it;
+        it = std::find_if(mRegenCreatures.begin(), mRegenCreatures.end(), [rCreature](ESM::RegenCreature o) { return o.mId == rCreature.mId; });
+        return (it != mRegenCreatures.end());
     }
 
     void MechanicsManager::update(float duration, bool paused)
@@ -1531,7 +1606,8 @@ namespace MWMechanics
     int MechanicsManager::countSavedGameRecords() const
     {
         return 1 // Death counter
-                +1; // Stolen items
+            + 1 // Stolen items
+            + 1; // Regen Creatures.
     }
 
     void MechanicsManager::write(ESM::ESMWriter &writer, Loading::Listener &listener) const
@@ -1543,6 +1619,13 @@ namespace MWMechanics
         writer.startRecord(ESM::REC_STLN);
         items.write(writer);
         writer.endRecord(ESM::REC_STLN);
+
+        
+        ESM::RegenCreatures rCreatures;
+        rCreatures.mRegenCreatures = mRegenCreatures;
+        writer.startRecord(ESM::REC_RGNT);
+        rCreatures.write(writer);
+        writer.endRecord(ESM::REC_RGNT);
     }
 
     void MechanicsManager::readRecord(ESM::ESMReader &reader, uint32_t type)
@@ -1553,6 +1636,12 @@ namespace MWMechanics
             items.load(reader);
             mStolenItems = items.mStolenItems;
         }
+        else if (type == ESM::REC_RGNT)
+        {
+            ESM::RegenCreatures rCreatures;
+            rCreatures.load(reader);
+            mRegenCreatures = rCreatures.mRegenCreatures;
+        }
         else
             mActors.readRecord(reader, type);
     }
@@ -1561,6 +1650,7 @@ namespace MWMechanics
     {
         mActors.clear();
         mStolenItems.clear();
+        mRegenCreatures.clear();
         mClassSelected = false;
         mRaceSelected = false;
     }

@@ -5,7 +5,7 @@
 namespace MWWorld
 {
 
-    const ESM::RefNum& CellRef::getRefNum() const
+    ESM::RefNum CellRef::getRefNum() const
     {
         return mCellRef.mRefNum;
     }

@@ -100,7 +100,12 @@ namespace MWMechanics
             void rest(bool sleep);
             ///< Update actors while the player is waiting or sleeping. This should be called every hour.
 
+            template <typename T>
+            void restoreDynamicStatsVar(const MWWorld::Ptr& ptr, bool sleep, T &stats);
+
             void restoreDynamicStats(const MWWorld::Ptr& actor, bool sleep);
+
+            void restoreDynamicStatsNPC(const MWWorld::Ptr & ptr, bool sleep);
 
             int getHoursToRest(const MWWorld::Ptr& ptr) const;
             ///< Calculate how many hours the given actor needs to rest in order to be fully healed

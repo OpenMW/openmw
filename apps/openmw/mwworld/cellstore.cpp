@@ -397,6 +397,24 @@ namespace MWWorld
         return searchVisitor.mFound;
     }
 
+    Ptr CellStore::searchViaCreatureId(int id)
+    {
+        if (Ptr ptr = ::searchViaActorId(mNpcs, id, this, mMovedToAnotherCell))
+            return ptr;
+
+        if (Ptr ptr = ::searchViaActorId(mCreatures, id, this, mMovedToAnotherCell))
+            return ptr;
+
+        for (MovedRefTracker::const_iterator it = mMovedHere.begin(); it != mMovedHere.end(); ++it)
+        {
+            MWWorld::Ptr actor(it->first, this);
+            if (actor.getClass().getCreatureStats(actor).matchesActorId(id) && actor.getRefData().getCount() > 0)
+                return actor;
+        }
+
+        return Ptr();
+    }
+
     Ptr CellStore::searchViaActorId (int id)
     {
         if (Ptr ptr = ::searchViaActorId (mNpcs, id, this, mMovedToAnotherCell))

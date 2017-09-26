@@ -481,12 +481,12 @@ namespace MWMechanics
         creatureStats.setMagicka(magicka);
     }
 
-    void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, bool sleep)
+    template <typename T>
+    void Actors::restoreDynamicStatsVar(const MWWorld::Ptr& ptr, bool sleep, T &stats)
     {
-        if (ptr.getClass().getCreatureStats(ptr).isDead())
+        if (stats.isDead())
             return;
 
-        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
         const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         if (sleep)
@@ -503,23 +503,36 @@ namespace MWMechanics
             stats.setMagicka(stat);
         }
 
-        int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+        int endurance = stats.getAttribute(ESM::Attribute::Endurance).getModified();
 
         float normalizedEncumbrance = ptr.getClass().getNormalizedEncumbrance(ptr);
         if (normalizedEncumbrance > 1)
             normalizedEncumbrance = 1;
 
         // restore fatigue
-        float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat ();
-        float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat ();
-        float fEndFatigueMult = settings.find("fEndFatigueMult")->getFloat ();
+        float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat();
+        float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat();
+        float fEndFatigueMult = settings.find("fEndFatigueMult")->getFloat();
 
         float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
         x *= fEndFatigueMult * endurance;
 
         DynamicStat<float> fatigue = stats.getFatigue();
-        fatigue.setCurrent (fatigue.getCurrent() + 3600 * x);
-        stats.setFatigue (fatigue);
+        fatigue.setCurrent(fatigue.getCurrent() + 3600 * x);
+        stats.setFatigue(fatigue);
+    }
+
+    void Actors::restoreDynamicStatsNPC(const MWWorld::Ptr& ptr, bool sleep)
+    {
+
+        MWMechanics::CreatureStats& stats = ptr.getClass().getNpcStats(ptr);
+        restoreDynamicStatsVar(ptr, sleep, stats);
+    }
+
+    void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, bool sleep)
+    {
+        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
+        restoreDynamicStatsVar(ptr, sleep, stats);
     }
 
     void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration)

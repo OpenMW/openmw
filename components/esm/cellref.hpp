@@ -23,6 +23,8 @@ namespace ESM
         enum { RefNum_NoContentFile = -1 };
         inline bool hasContentFile() const { return mContentFile != RefNum_NoContentFile; }
         inline void unset() { mIndex = 0; mContentFile = RefNum_NoContentFile; }
+
+        inline void setIndex(unsigned int index) { mIndex = index; }
     };
 
     /* Cell reference. This represents ONE object (of many) inside the
