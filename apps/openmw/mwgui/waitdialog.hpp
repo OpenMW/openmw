@@ -65,6 +65,7 @@ namespace MWGui
         void onWaitButtonClicked(MyGUI::Widget* sender);
         void onCancelButtonClicked(MyGUI::Widget* sender);
         void onHourSliderChangedPosition(MyGUI::ScrollBar* sender, size_t position);
+        void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
 
         void onWaitingProgressChanged(int cur, int total);
         void onWaitingInterrupted();

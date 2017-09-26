@@ -1,6 +1,7 @@
 #include "waitdialog.hpp"
 
 #include <MyGUI_ProgressBar.h>
+#include <MyGUI_InputManager.h>
 
 #include <components/misc/rng.hpp>
 
@@ -72,6 +73,10 @@ namespace MWGui
         mWaitButton->eventMouseButtonClick += MyGUI::newDelegate(this, &WaitDialog::onWaitButtonClicked);
         mHourSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &WaitDialog::onHourSliderChangedPosition);
 
+        mCancelButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &WaitDialog::onKeyButtonPressed);
+        mWaitButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &WaitDialog::onKeyButtonPressed);
+        mUntilHealedButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &WaitDialog::onKeyButtonPressed);
+
         mTimeAdvancer.eventProgressChanged += MyGUI::newDelegate(this, &WaitDialog::onWaitingProgressChanged);
         mTimeAdvancer.eventInterrupted += MyGUI::newDelegate(this, &WaitDialog::onWaitingInterrupted);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &WaitDialog::onWaitingFinished);
@@ -80,6 +85,11 @@ namespace MWGui
     void WaitDialog::setPtr(const MWWorld::Ptr &ptr)
     {
         setCanRest(!ptr.isEmpty() || MWBase::Environment::get().getWorld ()->canRest () == 0);
+
+        if (mUntilHealedButton->getVisible())
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mUntilHealedButton);
+        else
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mWaitButton);
     }
 
     bool WaitDialog::exit()
@@ -195,6 +205,18 @@ namespace MWGui
     {
         mHourText->setCaptionWithReplacing (MyGUI::utility::toString(position+1) + " #{sRestMenu2}");
         mManualHours = position+1;
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mWaitButton);
+    }
+
+    void WaitDialog::onKeyButtonPressed(MyGUI::Widget *sender, MyGUI::KeyCode key, MyGUI::Char character)
+    {
+        if (key == MyGUI::KeyCode::ArrowDown)
+            mHourSlider->setScrollPosition(std::min(mHourSlider->getScrollPosition()+1, mHourSlider->getScrollRange()-1));
+        else if (key == MyGUI::KeyCode::ArrowUp)
+            mHourSlider->setScrollPosition(std::max(static_cast<int>(mHourSlider->getScrollPosition())-1, 0));
+        else
+            return;
+        onHourSliderChangedPosition(mHourSlider, mHourSlider->getScrollPosition());
     }
 
     void WaitDialog::onWaitingProgressChanged(int cur, int total)
