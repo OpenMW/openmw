@@ -238,6 +238,14 @@ namespace Gui
         align();
     }
 
+    void HBox::initialiseOverride()
+    {
+        Base::initialiseOverride();
+        MyGUI::Widget* client = 0;
+        assignWidget(client, "Client");
+        setWidgetClient(client);
+    }
+
     void HBox::onWidgetCreated(MyGUI::Widget* _widget)
     {
         align();
@@ -383,6 +391,14 @@ namespace Gui
     {
         MyGUI::Widget::setCoord (_value);
         align();
+    }
+
+    void VBox::initialiseOverride()
+    {
+        Base::initialiseOverride();
+        MyGUI::Widget* client = 0;
+        assignWidget(client, "Client");
+        setWidgetClient(client);
     }
 
     MyGUI::IntSize VBox::getRequestedSize ()

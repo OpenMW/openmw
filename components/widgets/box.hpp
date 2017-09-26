@@ -99,6 +99,8 @@ namespace Gui
         virtual void setCoord (const MyGUI::IntCoord &_value);
 
     protected:
+        virtual void initialiseOverride();
+
         virtual void align();
         virtual MyGUI::IntSize getRequestedSize();
 
@@ -116,6 +118,8 @@ namespace Gui
         virtual void setCoord (const MyGUI::IntCoord &_value);
 
     protected:
+        virtual void initialiseOverride();
+
         virtual void align();
         virtual MyGUI::IntSize getRequestedSize();
 
