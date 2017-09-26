@@ -24,6 +24,7 @@
 #include <components/esm/loadgmst.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
+#include <components/settings/settings.hpp>
 
 #include <components/nifosg/particle.hpp> // FindRecIndexVisitor
 
@@ -1357,7 +1358,11 @@ namespace MWPhysics
         mMovementResults.clear();
 
         mTimeAccum += dt;
-        const float physicsDt = 1.f/60.0f;
+
+        static const float physFramerate = Settings::Manager::getFloat("physics framerate", "Physics");
+
+        // Allow to use a physics framerate between 10 and 60 FPS
+        static const float physicsDt = 1.f / std::max(10.f, std::min(60.f, physFramerate));
 
         const int maxAllowedSteps = 20;
         int numSteps = mTimeAccum / (physicsDt);
