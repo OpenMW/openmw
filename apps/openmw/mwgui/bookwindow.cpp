@@ -1,6 +1,7 @@
 #include "bookwindow.hpp"
 
 #include <MyGUI_TextBox.h>
+#include <MyGUI_InputManager.h>
 
 #include <components/esm/loadbook.hpp>
 
@@ -153,20 +154,16 @@ namespace MWGui
         mLeftPageNumber->setCaption( MyGUI::utility::toString(mCurrentPage*2 + 1) );
         mRightPageNumber->setCaption( MyGUI::utility::toString(mCurrentPage*2 + 2) );
 
-        //If it is the last page, hide the button "Next Page"
-        if (   (mCurrentPage+1)*2 == mPages.size()
-            || (mCurrentPage+1)*2 == mPages.size() + 1)
-        {
-            mNextPageButton->setVisible(false);
-        } else {
-            mNextPageButton->setVisible(true);
-        }
-        //If it is the fist page, hide the button "Prev Page"
-        if (mCurrentPage == 0) {
-            mPrevPageButton->setVisible(false);
-        } else {
-            mPrevPageButton->setVisible(true);
-        }
+        MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+        bool nextPageVisible = (mCurrentPage+1)*2 < mPages.size();
+        mNextPageButton->setVisible(nextPageVisible);
+        bool prevPageVisible = mCurrentPage != 0;
+        mPrevPageButton->setVisible(prevPageVisible);
+
+        if (focus == mNextPageButton && !nextPageVisible && prevPageVisible)
+            MyGUI::InputManager::getInstance().setKeyFocusWidget(mPrevPageButton);
+        else if (focus == mPrevPageButton && !prevPageVisible && nextPageVisible)
+            MyGUI::InputManager::getInstance().setKeyFocusWidget(mNextPageButton);
 
         if (mPages.empty())
             return;
