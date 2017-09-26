@@ -39,8 +39,11 @@ namespace Gui
         MYGUI_RTTI_DERIVED( AutoSizedEditBox )
 
     public:
+
         virtual MyGUI::IntSize getRequestedSize();
         virtual void setCaption(const MyGUI::UString& _value);
+
+        virtual void initialiseOverride();
 
     protected:
         virtual void setPropertyOverride(const std::string& _key, const std::string& _value);

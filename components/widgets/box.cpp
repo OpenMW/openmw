@@ -66,6 +66,13 @@ namespace Gui
         notifySizeChange (this);
     }
 
+    void AutoSizedEditBox::initialiseOverride()
+    {
+        Base::initialiseOverride();
+        setNeedKeyFocus(false);
+        setEditStatic(true);
+    }
+
     void AutoSizedEditBox::setPropertyOverride(const std::string& _key, const std::string& _value)
     {
         if (_key == "ExpandDirection")
