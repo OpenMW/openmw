@@ -32,6 +32,8 @@ namespace MWGui
 
         virtual void onOpen();
 
+        virtual MyGUI::Widget* getDefaultKeyFocus();
+
     private:
         MyGUI::Button* mCancelButton;
         MyGUI::Button* mAdmireButton;

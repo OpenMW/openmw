@@ -23,8 +23,15 @@ namespace MWGui
 
         void onFrame();
 
+        /// Set a key focus widget for this window, if one isn't already set.
+        void setDefaultFocus(MyGUI::Widget* window, MyGUI::Widget* defaultFocus);
+
+        void setModalWindow(MyGUI::Widget* window);
+
     private:
         bool switchFocus(int direction, bool wrap);
+
+        bool selectFirstWidget();
 
         /// Send button press event to focused button
         bool accept();
@@ -32,6 +39,7 @@ namespace MWGui
         std::map<int, MyGUI::Widget*> mKeyFocus;
 
         MyGUI::Widget* mCurrentFocus;
+        MyGUI::Widget* mModalWindow;
     };
 
 }

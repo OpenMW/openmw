@@ -77,7 +77,6 @@ namespace MWGui
 
     void PersuasionDialog::onOpen()
     {
-        WindowModal::onOpen();
         center();
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -88,6 +87,12 @@ namespace MWGui
         mBribe1000Button->setEnabled (playerGold >= 1000);
 
         mGoldLabel->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
+        WindowModal::onOpen();
+    }
+
+    MyGUI::Widget* PersuasionDialog::getDefaultKeyFocus()
+    {
+        return mAdmireButton;
     }
 
     // --------------------------------------------------------------------------------------------------

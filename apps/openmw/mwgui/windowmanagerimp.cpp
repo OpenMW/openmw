@@ -1738,6 +1738,10 @@ namespace MWGui
             mKeyboardNavigation->saveFocus(getMode());
 
         mCurrentModals.push(input);
+        mKeyboardNavigation->restoreFocus(-1);
+
+        mKeyboardNavigation->setModalWindow(input->mMainWidget);
+        mKeyboardNavigation->setDefaultFocus(input->mMainWidget, input->getDefaultKeyFocus());
     }
 
     void WindowManager::removeCurrentModal(WindowModal* input)
@@ -1747,12 +1751,20 @@ namespace MWGui
         if(!mCurrentModals.empty())
         {
             if(input == mCurrentModals.top())
+            {
                 mCurrentModals.pop();
+                mKeyboardNavigation->saveFocus(-1);
+            }
             else
                 std::cout << " warning: modal widget " << input << " " << typeid(input).name() << " not found " << std::endl;
         }
         if (mCurrentModals.empty())
+        {
+            mKeyboardNavigation->setModalWindow(NULL);
             mKeyboardNavigation->restoreFocus(getMode());
+        }
+        else
+            mKeyboardNavigation->setModalWindow(mCurrentModals.top()->mMainWidget);
     }
 
     void WindowManager::onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)

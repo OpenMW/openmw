@@ -38,6 +38,7 @@ bool shouldAcceptKeyFocus(MyGUI::Widget* w)
 
 KeyboardNavigation::KeyboardNavigation()
     : mCurrentFocus(nullptr)
+    , mModalWindow(nullptr)
 {
     MyGUI::WidgetManager::getInstance().registerUnlinker(this);
 }
@@ -51,9 +52,13 @@ void KeyboardNavigation::saveFocus(int mode)
 {
     MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
     if (shouldAcceptKeyFocus(focus))
+    {
         mKeyFocus[mode] = focus;
+    }
     else
+    {
         mKeyFocus[mode] = mCurrentFocus;
+    }
 }
 
 void KeyboardNavigation::restoreFocus(int mode)
@@ -87,6 +92,13 @@ void styleFocusedButton(MyGUI::Widget* w)
     }
 }
 
+bool isRootParent(MyGUI::Widget* widget, MyGUI::Widget* root)
+{
+    while (widget && widget->getParent())
+        widget = widget->getParent();
+    return widget == root;
+}
+
 void KeyboardNavigation::onFrame()
 {
     MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
@@ -98,7 +110,7 @@ void KeyboardNavigation::onFrame()
     }
 
     // workaround incorrect key focus resets (fix in MyGUI TBD)
-    if (!shouldAcceptKeyFocus(focus) && shouldAcceptKeyFocus(mCurrentFocus))
+    if (!shouldAcceptKeyFocus(focus) && shouldAcceptKeyFocus(mCurrentFocus) && (!mModalWindow || isRootParent(mCurrentFocus, mModalWindow)))
     {
         MyGUI::InputManager::getInstance().setKeyFocusWidget(mCurrentFocus);
         focus = mCurrentFocus;
@@ -117,6 +129,25 @@ void KeyboardNavigation::onFrame()
     }
 
     styleFocusedButton(mCurrentFocus);
+}
+
+void KeyboardNavigation::setDefaultFocus(MyGUI::Widget *window, MyGUI::Widget *defaultFocus)
+{
+    MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+    if (!focus || !shouldAcceptKeyFocus(focus))
+    {
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(defaultFocus);
+    }
+    else
+    {
+        if (!isRootParent(focus, window))
+            MyGUI::InputManager::getInstance().setKeyFocusWidget(defaultFocus);
+    }
+}
+
+void KeyboardNavigation::setModalWindow(MyGUI::Widget *window)
+{
+    mModalWindow = window;
 }
 
 enum Direction
@@ -152,29 +183,15 @@ bool KeyboardNavigation::injectKeyPress(MyGUI::KeyCode key, unsigned int text)
     }
 }
 
-bool selectFirstWidget()
-{
-    MyGUI::VectorWidgetPtr keyFocusList;
-    MyGUI::EnumeratorWidgetPtr enumerator = MyGUI::Gui::getInstance().getEnumerator();
-    while (enumerator.next())
-        getKeyFocusWidgets(enumerator.current(), keyFocusList);
-
-    if (!keyFocusList.empty())
-    {
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(keyFocusList[0]);
-        return true;
-    }
-    return false;
-}
-
 bool KeyboardNavigation::switchFocus(int direction, bool wrap)
 {
     MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
 
-    if ((focus && focus->getTypeName().find("Button") == std::string::npos) && direction != D_Prev && direction != D_Next)
+    bool isCycle = (direction == D_Prev || direction == D_Next);
+
+    if ((focus && focus->getTypeName().find("Button") == std::string::npos) && !isCycle)
         return false;
 
-    bool isCycle = (direction == D_Prev || direction == D_Next);
     if (focus && isCycle && focus->getUserString("AcceptTab") == "true")
         return false;
 
@@ -228,6 +245,23 @@ bool KeyboardNavigation::switchFocus(int direction, bool wrap)
 
     MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(keyFocusList[index]);
     return true;
+}
+
+bool KeyboardNavigation::selectFirstWidget()
+{
+    MyGUI::VectorWidgetPtr keyFocusList;
+    MyGUI::EnumeratorWidgetPtr enumerator = MyGUI::Gui::getInstance().getEnumerator();
+    if (mModalWindow)
+        enumerator = mModalWindow->getEnumerator();
+    while (enumerator.next())
+        getKeyFocusWidgets(enumerator.current(), keyFocusList);
+
+    if (!keyFocusList.empty())
+    {
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(keyFocusList[0]);
+        return true;
+    }
+    return false;
 }
 
 bool KeyboardNavigation::accept()

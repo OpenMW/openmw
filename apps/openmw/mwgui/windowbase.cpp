@@ -67,14 +67,17 @@ WindowModal::WindowModal(const std::string& parLayout)
 
 void WindowModal::onOpen()
 {
-    // Order important. We need to save the key focus widget before its unset
     MWBase::Environment::get().getWindowManager()->addCurrentModal(this); //Set so we can escape it if needed
+
+    MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
     MyGUI::InputManager::getInstance ().addWidgetModal (mMainWidget);
+    MyGUI::InputManager::getInstance().setKeyFocusWidget(focus);
 }
 
 void WindowModal::onClose()
 {
     MWBase::Environment::get().getWindowManager()->removeCurrentModal(this);
+
     MyGUI::InputManager::getInstance ().removeWidgetModal (mMainWidget);
 }
 
