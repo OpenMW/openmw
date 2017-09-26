@@ -187,7 +187,7 @@ namespace MWGui
     {
         // remove both Spells and Dialogue (since you always trade with the NPC/creature that you have previously talked to)
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_SpellBuying);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
     }
 
     void SpellBuyingWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)

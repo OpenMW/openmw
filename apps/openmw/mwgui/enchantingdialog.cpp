@@ -9,7 +9,6 @@
 #include <components/widgets/list.hpp>
 #include <components/settings/settings.hpp>
 
-#include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -176,7 +175,6 @@ namespace MWGui
 
     void EnchantingDialog::onReferenceUnavailable ()
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
         resetReference();
     }
@@ -352,8 +350,7 @@ namespace MWGui
                     MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(player, item, mPtr, 1);
 
                     MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
-                    MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
-                    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
+                    MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
                     return;
                 }
             }

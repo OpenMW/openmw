@@ -322,8 +322,7 @@ namespace MWGui
                 MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(player, it->mBase, mPtr, it->mCount);
 
                 onCancelButtonClicked(mCancelButton);
-                MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
-                MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
+                MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
                 return;
             }
         }
@@ -503,7 +502,7 @@ namespace MWGui
     {
         // remove both Trade and Dialogue (since you always trade with the NPC/creature that you have previously talked to)
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
     }
 
     int TradeWindow::getMerchantGold()

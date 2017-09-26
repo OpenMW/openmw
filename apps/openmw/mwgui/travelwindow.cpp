@@ -8,7 +8,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
@@ -177,8 +176,7 @@ namespace MWGui
         }
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
-        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
 
         // Teleports any followers, too.
         MWWorld::ActionTeleport action(interior ? cellname : "", pos, true);
@@ -208,7 +206,7 @@ namespace MWGui
     void TravelWindow::onReferenceUnavailable()
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
     }
 
     void TravelWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)

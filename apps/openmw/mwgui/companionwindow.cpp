@@ -164,7 +164,7 @@ void CompanionWindow::onMessageBoxButtonClicked(int button)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);
         // Important for Calvus' contract script to work properly
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
     }
 }
 
