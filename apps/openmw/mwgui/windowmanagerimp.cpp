@@ -876,11 +876,7 @@ namespace MWGui
             MWBase::StateManager::State_NoGame)
             return;
 
-        if (mDragAndDrop->mIsOnDragAndDrop)
-        {
-            assert(mDragAndDrop->mDraggedWidget);
-            mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
-        }
+        mDragAndDrop->onFrame();
 
         updateMap();
 

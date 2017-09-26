@@ -121,6 +121,12 @@ void DragAndDrop::drop(ItemModel *targetModel, ItemView *targetView)
     mSourceView->update();
 }
 
+void DragAndDrop::onFrame()
+{
+    if (mIsOnDragAndDrop && mItem.mBase.getRefData().getCount() == 0)
+        finish();
+}
+
 void DragAndDrop::finish()
 {
     mIsOnDragAndDrop = false;
