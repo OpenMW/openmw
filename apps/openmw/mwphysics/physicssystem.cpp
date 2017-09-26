@@ -1,5 +1,6 @@
 #include "physicssystem.hpp"
 
+#include <iostream>
 #include <stdexcept>
 
 #include <osg/Group>
@@ -24,7 +25,6 @@
 #include <components/esm/loadgmst.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
-#include <components/settings/settings.hpp>
 
 #include <components/nifosg/particle.hpp> // FindRecIndexVisitor
 
@@ -684,6 +684,7 @@ namespace MWPhysics
         , mWaterHeight(0)
         , mWaterEnabled(false)
         , mParentNode(parentNode)
+        , mPhysicsDt(1.f / 60.f)
     {
         mResourceSystem->addResourceManager(mShapeManager.get());
 
@@ -696,6 +697,20 @@ namespace MWPhysics
         // Don't update AABBs of all objects every frame. Most objects in MW are static, so we don't need this.
         // Should a "static" object ever be moved, we have to update its AABB manually using DynamicsWorld::updateSingleAabb.
         mCollisionWorld->setForceUpdateAllAabbs(false);
+
+        // Check if a user decided to override a physics system FPS
+        const char* env = getenv("OPENMW_PHYSICS_FPS");
+        if (env)
+        {
+            std::string str(env);
+
+            float physFramerate = std::atof(env);
+            if (physFramerate > 0)
+            {
+                mPhysicsDt = 1.f / physFramerate;
+                std::cerr << "Warning: physics framerate was overriden (a new value is " << physFramerate << ")."  << std::endl;
+            }
+        }
     }
 
     PhysicsSystem::~PhysicsSystem()
@@ -1359,16 +1374,11 @@ namespace MWPhysics
 
         mTimeAccum += dt;
 
-        static const float physFramerate = Settings::Manager::getFloat("physics framerate", "Physics");
-
-        // Allow to use a physics framerate between 10 and 60 FPS
-        static const float physicsDt = 1.f / std::max(10.f, std::min(60.f, physFramerate));
-
         const int maxAllowedSteps = 20;
-        int numSteps = mTimeAccum / (physicsDt);
+        int numSteps = mTimeAccum / (mPhysicsDt);
         numSteps = std::min(numSteps, maxAllowedSteps);
 
-        mTimeAccum -= numSteps * physicsDt;
+        mTimeAccum -= numSteps * mPhysicsDt;
 
         if (numSteps)
         {
@@ -1417,7 +1427,7 @@ namespace MWPhysics
             bool positionChanged = false;
             for (int i=0; i<numSteps; ++i)
             {
-                position = MovementSolver::move(position, physicActor->getPtr(), physicActor, iter->second, physicsDt,
+                position = MovementSolver::move(position, physicActor->getPtr(), physicActor, iter->second, mPhysicsDt,
                                                 flying, waterlevel, slowFall, mCollisionWorld, mStandingCollisions);
                 if (position != physicActor->getPosition())
                     positionChanged = true;
@@ -1426,7 +1436,7 @@ namespace MWPhysics
             if (positionChanged)
                 mCollisionWorld->updateSingleAabb(physicActor->getCollisionObject());
 
-            float interpolationFactor = mTimeAccum / physicsDt;
+            float interpolationFactor = mTimeAccum / mPhysicsDt;
             osg::Vec3f interpolated = position * interpolationFactor + physicActor->getPreviousPosition() * (1.f - interpolationFactor);
 
             float heightDiff = position.z() - oldHeight;
