@@ -112,7 +112,7 @@ void KeyboardNavigation::onFrame()
     // workaround incorrect key focus resets (fix in MyGUI TBD)
     if (!shouldAcceptKeyFocus(focus) && shouldAcceptKeyFocus(mCurrentFocus) && (!mModalWindow || isRootParent(mCurrentFocus, mModalWindow)))
     {
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mCurrentFocus);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCurrentFocus);
         focus = mCurrentFocus;
     }
 
@@ -136,12 +136,12 @@ void KeyboardNavigation::setDefaultFocus(MyGUI::Widget *window, MyGUI::Widget *d
     MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
     if (!focus || !shouldAcceptKeyFocus(focus))
     {
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(defaultFocus);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(defaultFocus);
     }
     else
     {
         if (!isRootParent(focus, window))
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(defaultFocus);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(defaultFocus);
     }
 }
 

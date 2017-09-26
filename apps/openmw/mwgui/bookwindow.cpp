@@ -161,9 +161,9 @@ namespace MWGui
         mPrevPageButton->setVisible(prevPageVisible);
 
         if (focus == mNextPageButton && !nextPageVisible && prevPageVisible)
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(mPrevPageButton);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mPrevPageButton);
         else if (focus == mPrevPageButton && !prevPageVisible && nextPageVisible)
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(mNextPageButton);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNextPageButton);
 
         if (mPages.empty())
             return;
