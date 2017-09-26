@@ -279,11 +279,14 @@ namespace MWRender
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
         mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
         mFirstPersonFieldOfView = Settings::Manager::getFloat("first person field of view", "Camera");
-        updateProjectionMatrix();
         mStateUpdater->setFogEnd(mViewDistance);
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
+
+        mUniformNear = mRootNode->getOrCreateStateSet()->getUniform("near");
+        mUniformFar = mRootNode->getOrCreateStateSet()->getUniform("far");
+        updateProjectionMatrix();
     }
 
     RenderingManager::~RenderingManager()
@@ -889,6 +892,9 @@ namespace MWRender
         if (mFieldOfViewOverridden)
             fov = mFieldOfViewOverride;
         mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance);
+
+        mUniformNear->set(mNearClip);
+        mUniformFar->set(mViewDistance);
     }
 
     void RenderingManager::updateTextureFiltering()

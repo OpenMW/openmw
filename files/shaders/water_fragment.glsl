@@ -6,7 +6,7 @@
 
 // tweakables -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-const float VISIBILITY = 1200.0; // how far you can look through water
+const float VISIBILITY = 2.5;
 
 const float BIG_WAVES_X = 0.1; // strength of big waves
 const float BIG_WAVES_Y = 0.1;
@@ -31,7 +31,7 @@ const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       //sunlight extinction
 
 const float SPEC_HARDNESS = 256.0;                 // specular highlights hardness
 
-const float BUMP_SUPPRESS_DEPTH = 0.03;            // at what water depth bumpmap will be supressed for reflections and refractions (prevents artifacts at shores)
+const float BUMP_SUPPRESS_DEPTH = 0.3;             // at what water depth bumpmap will be supressed for reflections and refractions (prevents artifacts at shores)
 
 const vec2 WIND_DIR = vec2(0.5f, -0.8f);
 const float WIND_SPEED = 0.2f;
@@ -58,9 +58,9 @@ float fresnel_dielectric(vec3 Incoming, vec3 Normal, float eta)
     return result;
 }
 
-varying vec3  screenCoordsPassthrough;
-varying vec4  position;
-varying float  depthPassthrough;
+varying vec3 screenCoordsPassthrough;
+varying vec4 position;
+varying float depthPassthrough;
 
 uniform sampler2D normalMap;
 
@@ -76,15 +76,18 @@ uniform float near;
 uniform float far;
 uniform vec3 nodePosition;
 
-float linearizeDepth(float depth)  // helper for transforming water depth
+float frustumDepth;
+
+float linearizeDepth(float depth)  // takes <0,1> non-linear depth value and returns <0,1> linearized value
   {
     float z_n = 2.0 * depth - 1.0;
-    depth = 2.0 * near * far / (far + near - z_n * (far - near));
-    return depth - depthPassthrough;
+    depth = 2.0 * near * far / (far + near - z_n * frustumDepth);
+    return depth / frustumDepth;
   }
 
 void main(void)
 {
+    frustumDepth = abs(far - near);
     vec3 worldPos = position.xyz + nodePosition.xyz;
     vec2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
     UV.y *= -1.0;
@@ -157,8 +160,13 @@ void main(void)
     fresnel = clamp(fresnel, 0.0, 1.0);
 
 #if REFRACTION
-    float realWaterDepth = linearizeDepth(texture2D(refractionDepthMap, screenCoords).x);
-    float shore = clamp(realWaterDepth / (BUMP_SUPPRESS_DEPTH * (far - near)),0,1);
+    float normalization = frustumDepth / 1000;
+    float depthSample = linearizeDepth(texture2D(refractionDepthMap,screenCoords).x) * normalization;
+    float depthSampleDistorted = linearizeDepth(texture2D(refractionDepthMap,screenCoords-(normal.xy*REFR_BUMP)).x) * normalization;
+    float surfaceDepth = linearizeDepth(gl_FragCoord.z) * normalization;
+    float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
+ 
+    float shore = clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH,0,1);
 #else
     float shore = 1.0;
 #endif
@@ -180,10 +188,8 @@ void main(void)
     waterColor = waterColor * length(gl_LightModel.ambient.xyz);
 
 #if REFRACTION
-    float waterDepth = linearizeDepth(texture2D(refractionDepthMap, screenCoords-(normal.xy*REFR_BUMP)).x); 
-
     if (cameraPos.z > 0.0)
-        refraction = mix(refraction, waterColor, clamp(waterDepth/VISIBILITY, 0.0, 1.0));
+        refraction = mix(refraction, waterColor, clamp(depthSampleDistorted/VISIBILITY, 0.0, 1.0));
 
     gl_FragData[0].xyz = mix( mix(refraction,  scatterColour,  lightScatter),  reflection,  fresnel) + specular * gl_LightSource[0].specular.xyz;
 #else
