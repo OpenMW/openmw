@@ -40,6 +40,7 @@ Programmers
     Chris Robinson (KittyCat)
     Cory F. Cohen (cfcohen)
     Cris Mihalache (Mirceam)
+    crussell187
     darkf
     devnexen
     Dieho
