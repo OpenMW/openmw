@@ -176,6 +176,7 @@ namespace MWGui
       , mWerewolfOverlayEnabled(Settings::Manager::getBool ("werewolf overlay", "GUI"))
       , mHudEnabled(true)
       , mCursorVisible(true)
+      , mCursorActive(false)
       , mPlayerName()
       , mPlayerRaceId()
       , mPlayerAttributes()
@@ -1009,7 +1010,16 @@ namespace MWGui
 
     void WindowManager::setCursorVisible(bool visible)
     {
+        if (visible == mCursorVisible)
+            return;
         mCursorVisible = visible;
+        if (!visible)
+            mCursorActive = false;
+    }
+
+    void WindowManager::setCursorActive(bool active)
+    {
+        mCursorActive = active;
     }
 
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
@@ -1518,7 +1528,7 @@ namespace MWGui
 
     bool WindowManager::getCursorVisible()
     {
-        return mCursorVisible;
+        return mCursorVisible && mCursorActive;
     }
 
     void WindowManager::trackWindow(Layout *layout, const std::string &name)

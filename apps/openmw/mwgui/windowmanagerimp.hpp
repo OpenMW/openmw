@@ -320,6 +320,9 @@ namespace MWGui
 
     virtual bool getCursorVisible();
 
+    /// Call when mouse cursor or buttons are used.
+    virtual void setCursorActive(bool active);
+
     /// Clear all savegame-specific data
     virtual void clear();
 
@@ -447,6 +450,7 @@ namespace MWGui
     bool mWerewolfOverlayEnabled;
     bool mHudEnabled;
     bool mCursorVisible;
+    bool mCursorActive;
 
     void setCursorVisible(bool visible);
 

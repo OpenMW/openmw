@@ -718,6 +718,7 @@ namespace MWInput
                     MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
                 }
             }
+            MWBase::Environment::get().getWindowManager()->setCursorActive(true);
         }
 
         setPlayerControlsEnabled(!guiMode);
@@ -764,6 +765,8 @@ namespace MWInput
             MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
             // FIXME: inject twice to force updating focused widget states (tooltips) resulting from changing the viewport by scroll wheel
             MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
+
+            MWBase::Environment::get().getWindowManager()->setCursorActive(true);
         }
 
         if (mMouseLookEnabled && !mControlsDisabled)
