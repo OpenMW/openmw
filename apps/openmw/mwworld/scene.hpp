@@ -96,6 +96,9 @@ namespace MWWorld
 
             void loadCell (CellStore *cell, Loading::Listener* loadingListener, bool respawn);
 
+            template <typename T>
+            void checkRegen(MWWorld::Ptr &ptr, T &stats);
+
             void playerMoved (const osg::Vec3f& pos);
 
             void changePlayerCell (CellStore* newCell, const ESM::Position& position, bool adjustPlayerPos);

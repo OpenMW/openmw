@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include "../mwworld/ptr.hpp"
+#include "../../../components/esm/regencreatures.hpp"
 
 namespace osg
 {
@@ -74,6 +75,12 @@ namespace MWBase
             /// component is up).
 
             virtual void advanceTime (float duration) = 0;
+
+            virtual void addRegenCreature(ESM::RegenCreature rCreature) = 0;
+
+            virtual bool isRegenCreatureInStack(ESM::RegenCreature rCreature) = 0;
+
+            virtual void regenCreatures() = 0;
 
             virtual void setPlayerName (const std::string& name) = 0;
             ///< Set player name.

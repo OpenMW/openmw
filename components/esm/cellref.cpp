@@ -10,7 +10,8 @@ void ESM::RefNum::load (ESMReader& esm, bool wide, const std::string& tag)
     if (wide)
         esm.getHNT (*this, tag.c_str(), 8);
     else
-        esm.getHNT (mIndex, tag.c_str());
+        esm.getHNT(mIndex, tag.c_str());
+
 }
 
 void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const

@@ -230,6 +230,8 @@ namespace MWWorld
             Ptr searchViaActorId (int id);
             ///< Will return an empty Ptr if cell is not loaded.
 
+            Ptr searchViaCreatureId(int id);
+
             float getWaterLevel() const;
 
             void setWaterLevel (float level);

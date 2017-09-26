@@ -24,6 +24,36 @@ namespace MWWorld
             return true;
         }
     };
+
+    struct CreatureObjectsVisitor
+    {
+        std::vector<MWWorld::Ptr> mObjects;
+
+        bool operator() (MWWorld::Ptr ptr)
+        {
+            if (ptr.getTypeName() == typeid (ESM::Creature).name())
+            {
+                mObjects.push_back(ptr);
+            }
+
+            return true;
+        }
+    };
+
+    struct NpcObjectsVisitor
+    {
+        std::vector<MWWorld::Ptr> mObjects;
+
+        bool operator() (MWWorld::Ptr ptr)
+        {
+            if (ptr.getTypeName() == typeid (ESM::NPC).name())
+            {
+                mObjects.push_back(ptr);
+            }
+
+            return true;
+        }
+    };
 }
 
 #endif

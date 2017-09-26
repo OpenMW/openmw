@@ -66,11 +66,23 @@ namespace ESM
         SpellState mSpells;
         ActiveSpells mActiveSpells;
 
+        static unsigned int nextActorId;
+
         /// Initialize to default state
         void blank();
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;
+
+        static int generateActorId()
+        {
+            return nextActorId++;
+        }
+
+        unsigned int getActorId()
+        {
+            return mActorId;
+        }
     };
 }
 

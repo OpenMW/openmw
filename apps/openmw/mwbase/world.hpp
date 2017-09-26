@@ -429,6 +429,8 @@ namespace MWBase
             virtual void getItemsOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out) = 0;
             ///< get all items in active cells owned by this Npc
 
+            virtual void getCreatureById(unsigned int id, MWWorld::Ptr& out) = 0;
+
             virtual bool getLOS(const MWWorld::ConstPtr& actor,const MWWorld::ConstPtr& targetActor) = 0;
             ///< get Line of Sight (morrowind stupid implementation)
 

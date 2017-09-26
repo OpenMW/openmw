@@ -2,6 +2,8 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+unsigned int ESM::CreatureStats::nextActorId = INT_MAX;
+
 void ESM::CreatureStats::load (ESMReader &esm)
 {
     for (int i=0; i<8; ++i)
@@ -89,6 +91,9 @@ void ESM::CreatureStats::load (ESMReader &esm)
 
     mActorId = -1;
     esm.getHNOT (mActorId, "ACID");
+
+    if (mActorId == 0)
+        mActorId = generateActorId();
 
     //mHitAttemptActorId = -1;
     //esm.getHNOT(mHitAttemptActorId, "HAID");
@@ -203,8 +208,7 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mLevel != 1)
         esm.writeHNT ("LEVL", mLevel);
 
-    if (mActorId != -1)
-        esm.writeHNT ("ACID", mActorId);
+    esm.writeHNT ("ACID", mActorId);
 
     //if (mHitAttemptActorId != -1)
     //    esm.writeHNT("HAID", mHitAttemptActorId);

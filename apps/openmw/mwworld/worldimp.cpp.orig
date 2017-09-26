@@ -1159,7 +1159,6 @@ namespace MWWorld
 
         if (currCell != newCell)
         {
-            
             removeContainerScripts(ptr);
 
             if (isPlayer)
@@ -2485,16 +2484,6 @@ namespace MWWorld
             for (std::vector<MWWorld::Ptr>::iterator it = visitor.mObjects.begin(); it != visitor.mObjects.end(); ++it)
                 if (Misc::StringUtils::ciEqual(it->getCellRef().getOwner(), npc.getCellRef().getRefId()))
                     out.push_back(*it);
-        }
-    }
-
-    void World::getCreatureById(const unsigned int id, MWWorld::Ptr& out)
-    {
-        const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
-        for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
-        {
-            MWWorld::CellStore* cellStore = (*cellIt);
-            out = cellStore->searchViaCreatureId(id);
         }
     }
 

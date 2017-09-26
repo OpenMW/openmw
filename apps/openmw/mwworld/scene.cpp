@@ -3,6 +3,7 @@
 #include <limits>
 #include <iostream>
 
+#include <components/esm/regencreatures.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
@@ -20,6 +21,8 @@
 
 #include "../mwphysics/physicssystem.hpp"
 
+#include "../mwmechanics/npcstats.hpp"
+
 #include "player.hpp"
 #include "localscripts.hpp"
 #include "esmstore.hpp"
@@ -27,6 +30,8 @@
 #include "cellvisitors.hpp"
 #include "cellstore.hpp"
 #include "cellpreloader.hpp"
+
+
 
 namespace
 {
@@ -226,10 +231,32 @@ namespace MWWorld
 
         mPreloader->updateCache(mRendering.getReferenceTime());
     }
-
+    
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
         std::cout << "Unloading cell\n";
+        for (CellStoreCollection::iterator iter = mActiveCells.begin(); iter != mActiveCells.end(); ++iter)
+        {
+            CreatureObjectsVisitor visitor;
+            (*iter)->forEach<CreatureObjectsVisitor>(visitor);
+            for (std::vector<MWWorld::Ptr>::iterator iter2 = visitor.mObjects.begin();
+                iter2 != visitor.mObjects.end(); ++iter2)
+            {
+                MWWorld::Ptr &ptr = (*iter2);
+                MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+                checkRegen(ptr, stats);
+            }
+            NpcObjectsVisitor visitor2;
+            (*iter)->forEach<NpcObjectsVisitor>(visitor2);
+            for (std::vector<MWWorld::Ptr>::iterator iter2 = visitor2.mObjects.begin();
+                iter2 != visitor2.mObjects.end(); ++iter2)
+            {
+                MWWorld::Ptr &ptr = (*iter2);
+                MWMechanics::NpcStats &stats = ptr.getClass().getNpcStats(ptr);
+                checkRegen(ptr, stats);
+            }
+        }
+
         ListAndResetObjectsVisitor visitor;
 
         (*iter)->forEach<ListAndResetObjectsVisitor>(visitor);
@@ -317,8 +344,31 @@ namespace MWWorld
             if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
                 mRendering.configureAmbient(cell->getCell());
         }
-
         mPreloader->notifyLoaded(cell);
+
+        MWBase::Environment::get().getMechanicsManager()->regenCreatures();
+    }
+
+    template <typename T>
+    void Scene::checkRegen(MWWorld::Ptr &ptr, T &stats)
+    {
+        if (stats.isDead())
+            return;
+
+        if (stats.getHealth().getCurrent() != stats.getHealth().getModified() ||
+            stats.getMagicka().getCurrent() != stats.getMagicka().getModified() ||
+            stats.getFatigue().getCurrent() != stats.getFatigue().getModified())
+        {
+            ESM::RegenCreature rechargeCreature;
+            MWWorld::CellRef &cRef = ptr.getCellRef();
+            cRef.getRefNum().setIndex(stats.getActorId());
+            rechargeCreature.mId = stats.getActorId();
+
+            rechargeCreature.mTimeStamp = MWBase::Environment::get().getWorld()->getTimeStamp().toEsm();
+            
+            if (!MWBase::Environment::get().getMechanicsManager()->isRegenCreatureInStack(rechargeCreature))
+                MWBase::Environment::get().getMechanicsManager()->addRegenCreature(rechargeCreature);
+        }
     }
 
     void Scene::clear()

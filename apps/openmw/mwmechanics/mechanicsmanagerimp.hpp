@@ -44,6 +44,8 @@ namespace MWMechanics
             typedef std::map<std::string, OwnerMap> StolenItemsMap;
             StolenItemsMap mStolenItems;
 
+            std::vector<ESM::RegenCreature> mRegenCreatures;
+
         public:
 
             void buildPlayer();
@@ -75,6 +77,14 @@ namespace MWMechanics
             /// component is up).
 
             virtual void advanceTime (float duration);
+
+            virtual void addRegenCreature(ESM::RegenCreature rCreature) {
+                mRegenCreatures.push_back(rCreature);
+            }
+
+            virtual void regenCreatures();
+
+            virtual bool isRegenCreatureInStack(ESM::RegenCreature rCreature);
 
             virtual void setPlayerName (const std::string& name);
             ///< Set player name.
