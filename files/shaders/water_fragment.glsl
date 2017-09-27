@@ -38,10 +38,85 @@ const float WIND_SPEED = 0.2f;
 
 const vec3 WATER_COLOR = vec3(0.090195, 0.115685, 0.12745);
 
+
+
+
+
+
+
+
+
+
+
+
+
+const float RAIN_RIPPLE_GAPS = 5.0;
+const float RAIN_RIPPLE_RADIUS = 0.1;
+
+int modulo(int v1, int v2)
+{
+  return v1 - v2 * int(floor(float(v1) / float(v2)));
+}
+
+vec2 randOffset(vec2 c)
+{
+  return fract(vec2(
+          c.x * c.y / 8.0 + c.y * 0.3 + c.x * 0.2,
+          c.x * c.y / 14.0 + c.y * 0.5 + c.x * 0.7));
+}
+
+float randPhase(vec2 c)
+{
+  return fract((c.x * c.y) /  (c.x + c.y + 0.1));
+}
+
+float circle(vec2 coords, vec2 i_part, float phase)
+{
+  float d = distance(vec2(0.5,0.5) + (0.5 - RAIN_RIPPLE_RADIUS) * (2.0 * randOffset(i_part) - 1.0),coords);
+  float r = RAIN_RIPPLE_RADIUS * phase;
+        
+  if (d > r)
+    return 0.0;
+        
+  float sinValue = (sin(d / r * 1.2) + 0.7) / 2.0;
+        
+  return (1.0 - abs(phase)) * pow(sinValue,3.0);
+}
+
+float rain(vec2 uv, float time)
+{
+  vec2 i_part = floor(uv * RAIN_RIPPLE_GAPS);
+  vec2 f_part = fract(uv * RAIN_RIPPLE_GAPS);
+  return circle(f_part,i_part,fract(time * 1.2 + randPhase(i_part)));
+}
+
+float rainCombined(vec2 uv, float time)
+{
+  return
+    rain(uv,time) +
+    rain(uv + vec2(10.5,5.7),time) +
+    rain(uv * 0.75 + vec2(3.7,18.9),time) +
+    rain(uv * 0.9 + vec2(5.7,30.1),time) +   
+    rain(uv * 0.8 + vec2(1.2,3.0),time);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
 
 float fresnel_dielectric(vec3 Incoming, vec3 Normal, float eta)
-{
+  {
     float c = abs(dot(Incoming, Normal));
     float g = eta * eta - 1.0 + c * c;
     float result;
@@ -56,7 +131,12 @@ float fresnel_dielectric(vec3 Incoming, vec3 Normal, float eta)
         result = 1.0;  /* TIR (no refracted component) */
 
     return result;
-}
+  }
+
+vec2 normalCoords(vec2 uv, float scale, float speed, float time, float timer1, float timer2, vec3 previousNormal)
+  {
+    return uv * (WAVE_SCALE * scale) + WIND_DIR * time * (WIND_SPEED * speed) -(previousNormal.xy/previousNormal.zz) * WAVE_CHOPPYNESS + vec2(time * timer1,time * timer2);
+  } 
 
 varying vec3 screenCoordsPassthrough;
 varying vec4 position;
@@ -101,22 +181,12 @@ void main(void)
 
     #define waterTimer osg_SimulationTime
 
-    nCoord = UV * (WAVE_SCALE * 0.05) + WIND_DIR * waterTimer * (WIND_SPEED*0.04);
-    vec3 normal0 = 2.0 * texture2D(normalMap,  nCoord + vec2(-waterTimer*0.015,-waterTimer*0.005)).rgb - 1.0;
-    nCoord = UV * (WAVE_SCALE * 0.1) + WIND_DIR * waterTimer * (WIND_SPEED*0.08)-(normal0.xy/normal0.zz)*WAVE_CHOPPYNESS;
-    vec3 normal1 = 2.0 * texture2D(normalMap,  nCoord + vec2(+waterTimer*0.020,+waterTimer*0.015)).rgb - 1.0;
-
-    nCoord = UV * (WAVE_SCALE * 0.25) + WIND_DIR * waterTimer * (WIND_SPEED*0.07)-(normal1.xy/normal1.zz)*WAVE_CHOPPYNESS;
-    vec3 normal2 = 2.0 * texture2D(normalMap,  nCoord + vec2(-waterTimer*0.04,-waterTimer*0.03)).rgb - 1.0;
-    nCoord = UV * (WAVE_SCALE * 0.5) + WIND_DIR * waterTimer * (WIND_SPEED*0.09)-(normal2.xy/normal2.z)*WAVE_CHOPPYNESS;
-    vec3 normal3 = 2.0 * texture2D(normalMap,  nCoord + vec2(+waterTimer*0.03,+waterTimer*0.04)).rgb - 1.0;
-
-    nCoord = UV * (WAVE_SCALE* 1.0) + WIND_DIR * waterTimer * (WIND_SPEED*0.4)-(normal3.xy/normal3.zz)*WAVE_CHOPPYNESS;
-    vec3 normal4 = 2.0 * texture2D(normalMap,  nCoord + vec2(-waterTimer*0.02,+waterTimer*0.1)).rgb - 1.0;
-    nCoord = UV * (WAVE_SCALE * 2.0) + WIND_DIR * waterTimer * (WIND_SPEED*0.7)-(normal4.xy/normal4.zz)*WAVE_CHOPPYNESS;
-    vec3 normal5 = 2.0 * texture2D(normalMap,  nCoord + vec2(+waterTimer*0.1,-waterTimer*0.06)).rgb - 1.0;
-
-
+    vec3 normal0 = 2.0 * texture2D(normalMap,normalCoords(UV, 0.05, 0.04, waterTimer, -0.015, -0.005, vec3(0.0,0.0,0.0))).rgb - 1.0; 
+    vec3 normal1 = 2.0 * texture2D(normalMap,normalCoords(UV, 0.1,  0.08, waterTimer,  0.02,   0.015, normal0)).rgb - 1.0;
+    vec3 normal2 = 2.0 * texture2D(normalMap,normalCoords(UV, 0.25, 0.07, waterTimer, -0.04,  -0.03,  normal1)).rgb - 1.0;
+    vec3 normal3 = 2.0 * texture2D(normalMap,normalCoords(UV, 0.5,  0.09, waterTimer,  0.03,   0.04,  normal2)).rgb - 1.0;
+    vec3 normal4 = 2.0 * texture2D(normalMap,normalCoords(UV, 1.0,  0.4,  waterTimer, -0.02,   0.1,   normal3)).rgb - 1.0;
+    vec3 normal5 = 2.0 * texture2D(normalMap,normalCoords(UV, 2.0,  0.7,  waterTimer,  0.1,   -0.06,  normal4)).rgb - 1.0;
 
     vec3 normal = (normal0 * BIG_WAVES_X + normal1 * BIG_WAVES_Y +
 			normal2 * MID_WAVES_X + normal3 * MID_WAVES_Y +
@@ -126,13 +196,16 @@ void main(void)
 
     normal = vec3(-normal.x, -normal.y, normal.z);
 
+    float rainRipple = rainCombined(position.xy / 1000.0,osg_SimulationTime); 
+
+//normal.y += 2 * rainRipple;
+
     // normal for sunlight scattering
     vec3 lNormal = (normal0 * BIG_WAVES_X*0.5 + normal1 * BIG_WAVES_Y*0.5 +
 		normal2 * MID_WAVES_X*0.2 + normal3 * MID_WAVES_Y*0.2 +
 		normal4 * SMALL_WAVES_X*0.1 + normal5 * SMALL_WAVES_Y*0.1).xyz;
     lNormal = normalize(vec3(lNormal.x * BUMP, lNormal.y * BUMP, lNormal.z));
     lNormal = vec3(-lNormal.x, -lNormal.y, lNormal.z);
-
 
     vec3 lVec = normalize((gl_ModelViewMatrixInverse * vec4(gl_LightSource[0].position.xyz, 0.0)).xyz);
 
@@ -199,6 +272,8 @@ void main(void)
     // fog
     float fogValue = clamp((depthPassthrough - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz,  gl_Fog.color.xyz,  fogValue);
+
+gl_FragData[0].xyz += vec3(rainRipple) * 0.2;
 
 #if REFRACTION
     gl_FragData[0].w = 1.0;
