@@ -697,7 +697,7 @@ namespace MWInput
             SDL_StopTextInput();
 
         bool consumed = false;
-        if (kc != OIS::KC_UNASSIGNED)
+        if (kc != OIS::KC_UNASSIGNED && !mInputBinder->detectingBindingState())
         {
             consumed = MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
             if (SDL_IsTextInputActive() &&  // Little trick to check if key is printable
@@ -726,7 +726,8 @@ namespace MWInput
         mJoystickLastUsed = false;
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
-        setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
+        if (!mInputBinder->detectingBindingState())
+            setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
         mInputBinder->keyReleased (arg);
     }
 
