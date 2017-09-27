@@ -174,6 +174,29 @@ namespace MWInput
         }
     }
 
+    void InputManager::handleGuiArrowKey(int action)
+    {
+        MyGUI::KeyCode key;
+        switch (action)
+        {
+        case A_MoveLeft:
+            key = MyGUI::KeyCode::ArrowLeft;
+            break;
+        case A_MoveRight:
+            key = MyGUI::KeyCode::ArrowRight;
+            break;
+        case A_MoveForward:
+            key = MyGUI::KeyCode::ArrowUp;
+            break;
+        case A_MoveBackward:
+        default:
+            key = MyGUI::KeyCode::ArrowDown;
+            break;
+        }
+
+        MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0);
+    }
+
     void InputManager::channelChanged(ICS::Channel* channel, float currentValue, float previousValue)
     {
         resetIdleTime ();
@@ -234,6 +257,12 @@ namespace MWInput
             case A_Activate:
                 resetIdleTime();
                 activate();
+                break;
+            case A_MoveLeft:
+            case A_MoveRight:
+            case A_MoveForward:
+            case A_MoveBackward:
+                handleGuiArrowKey(action);
                 break;
             case A_Journal:
                 toggleJournal ();
