@@ -38,17 +38,7 @@ const float WIND_SPEED = 0.2f;
 
 const vec3 WATER_COLOR = vec3(0.090195, 0.115685, 0.12745);
 
-
-
-
-
-
-
-
-
-
-
-
+// ---------------- rain ripples related stuff ---------------------
 
 const float RAIN_RIPPLE_GAPS = 5.0;
 const float RAIN_RIPPLE_RADIUS = 0.1;
@@ -70,27 +60,32 @@ float randPhase(vec2 c)
   return fract((c.x * c.y) /  (c.x + c.y + 0.1));
 }
 
-float circle(vec2 coords, vec2 i_part, float phase)
+vec4 circle(vec2 coords, vec2 i_part, float phase)
 {
-  float d = distance(vec2(0.5,0.5) + (0.5 - RAIN_RIPPLE_RADIUS) * (2.0 * randOffset(i_part) - 1.0),coords);
+  vec2 center = vec2(0.5,0.5) + (0.5 - RAIN_RIPPLE_RADIUS) * (2.0 * randOffset(i_part) - 1.0);
+  vec2 toCenter = coords - center;
+  float d = length(toCenter);
   float r = RAIN_RIPPLE_RADIUS * phase;
         
   if (d > r)
-    return 0.0;
+    return vec4(0.0,0.0,1.0,0.0);
         
   float sinValue = (sin(d / r * 1.2) + 0.7) / 2.0;
+  float height = (1.0 - abs(phase)) * pow(sinValue,3.0);
+
+  vec3 normal = normalize(mix(vec3(0.0,0.0,1.0),vec3(normalize(toCenter),0.0),height));
         
-  return (1.0 - abs(phase)) * pow(sinValue,3.0);
+  return vec4(normal,height);
 }
 
-float rain(vec2 uv, float time)
+vec4 rain(vec2 uv, float time)
 {
   vec2 i_part = floor(uv * RAIN_RIPPLE_GAPS);
   vec2 f_part = fract(uv * RAIN_RIPPLE_GAPS);
   return circle(f_part,i_part,fract(time * 1.2 + randPhase(i_part)));
 }
 
-float rainCombined(vec2 uv, float time)
+vec4 rainCombined(vec2 uv, float time)     // returns ripple normal in xyz and ripple height in w
 {
   return
     rain(uv,time) +
@@ -99,19 +94,6 @@ float rainCombined(vec2 uv, float time)
     rain(uv * 0.9 + vec2(5.7,30.1),time) +   
     rain(uv * 0.8 + vec2(1.2,3.0),time);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
 
@@ -188,22 +170,24 @@ void main(void)
     vec3 normal4 = 2.0 * texture2D(normalMap,normalCoords(UV, 1.0,  0.4,  waterTimer, -0.02,   0.1,   normal3)).rgb - 1.0;
     vec3 normal5 = 2.0 * texture2D(normalMap,normalCoords(UV, 2.0,  0.7,  waterTimer,  0.1,   -0.06,  normal4)).rgb - 1.0;
 
+    vec4 rainRipple = rainCombined(position.xy / 1000.0,waterTimer); 
+    vec3 rippleAdd = rainRipple.xyz * rainRipple.w * 10.0;
+
     vec3 normal = (normal0 * BIG_WAVES_X + normal1 * BIG_WAVES_Y +
 			normal2 * MID_WAVES_X + normal3 * MID_WAVES_Y +
-			normal4 * SMALL_WAVES_X + normal5 * SMALL_WAVES_Y);
+			normal4 * SMALL_WAVES_X + normal5 * SMALL_WAVES_Y +
+                        rippleAdd);
 
     normal = normalize(vec3(normal.x * BUMP, normal.y * BUMP, normal.z));
 
     normal = vec3(-normal.x, -normal.y, normal.z);
 
-    float rainRipple = rainCombined(position.xy / 1000.0,osg_SimulationTime); 
-
-//normal.y += 2 * rainRipple;
-
     // normal for sunlight scattering
     vec3 lNormal = (normal0 * BIG_WAVES_X*0.5 + normal1 * BIG_WAVES_Y*0.5 +
 		normal2 * MID_WAVES_X*0.2 + normal3 * MID_WAVES_Y*0.2 +
-		normal4 * SMALL_WAVES_X*0.1 + normal5 * SMALL_WAVES_Y*0.1).xyz;
+		normal4 * SMALL_WAVES_X*0.1 + normal5 * SMALL_WAVES_Y*0.1 +
+                rippleAdd).xyz;
+
     lNormal = normalize(vec3(lNormal.x * BUMP, lNormal.y * BUMP, lNormal.z));
     lNormal = vec3(-lNormal.x, -lNormal.y, lNormal.z);
 
@@ -224,10 +208,10 @@ void main(void)
 
     float s = clamp(dot(lR, vVec)*2.0-1.2, 0.0, 1.0);
     float lightScatter = shadow * clamp(dot(lVec,lNormal)*0.7+0.3, 0.0, 1.0) * s * SCATTER_AMOUNT * sunFade * clamp(1.0-exp(-sunHeight), 0.0, 1.0);
-    vec3 scatterColour = mix(vec3(SCATTER_COLOUR)*vec3(1.0,0.4,0.0),  SCATTER_COLOUR,  clamp(1.0-exp(-sunHeight*SUN_EXT), 0.0, 1.0));
+    vec3 scatterColour = mix(vec3(SCATTER_COLOUR)*vec3(1.0,0.4,0.0), SCATTER_COLOUR, clamp(1.0-exp(-sunHeight*SUN_EXT), 0.0, 1.0));
 
     // fresnel
-    float ior = (cameraPos.z>0.0)?(1.333/1.0):(1.0/1.333); //air to water; water to air
+    float ior = (cameraPos.z>0.0)?(1.333/1.0):(1.0/1.333); // air to water; water to air
     float fresnel = fresnel_dielectric(vVec, normal, ior);
 
     fresnel = clamp(fresnel, 0.0, 1.0);
@@ -243,12 +227,14 @@ void main(void)
 #else
     float shore = 1.0;
 #endif
+    vec2 screenCoordsOffset = ( (normal.xy + rainRipple.w * vec2(0.0,2.0)) * REFL_BUMP * shore);
+
     // reflection
-    vec3 reflection = texture2D(reflectionMap, screenCoords+(normal.xy*REFL_BUMP*shore)).rgb;
+    vec3 reflection = texture2D(reflectionMap, screenCoords + screenCoordsOffset).rgb;
 
     // refraction
 #if REFRACTION
-    vec3 refraction = texture2D(refractionMap, screenCoords-(normal.xy*REFR_BUMP*shore)).rgb;
+    vec3 refraction = texture2D(refractionMap, screenCoords - screenCoordsOffset).rgb;
 
     // brighten up the refraction underwater
     refraction = (cameraPos.z < 0.0) ? clamp(refraction * 1.5, 0.0, 1.0) : refraction;
@@ -268,12 +254,11 @@ void main(void)
 #else
     gl_FragData[0].xyz = mix(reflection,  waterColor,  (1.0-fresnel)*0.5) + specular * gl_LightSource[0].specular.xyz;
 #endif
-
     // fog
     float fogValue = clamp((depthPassthrough - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz,  gl_Fog.color.xyz,  fogValue);
 
-gl_FragData[0].xyz += vec3(rainRipple) * 0.2;
+    gl_FragData[0].xyz += vec3(rainRipple.w) * 0.2;
 
 #if REFRACTION
     gl_FragData[0].w = 1.0;
