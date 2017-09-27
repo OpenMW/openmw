@@ -5,7 +5,6 @@
 
 #include "../mwmechanics/alchemy.hpp"
 
-#include "widgets.hpp"
 #include "windowbase.hpp"
 
 namespace MWMechanics

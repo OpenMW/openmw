@@ -29,7 +29,6 @@
 #include "../mwstate/character.hpp"
 
 #include "confirmationdialog.hpp"
-#include "widgets.hpp"
 
 namespace MWGui
 {

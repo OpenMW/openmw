@@ -3,6 +3,8 @@
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_Window.h>
 #include <MyGUI_ProgressBar.h>
+#include <MyGUI_ScrollBar.h>
+#include <MyGUI_Button.h>
 
 #include <components/widgets/list.hpp>
 #include <components/translation/translation.hpp>
@@ -20,7 +22,6 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
-#include "widgets.hpp"
 #include "bookpage.hpp"
 #include "textcolours.hpp"
 

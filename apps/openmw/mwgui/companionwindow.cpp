@@ -13,6 +13,7 @@
 #include "companionitemmodel.hpp"
 #include "draganddrop.hpp"
 #include "countdialog.hpp"
+#include "widgets.hpp"
 
 namespace
 {

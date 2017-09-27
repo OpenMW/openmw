@@ -2,6 +2,7 @@
 
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_ScrollBar.h>
 
 #include <components/misc/rng.hpp>
 
@@ -23,8 +24,6 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwstate/charactermanager.hpp"
-
-#include "widgets.hpp"
 
 namespace MWGui
 {

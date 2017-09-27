@@ -1,12 +1,16 @@
 #ifndef OPENMW_MWGUI_COMPANIONWINDOW_H
 #define OPENMW_MWGUI_COMPANIONWINDOW_H
 
-#include "widgets.hpp"
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
 
 namespace MWGui
 {
+    namespace Widgets
+    {
+        class MWDynamicStat;
+    }
+
     class MessageBoxManager;
     class ItemView;
     class DragAndDrop;

@@ -21,7 +21,6 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
-#include "widgets.hpp"
 #include "itemwidget.hpp"
 #include "itemchargeview.hpp"
 #include "sortfilteritemmodel.hpp"

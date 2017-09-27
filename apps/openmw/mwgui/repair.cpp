@@ -17,8 +17,6 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 
-#include "widgets.hpp"
-
 #include "itemwidget.hpp"
 #include "itemchargeview.hpp"
 #include "sortfilteritemmodel.hpp"

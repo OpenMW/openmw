@@ -1,6 +1,8 @@
 #include "alchemywindow.hpp"
 
 #include <MyGUI_Gui.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_EditBox.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -19,6 +21,7 @@
 #include "sortfilteritemmodel.hpp"
 #include "itemview.hpp"
 #include "itemwidget.hpp"
+#include "widgets.hpp"
 
 namespace MWGui
 {
