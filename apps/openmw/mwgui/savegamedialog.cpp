@@ -57,6 +57,9 @@ namespace MWGui
         mSaveList->eventKeyButtonPressed += MyGUI::newDelegate(this, &SaveGameDialog::onKeyButtonPressed);
         mSaveNameEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &SaveGameDialog::onEditSelectAccept);
         mSaveNameEdit->eventEditTextChange += MyGUI::newDelegate(this, &SaveGameDialog::onSaveNameChanged);
+
+        // To avoid accidental deletions
+        mDeleteButton->setNeedKeyFocus(false);
     }
 
     void SaveGameDialog::onSlotActivated(MyGUI::ListBox *sender, size_t pos)
