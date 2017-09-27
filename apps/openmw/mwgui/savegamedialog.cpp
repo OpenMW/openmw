@@ -105,6 +105,11 @@ namespace MWGui
         }
     }
 
+    void SaveGameDialog::onDeleteSlotCancel()
+    {
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
+    }
+
     void SaveGameDialog::onSaveNameChanged(MyGUI::EditBox *sender)
     {
         // This might have previously been a save slot from the list. If so, that is no longer the case
@@ -225,6 +230,11 @@ namespace MWGui
         accept(true);
     }
 
+    void SaveGameDialog::onConfirmationCancel()
+    {
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
+    }
+
     void SaveGameDialog::accept(bool reallySure)
     {
         // Remove for MyGUI 3.2.2
@@ -240,6 +250,7 @@ namespace MWGui
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationGiven);
                 dialog->eventCancelClicked.clear();
+                dialog->eventCancelClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationCancel);
                 return;
             }
             if (mSaveNameEdit->getCaption().empty())
@@ -260,6 +271,7 @@ namespace MWGui
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationGiven);
                 dialog->eventCancelClicked.clear();
+                dialog->eventCancelClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationCancel);
                 return;
             }
         }

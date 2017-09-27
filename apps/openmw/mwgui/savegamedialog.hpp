@@ -37,10 +37,12 @@ namespace MWGui
         void onSlotMouseClick(MyGUI::ListBox* sender, size_t pos);
 
         void onDeleteSlotConfirmed();
+        void onDeleteSlotCancel();
 
         void onEditSelectAccept (MyGUI::EditBox* sender);
         void onSaveNameChanged (MyGUI::EditBox* sender);
         void onConfirmationGiven();
+        void onConfirmationCancel();
 
         void accept(bool reallySure=false);
 
