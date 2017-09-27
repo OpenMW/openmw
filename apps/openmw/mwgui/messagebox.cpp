@@ -36,8 +36,13 @@ namespace MWGui
 
     void MessageBoxManager::clear()
     {
-        delete mInterMessageBoxe;
-        mInterMessageBoxe = NULL;
+        if (mInterMessageBoxe)
+        {
+            mInterMessageBoxe->setVisible(false);
+
+            delete mInterMessageBoxe;
+            mInterMessageBoxe = NULL;
+        }
 
         std::vector<MessageBox*>::iterator it(mMessageBoxes.begin());
         for (; it != mMessageBoxes.end(); ++it)
