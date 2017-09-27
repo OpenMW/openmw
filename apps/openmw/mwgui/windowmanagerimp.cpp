@@ -773,6 +773,7 @@ namespace MWGui
                 double dt = frameTimer.time_s();
                 frameTimer.setStartTick();
 
+                mKeyboardNavigation->onFrame();
                 mMessageBoxManager->onFrame(dt);
                 MWBase::Environment::get().getInputManager()->update(dt, true, false);
 
