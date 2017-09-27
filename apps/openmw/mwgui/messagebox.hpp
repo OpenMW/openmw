@@ -77,6 +77,8 @@ namespace MWGui
             void mousePressed (MyGUI::Widget* _widget);
             int readPressedButton ();
 
+            virtual bool exit() { return false; }
+
             bool mMarkedToDelete;
 
         private:
