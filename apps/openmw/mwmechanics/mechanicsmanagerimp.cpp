@@ -1012,14 +1012,17 @@ namespace MWMechanics
 
         MWWorld::Ptr victim;
 
+        bool isAllowed = true;
         const MWWorld::CellRef* ownerCellRef = &item.getCellRef();
         if (!container.isEmpty())
         {
             // Inherit the owner of the container
             ownerCellRef = &container.getCellRef();
+            isAllowed = isAllowedToUse(ptr, container, victim);
         }
         else
         {
+            isAllowed = isAllowedToUse(ptr, item, victim);
             if (!item.getCellRef().hasContentFile())
             {
                 // this is a manually placed item, which means it was already stolen
@@ -1027,7 +1030,7 @@ namespace MWMechanics
             }
         }
 
-        if (isAllowedToUse(ptr, item, victim))
+        if (isAllowed)
             return;
 
         Owner owner;
