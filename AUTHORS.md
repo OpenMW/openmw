@@ -106,6 +106,7 @@ Programmers
     Michael Papageorgiou (werdanith)
     Michał Bień (Glorf)
     Michał Moroz (dragonee)
+    Miloslav Číž (drummyfish)
     Miroslav Puda (pakanek)
     MiroslavR
     Mitchell Schwitzer (schwitzerm)
