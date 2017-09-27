@@ -80,6 +80,7 @@ namespace MWGui
 
     void MainMenu::onNewGameConfirmed()
     {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_MainMenu);
         MWBase::Environment::get().getStateManager()->newGame();
     }
 
