@@ -152,13 +152,6 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
     }
 
-    void Console::onClose()
-    {
-        // Apparently, hidden widgets can retain key focus
-        // Remove for MyGUI 3.2.2
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
-    }
-
     void Console::setFont(const std::string &fntName)
     {
         mHistory->setFontName(fntName);

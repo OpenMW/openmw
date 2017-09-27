@@ -40,7 +40,6 @@ namespace MWGui
             Console(int w, int h, bool consoleOnlyScripts);
 
             virtual void onOpen();
-            virtual void onClose();
 
             void setFont(const std::string &fntName);
 
