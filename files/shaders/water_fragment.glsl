@@ -65,12 +65,14 @@ vec4 circle(vec2 coords, vec2 i_part, float phase)
   vec2 center = vec2(0.5,0.5) + (0.5 - RAIN_RIPPLE_RADIUS) * (2.0 * randOffset(i_part) - 1.0);
   vec2 toCenter = coords - center;
   float d = length(toCenter);
+
   float r = RAIN_RIPPLE_RADIUS * phase;
         
   if (d > r)
     return vec4(0.0,0.0,1.0,0.0);
         
   float sinValue = (sin(d / r * 1.2) + 0.7) / 2.0;
+
   float height = (1.0 - abs(phase)) * pow(sinValue,3.0);
 
   vec3 normal = normalize(mix(vec3(0.0,0.0,1.0),vec3(normalize(toCenter),0.0),height));
@@ -138,6 +140,8 @@ uniform float near;
 uniform float far;
 uniform vec3 nodePosition;
 
+uniform float rainIntensity;
+
 float frustumDepth;
 
 float linearizeDepth(float depth)  // takes <0,1> non-linear depth value and returns <0,1> linearized value
@@ -170,7 +174,13 @@ void main(void)
     vec3 normal4 = 2.0 * texture2D(normalMap,normalCoords(UV, 1.0,  0.4,  waterTimer, -0.02,   0.1,   normal3)).rgb - 1.0;
     vec3 normal5 = 2.0 * texture2D(normalMap,normalCoords(UV, 2.0,  0.7,  waterTimer,  0.1,   -0.06,  normal4)).rgb - 1.0;
 
-    vec4 rainRipple = rainCombined(position.xy / 1000.0,waterTimer); 
+    vec4 rainRipple;
+
+    if (rainIntensity > 0.01)
+      rainRipple = rainCombined(position.xy / 1000.0,waterTimer) * clamp(rainIntensity,0.0,1.0);
+    else
+      rainRipple = vec4(0.0,0.0,0.0,0.0);
+ 
     vec3 rippleAdd = rainRipple.xyz * rainRipple.w * 10.0;
 
     vec3 normal = (normal0 * BIG_WAVES_X + normal1 * BIG_WAVES_Y +
