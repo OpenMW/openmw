@@ -85,6 +85,7 @@ namespace MWRender
 
         osg::Uniform* mUniformNear;
         osg::Uniform* mUniformFar;
+        osg::Uniform* mUniformRainIntensity;
 
         void preloadCommonAssets();
 
