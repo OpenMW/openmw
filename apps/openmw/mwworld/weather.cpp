@@ -131,7 +131,6 @@ Weather::Weather(const std::string& name,
     , mWindSpeed(fallback.getFallbackFloat("Weather_" + name + "_Wind_Speed"))
     , mCloudSpeed(fallback.getFallbackFloat("Weather_" + name + "_Cloud_Speed"))
     , mGlareView(fallback.getFallbackFloat("Weather_" + name + "_Glare_View"))
-    , mDL{dlFactor, dlOffset}
     , mIsStorm(mWindSpeed > stormWindSpeed)
     , mRainSpeed(rainSpeed)
     , mRainFrequency(fallback.getFallbackFloat("Weather_" + name + "_Rain_Entrance_Speed"))
@@ -145,6 +144,8 @@ Weather::Weather(const std::string& name,
     , mFlashDecrement(fallback.getFallbackFloat("Weather_" + name + "_Flash_Decrement"))
     , mFlashBrightness(0.0f)
 {
+    mDL.FogFactor = dlFactor;
+    mDL.FogOffset = dlOffset;
     mThunderSoundID[0] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_0");
     mThunderSoundID[1] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_1");
     mThunderSoundID[2] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_2");
