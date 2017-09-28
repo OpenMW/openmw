@@ -82,6 +82,7 @@
 
         <!-- Sneak indicator box -->
         <Widget type="Button" skin="" position="162 146 36 36" align="Left Bottom" name="SneakBox">
+            <Property key="Visible" value="false"/>
             <Widget type="Widget" skin="HUD_Box" position="0 0 36 36">
                 <Property key="NeedMouse" value="false"/>
                 <Widget type="ImageBox" skin="ImageBox" position="2 2 32 32" align="Left Top" name="SneakImage">

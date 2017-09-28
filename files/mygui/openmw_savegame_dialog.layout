@@ -2,7 +2,7 @@
 
 <MyGUI type="Layout">
     <Widget type="VBox" skin="MW_DialogNoTransp" layer="Windows" position="0 0 600 400" align="Center" name="_Main">
-        <Property key="Padding" value="12"/>
+        <Property key="Padding" value="8"/>
         <Property key="Spacing" value="8"/>
 
         <Widget type="HBox" skin="">
@@ -46,6 +46,7 @@
                     <Property key="Static" value="true"/>
                     <Property key="MultiLine" value="true"/>
                     <Property key="WordWrap" value="true"/>
+                    <Property key="NeedKey" value="false"/>
                 </Widget>
 
 

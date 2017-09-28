@@ -15,6 +15,7 @@ using namespace MWGui;
 WindowBase::WindowBase(const std::string& parLayout)
   : Layout(parLayout)
 {
+    mMainWidget->setVisible(false);
 }
 
 void WindowBase::setVisible(bool visible)
@@ -23,9 +24,9 @@ void WindowBase::setVisible(bool visible)
     mMainWidget->setVisible(visible);
 
     if (visible)
-        open();
+        onOpen();
     else if (wasVisible && !visible)
-        close();
+        onClose();
 
     // This is needed as invisible widgets can retain key focus.
     // Remove for MyGUI 3.2.2
@@ -64,16 +65,20 @@ WindowModal::WindowModal(const std::string& parLayout)
 {
 }
 
-void WindowModal::open()
+void WindowModal::onOpen()
 {
-    MyGUI::InputManager::getInstance ().addWidgetModal (mMainWidget);
     MWBase::Environment::get().getWindowManager()->addCurrentModal(this); //Set so we can escape it if needed
+
+    MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+    MyGUI::InputManager::getInstance ().addWidgetModal (mMainWidget);
+    MyGUI::InputManager::getInstance().setKeyFocusWidget(focus);
 }
 
-void WindowModal::close()
+void WindowModal::onClose()
 {
-    MyGUI::InputManager::getInstance ().removeWidgetModal (mMainWidget);
     MWBase::Environment::get().getWindowManager()->removeCurrentModal(this);
+
+    MyGUI::InputManager::getInstance ().removeWidgetModal (mMainWidget);
 }
 
 NoDrop::NoDrop(DragAndDrop *drag, MyGUI::Widget *widget)

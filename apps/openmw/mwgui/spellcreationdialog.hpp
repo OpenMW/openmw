@@ -23,8 +23,8 @@ namespace MWGui
     public:
         EditEffectDialog();
 
-        virtual void open();
-        virtual void exit();
+        virtual void onOpen();
+        virtual bool exit();
 
         void setConstantEffect(bool constant);
 
@@ -150,16 +150,19 @@ namespace MWGui
     public:
         SpellCreationDialog();
 
-        virtual void open();
-        virtual void exit();
+        virtual void onOpen();
+        void clear() { resetReference(); }
 
-        void startSpellMaking(MWWorld::Ptr actor);
+        void onFrame(float dt) { checkReferenceAvailable(); }
+
+        void setPtr(const MWWorld::Ptr& actor);
 
     protected:
         virtual void onReferenceUnavailable ();
 
         void onCancelButtonClicked (MyGUI::Widget* sender);
         void onBuyButtonClicked (MyGUI::Widget* sender);
+        void onAccept(MyGUI::EditBox* sender);
 
         virtual void notifyEffectsChanged ();
 

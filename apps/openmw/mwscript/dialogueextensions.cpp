@@ -11,6 +11,7 @@
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/journal.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -116,7 +117,7 @@ namespace MWScript
                             runtime.pop();
                             arg0 = arg0 -1;
                         }
-                        dialogue->askQuestion(question,choice);
+                        dialogue->addChoice(question,choice);
                     }
                 }
         };
@@ -133,7 +134,7 @@ namespace MWScript
                     if (!ptr.getRefData().isEnabled())
                         return;
 
-                    MWBase::Environment::get().getDialogueManager()->startDialogue (ptr);
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue, ptr);
                 }
         };
 

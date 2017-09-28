@@ -101,9 +101,9 @@ namespace MWGui
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onOkClicked);
     }
 
-    void ReviewDialog::open()
+    void ReviewDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
         mUpdateSkillArea = true;
     }
 

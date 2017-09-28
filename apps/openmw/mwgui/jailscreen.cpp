@@ -26,8 +26,6 @@ namespace MWGui
     {
         getWidget(mProgressBar, "ProgressBar");
 
-        setVisible(false);
-
         mTimeAdvancer.eventProgressChanged += MyGUI::newDelegate(this, &JailScreen::onJailProgressChanged);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &JailScreen::onJailFinished);
 

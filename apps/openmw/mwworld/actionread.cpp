@@ -32,14 +32,12 @@ namespace MWWorld
             return;
         }
 
-        bool showTakeButton = (getTarget().getContainerStore() != &actor.getClass().getContainerStore(actor));
-
         LiveCellRef<ESM::Book> *ref = getTarget().get<ESM::Book>();
 
         if (ref->mBase->mData.mIsScroll)
-            MWBase::Environment::get().getWindowManager()->showScroll(getTarget(), showTakeButton);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Scroll, getTarget());
         else
-            MWBase::Environment::get().getWindowManager()->showBook(getTarget(), showTakeButton);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Book, getTarget());
 
         MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats (actor);
 

@@ -297,9 +297,6 @@ namespace MWGui
 
     void StatsWindow::onFrame (float dt)
     {
-        if (!mMainWidget->getVisible())
-            return;
-
         NoDrop::onFrame(dt);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();

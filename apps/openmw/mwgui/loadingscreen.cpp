@@ -51,8 +51,6 @@ namespace MWGui
         mBackgroundImage = MyGUI::Gui::getInstance().createWidgetReal<BackgroundImage>("ImageBox", 0,0,1,1,
             MyGUI::Align::Stretch, "Menu");
 
-        setVisible(false);
-
         findSplashScreens();
     }
 

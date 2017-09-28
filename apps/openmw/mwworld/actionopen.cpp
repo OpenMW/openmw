@@ -10,9 +10,8 @@
 
 namespace MWWorld
 {
-    ActionOpen::ActionOpen (const MWWorld::Ptr& container, bool loot)
+    ActionOpen::ActionOpen (const MWWorld::Ptr& container)
         : Action (false, container)
-        , mLoot(loot)
     {
     }
 
@@ -23,6 +22,6 @@ namespace MWWorld
 
         MWMechanics::diseaseContact(actor, getTarget());
 
-        MWBase::Environment::get().getWindowManager()->openContainer(getTarget(), mLoot);
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Container, getTarget());
     }
 }

@@ -14,13 +14,17 @@ namespace MWGui
     public:
         TrainingWindow();
 
-        virtual void open();
+        virtual void onOpen();
 
-        virtual void exit();
+        bool exit() { return false; }
 
-        void startTraining(MWWorld::Ptr actor);
+        void setPtr(const MWWorld::Ptr& actor);
 
         void onFrame(float dt);
+
+        WindowBase* getProgressBar() { return &mProgressBar; }
+
+        void clear() { resetReference(); }
 
     protected:
         virtual void onReferenceUnavailable ();
@@ -34,8 +38,6 @@ namespace MWGui
         MyGUI::Widget* mTrainingOptions;
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPlayerGold;
-
-        float mFadeTimeRemaining;
 
         WaitDialogProgressBar mProgressBar;
         TimeAdvancer mTimeAdvancer;

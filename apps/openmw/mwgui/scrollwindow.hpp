@@ -17,14 +17,16 @@ namespace MWGui
         public:
             ScrollWindow ();
 
-            void openScroll (MWWorld::Ptr scroll, bool showTakeButton);
-            virtual void exit();
+            void setPtr (const MWWorld::Ptr& scroll);
             void setInventoryAllowed(bool allowed);
+
+            void onResChange(int, int) { center(); }
 
         protected:
             void onCloseButtonClicked (MyGUI::Widget* _sender);
             void onTakeButtonClicked (MyGUI::Widget* _sender);
             void setTakeButtonShow(bool show);
+            void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
 
         private:
             Gui::ImageButton* mCloseButton;

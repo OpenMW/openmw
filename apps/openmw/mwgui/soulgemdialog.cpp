@@ -22,13 +22,11 @@ namespace MWGui
     {
         if (button == 0)
         {
-            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Recharge);
-            MWBase::Environment::get().getWindowManager()->startRecharge(mSoulgem);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Recharge, mSoulgem);
         }
         else
         {
-            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Enchanting);
-            MWBase::Environment::get().getWindowManager()->startSelfEnchanting(mSoulgem);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Enchanting, mSoulgem);
         }
     }
 

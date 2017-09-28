@@ -120,9 +120,9 @@ namespace MWGui
             okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
     }
 
-    void RaceDialog::open()
+    void RaceDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
 
         updateRaces();
         updateSkills();
@@ -163,6 +163,8 @@ namespace MWGui
         size_t initialPos = mHeadRotate->getScrollRange()/2+mHeadRotate->getScrollRange()/10;
         mHeadRotate->setScrollPosition(initialPos);
         onHeadRotate(mHeadRotate, initialPos);
+
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mRaceList);
     }
 
     void RaceDialog::setRaceId(const std::string &raceId)
@@ -183,8 +185,10 @@ namespace MWGui
         updateSpellPowers();
     }
 
-    void RaceDialog::close()
+    void RaceDialog::onClose()
     {
+        WindowModal::onClose();
+
         mPreviewImage->setRenderItemTexture(NULL);
 
         mPreviewTexture.reset(NULL);

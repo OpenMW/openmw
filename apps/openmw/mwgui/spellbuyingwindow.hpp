@@ -25,9 +25,13 @@ namespace MWGui
         public:
             SpellBuyingWindow();
 
-            void startSpellBuying(const MWWorld::Ptr& actor, int startOffset);
+            void setPtr(const MWWorld::Ptr& actor);
+            void setPtr(const MWWorld::Ptr& actor, int startOffset);
 
-            virtual void exit();
+            void onFrame(float dt) { checkReferenceAvailable(); }
+            void clear() { resetReference(); }
+
+            void onResChange(int, int) { center(); }
 
         protected:
             MyGUI::Button* mCancelButton;

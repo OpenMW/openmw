@@ -85,14 +85,11 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     mMouseListener->mouseReleased(evt.button, evt.button.button);
                     break;
                 case SDL_KEYDOWN:
-                    if (!evt.key.repeat)
-                    {
-                        mKeyboardListener->keyPressed(evt.key);
+                    mKeyboardListener->keyPressed(evt.key);
 
-                        if (!isModifierHeld(KMOD_ALT) && evt.key.keysym.sym >= SDLK_F1 && evt.key.keysym.sym <= SDLK_F12)
-                        {
-                            mViewer->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_F1 + (evt.key.keysym.sym - SDLK_F1));
-                        }
+                    if (!isModifierHeld(KMOD_ALT) && evt.key.keysym.sym >= SDLK_F1 && evt.key.keysym.sym <= SDLK_F12)
+                    {
+                        mViewer->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_F1 + (evt.key.keysym.sym - SDLK_F1));
                     }
 
                     break;
