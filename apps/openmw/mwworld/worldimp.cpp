@@ -153,7 +153,8 @@ namespace MWWorld
       mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles), mUserDataPath(userDataPath),
       mActivationDistanceOverride (activationDistanceOverride), mStartupScript(startupScript),
       mStartCell (startCell), mDistanceToFacedObject(-1), mTeleportEnabled(true),
-      mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0), mSpellPreloadTimer(0.f)
+      mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0), mSpellPreloadTimer(0.f), 
+      mPlayerTraveling(false)
     {
         mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
         mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath);
@@ -312,6 +313,8 @@ namespace MWWorld
         mGoToJail = false;
         mTeleportEnabled = true;
         mLevitationEnabled = true;
+
+        setPlayerTraveling(false);
 
         fillGlobalVariables();
     }
@@ -3222,6 +3225,45 @@ namespace MWWorld
             return true;
 
         return MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Jail);
+    }
+
+    void World::setPlayerTraveling(bool traveling)
+    {
+        mPlayerTraveling = traveling;
+    }
+
+    bool World::isPlayerTraveling() const
+    {
+        return mPlayerTraveling;
+    }
+
+    void World::travel(TravelTarget destination)
+    {
+        if (!MWBase::Environment::get().getWorld()->isPlayerTraveling())
+            return;
+
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+
+        if (!destination.interior)
+        {
+            ESM::Position playerPos = player.getRefData().getPosition();
+            float d = (osg::Vec3f(destination.pos.pos[0], destination.pos.pos[1], 0) - osg::Vec3f(playerPos.pos[0], playerPos.pos[1], 0)).length();
+            int hours = static_cast<int>(d / MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->getFloat());
+            for (int i = 0; i < hours; i++)
+            {
+                MWBase::Environment::get().getMechanicsManager()->rest(true);
+            }
+            MWBase::Environment::get().getWorld()->advanceTime(hours);
+        }
+
+        // Teleports any followers, too.
+        MWWorld::ActionTeleport action(destination.interior ? destination.cellname : "", destination.pos, true);
+        action.execute(player);
+
+        MWBase::Environment::get().getWorld()->setPlayerTraveling(false);
+
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
     }
 
     float World::getTerrainHeightAt(const osg::Vec3f& worldPos) const

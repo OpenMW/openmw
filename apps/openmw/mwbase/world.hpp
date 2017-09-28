@@ -90,6 +90,13 @@ namespace MWBase
                 float x, y; // world position
                 ESM::CellId dest;
             };
+            
+            struct TravelTarget
+            {
+                ESM::Position pos;
+                std::string cellname;
+                bool interior;
+            };
 
             World() {}
 
@@ -561,6 +568,11 @@ namespace MWBase
             virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;
 
             virtual bool isPlayerInJail() const = 0;
+
+            virtual void setPlayerTraveling(bool traveling) = 0;
+            virtual bool isPlayerTraveling() const = 0;
+
+            virtual void travel(TravelTarget destination) = 0;
 
             /// Return terrain height at \a worldPos position.
             virtual float getTerrainHeightAt(const osg::Vec3f& worldPos) const = 0;

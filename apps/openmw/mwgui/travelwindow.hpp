@@ -4,6 +4,7 @@
 
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MyGUI
 {
@@ -24,6 +25,8 @@ namespace MWGui
         public:
             TravelWindow();
 
+            virtual void onFrame();
+
             virtual void exit();
 
             void startTravel(const MWWorld::Ptr& actor);
@@ -36,8 +39,11 @@ namespace MWGui
 
             MyGUI::ScrollView* mDestinationsView;
 
+            MWBase::World::TravelTarget mTravelTarget;
+
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onTravelButtonClick(MyGUI::Widget* _sender);
+            void travel();
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
             void addDestination(const std::string& name, ESM::Position pos, bool interior);
             void clearDestinations();

@@ -170,6 +170,8 @@ namespace MWWorld
             bool mGoToJail;
             int mDaysInPrison;
 
+            bool mPlayerTraveling;
+
             float mSpellPreloadTimer;
 
             float feetToGameUnits(float feet);
@@ -667,6 +669,11 @@ namespace MWWorld
             virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target);
 
             virtual bool isPlayerInJail() const;
+
+            virtual void setPlayerTraveling(bool traveling);
+            virtual bool isPlayerTraveling() const;
+
+            virtual void travel(TravelTarget destination);
 
             /// Return terrain height at \a worldPos position.
             virtual float getTerrainHeightAt(const osg::Vec3f& worldPos) const;

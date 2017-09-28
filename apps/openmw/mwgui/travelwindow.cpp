@@ -26,6 +26,7 @@ namespace MWGui
     TravelWindow::TravelWindow() :
         WindowBase("openmw_travel_window.layout")
         , mCurrentY(0)
+        , mTravelTarget{}
     {
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
@@ -166,30 +167,21 @@ namespace MWGui
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
-        ESM::Position pos = *_sender->getUserData<ESM::Position>();
-        std::string cellname = _sender->getUserString("Destination");
-        bool interior = _sender->getUserString("interior") == "y";
-        if (!interior)
-        {
-            ESM::Position playerPos = player.getRefData().getPosition();
-            float d = (osg::Vec3f(pos.pos[0], pos.pos[1], 0) - osg::Vec3f(playerPos.pos[0], playerPos.pos[1], 0)).length();
-            int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->getFloat());
-            for(int i = 0;i < hours;i++)
-            {
-                MWBase::Environment::get().getMechanicsManager ()->rest (true);
-            }
-            MWBase::Environment::get().getWorld()->advanceTime(hours);
-        }
 
+        MWBase::Environment::get().getWorld()->setPlayerTraveling(true);
+
+        mTravelTarget = MWBase::World::TravelTarget{ *_sender->getUserData<ESM::Position>(), _sender->getUserString("Destination"), _sender->getUserString("interior") == "y" };
+    }
+
+    void TravelWindow::onFrame()
+    {
+        if (!MWBase::Environment::get().getWorld()->isPlayerTraveling())
+            return;
+        
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
         MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
 
-        // Teleports any followers, too.
-        MWWorld::ActionTeleport action(interior ? cellname : "", pos, true);
-        action.execute(player);
-
-        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
-        MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
+        MWBase::Environment::get().getWorld()->travel(mTravelTarget);
     }
 
     void TravelWindow::onCancelButtonClicked(MyGUI::Widget* _sender)

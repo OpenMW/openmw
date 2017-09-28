@@ -1120,8 +1120,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime &runtime)
                 {
-                    /// \todo implement traveling check
-                    runtime.push (0);
+                    runtime.push(MWBase::Environment::get().getWorld()->isPlayerTraveling());
                 }
         };
 

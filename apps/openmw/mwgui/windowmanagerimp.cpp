@@ -1043,6 +1043,7 @@ namespace MWGui
         mConsole->checkReferenceAvailable();
         mCompanionWindow->onFrame();
         mJailScreen->onFrame(frameDuration);
+        mTravelWindow->onFrame();
 
         if (mWerewolfFader)
             mWerewolfFader->update(frameDuration);
