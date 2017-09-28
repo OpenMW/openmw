@@ -236,7 +236,7 @@ void main(void)
 #else
     float shore = 1.0;
 #endif
-    vec2 screenCoordsOffset = ( (normal.xy + rainRipple.w * vec2(0.0,2.0)) * REFL_BUMP * shore);
+    vec2 screenCoordsOffset = normal.xy * REFL_BUMP * shore;
 
     // reflection
     vec3 reflection = texture2D(reflectionMap, screenCoords + screenCoordsOffset).rgb;
