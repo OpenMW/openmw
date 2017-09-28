@@ -97,6 +97,8 @@ namespace MWGui
 
         if (guiMode)
         {
+            if (!MWBase::Environment::get().getWindowManager()->getCursorVisible())
+                return;
             const MyGUI::IntPoint& mousePos = MyGUI::InputManager::getInstance().getMousePosition();
 
             if (MWBase::Environment::get().getWindowManager()->getWorldMouseOver() && ((MWBase::Environment::get().getWindowManager()->getMode() == GM_Console)
