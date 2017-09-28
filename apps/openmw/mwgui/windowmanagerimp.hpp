@@ -226,6 +226,8 @@ namespace MWGui
     virtual bool toggleFogOfWar();
     virtual bool toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
     virtual bool getFullHelp() const;
+    virtual void closeContainer() const;
+    virtual void takeAllItemsFromContainer() const;
 
     virtual void setActiveMap(int x, int y, bool interior);
     ///< set the indices of the map texture that should be used

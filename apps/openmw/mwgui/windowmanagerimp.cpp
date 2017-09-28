@@ -1143,6 +1143,16 @@ namespace MWGui
         return mToolTips->getFullHelp();
     }
 
+    void WindowManager::closeContainer() const
+    {
+        mContainerWindow->exit();
+    }
+
+    void WindowManager::takeAllItemsFromContainer() const
+    {
+        mContainerWindow->takeAll();
+    }
+
     void WindowManager::setWeaponVisibility(bool visible)
     {
         mHud->setWeapVisible (visible);

@@ -196,6 +196,8 @@ namespace MWBase
             ///< show extra info in item tooltips (owner, script)
 
             virtual bool getFullHelp() const = 0;
+            virtual void closeContainer() const = 0;
+            virtual void takeAllItemsFromContainer() const = 0;
 
             virtual void setActiveMap(int x, int y, bool interior) = 0;
             ///< set the indices of the map texture that should be used
