@@ -348,7 +348,8 @@ namespace MWGui
         if (id >= separatorPos)
         {
             onTopicActivated(topic);
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
+            if (mGoodbyeButton->getEnabled())
+                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
         }
         else
         {
