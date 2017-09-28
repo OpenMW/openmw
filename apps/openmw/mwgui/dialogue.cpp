@@ -346,7 +346,10 @@ namespace MWGui
         }
 
         if (id >= separatorPos)
+        {
             onTopicActivated(topic);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
+        }
         else
         {
             const MWWorld::Store<ESM::GameSetting> &gmst =
