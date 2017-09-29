@@ -1431,6 +1431,16 @@ int SkyManager::getSecundaPhase() const
     return mSecunda->getPhaseInt();
 }
 
+bool SkyManager::isEnabled()
+{
+    return mEnabled;
+}
+
+bool SkyManager::hasRain()
+{
+    return mRainNode != NULL;
+}
+
 void SkyManager::update(float duration)
 {
     if (!mEnabled) return;

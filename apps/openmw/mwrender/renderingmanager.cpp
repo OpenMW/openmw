@@ -504,6 +504,9 @@ namespace MWRender
             mWater->update(dt);
         }
 
+        if (!mSky->isEnabled() || !mSky->hasRain())
+          clearRainRipples();
+
         mCamera->update(dt, paused);
 
         osg::Vec3f focal, cameraPos;
@@ -803,7 +806,11 @@ namespace MWRender
     {
         mEffectManager->clear();
         mWater->clearRipples();
-        mUniformRainIntensity->set((float) 0.0);  // for interiors
+    }
+
+    void RenderingManager::clearRainRipples()
+    {
+        mUniformRainIntensity->set((float) 0.0);
     }
 
     void RenderingManager::clear()
