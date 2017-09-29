@@ -138,6 +138,10 @@ namespace MWRender
 
         void sunDisable();
 
+        bool isEnabled();
+
+        bool hasRain();
+
         void setRainSpeed(float speed);
 
         void setStormDirection(const osg::Vec3f& direction);
