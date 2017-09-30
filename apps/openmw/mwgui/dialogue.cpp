@@ -481,7 +481,7 @@ namespace MWGui
         if (services & ESM::NPC::Spells)
             mTopicsList->addItem(gmst.find("sSpells")->getString());
 
-        if (services & travel)
+        if (travel)
             mTopicsList->addItem(gmst.find("sTravel")->getString());
 
         if (services & ESM::NPC::Spellmaking)
