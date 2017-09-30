@@ -1,5 +1,7 @@
 #include "idtable.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <cstdint>
 #include <limits>
 #include <map>
@@ -346,8 +348,10 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
     for (int i = 0; i < idCollection()->getSize(); ++i)
     {
         auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(i));
+        std::string texture = record.get().mTexture;
+        std::transform(texture.begin(), texture.end(), texture.begin(), tolower);
         if (record.isModified())
-            reverseLookupMap.emplace(record.get().mTexture, idCollection()->getId(i));
+            reverseLookupMap.emplace(texture, idCollection()->getId(i));
     }
 
     for (const std::string& id : ids)
@@ -366,7 +370,9 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
 
         // Look for a pre-existing record
         auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(oldRow));
-        auto searchIt = reverseLookupMap.find(record.get().mTexture);
+        std::string texture = record.get().mTexture;
+        std::transform(texture.begin(), texture.end(), texture.begin(), tolower);
+        auto searchIt = reverseLookupMap.find(texture);
         if (searchIt != reverseLookupMap.end())
         {
             results.recordMapping.push_back(std::make_pair(id, searchIt->second));
@@ -385,6 +391,7 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
                 cloneRecord(id, newId, UniversalId::Type_LandTexture);
                 results.createdRecords.push_back(newId);
                 results.recordMapping.push_back(std::make_pair(id, newId));
+                reverseLookupMap.emplace(texture, newId);
                 break;
             }
 
