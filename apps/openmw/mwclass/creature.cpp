@@ -470,6 +470,9 @@ namespace MWClass
         if(stats.getAiSequence().isInCombat())
             return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
 
+        if(stats.getKnockedDown())
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
+
         return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
