@@ -215,6 +215,11 @@ namespace MWGui
         }
     }
 
+    void Console::clear()
+    {
+        resetReference();
+    }
+
     void Console::keyPress(MyGUI::Widget* _sender,
                   MyGUI::KeyCode key,
                   MyGUI::Char _char)

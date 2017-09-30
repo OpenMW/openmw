@@ -60,6 +60,8 @@ namespace MWGui
 
             void executeFile (const std::string& path);
 
+            void clear();
+
             virtual void resetReference ();
 
         protected:
