@@ -1573,7 +1573,7 @@ namespace MWGui
 
         mMessageBoxManager->clear();
 
-        mToolTips->setFocusObject(MWWorld::ConstPtr());
+        mToolTips->setFocusObject(MWWorld::Ptr());
 
         mSelectedSpell.clear();
         mCustomMarkers.clear();

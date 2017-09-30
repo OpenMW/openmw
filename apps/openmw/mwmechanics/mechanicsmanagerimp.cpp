@@ -840,16 +840,29 @@ namespace MWMechanics
         mAI = true;
     }
 
-    bool MechanicsManager::isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::ConstPtr& item, MWWorld::Ptr& victim)
+    bool MechanicsManager::isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, MWWorld::Ptr& victim)
     {
-        const MWWorld::CellRef& cellref = item.getCellRef();
+        const MWWorld::CellRef& cellref = target.getCellRef();
         // there is no harm to use unlocked doors
-        if (item.getClass().isDoor() && cellref.getLockLevel() <= 0 && ptr.getCellRef().getTrap().empty())
+        if (target.getClass().isDoor() && cellref.getLockLevel() <= 0 && ptr.getCellRef().getTrap().empty())
             return true;
 
-        // TODO: implement a better check to check if item is owned bed
-        if (item.getClass().isActivator() && item.getClass().getScript(item).compare(0, 3, "Bed") != 0)
+        // TODO: implement a better check to check if target is owned bed
+        if (target.getClass().isActivator() && target.getClass().getScript(target).compare(0, 3, "Bed") != 0)
             return true;
+
+        if (target.getClass().isNpc())
+        {
+            if (target.getClass().getCreatureStats(target).isDead())
+                return true;
+
+            // check if a player tries to pickpocket a target NPC
+            if(ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Sneak)
+                || target.getClass().getCreatureStats(target).getKnockedDown())
+                return false;
+
+            return true;
+        }
 
         const std::string& owner = cellref.getOwner();
         bool isOwned = !owner.empty() && owner != "player";
