@@ -1097,6 +1097,10 @@ namespace MWMechanics
             if (it->getClass().getCreatureStats(*it).isDead())
                 continue;
 
+            // Unconsious actor can not report about crime
+            if (it->getClass().getCreatureStats(*it).getKnockedDown())
+                continue;
+
             if ((*it == victim && victimAware)
                     || (MWBase::Environment::get().getWorld()->getLOS(player, *it) && awarenessCheck(player, *it) )
                     // Murder crime can be reported even if no one saw it (hearing is enough, I guess).
@@ -1208,10 +1212,14 @@ namespace MWMechanics
         // Tell everyone (including the original reporter) in alarm range
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
-            if (   *it == player
+            if (*it == player
                 || !it->getClass().isNpc() || it->getClass().getCreatureStats(*it).isDead()) continue;
 
             if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
+                continue;
+
+            // Unconsious actor can not report about crime and should not become hostile
+            if (it->getClass().getCreatureStats(*it).getKnockedDown())
                 continue;
 
             // Player's followers should not attack player, or try to arrest him
