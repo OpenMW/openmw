@@ -856,6 +856,9 @@ namespace MWMechanics
             if (target.getClass().getCreatureStats(target).isDead())
                 return true;
 
+            if (target.getClass().getCreatureStats(target).getAiSequence().isInCombat())
+                return true;
+
             // check if a player tries to pickpocket a target NPC
             if(ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Sneak)
                 || target.getClass().getCreatureStats(target).getKnockedDown())
