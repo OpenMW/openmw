@@ -1126,6 +1126,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     parentNode->addChild(skyroot);
 
     mRootNode = skyroot;
+    mParticleParent = mRootNode->getParent(0);
 
     mEarlyRenderBinRoot = new osg::Group;
     // render before the world is rendered
@@ -1421,7 +1422,7 @@ void SkyManager::createRain()
     mRainNode->addCullCallback(mUnderwaterSwitch);
     mRainNode->setNodeMask(Mask_WeatherParticles);
 
-    mRootNode->getParent(0)->addChild(mRainNode);
+    mParticleParent->addChild(mRainNode);
 }
 
 void SkyManager::destroyRain()
@@ -1429,7 +1430,7 @@ void SkyManager::destroyRain()
     if (!mRainNode)
         return;
 
-    mRootNode->getParent(0)->removeChild(mRainNode);
+    mParticleParent->removeChild(mRainNode);
     mRainNode = NULL;
     mRainParticleSystem = NULL;
     mRainShooter = NULL;
@@ -1501,8 +1502,9 @@ void SkyManager::setEnabled(bool enabled)
 
     mRootNode->setNodeMask(enabled ? Mask_Sky : 0);
 
-    if (mRainNode)
-      mRainNode->setNodeMask(enabled ? Mask_Sky : 0);
+if (mRainNode)
+mRainNode->setNodeMask(enabled ? Mask_Sky : 0);
+
 
     mEnabled = enabled;
 }

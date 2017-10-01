@@ -175,6 +175,7 @@ class RenderingManager;
         MWRender::RenderingManager *mRendering;
 
         osg::ref_ptr<osg::Group> mRootNode;
+        osg::ref_ptr<osg::Group> mParticleParent;      ///< parent node of particle systems
         osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
