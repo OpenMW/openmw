@@ -1501,9 +1501,8 @@ void SkyManager::setEnabled(bool enabled)
 
     mRootNode->setNodeMask(enabled ? Mask_Sky : 0);
 
-if (mRainNode)
-mRainNode->setNodeMask(enabled ? Mask_Sky : 0);
-
+    if (mRainNode)
+      mRainNode->setNodeMask(enabled ? Mask_Sky : 0);
 
     mEnabled = enabled;
 }
