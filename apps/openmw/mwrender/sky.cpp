@@ -1,4 +1,5 @@
 #include "sky.hpp"
+#include "renderingmanager.hpp"
 
 #include <cmath>
 
@@ -1091,8 +1092,9 @@ private:
     }
 };
 
-SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager)
+SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager, MWRender::RenderingManager *renderingManager)
     : mSceneManager(sceneManager)
+    , mRendering(renderingManager)
     , mAtmosphereNightRoll(0.f)
     , mCreated(false)
     , mIsStorm(false)
@@ -1337,6 +1339,24 @@ protected:
     osg::Uniform* mRainIntensityUniform;
 };
 
+class RainPlacer : public osgParticle::BoxPlacer
+{
+  public:
+    RainPlacer(MWRender::RenderingManager *renderingManager): BoxPlacer()
+    {
+        mRendering = renderingManager;
+    }
+
+    virtual void place(osgParticle::Particle *P) const override
+    {
+        BoxPlacer::place(P);
+        P->setPosition(P->getPosition() + mRendering->getCameraPosition());
+    }
+
+  protected:
+    MWRender::RenderingManager *mRendering;
+};
+
 void SkyManager::createRain()
 {
     if (mRainNode)
@@ -1356,6 +1376,7 @@ void SkyManager::createRain()
     raindropTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
     stateset->setTextureAttributeAndModes(0, raindropTex, osg::StateAttribute::ON);
+
     stateset->setNestRenderBins(false);
     stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
     stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
@@ -1367,16 +1388,21 @@ void SkyManager::createRain()
     particleTemplate.setLifeTime(1);
 
     osg::ref_ptr<osgParticle::ModularEmitter> emitter (new osgParticle::ModularEmitter);
+
     emitter->setParticleSystem(mRainParticleSystem);
 
-    osg::ref_ptr<osgParticle::BoxPlacer> placer (new osgParticle::BoxPlacer);
-    placer->setXRange(-300, 300); // Rain_Diameter
-    placer->setYRange(-300, 300);
+    osg::ref_ptr<osgParticle::BoxPlacer> placer (new RainPlacer(mRendering));
+
+    placer->setXRange(-1500, 1500); // Rain_Diameter
+    placer->setYRange(-1500, 1500);
     placer->setZRange(300, 300);
+
     emitter->setPlacer(placer);
 
     osg::ref_ptr<osgParticle::ConstantRateCounter> counter (new osgParticle::ConstantRateCounter);
-    counter->setNumberOfParticlesPerSecondToCreate(600.0);
+
+    counter->setNumberOfParticlesPerSecondToCreate(4800.0);
+
     emitter->setCounter(counter);
 
     osg::ref_ptr<RainShooter> shooter (new RainShooter);
@@ -1395,7 +1421,7 @@ void SkyManager::createRain()
     mRainNode->addCullCallback(mUnderwaterSwitch);
     mRainNode->setNodeMask(Mask_WeatherParticles);
 
-    mRootNode->addChild(mRainNode);
+    mRootNode->getParent(0)->addChild(mRainNode);
 }
 
 void SkyManager::destroyRain()
@@ -1403,7 +1429,7 @@ void SkyManager::destroyRain()
     if (!mRainNode)
         return;
 
-    mRootNode->removeChild(mRainNode);
+    mRootNode->getParent(0)->removeChild(mRainNode);
     mRainNode = NULL;
     mRainParticleSystem = NULL;
     mRainShooter = NULL;
@@ -1474,6 +1500,10 @@ void SkyManager::setEnabled(bool enabled)
         create();
 
     mRootNode->setNodeMask(enabled ? Mask_Sky : 0);
+
+if (mRainNode)
+mRainNode->setNodeMask(enabled ? Mask_Sky : 0);
+
 
     mEnabled = enabled;
 }
