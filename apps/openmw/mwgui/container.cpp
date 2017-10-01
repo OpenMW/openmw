@@ -136,7 +136,7 @@ namespace MWGui
 
         bool loot = mPtr.getClass().isActor() && mPtr.getClass().getCreatureStats(mPtr).isDead();
 
-        if (mPtr.getTypeName() == typeid(ESM::NPC).name() && !loot)
+        if (mPtr.getClass().isNpc() && !loot)
         {
             // we are stealing stuff
             MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -271,9 +271,8 @@ namespace MWGui
             MWMechanics::Pickpocket pickpocket(player, mPtr);
             if (pickpocket.pick(item.mBase, count))
             {
-                int value = item.mBase.getClass().getValue(item.mBase) * count;
                 MWBase::Environment::get().getMechanicsManager()->commitCrime(
-                            player, mPtr, MWBase::MechanicsManager::OT_Theft, value, true);
+                            player, mPtr, MWBase::MechanicsManager::OT_Pickpocket, 0, true);
                 MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
                 mPickpocketDetected = true;
                 return false;

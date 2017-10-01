@@ -325,7 +325,7 @@ namespace MWGui
         }
     }
 
-    void ToolTips::setFocusObject(const MWWorld::ConstPtr& focus)
+    void ToolTips::setFocusObject(const MWWorld::Ptr& focus)
     {
         mFocusObject = focus;
 

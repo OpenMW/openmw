@@ -567,6 +567,12 @@ namespace MWDialogue
             return;
         }
 
+        if (actor.getClass().getCreatureStats(actor).getKnockedDown())
+        {
+            // Unconscious actors can not speak
+            return;
+        }
+
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const ESM::Dialogue *dial = store.get<ESM::Dialogue>().find(topic);
 
