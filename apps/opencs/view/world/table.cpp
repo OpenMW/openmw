@@ -16,6 +16,7 @@
 #include "../../model/world/idtableproxymodel.hpp"
 #include "../../model/world/idtablebase.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/world/landtexturetableproxymodel.hpp"
 #include "../../model/world/record.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/commanddispatcher.hpp"
@@ -236,9 +237,14 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
 
     bool isInfoTable = id.getType() == CSMWorld::UniversalId::Type_TopicInfos ||
                        id.getType() == CSMWorld::UniversalId::Type_JournalInfos;
+    bool isLtexTable = (id.getType() == CSMWorld::UniversalId::Type_LandTextures);
     if (isInfoTable)
     {
         mProxyModel = new CSMWorld::InfoTableProxyModel(id.getType(), this);
+    }
+    else if (isLtexTable)
+    {
+        mProxyModel = new CSMWorld::LandTextureTableProxyModel (this);
     }
     else
     {
