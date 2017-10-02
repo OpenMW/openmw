@@ -226,6 +226,7 @@ namespace NifOsg
         void setShooter(osgParticle::Shooter* shooter);
         void setPlacer(osgParticle::Placer* placer);
         void setCounter(osgParticle::Counter* counter);
+        osgParticle::Placer *getPlacer();
 
     private:
         // NIF Record indices
