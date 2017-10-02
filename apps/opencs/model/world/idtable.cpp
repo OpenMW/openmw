@@ -313,32 +313,6 @@ CSMWorld::LandTextureIdTable::LandTextureIdTable(CollectionBase* idCollection, u
 {
 }
 
-QVariant CSMWorld::LandTextureIdTable::data(const QModelIndex& index, int role) const
-{
-    if (role==Qt::EditRole && !idCollection()->getRecord(index.row()).isModified())
-        return QVariant();
-
-    return IdTable::data(index, role);
-}
-
-bool CSMWorld::LandTextureIdTable::setData(const QModelIndex& index, const QVariant& value, int role)
-{
-    if (!idCollection()->getRecord(index.row()).isModified())
-        return false;
-    else
-        return IdTable::setData(index, value, role);
-}
-
-Qt::ItemFlags CSMWorld::LandTextureIdTable::flags(const QModelIndex& index) const
-{
-    Qt::ItemFlags flags = IdTable::flags(index);
-
-    if (!idCollection()->getRecord(index.row()).isModified())
-        flags &= ~Qt::ItemIsEnabled;
-
-    return flags;
-}
-
 CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::importTextures(const std::vector<std::string>& ids)
 {
     ImportResults results;
