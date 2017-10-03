@@ -1,4 +1,5 @@
 #include "sky.hpp"
+#include "renderingmanager.hpp"
 
 #include <cmath>
 
@@ -39,6 +40,7 @@
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/nifosg/particle.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -1091,8 +1093,9 @@ private:
     }
 };
 
-SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager)
+SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager, MWRender::RenderingManager *renderingManager)
     : mSceneManager(sceneManager)
+    , mRendering(renderingManager)
     , mAtmosphereNightRoll(0.f)
     , mCreated(false)
     , mIsStorm(false)
@@ -1124,6 +1127,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     parentNode->addChild(skyroot);
 
     mRootNode = skyroot;
+    mParticleParent = mRootNode->getParent(0);
 
     mEarlyRenderBinRoot = new osg::Group;
     // render before the world is rendered
@@ -1337,6 +1341,51 @@ protected:
     osg::Uniform* mRainIntensityUniform;
 };
 
+class CameraPlacerDecorator : public osgParticle::Placer
+{
+  public:
+    CameraPlacerDecorator(osgParticle::Placer *decorated, MWRender::RenderingManager *renderingManager): Placer()
+    {
+        mRendering = renderingManager;
+        mDecorated = decorated;
+    }
+
+    virtual void place(osgParticle::Particle *P) const override
+    {
+        mDecorated->place(P);
+        P->setPosition(P->getPosition() + mRendering->getCameraPosition());
+    }
+
+    virtual osg::Vec3 getControlPosition() const override
+    {
+        return mDecorated->getControlPosition();
+    }
+
+    virtual osg::Object* cloneType() const override
+    {
+        return mDecorated->cloneType();
+    }
+
+    virtual osg::Object* clone(const osg::CopyOp& op) const override
+    {
+        return mDecorated->clone(op);
+    }
+
+    osgParticle::Placer *getDecorated()
+    {
+        return mDecorated;
+    }
+
+  protected:
+    MWRender::RenderingManager *mRendering;
+    osgParticle::Placer *mDecorated;
+
+    ~CameraPlacerDecorator()
+    {
+        mDecorated->unref();
+    }
+};
+
 void SkyManager::createRain()
 {
     if (mRainNode)
@@ -1356,6 +1405,7 @@ void SkyManager::createRain()
     raindropTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
     stateset->setTextureAttributeAndModes(0, raindropTex, osg::StateAttribute::ON);
+
     stateset->setNestRenderBins(false);
     stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
     stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
@@ -1367,16 +1417,21 @@ void SkyManager::createRain()
     particleTemplate.setLifeTime(1);
 
     osg::ref_ptr<osgParticle::ModularEmitter> emitter (new osgParticle::ModularEmitter);
+
     emitter->setParticleSystem(mRainParticleSystem);
 
-    osg::ref_ptr<osgParticle::BoxPlacer> placer (new osgParticle::BoxPlacer);
-    placer->setXRange(-300, 300); // Rain_Diameter
-    placer->setYRange(-300, 300);
-    placer->setZRange(300, 300);
+    osg::ref_ptr<CameraPlacerDecorator> placer ( new CameraPlacerDecorator(new osgParticle::BoxPlacer,mRendering));
+
+    ((osgParticle::BoxPlacer *) placer->getDecorated())->setXRange(-1500, 1500); // Rain_Diameter
+    ((osgParticle::BoxPlacer *) placer->getDecorated())->setYRange(-1500, 1500);
+    ((osgParticle::BoxPlacer *) placer->getDecorated())->setZRange(300, 300);
+
     emitter->setPlacer(placer);
 
     osg::ref_ptr<osgParticle::ConstantRateCounter> counter (new osgParticle::ConstantRateCounter);
-    counter->setNumberOfParticlesPerSecondToCreate(600.0);
+
+    counter->setNumberOfParticlesPerSecondToCreate(4800.0);
+
     emitter->setCounter(counter);
 
     osg::ref_ptr<RainShooter> shooter (new RainShooter);
@@ -1388,6 +1443,7 @@ void SkyManager::createRain()
 
     mRainNode->addChild(emitter);
     mRainNode->addChild(mRainParticleSystem);
+
     mRainNode->addChild(updater);
 
     mRainFader = new RainFader(mRootNode->getParent(0)->getParent(0)->getStateSet()->getUniform("rainIntensity"));
@@ -1395,7 +1451,7 @@ void SkyManager::createRain()
     mRainNode->addCullCallback(mUnderwaterSwitch);
     mRainNode->setNodeMask(Mask_WeatherParticles);
 
-    mRootNode->addChild(mRainNode);
+    mParticleParent->addChild(mRainNode);
 }
 
 void SkyManager::destroyRain()
@@ -1403,7 +1459,7 @@ void SkyManager::destroyRain()
     if (!mRainNode)
         return;
 
-    mRootNode->removeChild(mRainNode);
+    mParticleParent->removeChild(mRainNode);
     mRainNode = NULL;
     mRainParticleSystem = NULL;
     mRainShooter = NULL;
@@ -1474,6 +1530,9 @@ void SkyManager::setEnabled(bool enabled)
         create();
 
     mRootNode->setNodeMask(enabled ? Mask_Sky : 0);
+
+    if (mRainNode)
+        mRainNode->setNodeMask(enabled ? Mask_Sky : 0);
 
     mEnabled = enabled;
 }
@@ -1548,7 +1607,10 @@ void SkyManager::setWeather(const WeatherResult& weather)
                 mParticleNode->setNodeMask(Mask_WeatherParticles);
                 mRootNode->addChild(mParticleNode);
             }
-            mParticleEffect = mSceneManager->getInstance(mCurrentParticleEffect, mParticleNode);
+
+            mParticleEffect = mSceneManager->getInstance(mCurrentParticleEffect, mParticleParent);
+
+            NifOsg::Emitter *emitter = (NifOsg::Emitter *) ((osg::Group *) ((osg::Group *) (mParticleEffect.get()))->getChild(0))->getChild(0);
 
             SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
             mParticleEffect->accept(assignVisitor);
@@ -1559,6 +1621,8 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
             SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
             mParticleEffect->accept(disableFreezeOnCullVisitor);
+
+            emitter->setPlacer(new CameraPlacerDecorator(emitter->getPlacer(),mRendering));
         }
     }
 

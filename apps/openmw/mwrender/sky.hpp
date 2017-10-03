@@ -103,12 +103,14 @@ namespace MWRender
         float mMoonAlpha;
     };
 
+class RenderingManager;
+
     ///@brief The SkyManager handles rendering of the sky domes, celestial bodies as well as other objects that need to be rendered
     /// relative to the camera (e.g. weather particle effects)
     class SkyManager
     {
     public:
-        SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager);
+        SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager, MWRender::RenderingManager *);
         ~SkyManager();
 
         void update(float duration);
@@ -170,8 +172,10 @@ namespace MWRender
         void updateRainParameters();
 
         Resource::SceneManager* mSceneManager;
+        MWRender::RenderingManager *mRendering;
 
         osg::ref_ptr<osg::Group> mRootNode;
+        osg::ref_ptr<osg::Group> mParticleParent;      ///< parent node of particle systems
         osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
