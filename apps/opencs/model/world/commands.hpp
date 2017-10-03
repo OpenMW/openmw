@@ -5,12 +5,14 @@
 
 #include <string>
 #include <map>
+#include <memory>
 #include <vector>
 
 #include <QVariant>
 #include <QUndoCommand>
 #include <QModelIndex>
 
+#include "columnimp.hpp"
 #include "universalid.hpp"
 #include "nestedtablewrapper.hpp"
 
@@ -23,6 +25,91 @@ namespace CSMWorld
     class IdTree;
     struct RecordBase;
     struct NestedTableWrapperBase;
+
+    class TouchCommand : public QUndoCommand
+    {
+        public:
+
+            TouchCommand(IdTable& model, const std::string& id, QUndoCommand* parent=nullptr);
+
+            void redo() override;
+            void undo() override;
+
+        private:
+
+            IdTable& mTable;
+            std::string mId;
+            std::unique_ptr<RecordBase> mOld;
+
+            bool mChanged;
+    };
+
+    class ImportLandTexturesCommand : public QUndoCommand
+    {
+        public:
+
+            ImportLandTexturesCommand(IdTable& landTable, IdTable& ltexTable,
+                QUndoCommand* parent);
+
+            void redo() override;
+            void undo() override;
+
+        protected:
+
+            using DataType = LandTexturesColumn::DataType;
+
+            virtual const std::string& getOriginId() const = 0;
+            virtual const std::string& getDestinationId() const = 0;
+
+            virtual void onRedo() = 0;
+            virtual void onUndo() = 0;
+
+            IdTable& mLands;
+            IdTable& mLtexs;
+            DataType mOld;
+            int mOldState;
+            std::vector<std::string> mCreatedTextures;
+    };
+
+    class CopyLandTexturesCommand : public ImportLandTexturesCommand
+    {
+        public:
+
+            CopyLandTexturesCommand(IdTable& landTable, IdTable& ltexTable, const std::string& origin,
+                const std::string& dest, QUndoCommand* parent = nullptr);
+
+        private:
+
+            const std::string& getOriginId() const override;
+            const std::string& getDestinationId() const override;
+
+            void onRedo() override {}
+            void onUndo() override {}
+
+            std::string mOriginId;
+            std::string mDestId;
+    };
+
+    class TouchLandCommand : public ImportLandTexturesCommand
+    {
+        public:
+
+            TouchLandCommand(IdTable& landTable, IdTable& ltexTable,
+                const std::string& id, QUndoCommand* parent = nullptr);
+
+        private:
+
+            const std::string& getOriginId() const override;
+            const std::string& getDestinationId() const override;
+
+            void onRedo() override;
+            void onUndo() override;
+
+            std::string mId;
+            std::unique_ptr<RecordBase> mOld;
+
+            bool mChanged;
+    };
 
     class ModifyCommand : public QUndoCommand
     {

@@ -1,5 +1,8 @@
 #include "terrainstorage.hpp"
 
+#include "../../model/world/land.hpp"
+#include "../../model/world/landtexture.hpp"
+
 namespace CSVRender
 {
 
@@ -11,12 +14,9 @@ namespace CSVRender
 
     osg::ref_ptr<const ESMTerrain::LandObject> TerrainStorage::getLand(int cellX, int cellY)
     {
-        std::ostringstream stream;
-        stream << "#" << cellX << " " << cellY;
-
         // The cell isn't guaranteed to have Land. This is because the terrain implementation
         // has to wrap the vertices of the last row and column to the next cell, which may be a nonexisting cell
-        int index = mData.getLand().searchId(stream.str());
+        int index = mData.getLand().searchId(CSMWorld::Land::createUniqueRecordId(cellX, cellY));
         if (index == -1)
             return NULL;
 
@@ -26,16 +26,11 @@ namespace CSVRender
 
     const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)
     {
-        int numRecords = mData.getLandTextures().getSize();
+        int row = mData.getLandTextures().searchId(CSMWorld::LandTexture::createUniqueRecordId(plugin, index));
+        if (row == -1)
+            return nullptr;
 
-        for (int i=0; i<numRecords; ++i)
-        {
-            const CSMWorld::LandTexture* ltex = &mData.getLandTextures().getRecord(i).get();
-            if (ltex->mIndex == index && ltex->mPluginIndex == plugin)
-                return ltex;
-        }
-
-        return NULL;
+        return &mData.getLandTextures().getRecord(row).get();
     }
 
     void TerrainStorage::getBounds(float &minX, float &maxX, float &minY, float &maxY)

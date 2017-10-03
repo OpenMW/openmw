@@ -412,6 +412,24 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
         Columns::ColumnId_NegativeLight, ESM::MagicEffect::NegativeLight));
     mMagicEffects.addColumn (new DescriptionColumn<ESM::MagicEffect>);
 
+    mLand.addColumn (new StringIdColumn<Land>);
+    mLand.addColumn (new RecordStateColumn<Land>);
+    mLand.addColumn (new FixedRecordTypeColumn<Land>(UniversalId::Type_Land));
+    mLand.addColumn (new LandPluginIndexColumn);
+    mLand.addColumn (new LandMapLodColumn);
+    mLand.addColumn (new LandNormalsColumn);
+    mLand.addColumn (new LandHeightsColumn);
+    mLand.addColumn (new LandColoursColumn);
+    mLand.addColumn (new LandTexturesColumn);
+
+    mLandTextures.addColumn (new StringIdColumn<LandTexture>(true));
+    mLandTextures.addColumn (new RecordStateColumn<LandTexture>);
+    mLandTextures.addColumn (new FixedRecordTypeColumn<LandTexture>(UniversalId::Type_LandTexture));
+    mLandTextures.addColumn (new LandTextureNicknameColumn);
+    mLandTextures.addColumn (new LandTexturePluginIndexColumn);
+    mLandTextures.addColumn (new LandTextureIndexColumn);
+    mLandTextures.addColumn (new TextureColumn<LandTexture>);
+
     mPathgrids.addColumn (new StringIdColumn<Pathgrid>);
     mPathgrids.addColumn (new RecordStateColumn<Pathgrid>);
     mPathgrids.addColumn (new FixedRecordTypeColumn<Pathgrid> (UniversalId::Type_Pathgrid));
@@ -531,6 +549,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     addModel (new IdTable (&mBodyParts), UniversalId::Type_BodyPart);
     addModel (new IdTable (&mSoundGens), UniversalId::Type_SoundGen);
     addModel (new IdTable (&mMagicEffects), UniversalId::Type_MagicEffect);
+    addModel (new IdTable (&mLand, IdTable::Feature_AllowTouch), UniversalId::Type_Land);
+    addModel (new LandTextureIdTable (&mLandTextures), UniversalId::Type_LandTexture);
     addModel (new IdTree (&mPathgrids, &mPathgrids), UniversalId::Type_Pathgrid);
     addModel (new IdTable (&mStartScripts), UniversalId::Type_StartScript);
     addModel (new IdTree (&mReferenceables, &mReferenceables, IdTable::Feature_Preview),
@@ -993,19 +1013,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
         case ESM::REC_LTEX: mLandTextures.load (*mReader, mBase); break;
 
-        case ESM::REC_LAND:
-        {
-            int index = mLand.load(*mReader, mBase);
-
-            // Load all land data for now. A future optimisation may only load non-base data
-            // if a suitable mechanism for avoiding race conditions can be established.
-            if (index!=-1/* && !mBase*/)
-                mLand.getRecord (index).get().loadData (
-                    ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR |
-                    ESM::Land::DATA_VTEX);
-
-            break;
-        }
+        case ESM::REC_LAND: mLand.load(*mReader, mBase); break;
 
         case ESM::REC_CELL:
         {

@@ -18,7 +18,7 @@ opencs_hdrs_noqt (model/doc
 
 
 opencs_units (model/world
-    idtable idtableproxymodel regionmap data commanddispatcher idtablebase resourcetable nestedtableproxymodel idtree infotableproxymodel
+    idtable idtableproxymodel regionmap data commanddispatcher idtablebase resourcetable nestedtableproxymodel idtree infotableproxymodel landtexturetableproxymodel
     )
 
 
@@ -70,7 +70,7 @@ opencs_units (view/world
     cellcreator pathgridcreator referenceablecreator startscriptcreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
     dialoguespinbox recordbuttonbar tableeditidaction scripterrortable extendedcommandconfigurator
-    bodypartcreator
+    bodypartcreator landtexturecreator landcreator
     )
 
 opencs_units_noqt (view/world

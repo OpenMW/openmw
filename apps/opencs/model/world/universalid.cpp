@@ -53,6 +53,8 @@ namespace
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_RunLog, "Run Log", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_SoundGens, "Sound Generators", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_MagicEffects, "Magic Effects", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Lands, "Lands", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_LandTextures, "LandTextures", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Pathgrids, "Pathgrids", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_StartScripts, "Start Scripts", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_MetaDatas, "Meta Data Table", 0 },
@@ -118,6 +120,8 @@ namespace
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_DebugProfile, "Debug Profile", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_SoundGen, "Sound Generator", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_MagicEffect, "Magic Effect", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Land, "Land", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_LandTexture, "LandTexture", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Pathgrid, "Pathgrid", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_StartScript, "Start Script", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_MetaData, "Meta Data", 0 },
@@ -364,8 +368,8 @@ std::vector<CSMWorld::UniversalId::Type> CSMWorld::UniversalId::listTypes (int c
     for (int i=0; sIndexArg[i].mName; ++i)
         if (sIndexArg[i].mClass & classes)
             list.push_back (sIndexArg[i].mType);
-            
-    return list;    
+
+    return list;
 }
 
 CSMWorld::UniversalId::Type CSMWorld::UniversalId::getParentType (Type type)

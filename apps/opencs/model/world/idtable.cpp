@@ -1,11 +1,17 @@
 #include "idtable.hpp"
 
+#include <algorithm>
+#include <cctype>
+#include <cstdint>
+#include <limits>
+#include <map>
 #include <stdexcept>
 
 #include <components/esm/cellid.hpp>
 
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
+#include "landtexture.hpp"
 
 CSMWorld::IdTable::IdTable (CollectionBase *idCollection, unsigned int features)
 : IdTableBase (features), mIdCollection (idCollection)
@@ -179,6 +185,26 @@ void CSMWorld::IdTable::cloneRecord(const std::string& origin,
     endInsertRows();
 }
 
+bool CSMWorld::IdTable::touchRecord(const std::string& id)
+{
+    bool changed = mIdCollection->touchRecord(id);
+
+    int row = mIdCollection->getIndex(id);
+    int column = mIdCollection->searchColumnIndex(Columns::ColumnId_RecordType);
+    if (changed && column != -1)
+    {
+        QModelIndex modelIndex = index(row, column);
+        emit dataChanged(modelIndex, modelIndex);
+    }
+
+    return changed;
+}
+
+std::string CSMWorld::IdTable::getId(int row) const
+{
+    return mIdCollection->getId(row);
+}
+
 ///This method can return only indexes to the top level table cells
 QModelIndex CSMWorld::IdTable::getModelIndex (const std::string& id, int column) const
 {
@@ -280,4 +306,73 @@ int CSMWorld::IdTable::getColumnId(int column) const
 CSMWorld::CollectionBase *CSMWorld::IdTable::idCollection() const
 {
     return mIdCollection;
+}
+
+CSMWorld::LandTextureIdTable::LandTextureIdTable(CollectionBase* idCollection, unsigned int features)
+    : IdTable(idCollection, features)
+{
+}
+
+CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::importTextures(const std::vector<std::string>& ids)
+{
+    ImportResults results;
+
+    // Map existing textures to ids
+    std::map<std::string, std::string> reverseLookupMap;
+    for (int i = 0; i < idCollection()->getSize(); ++i)
+    {
+        auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(i));
+        std::string texture = record.get().mTexture;
+        std::transform(texture.begin(), texture.end(), texture.begin(), tolower);
+        if (record.isModified())
+            reverseLookupMap.emplace(texture, idCollection()->getId(i));
+    }
+
+    for (const std::string& id : ids)
+    {
+        int plugin, index;
+
+        LandTexture::parseUniqueRecordId(id, plugin, index);
+        int oldRow = idCollection()->searchId(id);
+
+        // If it does not exist or it is in the current plugin, it can be skipped.
+        if (oldRow <= 0 || plugin == 0)
+        {
+            results.recordMapping.push_back(std::make_pair(id, id));
+            continue;
+        }
+
+        // Look for a pre-existing record
+        auto& record = static_cast<const Record<LandTexture>&>(idCollection()->getRecord(oldRow));
+        std::string texture = record.get().mTexture;
+        std::transform(texture.begin(), texture.end(), texture.begin(), tolower);
+        auto searchIt = reverseLookupMap.find(texture);
+        if (searchIt != reverseLookupMap.end())
+        {
+            results.recordMapping.push_back(std::make_pair(id, searchIt->second));
+            continue;
+        }
+
+        // Iterate until an unused index or found, or the index has completely wrapped around.
+        int startIndex = index;
+        do {
+            std::string newId = LandTexture::createUniqueRecordId(0, index);
+            int newRow = idCollection()->searchId(newId);
+
+            if (newRow < 0)
+            {
+                // Id not taken, clone it
+                cloneRecord(id, newId, UniversalId::Type_LandTexture);
+                results.createdRecords.push_back(newId);
+                results.recordMapping.push_back(std::make_pair(id, newId));
+                reverseLookupMap.emplace(texture, newId);
+                break;
+            }
+
+            const size_t MaxIndex = std::numeric_limits<uint16_t>::max() - 1;
+            index = (index + 1) % MaxIndex;
+        } while (index != startIndex);
+    }
+
+    return results;
 }

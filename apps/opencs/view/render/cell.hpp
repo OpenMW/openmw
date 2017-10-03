@@ -57,6 +57,7 @@ namespace CSVRender
             bool mDeleted;
             int mSubMode;
             unsigned int mSubModeElementMask;
+            bool mUpdateLand, mLandDeleted;
 
             /// Ignored if cell does not have an object with the given ID.
             ///
@@ -71,6 +72,9 @@ namespace CSVRender
             ///
             /// \return Have any objects been added?
             bool addObjects (int start, int end);
+
+            void updateLand();
+            void unloadLand();
 
         public:
 
@@ -118,6 +122,18 @@ namespace CSVRender
 
             void pathgridRemoved();
 
+            void landDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void landAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+            void landAdded (const QModelIndex& parent, int start, int end);
+
+            void landTextureChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void landTextureAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+            void landTextureAdded (const QModelIndex& parent, int start, int end);
+
             void reloadAssets();
 
             void setSelection (int elementMask, Selection mode);
@@ -145,6 +161,8 @@ namespace CSVRender
             /// Erase all overrides and restore the visual representation of the cell to its
             /// true state.
             void reset (unsigned int elementMask);
+
+            friend class CellNodeCallback;
     };
 }
 
