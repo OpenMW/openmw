@@ -1,7 +1,5 @@
 #version 120
 
-#define FRAGMENT
-
 varying vec2 uv;
 
 uniform sampler2D diffuseMap;

@@ -1,7 +1,5 @@
 #version 120
 
-#define FRAGMENT
-
 #if @diffuseMap
 uniform sampler2D diffuseMap;
 varying vec2 diffuseMapUV;
