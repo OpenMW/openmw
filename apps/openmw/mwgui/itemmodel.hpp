@@ -70,6 +70,9 @@ namespace MWGui
         virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false) = 0;
         virtual void removeItem (const ItemStack& item, size_t count) = 0;
 
+        /// Is the player allowed to use items from this item model? (default true)
+        virtual bool allowedToUseItems() const;
+
         /// Is the player allowed to insert items into this model? (default true)
         virtual bool allowedToInsertItems() const;
 
@@ -85,6 +88,9 @@ namespace MWGui
     public:
         ProxyItemModel();
         virtual ~ProxyItemModel();
+
+        bool allowedToUseItems() const;
+
         virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false);
         virtual void removeItem (const ItemStack& item, size_t count);
         virtual ModelIndex getIndex (ItemStack item);

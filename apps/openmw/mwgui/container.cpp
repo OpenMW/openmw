@@ -22,6 +22,7 @@
 #include "itemview.hpp"
 #include "itemwidget.hpp"
 #include "inventoryitemmodel.hpp"
+#include "containeritemmodel.hpp"
 #include "sortfilteritemmodel.hpp"
 #include "pickpocketitemmodel.hpp"
 #include "draganddrop.hpp"
@@ -136,15 +137,22 @@ namespace MWGui
 
         bool loot = mPtr.getClass().isActor() && mPtr.getClass().getCreatureStats(mPtr).isDead();
 
-        if (mPtr.getClass().isNpc() && !loot)
+        if (mPtr.getClass().hasInventoryStore(mPtr))
         {
-            // we are stealing stuff
-            MWWorld::Ptr player = MWMechanics::getPlayer();
-            mModel = new PickpocketItemModel(player, new InventoryItemModel(container),
-                                             !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown());
+            if (mPtr.getClass().isNpc() && !loot)
+            {
+                // we are stealing stuff
+                MWWorld::Ptr player = MWMechanics::getPlayer();
+                mModel = new PickpocketItemModel(player, new InventoryItemModel(container),
+                                                 !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown());
+            }
+            else
+                mModel = new InventoryItemModel(container);
         }
         else
-            mModel = new InventoryItemModel(container);
+        {
+            mModel = new ContainerItemModel(container);
+        }
 
         mDisposeCorpseButton->setVisible(loot);
 

@@ -11,6 +11,8 @@ namespace MWGui
     {
     public:
         PickpocketItemModel (const MWWorld::Ptr& thief, ItemModel* sourceModel, bool hideItems=true);
+
+        virtual bool allowedToUseItems() const;
         virtual ItemStack getItem (ModelIndex index);
         virtual size_t getItemCount();
         virtual void update();
