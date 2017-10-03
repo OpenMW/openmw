@@ -14,11 +14,6 @@
 #include <osg/ComputeBoundsVisitor>
 
 #include <osgShadow/ShadowedScene>
-#include <osgShadow/ViewDependentShadowMap>
-#include <osgShadow/ShadowMap>
-#include <osgShadow/ParallelSplitShadowMap>
-#include <osgShadow/ShadowMap>
-#include <osgShadow/LightSpacePerspectiveShadowMap>
 
 #include <osgUtil/LineSegmentIntersector>
 #include <osgUtil/IncrementalCompileOperation>
@@ -57,6 +52,7 @@
 #include "water.hpp"
 #include "terrainstorage.hpp"
 #include "util.hpp"
+#include "shadow.hpp"
 
 namespace MWRender
 {
@@ -228,7 +224,7 @@ namespace MWRender
         int mapres = 2048;
         settings->setTextureSize(osg::Vec2s(mapres,mapres));
 
-        osgShadow::MinimalShadowMap* tech = new osgShadow::LightSpacePerspectiveShadowMapDB();
+        MWShadow* tech = new MWShadow();
         shadowedScene->setShadowTechnique(tech);
 
         tech->setMaxFarPlane(0);
