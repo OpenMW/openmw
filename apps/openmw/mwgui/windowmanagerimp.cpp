@@ -606,7 +606,7 @@ namespace MWGui
             mMap->setVisible(false);
             mStatsWindow->setVisible(false);
             mSpellWindow->setVisible(false);
-            mInventoryWindow->setVisible(getMode() == GM_Container || getMode() == GM_Barter);
+            mInventoryWindow->setVisible(getMode() == GM_Container || getMode() == GM_Barter || getMode() == GM_Companion);
         }
 
         GuiMode mode = mGuiModes.back();
