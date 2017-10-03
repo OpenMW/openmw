@@ -4,7 +4,7 @@
     <Widget type="Window" skin="MW_DialogNoTransp" layer="Windows" position="0 0 244 248" align="Center" name="_Main">
 
         <!-- Edit box -->
-        <Widget type="Widget" skin="MW_Box" position="8 8 220 192" align="Stretch" name="Client"/>
+        <Widget type="Widget" skin="MW_Box" position="8 8 220 192" align="Stretch"/>
 
         <Widget type="EditBox" skin="MW_TextBoxEdit" position="10 10 218 190" name="TextEdit" align="Left Top Stretch">
             <Property key="MultiLine" value="true"/>

@@ -14,10 +14,10 @@ namespace MWGui
         public:
             BookWindow();
 
-            virtual void exit();
-
-            void openBook(MWWorld::Ptr book, bool showTakeButton);
+            void setPtr(const MWWorld::Ptr& book);
             void setInventoryAllowed(bool allowed);
+
+            void onResChange(int, int) { center(); }
 
         protected:
             void onNextPageButtonClicked (MyGUI::Widget* sender);
@@ -26,6 +26,8 @@ namespace MWGui
             void onTakeButtonClicked (MyGUI::Widget* sender);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
             void setTakeButtonShow(bool show);
+
+            void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
 
             void nextPage();
             void prevPage();

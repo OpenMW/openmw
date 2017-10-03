@@ -220,6 +220,8 @@ namespace MWPhysics
 
             osg::ref_ptr<osg::Group> mParentNode;
 
+            float mPhysicsDt;
+
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);
     };

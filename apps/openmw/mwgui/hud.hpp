@@ -16,7 +16,7 @@ namespace MWGui
     class SpellIcons;
     class ItemWidget;
 
-    class HUD : public Layout, public LocalMapBase
+    class HUD : public WindowBase, public LocalMapBase
     {
     public:
         HUD(CustomMarkerCollection& customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender);
@@ -55,10 +55,10 @@ namespace MWGui
 
         MyGUI::Widget* getEffectBox() { return mEffectBox; }
 
-        void update();
-
         void setEnemy(const MWWorld::Ptr& enemy);
         void resetEnemy();
+
+        void clear();
 
     private:
         MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth, *mDrowning;

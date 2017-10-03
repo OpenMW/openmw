@@ -6,7 +6,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -40,7 +39,6 @@ namespace MWGui
 
     TrainingWindow::TrainingWindow()
         : WindowBase("openmw_trainingwindow.layout")
-        , mFadeTimeRemaining(0)
         , mTimeAdvancer(0.05f)
     {
         getWidget(mTrainingOptions, "TrainingOptions");
@@ -51,21 +49,22 @@ namespace MWGui
 
         mTimeAdvancer.eventProgressChanged += MyGUI::newDelegate(this, &TrainingWindow::onTrainingProgressChanged);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &TrainingWindow::onTrainingFinished);
-
-        mProgressBar.setVisible(false);
     }
 
-    void TrainingWindow::open()
+    void TrainingWindow::onOpen()
     {
+        if (mTimeAdvancer.isRunning())
+        {
+            mProgressBar.setVisible(true);
+            setVisible(false);
+        }
+        else
+            mProgressBar.setVisible(false);
+
         center();
     }
 
-    void TrainingWindow::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
-    }
-
-    void TrainingWindow::startTraining (MWWorld::Ptr actor)
+    void TrainingWindow::setPtr (const MWWorld::Ptr& actor)
     {
         mPtr = actor;
 
@@ -124,7 +123,7 @@ namespace MWGui
 
     void TrainingWindow::onCancelButtonClicked (MyGUI::Widget *sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Training);
     }
 
     void TrainingWindow::onTrainingSelected (MyGUI::Widget *sender)
@@ -171,21 +170,18 @@ namespace MWGui
         // add gold to NPC trading gold pool
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
-        // go back to game mode
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
-        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
-
         // advance time
         MWBase::Environment::get().getMechanicsManager()->rest(false);
         MWBase::Environment::get().getMechanicsManager()->rest(false);
         MWBase::Environment::get().getWorld ()->advanceTime (2);
 
+        setVisible(false);
         mProgressBar.setVisible(true);
         mProgressBar.setProgress(0, 2);
         mTimeAdvancer.run(2);
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.25);
-        mFadeTimeRemaining = 0.5;
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.25, false, 0.25);
     }
 
     void TrainingWindow::onTrainingProgressChanged(int cur, int total)
@@ -196,18 +192,15 @@ namespace MWGui
     void TrainingWindow::onTrainingFinished()
     {
         mProgressBar.setVisible(false);
+
+        // go back to game mode
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
+        MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
     }
 
     void TrainingWindow::onFrame(float dt)
     {
+        checkReferenceAvailable();
         mTimeAdvancer.onFrame(dt);
-
-        if (mFadeTimeRemaining <= 0)
-            return;
-
-        mFadeTimeRemaining -= dt;
-
-        if (mFadeTimeRemaining <= 0)
-            MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.25);
     }
 }

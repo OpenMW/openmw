@@ -200,6 +200,7 @@ namespace MWMechanics
             stopWalking(actor, storage);
             currentCell = actor.getCell();
             storage.mPopulateAvailableNodes = true;
+            mStoredInitialActorPosition = false;
         }
 
         mRemainingDuration -= ((duration*MWBase::Environment::get().getWorld()->getTimeScaleFactor()) / 3600);

@@ -56,19 +56,9 @@ namespace MWGui
         mItemEdit->setValue(maxCount);
     }
 
-    void CountDialog::cancel() //Keeping this here as I don't know if anything else relies on it.
-    {
-        exit();
-    }
-
-    void CountDialog::exit()
-    {
-        setVisible(false);
-    }
-
     void CountDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        cancel();
+        setVisible(false);
     }
 
     void CountDialog::onOkButtonClicked(MyGUI::Widget* _sender)

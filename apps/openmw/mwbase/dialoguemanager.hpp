@@ -2,6 +2,8 @@
 #define GAME_MWBASE_DIALOGUEMANAGER_H
 
 #include <string>
+#include <vector>
+#include <list>
 
 #include <stdint.h>
 
@@ -42,24 +44,29 @@ namespace MWBase
 
             virtual bool isInChoice() const = 0;
 
-            virtual void startDialogue (const MWWorld::Ptr& actor) = 0;
+            typedef std::pair<std::string, std::string> Response; // title, text
+            virtual bool startDialogue (const MWWorld::Ptr& actor, Response& response) = 0;
 
             virtual void addTopic (const std::string& topic) = 0;
 
-            virtual void askQuestion (const std::string& question,int choice) = 0;
+            virtual void addChoice (const std::string& text,int choice) = 0;
+            virtual const std::vector<std::pair<std::string, int> >& getChoices() = 0;
+
+            virtual bool isGoodbye() = 0;
 
             virtual void goodbye() = 0;
 
             virtual void say(const MWWorld::Ptr &actor, const std::string &topic) = 0;
 
-            //calbacks for the GUI
-            virtual void keywordSelected (const std::string& keyword) = 0;
+            virtual Response keywordSelected (const std::string& keyword) = 0;
             virtual void goodbyeSelected() = 0;
-            virtual void questionAnswered (int answer) = 0;
+            virtual Response questionAnswered (int answer) = 0;
 
-            virtual bool checkServiceRefused () = 0;
+            virtual std::list<std::string> getAvailableTopics() = 0;
 
-            virtual void persuade (int type) = 0;
+            virtual bool checkServiceRefused (Response& response) = 0;
+
+            virtual Response persuade (int type) = 0;
             virtual int getTemporaryDispositionChange () const = 0;
 
             /// @note This change is temporary and gets discarded when dialogue ends.

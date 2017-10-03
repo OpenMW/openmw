@@ -406,10 +406,11 @@ namespace MWGui
             MyGUI::EditBox* box = parent->createWidget<MyGUI::EditBox>("NormalText",
                 MyGUI::IntCoord(0, pag.getCurrentTop(), pag.getPageWidth(), 0), MyGUI::Align::Left | MyGUI::Align::Top,
                 parent->getName() + MyGUI::utility::toString(parent->getChildCount()));
-            box->setProperty("Static", "true");
-            box->setProperty("MultiLine", "true");
-            box->setProperty("WordWrap", "true");
-            box->setProperty("NeedMouse", "false");
+            box->setEditStatic(true);
+            box->setEditMultiLine(true);
+            box->setEditWordWrap(true);
+            box->setNeedMouseFocus(false);
+            box->setNeedKeyFocus(false);
             box->setMaxTextLength(text.size());
             box->setTextAlign(mBlockStyle.mAlign);
             box->setTextColour(mTextStyle.mColour);

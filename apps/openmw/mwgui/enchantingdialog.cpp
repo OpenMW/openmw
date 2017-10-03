@@ -4,11 +4,11 @@
 
 #include <MyGUI_Button.h>
 #include <MyGUI_ScrollView.h>
+#include <MyGUI_EditBox.h>
 
 #include <components/widgets/list.hpp>
 #include <components/settings/settings.hpp>
 
-#include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -53,6 +53,7 @@ namespace MWGui
         mSoulBox->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onSelectSoul);
         mBuyButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onBuyButtonClicked);
         mTypeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onTypeButtonClicked);
+        mName->eventEditSelectAccept += MyGUI::newDelegate(this, &EnchantingDialog::onAccept);
     }
 
     EnchantingDialog::~EnchantingDialog()
@@ -60,9 +61,10 @@ namespace MWGui
         delete mItemSelectionDialog;
     }
 
-    void EnchantingDialog::open()
+    void EnchantingDialog::onOpen()
     {
         center();
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mName);
     }
 
     void EnchantingDialog::setSoulGem(const MWWorld::Ptr &gem)
@@ -98,11 +100,6 @@ namespace MWGui
             mItemBox->setUserData(MWWorld::Ptr(item));
             mEnchanting.setOldItem(item);
         }
-    }
-
-    void EnchantingDialog::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
     }
 
     void EnchantingDialog::updateLabels()
@@ -143,57 +140,41 @@ namespace MWGui
         }
     }
 
-    void EnchantingDialog::startEnchanting (MWWorld::Ptr actor)
+    void EnchantingDialog::setPtr (const MWWorld::Ptr& ptr)
     {
         mName->setCaption("");
 
-        mEnchanting.setSelfEnchanting(false);
-        mEnchanting.setEnchanter(actor);
+        if (ptr.getClass().isActor())
+        {
+            mEnchanting.setSelfEnchanting(false);
+            mEnchanting.setEnchanter(ptr);
+            mBuyButton->setCaptionWithReplacing("#{sBuy}");
+            mChanceLayout->setVisible(false);
+            mPtr = ptr;
+            setSoulGem(MWWorld::Ptr());
+            mPrice->setVisible(true);
+            mPriceText->setVisible(true);
+        }
+        else
+        {
+            mEnchanting.setSelfEnchanting(true);
+            mEnchanting.setEnchanter(MWMechanics::getPlayer());
+            mBuyButton->setCaptionWithReplacing("#{sCreate}");
+            bool enabled = Settings::Manager::getBool("show enchant chance","Game");
+            mChanceLayout->setVisible(enabled);
+            mPtr = MWMechanics::getPlayer();
+            setSoulGem(ptr);
+            mPrice->setVisible(false);
+            mPriceText->setVisible(false);
+        }
 
-        mBuyButton->setCaptionWithReplacing("#{sBuy}");
-
-        mChanceLayout->setVisible(false);
-
-        mPtr = actor;
-
-        setSoulGem(MWWorld::Ptr());
         setItem(MWWorld::Ptr());
-
         startEditing ();
-        mPrice->setVisible(true);
-        mPriceText->setVisible(true);
-        updateLabels();
-    }
-
-    void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
-    {
-        mName->setCaption("");
-
-        MWWorld::Ptr player = MWMechanics::getPlayer();
-
-        mEnchanting.setSelfEnchanting(true);
-        mEnchanting.setEnchanter(player);
-
-        mBuyButton->setCaptionWithReplacing("#{sCreate}");
-
-        bool enabled = Settings::Manager::getBool("show enchant chance","Game");
-
-        mChanceLayout->setVisible(enabled);
-
-        mPtr = player;
-        startEditing();
-
-        setSoulGem(soulgem);
-        setItem(MWWorld::Ptr());
-
-        mPrice->setVisible(false);
-        mPriceText->setVisible(false);
         updateLabels();
     }
 
     void EnchantingDialog::onReferenceUnavailable ()
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
         resetReference();
     }
@@ -209,7 +190,7 @@ namespace MWGui
 
     void EnchantingDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Enchanting);
     }
 
     void EnchantingDialog::onSelectItem(MyGUI::Widget *sender)
@@ -304,6 +285,11 @@ namespace MWGui
         updateEffectsView();
     }
 
+    void EnchantingDialog::onAccept(MyGUI::EditBox *sender)
+    {
+        onBuyButtonClicked(sender);
+    }
+
     void EnchantingDialog::onBuyButtonClicked(MyGUI::Widget* sender)
     {
         if (mEffects.size() <= 0)
@@ -364,7 +350,7 @@ namespace MWGui
                     MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(player, item, mPtr, 1);
 
                     MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
-                    MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+                    MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
                     return;
                 }
             }

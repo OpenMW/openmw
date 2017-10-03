@@ -40,6 +40,7 @@ Programmers
     Chris Robinson (KittyCat)
     Cory F. Cohen (cfcohen)
     Cris Mihalache (Mirceam)
+    crussell187
     darkf
     devnexen
     Dieho
@@ -105,6 +106,7 @@ Programmers
     Michael Papageorgiou (werdanith)
     Michał Bień (Glorf)
     Michał Moroz (dragonee)
+    Miloslav Číž (drummyfish)
     Miroslav Puda (pakanek)
     MiroslavR
     Mitchell Schwitzer (schwitzerm)

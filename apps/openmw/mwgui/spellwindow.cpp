@@ -62,22 +62,19 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Magic);
     }
 
-    void SpellWindow::open()
+    void SpellWindow::onOpen()
     {
         updateSpells();
     }
 
     void SpellWindow::onFrame(float dt) 
-    { 
-        if (mMainWidget->getVisible())
+    {
+        NoDrop::onFrame(dt);
+        mUpdateTimer += dt;
+        if (0.5f < mUpdateTimer)
         {
-            NoDrop::onFrame(dt);
-            mUpdateTimer += dt;
-            if (0.5f < mUpdateTimer)
-            {
-                mUpdateTimer = 0;
-                mSpellView->incrementalUpdate();
-            }
+            mUpdateTimer = 0;
+            mSpellView->incrementalUpdate();
         }
     }
 

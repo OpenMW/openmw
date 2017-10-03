@@ -16,6 +16,8 @@ set(ESSIMPORTER_FILES
     importjour.cpp
     importscri.cpp
     importscpt.cpp
+    importproj.cpp
+    importsplm.cpp
     importercontext.cpp
     converter.cpp
     convertacdt.cpp

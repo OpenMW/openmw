@@ -294,6 +294,10 @@ namespace MWRender
         sceneRoot->setNodeMask(Mask_Scene);
         sceneRoot->setName("Scene Root");
 
+        mUniformRainIntensity = new osg::Uniform("rainIntensity",(float) 0.0);
+        
+        mRootNode->getOrCreateStateSet()->addUniform(mUniformRainIntensity);
+
         mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
 
         source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
@@ -323,11 +327,14 @@ namespace MWRender
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
         mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
         mFirstPersonFieldOfView = Settings::Manager::getFloat("first person field of view", "Camera");
-        updateProjectionMatrix();
         mStateUpdater->setFogEnd(mViewDistance);
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
+
+        mUniformNear = mRootNode->getOrCreateStateSet()->getUniform("near");
+        mUniformFar = mRootNode->getOrCreateStateSet()->getUniform("far");
+        updateProjectionMatrix();
     }
 
     RenderingManager::~RenderingManager()
@@ -541,6 +548,9 @@ namespace MWRender
             mWater->update(dt);
         }
 
+        if (!mSky->isEnabled() || !mSky->hasRain())
+          clearRainRipples();
+
         mCamera->update(dt, paused);
 
         osg::Vec3f focal, cameraPos;
@@ -574,8 +584,10 @@ namespace MWRender
     void RenderingManager::updatePlayerPtr(const MWWorld::Ptr &ptr)
     {
         if(mPlayerAnimation.get())
+        {
+            setupPlayer(ptr);
             mPlayerAnimation->updatePtr(ptr);
-
+        }
         mCamera->attachTo(ptr);
     }
 
@@ -840,6 +852,11 @@ namespace MWRender
         mWater->clearRipples();
     }
 
+    void RenderingManager::clearRainRipples()
+    {
+        mUniformRainIntensity->set((float) 0.0);
+    }
+
     void RenderingManager::clear()
     {
         mSky->setMoonColour(false);
@@ -878,6 +895,7 @@ namespace MWRender
 
         player.getRefData().setBaseNode(mPlayerNode);
 
+        mWater->removeEmitter(player);
         mWater->addEmitter(player);
     }
 
@@ -930,6 +948,9 @@ namespace MWRender
         if (mFieldOfViewOverridden)
             fov = mFieldOfViewOverride;
         mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance);
+
+        mUniformNear->set(mNearClip);
+        mUniformFar->set(mViewDistance);
     }
 
     void RenderingManager::updateTextureFiltering()

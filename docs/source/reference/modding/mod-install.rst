@@ -9,7 +9,7 @@ Install
 #.	Your mod probably comes in some kind of archive, such as ``.zip``, ``.rar``, ``.7z``, or something along those lines. Unpack this archive into its own folder.
 #.	Ensure the structure of this folder is correct.
 
-	#.	Locate the plugin files, ``.esp`` or ``.omwaddon``. The folder containing the plugin files we will call your *data folder*
+	#.	Locate the plugin files, ``.esp`` or ``.omwaddon``, or possibly ``.esm``. The folder containing the plugin files we will call your *data folder*
 	#.	Check that all resource folders (``Meshes``, ``Textures``, etc.) containing additional resource files (the actual meshes, textures, etc.) are in the *data folder*.
 	
 	.. note::
@@ -18,9 +18,10 @@ Install
 #.	Open your ``openmw.cfg`` file in your preferred plain text editor. It is located as described in :doc:`paths` and *not* in your OpenMW root directory.
 #.	Find or search for ``data=``. This is located very near the bottom of the file. If you are using Morrowind, this first entry should already point to your Morrowind data directory, ``Data Files``; otherwise it will point to your game file, ``.omwgame``.
 #.	Create a new line underneath and type: ``data="path/to/your/data folder"`` Remember, the *data folder* is where your mod's plugin files are. The double quotes around this path name are *required*.
+#.	If your mod contains resources in a ``.bsa`` file, go to near the top of the file, locate the entries like ''fallback-archive=Morrowind.bsa'' and create a new line underneath and type: ``fallback-archive=<name of your bsa>.bsa''``.
 
 .. note::
-	Some text editors, such as TextEdit on Mac, will autocorrect your double quotes to typographical "curly" quotes instead of leaving them as the propper neutral vertical quotes ``""``.
+	Some text editors, such as TextEdit on Mac, will autocorrect your double quotes to typographical "curly" quotes instead of leaving them as the proper neutral vertical quotes ``""``.
 
 #.	Save your ``openmw.cfg`` file.
 

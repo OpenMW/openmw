@@ -143,8 +143,7 @@ namespace MWScript
                         if (::Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), item))
                             itemName = iter->getClass().getName(*iter);
 
-                    // Actors should not equip a replacement when items are removed with RemoveItem
-                    int numRemoved = store.remove(item, count, ptr, false);
+                    int numRemoved = store.remove(item, count, ptr);
 
                     // Spawn a messagebox (only for items removed from player's inventory)
                     if ((numRemoved > 0)

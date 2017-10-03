@@ -1305,13 +1305,19 @@ public:
         std::vector<osg::ref_ptr<AlphaFader> > mAlphaFaders;
     };
 
-private:
+protected:
     float mAlpha;
 };
 
 class RainFader : public AlphaFader
 {
 public:
+
+    RainFader(osg::Uniform *rainIntensityUniform): AlphaFader()
+    {
+        mRainIntensityUniform = rainIntensityUniform;
+    }
+
     virtual void setDefaults(osg::StateSet* stateset)
     {
         osg::ref_ptr<osg::Material> mat (new osg::Material);
@@ -1320,6 +1326,15 @@ public:
         mat->setColorMode(osg::Material::OFF);
         stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
     }
+
+    virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
+    {
+        AlphaFader::apply(stateset,nv);
+        mRainIntensityUniform->set((float) (mAlpha * 2.0));  // mAlpha is limited to 0.6 so multiply by 2 to reach full intensity
+    }
+
+protected:
+    osg::Uniform* mRainIntensityUniform;
 };
 
 void SkyManager::createRain()
@@ -1375,7 +1390,7 @@ void SkyManager::createRain()
     mRainNode->addChild(mRainParticleSystem);
     mRainNode->addChild(updater);
 
-    mRainFader = new RainFader;
+    mRainFader = new RainFader(mRootNode->getParent(0)->getParent(0)->getStateSet()->getUniform("rainIntensity"));
     mRainNode->addUpdateCallback(mRainFader);
     mRainNode->addCullCallback(mUnderwaterSwitch);
     mRainNode->setNodeMask(Mask_WeatherParticles);
@@ -1414,6 +1429,16 @@ int SkyManager::getSecundaPhase() const
 {
     if (!mCreated) return 0;
     return mSecunda->getPhaseInt();
+}
+
+bool SkyManager::isEnabled()
+{
+    return mEnabled;
+}
+
+bool SkyManager::hasRain()
+{
+    return mRainNode != NULL;
 }
 
 void SkyManager::update(float duration)

@@ -29,7 +29,6 @@
 #include "../mwstate/character.hpp"
 
 #include "confirmationdialog.hpp"
-#include "widgets.hpp"
 
 namespace MWGui
 {
@@ -58,6 +57,9 @@ namespace MWGui
         mSaveList->eventKeyButtonPressed += MyGUI::newDelegate(this, &SaveGameDialog::onKeyButtonPressed);
         mSaveNameEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &SaveGameDialog::onEditSelectAccept);
         mSaveNameEdit->eventEditTextChange += MyGUI::newDelegate(this, &SaveGameDialog::onSaveNameChanged);
+
+        // To avoid accidental deletions
+        mDeleteButton->setNeedKeyFocus(false);
     }
 
     void SaveGameDialog::onSlotActivated(MyGUI::ListBox *sender, size_t pos)
@@ -106,6 +108,11 @@ namespace MWGui
         }
     }
 
+    void SaveGameDialog::onDeleteSlotCancel()
+    {
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
+    }
+
     void SaveGameDialog::onSaveNameChanged(MyGUI::EditBox *sender)
     {
         // This might have previously been a save slot from the list. If so, that is no longer the case
@@ -118,9 +125,9 @@ namespace MWGui
         accept();
     }
 
-    void SaveGameDialog::open()
+    void SaveGameDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
 
         mSaveNameEdit->setCaption ("");
         if (mSaving)
@@ -191,11 +198,6 @@ namespace MWGui
 
     }
 
-    void SaveGameDialog::exit()
-    {
-        setVisible(false);
-    }
-
     void SaveGameDialog::setLoadOrSave(bool load)
     {
         mSaving = !load;
@@ -217,7 +219,7 @@ namespace MWGui
 
     void SaveGameDialog::onCancelButtonClicked(MyGUI::Widget *sender)
     {
-        exit();
+        setVisible(false);
     }
 
     void SaveGameDialog::onDeleteButtonClicked(MyGUI::Widget *sender)
@@ -229,6 +231,11 @@ namespace MWGui
     void SaveGameDialog::onConfirmationGiven()
     {
         accept(true);
+    }
+
+    void SaveGameDialog::onConfirmationCancel()
+    {
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
     }
 
     void SaveGameDialog::accept(bool reallySure)
@@ -246,6 +253,7 @@ namespace MWGui
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationGiven);
                 dialog->eventCancelClicked.clear();
+                dialog->eventCancelClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationCancel);
                 return;
             }
             if (mSaveNameEdit->getCaption().empty())
@@ -266,6 +274,7 @@ namespace MWGui
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationGiven);
                 dialog->eventCancelClicked.clear();
+                dialog->eventCancelClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationCancel);
                 return;
             }
         }

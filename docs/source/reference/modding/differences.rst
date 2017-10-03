@@ -12,14 +12,14 @@ OpenMW is designed to be able to use all the normal Morrowind mod files such as 
 Multiple Data Folders
 ---------------------
 
-The largest difference between OpenMW and Morrowind in terms of data structure is OpenMW's support of multiple data folders. This has many advantages, especially when it comes to unistalling mods and preventing unintentional overwrites of files.
+The largest difference between OpenMW and Morrowind in terms of data structure is OpenMW's support of multiple data folders. This has many advantages, especially when it comes to uninstalling mods and preventing unintentional overwrites of files.
 
 .. warning::
 	Most mods can still be installed into the root OpenMW data folder, but this is not recommended.
 
 To install mods via this new feature:
 
-#.	Open ``openmw.cfg`` with your preffered text editor. It is located as described in :doc:`paths` and *not* in your OpenMW root directory.
+#.	Open ``openmw.cfg`` with your preferred text editor. It is located as described in :doc:`paths` and *not* in your OpenMW root directory.
 #.	Find or search for ``data=``. This is located very near the bottom of the file.
 #.	Add a new line below this line and make a new entry of the format ``data="path/to/your/mod"``
 #.	Make as many of these entries as you need for each mod folder you want to include.

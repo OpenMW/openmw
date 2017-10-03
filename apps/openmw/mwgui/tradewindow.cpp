@@ -27,7 +27,6 @@
 #include "containeritemmodel.hpp"
 #include "tradeitemmodel.hpp"
 #include "countdialog.hpp"
-#include "dialogue.hpp"
 #include "controllers.hpp"
 
 namespace
@@ -96,6 +95,7 @@ namespace MWGui
         mDecreaseButton->eventMouseButtonReleased += MyGUI::newDelegate(this, &TradeWindow::onBalanceButtonReleased);
 
         mTotalBalance->eventValueChanged += MyGUI::newDelegate(this, &TradeWindow::onBalanceValueChanged);
+        mTotalBalance->eventEditSelectAccept += MyGUI::newDelegate(this, &TradeWindow::onAccept);
         mTotalBalance->setMinValue(INT_MIN+1); // disallow INT_MIN since abs(INT_MIN) is undefined
 
         setCoord(400, 0, 400, 300);
@@ -115,7 +115,7 @@ namespace MWGui
         }
     }
 
-    void TradeWindow::startTrade(const MWWorld::Ptr& actor)
+    void TradeWindow::setPtr(const MWWorld::Ptr& actor)
     {
         mPtr = actor;
 
@@ -140,6 +140,13 @@ namespace MWGui
         setTitle(actor.getClass().getName(actor));
 
         onFilterChanged(mFilterAll);
+
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTotalBalance);
+    }
+
+    void TradeWindow::onFrame(float dt)
+    {
+        checkReferenceAvailable();
     }
 
     void TradeWindow::onFilterChanged(MyGUI::Widget* _sender)
@@ -171,11 +178,11 @@ namespace MWGui
         return mPtr.getClass().getServices(mPtr);
     }
 
-    void TradeWindow::exit()
+    bool TradeWindow::exit()
     {
         mTradeModel->abort();
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel()->abort();
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
+        return true;
     }
 
     void TradeWindow::onItemSelected (int index)
@@ -315,7 +322,7 @@ namespace MWGui
                 MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(player, it->mBase, mPtr, it->mCount);
 
                 onCancelButtonClicked(mCancelButton);
-                MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+                MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
                 return;
             }
         }
@@ -350,8 +357,7 @@ namespace MWGui
                         mPtr.getClass().getCreatureStats(mPtr).getGoldPool() - mCurrentBalance );
         }
 
-        MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addResponse(
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sBarterDialog5")->getString());
+        eventTradeDone();
 
         MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
@@ -359,9 +365,15 @@ namespace MWGui
         restock();
     }
 
+    void TradeWindow::onAccept(MyGUI::EditBox *sender)
+    {
+        onOfferButtonClicked(sender);
+    }
+
     void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
         exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
     }
 
     void TradeWindow::onMaxSaleButtonClicked(MyGUI::Widget* _sender)
@@ -490,7 +502,7 @@ namespace MWGui
     {
         // remove both Trade and Dialogue (since you always trade with the NPC/creature that you have previously talked to)
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
     }
 
     int TradeWindow::getMerchantGold()

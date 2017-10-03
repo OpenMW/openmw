@@ -9,18 +9,23 @@
         <Widget type="HBox" position="8 8 566 24" align="Left Top HStretch" name="Categories">
             <Widget type="AutoSizedButton" skin="MW_Button" name="AllButton">
                 <Property key="Caption" value="#{sAllTab}"/>
+                <Property key="NeedKey" value="false"/>
             </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="WeaponButton">
                 <Property key="Caption" value="#{sWeaponTab}"/>
+                <Property key="NeedKey" value="false"/>
             </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="ApparelButton">
                 <Property key="Caption" value="#{sApparelTab}"/>
+                <Property key="NeedKey" value="false"/>
             </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="MagicButton">
                 <Property key="Caption" value="#{sMagicTab}"/>
+                <Property key="NeedKey" value="false"/>
             </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="MiscButton">
                 <Property key="Caption" value="#{sMiscTab}"/>
+                <Property key="NeedKey" value="false"/>
             </Widget>
         </Widget>
 
@@ -48,6 +53,10 @@
                 <Property key="TextAlign" value="Center"/>
             </Widget>
 
+            <Widget type="AutoSizedButton" skin="MW_Button" position="0 60 60 24" name="MaxSaleButton" align="Left Top">
+                <Property key="Caption" value="#{sMaxSale}"/>
+            </Widget>
+
             <Widget type="HBox" position="0 60 566 24" align="Right Bottom">
                 <Widget type="Widget">
                     <UserString key="HStretch" value="true"/>
@@ -60,9 +69,6 @@
                 </Widget>
             </Widget>
 
-            <Widget type="AutoSizedButton" skin="MW_Button" position="0 60 60 24" name="MaxSaleButton" align="Left Top">
-                <Property key="Caption" value="#{sMaxSale}"/>
-            </Widget>
         </Widget>
 
     </Widget>

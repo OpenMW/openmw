@@ -1,7 +1,7 @@
 #include "actiontalk.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 namespace MWWorld
 {
@@ -9,6 +9,6 @@ namespace MWWorld
 
     void ActionTalk::executeImp (const Ptr& actor)
     {
-        MWBase::Environment::get().getDialogueManager()->startDialogue (getTarget());
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue, getTarget());
     }
 }

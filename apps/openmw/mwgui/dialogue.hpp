@@ -8,6 +8,8 @@
 
 #include "../mwdialogue/keywordsearch.hpp"
 
+#include <MyGUI_Delegate.h>
+
 namespace Gui
 {
     class MWList;
@@ -20,16 +22,17 @@ namespace MWGui
 
 namespace MWGui
 {
-    class DialogueHistoryViewModel;
-    class BookPage;
-
     class PersuasionDialog : public WindowModal
     {
     public:
         PersuasionDialog();
 
-        virtual void open();
-        virtual void exit();
+        typedef MyGUI::delegates::CMultiDelegate2<const std::string&, const std::string&> EventHandle_Result;
+        EventHandle_Result eventPersuadeMsg;
+
+        virtual void onOpen();
+
+        virtual MyGUI::Widget* getDefaultKeyFocus();
 
     private:
         MyGUI::Button* mCancelButton;
@@ -54,6 +57,8 @@ namespace MWGui
 
     struct Topic : Link
     {
+        typedef MyGUI::delegates::CMultiDelegate1<const std::string&> EventHandle_TopicId;
+        EventHandle_TopicId eventTopicActivated;
         Topic(const std::string& id) : mTopicId(id) {}
         std::string mTopicId;
         virtual void activated ();
@@ -61,6 +66,8 @@ namespace MWGui
 
     struct Choice : Link
     {
+        typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_ChoiceId;
+        EventHandle_ChoiceId eventChoiceActivated;
         Choice(int id) : mChoiceId(id) {}
         int mChoiceId;
         virtual void activated ();
@@ -68,6 +75,8 @@ namespace MWGui
 
     struct Goodbye : Link
     {
+        typedef MyGUI::delegates::CMultiDelegate0 Event_Activated;
+        Event_Activated eventActivated;
         virtual void activated ();
     };
 
@@ -99,46 +108,41 @@ namespace MWGui
     {
     public:
         DialogueWindow();
+        ~DialogueWindow();
 
-        virtual void exit();
+        void onTradeComplete();
+
+        virtual bool exit();
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         void notifyLinkClicked (TypesetBook::InteractiveId link);
 
-        void startDialogue(MWWorld::Ptr actor, std::string npcName, bool resetHistory);
+        void setPtr(const MWWorld::Ptr& actor);
+
         void setKeywords(std::list<std::string> keyWord);
 
-        void addResponse (const std::string& text, const std::string& title="", bool needMargin = true);
+        void addResponse (const std::string& title, const std::string& text, bool needMargin = true);
 
         void addMessageBox(const std::string& text);
 
-        void addChoice(const std::string& choice, int id);
-        void clearChoices();
-
-        void goodbye();
-        void onFrame();
-
-        // make sure to call these before setKeywords()
-        void setServices(int services) { mServices = services; }
-
-        enum Services
-        {
-            Service_Trade = 0x01,
-            Service_BuySpells = 0x02,
-            Service_CreateSpells = 0x04,
-            Service_Enchant = 0x08,
-            Service_Training = 0x10,
-            Service_Travel = 0x20,
-            Service_Repair = 0x40
-        };
+        void onFrame(float dt);
+        void clear() { resetReference(); }
 
     protected:
-        void onSelectTopic(const std::string& topic, int id);
+        void updateTopics();
+        void updateTopicsPane();
+        bool isCompanion();
+
+        void onPersuadeResult(const std::string& title, const std::string& text);
+        void onSelectListItem(const std::string& topic, int id);
         void onByeClicked(MyGUI::Widget* _sender);
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
         void onWindowResize(MyGUI::Window* _sender);
+        void onTopicActivated(const std::string& topicId);
+        void onChoiceActivated(int id);
+        void onGoodbyeActivated();
 
         void onScrollbarMoved (MyGUI::ScrollBar* sender, size_t pos);
 
@@ -147,20 +151,23 @@ namespace MWGui
         virtual void onReferenceUnavailable();
 
     private:
-        void updateOptions();
+        void updateDisposition();
         void restock();
-
-        int mServices;
+        void deleteLater();
 
         bool mEnabled;
 
-        bool mGoodbye;
+        bool mIsCompanion;
+        std::list<std::string> mKeywords;
 
         std::vector<DialogueText*> mHistoryContents;
         std::vector<std::pair<std::string, int> > mChoices;
+        bool mGoodbye;
 
         std::vector<Link*> mLinks;
         std::map<std::string, Link*> mTopicLinks;
+
+        std::vector<Link*> mDeleteLater;
 
         KeywordSearchT mKeywordSearch;
 
@@ -169,6 +176,7 @@ namespace MWGui
         MyGUI::ScrollBar* mScrollBar;
         MyGUI::ProgressBar* mDispositionBar;
         MyGUI::TextBox*     mDispositionText;
+        MyGUI::Button* mGoodbyeButton;
 
         PersuasionDialog mPersuasionDialog;
 

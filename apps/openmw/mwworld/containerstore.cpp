@@ -408,13 +408,13 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const Cons
     return it;
 }
 
-int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const Ptr& actor, bool equipReplacement)
+int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const Ptr& actor)
 {
     int toRemove = count;
 
     for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
         if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), itemId))
-            toRemove -= remove(*iter, toRemove, actor, equipReplacement);
+            toRemove -= remove(*iter, toRemove, actor);
 
     flagAsModified();
 
@@ -422,7 +422,7 @@ int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const 
     return count - toRemove;
 }
 
-int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor, bool equipReplacement)
+int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor)
 {
     assert(this == item.getContainerStore());
 

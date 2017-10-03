@@ -27,11 +27,7 @@ namespace ESM
         BaseProjectileState::save(esm);
 
         esm.writeHNString ("SPEL", mSpellId);
-        esm.writeHNString ("SRCN", mSourceName);
-        mEffects.save(esm);
         esm.writeHNT ("SPED", mSpeed);
-        esm.writeHNT ("STCK", mStack);
-        esm.writeHNString ("SOUN", mSound);
     }
 
     void MagicBoltState::load(ESMReader &esm)
@@ -39,11 +35,14 @@ namespace ESM
         BaseProjectileState::load(esm);
 
         mSpellId = esm.getHNString("SPEL");
-        mSourceName = esm.getHNString ("SRCN");
-        mEffects.load(esm);
+        if (esm.isNextSub("SRCN")) // for backwards compatibility
+            esm.skipHSub();
+        ESM::EffectList().load(esm); // for backwards compatibility
         esm.getHNT (mSpeed, "SPED");
-        esm.getHNT (mStack, "STCK");
-        mSound = esm.getHNString ("SOUN");
+        if (esm.isNextSub("STCK")) // for backwards compatibility
+            esm.skipHSub();
+        if (esm.isNextSub("SOUN")) // for backwards compatibility
+            esm.skipHSub();
     }
 
     void ProjectileState::save(ESMWriter &esm) const

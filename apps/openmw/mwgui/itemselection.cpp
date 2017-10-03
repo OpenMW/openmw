@@ -29,9 +29,10 @@ namespace MWGui
         center();
     }
 
-    void ItemSelectionDialog::exit()
+    bool ItemSelectionDialog::exit()
     {
         eventDialogCanceled();
+        return true;
     }
 
     void ItemSelectionDialog::openContainer(const MWWorld::Ptr& container)

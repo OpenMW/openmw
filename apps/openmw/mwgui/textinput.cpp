@@ -42,9 +42,9 @@ namespace MWGui
         setText("LabelT", label);
     }
 
-    void TextInputDialog::open()
+    void TextInputDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
         // Make sure the edit box has focus
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);
     }

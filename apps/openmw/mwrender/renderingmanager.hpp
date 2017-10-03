@@ -83,6 +83,10 @@ namespace MWRender
         SceneUtil::UnrefQueue* getUnrefQueue();
         Terrain::World* getTerrain();
 
+        osg::Uniform* mUniformNear;
+        osg::Uniform* mUniformFar;
+        osg::Uniform* mUniformRainIntensity;
+
         void preloadCommonAssets();
 
         double getReferenceTime() const;
@@ -155,6 +159,8 @@ namespace MWRender
 
         /// Clear all worldspace-specific data
         void notifyWorldSpaceChanged();
+
+        void clearRainRipples();
 
         void update(float dt, bool paused);
 

@@ -169,9 +169,7 @@ namespace MWClass
             if(isTrapped)
             {
                 ptr.getCellRef().setTrap("");
-                MWBase::Environment::get().getSoundManager()->playSound3D(ptr,
-                    "Disarm Trap", 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
-                    MWBase::SoundManager::Play_Normal);
+                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Disarm Trap", 1.0f, 1.0f);
                 isTrapped = false;
             }
         }
