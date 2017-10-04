@@ -20,7 +20,6 @@ namespace SceneUtil
         }
 
         virtual void apply(osg::Group& group);
-
         virtual void apply(osg::MatrixTransform& node);
         virtual void apply(osg::Geometry& node);
 
@@ -28,6 +27,22 @@ namespace SceneUtil
 
         std::string mNameToFind;
         osg::Group* mFoundNode;
+    };
+
+    class FindByClassVisitor : public osg::NodeVisitor
+    {
+    public:
+        FindByClassVisitor(const std::string& nameToFind)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mNameToFind(nameToFind)
+            , mFoundNode(NULL)
+        {
+        }
+
+        virtual void apply(osg::Node &node);
+
+        std::string mNameToFind;
+        osg::Node* mFoundNode;
     };
 
     // Disable freezeOnCull for all visited particlesystems

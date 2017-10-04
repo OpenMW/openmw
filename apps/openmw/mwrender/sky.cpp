@@ -47,7 +47,7 @@
 #include "vismask.hpp"
 #include "renderbin.hpp"
 
-#define PARTICLE_WIDTH 600.0
+#define RAIN_WIDTH 600.0
 
 namespace
 {
@@ -1344,17 +1344,19 @@ protected:
 class WeatherParticleDrawCallback : public osg::Drawable::DrawCallback
 {
 public:
-    WeatherParticleDrawCallback(MWRender::RenderingManager *renderingManager) : osg::Drawable::DrawCallback()
+    WeatherParticleDrawCallback(MWRender::RenderingManager *renderingManager, float rangeX, float rangeY) : osg::Drawable::DrawCallback()
     {
       mRendering = renderingManager;
+      mRangeX = rangeX;
+      mRangeY = rangeY;
     }
 
     virtual void drawImplementation(osg::RenderInfo& renderInfo, const osg::Drawable *drawable) const
     {
         osg::Vec3 cameraPos = mRendering->getCameraPosition();
         osg::Vec3 cameraOffset = osg::Vec3(
-          PARTICLE_WIDTH - fmod(cameraPos.x(), PARTICLE_WIDTH / 2),
-          PARTICLE_WIDTH - fmod(cameraPos.y(), PARTICLE_WIDTH / 2),
+          mRangeX - fmod(cameraPos.x(), mRangeX / 2),
+          mRangeY - fmod(cameraPos.y(), mRangeY / 2),
           0);
 
         osgParticle::ParticleSystem *ps = (osgParticle::ParticleSystem *) drawable;
@@ -1362,7 +1364,7 @@ public:
         for (int xOff = 0; xOff < 3; xOff++)
             for (int yOff = 0; yOff < 3; yOff++)
                 {  
-                    osg::Vec3 offset = cameraOffset + osg::Vec3(-1 * xOff * PARTICLE_WIDTH, -1 * yOff * PARTICLE_WIDTH,0);
+                    osg::Vec3 offset = cameraOffset + osg::Vec3(-1 * xOff * mRangeX, -1 * yOff * mRangeY,0);
 
                     for(int i = 0; i < ps->numParticles(); i++)
                         ps->getParticle(i)->setPosition(ps->getParticle(i)->getPosition() + offset);
@@ -1376,6 +1378,7 @@ public:
 
 protected:
     MWRender::RenderingManager *mRendering;
+    float mRangeX, mRangeY;
 };
 
 void SkyManager::createRain()
@@ -1386,7 +1389,7 @@ void SkyManager::createRain()
     mRainNode = new osg::Group;
 
     mRainParticleSystem = new osgParticle::ParticleSystem;
-    mRainParticleSystem->setDrawCallback(new WeatherParticleDrawCallback(mRendering));
+    mRainParticleSystem->setDrawCallback(new WeatherParticleDrawCallback(mRendering,RAIN_WIDTH,RAIN_WIDTH));
 
     mRainParticleSystem->setParticleAlignment(osgParticle::ParticleSystem::FIXED);
     mRainParticleSystem->setAlignVectorX(osg::Vec3f(0.1,0,0));
@@ -1413,8 +1416,8 @@ void SkyManager::createRain()
     emitter->setParticleSystem(mRainParticleSystem);
 
     osg::ref_ptr<osgParticle::BoxPlacer> placer (new osgParticle::BoxPlacer);
-    placer->setXRange(-PARTICLE_WIDTH / 2, PARTICLE_WIDTH / 2); // Rain_Diameter
-    placer->setYRange(-PARTICLE_WIDTH / 2, PARTICLE_WIDTH / 2);
+    placer->setXRange(-RAIN_WIDTH / 2, RAIN_WIDTH / 2); // Rain_Diameter
+    placer->setYRange(-RAIN_WIDTH / 2, RAIN_WIDTH / 2);
     placer->setZRange(300, 300);
     emitter->setPlacer(placer);
 
@@ -1493,8 +1496,6 @@ void SkyManager::update(float duration)
         osg::Quat quat;
         quat.makeRotate(osg::Vec3f(0,1,0), mStormDirection);
 
-        if (mParticleNode)
-            mParticleNode->setAttitude(quat);
         mCloudNode->setAttitude(quat);
     }
     else
@@ -1586,7 +1587,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
         {
             if (!mParticleNode)
             {
-                mParticleNode = new osg::PositionAttitudeTransform;
+                mParticleNode = new osg::Group;
                 mParticleNode->addCullCallback(mUnderwaterSwitch);
                 mParticleNode->setNodeMask(Mask_WeatherParticles);
                 mRootNode->addChild(mParticleNode);
@@ -1603,11 +1604,29 @@ void SkyManager::setWeather(const WeatherResult& weather)
             SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
             mParticleEffect->accept(disableFreezeOnCullVisitor);
 
-            osgParticle::ParticleSystem *ps = (osgParticle::ParticleSystem *)
-              (mParticleEffect->asGroup()->getChild(1)->asGroup()->getChild(0)
-               ->asGroup()->getChild(2));
+            SceneUtil::FindByClassVisitor findEmitterVisitor(std::string("Emitter"));
+            mParticleEffect->accept(findEmitterVisitor);
 
-            ps->setDrawCallback(new WeatherParticleDrawCallback(mRendering));
+            float rangeX = RAIN_WIDTH;
+            float rangeY = RAIN_WIDTH;
+
+            if (findEmitterVisitor.mFoundNode)
+              {
+                osgParticle::Placer *placer = ((NifOsg::Emitter *) findEmitterVisitor.mFoundNode)->getPlacer();
+
+                if (placer && strcmp(placer->className(),"BoxPlacer") == 0)
+                    {
+                        rangeX = ((osgParticle::BoxPlacer *) placer)->getXRange().maximum;
+                        rangeY = ((osgParticle::BoxPlacer *) placer)->getYRange().maximum;
+                    } 
+              }
+
+
+            SceneUtil::FindByClassVisitor findPSVisitor(std::string("ParticleSystem"));
+            mParticleEffect->accept(findPSVisitor);
+
+            if (findPSVisitor.mFoundNode)
+                ((osgParticle::ParticleSystem *) findPSVisitor.mFoundNode)->setDrawCallback(new WeatherParticleDrawCallback(mRendering,rangeX,rangeY));
         }
     }
 

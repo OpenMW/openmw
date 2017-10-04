@@ -177,7 +177,7 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;
 
-        osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
+        osg::ref_ptr<osg::Group> mParticleNode;
         osg::ref_ptr<osg::Node> mParticleEffect;
         std::vector<osg::ref_ptr<AlphaFader> > mParticleFaders;
         osg::ref_ptr<UnderwaterSwitchCallback> mUnderwaterSwitch;

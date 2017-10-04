@@ -225,6 +225,7 @@ namespace NifOsg
 
         void setShooter(osgParticle::Shooter* shooter);
         void setPlacer(osgParticle::Placer* placer);
+        osgParticle::Placer *getPlacer();
         void setCounter(osgParticle::Counter* counter);
 
     private:

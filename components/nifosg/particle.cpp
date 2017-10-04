@@ -250,6 +250,11 @@ void Emitter::setPlacer(osgParticle::Placer *placer)
     mPlacer = placer;
 }
 
+osgParticle::Placer *Emitter::getPlacer()
+{
+    return mPlacer;
+}
+
 void Emitter::setCounter(osgParticle::Counter *counter)
 {
     mCounter = counter;
