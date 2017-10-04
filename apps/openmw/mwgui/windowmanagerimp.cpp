@@ -613,18 +613,18 @@ namespace MWGui
 
         mInventoryWindow->setTrading(mode == GM_Barter);
 
-        // For the inventory mode, compute the effective set of windows to show.
-        // This is controlled both by what windows the
-        // user has opened/closed (the 'shown' variable) and by what
-        // windows we are allowed to show (the 'allowed' var.)
-        int eff = mShown & mAllowed & ~mForceHidden;
-        mGuiModeStates[GM_Inventory].mVisibilityMask.resize(4);
-        mGuiModeStates[GM_Inventory].mVisibilityMask[0] = eff & GW_Map;
-        mGuiModeStates[GM_Inventory].mVisibilityMask[1] = eff & GW_Inventory;
-        mGuiModeStates[GM_Inventory].mVisibilityMask[2] = eff & GW_Magic;
-        mGuiModeStates[GM_Inventory].mVisibilityMask[3] = eff & GW_Stats;
         if (getMode() == GM_Inventory)
-            mGuiModeStates[GM_Inventory].update(true);
+        {
+            // For the inventory mode, compute the effective set of windows to show.
+            // This is controlled both by what windows the
+            // user has opened/closed (the 'shown' variable) and by what
+            // windows we are allowed to show (the 'allowed' var.)
+            int eff = mShown & mAllowed & ~mForceHidden;
+            mMap->setVisible(eff & GW_Map);
+            mInventoryWindow->setVisible(eff & GW_Inventory);
+            mSpellWindow->setVisible(eff & GW_Magic);
+            mStatsWindow->setVisible(eff & GW_Stats);
+        }
 
         switch (mode)
         {
@@ -2063,12 +2063,7 @@ namespace MWGui
     void WindowManager::GuiModeState::update(bool visible)
     {
         for (unsigned int i=0; i<mWindows.size(); ++i)
-        {
-            bool visibilityMask = true;
-            if (i < mVisibilityMask.size())
-                visibilityMask = mVisibilityMask[i];
-            mWindows[i]->setVisible(visible && visibilityMask);
-        }
+            mWindows[i]->setVisible(visible);
     }
 
 }

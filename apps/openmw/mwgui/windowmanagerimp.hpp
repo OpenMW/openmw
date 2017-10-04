@@ -477,7 +477,6 @@ namespace MWGui
         void update(bool visible);
 
         std::vector<WindowBase*> mWindows;
-        std::vector<bool> mVisibilityMask; // optional, may be used to temporarily exclude windows from this mode.
 
         std::string mCloseSound;
         std::string mOpenSound;
