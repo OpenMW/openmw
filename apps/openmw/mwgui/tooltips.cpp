@@ -120,7 +120,7 @@ namespace MWGui
                     if (info.caption.empty())
                         info.caption=mFocusObject.getCellRef().getRefId();
                     info.icon="";
-                    tooltipSize = createToolTip(info, true);
+                    tooltipSize = createToolTip(info, checkOwned());
                 }
                 else
                     tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), true);
@@ -186,22 +186,24 @@ namespace MWGui
                     ToolTipInfo info;
                     info.text = data.caption;
                     info.notes = data.notes;
-                    tooltipSize = createToolTip(info, false);
+                    tooltipSize = createToolTip(info);
                 }
                 else if (type == "ItemPtr")
                 {
                     mFocusObject = *focus->getUserData<MWWorld::Ptr>();
-                    tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), false);
+                    bool isAllowedToUse = checkOwned();
+                    tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), false, !isAllowedToUse);
                 }
                 else if (type == "ItemModelIndex")
                 {
                     std::pair<ItemModel::ModelIndex, ItemModel*> pair = *focus->getUserData<std::pair<ItemModel::ModelIndex, ItemModel*> >();
                     mFocusObject = pair.second->getItem(pair.first).mBase;
-                    tooltipSize = getToolTipViaPtr(pair.second->getItem(pair.first).mCount, false);
+                    bool isAllowedToUse = pair.second->allowedToUseItems();
+                    tooltipSize = getToolTipViaPtr(pair.second->getItem(pair.first).mCount, false, !isAllowedToUse);
                 }
                 else if (type == "ToolTipInfo")
                 {
-                    tooltipSize = createToolTip(*focus->getUserData<MWGui::ToolTipInfo>(), false);
+                    tooltipSize = createToolTip(*focus->getUserData<MWGui::ToolTipInfo>());
                 }
                 else if (type == "AvatarItemSelection")
                 {
@@ -244,7 +246,7 @@ namespace MWGui
                         info.text = "#{sSchool}: " + sSchoolNames[school];
                     }
                     info.effects = effects;
-                    tooltipSize = createToolTip(info, false);
+                    tooltipSize = createToolTip(info);
                 }
                 else if (type == "Layout")
                 {
@@ -298,7 +300,7 @@ namespace MWGui
         {
             if (!mFocusObject.isEmpty())
             {
-                MyGUI::IntSize tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount());
+                MyGUI::IntSize tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), true, checkOwned());
 
                 setCoord(viewSize.width/2 - tooltipSize.width/2,
                         std::max(0, int(mFocusToolTipY*viewSize.height - tooltipSize.height)),
@@ -332,7 +334,7 @@ namespace MWGui
         update(mFrameDuration);
     }
 
-    MyGUI::IntSize ToolTips::getToolTipViaPtr (int count, bool image)
+    MyGUI::IntSize ToolTips::getToolTipViaPtr (int count, bool image, bool isOwned)
     {
         // this the maximum width of the tooltip before it starts word-wrapping
         setCoord(0, 0, 300, 300);
@@ -351,7 +353,7 @@ namespace MWGui
             ToolTipInfo info = object.getToolTipInfo(mFocusObject, count);
             if (!image)
                 info.icon = "";
-            tooltipSize = createToolTip(info, true);
+            tooltipSize = createToolTip(info, isOwned);
         }
 
         return tooltipSize;
@@ -359,27 +361,21 @@ namespace MWGui
     
     bool ToolTips::checkOwned()
     {
-        if(!mFocusObject.isEmpty())
-        {
-            MWWorld::Ptr ptr = MWMechanics::getPlayer();
-            MWWorld::Ptr victim;
-            
-            MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
-            bool allowed = mm->isAllowedToUse(ptr, mFocusObject, victim); 
-
-            return !allowed;
-        }
-        else
-        {
+        if(mFocusObject.isEmpty())
             return false;
-        }
+
+        MWWorld::Ptr ptr = MWMechanics::getPlayer();
+        MWWorld::Ptr victim;
+
+        MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
+        return !mm->isAllowedToUse(ptr, mFocusObject, victim);
     }
 
-    MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info, bool isFocusObject)
+    MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info, bool isOwned)
     {
         mDynamicToolTipBox->setVisible(true);
         
-        if((mShowOwned == 1 || mShowOwned == 3) && isFocusObject && checkOwned())
+        if((mShowOwned == 1 || mShowOwned == 3) && isOwned)
             mDynamicToolTipBox->changeWidgetSkin(MWBase::Environment::get().getWindowManager()->isGuiMode() ? "HUD_Box_NoTransp_Owned" : "HUD_Box_Owned");
         else
             mDynamicToolTipBox->changeWidgetSkin(MWBase::Environment::get().getWindowManager()->isGuiMode() ? "HUD_Box_NoTransp" : "HUD_Box");

@@ -15,6 +15,11 @@ namespace MWGui
         mSourceModel = sourceModel;
     }
 
+    bool TradeItemModel::allowedToUseItems() const
+    {
+        return true;
+    }
+
     ItemStack TradeItemModel::getItem (ModelIndex index)
     {
         if (index < 0)

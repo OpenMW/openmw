@@ -6,7 +6,10 @@
 #include "../mwworld/class.hpp"
 
 #include "../mwbase/world.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/environment.hpp"
+
+#include "../mwmechanics/actorutil.hpp"
 
 namespace
 {
@@ -45,6 +48,19 @@ ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSour
 ContainerItemModel::ContainerItemModel (const MWWorld::Ptr& source)
 {
     mItemSources.push_back(source);
+}
+
+bool ContainerItemModel::allowedToUseItems() const
+{
+    if (mItemSources.size() == 0)
+        return true;
+
+    MWWorld::Ptr ptr = MWMechanics::getPlayer();
+    MWWorld::Ptr victim;
+
+    // Check if the player is allowed to use items from opened container
+    MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
+    return mm->isAllowedToUse(ptr, mItemSources[0], victim);
 }
 
 ItemStack ContainerItemModel::getItem (ModelIndex index)

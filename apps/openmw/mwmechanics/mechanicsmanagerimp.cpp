@@ -842,6 +842,9 @@ namespace MWMechanics
 
     bool MechanicsManager::isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, MWWorld::Ptr& victim)
     {
+        if (target.isEmpty())
+            return true;
+
         const MWWorld::CellRef& cellref = target.getCellRef();
         // there is no harm to use unlocked doors
         if (target.getClass().isDoor() && cellref.getLockLevel() <= 0 && ptr.getCellRef().getTrap().empty())

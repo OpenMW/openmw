@@ -159,6 +159,11 @@ namespace MWGui
         mSourceModel = sourceModel;
     }
 
+    bool SortFilterItemModel::allowedToUseItems() const
+    {
+        return mSourceModel->allowedToUseItems();
+    }
+
     void SortFilterItemModel::addDragItem (const MWWorld::Ptr& dragItem, size_t count)
     {
         mDragItems.push_back(std::make_pair(dragItem, count));
