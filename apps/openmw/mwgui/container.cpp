@@ -100,28 +100,10 @@ namespace MWGui
 
     void ContainerWindow::dropItem()
     {
-        if (mPtr.getTypeName() == typeid(ESM::Container).name())
-        {
-            // check container organic flag
-            MWWorld::LiveCellRef<ESM::Container>* ref = mPtr.get<ESM::Container>();
-            if (ref->mBase->mFlags & ESM::Container::Organic)
-            {
-                MWBase::Environment::get().getWindowManager()->
-                    messageBox("#{sContentsMessage2}");
-                return;
-            }
+        bool success = mModel->onDropItem(mDragAndDrop->mItem.mBase, mDragAndDrop->mDraggedCount);
 
-            // check that we don't exceed container capacity
-            MWWorld::Ptr item = mDragAndDrop->mItem.mBase;
-            float weight = item.getClass().getWeight(item) * mDragAndDrop->mDraggedCount;
-            if (mPtr.getClass().getCapacity(mPtr) < mPtr.getClass().getEncumbrance(mPtr) + weight)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage3}");
-                return;
-            }
-        }
-
-        mDragAndDrop->drop(mModel, mItemView);
+        if (success)
+            mDragAndDrop->drop(mModel, mItemView);
     }
 
     void ContainerWindow::onBackgroundSelected()

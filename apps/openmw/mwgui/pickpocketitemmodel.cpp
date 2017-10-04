@@ -4,6 +4,7 @@
 #include <components/esm/loadskil.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/pickpocket.hpp"
 
 #include "../mwworld/class.hpp"
@@ -80,12 +81,21 @@ namespace MWGui
 
     bool PickpocketItemModel::allowedToInsertItems() const
     {
-        // don't allow "reverse pickpocket" (yet)
+        // don't allow "reverse pickpocket" (it will be handled by scripts after 1.0)
+        return false;
+    }
+
+    bool PickpocketItemModel::onDropItem(const MWWorld::Ptr &item, int count)
+    {
+        // don't allow "reverse pickpocket" (it will be handled by scripts after 1.0)
         return false;
     }
 
     bool PickpocketItemModel::onTakeItem(const MWWorld::Ptr &item, int count) const
     {
+        if (mActor.getClass().getCreatureStats(mActor).getKnockedDown())
+            return mSourceModel->onTakeItem(item, count);
+
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::Pickpocket pickpocket(player, mActor);
         if (pickpocket.pick(item, count))

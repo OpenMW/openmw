@@ -10,6 +10,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
@@ -185,8 +186,37 @@ void ContainerItemModel::update()
         }
     }
 }
+bool ContainerItemModel::onDropItem(const MWWorld::Ptr &item, int count) const
+{
+    if (mItemSources.empty())
+        return false;
 
-bool ContainerItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
+    MWWorld::Ptr target = mItemSources[0];
+
+    if (target.getTypeName() != typeid(ESM::Container).name())
+        return true;
+
+    // check container organic flag
+    MWWorld::LiveCellRef<ESM::Container>* ref = target.get<ESM::Container>();
+    if (ref->mBase->mFlags & ESM::Container::Organic)
+    {
+        MWBase::Environment::get().getWindowManager()->
+            messageBox("#{sContentsMessage2}");
+        return false;
+    }
+
+    // check that we don't exceed container capacity
+    float weight = item.getClass().getWeight(item) * count;
+    if (target.getClass().getCapacity(target) < target.getClass().getEncumbrance(target) + weight)
+    {
+        MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage3}");
+        return false;
+    }
+
+    return true;
+}
+
+bool ContainerItemModel::onTakeItem(const MWWorld::Ptr &item, int count) const
 {
     if (mItemSources.empty())
         return false;
@@ -196,7 +226,7 @@ bool ContainerItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
     // Looting a dead corpse is considered OK
     if (target.getClass().isActor() && target.getClass().getCreatureStats(target).isDead())
         return true;
-    
+
     MWWorld::Ptr player = MWMechanics::getPlayer();
     MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item, target, count);
 

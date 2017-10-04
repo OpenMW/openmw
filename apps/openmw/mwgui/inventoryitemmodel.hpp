@@ -15,6 +15,8 @@ namespace MWGui
         virtual ModelIndex getIndex (ItemStack item);
         virtual size_t getItemCount();
 
+        virtual bool onTakeItem(const MWWorld::Ptr &item, int count) const;
+
         virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false);
         virtual void removeItem (const ItemStack& item, size_t count);
 
@@ -22,7 +24,6 @@ namespace MWGui
         virtual MWWorld::Ptr moveItem (const ItemStack& item, size_t count, ItemModel* otherModel);
 
         virtual void update();
-        virtual bool onTakeItem(const MWWorld::Ptr &item, int count) const;
 
     protected:
         MWWorld::Ptr mActor;
