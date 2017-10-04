@@ -311,7 +311,12 @@ namespace MWGui
         std::sort(mItems.begin(), mItems.end(), cmp);
     }
 
-    bool SortFilterItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
+    bool SortFilterItemModel::onDropItem(const MWWorld::Ptr &item, int count) const
+    {
+        return mSourceModel->onDropItem (item, count);
+    }
+
+    bool SortFilterItemModel::onTakeItem(const MWWorld::Ptr &item, int count) const
     {
         return mSourceModel->onTakeItem (item, count);
     }

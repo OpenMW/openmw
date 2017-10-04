@@ -100,46 +100,10 @@ namespace MWGui
 
     void ContainerWindow::dropItem()
     {
-        if (mPtr.getTypeName() == typeid(ESM::Container).name())
-        {
-            // check container organic flag
-            MWWorld::LiveCellRef<ESM::Container>* ref = mPtr.get<ESM::Container>();
-            if (ref->mBase->mFlags & ESM::Container::Organic)
-            {
-                MWBase::Environment::get().getWindowManager()->
-                    messageBox("#{sContentsMessage2}");
-                return;
-            }
+        bool success = mModel->onDropItem(mDragAndDrop->mItem.mBase, mDragAndDrop->mDraggedCount);
 
-            // check that we don't exceed container capacity
-            MWWorld::Ptr item = mDragAndDrop->mItem.mBase;
-            float weight = item.getClass().getWeight(item) * mDragAndDrop->mDraggedCount;
-            if (mPtr.getClass().getCapacity(mPtr) < mPtr.getClass().getEncumbrance(mPtr) + weight)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage3}");
-                return;
-            }
-        }
-
-        // reverse pickpocketing
-        if (dynamic_cast<PickpocketItemModel*>(mModel)
-                && !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown())
-        {
-            MWWorld::Ptr player = MWMechanics::getPlayer();
-            MWMechanics::Pickpocket pickpocket(player, mPtr);
-            if (pickpocket.pick(mDragAndDrop->mItem.mBase, mDragAndDrop->mDraggedCount))
-            {
-                MWBase::Environment::get().getMechanicsManager()->commitCrime(
-                            player, mPtr, MWBase::MechanicsManager::OT_Pickpocket, 0, true);
-                MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
-                mPickpocketDetected = true;
-                return;
-            }
-            else
-                player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 1);
-        }
-
-        mDragAndDrop->drop(mModel, mItemView);
+        if (success)
+            mDragAndDrop->drop(mModel, mItemView);
     }
 
     void ContainerWindow::onBackgroundSelected()

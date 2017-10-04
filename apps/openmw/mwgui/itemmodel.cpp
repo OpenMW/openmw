@@ -129,7 +129,12 @@ namespace MWGui
         return true;
     }
 
-    bool ItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
+    bool ItemModel::onDropItem(const MWWorld::Ptr &item, int count) const
+    {
+        return true;
+    }
+
+    bool ItemModel::onTakeItem(const MWWorld::Ptr &item, int count) const
     {
         return true;
     }
@@ -203,7 +208,12 @@ namespace MWGui
         mSourceModel = sourceModel;
     }
 
-    bool ProxyItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
+    bool ProxyItemModel::onDropItem(const MWWorld::Ptr &item, int count) const
+    {
+        return mSourceModel->onDropItem (item, count);
+    }
+
+    bool ProxyItemModel::onTakeItem(const MWWorld::Ptr &item, int count) const
     {
         return mSourceModel->onTakeItem (item, count);
     }

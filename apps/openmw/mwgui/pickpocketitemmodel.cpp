@@ -4,6 +4,7 @@
 #include <components/esm/loadskil.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/pickpocket.hpp"
 
 #include "../mwworld/class.hpp"
@@ -83,8 +84,33 @@ namespace MWGui
         return true;
     }
 
+    bool PickpocketItemModel::onDropItem(const MWWorld::Ptr &item, int count) const
+    {
+        if (mActor.getClass().getCreatureStats(mActor).getKnockedDown())
+            return true;
+
+        // reverse pickpocketing
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        MWMechanics::Pickpocket pickpocket(player, mActor);
+        if (pickpocket.pick(item, count))
+        {
+            MWBase::Environment::get().getMechanicsManager()->commitCrime(
+                        player, mActor, MWBase::MechanicsManager::OT_Pickpocket, 0, true);
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
+            //mPickpocketDetected = true;
+            return false;
+        }
+        else
+            player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 1);
+
+        return true;
+    }
+
     bool PickpocketItemModel::onTakeItem(const MWWorld::Ptr &item, int count) const
     {
+        if (mActor.getClass().getCreatureStats(mActor).getKnockedDown())
+            return mSourceModel->onTakeItem(item, count);
+
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::Pickpocket pickpocket(player, mActor);
         if (pickpocket.pick(item, count))

@@ -18,6 +18,10 @@ namespace MWGui
         ContainerItemModel (const MWWorld::Ptr& source);
 
         virtual bool allowedToUseItems() const;
+
+        virtual bool onDropItem(const MWWorld::Ptr &item, int count) const;
+        virtual bool onTakeItem(const MWWorld::Ptr &item, int count) const;
+
         virtual ItemStack getItem (ModelIndex index);
         virtual ModelIndex getIndex (ItemStack item);
         virtual size_t getItemCount();
@@ -26,7 +30,6 @@ namespace MWGui
         virtual void removeItem (const ItemStack& item, size_t count);
 
         virtual void update();
-        virtual bool onTakeItem(const MWWorld::Ptr &item, int count);
 
     private:
         std::vector<MWWorld::Ptr> mItemSources;
