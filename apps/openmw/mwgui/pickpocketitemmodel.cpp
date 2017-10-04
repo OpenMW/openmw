@@ -71,8 +71,7 @@ namespace MWGui
 
     bool PickpocketItemModel::allowedToInsertItems() const
     {
-        // don't allow "reverse pickpocket" (yet)
-        return false;
+        return true;
     }
 
 }

@@ -121,6 +121,24 @@ namespace MWGui
             }
         }
 
+        // reverse pickpocketing
+        if (dynamic_cast<PickpocketItemModel*>(mModel)
+                && !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown())
+        {
+            MWWorld::Ptr player = MWMechanics::getPlayer();
+            MWMechanics::Pickpocket pickpocket(player, mPtr);
+            if (pickpocket.pick(mDragAndDrop->mItem.mBase, mDragAndDrop->mDraggedCount))
+            {
+                MWBase::Environment::get().getMechanicsManager()->commitCrime(
+                            player, mPtr, MWBase::MechanicsManager::OT_Pickpocket, 0, true);
+                MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
+                mPickpocketDetected = true;
+                return;
+            }
+            else
+                player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 1);
+        }
+
         mDragAndDrop->drop(mModel, mItemView);
     }
 
