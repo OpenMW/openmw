@@ -8,13 +8,13 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/pickpocket.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "countdialog.hpp"
 #include "inventorywindow.hpp"
@@ -159,10 +159,9 @@ namespace MWGui
         {
             if (mPtr.getClass().isNpc() && !loot)
             {
-                // we are stealing stuff
-                MWWorld::Ptr player = MWMechanics::getPlayer();
-                mModel = new PickpocketItemModel(player, new InventoryItemModel(container),
-                                                 !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown());
+            // we are stealing stuff
+            mModel = new PickpocketItemModel(mPtr, new InventoryItemModel(container),
+                                             !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown());
             }
             else
                 mModel = new InventoryItemModel(container);
@@ -289,32 +288,8 @@ namespace MWGui
 
     bool ContainerWindow::onTakeItem(const ItemStack &item, int count)
     {
-        MWWorld::Ptr player = MWMechanics::getPlayer();
-        // TODO: move to ItemModels
-        if (dynamic_cast<PickpocketItemModel*>(mModel)
-                && !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown())
-        {
-            MWMechanics::Pickpocket pickpocket(player, mPtr);
-            if (pickpocket.pick(item.mBase, count))
-            {
-                MWBase::Environment::get().getMechanicsManager()->commitCrime(
-                            player, mPtr, MWBase::MechanicsManager::OT_Pickpocket, 0, true);
-                MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
-                mPickpocketDetected = true;
-                return false;
-            }
-            else
-                player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 1);
-        }
-        else
-        {
-            // Looting a dead corpse is considered OK
-            if (mPtr.getClass().isActor() && mPtr.getClass().getCreatureStats(mPtr).isDead())
-                return true;
-            else
-                MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item.mBase, mPtr, count);
-        }
-        return true;
+        // TODO: mPickpocketDetected = true;
+        return mModel->onTakeItem(item.mBase, count);
     }
 
 }

@@ -29,6 +29,8 @@ namespace MWGui
         /// Use ItemStack::Type for sorting?
         void setSortByType(bool sort) { mSortByType = sort; }
 
+        bool onTakeItem(const MWWorld::Ptr &item, int count);
+
         static const int Category_Weapon = (1<<1);
         static const int Category_Apparel = (1<<2);
         static const int Category_Misc = (1<<3);

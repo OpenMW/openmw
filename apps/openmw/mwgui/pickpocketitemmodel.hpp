@@ -18,6 +18,10 @@ namespace MWGui
         virtual void update();
         virtual void removeItem (const ItemStack& item, size_t count);
         virtual bool allowedToInsertItems() const;
+        virtual bool onTakeItem(const MWWorld::Ptr &item, int count) const;
+
+    protected:
+        MWWorld::Ptr mActor;
 
     private:
         std::vector<ItemStack> mHiddenItems;

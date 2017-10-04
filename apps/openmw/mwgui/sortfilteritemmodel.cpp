@@ -311,4 +311,8 @@ namespace MWGui
         std::sort(mItems.begin(), mItems.end(), cmp);
     }
 
+    bool SortFilterItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
+    {
+        return mSourceModel->onTakeItem (item, count);
+    }
 }

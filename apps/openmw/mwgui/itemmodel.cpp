@@ -129,6 +129,11 @@ namespace MWGui
         return true;
     }
 
+    bool ItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
+    {
+        return true;
+    }
+
 
     ProxyItemModel::ProxyItemModel()
         : mSourceModel(NULL)
@@ -198,4 +203,8 @@ namespace MWGui
         mSourceModel = sourceModel;
     }
 
+    bool ProxyItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
+    {
+        return mSourceModel->onTakeItem (item, count);
+    }
 }
