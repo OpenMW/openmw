@@ -865,7 +865,7 @@ namespace MWGui
                 window->onFrame(frameDuration);
         }
         if (!mCurrentModals.empty())
-            mCurrentModals.top()->onFrame(frameDuration);
+            mCurrentModals.back()->onFrame(frameDuration);
 
         mKeyboardNavigation->onFrame();
 
@@ -1727,9 +1727,9 @@ namespace MWGui
     {
         if (!mCurrentModals.empty())
         {
-            if (!mCurrentModals.top()->exit())
+            if (!mCurrentModals.back()->exit())
                 return;
-            mCurrentModals.top()->setVisible(false);
+            mCurrentModals.back()->setVisible(false);
         }
     }
 
@@ -1738,7 +1738,7 @@ namespace MWGui
         if (mCurrentModals.empty())
             mKeyboardNavigation->saveFocus(getMode());
 
-        mCurrentModals.push(input);
+        mCurrentModals.push_back(input);
         mKeyboardNavigation->restoreFocus(-1);
 
         mKeyboardNavigation->setModalWindow(input->mMainWidget);
@@ -1747,17 +1747,21 @@ namespace MWGui
 
     void WindowManager::removeCurrentModal(WindowModal* input)
     {
-        // Only remove the top if it matches the current pointer. A lot of things hide their visibility before showing it,
-        //so just popping the top would cause massive issues.
         if(!mCurrentModals.empty())
         {
-            if(input == mCurrentModals.top())
+            if(input == mCurrentModals.back())
             {
-                mCurrentModals.pop();
+                mCurrentModals.pop_back();
                 mKeyboardNavigation->saveFocus(-1);
             }
             else
-                std::cout << " warning: modal widget " << input << " " << typeid(input).name() << " not found " << std::endl;
+            {
+                auto found = std::find(mCurrentModals.begin(), mCurrentModals.end(), input);
+                if (found != mCurrentModals.end())
+                    mCurrentModals.erase(found);
+                else
+                    std::cerr << " warning: can't find modal window " << input << std::endl;
+            }
         }
         if (mCurrentModals.empty())
         {
@@ -1765,7 +1769,7 @@ namespace MWGui
             mKeyboardNavigation->restoreFocus(getMode());
         }
         else
-            mKeyboardNavigation->setModalWindow(mCurrentModals.top()->mMainWidget);
+            mKeyboardNavigation->setModalWindow(mCurrentModals.back()->mMainWidget);
     }
 
     void WindowManager::onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)

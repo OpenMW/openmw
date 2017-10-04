@@ -401,7 +401,7 @@ namespace MWGui
     MWWorld::Ptr mSelectedEnchantItem;
     MWWorld::Ptr mSelectedWeapon;
 
-    std::stack<WindowModal*> mCurrentModals;
+    std::vector<WindowModal*> mCurrentModals;
 
     // Markers placed manually by the player. Must be shared between both map views (the HUD map and the map window).
     CustomMarkerCollection mCustomMarkers;
