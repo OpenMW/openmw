@@ -12,9 +12,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 
-#include "../mwmechanics/pickpocket.hpp"
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/actorutil.hpp"
 
 #include "countdialog.hpp"
 #include "inventorywindow.hpp"
@@ -33,7 +31,6 @@ namespace MWGui
     ContainerWindow::ContainerWindow(DragAndDrop* dragAndDrop)
         : WindowBase("openmw_container_window.layout")
         , mDragAndDrop(dragAndDrop)
-        , mPickpocketDetected(false)
         , mSortModel(NULL)
         , mModel(NULL)
         , mSelectedItem(-1)
@@ -114,7 +111,6 @@ namespace MWGui
 
     void ContainerWindow::setPtr(const MWWorld::Ptr& container)
     {
-        mPickpocketDetected = false;
         mPtr = container;
 
         bool loot = mPtr.getClass().isActor() && mPtr.getClass().getCreatureStats(mPtr).isDead();
@@ -159,24 +155,7 @@ namespace MWGui
     {
         WindowBase::onClose();
 
-        if (dynamic_cast<PickpocketItemModel*>(mModel)
-                // Make sure we were actually closed, rather than just temporarily hidden (e.g. console or main menu opened)
-                && !MWBase::Environment::get().getWindowManager()->containsMode(GM_Container)
-                // If it was already detected while taking an item, no need to check now
-                && !mPickpocketDetected
-                )
-        {
-            MWWorld::Ptr player = MWMechanics::getPlayer();
-            MWMechanics::Pickpocket pickpocket(player, mPtr);
-            if (pickpocket.finish())
-            {
-                MWBase::Environment::get().getMechanicsManager()->commitCrime(
-                            player, mPtr, MWBase::MechanicsManager::OT_Pickpocket, 0, true);
-                MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
-                mPickpocketDetected = true;
-                return;
-            }
-        }
+        mModel->onClose();
     }
 
     void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
@@ -252,7 +231,6 @@ namespace MWGui
 
     bool ContainerWindow::onTakeItem(const ItemStack &item, int count)
     {
-        // TODO: mPickpocketDetected = true;
         return mModel->onTakeItem(item.mBase, count);
     }
 

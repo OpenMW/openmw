@@ -119,7 +119,7 @@ void InventoryItemModel::update()
     }
 }
 
-bool InventoryItemModel::onTakeItem(const MWWorld::Ptr &item, int count) const
+bool InventoryItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
 {
     // Looting a dead corpse is considered OK
     if (mActor.getClass().isActor() && mActor.getClass().getCreatureStats(mActor).isDead())
