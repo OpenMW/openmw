@@ -26,6 +26,7 @@ namespace MWGui
         virtual void removeItem (const ItemStack& item, size_t count);
 
         virtual void update();
+        virtual bool onTakeItem(const MWWorld::Ptr &item, int count);
 
     private:
         std::vector<MWWorld::Ptr> mItemSources;

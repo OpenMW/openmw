@@ -3,15 +3,24 @@
 #include <components/misc/rng.hpp>
 #include <components/esm/loadskil.hpp>
 
+#include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/pickpocket.hpp"
+
 #include "../mwworld/class.hpp"
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 namespace MWGui
 {
 
-    PickpocketItemModel::PickpocketItemModel(const MWWorld::Ptr& thief, ItemModel *sourceModel, bool hideItems)
+    PickpocketItemModel::PickpocketItemModel(const MWWorld::Ptr& actor, ItemModel *sourceModel, bool hideItems)
+        : mActor(actor)
     {
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         mSourceModel = sourceModel;
-        int chance = thief.getClass().getSkill(thief, ESM::Skill::Sneak);
+        int chance = player.getClass().getSkill(player, ESM::Skill::Sneak);
 
         mSourceModel->update();
 
@@ -75,4 +84,20 @@ namespace MWGui
         return false;
     }
 
+    bool PickpocketItemModel::onTakeItem(const MWWorld::Ptr &item, int count) const
+    {
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        MWMechanics::Pickpocket pickpocket(player, mActor);
+        if (pickpocket.pick(item, count))
+        {
+            MWBase::Environment::get().getMechanicsManager()->commitCrime(
+                        player, mActor, MWBase::MechanicsManager::OT_Pickpocket, 0, true);
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
+            return false;
+        }
+        else
+            player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 1);
+
+        return true;
+    }
 }

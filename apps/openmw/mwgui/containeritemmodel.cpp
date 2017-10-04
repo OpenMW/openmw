@@ -2,12 +2,15 @@
 
 #include <algorithm>
 
+#include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
+
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
@@ -181,6 +184,23 @@ void ContainerItemModel::update()
             mItems.push_back(newItem);
         }
     }
+}
+
+bool ContainerItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
+{
+    if (mItemSources.empty())
+        return false;
+
+    MWWorld::Ptr target = mItemSources[0];
+
+    // Looting a dead corpse is considered OK
+    if (target.getClass().isActor() && target.getClass().getCreatureStats(target).isDead())
+        return true;
+    
+    MWWorld::Ptr player = MWMechanics::getPlayer();
+    MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item, target, count);
+
+    return true;
 }
 
 }

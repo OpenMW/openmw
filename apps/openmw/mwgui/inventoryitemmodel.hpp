@@ -22,6 +22,7 @@ namespace MWGui
         virtual MWWorld::Ptr moveItem (const ItemStack& item, size_t count, ItemModel* otherModel);
 
         virtual void update();
+        virtual bool onTakeItem(const MWWorld::Ptr &item, int count) const;
 
     protected:
         MWWorld::Ptr mActor;
