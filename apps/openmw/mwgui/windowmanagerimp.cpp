@@ -864,6 +864,14 @@ namespace MWGui
             for (WindowBase* window : state.mWindows)
                 window->onFrame(frameDuration);
         }
+        else
+        {
+            // update pinned windows if visible
+            for (WindowBase* window : mGuiModeStates[GM_Inventory].mWindows)
+                if (window->isVisible())
+                    window->onFrame(frameDuration);
+        }
+
         if (!mCurrentModals.empty())
             mCurrentModals.back()->onFrame(frameDuration);
 
