@@ -9,6 +9,8 @@
 #include <osg/ref_ptr>
 #include <osg/Vec4f>
 
+#include <apps/openmw/mwrender/renderingmanager.hpp>
+
 namespace osg
 {
     class Group;
@@ -108,7 +110,7 @@ namespace MWRender
     class SkyManager
     {
     public:
-        SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager);
+        SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager, MWRender::RenderingManager *renderingManager);
         ~SkyManager();
 
         void update(float duration);
@@ -170,6 +172,7 @@ namespace MWRender
         void updateRainParameters();
 
         Resource::SceneManager* mSceneManager;
+        MWRender::RenderingManager *mRendering;
 
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;
