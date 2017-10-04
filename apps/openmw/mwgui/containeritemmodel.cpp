@@ -186,7 +186,7 @@ void ContainerItemModel::update()
         }
     }
 }
-bool ContainerItemModel::onDropItem(const MWWorld::Ptr &item, int count) const
+bool ContainerItemModel::onDropItem(const MWWorld::Ptr &item, int count)
 {
     if (mItemSources.empty())
         return false;
@@ -216,7 +216,7 @@ bool ContainerItemModel::onDropItem(const MWWorld::Ptr &item, int count) const
     return true;
 }
 
-bool ContainerItemModel::onTakeItem(const MWWorld::Ptr &item, int count) const
+bool ContainerItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
 {
     if (mItemSources.empty())
         return false;

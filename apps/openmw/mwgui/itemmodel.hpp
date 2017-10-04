@@ -75,8 +75,11 @@ namespace MWGui
 
         /// Is the player allowed to insert items into this model? (default true)
         virtual bool allowedToInsertItems() const;
-        virtual bool onDropItem(const MWWorld::Ptr &item, int count) const;
-        virtual bool onTakeItem(const MWWorld::Ptr &item, int count) const;
+        virtual void onClose()
+        {
+        }
+        virtual bool onDropItem(const MWWorld::Ptr &item, int count);
+        virtual bool onTakeItem(const MWWorld::Ptr &item, int count);
 
     private:
         ItemModel(const ItemModel&);
@@ -93,8 +96,9 @@ namespace MWGui
 
         bool allowedToUseItems() const;
 
-        virtual bool onDropItem(const MWWorld::Ptr &item, int count) const;
-        virtual bool onTakeItem(const MWWorld::Ptr &item, int count) const;
+        virtual void onClose();
+        virtual bool onDropItem(const MWWorld::Ptr &item, int count);
+        virtual bool onTakeItem(const MWWorld::Ptr &item, int count);
 
         virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false);
         virtual void removeItem (const ItemStack& item, size_t count);

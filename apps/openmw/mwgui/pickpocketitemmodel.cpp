@@ -17,7 +17,7 @@ namespace MWGui
 {
 
     PickpocketItemModel::PickpocketItemModel(const MWWorld::Ptr& actor, ItemModel *sourceModel, bool hideItems)
-        : mActor(actor)
+        : mActor(actor), mPickpocketDetected(false)
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         mSourceModel = sourceModel;
@@ -91,11 +91,35 @@ namespace MWGui
         return false;
     }
 
-    bool PickpocketItemModel::onTakeItem(const MWWorld::Ptr &item, int count) const
+    void PickpocketItemModel::onClose()
+    {
+        // Make sure we were actually closed, rather than just temporarily hidden (e.g. console or main menu opened)
+        if (MWBase::Environment::get().getWindowManager()->containsMode(GM_Container)
+        // If it was already detected while taking an item, no need to check now
+                || mPickpocketDetected)
+            return;
+
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        MWMechanics::Pickpocket pickpocket(player, mActor);
+        if (pickpocket.finish())
+        {
+            MWBase::Environment::get().getMechanicsManager()->commitCrime(
+                        player, mActor, MWBase::MechanicsManager::OT_Pickpocket, 0, true);
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
+            mPickpocketDetected = true;
+        }
+    }
+
+    bool PickpocketItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
     {
         if (mActor.getClass().getCreatureStats(mActor).getKnockedDown())
             return mSourceModel->onTakeItem(item, count);
 
+        return stealItem(item, count);
+    }
+
+    bool PickpocketItemModel::stealItem(const MWWorld::Ptr &item, int count)
+    {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::Pickpocket pickpocket(player, mActor);
         if (pickpocket.pick(item, count))
@@ -103,6 +127,7 @@ namespace MWGui
             MWBase::Environment::get().getMechanicsManager()->commitCrime(
                         player, mActor, MWBase::MechanicsManager::OT_Pickpocket, 0, true);
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
+            mPickpocketDetected = true;
             return false;
         }
         else
