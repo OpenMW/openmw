@@ -894,12 +894,6 @@ namespace MWGui
 
         mHud->onFrame(frameDuration);
 
-        if (mWerewolfFader)
-            mWerewolfFader->update(frameDuration);
-        mBlindnessFader->update(frameDuration);
-        mHitFader->update(frameDuration);
-        mScreenFader->update(frameDuration);
-
         mDebugWindow->onFrame(frameDuration);
 
         if (mCharGen)
