@@ -1094,9 +1094,8 @@ private:
     }
 };
 
-SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager, MWRender::RenderingManager *renderingManager)
+SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager)
     : mSceneManager(sceneManager)
-    , mRendering(renderingManager)
     , mAtmosphereNightRoll(0.f)
     , mCreated(false)
     , mIsStorm(false)
@@ -1344,40 +1343,50 @@ protected:
 class WeatherParticleDrawCallback : public osg::Drawable::DrawCallback
 {
 public:
-    WeatherParticleDrawCallback(MWRender::RenderingManager *renderingManager, float rangeX, float rangeY) : osg::Drawable::DrawCallback()
+    WeatherParticleDrawCallback(float rangeX, float rangeY) : osg::Drawable::DrawCallback()
     {
-      mRendering = renderingManager;
       mRangeX = rangeX;
       mRangeY = rangeY;
     }
 
     virtual void drawImplementation(osg::RenderInfo& renderInfo, const osg::Drawable *drawable) const
     {
-        osg::Vec3 cameraPos = mRendering->getCameraPosition();
-        osg::Vec3 cameraOffset = osg::Vec3(
-          mRangeX - fmod(cameraPos.x(), mRangeX / 2),
-          mRangeY - fmod(cameraPos.y(), mRangeY / 2),
-          0);
-
         osgParticle::ParticleSystem *ps = (osgParticle::ParticleSystem *) drawable;
+        osg::Vec3 cameraPos = renderInfo.getCurrentCamera()->getInverseViewMatrix().getTrans();
 
-        for (int xOff = 0; xOff < 3; xOff++)
-            for (int yOff = 0; yOff < 3; yOff++)
-                {  
-                    osg::Vec3 offset = cameraOffset + osg::Vec3(-1 * xOff * mRangeX, -1 * yOff * mRangeY,0);
+        osg::Vec3 cameraOffset = osg::Vec3(
+          fmod(cameraPos.x(), mRangeX),
+          fmod(cameraPos.y(), mRangeY),
+          0.0);
 
-                    for(int i = 0; i < ps->numParticles(); i++)
-                        ps->getParticle(i)->setPosition(ps->getParticle(i)->getPosition() + offset);
+        std::vector<osg::Vec3> positionBackups;
 
-                    ps->drawImplementation(renderInfo);
+        for (int i = 0; i < ps->numParticles(); i++)
+          {
+             osgParticle::Particle *particle = ps->getParticle(i);
 
-                    for(int i = 0; i < ps->numParticles(); i++)
-                        ps->getParticle(i)->setPosition(ps->getParticle(i)->getPosition() - offset);
-                }
+             positionBackups.push_back(particle->getPosition());
+
+             particle->setPosition(particle->getPosition() - cameraOffset);
+
+             if (particle->getPosition().x() > mRangeX / 2.0)        // wrap-around effect
+                 particle->setPosition(particle->getPosition() - osg::Vec3(mRangeX,0,0)); 
+             else if (particle->getPosition().x() < -mRangeX / 2.0)
+                 particle->setPosition(particle->getPosition() + osg::Vec3(mRangeX,0,0)); 
+
+             if (particle->getPosition().y() > mRangeY / 2.0)  
+                 particle->setPosition(particle->getPosition() - osg::Vec3(0,mRangeY,0)); 
+             else if (particle->getPosition().y() < -mRangeY / 2.0)
+                 particle->setPosition(particle->getPosition() + osg::Vec3(0,mRangeY,0)); 
+          }
+
+        ps->drawImplementation(renderInfo);
+
+        for (int i = 0; i < ps->numParticles(); i++)                // restore positions
+            ps->getParticle(i)->setPosition(positionBackups[i]);
     }
 
 protected:
-    MWRender::RenderingManager *mRendering;
     float mRangeX, mRangeY;
 };
 
@@ -1389,11 +1398,12 @@ void SkyManager::createRain()
     mRainNode = new osg::Group;
 
     mRainParticleSystem = new osgParticle::ParticleSystem;
-    mRainParticleSystem->setDrawCallback(new WeatherParticleDrawCallback(mRendering,RAIN_WIDTH,RAIN_WIDTH));
+    mRainParticleSystem->setDrawCallback(new WeatherParticleDrawCallback(RAIN_WIDTH,RAIN_WIDTH));
 
     mRainParticleSystem->setParticleAlignment(osgParticle::ParticleSystem::FIXED);
     mRainParticleSystem->setAlignVectorX(osg::Vec3f(0.1,0,0));
     mRainParticleSystem->setAlignVectorY(osg::Vec3f(0,0,1));
+    mRainParticleSystem->setCullingActive(false);
 
     osg::ref_ptr<osg::StateSet> stateset (mRainParticleSystem->getOrCreateStateSet());
 
@@ -1422,7 +1432,8 @@ void SkyManager::createRain()
     emitter->setPlacer(placer);
 
     osg::ref_ptr<osgParticle::ConstantRateCounter> counter (new osgParticle::ConstantRateCounter);
-    counter->setNumberOfParticlesPerSecondToCreate(600.0);
+//    counter->setNumberOfParticlesPerSecondToCreate(600.0);
+    counter->setNumberOfParticlesPerSecondToCreate(2000);
     emitter->setCounter(counter);
 
     osg::ref_ptr<RainShooter> shooter (new RainShooter);
@@ -1495,6 +1506,9 @@ void SkyManager::update(float duration)
     {
         osg::Quat quat;
         quat.makeRotate(osg::Vec3f(0,1,0), mStormDirection);
+
+    if (mParticleNode)
+      mParticleNode->setAttitude(quat);
 
         mCloudNode->setAttitude(quat);
     }
@@ -1587,7 +1601,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
         {
             if (!mParticleNode)
             {
-                mParticleNode = new osg::Group;
+                mParticleNode = new osg::PositionAttitudeTransform;
                 mParticleNode->addCullCallback(mUnderwaterSwitch);
                 mParticleNode->setNodeMask(Mask_WeatherParticles);
                 mRootNode->addChild(mParticleNode);
@@ -1621,12 +1635,11 @@ void SkyManager::setWeather(const WeatherResult& weather)
                     } 
               }
 
-
             SceneUtil::FindByClassVisitor findPSVisitor(std::string("ParticleSystem"));
             mParticleEffect->accept(findPSVisitor);
 
             if (findPSVisitor.mFoundNode)
-                ((osgParticle::ParticleSystem *) findPSVisitor.mFoundNode)->setDrawCallback(new WeatherParticleDrawCallback(mRendering,rangeX,rangeY));
+                ((osgParticle::ParticleSystem *) findPSVisitor.mFoundNode)->setDrawCallback(new WeatherParticleDrawCallback(rangeX,rangeY));
         }
     }
 
