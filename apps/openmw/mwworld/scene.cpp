@@ -580,10 +580,16 @@ namespace MWWorld
 
         MWBase::Environment::get().getWorld()->positionToIndex (position.pos[0], position.pos[1], x, y);
 
+        if (changeEvent)
+            MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
+
         changeCellGrid(x, y, changeEvent);
 
         CellStore* current = MWBase::Environment::get().getWorld()->getExterior(x, y);
         changePlayerCell(current, position, adjustPlayerPos);
+
+        if (changeEvent)
+            MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
     }
 
     CellStore* Scene::getCurrentCell ()
