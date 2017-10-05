@@ -24,6 +24,7 @@ namespace MWGui
 
     protected:
         MWWorld::Ptr mActor;
+        bool mAdvanced;
         bool mPickpocketDetected;
         bool stealItem(const MWWorld::Ptr &item, int count);
 

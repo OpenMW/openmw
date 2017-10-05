@@ -9,7 +9,7 @@ namespace MWMechanics
     class Pickpocket
     {
     public:
-        Pickpocket (const MWWorld::Ptr& thief, const MWWorld::Ptr& victim);
+        Pickpocket (const MWWorld::Ptr& thief, const MWWorld::Ptr& victim, bool isAdvanced = false);
 
         /// Steal some items
         /// @return Was the thief detected?
@@ -23,6 +23,7 @@ namespace MWMechanics
         float getChanceModifier(const MWWorld::Ptr& ptr, float add=0);
         MWWorld::Ptr mThief;
         MWWorld::Ptr mVictim;
+        bool mAdvanced;
     };
 
 }

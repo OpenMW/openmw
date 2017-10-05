@@ -2,6 +2,7 @@
 
 #include <components/misc/rng.hpp>
 #include <components/esm/loadskil.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -34,6 +35,8 @@ namespace MWGui
                     mHiddenItems.push_back(mSourceModel->getItem(i));
             }
         }
+
+        mAdvanced = Settings::Manager::getBool("advanced pickpocketing", "Game");
     }
 
     bool PickpocketItemModel::allowedToUseItems() const
@@ -93,7 +96,7 @@ namespace MWGui
             return;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        MWMechanics::Pickpocket pickpocket(player, mActor);
+        MWMechanics::Pickpocket pickpocket(player, mActor, mAdvanced);
         if (pickpocket.finish())
         {
             MWBase::Environment::get().getMechanicsManager()->commitCrime(
@@ -105,6 +108,9 @@ namespace MWGui
 
     bool PickpocketItemModel::onDropItem(const MWWorld::Ptr &item, int count)
     {
+        if (!mAdvanced)
+            return false;
+
         // check that we don't exceed inventory encumberance
         float weight = item.getClass().getWeight(item) * count;
         if (mActor.getClass().getCapacity(mActor) < mActor.getClass().getEncumbrance(mActor) + weight)
@@ -131,7 +137,7 @@ namespace MWGui
     bool PickpocketItemModel::stealItem(const MWWorld::Ptr &item, int count)
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        MWMechanics::Pickpocket pickpocket(player, mActor);
+        MWMechanics::Pickpocket pickpocket(player, mActor, mAdvanced);
         if (pickpocket.pick(item, count))
         {
             MWBase::Environment::get().getMechanicsManager()->commitCrime(

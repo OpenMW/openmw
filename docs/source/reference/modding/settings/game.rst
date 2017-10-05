@@ -51,6 +51,18 @@ Whether or not the chance of success will be displayed in the enchanting menu.
 
 The default value is false. This setting can only be configured by editing the settings configuration file.
 
+advanced pickpocketing
+----------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true, the engine will use the the weight of an item instead of the value to calculate the chance of successful pickpocketing.
+Also the "reverse pickpocketing" will be allowed in this case.
+
+The default value is false. This setting can only be configured by editing the settings configuration file.
+
 best attack
 -----------
 
