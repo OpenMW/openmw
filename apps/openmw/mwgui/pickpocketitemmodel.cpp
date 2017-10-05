@@ -7,6 +7,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/pickpocket.hpp"
 
+#include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -76,7 +77,6 @@ namespace MWGui
     void PickpocketItemModel::removeItem (const ItemStack &item, size_t count)
     {
         ProxyItemModel::removeItem(item, count);
-        /// \todo check if player is detected
     }
 
     bool PickpocketItemModel::allowedToInsertItems() const
@@ -115,7 +115,14 @@ namespace MWGui
         if (mActor.getClass().getCreatureStats(mActor).getKnockedDown())
             return mSourceModel->onTakeItem(item, count);
 
-        return stealItem(item, count);
+        bool success = stealItem(item, count);
+        if (success)
+        {
+            MWWorld::Ptr player = MWMechanics::getPlayer();
+            MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item, mActor, count, false);
+        }
+
+        return success;
     }
 
     bool PickpocketItemModel::stealItem(const MWWorld::Ptr &item, int count)

@@ -135,7 +135,7 @@ namespace MWMechanics
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             /// @param container The container the item is in; may be empty for an item in the world
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, const MWWorld::Ptr& container,
-                                    int count);
+                                    int count, bool alarm = true);
             /// Utility to check if opening (i.e. unlocking) this object is illegal and calling commitCrime if so
             virtual void objectOpened (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item);
             /// Attempt sleeping in a bed. If this is illegal, call commitCrime.

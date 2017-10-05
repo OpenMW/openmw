@@ -1024,7 +1024,7 @@ namespace MWMechanics
     }
 
     void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, const MWWorld::Ptr& container,
-                                     int count)
+                                     int count, bool alarm)
     {
         if (ptr != getPlayer())
             return;
@@ -1053,19 +1053,29 @@ namespace MWMechanics
             return;
 
         Owner owner;
-        owner.first = ownerCellRef->getOwner();
         owner.second = false;
-        if (owner.first.empty())
+        if (!container.isEmpty() && container.getClass().isActor())
         {
-            owner.first = ownerCellRef->getFaction();
-            owner.second = true;
+            // "container" is an actor inventory, so just take actor's ID
+            owner.first = ownerCellRef->getRefId();
         }
+        else
+        {
+            owner.first = ownerCellRef->getOwner();
+            if (owner.first.empty())
+            {
+                owner.first = ownerCellRef->getFaction();
+                owner.second = true;
+            }
+        }
+
         Misc::StringUtils::lowerCaseInPlace(owner.first);
 
         if (!Misc::StringUtils::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
             mStolenItems[Misc::StringUtils::lowerCase(item.getCellRef().getRefId())][owner] += count;
 
-        commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
+        if (alarm)
+            commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
 
 
