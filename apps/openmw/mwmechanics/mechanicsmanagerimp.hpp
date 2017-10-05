@@ -213,6 +213,7 @@ namespace MWMechanics
             virtual void cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId);
 
             virtual void confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count);
+            virtual void modifyStolenItemsCount(const MWWorld::Ptr &item, int count, const MWWorld::Ptr& victim);
 
             virtual bool isAttackPrepairing(const MWWorld::Ptr& ptr);
             virtual bool isRunning(const MWWorld::Ptr& ptr);

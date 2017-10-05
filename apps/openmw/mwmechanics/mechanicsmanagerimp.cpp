@@ -993,6 +993,33 @@ namespace MWMechanics
         commitCrime(player, victim, OT_Theft, item.getClass().getValue(item) * toRemove);
     }
 
+    void MechanicsManager::modifyStolenItemsCount(const MWWorld::Ptr &item, int count, const MWWorld::Ptr& victim)
+    {
+        const std::string itemId = Misc::StringUtils::lowerCase(item.getCellRef().getRefId());
+
+        if (Misc::StringUtils::ciEqual(itemId, MWWorld::ContainerStore::sGoldId))
+            return;
+
+        Owner owner;
+        owner.first = victim.getCellRef().getRefId();
+        owner.second = false;
+
+        Misc::StringUtils::lowerCaseInPlace(owner.first);
+
+        mStolenItems[itemId][owner] += count;
+        if (mStolenItems[itemId][owner] <= 0)
+        {
+            // erase owner from stolen items owners
+            StolenItemsMap::iterator it = mStolenItems.find(itemId);
+            if (it == mStolenItems.end())
+                return;
+            OwnerMap& owners = it->second;
+            OwnerMap::iterator ownersIt = owners.find(owner);
+            if (ownersIt != owners.end())
+                owners.erase(ownersIt);
+        }
+    }
+
     void MechanicsManager::confiscateStolenItems(const MWWorld::Ptr &player, const MWWorld::Ptr &targetContainer)
     {
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);

@@ -15,6 +15,7 @@ namespace MWGui
         virtual bool allowedToUseItems() const;
         virtual ItemStack getItem (ModelIndex index);
         virtual size_t getItemCount();
+        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=true);
         virtual void update();
         virtual void removeItem (const ItemStack& item, size_t count);
         virtual bool allowedToInsertItems() const;

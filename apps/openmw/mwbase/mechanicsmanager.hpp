@@ -250,6 +250,7 @@ namespace MWBase
             virtual void cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId) = 0;
 
             virtual void confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count) = 0;
+            virtual void modifyStolenItemsCount(const MWWorld::Ptr &item, int count, const MWWorld::Ptr& victim) = 0;
 
             virtual bool isAttackPrepairing(const MWWorld::Ptr& ptr) = 0;
             virtual bool isRunning(const MWWorld::Ptr& ptr) = 0;
