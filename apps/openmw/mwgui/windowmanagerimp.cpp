@@ -750,8 +750,8 @@ namespace MWGui
             if (!window->exit())
             {
                 // unable to exit window, but give access to main menu
-                if (!MyGUI::InputManager::getInstance().isModalAny())
-                    pushGuiMode (MWGui::GM_MainMenu);
+                if (!MyGUI::InputManager::getInstance().isModalAny() && getMode() != GM_MainMenu)
+                    pushGuiMode (GM_MainMenu);
                 return;
             }
         }

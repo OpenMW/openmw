@@ -38,6 +38,8 @@ namespace MWGui
 
             void onFrame(float dt);
 
+            bool exit();
+
         private:
             const VFS::Manager* mVFS;
 
