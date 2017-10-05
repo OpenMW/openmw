@@ -105,6 +105,14 @@ namespace MWGui
 
     bool PickpocketItemModel::onDropItem(const MWWorld::Ptr &item, int count)
     {
+        // check that we don't exceed inventory encumberance
+        float weight = item.getClass().getWeight(item) * count;
+        if (mActor.getClass().getCapacity(mActor) < mActor.getClass().getEncumbrance(mActor) + weight)
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage3}");
+            return false;
+        }
+
         if (mActor.getClass().getCreatureStats(mActor).getKnockedDown())
             return true;
 
