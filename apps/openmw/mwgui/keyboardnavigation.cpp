@@ -12,6 +12,11 @@
 namespace MWGui
 {
 
+bool shouldAcceptKeyFocus(MyGUI::Widget* w)
+{
+    return w && !w->castType<MyGUI::Window>(false) && w->getInheritedEnabled() && w->getInheritedVisible() && w->getVisible() && w->getEnabled();
+}
+
 /// Recursively get all child widgets that accept keyboard input
 void getKeyFocusWidgets(MyGUI::Widget* parent, std::vector<MyGUI::Widget*>& results)
 {
@@ -24,16 +29,11 @@ void getKeyFocusWidgets(MyGUI::Widget* parent, std::vector<MyGUI::Widget*>& resu
         MyGUI::Widget* w = enumerator.current();
         if (!w->getVisible() || !w->getEnabled())
             continue;
-        if (w->getNeedKeyFocus())
+        if (w->getNeedKeyFocus() && shouldAcceptKeyFocus(w))
             results.push_back(w);
         else
             getKeyFocusWidgets(w, results);
     }
-}
-
-bool shouldAcceptKeyFocus(MyGUI::Widget* w)
-{
-    return w && !w->castType<MyGUI::Window>(false) && w->getInheritedEnabled() && w->getInheritedVisible() && w->getVisible() && w->getEnabled();
 }
 
 KeyboardNavigation::KeyboardNavigation()
