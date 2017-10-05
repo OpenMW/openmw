@@ -126,6 +126,13 @@ namespace MWGui
             return false;
         }
 
+        // a player can not get rid of bound item
+        if (MWBase::Environment::get().getMechanicsManager()->isBoundItem(item))
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
+            return false;
+        }
+
         if (mActor.getClass().getCreatureStats(mActor).getKnockedDown())
             return true;
 
