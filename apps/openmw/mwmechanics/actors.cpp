@@ -70,11 +70,7 @@ void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& a
         }
     }
     else
-    {
-        MWWorld::Ptr itemPtr = actor.getClass().getInventoryStore(actor).search(item);
-        if (!itemPtr.isEmpty())
-            actor.getClass().getInventoryStore(actor).remove(itemPtr, 1, actor, true);
-    }
+        actor.getClass().getInventoryStore(actor).remove(item, 1, actor, true);
 }
 
 class CheckActorCommanded : public MWMechanics::EffectSourceVisitor

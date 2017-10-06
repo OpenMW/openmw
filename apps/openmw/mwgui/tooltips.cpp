@@ -191,8 +191,7 @@ namespace MWGui
                 else if (type == "ItemPtr")
                 {
                     mFocusObject = *focus->getUserData<MWWorld::Ptr>();
-                    bool isAllowedToUse = checkOwned();
-                    tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), false, !isAllowedToUse);
+                    tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), false, checkOwned());
                 }
                 else if (type == "ItemModelIndex")
                 {
