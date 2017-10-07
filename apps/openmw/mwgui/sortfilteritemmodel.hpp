@@ -15,6 +15,7 @@ namespace MWGui
 
         bool filterAccepts (const ItemStack& item);
 
+        bool allowedToUseItems() const;
         virtual ItemStack getItem (ModelIndex index);
         virtual size_t getItemCount();
 

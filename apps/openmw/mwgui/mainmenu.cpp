@@ -210,6 +210,11 @@ namespace MWGui
         }
     }
 
+    bool MainMenu::exit()
+    {
+        return MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_Running;
+    }
+
     void MainMenu::updateMenu()
     {
         setCoord(0,0, mWidth, mHeight);

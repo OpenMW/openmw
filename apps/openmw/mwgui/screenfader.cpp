@@ -2,6 +2,7 @@
 
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_Gui.h>
 
 namespace MWGui
 {
@@ -80,6 +81,8 @@ namespace MWGui
         , mFactor(1.f)
         , mRepeat(false)
     {
+        MyGUI::Gui::getInstance().eventFrameStart += MyGUI::newDelegate(this, &ScreenFader::onFrameStart);
+
         mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
 
         MyGUI::ImageBox* imageBox = mMainWidget->castType<MyGUI::ImageBox>(false);
@@ -94,7 +97,12 @@ namespace MWGui
         }
     }
 
-    void ScreenFader::update(float dt)
+    ScreenFader::~ScreenFader()
+    {
+        MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate(this, &ScreenFader::onFrameStart);
+    }
+
+    void ScreenFader::onFrameStart(float dt)
     {
         if (!mQueue.empty())
         {

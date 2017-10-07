@@ -75,4 +75,9 @@ void World::updateTextureFiltering()
     mTextureManager->updateTextureFiltering();
 }
 
+void World::clearAssociatedCaches()
+{
+    mChunkManager->clearCache();
+}
+
 }

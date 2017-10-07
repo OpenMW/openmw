@@ -32,7 +32,9 @@ namespace CSMWorld
                 Feature_Preview = 8,
 
                 /// Table can not be modified through ordinary means.
-                Feature_Constant = 16
+                Feature_Constant = 16,
+
+                Feature_AllowTouch = 32
             };
 
         private:
@@ -61,7 +63,7 @@ namespace CSMWorld
             virtual bool isDeleted (const std::string& id) const = 0;
 
             virtual int getColumnId (int column) const = 0;
-            
+
             unsigned int getFeatures() const;
     };
 }

@@ -31,6 +31,8 @@ struct Land
 
     // File context. This allows the ESM reader to be 'reset' to this
     // location later when we are ready to load the full data set.
+    // In the editor, there may not be a file associated with the Land,
+    // in which case the filename will be empty.
     ESM_Context mContext;
 
     int mDataTypes;
@@ -63,6 +65,8 @@ struct Land
 
     //total number of textures per land
     static const int LAND_NUM_TEXTURES = LAND_TEXTURE_SIZE * LAND_TEXTURE_SIZE;
+
+    static const int LAND_GLOBAL_MAP_LOD_SIZE = 81;
 
 #pragma pack(push,1)
     struct VHGT
@@ -109,12 +113,12 @@ struct Land
     };
 
     // low-LOD heightmap (used for rendering the global map)
-    signed char mWnam[81];
+    signed char mWnam[LAND_GLOBAL_MAP_LOD_SIZE];
 
     void load(ESMReader &esm, bool &isDeleted);
     void save(ESMWriter &esm, bool isDeleted = false) const;
 
-    void blank() {}
+    void blank();
 
     /**
      * Actually loads data into target
@@ -130,6 +134,9 @@ struct Land
     /// Check if given data type is loaded
     /// @note We only check data types that *can* be loaded (present in mDataTypes)
     bool isDataLoaded(int flags) const;
+
+    /// Sets the flags and creates a LandData if needed
+    void setDataLoaded(int flags);
 
         Land (const Land& land);
 

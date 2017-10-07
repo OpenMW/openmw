@@ -56,6 +56,7 @@ namespace CSVWorld
             QAction *mEditAction;
             QAction *mCreateAction;
             QAction *mCloneAction;
+            QAction *mTouchAction;
             QAction *mRevertAction;
             QAction *mDeleteAction;
             QAction *mMoveUpAction;
@@ -115,6 +116,8 @@ namespace CSVWorld
 
             void cloneRequest(const CSMWorld::UniversalId&);
 
+            void touchRequest(const std::vector<CSMWorld::UniversalId>& ids);
+
             void closeRequest();
 
             void extendedDeleteConfigRequest(const std::vector<std::string> &selectedIds);
@@ -128,6 +131,8 @@ namespace CSVWorld
             void editRecord();
 
             void cloneRecord();
+
+            void touchRecord();
 
             void moveUpRecord();
 

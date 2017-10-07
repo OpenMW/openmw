@@ -390,6 +390,7 @@ namespace MWGui
         {
             // No greetings found. The dialogue window should not be shown.
             // If this is a companion, we must show the companion window directly (used by BM_bear_be_unique).
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
             if (isCompanion())
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Companion, mPtr);
             return;

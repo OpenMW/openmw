@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cctype>
 #include <stdexcept>
+#include <string>
 #include <functional>
 
 #include <QVariant>
@@ -13,8 +14,9 @@
 #include <components/misc/stringops.hpp>
 
 #include "columnbase.hpp"
-
 #include "collectionbase.hpp"
+#include "land.hpp"
+#include "landtexture.hpp"
 
 namespace CSMWorld
 {
@@ -22,21 +24,53 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct IdAccessor
     {
-        std::string& getId (ESXRecordT& record);
-
+        void setId(ESXRecordT& record, const std::string& id) const;
         const std::string getId (const ESXRecordT& record) const;
     };
 
     template<typename ESXRecordT>
-    std::string& IdAccessor<ESXRecordT>::getId (ESXRecordT& record)
+    void IdAccessor<ESXRecordT>::setId(ESXRecordT& record, const std::string& id) const
     {
-        return record.mId;
+        record.mId = id;
     }
 
     template<typename ESXRecordT>
     const std::string IdAccessor<ESXRecordT>::getId (const ESXRecordT& record) const
     {
         return record.mId;
+    }
+
+    template<>
+    inline void IdAccessor<Land>::setId (Land& record, const std::string& id) const
+    {
+        int x=0, y=0;
+
+        Land::parseUniqueRecordId(id, x, y);
+        record.mX = x;
+        record.mY = y;
+    }
+
+    template<>
+    inline void IdAccessor<LandTexture>::setId (LandTexture& record, const std::string& id) const
+    {
+        int plugin = 0;
+        int index = 0;
+
+        LandTexture::parseUniqueRecordId(id, plugin, index);
+        record.mPluginIndex = plugin;
+        record.mIndex = index;
+    }
+
+    template<>
+    inline const std::string IdAccessor<Land>::getId (const Land& record) const
+    {
+        return Land::createUniqueRecordId(record.mX, record.mY);
+    }
+
+    template<>
+    inline const std::string IdAccessor<LandTexture>::getId (const LandTexture& record) const
+    {
+        return LandTexture::createUniqueRecordId(record.mPluginIndex, record.mIndex);
     }
 
     /// \brief Single-type record collection
@@ -68,6 +102,13 @@ namespace CSMWorld
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
             ///
             /// \return Success?
+
+            int cloneRecordImp (const std::string& origin, const std::string& dest,
+                UniversalId::Type type);
+            ///< Returns the index of the clone.
+
+            int touchRecordImp (const std::string& id);
+            ///< Returns the index of the record on success, -1 on failure.
 
         public:
 
@@ -107,6 +148,10 @@ namespace CSMWorld
             virtual void cloneRecord(const std::string& origin,
                                      const std::string& destination,
                                      const UniversalId::Type type);
+
+            virtual bool touchRecord(const std::string& id);
+            ///< Change the state of a record from base to modified, if it is not already.
+            ///  \return True if the record was changed.
 
             virtual int searchId (const std::string& id) const;
             ////< Search record with \a id.
@@ -206,16 +251,71 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void Collection<ESXRecordT, IdAccessorT>::cloneRecord(const std::string& origin,
-                                                          const std::string& destination,
-                                                          const UniversalId::Type type)
+    int Collection<ESXRecordT, IdAccessorT>::cloneRecordImp(const std::string& origin,
+        const std::string& destination, UniversalId::Type type)
     {
-       Record<ESXRecordT> copy;
-       copy.mModified = getRecord(origin).get();
-       copy.mState = RecordBase::State_ModifiedOnly;
-       copy.get().mId = destination;
+        Record<ESXRecordT> copy;
+        copy.mModified = getRecord(origin).get();
+        copy.mState = RecordBase::State_ModifiedOnly;
+        IdAccessorT().setId(copy.get(), destination);
 
-       insertRecord(copy, getAppendIndex(destination, type));
+        int index = getAppendIndex(destination, type);
+        insertRecord(copy, getAppendIndex(destination, type));
+
+        return index;
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    int Collection<ESXRecordT, IdAccessorT>::touchRecordImp(const std::string& id)
+    {
+        int index = getIndex(id);
+        Record<ESXRecordT>& record = mRecords.at(index);
+        if (record.isDeleted())
+        {
+            throw std::runtime_error("attempt to touch deleted record");
+        }
+
+        if (!record.isModified())
+        {
+            record.setModified(record.get());
+            return index;
+        }
+
+        return -1;
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    void Collection<ESXRecordT, IdAccessorT>::cloneRecord(const std::string& origin,
+        const std::string& destination, const UniversalId::Type type)
+    {
+        cloneRecordImp(origin, destination, type);
+    }
+
+    template<>
+    inline void Collection<Land, IdAccessor<Land> >::cloneRecord(const std::string& origin,
+        const std::string& destination, const UniversalId::Type type)
+    {
+        int index = cloneRecordImp(origin, destination, type);
+        mRecords.at(index).get().mPlugin = 0;
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    bool Collection<ESXRecordT, IdAccessorT>::touchRecord(const std::string& id)
+    {
+        return touchRecordImp(id) != -1;
+    }
+
+    template<>
+    inline bool Collection<Land, IdAccessor<Land> >::touchRecord(const std::string& id)
+    {
+        int index = touchRecordImp(id);
+        if (index >= 0)
+        {
+            mRecords.at(index).get().mPlugin = 0;
+            return true;
+        }
+
+        return false;
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -366,7 +466,7 @@ namespace CSMWorld
         UniversalId::Type type)
     {
         ESXRecordT record;
-        IdAccessorT().getId (record) = id;
+        IdAccessorT().setId(record, id);
         record.blank();
 
         Record<ESXRecordT> record2;

@@ -178,6 +178,8 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
         MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
 
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
+
         // Teleports any followers, too.
         MWWorld::ActionTeleport action(interior ? cellname : "", pos, true);
         action.execute(player);

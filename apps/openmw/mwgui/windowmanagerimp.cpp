@@ -606,25 +606,25 @@ namespace MWGui
             mMap->setVisible(false);
             mStatsWindow->setVisible(false);
             mSpellWindow->setVisible(false);
-            mInventoryWindow->setVisible(getMode() == GM_Container || getMode() == GM_Barter);
+            mInventoryWindow->setVisible(getMode() == GM_Container || getMode() == GM_Barter || getMode() == GM_Companion);
         }
 
         GuiMode mode = mGuiModes.back();
 
         mInventoryWindow->setTrading(mode == GM_Barter);
 
-        // For the inventory mode, compute the effective set of windows to show.
-        // This is controlled both by what windows the
-        // user has opened/closed (the 'shown' variable) and by what
-        // windows we are allowed to show (the 'allowed' var.)
-        int eff = mShown & mAllowed & ~mForceHidden;
-        mGuiModeStates[GM_Inventory].mVisibilityMask.resize(4);
-        mGuiModeStates[GM_Inventory].mVisibilityMask[0] = eff & GW_Map;
-        mGuiModeStates[GM_Inventory].mVisibilityMask[1] = eff & GW_Inventory;
-        mGuiModeStates[GM_Inventory].mVisibilityMask[2] = eff & GW_Magic;
-        mGuiModeStates[GM_Inventory].mVisibilityMask[3] = eff & GW_Stats;
         if (getMode() == GM_Inventory)
-            mGuiModeStates[GM_Inventory].update(true);
+        {
+            // For the inventory mode, compute the effective set of windows to show.
+            // This is controlled both by what windows the
+            // user has opened/closed (the 'shown' variable) and by what
+            // windows we are allowed to show (the 'allowed' var.)
+            int eff = mShown & mAllowed & ~mForceHidden;
+            mMap->setVisible(eff & GW_Map);
+            mInventoryWindow->setVisible(eff & GW_Inventory);
+            mSpellWindow->setVisible(eff & GW_Magic);
+            mStatsWindow->setVisible(eff & GW_Stats);
+        }
 
         switch (mode)
         {
@@ -750,8 +750,8 @@ namespace MWGui
             if (!window->exit())
             {
                 // unable to exit window, but give access to main menu
-                if (!MyGUI::InputManager::getInstance().isModalAny())
-                    pushGuiMode (MWGui::GM_MainMenu);
+                if (!MyGUI::InputManager::getInstance().isModalAny() && getMode() != GM_MainMenu)
+                    pushGuiMode (GM_MainMenu);
                 return;
             }
         }
@@ -864,8 +864,16 @@ namespace MWGui
             for (WindowBase* window : state.mWindows)
                 window->onFrame(frameDuration);
         }
+        else
+        {
+            // update pinned windows if visible
+            for (WindowBase* window : mGuiModeStates[GM_Inventory].mWindows)
+                if (window->isVisible())
+                    window->onFrame(frameDuration);
+        }
+
         if (!mCurrentModals.empty())
-            mCurrentModals.top()->onFrame(frameDuration);
+            mCurrentModals.back()->onFrame(frameDuration);
 
         mKeyboardNavigation->onFrame();
 
@@ -885,12 +893,6 @@ namespace MWGui
         updateMap();
 
         mHud->onFrame(frameDuration);
-
-        if (mWerewolfFader)
-            mWerewolfFader->update(frameDuration);
-        mBlindnessFader->update(frameDuration);
-        mHitFader->update(frameDuration);
-        mScreenFader->update(frameDuration);
 
         mDebugWindow->onFrame(frameDuration);
 
@@ -1727,9 +1729,10 @@ namespace MWGui
     {
         if (!mCurrentModals.empty())
         {
-            if (!mCurrentModals.top()->exit())
+            WindowModal* window = mCurrentModals.back();
+            if (!window->exit())
                 return;
-            mCurrentModals.top()->setVisible(false);
+            window->setVisible(false);
         }
     }
 
@@ -1738,7 +1741,7 @@ namespace MWGui
         if (mCurrentModals.empty())
             mKeyboardNavigation->saveFocus(getMode());
 
-        mCurrentModals.push(input);
+        mCurrentModals.push_back(input);
         mKeyboardNavigation->restoreFocus(-1);
 
         mKeyboardNavigation->setModalWindow(input->mMainWidget);
@@ -1747,17 +1750,21 @@ namespace MWGui
 
     void WindowManager::removeCurrentModal(WindowModal* input)
     {
-        // Only remove the top if it matches the current pointer. A lot of things hide their visibility before showing it,
-        //so just popping the top would cause massive issues.
         if(!mCurrentModals.empty())
         {
-            if(input == mCurrentModals.top())
+            if(input == mCurrentModals.back())
             {
-                mCurrentModals.pop();
+                mCurrentModals.pop_back();
                 mKeyboardNavigation->saveFocus(-1);
             }
             else
-                std::cout << " warning: modal widget " << input << " " << typeid(input).name() << " not found " << std::endl;
+            {
+                auto found = std::find(mCurrentModals.begin(), mCurrentModals.end(), input);
+                if (found != mCurrentModals.end())
+                    mCurrentModals.erase(found);
+                else
+                    std::cerr << " warning: can't find modal window " << input << std::endl;
+            }
         }
         if (mCurrentModals.empty())
         {
@@ -1765,7 +1772,7 @@ namespace MWGui
             mKeyboardNavigation->restoreFocus(getMode());
         }
         else
-            mKeyboardNavigation->setModalWindow(mCurrentModals.top()->mMainWidget);
+            mKeyboardNavigation->setModalWindow(mCurrentModals.back()->mMainWidget);
     }
 
     void WindowManager::onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)
@@ -2059,12 +2066,7 @@ namespace MWGui
     void WindowManager::GuiModeState::update(bool visible)
     {
         for (unsigned int i=0; i<mWindows.size(); ++i)
-        {
-            bool visibilityMask = true;
-            if (i < mVisibilityMask.size())
-                visibilityMask = mVisibilityMask[i];
-            mWindows[i]->setVisible(visible && visibilityMask);
-        }
+            mWindows[i]->setVisible(visible);
     }
 
 }

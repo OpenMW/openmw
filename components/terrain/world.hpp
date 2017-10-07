@@ -63,6 +63,10 @@ namespace Terrain
 
         float getHeightAt (const osg::Vec3f& worldPos);
 
+        /// Clears the cached land and landtexture data.
+        /// @note Thread safe.
+        virtual void clearAssociatedCaches();
+
         /// Load a terrain cell at maximum LOD and store it in the View for later use.
         /// @note Thread safe.
         virtual void cacheCell(View* view, int x, int y) {}

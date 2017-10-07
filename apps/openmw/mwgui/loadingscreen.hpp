@@ -72,6 +72,7 @@ namespace MWGui
         MyGUI::TextBox* mLoadingText;
         MyGUI::ScrollBar* mProgressBar;
         BackgroundImage* mBackgroundImage;
+        BackgroundImage* mSceneImage;
 
         std::vector<std::string> mSplashScreens;
 

@@ -401,7 +401,7 @@ namespace MWGui
     MWWorld::Ptr mSelectedEnchantItem;
     MWWorld::Ptr mSelectedWeapon;
 
-    std::stack<WindowModal*> mCurrentModals;
+    std::vector<WindowModal*> mCurrentModals;
 
     // Markers placed manually by the player. Must be shared between both map views (the HUD map and the map window).
     CustomMarkerCollection mCustomMarkers;
@@ -477,7 +477,6 @@ namespace MWGui
         void update(bool visible);
 
         std::vector<WindowBase*> mWindows;
-        std::vector<bool> mVisibilityMask; // optional, may be used to temporarily exclude windows from this mode.
 
         std::string mCloseSound;
         std::string mOpenSound;

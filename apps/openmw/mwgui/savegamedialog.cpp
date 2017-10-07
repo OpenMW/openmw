@@ -50,7 +50,8 @@ namespace MWGui
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onOkButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onCancelButtonClicked);
         mDeleteButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onDeleteButtonClicked);
-        mCharacterSelection->eventComboAccept += MyGUI::newDelegate(this, &SaveGameDialog::onCharacterSelected);
+        mCharacterSelection->eventComboChangePosition += MyGUI::newDelegate(this, &SaveGameDialog::onCharacterSelected);
+        mCharacterSelection->eventComboAccept += MyGUI::newDelegate(this, &SaveGameDialog::onCharacterAccept);
         mSaveList->eventListChangePosition += MyGUI::newDelegate(this, &SaveGameDialog::onSlotSelected);
         mSaveList->eventListMouseItemActivate += MyGUI::newDelegate(this, &SaveGameDialog::onSlotMouseClick);
         mSaveList->eventListSelectAccept += MyGUI::newDelegate(this, &SaveGameDialog::onSlotActivated);
@@ -132,6 +133,8 @@ namespace MWGui
         mSaveNameEdit->setCaption ("");
         if (mSaving)
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveNameEdit);
+        else
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
 
         center();
 
@@ -322,6 +325,12 @@ namespace MWGui
         fillSaveList();
     }
 
+    void SaveGameDialog::onCharacterAccept(MyGUI::ComboBox* sender, size_t pos)
+    {
+        // Give key focus to save list so we can confirm the selection with Enter
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
+    }
+
     void SaveGameDialog::fillSaveList()
     {
         mSaveList->removeAllItems();
@@ -336,8 +345,6 @@ namespace MWGui
         {
             mSaveList->setIndexSelected(0);
             onSlotSelected(mSaveList, 0);
-            // Give key focus to save list so we can confirm the selection with Enter
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
         }
         else
             onSlotSelected(mSaveList, MyGUI::ITEM_NONE);

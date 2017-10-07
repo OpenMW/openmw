@@ -175,6 +175,45 @@ namespace ESM
 
     }
 
+    void Land::blank()
+    {
+        mPlugin = 0;
+
+        for (int i = 0; i < LAND_GLOBAL_MAP_LOD_SIZE; ++i)
+            mWnam[0] = 0;
+
+        if (!mLandData)
+            mLandData = new LandData;
+
+        mLandData->mHeightOffset = 0;
+        for (int i = 0; i < LAND_NUM_VERTS; ++i)
+            mLandData->mHeights[i] = 0;
+        mLandData->mMinHeight = 0;
+        mLandData->mMaxHeight = 0;
+        for (int i = 0; i < LAND_NUM_VERTS; ++i)
+        {
+            mLandData->mNormals[i*3+0] = 0;
+            mLandData->mNormals[i*3+1] = 0;
+            mLandData->mNormals[i*3+2] = 127;
+        }
+        for (int i = 0; i < LAND_NUM_TEXTURES; ++i)
+            mLandData->mTextures[i] = 0;
+        for (int i = 0; i < LAND_NUM_VERTS; ++i)
+        {
+            mLandData->mColours[i*3+0] = -1;
+            mLandData->mColours[i*3+1] = -1;
+            mLandData->mColours[i*3+2] = -1;
+        }
+        mLandData->mUnk1 = 0;
+        mLandData->mUnk2 = 0;
+        mLandData->mDataLoaded = Land::DATA_VNML | Land::DATA_VHGT | Land::DATA_WNAM |
+            Land::DATA_VCLR | Land::DATA_VTEX;
+        mDataTypes = mLandData->mDataLoaded;
+
+        // No file associated with the land now
+        mContext.filename.clear();
+    }
+
     void Land::loadData(int flags, LandData* target) const
     {
         // Create storage if nothing is loaded
@@ -190,6 +229,16 @@ namespace ESM
         flags = flags & mDataTypes;
         // Return if all required data is loaded
         if ((target->mDataLoaded & flags) == flags) {
+            return;
+        }
+
+        // Copy data to target if no file
+        if (mContext.filename.empty())
+        {
+            // Make sure there is data, and that it doesn't point to the same object.
+            if (mLandData && mLandData != target)
+                *target = *mLandData;
+
             return;
         }
 
@@ -267,6 +316,15 @@ namespace ESM
     bool Land::isDataLoaded(int flags) const
     {
         return mLandData && (mLandData->mDataLoaded & flags) == (flags & mDataTypes);
+    }
+
+    void Land::setDataLoaded(int flags)
+    {
+        if (!mLandData)
+            mLandData = new LandData;
+
+        mDataTypes |= flags;
+        mLandData->mDataLoaded |= flags;
     }
 
     Land::Land (const Land& land)

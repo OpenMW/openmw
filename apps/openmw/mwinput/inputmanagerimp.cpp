@@ -241,9 +241,7 @@ namespace MWInput
             switch (action)
             {
             case A_GameMenu:
-                if(!(MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running
-                    && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_MainMenu))
-                        toggleMainMenu ();
+                toggleMainMenu ();
                 break;
             case A_Screenshot:
                 screenshot();

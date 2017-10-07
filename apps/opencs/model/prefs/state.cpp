@@ -240,6 +240,8 @@ void CSMPrefs::State::declare()
     declareShortcut ("document-world-cells", "Open Cell List", QKeySequence());
     declareShortcut ("document-world-referencables", "Open Object List", QKeySequence());
     declareShortcut ("document-world-references", "Open Instance List", QKeySequence());
+    declareShortcut ("document-world-lands", "Open Lands List", QKeySequence());
+    declareShortcut ("document-world-landtextures", "Open Land Textures List", QKeySequence());
     declareShortcut ("document-world-pathgrid", "Open Pathgrid List", QKeySequence());
     declareShortcut ("document-world-regionmap", "Open Region Map", QKeySequence());
     declareShortcut ("document-mechanics-globals", "Open Global List", QKeySequence());
@@ -276,6 +278,7 @@ void CSMPrefs::State::declare()
     declareShortcut ("table-edit", "Edit Record", QKeySequence());
     declareShortcut ("table-add", "Add Row/Record", QKeySequence(Qt::ShiftModifier | Qt::Key_A));
     declareShortcut ("table-clone", "Clone Record", QKeySequence(Qt::ShiftModifier | Qt::Key_D));
+    declareShortcut ("touch-record", "Touch Record", QKeySequence());
     declareShortcut ("table-revert", "Revert Record", QKeySequence());
     declareShortcut ("table-remove", "Remove Row/Record", QKeySequence(Qt::Key_Delete));
     declareShortcut ("table-moveup", "Move Record Up", QKeySequence());

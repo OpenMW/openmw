@@ -29,6 +29,7 @@ namespace MWGui
         void onOkButtonClicked (MyGUI::Widget* sender);
         void onDeleteButtonClicked (MyGUI::Widget* sender);
         void onCharacterSelected (MyGUI::ComboBox* sender, size_t pos);
+        void onCharacterAccept(MyGUI::ComboBox* sender, size_t pos);
         // Slot selected (mouse click or arrow keys)
         void onSlotSelected (MyGUI::ListBox* sender, size_t pos);
         // Slot activated (double click or enter key)

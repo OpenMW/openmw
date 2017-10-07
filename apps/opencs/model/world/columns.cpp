@@ -124,7 +124,7 @@ namespace CSMWorld
             { ColumnId_Portable, "Portable" },
             { ColumnId_NegativeLight, "Negative Light" },
             { ColumnId_EmitterType, "Emitter Type" },
-            
+
             { ColumnId_Fire, "Fire" },
             { ColumnId_OffByDefault, "Off by default" },
             { ColumnId_IsKey, "Is Key" },
@@ -330,6 +330,14 @@ namespace CSMWorld
             { ColumnId_WeatherChance, "Percent Chance" },
 
             { ColumnId_Text, "Text" },
+            { ColumnId_TextureNickname, "Texture Nickname" },
+            { ColumnId_PluginIndex, "Plugin Index" },
+            { ColumnId_TextureIndex, "Texture Index" },
+            { ColumnId_LandMapLodIndex, "Land map height LOD" },
+            { ColumnId_LandNormalsIndex, "Land normals" },
+            { ColumnId_LandHeightsIndex, "Land heights" },
+            { ColumnId_LandColoursIndex, "Land colors" },
+            { ColumnId_LandTexturesIndex, "Land textures" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },

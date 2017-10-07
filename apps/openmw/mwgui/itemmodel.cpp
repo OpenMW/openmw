@@ -119,6 +119,11 @@ namespace MWGui
         return ret;
     }
 
+    bool ItemModel::allowedToUseItems() const
+    {
+        return true;
+    }
+
     bool ItemModel::allowedToInsertItems() const
     {
         return true;
@@ -133,6 +138,11 @@ namespace MWGui
     ProxyItemModel::~ProxyItemModel()
     {
         delete mSourceModel;
+    }
+
+    bool ProxyItemModel::allowedToUseItems() const
+    {
+        return mSourceModel->allowedToUseItems();
     }
 
     MWWorld::Ptr ProxyItemModel::copyItem (const ItemStack& item, size_t count, bool setNewOwner)

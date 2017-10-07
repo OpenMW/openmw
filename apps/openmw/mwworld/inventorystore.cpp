@@ -654,9 +654,28 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSelectedEnchantItem(
     return mSelectedEnchantItem;
 }
 
+int MWWorld::InventoryStore::remove(const std::string& itemId, int count, const Ptr& actor)
+{
+    return remove(itemId, count, actor, false);
+}
+
 int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor)
 {
     return remove(item, count, actor, false);
+}
+
+int MWWorld::InventoryStore::remove(const std::string& itemId, int count, const Ptr& actor, bool equipReplacement)
+{
+    int toRemove = count;
+
+    for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), itemId))
+            toRemove -= remove(*iter, toRemove, actor, equipReplacement);
+
+    flagAsModified();
+
+    // number of removed items
+    return count - toRemove;
 }
 
 int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor, bool equipReplacement)
