@@ -692,32 +692,23 @@ namespace CSMWorld
         }
     };
 
-    /// \todo QColor is a GUI class and should not be in model. Need to think of an alternative
-    /// solution.
     template<typename ESXRecordT>
     struct MapColourColumn : public Column<ESXRecordT>
     {
-        /// \todo Replace Display_Integer with something that displays the colour value more directly.
         MapColourColumn()
         : Column<ESXRecordT> (Columns::ColumnId_MapColour, ColumnBase::Display_Colour)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
-            int colour = record.get().mMapColor;
-
-            return QColor (colour & 0xff, (colour>>8) & 0xff, (colour>>16) & 0xff);
+            return record.get().mMapColor;
         }
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
         {
-            ESXRecordT record2 = record.get();
-
-            QColor colour = data.value<QColor>();
-
-            record2.mMapColor = (colour.blue() << 16) | (colour.green() << 8) | colour.red();
-
-            record.setModified (record2);
+            ESXRecordT copy = record.get();
+            copy.mMapColor = data.toInt();
+            record.setModified (copy);
         }
 
         virtual bool isEditable() const
