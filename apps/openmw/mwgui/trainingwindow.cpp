@@ -203,4 +203,10 @@ namespace MWGui
         checkReferenceAvailable();
         mTimeAdvancer.onFrame(dt);
     }
+
+    bool TrainingWindow::exit()
+    {
+        return !mTimeAdvancer.isRunning();
+    }
+
 }

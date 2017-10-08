@@ -16,7 +16,7 @@ namespace MWGui
 
         virtual void onOpen();
 
-        bool exit() { return false; }
+        bool exit();
 
         void setPtr(const MWWorld::Ptr& actor);
 
