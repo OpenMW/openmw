@@ -34,7 +34,7 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadow
 
     vec3 diffuseLight, ambientLight;
     perLight(ambientLight, diffuseLight, 0, viewPos, viewNormal, diffuse, ambient);
-#ifdef FRAGMENT
+#if PER_PIXEL_LIGHTING
     lightResult.xyz += ambientLight + diffuseLight * shadowing;
 #else
     shadowDiffuse = diffuseLight;
