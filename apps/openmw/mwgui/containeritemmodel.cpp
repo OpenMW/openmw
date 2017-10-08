@@ -142,6 +142,9 @@ void ContainerItemModel::update()
 
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
+            if (!(*it).getClass().showsInInventory(*it))
+                continue;
+
             std::vector<ItemStack>::iterator itemStack = mItems.begin();
             for (; itemStack != mItems.end(); ++itemStack)
             {
