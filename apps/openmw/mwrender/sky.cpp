@@ -1361,24 +1361,38 @@ public:
 
         std::vector<osg::Vec3> positionBackups;
 
+        osg::Matrix toWorld, toLocal;
+
+        toWorld.makeIdentity();
+        toLocal.makeIdentity();
+
+        std::vector<osg::Matrix> worldMatrices = drawable->getWorldMatrices();
+
+        if (!worldMatrices.empty())
+            {
+                toWorld = worldMatrices[0];
+                toLocal.invert(toWorld);
+            }
+
         for (int i = 0; i < ps->numParticles(); i++)
-          {
-             osgParticle::Particle *particle = ps->getParticle(i);
+            {
+                 osgParticle::Particle *particle = ps->getParticle(i);
+                 positionBackups.push_back(particle->getPosition());
+                 particle->setPosition(toWorld.preMult(particle->getPosition()));
+                 particle->setPosition(particle->getPosition() - cameraOffset);
 
-             positionBackups.push_back(particle->getPosition());
+                 if (particle->getPosition().x() > mRangeX / 2.0)        // wrap-around effect
+                     particle->setPosition(particle->getPosition() - osg::Vec3(mRangeX,0,0)); 
+                 else if (particle->getPosition().x() < -mRangeX / 2.0)
+                     particle->setPosition(particle->getPosition() + osg::Vec3(mRangeX,0,0)); 
 
-             particle->setPosition(particle->getPosition() - cameraOffset);
+                 if (particle->getPosition().y() > mRangeY / 2.0)  
+                     particle->setPosition(particle->getPosition() - osg::Vec3(0,mRangeY,0)); 
+                 else if (particle->getPosition().y() < -mRangeY / 2.0)
+                     particle->setPosition(particle->getPosition() + osg::Vec3(0,mRangeY,0)); 
 
-             if (particle->getPosition().x() > mRangeX / 2.0)        // wrap-around effect
-                 particle->setPosition(particle->getPosition() - osg::Vec3(mRangeX,0,0)); 
-             else if (particle->getPosition().x() < -mRangeX / 2.0)
-                 particle->setPosition(particle->getPosition() + osg::Vec3(mRangeX,0,0)); 
-
-             if (particle->getPosition().y() > mRangeY / 2.0)  
-                 particle->setPosition(particle->getPosition() - osg::Vec3(0,mRangeY,0)); 
-             else if (particle->getPosition().y() < -mRangeY / 2.0)
-                 particle->setPosition(particle->getPosition() + osg::Vec3(0,mRangeY,0)); 
-          }
+                 particle->setPosition(toLocal.preMult(particle->getPosition()));
+             }
 
         ps->drawImplementation(renderInfo);
 
@@ -1388,6 +1402,7 @@ public:
 
 protected:
     float mRangeX, mRangeY;
+
 };
 
 void SkyManager::createRain()
@@ -1432,8 +1447,7 @@ void SkyManager::createRain()
     emitter->setPlacer(placer);
 
     osg::ref_ptr<osgParticle::ConstantRateCounter> counter (new osgParticle::ConstantRateCounter);
-//    counter->setNumberOfParticlesPerSecondToCreate(600.0);
-    counter->setNumberOfParticlesPerSecondToCreate(2000);
+    counter->setNumberOfParticlesPerSecondToCreate(600.0);
     emitter->setCounter(counter);
 
     osg::ref_ptr<RainShooter> shooter (new RainShooter);
@@ -1507,8 +1521,8 @@ void SkyManager::update(float duration)
         osg::Quat quat;
         quat.makeRotate(osg::Vec3f(0,1,0), mStormDirection);
 
-    if (mParticleNode)
-      mParticleNode->setAttitude(quat);
+        if (mParticleNode)
+            mParticleNode->setAttitude(quat);
 
         mCloudNode->setAttitude(quat);
     }
