@@ -274,10 +274,7 @@ namespace MWClass
 
     void Container::lock (const MWWorld::Ptr& ptr, int lockLevel) const
     {
-        if(lockLevel!=0)
-            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, in positive
-        else
-            ptr.getCellRef().setLockLevel(abs(ptr.getCellRef().getLockLevel())); //No locklevel given, just flip the original one
+        ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to the absolute value of locklevel
     }
 
     void Container::unlock (const MWWorld::Ptr& ptr) const
