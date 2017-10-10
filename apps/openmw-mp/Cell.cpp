@@ -29,8 +29,17 @@ Cell::Iterator Cell::end() const
 
 void Cell::addPlayer(Player *player)
 {
-    auto it = find(player->cells.begin(), player->cells.end(), this);
-    if (it == player->cells.end())
+    // Ensure the player hasn't already been added
+    auto it = find(begin(), end(), player);
+
+    if (it != end())
+    {
+        LOG_APPEND(Log::LOG_INFO, "- Attempt to add %s to Cell %s again was ignored", player->npc.mName.c_str(), getDescription().c_str());
+        return;
+    }
+
+    auto it2 = find(player->cells.begin(), player->cells.end(), this);
+    if (it2 == player->cells.end())
     {
         LOG_APPEND(Log::LOG_INFO, "- Adding %s to Player %s", getDescription().c_str(), player->npc.mName.c_str());
 
