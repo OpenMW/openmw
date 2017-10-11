@@ -38,8 +38,4 @@ macro (configure_resource_file source_path destination_dir_base dest_path_relati
 	endif (MSVC)
 endmacro (configure_resource_file)
 
-message(STATUS ${VERSION_IN_FILE})
-message(STATUS ${VERSION_FILE_PATH_BASE})
-message(STATUS ${VERSION_FILE_PATH_RELATIVE})
-
 configure_resource_file(${VERSION_IN_FILE} ${VERSION_FILE_PATH_BASE} ${VERSION_FILE_PATH_RELATIVE})
