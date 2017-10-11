@@ -210,7 +210,7 @@ namespace MWRender
         settings->setReceivesShadowTraversalMask(~0u);
 
         //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::PERSPECTIVE_SHADOW_MAP);
-        //settings->setBaseShadowTextureUnit(1);
+        settings->setBaseShadowTextureUnit(1);
         //settings->setMinimumShadowMapNearFarRatio(0);
         //settings->setNumShadowMapsPerLight(1);
         //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::ORTHOGRAPHIC_SHADOW_MAP);
@@ -227,12 +227,12 @@ namespace MWRender
         MWShadow* tech = new MWShadow();
         shadowedScene->setShadowTechnique(tech);
 
-        tech->setMaxFarPlane(0);
+        /*tech->setMaxFarPlane(0);
         tech->setTextureSize(osg::Vec2s(mapres, mapres));
         tech->setShadowTextureCoordIndex(1);
         tech->setShadowTextureUnit(1);
         tech->setBaseTextureCoordIndex(0);
-        tech->setBaseTextureUnit(0);
+        tech->setBaseTextureUnit(0);*/
 
         //mRootNode->addChild(sceneRoot);
         shadowedScene->addChild(sceneRoot);

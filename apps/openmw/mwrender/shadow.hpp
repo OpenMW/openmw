@@ -1,26 +1,24 @@
 #ifndef OPENMW_MWRENDER_SHADOW_H
 #define OPENMW_MWRENDER_SHADOW_H
 
-#include <osgShadow/LightSpacePerspectiveShadowMap>
+#include <osgShadow/ViewDependentShadowMap>
 
 namespace MWRender
 {
-    class MWShadow : public osgShadow::LightSpacePerspectiveShadowMapDB
+    class MWShadow : public osgShadow::ViewDependentShadowMap
     {
-    protected:
-        struct ViewData : public LightSpacePerspectiveShadowMapDB::ViewData
-        {
-            virtual void init(MWShadow * st, osgUtil::CullVisitor * cv);
-        };
+    public:
+        MWShadow();
 
-        virtual ViewDependentShadowTechnique::ViewData * initViewDependentData(osgUtil::CullVisitor *cv, ViewDependentShadowTechnique::ViewData * vd)
-        {
-            MWShadow::ViewData* td = dynamic_cast<MWShadow::ViewData*>(vd);
-            if (!td)
-                td = new MWShadow::ViewData;
-            td->init(this, cv);
-            return td;
-        }
+        virtual void cull(osgUtil::CullVisitor& cv);
+    protected:
+        osg::ref_ptr<osg::Camera> debugCamera;
+
+        osg::ref_ptr<osg::Program> debugProgram;
+
+        osg::ref_ptr<osg::Node> debugGeometry;
+
+        osg::ref_ptr<osg::Texture2D> testTex;
     };
 }
 
