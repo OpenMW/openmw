@@ -26,4 +26,20 @@ else ()
     message(WARNING "Failed to get valid version information from Git")
 endif ()
 
-configure_file(${VERSION_IN_FILE} ${VERSION_FILE})
+# duplicated from OpenMWMacros.cmake
+macro (configure_resource_file source_path destination_dir_base dest_path_relative)
+	if (MSVC)
+		configure_file(${source_path} "${destination_dir_base}/Debug/${dest_path_relative}")
+		configure_file(${source_path} "${destination_dir_base}/Release/${dest_path_relative}")
+		configure_file(${source_path} "${destination_dir_base}/RelWithDebInfo/${dest_path_relative}")
+		configure_file(${source_path} "${destination_dir_base}/MinSizeRel/${dest_path_relative}")
+	else (MSVC)
+		configure_file(${source_path} "${destination_dir_base}/${dest_path_relative}")
+	endif (MSVC)
+endmacro (configure_resource_file)
+
+message(STATUS ${VERSION_IN_FILE})
+message(STATUS ${VERSION_FILE_PATH_BASE})
+message(STATUS ${VERSION_FILE_PATH_RELATIVE})
+
+configure_resource_file(${VERSION_IN_FILE} ${VERSION_FILE_PATH_BASE} ${VERSION_FILE_PATH_RELATIVE})
