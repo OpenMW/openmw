@@ -88,13 +88,6 @@ endforeach (u)
 source_group ("components\\${dir}" FILES ${files})
 endmacro (add_component_qt_dir)
 
-macro (copy_all_files source_dir destination_dir files)
-foreach (f ${files})
-get_filename_component(filename ${f} NAME)
-configure_file(${source_dir}/${f} ${destination_dir}/${filename} COPYONLY)
-endforeach (f)
-endmacro (copy_all_files)
-
 macro (add_file project type file)
 list (APPEND ${project}${type} ${file})
 endmacro (add_file)
