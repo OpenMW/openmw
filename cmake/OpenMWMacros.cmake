@@ -174,10 +174,10 @@ endmacro (openmw_add_executable)
 
 macro (get_generator_is_multi_config VALUE)
 	if (CMAKE_VERSION VERSION_GREATER 3.9 OR CMAKE_VERSION VERSION_EQUAL 3.9)
-		set(${VALUE} ${GENERATOR_IS_MULTI_CONFIG})
+		get_cmake_property(${VALUE} GENERATOR_IS_MULTI_CONFIG)
 	else (CMAKE_VERSION VERSION_GREATER 3.9 OR CMAKE_VERSION VERSION_EQUAL 3.9)
 		list(LENGTH ${CMAKE_CONFIGURATION_TYPES} ${VALUE})
-	endif ((CMAKE_VERSION VERSION_GREATER 3.9 OR CMAKE_VERSION VERSION_EQUAL 3.9))
+	endif (CMAKE_VERSION VERSION_GREATER 3.9 OR CMAKE_VERSION VERSION_EQUAL 3.9)
 endmacro (get_generator_is_multi_config)
 
 macro (copy_resource_file source_path destination_dir_base dest_path_relative)
