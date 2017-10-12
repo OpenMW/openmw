@@ -199,4 +199,4 @@ macro (copy_all_resource_files source_dir destination_dir_base destination_dir_r
 		get_filename_component(filename ${f} NAME)
 		copy_resource_file("${source_dir}/${f}" "${destination_dir_base}" "${destination_dir_relative}/${filename}")
 	endforeach (f)
-endmacro (copy_all_files)
+endmacro (copy_all_resource_files)

@@ -17,6 +17,7 @@ if (GIT_CHECKOUT)
             -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
             -DOPENMW_VERSION=${OPENMW_VERSION}
             -DMSVC=${MSVC}
+			-DMACROSFILE=${CMAKE_SOURCE_DIR}/cmake/OpenMWMacros.cmake
             -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/GitVersion.cmake
             VERBATIM)
 else (GIT_CHECKOUT)
