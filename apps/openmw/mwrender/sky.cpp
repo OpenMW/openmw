@@ -18,6 +18,8 @@
 #include <osg/PolygonOffset>
 #include <osg/observer_ptr>
 
+#include <OpenThreads/ReadWriteMutex>
+
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
 #include <osgParticle/ModularEmitter>
@@ -39,7 +41,6 @@
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
-#include <components/nifosg/particle.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -47,12 +48,8 @@
 #include "vismask.hpp"
 #include "renderbin.hpp"
 
-#define RAIN_WIDTH 600.0
-#define RAIN_HEIGHT 600.0
-
 namespace
 {
-
     osg::ref_ptr<osg::Material> createAlphaTrackingUnlitMaterial()
     {
         osg::ref_ptr<osg::Material> mat = new osg::Material;
@@ -1344,60 +1341,69 @@ protected:
 class WeatherParticleDrawCallback : public osg::Drawable::DrawCallback
 {
 public:
-    WeatherParticleDrawCallback(osg::Vec3 wrapRange) : osg::Drawable::DrawCallback()
+    WeatherParticleDrawCallback(osg::Vec3 &wrapRange) : osg::Drawable::DrawCallback()
     {
         mWrapRange = wrapRange;
     }
 
     virtual void drawImplementation(osg::RenderInfo& renderInfo, const osg::Drawable *drawable) const
     {
+
         osgParticle::ParticleSystem *ps = (osgParticle::ParticleSystem *) drawable;
+
+        osgParticle::ParticleSystem::ScopedReadLock *lock = new osgParticle::ParticleSystem::ScopedReadLock(*ps->getReadWriteMutex());
+
         osg::Vec3 cameraPos = renderInfo.getCurrentCamera()->getInverseViewMatrix().getTrans();
 
         osg::Vec3 cameraOffset = osg::Vec3(
           fmod(cameraPos.x(), mWrapRange.x()),
           fmod(cameraPos.y(), mWrapRange.y()),
-          0.0);
+          fmod(cameraPos.z(), mWrapRange.z()));
 
         std::vector<osg::Vec3> positionBackups;
 
         osg::Matrix toWorld, toLocal;
 
-        toWorld.makeIdentity();
-        toLocal.makeIdentity();
-
         std::vector<osg::Matrix> worldMatrices = drawable->getWorldMatrices();
 
         if (!worldMatrices.empty())
-            {
-                toWorld = worldMatrices[0];
-                toLocal.invert(toWorld);
-            }
+        {
+            toWorld = worldMatrices[0];
+            toLocal.invert(toWorld);
+        }
 
         for (int i = 0; i < ps->numParticles(); i++)
-            {
-                 osgParticle::Particle *particle = ps->getParticle(i);
-                 positionBackups.push_back(particle->getPosition());
-                 particle->setPosition(toWorld.preMult(particle->getPosition()));
-                 particle->setPosition(particle->getPosition() - cameraOffset);
+        {
+             osgParticle::Particle *particle = ps->getParticle(i);
+             positionBackups.push_back(particle->getPosition());
+             particle->setPosition(toWorld.preMult(particle->getPosition()));
+             particle->setPosition(particle->getPosition() - cameraOffset);
 
-                 if (particle->getPosition().x() > mWrapRange.x() / 2.0)        // wrap-around effect
-                     particle->setPosition(particle->getPosition() - osg::Vec3(mWrapRange.x(),0,0)); 
-                 else if (particle->getPosition().x() < -mWrapRange.x() / 2.0)
-                     particle->setPosition(particle->getPosition() + osg::Vec3(mWrapRange.x(),0,0)); 
+             for (int j = 0; j < 3; j++)   // wrap-around effect in all 3 directions 
+             {
+                 osg::Vec3 newPosition = particle->getPosition();
 
-                 if (particle->getPosition().y() > mWrapRange.y() / 2.0)  
-                     particle->setPosition(particle->getPosition() - osg::Vec3(0,mWrapRange.y(),0)); 
-                 else if (particle->getPosition().y() < -mWrapRange.y() / 2.0)
-                     particle->setPosition(particle->getPosition() + osg::Vec3(0,mWrapRange.y(),0)); 
+                 if (particle->getPosition()[j] > mWrapRange[j] / 2.0)
+                     newPosition[j] -= mWrapRange[j];
+                 else if (particle->getPosition()[j] < -mWrapRange[j] / 2.0)
+                     newPosition[j] += mWrapRange[j];
 
-                 particle->setPosition(toLocal.preMult(particle->getPosition()));
+                 particle->setPosition(newPosition);
              }
+
+             particle->setPosition(toLocal.preMult(particle->getPosition()));
+        }
+
+        delete lock;     // unlock the mutex as ps will try to lock it in the following command
 
         ps->drawImplementation(renderInfo);
 
+        lock = new osgParticle::ParticleSystem::ScopedReadLock(*ps->getReadWriteMutex());
+
         for (int i = 0; i < ps->numParticles(); i++)                // restore positions
             ps->getParticle(i)->setPosition(positionBackups[i]);
+
+        delete lock;
     }
 
 protected:
@@ -1412,7 +1418,8 @@ void SkyManager::createRain()
     mRainNode = new osg::Group;
 
     mRainParticleSystem = new osgParticle::ParticleSystem;
-    mRainParticleSystem->setDrawCallback(new WeatherParticleDrawCallback(osg::Vec3(RAIN_WIDTH,RAIN_WIDTH,RAIN_HEIGHT)));
+    osg::Vec3 rainRange = osg::Vec3(600,600,600);
+    mRainParticleSystem->setDrawCallback(new WeatherParticleDrawCallback(rainRange));
 
     mRainParticleSystem->setParticleAlignment(osgParticle::ParticleSystem::FIXED);
     mRainParticleSystem->setAlignVectorX(osg::Vec3f(0.1,0,0));
@@ -1440,8 +1447,8 @@ void SkyManager::createRain()
     emitter->setParticleSystem(mRainParticleSystem);
 
     osg::ref_ptr<osgParticle::BoxPlacer> placer (new osgParticle::BoxPlacer);
-    placer->setXRange(-RAIN_WIDTH / 2, RAIN_WIDTH / 2); // Rain_Diameter
-    placer->setYRange(-RAIN_WIDTH / 2, RAIN_WIDTH / 2);
+    placer->setXRange(-rainRange.x() / 2, rainRange.x() / 2); // Rain_Diameter
+    placer->setYRange(-rainRange.y() / 2, rainRange.y() / 2);
     placer->setZRange(300, 300);
     emitter->setPlacer(placer);
 
@@ -1631,19 +1638,14 @@ void SkyManager::setWeather(const WeatherResult& weather)
             SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
             mParticleEffect->accept(disableFreezeOnCullVisitor);
 
-            SceneUtil::FindByClassVisitor findEmitterVisitor(std::string("Emitter"));
-            mParticleEffect->accept(findEmitterVisitor);
+            SceneUtil::FindByClassVisitor findPSVisitor(std::string("ParticleSystem"));
+            mParticleEffect->accept(findPSVisitor);
 
-            for (unsigned int i = 0; i < findEmitterVisitor.mFoundNodes.size(); i++)
+            for (unsigned int i = 0; i < findPSVisitor.mFoundNodes.size(); i++)
             {
-                NifOsg::Emitter *emitter = (NifOsg::Emitter *) findEmitterVisitor.mFoundNodes[i];
-                NifOsg::ParticleSystem *ps = (NifOsg::ParticleSystem *) emitter->getParticleSystem();
-
-                osg::BoundingBox box = ps->getBoundingBox();
-
-                osg::Vec3 wrapRange = osg::Vec3(box.xMax() - box.xMin(),box.yMax() - box.yMin(),box.zMax() - box.zMin());
-
-                ps->setDrawCallback(new WeatherParticleDrawCallback(wrapRange));
+                osgParticle::ParticleSystem *ps = static_cast<osgParticle::ParticleSystem *>(findPSVisitor.mFoundNodes[i]);
+                osg::Vec3 weatherRange = osg::Vec3(1024,1024,800);
+                ps->setDrawCallback(new WeatherParticleDrawCallback(weatherRange));
             }
         }
     }
