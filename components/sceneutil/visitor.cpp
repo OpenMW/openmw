@@ -22,9 +22,9 @@ namespace SceneUtil
     void FindByClassVisitor::apply(osg::Node &node)
     {
         if (Misc::StringUtils::ciEqual(node.className(), mNameToFind))
-            mFoundNode = &node;
-        else
-            traverse(node);
+            mFoundNodes.push_back(&node);
+        
+        traverse(node);
     }
 
     void FindByNameVisitor::apply(osg::Group &group)

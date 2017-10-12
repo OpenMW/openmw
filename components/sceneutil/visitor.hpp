@@ -35,14 +35,13 @@ namespace SceneUtil
         FindByClassVisitor(const std::string& nameToFind)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
             , mNameToFind(nameToFind)
-            , mFoundNode(NULL)
         {
         }
 
         virtual void apply(osg::Node &node);
 
         std::string mNameToFind;
-        osg::Node* mFoundNode;
+        std::vector<osg::Node *> mFoundNodes;
     };
 
     // Disable freezeOnCull for all visited particlesystems
