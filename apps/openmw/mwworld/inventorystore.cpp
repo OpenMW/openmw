@@ -265,7 +265,6 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 
     // Autoequip clothing, armor and weapons.
     // Equipping lights is handled in Actors::updateEquippedLight based on environment light.
-
     for (ContainerStoreIterator iter (begin(ContainerStore::Type_Clothing | ContainerStore::Type_Armor)); iter!=end(); ++iter)
     {
         Ptr test = *iter;
@@ -290,9 +289,12 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         std::pair<std::vector<int>, bool> itemsSlots =
             iter->getClass().getEquipmentSlots (*iter);
 
+        // checking if current item poited by iter can be equipped
         for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
             iter2!=itemsSlots.first.end(); ++iter2)
         {
+            // if true then it means slot is equipped already
+            // check if slot may require swapping if current item is more valueable
             if (slots_.at (*iter2)!=end())
             {
                 Ptr old = *slots_.at (*iter2);
@@ -315,6 +317,26 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 }
                 else if (iter.getType() == ContainerStore::Type_Clothing)
                 {
+                    // if left ring is equipped
+                    if (*iter2 == Slot_LeftRing)
+                    {
+                        // if there is a place for right ring dont swap it
+                        if (slots_.at(Slot_RightRing) == end())
+                        {
+                            continue;
+                        }
+                        else // if right ring is equipped too
+                        {
+                            Ptr rightRing = *slots_.at(Slot_RightRing);
+
+                            // we want to swap cheaper ring only if both are equipped
+                            if (rightRing.getClass().getValue(rightRing) < old.getClass().getValue(old))
+                            {
+                                continue;
+                            }
+                        }
+                    }
+
                     if (old.getTypeName() == typeid(ESM::Clothing).name())
                     {
                         // check value
@@ -337,6 +359,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 }
             }
 
+            // if we are here it means item can be equipped or swapped
             slots_[*iter2] = iter;
             break;
         }
