@@ -321,12 +321,22 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 else if (iter.getType() == ContainerStore::Type_Clothing)
                 {
                     // if left ring is equipped
-                    if (*iter2 == MWWorld::InventoryStore::Slot_LeftRing)
+                    if (*iter2 == Slot_LeftRing)
                     {
                         // if there is a place for right ring dont swap left leaving right hand empty
-                        if (slots_.at(MWWorld::InventoryStore::Slot_RightRing) == end())
+                        if (slots_.at(Slot_RightRing) == end())
                         {
                             continue;
+                        }
+                        else // if right ring is equipped too
+                        {
+                            Ptr rightRing = *slots_.at(Slot_RightRing);
+
+                            // we want to swap cheaper ring only if both are equipped
+                            if (rightRing.getClass().getValue(rightRing) < old.getClass().getValue(old))
+                            {
+                                continue;
+                            }
                         }
                     }
 
