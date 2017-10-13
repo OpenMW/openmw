@@ -557,7 +557,7 @@ printf "OSG 3.4.0-scrawl... "
 		"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer}${SUFFIX}.dll
 
 	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.0/osgdb_"{bmp,dds,jpeg,osg,png,tga}${SUFFIX}.dll
-	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.0/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer}${SUFFIX}.dll
+	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.0/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer,shadow}${SUFFIX}.dll
 
 	echo Done.
 }
