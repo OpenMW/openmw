@@ -265,8 +265,6 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 
     // Autoequip clothing, armor and weapons.
     // Equipping lights is handled in Actors::updateEquippedLight based on environment light.
-
-    // the main loop iterating through all items in inventory
     for (ContainerStoreIterator iter (begin(ContainerStore::Type_Clothing | ContainerStore::Type_Armor)); iter!=end(); ++iter)
     {
         Ptr test = *iter;
@@ -291,8 +289,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         std::pair<std::vector<int>, bool> itemsSlots =
             iter->getClass().getEquipmentSlots (*iter);
 
-        // nested loop for iterating through avialable NPC slots for equipped items
-        // and checking if current item poited by iter can be placed there
+        // checking if current item poited by iter can be equipped
         for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
             iter2!=itemsSlots.first.end(); ++iter2)
         {
@@ -323,7 +320,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                     // if left ring is equipped
                     if (*iter2 == Slot_LeftRing)
                     {
-                        // if there is a place for right ring dont swap left leaving right hand empty
+                        // if there is a place for right ring dont swap it
                         if (slots_.at(Slot_RightRing) == end())
                         {
                             continue;

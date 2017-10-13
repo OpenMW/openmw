@@ -7,7 +7,6 @@ Makefile
 makefile
 build*
 prebuilt
-cmake-build-debug/
 
 ##windows build process
 /deps
@@ -27,6 +26,7 @@ Doxygen
 .settings
 .directory
 .idea
+cmake-build-*
 files/windows/*.aps
 ## qt-creator
 CMakeLists.txt.user*
