@@ -315,6 +315,14 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 }
                 else if (iter.getType() == ContainerStore::Type_Clothing)
                 {
+                    if (*iter2 == MWWorld::InventoryStore::Slot_LeftRing)
+                    {
+                        if (slots_.at(MWWorld::InventoryStore::Slot_RightRing) == end())
+                        {
+                            continue;
+                        }
+                    }
+
                     if (old.getTypeName() == typeid(ESM::Clothing).name())
                     {
                         // check value
