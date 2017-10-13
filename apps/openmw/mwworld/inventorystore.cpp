@@ -266,6 +266,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     // Autoequip clothing, armor and weapons.
     // Equipping lights is handled in Actors::updateEquippedLight based on environment light.
 
+    // the main loop iterating through all items in inventory
     for (ContainerStoreIterator iter (begin(ContainerStore::Type_Clothing | ContainerStore::Type_Armor)); iter!=end(); ++iter)
     {
         Ptr test = *iter;
@@ -290,9 +291,13 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         std::pair<std::vector<int>, bool> itemsSlots =
             iter->getClass().getEquipmentSlots (*iter);
 
+        // nested loop for iterating through avialable NPC slots for equipped items
+        // and checking if current item poited by iter can be placed there
         for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
             iter2!=itemsSlots.first.end(); ++iter2)
         {
+            // if true then it means slot is equipped already
+            // check if slot may require swapping if current item is more valueable
             if (slots_.at (*iter2)!=end())
             {
                 Ptr old = *slots_.at (*iter2);
@@ -315,8 +320,10 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 }
                 else if (iter.getType() == ContainerStore::Type_Clothing)
                 {
+                    // if left ring is equipped
                     if (*iter2 == MWWorld::InventoryStore::Slot_LeftRing)
                     {
+                        // if there is a place for right ring dont swap left leaving right hand empty
                         if (slots_.at(MWWorld::InventoryStore::Slot_RightRing) == end())
                         {
                             continue;
@@ -345,6 +352,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 }
             }
 
+            // if we are here it means item can be equipped or swapped
             slots_[*iter2] = iter;
             break;
         }
