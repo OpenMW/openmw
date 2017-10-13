@@ -430,6 +430,7 @@ namespace MWInput
 
                 MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
                 mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
+                MWBase::Environment::get().getWindowManager()->setCursorActive(true);
             }
         }
         if (mMouseLookEnabled)
