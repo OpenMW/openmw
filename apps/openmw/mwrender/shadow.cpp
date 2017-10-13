@@ -71,7 +71,7 @@ namespace MWRender
         stateSet->addUniform(textureUniform.get());
 
         testTex->setDataVariance(osg::Object::DYNAMIC);
-        osg::ref_ptr<osg::Image> testImage = osgDB::readRefImageFile("path/to/an/image/file.png");
+        osg::ref_ptr<osg::Image> testImage = osgDB::readRefImageFile("resources/mygui/openmw.png");
         testTex->setImage(testImage);
     }
     
