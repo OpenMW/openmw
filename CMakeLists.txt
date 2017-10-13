@@ -313,27 +313,27 @@ endif (APPLE)
 
 # Other files
 
-configure_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
-    "${OpenMW_BINARY_DIR}/settings-default.cfg")
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
+    "${OpenMW_BINARY_DIR}" "settings-default.cfg")
 
 if (NOT APPLE)
-    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
-        "${OpenMW_BINARY_DIR}/openmw.cfg")
-    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-        "${OpenMW_BINARY_DIR}/openmw.cfg.install")
+    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
+        "${OpenMW_BINARY_DIR}" "openmw.cfg")
+    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+        "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
 else ()
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
         "${OpenMW_BINARY_DIR}/openmw.cfg")
 endif ()
 
-configure_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
-    "${OpenMW_BINARY_DIR}/openmw-cs.cfg")
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
+    "${OpenMW_BINARY_DIR}" "openmw-cs.cfg")
 
-configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
-    "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
+    "${OpenMW_BINARY_DIR}" "resources/defaultfilters" COPYONLY)
 
-configure_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb.txt
-    "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt")
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb.txt
+    "${OpenMW_BINARY_DIR}" "gamecontrollerdb.txt")
 
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
