@@ -256,6 +256,7 @@ namespace MWRender
         mRootNode->getOrCreateStateSet()->addUniform(mUniformRainIntensity);
 
         mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
+        mSky->setCamera(mViewer->getCamera());
 
         source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
 
