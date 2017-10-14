@@ -152,9 +152,31 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
     while (i.hasPrevious()) {
         i.previous();
 
+        // 'data=...' lines need quotes and ampersands escaping to match how boost::filesystem::path uses boost::io::quoted
+        if (i.key() == QLatin1String("data"))
+        {
+            stream << i.key() << "=";
+
+            // The following is based on boost::io::detail::quoted_manip.hpp, but calling this function did not work as there are too may QStrings involved
+            QChar delim = '\"';
+            QChar escape = '&';
+            QString string = i.value();
+
+            stream << delim;
+            for (QString::const_iterator it = string.begin(); it != string.end(); ++it)
+            {
+                if (*it == delim || *it == escape)
+                    stream << escape;
+                stream << *it;
+            }
+            stream << delim;
+
+            stream << '\n';
+            continue;
+        }
+
         // Quote paths with spaces
-        if (i.key() == QLatin1String("data")
-            || i.key() == QLatin1String("data-local")
+        if (i.key() == QLatin1String("data-local")
             || i.key() == QLatin1String("resources"))
         {
             if (i.value().contains(QChar(' ')))
