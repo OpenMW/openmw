@@ -17,7 +17,7 @@ namespace MWRender
         "                                                                        \n"
         "void main(void)                                                         \n"
         "{                                                                       \n"
-#if 0
+#if 1
         "    float f = texture2D( texture, gl_TexCoord[0] ).r;                   \n"
         "                                                                        \n"
         "    f = 256.0 * f;                                                      \n"
@@ -62,7 +62,7 @@ namespace MWRender
         osg::ref_ptr<osg::Shader> fragmentShader = new osg::Shader(osg::Shader::FRAGMENT, debugFragmentShaderSource);
         debugProgram->addShader(fragmentShader);
 
-        debugGeometry = osg::createTexturedQuadGeometry(osg::Vec3(-1, -1, 0), osg::Vec3(2, 0, 0), osg::Vec3(0, 2, 0));-
+        debugGeometry = osg::createTexturedQuadGeometry(osg::Vec3(-1, -1, 0), osg::Vec3(2, 0, 0), osg::Vec3(0, 2, 0));
         debugCamera->addChild(debugGeometry);
         osg::ref_ptr<osg::StateSet> stateSet = debugGeometry->getOrCreateStateSet();
         stateSet->setAttributeAndModes(debugProgram, osg::StateAttribute::ON);
