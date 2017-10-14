@@ -180,5 +180,36 @@ void CSMTools::FixLandsAndLandTexturesMergeStage::perform (int stage, CSMDoc::Me
 
         CSMWorld::TouchLandCommand cmd(landTable, ltexTable, id);
         cmd.redo();
+
+        // Get rid of base data
+        const CSMWorld::Record<CSMWorld::Land>& oldRecord =
+            mState.mTarget->getData().getLand().getRecord (stage);
+
+        CSMWorld::Record<CSMWorld::Land> newRecord(CSMWorld::RecordBase::State_ModifiedOnly,
+            nullptr, &oldRecord.get());
+
+        mState.mTarget->getData().getLand().setRecord(stage, newRecord);
+    }
+}
+
+CSMTools::CleanupLandTexturesMergeStage::CleanupLandTexturesMergeStage (MergeState& state)
+    : mState (state)
+{
+}
+
+int CSMTools::CleanupLandTexturesMergeStage::setup()
+{
+    return 1;
+}
+
+void CSMTools::CleanupLandTexturesMergeStage::perform (int stage, CSMDoc::Messages& messages)
+{
+    auto& landTextures = mState.mTarget->getData().getLandTextures();
+    for (int i = 0; i < landTextures.getSize(); )
+    {
+        if (!landTextures.getRecord(i).isModified())
+            landTextures.removeRows(i, 1);
+        else
+            ++i;
     }
 }

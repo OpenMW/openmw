@@ -162,6 +162,22 @@ namespace CSMTools
             virtual void perform (int stage, CSMDoc::Messages& messages);
             ///< Messages resulting from this stage will be appended to \a messages.
     };
+
+    // Removes base LandTexture records.
+    class CleanupLandTexturesMergeStage : public CSMDoc::Stage
+    {
+            MergeState& mState;
+
+        public:
+
+            CleanupLandTexturesMergeStage (MergeState& state);
+
+            virtual int setup();
+            ///< \return number of steps
+
+            virtual void perform (int stage, CSMDoc::Messages& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
 }
 
 #endif

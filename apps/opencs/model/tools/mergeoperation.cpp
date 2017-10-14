@@ -41,6 +41,7 @@ CSMTools::MergeOperation::MergeOperation (CSMDoc::Document& document, ToUTF8::Fr
     appendStage (new PopulateLandTexturesMergeStage (mState));
     appendStage (new MergeLandStage (mState));
     appendStage (new FixLandsAndLandTexturesMergeStage (mState));
+    appendStage (new CleanupLandTexturesMergeStage (mState));
 
     appendStage (new FinishMergedDocumentStage (mState, encoding));
 }
