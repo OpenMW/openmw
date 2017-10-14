@@ -116,29 +116,14 @@ namespace CSMTools
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
-    class ListLandTexturesMergeStage : public CSMDoc::Stage
+    /// Adds all land texture records that could potentially be referenced when merging
+    class PopulateLandTexturesMergeStage : public CSMDoc::Stage
     {
             MergeState& mState;
 
         public:
 
-            ListLandTexturesMergeStage (MergeState& state);
-
-            virtual int setup();
-            ///< \return number of steps
-
-            virtual void perform (int stage, CSMDoc::Messages& messages);
-            ///< Messages resulting from this stage will be appended to \a messages.
-    };
-
-    class MergeLandTexturesStage : public CSMDoc::Stage
-    {
-            MergeState& mState;
-            std::map<std::pair<uint16_t, int>, int>::iterator mNext;
-
-        public:
-
-            MergeLandTexturesStage (MergeState& state);
+            PopulateLandTexturesMergeStage (MergeState& state);
 
             virtual int setup();
             ///< \return number of steps
@@ -154,6 +139,22 @@ namespace CSMTools
         public:
 
             MergeLandStage (MergeState& state);
+
+            virtual int setup();
+            ///< \return number of steps
+
+            virtual void perform (int stage, CSMDoc::Messages& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
+
+    /// Flattens the added land and land texture records.
+    class FixLandsAndLandTexturesMergeStage : public CSMDoc::Stage
+    {
+            MergeState& mState;
+
+        public:
+
+            FixLandsAndLandTexturesMergeStage (MergeState& state);
 
             virtual int setup();
             ///< \return number of steps
