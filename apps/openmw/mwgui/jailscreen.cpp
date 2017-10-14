@@ -58,6 +58,7 @@ namespace MWGui
         {
             MWWorld::Ptr player = MWMechanics::getPlayer();
             MWBase::Environment::get().getWorld()->teleportToClosestMarker(player, "prisonmarker");
+            MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.f); // override fade-in caused by cell transition
 
             setVisible(true);
             mTimeAdvancer.run(100);
