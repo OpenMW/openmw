@@ -84,6 +84,7 @@ namespace MWGui
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onDeleteSlotConfirmed);
         dialog->eventCancelClicked.clear();
+        dialog->eventCancelClicked += MyGUI::newDelegate(this, &SaveGameDialog::onDeleteSlotCancel);
     }
 
     void SaveGameDialog::onDeleteSlotConfirmed()
