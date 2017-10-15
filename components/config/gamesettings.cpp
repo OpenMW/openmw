@@ -55,7 +55,6 @@ void Config::GameSettings::validatePaths()
 
     for (Files::PathContainer::iterator it = dataDirs.begin(); it != dataDirs.end(); ++it) {
         QString path = QString::fromUtf8(it->string().c_str());
-        path.remove(QChar('\"'));
 
         QDir dir(path);
         if (dir.exists())
@@ -64,6 +63,11 @@ void Config::GameSettings::validatePaths()
 
     // Do the same for data-local
     QString local = mSettings.value(QString("data-local"));
+    if (local.at(0) == QChar('\"'))
+    {
+        local.remove(0, 1);
+        local.chop(1);
+    }
 
     if (local.isEmpty())
         return;
@@ -76,7 +80,6 @@ void Config::GameSettings::validatePaths()
 
     if (!dataDirs.empty()) {
         QString path = QString::fromUtf8(dataDirs.front().string().c_str());
-        path.remove(QChar('\"'));
 
         QDir dir(path);
         if (dir.exists())
@@ -120,6 +123,27 @@ bool Config::GameSettings::readFile(QTextStream &stream, QMap<QString, QString> 
             // Don't remove existing data entries
             if (key != QLatin1String("data"))
                 settings.remove(key);
+            else
+            {
+                // 'data=...' line, so needs processing to deal with ampersands and quotes
+                QChar delim = '\"';
+                QChar escape = '&';
+
+                if (value.at(0) == delim)
+                {
+                    QString valueOriginal = value;
+                    value = "";
+
+                    for (QString::const_iterator it = valueOriginal.begin() + 1; it != valueOriginal.end(); ++it)
+                    {
+                        if (*it == escape)
+                            ++it;
+                        else if (*it == delim)
+                            break;
+                        value += *it;
+                    }
+                }
+            }
 
             QStringList values = cache.values(key);
             values.append(settings.values(key));
@@ -157,7 +181,7 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
         {
             stream << i.key() << "=";
 
-            // The following is based on boost::io::detail::quoted_manip.hpp, but calling this function did not work as there are too may QStrings involved
+            // The following is based on boost::io::detail::quoted_manip.hpp, but calling those functions did not work as there are too may QStrings involved
             QChar delim = '\"';
             QChar escape = '&';
             QString string = i.value();
@@ -380,9 +404,26 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
     {
         it.previous();
 
+        if (it.key() == QLatin1String("data"))
+        {
+            settingLine = it.key() + "=";
+
+            // The following is based on boost::io::detail::quoted_manip.hpp, but calling those functions did not work as there are too may QStrings involved
+            QChar delim = '\"';
+            QChar escape = '&';
+            QString string = it.value();
+
+            settingLine += delim;
+            for (QString::const_iterator iter = string.begin(); iter != string.end(); ++iter)
+            {
+                if (*iter == delim || *iter == escape)
+                    settingLine += escape;
+                settingLine += *iter;
+            }
+            settingLine += delim;
+        }
         // Quote paths with spaces
-        if ((it.key() == QLatin1String("data")
-             || it.key() == QLatin1String("data-local")
+        else if ((it.key() == QLatin1String("data-local")
              || it.key() == QLatin1String("resources")) && it.value().contains(QChar(' ')))
         {
             QString stripped = it.value();
