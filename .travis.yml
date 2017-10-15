@@ -41,8 +41,8 @@ addons:
     project:
       name: "OpenMW/openmw"
       description: "<Your project description here>"
-    notification_email: scrawl@baseoftrash.de
-    build_command_prepend: "cmake . -DBUILD_UNITTESTS=FALSE"
+    notification_email: 720642+scrawl@users.noreply.github.com
+    build_command_prepend: "cmake . -DBUILD_UNITTESTS=FALSE -DBUILD_OPENCS=FALSE -DBUILD_BSATOOL=FALSE -DBUILD_ESMTOOL=FALSE -DBUILD_MWINIIMPORTER=FALSE -DBUILD_LAUNCHER=FALSE"
     build_command:   "make -j3"
     branch_pattern: coverity_scan
 matrix:
