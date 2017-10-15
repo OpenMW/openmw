@@ -1046,7 +1046,7 @@ namespace MWPhysics
     bool PhysicsSystem::isOnGround(const MWWorld::Ptr &actor)
     {
         Actor* physactor = getActor(actor);
-        return physactor->getOnGround();
+        return physactor && physactor->getOnGround();
     }
 
     bool PhysicsSystem::canMoveToWaterSurface(const MWWorld::ConstPtr &actor, const float waterlevel)
