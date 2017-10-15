@@ -50,7 +50,7 @@ public:
         abort();
     }
 
-    osg::ref_ptr<Resource::BulletShape> load(const Nif::NIFFilePtr file);
+    osg::ref_ptr<Resource::BulletShape> load(const Nif::NIFFilePtr& file);
 
 private:
     bool findBoundingBox(const Nif::Node* node, int flags = 0);

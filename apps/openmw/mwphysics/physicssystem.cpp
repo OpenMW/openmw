@@ -702,8 +702,6 @@ namespace MWPhysics
         const char* env = getenv("OPENMW_PHYSICS_FPS");
         if (env)
         {
-            std::string str(env);
-
             float physFramerate = std::atof(env);
             if (physFramerate > 0)
             {

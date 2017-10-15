@@ -69,7 +69,6 @@ namespace MWGui
         MyGUI::Widget *mEffectBox, *mMinimapBox;
         MyGUI::Button* mMinimapButton;
         MyGUI::ScrollView* mMinimap;
-        MyGUI::ImageBox* mCompass;
         MyGUI::ImageBox* mCrosshair;
         MyGUI::TextBox* mCellNameBox;
         MyGUI::TextBox* mWeaponSpellBox;

@@ -119,6 +119,7 @@ unsigned int WorkQueue::getNumActiveThreads() const
 
 WorkThread::WorkThread(WorkQueue *workQueue)
     : mWorkQueue(workQueue)
+    , mActive(false)
 {
 }
 

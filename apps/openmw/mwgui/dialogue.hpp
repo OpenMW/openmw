@@ -155,8 +155,6 @@ namespace MWGui
         void restock();
         void deleteLater();
 
-        bool mEnabled;
-
         bool mIsCompanion;
         std::list<std::string> mKeywords;
 

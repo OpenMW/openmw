@@ -46,7 +46,7 @@ namespace MWGui
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
             void addSpell(const ESM::Spell& spell);
             void clearSpells();
-            int mLastPos,mCurrentY;
+            int mCurrentY;
 
             static const int sLineHeight;
 

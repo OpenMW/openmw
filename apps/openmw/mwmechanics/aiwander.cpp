@@ -451,11 +451,10 @@ namespace MWMechanics
         // Check if an idle actor is  too close to a door - if so start walking
         storage.mDoorCheckDuration += duration;
 
-        static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
-
         if (storage.mDoorCheckDuration >= DOOR_CHECK_INTERVAL)
         {
             storage.mDoorCheckDuration = 0;    // restart timer
+            static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
             if (mDistance &&            // actor is not intended to be stationary
                 proximityToDoor(actor, distance*1.6f))
             {
@@ -531,11 +530,10 @@ namespace MWMechanics
 
     void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration, ESM::Position& pos)
     {
-        static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
-
         if (mObstacleCheck.isEvading())
         {
             // first check if we're walking into a door
+            static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
             if (proximityToDoor(actor, distance))
             {
                 // remove allowed points then select another random destination
