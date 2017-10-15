@@ -31,6 +31,7 @@ namespace osgDB
 namespace Shader
 {
     class ShaderManager;
+    class ShaderVisitor;
 }
 
 namespace Resource
@@ -148,6 +149,8 @@ namespace Resource
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 
     private:
+
+        Shader::ShaderVisitor* createShaderVisitor();
 
         std::unique_ptr<Shader::ShaderManager> mShaderManager;
         bool mForceShaders;
