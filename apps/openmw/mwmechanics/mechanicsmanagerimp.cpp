@@ -1123,6 +1123,10 @@ namespace MWMechanics
                 if (playerFollowers.find(*it) != playerFollowers.end())
                     continue;
 
+                // NPC will complain about theft even if he will do nothing about it
+                if (type == OT_Theft || type == OT_Pickpocket)
+                    MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
+
                 crimeSeen = true;
             }
         }
@@ -1243,9 +1247,7 @@ namespace MWMechanics
             {
                 reported = true;
 
-                if (type == OT_Theft || type == OT_Pickpocket)
-                    MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
-                else if (type == OT_Trespassing)
+                if (type == OT_Trespassing)
                     MWBase::Environment::get().getDialogueManager()->say(*it, "intruder");
             }
 
