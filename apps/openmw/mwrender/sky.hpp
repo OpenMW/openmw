@@ -11,6 +11,11 @@
 
 namespace osg
 {
+    class Camera;
+}
+
+namespace osg
+{
     class Group;
     class Node;
     class Material;
@@ -161,6 +166,8 @@ namespace MWRender
 
         void listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures);
 
+        void setCamera(osg::Camera *camera);
+
     private:
         void create();
         ///< no need to call this, automatically done on first enable()
@@ -170,6 +177,8 @@ namespace MWRender
         void updateRainParameters();
 
         Resource::SceneManager* mSceneManager;
+
+        osg::Camera* mCamera;
 
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;

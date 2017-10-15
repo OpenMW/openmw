@@ -25,6 +25,9 @@
 #include <osgParticle/ConstantRateCounter>
 #include <osgParticle/RadialShooter>
 
+#include <osgParticle/Operator>
+#include <osgParticle/ModularProgram>
+
 #include <components/misc/rng.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
@@ -48,7 +51,6 @@
 
 namespace
 {
-
     osg::ref_ptr<osg::Material> createAlphaTrackingUnlitMaterial()
     {
         osg::ref_ptr<osg::Material> mat = new osg::Material;
@@ -1093,6 +1095,7 @@ private:
 
 SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager)
     : mSceneManager(sceneManager)
+    , mCamera(NULL)
     , mAtmosphereNightRoll(0.f)
     , mCreated(false)
     , mIsStorm(false)
@@ -1337,6 +1340,87 @@ protected:
     osg::Uniform* mRainIntensityUniform;
 };
 
+void SkyManager::setCamera(osg::Camera *camera)
+{
+    mCamera = camera;
+}
+
+class WrapAroundOperator : public osgParticle::Operator
+{
+public:
+    WrapAroundOperator(osg::Camera *camera, const osg::Vec3 &wrapRange): osgParticle::Operator()
+    {
+        mCamera = camera;
+        mWrapRange = wrapRange;
+        mHalfWrapRange = mWrapRange / 2.0;
+        mPreviousCameraPosition = getCameraPosition();
+    }
+
+    virtual osg::Object *cloneType() const override
+    {
+        return NULL;
+    }
+
+    virtual osg::Object *clone(const osg::CopyOp &op) const override
+    {
+        return NULL;
+    }
+
+    virtual void operate(osgParticle::Particle *P, double dt) override
+    {
+    }
+
+    virtual void operateParticles(osgParticle::ParticleSystem *ps, double dt) override
+    {
+        osg::Vec3 position = getCameraPosition();
+        osg::Vec3 positionDifference = position - mPreviousCameraPosition;
+
+        osg::Matrix toWorld, toLocal;
+
+        std::vector<osg::Matrix> worldMatrices = ps->getWorldMatrices();
+ 
+        if (!worldMatrices.empty())
+        {
+            toWorld = worldMatrices[0];
+            toLocal.invert(toWorld);
+        }
+
+        for (int i = 0; i < ps->numParticles(); ++i)
+        {
+            osgParticle::Particle *p = ps->getParticle(i);
+            p->setPosition(toWorld.preMult(p->getPosition()));
+            p->setPosition(p->getPosition() - positionDifference);
+
+            for (int j = 0; j < 3; ++j)  // wrap-around in all 3 dimensions
+            {
+                osg::Vec3 pos = p->getPosition();
+
+                if (pos[j] < -mHalfWrapRange[j])
+                    pos[j] = mHalfWrapRange[j] + fmod(pos[j] - mHalfWrapRange[j],mWrapRange[j]);
+                else if (pos[j] > mHalfWrapRange[j])
+                    pos[j] = fmod(pos[j] + mHalfWrapRange[j],mWrapRange[j]) - mHalfWrapRange[j];
+
+                p->setPosition(pos);
+            }
+
+            p->setPosition(toLocal.preMult(p->getPosition()));
+        }
+
+        mPreviousCameraPosition = position;
+    }
+
+protected:
+    osg::Camera *mCamera;
+    osg::Vec3 mPreviousCameraPosition;
+    osg::Vec3 mWrapRange;
+    osg::Vec3 mHalfWrapRange;
+
+    osg::Vec3 getCameraPosition()
+    {
+        return mCamera->getInverseViewMatrix().getTrans();
+    }
+};
+
 void SkyManager::createRain()
 {
     if (mRainNode)
@@ -1345,6 +1429,8 @@ void SkyManager::createRain()
     mRainNode = new osg::Group;
 
     mRainParticleSystem = new osgParticle::ParticleSystem;
+    osg::Vec3 rainRange = osg::Vec3(600,600,600);
+
     mRainParticleSystem->setParticleAlignment(osgParticle::ParticleSystem::FIXED);
     mRainParticleSystem->setAlignVectorX(osg::Vec3f(0.1,0,0));
     mRainParticleSystem->setAlignVectorY(osg::Vec3f(0,0,1));
@@ -1370,8 +1456,8 @@ void SkyManager::createRain()
     emitter->setParticleSystem(mRainParticleSystem);
 
     osg::ref_ptr<osgParticle::BoxPlacer> placer (new osgParticle::BoxPlacer);
-    placer->setXRange(-300, 300); // Rain_Diameter
-    placer->setYRange(-300, 300);
+    placer->setXRange(-rainRange.x() / 2, rainRange.x() / 2); // Rain_Diameter
+    placer->setYRange(-rainRange.y() / 2, rainRange.y() / 2);
     placer->setZRange(300, 300);
     emitter->setPlacer(placer);
 
@@ -1385,6 +1471,11 @@ void SkyManager::createRain()
 
     osg::ref_ptr<osgParticle::ParticleSystemUpdater> updater (new osgParticle::ParticleSystemUpdater);
     updater->addParticleSystem(mRainParticleSystem);
+
+    osg::ref_ptr<osgParticle::ModularProgram> program (new osgParticle::ModularProgram);
+    program->addOperator(new WrapAroundOperator(mCamera,rainRange));
+    program->setParticleSystem(mRainParticleSystem);
+    mRainNode->addChild(program);
 
     mRainNode->addChild(emitter);
     mRainNode->addChild(mRainParticleSystem);
@@ -1452,6 +1543,7 @@ void SkyManager::update(float duration)
 
         if (mParticleNode)
             mParticleNode->setAttitude(quat);
+
         mCloudNode->setAttitude(quat);
     }
     else
@@ -1559,6 +1651,22 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
             SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
             mParticleEffect->accept(disableFreezeOnCullVisitor);
+
+            if (!weather.mIsStorm)
+            {
+                SceneUtil::FindByClassVisitor findPSVisitor(std::string("ParticleSystem"));
+                mParticleEffect->accept(findPSVisitor);
+
+                for (unsigned int i = 0; i < findPSVisitor.mFoundNodes.size(); ++i)
+                {
+                    osgParticle::ParticleSystem *ps = static_cast<osgParticle::ParticleSystem *>(findPSVisitor.mFoundNodes[i]);
+                    
+                    osg::ref_ptr<osgParticle::ModularProgram> program (new osgParticle::ModularProgram);
+                    program->addOperator(new WrapAroundOperator(mCamera,osg::Vec3(1024,1024,800)));
+                    program->setParticleSystem(ps);
+                    mParticleNode->addChild(program);
+                }
+            }
         }
     }
 
