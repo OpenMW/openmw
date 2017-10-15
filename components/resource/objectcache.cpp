@@ -34,6 +34,11 @@ ObjectCache::~ObjectCache()
 
 void ObjectCache::addEntryToObjectCache(const std::string& filename, osg::Object* object, double timestamp)
 {
+    if (!object)
+    {
+        OSG_ALWAYS << " trying to add NULL object to cache for " << filename << std::endl;
+        return;
+    }
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_objectCacheMutex);
     _objectCache[filename]=ObjectTimeStampPair(object,timestamp);
 }
