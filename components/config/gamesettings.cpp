@@ -126,6 +126,7 @@ bool Config::GameSettings::readFile(QTextStream &stream, QMap<QString, QString> 
             else
             {
                 // 'data=...' line, so needs processing to deal with ampersands and quotes
+                // The following is based on boost::io::detail::quoted_manip.hpp, but calling those functions did not work as there are too may QStrings involved
                 QChar delim = '\"';
                 QChar escape = '&';
 
