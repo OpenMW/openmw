@@ -1245,9 +1245,11 @@ private:
 class AlphaFader : public SceneUtil::StateSetUpdater
 {
 public:
-    AlphaFader()
+    /// @param rainIntensityUniform rain uniform to update along with alpha, can be NULL
+    AlphaFader(osg::Uniform *rainIntensityUniform=NULL)
         : mAlpha(1.f)
     {
+        mRainIntensityUniform = rainIntensityUniform;
     }
 
     void setAlpha(float alpha)
@@ -1266,15 +1268,19 @@ public:
     {
         osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
         mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,mAlpha));
+
+        if (mRainIntensityUniform)
+            mRainIntensityUniform->set((float) mAlpha);
     }
 
     // Helper for adding AlphaFaders to a subgraph
     class SetupVisitor : public osg::NodeVisitor
     {
     public:
-        SetupVisitor()
+        SetupVisitor(osg::Uniform *rainIntensityUniform)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         {
+            mRainIntensityUniform = rainIntensityUniform;
         }
 
         virtual void apply(osg::Node &node)
@@ -1285,14 +1291,16 @@ public:
                 {
                     SceneUtil::CompositeStateSetUpdater* composite = NULL;
                     osg::Callback* callback = node.getUpdateCallback();
+
                     while (callback)
                     {
                         if ((composite = dynamic_cast<SceneUtil::CompositeStateSetUpdater*>(callback)))
                             break;
+
                         callback = callback->getNestedCallback();
                     }
 
-                    osg::ref_ptr<AlphaFader> alphaFader (new AlphaFader);
+                    osg::ref_ptr<AlphaFader> alphaFader (new AlphaFader(mRainIntensityUniform));
 
                     if (composite)
                         composite->addController(alphaFader);
@@ -1312,10 +1320,12 @@ public:
 
     private:
         std::vector<osg::ref_ptr<AlphaFader> > mAlphaFaders;
+        osg::Uniform *mRainIntensityUniform;
     };
 
 protected:
     float mAlpha;
+    osg::Uniform *mRainIntensityUniform;
 };
 
 class RainFader : public AlphaFader
@@ -1645,12 +1655,16 @@ void SkyManager::setWeather(const WeatherResult& weather)
                 mParticleNode->setNodeMask(Mask_WeatherParticles);
                 mRootNode->addChild(mParticleNode);
             }
+
             mParticleEffect = mSceneManager->getInstance(mCurrentParticleEffect, mParticleNode);
 
             SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
             mParticleEffect->accept(assignVisitor);
 
-            AlphaFader::SetupVisitor alphaFaderSetupVisitor;
+            osg::Uniform *rainUniform = weather.mIsStorm ? NULL : mRainIntensityUniform;
+
+            AlphaFader::SetupVisitor alphaFaderSetupVisitor(rainUniform);
+
             mParticleEffect->accept(alphaFaderSetupVisitor);
             mParticleFaders = alphaFaderSetupVisitor.getAlphaFaders();
 
