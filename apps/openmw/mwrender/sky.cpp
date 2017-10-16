@@ -1548,14 +1548,19 @@ void SkyManager::update(float duration)
 {
     if (!mEnabled)
     {
-        mRainIntensityUniform->set((float) 0.0);
+        if (mRainIntensityUniform)
+            mRainIntensityUniform->set((float) 0.0);
+
         return;
     }
 
-    if (mIsStorm || (!hasRain() && !mParticleNode))
-        mRainIntensityUniform->set((float) 0.0);
-    else
-        mRainIntensityUniform->set((float) mWeatherAlpha);
+    if (mRainIntensityUniform)
+    {
+        if (mIsStorm || (!hasRain() && !mParticleNode))
+            mRainIntensityUniform->set((float) 0.0);
+        else
+            mRainIntensityUniform->set((float) mWeatherAlpha);
+    }
 
     if (mIsStorm)
     {

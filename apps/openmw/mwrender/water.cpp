@@ -416,13 +416,14 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 
     setHeight(mTop);
 
-    mRainIntensityUniform = NULL;
     updateWaterMaterial();
+
+    mRainIntensityUniform = new osg::Uniform("rainIntensity",(float) 0.0);
 }
 
 osg::Uniform *Water::getRainIntensityUniform()
 {
-    return mRainIntensityUniform;
+    return mRainIntensityUniform.get();
 }
 
 void Water::updateWaterMaterial()
@@ -556,7 +557,6 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     program->addShader(fragmentShader);
     shaderStateset->setAttributeAndModes(program, osg::StateAttribute::ON);
 
-    mRainIntensityUniform = new osg::Uniform("rainIntensity",(float) 0.0);
     shaderStateset->addUniform(mRainIntensityUniform);
 
     node->setStateSet(shaderStateset);

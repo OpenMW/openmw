@@ -51,7 +51,7 @@ namespace MWRender
     {
         static const int CELL_SIZE = 8192;
 
-        osg::Uniform* mRainIntensityUniform;
+        osg::ref_ptr<osg::Uniform> mRainIntensityUniform;
 
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mSceneRoot;
