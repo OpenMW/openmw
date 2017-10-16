@@ -44,6 +44,15 @@ namespace CSMWorld
             bool mChanged;
     };
 
+    /// \brief Adds LandTexture records and modifies texture indices as needed.
+    ///
+    /// LandTexture records are different from other types of records, because
+    /// they only effect the current plugin. Thus, when modifying or copying
+    /// a Land record, all of the LandTexture records referenced need to be
+    /// added to the current plugin. Since these newly added LandTextures could
+    /// have indices that conflict with pre-existing LandTextures in the current
+    /// plugin, the indices might have to be changed, both for the newly added
+    /// LandRecord and within the Land record.
     class ImportLandTexturesCommand : public QUndoCommand
     {
         public:
@@ -71,6 +80,9 @@ namespace CSMWorld
             std::vector<std::string> mCreatedTextures;
     };
 
+    /// \brief This command is used to fix LandTexture records and texture
+    ///     indices after cloning a Land. See ImportLandTexturesCommand for
+    ///     details.
     class CopyLandTexturesCommand : public ImportLandTexturesCommand
     {
         public:
@@ -90,6 +102,9 @@ namespace CSMWorld
             std::string mDestId;
     };
 
+    /// \brief This command brings a land record into the current plugin, adding
+    ///     LandTexture records and modifying texture indices as needed.
+    /// \note See ImportLandTextures for more details.
     class TouchLandCommand : public ImportLandTexturesCommand
     {
         public:

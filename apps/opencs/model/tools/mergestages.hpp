@@ -147,7 +147,8 @@ namespace CSMTools
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
-    /// Flattens the added land and land texture records.
+    /// During this stage, the complex process of combining LandTextures from
+    /// potentially multiple plugins is undertaken.
     class FixLandsAndLandTexturesMergeStage : public CSMDoc::Stage
     {
             MergeState& mState;
@@ -163,7 +164,8 @@ namespace CSMTools
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
-    // Removes base LandTexture records.
+    /// Removes base LandTexture records. This gets rid of the base records previously
+    /// needed in FixLandsAndLandTexturesMergeStage.
     class CleanupLandTexturesMergeStage : public CSMDoc::Stage
     {
             MergeState& mState;
