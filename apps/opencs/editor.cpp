@@ -90,16 +90,16 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     boost::program_options::options_description desc("Syntax: openmw-cs <options>\nAllowed options");
 
     desc.add_options()
-    ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken()->composing())
-    ("data-local", boost::program_options::value<std::string>()->default_value(""))
+    ("data", boost::program_options::value<Files::EscapePathContainer>()->default_value(Files::EscapePathContainer(), "data")->multitoken()->composing())
+    ("data-local", boost::program_options::value<Files::EscapeHashString>()->default_value(""))
     ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
-    ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))
-    ("resources", boost::program_options::value<std::string>()->default_value("resources"))
-    ("fallback-archive", boost::program_options::value<std::vector<std::string> >()->
-        default_value(std::vector<std::string>(), "fallback-archive")->multitoken())
+    ("encoding", boost::program_options::value<Files::EscapeHashString>()->default_value("win1252"))
+    ("resources", boost::program_options::value<Files::EscapeHashString>()->default_value("resources"))
+    ("fallback-archive", boost::program_options::value<Files::EscapeStringVector>()->
+        default_value(Files::EscapeStringVector(), "fallback-archive")->multitoken())
     ("fallback", boost::program_options::value<FallbackMap>()->default_value(FallbackMap(), "")
         ->multitoken()->composing(), "fallback values")
-    ("script-blacklist", boost::program_options::value<std::vector<std::string> >()->default_value(std::vector<std::string>(), "")
+    ("script-blacklist", boost::program_options::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
         ->multitoken(), "exclude specified script from the verifier (if the use of the blacklist is enabled)")
     ("script-blacklist-use", boost::program_options::value<bool>()->implicit_value(true)
         ->default_value(true), "enable script blacklisting");
@@ -109,24 +109,24 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     mCfgMgr.readConfiguration(variables, desc, quiet);
 
     mDocumentManager.setEncoding (
-        ToUTF8::calculateEncoding (variables["encoding"].as<std::string>()));
+        ToUTF8::calculateEncoding (variables["encoding"].as<Files::EscapeHashString>().toStdString()));
 
-    mDocumentManager.setResourceDir (mResources = variables["resources"].as<std::string>());
+    mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::EscapeHashString>().toStdString());
 
     mDocumentManager.setFallbackMap (variables["fallback"].as<FallbackMap>().mMap);
 
     if (variables["script-blacklist-use"].as<bool>())
         mDocumentManager.setBlacklistedScripts (
-            variables["script-blacklist"].as<std::vector<std::string> >());
+            variables["script-blacklist"].as<Files::EscapeStringVector>().toStdStringVector());
 
     mFsStrict = variables["fs-strict"].as<bool>();
 
     Files::PathContainer dataDirs, dataLocal;
     if (!variables["data"].empty()) {
-        dataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
+        dataDirs = Files::PathContainer(Files::EscapePath::toPathContainer(variables["data"].as<Files::EscapePathContainer>()));
     }
 
-    std::string local = variables["data-local"].as<std::string>();
+    std::string local = variables["data-local"].as<Files::EscapeHashString>().toStdString();
     if (!local.empty()) {
         dataLocal.push_back(Files::PathContainer::value_type(local));
     }
@@ -157,7 +157,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
         mFileDialog.addFiles(path);
     }
 
-    return std::make_pair (dataDirs, variables["fallback-archive"].as<std::vector<std::string> >());
+    return std::make_pair (dataDirs, variables["fallback-archive"].as<Files::EscapeStringVector>().toStdStringVector());
 }
 
 void CS::Editor::createGame()
