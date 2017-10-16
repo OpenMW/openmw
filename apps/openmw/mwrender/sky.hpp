@@ -252,6 +252,8 @@ namespace MWRender
         bool mEnabled;
         bool mSunEnabled;
 
+        float mWeatherAlpha;
+
         osg::Vec4f mMoonScriptColor;
     };
 }

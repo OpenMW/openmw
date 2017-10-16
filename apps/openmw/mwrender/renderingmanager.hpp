@@ -159,8 +159,6 @@ namespace MWRender
         /// Clear all worldspace-specific data
         void notifyWorldSpaceChanged();
 
-        void clearRainRipples();
-
         void update(float dt, bool paused);
 
         Animation* getAnimation(const MWWorld::Ptr& ptr);
