@@ -1096,6 +1096,7 @@ private:
 SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager)
     : mSceneManager(sceneManager)
     , mCamera(NULL)
+    , mRainIntensityUniform(NULL)
     , mAtmosphereNightRoll(0.f)
     , mCreated(false)
     , mIsStorm(false)
@@ -1136,6 +1137,11 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     mRootNode->addChild(mEarlyRenderBinRoot);
 
     mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
+}
+
+void SkyManager::setRainIntensityUniform(osg::Uniform *uniform)
+{
+    mRainIntensityUniform = uniform;
 }
 
 void SkyManager::create()
@@ -1315,7 +1321,6 @@ protected:
 class RainFader : public AlphaFader
 {
 public:
-
     RainFader(osg::Uniform *rainIntensityUniform): AlphaFader()
     {
         mRainIntensityUniform = rainIntensityUniform;
@@ -1481,7 +1486,7 @@ void SkyManager::createRain()
     mRainNode->addChild(mRainParticleSystem);
     mRainNode->addChild(updater);
 
-    mRainFader = new RainFader(mRootNode->getParent(0)->getParent(0)->getStateSet()->getUniform("rainIntensity"));
+    mRainFader = new RainFader(mRainIntensityUniform);
     mRainNode->addUpdateCallback(mRainFader);
     mRainNode->addCullCallback(mUnderwaterSwitch);
     mRainNode->setNodeMask(Mask_WeatherParticles);
@@ -1742,7 +1747,8 @@ void SkyManager::setWeather(const WeatherResult& weather)
     mSun->adjustTransparency(weather.mGlareView * weather.mSunDiscColor.a());
 
     float nextStarsOpacity = weather.mNightFade * weather.mGlareView;
-    if(weather.mNight && mStarsOpacity != nextStarsOpacity)
+
+    if (weather.mNight && mStarsOpacity != nextStarsOpacity)
     {
         mStarsOpacity = nextStarsOpacity;
 
@@ -1753,6 +1759,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
     if (mRainFader)
         mRainFader->setAlpha(weather.mEffectFade * 0.6); // * Rain_Threshold?
+
     for (std::vector<osg::ref_ptr<AlphaFader> >::const_iterator it = mParticleFaders.begin(); it != mParticleFaders.end(); ++it)
         (*it)->setAlpha(weather.mEffectFade);
 }
