@@ -127,7 +127,11 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     }
 
     std::string local = variables["data-local"].as<Files::EscapeHashString>().toStdString();
-    if (!local.empty()) {
+    if (!local.empty())
+    {
+        if (local.front() == '\"')
+            local = local.substr(1, local.length() - 2);
+
         dataLocal.push_back(Files::PathContainer::value_type(local));
     }
 
