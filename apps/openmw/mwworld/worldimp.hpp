@@ -227,7 +227,7 @@ namespace MWWorld
 
             virtual const MWWorld::ESMStore& getStore() const override;
 
-            virtual std::vector<ESM::ESMReader>& getEsmReader();
+            virtual std::vector<ESM::ESMReader>& getEsmReader() override;
 
             virtual LocalScripts& getLocalScripts() override;
 
