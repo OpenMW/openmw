@@ -69,7 +69,7 @@ namespace MWWorld
 
     /// \brief The game world and its visual representation
 
-    class World : public MWBase::World
+    class World final: public MWBase::World
     {
             Resource::ResourceSystem* mResourceSystem;
 
