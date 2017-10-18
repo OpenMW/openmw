@@ -20,6 +20,7 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 : mDocument (document), mAborted (false), mMessages (0), mTotalRecords (0)
 {
     setWindowTitle (QString::fromUtf8((std::string("Opening ") + document->getSavePath().filename().string()).c_str()));
+    setWindowFlags (Qt::MSWindowsFixedSizeDialogHint);
 
     setMinimumWidth (400);
 
@@ -71,6 +72,7 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 
     show();
 
+    setFixedSize (this->size());
     connect (mButtons, SIGNAL (rejected()), this, SLOT (cancel()));
 }
 
