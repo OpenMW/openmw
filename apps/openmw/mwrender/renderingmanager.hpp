@@ -85,7 +85,6 @@ namespace MWRender
 
         osg::Uniform* mUniformNear;
         osg::Uniform* mUniformFar;
-        osg::Uniform* mUniformRainIntensity;
 
         void preloadCommonAssets();
 
@@ -159,8 +158,6 @@ namespace MWRender
 
         /// Clear all worldspace-specific data
         void notifyWorldSpaceChanged();
-
-        void clearRainRipples();
 
         void update(float dt, bool paused);
 

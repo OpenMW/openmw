@@ -1096,6 +1096,7 @@ private:
 SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager)
     : mSceneManager(sceneManager)
     , mCamera(NULL)
+    , mRainIntensityUniform(NULL)
     , mAtmosphereNightRoll(0.f)
     , mCreated(false)
     , mIsStorm(false)
@@ -1136,6 +1137,11 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     mRootNode->addChild(mEarlyRenderBinRoot);
 
     mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
+}
+
+void SkyManager::setRainIntensityUniform(osg::Uniform *uniform)
+{
+    mRainIntensityUniform = uniform;
 }
 
 void SkyManager::create()
@@ -1239,9 +1245,11 @@ private:
 class AlphaFader : public SceneUtil::StateSetUpdater
 {
 public:
-    AlphaFader()
+    /// @param alphaUpdate variable which to update with alpha value
+    AlphaFader(float *alphaUpdate)
         : mAlpha(1.f)
     {
+        mAlphaUpdate = alphaUpdate;
     }
 
     void setAlpha(float alpha)
@@ -1260,15 +1268,19 @@ public:
     {
         osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
         mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,mAlpha));
+
+        if (mAlphaUpdate)
+            *mAlphaUpdate = mAlpha;
     }
 
     // Helper for adding AlphaFaders to a subgraph
     class SetupVisitor : public osg::NodeVisitor
     {
     public:
-        SetupVisitor()
+        SetupVisitor(float *alphaUpdate)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         {
+            mAlphaUpdate = alphaUpdate;
         }
 
         virtual void apply(osg::Node &node)
@@ -1279,14 +1291,16 @@ public:
                 {
                     SceneUtil::CompositeStateSetUpdater* composite = NULL;
                     osg::Callback* callback = node.getUpdateCallback();
+
                     while (callback)
                     {
                         if ((composite = dynamic_cast<SceneUtil::CompositeStateSetUpdater*>(callback)))
                             break;
+
                         callback = callback->getNestedCallback();
                     }
 
-                    osg::ref_ptr<AlphaFader> alphaFader (new AlphaFader);
+                    osg::ref_ptr<AlphaFader> alphaFader (new AlphaFader(mAlphaUpdate));
 
                     if (composite)
                         composite->addController(alphaFader);
@@ -1296,6 +1310,7 @@ public:
                     mAlphaFaders.push_back(alphaFader);
                 }
             }
+
             traverse(node);
         }
 
@@ -1306,19 +1321,19 @@ public:
 
     private:
         std::vector<osg::ref_ptr<AlphaFader> > mAlphaFaders;
+        float *mAlphaUpdate;
     };
 
 protected:
     float mAlpha;
+    float *mAlphaUpdate;
 };
 
 class RainFader : public AlphaFader
 {
 public:
-
-    RainFader(osg::Uniform *rainIntensityUniform): AlphaFader()
+    RainFader(float *alphaUpdate): AlphaFader(alphaUpdate)
     {
-        mRainIntensityUniform = rainIntensityUniform;
     }
 
     virtual void setDefaults(osg::StateSet* stateset)
@@ -1333,11 +1348,8 @@ public:
     virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
     {
         AlphaFader::apply(stateset,nv);
-        mRainIntensityUniform->set((float) (mAlpha * 2.0));  // mAlpha is limited to 0.6 so multiply by 2 to reach full intensity
+        *mAlphaUpdate = mAlpha * 2.0;  // mAlpha is limited to 0.6 so multiply by 2 to reach full intensity
     }
-
-protected:
-    osg::Uniform* mRainIntensityUniform;
 };
 
 void SkyManager::setCamera(osg::Camera *camera)
@@ -1481,7 +1493,7 @@ void SkyManager::createRain()
     mRainNode->addChild(mRainParticleSystem);
     mRainNode->addChild(updater);
 
-    mRainFader = new RainFader(mRootNode->getParent(0)->getParent(0)->getStateSet()->getUniform("rainIntensity"));
+    mRainFader = new RainFader(&mWeatherAlpha);
     mRainNode->addUpdateCallback(mRainFader);
     mRainNode->addCullCallback(mUnderwaterSwitch);
     mRainNode->setNodeMask(Mask_WeatherParticles);
@@ -1534,7 +1546,21 @@ bool SkyManager::hasRain()
 
 void SkyManager::update(float duration)
 {
-    if (!mEnabled) return;
+    if (!mEnabled)
+    {
+        if (mRainIntensityUniform)
+            mRainIntensityUniform->set((float) 0.0);
+
+        return;
+    }
+
+    if (mRainIntensityUniform)
+    {
+        if (mIsStorm || (!hasRain() && !mParticleNode))
+            mRainIntensityUniform->set((float) 0.0);
+        else
+            mRainIntensityUniform->set((float) mWeatherAlpha);
+    }
 
     if (mIsStorm)
     {
@@ -1640,12 +1666,14 @@ void SkyManager::setWeather(const WeatherResult& weather)
                 mParticleNode->setNodeMask(Mask_WeatherParticles);
                 mRootNode->addChild(mParticleNode);
             }
+
             mParticleEffect = mSceneManager->getInstance(mCurrentParticleEffect, mParticleNode);
 
             SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
             mParticleEffect->accept(assignVisitor);
 
-            AlphaFader::SetupVisitor alphaFaderSetupVisitor;
+            AlphaFader::SetupVisitor alphaFaderSetupVisitor(&mWeatherAlpha);
+
             mParticleEffect->accept(alphaFaderSetupVisitor);
             mParticleFaders = alphaFaderSetupVisitor.getAlphaFaders();
 
@@ -1742,7 +1770,8 @@ void SkyManager::setWeather(const WeatherResult& weather)
     mSun->adjustTransparency(weather.mGlareView * weather.mSunDiscColor.a());
 
     float nextStarsOpacity = weather.mNightFade * weather.mGlareView;
-    if(weather.mNight && mStarsOpacity != nextStarsOpacity)
+
+    if (weather.mNight && mStarsOpacity != nextStarsOpacity)
     {
         mStarsOpacity = nextStarsOpacity;
 
@@ -1753,6 +1782,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
     if (mRainFader)
         mRainFader->setAlpha(weather.mEffectFade * 0.6); // * Rain_Threshold?
+
     for (std::vector<osg::ref_ptr<AlphaFader> >::const_iterator it = mParticleFaders.begin(); it != mParticleFaders.end(); ++it)
         (*it)->setAlpha(weather.mEffectFade);
 }

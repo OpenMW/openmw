@@ -411,12 +411,19 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     createSimpleWaterStateSet(geom2, mFallback->getFallbackFloat("Water_Map_Alpha"));
     geom2->setNodeMask(Mask_SimpleWater);
     mWaterNode->addChild(geom2);
-
+ 
     mSceneRoot->addChild(mWaterNode);
 
     setHeight(mTop);
 
     updateWaterMaterial();
+
+    mRainIntensityUniform = new osg::Uniform("rainIntensity",(float) 0.0);
+}
+
+osg::Uniform *Water::getRainIntensityUniform()
+{
+    return mRainIntensityUniform.get();
 }
 
 void Water::updateWaterMaterial()
@@ -549,6 +556,8 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     program->addShader(vertexShader);
     program->addShader(fragmentShader);
     shaderStateset->setAttributeAndModes(program, osg::StateAttribute::ON);
+
+    shaderStateset->addUniform(mRainIntensityUniform);
 
     node->setStateSet(shaderStateset);
     node->setUpdateCallback(NULL);
