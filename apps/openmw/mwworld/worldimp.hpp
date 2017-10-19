@@ -635,7 +635,7 @@ namespace MWWorld
             void goToJail () override;
 
             /// Spawn a random creature from a levelled list next to the player
-             void spawnRandomCreature(const std::string& creatureList) override;
+            void spawnRandomCreature(const std::string& creatureList) override;
 
             /// Spawn a blood effect for \a ptr at \a worldPosition
             void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;
@@ -661,7 +661,7 @@ namespace MWWorld
 
             /// Return a vector aiming the actor's weapon towards a target.
             /// @note The length of the vector is the distance between actor and target.
-             osg::Vec3f aimToTarget(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) override;
+            osg::Vec3f aimToTarget(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) override;
 
             /// Return the distance between actor's weapon and target's collision box.
             float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) override;
