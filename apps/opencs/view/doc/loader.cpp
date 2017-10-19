@@ -20,9 +20,9 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 : mDocument (document), mAborted (false), mMessages (0), mTotalRecords (0)
 {
     setWindowTitle (QString::fromUtf8((std::string("Opening ") + document->getSavePath().filename().string()).c_str()));
-    setWindowFlags (Qt::MSWindowsFixedSizeDialogHint);
+    setWindowFlags (Qt::MSWindowsFixedSizeDialogHint | Qt::Dialog);
 
-    setMinimumWidth (400);
+    int minimumWidth = 400;
 
     mLayout = new QVBoxLayout (this);
 
@@ -32,6 +32,8 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
     mLayout->addWidget (mFile);
 
     mFileProgress = new QProgressBar (this);
+
+    mFileProgress->setMinimumWidth (minimumWidth);
 
     mLayout->addWidget (mFileProgress);
 
@@ -48,6 +50,8 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
     mLayout->addWidget (mRecords = new QLabel ("Records", this));
 
     mRecordProgress = new QProgressBar (this);
+
+    mRecordProgress->setMinimumWidth (minimumWidth);
 
     mLayout->addWidget (mRecordProgress);
 
@@ -66,13 +70,14 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
 
     mLayout->addWidget (mButtons);
 
+    mLayout->setSizeConstraint(QLayout::SetFixedSize);
+
     setLayout (mLayout);
 
     move (QCursor::pos());
 
     show();
 
-    setFixedSize (this->size());
     connect (mButtons, SIGNAL (rejected()), this, SLOT (cancel()));
 }
 
