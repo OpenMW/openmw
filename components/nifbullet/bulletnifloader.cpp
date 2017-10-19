@@ -49,7 +49,7 @@ BulletNifLoader::~BulletNifLoader()
 {
 }
 
-osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::NIFFilePtr nif)
+osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::NIFFilePtr& nif)
 {
     mShape = new Resource::BulletShape;
 

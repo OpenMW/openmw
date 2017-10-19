@@ -315,16 +315,7 @@ namespace ESM
 
     bool Land::isDataLoaded(int flags) const
     {
-        return mLandData && (mLandData->mDataLoaded & flags) == (flags & mDataTypes);
-    }
-
-    void Land::setDataLoaded(int flags)
-    {
-        if (!mLandData)
-            mLandData = new LandData;
-
-        mDataTypes |= flags;
-        mLandData->mDataLoaded |= flags;
+        return mLandData && (mLandData->mDataLoaded & flags) == flags;
     }
 
     Land::Land (const Land& land)

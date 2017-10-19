@@ -1191,8 +1191,8 @@ namespace NifOsg
             if (pixelData->mipmaps.empty())
                 return NULL;
 
-            unsigned int width = 0;
-            unsigned int height = 0;
+            int width = 0;
+            int height = 0;
 
             std::vector<unsigned int> mipmapVector;
             for (unsigned int i=0; i<pixelData->mipmaps.size()-3; ++i)

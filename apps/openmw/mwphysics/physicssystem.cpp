@@ -702,8 +702,6 @@ namespace MWPhysics
         const char* env = getenv("OPENMW_PHYSICS_FPS");
         if (env)
         {
-            std::string str(env);
-
             float physFramerate = std::atof(env);
             if (physFramerate > 0)
             {
@@ -1046,7 +1044,7 @@ namespace MWPhysics
     bool PhysicsSystem::isOnGround(const MWWorld::Ptr &actor)
     {
         Actor* physactor = getActor(actor);
-        return physactor->getOnGround();
+        return physactor && physactor->getOnGround();
     }
 
     bool PhysicsSystem::canMoveToWaterSurface(const MWWorld::ConstPtr &actor, const float waterlevel)
