@@ -1,5 +1,7 @@
 #include "inventorywindow.hpp"
 
+#include <stdexcept>
+
 #include <MyGUI_Window.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_RenderManager.h>
@@ -225,8 +227,8 @@ namespace MWGui
         std::string sound = item.mBase.getClass().getDownSoundId(item.mBase);
 
         MWWorld::Ptr object = item.mBase;
-        bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
         int count = item.mCount;
+        bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
 
         if (MyGUI::InputManager::getInstance().isControlPressed())
             count = 1;
@@ -525,7 +527,6 @@ namespace MWGui
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
             MWWorld::Ptr ptr = mDragAndDrop->mItem.mBase;
-            int itemType = ptr.getContainerStore()->getType(ptr);
 
             mDragAndDrop->finish();
 
@@ -538,13 +539,15 @@ namespace MWGui
             useItem(ptr);
 
             // If item is ingredient or potion don't stop drag and drop to simplify action of taking more than one 1 item
-            if ((itemType == MWWorld::ContainerStore::Type_Ingredient
-                    || itemType == MWWorld::ContainerStore::Type_Potion)
+            if ((ptr.getTypeName() == typeid(ESM::Potion).name() ||
+                 ptr.getTypeName() == typeid(ESM::Ingredient).name())
                 && mDragAndDrop->mDraggedCount > 1)
             {
-                dragItem (nullptr, mDragAndDrop->mDraggedCount - 1);
+                // Item can be provided from other window for example container.
+                // But after DragAndDrop::startDrag item automaticly always gets to player inventory.
+                mSelectedItem = getModel()->getIndex(mDragAndDrop->mItem);
+                dragItem(nullptr, mDragAndDrop->mDraggedCount - 1);
             }
-
         }
         else
         {
