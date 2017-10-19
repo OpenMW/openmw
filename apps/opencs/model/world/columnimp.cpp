@@ -108,7 +108,7 @@ namespace CSMWorld
             throw std::runtime_error("invalid land map LOD data");
 
         Land copy = record.get();
-        copy.setDataLoaded(Land::DATA_WNAM);
+        copy.add(Land::DATA_WNAM);
 
         for (int i = 0; i < values.size(); ++i)
         {
@@ -155,7 +155,7 @@ namespace CSMWorld
             throw std::runtime_error("invalid land normals data");
 
         Land copy = record.get();
-        copy.setDataLoaded(Land::DATA_VNML);
+        copy.add(Land::DATA_VNML);
 
         for (int i = 0; i < values.size(); ++i)
         {
@@ -202,7 +202,7 @@ namespace CSMWorld
             throw std::runtime_error("invalid land heights data");
 
         Land copy = record.get();
-        copy.setDataLoaded(Land::DATA_VHGT);
+        copy.add(Land::DATA_VHGT);
 
         for (int i = 0; i < values.size(); ++i)
         {
@@ -249,7 +249,7 @@ namespace CSMWorld
             throw std::runtime_error("invalid land colours data");
 
         Land copy = record.get();
-        copy.setDataLoaded(Land::DATA_VCLR);
+        copy.add(Land::DATA_VCLR);
 
         for (int i = 0; i < values.size(); ++i)
         {
@@ -296,7 +296,7 @@ namespace CSMWorld
             throw std::runtime_error("invalid land textures data");
 
         Land copy = record.get();
-        copy.setDataLoaded(Land::DATA_VTEX);
+        copy.add(Land::DATA_VTEX);
 
         for (int i = 0; i < values.size(); ++i)
         {

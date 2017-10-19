@@ -336,7 +336,7 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
         int oldRow = idCollection()->searchId(id);
 
         // If it does not exist or it is in the current plugin, it can be skipped.
-        if (oldRow <= 0 || plugin == 0)
+        if (oldRow < 0 || plugin == 0)
         {
             results.recordMapping.push_back(std::make_pair(id, id));
             continue;

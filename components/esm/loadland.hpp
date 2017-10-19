@@ -132,7 +132,6 @@ struct Land
     void unloadData() const;
 
     /// Check if given data type is loaded
-    /// @note We only check data types that *can* be loaded (present in mDataTypes)
     bool isDataLoaded(int flags) const;
 
     /// Sets the flags and creates a LandData if needed
