@@ -22,7 +22,7 @@ CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
     setWindowTitle (QString::fromUtf8((std::string("Opening ") + document->getSavePath().filename().string()).c_str()));
     setWindowFlags (Qt::MSWindowsFixedSizeDialogHint | Qt::Dialog);
 
-    int minimumWidth = 400;
+    const int minimumWidth = 400;
 
     mLayout = new QVBoxLayout (this);
 
