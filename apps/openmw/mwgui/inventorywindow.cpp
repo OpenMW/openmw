@@ -213,11 +213,13 @@ namespace MWGui
 
     void InventoryWindow::onItemSelected (int index)
     {
-        onItemSelectedFromSourceModel (mSortModel->mapToSource(index));
+        onItemSelectedFromSourceModel (mSortModel->mapToSource(index), false);
     }
 
-    void InventoryWindow::onItemSelectedFromSourceModel (int index)
+    void InventoryWindow::onItemSelectedFromSourceModel (int index, bool takeMaxItemCount)
     {
+        mLastItemIndex = index;
+
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
             mDragAndDrop->drop(mTradeModel, mItemView);
@@ -230,7 +232,8 @@ namespace MWGui
         MWWorld::Ptr object = item.mBase;
         int count = item.mCount;
 
-        bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
+        bool shift = takeMaxItemCount ? true : MyGUI::InputManager::getInstance().isShiftPressed();
+
         if (MyGUI::InputManager::getInstance().isControlPressed())
             count = 1;
 
@@ -528,6 +531,8 @@ namespace MWGui
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
             MWWorld::Ptr ptr = mDragAndDrop->mItem.mBase;
+            int itemType = ptr.getContainerStore()->getType(ptr);
+
             mDragAndDrop->finish();
 
             if (mDragAndDrop->mSourceModel != mTradeModel)
@@ -536,6 +541,12 @@ namespace MWGui
                 ptr = mDragAndDrop->mSourceModel->moveItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount, mTradeModel);
             }
             useItem(ptr);
+
+            if ((itemType == MWWorld::ContainerStore::Type_Ingredient || itemType == MWWorld::ContainerStore::Type_Potion) && mDragAndDrop->mDraggedCount > 1)
+            {
+                onItemSelectedFromSourceModel(mLastItemIndex, true);
+            }
+
         }
         else
         {
@@ -550,7 +561,7 @@ namespace MWGui
             {
                 if (mTradeModel->getItem(i).mBase == itemSelected)
                 {
-                    onItemSelectedFromSourceModel(i);
+                    onItemSelectedFromSourceModel(i, false);
                     return;
                 }
             }
