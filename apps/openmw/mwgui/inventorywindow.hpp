@@ -69,7 +69,6 @@ namespace MWGui
             DragAndDrop* mDragAndDrop;
 
             int mSelectedItem;
-            int mLastItemIndex;
 
             MWWorld::Ptr mPtr;
 
@@ -104,7 +103,7 @@ namespace MWGui
             bool mTrading;
 
             void onItemSelected(int index);
-            void onItemSelectedFromSourceModel(int index, bool takeMaxCount);
+            void onItemSelectedFromSourceModel(int index);
 
             void onBackgroundSelected();
 

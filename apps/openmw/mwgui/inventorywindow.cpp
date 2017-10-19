@@ -1,7 +1,5 @@
 #include "inventorywindow.hpp"
 
-#include <stdexcept>
-
 #include <MyGUI_Window.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_RenderManager.h>
@@ -26,7 +24,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
 #include "../mwscript/interpretercontext.hpp"
-#include "../mwrender/characterpreview.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -213,13 +210,11 @@ namespace MWGui
 
     void InventoryWindow::onItemSelected (int index)
     {
-        onItemSelectedFromSourceModel (mSortModel->mapToSource(index), false);
+        onItemSelectedFromSourceModel (mSortModel->mapToSource(index));
     }
 
-    void InventoryWindow::onItemSelectedFromSourceModel (int index, bool takeMaxItemCount)
+    void InventoryWindow::onItemSelectedFromSourceModel (int index)
     {
-        mLastItemIndex = index;
-
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
             mDragAndDrop->drop(mTradeModel, mItemView);
@@ -230,9 +225,8 @@ namespace MWGui
         std::string sound = item.mBase.getClass().getDownSoundId(item.mBase);
 
         MWWorld::Ptr object = item.mBase;
+        bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
         int count = item.mCount;
-
-        bool shift = takeMaxItemCount ? true : MyGUI::InputManager::getInstance().isShiftPressed();
 
         if (MyGUI::InputManager::getInstance().isControlPressed())
             count = 1;
@@ -540,11 +534,15 @@ namespace MWGui
                 // Move item to the player's inventory
                 ptr = mDragAndDrop->mSourceModel->moveItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount, mTradeModel);
             }
+
             useItem(ptr);
 
-            if ((itemType == MWWorld::ContainerStore::Type_Ingredient || itemType == MWWorld::ContainerStore::Type_Potion) && mDragAndDrop->mDraggedCount > 1)
+            // If item is ingredient or potion don't stop drag and drop to simplify action of taking more than one 1 item
+            if ((itemType == MWWorld::ContainerStore::Type_Ingredient
+                    || itemType == MWWorld::ContainerStore::Type_Potion)
+                && mDragAndDrop->mDraggedCount > 1)
             {
-                onItemSelectedFromSourceModel(mLastItemIndex, true);
+                dragItem (nullptr, mDragAndDrop->mDraggedCount - 1);
             }
 
         }
@@ -561,7 +559,7 @@ namespace MWGui
             {
                 if (mTradeModel->getItem(i).mBase == itemSelected)
                 {
-                    onItemSelectedFromSourceModel(i, false);
+                    onItemSelectedFromSourceModel(i);
                     return;
                 }
             }
