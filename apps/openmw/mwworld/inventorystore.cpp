@@ -340,7 +340,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                     if (old.getTypeName() == typeid(ESM::Clothing).name())
                     {
                         // check value
-                        if (old.getClass().getValue (old) > test.getClass().getValue (test))
+                        if (old.getClass().getValue (old) >= test.getClass().getValue (test))
                             // old clothing was more valuable
                             continue;
                     }
