@@ -528,25 +528,25 @@ namespace MWWorld
             void hurtStandingActors (const MWWorld::ConstPtr& object, float dmgPerSecond) override;
             ///< Apply a health difference to any actors standing on \a object.
             /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
-             void hurtCollidingActors (const MWWorld::ConstPtr& object, float dmgPerSecond) override;
+            void hurtCollidingActors (const MWWorld::ConstPtr& object, float dmgPerSecond) override;
             ///< Apply a health difference to any actors colliding with \a object.
             /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
 
-             float getWindSpeed() override;
+            float getWindSpeed() override;
 
-             void getContainersOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out) override;
+            void getContainersOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out) override;
             ///< get all containers in active cells owned by this Npc
-             void getItemsOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out) override;
+            void getItemsOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out) override;
             ///< get all items in active cells owned by this Npc
 
-             bool getLOS(const MWWorld::ConstPtr& actor,const MWWorld::ConstPtr& targetActor) override;
+            bool getLOS(const MWWorld::ConstPtr& actor,const MWWorld::ConstPtr& targetActor) override;
             ///< get Line of Sight (morrowind stupid implementation)
 
-             float getDistToNearestRayHit(const osg::Vec3f& from, const osg::Vec3f& dir, float maxDist, bool includeWater = false) override;
+            float getDistToNearestRayHit(const osg::Vec3f& from, const osg::Vec3f& dir, float maxDist, bool includeWater = false) override;
 
-             void enableActorCollision(const MWWorld::Ptr& actor, bool enable) override;
+            void enableActorCollision(const MWWorld::Ptr& actor, bool enable) override;
 
-             int canRest() override;
+            int canRest() override;
             ///< check if the player is allowed to rest \n
             /// 0 - yes \n
             /// 1 - only waiting \n
@@ -554,132 +554,132 @@ namespace MWWorld
             /// 3 - enemies are nearby (not implemented)
 
             /// \todo Probably shouldn't be here
-             MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) override;
-             const MWRender::Animation* getAnimation(const MWWorld::ConstPtr &ptr) const override;
-             void reattachPlayerCamera() override;
+            MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) override;
+            const MWRender::Animation* getAnimation(const MWWorld::ConstPtr &ptr) const override;
+            void reattachPlayerCamera() override;
 
             /// \todo this does not belong here
-             void screenshot (osg::Image* image, int w, int h) override;
+            void screenshot (osg::Image* image, int w, int h) override;
 
             /// Find center of exterior cell above land surface
             /// \return false if exterior with given name not exists, true otherwise
-             bool findExteriorPosition(const std::string &name, ESM::Position &pos) override;
+            bool findExteriorPosition(const std::string &name, ESM::Position &pos) override;
 
             /// Find position in interior cell near door entrance
             /// \return false if interior with given name not exists, true otherwise
-             bool findInteriorPosition(const std::string &name, ESM::Position &pos) override;
+            bool findInteriorPosition(const std::string &name, ESM::Position &pos) override;
 
             /// Enables or disables use of teleport spell effects (recall, intervention, etc).
-             void enableTeleporting(bool enable) override;
+            void enableTeleporting(bool enable) override;
 
             /// Returns true if teleport spell effects are allowed.
-             bool isTeleportingEnabled() const override;
+            bool isTeleportingEnabled() const override;
 
             /// Enables or disables use of levitation spell effect.
-             void enableLevitation(bool enable) override;
+            void enableLevitation(bool enable) override;
 
             /// Returns true if levitation spell effect is allowed.
-             bool isLevitationEnabled() const override;
+            bool isLevitationEnabled() const override;
 
-             bool getGodModeState() override;
+            bool getGodModeState() override;
 
-             bool toggleGodMode() override;
+            bool toggleGodMode() override;
 
-             bool toggleScripts() override;
-             bool getScriptsEnabled() const override;
+            bool toggleScripts() override;
+            bool getScriptsEnabled() const override;
 
             /**
              * @brief startSpellCast attempt to start casting a spell. Might fail immediately if conditions are not met.
              * @param actor
              * @return true if the spell can be casted (i.e. the animation should start)
              */
-             bool startSpellCast (const MWWorld::Ptr& actor) override;
+            bool startSpellCast (const MWWorld::Ptr& actor) override;
 
             /**
              * @brief Cast the actual spell, should be called mid-animation
              * @param actor
              */
-             void castSpell (const MWWorld::Ptr& actor) override;
+            void castSpell (const MWWorld::Ptr& actor) override;
 
-             void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection) override;
-             void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
+            void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection) override;
+            void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength) override;
 
 
-             const std::vector<std::string>& getContentFiles() const override;
+            const std::vector<std::string>& getContentFiles() const override;
 
-             void breakInvisibility (const MWWorld::Ptr& actor) override;
+            void breakInvisibility (const MWWorld::Ptr& actor) override;
             // Are we in an exterior or pseudo-exterior cell and it's night?
-             bool isDark() const override;
+            bool isDark() const override;
 
-             bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result) override;
+            bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result) override;
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case
-             void teleportToClosestMarker (const MWWorld::Ptr& ptr,
+            void teleportToClosestMarker (const MWWorld::Ptr& ptr,
                                                   const std::string& id) override;
 
             /// List all references (filtered by \a type) detected by \a ptr. The range
             /// is determined by the current magnitude of the "Detect X" magic effect belonging to \a type.
             /// @note This also works for references in containers.
-             void listDetectedReferences (const MWWorld::Ptr& ptr, std::vector<MWWorld::Ptr>& out,
+            void listDetectedReferences (const MWWorld::Ptr& ptr, std::vector<MWWorld::Ptr>& out,
                                                   DetectionType type) override;
 
             /// Update the value of some globals according to the world state, which may be used by dialogue entries.
             /// This should be called when initiating a dialogue.
-             void updateDialogueGlobals() override;
+            void updateDialogueGlobals() override;
 
             /// Moves all stolen items from \a ptr to the closest evidence chest.
-             void confiscateStolenItems(const MWWorld::Ptr& ptr) override;
+            void confiscateStolenItems(const MWWorld::Ptr& ptr) override;
 
-             void goToJail () override;
+            void goToJail () override;
 
             /// Spawn a random creature from a levelled list next to the player
              void spawnRandomCreature(const std::string& creatureList) override;
 
             /// Spawn a blood effect for \a ptr at \a worldPosition
-             void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;
+            void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;
 
-             void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos) override;
+            void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos) override;
 
-             void explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster, const MWWorld::Ptr& ignore,
+            void explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster, const MWWorld::Ptr& ignore,
                                       ESM::RangeType rangeType, const std::string& id, const std::string& sourceName,
                                       const bool fromProjectile=false) override;
 
-             void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) override;
+            void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) override;
 
             /// @see MWWorld::WeatherManager::isInStorm
-             bool isInStorm() const override;
+            bool isInStorm() const override;
 
             /// @see MWWorld::WeatherManager::getStormDirection
-             osg::Vec3f getStormDirection() const override;
+            osg::Vec3f getStormDirection() const override;
 
             /// Resets all actors in the current active cells to their original location within that cell.
-             void resetActors() override;
+            void resetActors() override;
 
-             bool isWalkingOnWater (const MWWorld::ConstPtr& actor) const override;
+            bool isWalkingOnWater (const MWWorld::ConstPtr& actor) const override;
 
             /// Return a vector aiming the actor's weapon towards a target.
             /// @note The length of the vector is the distance between actor and target.
              osg::Vec3f aimToTarget(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) override;
 
             /// Return the distance between actor's weapon and target's collision box.
-             float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) override;
+            float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) override;
 
-             bool isPlayerInJail() const override;
+            bool isPlayerInJail() const override;
 
             /// Return terrain height at \a worldPos position.
-             float getTerrainHeightAt(const osg::Vec3f& worldPos) const override;
+            float getTerrainHeightAt(const osg::Vec3f& worldPos) const override;
 
             /// Return physical or rendering half extents of the given actor.
-             osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& actor, bool rendering=false) const override;
+            osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& actor, bool rendering=false) const override;
 
             /// Export scene graph to a file and return the filename.
             /// \param ptr object to export scene graph for (if empty, export entire scene graph)
-             std::string exportSceneGraph(const MWWorld::Ptr& ptr) override;
+            std::string exportSceneGraph(const MWWorld::Ptr& ptr) override;
 
             /// Preload VFX associated with this effect list
-             void preloadEffects(const ESM::EffectList* effectList) override;
+            void preloadEffects(const ESM::EffectList* effectList) override;
     };
 }
 
