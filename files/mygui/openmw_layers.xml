@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layer" version="1.0">
+    <Layer name="Scene" overlapped="false" pick="false"/>
     <Layer name="Overlay" overlapped="false" pick="false"/>
     <Layer name="AdditiveOverlay" type="AdditiveLayer" pick="false"/>
     <Layer name="HUD" overlapped="false" pick="true"/>

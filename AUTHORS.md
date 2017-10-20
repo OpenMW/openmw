@@ -34,11 +34,13 @@ Programmers
     Ben Shealy (bentsherman)
     Bret Curtis (psi29a)
     Britt Mathis (galdor557)
+    Capostrophic
     cc9cii
     Chris Boyce (slothlife)
     Chris Robinson (KittyCat)
     Cory F. Cohen (cfcohen)
     Cris Mihalache (Mirceam)
+    crussell187
     darkf
     devnexen
     Dieho
@@ -86,6 +88,7 @@ Programmers
     lazydev
     Leon Krieg (lkrieg)
     Leon Saunders (emoose)
+    Łukasz Gołębiewski (lukago)
     logzero
     lohikaarme
     Lukasz Gromanowski (lgro)
@@ -104,6 +107,7 @@ Programmers
     Michael Papageorgiou (werdanith)
     Michał Bień (Glorf)
     Michał Moroz (dragonee)
+    Miloslav Číž (drummyfish)
     Miroslav Puda (pakanek)
     MiroslavR
     Mitchell Schwitzer (schwitzerm)

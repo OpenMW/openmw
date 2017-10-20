@@ -22,7 +22,7 @@ namespace MWGui
         QuickKeysMenu();
         ~QuickKeysMenu();
 
-        virtual void exit();
+        void onResChange(int, int) { center(); }
 
         void onItemButtonClicked(MyGUI::Widget* sender);
         void onMagicButtonClicked(MyGUI::Widget* sender);
@@ -77,7 +77,6 @@ namespace MWGui
     {
     public:
         QuickKeysMenuAssign(QuickKeysMenu* parent);
-        virtual void exit();
 
     private:
         MyGUI::TextBox* mLabel;
@@ -94,8 +93,8 @@ namespace MWGui
     public:
         MagicSelectionDialog(QuickKeysMenu* parent);
 
-        virtual void open();
-        virtual void exit();
+        virtual void onOpen();
+        virtual bool exit();
 
     private:
         MyGUI::Button* mCancelButton;

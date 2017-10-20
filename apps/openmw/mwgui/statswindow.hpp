@@ -37,7 +37,7 @@ namespace MWGui
             void setBounty (int bounty) { if (bounty != mBounty) mChanged = true; this->mBounty = bounty; }
             void updateSkillArea();
 
-            virtual void open() { onWindowResize(mMainWidget->castType<MyGUI::Window>()); }
+            virtual void onOpen() { onWindowResize(mMainWidget->castType<MyGUI::Window>()); }
 
         private:
             void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);

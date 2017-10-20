@@ -1,12 +1,16 @@
 #ifndef OPENMW_MWGUI_COMPANIONWINDOW_H
 #define OPENMW_MWGUI_COMPANIONWINDOW_H
 
-#include "widgets.hpp"
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
 
 namespace MWGui
 {
+    namespace Widgets
+    {
+        class MWDynamicStat;
+    }
+
     class MessageBoxManager;
     class ItemView;
     class DragAndDrop;
@@ -18,12 +22,13 @@ namespace MWGui
     public:
         CompanionWindow(DragAndDrop* dragAndDrop, MessageBoxManager* manager);
 
-        virtual void exit();
+        virtual bool exit();
 
         virtual void resetReference();
 
-        void openCompanion(const MWWorld::Ptr& npc);
-        void onFrame ();
+        void setPtr(const MWWorld::Ptr& npc);
+        void onFrame (float dt);
+        void clear() { resetReference(); }
 
     private:
         ItemView* mItemView;

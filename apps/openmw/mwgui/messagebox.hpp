@@ -77,11 +77,12 @@ namespace MWGui
             void mousePressed (MyGUI::Widget* _widget);
             int readPressedButton ();
 
+            virtual bool exit() { return false; }
+
             bool mMarkedToDelete;
 
         private:
             void buttonActivated (MyGUI::Widget* _widget);
-            void onKeyPressed(MyGUI::Widget* _sender, MyGUI::KeyCode _key, MyGUI::Char _char);
 
             MessageBoxManager& mMessageBoxManager;
             MyGUI::EditBox* mMessageWidget;

@@ -34,21 +34,19 @@ namespace Misc
 
                         if (i < m.size())
                         {
-                            int precision = 0;
-                            bool precisionSet = false;
+                            int precision = -1;
                             if (m[i] == '.')
                             {
+                                precision = 0;
                                 while (++i < m.size() && m[i] >= '0' && m[i] <= '9')
                                 {
                                     precision = precision * 10 + (m[i] - '0');
-                                    precisionSet = true;
                                 }
                             }
 
                             if (i < m.size())
                             {
                                 width = (widthSet) ? width : -1;
-                                precision = (precisionSet) ? precision : -1;
 
                                 if (m[i] == 'S' || m[i] == 's')
                                     visitedPlaceholder(StringPlaceholder, pad, width, precision);

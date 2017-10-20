@@ -145,23 +145,11 @@ namespace MWGui
         mCompilerContext.setExtensions (&mExtensions);
     }
 
-    void Console::open()
+    void Console::onOpen()
     {
         // Give keyboard focus to the combo box whenever the console is
         // turned on
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
-    }
-
-    void Console::close()
-    {
-        // Apparently, hidden widgets can retain key focus
-        // Remove for MyGUI 3.2.2
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
-    }
-
-    void Console::exit()
-    {
-         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Console);
     }
 
     void Console::setFont(const std::string &fntName)
@@ -225,6 +213,11 @@ namespace MWGui
             while (std::getline (stream, line))
                 execute (line);
         }
+    }
+
+    void Console::clear()
+    {
+        resetReference();
     }
 
     void Console::keyPress(MyGUI::Widget* _sender,

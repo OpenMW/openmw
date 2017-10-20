@@ -191,6 +191,10 @@ namespace MWMechanics
             /// Is \a ptr casting spell or using weapon now?
             virtual bool isAttackingOrSpell(const MWWorld::Ptr &ptr) const;
 
+            /// Check if the target actor was detected by an observer
+            /// If the observer is a non-NPC, check all actors in AI processing distance as observers
+            virtual bool isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer);
+
             virtual void confiscateStolenItems (const MWWorld::Ptr& player, const MWWorld::Ptr& targetContainer);
 
             /// List the owners that the player has stolen this item from (the owner can be an NPC or a faction).
@@ -200,8 +204,8 @@ namespace MWMechanics
             /// Has the player stolen this item from the given owner?
             virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid);
 
-            /// @return is \a ptr allowed to take/use \a cellref or is it a crime?
-            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::ConstPtr& item, MWWorld::Ptr& victim);
+            /// @return is \a ptr allowed to take/use \a target or is it a crime?
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, MWWorld::Ptr& victim);
 
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
@@ -210,8 +214,10 @@ namespace MWMechanics
 
             virtual void confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count);
 
+            virtual bool isAttackPrepairing(const MWWorld::Ptr& ptr);
             virtual bool isRunning(const MWWorld::Ptr& ptr);
             virtual bool isSneaking(const MWWorld::Ptr& ptr);
+
         private:
             void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0);

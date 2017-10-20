@@ -14,6 +14,8 @@ namespace MWGui
 
             void onFrame(float dt);
 
+            bool exit() { return false; }
+
         private:
             int mDays;
 

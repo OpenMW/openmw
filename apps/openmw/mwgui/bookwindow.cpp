@@ -1,6 +1,7 @@
 #include "bookwindow.hpp"
 
 #include <MyGUI_TextBox.h>
+#include <MyGUI_InputManager.h>
 
 #include <components/esm/loadbook.hpp>
 
@@ -11,6 +12,7 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/class.hpp"
 
 #include "formatting.hpp"
 
@@ -51,6 +53,11 @@ namespace MWGui
         mRightPage->setNeedMouseFocus(true);
         mRightPage->eventMouseWheel += MyGUI::newDelegate(this, &BookWindow::onMouseWheel);
 
+        mNextPageButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &BookWindow::onKeyButtonPressed);
+        mPrevPageButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &BookWindow::onKeyButtonPressed);
+        mTakeButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &BookWindow::onKeyButtonPressed);
+        mCloseButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &BookWindow::onKeyButtonPressed);
+
         if (mNextPageButton->getSize().width == 64)
         {
             // english button has a 7 pixel wide strip of garbage on its right edge
@@ -74,14 +81,15 @@ namespace MWGui
         mPages.clear();
     }
 
-    void BookWindow::openBook (MWWorld::Ptr book, bool showTakeButton)
+    void BookWindow::setPtr (const MWWorld::Ptr& book)
     {
         mBook = book;
 
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        bool showTakeButton = book.getContainerStore() != &player.getClass().getContainerStore(player);
+
         clearPages();
         mCurrentPage = 0;
-
-        MWBase::Environment::get().getWindowManager()->playSound("book open");
 
         MWWorld::LiveCellRef<ESM::Book> *ref = mBook.get<ESM::Book>();
 
@@ -92,20 +100,22 @@ namespace MWGui
         updatePages();
 
         setTakeButtonShow(showTakeButton);
-    }
 
-    void BookWindow::exit()
-    {
-        // no 3d sounds because the object could be in a container.
-        MWBase::Environment::get().getWindowManager()->playSound("book close");
-
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
     }
 
     void BookWindow::setTakeButtonShow(bool show)
     {
         mTakeButtonShow = show;
         mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
+    }
+
+    void BookWindow::onKeyButtonPressed(MyGUI::Widget *sender, MyGUI::KeyCode key, MyGUI::Char character)
+    {
+        if (key == MyGUI::KeyCode::ArrowUp)
+            prevPage();
+        else if (key == MyGUI::KeyCode::ArrowDown)
+            nextPage();
     }
 
     void BookWindow::setInventoryAllowed(bool allowed)
@@ -116,7 +126,7 @@ namespace MWGui
 
     void BookWindow::onCloseButtonClicked (MyGUI::Widget* sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
     }
 
     void BookWindow::onTakeButtonClicked (MyGUI::Widget* sender)
@@ -144,20 +154,16 @@ namespace MWGui
         mLeftPageNumber->setCaption( MyGUI::utility::toString(mCurrentPage*2 + 1) );
         mRightPageNumber->setCaption( MyGUI::utility::toString(mCurrentPage*2 + 2) );
 
-        //If it is the last page, hide the button "Next Page"
-        if (   (mCurrentPage+1)*2 == mPages.size()
-            || (mCurrentPage+1)*2 == mPages.size() + 1)
-        {
-            mNextPageButton->setVisible(false);
-        } else {
-            mNextPageButton->setVisible(true);
-        }
-        //If it is the fist page, hide the button "Prev Page"
-        if (mCurrentPage == 0) {
-            mPrevPageButton->setVisible(false);
-        } else {
-            mPrevPageButton->setVisible(true);
-        }
+        MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+        bool nextPageVisible = (mCurrentPage+1)*2 < mPages.size();
+        mNextPageButton->setVisible(nextPageVisible);
+        bool prevPageVisible = mCurrentPage != 0;
+        mPrevPageButton->setVisible(prevPageVisible);
+
+        if (focus == mNextPageButton && !nextPageVisible && prevPageVisible)
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mPrevPageButton);
+        else if (focus == mPrevPageButton && !prevPageVisible && nextPageVisible)
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNextPageButton);
 
         if (mPages.empty())
             return;

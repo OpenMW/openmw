@@ -64,11 +64,6 @@ namespace MWGui
         }
     }
 
-    void QuickKeysMenu::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_QuickKeysMenu);
-    }
-
     void QuickKeysMenu::clear()
     {
         mActivatedIndex = -1;
@@ -344,16 +339,17 @@ namespace MWGui
         {
             MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
             bool isWeapon = item.getTypeName() == typeid(ESM::Weapon).name();
+            bool isTool = item.getTypeName() == typeid(ESM::Probe).name() || item.getTypeName() == typeid(ESM::Lockpick).name();
 
             // delay weapon switching if player is busy
-            if (isDelayNeeded && isWeapon)
+            if (isDelayNeeded && (isWeapon || isTool))
             {
                 mActivatedIndex = index;
                 return;
             }
 
             // disable weapon switching if player is dead or paralyzed
-            if (isReturnNeeded && isWeapon)
+            if (isReturnNeeded && (isWeapon || isTool))
             {
                 return;
             }
@@ -446,11 +442,6 @@ namespace MWGui
                               mCancelButton->getHeight());
 
         center();
-    }
-
-    void QuickKeysMenuAssign::exit()
-    {
-        setVisible(false);
     }
 
     void QuickKeysMenu::write(ESM::ESMWriter &writer)
@@ -584,14 +575,15 @@ namespace MWGui
         exit();
     }
 
-    void MagicSelectionDialog::exit()
+    bool MagicSelectionDialog::exit()
     {
         mParent->onAssignMagicCancel();
+        return true;
     }
 
-    void MagicSelectionDialog::open ()
+    void MagicSelectionDialog::onOpen ()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
 
         mMagicList->setModel(new SpellModel(MWMechanics::getPlayer()));
         mMagicList->resetScrollbars();

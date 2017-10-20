@@ -1189,6 +1189,14 @@ namespace MWScript
                 if (mNegativeEffect != -1)
                     currentValue -= effects.get(mNegativeEffect).getMagnitude();
 
+                // GetResist* should take in account elemental shields
+                if (mPositiveEffect == ESM::MagicEffect::ResistFire)
+                    currentValue += effects.get(ESM::MagicEffect::FireShield).getMagnitude();
+                if (mPositiveEffect == ESM::MagicEffect::ResistShock)
+                    currentValue += effects.get(ESM::MagicEffect::LightningShield).getMagnitude();
+                if (mPositiveEffect == ESM::MagicEffect::ResistFrost)
+                    currentValue += effects.get(ESM::MagicEffect::FrostShield).getMagnitude();
+
                 int ret = static_cast<int>(currentValue);
                 runtime.push(ret);
             }
@@ -1214,6 +1222,14 @@ namespace MWScript
                 float currentValue = effects.get(mPositiveEffect).getMagnitude();
                 if (mNegativeEffect != -1)
                     currentValue -= effects.get(mNegativeEffect).getMagnitude();
+
+                // SetResist* should take in account elemental shields
+                if (mPositiveEffect == ESM::MagicEffect::ResistFire)
+                    currentValue += effects.get(ESM::MagicEffect::FireShield).getMagnitude();
+                if (mPositiveEffect == ESM::MagicEffect::ResistShock)
+                    currentValue += effects.get(ESM::MagicEffect::LightningShield).getMagnitude();
+                if (mPositiveEffect == ESM::MagicEffect::ResistFrost)
+                    currentValue += effects.get(ESM::MagicEffect::FrostShield).getMagnitude();
 
                 int arg = runtime[0].mInteger;
                 runtime.pop();

@@ -255,6 +255,19 @@ namespace MWGui
             }
         }
 
+        // If we unequip weapon during attack, it can lead to unexpected behaviour
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPtr))
+        {
+            bool isWeapon = item.mBase.getTypeName() == typeid(ESM::Weapon).name();
+            MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
+
+            if (isWeapon && invStore.isEquipped(item.mBase))
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sCantEquipWeapWarning}");
+                return;
+            }
+        }
+
         if (count > 1 && !shift)
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
@@ -350,7 +363,7 @@ namespace MWGui
         dirtyPreview();
     }
 
-    void InventoryWindow::open()
+    void InventoryWindow::onOpen()
     {
         if (!mPtr.isEmpty())
         {
@@ -576,11 +589,8 @@ namespace MWGui
         mEncumbranceBar->setValue(static_cast<int>(encumbrance), static_cast<int>(capacity));
     }
 
-    void InventoryWindow::onFrame()
+    void InventoryWindow::onFrame(float dt)
     {
-        if (!mMainWidget->getVisible())
-            return;
-
         updateEncumbranceBar();
     }
 
@@ -704,7 +714,9 @@ namespace MWGui
 
             lastId = item.getCellRef().getRefId();
 
-            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() && isRightHandWeapon(item))
+            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() &&
+                isRightHandWeapon(item) &&
+                item.getClass().canBeEquipped(item, player).first)
             {
                 found = true;
                 break;

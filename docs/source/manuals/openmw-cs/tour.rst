@@ -218,6 +218,128 @@ actually modify the contents of the game.
 Subsection to come...
 =====================
 
+Adding to an npc
+****************
+
+The simplest way is probably to add it to the inventory of a shopkeeper. 
+An obvious candidate is Arrille in Seyda Neen - he's quick to find in a new game
+and he's easy to find in the CS as his name comes early alphabetically.
+
+.. figure:: _static/images/chapter-1/Ring_to_Arrille.png
+   :alt: Putting the ring into Arrille's inventory
+   
+Open the CS and open the *Objects* table (*World* → *Objects*). 
+Scroll down to Arrille, or use a filter like !string("ID","arrille").
+
+Open another pane to edit him - either right click and select edit or use the 
+shortcut (default is shift double-click). Scroll down to the inventory section
+and right click to add a new row. Type in the id of the ring (or find it in the 
+object pane, and drag and drop). Set the number of rings for him to stock - with 
+a negative number indicating that he will restock again to maintain that level.
+
+However, it's an attractive item, so he will probably wear it rather than sell it.
+So set his stock level too high for him to wear them all (3 works, 2 might do).
+
+Another possibilty, again in Seyda Neen making it easy to access, would be for
+Fargoth to give it to the player in exchange for his healing ring.
+
+.. figure:: _static/images/chapter-1/Ring_to_Fargoth_1.png
+   :alt: Editing Fargoth to give ring to player
+   
+Open the *Topicinfo* Table (*Characters* → *Topic Infos*). Use a filter !string(Topic,ring)
+and select the row with a response starting with "You found it!". Edit the record,
+firstly by adding a bit more to the response, then by adding a line to the script
+to give the ring to the player - the same as used earlier in the console
+
+.. code::
+
+   player->AddItem "ring_night_vision" 1
+
+.. figure:: _static/images/chapter-1/Ring_to_Fargoth_2.png
+   :alt: Editing Fargoth to give ring to player
+
+Navigation in the CS
+====================
+This is probably a suitable place to start talking about how navigation differs from TESCS
+in vanilla Morrowind.
+
+There is advice in Scripting for Dummies, the definitive manual for Morrowind Scripting:
+"If you give your scripts a common tag, that will make it easier to jump between the 
+different scripts of your project, e.g. start every script name with AA_Scriptname 
+this will put them right at the beginning of the list and keep them neatly together."
+
+This is valid for the rather poorer navigation facilities there, but it's not sensible for
+the OpenMW CS. Some modders took it further, and started script names and object id with numbers,
+typically "1", to bring the items even earlier in the default alphabetical sorts. In fact
+the CS won't allow names/ids to start with numbers or to include ".".
+
+There are better options available:
+
+Filtering, which isn't available at all in TESCS - put in a filter like
+
+!string("ID",".*ring.*")
+
+to find all IDs which contain the string "ring"
+
+Sorting, which is available in some parts of TESCS, but not for scripts (other than script names being
+sorted in ascending order)- hence the recommendation
+Typically the "Modified" column is useful here - most items will have "Base" status, unchanged from
+the base game.
+
+"Added" status" will cover those items added in this addon.
+
+"Modified" status will cover items from the base game which have been modified in this addon.
+
+Click on the top of the column to toggle between ascending and descending order - thus between "Added" 
+and "Modified" at the top. Or put your desired modified status into a filter then sort alpabetically 
+on a different column.
 
 
+   
+Checking your new addon
+=======================
 
+Launch OpenMW and in the launcher under *Data Files* check your addon, if it's not
+already checked. Load a game and make your way to Seyda Neen - or start a new game.
+
+Check whether Arrille has one (or more) for sale, and whether Fargoth give you one
+when you return his healing ring.
+
+Placing in a chest
+******************
+
+For this example we will use the small chest intended for lockpick practice, 
+located in the Census and Excise Office in Seyda Neen.
+
+First we need the ID of the chest - this can be obtained either by clicking on it in the console
+in the game, or by applying a similar process in the CS - 
+
+World/Cells
+
+Select "Seyda Neen, Census and Excise Office"
+
+Right-click and select "View"
+
+Use mouse wheel to zoom in/out, and mouse plus WASD keys to navigate
+
+Click on the small chest
+
+Either way, you should find the ID, which is "chest_small_02_lockprac".
+
+Open the Objects table (World/Objects) and scroll down to find this item.
+
+Alternatively use the Edit/Search facility, selecting ID rather than text, 
+enter "lockprac" (without the quotes) into the search box, press "Search",
+which should return two rows, then select the "Container" one rather than the "Instance"
+
+Right-click and "Edit Record".
+
+Right-click the "Content" section and select "Add a row"
+
+Set the Item ID of the new row to be your new ring - simplest way is probably to open the Objects
+table if it's not already open, sort on the "Modified" column which should bring the ring,
+with its status of "Added" to the top, then drag and drop to the chest row. 
+
+Increase the Count to 1.
+
+Save the addon, then test to ensure it works - e.g. start a new game and lockpick the chest.

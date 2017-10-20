@@ -3,6 +3,7 @@
 #include <components/esm/loadprob.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -153,6 +154,16 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
+    }
+
+    std::pair<int, std::string> Probe::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
+    {
+        // Do not allow equip tools from inventory during attack
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc)
+            && MWBase::Environment::get().getWindowManager()->isGuiMode())
+            return std::make_pair(0, "#{sCantEquipWeapWarning}");
+
+        return std::make_pair(1, "");
     }
 
     bool Probe::canSell (const MWWorld::ConstPtr& item, int npcServices) const

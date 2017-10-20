@@ -7,9 +7,14 @@
 
 namespace MWSound
 {
-    class Sound {
-        Sound& operator=(const Sound &rhs);
-        Sound(const Sound &rhs);
+    // For testing individual PlayMode flags
+    inline int operator&(int a, PlayMode b) { return a & static_cast<int>(b); }
+    inline int operator&(PlayMode a, PlayMode b) { return static_cast<int>(a) & static_cast<int>(b); }
+
+    class SoundBase {
+        SoundBase& operator=(const SoundBase&) = delete;
+        SoundBase(const SoundBase&) = delete;
+        SoundBase(SoundBase&&) = delete;
 
         osg::Vec3f mPos;
         float mVolume; /* NOTE: Real volume = mVolume*mBaseVolume */
@@ -47,37 +52,62 @@ namespace MWSound
         float getMinDistance() const { return mMinDistance; }
         float getMaxDistance() const { return mMaxDistance; }
 
-        MWBase::SoundManager::PlayType getPlayType() const
-        { return (MWBase::SoundManager::PlayType)(mFlags&MWBase::SoundManager::Play_TypeMask); }
-        bool getUseEnv() const { return !(mFlags&MWBase::SoundManager::Play_NoEnv); }
-        bool getIsLooping() const { return mFlags&MWBase::SoundManager::Play_Loop; }
-        bool getDistanceCull() const { return mFlags&MWBase::SoundManager::Play_RemoveAtDistance; }
+        MWSound::Type getPlayType() const
+        { return static_cast<MWSound::Type>(mFlags&MWSound::Type::Mask); }
+        bool getUseEnv() const { return !(mFlags&MWSound::PlayMode::NoEnv); }
+        bool getIsLooping() const { return mFlags&MWSound::PlayMode::Loop; }
+        bool getDistanceCull() const { return mFlags&MWSound::PlayMode::RemoveAtDistance; }
         bool getIs3D() const { return mFlags&Play_3D; }
 
-        Sound(const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
-          : mPos(pos), mVolume(vol), mBaseVolume(basevol), mPitch(pitch)
-          , mMinDistance(mindist), mMaxDistance(maxdist), mFlags(flags)
-          , mFadeOutTime(0.0f), mHandle(0)
-        { }
-        Sound(float vol, float basevol, float pitch, int flags)
-          : mPos(0.0f, 0.0f, 0.0f), mVolume(vol), mBaseVolume(basevol), mPitch(pitch)
-          , mMinDistance(1.0f), mMaxDistance(1000.0f), mFlags(flags)
-          , mFadeOutTime(0.0f), mHandle(0)
+        void init(const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
+        {
+            mPos = pos;
+            mVolume = vol;
+            mBaseVolume = basevol;
+            mPitch = pitch;
+            mMinDistance = mindist;
+            mMaxDistance = maxdist;
+            mFlags = flags;
+            mFadeOutTime = 0.0f;
+            mHandle = nullptr;
+        }
+
+        void init(float vol, float basevol, float pitch, int flags)
+        {
+            mPos = osg::Vec3f(0.0f, 0.0f, 0.0f);
+            mVolume = vol;
+            mBaseVolume = basevol;
+            mPitch = pitch;
+            mMinDistance = 1.0f;
+            mMaxDistance = 1000.0f;
+            mFlags = flags;
+            mFadeOutTime = 0.0f;
+            mHandle = nullptr;
+        }
+
+        SoundBase()
+          : mPos(0.0f, 0.0f, 0.0f), mVolume(1.0f), mBaseVolume(1.0f), mPitch(1.0f)
+          , mMinDistance(1.0f), mMaxDistance(1000.0f), mFlags(0), mFadeOutTime(0.0f)
+          , mHandle(nullptr)
         { }
     };
 
-    // Same as above, but it's a different type since the output handles them differently
-    class Stream : public Sound {
-        Stream& operator=(const Stream &rhs);
-        Stream(const Stream &rhs);
+    class Sound : public SoundBase {
+        Sound& operator=(const Sound&) = delete;
+        Sound(const Sound&) = delete;
+        Sound(Sound&&) = delete;
 
     public:
-        Stream(const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
-          : Sound(pos, vol, basevol, pitch, mindist, maxdist, flags)
-        { }
-        Stream(float vol, float basevol, float pitch, int flags)
-          : Sound(vol, basevol, pitch, flags)
-        { }
+        Sound() { }
+    };
+
+    class Stream : public SoundBase {
+        Stream& operator=(const Stream&) = delete;
+        Stream(const Stream&) = delete;
+        Stream(Stream&&) = delete;
+
+    public:
+        Stream() { }
     };
 }
 

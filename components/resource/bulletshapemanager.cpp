@@ -63,7 +63,7 @@ class NodeToShapeVisitor : public osg::NodeVisitor
 public:
     NodeToShapeVisitor()
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-        , mTriangleMesh(NULL)
+        , mTriangleMesh(nullptr)
     {
 
     }
@@ -71,11 +71,11 @@ public:
     virtual void apply(osg::Drawable &drawable)
     {
         if (!mTriangleMesh)
-            mTriangleMesh = new btTriangleMesh;
+            mTriangleMesh.reset(new btTriangleMesh);
 
         osg::Matrixf worldMat = osg::computeLocalToWorld(getNodePath());
         osg::TriangleFunctor<GetTriangleFunctor> functor;
-        functor.setTriMesh(mTriangleMesh);
+        functor.setTriMesh(mTriangleMesh.get());
         functor.setMatrix(worldMat);
         drawable.accept(functor);
     }
@@ -86,14 +86,12 @@ public:
             return osg::ref_ptr<BulletShape>();
 
         osg::ref_ptr<BulletShape> shape (new BulletShape);
-        TriangleMeshShape* meshShape = new TriangleMeshShape(mTriangleMesh, true);
-        shape->mCollisionShape = meshShape;
-        mTriangleMesh = NULL;
+        shape->mCollisionShape = new TriangleMeshShape(mTriangleMesh.release(), true);
         return shape;
     }
 
 private:
-    btTriangleMesh* mTriangleMesh;
+    std::unique_ptr<btTriangleMesh> mTriangleMesh;
 };
 
 BulletShapeManager::BulletShapeManager(const VFS::Manager* vfs, SceneManager* sceneMgr, NifFileManager* nifFileManager)
@@ -141,10 +139,7 @@ osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &
             node->accept(visitor);
             shape = visitor.getShape();
             if (!shape)
-            {
-                mCache->addEntryToObjectCache(normalized, NULL);
                 return osg::ref_ptr<BulletShape>();
-            }
         }
 
         mCache->addEntryToObjectCache(normalized, shape);
@@ -158,7 +153,8 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::cacheInstance(const std::s
     mVFS->normalizeFilename(normalized);
 
     osg::ref_ptr<BulletShapeInstance> instance = createInstance(normalized);
-    mInstanceCache->addEntryToObjectCache(normalized, instance.get());
+    if (instance)
+        mInstanceCache->addEntryToObjectCache(normalized, instance.get());
     return instance;
 }
 

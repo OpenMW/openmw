@@ -70,9 +70,7 @@ void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& a
         }
     }
     else
-    {
-        actor.getClass().getContainerStore(actor).remove(item, 1, actor);
-    }
+        actor.getClass().getInventoryStore(actor).remove(item, 1, actor, true);
 }
 
 class CheckActorCommanded : public MWMechanics::EffectSourceVisitor
@@ -208,6 +206,9 @@ namespace MWMechanics
             // Set the soul on just one of the gems, not the whole stack
             gem->getContainerStore()->unstack(*gem, caster);
             gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
+
+            // Restack the gem with other gems with the same soul
+            gem->getContainerStore()->restack(*gem);
 
             mTrapped = true;
 
@@ -394,10 +395,15 @@ namespace MWMechanics
                     aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
             }
         }
-        
+
         // Make guards go aggressive with creatures that are in combat, unless the creature is a follower or escorter
         if (actor1.getClass().isClass(actor1, "Guard") && !actor2.getClass().isNpc())
         {
+            // Check if the creature is too far
+            static const float fAlarmRadius = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
+            if (sqrDist > fAlarmRadius * fAlarmRadius)
+                return;
+
             bool followerOrEscorter = false;
             for (std::list<MWMechanics::AiPackage*>::const_iterator it = creatureStats2.getAiSequence().begin(); it != creatureStats2.getAiSequence().end(); ++it)
             {
@@ -802,6 +808,16 @@ namespace MWMechanics
         }
     }
 
+    bool Actors::isAttackPrepairing(const MWWorld::Ptr& ptr)
+    {
+        PtrActorMap::iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+        CharacterController* ctrl = it->second->getCharacterController();
+
+        return ctrl->isAttackPrepairing();
+    }
+
     bool Actors::isRunning(const MWWorld::Ptr& ptr)
     {
         PtrActorMap::iterator it = mActors.find(ptr);
@@ -976,7 +992,7 @@ namespace MWMechanics
                 // ...But, only the player makes a sound.
                 if(isPlayer)
                     MWBase::Environment::get().getSoundManager()->playSound("torch out",
-                            1.0, 1.0, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoEnv);
+                            1.0, 1.0, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
             }
         }
     }
@@ -1069,6 +1085,39 @@ namespace MWMechanics
             delete iter->second;
             mActors.erase(iter);
         }
+    }
+
+    bool Actors::isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer)
+    {
+        if (!actor.getClass().isActor())
+            return false;
+
+        // If an observer is NPC, check if he detected an actor
+        if (!observer.isEmpty() && observer.getClass().isNpc())
+        {
+            return
+                MWBase::Environment::get().getWorld()->getLOS(observer, actor) &&
+                MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, observer);
+        }
+
+        // Otherwise check if any actor in AI processing range sees the target actor
+        std::vector<MWWorld::Ptr> actors;
+        osg::Vec3f position (actor.getRefData().getPosition().asVec3());
+        getObjectsInRange(position, aiProcessingDistance, actors);
+        for(std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); ++it)
+        {
+            if (*it == actor)
+                continue;
+
+            bool result =
+                MWBase::Environment::get().getWorld()->getLOS(*it, actor) &&
+                MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, *it);
+
+            if (result)
+                return true;
+        }
+
+        return false;
     }
 
     void Actors::updateActor(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
@@ -1180,7 +1229,7 @@ namespace MWMechanics
                         {
                             float sqrHeadTrackDistance = std::numeric_limits<float>::max();
                             MWWorld::Ptr headTrackTarget;
-                            if (!((iter->first == player) && MWBase::Environment::get().getWorld()->getPlayer().getThirdPersonOverShoulderRanged()))
+                            if (!((iter->first == player) && MWBase::Environment::get().getWorld()->getPlayer().getThirdPersonOverShoulderRanged()) && !iter->first.getClass().getCreatureStats(iter->first).getKnockedDown())                            
                             {
                                 for (PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                                 {
@@ -1188,8 +1237,8 @@ namespace MWMechanics
                                         continue;
                                     updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
                                 }
+                                iter->second->getCharacterController()->setHeadTrackTarget(headTrackTarget);
                             }
-                            iter->second->getCharacterController()->setHeadTrackTarget(headTrackTarget);
                         }
 
                         if (iter->first.getClass().isNpc() && iter->first != player)
@@ -1755,8 +1804,9 @@ namespace MWMechanics
             {
                 std::string id = reader.getHString();
                 int count;
-                reader.getHNT (count, "COUN");
-                mDeathCount[id] = count;
+                reader.getHNT(count, "COUN");
+                if (MWBase::Environment::get().getWorld()->getStore().find(id))
+                    mDeathCount[id] = count;
             }
         }
     }

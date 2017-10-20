@@ -39,10 +39,7 @@ namespace MWGui
 
             Console(int w, int h, bool consoleOnlyScripts);
 
-            virtual void open();
-            virtual void close();
-
-            virtual void exit();
+            virtual void onOpen();
 
             void setFont(const std::string &fntName);
 
@@ -62,6 +59,8 @@ namespace MWGui
             void execute (const std::string& command);
 
             void executeFile (const std::string& path);
+
+            void clear();
 
             virtual void resetReference ();
 

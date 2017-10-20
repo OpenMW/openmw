@@ -5,49 +5,46 @@
 <Widget type="Window" skin="" layer="JournalBooks" align="Left Top" position="0 0 584 398" name="_Main">
 
     <Widget type="ImageBox" skin="ImageBox" position="-71 0 728 398" align="Left Top" name="JImage">
-    <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
-    <Widget type="Widget" position="71 0 584 398" align="Left Top">
+        <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
+        <Widget type="Widget" position="71 0 584 398" align="Left Top">
 
-        <Widget type="Widget" position="0 0 292 398">
+            <Widget type="ImageButton" skin="ImageBox" position="40 358 64 32" name="TakeButton">
+                <Property key="ImageHighlighted" value="textures\tx_menubook_take_over.dds"/>
+                <Property key="ImageNormal" value="textures\tx_menubook_take_idle.dds"/>
+                <Property key="ImagePushed" value="textures\tx_menubook_take_pressed.dds"/>
+            </Widget>
+
             <Widget type="ImageButton" skin="ImageBox" position="205 358 48 32" name="PrevPageBTN">
                 <Property key="ImageHighlighted" value="textures\tx_menubook_prev_over.dds"/>
                 <Property key="ImageNormal" value="textures\tx_menubook_prev_idle.dds"/>
                 <Property key="ImagePushed" value="textures\tx_menubook_prev_pressed.dds"/>
             </Widget>
-        </Widget>
-        <Widget type="Widget" position="292 0 292 398">
-            <Widget type="ImageButton" skin="ImageBox" position="38 358 48 32" name="NextPageBTN">
+            <Widget type="ImageButton" skin="ImageBox" position="330 358 48 32" name="NextPageBTN">
                 <Property key="ImageHighlighted" value="textures\tx_menubook_next_over.dds"/>
                 <Property key="ImageNormal" value="textures\tx_menubook_next_idle.dds"/>
                 <Property key="ImagePushed" value="textures\tx_menubook_next_pressed.dds"/>
             </Widget>
-        </Widget>
 
-        <Widget type="ImageButton" skin="ImageBox" position="40 358 64 32" name="TakeButton">
-            <Property key="ImageHighlighted" value="textures\tx_menubook_take_over.dds"/>
-            <Property key="ImageNormal" value="textures\tx_menubook_take_idle.dds"/>
-            <Property key="ImagePushed" value="textures\tx_menubook_take_pressed.dds"/>
-        </Widget>
-        <Widget type="ImageButton" skin="ImageBox" position="488 358 48 32" name="CloseButton">
-            <Property key="ImageHighlighted" value="textures\tx_menubook_close_over.dds"/>
-            <Property key="ImageNormal" value="textures\tx_menubook_close_idle.dds"/>
-            <Property key="ImagePushed" value="textures\tx_menubook_close_pressed.dds"/>
-        </Widget>
+            <Widget type="ImageButton" skin="ImageBox" position="488 358 48 32" name="CloseButton">
+                <Property key="ImageHighlighted" value="textures\tx_menubook_close_over.dds"/>
+                <Property key="ImageNormal" value="textures\tx_menubook_close_idle.dds"/>
+                <Property key="ImagePushed" value="textures\tx_menubook_close_pressed.dds"/>
+            </Widget>
 
-        <Widget type="TextBox" skin="NormalText" position="30 358 250 16" name="LeftPageNumber">
-            <Property key="TextColour" value="0 0 0"/>
-            <Property key="TextAlign" value="Center"/>
-            <Property key="NeedMouse" value="false"/>
-        </Widget>
-        <Widget type="TextBox" skin="NormalText" position="310 358 250 16" name="RightPageNumber">
-            <Property key="TextColour" value="0 0 0"/>
-            <Property key="TextAlign" value="Center"/>
-            <Property key="NeedMouse" value="false"/>
-        </Widget>
+            <Widget type="TextBox" skin="NormalText" position="30 358 250 16" name="LeftPageNumber">
+                <Property key="TextColour" value="0 0 0"/>
+                <Property key="TextAlign" value="Center"/>
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+            <Widget type="TextBox" skin="NormalText" position="310 358 250 16" name="RightPageNumber">
+                <Property key="TextColour" value="0 0 0"/>
+                <Property key="TextAlign" value="Center"/>
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
 
-        <Widget type="Widget" skin="" position="30 15 250 328" name="LeftPage"/>
-        <Widget type="Widget" skin="" position="310 15 250 328" name="RightPage"/>
-    </Widget>
+            <Widget type="Widget" skin="" position="30 15 250 328" name="LeftPage"/>
+            <Widget type="Widget" skin="" position="310 15 250 328" name="RightPage"/>
+        </Widget>
     </Widget>
 </Widget>
 

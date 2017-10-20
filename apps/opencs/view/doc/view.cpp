@@ -172,6 +172,16 @@ void CSVDoc::View::setupWorldMenu()
     setupShortcut("document-world-references", references);
     world->addAction (references);
 
+    QAction *lands = new QAction (tr ("Lands"), this);
+    connect (lands, SIGNAL (triggered()), this, SLOT (addLandsSubView()));
+    setupShortcut("document-world-lands", lands);
+    world->addAction (lands);
+
+    QAction *landTextures = new QAction (tr ("Land Textures"), this);
+    connect (landTextures, SIGNAL (triggered()), this, SLOT (addLandTexturesSubView()));
+    setupShortcut("document-world-landtextures", landTextures);
+    world->addAction (landTextures);
+
     QAction *grid = new QAction (tr ("Pathgrid"), this);
     connect (grid, SIGNAL (triggered()), this, SLOT (addPathgridSubView()));
     setupShortcut("document-world-pathgrid", grid);
@@ -874,6 +884,16 @@ void CSVDoc::View::addDebugProfilesSubView()
 void CSVDoc::View::addRunLogSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_RunLog);
+}
+
+void CSVDoc::View::addLandsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Lands);
+}
+
+void CSVDoc::View::addLandTexturesSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_LandTextures);
 }
 
 void CSVDoc::View::addPathgridSubView()

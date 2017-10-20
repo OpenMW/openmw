@@ -424,26 +424,6 @@ namespace MWMechanics
         }
     }
 
-    bool isEnvironmentCompatible(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim)
-    {
-        const MWWorld::Class& attackerClass = attacker.getClass();
-        MWBase::World* world = MWBase::Environment::get().getWorld();
-
-        // If attacker is fish, victim must be in water
-        if (attackerClass.isPureWaterCreature(attacker))
-        {
-            return world->isWading(victim);
-        }
-        
-        // If attacker can't swim, victim must not be in water
-        if (!attackerClass.canSwim(attacker))
-        {
-            return !world->isSwimming(victim);
-        }
-
-        return true;
-    }
-
     float getFightDistanceBias(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2)
     {
         osg::Vec3f pos1 (actor1.getRefData().getPosition().asVec3());

@@ -66,6 +66,7 @@ color_misc=0,205,205 # ????
     <Resource type="ResourceSkin" name="SandTextButtonC" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Top HCenter"/>
+        <Property key="NeedKey" value="true"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
             <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
             <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
@@ -81,6 +82,7 @@ color_misc=0,205,205 # ????
     <Resource type="ResourceSkin" name="SandTextButton" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
+        <Property key="NeedKey" value="true"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
             <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
             <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
@@ -96,6 +98,7 @@ color_misc=0,205,205 # ????
     <Resource type="ResourceSkin" name="SandTextButtonDisabled" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
+        <Property key="NeedKey" value="true"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
             <State name="normal" colour="#{fontcolour=disabled}" shift="0"/>
         </BasisSkin>
@@ -103,6 +106,7 @@ color_misc=0,205,205 # ????
 
     <Resource type="ResourceSkin" name="SpellTextUnequipped" size="16 16">
         <Property key="FontName" value="Default"/>
+        <Property key="NeedKey" value="true"/>
         <Property key="TextAlign" value="Left Bottom"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
             <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>

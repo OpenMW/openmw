@@ -162,27 +162,49 @@ namespace MWInput
 
     void InputManager::setPlayerControlsEnabled(bool enabled)
     {
-        int nPlayerChannels = 19;
-        int playerChannels[] = {A_Activate, A_AutoMove, A_AlwaysRun, A_ToggleWeapon,
+        int playerChannels[] = {A_AutoMove, A_AlwaysRun, A_ToggleWeapon,
                                 A_ToggleSpell, A_Rest, A_QuickKey1, A_QuickKey2,
                                 A_QuickKey3, A_QuickKey4, A_QuickKey5, A_QuickKey6,
                                 A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10,
                                 A_Use, A_Journal, A_Aim};
 
-        for(int i = 0; i < nPlayerChannels; i++) {
+        for(size_t i = 0; i < sizeof(playerChannels)/sizeof(playerChannels[0]); i++) {
             int pc = playerChannels[i];
             mInputBinder->getChannel(pc)->setEnabled(enabled);
         }
     }
 
+    void InputManager::handleGuiArrowKey(int action)
+    {
+        MyGUI::KeyCode key;
+        switch (action)
+        {
+        case A_MoveLeft:
+            key = MyGUI::KeyCode::ArrowLeft;
+            break;
+        case A_MoveRight:
+            key = MyGUI::KeyCode::ArrowRight;
+            break;
+        case A_MoveForward:
+            key = MyGUI::KeyCode::ArrowUp;
+            break;
+        case A_MoveBackward:
+        default:
+            key = MyGUI::KeyCode::ArrowDown;
+            break;
+        }
+
+        MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0);
+    }
+
     void InputManager::channelChanged(ICS::Channel* channel, float currentValue, float previousValue)
     {
-        if (mDragDrop)
-            return;
-
         resetIdleTime ();
 
         int action = channel->getNumber();
+
+        if (mDragDrop && action != A_GameMenu && action != A_Inventory)
+            return;
 
         if((previousValue == 1 || previousValue == 0) && (currentValue==1 || currentValue==0))
         {
@@ -234,9 +256,7 @@ namespace MWInput
             switch (action)
             {
             case A_GameMenu:
-                if (!(MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running
-                    && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_MainMenu))
-                    toggleMainMenu();
+                toggleMainMenu ();
                 break;
             case A_Screenshot:
                 screenshot();
@@ -249,8 +269,13 @@ namespace MWInput
                 break;
             case A_Activate:
                 resetIdleTime();
-                if (!currentGuiMode)
-                    activate();
+                activate();
+                break;
+            case A_MoveLeft:
+            case A_MoveRight:
+            case A_MoveForward:
+            case A_MoveBackward:
+                handleGuiArrowKey(action);
                 break;
             case A_Journal:
                 toggleJournal();
@@ -304,7 +329,7 @@ namespace MWInput
                 showQuickKeysMenu();
                 break;
             case A_ToggleHUD:
-                MWBase::Environment::get().getWindowManager()->toggleGui();
+                MWBase::Environment::get().getWindowManager()->toggleHud();
                 break;
             case A_ToggleDebug:
                 MWBase::Environment::get().getWindowManager()->toggleDebugWindow();
@@ -422,8 +447,6 @@ namespace MWInput
         mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
 
         mInputManager->capture(disableEvents);
-        // inject some fake mouse movement to force updating MyGUI's widget states
-        MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
 
         if (mControlsDisabled)
         {
@@ -461,6 +484,7 @@ namespace MWInput
 
                 MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
                 mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
+                MWBase::Environment::get().getWindowManager()->setCursorActive(true);
             }
         }
         if (mMouseLookEnabled)
@@ -729,13 +753,17 @@ namespace MWInput
             SDL_StopTextInput();
 
         bool consumed = false;
-        if (kc != OIS::KC_UNASSIGNED)
+        if (kc != OIS::KC_UNASSIGNED && !mInputBinder->detectingBindingState())
         {
-            consumed = SDL_IsTextInputActive() &&
-                    ( !(SDLK_SCANCODE_MASK & arg.keysym.sym) && std::isprint(arg.keysym.sym)); // Little trick to check if key is printable
-            bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
-            setPlayerControlsEnabled(!guiFocus);
+            consumed = MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+            if (SDL_IsTextInputActive() &&  // Little trick to check if key is printable
+                                    ( !(SDLK_SCANCODE_MASK & arg.keysym.sym) && std::isprint(arg.keysym.sym)))
+                consumed = true;
+            setPlayerControlsEnabled(!consumed);
         }
+        if (arg.repeat)
+            return;
+
         if (!mControlsDisabled && !consumed)
             mInputBinder->keyPressed (arg);
         mJoystickLastUsed = false;
@@ -754,7 +782,8 @@ namespace MWInput
         mJoystickLastUsed = false;
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
-        setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
+        if (!mInputBinder->detectingBindingState())
+            setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
         mInputBinder->keyReleased (arg);
     }
 
@@ -775,6 +804,7 @@ namespace MWInput
                     MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
                 }
             }
+            MWBase::Environment::get().getWindowManager()->setCursorActive(true);
         }
 
         setPlayerControlsEnabled(!guiMode);
@@ -819,6 +849,10 @@ namespace MWInput
             mMouseWheel = int(arg.z);
 
             MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
+            // FIXME: inject twice to force updating focused widget states (tooltips) resulting from changing the viewport by scroll wheel
+            MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
+
+            MWBase::Environment::get().getWindowManager()->setCursorActive(true);
         }
 
         if (mMouseLookEnabled && !mControlsDisabled)
@@ -1005,7 +1039,11 @@ namespace MWInput
         if (!mControlSwitch["playerfighting"] || !mControlSwitch["playercontrols"])
             return;
 
-        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPlayer->getPlayer()))
+        // We want to interrupt animation only if attack is prepairing, but still is not triggered
+        // Otherwise we will get a "speedshooting" exploit, when player can skip reload animation by hitting "Toggle Weapon" key twice
+        if (MWBase::Environment::get().getMechanicsManager()->isAttackPrepairing(mPlayer->getPlayer()))
+            mPlayer->setAttackingOrSpell(false);
+        else if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPlayer->getPlayer()))
             return;
 
         MWMechanics::DrawState_ state = mPlayer->getDrawState();
@@ -1089,12 +1127,10 @@ namespace MWInput
                 && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_MainMenu
                 && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
         {
-            MWBase::Environment::get().getWindowManager()->playSound ("book open");
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Journal);
         }
         else if(MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Journal))
         {
-            MWBase::Environment::get().getWindowManager()->playSound ("book close");
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Journal);
         }
     }
@@ -1131,7 +1167,9 @@ namespace MWInput
 
     void InputManager::activate()
     {
-        if (mControlSwitch["playercontrols"])
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Return, 0);
+        else if (mControlSwitch["playercontrols"])
             mPlayer->activate();
     }
 
@@ -1268,6 +1306,17 @@ namespace MWInput
                 {
                     control->setInitialValue(0.0f);
                     mInputBinder->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
+                }
+
+                if (i == A_LookLeftRight && !mInputBinder->isKeyBound(SDL_SCANCODE_KP_4) && !mInputBinder->isKeyBound(SDL_SCANCODE_KP_6))
+                {
+                    mInputBinder->addKeyBinding(control, SDL_SCANCODE_KP_6, ICS::Control::INCREASE);
+                    mInputBinder->addKeyBinding(control, SDL_SCANCODE_KP_4, ICS::Control::DECREASE);
+                }
+                if (i == A_LookUpDown && !mInputBinder->isKeyBound(SDL_SCANCODE_KP_8) && !mInputBinder->isKeyBound(SDL_SCANCODE_KP_2))
+                {
+                    mInputBinder->addKeyBinding(control, SDL_SCANCODE_KP_2, ICS::Control::INCREASE);
+                    mInputBinder->addKeyBinding(control, SDL_SCANCODE_KP_8, ICS::Control::DECREASE);
                 }
             }
         }

@@ -26,6 +26,33 @@
 #include "terrainstorage.hpp"
 #include "object.hpp"
 
+namespace CSVRender
+{
+    class CellNodeContainer : public osg::Referenced
+    {
+        public:
+
+            CellNodeContainer(Cell* cell) : mCell(cell) {}
+
+            Cell* getCell(){ return mCell; }
+
+        private:
+
+            Cell* mCell;
+    };
+
+    class CellNodeCallback : public osg::NodeCallback
+    {
+        public:
+
+            virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+            {
+                CellNodeContainer* container = static_cast<CellNodeContainer*>(node->getUserData());
+                container->getCell()->updateLand();
+            }
+    };
+}
+
 bool CSVRender::Cell::removeObject (const std::string& id)
 {
     std::map<std::string, Object *>::iterator iter =
@@ -75,10 +102,69 @@ bool CSVRender::Cell::addObjects (int start, int end)
     return modified;
 }
 
+void CSVRender::Cell::updateLand()
+{
+    if (!mUpdateLand || mLandDeleted)
+        return;
+
+    mUpdateLand = false;
+
+    // Cell is deleted
+    if (mDeleted)
+    {
+        unloadLand();
+        return;
+    }
+
+    // Setup land if available
+    const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
+    int landIndex = land.searchId(mId);
+    if (landIndex != -1 && !land.getRecord(mId).isDeleted())
+    {
+        const ESM::Land& esmLand = land.getRecord(mId).get();
+
+        if (esmLand.getLandData (ESM::Land::DATA_VHGT))
+        {
+            if (mTerrain)
+            {
+                mTerrain->unloadCell(mCoordinates.getX(), mCoordinates.getY());
+                mTerrain->clearAssociatedCaches();
+            }
+            else
+            {
+                mTerrain.reset(new Terrain::TerrainGrid(mCellNode, mCellNode,
+                    mData.getResourceSystem().get(), new TerrainStorage(mData), Mask_Terrain));
+            }
+
+            mTerrain->loadCell(esmLand.mX, esmLand.mY);
+
+            if (!mCellBorder)
+                mCellBorder.reset(new CellBorder(mCellNode, mCoordinates));
+
+            mCellBorder->buildShape(esmLand);
+
+            return;
+        }
+    }
+
+    // No land data
+    mLandDeleted = true;
+    unloadLand();
+}
+
+void  CSVRender::Cell::unloadLand()
+{
+    if (mTerrain)
+        mTerrain->unloadCell(mCoordinates.getX(), mCoordinates.getY());
+
+    if (mCellBorder)
+        mCellBorder.reset();
+}
+
 CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
     bool deleted)
 : mData (data), mId (Misc::StringUtils::lowerCase (id)), mDeleted (deleted), mSubMode (0),
-  mSubModeElementMask (0)
+  mSubModeElementMask (0), mUpdateLand(true), mLandDeleted(false)
 {
     std::pair<CSMWorld::CellCoordinates, bool> result = CSMWorld::CellCoordinates::fromId (id);
 
@@ -86,6 +172,8 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
         mCoordinates = result.first;
 
     mCellNode = new osg::Group;
+    mCellNode->setUserData(new CellNodeContainer(this));
+    mCellNode->setUpdateCallback(new CellNodeCallback);
     rootNode->addChild(mCellNode);
 
     setCellMarker();
@@ -99,22 +187,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
 
         addObjects (0, rows-1);
 
-        const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
-        int landIndex = land.searchId(mId);
-        if (landIndex != -1)
-        {
-            const ESM::Land& esmLand = land.getRecord(mId).get();
-
-            if (esmLand.getLandData (ESM::Land::DATA_VHGT))
-            {
-                mTerrain.reset(new Terrain::TerrainGrid(mCellNode, mCellNode, data.getResourceSystem().get(), new TerrainStorage(mData), Mask_Terrain));
-                mTerrain->loadCell(esmLand.mX,
-                                   esmLand.mY);
-
-                mCellBorder.reset(new CellBorder(mCellNode, mCoordinates));
-                mCellBorder->buildShape(esmLand);
-            }
-        }
+        updateLand();
 
         mPathgrid.reset(new Pathgrid(mData, mCellNode, mId, mCoordinates));
         mCellWater.reset(new CellWater(mData, mCellNode, mId, mCoordinates));
@@ -283,6 +356,38 @@ void CSVRender::Cell::pathgridRemoved()
 {
     if (mPathgrid)
         mPathgrid->removeGeometry();
+}
+
+void CSVRender::Cell::landDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    mUpdateLand = true;
+}
+
+void CSVRender::Cell::landAboutToBeRemoved (const QModelIndex& parent, int start, int end)
+{
+    mLandDeleted = true;
+    unloadLand();
+}
+
+void CSVRender::Cell::landAdded (const QModelIndex& parent, int start, int end)
+{
+    mUpdateLand = true;
+    mLandDeleted = false;
+}
+
+void CSVRender::Cell::landTextureChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    mUpdateLand = true;
+}
+
+void CSVRender::Cell::landTextureAboutToBeRemoved (const QModelIndex& parent, int start, int end)
+{
+    mUpdateLand = true;
+}
+
+void CSVRender::Cell::landTextureAdded (const QModelIndex& parent, int start, int end)
+{
+    mUpdateLand = true;
 }
 
 void CSVRender::Cell::reloadAssets()

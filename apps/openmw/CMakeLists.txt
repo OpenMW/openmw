@@ -42,7 +42,7 @@ add_openmw_dir (mwgui
     itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel controllers savegamedialog
     recharge mode videowidget backgroundimage itemwidget screenfader debugwindow spellmodel spellview
-    draganddrop timeadvancer jailscreen itemchargeview
+    draganddrop timeadvancer jailscreen itemchargeview keyboardnavigation
     )
 
 add_openmw_dir (mwdialogue
@@ -57,7 +57,8 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanagerimp openal_output ffmpeg_decoder sound sound_buffer sound_decoder sound_output loudness movieaudiofactory
+    soundmanagerimp openal_output ffmpeg_decoder sound sound_buffer sound_decoder sound_output
+    loudness movieaudiofactory alext efx efx-presets
     )
 
 add_openmw_dir (mwworld
@@ -99,7 +100,7 @@ add_openmw_dir (mwbase
 # Main executable
 
 if (NOT ANDROID)
-    add_executable(openmw
+    openmw_add_executable(openmw
         ${OPENMW_FILES}
         ${GAME} ${GAME_HEADER}
         ${APPLE_BUNDLE_RESOURCES}

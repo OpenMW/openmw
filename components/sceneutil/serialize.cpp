@@ -6,6 +6,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/riggeometry.hpp>
+#include <components/sceneutil/morphgeometry.hpp>
 
 namespace SceneUtil
 {
@@ -37,20 +38,20 @@ public:
     }
 };
 
-class FrameSwitchSerializer : public osgDB::ObjectWrapper
-{
-public:
-    FrameSwitchSerializer()
-        : osgDB::ObjectWrapper(createInstanceFunc<osg::Group>, "NifOsg::FrameSwitch", "osg::Object osg::Node osg::Group NifOsg::FrameSwitch")
-    {
-    }
-};
-
 class RigGeometrySerializer : public osgDB::ObjectWrapper
 {
 public:
     RigGeometrySerializer()
-        : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::RigGeometry>, "SceneUtil::RigGeometry", "osg::Object osg::Node osg::Drawable osg::Geometry SceneUtil::RigGeometry")
+        : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::RigGeometry>, "SceneUtil::RigGeometry", "osg::Object osg::Node osg::Drawable SceneUtil::RigGeometry")
+    {
+    }
+};
+
+class MorphGeometrySerializer : public osgDB::ObjectWrapper
+{
+public:
+    MorphGeometrySerializer()
+        : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::MorphGeometry>, "SceneUtil::MorphGeometry", "osg::Object osg::Node osg::Drawable SceneUtil::MorphGeometry")
     {
     }
 };
@@ -95,8 +96,8 @@ void registerSerializers()
         osgDB::ObjectWrapperManager* mgr = osgDB::Registry::instance()->getObjectWrapperManager();
         mgr->addWrapper(new PositionAttitudeTransformSerializer);
         mgr->addWrapper(new SkeletonSerializer);
-        mgr->addWrapper(new FrameSwitchSerializer);
         mgr->addWrapper(new RigGeometrySerializer);
+        mgr->addWrapper(new MorphGeometrySerializer);
         mgr->addWrapper(new LightManagerSerializer);
         mgr->addWrapper(new CameraRelativeTransformSerializer);
 

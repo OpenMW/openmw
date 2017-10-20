@@ -750,19 +750,4 @@ if [ -z $VERBOSE ]; then
 	fi
 fi
 
-if [ -z $CI ]; then
-	echo "- Copying Runtime Resources/Config Files"
-	echo "    gamecontrollerdb.txt"
-	cp gamecontrollerdb.txt $BUILD_CONFIG/gamecontrollerdb.txt
-	echo "    openmw.cfg"
-	cp openmw.cfg.install $BUILD_CONFIG/openmw.cfg
-	echo "    openmw-cs.cfg"
-	cp openmw-cs.cfg $BUILD_CONFIG/openmw-cs.cfg
-	echo "    settings-default.cfg"
-	cp settings-default.cfg $BUILD_CONFIG/settings-default.cfg
-	echo "    resources/"
-	cp -r resources $BUILD_CONFIG/resources
-	echo
-fi
-
 exit $RET

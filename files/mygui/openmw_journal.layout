@@ -3,32 +3,27 @@
 <MyGUI type="Layout">
 
   <Widget type="Window" skin="" layer="JournalBooks" align="Left|Top" position="0 0 565 390" name="_Main">
-    <Property key="NeedKey" value="false"/>
     <!-- pages -->
     <Widget type="ImageBox" skin="ImageBox" position="-70 0 705 390" align="Top|Right" name="JImage">
     <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
     <Widget type="Widget" position="70 0 565 390" align="Top|Right">
 
 
-      <Widget type="Widget" position="0 0 282 390">
-          <Widget type="ImageButton" skin="ImageBox" position="205 350 48 32" name="PrevPageBTN">
-            <Property key="ImageHighlighted" value="textures\tx_menubook_prev_over.dds"/>
-            <Property key="ImageNormal" value="textures\tx_menubook_prev_idle.dds"/>
-            <Property key="ImagePushed" value="textures\tx_menubook_prev_pressed.dds"/>
-          </Widget>
-      </Widget>
-      <Widget type="Widget" position="282 0 282 390">
-          <Widget type="ImageButton" skin="ImageBox" position="18 350 48 32" name="NextPageBTN">
-            <Property key="ImageHighlighted" value="textures\tx_menubook_next_over.dds"/>
-            <Property key="ImageNormal" value="textures\tx_menubook_next_idle.dds"/>
-            <Property key="ImagePushed" value="textures\tx_menubook_next_pressed.dds"/>
-          </Widget>
-      </Widget>
-
-      <!-- buttons -->
       <Widget type="ImageButton" skin="ImageBox" position="40 350 64 32" name="OptionsBTN">
         <!-- Image set at runtime since it may not be available in all versions of the game -->
       </Widget>
+
+      <Widget type="ImageButton" skin="ImageBox" position="205 350 48 32" name="PrevPageBTN">
+        <Property key="ImageHighlighted" value="textures\tx_menubook_prev_over.dds"/>
+        <Property key="ImageNormal" value="textures\tx_menubook_prev_idle.dds"/>
+        <Property key="ImagePushed" value="textures\tx_menubook_prev_pressed.dds"/>
+      </Widget>
+      <Widget type="ImageButton" skin="ImageBox" position="300 350 48 32" name="NextPageBTN">
+        <Property key="ImageHighlighted" value="textures\tx_menubook_next_over.dds"/>
+        <Property key="ImageNormal" value="textures\tx_menubook_next_idle.dds"/>
+        <Property key="ImagePushed" value="textures\tx_menubook_next_pressed.dds"/>
+      </Widget>
+
       <Widget type="TextBox" skin="NormalText" position="150 350 32 16" name="PageOneNum">
         <Property key="TextColour" value="0 0 0"/>
       </Widget>
@@ -36,11 +31,14 @@
       <Widget type="TextBox" skin="NormalText" position="410 350 32 16" name="PageTwoNum">
         <Property key="TextColour" value="0 0 0"/>
       </Widget>
+
+
       <Widget type="ImageButton" skin="ImageBox" position="460 350 48 32" name="CloseBTN">
         <Property key="ImageHighlighted" value="textures\tx_menubook_close_over.dds"/>
         <Property key="ImageNormal" value="textures\tx_menubook_close_idle.dds"/>
         <Property key="ImagePushed" value="textures\tx_menubook_close_pressed.dds"/>
       </Widget>
+
       <Widget type="ImageButton" skin="ImageBox" position="460 350 64 32" name="JournalBTN">
         <Property key="ImageHighlighted" value="textures\tx_menubook_journal_over.dds"/>
         <Property key="ImageNormal" value="textures\tx_menubook_journal_idle.dds"/>

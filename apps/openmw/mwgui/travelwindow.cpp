@@ -8,7 +8,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
@@ -43,11 +42,6 @@ namespace MWGui
                           mSelect->getTop(),
                           mSelect->getTextSize().width,
                           mSelect->getHeight());
-    }
-
-    void TravelWindow::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
     }
 
     void TravelWindow::addDestination(const std::string& name,ESM::Position pos,bool interior)
@@ -108,7 +102,7 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(mDestinationsView->getChildAt(0));
     }
 
-    void TravelWindow::startTravel(const MWWorld::Ptr& actor)
+    void TravelWindow::setPtr(const MWWorld::Ptr& actor)
     {
         center();
         mPtr = actor;
@@ -182,7 +176,9 @@ namespace MWGui
         }
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
-        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+        MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
 
         // Teleports any followers, too.
         MWWorld::ActionTeleport action(interior ? cellname : "", pos, true);
@@ -194,7 +190,7 @@ namespace MWGui
 
     void TravelWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
     }
 
     void TravelWindow::updateLabels()
@@ -212,7 +208,7 @@ namespace MWGui
     void TravelWindow::onReferenceUnavailable()
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
     }
 
     void TravelWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)

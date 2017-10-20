@@ -24,7 +24,7 @@ void CSVPrefs::Dialogue::buildCategorySelector (QSplitter *main)
 
     main->addWidget (list);
 
-    QFontMetrics metrics (QApplication::font());
+    QFontMetrics metrics (QApplication::font(list));
 
     int maxWidth = 1;
 

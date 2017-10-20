@@ -83,6 +83,9 @@ namespace MWRender
         SceneUtil::UnrefQueue* getUnrefQueue();
         Terrain::World* getTerrain();
 
+        osg::Uniform* mUniformNear;
+        osg::Uniform* mUniformFar;
+
         void preloadCommonAssets();
 
         double getReferenceTime() const;

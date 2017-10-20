@@ -26,6 +26,11 @@ namespace MWGui
         }
     }
 
+    bool PickpocketItemModel::allowedToUseItems() const
+    {
+        return false;
+    }
+
     ItemStack PickpocketItemModel::getItem (ModelIndex index)
     {
         if (index < 0)

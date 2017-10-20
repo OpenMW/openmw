@@ -214,6 +214,7 @@ namespace MWInput
         void updateIdleTime(float dt);
 
         void setPlayerControlsEnabled(bool enabled);
+        void handleGuiArrowKey(int action);
 
         void updateCursorMode();
 

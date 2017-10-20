@@ -11,7 +11,9 @@
         </Widget>
 
         <!-- Spell list -->
-        <Widget type="Widget" skin="" position="8 160 519 178" align="Left Top" name="SpellArea"/>
+        <Widget type="ScrollView" skin="MW_ScrollView" position="8 160 507 170" align="Left Top" name="SpellArea">
+            <Property key="CanvasAlign" value="Left"/>
+        </Widget>>
 
         <!-- Dialog buttons -->
         <Widget type="HBox" position="0 338 511 24">
