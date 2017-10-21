@@ -133,6 +133,7 @@ namespace MWGui
     protected:
         void updateTopics();
         void updateTopicsPane();
+        bool isCompanion(const MWWorld::Ptr& actor);
         bool isCompanion();
 
         void onPersuadeResult(const std::string& title, const std::string& text);
