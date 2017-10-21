@@ -391,8 +391,8 @@ namespace MWGui
             // No greetings found. The dialogue window should not be shown.
             // If this is a companion, we must show the companion window directly (used by BM_bear_be_unique).
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
-            if (isCompanion())
-                MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Companion, mPtr);
+            if (isCompanion(actor))
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Companion, actor);
             return;
         }
 
@@ -698,8 +698,13 @@ namespace MWGui
 
     bool DialogueWindow::isCompanion()
     {
-        return !mPtr.getClass().getScript(mPtr).empty()
-                && mPtr.getRefData().getLocals().getIntVar(mPtr.getClass().getScript(mPtr), "companion");
+        return isCompanion(mPtr);
+    }
+
+    bool DialogueWindow::isCompanion(const MWWorld::Ptr& actor)
+    {
+        return !actor.getClass().getScript(actor).empty()
+                && actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion");
     }
 
     void DialogueWindow::onPersuadeResult(const std::string &title, const std::string &text)
