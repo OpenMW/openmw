@@ -8,6 +8,7 @@
 
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/translation/translation.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -22,13 +23,13 @@ namespace MWDialogue
 {
     class DialogueManager : public MWBase::DialogueManager
     {
-            std::set<std::string> mKnownTopics;// Those are the topics the player knows.
+            std::set<std::string, Misc::StringUtils::CiComp> mKnownTopics;// Those are the topics the player knows.
 
             // Modified faction reactions. <Faction1, <Faction2, Difference> >
             typedef std::map<std::string, std::map<std::string, int> > ModFactionReactionMap;
             ModFactionReactionMap mChangedFactionReaction;
 
-            std::set<std::string> mActorKnownTopics;
+            std::set<std::string, Misc::StringUtils::CiComp> mActorKnownTopics;
 
             Translation::Storage& mTranslationDataStorage;
             MWScript::CompilerContext mCompilerContext;
