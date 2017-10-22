@@ -1999,6 +1999,8 @@ void CharacterController::update(float duration)
 
     if (mFloatToSurface && cls.isActor() && cls.getCreatureStats(mPtr).isDead() && cls.canSwim(mPtr))
         moved.z() = 1.0;
+    if (cls.isActor() && cls.canSwim(mPtr) && mPtr == getPlayer() && world->isSwimming(mPtr))
+        moved.z() += 20.f;
 
     // Update movement
     if(mMovementAnimationControlled && mPtr.getClass().isActor())
