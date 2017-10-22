@@ -330,9 +330,9 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"OpenAL-Soft-1.17.2.zip"
 
 	# OSG
-	download "OpenSceneGraph 3.4.0-scrawl" \
-		"http://www.lysator.liu.se/~ace/OpenMW/deps/OSG-3.4.0-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z" \
-		"OSG-3.4.0-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z"
+	download "OpenSceneGraph 3.4.1-scrawl" \
+		"http://www.lysator.liu.se/~ace/OpenMW/deps/OSG-3.4.1-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z" \
+		"OSG-3.4.1-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z"
 
 	# Qt
 	if [ -z $APPVEYOR ]; then
@@ -527,20 +527,20 @@ cd $DEPS
 echo
 
 # OSG
-printf "OSG 3.4.0-scrawl... "
+printf "OSG 3.4.1-scrawl... "
 {
 	cd $DEPS_INSTALL
 
 	if [ -d OSG ] && \
 		grep "OPENSCENEGRAPH_MAJOR_VERSION    3" OSG/include/osg/Version > /dev/null && \
 		grep "OPENSCENEGRAPH_MINOR_VERSION    4" OSG/include/osg/Version > /dev/null && \
-		grep "OPENSCENEGRAPH_PATCH_VERSION    0" OSG/include/osg/Version > /dev/null
+		grep "OPENSCENEGRAPH_PATCH_VERSION    1" OSG/include/osg/Version > /dev/null
 	then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf OSG
-		eval 7z x -y "${DEPS}/OSG-3.4.0-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z" $STRIP
-		mv "OSG-3.4.0-scrawl-msvc${MSVC_YEAR}-win${BITS}" OSG
+		eval 7z x -y "${DEPS}/OSG-3.4.1-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z" $STRIP
+		mv "OSG-3.4.1-scrawl-msvc${MSVC_YEAR}-win${BITS}" OSG
 	fi
 
 	OSG_SDK="$(real_pwd)/OSG"
@@ -556,8 +556,8 @@ printf "OSG 3.4.0-scrawl... "
 	add_runtime_dlls "$(pwd)/OSG/bin/"{OpenThreads,zlib,libpng*}${SUFFIX}.dll \
 		"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer}${SUFFIX}.dll
 
-	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.0/osgdb_"{bmp,dds,jpeg,osg,png,tga}${SUFFIX}.dll
-	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.0/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer}${SUFFIX}.dll
+	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.1/osgdb_"{bmp,dds,jpeg,osg,png,tga}${SUFFIX}.dll
+	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.1/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer}${SUFFIX}.dll
 
 	echo Done.
 }
@@ -717,10 +717,10 @@ if [ -z $CI ]; then
 	echo
 
 	echo "- OSG Plugin DLLs..."
-	mkdir -p $BUILD_CONFIG/osgPlugins-3.4.0
+	mkdir -p $BUILD_CONFIG/osgPlugins-3.4.1
 	for DLL in $OSG_PLUGINS; do
 		echo "    $(basename $DLL)."
-		cp "$DLL" $BUILD_CONFIG/osgPlugins-3.4.0
+		cp "$DLL" $BUILD_CONFIG/osgPlugins-3.4.1
 	done
 	echo
 
