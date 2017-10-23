@@ -131,16 +131,14 @@ namespace MWScript
                 }
         };
 
+        template <class R>
         class OpOnActivate : public Interpreter::Opcode0
         {
             public:
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr ptr = context.getReference();
+                    MWWorld::Ptr ptr = R()(runtime);
 
                     runtime.push (ptr.getRefData().onActivate());
                 }
@@ -1280,7 +1278,8 @@ namespace MWScript
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
-            interpreter.installSegment5 (Compiler::Misc::opcodeOnActivate, new OpOnActivate);
+            interpreter.installSegment5 (Compiler::Misc::opcodeOnActivate, new OpOnActivate<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeOnActivateExplicit, new OpOnActivate<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeActivate, new OpActivate<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeActivateExplicit, new OpActivate<ExplicitRef>);
             interpreter.installSegment3 (Compiler::Misc::opcodeLock, new OpLock<ImplicitRef>);
