@@ -3,6 +3,7 @@ os:
  - osx
 osx_image: xcode8.3
 language: cpp
+install: export CXX="g++-5"
 sudo: required
 dist: trusty
 branches:
@@ -24,7 +25,7 @@ addons:
       - llvm-toolchain-precise-3.6
     packages: [
       # Dev
-      clang-3.6, libunshield-dev, libtinyxml-dev,
+      g++-5, clang-3.6, libunshield-dev, libtinyxml-dev,
       # Tests
       libgtest-dev, google-mock,
       # Boost
