@@ -200,6 +200,7 @@ namespace Compiler
     {
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
+        const int opcodeOnActivateExplicit = 0x2000306;
         const int opcodeActivate = 0x2000075;
         const int opcodeActivateExplicit = 0x2000244;
         const int opcodeLock = 0x20004;

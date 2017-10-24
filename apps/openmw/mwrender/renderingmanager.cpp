@@ -252,6 +252,7 @@ namespace MWRender
         sceneRoot->setName("Scene Root");
 
         mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
+
         mSky->setCamera(mViewer->getCamera());
         mSky->setRainIntensityUniform(mWater->getRainIntensityUniform());
 

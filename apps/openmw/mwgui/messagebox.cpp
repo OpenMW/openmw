@@ -126,6 +126,7 @@ namespace MWGui
         if (mInterMessageBoxe != NULL)
         {
             std::cerr << "Warning: replacing an interactive message box that was not answered yet" << std::endl;
+            mInterMessageBoxe->setVisible(false);
             delete mInterMessageBoxe;
             mInterMessageBoxe = NULL;
         }

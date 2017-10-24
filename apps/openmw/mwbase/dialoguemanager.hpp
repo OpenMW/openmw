@@ -36,6 +36,12 @@ namespace MWBase
 
         public:
 
+            class ResponseCallback
+            {
+            public:
+                virtual void addResponse(const std::string& title, const std::string& text) = 0;
+            };
+
             DialogueManager() {}
 
             virtual void clear() = 0;
@@ -44,8 +50,7 @@ namespace MWBase
 
             virtual bool isInChoice() const = 0;
 
-            typedef std::pair<std::string, std::string> Response; // title, text
-            virtual bool startDialogue (const MWWorld::Ptr& actor, Response& response) = 0;
+            virtual bool startDialogue (const MWWorld::Ptr& actor, ResponseCallback* callback) = 0;
 
             virtual void addTopic (const std::string& topic) = 0;
 
@@ -58,15 +63,15 @@ namespace MWBase
 
             virtual void say(const MWWorld::Ptr &actor, const std::string &topic) = 0;
 
-            virtual Response keywordSelected (const std::string& keyword) = 0;
+            virtual void keywordSelected (const std::string& keyword, ResponseCallback* callback) = 0;
             virtual void goodbyeSelected() = 0;
-            virtual Response questionAnswered (int answer) = 0;
+            virtual void questionAnswered (int answer, ResponseCallback* callback) = 0;
 
             virtual std::list<std::string> getAvailableTopics() = 0;
 
-            virtual bool checkServiceRefused (Response& response) = 0;
+            virtual bool checkServiceRefused (ResponseCallback* callback) = 0;
 
-            virtual Response persuade (int type) = 0;
+            virtual void persuade (int type, ResponseCallback* callback) = 0;
             virtual int getTemporaryDispositionChange () const = 0;
 
             /// @note This change is temporary and gets discarded when dialogue ends.
