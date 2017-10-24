@@ -3,6 +3,7 @@ os:
  - osx
 osx_image: xcode8.3
 language: cpp
+install: export CXX="g++-5"
 sudo: required
 dist: trusty
 branches:
@@ -24,7 +25,8 @@ addons:
       - llvm-toolchain-precise-3.6
     packages: [
       # Dev
-      cmake, clang-3.6, libunshield-dev, libtinyxml-dev,
+      g++-5, cmake, clang-3.6, libunshield-dev, libtinyxml-dev,
+       clang-3.6, libunshield-dev, libtinyxml-dev,
       # Tests
       libgtest-dev, google-mock,
       # Boost
@@ -32,7 +34,7 @@ addons:
       # FFmpeg
       libavcodec-dev, libavformat-dev, libavutil-dev, libswscale-dev,
       # Audio & Video
-      libsdl2-dev, libqt5opengl5-dev, libopenal-dev,
+      libsdl2-dev, libqt5opengl5-dev, libqt4-dev, libopenal-dev,
       # The other ones from OpenMW ppa
       libbullet-dev, libswresample-dev, libopenscenegraph-3.4-dev, libmygui-dev
     ]

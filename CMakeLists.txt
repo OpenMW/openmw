@@ -1,17 +1,17 @@
 # Apps and tools
-option(BUILD_OPENMW             "build OpenMW" ON)
-option(BUILD_BSATOOL            "build BSA extractor" ON)
-option(BUILD_ESMTOOL            "build ESM inspector" ON)
-option(BUILD_LAUNCHER           "build Launcher" ON)
-option(BUILD_MWINIIMPORTER      "build MWiniImporter" ON)
-option(BUILD_ESSIMPORTER        "build ESS (Morrowind save game) importer" ON)
-option(BUILD_OPENCS             "build OpenMW Construction Set" ON)
-option(BUILD_WIZARD             "build Installation Wizard" ON)
+option(BUILD_OPENMW "build OpenMW" ON)
+option(BUILD_BSATOOL "build BSA extractor" ON)
+option(BUILD_ESMTOOL "build ESM inspector" ON)
+option(BUILD_LAUNCHER "build Launcher" ON)
+option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
+option(BUILD_ESSIMPORTER "build ESS (Morrowind save game) importer" ON)
+option(BUILD_OPENCS "build OpenMW Construction Set" ON)
+option(BUILD_WIZARD "build Installation Wizard" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
-option(BUILD_UNITTESTS          "Enable Unittests with Google C++ Unittest" OFF)
-option(BUILD_NIFTEST            "build nif file tester" OFF)
-option(BUILD_MYGUI_PLUGIN       "build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
-option(BUILD_DOCS               "build documentation." OFF )
+option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest" OFF)
+option(BUILD_NIFTEST "build nif file tester" OFF)
+option(BUILD_MYGUI_PLUGIN "build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
+option(BUILD_DOCS        "build documentation." OFF )
 
 if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
    set(USE_QT FALSE)
@@ -20,12 +20,20 @@ else()
 endif()
 
 if (USE_QT)
-    set(DESIRED_QT_VERSION 5 CACHE STRING "The QT version OpenMW should use (4 or 5)")
+    set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
     set_property(CACHE DESIRED_QT_VERSION PROPERTY STRINGS 4 5)
 endif()
 
-# set the minimum required version across the board
-cmake_minimum_required(VERSION 3.1.0)
+if (APPLE)
+    # OS X build process relies on this fix: https://github.com/Kitware/CMake/commit/3df5147043d83aa09acd5c9ce31d5c602efb99db
+    cmake_minimum_required(VERSION 3.1.0)
+elseif (USE_QT AND DESIRED_QT_VERSION MATCHES 5)
+    # 2.8.11+ is required to make Qt5 happy and allow linking QtMain on Windows.
+    cmake_minimum_required(VERSION 2.8.11)
+else()
+    # We probably support older versions than this.
+    cmake_minimum_required(VERSION 2.6)
+endif()
 
 project(OpenMW)
 
@@ -77,13 +85,14 @@ endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 include(OpenMWMacros)
 
 # doxygen main page
+
 configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_DIR}/docs/mainpage.hpp")
 
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
-option(SDL2_STATIC  "Link static build of SDL into the binaries" FALSE)
-option(OSG_STATIC   "Link static build of OpenSceneGraph into the binaries" FALSE)
-option(QT_STATIC    "Link static build of QT into the binaries" FALSE)
+option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
+option(OSG_STATIC "Link static build of OpenSceneGraph into the binaries" FALSE)
+option(QT_STATIC "Link static build of QT into the binaries" FALSE)
 
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 
@@ -201,14 +210,14 @@ find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgPart
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 set(USED_OSG_PLUGINS
-        osgdb_bmp
-        osgdb_dds
-        osgdb_jpeg
-        osgdb_osg
-        osgdb_png
-        osgdb_serializers_osg
-        osgdb_tga
-)
+                    osgdb_bmp
+                    osgdb_dds
+                    osgdb_jpeg
+                    osgdb_osg
+                    osgdb_png
+                    osgdb_serializers_osg
+                    osgdb_tga
+                  )
 
 get_filename_component(OSG_LIB_DIR ${OSGDB_LIBRARY} DIRECTORY)
 set(OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
@@ -252,12 +261,12 @@ find_package(OpenAL REQUIRED)
 find_package(Bullet ${REQUIRED_BULLET_VERSION} REQUIRED COMPONENTS BulletCollision LinearMath)
 
 include_directories("."
-        SYSTEM
-        ${SDL2_INCLUDE_DIR}
-        ${Boost_INCLUDE_DIR}
-        ${MyGUI_INCLUDE_DIRS}
-        ${OPENAL_INCLUDE_DIR}
-        ${Bullet_INCLUDE_DIRS}
+    SYSTEM
+    ${SDL2_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIR}
+    ${MyGUI_INCLUDE_DIRS}
+    ${OPENAL_INCLUDE_DIR}
+    ${Bullet_INCLUDE_DIRS}
 )
 
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
@@ -401,6 +410,9 @@ IF(NOT WIN32 AND NOT APPLE)
     IF(BUILD_WIZARD)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw-wizard" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_WIZARD)
+    #if(BUILD_MYGUI_PLUGIN)
+    #    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Plugin_MyGUI_OpenMW_Resources.so" DESTINATION "${LIBDIR}" )
+    #ENDIF(BUILD_MYGUI_PLUGIN)
 
     # Install licenses
     INSTALL(FILES "files/mygui/DejaVu Font License.txt" DESTINATION "${LICDIR}" )
