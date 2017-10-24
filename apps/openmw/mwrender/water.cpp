@@ -416,9 +416,9 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 
     setHeight(mTop);
 
-    updateWaterMaterial();
-
     mRainIntensityUniform = new osg::Uniform("rainIntensity",(float) 0.0);
+
+    updateWaterMaterial();
 }
 
 osg::Uniform *Water::getRainIntensityUniform()
@@ -517,6 +517,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     osg::ref_ptr<osg::Shader> fragmentShader (shaderMgr.getShader("water_fragment.glsl", defineMap, osg::Shader::FRAGMENT));
 
     osg::ref_ptr<osg::Texture2D> normalMap (new osg::Texture2D(readPngImage(mResourcePath + "/shaders/water_nm.png")));
+
     if (normalMap->getImage())
         normalMap->getImage()->flipVertical();
     normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
@@ -531,6 +532,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
 
     shaderStateset->setTextureAttributeAndModes(0, normalMap, osg::StateAttribute::ON);
     shaderStateset->setTextureAttributeAndModes(1, reflection->getReflectionTexture(), osg::StateAttribute::ON);
+
     if (refraction)
     {
         shaderStateset->setTextureAttributeAndModes(2, refraction->getRefractionTexture(), osg::StateAttribute::ON);
@@ -552,12 +554,12 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
 
     shaderStateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
 
+    shaderStateset->addUniform(mRainIntensityUniform.get());
+
     osg::ref_ptr<osg::Program> program (new osg::Program);
     program->addShader(vertexShader);
     program->addShader(fragmentShader);
     shaderStateset->setAttributeAndModes(program, osg::StateAttribute::ON);
-
-    shaderStateset->addUniform(mRainIntensityUniform);
 
     node->setStateSet(shaderStateset);
     node->setUpdateCallback(NULL);
