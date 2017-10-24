@@ -82,7 +82,8 @@ namespace MWDialogue
         for (TEntryIter i = mJournal.begin (); i != mJournal.end (); ++i)
             if (i->mTopic == id && i->mInfoId == infoId)
             {
-                setJournalIndex(id, index);
+                if (getJournalIndex(id) < index)
+                    setJournalIndex(id, index);
                 MWBase::Environment::get().getWindowManager()->messageBox ("#{sJournalEntry}");
                 return;
             }
