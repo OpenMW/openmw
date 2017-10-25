@@ -5,7 +5,8 @@ set (VERSION_IN_FILE "${OpenMW_SOURCE_DIR}/files/version.in")
 set (VERSION_FILE_PATH_BASE "${OpenMW_BINARY_DIR}")
 set (VERSION_FILE_PATH_RELATIVE resources/version)
 if (GIT_CHECKOUT)
-  add_custom_target (git-version
+    get_generator_is_multi_config(multi_config)
+    add_custom_target (git-version
        COMMAND ${CMAKE_COMMAND}
             -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
             -DPROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}
@@ -16,7 +17,9 @@ if (GIT_CHECKOUT)
             -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
             -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
             -DOPENMW_VERSION=${OPENMW_VERSION}
-			-DMACROSFILE=${CMAKE_SOURCE_DIR}/cmake/OpenMWMacros.cmake
+            -DMACROSFILE=${CMAKE_SOURCE_DIR}/cmake/OpenMWMacros.cmake
+            "-DCMAKE_CONFIGURATION_TYPES=${CMAKE_CONFIGURATION_TYPES}"
+            -Dgenerator_is_multi_config_var=${multi_config}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/GitVersion.cmake
             VERBATIM)
 else (GIT_CHECKOUT)
