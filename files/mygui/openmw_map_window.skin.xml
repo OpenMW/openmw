@@ -2,6 +2,7 @@
 
 <MyGUI type="Resource" version="1.1">
     <Resource type="ResourceSkin" name="MW_MapView" size="516 516">
+        <Property key="NeedKey" value="false"/>
         <Child type="Widget" skin="" offset="0 0 516 516" align="Stretch" name="Client"/>
 
         <!-- invisible scroll bars, needed for setting the view offset -->

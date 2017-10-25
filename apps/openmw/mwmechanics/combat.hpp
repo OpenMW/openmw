@@ -39,10 +39,6 @@ void getHandToHandDamage (const MWWorld::Ptr& attacker, const MWWorld::Ptr& vict
 /// Apply the fatigue loss incurred by attacking with the given weapon (weapon may be empty = hand-to-hand)
 void applyFatigueLoss(const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float attackStrength);
 
-/// Can attacker operate in victim's environment?
-/// e.g. If attacker is a fish, is victim in water? Or, if attacker can't swim, is victim on land?
-bool isEnvironmentCompatible(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim);
-
 float getFightDistanceBias(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2);
 }
 

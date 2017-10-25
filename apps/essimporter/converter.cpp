@@ -1,12 +1,12 @@
 #include "converter.hpp"
 
 #include <stdexcept>
+#include <algorithm>
 
 #include <osgDB/WriteFile>
 
 #include <components/esm/creaturestate.hpp>
 #include <components/esm/containerstate.hpp>
-#include <components/esm/projectilestate.hpp>
 
 #include "convertcrec.hpp"
 #include "convertcntc.hpp"
@@ -461,11 +461,7 @@ namespace ESSImport
             if (!pnam.isMagic())
             {
                 ESM::ProjectileState out;
-                out.mId = pnam.mArrowId.toString();
-                out.mPosition = pnam.mPosition;
-                out.mOrientation.mValues[0] = out.mOrientation.mValues[1] = out.mOrientation.mValues[2] = 0.0f;
-                out.mOrientation.mValues[3] = 1.0f;
-                out.mActorId = convertActorId(pnam.mActorId.toString(), *mContext);
+                convertBaseState(out, pnam);
 
                 out.mBowId = pnam.mBowId.toString();
                 out.mVelocity = pnam.mVelocity;
@@ -477,16 +473,49 @@ namespace ESSImport
             }
             else
             {
-                // TODO: Implement magic projectile conversion.
+                ESM::MagicBoltState out;
+                convertBaseState(out, pnam);
 
-                /*esm.startRecord(ESM::REC_MPRJ);
+                auto it = std::find_if(mContext->mActiveSpells.begin(), mContext->mActiveSpells.end(),
+                                       [&pnam](const SPLM::ActiveSpell& spell) -> bool { return spell.mIndex == pnam.mSplmIndex; });
+
+                if (it == mContext->mActiveSpells.end())
+                {
+                    std::cerr << "Warning: Skipped conversion for magic projectile \"" << pnam.mArrowId.toString() << "\" (invalid spell link)" << std::endl;
+                    continue;
+                }
+
+                out.mSpellId = it->mSPDT.mId.toString();
+                out.mSpeed = pnam.mSpeed * 0.001f; // not sure where this factor comes from
+
+                esm.startRecord(ESM::REC_MPRJ);
                 out.save(esm);
-                esm.endRecord(ESM::REC_MPRJ);*/
-
-                std::cerr << "Warning: Skipped conversion for magic projectile \"" << pnam.mArrowId.toString() << "\" (not implemented)" << std::endl;
-                continue;
+                esm.endRecord(ESM::REC_MPRJ);
             }
         }
+    }
+
+    void ConvertPROJ::convertBaseState(ESM::BaseProjectileState& base, const PROJ::PNAM& pnam)
+    {
+        base.mId = pnam.mArrowId.toString();
+        base.mPosition = pnam.mPosition;
+
+        osg::Quat orient;
+        orient.makeRotate(osg::Vec3f(0,1,0), pnam.mVelocity);
+        base.mOrientation = orient;
+
+        base.mActorId = convertActorId(pnam.mActorId.toString(), *mContext);
+    }
+
+    void ConvertSPLM::read(ESM::ESMReader& esm)
+    {
+        mSPLM.load(esm);
+        mContext->mActiveSpells = mSPLM.mActiveSpells;
+    }
+
+    void ConvertSPLM::write(ESM::ESMWriter& esm)
+    {
+        std::cerr << "Warning: Skipped active spell conversion (not implemented)" << std::endl;
     }
 
 }

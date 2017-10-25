@@ -105,7 +105,7 @@ namespace MWGui
             assignWidget(button, "StatValueButton");
             if (button)
             {
-                mSkillNameWidget = button;
+                mSkillValueWidget = button;
                 button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWSkill::onClicked);
             }
         }

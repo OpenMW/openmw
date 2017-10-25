@@ -8,6 +8,7 @@
 
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_InputManager.h>
 
 #include <components/misc/stringops.hpp>
 #include <components/widgets/imagebutton.hpp>
@@ -44,7 +45,7 @@ namespace
     static char const LeftTopicIndex [] = "LeftTopicIndex";
     static char const RightTopicIndex [] = "RightTopicIndex";
 
-    struct JournalWindowImpl : MWGui::WindowBase, MWGui::JournalBooks, MWGui::JournalWindow
+    struct JournalWindowImpl : MWGui::JournalBooks, MWGui::JournalWindow
     {
         struct DisplayState
         {
@@ -84,8 +85,14 @@ namespace
 
         void adviseButtonClick (char const * name, void (JournalWindowImpl::*Handler) (MyGUI::Widget* _sender))
         {
-            getWidget <Gui::ImageButton> (name) ->
+            getWidget <MyGUI::Widget> (name) ->
                 eventMouseButtonClick += newDelegate(this, Handler);
+        }
+
+        void adviseKeyPress (char const * name, void (JournalWindowImpl::*Handler) (MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char character))
+        {
+            getWidget <MyGUI::Widget> (name) ->
+                eventKeyButtonPressed += newDelegate(this, Handler);
         }
 
         MWGui::BookPage* getPage (char const * name)
@@ -94,9 +101,8 @@ namespace
         }
 
         JournalWindowImpl (MWGui::JournalViewModel::Ptr Model, bool questList)
-            : WindowBase("openmw_journal.layout"), JournalBooks (Model)
+            : JournalBooks (Model), JournalWindow()
         {
-            mMainWidget->setVisible(false);
             center();
 
             adviseButtonClick (OptionsBTN,    &JournalWindowImpl::notifyOptions   );
@@ -111,6 +117,12 @@ namespace
 
             adviseButtonClick (ShowAllBTN,    &JournalWindowImpl::notifyShowAll   );
             adviseButtonClick (ShowActiveBTN, &JournalWindowImpl::notifyShowActive);
+
+            adviseKeyPress (OptionsBTN, &JournalWindowImpl::notifyKeyPress);
+            adviseKeyPress (PrevPageBTN, &JournalWindowImpl::notifyKeyPress);
+            adviseKeyPress (NextPageBTN, &JournalWindowImpl::notifyKeyPress);
+            adviseKeyPress (CloseBTN, &JournalWindowImpl::notifyKeyPress);
+            adviseKeyPress (JournalBTN, &JournalWindowImpl::notifyKeyPress);
 
             Gui::MWList* list = getWidget<Gui::MWList>(QuestsList);
             list->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyQuestClicked);
@@ -211,7 +223,7 @@ namespace
                 button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
         }
 
-        void open()
+        void onOpen()
         {
             if (!MWBase::Environment::get().getWindowManager ()->getJournalAllowed ())
             {
@@ -238,9 +250,11 @@ namespace
                     --page;
             }
             updateShowingPages();
+
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(getWidget<MyGUI::Widget>(CloseBTN));
         }
 
-        void close()
+        void onClose()
         {
             mModel->unload ();
 
@@ -349,8 +363,19 @@ namespace
                 relPages = 0;
             }
 
-            setVisible (PrevPageBTN, page > 0);
-            setVisible (NextPageBTN, relPages > 2);
+            MyGUI::Widget* nextPageBtn = getWidget<MyGUI::Widget>(NextPageBTN);
+            MyGUI::Widget* prevPageBtn = getWidget<MyGUI::Widget>(PrevPageBTN);
+
+            MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+            bool nextPageVisible = relPages > 2;
+            nextPageBtn->setVisible(nextPageVisible);
+            bool prevPageVisible = page > 0;
+            prevPageBtn->setVisible(prevPageVisible);
+
+            if (focus == nextPageBtn && !nextPageVisible && prevPageVisible)
+                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(prevPageBtn);
+            else if (focus == prevPageBtn && !prevPageVisible && nextPageVisible)
+                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(nextPageBtn);
 
             setVisible (PageOneNum, relPages > 0);
             setVisible (PageTwoNum, relPages > 1);
@@ -360,6 +385,14 @@ namespace
 
             setText (PageOneNum, page + 1);
             setText (PageTwoNum, page + 2);
+        }
+
+        void notifyKeyPress(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character)
+        {
+            if (key == MyGUI::KeyCode::ArrowUp)
+                notifyPrevPage(sender);
+            else if (key == MyGUI::KeyCode::ArrowDown)
+                notifyNextPage(sender);
         }
 
         void notifyTopicClicked (intptr_t linkId)
@@ -602,4 +635,10 @@ namespace
 MWGui::JournalWindow * MWGui::JournalWindow::create (JournalViewModel::Ptr Model, bool questList)
 {
     return new JournalWindowImpl (Model, questList);
+}
+
+MWGui::JournalWindow::JournalWindow()
+    :WindowBase("openmw_journal.layout")
+{
+
 }

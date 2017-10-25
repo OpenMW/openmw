@@ -3,6 +3,7 @@
 #include <MyGUI_ListBox.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ScrollView.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -63,11 +64,12 @@ namespace MWGui
             okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
     }
 
-    void BirthDialog::open()
+    void BirthDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
         updateBirths();
         updateSpells();
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mBirthList);
     }
 
 
@@ -244,6 +246,11 @@ namespace MWGui
                 }
             }
         }
-    }
 
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mSpellArea->setVisibleVScroll(false);
+        mSpellArea->setCanvasSize(MyGUI::IntSize(mSpellArea->getWidth(), std::max(mSpellArea->getHeight(), coord.top)));
+        mSpellArea->setVisibleVScroll(true);
+        mSpellArea->setViewOffset(MyGUI::IntPoint(0, 0));
+    }
 }

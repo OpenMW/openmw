@@ -22,6 +22,7 @@
 #include <components/esm/globalscript.hpp>
 #include <components/esm/queststate.hpp>
 #include <components/esm/stolenitems.hpp>
+#include <components/esm/projectilestate.hpp>
 
 #include "importcrec.hpp"
 #include "importcntc.hpp"
@@ -36,6 +37,7 @@
 #include "importjour.hpp"
 #include "importscpt.hpp"
 #include "importproj.h"
+#include "importsplm.h"
 
 #include "convertacdt.hpp"
 #include "convertnpcc.hpp"
@@ -602,7 +604,17 @@ public:
     virtual void read(ESM::ESMReader& esm) override;
     virtual void write(ESM::ESMWriter& esm) override;
 private:
+    void convertBaseState(ESM::BaseProjectileState& base, const PROJ::PNAM& pnam);
     PROJ mProj;
+};
+
+class ConvertSPLM : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader& esm) override;
+    virtual void write(ESM::ESMWriter& esm) override;
+private:
+    SPLM mSPLM;
 };
 
 }

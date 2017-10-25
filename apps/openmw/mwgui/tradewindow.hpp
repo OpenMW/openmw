@@ -27,16 +27,22 @@ namespace MWGui
         public:
             TradeWindow();
 
-            void startTrade(const MWWorld::Ptr& actor);
+            void setPtr(const MWWorld::Ptr& actor);
+
+            void onFrame(float dt);
+            void clear() { resetReference(); }
 
             void borrowItem (int index, size_t count);
             void returnItem (int index, size_t count);
 
             int getMerchantServices();
 
-            virtual void exit();
+            virtual bool exit();
 
             virtual void resetReference();
+
+            typedef MyGUI::delegates::CMultiDelegate0 EventHandle_TradeDone;
+            EventHandle_TradeDone eventTradeDone;
 
         private:
             ItemView* mItemView;
@@ -81,6 +87,7 @@ namespace MWGui
 
             void onFilterChanged(MyGUI::Widget* _sender);
             void onOfferButtonClicked(MyGUI::Widget* _sender);
+            void onAccept(MyGUI::EditBox* sender);
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onMaxSaleButtonClicked(MyGUI::Widget* _sender);
             void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);

@@ -64,11 +64,6 @@ namespace MWGui
         }
     }
 
-    void QuickKeysMenu::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_QuickKeysMenu);
-    }
-
     void QuickKeysMenu::clear()
     {
         mActivatedIndex = -1;
@@ -449,11 +444,6 @@ namespace MWGui
         center();
     }
 
-    void QuickKeysMenuAssign::exit()
-    {
-        setVisible(false);
-    }
-
     void QuickKeysMenu::write(ESM::ESMWriter &writer)
     {
         writer.startRecord(ESM::REC_KEYS);
@@ -585,14 +575,15 @@ namespace MWGui
         exit();
     }
 
-    void MagicSelectionDialog::exit()
+    bool MagicSelectionDialog::exit()
     {
         mParent->onAssignMagicCancel();
+        return true;
     }
 
-    void MagicSelectionDialog::open ()
+    void MagicSelectionDialog::onOpen ()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
 
         mMagicList->setModel(new SpellModel(MWMechanics::getPlayer()));
         mMagicList->resetScrollbars();

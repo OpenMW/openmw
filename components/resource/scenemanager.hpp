@@ -31,6 +31,7 @@ namespace osgDB
 namespace Shader
 {
     class ShaderManager;
+    class ShaderVisitor;
 }
 
 namespace Resource
@@ -141,13 +142,15 @@ namespace Resource
         void setUnRefImageDataAfterApply(bool unref);
 
         /// @see ResourceManager::updateCache
-        virtual void updateCache(double referenceTime);
+        void updateCache(double referenceTime) override;
 
-        virtual void clearCache();
+        void clearCache() override;
 
-        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
+        void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 
     private:
+
+        Shader::ShaderVisitor* createShaderVisitor();
 
         std::unique_ptr<Shader::ShaderManager> mShaderManager;
         bool mForceShaders;

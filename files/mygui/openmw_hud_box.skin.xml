@@ -8,27 +8,27 @@
 
         <!-- The interior of the box -->
 
-        <Child type="Widget" skin="BlackBG" offset="0 0 40 40" align="Stretch" name="Client"/>
+        <Child type="Widget" skin="BlackBG" offset="0 0 40 40" align="Stretch"/>
 
         <!-- Borders -->
 
-        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch" name="Client"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch"/>
 
     </Resource>
 
     <Resource type="ResourceSkin" name="HUD_Box_Transparent" size="40 40">
-        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch" name="Client"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch"/>
     </Resource>
 
     <Resource type="ResourceSkin" name="HUD_Box_NoTransp" size="40 40">
 
         <!-- The interior of the box -->
 
-        <Child type="Widget" skin="DialogBG" offset="0 0 40 40" align="Stretch" name="Client"/>
+        <Child type="Widget" skin="DialogBG" offset="0 0 40 40" align="Stretch"/>
 
         <!-- Borders -->
 
-        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch" name="Client"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch"/>
 
     </Resource>
     
@@ -36,11 +36,11 @@
 
         <!-- The interior of the box -->
 
-        <Child type="Widget" skin="DialogBG_NoTransp_Owned" offset="0 0 40 40" align="Stretch" name="Client"/>
+        <Child type="Widget" skin="DialogBG_NoTransp_Owned" offset="0 0 40 40" align="Stretch"/>
 
         <!-- Borders -->
 
-        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch" name="Client"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch"/>
 
     </Resource>
 
@@ -48,11 +48,11 @@
 
         <!-- The interior of the box -->
 
-        <Child type="Widget" skin="DialogBG_Owned" offset="0 0 40 40" align="Stretch" name="Client"/>
+        <Child type="Widget" skin="DialogBG_Owned" offset="0 0 40 40" align="Stretch"/>
 
         <!-- Borders -->
 
-        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch" name="Client"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch"/>
 
     </Resource>
     

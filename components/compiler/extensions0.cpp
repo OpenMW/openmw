@@ -240,7 +240,7 @@ namespace Compiler
         void registerExtensions (Extensions& extensions)
         {
             extensions.registerFunction ("xbox", 'l', "", opcodeXBox);
-            extensions.registerFunction ("onactivate", 'l', "", opcodeOnActivate);
+            extensions.registerFunction ("onactivate", 'l', "", opcodeOnActivate, opcodeOnActivateExplicit);
             extensions.registerInstruction ("activate", "x", opcodeActivate, opcodeActivateExplicit);
             extensions.registerInstruction ("lock", "/l", opcodeLock, opcodeLockExplicit);
             extensions.registerInstruction ("unlock", "", opcodeUnlock, opcodeUnlockExplicit);

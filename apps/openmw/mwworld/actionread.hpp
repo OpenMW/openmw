@@ -16,4 +16,4 @@ namespace MWWorld
     };
 }
 
-#endif // ACTIONOPEN_H
+#endif // ACTIONREAD_H

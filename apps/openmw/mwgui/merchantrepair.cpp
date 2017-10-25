@@ -32,7 +32,7 @@ MerchantRepair::MerchantRepair()
     mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onOkButtonClick);
 }
 
-void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
+void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
 {
     mActor = actor;
 
@@ -111,16 +111,11 @@ void MerchantRepair::onMouseWheel(MyGUI::Widget* _sender, int _rel)
         mList->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mList->getViewOffset().top + _rel*0.3f)));
 }
 
-void MerchantRepair::open()
+void MerchantRepair::onOpen()
 {
     center();
     // Reset scrollbars
     mList->setViewOffset(MyGUI::IntPoint(0, 0));
-}
-
-void MerchantRepair::exit()
-{
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_MerchantRepair);
 }
 
 void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
@@ -145,12 +140,12 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
     MWMechanics::CreatureStats& actorStats = mActor.getClass().getCreatureStats(mActor);
     actorStats.setGoldPool(actorStats.getGoldPool() + price);
 
-    startRepair(mActor);
+    setPtr(mActor);
 }
 
 void MerchantRepair::onOkButtonClick(MyGUI::Widget *sender)
 {
-    exit();
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_MerchantRepair);
 }
 
 }

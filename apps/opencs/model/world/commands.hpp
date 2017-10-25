@@ -5,12 +5,14 @@
 
 #include <string>
 #include <map>
+#include <memory>
 #include <vector>
 
 #include <QVariant>
 #include <QUndoCommand>
 #include <QModelIndex>
 
+#include "columnimp.hpp"
 #include "universalid.hpp"
 #include "nestedtablewrapper.hpp"
 
@@ -23,6 +25,106 @@ namespace CSMWorld
     class IdTree;
     struct RecordBase;
     struct NestedTableWrapperBase;
+
+    class TouchCommand : public QUndoCommand
+    {
+        public:
+
+            TouchCommand(IdTable& model, const std::string& id, QUndoCommand* parent=nullptr);
+
+            void redo() override;
+            void undo() override;
+
+        private:
+
+            IdTable& mTable;
+            std::string mId;
+            std::unique_ptr<RecordBase> mOld;
+
+            bool mChanged;
+    };
+
+    /// \brief Adds LandTexture records and modifies texture indices as needed.
+    ///
+    /// LandTexture records are different from other types of records, because
+    /// they only effect the current plugin. Thus, when modifying or copying
+    /// a Land record, all of the LandTexture records referenced need to be
+    /// added to the current plugin. Since these newly added LandTextures could
+    /// have indices that conflict with pre-existing LandTextures in the current
+    /// plugin, the indices might have to be changed, both for the newly added
+    /// LandRecord and within the Land record.
+    class ImportLandTexturesCommand : public QUndoCommand
+    {
+        public:
+
+            ImportLandTexturesCommand(IdTable& landTable, IdTable& ltexTable,
+                QUndoCommand* parent);
+
+            void redo() override;
+            void undo() override;
+
+        protected:
+
+            using DataType = LandTexturesColumn::DataType;
+
+            virtual const std::string& getOriginId() const = 0;
+            virtual const std::string& getDestinationId() const = 0;
+
+            virtual void onRedo() = 0;
+            virtual void onUndo() = 0;
+
+            IdTable& mLands;
+            IdTable& mLtexs;
+            DataType mOld;
+            int mOldState;
+            std::vector<std::string> mCreatedTextures;
+    };
+
+    /// \brief This command is used to fix LandTexture records and texture
+    ///     indices after cloning a Land. See ImportLandTexturesCommand for
+    ///     details.
+    class CopyLandTexturesCommand : public ImportLandTexturesCommand
+    {
+        public:
+
+            CopyLandTexturesCommand(IdTable& landTable, IdTable& ltexTable, const std::string& origin,
+                const std::string& dest, QUndoCommand* parent = nullptr);
+
+        private:
+
+            const std::string& getOriginId() const override;
+            const std::string& getDestinationId() const override;
+
+            void onRedo() override {}
+            void onUndo() override {}
+
+            std::string mOriginId;
+            std::string mDestId;
+    };
+
+    /// \brief This command brings a land record into the current plugin, adding
+    ///     LandTexture records and modifying texture indices as needed.
+    /// \note See ImportLandTextures for more details.
+    class TouchLandCommand : public ImportLandTexturesCommand
+    {
+        public:
+
+            TouchLandCommand(IdTable& landTable, IdTable& ltexTable,
+                const std::string& id, QUndoCommand* parent = nullptr);
+
+        private:
+
+            const std::string& getOriginId() const override;
+            const std::string& getDestinationId() const override;
+
+            void onRedo() override;
+            void onUndo() override;
+
+            std::string mId;
+            std::unique_ptr<RecordBase> mOld;
+
+            bool mChanged;
+    };
 
     class ModifyCommand : public QUndoCommand
     {

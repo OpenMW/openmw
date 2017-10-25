@@ -380,6 +380,7 @@ static std::map<short,std::string> genNameMap()
     names[131] ="sEffectBoundGloves";
     names[128] ="sEffectBoundHelm";
     names[125] ="sEffectBoundLongbow";
+    names[126] ="sEffectExtraSpell";
     names[121] ="sEffectBoundLongsword";
     names[122] ="sEffectBoundMace";
     names[130] ="sEffectBoundShield";

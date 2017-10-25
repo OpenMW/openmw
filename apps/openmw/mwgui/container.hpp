@@ -33,12 +33,13 @@ namespace MWGui
     public:
         ContainerWindow(DragAndDrop* dragAndDrop);
 
-        void openContainer(const MWWorld::Ptr& container, bool loot=false);
-        virtual void close();
+        void setPtr(const MWWorld::Ptr& container);
+        virtual void onClose();
+        void clear() { resetReference(); }
+
+        void onFrame(float dt) { checkReferenceAvailable(); }
 
         virtual void resetReference();
-
-        virtual void exit();
 
     private:
         DragAndDrop* mDragAndDrop;
@@ -61,7 +62,6 @@ namespace MWGui
         void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onTakeAllButtonClicked(MyGUI::Widget* _sender);
         void onDisposeCorpseButtonClicked(MyGUI::Widget* sender);
-        void onKeyPressed(MyGUI::Widget* _sender, MyGUI::KeyCode _key, MyGUI::Char _char);
 
         /// @return is taking the item allowed?
         bool onTakeItem(const ItemStack& item, int count);

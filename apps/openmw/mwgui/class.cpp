@@ -125,11 +125,12 @@ namespace MWGui
             okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
     }
 
-    void PickClassDialog::open()
+    void PickClassDialog::onOpen()
     {
-        WindowModal::open ();
+        WindowModal::onOpen ();
         updateClasses();
         updateStats();
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mClassList);
     }
 
 
@@ -341,9 +342,9 @@ namespace MWGui
         }
     }
 
-    void InfoBoxDialog::open()
+    void InfoBoxDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
         // Fix layout
         layoutVertically(mTextBox, 4);
         layoutVertically(mButtonBar, 6);
@@ -730,9 +731,10 @@ namespace MWGui
         exit();
     }
 
-    void SelectSpecializationDialog::exit()
+    bool SelectSpecializationDialog::exit()
     {
         eventCancel();
+        return true;
     }
 
     /* SelectAttributeDialog */
@@ -778,9 +780,10 @@ namespace MWGui
         exit();
     }
 
-    void SelectAttributeDialog::exit()
+    bool SelectAttributeDialog::exit()
     {
         eventCancel();
+        return true;
     }
 
 
@@ -869,9 +872,10 @@ namespace MWGui
         exit();
     }
 
-    void SelectSkillDialog::exit()
+    bool SelectSkillDialog::exit()
     {
         eventCancel();
+        return true;
     }
 
     /* DescriptionDialog */

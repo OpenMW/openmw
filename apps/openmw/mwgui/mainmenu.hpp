@@ -1,7 +1,7 @@
 #ifndef OPENMW_GAME_MWGUI_MAINMENU_H
 #define OPENMW_GAME_MWGUI_MAINMENU_H
 
-#include "layout.hpp"
+#include "windowbase.hpp"
 
 namespace Gui
 {
@@ -20,7 +20,7 @@ namespace MWGui
     class SaveGameDialog;
     class VideoWidget;
 
-    class MainMenu : public Layout
+    class MainMenu : public WindowBase
     {
             int mWidth;
             int mHeight;
@@ -36,7 +36,9 @@ namespace MWGui
 
             virtual void setVisible (bool visible);
 
-            void update(float dt);
+            void onFrame(float dt);
+
+            bool exit();
 
         private:
             const VFS::Manager* mVFS;

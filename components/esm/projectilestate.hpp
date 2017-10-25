@@ -31,11 +31,7 @@ namespace ESM
     struct MagicBoltState : public BaseProjectileState
     {
         std::string mSpellId;
-        std::string mSourceName;
-        ESM::EffectList mEffects;
         float mSpeed;
-        bool mStack;
-        std::string mSound;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

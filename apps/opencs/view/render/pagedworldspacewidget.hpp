@@ -155,6 +155,14 @@ namespace CSVRender
 
             virtual void cellAdded (const QModelIndex& index, int start, int end);
 
+            virtual void landDataChanged (const QModelIndex& topLeft, const QModelIndex& botomRight);
+            virtual void landAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+            virtual void landAdded (const QModelIndex& parent, int start, int end);
+
+            virtual void landTextureDataChanged (const QModelIndex& topLeft, const QModelIndex& botomRight);
+            virtual void landTextureAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+            virtual void landTextureAdded (const QModelIndex& parent, int start, int end);
+
             void assetTablesChanged ();
 
             void loadCameraCell();

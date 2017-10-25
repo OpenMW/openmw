@@ -105,7 +105,7 @@ namespace MWGui
 
         std::stringstream out;
         out << val << "/" << max;
-        setText(tname, out.str().c_str());
+        setText(tname, out.str());
 
         pt->setProgressRange(std::max(0, max));
         pt->setProgressPosition(std::max(0, val));
@@ -297,9 +297,6 @@ namespace MWGui
 
     void StatsWindow::onFrame (float dt)
     {
-        if (!mMainWidget->getVisible())
-            return;
-
         NoDrop::onFrame(dt);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();

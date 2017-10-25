@@ -288,7 +288,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
 
-    if (!boost::filesystem::exists (mProjectPath))
+    if (mNew || !boost::filesystem::exists (mProjectPath))
     {
         boost::filesystem::path customFiltersPath (configuration.getUserDataPath());
         customFiltersPath /= "defaultfilters";

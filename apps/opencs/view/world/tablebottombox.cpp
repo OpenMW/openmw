@@ -72,9 +72,9 @@ void CSVWorld::TableBottomBox::extendedConfigRequest(CSVWorld::ExtendedCommandCo
     mExtendedConfigurator->setFocus();
 }
 
-CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFactory, 
-                                          CSMDoc::Document& document, 
-                                          const CSMWorld::UniversalId& id, 
+CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFactory,
+                                          CSMDoc::Document& document,
+                                          const CSMWorld::UniversalId& id,
                                           QWidget *parent)
 : QWidget (parent), mShowStatusBar (false), mEditMode(EditMode_None), mHasPosition(false), mRow(0), mColumn(0)
 {
@@ -247,6 +247,11 @@ void CSVWorld::TableBottomBox::cloneRequest(const std::string& id,
     setVisible (true);
     mEditMode = EditMode_Creation;
     mCreator->focus();
+}
+
+void CSVWorld::TableBottomBox::touchRequest(const std::vector<CSMWorld::UniversalId>& ids)
+{
+    mCreator->touch(ids);
 }
 
 void CSVWorld::TableBottomBox::extendedDeleteConfigRequest(const std::vector<std::string> &selectedIds)

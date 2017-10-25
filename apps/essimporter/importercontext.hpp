@@ -15,7 +15,7 @@
 #include "importcrec.hpp"
 #include "importcntc.hpp"
 #include "importplayer.hpp"
-
+#include "importsplm.h"
 
 
 
@@ -53,6 +53,8 @@ namespace ESSImport
 
         std::map<std::string, ESM::Creature> mCreatures;
         std::map<std::string, ESM::NPC> mNpcs;
+
+        std::vector<SPLM::ActiveSpell> mActiveSpells;
 
         Context()
             : mDay(0)

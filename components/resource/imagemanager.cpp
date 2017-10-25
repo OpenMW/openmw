@@ -69,7 +69,6 @@ namespace Resource
                         // This one works too. Should it be included in isTextureCompressionS3TCSupported()? Submitted as a patch to OSG.
                         && !osg::isGLExtensionSupported(0, "GL_S3_s3tc"))
                 {
-                    std::cerr << "Error loading " << filename << ": no S3TC texture compression support installed" << std::endl;
                     return false;
                 }
                 break;
@@ -123,12 +122,31 @@ namespace Resource
                 return mWarningImage;
             }
 
-            osg::Image* image = result.getImage();
+            osg::ref_ptr<osg::Image> image = result.getImage();
+
             image->setFileName(normalized);
             if (!checkSupported(image, filename))
             {
-                mCache->addEntryToObjectCache(normalized, mWarningImage);
-                return mWarningImage;
+                static bool uncompress = (getenv("OPENMW_DECOMPRESS_TEXTURES") != 0);
+                if (!uncompress)
+                {
+                    std::cerr << "Error loading " << filename << ": no S3TC texture compression support installed" << std::endl;
+                    mCache->addEntryToObjectCache(normalized, mWarningImage);
+                    return mWarningImage;
+                }
+                else
+                {
+                    // decompress texture in software if not supported by GPU
+                    // requires update to getColor() to be released with OSG 3.6
+                    osg::ref_ptr<osg::Image> newImage = new osg::Image;
+                    newImage->setFileName(image->getFileName());
+                    newImage->allocateImage(image->s(), image->t(), image->r(), image->isImageTranslucent() ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE);
+                    for (int s=0; s<image->s(); ++s)
+                        for (int t=0; t<image->t(); ++t)
+                            for (int r=0; r<image->r(); ++r)
+                                newImage->setColor(image->getColor(s,t,r), s,t,r);
+                    image = newImage;
+                }
             }
 
             mCache->addEntryToObjectCache(normalized, image);

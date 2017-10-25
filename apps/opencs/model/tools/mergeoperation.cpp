@@ -38,9 +38,10 @@ CSMTools::MergeOperation::MergeOperation (CSMDoc::Document& document, ToUTF8::Fr
     appendStage (new MergeRefIdsStage (mState));
     appendStage (new MergeReferencesStage (mState));
     appendStage (new MergeReferencesStage (mState));
-    appendStage (new ListLandTexturesMergeStage (mState));
-    appendStage (new MergeLandTexturesStage (mState));
+    appendStage (new PopulateLandTexturesMergeStage (mState));
     appendStage (new MergeLandStage (mState));
+    appendStage (new FixLandsAndLandTexturesMergeStage (mState));
+    appendStage (new CleanupLandTexturesMergeStage (mState));
 
     appendStage (new FinishMergedDocumentStage (mState, encoding));
 }

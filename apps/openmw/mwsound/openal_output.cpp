@@ -192,12 +192,11 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
         { AL_FORMAT_STEREO8,  ChannelConfig_Stereo, SampleType_UInt8 },
     }};
 
-    auto fmt = std::find_if(fmtlist.cbegin(), fmtlist.cend(),
-        [chans,type](const FormatEntry &fmt) -> bool
-        { return fmt.chans == chans && fmt.type == type; }
-    );
-    if(fmt != fmtlist.cend())
-        return fmt->format;
+    for(auto &fmt : fmtlist)
+    {
+        if(fmt.chans == chans && fmt.type == type)
+            return fmt.format;
+    }
 
     if(alIsExtensionPresent("AL_EXT_MCFORMATS"))
     {
@@ -209,18 +208,16 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
             { "AL_FORMAT_71CHN16",  ChannelConfig_7point1, SampleType_Int16 },
             { "AL_FORMAT_71CHN8",   ChannelConfig_7point1, SampleType_UInt8 },
         }};
-        ALenum format = AL_NONE;
 
-        std::find_if(mcfmtlist.cbegin(), mcfmtlist.cend(),
-            [&format,chans,type](const FormatEntryExt &fmt) -> bool
+        for(auto &fmt : mcfmtlist)
+        {
+            if(fmt.chans == chans && fmt.type == type)
             {
-                if(fmt.chans == chans && fmt.type == type)
-                    format = alGetEnumValue(fmt.name);
-                return format != 0 && format != -1;
+                ALenum format = alGetEnumValue(fmt.name);
+                if(format != 0 && format != -1)
+                    return format;
             }
-        );
-        if(format != 0 && format != -1)
-            return format;
+        }
     }
     if(alIsExtensionPresent("AL_EXT_FLOAT32"))
     {
@@ -228,18 +225,16 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
             { "AL_FORMAT_MONO_FLOAT32",   ChannelConfig_Mono,   SampleType_Float32 },
             { "AL_FORMAT_STEREO_FLOAT32", ChannelConfig_Stereo, SampleType_Float32 },
         }};
-        ALenum format = AL_NONE;
 
-        std::find_if(fltfmtlist.cbegin(), fltfmtlist.cend(),
-            [&format,chans,type](const FormatEntryExt &fmt) -> bool
+        for(auto &fmt : fltfmtlist)
+        {
+            if(fmt.chans == chans && fmt.type == type)
             {
-                if(fmt.chans == chans && fmt.type == type)
-                    format = alGetEnumValue(fmt.name);
-                return format != 0 && format != -1;
+                ALenum format = alGetEnumValue(fmt.name);
+                if(format != 0 && format != -1)
+                    return format;
             }
-        );
-        if(format != 0 && format != -1)
-            return format;
+        }
 
         if(alIsExtensionPresent("AL_EXT_MCFORMATS"))
         {
@@ -249,16 +244,15 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
                 { "AL_FORMAT_71CHN32", ChannelConfig_7point1, SampleType_Float32 },
             }};
 
-            std::find_if(fltmcfmtlist.cbegin(), fltmcfmtlist.cend(),
-                [&format,chans,type](const FormatEntryExt &fmt) -> bool
+            for(auto &fmt : fltmcfmtlist)
+            {
+                if(fmt.chans == chans && fmt.type == type)
                 {
-                    if(fmt.chans == chans && fmt.type == type)
-                        format = alGetEnumValue(fmt.name);
-                    return format != 0 && format != -1;
+                    ALenum format = alGetEnumValue(fmt.name);
+                    if(format != 0 && format != -1)
+                        return format;
                 }
-            );
-            if(format != 0 && format != -1)
-                return format;
+            }
         }
     }
 
@@ -547,11 +541,11 @@ ALint OpenAL_SoundStream::refillQueue()
         std::vector<char> data(mBufferSize);
         for(;!mIsFinished && (ALuint)queued < mBuffers.size();++queued)
         {
-            size_t got = mDecoder->read(&data[0], data.size());
+            size_t got = mDecoder->read(data.data(), data.size());
             if(got < data.size())
             {
                 mIsFinished = true;
-                std::memset(&data[got], mSilence, data.size()-got);
+                std::fill(data.begin()+got, data.end(), mSilence);
             }
             if(got > 0)
             {
@@ -559,7 +553,7 @@ ALint OpenAL_SoundStream::refillQueue()
                     mLoudnessAnalyzer->analyzeLoudness(data);
 
                 ALuint bufid = mBuffers[mCurrentBufIdx];
-                alBufferData(bufid, mFormat, &data[0], data.size(), mSampleRate);
+                alBufferData(bufid, mFormat, data.data(), data.size(), mSampleRate);
                 alSourceQueueBuffers(mSource, 1, &bufid);
                 mCurrentBufIdx = (mCurrentBufIdx+1) % mBuffers.size();
             }
@@ -594,24 +588,32 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
 {
     deinit();
 
+    std::cout<< "Initializing OpenAL..." <<std::endl;
+
     mDevice = alcOpenDevice(devname.c_str());
+    if(!mDevice && !devname.empty())
+    {
+        std::cerr<< "Failed to open \""<<devname<<"\", trying default" <<std::endl;
+        mDevice = alcOpenDevice(nullptr);
+    }
     if(!mDevice)
     {
-        if(devname.empty())
-            std::cerr<< "Failed to open default audio device" <<std::endl;
-        else
-            std::cerr<< "Failed to open \""<<devname<<"\"" <<std::endl;
+        std::cerr<< "Failed to open default audio device" <<std::endl;
         return false;
     }
-    else
-    {
-        const ALCchar *name = NULL;
-        if(alcIsExtensionPresent(mDevice, "ALC_ENUMERATE_ALL_EXT"))
-            name = alcGetString(mDevice, ALC_ALL_DEVICES_SPECIFIER);
-        if(alcGetError(mDevice) != AL_NO_ERROR || !name)
-            name = alcGetString(mDevice, ALC_DEVICE_SPECIFIER);
-        std::cout << "Opened \""<<name<<"\"" << std::endl;
-    }
+
+    const ALCchar *name = nullptr;
+    if(alcIsExtensionPresent(mDevice, "ALC_ENUMERATE_ALL_EXT"))
+        name = alcGetString(mDevice, ALC_ALL_DEVICES_SPECIFIER);
+    if(alcGetError(mDevice) != AL_NO_ERROR || !name)
+        name = alcGetString(mDevice, ALC_DEVICE_SPECIFIER);
+    std::cout<< "Opened \""<<name<<"\"" <<std::endl;
+
+    ALCint major=0, minor=0;
+    alcGetIntegerv(mDevice, ALC_MAJOR_VERSION, 1, &major);
+    alcGetIntegerv(mDevice, ALC_MINOR_VERSION, 1, &minor);
+    std::cout<< "  ALC Version: "<<major<<"."<<minor<<"\n"<<
+                "  ALC Extensions: "<<alcGetString(mDevice, ALC_EXTENSIONS) <<std::endl;
 
     ALC.EXT_EFX = alcIsExtensionPresent(mDevice, "ALC_EXT_EFX");
     ALC.SOFT_HRTF = alcIsExtensionPresent(mDevice, "ALC_SOFT_HRTF");
@@ -643,7 +645,7 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
             }
 
             if(index < 0)
-                std::cerr<< "Failed to find HRTF name \""<<hrtfname<<"\", using default" <<std::endl;
+                std::cerr<< "Failed to find HRTF \""<<hrtfname<<"\", using default" <<std::endl;
             else
             {
                 attrs.push_back(ALC_HRTF_ID_SOFT);
@@ -664,6 +666,11 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
         mDevice = nullptr;
         return false;
     }
+
+    std::cout<< "  Vendor: "<<alGetString(AL_VENDOR)<<"\n"<<
+                "  Renderer: "<<alGetString(AL_RENDERER)<<"\n"<<
+                "  Version: "<<alGetString(AL_VERSION)<<"\n"<<
+                "  Extensions: "<<alGetString(AL_EXTENSIONS)<<std::endl;
 
     if(!ALC.SOFT_HRTF)
         std::cout<< "HRTF status unavailable" <<std::endl;
@@ -698,7 +705,7 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
     {
         ALuint src = 0;
         alGenSources(1, &src);
-        if(getALError() != AL_NO_ERROR)
+        if(alGetError() != AL_NO_ERROR)
             break;
         mFreeSources.push_back(src);
     }
@@ -824,8 +831,8 @@ void OpenAL_Output::deinit()
 {
     mStreamThread->removeAll();
 
-    for(size_t i = 0;i < mFreeSources.size();i++)
-        alDeleteSources(1, &mFreeSources[i]);
+    for(ALuint source : mFreeSources)
+        alDeleteSources(1, &source);
     mFreeSources.clear();
 
     if(mEffectSlot)
@@ -934,7 +941,7 @@ void OpenAL_Output::setHrtf(const std::string &hrtfname, HrtfMode hrtfmode)
 }
 
 
-Sound_Handle OpenAL_Output::loadSound(const std::string &fname)
+std::pair<Sound_Handle,size_t> OpenAL_Output::loadSound(const std::string &fname)
 {
     getALError();
 
@@ -959,27 +966,31 @@ Sound_Handle OpenAL_Output::loadSound(const std::string &fname)
 
     decoder->getInfo(&srate, &chans, &type);
     format = getALFormat(chans, type);
-    if(!format) return nullptr;
+    if(!format) return std::make_pair(nullptr, 0);
 
     decoder->readAll(data);
     decoder->close();
 
+    ALint size;
     ALuint buf = 0;
     alGenBuffers(1, &buf);
-    alBufferData(buf, format, &data[0], data.size(), srate);
+    alBufferData(buf, format, data.data(), data.size(), srate);
+    alGetBufferi(buf, AL_SIZE, &size);
     if(getALError() != AL_NO_ERROR)
     {
         if(buf && alIsBuffer(buf))
             alDeleteBuffers(1, &buf);
         getALError();
-        return nullptr;
+        return std::make_pair(nullptr, 0);
     }
-    return MAKE_PTRID(buf);
+    return std::make_pair(MAKE_PTRID(buf), size);
 }
 
-void OpenAL_Output::unloadSound(Sound_Handle data)
+size_t OpenAL_Output::unloadSound(Sound_Handle data)
 {
     ALuint buffer = GET_PTRID(data);
+    if(!buffer) return 0;
+
     // Make sure no sources are playing this buffer before unloading it.
     SoundVec::const_iterator iter = mActiveSounds.begin();
     for(;iter != mActiveSounds.end();++iter)
@@ -996,19 +1007,11 @@ void OpenAL_Output::unloadSound(Sound_Handle data)
             alSourcei(source, AL_BUFFER, 0);
         }
     }
+    ALint size = 0;
+    alGetBufferi(buffer, AL_SIZE, &size);
     alDeleteBuffers(1, &buffer);
     getALError();
-}
-
-size_t OpenAL_Output::getSoundDataSize(Sound_Handle data) const
-{
-    ALuint buffer = GET_PTRID(data);
-    ALint size = 0;
-
-    alGetBufferi(buffer, AL_SIZE, &size);
-    getALError();
-
-    return (ALuint)size;
+    return size;
 }
 
 
@@ -1368,23 +1371,19 @@ void OpenAL_Output::updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdi
             if(mWaterFilter)
             {
                 ALuint filter = (env == Env_Underwater) ? mWaterFilter : AL_FILTER_NULL;
-                std::for_each(mActiveSounds.cbegin(), mActiveSounds.cend(),
-                    [filter](const SoundVec::value_type &item) -> void
-                    {
-                        if(item->getUseEnv())
-                            alSourcei(GET_PTRID(item->mHandle), AL_DIRECT_FILTER, filter);
-                    }
-                );
-                std::for_each(mActiveStreams.cbegin(), mActiveStreams.cend(),
-                    [filter](const StreamVec::value_type &item) -> void
-                    {
-                        if(item->getUseEnv())
-                            alSourcei(
-                                reinterpret_cast<OpenAL_SoundStream*>(item->mHandle)->mSource,
-                                AL_DIRECT_FILTER, filter
-                            );
-                    }
-                );
+                for(Sound *sound : mActiveSounds)
+                {
+                    if(sound->getUseEnv())
+                        alSourcei(GET_PTRID(sound->mHandle), AL_DIRECT_FILTER, filter);
+                }
+                for(Stream *sound : mActiveStreams)
+                {
+                    if(sound->getUseEnv())
+                        alSourcei(
+                            reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle)->mSource,
+                            AL_DIRECT_FILTER, filter
+                        );
+                }
             }
             // Update the environment effect
             if(mEffectSlot)
@@ -1403,23 +1402,19 @@ void OpenAL_Output::updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdi
 void OpenAL_Output::pauseSounds(int types)
 {
     std::vector<ALuint> sources;
-    std::for_each(mActiveSounds.cbegin(), mActiveSounds.cend(),
-        [types,&sources](const SoundVec::value_type &sound) -> void
+    for(Sound *sound : mActiveSounds)
+    {
+        if((types&sound->getPlayType()))
+            sources.push_back(GET_PTRID(sound->mHandle));
+    }
+    for(Stream *sound : mActiveStreams)
+    {
+        if((types&sound->getPlayType()))
         {
-            if(sound && sound->mHandle && (types&sound->getPlayType()))
-                sources.push_back(GET_PTRID(sound->mHandle));
+            OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
+            sources.push_back(stream->mSource);
         }
-    );
-    std::for_each(mActiveStreams.cbegin(), mActiveStreams.cend(),
-        [types,&sources](const StreamVec::value_type &stream) -> void
-        {
-            if(stream && stream->mHandle && (types&stream->getPlayType()))
-            {
-                OpenAL_SoundStream *strm = reinterpret_cast<OpenAL_SoundStream*>(stream->mHandle);
-                sources.push_back(strm->mSource);
-            }
-        }
-    );
+    }
     if(!sources.empty())
     {
         alSourcePausev(sources.size(), sources.data());
@@ -1430,23 +1425,19 @@ void OpenAL_Output::pauseSounds(int types)
 void OpenAL_Output::resumeSounds(int types)
 {
     std::vector<ALuint> sources;
-    std::for_each(mActiveSounds.cbegin(), mActiveSounds.cend(),
-        [types,&sources](const SoundVec::value_type &sound) -> void
+    for(Sound *sound : mActiveSounds)
+    {
+        if((types&sound->getPlayType()))
+            sources.push_back(GET_PTRID(sound->mHandle));
+    }
+    for(Stream *sound : mActiveStreams)
+    {
+        if((types&sound->getPlayType()))
         {
-            if(sound && sound->mHandle && (types&sound->getPlayType()))
-                sources.push_back(GET_PTRID(sound->mHandle));
+            OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
+            sources.push_back(stream->mSource);
         }
-    );
-    std::for_each(mActiveStreams.cbegin(), mActiveStreams.cend(),
-        [types,&sources](const StreamVec::value_type &stream) -> void
-        {
-            if(stream && stream->mHandle && (types&stream->getPlayType()))
-            {
-                OpenAL_SoundStream *strm = reinterpret_cast<OpenAL_SoundStream*>(stream->mHandle);
-                sources.push_back(strm->mSource);
-            }
-        }
-    );
+    }
     if(!sources.empty())
     {
         alSourcePlayv(sources.size(), sources.data());

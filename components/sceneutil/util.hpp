@@ -15,8 +15,6 @@ namespace SceneUtil
 
     osg::Vec4f colourFromRGB (unsigned int clr);
 
-    osg::Vec4f colourFromRGBA (unsigned int clr);
-
 }
 
 #endif

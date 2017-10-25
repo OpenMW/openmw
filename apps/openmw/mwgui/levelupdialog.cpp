@@ -41,6 +41,7 @@ namespace MWGui
         {
             MyGUI::TextBox* t;
             getWidget(t, "AttribVal" + MyGUI::utility::toString(i));
+            mAttributeValues.push_back(t);
 
             MyGUI::Button* b;
             getWidget(b, "Attrib" + MyGUI::utility::toString(i));
@@ -48,10 +49,7 @@ namespace MWGui
             b->eventMouseButtonClick += MyGUI::newDelegate(this, &LevelupDialog::onAttributeClicked);
             mAttributes.push_back(b);
 
-            mAttributeValues.push_back(t);
-
             getWidget(t, "AttribMultiplier" + MyGUI::utility::toString(i));
-
             mAttributeMultipliers.push_back(t);
         }
 
@@ -128,7 +126,7 @@ namespace MWGui
         setAttributeValues();
     }
 
-    void LevelupDialog::open()
+    void LevelupDialog::onOpen()
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();

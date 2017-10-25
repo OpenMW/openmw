@@ -66,6 +66,13 @@ namespace Gui
         notifySizeChange (this);
     }
 
+    void AutoSizedEditBox::initialiseOverride()
+    {
+        Base::initialiseOverride();
+        setNeedKeyFocus(false);
+        setEditStatic(true);
+    }
+
     void AutoSizedEditBox::setPropertyOverride(const std::string& _key, const std::string& _value)
     {
         if (_key == "ExpandDirection")
@@ -171,9 +178,11 @@ namespace Gui
                 total_width += mSpacing;
         }
 
-        if (mAutoResize && (total_width+mPadding*2 != getSize().width || total_height+mPadding*2 != getSize().height))
+        if (mAutoResize && (total_width+mPadding*2 != getClientCoord().width || total_height+mPadding*2 != getClientCoord().height))
         {
-            setSize(MyGUI::IntSize(total_width+mPadding*2, total_height+mPadding*2));
+            int xmargin = getSize().width - getClientCoord().width;
+            int ymargin = getSize().height - getClientCoord().height;
+            setSize(MyGUI::IntSize(total_width+mPadding*2 + xmargin, total_height+mPadding*2 + ymargin));
             return;
         }
 
@@ -191,19 +200,19 @@ namespace Gui
                 continue;
 
             bool vstretch = w->getUserString ("VStretch") == "true";
-            int max_height = getSize().height - mPadding*2;
+            int max_height = getClientCoord().height - mPadding*2;
             int height = vstretch ? max_height : sizes[i].first.height;
 
             MyGUI::IntCoord widgetCoord;
             widgetCoord.left = curX;
-            widgetCoord.top = mPadding + (getSize().height-mPadding*2 - height) / 2;
+            widgetCoord.top = mPadding + (getClientCoord().height-mPadding*2 - height) / 2;
 
             int width = 0;
             if (sizes[i].second)
             {
                 if (h_stretched_count == 0)
                     throw std::logic_error("unexpected");
-                width = sizes[i].first.width + (getSize().width-mPadding*2 - total_width)/h_stretched_count;
+                width = sizes[i].first.width + (getClientCoord().width-mPadding*2 - total_width)/h_stretched_count;
             }
             else
                 width = sizes[i].first.width;
@@ -234,6 +243,14 @@ namespace Gui
     {
         MyGUI::Widget::setCoord (_value);
         align();
+    }
+
+    void HBox::initialiseOverride()
+    {
+        Base::initialiseOverride();
+        MyGUI::Widget* client = 0;
+        assignWidget(client, "Client");
+        setWidgetClient(client);
     }
 
     void HBox::onWidgetCreated(MyGUI::Widget* _widget)
@@ -317,12 +334,13 @@ namespace Gui
                 total_height += mSpacing;
         }
 
-        if (mAutoResize && (total_width+mPadding*2 != getSize().width || total_height+mPadding*2 != getSize().height))
+        if (mAutoResize && (total_width+mPadding*2 != getClientCoord().width || total_height+mPadding*2 != getClientCoord().height))
         {
-            setSize(MyGUI::IntSize(total_width+mPadding*2, total_height+mPadding*2));
+            int xmargin = getSize().width - getClientCoord().width;
+            int ymargin = getSize().height - getClientCoord().height;
+            setSize(MyGUI::IntSize(total_width+mPadding*2 + xmargin, total_height+mPadding*2 + ymargin));
             return;
         }
-
 
         int curY = 0;
         for (unsigned int i = 0; i < count; ++i)
@@ -337,19 +355,19 @@ namespace Gui
                 continue;
 
             bool hstretch = w->getUserString ("HStretch") == "true";
-            int maxWidth = getSize().width - mPadding*2;
+            int maxWidth = getClientCoord().width - mPadding*2;
             int width = hstretch ? maxWidth : sizes[i].first.width;
 
             MyGUI::IntCoord widgetCoord;
             widgetCoord.top = curY;
-            widgetCoord.left = mPadding + (getSize().width-mPadding*2 - width) / 2;
+            widgetCoord.left = mPadding + (getClientCoord().width-mPadding*2 - width) / 2;
 
             int height = 0;
             if (sizes[i].second)
             {
                 if (v_stretched_count == 0)
                     throw std::logic_error("unexpected");
-                height = sizes[i].first.height + (getSize().height-mPadding*2 - total_height)/v_stretched_count;
+                height = sizes[i].first.height + (getClientCoord().height-mPadding*2 - total_height)/v_stretched_count;
             }
             else
                 height = sizes[i].first.height;
@@ -380,6 +398,14 @@ namespace Gui
     {
         MyGUI::Widget::setCoord (_value);
         align();
+    }
+
+    void VBox::initialiseOverride()
+    {
+        Base::initialiseOverride();
+        MyGUI::Widget* client = 0;
+        assignWidget(client, "Client");
+        setWidgetClient(client);
     }
 
     MyGUI::IntSize VBox::getRequestedSize ()

@@ -50,8 +50,8 @@ namespace MWGui
 
         mBackgroundImage = MyGUI::Gui::getInstance().createWidgetReal<BackgroundImage>("ImageBox", 0,0,1,1,
             MyGUI::Align::Stretch, "Menu");
-
-        setVisible(false);
+        mSceneImage = MyGUI::Gui::getInstance().createWidgetReal<BackgroundImage>("ImageBox", 0,0,1,1,
+            MyGUI::Align::Stretch, "Scene");
 
         findSplashScreens();
     }
@@ -112,6 +112,7 @@ namespace MWGui
     {
         WindowBase::setVisible(visible);
         mBackgroundImage->setVisible(visible);
+        mSceneImage->setVisible(visible);
     }
 
     double LoadingScreen::getTargetFrameRate() const
@@ -216,8 +217,11 @@ namespace MWGui
             // TODO: add option (filename pattern?) to use image aspect ratio instead of 4:3
             // we can't do this by default, because the Morrowind splash screens are 1024x1024, but should be displayed as 4:3
             bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
+            mBackgroundImage->setVisible(true);
             mBackgroundImage->setBackgroundImage(randomSplash, true, stretch);
         }
+        mSceneImage->setBackgroundImage("");
+        mSceneImage->setVisible(false);
     }
 
     void LoadingScreen::setProgressRange (size_t range)
@@ -294,9 +298,11 @@ namespace MWGui
         mViewer->getCamera()->setInitialDrawCallback(new CopyFramebufferToTextureCallback(mTexture));
 
         mBackgroundImage->setBackgroundImage("");
+        mBackgroundImage->setVisible(false);
 
-        mBackgroundImage->setRenderItemTexture(mGuiTexture.get());
-        mBackgroundImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+        mSceneImage->setRenderItemTexture(mGuiTexture.get());
+        mSceneImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+        mSceneImage->setVisible(true);
     }
 
     void LoadingScreen::draw()

@@ -70,9 +70,7 @@ void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& a
         }
     }
     else
-    {
-        actor.getClass().getContainerStore(actor).remove(item, 1, actor);
-    }
+        actor.getClass().getInventoryStore(actor).remove(item, 1, actor, true);
 }
 
 class CheckActorCommanded : public MWMechanics::EffectSourceVisitor
@@ -208,6 +206,9 @@ namespace MWMechanics
             // Set the soul on just one of the gems, not the whole stack
             gem->getContainerStore()->unstack(*gem, caster);
             gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
+
+            // Restack the gem with other gems with the same soul
+            gem->getContainerStore()->restack(*gem);
 
             mTrapped = true;
 
@@ -1086,6 +1087,39 @@ namespace MWMechanics
         }
     }
 
+    bool Actors::isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer)
+    {
+        if (!actor.getClass().isActor())
+            return false;
+
+        // If an observer is NPC, check if he detected an actor
+        if (!observer.isEmpty() && observer.getClass().isNpc())
+        {
+            return
+                MWBase::Environment::get().getWorld()->getLOS(observer, actor) &&
+                MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, observer);
+        }
+
+        // Otherwise check if any actor in AI processing range sees the target actor
+        std::vector<MWWorld::Ptr> actors;
+        osg::Vec3f position (actor.getRefData().getPosition().asVec3());
+        getObjectsInRange(position, aiProcessingDistance, actors);
+        for(std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); ++it)
+        {
+            if (*it == actor)
+                continue;
+
+            bool result =
+                MWBase::Environment::get().getWorld()->getLOS(*it, actor) &&
+                MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, *it);
+
+            if (result)
+                return true;
+        }
+
+        return false;
+    }
+
     void Actors::updateActor(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
     {
         PtrActorMap::iterator iter = mActors.find(old);
@@ -1196,13 +1230,17 @@ namespace MWMechanics
                             float sqrHeadTrackDistance = std::numeric_limits<float>::max();
                             MWWorld::Ptr headTrackTarget;
 
-                            for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
+                            // Unconsious actor can not track target
+                            if (!iter->first.getClass().getCreatureStats(iter->first).getKnockedDown())
                             {
-                                if (it->first == iter->first)
-                                    continue;
-                                updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
+                                for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
+                                {
+                                    if (it->first == iter->first)
+                                        continue;
+                                    updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
+                                }
+                                iter->second->getCharacterController()->setHeadTrackTarget(headTrackTarget);
                             }
-                            iter->second->getCharacterController()->setHeadTrackTarget(headTrackTarget);
                         }
 
                         if (iter->first.getClass().isNpc() && iter->first != player)
@@ -1768,8 +1806,9 @@ namespace MWMechanics
             {
                 std::string id = reader.getHString();
                 int count;
-                reader.getHNT (count, "COUN");
-                mDeathCount[id] = count;
+                reader.getHNT(count, "COUN");
+                if (MWBase::Environment::get().getWorld()->getStore().find(id))
+                    mDeathCount[id] = count;
             }
         }
     }

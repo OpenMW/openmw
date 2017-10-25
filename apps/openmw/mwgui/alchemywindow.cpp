@@ -1,6 +1,8 @@
 #include "alchemywindow.hpp"
 
 #include <MyGUI_Gui.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_EditBox.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -19,6 +21,7 @@
 #include "sortfilteritemmodel.hpp"
 #include "itemview.hpp"
 #include "itemwidget.hpp"
+#include "widgets.hpp"
 
 namespace MWGui
 {
@@ -54,12 +57,19 @@ namespace MWGui
         mCreateButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCreateButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCancelButtonClicked);
 
+        mNameEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &AlchemyWindow::onAccept);
+
         center();
+    }
+
+    void AlchemyWindow::onAccept(MyGUI::EditBox* sender)
+    {
+        onCreateButtonClicked(sender);
     }
 
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Alchemy);
     }
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
@@ -101,8 +111,9 @@ namespace MWGui
         update();
     }
 
-    void AlchemyWindow::open()
+    void AlchemyWindow::onOpen()
     {
+        mAlchemy->clear();
         mAlchemy->setAlchemist (MWMechanics::getPlayer());
 
         InventoryItemModel* model = new InventoryItemModel(MWMechanics::getPlayer());
@@ -127,12 +138,8 @@ namespace MWGui
         }
 
         update();
-    }
 
-    void AlchemyWindow::exit() {
-        mAlchemy->clear();
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Alchemy);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Inventory);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit);
     }
 
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)

@@ -757,8 +757,6 @@ namespace MWRender
                 break;
             }
         }
-        if(iter == mAnimSources.rend())
-            std::cerr<< "Failed to find animation "<<groupname<<" for "<<mPtr.getCellRef().getRefId() <<std::endl;
 
         resetActiveGroups();
     }
@@ -795,7 +793,7 @@ namespace MWRender
               // We have to ignore extra garbage at the end.
               // The Scrib's idle3 animation has "Idle3: Stop." instead of "Idle3: Stop".
               // Why, just why? :(
-              && (stopkey->second.size() < stoptag.size() || stopkey->second.substr(0,stoptag.size()) != stoptag))
+              && (stopkey->second.size() < stoptag.size() || stopkey->second.compare(0,stoptag.size(), stoptag) != 0))
             ++stopkey;
         if(stopkey == keys.rend())
             return false;

@@ -313,27 +313,28 @@ endif (APPLE)
 
 # Other files
 
-configure_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
-    "${OpenMW_BINARY_DIR}/settings-default.cfg")
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
+    "${OpenMW_BINARY_DIR}" "settings-default.cfg")
 
 if (NOT APPLE)
-    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
-        "${OpenMW_BINARY_DIR}/openmw.cfg")
-    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-        "${OpenMW_BINARY_DIR}/openmw.cfg.install")
+    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
+        "${OpenMW_BINARY_DIR}" "openmw.cfg")
+    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+        "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
 else ()
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
         "${OpenMW_BINARY_DIR}/openmw.cfg")
 endif ()
 
-configure_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
-    "${OpenMW_BINARY_DIR}/openmw-cs.cfg")
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
+    "${OpenMW_BINARY_DIR}" "openmw-cs.cfg")
 
-configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
-    "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
+# Needs the copy version because the configure version assumes the end of the file has been reached when a null character is reached and there are no CMake expressions to evaluate.
+copy_resource_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
+    "${OpenMW_BINARY_DIR}" "resources/defaultfilters")
 
-configure_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb.txt
-    "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt")
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb.txt
+    "${OpenMW_BINARY_DIR}" "gamecontrollerdb.txt")
 
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
@@ -497,6 +498,7 @@ if(WIN32)
     SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "openmw-launcher.exe")
+    SET(CPACK_NSIS_MUI_FINISHPAGE_RUN "openmw-launcher.exe")
     SET(CPACK_NSIS_MUI_ICON "${OpenMW_SOURCE_DIR}/files/windows/openmw.ico")
     SET(CPACK_NSIS_MUI_UNIICON "${OpenMW_SOURCE_DIR}/files/windows/openmw.ico")
     SET(CPACK_PACKAGE_ICON "${OpenMW_SOURCE_DIR}\\\\files\\\\openmw.bmp")

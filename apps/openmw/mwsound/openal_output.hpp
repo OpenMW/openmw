@@ -66,9 +66,8 @@ namespace MWSound
         virtual std::vector<std::string> enumerateHrtf();
         virtual void setHrtf(const std::string &hrtfname, HrtfMode hrtfmode);
 
-        virtual Sound_Handle loadSound(const std::string &fname);
-        virtual void unloadSound(Sound_Handle data);
-        virtual size_t getSoundDataSize(Sound_Handle data) const;
+        virtual std::pair<Sound_Handle,size_t> loadSound(const std::string &fname);
+        virtual size_t unloadSound(Sound_Handle data);
 
         virtual bool playSound(Sound *sound, Sound_Handle data, float offset);
         virtual bool playSound3D(Sound *sound, Sound_Handle data, float offset);

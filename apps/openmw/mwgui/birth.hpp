@@ -20,7 +20,9 @@ namespace MWGui
         void setBirthId(const std::string &raceId);
 
         void setNextButtonShow(bool shown);
-        virtual void open();
+        virtual void onOpen();
+
+        bool exit() { return false; }
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
@@ -47,7 +49,7 @@ namespace MWGui
         void updateSpells();
 
         MyGUI::ListBox* mBirthList;
-        MyGUI::Widget*  mSpellArea;
+        MyGUI::ScrollView* mSpellArea;
         MyGUI::ImageBox* mBirthImage;
         std::vector<MyGUI::Widget*> mSpellItems;
 

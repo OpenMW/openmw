@@ -17,15 +17,12 @@ namespace MWGui
 
         void checkReferenceAvailable(); ///< closes the window, if the MW-reference has become unavailable
 
-        virtual void resetReference() { mPtr = MWWorld::Ptr(); mCurrentPlayerCell = NULL; }
+        virtual void resetReference() { mPtr = MWWorld::Ptr(); }
 
     protected:
         virtual void onReferenceUnavailable() = 0; ///< called when reference has become unavailable
 
         MWWorld::Ptr mPtr;
-
-    private:
-        MWWorld::CellStore* mCurrentPlayerCell;
     };
 }
 
