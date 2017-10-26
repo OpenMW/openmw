@@ -63,6 +63,7 @@ namespace MWRender
         debugProgram->addShader(fragmentShader);
 
         debugGeometry = osg::createTexturedQuadGeometry(osg::Vec3(-1, -1, 0), osg::Vec3(2, 0, 0), osg::Vec3(0, 2, 0));
+        debugGeometry->setCullingActive(false);
         debugCamera->addChild(debugGeometry);
         osg::ref_ptr<osg::StateSet> stateSet = debugGeometry->getOrCreateStateSet();
         stateSet->setAttributeAndModes(debugProgram, osg::StateAttribute::ON);
