@@ -22,10 +22,10 @@ addons:
     sources:
       - sourceline: 'ppa:openmw/openmw'
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-precise-3.6
+      - llvm-toolchain-trusty-5.0
     packages: [
-      # Dev
-      g++-5, clang-3.6, libunshield-dev, libtinyxml-dev,
+      # Dev Tool Chain
+      g++-5, clang-5.0,
       # Tests
       libgtest-dev, google-mock,
       # Boost
@@ -34,6 +34,8 @@ addons:
       libavcodec-dev, libavformat-dev, libavutil-dev, libswscale-dev,
       # Audio & Video
       libsdl2-dev, libqt5opengl5-dev, libqt4-dev, libopenal-dev,
+      # Additional 3rd party required libraries
+      libunshield-dev, libtinyxml-dev,
       # The other ones from OpenMW ppa
       libbullet-dev, libswresample-dev, libopenscenegraph-3.4-dev, libmygui-dev
     ]
