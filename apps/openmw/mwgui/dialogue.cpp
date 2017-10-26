@@ -30,8 +30,29 @@
 namespace MWGui
 {
 
-    PersuasionDialog::PersuasionDialog()
+    class ResponseCallback : public MWBase::DialogueManager::ResponseCallback
+    {
+    public:
+        ResponseCallback(DialogueWindow* win, bool needMargin=true)
+            : mWindow(win)
+            , mNeedMargin(needMargin)
+        {
+
+        }
+
+        void addResponse(const std::string& title, const std::string& text)
+        {
+            mWindow->addResponse(title, text, mNeedMargin);
+        }
+
+    private:
+        DialogueWindow* mWindow;
+        bool mNeedMargin;
+    };
+
+    PersuasionDialog::PersuasionDialog(ResponseCallback* callback)
         : WindowModal("openmw_persuasion_dialog.layout")
+        , mCallback(callback)
     {
         getWidget(mCancelButton, "CancelButton");
         getWidget(mAdmireButton, "AdmireButton");
@@ -69,9 +90,7 @@ namespace MWGui
         else /*if (sender == mBribe1000Button)*/
             type = MWBase::MechanicsManager::PT_Bribe1000;
 
-        MWBase::DialogueManager::Response response = MWBase::Environment::get().getDialogueManager()->persuade(type);
-
-        eventPersuadeMsg(response.first, response.second);
+        MWBase::Environment::get().getDialogueManager()->persuade(type, mCallback.get());
 
         setVisible(false);
     }
@@ -244,13 +263,14 @@ namespace MWGui
         : WindowBase("openmw_dialogue_window.layout")
         , mIsCompanion(false)
         , mGoodbye(false)
-        , mPersuasionDialog()
+        , mPersuasionDialog(new ResponseCallback(this))
+        , mCallback(new ResponseCallback(this))
+        , mGreetingCallback(new ResponseCallback(this, false))
     {
         // Centre dialog
         center();
 
         mPersuasionDialog.setVisible(false);
-        mPersuasionDialog.eventPersuadeMsg += MyGUI::newDelegate(this, &DialogueWindow::onPersuadeResult);
 
         //History view
         getWidget(mHistory, "History");
@@ -277,8 +297,6 @@ namespace MWGui
 
     DialogueWindow::~DialogueWindow()
     {
-        mPersuasionDialog.eventPersuadeMsg.clear();
-
         deleteLater();
         for (Link* link : mLinks)
             delete link;
@@ -356,12 +374,11 @@ namespace MWGui
             const MWWorld::Store<ESM::GameSetting> &gmst =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-            MWBase::DialogueManager::Response response;
             if (topic == gmst.find("sPersuasion")->getString())
                 mPersuasionDialog.setVisible(true);
             else if (topic == gmst.find("sCompanionShare")->getString())
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Companion, mPtr);
-            else if (!MWBase::Environment::get().getDialogueManager()->checkServiceRefused(response))
+            else if (!MWBase::Environment::get().getDialogueManager()->checkServiceRefused(mCallback.get()))
             {
                 if (topic == gmst.find("sBarter")->getString())
                     MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Barter, mPtr);
@@ -378,19 +395,34 @@ namespace MWGui
                 else if (topic == gmst.find("sRepair")->getString())
                     MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_MerchantRepair, mPtr);
             }
-            else
-                addResponse(response.first, response.second);
         }
     }
 
     void DialogueWindow::setPtr(const MWWorld::Ptr& actor)
     {
-        MWBase::DialogueManager::Response response;
-        if (!MWBase::Environment::get().getDialogueManager()->startDialogue(actor, response))
+        bool sameActor = (mPtr == actor);
+        if (!sameActor)
+        {
+            for (std::vector<DialogueText*>::iterator it = mHistoryContents.begin(); it != mHistoryContents.end(); ++it)
+                delete (*it);
+            mHistoryContents.clear();
+            mKeywords.clear();
+            mTopicsList->clear();
+            for (std::vector<Link*>::iterator it = mLinks.begin(); it != mLinks.end(); ++it)
+                mDeleteLater.push_back(*it); // Links are not deleted right away to prevent issues with event handlers
+            mLinks.clear();
+        }
+
+        mPtr = actor;
+        mGoodbye = false;
+        mTopicsList->setEnabled(true);
+
+        if (!MWBase::Environment::get().getDialogueManager()->startDialogue(actor, mGreetingCallback.get()))
         {
             // No greetings found. The dialogue window should not be shown.
             // If this is a companion, we must show the companion window directly (used by BM_bear_be_unique).
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
+            mPtr = MWWorld::Ptr();
             if (isCompanion(actor))
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Companion, actor);
             return;
@@ -398,32 +430,11 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
 
-        mGoodbye = false;
-        bool sameActor = (mPtr == actor);
-        mPtr = actor;
-        mTopicsList->setEnabled(true);
         setTitle(mPtr.getClass().getName(mPtr));
 
-        mTopicsList->clear();
-
-        if (!sameActor)
-        {
-            for (std::vector<DialogueText*>::iterator it = mHistoryContents.begin(); it != mHistoryContents.end(); ++it)
-                delete (*it);
-            mHistoryContents.clear();
-
-            mKeywords.clear();
-            updateTopicsPane();
-        }
-
-        for (std::vector<Link*>::iterator it = mLinks.begin(); it != mLinks.end(); ++it)
-            mDeleteLater.push_back(*it); // Links are not deleted right away to prevent issues with event handlers
-        mLinks.clear();
-
+        updateTopicsPane();
         updateDisposition();
         restock();
-
-        addResponse(response.first, response.second, false);
     }
 
     void DialogueWindow::restock()
@@ -608,14 +619,12 @@ namespace MWGui
 
     void DialogueWindow::onTopicActivated(const std::string &topicId)
     {
-        MWBase::DialogueManager::Response response = MWBase::Environment::get().getDialogueManager()->keywordSelected(topicId);
-        addResponse(response.first, response.second);
+        MWBase::Environment::get().getDialogueManager()->keywordSelected(topicId, mCallback.get());
     }
 
     void DialogueWindow::onChoiceActivated(int id)
     {
-        MWBase::DialogueManager::Response response = MWBase::Environment::get().getDialogueManager()->questionAnswered(id);
-        addResponse(response.first, response.second);
+        MWBase::Environment::get().getDialogueManager()->questionAnswered(id, mCallback.get());
     }
 
     void DialogueWindow::onGoodbyeActivated()
@@ -707,8 +716,4 @@ namespace MWGui
                 && actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion");
     }
 
-    void DialogueWindow::onPersuadeResult(const std::string &title, const std::string &text)
-    {
-        addResponse(title, text);
-    }
 }

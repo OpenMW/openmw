@@ -8,6 +8,7 @@
 
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/translation/translation.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -22,13 +23,13 @@ namespace MWDialogue
 {
     class DialogueManager : public MWBase::DialogueManager
     {
-            std::set<std::string> mKnownTopics;// Those are the topics the player knows.
+            std::set<std::string, Misc::StringUtils::CiComp> mKnownTopics;// Those are the topics the player knows.
 
             // Modified faction reactions. <Faction1, <Faction2, Difference> >
             typedef std::map<std::string, std::map<std::string, int> > ModFactionReactionMap;
             ModFactionReactionMap mChangedFactionReaction;
 
-            std::set<std::string> mActorKnownTopics;
+            std::set<std::string, Misc::StringUtils::CiComp> mActorKnownTopics;
 
             Translation::Storage& mTranslationDataStorage;
             MWScript::CompilerContext mCompilerContext;
@@ -56,7 +57,7 @@ namespace MWDialogue
             bool compile (const std::string& cmd, std::vector<Interpreter::Type_Code>& code, const MWWorld::Ptr& actor);
             void executeScript (const std::string& script, const MWWorld::Ptr& actor);
 
-            Response executeTopic (const std::string& topic);
+            void executeTopic (const std::string& topic, ResponseCallback* callback);
 
             const ESM::Dialogue* searchDialogue(const std::string& id);
 
@@ -68,7 +69,7 @@ namespace MWDialogue
 
             virtual bool isInChoice() const;
 
-            virtual bool startDialogue (const MWWorld::Ptr& actor, Response& response);
+            virtual bool startDialogue (const MWWorld::Ptr& actor, ResponseCallback* callback);
 
             std::list<std::string> getAvailableTopics();
 
@@ -81,16 +82,16 @@ namespace MWDialogue
 
             virtual void goodbye();
 
-            virtual bool checkServiceRefused (Response& response);
+            virtual bool checkServiceRefused (ResponseCallback* callback);
 
             virtual void say(const MWWorld::Ptr &actor, const std::string &topic);
 
             //calbacks for the GUI
-            virtual Response keywordSelected (const std::string& keyword);
+            virtual void keywordSelected (const std::string& keyword, ResponseCallback* callback);
             virtual void goodbyeSelected();
-            virtual Response questionAnswered (int answer);
+            virtual void questionAnswered (int answer, ResponseCallback* callback);
 
-            virtual Response persuade (int type);
+            virtual void persuade (int type, ResponseCallback* callback);
             virtual int getTemporaryDispositionChange () const;
 
             /// @note This change is temporary and gets discarded when dialogue ends.

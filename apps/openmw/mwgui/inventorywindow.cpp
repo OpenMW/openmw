@@ -26,7 +26,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
 #include "../mwscript/interpretercontext.hpp"
-#include "../mwrender/characterpreview.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -229,8 +228,8 @@ namespace MWGui
 
         MWWorld::Ptr object = item.mBase;
         int count = item.mCount;
-
         bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
+
         if (MyGUI::InputManager::getInstance().isControlPressed())
             count = 1;
 
@@ -528,6 +527,7 @@ namespace MWGui
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
             MWWorld::Ptr ptr = mDragAndDrop->mItem.mBase;
+
             mDragAndDrop->finish();
 
             if (mDragAndDrop->mSourceModel != mTradeModel)
@@ -535,7 +535,19 @@ namespace MWGui
                 // Move item to the player's inventory
                 ptr = mDragAndDrop->mSourceModel->moveItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount, mTradeModel);
             }
+
             useItem(ptr);
+
+            // If item is ingredient or potion don't stop drag and drop to simplify action of taking more than one 1 item
+            if ((ptr.getTypeName() == typeid(ESM::Potion).name() ||
+                 ptr.getTypeName() == typeid(ESM::Ingredient).name())
+                && mDragAndDrop->mDraggedCount > 1)
+            {
+                // Item can be provided from other window for example container.
+                // But after DragAndDrop::startDrag item automaticly always gets to player inventory.
+                mSelectedItem = getModel()->getIndex(mDragAndDrop->mItem);
+                dragItem(nullptr, mDragAndDrop->mDraggedCount - 1);
+            }
         }
         else
         {
