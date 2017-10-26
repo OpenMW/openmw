@@ -1,6 +1,6 @@
 #!/bin/sh
-sudo ln -s /usr/bin/clang-3.6 /usr/local/bin/clang
-sudo ln -s /usr/bin/clang++-3.6 /usr/local/bin/clang++
+sudo ln -s /usr/bin/clang-5.0 /usr/local/bin/clang
+sudo ln -s /usr/bin/clang++-5.0 /usr/local/bin/clang++
 
 # build libgtest & libgtest_main
 sudo mkdir /usr/src/gtest/build
