@@ -52,10 +52,10 @@ matrix:
   include:
     - os: linux
       env:
-        ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
+        ANALYZE="scan-build-5.0 --use-cc clang-5.0 --use-c++ clang++-5.0 "
       compiler: clang
   allow_failures:
-    - env: ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
+    - env: ANALYZE="scan-build-5.0 --use-cc clang-5.0 --use-c++ clang++-5.0 "
 
 before_install: ./CI/before_install.${TRAVIS_OS_NAME}.sh
 before_script: ./CI/before_script.${TRAVIS_OS_NAME}.sh
