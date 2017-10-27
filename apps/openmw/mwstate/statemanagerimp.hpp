@@ -5,7 +5,7 @@
 
 #include "../mwbase/statemanager.hpp"
 
-#include <boost/filesystem/path.hpp>
+#include <experimental/filesystem>
 
 #include "charactermanager.hpp"
 
@@ -31,7 +31,7 @@ namespace MWState
 
         public:
 
-            StateManager (const boost::filesystem::path& saves, const std::string& game);
+            StateManager (const sfs::path& saves, const std::string& game);
 
             virtual void requestQuit();
 

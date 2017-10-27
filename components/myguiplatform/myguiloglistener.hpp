@@ -2,7 +2,8 @@
 #define OPENMW_COMPONENTS_MYGUIPLATFORM_LOGLISTENER_H
 
 #include <string>
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
+#include <string.h>
 
 #include <MyGUI_ILogListener.h>
 #include <MyGUI_LogSource.h>
@@ -33,7 +34,7 @@ namespace osgMyGUI
         const std::string& getFileName() const { return mFileName; }
 
     private:
-        boost::filesystem::ofstream mStream;
+        std::ofstream mStream;
         std::string mFileName;
     };
 

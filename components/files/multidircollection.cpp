@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-#include <boost/filesystem.hpp>
-
 namespace Files
 {
     struct NameEqual
@@ -44,16 +42,16 @@ namespace Files
         for (PathContainer::const_iterator iter = directories.begin();
             iter!=directories.end(); ++iter)
         {
-            if (!boost::filesystem::is_directory(*iter))
+            if (!std::experimental::filesystem::is_directory((*iter).string()))
             {
                 std::cout << "Skipping invalid directory: " << (*iter).string() << std::endl;
                 continue;
             }
 
-            for (boost::filesystem::directory_iterator dirIter(*iter);
-                    dirIter != boost::filesystem::directory_iterator(); ++dirIter)
+            for (sfs::directory_iterator dirIter((*iter).string());
+                    dirIter != sfs::directory_iterator(); ++dirIter)
             {
-                boost::filesystem::path path = *dirIter;
+                sfs::path path = *dirIter;
 
                 if (!equal (extension, path.extension().string()))
                     continue;
@@ -80,7 +78,7 @@ namespace Files
         }
     }
 
-    boost::filesystem::path MultiDirCollection::getPath (const std::string& file) const
+    sfs::path MultiDirCollection::getPath (const std::string& file) const
     {
         TIter iter = mFiles.find (file);
 

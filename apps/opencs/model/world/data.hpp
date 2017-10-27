@@ -4,7 +4,7 @@
 #include <map>
 #include <vector>
 
-#include <boost/filesystem/path.hpp>
+#include <experimental/filesystem>
 
 #include <QObject>
 #include <QModelIndex>
@@ -148,7 +148,7 @@ namespace CSMWorld
 
             Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
                 const std::vector<std::string>& archives, const Fallback::Map* fallback,
-                const boost::filesystem::path& resDir);
+                const sfs::path& resDir);
 
             virtual ~Data();
 
@@ -288,7 +288,7 @@ namespace CSMWorld
             void merge();
             ///< Merge modified into base.
 
-            int startLoading (const boost::filesystem::path& path, bool base, bool project);
+            int startLoading (const sfs::path& path, bool base, bool project);
             ///< Begin merging content of a file into base or modified.
             ///
             /// \param project load project file instead of content file

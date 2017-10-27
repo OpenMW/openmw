@@ -32,15 +32,15 @@ namespace Files
         return iter->second;
     }
 
-    boost::filesystem::path Collections::getPath(const std::string& file) const
+    sfs::path Collections::getPath(const std::string& file) const
     {
         for (Files::PathContainer::const_iterator iter = mDirectories.begin();
              iter != mDirectories.end(); ++iter)
         {
-            for (boost::filesystem::directory_iterator iter2 (*iter);
-                iter2!=boost::filesystem::directory_iterator(); ++iter2)
+            for (sfs::directory_iterator iter2 (*iter);
+                iter2!=sfs::directory_iterator(); ++iter2)
             {
-                boost::filesystem::path path = *iter2;
+                sfs::path path = *iter2;
 
                 if (mFoldCase)
                 {
@@ -60,10 +60,10 @@ namespace Files
         for (Files::PathContainer::const_iterator iter = mDirectories.begin();
              iter != mDirectories.end(); ++iter)
         {
-            for (boost::filesystem::directory_iterator iter2 (*iter);
-                iter2!=boost::filesystem::directory_iterator(); ++iter2)
+            for (sfs::directory_iterator iter2 (*iter);
+                iter2!=sfs::directory_iterator(); ++iter2)
             {
-                boost::filesystem::path path = *iter2;
+                sfs::path path = *iter2;
 
                 if (mFoldCase)
                 {

@@ -2,10 +2,12 @@
 
 #include <MyGUI_DataFileStream.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <experimental/filesystem>
+#include <fstream>
 
 #include <iostream>
+
+namespace sfs = std::experimental::filesystem;
 
 namespace osgMyGUI
 {
@@ -18,8 +20,8 @@ void DataManager::setResourcePath(const std::string &path)
 MyGUI::IDataStream *DataManager::getData(const std::string &name)
 {
     std::string fullpath = getDataPath(name);
-    std::unique_ptr<boost::filesystem::ifstream> stream;
-    stream.reset(new boost::filesystem::ifstream);
+    std::unique_ptr<std::ifstream> stream;
+    stream.reset(new std::ifstream);
     stream->open(fullpath, std::ios::binary);
     if (stream->fail())
     {
@@ -37,7 +39,7 @@ void DataManager::freeData(MyGUI::IDataStream *data)
 bool DataManager::isDataExist(const std::string &name)
 {
     std::string fullpath = mResourcePath + "/" + name;
-    return boost::filesystem::exists(fullpath);
+    return sfs::exists(fullpath);
 }
 
 const MyGUI::VectorString &DataManager::getDataListNames(const std::string &pattern)

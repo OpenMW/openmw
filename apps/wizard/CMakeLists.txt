@@ -107,7 +107,8 @@ openmw_add_executable(openmw-wizard
 
 target_link_libraries(openmw-wizard
     components
-)
+    stdc++fs
+        )
 
 if (DESIRED_QT_VERSION MATCHES 4)
     target_link_libraries(openmw-wizard

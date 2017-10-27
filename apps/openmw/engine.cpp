@@ -2,7 +2,7 @@
 
 #include <iomanip>
 
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
 
 #include <osgViewer/ViewerEventHandlers>
 #include <osgDB/ReadFile>
@@ -270,7 +270,7 @@ void OMW::Engine::addArchive (const std::string& archive) {
 }
 
 // Set resource dir
-void OMW::Engine::setResourceDir (const boost::filesystem::path& parResDir)
+void OMW::Engine::setResourceDir (const sfs::path& parResDir)
 {
     mResDir = parResDir;
 }
@@ -299,16 +299,16 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
     const std::string globaldefault = (mCfgMgr.getGlobalPath() / "settings-default.cfg").string();
 
     // prefer local
-    if (boost::filesystem::exists(localdefault))
+    if (sfs::exists(localdefault))
         settings.loadDefault(localdefault);
-    else if (boost::filesystem::exists(globaldefault))
+    else if (sfs::exists(globaldefault))
         settings.loadDefault(globaldefault);
     else
         throw std::runtime_error ("No default settings file found! Make sure the file \"settings-default.cfg\" was properly installed.");
 
     // load user settings if they exist
     const std::string settingspath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
-    if (boost::filesystem::exists(settingspath))
+    if (sfs::exists(settingspath))
         settings.loadUser(settingspath);
 
     return settingspath;
@@ -411,7 +411,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
 
 void OMW::Engine::setWindowIcon()
 {
-    boost::filesystem::ifstream windowIconStream;
+    std::ifstream windowIconStream;
     std::string windowIcon = (mResDir / "mygui" / "openmw.png").string();
     windowIconStream.open(windowIcon, std::ios_base::in | std::ios_base::binary);
     if (windowIconStream.fail())
@@ -466,13 +466,13 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // showing a loading screen and keeping the window responsive while doing so
 
     std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v3.xml").string();
-    bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
+    bool keybinderUserExists = sfs::exists(keybinderUser);
     if(!keybinderUserExists)
     {
         std::string input2 = (mCfgMgr.getUserConfigPath() / "input_v2.xml").string();
-        if(boost::filesystem::exists(input2)) {
-            boost::filesystem::copy_file(input2, keybinderUser);
-            keybinderUserExists = boost::filesystem::exists(keybinderUser);
+        if(sfs::exists(input2)) {
+            sfs::copy_file(input2, keybinderUser);
+            keybinderUserExists = sfs::exists(keybinderUser);
         }
     }
 
@@ -480,9 +480,9 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     const std::string localdefault = mCfgMgr.getLocalPath().string() + "/gamecontrollerdb.txt";
     const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/gamecontrollerdb.txt";
     std::string gameControllerdb;
-    if (boost::filesystem::exists(localdefault))
+    if (sfs::exists(localdefault))
         gameControllerdb = localdefault;
-    else if (boost::filesystem::exists(globaldefault))
+    else if (sfs::exists(globaldefault))
         gameControllerdb = globaldefault;
     else
         gameControllerdb = ""; //if it doesn't exist, pass in an empty string
@@ -590,10 +590,10 @@ public:
 
             stream << mScreenshotPath << "/screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << "." << mScreenshotFormat;
 
-        } while (boost::filesystem::exists(stream.str()));
+        } while (sfs::exists(stream.str()));
 
-        boost::filesystem::ofstream outStream;
-        outStream.open(boost::filesystem::path(stream.str()), std::ios::binary);
+        std::ofstream outStream;
+        outStream.open(sfs::path(stream.str()), std::ios::binary);
 
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension(mScreenshotFormat);
         if (!readerwriter)

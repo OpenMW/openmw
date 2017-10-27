@@ -88,7 +88,7 @@ void CSMDoc::Loader::load()
 
         if (iter->second.mFile<size)
         {
-            boost::filesystem::path path = document->getContentFiles()[iter->second.mFile];
+            sfs::path path = document->getContentFiles()[iter->second.mFile];
 
             int steps = document->getData().startLoading (path, iter->second.mFile!=editedIndex, false);
             iter->second.mRecordsLeft = true;

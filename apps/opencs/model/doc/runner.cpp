@@ -7,7 +7,7 @@
 
 #include "operationholder.hpp"
 
-CSMDoc::Runner::Runner (const boost::filesystem::path& projectPath)
+CSMDoc::Runner::Runner (const sfs::path& projectPath)
 : mRunning (false), mStartup (0), mProjectPath (projectPath)
 {
     connect (&mProcess, SIGNAL (finished (int, QProcess::ExitStatus)),

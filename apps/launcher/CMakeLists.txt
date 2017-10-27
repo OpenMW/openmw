@@ -94,6 +94,7 @@ endif (WIN32)
 target_link_libraries(openmw-launcher
     ${SDL2_LIBRARY_ONLY}
     components
+    stdc++fs
 )
 
 if (DESIRED_QT_VERSION MATCHES 4)
