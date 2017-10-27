@@ -88,7 +88,7 @@ void CSMDoc::Loader::load()
 
         if (iter->second.mFile<size)
         {
-            sfs::path path = document->getContentFiles()[iter->second.mFile];
+            std::experimental::filesystem::path path = document->getContentFiles()[iter->second.mFile];
 
             int steps = document->getData().startLoading (path, iter->second.mFile!=editedIndex, false);
             iter->second.mRecordsLeft = true;

@@ -10,7 +10,7 @@
 
 #include <boost/version.hpp>
 
-namespace sfs = std::experimental::filesystem;
+
 
 MwIniImporter::MwIniImporter()
     : mVerbose(false)
@@ -661,12 +661,12 @@ std::string MwIniImporter::numberToString(int n) {
     return str.str();
 }
 
-MwIniImporter::multistrmap MwIniImporter::loadIniFile(const sfs::path&  filename) const {
+MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::experimental::filesystem::path&  filename) const {
     std::cout << "load ini file: " << filename << std::endl;
 
     std::string section("");
     MwIniImporter::multistrmap map;
-    std::ifstream file((sfs::path(filename)));
+    std::ifstream file((std::experimental::filesystem::path(filename)));
     ToUTF8::Utf8Encoder encoder(mEncoding);
 
     std::string line;
@@ -720,11 +720,11 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const sfs::path&  filename
     return map;
 }
 
-MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const sfs::path& filename) {
+MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const std::experimental::filesystem::path& filename) {
     std::cout << "load cfg file: " << filename << std::endl;
 
     MwIniImporter::multistrmap map;
-    std::ifstream file((sfs::path(filename)));
+    std::ifstream file((std::experimental::filesystem::path(filename)));
 
     std::string line;
     while (std::getline(file, line)) {
@@ -826,14 +826,14 @@ void MwIniImporter::importArchives(multistrmap &cfg, const multistrmap &ini) con
     }
 }
 
-void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, const sfs::path& iniFilename) const {
+void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, const std::experimental::filesystem::path& iniFilename) const {
     std::vector<std::pair<std::time_t, std::string> > contentFiles;
     std::string baseGameFile("Game Files:GameFile");
     std::string gameFile("");
     std::time_t defaultTime = 0;
 
     // assume the Game Files are all in a "Data Files" directory under the directory holding Morrowind.ini
-    const sfs::path gameFilesDir(iniFilename.parent_path() /= "Data Files");
+    const std::experimental::filesystem::path gameFilesDir(iniFilename.parent_path() /= "Data Files");
 
     multistrmap::const_iterator it = ini.begin();
     for(int i=0; it != ini.end(); i++) {
@@ -850,7 +850,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
             Misc::StringUtils::lowerCaseInPlace(filetype);
 
             if(filetype.compare("esm") == 0 || filetype.compare("esp") == 0) {
-                sfs::path filepath(gameFilesDir);
+                std::experimental::filesystem::path filepath(gameFilesDir);
                 filepath /= *entry;
                 contentFiles.push_back(std::make_pair(lastWriteTime(filepath, defaultTime), *entry));
             }
@@ -881,20 +881,20 @@ void MwIniImporter::setInputEncoding(const ToUTF8::FromType &encoding)
   mEncoding = encoding;
 }
 
-std::time_t MwIniImporter::lastWriteTime(const sfs::path& filename, std::time_t defaultTime)
+std::time_t MwIniImporter::lastWriteTime(const std::experimental::filesystem::path& filename, std::time_t defaultTime)
 {
     std::time_t writeTime(defaultTime);
-    if (sfs::exists(filename))
+    if (std::experimental::filesystem::exists(filename))
     {
         // FixMe: remove #if when Boost dependency for Linux builds updated
         // This allows Linux to build until then
 #if (BOOST_VERSION >= 104800)
         // need to resolve any symlinks so that we get time of file, not symlink
-        sfs::path resolved = sfs::canonical(filename);
+        std::experimental::filesystem::path resolved = std::experimental::filesystem::canonical(filename);
 #else
-        sfs::path resolved = filename;
+        std::experimental::filesystem::path resolved = filename;
 #endif
-        writeTime = std::chrono::system_clock::to_time_t(sfs::last_write_time(resolved));
+        writeTime = std::chrono::system_clock::to_time_t(std::experimental::filesystem::last_write_time(resolved));
 
         // print timestamp
         const int size=1024;

@@ -8,7 +8,7 @@
 class QPushButton;
 class QListWidget;
 
-namespace sfs = std::experimental::filesystem;
+
 
 namespace CSMDoc
 {
@@ -44,7 +44,7 @@ namespace CSVTools
             /// Configure dialogue for a new merge
             void configure (CSMDoc::Document *document);
 
-            void setLocalData (const sfs::path& localData);
+            void setLocalData (const std::experimental::filesystem::path& localData);
 
             CSMDoc::Document *getDocument() const;
 

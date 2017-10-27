@@ -8,7 +8,7 @@
 #include "operation.hpp"
 #include "savingstate.hpp"
 
-namespace sfs = std::experimental::filesystem;
+
 
 namespace CSMDoc
 {
@@ -23,7 +23,7 @@ namespace CSMDoc
 
         public:
 
-            Saving (Document& document, const sfs::path& projectPath,
+            Saving (Document& document, const std::experimental::filesystem::path& projectPath,
                 ToUTF8::FromType encoding);
 
     };

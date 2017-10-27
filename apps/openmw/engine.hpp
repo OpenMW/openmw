@@ -79,7 +79,7 @@ namespace OMW
             ToUTF8::Utf8Encoder* mEncoder;
             Files::PathContainer mDataDirs;
             std::vector<std::string> mArchives;
-            sfs::path mResDir;
+            std::experimental::filesystem::path mResDir;
             osg::ref_ptr<osgViewer::Viewer> mViewer;
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
             std::string mCellName;
@@ -146,7 +146,7 @@ namespace OMW
             void addArchive(const std::string& archive);
 
             /// Set resource dir
-            void setResourceDir(const sfs::path& parResDir);
+            void setResourceDir(const std::experimental::filesystem::path& parResDir);
 
             /// Set start cell name
             void setCell(const std::string& cellName);

@@ -64,7 +64,7 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 }
 
 CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
-    const std::vector<std::string>& archives, const Fallback::Map* fallback, const sfs::path& resDir)
+    const std::vector<std::string>& archives, const Fallback::Map* fallback, const std::experimental::filesystem::path& resDir)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
   mFallbackMap(fallback), mReader (0), mDialogue (0), mReaderIndex(1),
   mFsStrict(fsStrict), mDataPaths(dataPaths), mArchives(archives)
@@ -917,7 +917,7 @@ void CSMWorld::Data::merge()
     mGlobals.merge();
 }
 
-int CSMWorld::Data::startLoading (const sfs::path& path, bool base, bool project)
+int CSMWorld::Data::startLoading (const std::experimental::filesystem::path& path, bool base, bool project)
 {
     // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading
     std::shared_ptr<ESM::ESMReader> ptr(mReader);

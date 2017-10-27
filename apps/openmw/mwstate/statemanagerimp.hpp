@@ -31,7 +31,7 @@ namespace MWState
 
         public:
 
-            StateManager (const sfs::path& saves, const std::string& game);
+            StateManager (const std::experimental::filesystem::path& saves, const std::string& game);
 
             virtual void requestQuit();
 

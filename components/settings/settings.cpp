@@ -11,7 +11,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-namespace sfs = std::experimental::filesystem;
+
 
 namespace
 {
@@ -73,7 +73,7 @@ public:
     {
         mFile = file;
         std::ifstream stream;
-        stream.open(sfs::path(file));
+        stream.open(std::experimental::filesystem::path(file));
         std::cout << "Loading settings file: " << file << std::endl;
         std::string currentCategory;
         mLine = 0;
@@ -144,7 +144,7 @@ public:
         // as the output file if we're copying the setting from the default settings.cfg for the
         // first time.  A minor change in API to pass the source file might be in order here.
         std::ifstream istream;
-        sfs::path ipath(file);
+        std::experimental::filesystem::path ipath(file);
         istream.open(ipath);
 
         // Create a new string stream to write the current settings to.  It's likely that the

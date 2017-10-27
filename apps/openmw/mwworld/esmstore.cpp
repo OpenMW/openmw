@@ -10,7 +10,7 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 
-namespace sfs = std::experimental::filesystem;
+
 
 namespace MWWorld
 {
@@ -53,7 +53,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         int index = ~0;
         for (int i = 0; i < esm.getIndex(); i++) {
             const std::string &candidate = allPlugins->at(i).getContext().filename;
-            std::string fnamecandidate = sfs::path(candidate).filename().string();
+            std::string fnamecandidate = std::experimental::filesystem::path(candidate).filename().string();
             if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
                 index = i;
                 break;

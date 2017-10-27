@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include <boost/format.hpp>
+#include <fmt/format.h>
 
 #include <MyGUI_LanguageManager.h>
 
@@ -72,12 +72,12 @@ namespace MWScript
                         if (count == 1)
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage60}");
-                            msgBox = boost::str(boost::format(msgBox) % itemName);
+                            msgBox = fmt::sprintf(msgBox, itemName);
                         }
                         else
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage61}");
-                            msgBox = boost::str(boost::format(msgBox) % count % itemName);
+                            msgBox = fmt::sprintf(msgBox, count, itemName);
                         }
                         MWBase::Environment::get().getWindowManager()->messageBox(msgBox, MWGui::ShowInDialogueMode_Only);
                     }
@@ -155,12 +155,12 @@ namespace MWScript
                         if(numRemoved > 1)
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage63}");
-                            msgBox = boost::str (boost::format(msgBox) % numRemoved % itemName);
+                            msgBox = fmt::sprintf(msgBox, numRemoved, itemName);
                         }
                         else
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage62}");
-                            msgBox = boost::str (boost::format(msgBox) % itemName);
+                            msgBox = fmt::sprintf(msgBox, itemName);
                         }
                         MWBase::Environment::get().getWindowManager()->messageBox(msgBox, MWGui::ShowInDialogueMode_Only);
                     }

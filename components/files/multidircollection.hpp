@@ -9,11 +9,11 @@
 
 #include <components/misc/stringops.hpp>
 
-namespace sfs = std::experimental::filesystem;
+
 
 namespace Files
 {
-    typedef std::vector<sfs::path> PathContainer;
+    typedef std::vector<std::experimental::filesystem::path> PathContainer;
 
     struct NameLess
     {
@@ -52,7 +52,7 @@ namespace Files
     {
         public:
 
-            typedef std::map<std::string, sfs::path, NameLess> TContainer;
+            typedef std::map<std::string, std::experimental::filesystem::path, NameLess> TContainer;
             typedef TContainer::const_iterator TIter;
 
         private:
@@ -68,7 +68,7 @@ namespace Files
             /// contain the leading dot.
             /// \param foldCase Ignore filename case
 
-            sfs::path getPath (const std::string& file) const;
+            std::experimental::filesystem::path getPath (const std::string& file) const;
             ///< Return full path (including filename) of \a file.
             ///
             /// If the file does not exist, an exception is thrown. \a file must include

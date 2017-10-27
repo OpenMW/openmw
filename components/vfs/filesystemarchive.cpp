@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <experimental/filesystem>
 
-namespace sfs = std::experimental::filesystem;
+
 
 namespace VFS
 {
@@ -19,7 +19,7 @@ namespace VFS
     {
         if (!mBuiltIndex)
         {
-            typedef sfs::recursive_directory_iterator directory_iterator;
+            typedef std::experimental::filesystem::recursive_directory_iterator directory_iterator;
 
             directory_iterator end;
 
@@ -30,7 +30,7 @@ namespace VFS
 
             for (directory_iterator i (mPath); i != end; ++i)
             {
-                if(sfs::is_directory (*i))
+                if(std::experimental::filesystem::is_directory (*i))
                     continue;
 
                 std::string proper = i->path ().string ();

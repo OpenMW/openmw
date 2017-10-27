@@ -15,7 +15,7 @@
 
 // Create local aliases for brevity
 namespace bpo = boost::program_options;
-namespace sfs = std::experimental::filesystem;
+
 
 ///See if the file has the named extension
 bool hasExtension(std::string filename, std::string  extensionToFind)
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
 //                 std::cout << "Reading BSA File: " << name << std::endl;
                 readVFS(new VFS::BsaArchive(name));
              }
-             else if(sfs::is_directory(sfs::path(name)))
+             else if(std::experimental::filesystem::is_directory(std::experimental::filesystem::path(name)))
              {
 //                 std::cout << "Reading All Files in: " << name << std::endl;
                 readVFS(new VFS::FileSystemArchive(name),name);

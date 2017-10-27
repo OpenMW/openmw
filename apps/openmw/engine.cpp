@@ -270,7 +270,7 @@ void OMW::Engine::addArchive (const std::string& archive) {
 }
 
 // Set resource dir
-void OMW::Engine::setResourceDir (const sfs::path& parResDir)
+void OMW::Engine::setResourceDir (const std::experimental::filesystem::path& parResDir)
 {
     mResDir = parResDir;
 }
@@ -299,16 +299,16 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
     const std::string globaldefault = (mCfgMgr.getGlobalPath() / "settings-default.cfg").string();
 
     // prefer local
-    if (sfs::exists(localdefault))
+    if (std::experimental::filesystem::exists(localdefault))
         settings.loadDefault(localdefault);
-    else if (sfs::exists(globaldefault))
+    else if (std::experimental::filesystem::exists(globaldefault))
         settings.loadDefault(globaldefault);
     else
         throw std::runtime_error ("No default settings file found! Make sure the file \"settings-default.cfg\" was properly installed.");
 
     // load user settings if they exist
     const std::string settingspath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
-    if (sfs::exists(settingspath))
+    if (std::experimental::filesystem::exists(settingspath))
         settings.loadUser(settingspath);
 
     return settingspath;
@@ -466,13 +466,13 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // showing a loading screen and keeping the window responsive while doing so
 
     std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v3.xml").string();
-    bool keybinderUserExists = sfs::exists(keybinderUser);
+    bool keybinderUserExists = std::experimental::filesystem::exists(keybinderUser);
     if(!keybinderUserExists)
     {
         std::string input2 = (mCfgMgr.getUserConfigPath() / "input_v2.xml").string();
-        if(sfs::exists(input2)) {
-            sfs::copy_file(input2, keybinderUser);
-            keybinderUserExists = sfs::exists(keybinderUser);
+        if(std::experimental::filesystem::exists(input2)) {
+            std::experimental::filesystem::copy_file(input2, keybinderUser);
+            keybinderUserExists = std::experimental::filesystem::exists(keybinderUser);
         }
     }
 
@@ -480,9 +480,9 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     const std::string localdefault = mCfgMgr.getLocalPath().string() + "/gamecontrollerdb.txt";
     const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/gamecontrollerdb.txt";
     std::string gameControllerdb;
-    if (sfs::exists(localdefault))
+    if (std::experimental::filesystem::exists(localdefault))
         gameControllerdb = localdefault;
-    else if (sfs::exists(globaldefault))
+    else if (std::experimental::filesystem::exists(globaldefault))
         gameControllerdb = globaldefault;
     else
         gameControllerdb = ""; //if it doesn't exist, pass in an empty string
@@ -590,10 +590,10 @@ public:
 
             stream << mScreenshotPath << "/screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << "." << mScreenshotFormat;
 
-        } while (sfs::exists(stream.str()));
+        } while (std::experimental::filesystem::exists(stream.str()));
 
         std::ofstream outStream;
-        outStream.open(sfs::path(stream.str()), std::ios::binary);
+        outStream.open(std::experimental::filesystem::path(stream.str()), std::ios::binary);
 
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension(mScreenshotFormat);
         if (!readerwriter)

@@ -5,13 +5,13 @@
 
 #include <components/esm/savedgame.hpp>
 
-namespace sfs = std::experimental::filesystem;
+
 
 namespace MWState
 {
     struct Slot
     {
-        sfs::path mPath;
+        std::experimental::filesystem::path mPath;
         ESM::SavedGame mProfile;
         std::time_t mTimeStamp;
     };
@@ -26,16 +26,16 @@ namespace MWState
 
         private:
 
-            sfs::path mPath;
+            std::experimental::filesystem::path mPath;
             std::vector<Slot> mSlots;
 
-            void addSlot (const sfs::path& path, const std::string& game);
+            void addSlot (const std::experimental::filesystem::path& path, const std::string& game);
 
             void addSlot (const ESM::SavedGame& profile);
 
         public:
 
-            Character (const sfs::path& saves, const std::string& game);
+            Character (const std::experimental::filesystem::path& saves, const std::string& game);
 
             void cleanup();
             ///< Delete the directory we used, if it is empty
@@ -60,7 +60,7 @@ namespace MWState
 
             SlotIterator end() const;
 
-            const sfs::path& getPath() const;
+            const std::experimental::filesystem::path& getPath() const;
 
             ESM::SavedGame getSignature() const;
             ///< Return signature information for this character.

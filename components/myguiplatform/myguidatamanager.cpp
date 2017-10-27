@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-namespace sfs = std::experimental::filesystem;
+
 
 namespace osgMyGUI
 {
@@ -39,7 +39,7 @@ void DataManager::freeData(MyGUI::IDataStream *data)
 bool DataManager::isDataExist(const std::string &name)
 {
     std::string fullpath = mResourcePath + "/" + name;
-    return sfs::exists(fullpath);
+    return std::experimental::filesystem::exists(fullpath);
 }
 
 const MyGUI::VectorString &DataManager::getDataListNames(const std::string &pattern)

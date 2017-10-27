@@ -3,7 +3,7 @@
 #include "operation.hpp"
 #include "document.hpp"
 
-CSMDoc::SavingState::SavingState (Operation& operation, const sfs::path& projectPath,
+CSMDoc::SavingState::SavingState (Operation& operation, const std::experimental::filesystem::path& projectPath,
     ToUTF8::FromType encoding)
 : mOperation (operation), mEncoder (encoding),  mProjectPath (projectPath), mProjectFile (false)
 {
@@ -31,19 +31,19 @@ void CSMDoc::SavingState::start (Document& document, bool project)
     else
         mPath = document.getSavePath();
 
-    sfs::path file (mPath.filename().string() + ".tmp");
+    std::experimental::filesystem::path file (mPath.filename().string() + ".tmp");
 
     mTmpPath = mPath.parent_path();
 
     mTmpPath /= file;
 }
 
-const sfs::path& CSMDoc::SavingState::getPath() const
+const std::experimental::filesystem::path& CSMDoc::SavingState::getPath() const
 {
     return mPath;
 }
 
-const sfs::path& CSMDoc::SavingState::getTmpPath() const
+const std::experimental::filesystem::path& CSMDoc::SavingState::getTmpPath() const
 {
     return mTmpPath;
 }

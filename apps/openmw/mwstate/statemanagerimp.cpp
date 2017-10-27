@@ -80,7 +80,7 @@ std::map<int, int> MWState::StateManager::buildContentFileIndexMap (const ESM::E
     return map;
 }
 
-MWState::StateManager::StateManager (const sfs::path& saves, const std::string& game)
+MWState::StateManager::StateManager (const std::experimental::filesystem::path& saves, const std::string& game)
 : mQuitRequest (false), mAskLoadRecent(false), mState (State_NoGame), mCharacterManager (saves, game), mTimePlayed (0)
 {
 
@@ -302,7 +302,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
 
         // If no file was written, clean up the slot
-        if (character && slot && !sfs::exists(slot->mPath))
+        if (character && slot && !std::experimental::filesystem::exists(slot->mPath))
         {
             character->deleteSlot(slot);
             character->cleanup();
@@ -345,7 +345,7 @@ void MWState::StateManager::loadGame(const std::string& filepath)
         for (MWState::Character::SlotIterator slotIt = character.begin(); slotIt != character.end(); ++slotIt)
         {
             const MWState::Slot& slot = *slotIt;
-            if (slot.mPath == sfs::path(filepath))
+            if (slot.mPath == std::experimental::filesystem::path(filepath))
             {
                 loadGame(&character, slot.mPath.string());
                 return;

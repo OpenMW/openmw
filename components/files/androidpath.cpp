@@ -8,7 +8,7 @@
 #include "androidpath.h"
 #include <unistd.h>
 
-namespace sfs = std::experimental::filesystem;
+
 
 class Buffer {
     public:
@@ -37,7 +37,7 @@ JNIEXPORT void JNICALL Java_ui_activity_GameActivity_getPathToJni(JNIEnv *env, j
 namespace
 {
 
-    sfs::path getUserHome()
+    std::experimental::filesystem::path getUserHome()
     {
         const char* dir = getenv("HOME");
         if (dir == NULL)
@@ -49,17 +49,17 @@ namespace
             }
         }
         if (dir == NULL)
-            return sfs::path();
+            return std::experimental::filesystem::path();
         else
-            return sfs::path(dir);
+            return std::experimental::filesystem::path(dir);
     }
 
-    sfs::path getEnv(const std::string& envVariable, const sfs::path& fallback)
+    std::experimental::filesystem::path getEnv(const std::string& envVariable, const std::experimental::filesystem::path& fallback)
     {
         const char* result = getenv(envVariable.c_str());
         if (!result)
             return fallback;
-        sfs::path dir(result);
+        std::experimental::filesystem::path dir(result);
         if (dir.empty())
             return fallback;
         else
@@ -78,51 +78,51 @@ AndroidPath::AndroidPath(const std::string& application_name)
 {
 }
 
-sfs::path AndroidPath::getUserConfigPath() const
+std::experimental::filesystem::path AndroidPath::getUserConfigPath() const
 {
     std::string buffer = ""; 
     buffer = buffer + Buffer::getData() +"/config";
     return getEnv("XDG_CONFIG_HOME", buffer) / mName;
 }
 
-sfs::path AndroidPath::getUserDataPath() const
+std::experimental::filesystem::path AndroidPath::getUserDataPath() const
 {
     std::string buffer = ""; 
     buffer = buffer + Buffer::getData() +"/share";
     return getEnv("XDG_DATA_HOME", buffer) / mName;
 }
 
-sfs::path AndroidPath::getCachePath() const
+std::experimental::filesystem::path AndroidPath::getCachePath() const
 {
     std::string buffer = ""; 
     buffer = buffer + Buffer::getData() +"/cache";
     return getEnv("XDG_CACHE_HOME", buffer) / mName;
 }
 
-sfs::path AndroidPath::getGlobalConfigPath() const
+std::experimental::filesystem::path AndroidPath::getGlobalConfigPath() const
 {
     std::string buffer = ""; 
     buffer = buffer + Buffer::getData() +"/";
-    sfs::path globalPath(buffer);
+    std::experimental::filesystem::path globalPath(buffer);
     return globalPath / mName;
 }
 
-sfs::path AndroidPath::getLocalPath() const
+std::experimental::filesystem::path AndroidPath::getLocalPath() const
 {
-    return sfs::path("./");
+    return std::experimental::filesystem::path("./");
 }
 
-sfs::path AndroidPath::getGlobalDataPath() const
+std::experimental::filesystem::path AndroidPath::getGlobalDataPath() const
 {
     std::string buffer = ""; 
     buffer = buffer + Buffer::getData() +"/data";
-    sfs::path globalDataPath(buffer);
+    std::experimental::filesystem::path globalDataPath(buffer);
     return globalDataPath / mName;
 }
 
-sfs::path AndroidPath::getInstallPath() const
+std::experimental::filesystem::path AndroidPath::getInstallPath() const
 {
-    return sfs::path();
+    return std::experimental::filesystem::path();
 }
 
 

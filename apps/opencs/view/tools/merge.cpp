@@ -98,14 +98,14 @@ void CSVTools::Merge::configure (CSMDoc::Document *document)
     while (mFiles->count())
         delete mFiles->takeItem (0);
 
-    std::vector<sfs::path> files = document->getContentFiles();
+    std::vector<std::experimental::filesystem::path> files = document->getContentFiles();
 
-    for (std::vector<sfs::path>::const_iterator iter (files.begin());
+    for (std::vector<std::experimental::filesystem::path>::const_iterator iter (files.begin());
         iter!=files.end(); ++iter)
         mFiles->addItem (QString::fromUtf8 (iter->filename().string().c_str()));
 }
 
-void CSVTools::Merge::setLocalData (const sfs::path& localData)
+void CSVTools::Merge::setLocalData (const std::experimental::filesystem::path& localData)
 {
     mAdjuster->setLocalData (localData);
 }
@@ -125,7 +125,7 @@ void CSVTools::Merge::accept()
 {
     if ((mDocument->getState() & CSMDoc::State_Merging)==0)
     {
-        std::vector< sfs::path > files (1, mAdjuster->getPath());
+        std::vector< std::experimental::filesystem::path > files (1, mAdjuster->getPath());
 
         std::unique_ptr<CSMDoc::Document> target (
             mDocumentManager.makeDocument (files, files[0], true));

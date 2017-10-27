@@ -131,6 +131,7 @@ target_link_libraries(openmw
     ${Boost_THREAD_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     stdc++fs
+    fmt
     ${OPENAL_LIBRARY}
     ${FFmpeg_LIBRARIES}
     ${MyGUI_LIBRARIES}

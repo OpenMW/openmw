@@ -8,7 +8,7 @@
 
 #include "components/loadinglistener/loadinglistener.hpp"
 
-namespace sfs = std::experimental::filesystem;
+
 
 namespace MWWorld
 {
@@ -24,7 +24,7 @@ struct ContentLoader
     {
     }
 
-    virtual void load(const sfs::path& filepath, int& index)
+    virtual void load(const std::experimental::filesystem::path& filepath, int& index)
     {
       std::cout << "Loading content file " << filepath.string() << std::endl;
       mListener.setLabel(MyGUI::TextIterator::toTagsString(filepath.string()));

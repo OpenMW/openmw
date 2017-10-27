@@ -158,6 +158,9 @@ if (USE_QT)
     endif()
 endif()
 
+# FMT search
+find_package(Fmt REQUIRED)
+
 # Sound setup
 find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
 # Required for building the FFmpeg headers

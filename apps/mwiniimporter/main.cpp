@@ -7,7 +7,7 @@
 #include <experimental/filesystem>
 
 namespace bpo = boost::program_options;
-namespace sfs = std::experimental::filesystem;
+
 
 #ifndef _WIN32
 int main(int argc, char *argv[]) {
@@ -47,12 +47,12 @@ private:
     OpenMW application stack assumes UTF-8 encoding, therefore this
     conversion.
 
-    For sfs::path::imbue see components/files/windowspath.cpp
+    For std::experimental::filesystem::path::imbue see components/files/windowspath.cpp
 */
 int wmain(int argc, wchar_t *wargv[]) {
     utf8argv converter(argc, wargv);
     char **argv = converter.get();
-    sfs::path::imbue(boost::locale::generator().generate(""));
+    std::experimental::filesystem::path::imbue(boost::locale::generator().generate(""));
 #endif
 
     try
@@ -91,8 +91,8 @@ int wmain(int argc, wchar_t *wargv[]) {
 
         bpo::notify(vm);
 
-        sfs::path iniFile(vm["ini"].as<std::string>());
-        sfs::path cfgFile(vm["cfg"].as<std::string>());
+        std::experimental::filesystem::path iniFile(vm["ini"].as<std::string>());
+        std::experimental::filesystem::path cfgFile(vm["cfg"].as<std::string>());
 
         // if no output is given, write back to cfg file
         std::string outputFile(vm["output"].as<std::string>());
@@ -100,11 +100,11 @@ int wmain(int argc, wchar_t *wargv[]) {
             outputFile = vm["cfg"].as<std::string>();
         }
 
-        if(!sfs::exists(iniFile)) {
+        if(!std::experimental::filesystem::exists(iniFile)) {
             std::cerr << "ini file does not exist" << std::endl;
             return -3;
         }
-        if(!sfs::exists(cfgFile))
+        if(!std::experimental::filesystem::exists(cfgFile))
             std::cerr << "cfg file does not exist" << std::endl;
 
         MwIniImporter importer;
@@ -129,7 +129,7 @@ int wmain(int argc, wchar_t *wargv[]) {
         }
 
         std::cout << "write to: " << outputFile << std::endl;
-        std::ofstream file((sfs::path(outputFile)));
+        std::ofstream file((std::experimental::filesystem::path(outputFile)));
         importer.writeToFile(file, cfg);
     }
     catch (std::exception& e)

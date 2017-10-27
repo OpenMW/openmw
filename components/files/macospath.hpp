@@ -5,7 +5,7 @@
 
 #include <experimental/filesystem>
 
-namespace sfs = std::experimental::filesystem;
+
 
 /**
  * \namespace Files
@@ -23,42 +23,42 @@ struct MacOsPath
     /**
      * \brief Return path to the local directory.
      *
-     * \return sfs::path
+     * \return std::experimental::filesystem::path
      */
-    sfs::path getUserConfigPath() const;
+    std::experimental::filesystem::path getUserConfigPath() const;
 
-    sfs::path getUserDataPath() const;
+    std::experimental::filesystem::path getUserDataPath() const;
 
     /**
      * \brief Return path to the global (system) directory.
      *
-     * \return sfs::path
+     * \return std::experimental::filesystem::path
      */
-    sfs::path getGlobalConfigPath() const;
+    std::experimental::filesystem::path getGlobalConfigPath() const;
 
     /**
      * \brief Return path to the runtime directory which is the
      * place where an application was started.
      *
-     * \return sfs::path
+     * \return std::experimental::filesystem::path
      */
-    sfs::path getLocalPath() const;
+    std::experimental::filesystem::path getLocalPath() const;
 
     /**
      * \brief
      *
-     * \return sfs::path
+     * \return std::experimental::filesystem::path
      */
-    sfs::path getCachePath() const;
+    std::experimental::filesystem::path getCachePath() const;
 
     /**
      * \brief
      *
-     * \return sfs::path
+     * \return std::experimental::filesystem::path
      */
-    sfs::path getGlobalDataPath() const;
+    std::experimental::filesystem::path getGlobalDataPath() const;
 
-    sfs::path getInstallPath() const;
+    std::experimental::filesystem::path getInstallPath() const;
 
     std::string mName;
 };

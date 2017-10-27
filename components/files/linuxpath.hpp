@@ -5,7 +5,7 @@
 
 #include <experimental/filesystem>
 
-namespace sfs = std::experimental::filesystem;
+
 
 /**
  * \namespace Files
@@ -23,35 +23,35 @@ struct LinuxPath
     /**
      * \brief Return path to the user directory.
      */
-    sfs::path getUserConfigPath() const;
+    std::experimental::filesystem::path getUserConfigPath() const;
 
-    sfs::path getUserDataPath() const;
+    std::experimental::filesystem::path getUserDataPath() const;
 
     /**
      * \brief Return path to the global (system) directory where config files can be placed.
      */
-    sfs::path getGlobalConfigPath() const;
+    std::experimental::filesystem::path getGlobalConfigPath() const;
 
     /**
      * \brief Return path to the runtime configuration directory which is the
      * place where an application was started.
      */
-    sfs::path getLocalPath() const;
+    std::experimental::filesystem::path getLocalPath() const;
 
     /**
      * \brief Return path to the global (system) directory where game files can be placed.
      */
-    sfs::path getGlobalDataPath() const;
+    std::experimental::filesystem::path getGlobalDataPath() const;
 
     /**
      * \brief
      */
-    sfs::path getCachePath() const;
+    std::experimental::filesystem::path getCachePath() const;
 
     /**
      * \brief Gets the path of the installed Morrowind version if there is one.
      */
-    sfs::path getInstallPath() const;
+    std::experimental::filesystem::path getInstallPath() const;
 
     std::string mName;
 };

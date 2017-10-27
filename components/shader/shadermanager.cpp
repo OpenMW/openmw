@@ -11,7 +11,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-namespace sfs = std::experimental::filesystem;
+
 
 namespace Shader
 {
@@ -21,11 +21,11 @@ namespace Shader
         mPath = path;
     }
 
-    bool parseIncludes(sfs::path shaderPath, std::string& source)
+    bool parseIncludes(std::experimental::filesystem::path shaderPath, std::string& source)
     {
         boost::replace_all(source, "\r\n", "\n");
 
-        std::set<sfs::path> includedFiles;
+        std::set<std::experimental::filesystem::path> includedFiles;
         size_t foundPos = 0;
         int fileNumber = 1;
         while ((foundPos = source.find("#include")) != std::string::npos)
@@ -43,7 +43,7 @@ namespace Shader
                 return false;
             }
             std::string includeFilename = source.substr(start+1, end-(start+1));
-            sfs::path includePath = shaderPath / includeFilename;
+            std::experimental::filesystem::path includePath = shaderPath / includeFilename;
             std::ifstream includeFstream;
             includeFstream.open(includePath);
             if (includeFstream.fail())
@@ -109,7 +109,7 @@ namespace Shader
         TemplateMap::iterator templateIt = mShaderTemplates.find(shaderTemplate);
         if (templateIt == mShaderTemplates.end())
         {
-            sfs::path p = (sfs::path(mPath) / shaderTemplate);
+            std::experimental::filesystem::path p = (std::experimental::filesystem::path(mPath) / shaderTemplate);
             std::ifstream stream;
             stream.open(p);
             if (stream.fail())
@@ -122,7 +122,7 @@ namespace Shader
 
             // parse includes
             std::string source = buffer.str();
-            if (!parseIncludes(sfs::path(mPath), source))
+            if (!parseIncludes(std::experimental::filesystem::path(mPath), source))
                 return NULL;
 
             templateIt = mShaderTemplates.insert(std::make_pair(shaderTemplate, source)).first;

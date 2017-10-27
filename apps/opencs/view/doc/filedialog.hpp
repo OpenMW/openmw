@@ -9,7 +9,7 @@
 
 #ifndef CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
 #define CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
-Q_DECLARE_METATYPE (sfs::path)
+Q_DECLARE_METATYPE (std::experimental::filesystem::path)
 #endif
 
 #include "ui_filedialog.h"
@@ -47,7 +47,7 @@ namespace CSVDoc
         QString filename() const;
         QStringList selectedFilePaths();
 
-        void setLocalData (const sfs::path& localData);
+        void setLocalData (const std::experimental::filesystem::path& localData);
 
     private:
 
@@ -56,8 +56,8 @@ namespace CSVDoc
 
     signals:
 
-        void signalOpenFiles (const sfs::path &path);
-        void signalCreateNewFile (const sfs::path &path);
+        void signalOpenFiles (const std::experimental::filesystem::path &path);
+        void signalCreateNewFile (const std::experimental::filesystem::path &path);
 
         void signalUpdateAcceptButton (bool, int);
 

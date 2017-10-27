@@ -32,15 +32,15 @@ namespace Files
         return iter->second;
     }
 
-    sfs::path Collections::getPath(const std::string& file) const
+    std::experimental::filesystem::path Collections::getPath(const std::string& file) const
     {
         for (Files::PathContainer::const_iterator iter = mDirectories.begin();
              iter != mDirectories.end(); ++iter)
         {
-            for (sfs::directory_iterator iter2 (*iter);
-                iter2!=sfs::directory_iterator(); ++iter2)
+            for (std::experimental::filesystem::directory_iterator iter2 (*iter);
+                iter2!=std::experimental::filesystem::directory_iterator(); ++iter2)
             {
-                sfs::path path = *iter2;
+                std::experimental::filesystem::path path = *iter2;
 
                 if (mFoldCase)
                 {
@@ -60,10 +60,10 @@ namespace Files
         for (Files::PathContainer::const_iterator iter = mDirectories.begin();
              iter != mDirectories.end(); ++iter)
         {
-            for (sfs::directory_iterator iter2 (*iter);
-                iter2!=sfs::directory_iterator(); ++iter2)
+            for (std::experimental::filesystem::directory_iterator iter2 (*iter);
+                iter2!=std::experimental::filesystem::directory_iterator(); ++iter2)
             {
-                sfs::path path = *iter2;
+                std::experimental::filesystem::path path = *iter2;
 
                 if (mFoldCase)
                 {

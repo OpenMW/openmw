@@ -32,63 +32,63 @@ WindowsPath::WindowsPath(const std::string& application_name)
 
         See boost::filesystem and boost::locale reference for details.
     */
-    sfs::path::imbue(boost::locale::generator().generate(""));
+    std::experimental::filesystem::path::imbue(boost::locale::generator().generate(""));
 }
 
-sfs::path WindowsPath::getUserConfigPath() const
+std::experimental::filesystem::path WindowsPath::getUserConfigPath() const
 {
-    sfs::path userPath(".");
+    std::experimental::filesystem::path userPath(".");
 
     WCHAR path[MAX_PATH + 1];
     memset(path, 0, sizeof(path));
 
     if(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, 0, path)))
     {
-        userPath = sfs::path(bconv::utf_to_utf<char>(path));
+        userPath = std::experimental::filesystem::path(bconv::utf_to_utf<char>(path));
     }
 
     return userPath / "My Games" / mName;
 }
 
-sfs::path WindowsPath::getUserDataPath() const
+std::experimental::filesystem::path WindowsPath::getUserDataPath() const
 {
     // Have some chaos, windows people!
     return getUserConfigPath();
 }
 
-sfs::path WindowsPath::getGlobalConfigPath() const
+std::experimental::filesystem::path WindowsPath::getGlobalConfigPath() const
 {
-    sfs::path globalPath(".");
+    std::experimental::filesystem::path globalPath(".");
 
     WCHAR path[MAX_PATH + 1];
     memset(path, 0, sizeof(path));
 
     if(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROGRAM_FILES | CSIDL_FLAG_CREATE, NULL, 0, path)))
     {
-        globalPath = sfs::path(bconv::utf_to_utf<char>(path));
+        globalPath = std::experimental::filesystem::path(bconv::utf_to_utf<char>(path));
     }
 
     return globalPath / mName;
 }
 
-sfs::path WindowsPath::getLocalPath() const
+std::experimental::filesystem::path WindowsPath::getLocalPath() const
 {
-    return sfs::path("./");
+    return std::experimental::filesystem::path("./");
 }
 
-sfs::path WindowsPath::getGlobalDataPath() const
+std::experimental::filesystem::path WindowsPath::getGlobalDataPath() const
 {
     return getGlobalConfigPath();
 }
 
-sfs::path WindowsPath::getCachePath() const
+std::experimental::filesystem::path WindowsPath::getCachePath() const
 {
     return getUserConfigPath() / "cache";
 }
 
-sfs::path WindowsPath::getInstallPath() const
+std::experimental::filesystem::path WindowsPath::getInstallPath() const
 {
-    sfs::path installPath("");
+    std::experimental::filesystem::path installPath("");
 
     HKEY hKey;
 

@@ -31,8 +31,8 @@ ConfigurationManager::ConfigurationManager(bool silent)
 {
     setupTokensMapping();
 
-    sfs::create_directories(mFixedPath.getUserConfigPath());
-    sfs::create_directories(mFixedPath.getUserDataPath());
+    std::experimental::filesystem::create_directories(mFixedPath.getUserConfigPath());
+    std::experimental::filesystem::create_directories(mFixedPath.getUserDataPath());
 
     mLogPath = mFixedPath.getUserConfigPath();
 }
@@ -85,7 +85,7 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool cre
                 TokensMappingContainer::iterator tokenIt = mTokensMapping.find(path.substr(0, pos + 1));
                 if (tokenIt != mTokensMapping.end())
                 {
-                    sfs::path tempPath(((mFixedPath).*(tokenIt->second))());
+                    std::experimental::filesystem::path tempPath(((mFixedPath).*(tokenIt->second))());
                     if (pos < path.length() - 1)
                     {
                         // There is something after the token, so we should
@@ -103,17 +103,17 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool cre
             }
         }
 
-        if (!sfs::is_directory(*it))
+        if (!std::experimental::filesystem::is_directory(*it))
         {
             if (create)
             {
                 try
                 {
-                    sfs::create_directories (*it);
+                    std::experimental::filesystem::create_directories (*it);
                 }
                 catch (...) {}
 
-                if (sfs::is_directory(*it))
+                if (std::experimental::filesystem::is_directory(*it))
                     continue;
             }
 
@@ -122,16 +122,16 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool cre
     }
 
     dataDirs.erase(std::remove_if(dataDirs.begin(), dataDirs.end(),
-        std::bind(&sfs::path::empty, std::placeholders::_1)), dataDirs.end());
+        std::bind(&std::experimental::filesystem::path::empty, std::placeholders::_1)), dataDirs.end());
 }
 
-bool ConfigurationManager::loadConfig(const sfs::path& path,
+bool ConfigurationManager::loadConfig(const std::experimental::filesystem::path& path,
     boost::program_options::variables_map& variables,
     boost::program_options::options_description& description)
 {
-    sfs::path cfgFile(path);
+    std::experimental::filesystem::path cfgFile(path);
     cfgFile /= std::string(openmwCfgFile);
-    if (sfs::is_regular_file(cfgFile))
+    if (std::experimental::filesystem::is_regular_file(cfgFile))
     {
         if (!mSilent)
             std::cout << "Loading config file: " << cfgFile.string() << "... ";
@@ -159,42 +159,42 @@ bool ConfigurationManager::loadConfig(const sfs::path& path,
     return false;
 }
 
-const sfs::path& ConfigurationManager::getGlobalPath() const
+const std::experimental::filesystem::path& ConfigurationManager::getGlobalPath() const
 {
     return mFixedPath.getGlobalConfigPath();
 }
 
-const sfs::path& ConfigurationManager::getUserConfigPath() const
+const std::experimental::filesystem::path& ConfigurationManager::getUserConfigPath() const
 {
     return mFixedPath.getUserConfigPath();
 }
 
-const sfs::path& ConfigurationManager::getUserDataPath() const
+const std::experimental::filesystem::path& ConfigurationManager::getUserDataPath() const
 {
     return mFixedPath.getUserDataPath();
 }
 
-const sfs::path& ConfigurationManager::getLocalPath() const
+const std::experimental::filesystem::path& ConfigurationManager::getLocalPath() const
 {
     return mFixedPath.getLocalPath();
 }
 
-const sfs::path& ConfigurationManager::getGlobalDataPath() const
+const std::experimental::filesystem::path& ConfigurationManager::getGlobalDataPath() const
 {
     return mFixedPath.getGlobalDataPath();
 }
 
-const sfs::path& ConfigurationManager::getCachePath() const
+const std::experimental::filesystem::path& ConfigurationManager::getCachePath() const
 {
     return mFixedPath.getCachePath();
 }
 
-const sfs::path& ConfigurationManager::getInstallPath() const
+const std::experimental::filesystem::path& ConfigurationManager::getInstallPath() const
 {
     return mFixedPath.getInstallPath();
 }
 
-const sfs::path& ConfigurationManager::getLogPath() const
+const std::experimental::filesystem::path& ConfigurationManager::getLogPath() const
 {
     return mLogPath;
 }

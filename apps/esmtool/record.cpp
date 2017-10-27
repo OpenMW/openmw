@@ -3,8 +3,9 @@
 
 #include <iostream>
 #include <sstream>
+#include <string>
 
-#include <boost/format.hpp>
+#include <fmt/format.h>
 
 namespace
 {
@@ -12,7 +13,7 @@ namespace
 void printAIPackage(ESM::AIPackage p)
 {
     std::cout << "  AI Type: " << aiTypeLabel(p.mType)
-              << " (" << boost::format("0x%08X") % p.mType << ")" << std::endl;
+              << " (" << fmt::sprintf("0x%08X", p.mType) << ")" << std::endl;
     if (p.mType == ESM::AI_Wander)
     {
         std::cout << "    Distance: " << p.mWander.mDistance << std::endl;
@@ -46,7 +47,7 @@ void printAIPackage(ESM::AIPackage p)
         std::cout << "    Activate Unknown: " << p.mActivate.mUnk << std::endl;
     }
     else {
-        std::cout << "    BadPackage: " << boost::format("0x%08x") % p.mType << std::endl;
+        std::cout << "    BadPackage: " << fmt::sprintf("0x%08x", p.mType) << std::endl;
     }
 
     if (p.mCellName != "")
@@ -64,7 +65,7 @@ std::string ruleString(ESM::DialInfo::SelectStruct ss)
     char indicator = rule[2];
 
     std::string type_str = "INVALID";
-    std::string func_str = str(boost::format("INVALID=%s") % rule.substr(1,3));
+    std::string func_str = fmt::sprintf("INVALID=%d", rule.substr(1,3));
     int func;
     std::istringstream iss(rule.substr(2,2));
     iss >> func;
@@ -104,7 +105,7 @@ std::string ruleString(ESM::DialInfo::SelectStruct ss)
     // for all types not qual to one.  If this wasn't true, go back to
     // the error message.
     if (type != '1' && rule[3] != 'X')
-        func_str = str(boost::format("INVALID=%s") % rule.substr(1,3));
+        func_str = fmt::sprintf("INVALID=%s", rule.substr(1,3));
 
     char oper = rule[4];
     std::string oper_str = "??";
@@ -122,8 +123,7 @@ std::string ruleString(ESM::DialInfo::SelectStruct ss)
     std::ostringstream stream;
     stream << ss.mValue;
 
-    std::string result = str(boost::format("%-12s %-32s %2s %s")
-                             % type_str % func_str % oper_str % stream.str());
+    std::string result = fmt::sprintf("%-12s %-32s %2s %s", type_str, func_str, oper_str, stream.str());
     return result;
 }
 
@@ -158,13 +158,13 @@ void printTransport(const std::vector<ESM::Transport::Dest>& transport)
     for (dit = transport.begin(); dit != transport.end(); ++dit)
     {
         std::cout << "  Destination Position: "
-                  << boost::format("%12.3f") % dit->mPos.pos[0] << ","
-                  << boost::format("%12.3f") % dit->mPos.pos[1] << ","
-                  << boost::format("%12.3f") % dit->mPos.pos[2] << ")" << std::endl;
+                  << fmt::sprintf("%12.3f", dit->mPos.pos[0]) << ","
+                  << fmt::sprintf("%12.3f", dit->mPos.pos[1]) << ","
+                  << fmt::sprintf("%12.3f", dit->mPos.pos[2]) << ")" << std::endl;
         std::cout << "  Destination Rotation: "
-                  << boost::format("%9.6f") % dit->mPos.rot[0] << ","
-                  << boost::format("%9.6f") % dit->mPos.rot[1] << ","
-                  << boost::format("%9.6f") % dit->mPos.rot[2] << ")" << std::endl;
+                  << fmt::sprintf("%9.6f", dit->mPos.rot[0]) << ","
+                  << fmt::sprintf("%9.6f", dit->mPos.rot[1]) << ","
+                  << fmt::sprintf("%9.6f", dit->mPos.rot[2]) << ")" << std::endl;
         if (dit->mCellName != "")
             std::cout << "  Destination Cell: " << dit->mCellName << std::endl;
     }
@@ -545,7 +545,7 @@ void Record<ESM::Cell>::print()
         std::cout << "  Water Level: " << mData.mWater << std::endl;
     }
     else
-        std::cout << "  Map Color: " << boost::format("0x%08X") % mData.mMapColor << std::endl;
+        std::cout << "  Map Color: " << fmt::sprintf("0x%08X", mData.mMapColor) << std::endl;
     std::cout << "  Water Level Int: " << mData.mWaterInt << std::endl;
     std::cout << "  RefId counter: " << mData.mRefNumCounter << std::endl;
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
@@ -612,7 +612,7 @@ void Record<ESM::Container>::print()
     std::cout << "  Weight: " << mData.mWeight << std::endl;
     std::vector<ESM::ContItem>::iterator cit;
     for (cit = mData.mInventory.mList.begin(); cit != mData.mInventory.mList.end(); ++cit)
-        std::cout << "  Inventory: Count: " << boost::format("%4d") % cit->mCount
+        std::cout << "  Inventory: Count: " << fmt::sprintf("%4d", cit->mCount)
                   << " Item: " << cit->mItem.toString() << std::endl;
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
@@ -658,7 +658,7 @@ void Record<ESM::Creature>::print()
 
     std::vector<ESM::ContItem>::iterator cit;
     for (cit = mData.mInventory.mList.begin(); cit != mData.mInventory.mList.end(); ++cit)
-        std::cout << "  Inventory: Count: " << boost::format("%4d") % cit->mCount
+        std::cout << "  Inventory: Count: " << fmt::sprintf("%4d", cit->mCount)
                   << " Item: " << cit->mItem.toString() << std::endl;
 
     std::vector<std::string>::iterator sit;
@@ -676,7 +676,7 @@ void Record<ESM::Creature>::print()
     std::cout << "    AI U2:" << (int)mData.mAiData.mU2 << std::endl;
     std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
     std::cout << "    AI U4:" << (int)mData.mAiData.mU4 << std::endl;
-    std::cout << "    AI Services:" << boost::format("0x%08X") % mData.mAiData.mServices << std::endl;
+    std::cout << "    AI Services:" << fmt::sprintf("0x%08X", mData.mAiData.mServices) << std::endl;
 
     std::vector<ESM::AIPackage>::iterator pit;
     for (pit = mData.mAiPackage.mList.begin(); pit != mData.mAiPackage.mList.end(); ++pit)
@@ -1083,7 +1083,7 @@ void Record<ESM::NPC>::print()
 
     std::vector<ESM::ContItem>::iterator cit;
     for (cit = mData.mInventory.mList.begin(); cit != mData.mInventory.mList.end(); ++cit)
-        std::cout << "  Inventory: Count: " << boost::format("%4d") % cit->mCount
+        std::cout << "  Inventory: Count: " << fmt::sprintf("%4d", cit->mCount)
                   << " Item: " << cit->mItem.toString() << std::endl;
 
     std::vector<std::string>::iterator sit;
@@ -1101,7 +1101,7 @@ void Record<ESM::NPC>::print()
     std::cout << "    AI U2:" << (int)mData.mAiData.mU2 << std::endl;
     std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
     std::cout << "    AI U4:" << (int)mData.mAiData.mU4 << std::endl;
-    std::cout << "    AI Services:" << boost::format("0x%08X") % mData.mAiData.mServices << std::endl;
+    std::cout << "    AI Services:" << fmt::sprintf("0x%08X", mData.mAiData.mServices) << std::endl;
 
     std::vector<ESM::AIPackage>::iterator pit;
     for (pit = mData.mAiPackage.mList.begin(); pit != mData.mAiPackage.mList.end(); ++pit)
@@ -1231,7 +1231,7 @@ void Record<ESM::Script>::print()
     std::cout << "  ByteCode: ";
     std::vector<unsigned char>::iterator cit;
     for (cit = mData.mScriptData.begin(); cit != mData.mScriptData.end(); ++cit)
-        std::cout << boost::format("%02X") % (int)(*cit);
+        std::cout << fmt::sprintf("%02X", (int)(*cit));
     std::cout << std::endl;
 
     if (mPrintPlain)

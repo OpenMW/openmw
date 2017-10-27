@@ -60,15 +60,15 @@ namespace CSMDoc
 
         private:
 
-            sfs::path mSavePath;
-            std::vector<sfs::path> mContentFiles;
+            std::experimental::filesystem::path mSavePath;
+            std::vector<std::experimental::filesystem::path> mContentFiles;
             bool mNew;
             CSMWorld::Data mData;
             CSMTools::Tools mTools;
-            sfs::path mProjectPath;
+            std::experimental::filesystem::path mProjectPath;
             Saving mSavingOperation;
             OperationHolder mSaving;
-            sfs::path mResDir;
+            std::experimental::filesystem::path mResDir;
             const Fallback::Map* mFallbackMap;
             Blacklist mBlacklist;
             Runner mRunner;
@@ -103,8 +103,8 @@ namespace CSMDoc
         public:
 
             Document (const Files::ConfigurationManager& configuration,
-                const std::vector< sfs::path >& files, bool new_,
-                const sfs::path& savePath, const sfs::path& resDir,
+                const std::vector< std::experimental::filesystem::path >& files, bool new_,
+                const std::experimental::filesystem::path& savePath, const std::experimental::filesystem::path& resDir,
                 const Fallback::Map* fallback, ToUTF8::FromType encoding,
                 const std::vector<std::string>& blacklistedScripts,
                 bool fsStrict, const Files::PathContainer& dataPaths, const std::vector<std::string>& archives);
@@ -115,11 +115,11 @@ namespace CSMDoc
 
             int getState() const;
 
-            const sfs::path& getSavePath() const;
+            const std::experimental::filesystem::path& getSavePath() const;
 
-            const sfs::path& getProjectPath() const;
+            const std::experimental::filesystem::path& getProjectPath() const;
 
-            const std::vector<sfs::path>& getContentFiles() const;
+            const std::vector<std::experimental::filesystem::path>& getContentFiles() const;
             ///< \attention The last element in this collection is the file that is being edited,
             /// but with its original path instead of the save path.
 

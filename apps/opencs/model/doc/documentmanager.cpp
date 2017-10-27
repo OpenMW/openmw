@@ -11,10 +11,10 @@
 CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& configuration)
 : mConfiguration (configuration), mEncoding (ToUTF8::WINDOWS_1252)
 {
-    sfs::path projectPath = configuration.getUserDataPath() / "projects";
+    std::experimental::filesystem::path projectPath = configuration.getUserDataPath() / "projects";
 
-    if (!sfs::is_directory (projectPath))
-        sfs::create_directories (projectPath);
+    if (!std::experimental::filesystem::is_directory (projectPath))
+        std::experimental::filesystem::create_directories (projectPath);
 
     mLoader.moveToThread (&mLoaderThread);
     mLoaderThread.start();
@@ -51,7 +51,7 @@ bool CSMDoc::DocumentManager::isEmpty()
     return mDocuments.empty();
 }
 
-void CSMDoc::DocumentManager::addDocument (const std::vector<sfs::path>& files, const sfs::path& savePath,
+void CSMDoc::DocumentManager::addDocument (const std::vector<std::experimental::filesystem::path>& files, const std::experimental::filesystem::path& savePath,
     bool new_)
 {
     Document *document = makeDocument (files, savePath, new_);
@@ -59,8 +59,8 @@ void CSMDoc::DocumentManager::addDocument (const std::vector<sfs::path>& files, 
 }
 
 CSMDoc::Document *CSMDoc::DocumentManager::makeDocument (
-    const std::vector< sfs::path >& files,
-    const sfs::path& savePath, bool new_)
+    const std::vector< std::experimental::filesystem::path >& files,
+    const std::experimental::filesystem::path& savePath, bool new_)
 {
     return new Document (mConfiguration, files, new_, savePath, mResDir, &mFallbackMap, mEncoding, mBlacklistedScripts, mFsStrict, mDataPaths, mArchives);
 }
@@ -93,9 +93,9 @@ void CSMDoc::DocumentManager::removeDocument (CSMDoc::Document *document)
         emit lastDocumentDeleted();
 }
 
-void CSMDoc::DocumentManager::setResourceDir (const sfs::path& parResDir)
+void CSMDoc::DocumentManager::setResourceDir (const std::experimental::filesystem::path& parResDir)
 {
-    mResDir = sfs::system_complete(parResDir);
+    mResDir = std::experimental::filesystem::system_complete(parResDir);
 }
 
 void CSMDoc::DocumentManager::setFallbackMap(const std::map<std::string, std::string>& fallbackMap)

@@ -19,7 +19,7 @@ namespace Files
             /// leading dot and must be all lower-case.
             const MultiDirCollection& getCollection(const std::string& extension) const;
 
-            sfs::path getPath(const std::string& file) const;
+            std::experimental::filesystem::path getPath(const std::string& file) const;
             ///< Return full path (including filename) of \a file.
             ///
             /// If the file does not exist in any of the collection's

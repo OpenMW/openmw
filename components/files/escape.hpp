@@ -179,7 +179,7 @@ namespace Files
 
     struct EscapePath
     {
-        sfs::path mPath;
+        std::experimental::filesystem::path mPath;
 
         static PathContainer toPathContainer(const std::vector<EscapePath> & escapePathContainer);
     };

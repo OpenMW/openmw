@@ -6,11 +6,11 @@
 #include <QDialog>
 #include <QMetaType>
 
-namespace sfs = std::experimental::filesystem;
+
 
 #ifndef CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
 #define CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
-Q_DECLARE_METATYPE (sfs::path)
+Q_DECLARE_METATYPE (std::experimental::filesystem::path)
 #endif
 
 class QPushButton;
@@ -32,11 +32,11 @@ namespace CSVDoc
 
             NewGameDialogue();
 
-            void setLocalData (const sfs::path& localData);
+            void setLocalData (const std::experimental::filesystem::path& localData);
 
         signals:
 
-            void createRequest (const sfs::path& file);
+            void createRequest (const std::experimental::filesystem::path& file);
 
             void cancelCreateGame ();
 

@@ -9,11 +9,11 @@
 
 #include <experimental/filesystem>
 
-namespace sfs = std::experimental::filesystem;
+
 
 namespace Files
 {
-  typedef std::vector<sfs::path> PathContainer;
+  typedef std::vector<std::experimental::filesystem::path> PathContainer;
   struct ConfigurationManager;
 }
 

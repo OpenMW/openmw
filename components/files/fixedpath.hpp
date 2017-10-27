@@ -4,7 +4,7 @@
 #include <string>
 #include <experimental/filesystem>
 
-namespace sfs = std::experimental::filesystem;
+
 
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__OpenBSD__)
 #ifndef ANDROID
@@ -67,12 +67,12 @@ struct FixedPath
     /**
      * \brief Return path pointing to the user local configuration directory.
      */
-    const sfs::path& getUserConfigPath() const
+    const std::experimental::filesystem::path& getUserConfigPath() const
     {
         return mUserConfigPath;
     }
 
-    const sfs::path& getUserDataPath() const
+    const std::experimental::filesystem::path& getUserDataPath() const
     {
         return mUserDataPath;
     }
@@ -80,7 +80,7 @@ struct FixedPath
     /**
      * \brief Return path pointing to the global (system) configuration directory.
      */
-    const sfs::path& getGlobalConfigPath() const
+    const std::experimental::filesystem::path& getGlobalConfigPath() const
     {
         return mGlobalConfigPath;
     }
@@ -88,23 +88,23 @@ struct FixedPath
     /**
      * \brief Return path pointing to the directory where application was started.
      */
-    const sfs::path& getLocalPath() const
+    const std::experimental::filesystem::path& getLocalPath() const
     {
         return mLocalPath;
     }
 
 
-    const sfs::path& getInstallPath() const
+    const std::experimental::filesystem::path& getInstallPath() const
     {
         return mInstallPath;
     }
 
-    const sfs::path& getGlobalDataPath() const
+    const std::experimental::filesystem::path& getGlobalDataPath() const
     {
         return mGlobalDataPath;
     }
 
-    const sfs::path& getCachePath() const
+    const std::experimental::filesystem::path& getCachePath() const
     {
         return mCachePath;
     }
@@ -112,16 +112,16 @@ struct FixedPath
     private:
         PathType mPath;
 
-        sfs::path mUserConfigPath;       /**< User path  */
-        sfs::path mUserDataPath;
-        sfs::path mGlobalConfigPath;     /**< Global path */
-        sfs::path mLocalPath;      /**< It is the same directory where application was run */
+        std::experimental::filesystem::path mUserConfigPath;       /**< User path  */
+        std::experimental::filesystem::path mUserDataPath;
+        std::experimental::filesystem::path mGlobalConfigPath;     /**< Global path */
+        std::experimental::filesystem::path mLocalPath;      /**< It is the same directory where application was run */
 
-        sfs::path mGlobalDataPath;        /**< Global application data path */
+        std::experimental::filesystem::path mGlobalDataPath;        /**< Global application data path */
 
-        sfs::path mCachePath;
+        std::experimental::filesystem::path mCachePath;
 
-        sfs::path mInstallPath;
+        std::experimental::filesystem::path mInstallPath;
 
 };
 

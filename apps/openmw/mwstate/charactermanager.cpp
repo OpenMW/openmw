@@ -4,22 +4,22 @@
 
 #include <experimental/filesystem>
 
-MWState::CharacterManager::CharacterManager (const sfs::path& saves,
+MWState::CharacterManager::CharacterManager (const std::experimental::filesystem::path& saves,
     const std::string& game)
 : mPath (saves), mCurrent (0), mGame (game)
 {
-    if (!sfs::is_directory (mPath))
+    if (!std::experimental::filesystem::is_directory (mPath))
     {
-        sfs::create_directories (mPath);
+        std::experimental::filesystem::create_directories (mPath);
     }
     else
     {
-        for (sfs::directory_iterator iter (mPath);
-            iter!=sfs::directory_iterator(); ++iter)
+        for (std::experimental::filesystem::directory_iterator iter (mPath);
+            iter!=std::experimental::filesystem::directory_iterator(); ++iter)
         {
-            sfs::path characterDir = *iter;
+            std::experimental::filesystem::path characterDir = *iter;
 
-            if (sfs::is_directory (characterDir))
+            if (std::experimental::filesystem::is_directory (characterDir))
             {
                 Character character (characterDir, mGame);
 
@@ -64,11 +64,11 @@ MWState::Character* MWState::CharacterManager::createCharacter(const std::string
             stream << "_";
     }
 
-    sfs::path path = mPath / stream.str();
+    std::experimental::filesystem::path path = mPath / stream.str();
 
     // Append an index if necessary to ensure a unique directory
     int i=0;
-    while (sfs::exists(path))
+    while (std::experimental::filesystem::exists(path))
     {
            std::ostringstream test;
            test << stream.str();

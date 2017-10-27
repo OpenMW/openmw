@@ -12,7 +12,7 @@
 
 namespace
 {
-    sfs::path getUserHome()
+    std::experimental::filesystem::path getUserHome()
     {
         const char* dir = getenv("HOME");
         if (dir == NULL)
@@ -24,17 +24,17 @@ namespace
             }
         }
         if (dir == NULL)
-            return sfs::path();
+            return std::experimental::filesystem::path();
         else
-            return sfs::path(dir);
+            return std::experimental::filesystem::path(dir);
     }
 
-    sfs::path getEnv(const std::string& envVariable, const sfs::path& fallback)
+    std::experimental::filesystem::path getEnv(const std::string& envVariable, const std::experimental::filesystem::path& fallback)
     {
         const char* result = getenv(envVariable.c_str());
         if (!result)
             return fallback;
-        sfs::path dir(result);
+        std::experimental::filesystem::path dir(result);
         if (dir.empty())
             return fallback;
         else
@@ -53,50 +53,50 @@ LinuxPath::LinuxPath(const std::string& application_name)
 {
 }
 
-sfs::path LinuxPath::getUserConfigPath() const
+std::experimental::filesystem::path LinuxPath::getUserConfigPath() const
 {
     return getEnv("XDG_CONFIG_HOME", getUserHome() / ".config") / mName;
 }
 
-sfs::path LinuxPath::getUserDataPath() const
+std::experimental::filesystem::path LinuxPath::getUserDataPath() const
 {
     return getEnv("XDG_DATA_HOME", getUserHome() / ".local/share") / mName;
 }
 
-sfs::path LinuxPath::getCachePath() const
+std::experimental::filesystem::path LinuxPath::getCachePath() const
 {
     return getEnv("XDG_CACHE_HOME", getUserHome() / ".cache") / mName;
 }
 
-sfs::path LinuxPath::getGlobalConfigPath() const
+std::experimental::filesystem::path LinuxPath::getGlobalConfigPath() const
 {
-    sfs::path globalPath(GLOBAL_CONFIG_PATH);
+    std::experimental::filesystem::path globalPath(GLOBAL_CONFIG_PATH);
     return globalPath / mName;
 }
 
-sfs::path LinuxPath::getLocalPath() const
+std::experimental::filesystem::path LinuxPath::getLocalPath() const
 {
-    return sfs::path("./");
+    return std::experimental::filesystem::path("./");
 }
 
-sfs::path LinuxPath::getGlobalDataPath() const
+std::experimental::filesystem::path LinuxPath::getGlobalDataPath() const
 {
-    sfs::path globalDataPath(GLOBAL_DATA_PATH);
+    std::experimental::filesystem::path globalDataPath(GLOBAL_DATA_PATH);
     return globalDataPath / mName;
 }
 
-sfs::path LinuxPath::getInstallPath() const
+std::experimental::filesystem::path LinuxPath::getInstallPath() const
 {
-    sfs::path installPath;
+    std::experimental::filesystem::path installPath;
 
-    sfs::path homePath = getUserHome();
+    std::experimental::filesystem::path homePath = getUserHome();
 
     if (!homePath.empty())
     {
-        sfs::path wineDefaultRegistry(homePath);
+        std::experimental::filesystem::path wineDefaultRegistry(homePath);
         wineDefaultRegistry /= ".wine/system.reg";
 
-        if (sfs::is_regular_file(wineDefaultRegistry))
+        if (std::experimental::filesystem::is_regular_file(wineDefaultRegistry))
         {
             std::ifstream file(wineDefaultRegistry);
             bool isRegEntry = false;
@@ -145,7 +145,7 @@ sfs::path LinuxPath::getInstallPath() const
                 installPath /= ".wine/dosdevices/";
                 installPath /= mwpath;
 
-                if (!sfs::is_directory(installPath))
+                if (!std::experimental::filesystem::is_directory(installPath))
                 {
                     installPath.clear();
                 }

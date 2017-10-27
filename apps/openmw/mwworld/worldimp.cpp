@@ -86,7 +86,7 @@ namespace MWWorld
             return mLoaders.insert(std::make_pair(extension, loader)).second;
         }
 
-        void load(const sfs::path& filepath, int& index)
+        void load(const std::experimental::filesystem::path& filepath, int& index)
         {
             LoadersContainer::iterator it(mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string())));
             if (it != mLoaders.end())
@@ -2674,7 +2674,7 @@ namespace MWWorld
         std::vector<std::string>::const_iterator end(content.end());
         for (int idx = 0; it != end; ++it, ++idx)
         {
-            sfs::path filename(*it);
+            std::experimental::filesystem::path filename(*it);
             const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
             if (col.doesExist(*it))
             {

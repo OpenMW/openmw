@@ -12,7 +12,7 @@
 
 // Create local aliases for brevity
 namespace bpo = boost::program_options;
-namespace sfs = std::experimental::filesystem;
+
 
 struct Arguments
 {
@@ -217,20 +217,20 @@ int extract(Bsa::BSAFile& bsa, Arguments& info)
     }
 
     // Get the target path (the path the file will be extracted to)
-    sfs::path relPath (extractPath);
-    sfs::path outdir (info.outdir);
+    std::experimental::filesystem::path relPath (extractPath);
+    std::experimental::filesystem::path outdir (info.outdir);
 
-    sfs::path target;
+    std::experimental::filesystem::path target;
     if (info.fullpath)
         target = outdir / relPath;
     else
         target = outdir / relPath.filename();
 
     // Create the directory hierarchy
-    sfs::create_directories(target.parent_path());
+    std::experimental::filesystem::create_directories(target.parent_path());
 
-    sfs::file_status s = sfs::status(target.parent_path());
-    if (!sfs::is_directory(s))
+    std::experimental::filesystem::file_status s = std::experimental::filesystem::status(target.parent_path());
+    if (!std::experimental::filesystem::is_directory(s))
     {
         std::cout << "ERROR: " << target.parent_path() << " is not a directory." << std::endl;
         return 3;
@@ -263,14 +263,14 @@ int extractAll(Bsa::BSAFile& bsa, Arguments& info)
         replaceAll(extractPath, "\\", "/");
 
         // Get the target path (the path the file will be extracted to)
-        sfs::path target (info.outdir);
+        std::experimental::filesystem::path target (info.outdir);
         target /= extractPath;
 
         // Create the directory hierarchy
-        sfs::create_directories(target.parent_path());
+        std::experimental::filesystem::create_directories(target.parent_path());
 
-        sfs::file_status s = sfs::status(target.parent_path());
-        if (!sfs::is_directory(s))
+        std::experimental::filesystem::file_status s = std::experimental::filesystem::status(target.parent_path());
+        if (!std::experimental::filesystem::is_directory(s))
         {
             std::cout << "ERROR: " << target.parent_path() << " is not a directory." << std::endl;
             return 3;

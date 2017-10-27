@@ -11,7 +11,7 @@ namespace MWState
 {
     class CharacterManager
     {
-            sfs::path mPath;
+            std::experimental::filesystem::path mPath;
 
             // Uses std::list, so that mCurrent stays valid when characters are deleted
             std::list<Character> mCharacters;
@@ -31,7 +31,7 @@ namespace MWState
 
         public:
 
-            CharacterManager (const sfs::path& saves, const std::string& game);
+            CharacterManager (const std::experimental::filesystem::path& saves, const std::string& game);
 
             Character *getCurrentCharacter ();
             ///< @note May return null

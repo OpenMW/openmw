@@ -14,11 +14,11 @@ bool MWState::operator< (const Slot& left, const Slot& right)
 }
 
 
-void MWState::Character::addSlot (const sfs::path& path, const std::string& game)
+void MWState::Character::addSlot (const std::experimental::filesystem::path& path, const std::string& game)
 {
     Slot slot;
     slot.mPath = path;
-    slot.mTimeStamp = std::chrono::system_clock::to_time_t(sfs::last_write_time(path));
+    slot.mTimeStamp = std::chrono::system_clock::to_time_t(std::experimental::filesystem::last_write_time(path));
 
     ESM::ESMReader reader;
     reader.open (slot.mPath.string());
@@ -57,7 +57,7 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
 
     // Append an index if necessary to ensure a unique file
     int i=0;
-    while (sfs::exists(slot.mPath))
+    while (std::experimental::filesystem::exists(slot.mPath))
     {
            std::ostringstream test;
            test << stream.str();
@@ -71,19 +71,19 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
     mSlots.push_back (slot);
 }
 
-MWState::Character::Character (const sfs::path& saves, const std::string& game)
+MWState::Character::Character (const std::experimental::filesystem::path& saves, const std::string& game)
 : mPath (saves)
 {
-    if (!sfs::is_directory (mPath))
+    if (!std::experimental::filesystem::is_directory (mPath))
     {
-        sfs::create_directories (mPath);
+        std::experimental::filesystem::create_directories (mPath);
     }
     else
     {
-        for (sfs::directory_iterator iter (mPath);
-            iter!=sfs::directory_iterator(); ++iter)
+        for (std::experimental::filesystem::directory_iterator iter (mPath);
+            iter!=std::experimental::filesystem::directory_iterator(); ++iter)
         {
-            sfs::path slotPath = *iter;
+            std::experimental::filesystem::path slotPath = *iter;
 
             try
             {
@@ -101,12 +101,12 @@ void MWState::Character::cleanup()
     if (mSlots.size() == 0)
     {
         // All slots are gone, no need to keep the empty directory
-        if (sfs::is_directory (mPath))
+        if (std::experimental::filesystem::is_directory (mPath))
         {
             // Extra safety check to make sure the directory is empty (e.g. slots failed to parse header)
-            sfs::directory_iterator it(mPath);
-            if (it == sfs::directory_iterator())
-                sfs::remove_all(mPath);
+            std::experimental::filesystem::directory_iterator it(mPath);
+            if (it == std::experimental::filesystem::directory_iterator())
+                std::experimental::filesystem::remove_all(mPath);
         }
     }
 }
@@ -128,7 +128,7 @@ void MWState::Character::deleteSlot (const Slot *slot)
         throw std::logic_error ("slot not found");
     }
 
-    sfs::remove(slot->mPath);
+    std::experimental::filesystem::remove(slot->mPath);
 
     mSlots.erase (mSlots.begin()+index);
 }
@@ -183,7 +183,7 @@ ESM::SavedGame MWState::Character::getSignature() const
     return slot.mProfile;
 }
 
-const sfs::path& MWState::Character::getPath() const
+const std::experimental::filesystem::path& MWState::Character::getPath() const
 {
     return mPath;
 }

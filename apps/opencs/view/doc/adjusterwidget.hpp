@@ -5,7 +5,7 @@
 
 #include <QWidget>
 
-namespace sfs = std::experimental::filesystem;
+
 
 class QLabel;
 
@@ -24,11 +24,11 @@ namespace CSVDoc
 
         public:
 
-            sfs::path mLocalData;
+            std::experimental::filesystem::path mLocalData;
             QLabel *mMessage;
             QLabel *mIcon;
             bool mValid;
-            sfs::path mResultPath;
+            std::experimental::filesystem::path mResultPath;
             ContentAction mAction;
             bool mDoFilenameCheck;
 
@@ -36,13 +36,13 @@ namespace CSVDoc
 
             AdjusterWidget (QWidget *parent = 0);
 
-            void setLocalData (const sfs::path& localData);
+            void setLocalData (const std::experimental::filesystem::path& localData);
             void setAction (ContentAction action);
 
             void setFilenameCheck (bool doCheck);
             bool isValid() const;
 
-            sfs::path getPath() const;
+            std::experimental::filesystem::path getPath() const;
             ///< This function must not be called if there is no valid path.
 
         public slots:

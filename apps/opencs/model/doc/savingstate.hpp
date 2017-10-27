@@ -11,7 +11,7 @@
 
 #include <components/to_utf8/to_utf8.hpp>
 
-namespace sfs = std::experimental::filesystem;
+
 
 namespace CSMDoc
 {
@@ -21,18 +21,18 @@ namespace CSMDoc
     class SavingState
     {
             Operation& mOperation;
-            sfs::path mPath;
-            sfs::path mTmpPath;
+            std::experimental::filesystem::path mPath;
+            std::experimental::filesystem::path mTmpPath;
             ToUTF8::Utf8Encoder mEncoder;
             std::ofstream mStream;
             ESM::ESMWriter mWriter;
-            sfs::path mProjectPath;
+            std::experimental::filesystem::path mProjectPath;
             bool mProjectFile;
             std::map<std::string, std::deque<int> > mSubRecords; // record ID, list of subrecords
 
         public:
 
-            SavingState (Operation& operation, const sfs::path& projectPath,
+            SavingState (Operation& operation, const std::experimental::filesystem::path& projectPath,
                 ToUTF8::FromType encoding);
 
             bool hasError() const;
@@ -40,9 +40,9 @@ namespace CSMDoc
             void start (Document& document, bool project);
             ///< \param project Save project file instead of content file.
 
-            const sfs::path& getPath() const;
+            const std::experimental::filesystem::path& getPath() const;
 
-            const sfs::path& getTmpPath() const;
+            const std::experimental::filesystem::path& getTmpPath() const;
 
             std::ofstream& getStream();
 

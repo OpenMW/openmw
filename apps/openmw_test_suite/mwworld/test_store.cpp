@@ -24,7 +24,7 @@ struct ContentFileTest : public ::testing::Test
         readerList.resize(mContentFiles.size());
 
         int index=0;
-        for (std::vector<sfs::path>::const_iterator it = mContentFiles.begin(); it != mContentFiles.end(); ++it)
+        for (std::vector<std::experimental::filesystem::path>::const_iterator it = mContentFiles.begin(); it != mContentFiles.end(); ++it)
         {
             ESM::ESMReader lEsm;
             lEsm.setEncoder(NULL);
@@ -86,7 +86,7 @@ struct ContentFileTest : public ::testing::Test
 protected:
     Files::ConfigurationManager mConfigurationManager;
     MWWorld::ESMStore mEsmStore;
-    std::vector<sfs::path> mContentFiles;
+    std::vector<std::experimental::filesystem::path> mContentFiles;
 };
 
 /// Print results of the dialogue merging process, i.e. the resulting linked list.

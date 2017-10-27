@@ -15,6 +15,7 @@ openmw_add_executable(esmtool
 target_link_libraries(esmtool
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
   components
+  fmt
 )
 
 if (BUILD_WITH_CODE_COVERAGE)

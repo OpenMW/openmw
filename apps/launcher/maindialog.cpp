@@ -406,9 +406,9 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     std::string defaultPath;
 
     // Prefer the settings-default.cfg in the current directory.
-    if (sfs::exists(localDefault))
+    if (std::experimental::filesystem::exists(localDefault))
         defaultPath = localDefault;
-    else if (sfs::exists(globalDefault))
+    else if (std::experimental::filesystem::exists(globalDefault))
         defaultPath = globalDefault;
     // Something's very wrong if we can't find the file at all.
     else {
@@ -432,7 +432,7 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     // Load user settings if they exist
     const std::string userPath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
     // User settings are not required to exist, so if they don't we're done.
-    if (!sfs::exists(userPath)) return true;
+    if (!std::experimental::filesystem::exists(userPath)) return true;
 
     try {
         mEngineSettings.loadUser(userPath);

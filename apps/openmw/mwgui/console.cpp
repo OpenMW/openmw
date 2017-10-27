@@ -201,8 +201,8 @@ namespace MWGui
 
     void Console::executeFile (const std::string& path)
     {
-        namespace sfs = std::experimental::filesystem;
-        std::ifstream stream ((sfs::path(path)));
+
+        std::ifstream stream ((std::experimental::filesystem::path(path)));
 
         if (!stream.is_open())
             printError ("failed to open file: " + path);

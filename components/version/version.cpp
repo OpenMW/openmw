@@ -3,14 +3,14 @@
 #include <experimental/filesystem>
 #include <fstream>
 
-namespace sfs = std::experimental::filesystem;
+
 
 namespace Version
 {
 
 Version getOpenmwVersion(const std::string &resourcePath)
 {
-    sfs::path path (resourcePath + "/version");
+    std::experimental::filesystem::path path (resourcePath + "/version");
 
     std::ifstream stream (path);
 

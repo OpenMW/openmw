@@ -269,8 +269,8 @@ void CSMDoc::Document::createBase()
 }
 
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
-    const std::vector< sfs::path >& files,bool new_,
-    const sfs::path& savePath, const sfs::path& resDir,
+    const std::vector< std::experimental::filesystem::path >& files,bool new_,
+    const std::experimental::filesystem::path& savePath, const std::experimental::filesystem::path& resDir,
     const Fallback::Map* fallback,
     ToUTF8::FromType encoding,
     const std::vector<std::string>& blacklistedScripts,
@@ -287,14 +287,14 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
 
-    if (mNew || !sfs::exists (mProjectPath))
+    if (mNew || !std::experimental::filesystem::exists (mProjectPath))
     {
-        sfs::path customFiltersPath (configuration.getUserDataPath());
+        std::experimental::filesystem::path customFiltersPath (configuration.getUserDataPath());
         customFiltersPath /= "defaultfilters";
 
         std::ofstream destination (mProjectPath.string().c_str(), std::ios::binary);
 
-        if (sfs::exists (customFiltersPath))
+        if (std::experimental::filesystem::exists (customFiltersPath))
         {
             destination << std::ifstream(customFiltersPath.string().c_str(), std::ios::binary).rdbuf();
         }
@@ -361,17 +361,17 @@ int CSMDoc::Document::getState() const
     return state;
 }
 
-const sfs::path& CSMDoc::Document::getSavePath() const
+const std::experimental::filesystem::path& CSMDoc::Document::getSavePath() const
 {
     return mSavePath;
 }
 
-const sfs::path& CSMDoc::Document::getProjectPath() const
+const std::experimental::filesystem::path& CSMDoc::Document::getProjectPath() const
 {
     return mProjectPath;
 }
 
-const std::vector<sfs::path>& CSMDoc::Document::getContentFiles() const
+const std::vector<std::experimental::filesystem::path>& CSMDoc::Document::getContentFiles() const
 {
     return mContentFiles;
 }
@@ -470,7 +470,7 @@ void CSMDoc::Document::startRunning (const std::string& profile,
 {
     std::vector<std::string> contentFiles;
 
-    for (std::vector<sfs::path>::const_iterator iter (mContentFiles.begin());
+    for (std::vector<std::experimental::filesystem::path>::const_iterator iter (mContentFiles.begin());
         iter!=mContentFiles.end(); ++iter)
         contentFiles.push_back (iter->filename().string());
 

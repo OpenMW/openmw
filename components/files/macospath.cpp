@@ -11,7 +11,7 @@
 
 namespace
 {
-    sfs::path getUserHome()
+    std::experimental::filesystem::path getUserHome()
     {
         const char* dir = getenv("HOME");
         if (dir == NULL)
@@ -23,9 +23,9 @@ namespace
             }
         }
         if (dir == NULL)
-            return sfs::path();
+            return std::experimental::filesystem::path();
         else
-            return sfs::path(dir);
+            return std::experimental::filesystem::path(dir);
     }
 }
 
@@ -37,60 +37,60 @@ MacOsPath::MacOsPath(const std::string& application_name)
 {
 }
 
-sfs::path MacOsPath::getUserConfigPath() const
+std::experimental::filesystem::path MacOsPath::getUserConfigPath() const
 {
-    sfs::path userPath (getUserHome());
+    std::experimental::filesystem::path userPath (getUserHome());
     userPath /= "Library/Preferences/";
 
     return userPath / mName;
 }
 
-sfs::path MacOsPath::getUserDataPath() const
+std::experimental::filesystem::path MacOsPath::getUserDataPath() const
 {
-    sfs::path userPath (getUserHome());
+    std::experimental::filesystem::path userPath (getUserHome());
     userPath /= "Library/Application Support/";
 
     return userPath / mName;
 }
 
-sfs::path MacOsPath::getGlobalConfigPath() const
+std::experimental::filesystem::path MacOsPath::getGlobalConfigPath() const
 {
-    sfs::path globalPath("/Library/Preferences/");
+    std::experimental::filesystem::path globalPath("/Library/Preferences/");
     return globalPath / mName;
 }
 
-sfs::path MacOsPath::getCachePath() const
+std::experimental::filesystem::path MacOsPath::getCachePath() const
 {
-    sfs::path userPath (getUserHome());
+    std::experimental::filesystem::path userPath (getUserHome());
     userPath /= "Library/Caches";
     return userPath / mName;
 }
 
-sfs::path MacOsPath::getLocalPath() const
+std::experimental::filesystem::path MacOsPath::getLocalPath() const
 {
-    return sfs::path("../Resources/");
+    return std::experimental::filesystem::path("../Resources/");
 }
 
-sfs::path MacOsPath::getGlobalDataPath() const
+std::experimental::filesystem::path MacOsPath::getGlobalDataPath() const
 {
-    sfs::path globalDataPath("/Library/Application Support/");
+    std::experimental::filesystem::path globalDataPath("/Library/Application Support/");
     return globalDataPath / mName;
 }
 
-sfs::path MacOsPath::getInstallPath() const
+std::experimental::filesystem::path MacOsPath::getInstallPath() const
 {
-    sfs::path installPath;
+    std::experimental::filesystem::path installPath;
 
-    sfs::path homePath = getUserHome();
+    std::experimental::filesystem::path homePath = getUserHome();
 
     if (!homePath.empty())
     {
-        sfs::path wineDefaultRegistry(homePath);
+        std::experimental::filesystem::path wineDefaultRegistry(homePath);
         wineDefaultRegistry /= ".wine/system.reg";
 
-        if (sfs::is_regular_file(wineDefaultRegistry))
+        if (std::experimental::filesystem::is_regular_file(wineDefaultRegistry))
         {
-            sfs::ifstream file(wineDefaultRegistry);
+            std::experimental::filesystem::ifstream file(wineDefaultRegistry);
             bool isRegEntry = false;
             std::string line;
             std::string mwpath;
@@ -136,7 +136,7 @@ sfs::path MacOsPath::getInstallPath() const
                 installPath /= ".wine/dosdevices/";
                 installPath /= mwpath;
 
-                if (!sfs::is_directory(installPath))
+                if (!std::experimental::filesystem::is_directory(installPath))
                 {
                     installPath.clear();
                 }

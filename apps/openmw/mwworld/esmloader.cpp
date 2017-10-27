@@ -15,7 +15,7 @@ EsmLoader::EsmLoader(MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& read
 {
 }
 
-void EsmLoader::load(const sfs::path& filepath, int& index)
+void EsmLoader::load(const std::experimental::filesystem::path& filepath, int& index)
 {
   ContentLoader::load(filepath.filename(), index);
 

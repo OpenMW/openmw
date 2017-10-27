@@ -43,7 +43,7 @@ void CSMTools::FinishMergedDocumentStage::perform (int stage, CSMDoc::Messages& 
     // We know that the content file list contains at least two entries and that the first one
     // does exist on disc (otherwise it would have been impossible to initiate a merge on that
     // document).
-    sfs::path path = mState.mSource.getContentFiles()[0];
+    std::experimental::filesystem::path path = mState.mSource.getContentFiles()[0];
 
     ESM::ESMReader reader;
     reader.setEncoder (&mEncoder);

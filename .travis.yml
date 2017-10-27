@@ -3,7 +3,7 @@ os:
  - osx
 osx_image: xcode8.3
 language: cpp
-install: export CXX="g++-5"
+install: export CXX="g++-7"
 sudo: required
 dist: trusty
 branches:
@@ -25,7 +25,7 @@ addons:
       - llvm-toolchain-trusty-5.0
     packages: [
       # Dev Tool Chain
-      g++-5, clang-5.0,
+      g++-7, clang-5.0,
       # Tests
       libgtest-dev, google-mock,
       # Boost
@@ -35,7 +35,7 @@ addons:
       # Audio & Video
       libsdl2-dev, libqt5opengl5-dev, libqt4-dev, libopenal-dev,
       # Additional 3rd party required libraries
-      libunshield-dev, libtinyxml-dev,
+      libunshield-dev, libtinyxml-dev, libfmt3-dev
       # The other ones from OpenMW ppa
       libbullet-dev, libswresample-dev, libopenscenegraph-3.4-dev, libmygui-dev
     ]

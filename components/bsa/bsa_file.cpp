@@ -71,8 +71,8 @@ void BSAFile::readHeader()
      */
     assert(!isLoaded);
 
-    namespace sfs = std::experimental::filesystem;
-    std::ifstream input(sfs::path(filename), std::ios_base::binary);
+
+    std::ifstream input(std::experimental::filesystem::path(filename), std::ios_base::binary);
 
     // Total archive size
     std::streamoff fsize = 0;

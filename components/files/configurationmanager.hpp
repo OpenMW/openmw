@@ -9,7 +9,7 @@
 #include <components/files/fixedpath.hpp>
 #include <components/files/collections.hpp>
 
-namespace sfs = std::experimental::filesystem;
+
 
 /**
  * \namespace Files
@@ -32,26 +32,26 @@ struct ConfigurationManager
     ///< \param create Try creating the directory, if it does not exist.
 
     /**< Fixed paths */
-    const sfs::path& getGlobalPath() const;
-    const sfs::path& getUserConfigPath() const;
-    const sfs::path& getLocalPath() const;
+    const std::experimental::filesystem::path& getGlobalPath() const;
+    const std::experimental::filesystem::path& getUserConfigPath() const;
+    const std::experimental::filesystem::path& getLocalPath() const;
 
-    const sfs::path& getGlobalDataPath() const;
-    const sfs::path& getUserDataPath() const;
-    const sfs::path& getLocalDataPath() const;
-    const sfs::path& getInstallPath() const;
+    const std::experimental::filesystem::path& getGlobalDataPath() const;
+    const std::experimental::filesystem::path& getUserDataPath() const;
+    const std::experimental::filesystem::path& getLocalDataPath() const;
+    const std::experimental::filesystem::path& getInstallPath() const;
 
-    const sfs::path& getCachePath() const;
+    const std::experimental::filesystem::path& getCachePath() const;
 
-    const sfs::path& getLogPath() const;
+    const std::experimental::filesystem::path& getLogPath() const;
 
     private:
         typedef Files::FixedPath<> FixedPathType;
 
-        typedef const sfs::path& (FixedPathType::*path_type_f)() const;
+        typedef const std::experimental::filesystem::path& (FixedPathType::*path_type_f)() const;
         typedef std::map<std::string, path_type_f> TokensMappingContainer;
 
-        bool loadConfig(const sfs::path& path,
+        bool loadConfig(const std::experimental::filesystem::path& path,
             boost::program_options::variables_map& variables,
             boost::program_options::options_description& description);
 
@@ -59,7 +59,7 @@ struct ConfigurationManager
 
         FixedPathType mFixedPath;
 
-        sfs::path mLogPath;
+        std::experimental::filesystem::path mLogPath;
 
         TokensMappingContainer mTokensMapping;
 

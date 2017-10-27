@@ -17,20 +17,20 @@ CSMPrefs::State *CSMPrefs::State::sThis = 0;
 void CSMPrefs::State::load()
 {
     // default settings file
-    sfs::path local = mConfigurationManager.getLocalPath() / mConfigFile;
-    sfs::path global = mConfigurationManager.getGlobalPath() / mConfigFile;
+    std::experimental::filesystem::path local = mConfigurationManager.getLocalPath() / mConfigFile;
+    std::experimental::filesystem::path global = mConfigurationManager.getGlobalPath() / mConfigFile;
 
-    if (sfs::exists (local))
+    if (std::experimental::filesystem::exists (local))
         mSettings.loadDefault (local.string());
-    else if (sfs::exists (global))
+    else if (std::experimental::filesystem::exists (global))
         mSettings.loadDefault (global.string());
     else
         throw std::runtime_error ("No default settings file found! Make sure the file \"openmw-cs.cfg\" was properly installed.");
 
     // user settings file
-    sfs::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
+    std::experimental::filesystem::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
 
-    if (sfs::exists (user))
+    if (std::experimental::filesystem::exists (user))
         mSettings.loadUser (user.string());
 }
 
@@ -550,7 +550,7 @@ CSMPrefs::State::~State()
 
 void CSMPrefs::State::save()
 {
-    sfs::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
+    std::experimental::filesystem::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
     mSettings.saveUser (user.string());
 }
 

@@ -21,7 +21,7 @@
 // Create a local alias for brevity
 namespace bpo = boost::program_options;
 
-namespace sfs = std::experimental::filesystem;
+
 
 struct ESMData
 {

@@ -62,7 +62,7 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
     setupInstallations();
     setupPages();
 
-    const sfs::path& installedPath = mCfgMgr.getInstallPath();
+    const std::experimental::filesystem::path& installedPath = mCfgMgr.getInstallPath();
     if (!installedPath.empty())
     {
         addInstallation(toQString(installedPath));
@@ -466,7 +466,7 @@ bool Wizard::MainWizard::findFiles(const QString &name, const QString &path)
             && dir.entryList().contains(name + QLatin1String(".bsa"), Qt::CaseInsensitive));
 }
 
-QString Wizard::MainWizard::toQString(const sfs::path& path)
+QString Wizard::MainWizard::toQString(const std::experimental::filesystem::path& path)
 {
     return QString::fromUtf8(path.string().c_str());
 }

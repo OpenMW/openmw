@@ -32,12 +32,12 @@ void CSVDoc::AdjusterWidget::setAction (ContentAction action)
     mAction = action;
 }
 
-void CSVDoc::AdjusterWidget::setLocalData (const sfs::path& localData)
+void CSVDoc::AdjusterWidget::setLocalData (const std::experimental::filesystem::path& localData)
 {
     mLocalData = localData;
 }
 
-sfs::path CSVDoc::AdjusterWidget::getPath() const
+std::experimental::filesystem::path CSVDoc::AdjusterWidget::getPath() const
 {
     if (!mValid)
         throw std::logic_error ("invalid content file path");
@@ -68,7 +68,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
     }
     else
     {
-        sfs::path path (name.toUtf8().data());
+        std::experimental::filesystem::path path (name.toUtf8().data());
 
         std::string extension = path.extension().string();
         boost::algorithm::to_lower(extension);
@@ -99,7 +99,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
             message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str());
             mResultPath = path;
 
-            if (sfs::exists (path))
+            if (std::experimental::filesystem::exists (path))
             {
                 /// \todo add an user setting to make this an error.
                 message += "<p>A file with the same name already exists. If you continue, it will be overwritten.";

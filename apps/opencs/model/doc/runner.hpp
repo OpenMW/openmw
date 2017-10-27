@@ -12,7 +12,7 @@
 
 #include <components/esm/debugprofile.hpp>
 
-namespace sfs = std::experimental::filesystem;
+
 
 class QTemporaryFile;
 
@@ -31,11 +31,11 @@ namespace CSMDoc
             std::string mStartupInstruction;
             QTemporaryFile *mStartup;
             QTextDocument mLog;
-            sfs::path mProjectPath;
+            std::experimental::filesystem::path mProjectPath;
 
         public:
 
-            Runner (const sfs::path& projectPath);
+            Runner (const std::experimental::filesystem::path& projectPath);
 
             ~Runner();
 

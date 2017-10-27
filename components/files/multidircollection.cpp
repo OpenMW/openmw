@@ -48,10 +48,10 @@ namespace Files
                 continue;
             }
 
-            for (sfs::directory_iterator dirIter((*iter).string());
-                    dirIter != sfs::directory_iterator(); ++dirIter)
+            for (std::experimental::filesystem::directory_iterator dirIter((*iter).string());
+                    dirIter != std::experimental::filesystem::directory_iterator(); ++dirIter)
             {
-                sfs::path path = *dirIter;
+                std::experimental::filesystem::path path = *dirIter;
 
                 if (!equal (extension, path.extension().string()))
                     continue;
@@ -78,7 +78,7 @@ namespace Files
         }
     }
 
-    sfs::path MultiDirCollection::getPath (const std::string& file) const
+    std::experimental::filesystem::path MultiDirCollection::getPath (const std::string& file) const
     {
         TIter iter = mFiles.find (file);
 

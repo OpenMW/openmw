@@ -47,9 +47,9 @@ namespace CS
             CSVDoc::NewGameDialogue mNewGame;
             CSVPrefs::Dialogue mSettings;
             CSVDoc::FileDialog mFileDialog;
-            sfs::path mLocal;
-            sfs::path mResources;
-            sfs::path mPid;
+            std::experimental::filesystem::path mLocal;
+            std::experimental::filesystem::path mResources;
+            std::experimental::filesystem::path mPid;
             boost::interprocess::file_lock mLock;
             std::ofstream mPidFile;
             bool mFsStrict;
@@ -83,9 +83,9 @@ namespace CS
             void cancelFileDialog();
 
             void loadDocument();
-            void openFiles (const sfs::path &path);
-            void createNewFile (const sfs::path& path);
-            void createNewGame (const sfs::path& file);
+            void openFiles (const std::experimental::filesystem::path &path);
+            void createNewFile (const std::experimental::filesystem::path& path);
+            void createNewGame (const std::experimental::filesystem::path& file);
 
             void showStartup();
 

@@ -48,7 +48,7 @@ QStringList CSVDoc::FileDialog::selectedFilePaths()
     return filePaths;
 }
 
-void CSVDoc::FileDialog::setLocalData (const sfs::path& localData)
+void CSVDoc::FileDialog::setLocalData (const std::experimental::filesystem::path& localData)
 {
     mAdjusterWidget->setLocalData (localData);
 }
