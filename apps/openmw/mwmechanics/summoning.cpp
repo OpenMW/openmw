@@ -38,26 +38,10 @@ namespace MWMechanics
         }
     }
 
-    void UpdateSummonedCreatures::process()
+    void UpdateSummonedCreatures::process(bool cleanup)
     {
-
-
         MWMechanics::CreatureStats& creatureStats = mActor.getClass().getCreatureStats(mActor);
-
-        // Update summon effects
         std::map<CreatureStats::SummonKey, int>& creatureMap = creatureStats.getSummonedCreatureMap();
-        for (std::map<CreatureStats::SummonKey, int>::iterator it = creatureMap.begin(); it != creatureMap.end(); )
-        {
-            bool found = mActiveEffects.find(it->first) != mActiveEffects.end();
-            if (!found)
-            {
-                // Effect has ended
-                MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mActor, it->second);
-                creatureMap.erase(it++);
-                continue;
-            }
-            ++it;
-        }
 
         for (std::set<std::pair<int, std::string> >::iterator it = mActiveEffects.begin(); it != mActiveEffects.end(); ++it)
         {
@@ -101,21 +85,18 @@ namespace MWMechanics
             }
         }
 
+        // Update summon effects
         for (std::map<CreatureStats::SummonKey, int>::iterator it = creatureMap.begin(); it != creatureMap.end(); )
         {
-            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->second);
-            if (!ptr.isEmpty() && ptr.getClass().getCreatureStats(ptr).isDead() && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished())
+            bool found = mActiveEffects.find(it->first) != mActiveEffects.end();
+            if (!found)
             {
-                // Purge the magic effect so a new creature can be summoned if desired
-                creatureStats.getActiveSpells().purgeEffect(it->first.first, it->first.second);
-                if (mActor.getClass().hasInventoryStore(ptr))
-                    mActor.getClass().getInventoryStore(mActor).purgeEffect(it->first.first, it->first.second);
-
+                // Effect has ended
                 MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mActor, it->second);
                 creatureMap.erase(it++);
+                continue;
             }
-            else
-                ++it;
+            ++it;
         }
 
         std::vector<int>& graveyard = creatureStats.getSummonedCreatureGraveyard();
@@ -133,6 +114,26 @@ namespace MWMechanics
                         "", ptr.getRefData().getPosition().asVec3());
 
                 MWBase::Environment::get().getWorld()->deleteObject(ptr);
+            }
+            else
+                ++it;
+        }
+
+        if (!cleanup)
+            return;
+
+        for (std::map<CreatureStats::SummonKey, int>::iterator it = creatureMap.begin(); it != creatureMap.end(); )
+        {
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->second);
+            if (ptr.isEmpty() || (ptr.getClass().getCreatureStats(ptr).isDead() && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished()))
+            {
+                // Purge the magic effect so a new creature can be summoned if desired
+                creatureStats.getActiveSpells().purgeEffect(it->first.first, it->first.second);
+                if (mActor.getClass().hasInventoryStore(mActor))
+                    mActor.getClass().getInventoryStore(mActor).purgeEffect(it->first.first, it->first.second);
+
+                MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mActor, it->second);
+                creatureMap.erase(it++);
             }
             else
                 ++it;

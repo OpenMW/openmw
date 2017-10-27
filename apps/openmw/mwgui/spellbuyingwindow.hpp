@@ -25,9 +25,13 @@ namespace MWGui
         public:
             SpellBuyingWindow();
 
-            void startSpellBuying(const MWWorld::Ptr& actor, int startOffset);
+            void setPtr(const MWWorld::Ptr& actor);
+            void setPtr(const MWWorld::Ptr& actor, int startOffset);
 
-            virtual void exit();
+            void onFrame(float dt) { checkReferenceAvailable(); }
+            void clear() { resetReference(); }
+
+            void onResChange(int, int) { center(); }
 
         protected:
             MyGUI::Button* mCancelButton;
@@ -42,7 +46,7 @@ namespace MWGui
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
             void addSpell(const ESM::Spell& spell);
             void clearSpells();
-            int mLastPos,mCurrentY;
+            int mCurrentY;
 
             static const int sLineHeight;
 

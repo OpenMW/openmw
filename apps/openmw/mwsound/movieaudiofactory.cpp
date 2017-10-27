@@ -37,7 +37,7 @@ namespace MWSound
     {
     public:
         MovieAudioDecoder(Video::VideoState *videoState)
-            : Video::MovieAudioDecoder(videoState)
+            : Video::MovieAudioDecoder(videoState), mAudioTrack(nullptr)
         {
             mDecoderBridge.reset(new MWSoundDecoderBridge(this));
         }
@@ -85,13 +85,13 @@ namespace MWSound
     public:
         ~MovieAudioDecoder()
         {
-            if(mAudioTrack.get())
+            if(mAudioTrack)
                 MWBase::Environment::get().getSoundManager()->stopTrack(mAudioTrack);
-            mAudioTrack.reset();
+            mAudioTrack = nullptr;
             mDecoderBridge.reset();
         }
 
-        MWBase::SoundStreamPtr mAudioTrack;
+        MWBase::SoundStream *mAudioTrack;
         std::shared_ptr<MWSoundDecoderBridge> mDecoderBridge;
     };
 
@@ -162,8 +162,8 @@ namespace MWSound
         decoder->setupFormat();
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        MWBase::SoundStreamPtr sound = sndMgr->playTrack(decoder->mDecoderBridge, MWBase::SoundManager::Play_TypeMovie);
-        if (!sound.get())
+        MWBase::SoundStream *sound = sndMgr->playTrack(decoder->mDecoderBridge, MWSound::Type::Movie);
+        if (!sound)
         {
             decoder.reset();
             return decoder;

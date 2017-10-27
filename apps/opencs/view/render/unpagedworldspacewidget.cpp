@@ -47,6 +47,9 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
     connect (mCellsModel, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (cellRowsAboutToBeRemoved (const QModelIndex&, int, int)));
 
+    connect (&document.getData(), SIGNAL (assetTablesChanged ()),
+        this, SLOT (assetTablesChanged ()));
+
     update();
 
     mCell.reset (new Cell (document.getData(), mRootNode, mCellId));
@@ -80,6 +83,12 @@ void CSVRender::UnpagedWorldspaceWidget::cellRowsAboutToBeRemoved (const QModelI
 
     if (cellIndex.row()>=start && cellIndex.row()<=end)
         emit closeRequest();
+}
+
+void CSVRender::UnpagedWorldspaceWidget::assetTablesChanged()
+{
+    if (mCell)
+        mCell->reloadAssets();
 }
 
 bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld::UniversalId>& universalIdData, DropType type)

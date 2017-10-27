@@ -23,6 +23,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
@@ -769,8 +770,9 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
             mSoundIds[type] = csi->getClass().getSound(*csi);
             if (!mSoundIds[type].empty())
             {
-                MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, mSoundIds[type], 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
-                    MWBase::SoundManager::Play_Loop);
+                MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, mSoundIds[type],
+                    1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Loop
+                );
             }
         }
     }
@@ -919,6 +921,9 @@ void NpcAnimation::showWeapons(bool showWeapon)
     else
     {
         removeIndividualPart(ESM::PRT_Weapon);
+        // If we remove/hide weapon from player, we should reset attack animation as well
+        if (mPtr == MWMechanics::getPlayer())
+            MWBase::Environment::get().getWorld()->getPlayer().setAttackingOrSpell(false);
     }
 }
 

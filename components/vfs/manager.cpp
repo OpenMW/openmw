@@ -39,6 +39,12 @@ namespace VFS
 
     Manager::~Manager()
     {
+        reset();
+    }
+
+    void Manager::reset()
+    {
+        mIndex.clear();
         for (std::vector<Archive*>::iterator it = mArchives.begin(); it != mArchives.end(); ++it)
             delete *it;
         mArchives.clear();

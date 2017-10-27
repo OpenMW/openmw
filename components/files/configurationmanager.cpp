@@ -75,8 +75,6 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool cre
     for (Files::PathContainer::iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
     {
         path = it->string();
-        boost::erase_all(path, "\"");
-        *it = boost::filesystem::path(path);
 
         // Check if path contains a token
         if (!path.empty() && *path.begin() == '?')

@@ -8,7 +8,7 @@ set(ESMTOOL
 source_group(apps\\esmtool FILES ${ESMTOOL})
 
 # Main executable
-add_executable(esmtool
+openmw_add_executable(esmtool
   ${ESMTOOL}
 )
 

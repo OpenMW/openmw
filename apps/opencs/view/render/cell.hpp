@@ -60,6 +60,7 @@ namespace CSVRender
             bool mDeleted;
             int mSubMode;
             unsigned int mSubModeElementMask;
+            bool mUpdateLand, mLandDeleted;
 
             /// Ignored if cell does not have an object with the given ID.
             ///
@@ -74,6 +75,9 @@ namespace CSVRender
             ///
             /// \return Have any objects been added?
             bool addObjects (int start, int end);
+
+            void updateLand();
+            void unloadLand();
 
         public:
 
@@ -121,6 +125,20 @@ namespace CSVRender
 
             void pathgridRemoved();
 
+            void landDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void landAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+            void landAdded (const QModelIndex& parent, int start, int end);
+
+            void landTextureChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void landTextureAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+            void landTextureAdded (const QModelIndex& parent, int start, int end);
+
+            void reloadAssets();
+
             void setSelection (int elementMask, Selection mode);
 
             // Select everything that references the same ID as at least one of the elements
@@ -148,6 +166,8 @@ namespace CSVRender
             void reset (unsigned int elementMask);
 
             TerrainSelection* getTerrainSelection(TerrainSelectionType) const;
+
+            friend class CellNodeCallback;
     };
 }
 

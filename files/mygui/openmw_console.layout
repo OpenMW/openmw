@@ -18,6 +18,7 @@
     <!-- Command line -->
     <Widget type="EditBox" skin="MW_ConsoleCommand" position="0 338 384 28" align="HStretch Bottom" name="edit_Command">
         <Property key="InvertSelected" value="false"/>
+        <UserString key="AcceptTab" value="true"/>
     </Widget>
 
   </Widget>

@@ -74,8 +74,6 @@ namespace SceneUtil
         bool mActive;
 
         unsigned int mLastFrameNumber;
-        bool mTraversedEvenFrame;
-        bool mTraversedOddFrame;
     };
 
 }

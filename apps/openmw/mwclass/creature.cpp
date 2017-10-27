@@ -4,6 +4,7 @@
 
 #include <components/esm/loadcrea.hpp>
 #include <components/esm/creaturestate.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
@@ -448,10 +449,30 @@ namespace MWClass
             return action;
         }
 
-        if(getCreatureStats(ptr).isDead())
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
-        if(ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat())
+        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+
+        if(stats.isDead())
+        {
+            bool canLoot = Settings::Manager::getBool ("can loot during death animation", "Game");
+
+            // by default user can loot friendly actors during death animation
+            if (canLoot && !stats.getAiSequence().isInCombat())
+                return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr));
+
+            // otherwise wait until death animation
+            if(stats.isDeathAnimationFinished())
+                return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr));
+
+            // death animation is not finished, do nothing
+            return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
+        }
+
+        if(stats.getAiSequence().isInCombat())
             return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
+
+        if(stats.getKnockedDown())
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
+
         return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
@@ -558,7 +579,11 @@ namespace MWClass
             return true;
 
         const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
-        return !customData.mCreatureStats.getAiSequence().isInCombat() || customData.mCreatureStats.isDead();
+
+        if (customData.mCreatureStats.isDead() && customData.mCreatureStats.isDeathAnimationFinished())
+            return true;
+
+        return !customData.mCreatureStats.getAiSequence().isInCombat();
     }
 
     MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const

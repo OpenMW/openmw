@@ -35,12 +35,12 @@ namespace MWGui
         public:
             InventoryWindow(DragAndDrop* dragAndDrop, osg::Group* parent, Resource::ResourceSystem* resourceSystem);
 
-            virtual void open();
+            virtual void onOpen();
 
             /// start trading, disables item drag&drop
             void setTrading(bool trading);
 
-            void onFrame();
+            void onFrame(float dt);
 
             void pickUpObject (MWWorld::Ptr object);
 

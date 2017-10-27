@@ -10,6 +10,7 @@
             <Property key="Static" value="true"/>
             <Property key="WordWrap" value="true"/>
             <Property key="MultiLine" value="true"/>
+            <Property key="NeedKey" value="false"/>
         </Widget>
 
         <Widget type="VBox" position="0 89 352 24" align="Center Bottom">

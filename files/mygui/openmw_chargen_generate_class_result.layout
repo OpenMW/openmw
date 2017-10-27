@@ -3,7 +3,7 @@
 <MyGUI type="Layout">
     <Widget type="VBox" skin="MW_Dialog" layer="Windows" position="0 0 289 256" align="Center" name="_Main">
         <Property key="AutoResize" value="true"/>
-        <Property key="Padding" value="12"/>
+        <Property key="Padding" value="8"/>
         <Property key="Spacing" value="8"/>
 
         <!-- Class image -->

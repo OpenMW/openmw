@@ -9,6 +9,7 @@
 #include <QObject>
 #include <QTimer>
 
+#include <components/files/multidircollection.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "../world/data.hpp"
@@ -59,7 +60,6 @@ namespace CSMDoc
 
         private:
 
-            const VFS::Manager* mVFS;
             boost::filesystem::path mSavePath;
             std::vector<boost::filesystem::path> mContentFiles;
             bool mNew;
@@ -102,16 +102,14 @@ namespace CSMDoc
 
         public:
 
-            Document (const VFS::Manager* vfs, const Files::ConfigurationManager& configuration,
+            Document (const Files::ConfigurationManager& configuration,
                 const std::vector< boost::filesystem::path >& files, bool new_,
                 const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
-                const Fallback::Map* fallback,
-                ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
-                const std::vector<std::string>& blacklistedScripts);
+                const Fallback::Map* fallback, ToUTF8::FromType encoding,
+                const std::vector<std::string>& blacklistedScripts,
+                bool fsStrict, const Files::PathContainer& dataPaths, const std::vector<std::string>& archives);
 
             ~Document();
-
-            const VFS::Manager* getVFS() const;
 
             QUndoStack& getUndoStack();
 

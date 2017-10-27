@@ -176,7 +176,7 @@ The sacks included in Apel's `Various Things - Sacks`_ come in two versions – 
 #. Open up each of the models in NifSkope and look for these certain blocks_:
     - NiTextureEffect
     - NiSourceTexture with the value that appears to be a normal map file, in this mod, they have the suffix *_nm.dds*.
-#. Remove all these tags by selecting them one at a time and press right click>Block>Remove.
+#. Remove all these tags by selecting them one at a time and press right click>Block>Remove Branch. (Ctrl-Del)
 #. Repeat this on all the affected models.
 #. If you launch OpenMW now, you'll `no longer have shiny models`_. But one thing is missing. Can you see it? It's actually hard to spot on still pictures, but we have no normal maps here.
 #. Now, go back to the root of where you installed the mod. Now go to ``./Textures/`` and you'll find the texture files in question. 

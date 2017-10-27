@@ -22,6 +22,8 @@ namespace CSMWorld
 
             void addResources (const Resources& resources);
 
+            const char * const * getMeshExtensions();
+
         public:
 
             ResourcesManager();
@@ -29,6 +31,8 @@ namespace CSMWorld
             const VFS::Manager* getVFS() const;
 
             void setVFS(const VFS::Manager* vfs);
+
+            void recreateResources();
 
             const Resources& get (UniversalId::Type type) const;
     };

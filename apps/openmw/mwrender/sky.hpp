@@ -4,9 +4,16 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <iostream>
 
 #include <osg/ref_ptr>
 #include <osg/Vec4f>
+#include <osg/Uniform>
+
+namespace osg
+{
+    class Camera;
+}
 
 namespace osg
 {
@@ -137,6 +144,10 @@ namespace MWRender
 
         void sunDisable();
 
+        bool isEnabled();
+
+        bool hasRain();
+
         void setRainSpeed(float speed);
 
         void setStormDirection(const osg::Vec3f& direction);
@@ -156,6 +167,10 @@ namespace MWRender
 
         void listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures);
 
+        void setCamera(osg::Camera *camera);
+
+        void setRainIntensityUniform(osg::Uniform *uniform);
+
     private:
         void create();
         ///< no need to call this, automatically done on first enable()
@@ -165,6 +180,9 @@ namespace MWRender
         void updateRainParameters();
 
         Resource::SceneManager* mSceneManager;
+
+        osg::Camera *mCamera;
+        osg::Uniform *mRainIntensityUniform;
 
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;
@@ -233,6 +251,8 @@ namespace MWRender
 
         bool mEnabled;
         bool mSunEnabled;
+
+        float mWeatherAlpha;
 
         osg::Vec4f mMoonScriptColor;
     };

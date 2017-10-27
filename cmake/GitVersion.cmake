@@ -26,4 +26,6 @@ else ()
     message(WARNING "Failed to get valid version information from Git")
 endif ()
 
-configure_file(${VERSION_IN_FILE} ${VERSION_FILE})
+include(${MACROSFILE})
+
+configure_resource_file(${VERSION_IN_FILE} ${VERSION_FILE_PATH_BASE} ${VERSION_FILE_PATH_RELATIVE})

@@ -193,7 +193,8 @@ bool MWDialogue::Filter::testFunctionLocal(const MWDialogue::SelectWrapper& sele
         return false; // shouldn't happen, we checked that variable has a type above, so must exist
 
     const MWScript::Locals& locals = mActor.getRefData().getLocals();
-
+    if (locals.isEmpty())
+        return select.selectCompare(0);
     switch (type)
     {
         case 's': return select.selectCompare (static_cast<int> (locals.mShorts[index]));

@@ -10,73 +10,17 @@
 namespace SceneUtil
 {
 
-class UpdateRigBounds : public osg::Drawable::UpdateCallback
-{
-public:
-    UpdateRigBounds()
-    {
-    }
-
-    UpdateRigBounds(const UpdateRigBounds& copy, const osg::CopyOp& copyop)
-        : osg::Drawable::UpdateCallback(copy, copyop)
-    {
-    }
-
-    META_Object(SceneUtil, UpdateRigBounds)
-
-    void update(osg::NodeVisitor* nv, osg::Drawable* drw)
-    {
-        RigGeometry* rig = static_cast<RigGeometry*>(drw);
-
-        rig->updateBounds(nv);
-    }
-};
-
-// TODO: make threadsafe for multiple cull threads
-class UpdateRigGeometry : public osg::Drawable::CullCallback
-{
-public:
-    UpdateRigGeometry()
-    {
-    }
-
-    UpdateRigGeometry(const UpdateRigGeometry& copy, const osg::CopyOp& copyop)
-        : osg::Drawable::CullCallback(copy, copyop)
-    {
-    }
-
-    META_Object(SceneUtil, UpdateRigGeometry)
-
-    virtual bool cull(osg::NodeVisitor* nv, osg::Drawable* drw, osg::State*) const
-    {
-        RigGeometry* geom = static_cast<RigGeometry*>(drw);
-        geom->update(nv);
-        return false;
-    }
-};
-
-// We can't compute the bounds without a NodeVisitor, since we need the current geomToSkelMatrix.
-// So we return nothing. Bounds are updated every frame in the UpdateCallback.
-class DummyComputeBoundCallback : public osg::Drawable::ComputeBoundingBoxCallback
-{
-public:
-    virtual osg::BoundingBox computeBound(const osg::Drawable&) const  { return osg::BoundingBox(); }
-};
-
 RigGeometry::RigGeometry()
     : mSkeleton(NULL)
     , mLastFrameNumber(0)
     , mBoundsFirstFrame(true)
 {
-    setCullCallback(new UpdateRigGeometry);
-    setUpdateCallback(new UpdateRigBounds);
-    setSupportsDisplayList(false);
-    setUseVertexBufferObjects(true);
-    setComputeBoundingBoxCallback(new DummyComputeBoundCallback);
+    setUpdateCallback(new osg::Callback); // dummy to make sure getNumChildrenRequiringUpdateTraversal() is correct
+                                          // update done in accept(NodeVisitor&)
 }
 
 RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
-    : osg::Geometry(copy, copyop)
+    : Drawable(copy, copyop)
     , mSkeleton(NULL)
     , mInfluenceMap(copy.mInfluenceMap)
     , mLastFrameNumber(0)
@@ -89,57 +33,47 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
 {
     mSourceGeometry = sourceGeometry;
 
-    osg::Geometry& from = *sourceGeometry;
-
-    if (from.getStateSet())
-        setStateSet(from.getStateSet());
-
-    // shallow copy primitive sets & vertex attributes that we will not modify
-    setPrimitiveSetList(from.getPrimitiveSetList());
-    setColorArray(from.getColorArray());
-    setSecondaryColorArray(from.getSecondaryColorArray());
-    setFogCoordArray(from.getFogCoordArray());
-
-    // need to copy over texcoord list manually due to a missing null pointer check in setTexCoordArrayList(), this has been fixed in OSG 3.5
-    osg::Geometry::ArrayList& texCoordList = from.getTexCoordArrayList();
-    for (unsigned int i=0; i<texCoordList.size(); ++i)
-        if (texCoordList[i])
-            setTexCoordArray(i, texCoordList[i], osg::Array::BIND_PER_VERTEX);
-
-    setVertexAttribArrayList(from.getVertexAttribArrayList());
-
-    // vertices and normals are modified every frame, so we need to deep copy them.
-    // assign a dedicated VBO to make sure that modifications don't interfere with source geometry's VBO.
-    osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
-    vbo->setUsage(GL_DYNAMIC_DRAW_ARB);
-
-    osg::ref_ptr<osg::Array> vertexArray = osg::clone(from.getVertexArray(), osg::CopyOp::DEEP_COPY_ALL);
-    if (vertexArray)
+    for (unsigned int i=0; i<2; ++i)
     {
-        vertexArray->setVertexBufferObject(vbo);
-        setVertexArray(vertexArray);
-    }
+        const osg::Geometry& from = *sourceGeometry;
+        mGeometry[i] = new osg::Geometry(from, osg::CopyOp::SHALLOW_COPY);
+        osg::Geometry& to = *mGeometry[i];
+        to.setSupportsDisplayList(false);
+        to.setUseVertexBufferObjects(true);
+        to.setCullingActive(false); // make sure to disable culling since that's handled by this class
 
-    if (osg::Array* normals = from.getNormalArray())
-    {
-        osg::ref_ptr<osg::Array> normalArray = osg::clone(normals, osg::CopyOp::DEEP_COPY_ALL);
-        if (normalArray)
+        // vertices and normals are modified every frame, so we need to deep copy them.
+        // assign a dedicated VBO to make sure that modifications don't interfere with source geometry's VBO.
+        osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
+        vbo->setUsage(GL_DYNAMIC_DRAW_ARB);
+
+        osg::ref_ptr<osg::Array> vertexArray = osg::clone(from.getVertexArray(), osg::CopyOp::DEEP_COPY_ALL);
+        if (vertexArray)
         {
-            normalArray->setVertexBufferObject(vbo);
-            setNormalArray(normalArray, osg::Array::BIND_PER_VERTEX);
+            vertexArray->setVertexBufferObject(vbo);
+            to.setVertexArray(vertexArray);
         }
-    }
 
+        if (const osg::Array* normals = from.getNormalArray())
+        {
+            osg::ref_ptr<osg::Array> normalArray = osg::clone(normals, osg::CopyOp::DEEP_COPY_ALL);
+            if (normalArray)
+            {
+                normalArray->setVertexBufferObject(vbo);
+                to.setNormalArray(normalArray, osg::Array::BIND_PER_VERTEX);
+            }
+        }
 
-    if (osg::Vec4Array* tangents = dynamic_cast<osg::Vec4Array*>(from.getTexCoordArray(7)))
-    {
-        mSourceTangents = tangents;
-        osg::ref_ptr<osg::Array> tangentArray = osg::clone(tangents, osg::CopyOp::DEEP_COPY_ALL);
-        tangentArray->setVertexBufferObject(vbo);
-        setTexCoordArray(7, tangentArray, osg::Array::BIND_PER_VERTEX);
+        if (const osg::Vec4Array* tangents = dynamic_cast<const osg::Vec4Array*>(from.getTexCoordArray(7)))
+        {
+            mSourceTangents = tangents;
+            osg::ref_ptr<osg::Array> tangentArray = osg::clone(tangents, osg::CopyOp::DEEP_COPY_ALL);
+            tangentArray->setVertexBufferObject(vbo);
+            to.setTexCoordArray(7, tangentArray, osg::Array::BIND_PER_VERTEX);
+        }
+        else
+            mSourceTangents = NULL;
     }
-    else
-        mSourceTangents = NULL;
 }
 
 osg::ref_ptr<osg::Geometry> RigGeometry::getSourceGeometry()
@@ -228,7 +162,7 @@ void accumulateMatrix(const osg::Matrixf& invBindMatrix, const osg::Matrixf& mat
     ptrresult[14] += ptr[14] * weight;
 }
 
-void RigGeometry::update(osg::NodeVisitor* nv)
+void RigGeometry::cull(osg::NodeVisitor* nv)
 {
     if (!mSkeleton)
     {
@@ -238,23 +172,27 @@ void RigGeometry::update(osg::NodeVisitor* nv)
             return;
     }
 
-    if (!mSkeleton->getActive() && mLastFrameNumber != 0)
+    if ((!mSkeleton->getActive() && mLastFrameNumber != 0) || mLastFrameNumber == nv->getTraversalNumber())
+    {
+        osg::Geometry& geom = *getGeometry(mLastFrameNumber);
+        nv->pushOntoNodePath(&geom);
+        nv->apply(geom);
+        nv->popFromNodePath();
         return;
-
-    if (mLastFrameNumber == nv->getTraversalNumber())
-        return;
+    }
     mLastFrameNumber = nv->getTraversalNumber();
+    osg::Geometry& geom = *getGeometry(mLastFrameNumber);
 
     mSkeleton->updateBoneMatrices(nv->getTraversalNumber());
 
     // skinning
-    osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
-    osg::Vec3Array* normalSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getNormalArray());
-    osg::Vec4Array* tangentSrc = mSourceTangents;
+    const osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
+    const osg::Vec3Array* normalSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getNormalArray());
+    const osg::Vec4Array* tangentSrc = mSourceTangents;
 
-    osg::Vec3Array* positionDst = static_cast<osg::Vec3Array*>(getVertexArray());
-    osg::Vec3Array* normalDst = static_cast<osg::Vec3Array*>(getNormalArray());
-    osg::Vec4Array* tangentDst = static_cast<osg::Vec4Array*>(getTexCoordArray(7));
+    osg::Vec3Array* positionDst = static_cast<osg::Vec3Array*>(geom.getVertexArray());
+    osg::Vec3Array* normalDst = static_cast<osg::Vec3Array*>(geom.getNormalArray());
+    osg::Vec4Array* tangentDst = static_cast<osg::Vec4Array*>(geom.getTexCoordArray(7));
 
     for (Bone2VertexMap::const_iterator it = mBone2VertexMap.begin(); it != mBone2VertexMap.end(); ++it)
     {
@@ -294,6 +232,10 @@ void RigGeometry::update(osg::NodeVisitor* nv)
         normalDst->dirty();
     if (tangentDst)
         tangentDst->dirty();
+
+    nv->pushOntoNodePath(&geom);
+    nv->apply(geom);
+    nv->popFromNodePath();
 }
 
 void RigGeometry::updateBounds(osg::NodeVisitor *nv)
@@ -363,6 +305,33 @@ void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
 void RigGeometry::setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap)
 {
     mInfluenceMap = influenceMap;
+}
+
+void RigGeometry::accept(osg::NodeVisitor &nv)
+{
+    if (!nv.validNodeMask(*this))
+        return;
+
+    nv.pushOntoNodePath(this);
+
+    if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+        cull(&nv);
+    else if (nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR)
+        updateBounds(&nv);
+    else
+        nv.apply(*this);
+
+    nv.popFromNodePath();
+}
+
+void RigGeometry::accept(osg::PrimitiveFunctor& func) const
+{
+    getGeometry(mLastFrameNumber)->accept(func);
+}
+
+osg::Geometry* RigGeometry::getGeometry(unsigned int frame) const
+{
+    return mGeometry[frame%2].get();
 }
 
 

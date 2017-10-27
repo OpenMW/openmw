@@ -51,6 +51,11 @@ namespace MWClass
         return "";
     }
 
+    bool Activator::isActivator() const
+    {
+        return true;
+    }
+
     bool Activator::useAnim() const
     {
         return true;

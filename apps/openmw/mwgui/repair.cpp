@@ -17,8 +17,6 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 
-#include "widgets.hpp"
-
 #include "itemwidget.hpp"
 #include "itemchargeview.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -46,7 +44,7 @@ Repair::Repair()
     mToolIcon->eventMouseButtonClick += MyGUI::newDelegate(this, &Repair::onSelectItem);
 }
 
-void Repair::open()
+void Repair::onOpen()
 {
     center();
 
@@ -58,12 +56,7 @@ void Repair::open()
     mRepairBox->resetScrollbars();
 }
 
-void Repair::exit()
-{
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Repair);
-}
-
-void Repair::startRepairItem(const MWWorld::Ptr &item)
+void Repair::setPtr(const MWWorld::Ptr &item)
 {
     MWBase::Environment::get().getWindowManager()->playSound("Item Repair Up");
 
@@ -145,7 +138,7 @@ void Repair::onItemCancel()
 
 void Repair::onCancel(MyGUI::Widget* /*sender*/)
 {
-    exit();
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Repair);
 }
 
 void Repair::onRepairItem(MyGUI::Widget* /*sender*/, const MWWorld::Ptr& ptr)

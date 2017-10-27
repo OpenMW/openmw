@@ -258,7 +258,7 @@ namespace MWGui
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
     }
 
     void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
@@ -353,24 +353,31 @@ namespace MWGui
             }
 
             bool supported = false;
+            int fallbackX = 0, fallbackY = 0;
             for (unsigned int i=0; i<mResolutionList->getItemCount(); ++i)
             {
                 std::string resStr = mResolutionList->getItemNameAt(i);
                 int resX, resY;
                 parseResolution (resX, resY, resStr);
 
+                if (i == 0)
+                {
+                    fallbackX = resX;
+                    fallbackY = resY;
+                }
+
                 if (resX == Settings::Manager::getInt("resolution x", "Video")
                     && resY  == Settings::Manager::getInt("resolution y", "Video"))
                     supported = true;
             }
 
-            if (!supported)
+            if (!supported && mResolutionList->getItemCount())
             {
-                std::string msg = "This resolution is not supported in Fullscreen mode. Please select a resolution from the list.";
-                MWBase::Environment::get().getWindowManager()->
-                    messageBox(msg);
-                _sender->castType<MyGUI::Button>()->setCaption(off);
-                return;
+                if (fallbackX != 0 && fallbackY != 0)
+                {
+                    Settings::Manager::setInt("resolution x", "Video", fallbackX);
+                    Settings::Manager::setInt("resolution y", "Video", fallbackY);
+                }
             }
 
             mWindowBorderButton->setEnabled(!newState);
@@ -553,15 +560,10 @@ namespace MWGui
         updateControlsBox ();
     }
 
-    void SettingsWindow::open()
+    void SettingsWindow::onOpen()
     {
         updateControlsBox ();
         resetScrollbars();
-    }
-
-    void SettingsWindow::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
     }
 
     void SettingsWindow::onWindowResize(MyGUI::Window *_sender)

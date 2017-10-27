@@ -22,8 +22,15 @@ struct AiFollowStorage : AiTemporaryBase
 {
     float mTimer;
     bool mMoving;
+    float mTargetAngleRadians;
+    bool mTurnActorToTarget;
 
-    AiFollowStorage() : mTimer(0.f), mMoving(false) {}
+    AiFollowStorage() :
+        mTimer(0.f),
+        mMoving(false),
+        mTargetAngleRadians(0.f),
+        mTurnActorToTarget(false)
+    {}
 };
 
 int AiFollow::mFollowIndexCounter = 0;
@@ -72,6 +79,15 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
     actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
     AiFollowStorage& storage = state.get<AiFollowStorage>();
+
+    bool& rotate = storage.mTurnActorToTarget;
+    if (rotate)
+    {
+        if (zTurn(actor, storage.mTargetAngleRadians))
+            rotate = false;
+
+        return false;
+    }
 
     // AiFollow requires the target to be in range and within sight for the initial activation
     if (!mActive)
@@ -144,13 +160,33 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
     //Set the target destination from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
-    if (!storage.mMoving) 
-    {
-        const short threshold = 10; // to avoid constant switching between moving/stopping
+    short baseFollowDistance = followDistance;
+    short threshold = 30; // to avoid constant switching between moving/stopping
+    if (storage.mMoving)
+        followDistance -= threshold;
+    else
         followDistance += threshold;
+
+    osg::Vec3f targetPos(target.getRefData().getPosition().asVec3());
+    osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
+
+    osg::Vec3f dir = targetPos - actorPos;
+    float targetDistSqr = dir.length2();
+
+    if (targetDistSqr <= followDistance * followDistance)
+    {
+        float faceAngleRadians = std::atan2(dir.x(), dir.y());
+
+        if (!zTurn(actor, faceAngleRadians, osg::DegreesToRadians(45.f)))
+        {
+            storage.mTargetAngleRadians = faceAngleRadians;
+            storage.mTurnActorToTarget = true;
+        }
+
+        return false;
     }
 
-    storage.mMoving = !pathTo(actor, dest, duration, followDistance); // Go to the destination
+    storage.mMoving = !pathTo(actor, dest, duration, baseFollowDistance); // Go to the destination
 
     if (storage.mMoving)
     {

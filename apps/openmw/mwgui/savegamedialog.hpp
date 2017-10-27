@@ -17,9 +17,7 @@ namespace MWGui
     public:
         SaveGameDialog();
 
-        virtual void open();
-
-        virtual void exit();
+        virtual void onOpen();
 
         void setLoadOrSave(bool load);
 
@@ -31,6 +29,7 @@ namespace MWGui
         void onOkButtonClicked (MyGUI::Widget* sender);
         void onDeleteButtonClicked (MyGUI::Widget* sender);
         void onCharacterSelected (MyGUI::ComboBox* sender, size_t pos);
+        void onCharacterAccept(MyGUI::ComboBox* sender, size_t pos);
         // Slot selected (mouse click or arrow keys)
         void onSlotSelected (MyGUI::ListBox* sender, size_t pos);
         // Slot activated (double click or enter key)
@@ -39,10 +38,12 @@ namespace MWGui
         void onSlotMouseClick(MyGUI::ListBox* sender, size_t pos);
 
         void onDeleteSlotConfirmed();
+        void onDeleteSlotCancel();
 
         void onEditSelectAccept (MyGUI::EditBox* sender);
         void onSaveNameChanged (MyGUI::EditBox* sender);
         void onConfirmationGiven();
+        void onConfirmationCancel();
 
         void accept(bool reallySure=false);
 

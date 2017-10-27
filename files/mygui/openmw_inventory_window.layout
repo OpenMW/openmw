@@ -32,18 +32,23 @@
             <Widget type="HBox" position="0 8 350 24" align="Left Top HStretch" name="Categories">
                 <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="AllButton">
                     <Property key="Caption" value="#{sAllTab}"/>
+                    <Property key="NeedKey" value="false"/>
                 </Widget>
                 <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="WeaponButton">
                     <Property key="Caption" value="#{sWeaponTab}"/>
+                    <Property key="NeedKey" value="false"/>
                 </Widget>
                 <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="ApparelButton">
                     <Property key="Caption" value="#{sApparelTab}"/>
+                    <Property key="NeedKey" value="false"/>
                 </Widget>
                 <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="MagicButton">
                     <Property key="Caption" value="#{sMagicTab}"/>
+                    <Property key="NeedKey" value="false"/>
                 </Widget>
                 <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="MiscButton">
                     <Property key="Caption" value="#{sMiscTab}"/>
+                    <Property key="NeedKey" value="false"/>
                 </Widget>
             </Widget>
 

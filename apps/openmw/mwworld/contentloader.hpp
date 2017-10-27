@@ -4,6 +4,7 @@
 #include <iosfwd>
 #include <iostream>
 #include <boost/filesystem/path.hpp>
+#include <MyGUI_TextIterator.h>
 
 #include "components/loadinglistener/loadinglistener.hpp"
 
@@ -24,7 +25,7 @@ struct ContentLoader
     virtual void load(const boost::filesystem::path& filepath, int& index)
     {
       std::cout << "Loading content file " << filepath.string() << std::endl;
-      mListener.setLabel(filepath.string());
+      mListener.setLabel(MyGUI::TextIterator::toTagsString(filepath.string()));
     }
 
     protected:
