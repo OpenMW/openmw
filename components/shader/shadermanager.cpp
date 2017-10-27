@@ -7,9 +7,11 @@
 
 #include <osg/Program>
 
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <experimental/filesystem>
+
 #include <boost/algorithm/string.hpp>
+
+namespace sfs = std::experimental::filesystem;
 
 namespace Shader
 {
@@ -19,11 +21,11 @@ namespace Shader
         mPath = path;
     }
 
-    bool parseIncludes(boost::filesystem::path shaderPath, std::string& source)
+    bool parseIncludes(sfs::path shaderPath, std::string& source)
     {
         boost::replace_all(source, "\r\n", "\n");
 
-        std::set<boost::filesystem::path> includedFiles;
+        std::set<sfs::path> includedFiles;
         size_t foundPos = 0;
         int fileNumber = 1;
         while ((foundPos = source.find("#include")) != std::string::npos)
@@ -41,8 +43,8 @@ namespace Shader
                 return false;
             }
             std::string includeFilename = source.substr(start+1, end-(start+1));
-            boost::filesystem::path includePath = shaderPath / includeFilename;
-            boost::filesystem::ifstream includeFstream;
+            sfs::path includePath = shaderPath / includeFilename;
+            std::ifstream includeFstream;
             includeFstream.open(includePath);
             if (includeFstream.fail())
             {
@@ -107,8 +109,8 @@ namespace Shader
         TemplateMap::iterator templateIt = mShaderTemplates.find(shaderTemplate);
         if (templateIt == mShaderTemplates.end())
         {
-            boost::filesystem::path p = (boost::filesystem::path(mPath) / shaderTemplate);
-            boost::filesystem::ifstream stream;
+            sfs::path p = (sfs::path(mPath) / shaderTemplate);
+            std::ifstream stream;
             stream.open(p);
             if (stream.fail())
             {
@@ -120,7 +122,7 @@ namespace Shader
 
             // parse includes
             std::string source = buffer.str();
-            if (!parseIncludes(boost::filesystem::path(mPath), source))
+            if (!parseIncludes(sfs::path(mPath), source))
                 return NULL;
 
             templateIt = mShaderTemplates.insert(std::make_pair(shaderTemplate, source)).first;

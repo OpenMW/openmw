@@ -3,10 +3,12 @@
 
 #include <QWidget>
 
-#include <boost/filesystem/path.hpp>
+#include <experimental/filesystem>
 
 class QPushButton;
 class QListWidget;
+
+namespace sfs = std::experimental::filesystem;
 
 namespace CSMDoc
 {
@@ -42,7 +44,7 @@ namespace CSVTools
             /// Configure dialogue for a new merge
             void configure (CSMDoc::Document *document);
 
-            void setLocalData (const boost::filesystem::path& localData);
+            void setLocalData (const sfs::path& localData);
 
             CSMDoc::Document *getDocument() const;
 

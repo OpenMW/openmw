@@ -1,12 +1,12 @@
 #ifndef COMPONENTS_FILES_ESCAPE_HPP
 #define COMPONENTS_FILES_ESCAPE_HPP
 
+#include <experimental/any>
 #include <queue>
 
 #include <components/files/multidircollection.hpp>
 
 #include <boost/iostreams/filtering_stream.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
 /**
@@ -179,7 +179,7 @@ namespace Files
 
     struct EscapePath
     {
-        boost::filesystem::path mPath;
+        sfs::path mPath;
 
         static PathContainer toPathContainer(const std::vector<EscapePath> & escapePathContainer);
     };

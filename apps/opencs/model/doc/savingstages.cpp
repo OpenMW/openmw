@@ -1,6 +1,6 @@
 #include "savingstages.hpp"
 
-#include <boost/filesystem.hpp>
+#include <experimental/filesystem>
 
 #include <QUndoStack>
 
@@ -64,14 +64,14 @@ void CSMDoc::WriteHeaderStage::perform (int stage, Messages& messages)
             mDocument.getData().count (CSMWorld::RecordBase::State_Deleted));
 
         /// \todo refine dependency list (at least remove redundant dependencies)
-        std::vector<boost::filesystem::path> dependencies = mDocument.getContentFiles();
-        std::vector<boost::filesystem::path>::const_iterator end (--dependencies.end());
+        std::vector<sfs::path> dependencies = mDocument.getContentFiles();
+        std::vector<sfs::path>::const_iterator end (--dependencies.end());
 
-        for (std::vector<boost::filesystem::path>::const_iterator iter (dependencies.begin());
+        for (std::vector<sfs::path>::const_iterator iter (dependencies.begin());
             iter!=end; ++iter)
         {
             std::string name = iter->filename().string();
-            uint64_t size = boost::filesystem::file_size (*iter);
+            uint64_t size = sfs::file_size (*iter);
 
             mState.getWriter().addMaster (name, size);
         }
@@ -485,15 +485,15 @@ void CSMDoc::FinalSavingStage::perform (int stage, Messages& messages)
         mState.getWriter().close();
         mState.getStream().close();
 
-        if (boost::filesystem::exists (mState.getTmpPath()))
-            boost::filesystem::remove (mState.getTmpPath());
+        if (sfs::exists (mState.getTmpPath()))
+            sfs::remove (mState.getTmpPath());
     }
     else if (!mState.isProjectFile())
     {
-        if (boost::filesystem::exists (mState.getPath()))
-            boost::filesystem::remove (mState.getPath());
+        if (sfs::exists (mState.getPath()))
+            sfs::remove (mState.getPath());
 
-        boost::filesystem::rename (mState.getTmpPath(), mState.getPath());
+        sfs::rename (mState.getTmpPath(), mState.getPath());
 
         mDocument.getUndoStack().setClean();
     }

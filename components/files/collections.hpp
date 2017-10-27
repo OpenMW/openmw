@@ -1,7 +1,7 @@
 #ifndef COMPONENTS_FILES_COLLECTION_HPP
 #define COMPONENTS_FILES_COLLECTION_HPP
 
-#include <boost/filesystem.hpp>
+#include <experimental/filesystem>
 
 #include "multidircollection.hpp"
 
@@ -19,7 +19,7 @@ namespace Files
             /// leading dot and must be all lower-case.
             const MultiDirCollection& getCollection(const std::string& extension) const;
 
-            boost::filesystem::path getPath(const std::string& file) const;
+            sfs::path getPath(const std::string& file) const;
             ///< Return full path (including filename) of \a file.
             ///
             /// If the file does not exist in any of the collection's

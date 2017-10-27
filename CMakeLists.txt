@@ -24,16 +24,8 @@ if (USE_QT)
     set_property(CACHE DESIRED_QT_VERSION PROPERTY STRINGS 4 5)
 endif()
 
-if (APPLE)
-    # OS X build process relies on this fix: https://github.com/Kitware/CMake/commit/3df5147043d83aa09acd5c9ce31d5c602efb99db
-    cmake_minimum_required(VERSION 3.1.0)
-elseif (USE_QT AND DESIRED_QT_VERSION MATCHES 5)
-    # 2.8.11+ is required to make Qt5 happy and allow linking QtMain on Windows.
-    cmake_minimum_required(VERSION 2.8.11)
-else()
-    # We probably support older versions than this.
-    cmake_minimum_required(VERSION 2.6)
-endif()
+# set the minimum required version across the board
+cmake_minimum_required(VERSION 3.1.0)
 
 project(OpenMW)
 
@@ -348,9 +340,9 @@ if (NOT WIN32 AND NOT APPLE)
 endif()
 
 # CXX Compiler settings
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wundef -Wno-unused-parameter -std=c++17 -pedantic -Wno-long-long")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wundef -Wno-unused-parameter -pedantic -Wno-long-long")
     add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS=ON )
 
     if (APPLE)

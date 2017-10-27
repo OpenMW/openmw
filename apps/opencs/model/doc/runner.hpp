@@ -4,13 +4,15 @@
 #include <vector>
 #include <string>
 
-#include <boost/filesystem/path.hpp>
+#include <experimental/filesystem>
 
 #include <QObject>
 #include <QProcess>
 #include <QTextDocument>
 
 #include <components/esm/debugprofile.hpp>
+
+namespace sfs = std::experimental::filesystem;
 
 class QTemporaryFile;
 
@@ -29,11 +31,11 @@ namespace CSMDoc
             std::string mStartupInstruction;
             QTemporaryFile *mStartup;
             QTextDocument mLog;
-            boost::filesystem::path mProjectPath;
+            sfs::path mProjectPath;
 
         public:
 
-            Runner (const boost::filesystem::path& projectPath);
+            Runner (const sfs::path& projectPath);
 
             ~Runner();
 

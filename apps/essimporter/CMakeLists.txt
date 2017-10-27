@@ -36,8 +36,8 @@ openmw_add_executable(openmw-essimporter
 
 target_link_libraries(openmw-essimporter
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
     components
+    stdc++fs
 )
 
 if (BUILD_WITH_CODE_COVERAGE)

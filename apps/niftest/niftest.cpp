@@ -11,11 +11,11 @@
 #include <components/vfs/filesystemarchive.hpp>
 
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
+#include <experimental/filesystem>
 
 // Create local aliases for brevity
 namespace bpo = boost::program_options;
-namespace bfs = boost::filesystem;
+namespace sfs = std::experimental::filesystem;
 
 ///See if the file has the named extension
 bool hasExtension(std::string filename, std::string  extensionToFind)
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
 //                 std::cout << "Reading BSA File: " << name << std::endl;
                 readVFS(new VFS::BsaArchive(name));
              }
-             else if(bfs::is_directory(bfs::path(name)))
+             else if(sfs::is_directory(sfs::path(name)))
              {
 //                 std::cout << "Reading All Files in: " << name << std::endl;
                 readVFS(new VFS::FileSystemArchive(name),name);

@@ -1,11 +1,9 @@
 #include "savingstate.hpp"
 
-#include <boost/filesystem/fstream.hpp>
-
 #include "operation.hpp"
 #include "document.hpp"
 
-CSMDoc::SavingState::SavingState (Operation& operation, const boost::filesystem::path& projectPath,
+CSMDoc::SavingState::SavingState (Operation& operation, const sfs::path& projectPath,
     ToUTF8::FromType encoding)
 : mOperation (operation), mEncoder (encoding),  mProjectPath (projectPath), mProjectFile (false)
 {
@@ -33,24 +31,24 @@ void CSMDoc::SavingState::start (Document& document, bool project)
     else
         mPath = document.getSavePath();
 
-    boost::filesystem::path file (mPath.filename().string() + ".tmp");
+    sfs::path file (mPath.filename().string() + ".tmp");
 
     mTmpPath = mPath.parent_path();
 
     mTmpPath /= file;
 }
 
-const boost::filesystem::path& CSMDoc::SavingState::getPath() const
+const sfs::path& CSMDoc::SavingState::getPath() const
 {
     return mPath;
 }
 
-const boost::filesystem::path& CSMDoc::SavingState::getTmpPath() const
+const sfs::path& CSMDoc::SavingState::getTmpPath() const
 {
     return mTmpPath;
 }
 
-boost::filesystem::ofstream& CSMDoc::SavingState::getStream()
+std::ofstream& CSMDoc::SavingState::getStream()
 {
     return mStream;
 }

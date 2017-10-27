@@ -2,8 +2,6 @@
 
 #include <iomanip>
 
-#include <boost/filesystem/fstream.hpp>
-
 #include <osgDB/ReadFile>
 #include <osg/ImageUtils>
 

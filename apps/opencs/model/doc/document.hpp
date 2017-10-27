@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <boost/filesystem/path.hpp>
+#include <experimental/filesystem>
 
 #include <QUndoStack>
 #include <QObject>
@@ -60,15 +60,15 @@ namespace CSMDoc
 
         private:
 
-            boost::filesystem::path mSavePath;
-            std::vector<boost::filesystem::path> mContentFiles;
+            sfs::path mSavePath;
+            std::vector<sfs::path> mContentFiles;
             bool mNew;
             CSMWorld::Data mData;
             CSMTools::Tools mTools;
-            boost::filesystem::path mProjectPath;
+            sfs::path mProjectPath;
             Saving mSavingOperation;
             OperationHolder mSaving;
-            boost::filesystem::path mResDir;
+            sfs::path mResDir;
             const Fallback::Map* mFallbackMap;
             Blacklist mBlacklist;
             Runner mRunner;
@@ -103,8 +103,8 @@ namespace CSMDoc
         public:
 
             Document (const Files::ConfigurationManager& configuration,
-                const std::vector< boost::filesystem::path >& files, bool new_,
-                const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
+                const std::vector< sfs::path >& files, bool new_,
+                const sfs::path& savePath, const sfs::path& resDir,
                 const Fallback::Map* fallback, ToUTF8::FromType encoding,
                 const std::vector<std::string>& blacklistedScripts,
                 bool fsStrict, const Files::PathContainer& dataPaths, const std::vector<std::string>& archives);
@@ -115,11 +115,11 @@ namespace CSMDoc
 
             int getState() const;
 
-            const boost::filesystem::path& getSavePath() const;
+            const sfs::path& getSavePath() const;
 
-            const boost::filesystem::path& getProjectPath() const;
+            const sfs::path& getProjectPath() const;
 
-            const std::vector<boost::filesystem::path>& getContentFiles() const;
+            const std::vector<sfs::path>& getContentFiles() const;
             ///< \attention The last element in this collection is the file that is being edited,
             /// but with its original path instead of the save path.
 
