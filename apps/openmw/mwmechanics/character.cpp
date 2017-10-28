@@ -558,9 +558,6 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     if (mPtr.getClass().isActor())
         refreshHitRecoilAnims();
 
-    if (isTurning() && mJumpState != JumpState_InAir)
-        mAnimation->disable(mJumpAnimName);
-
     const WeaponInfo *weap = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(mWeaponType));
     if (!mPtr.getClass().isBipedal(mPtr))
         weap = sWeaponTypeListEnd;
@@ -1883,9 +1880,15 @@ void CharacterController::update(float duration)
             else if(rot.z() != 0.0f && !sneak && !(mPtr == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson()))
             {
                 if(rot.z() > 0.0f)
+                {
                     movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
+                    mAnimation->disable(mJumpAnimName);
+                }
                 else if(rot.z() < 0.0f)
+                {
                     movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
+                    mAnimation->disable(mJumpAnimName);
+                }
             }
         }
 
