@@ -372,6 +372,9 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
             }
         }
 
+        if (jumpAnimName.length() > 0)
+            mJumpAnimName = jumpAnimName;
+
         if(mJumpState == JumpState_InAir)
         {
             mAnimation->disable(mCurrentJump);
@@ -554,6 +557,9 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 {
     if (mPtr.getClass().isActor())
         refreshHitRecoilAnims();
+
+    if (isTurning() && mJumpState != JumpState_InAir)
+        mAnimation->disable(mJumpAnimName);
 
     const WeaponInfo *weap = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(mWeaponType));
     if (!mPtr.getClass().isBipedal(mPtr))
