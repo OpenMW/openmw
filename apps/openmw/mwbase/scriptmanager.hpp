@@ -42,6 +42,10 @@ namespace MWBase
             ///< Compile script with the given namen
             /// \return Success?
 
+            virtual bool hasOnActivate (const std::string& name) = 0;
+            ///< Determine if a script with the given name contains OnActivate
+            /// \return Contains OnActivate?
+
             virtual std::pair<int, int> compileAll() = 0;
             ///< Compile all scripts
             /// \return count, success
