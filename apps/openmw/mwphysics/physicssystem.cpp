@@ -357,10 +357,9 @@ namespace MWPhysics
                 osg::Vec3f nextpos = newPosition + velocity * remainingTime;
 
                 // If not able to fly, don't allow to swim up into the air
-                if(newPosition.z() < swimlevel &&
-                   !isFlying &&  // can't fly
+                if(!isFlying &&                   // can't fly
                    nextpos.z() > swimlevel &&     // but about to go above water
-                   newPosition.z() <= swimlevel)
+                   newPosition.z() < swimlevel)
                 {
                     const osg::Vec3f down(0,0,-1);
                     velocity = slide(velocity, down);
