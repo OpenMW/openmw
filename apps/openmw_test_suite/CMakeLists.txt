@@ -19,7 +19,7 @@ if (GTEST_FOUND)
 
     openmw_add_executable(openmw_test_suite openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
 
-    target_link_libraries(openmw_test_suite ${GTEST_BOTH_LIBRARIES} components)
+    target_link_libraries(openmw_test_suite ${GTEST_BOTH_LIBRARIES} components stdc++fs)
     # Fix for not visible pthreads functions for linker with glibc 2.15
     if (UNIX AND NOT APPLE)
         target_link_libraries(openmw_test_suite ${CMAKE_THREAD_LIBS_INIT})
