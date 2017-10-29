@@ -58,6 +58,8 @@ namespace MWGui
 
             void clear();
 
+            void activateItems();
+
             void useItem(const MWWorld::Ptr& ptr);
 
             void setGuiMode(GuiMode mode);
@@ -69,6 +71,8 @@ namespace MWGui
             DragAndDrop* mDragAndDrop;
 
             int mSelectedItem;
+
+            std::vector<MWWorld::Ptr> mItemsToActivate;
 
             MWWorld::Ptr mPtr;
 

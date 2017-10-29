@@ -1,6 +1,7 @@
 #include "inventorywindow.hpp"
 
 #include <stdexcept>
+#include <algorithm>
 
 #include <MyGUI_Window.h>
 #include <MyGUI_ImageBox.h>
@@ -147,6 +148,15 @@ namespace MWGui
         mTradeModel = NULL;
         mSortModel = NULL;
         mItemView->setModel(NULL);
+    }
+
+    void InventoryWindow::activateItems()
+    {
+        for (std::vector<MWWorld::Ptr>::iterator it = mItemsToActivate.begin(); it != mItemsToActivate.end(); it++)
+        {
+            it->getRefData().activate();
+        }
+        mItemsToActivate.clear();
     }
 
     void InventoryWindow::setGuiMode(GuiMode mode)
@@ -652,6 +662,16 @@ namespace MWGui
 
         if (object.getClass().getName(object) == "") // objects without name presented to user can never be picked up
             return;
+
+        std::string scriptName = object.getClass().getScript(object); // Objects that have OnActivte in their script cannot be picked up through inventory
+        if (!scriptName.empty() && MWBase::Environment::get().getScriptManager()->hasOnActivate(scriptName))
+        {
+            if (std::find(mItemsToActivate.begin(), mItemsToActivate.end(), object) == mItemsToActivate.end())
+            {
+                mItemsToActivate.push_back(object);
+            }
+            return;
+        }
 
         int count = object.getRefData().getCount();
 
