@@ -209,7 +209,7 @@ if [ -z $CONFIGURATION ]; then
 fi
 
 if [ -z $VS_VERSION ]; then
-	VS_VERSION="2013"
+	VS_VERSION="2015"
 fi
 
 case $VS_VERSION in
