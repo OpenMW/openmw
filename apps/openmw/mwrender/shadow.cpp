@@ -227,6 +227,19 @@ namespace MWRender
             popCurrentMask();
         }
 
+        void apply(osg::Drawable& drawable)
+        {
+            if (isCulled(drawable)) return;
+
+            // push the culling mode.
+            pushCurrentMask();
+
+            updateBound(drawable.getBoundingBox());
+
+            // pop the culling mode.
+            popCurrentMask();
+        }
+
         void apply(osg::Billboard&)
         {
             OSG_INFO << "Warning Billboards not yet supported" << std::endl;
@@ -547,7 +560,7 @@ namespace MWRender
                 {
                     osg::ref_ptr<osg::Texture2D> texture = sd->_texture;
                     osg::ref_ptr<osg::StateSet> stateSet = debugGeometry->getOrCreateStateSet();
-                    if (false)
+                    if (true)
                         stateSet->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
                     else
                         stateSet->setTextureAttributeAndModes(0, testTex, osg::StateAttribute::ON);
