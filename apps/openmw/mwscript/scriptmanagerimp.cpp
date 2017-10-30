@@ -88,12 +88,6 @@ namespace MWScript
         return false;
     }
 
-    bool ScriptManager::hasOnActivate(const std::string& name)
-    {
-        const ESM::Script *script = mStore.get<ESM::Script>().find(name);
-        return script->mScriptText.find("OnActivate");
-    }
-
     void ScriptManager::run (const std::string& name, Interpreter::Context& interpreterContext)
     {
         // compile script

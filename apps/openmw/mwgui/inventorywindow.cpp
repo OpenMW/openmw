@@ -663,8 +663,7 @@ namespace MWGui
         if (object.getClass().getName(object) == "") // objects without name presented to user can never be picked up
             return;
 
-        std::string scriptName = object.getClass().getScript(object); // Objects that have OnActivte in their script cannot be picked up through inventory
-        if (!scriptName.empty() && MWBase::Environment::get().getScriptManager()->hasOnActivate(scriptName))
+        if (object.getRefData().hasSuppressActivate()) // if Flag_SuppressActivate is set, script that contains OnActivate is attached to the item
         {
             if (std::find(mItemsToActivate.begin(), mItemsToActivate.end(), object) == mItemsToActivate.end())
             {
