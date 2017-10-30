@@ -1,7 +1,7 @@
 os:
  - linux
  - osx
-osx_image: xcode8.3
+osx_image: xcode9.0
 language: cpp
 install: export CXX="g++-7"
 sudo: required
