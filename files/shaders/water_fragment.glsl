@@ -142,6 +142,9 @@ uniform vec3 nodePosition;
 
 uniform float rainIntensity;
 
+uniform sampler2DShadow shadowTexture0;
+varying vec4 shadowSpaceCoords;
+
 float frustumDepth;
 
 float linearizeDepth(float depth)  // takes <0,1> non-linear depth value and returns <0,1> linearized value
@@ -158,7 +161,7 @@ void main(void)
     vec2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
     UV.y *= -1.0;
 
-    float shadow = 1.0;
+    float shadow = shadow2DProj(shadowTexture0, shadowSpaceCoords).r;
 
     vec2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
     screenCoords.y = (1.0-screenCoords.y);
