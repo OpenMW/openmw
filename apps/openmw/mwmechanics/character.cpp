@@ -372,9 +372,6 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
             }
         }
 
-        if (jumpAnimName.length() > 0)
-            mJumpAnimName = jumpAnimName;
-
         if(mJumpState == JumpState_InAir)
         {
             mAnimation->disable(mCurrentJump);
@@ -385,8 +382,9 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
         }
         else
         {
-            mAnimation->disable(mCurrentJump);
-            mCurrentJump.clear();
+            if (startAtLoop) 
+                mAnimation->disable(mCurrentJump);
+
             if (mAnimation->hasAnimation("jump"))
                 mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, true,
                              1.0f, "loop stop", "stop", 0.0f, 0);
@@ -1882,12 +1880,12 @@ void CharacterController::update(float duration)
                 if(rot.z() > 0.0f)
                 {
                     movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
-                    mAnimation->disable(mJumpAnimName);
+                    mAnimation->disable(mCurrentJump);
                 }
                 else if(rot.z() < 0.0f)
                 {
                     movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
-                    mAnimation->disable(mJumpAnimName);
+                    mAnimation->disable(mCurrentJump);
                 }
             }
         }

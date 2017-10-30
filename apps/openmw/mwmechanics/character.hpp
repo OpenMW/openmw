@@ -184,7 +184,6 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     JumpingState mJumpState;
     std::string mCurrentJump;
-    std::string mJumpAnimName;
 
     WeaponType mWeaponType;
     std::string mCurrentWeapon;
