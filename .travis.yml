@@ -3,7 +3,7 @@ os:
  - osx
 osx_image: xcode9.1
 language: cpp
-install: export CXX="g++-7"
+install: export c
 sudo: required
 dist: trusty
 branches:
