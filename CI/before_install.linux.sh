@@ -1,4 +1,9 @@
 #!/bin/sh
+# explicitly use gcc7
+export CXX=g++-7
+export CC=gcc-7
+
+# explicitly use clang5
 sudo ln -s /usr/bin/clang-5.0 /usr/local/bin/clang
 sudo ln -s /usr/bin/clang++-5.0 /usr/local/bin/clang++
 

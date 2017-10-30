@@ -1,7 +1,7 @@
 os:
  - linux
  - osx
-osx_image: xcode9
+osx_image: xcode9.1
 language: cpp
 install: export c
 sudo: required
