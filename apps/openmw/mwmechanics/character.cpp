@@ -380,7 +380,7 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
                 mAnimation->play(mCurrentJump, Priority_Jump, jumpmask, false,
                              1.0f, (startAtLoop?"loop start":"start"), "stop", 0.0f, ~0ul);
         }
-        else
+        else if (mJumpState == JumpState_Landing)
         {
             if (startAtLoop) 
                 mAnimation->disable(mCurrentJump);
@@ -388,6 +388,14 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
             if (mAnimation->hasAnimation("jump"))
                 mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, true,
                              1.0f, "loop stop", "stop", 0.0f, 0);
+        }
+        else    // JumpState_None
+        {
+            if (mCurrentJump.length() > 0)
+            {
+                mAnimation->disable(mCurrentJump);
+                mCurrentJump.clear();
+            }
         }
     }
 }
@@ -1693,7 +1701,6 @@ void CharacterController::update(float duration)
         mHasMovedInXY = std::abs(vec.x())+std::abs(vec.y()) > 0.0f;
         isrunning = isrunning && mHasMovedInXY;
 
-
         // advance athletics
         if(mHasMovedInXY && mPtr == getPlayer())
         {
@@ -1848,7 +1855,8 @@ void CharacterController::update(float duration)
         }
         else
         {
-            jumpstate = JumpState_None;
+            jumpstate = mAnimation->isPlaying(mCurrentJump) ? JumpState_Landing : JumpState_None;
+
             vec.z() = 0.0f;
 
             inJump = false;
