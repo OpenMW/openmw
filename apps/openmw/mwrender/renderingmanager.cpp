@@ -206,7 +206,7 @@ namespace MWRender
 
         osgShadow::ShadowSettings* settings = shadowedScene->getShadowSettings();
         settings->setLightNum(0);
-        settings->setCastsShadowTraversalMask(Mask_Scene|Mask_Actor|Mask_Player);
+        settings->setCastsShadowTraversalMask(Mask_Scene|Mask_Actor|Mask_Player|Mask_Terrain);
         settings->setReceivesShadowTraversalMask(~0u);
 
         //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::PERSPECTIVE_SHADOW_MAP);
