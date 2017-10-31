@@ -735,7 +735,7 @@ namespace MWGui
             }
         }
 
-        if (!found)
+        if (!found || selected == cycled)
             return;
 
         useItem(model.getItem(cycled).mBase);
