@@ -268,7 +268,7 @@ namespace MWRender
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
         osg::ref_ptr<osg::LightSource> source = new osg::LightSource;
-        //source->setNodeMask(Mask_Lighting);
+        source->setNodeMask(Mask_Lighting);
         mSunLight = new osg::Light;
         source->setLight(mSunLight);
         mSunLight->setDiffuse(osg::Vec4f(0,0,0,1));
@@ -315,8 +315,7 @@ namespace MWRender
         mViewer->getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
         mViewer->getCamera()->setCullingMode(cullingMode);
 
-        //mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
-        mViewer->getCamera()->setCullMask(~(Mask_Lighting));
+        mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
