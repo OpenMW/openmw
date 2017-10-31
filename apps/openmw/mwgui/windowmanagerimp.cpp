@@ -1171,8 +1171,6 @@ namespace MWGui
             mGuiModeStates[mode].update(false);
             if (!noSound)
                 playSound(mGuiModeStates[mode].mCloseSound);
-            if (mode == GM_Inventory)
-                mInventoryWindow->activateItems(); // Activate cursed items when inventory is closed
         }
 
         if (!mGuiModes.empty())

@@ -14,6 +14,9 @@ namespace MWWorld
 
     void ActionTake::executeImp (const Ptr& actor)
     {
+        //No need to do anything if moving items from the player's inventory back into player's inventory
+        if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr() && getTarget().getCell() == 0)
+            return;
         MWBase::Environment::get().getMechanicsManager()->itemTaken(
                     actor, getTarget(), MWWorld::Ptr(), getTarget().getRefData().getCount());
         MWWorld::Ptr newitem = *actor.getClass().getContainerStore (actor).add (getTarget(), getTarget().getRefData().getCount(), actor);

@@ -1,7 +1,6 @@
 #include "inventorywindow.hpp"
 
 #include <stdexcept>
-#include <algorithm>
 
 #include <MyGUI_Window.h>
 #include <MyGUI_ImageBox.h>
@@ -148,15 +147,6 @@ namespace MWGui
         mTradeModel = NULL;
         mSortModel = NULL;
         mItemView->setModel(NULL);
-    }
-
-    void InventoryWindow::activateItems()
-    {
-        for (std::vector<MWWorld::Ptr>::iterator it = mItemsToActivate.begin(); it != mItemsToActivate.end(); it++)
-        {
-            it->getRefData().activate();
-        }
-        mItemsToActivate.clear();
     }
 
     void InventoryWindow::setGuiMode(GuiMode mode)
@@ -663,15 +653,6 @@ namespace MWGui
         if (object.getClass().getName(object) == "") // objects without name presented to user can never be picked up
             return;
 
-        if (object.getRefData().hasSuppressActivate()) // if Flag_SuppressActivate is set, script that contains OnActivate is attached to the item
-        {
-            if (std::find(mItemsToActivate.begin(), mItemsToActivate.end(), object) == mItemsToActivate.end())
-            {
-                mItemsToActivate.push_back(object);
-            }
-            return;
-        }
-
         int count = object.getRefData().getCount();
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -682,6 +663,13 @@ namespace MWGui
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
         MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
+        
+        if (object.getRefData().hasSuppressActivate()) // if Flag_SuppressActivate is set, script that contains OnActivate is attached to the item
+        {
+            newObject.getRefData().onActivate(); // set the flag_SuppressActivate flag for the new item
+            newObject.getRefData().activate();
+        }
+
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject (object);
 
