@@ -43,7 +43,7 @@ void writeMissing(bool last)
   writeChar(value, 1, last, "not part of this charset");
 }
 
-int write_table(const std::string &charset, const std::string &tableName)
+int write_table(const std::string &charset, const std::string &tableName, int tableSize = 256)
 {
   // Write table header
   cout << "static signed char " << tableName << "[] =\n{\n";
@@ -51,14 +51,27 @@ int write_table(const std::string &charset, const std::string &tableName)
   // Open conversion system
   iconv_t cd = iconv_open ("UTF-8", charset.c_str());
 
-  // Convert each character from 0 to 255
-  for(int i=0; i<256; i++)
-    {
-      bool last = (i==255);
-
-      char input = i;
-      char *iptr = &input;
-      size_t ileft = 1;
+  // Convert each character from 0 to tableSize
+  for (int i = 0; i<tableSize; i++)
+  {
+      char input[2] = {0};
+      size_t ileft;
+      
+      if (i < 256)
+      {
+        input[0] = i;
+        ileft = 1;
+      }
+      else
+      {
+        input[0] = i / 256;
+        input[1] = i % 256;
+        ileft = 2;
+      }
+      
+      bool last = (i==tableSize-1);
+      
+      char *iptr = input;
 
       char output[5];
       for(int k=0; k<5; k++) output[k] = 0;
@@ -69,7 +82,7 @@ int write_table(const std::string &charset, const std::string &tableName)
 
       if(res) writeMissing(last);
       else writeChar(output, 5-oleft, last);
-    }
+  }
 
   iconv_close (cd);
 
@@ -105,7 +118,12 @@ int main()
   cout << "\n/// Latin alphabet used by English and some other Western languages"
           "\n";
   write_table("WINDOWS-1252", "windows_1252");
-
+  
+  // Korean
+  cout << "\n/// Korean alphabet used by Korean"
+          "\n";
+  write_table("CP949", "cp949", 55296);
+  
   write_table("CP437", "cp437");
 
   // Close namespace

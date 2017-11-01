@@ -55,5 +55,6 @@ int main()
 {
     testEncoder(ToUTF8::WINDOWS_1251, "test_data/russian-win1251.txt", "test_data/russian-utf8.txt");
     testEncoder(ToUTF8::WINDOWS_1252, "test_data/french-win1252.txt", "test_data/french-utf8.txt");
+    testEncoder(ToUTF8::CP949, "test_data/korean-cp949.txt", "test_data/korean-utf8.txt");
     return 0;
 }
