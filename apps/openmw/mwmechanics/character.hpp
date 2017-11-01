@@ -7,6 +7,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/timestamp.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -195,6 +196,8 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     // counted for skill increase
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
+
+    MWWorld::TimeStamp mKnockoutTime;
 
     MWWorld::ConstPtr mHeadTrackTarget;
 
