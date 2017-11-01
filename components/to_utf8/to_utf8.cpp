@@ -47,6 +47,9 @@ using namespace ToUTF8;
 Utf8Encoder::Utf8Encoder(const FromType sourceEncoding):
     mOutput(50*1024)
 {
+    arraySize = 256;        // base 
+    isUseWided = false;     // base
+    
     switch (sourceEncoding)
     {
         case ToUTF8::WINDOWS_1252:
@@ -62,6 +65,13 @@ Utf8Encoder::Utf8Encoder(const FromType sourceEncoding):
         case ToUTF8::WINDOWS_1251:
         {
             translationArray = ToUTF8::windows_1251;
+            break;
+        }
+        case ToUTF8::CP949:
+        {
+            translationArray = ToUTF8::cp949;
+            arraySize = 55296;
+            isUseWided = true;
             break;
         }
         case ToUTF8::CP437:
@@ -93,7 +103,8 @@ std::string Utf8Encoder::getUtf8(const char* input, size_t size)
     // Compute output length, and check for pure ascii input at the same
     // time.
     bool ascii;
-    size_t outlen = getLength(input, ascii);
+    // if isUseWided is set, use wided function.
+    size_t outlen = !isUseWided ? getLength(input, ascii) : getLengthWided(input, ascii);
 
     // If we're pure ascii, then don't bother converting anything.
     if(ascii)
@@ -104,8 +115,17 @@ std::string Utf8Encoder::getUtf8(const char* input, size_t size)
     char *out = &mOutput[0];
 
     // Translate
-    while (*input)
-        copyFromArray(*(input++), out);
+    // if isUseWided is set, use wided function.
+    if(!isUseWided)
+    {
+        while (*input)
+            copyFromArray(*(input++), out);
+    }
+    else
+    {
+        while (*input)
+            copyFromArrayWided(input, out);
+    }
 
     // Make sure that we wrote the correct number of bytes
     assert((out-&mOutput[0]) == (int)outlen);
@@ -134,7 +154,8 @@ std::string Utf8Encoder::getLegacyEnc(const char *input, size_t size)
     // Compute output length, and check for pure ascii input at the same
     // time.
     bool ascii;
-    size_t outlen = getLength2(input, ascii);
+    // if isUseWided is set, use wided function.
+    size_t outlen = !isUseWided ? getLength2(input, ascii) : getLength2Wided(input, ascii);
 
     // If we're pure ascii, then don't bother converting anything.
     if(ascii)
@@ -145,8 +166,17 @@ std::string Utf8Encoder::getLegacyEnc(const char *input, size_t size)
     char *out = &mOutput[0];
 
     // Translate
-    while(*input)
-        copyFromArray2(input, out);
+    // if isUseWided is set, use wided function.
+    if (!isUseWided)
+    {
+        while(*input)
+            copyFromArray2(input, out);
+    }
+    else
+    {
+        while(*input)
+            copyFromArray2Wided(input, out);
+    }
 
     // Make sure that we wrote the correct number of bytes
     assert((out-&mOutput[0]) == (int)outlen);
@@ -309,11 +339,117 @@ void Utf8Encoder::copyFromArray2(const char*& chp, char* &out)
     if (len == 3)
         ch3 = *(chp++);
 
-    for (int i = 128; i < 256; i++)
+    for (int i = 128; i < arraySize; i++)
     {
         unsigned char b1 = translationArray[i*6 + 1], b2 = translationArray[i*6 + 2], b3 = translationArray[i*6 + 3];
         if (b1 == ch && b2 == ch2 && (len != 3 || b3 == ch3))
         {
+            *(out++) = (char)i;
+            return;
+        }
+    }
+
+    std::ios::fmtflags f(std::cout.flags());
+    std::cout << "Could not find glyph " << std::hex << (int)ch << " " << (int)ch2 << " " << (int)ch3 << std::endl;
+    std::cout.flags(f);
+
+    *(out++) = ch; // Could not find glyph, just put whatever
+}
+
+size_t Utf8Encoder::getLengthWided(const char* input, bool &ascii)
+{
+    ascii = false;
+    size_t len = 0;
+    const char* ptr = input;
+    unsigned char inp = *ptr;
+    int dwid;
+    
+    while (inp)
+    {
+        // if inp is ascii
+        if (inp < 0x80)
+        {
+            len++;
+            inp = *(++ptr);
+        }
+        // if inp is double-width char
+        else
+        {
+            dwid = inp << 8;    // shift inp to left 8 times. e.g.) 00AC -> AC00
+            inp = *(++ptr);
+            dwid += inp;
+            len += translationArray[dwid*6];
+            inp = *(++ptr);
+        }
+    }
+    
+    return len;
+}
+
+void Utf8Encoder::copyFromArrayWided(const char *&chp, char* &out)
+{
+    unsigned char ch = *(chp++);
+    // Optimize for ASCII values
+    if (ch < 128)
+    {
+        *(out++) = ch;
+        return;
+    }
+    
+    int dwid = ch << 8;
+    ch = *(chp++);
+    dwid += ch;
+    
+    const signed char *in = translationArray + dwid*6;
+    int len = *(in++);
+    for (int i=0; i<len; i++)
+        *(out++) = *(in++);
+}
+
+size_t Utf8Encoder::getLength2Wided(const char* input, bool &ascii)
+{
+    ascii = false;
+    size_t len = 0;
+    const char* ptr = input;
+    unsigned char inp = *ptr;
+
+    // If we're not at the null terminator at this point, then there
+    // were some non-ascii characters to deal with. Go to slow-mode for
+    // the rest of the string.
+    while(inp)
+    {
+        len += 1;
+        
+        // if utf-8 len is 3, subtract 1 from len.
+        if (inp > 0xE0)
+        {
+            len -= 1;
+        }
+        
+        inp = *(++ptr);
+    }
+    return len;
+}
+
+void Utf8Encoder::copyFromArray2Wided(const char*& chp, char* &out)
+{
+    unsigned char ch = *(chp++);
+    // Optimize for ASCII values
+    if (ch < 128)
+    {
+        *(out++) = ch;
+        return;
+    }
+    
+    unsigned char ch2 = *(chp++);
+    unsigned char ch3 = *(chp++);
+    
+    for (int i = 0x8000; i < arraySize; i++)
+    {
+        unsigned char b1 = translationArray[i*6 + 1], b2 = translationArray[i*6 + 2], b3 = translationArray[i*6 + 3];
+        if (b1 == ch && b2 == ch2 && b3 == ch3)
+        {
+            *(out++) = (char)(i >> 8);
             *(out++) = (char)i;
             return;
         }
@@ -334,6 +470,8 @@ ToUTF8::FromType ToUTF8::calculateEncoding(const std::string& encodingName)
         return ToUTF8::WINDOWS_1251;
     else if (encodingName == "win1252")
         return ToUTF8::WINDOWS_1252;
+    else if (encodingName == "cp949")
+        return ToUTF8::CP949;
     else
         throw std::runtime_error(std::string("Unknown encoding '") + encodingName + std::string("', see openmw --help for available options."));
 }
@@ -346,6 +484,8 @@ std::string ToUTF8::encodingUsingMessage(const std::string& encodingName)
         return "Using Cyrillic font encoding.";
     else if (encodingName == "win1252")
         return "Using default (English) font encoding.";
+    else if (encodingName == "cp949")
+        return "Using Korean font encoding.";
     else
         throw std::runtime_error(std::string("Unknown encoding '") + encodingName + std::string("', see openmw --help for available options."));
 }
