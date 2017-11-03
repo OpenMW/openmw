@@ -12,13 +12,13 @@ namespace MWRender
 
         virtual void cull(osgUtil::CullVisitor& cv);
     protected:
+        const int debugTextureUnit;
+
         osg::ref_ptr<osg::Camera> debugCamera;
 
         osg::ref_ptr<osg::Program> debugProgram;
 
         osg::ref_ptr<osg::Node> debugGeometry;
-
-        osg::ref_ptr<osg::Texture2D> testTex;
     };
 }
 

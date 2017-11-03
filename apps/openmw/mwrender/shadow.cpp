@@ -51,7 +51,7 @@ namespace MWRender
         "}                                                                       \n";
 
 
-    MWShadow::MWShadow() : debugCamera(new osg::Camera), debugProgram(new osg::Program), testTex(new osg::Texture2D)
+    MWShadow::MWShadow() : debugCamera(new osg::Camera), debugProgram(new osg::Program), debugTextureUnit(0)
     {
         debugCamera->setViewport(0, 0, 200, 200);
         debugCamera->setRenderOrder(osg::Camera::POST_RENDER);
@@ -67,13 +67,9 @@ namespace MWRender
         debugCamera->addChild(debugGeometry);
         osg::ref_ptr<osg::StateSet> stateSet = debugGeometry->getOrCreateStateSet();
         stateSet->setAttributeAndModes(debugProgram, osg::StateAttribute::ON);
-        osg::ref_ptr<osg::Uniform> textureUniform = new osg::Uniform("texture", 0);
+        osg::ref_ptr<osg::Uniform> textureUniform = new osg::Uniform("texture", debugTextureUnit);
         //textureUniform->setType(osg::Uniform::SAMPLER_2D);
         stateSet->addUniform(textureUniform.get());
-
-        testTex->setDataVariance(osg::Object::DYNAMIC);
-        osg::ref_ptr<osg::Image> testImage = osgDB::readRefImageFile("resources/mygui/openmw.png");
-        testTex->setImage(testImage);
     }
     
     class VDSMCameraCullCallback : public osg::NodeCallback
@@ -560,10 +556,7 @@ namespace MWRender
                 {
                     osg::ref_ptr<osg::Texture2D> texture = sd->_texture;
                     osg::ref_ptr<osg::StateSet> stateSet = debugGeometry->getOrCreateStateSet();
-                    if (true)
-                        stateSet->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
-                    else
-                        stateSet->setTextureAttributeAndModes(0, testTex, osg::StateAttribute::ON);
+                    stateSet->setTextureAttributeAndModes(debugTextureUnit, texture, osg::StateAttribute::ON);
 
                     unsigned int traversalMask = cv.getTraversalMask();
                     cv.setTraversalMask(debugGeometry->getNodeMask());
