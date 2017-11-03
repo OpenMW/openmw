@@ -139,6 +139,7 @@ public:
     virtual void showWeapon(bool show) { showWeapons(show); }
 
     void setViewMode(ViewMode viewMode);
+    ViewMode getViewMode() {return mViewMode;}
 
     void updateParts();
 

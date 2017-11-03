@@ -651,7 +651,7 @@ void NpcAnimation::updateParts()
     }
 
     if (mViewMode == VM_FirstPersonBody)
-      removeIndividualPart(ESM::PRT_Neck);
+        removeIndividualPart(ESM::PRT_Neck);
 
     if (wasArrowAttached)
         attachArrow();

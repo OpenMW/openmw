@@ -112,10 +112,17 @@ namespace MWRender
         osg::Quat orient =  osg::Quat(getPitch(), osg::Vec3d(1,0,0)) * osg::Quat(getYaw(), osg::Vec3d(0,0,1));
 
         osg::Vec3d offset = orient * osg::Vec3d(0, isFirstPerson() ? 0 : -mCameraDistance, 0);
+
+        if (mAnimation->getViewMode() == NpcAnimation::VM_FirstPersonBody)
+          {
+            position += osg::Vec3d(sin(-getYaw()),cos(-getYaw()),0) * 10.0;
+          }
+
         position += offset;
 
         osg::Vec3d forward = orient * osg::Vec3d(0,1,0);
         osg::Vec3d up = orient * osg::Vec3d(0,0,1);
+
 
         cam->setViewMatrixAsLookAt(position, position + forward, up);
     }
