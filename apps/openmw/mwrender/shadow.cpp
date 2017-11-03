@@ -18,7 +18,7 @@ namespace MWRender
         "void main(void)                                                         \n"
         "{                                                                       \n"
 #if 1
-        "    float f = texture2D( texture, gl_TexCoord[0] ).r;                   \n"
+        "    float f = texture2D( texture, gl_TexCoord[0].xy ).r;                   \n"
         "                                                                        \n"
         "    f = 256.0 * f;                                                      \n"
         "    float fC = floor( f ) / 256.0;                                      \n"
@@ -45,7 +45,7 @@ namespace MWRender
         "                                                                        \n"
         "    gl_FragColor =  vec4( fS + fH * color, 1 );                         \n"
 #else
-        "    gl_FragColor = texture2D(texture, gl_TexCoord[0]);                  \n"
+        "    gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);                  \n"
         "    //gl_FragColor = vec4(1.0, 0.5, 0.5, 1.0);                            \n"
 #endif
         "}                                                                       \n";

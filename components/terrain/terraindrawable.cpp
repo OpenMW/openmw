@@ -51,6 +51,12 @@ void TerrainDrawable::cull(osgUtil::CullVisitor *cv)
     if (osg::isNaN(depth))
         return;
 
+    if (cv->getCurrentCamera()->getName() == "ShadowCamera")
+    {
+        cv->addDrawableAndDepth(this, &matrix, depth);
+        return;
+    }
+
     bool pushedLight = mLightListCallback && mLightListCallback->pushLightState(this, cv);
 
     for (PassVector::const_iterator it = mPasses.begin(); it != mPasses.end(); ++it)
