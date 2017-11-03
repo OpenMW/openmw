@@ -114,9 +114,7 @@ namespace MWRender
         osg::Vec3d offset = orient * osg::Vec3d(0, isFirstPerson() ? 0 : -mCameraDistance, 0);
 
         if (mAnimation->getViewMode() == NpcAnimation::VM_FirstPersonBody)
-          {
             position += osg::Vec3d(sin(-getYaw()),cos(-getYaw()),0) * 10.0;
-          }
 
         position += offset;
 
