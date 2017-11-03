@@ -12,6 +12,8 @@
 
 #include "npcanimation.hpp"
 
+#include <components/settings/settings.hpp>
+
 namespace
 {
 
@@ -363,7 +365,12 @@ namespace MWRender
     {
         if(isFirstPerson())
         {
-            mAnimation->setViewMode(NpcAnimation::VM_FirstPersonBody);
+            mAnimation->setViewMode(
+                Settings::Manager::getBool("first person body","Camera") ?
+                NpcAnimation::VM_FirstPersonBody :
+                NpcAnimation::VM_FirstPerson
+            );
+
             mTrackingNode = mAnimation->getNode("Camera");
             if (!mTrackingNode)
                 mTrackingNode = mAnimation->getNode("Head");
