@@ -454,7 +454,8 @@ void NpcAnimation::updateNpcBase()
     bool isFemale = !mNpc->isMale();
 
     std::string smodel;
-    if (mViewMode != VM_FirstPerson)
+
+    if (mViewMode != VM_FirstPerson || mViewMode == VM_FirstPersonBody)
     {
         if (isWerewolf)
             smodel = "meshes\\wolf\\skin.nif";
@@ -607,7 +608,7 @@ void NpcAnimation::updateParts()
         }
     }
 
-    if(mViewMode != VM_FirstPerson)
+    if(mViewMode != VM_FirstPerson && mViewMode != VM_FirstPersonBody)
     {
         if(mPartPriorities[ESM::PRT_Head] < 1 && !mHeadModel.empty())
             addOrReplaceIndividualPart(ESM::PRT_Head, -1,1, mHeadModel);
@@ -648,6 +649,9 @@ void NpcAnimation::updateParts()
                                            "meshes\\"+bodypart->mModel);
         }
     }
+
+    if (mViewMode == VM_FirstPersonBody)
+      removeIndividualPart(ESM::PRT_Neck);
 
     if (wasArrowAttached)
         attachArrow();

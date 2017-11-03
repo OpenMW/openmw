@@ -32,6 +32,7 @@ public:
     enum ViewMode {
         VM_Normal,
         VM_FirstPerson,
+        VM_FirstPersonBody,
         VM_HeadOnly
     };
 

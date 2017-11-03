@@ -41,7 +41,6 @@ private:
 
 namespace MWRender
 {
-
     Camera::Camera (osg::Camera* camera)
     : mHeightScale(1.f),
       mCamera(camera),
@@ -364,7 +363,7 @@ namespace MWRender
     {
         if(isFirstPerson())
         {
-            mAnimation->setViewMode(NpcAnimation::VM_FirstPerson);
+            mAnimation->setViewMode(NpcAnimation::VM_FirstPersonBody);
             mTrackingNode = mAnimation->getNode("Camera");
             if (!mTrackingNode)
                 mTrackingNode = mAnimation->getNode("Head");
