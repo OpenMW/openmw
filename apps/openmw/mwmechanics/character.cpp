@@ -20,7 +20,6 @@
 #include "character.hpp"
 
 #include <iostream>
-#include <random>
 
 #include <components/misc/rng.hpp>
 
@@ -243,6 +242,11 @@ std::string CharacterController::chooseRandomGroup (const std::string& prefix, i
     return prefix + toString(roll);
 }
 
+void CharacterController::updateKnockoutTimer(float duration)
+{
+    mTimeUntilWake -= duration;
+}
+
 void CharacterController::refreshHitRecoilAnims()
 {
     bool recovery = mPtr.getClass().getCreatureStats(mPtr).getHitRecovery();
@@ -255,11 +259,7 @@ void CharacterController::refreshHitRecoilAnims()
                 || mPtr.getClass().getCreatureStats(mPtr).getFatigue().getBase() == 0)
                 && mAnimation->hasAnimation("knockout"))
         {
-            std::random_device r;
-            std::mt19937 gen(r());
-            std::uniform_int_distribution<int> dist(1, 3);
-            mTimeToWake = time(NULL);
-            mTimeToWake += dist(gen); // Wake up after 1 to 3 seconds
+            mTimeUntilWake = Misc::Rng::rollClosedProbability() * 2 + 1; // Wake up after 1 to 3 seconds
             if (isSwimming && mAnimation->hasAnimation("swimknockout"))
             {
                 mHitState = CharState_SwimKnockOut;
@@ -345,7 +345,7 @@ void CharacterController::refreshHitRecoilAnims()
         mHitState = CharState_None;
     }
     else if (isKnockedOut() && mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() > 0 
-            && time(NULL) > mTimeToWake)
+            && mTimeUntilWake <= 0)
     {
         mHitState = isSwimming ? CharState_SwimKnockDown : CharState_KnockDown;
         mAnimation->disable(mCurrentHit);
@@ -1635,6 +1635,9 @@ void CharacterController::update(float duration)
     float speed = 0.f;
 
     updateMagicEffects();
+        
+    if (isKnockedOut())
+        updateKnockoutTimer(duration);
 
     bool godmode = mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
 
