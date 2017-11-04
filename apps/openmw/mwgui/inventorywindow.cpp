@@ -653,13 +653,13 @@ namespace MWGui
         if (object.getClass().getName(object) == "") // objects without name presented to user can never be picked up
             return;
 
-        if (!object.getRefData().activate())
-            return;
-
         int count = object.getRefData().getCount();
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWBase::Environment::get().getWorld()->breakInvisibility(player);
+        
+        if (!object.getRefData().activate())
+            return;
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, object, MWWorld::Ptr(), count);
 
