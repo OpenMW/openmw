@@ -197,7 +197,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
-    MWWorld::TimeStamp mKnockoutTime;
+    time_t mTimeToWake;
 
     MWWorld::ConstPtr mHeadTrackTarget;
 

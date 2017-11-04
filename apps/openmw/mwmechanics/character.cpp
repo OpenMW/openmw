@@ -248,15 +248,14 @@ void CharacterController::refreshHitRecoilAnims()
     bool knockdown = mPtr.getClass().getCreatureStats(mPtr).getKnockedDown();
     bool block = mPtr.getClass().getCreatureStats(mPtr).getBlock();
     bool isSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
-    MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
-    float timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
     if(mHitState == CharState_None)
     {
         if ((mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() < 0
                 || mPtr.getClass().getCreatureStats(mPtr).getFatigue().getBase() == 0)
                 && mAnimation->hasAnimation("knockout"))
         {
-            mKnockoutTime = MWBase::Environment::get().getWorld()->getTimeStamp();
+            mTimeToWake = time(NULL);
+            mTimeToWake += rand() % 2 + 1; // Wake up after 1 to 3 seconds
             if (isSwimming && mAnimation->hasAnimation("swimknockout"))
             {
                 mHitState = CharState_SwimKnockOut;
@@ -342,7 +341,7 @@ void CharacterController::refreshHitRecoilAnims()
         mHitState = CharState_None;
     }
     else if (isKnockedOut() && mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() > 0 
-            && (currentTime - mKnockoutTime) > 3*timeScale/3600) //Wait 3 seconds before getting up
+            && time(NULL) > mTimeToWake)
     {
         mHitState = isSwimming ? CharState_SwimKnockDown : CharState_KnockDown;
         mAnimation->disable(mCurrentHit);
