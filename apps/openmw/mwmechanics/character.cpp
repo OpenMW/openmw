@@ -255,7 +255,7 @@ void CharacterController::refreshHitRecoilAnims()
                 && mAnimation->hasAnimation("knockout"))
         {
             mTimeToWake = time(NULL);
-            mTimeToWake += rand() % 2 + 1; // Wake up after 1 to 3 seconds
+            mTimeToWake += (int)( (float)rand() / (float)RAND_MAX * 2) + 1; // Wake up after 1 to 3 seconds
             if (isSwimming && mAnimation->hasAnimation("swimknockout"))
             {
                 mHitState = CharState_SwimKnockOut;
