@@ -20,6 +20,7 @@
 #include "character.hpp"
 
 #include <iostream>
+#include <random>
 
 #include <components/misc/rng.hpp>
 
@@ -254,8 +255,11 @@ void CharacterController::refreshHitRecoilAnims()
                 || mPtr.getClass().getCreatureStats(mPtr).getFatigue().getBase() == 0)
                 && mAnimation->hasAnimation("knockout"))
         {
+            std::random_device r;
+            std::mt19937 gen(r());
+            std::uniform_int_distribution<int> dist(1, 3);
             mTimeToWake = time(NULL);
-            mTimeToWake += (int)( (float)rand() / (float)RAND_MAX * 2) + 1; // Wake up after 1 to 3 seconds
+            mTimeToWake += dist(gen); // Wake up after 1 to 3 seconds
             if (isSwimming && mAnimation->hasAnimation("swimknockout"))
             {
                 mHitState = CharState_SwimKnockOut;

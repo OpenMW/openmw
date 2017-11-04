@@ -7,7 +7,6 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/timestamp.hpp"
 
 #include "../mwrender/animation.hpp"
 
