@@ -192,11 +192,6 @@ namespace MWWorld
         return mEnabled;
     }
 
-    bool RefData::hasSuppressActivate()
-    {
-        return mFlags & Flag_SuppressActivate;
-    }
-
     void RefData::enable()
     {
         if (!mEnabled)

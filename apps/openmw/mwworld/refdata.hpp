@@ -111,8 +111,6 @@ namespace MWWorld
 
             bool isEnabled() const;
 
-            bool hasSuppressActivate();
-
             void enable();
 
             void disable();
