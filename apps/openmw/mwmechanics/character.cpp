@@ -372,29 +372,28 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
             }
         }
 
-        if(mJumpState == JumpState_InAir)
+        if (!mCurrentJump.empty())
         {
             mAnimation->disable(mCurrentJump);
-            mCurrentJump = jumpAnimName;
-            if (mAnimation->hasAnimation("jump"))
-                mAnimation->play(mCurrentJump, Priority_Jump, jumpmask, false,
+            mCurrentJump.clear();
+        }
+
+        if(mJumpState == JumpState_InAir)
+        {
+            if (mAnimation->hasAnimation(jumpAnimName))
+            {
+                mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, false,
                              1.0f, (startAtLoop?"loop start":"start"), "stop", 0.0f, ~0ul);
+                mCurrentJump = jumpAnimName;
+            }
         }
         else if (mJumpState == JumpState_Landing)
         {
-            if (startAtLoop) 
-                mAnimation->disable(mCurrentJump);
-
-            if (mAnimation->hasAnimation("jump"))
+             if (mAnimation->hasAnimation(jumpAnimName))
+             {
                 mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, true,
                              1.0f, "loop stop", "stop", 0.0f, 0);
-        }
-        else    // JumpState_None
-        {
-            if (mCurrentJump.length() > 0)
-            {
-                mAnimation->disable(mCurrentJump);
-                mCurrentJump.clear();
+                mCurrentJump = jumpAnimName;
             }
         }
     }
