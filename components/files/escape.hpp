@@ -78,6 +78,12 @@ namespace Files
                     mFinishLine = true;
                 }
             }
+            else if (character == sEscape)
+            {
+                mNext.push(sEscape);
+                mNext.push(sEscapeIdentifier);
+                record = false;
+            }
             else if (mPrevious == sEscape)
             {
                 mNext.push(sEscape);
