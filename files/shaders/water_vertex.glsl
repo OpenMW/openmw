@@ -4,6 +4,7 @@ varying vec3  screenCoordsPassthrough;
 varying vec4  position;
 varying float  depthPassthrough;
 
+uniform int shadowTextureUnit0;
 varying vec4 shadowSpaceCoords;
 
 void main(void)
@@ -23,6 +24,6 @@ void main(void)
     depthPassthrough = gl_Position.z;
 
 	// This matrix has the opposite handedness to the others used here, so multiplication must have the vector to the left. Alternatively it could be transposed after construction, but that's extra work for the GPU just to make the code look a tiny bit cleaner.
-	mat4 eyePlaneMat = mat4(gl_EyePlaneS[1], gl_EyePlaneT[1], gl_EyePlaneR[1], gl_EyePlaneQ[1]);
+	mat4 eyePlaneMat = mat4(gl_EyePlaneS[shadowTextureUnit0], gl_EyePlaneT[shadowTextureUnit0], gl_EyePlaneR[shadowTextureUnit0], gl_EyePlaneQ[shadowTextureUnit0]);
 	shadowSpaceCoords = (gl_ModelViewMatrix * gl_Vertex) * eyePlaneMat;
 }
