@@ -242,11 +242,6 @@ std::string CharacterController::chooseRandomGroup (const std::string& prefix, i
     return prefix + toString(roll);
 }
 
-void CharacterController::updateKnockoutTimer(float duration)
-{
-    mTimeUntilWake -= duration;
-}
-
 void CharacterController::refreshHitRecoilAnims()
 {
     bool recovery = mPtr.getClass().getCreatureStats(mPtr).getHitRecovery();
@@ -766,6 +761,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSecondsOfRunning(0)
     , mTurnAnimationThreshold(0)
     , mAttackingOrSpell(false)
+    , mTimeUntilWake(0.f)
 {
     if(!mAnimation)
         return;
@@ -1637,7 +1633,7 @@ void CharacterController::update(float duration)
     updateMagicEffects();
         
     if (isKnockedOut())
-        updateKnockoutTimer(duration);
+        mTimeUntilWake -= duration;
 
     bool godmode = mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
 

@@ -226,8 +226,6 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     void updateMagicEffects();
 
-    void updateKnockoutTimer(float duration);
-
     void playDeath(float startpoint, CharacterState death);
     CharacterState chooseRandomDeathState() const;
     void playRandomDeath(float startpoint = 0.0f);
