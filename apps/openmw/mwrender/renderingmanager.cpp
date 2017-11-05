@@ -210,7 +210,7 @@ namespace MWRender
         settings->setReceivesShadowTraversalMask(~0u);
 
         //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::PERSPECTIVE_SHADOW_MAP);
-        settings->setBaseShadowTextureUnit(7);
+        settings->setBaseShadowTextureUnit(MWShadow::baseShadowTextureUnit);
         //settings->setMinimumShadowMapNearFarRatio(0);
         //settings->setNumShadowMapsPerLight(1);
         //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::ORTHOGRAPHIC_SHADOW_MAP);

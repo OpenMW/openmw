@@ -10,6 +10,8 @@ namespace MWRender
     public:
         MWShadow();
 
+        const static int baseShadowTextureUnit = 7;
+
         virtual void cull(osgUtil::CullVisitor& cv);
     protected:
         const int debugTextureUnit;
