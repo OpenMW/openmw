@@ -22,7 +22,7 @@ General introduction to normal map conversion
 
 This page has general information and tutorials on how normal mapping works in OpenMW and how you can make mods using the old fake normal mapping technique (such as `Netch Bump mapped`_ and `Hlaalu Bump mapped`_, and maybe the most (in)famous one to give shiny rocks in OpenMW, the mod `On the Rocks`_!, featured in MGSO and Morrowind Rebirth) work in OpenMW. 
 
-*Note:* The conversion made in the `Converting Apel's Various Things - Sacks`_-part of this tutorial require the use of the application NifSkope. There are NifSkope 2.X binaries available for Windows, but not for Mac or Linux. NifSkope 1.1.3 is available in RPM format at https://github.com/niftools/nifskope/releases/tag/nifskope-1.1.3 and can be converted to .deb using alien and installs and works correctly on KDE Neon, ubuntu 16.04.
+*Note:* The conversion made in the `Converting Apel's Various Things - Sacks`_-part of this tutorial require the use of the application NifSkope. There are NifSkope 2.X binaries available for Windows, but not for Mac or Linux. NifSkope 1.1.3 is available in RPM format at https://github.com/niftools/nifskope/releases/tag/nifskope-1.1.3 and LSB Debian format at https://www.nexusmods.com/morrowind/mods/45282/?.
 
 *Another note:* I will use the terms bump mapping and normal mapping simultaneously. Normal mapping is one form of bump mapping. In other words, normal mapping is bump mapping, but bump mapping isn't necessarily normal mapping. There are several techniques for bump mapping, and normal mapping is the most common one today.
 
