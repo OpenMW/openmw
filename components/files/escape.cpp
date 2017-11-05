@@ -27,7 +27,8 @@ namespace Files
     std::string EscapeHashString::processString(const std::string & str)
     {
         std::string temp = boost::replace_all_copy<std::string>(str, std::string() + (char)escape_hash_filter::sEscape + (char)escape_hash_filter::sHashIdentifier, "#");
-        boost::replace_all(temp, std::string() + (char)escape_hash_filter::sEscape + (char)escape_hash_filter::sEscapeIdentifier, std::string((char)escape_hash_filter::sEscape, 1));
+        auto format = std::string(1, (char)escape_hash_filter::sEscape);
+        boost::replace_all(temp, std::string() + (char)escape_hash_filter::sEscape + (char)escape_hash_filter::sEscapeIdentifier, format);
         return temp;
     }
 
