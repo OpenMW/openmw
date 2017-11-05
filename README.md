@@ -8,12 +8,12 @@ OpenMW is a recreation of the engine for the popular role-playing game Morrowind
 OpenMW also comes with OpenMW-CS, a replacement for Morrowind's TES Construction Set.
 
 * Version: 0.42.0
-* License: GPLv3 (see [docs/license/GPL3.txt](https://github.com/OpenMW/openmw/blob/master/docs/license/GPL3.txt) for more information)
+* License: GPLv3 (see [LICENSE](https://github.com/OpenMW/openmw/blob/master/LICENSE) for more information)
 * Website: http://www.openmw.org
 * IRC: #openmw on irc.freenode.net
 
 Font Licenses:
-* DejaVuLGCSansMono.ttf: custom (see docs/license/DejaVu Font License.txt for more information)
+* DejaVuLGCSansMono.ttf: custom (see [files/mygui/DejaVu Font License.txt](https://github.com/OpenMW/openmw/blob/master/files/mygui/DejaVu%20Font%20License.txt) for more information)
 
 Current Status
 --------------

@@ -412,7 +412,7 @@ IF(NOT WIN32 AND NOT APPLE)
     #ENDIF(BUILD_MYGUI_PLUGIN)
 
     # Install licenses
-    INSTALL(FILES "docs/license/DejaVu Font License.txt" DESTINATION "${LICDIR}" )
+    INSTALL(FILES "files/mygui/DejaVu Font License.txt" DESTINATION "${LICDIR}" )
 
     # Install icon and desktop file
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "openmw")
@@ -446,9 +446,9 @@ if(WIN32)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "." RENAME "LICENSE.txt")
     INSTALL(FILES
-        "${OpenMW_SOURCE_DIR}/Docs/license/GPL3.txt"
-        "${OpenMW_SOURCE_DIR}/Docs/license/DejaVu Font License.txt"
+        "${OpenMW_SOURCE_DIR}/files/mygui/DejaVu Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt"
         DESTINATION ".")
