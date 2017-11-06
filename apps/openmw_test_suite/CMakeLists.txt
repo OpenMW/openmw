@@ -14,6 +14,13 @@ file(GLOB UNITTEST_SRC_FILES
     esm/test_fixed_string.cpp
 
     misc/test_stringops.cpp
+
+    ../openmw/mwmechanics/findoptimalpath.cpp
+    ../openmw/mwphysics/closestcollision.cpp
+    mwmechanics/findoptimalpath/testscenarios.cpp
+    mwmechanics/findoptimalpath/testrandom.cpp
+    mwmechanics/findoptimalpath/testgetneighbors.cpp
+    mwmechanics/findoptimalpath/testcommon.cpp
 )
 
 source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})

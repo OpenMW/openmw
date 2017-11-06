@@ -34,6 +34,20 @@ namespace MWPhysics
     boost::optional<Collision> getClosestCollision(const btCollisionObject& actorObject,
             const btVector3& source, const btVector3& destination, const btCollisionWorld& collisionWorld,
             int excludeFilterMask = 0);
+
+    class CollisionWithObjectCallback : public btCollisionWorld::ClosestConvexResultCallback
+    {
+    public:
+        CollisionWithObjectCallback(const btCollisionObject& object);
+
+        virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult, bool normalInWorldSpace);
+
+    private:
+        const btCollisionObject* mObject;
+    };
+
+    boost::optional<Collision> getClosestCollisionWithStepUp(const btCollisionObject& actorObject,
+            const btVector3& source, const btVector3& destination, const btCollisionWorld& collisionWorld);
 }
 
 #endif
