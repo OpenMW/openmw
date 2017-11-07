@@ -622,8 +622,34 @@ namespace MWRender
         mutable bool mDone;
     };
 
+    class SphericalScreenshot
+    {
+    public:
+        SphericalScreenshot(int size) 
+        {
+            mSize = size;
+
+            for (int i = 0; i < 6; ++i)
+                mImages.push_back(new osg::Image);
+        }
+
+        osg::Image *getImage(int index)
+        {
+            return mImages[index].get();
+        }
+
+    protected:
+        std::vector<osg::ref_ptr<osg::Image>> mImages;
+        int mSize;
+    };
+
     void RenderingManager::screenshot360(osg::Image* image, int w)
     {
+        int resultW = 1024;
+        int resultH = 768;
+
+        SphericalScreenshot s(w);
+
         osg::Vec3 directions[6] = {
           osg::Vec3(0,0,-1),
           osg::Vec3(-1,0,0),
@@ -641,14 +667,14 @@ namespace MWRender
 
         for (int i = 0; i < 6; i++)      // for each cube side
         {
-            osg::ref_ptr<osg::Image> sideImage (new osg::Image);
-            screenshot(sideImage.get(),w,w,directions[i]);
+            osg::Image *sideImage = s.getImage(i);
+            screenshot(sideImage,w,w,directions[i]);
 
             if (i == 0)
-                image->allocateImage(w * 6,w,sideImage->r(),sideImage->getPixelFormat(),sideImage->getDataType());
+                //image->allocateImage(resultW,resultH,sideImage->r(),sideImage->getPixelFormat(),sideImage->getDataType());
+                image->allocateImage(6 * w,w,sideImage->r(),sideImage->getPixelFormat(),sideImage->getDataType());
 
-            osg::copyImage(sideImage.get(),0,0,0,sideImage->s(),sideImage->t(),sideImage->r(),
-                           image,w * i,0,0);
+            osg::copyImage(sideImage,0,0,0,sideImage->s(),sideImage->t(),sideImage->r(),image,w * i,0,0);
         }
 
         if (mCamera->isFirstPerson())
