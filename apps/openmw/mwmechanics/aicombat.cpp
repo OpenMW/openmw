@@ -490,6 +490,28 @@ namespace MWMechanics
 
     void AiCombatStorage::startCombatMove(bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
     {
+        // get the range of the target's weapon
+        float rangeAttackOfTarget = 0.f;
+        MWWorld::Ptr targetWeapon = MWWorld::Ptr();
+        const MWWorld::Class& targetClass = target.getClass();
+
+        if (targetClass.hasInventoryStore(target))
+        {
+            MWMechanics::WeaponType weapType = WeapType_None;
+            MWWorld::ContainerStoreIterator weaponSlot =
+                MWMechanics::getActiveWeapon(targetClass.getCreatureStats(target), targetClass.getInventoryStore(target), &weapType);
+            if (weapType != WeapType_PickProbe && weapType != WeapType_Spell && weapType != WeapType_None && weapType != WeapType_HandToHand)
+                targetWeapon = *weaponSlot;
+        }
+
+        std::shared_ptr<Action> targetWeaponAction(new ActionWeapon(targetWeapon));
+
+        bool isRangedCombat = false;
+        if (targetWeaponAction.get())
+        {
+            rangeAttackOfTarget = targetWeaponAction->getCombatRange(isRangedCombat);
+        }
+        
         if (mMovement.mPosition[0] || mMovement.mPosition[1])
         {
             mTimerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
@@ -498,28 +520,6 @@ namespace MWMechanics
         // dodge movements (for NPCs and bipedal creatures)
         else if (actor.getClass().isBipedal(actor))
         {
-            // get the range of the target's weapon
-            float rangeAttackOfTarget = 0.f;
-            MWWorld::Ptr targetWeapon = MWWorld::Ptr();
-            const MWWorld::Class& targetClass = target.getClass();
-
-            if (targetClass.hasInventoryStore(target))
-            {
-                MWMechanics::WeaponType weapType = WeapType_None;
-                MWWorld::ContainerStoreIterator weaponSlot =
-                    MWMechanics::getActiveWeapon(targetClass.getCreatureStats(target), targetClass.getInventoryStore(target), &weapType);
-                if (weapType != WeapType_PickProbe && weapType != WeapType_Spell && weapType != WeapType_None && weapType != WeapType_HandToHand)
-                    targetWeapon = *weaponSlot;
-            }
-
-            std::shared_ptr<Action> targetWeaponAction (new ActionWeapon(targetWeapon));
-
-            if (targetWeaponAction.get())
-            {
-                bool isRangedCombat = false;
-                rangeAttackOfTarget = targetWeaponAction->getCombatRange(isRangedCombat);
-            }
-              
             // apply sideway movement (kind of dodging) with some probability
             // if actor is within range of target's weapon
             if (distToTarget <= rangeAttackOfTarget && Misc::Rng::rollClosedProbability() < 0.25)
@@ -533,13 +533,14 @@ namespace MWMechanics
         // Below behavior for backing up during ranged combat differs from vanilla.
         // Vanilla is observed as backing up only as far as fCombatDistance or
         // opponent's weapon range, or not backing up if opponent is also using a ranged weapon
-        if (isDistantCombat && distToTarget < rangeAttack / 4)
+        if (isDistantCombat)
         {
             // actor should not back up into water
             if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(actor), 0.5f))
                 return;
 
-            mMovement.mPosition[1] = -1;
+            if (!isRangedCombat && distToTarget <= rangeAttackOfTarget*1.5) // Don't back up if the target is wielding ranged weapon
+                mMovement.mPosition[1] = -1;
         }
     }
 
