@@ -620,6 +620,11 @@ namespace MWRender
         mutable bool mDone;
     };
 
+    void RenderingManager::screenshot360(osg::Image* image, int w)
+    {
+       screenshot(image,w,w); 
+    }
+
     void RenderingManager::screenshot(osg::Image *image, int w, int h)
     {
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);

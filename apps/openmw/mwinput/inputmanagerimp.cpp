@@ -1,6 +1,7 @@
 #include "inputmanagerimp.hpp"
 
 #include <osgViewer/ViewerEventHandlers>
+#include <osgDB/Registry>
 
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
@@ -1014,10 +1015,36 @@ namespace MWInput
 
     void InputManager::screenshot()
     {
-        mScreenCaptureHandler->setFramesToCapture(1);
-        mScreenCaptureHandler->captureNextFrame(*mViewer);
+        // MOVE THIS ELSEWHERE LATER!
+        int screenshotW = 512;
+        osg::ref_ptr<osg::Image> screenshot (new osg::Image);
+        MWBase::Environment::get().getWorld()->screenshot360(screenshot.get(), screenshotW);
 
-        MWBase::Environment::get().getWindowManager()->messageBox ("Screenshot saved");
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
+
+        if (!readerwriter)
+        {
+            std::cerr << "Error: Unable to write screenshot, can't find a jpg ReaderWriter" << std::endl;
+            return;
+        }
+
+        std::ofstream outfile;
+        outfile.open("test.jpg");
+
+        osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*screenshot, outfile);
+
+        if (!result.success())
+        {
+            outfile << "Error: Unable to write screenshot: " << result.message() << " code " << result.status() << std::endl;
+            return;
+        }
+
+        outfile.close();
+
+//        mScreenCaptureHandler->setFramesToCapture(1);
+//        mScreenCaptureHandler->captureNextFrame(*mViewer);
+
+//        MWBase::Environment::get().getWindowManager()->messageBox ("Screenshot saved");
     }
 
     void InputManager::toggleInventory()
