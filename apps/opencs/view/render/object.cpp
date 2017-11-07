@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <iostream>
 
+#include <osg/Depth>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
 
@@ -285,15 +286,15 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeMoveOrScaleMarker (int axis)
 
     for (int i=0; i<8; ++i)
         colours->push_back (osg::Vec4f (axis==0 ? 1.0f : 0.2f, axis==1 ? 1.0f : 0.2f,
-            axis==2 ? 1.0f : 0.2f, 1.0f));
+            axis==2 ? 1.0f : 0.2f, mMarkerTransparency));
 
     for (int i=8; i<8+4+1; ++i)
         colours->push_back (osg::Vec4f (axis==0 ? 1.0f : 0.0f, axis==1 ? 1.0f : 0.0f,
-            axis==2 ? 1.0f : 0.0f, 1.0f));
+            axis==2 ? 1.0f : 0.0f, mMarkerTransparency));
 
     geometry->setColorArray (colours, osg::Array::BIND_PER_VERTEX);
 
-    geometry->getOrCreateStateSet()->setMode (GL_LIGHTING, osg::StateAttribute::OFF);
+    setupCommonMarkerState(geometry);
 
     osg::ref_ptr<osg::Geode> geode (new osg::Geode);
     geode->addDrawable (geometry);
@@ -350,7 +351,11 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
         vertices->at(index++) = getMarkerPosition(outerX, outerY, -MarkerShaftWidth / 2, axis);
     }
 
-    colors->at(0) = osg::Vec4f (axis==0 ? 1.0f : 0.2f, axis==1 ? 1.0f : 0.2f, axis==2 ? 1.0f : 0.2f, 1.0f);
+    colors->at(0) = osg::Vec4f (
+        axis==0 ? 1.0f : 0.2f,
+        axis==1 ? 1.0f : 0.2f,
+        axis==2 ? 1.0f : 0.2f,
+        mMarkerTransparency);
 
     for (size_t i = 0; i < SegmentCount; ++i)
     {
@@ -374,12 +379,27 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
     geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
     geometry->addPrimitiveSet(primitives);
 
-    geometry->getOrCreateStateSet()->setMode (GL_LIGHTING, osg::StateAttribute::OFF);
+    setupCommonMarkerState(geometry);
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode();
     geode->addDrawable (geometry);
 
     return geode;
+}
+
+void CSVRender::Object::setupCommonMarkerState(osg::ref_ptr<osg::Geometry> geometry)
+{
+    const int RenderBin = osg::StateSet::TRANSPARENT_BIN - 1;
+
+    osg::ref_ptr<osg::StateSet> state = geometry->getOrCreateStateSet();
+    state->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    state->setMode(GL_BLEND, osg::StateAttribute::ON);
+
+    osg::ref_ptr<osg::Depth> depth(new osg::Depth);
+    depth->setWriteMask(false);
+    state->setAttributeAndModes(depth, osg::StateAttribute::ON);
+
+    state->setRenderBinDetails(RenderBin, "RenderBin");
 }
 
 osg::Vec3f CSVRender::Object::getMarkerPosition (float x, float y, float z, int axis)
@@ -399,7 +419,7 @@ osg::Vec3f CSVRender::Object::getMarkerPosition (float x, float y, float z, int 
 CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
     const std::string& id, bool referenceable, bool forceBaseToZero)
 : mData (data), mBaseNode(0), mSelected(false), mParentNode(parentNode), mResourceSystem(data.getResourceSystem().get()), mForceBaseToZero (forceBaseToZero),
-  mScaleOverride (1), mOverrideFlags (0), mSubMode (-1)
+  mScaleOverride (1), mOverrideFlags (0), mSubMode (-1), mMarkerTransparency(0.5f)
 {
     mRootNode = new osg::PositionAttitudeTransform;
 
@@ -627,6 +647,12 @@ void CSVRender::Object::setScale (float scale)
     mScaleOverride = scale;
 
     adjustTransform();
+}
+
+void CSVRender::Object::setMarkerTransparency(float value)
+{
+    mMarkerTransparency = value;
+    updateMarker();
 }
 
 void CSVRender::Object::apply (CSMWorld::CommandMacro& commands)
