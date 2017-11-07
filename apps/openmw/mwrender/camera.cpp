@@ -293,8 +293,6 @@ namespace MWRender
     {
         const float epsilon = 0.000001f;
         float limit = osg::PI_2 - epsilon;
-        if(mPreviewMode)
-            limit /= 2;
 
         if(angle > limit)
             angle = limit;
