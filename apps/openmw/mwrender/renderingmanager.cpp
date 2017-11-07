@@ -638,6 +638,80 @@ namespace MWRender
             return mImages[index].get();
         }
 
+        void create(osg::Image *dest, int w, int h)
+        {
+            dest->allocateImage(w,h,mImages[0]->r(),mImages[0]->getPixelFormat(),mImages[0]->getDataType());
+
+            for (int j = 0; j < h; ++j)
+                for (int i = 0; i < w; ++i)
+                    dest->setColor(getColorByDirection(cylindricalCoords(i / ((float) w), j / ((float) h))),i,j);
+        }
+
+        osg::Vec3d cylindricalCoords(double x, double y)
+        {
+            osg::Vec3 result = osg::Vec3d(sin(x * 2 * osg::PI),cos(x * 2 * osg::PI),y * 2.0 - 1.0);
+            result.normalize();
+            return result;
+        }
+
+        osg::Vec4 getColorByDirection(osg::Vec3d d)
+        {
+            double x, y;
+            double ma;       // see OpenGL 4.4 specification page 241
+            int side;
+
+            double ax, ay, az;
+            ax = d.x() > 0 ? d.x() : -d.x();
+            ay = d.y() > 0 ? d.y() : -d.y();
+            az = d.z() > 0 ? d.z() : -d.z();
+
+
+            if (ax > ay)
+            {
+                if (ax > az)
+                {
+                    side = d.x() > 0 ? 1 : 3;
+                    ma = ax;
+                }
+                else
+                {
+                    side = d.z() > 0 ? 5 : 4;
+                    ma = az;
+                }
+            }
+            else
+            {
+                if (ay > az)
+                {
+                    side = d.y() > 0 ? 0 : 2;
+                    ma = ay;
+                } 
+                else
+                {
+                    side = d.z() > 0 ? 5 : 4;
+                    ma = az;
+                }
+            }
+
+            switch (side)
+            {
+                case 0: x = d.x();  y = d.z(); break;
+                case 1: x = -d.y();  y = d.z(); break;
+                case 2: x = -d.x(); y = d.z(); break;
+                case 3: x = d.y(); y = d.z(); break;
+                case 4: x = d.x(); y = d.y(); break;
+                case 5: x = d.x(); y = -d.y(); break;
+                default: break;
+            }
+
+            x = 0.5 * (x / ma + 1);
+            y = 0.5 * (y / ma + 1);
+
+            return mImages[side]->getColor(
+                std::min(std::max(int(x * mSize),0),mSize - 1),
+                std::min(std::max(int(y * mSize),0),mSize - 1));       //osg::Vec4(d.x(),d.y(),d.z(),1);
+        }
+
     protected:
         std::vector<osg::ref_ptr<osg::Image>> mImages;
         int mSize;
@@ -645,9 +719,6 @@ namespace MWRender
 
     void RenderingManager::screenshot360(osg::Image* image, int w)
     {
-        int resultW = 1024;
-        int resultH = 768;
-
         SphericalScreenshot s(w);
 
         osg::Vec3 directions[6] = {
@@ -670,15 +741,17 @@ namespace MWRender
             osg::Image *sideImage = s.getImage(i);
             screenshot(sideImage,w,w,directions[i]);
 
-            if (i == 0)
+          //    if (i == 0)
                 //image->allocateImage(resultW,resultH,sideImage->r(),sideImage->getPixelFormat(),sideImage->getDataType());
-                image->allocateImage(6 * w,w,sideImage->r(),sideImage->getPixelFormat(),sideImage->getDataType());
+                //image->allocateImage(6 * w,w,sideImage->r(),sideImage->getPixelFormat(),sideImage->getDataType());
 
-            osg::copyImage(sideImage,0,0,0,sideImage->s(),sideImage->t(),sideImage->r(),image,w * i,0,0);
+          //    osg::copyImage(sideImage,0,0,0,sideImage->s(),sideImage->t(),sideImage->r(),image,w * i,0,0);
         }
 
         if (mCamera->isFirstPerson())
             mPlayerAnimation->getObjectRoot()->setNodeMask(1);
+
+        s.create(image,1600,768);
 
         mFieldOfView = fovBackup;
     }
