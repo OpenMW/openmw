@@ -7,8 +7,9 @@
             <Property key="TextAlign" value="Right"/>
             <Property key="TextShadow" value="true"/>
             <Property key="TextShadowColour" value="0 0 0"/>
-            <Property key="ReadOnly" value="true"/>
+            <Property key="Static" value="true"/>
             <Property key="MultiLine" value="true"/>
+            <Property key="NeedKey" value="false"/>
         </Widget>
     </Widget>
 </MyGUI>
