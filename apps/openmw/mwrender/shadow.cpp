@@ -51,25 +51,31 @@ namespace MWRender
         "}                                                                       \n";
 
 
-    MWShadow::MWShadow() : debugCamera(new osg::Camera), debugProgram(new osg::Program), debugTextureUnit(0)
+    MWShadow::MWShadow() : debugProgram(new osg::Program), debugTextureUnit(0)
     {
-        debugCamera->setViewport(0, 0, 200, 200);
-        debugCamera->setRenderOrder(osg::Camera::POST_RENDER);
-        debugCamera->setClearColor(osg::Vec4(1.0, 1.0, 0.0, 1.0));
-
         osg::ref_ptr<osg::Shader> vertexShader = new osg::Shader(osg::Shader::VERTEX, debugVertexShaderSource);
         debugProgram->addShader(vertexShader);
         osg::ref_ptr<osg::Shader> fragmentShader = new osg::Shader(osg::Shader::FRAGMENT, debugFragmentShaderSource);
         debugProgram->addShader(fragmentShader);
 
-        debugGeometry = osg::createTexturedQuadGeometry(osg::Vec3(-1, -1, 0), osg::Vec3(2, 0, 0), osg::Vec3(0, 2, 0));
-        debugGeometry->setCullingActive(false);
-        debugCamera->addChild(debugGeometry);
-        osg::ref_ptr<osg::StateSet> stateSet = debugGeometry->getOrCreateStateSet();
-        stateSet->setAttributeAndModes(debugProgram, osg::StateAttribute::ON);
-        osg::ref_ptr<osg::Uniform> textureUniform = new osg::Uniform("texture", debugTextureUnit);
-        //textureUniform->setType(osg::Uniform::SAMPLER_2D);
-        stateSet->addUniform(textureUniform.get());
+        for (int i = 0; i < numberOfShadowMapsPerLight; ++i)
+        {
+            std::cout << i << std::endl;
+            
+            debugCameras.push_back(new osg::Camera);
+            debugCameras[i]->setViewport(200 * i, 0, 200, 200);
+            debugCameras[i]->setRenderOrder(osg::Camera::POST_RENDER);
+            debugCameras[i]->setClearColor(osg::Vec4(1.0, 1.0, 0.0, 1.0));
+            
+            debugGeometry.push_back(osg::createTexturedQuadGeometry(osg::Vec3(-1, -1, 0), osg::Vec3(2, 0, 0), osg::Vec3(0, 2, 0)));
+            debugGeometry[i]->setCullingActive(false);
+            debugCameras[i]->addChild(debugGeometry[i]);
+            osg::ref_ptr<osg::StateSet> stateSet = debugGeometry[i]->getOrCreateStateSet();
+            stateSet->setAttributeAndModes(debugProgram, osg::StateAttribute::ON);
+            osg::ref_ptr<osg::Uniform> textureUniform = new osg::Uniform("texture", debugTextureUnit);
+            //textureUniform->setType(osg::Uniform::SAMPLER_2D);
+            stateSet->addUniform(textureUniform.get());
+        }
     }
     
     class VDSMCameraCullCallback : public osg::NodeCallback
@@ -552,16 +558,16 @@ namespace MWRender
                     previous_sdl.erase(previous_sdl.begin());
                 }
 
-                if (true)
+                if (debugHud)
                 {
                     osg::ref_ptr<osg::Texture2D> texture = sd->_texture;
-                    osg::ref_ptr<osg::StateSet> stateSet = debugGeometry->getOrCreateStateSet();
+                    osg::ref_ptr<osg::StateSet> stateSet = debugGeometry[sm_i]->getOrCreateStateSet();
                     stateSet->setTextureAttributeAndModes(debugTextureUnit, texture, osg::StateAttribute::ON);
 
                     unsigned int traversalMask = cv.getTraversalMask();
-                    cv.setTraversalMask(debugGeometry->getNodeMask());
+                    cv.setTraversalMask(debugGeometry[sm_i]->getNodeMask());
                     cv.pushStateSet(stateSet);
-                    debugCamera->accept(cv);
+                    debugCameras[sm_i]->accept(cv);
                     cv.popStateSet();
                     cv.setTraversalMask(traversalMask);
 

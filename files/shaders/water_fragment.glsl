@@ -143,7 +143,9 @@ uniform vec3 nodePosition;
 uniform float rainIntensity;
 
 uniform sampler2DShadow shadowTexture0;
-varying vec4 shadowSpaceCoords;
+uniform sampler2DShadow shadowTexture1;
+varying vec4 shadowSpaceCoords0;
+varying vec4 shadowSpaceCoords1;
 
 float frustumDepth;
 
@@ -161,7 +163,8 @@ void main(void)
     vec2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
     UV.y *= -1.0;
 
-    float shadow = shadow2DProj(shadowTexture0, shadowSpaceCoords).r;
+    float shadow = shadow2DProj(shadowTexture0, shadowSpaceCoords0).r;
+	shadow *= shadow2DProj(shadowTexture1, shadowSpaceCoords1).r;
 
     vec2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
     screenCoords.y = (1.0-screenCoords.y);
