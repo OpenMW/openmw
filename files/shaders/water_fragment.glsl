@@ -1,6 +1,7 @@
 #version 120
 
 #define REFRACTION @refraction_enabled
+#define SHADOWS @shadows_enabled
 
 // Inspired by Blender GLSL Water by martinsh ( http://devlog-martinsh.blogspot.de/2012/07/waterundewater-shader-wip.html )
 
@@ -142,10 +143,11 @@ uniform vec3 nodePosition;
 
 uniform float rainIntensity;
 
-uniform sampler2DShadow shadowTexture0;
-uniform sampler2DShadow shadowTexture1;
-varying vec4 shadowSpaceCoords0;
-varying vec4 shadowSpaceCoords1;
+#if SHADOWS
+	@shadow_texture_sampler_declarations
+
+	@shadow_space_coordinate_declarations
+#endif // SHADOWS
 
 float frustumDepth;
 
@@ -163,8 +165,15 @@ void main(void)
     vec2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
     UV.y *= -1.0;
 
-    float shadow = shadow2DProj(shadowTexture0, shadowSpaceCoords0).r;
-	shadow *= shadow2DProj(shadowTexture1, shadowSpaceCoords1).r;
+	#if SHADOWS
+		float shadowing = 1.0;
+
+		@shadow_texture_lookup_calculations
+
+		float shadow = shadowing;
+	#else // NOT SHADOWS
+		float shadow = 1.0;
+	#endif // SHADOWS
 
     vec2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
     screenCoords.y = (1.0-screenCoords.y);

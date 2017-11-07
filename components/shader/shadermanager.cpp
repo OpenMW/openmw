@@ -99,9 +99,38 @@ namespace Shader
         return true;
     }
 
-    osg::ref_ptr<osg::Shader> ShaderManager::getShader(const std::string &shaderTemplate, const ShaderManager::DefineMap &defines, osg::Shader::Type shaderType)
+    osg::ref_ptr<osg::Shader> ShaderManager::getShader(const std::string &shaderTemplate, const ShaderManager::DefineMap &defines, osg::Shader::Type shaderType, bool disableShadows)
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+
+        // set up shadows in the shader
+        // get these values from settings manager
+        bool shadows = true & !disableShadows;
+        int numShadowMaps = 2;
+        DefineMap definesWithShadows;
+        if (shadows)
+        {
+            definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("1")));
+
+            /*definesWithShadows.insert(std::string("shadow_texture_unit_declarations"), std::string(""));
+            definesWithShadows.insert(std::string("shadow_space_coordinate_declarations"), std::string(""));
+            definesWithShadows.insert(std::string("shadow_space_coordinate_calculations"), std::string(""));
+            definesWithShadows.insert(std::string("shadow_texture_sampler_declarations"), std::string(""));
+            definesWithShadows.insert(std::string("shadow_texture_lookup_calculations"), std::string(""));*/
+            for (int i = 0; i < numShadowMaps; ++i)
+            {
+                definesWithShadows["shadow_texture_unit_declarations"] += "uniform int shadowTextureUnit" + std::to_string(i) + ";\n";
+                definesWithShadows["shadow_space_coordinate_declarations"] += "varying vec4 shadowSpaceCoords" + std::to_string(i) + ";\n";
+
+                definesWithShadows["shadow_space_coordinate_calculations"] += "eyePlaneMat = mat4(gl_EyePlaneS[shadowTextureUnit" + std::to_string(i) + "], gl_EyePlaneT[shadowTextureUnit" + std::to_string(i) + "], gl_EyePlaneR[shadowTextureUnit" + std::to_string(i) + "], gl_EyePlaneQ[shadowTextureUnit" + std::to_string(i) + "]);\n"
+                    + "shadowSpaceCoords" + std::to_string(i) + " = viewPos * eyePlaneMat;\n";
+
+                definesWithShadows["shadow_texture_sampler_declarations"] += "uniform sampler2DShadow shadowTexture" + std::to_string(i) + ";\n";
+                definesWithShadows["shadow_texture_lookup_calculations"] += "shadowing *= shadow2DProj(shadowTexture" + std::to_string(i) + ", shadowSpaceCoords" + std::to_string(i) + ").r;\n";
+            }
+        }
+
+        definesWithShadows.insert(defines.begin(), defines.end());
 
         // read the template if we haven't already
         TemplateMap::iterator templateIt = mShaderTemplates.find(shaderTemplate);
@@ -126,11 +155,11 @@ namespace Shader
             templateIt = mShaderTemplates.insert(std::make_pair(shaderTemplate, source)).first;
         }
 
-        ShaderMap::iterator shaderIt = mShaders.find(std::make_pair(shaderTemplate, defines));
+        ShaderMap::iterator shaderIt = mShaders.find(std::make_pair(shaderTemplate, definesWithShadows));
         if (shaderIt == mShaders.end())
         {
             std::string shaderSource = templateIt->second;
-            if (!parseDefines(shaderSource, defines))
+            if (!parseDefines(shaderSource, definesWithShadows))
                 return NULL;
 
             osg::ref_ptr<osg::Shader> shader (new osg::Shader(shaderType));
@@ -139,7 +168,7 @@ namespace Shader
             static unsigned int counter = 0;
             shader->setName(std::to_string(counter++));
 
-            shaderIt = mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, defines), shader)).first;
+            shaderIt = mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, definesWithShadows), shader)).first;
         }
         return shaderIt->second;
     }

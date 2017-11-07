@@ -1,5 +1,7 @@
 #version 120
 
+#define SHADOWS @shadows_enabled
+
 varying vec2 uv;
 varying float depth;
 
@@ -14,10 +16,10 @@ varying vec4 passColor;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
-uniform int shadowTextureUnit0;
-uniform int shadowTextureUnit1;
-varying vec4 shadowSpaceCoords0;
-varying vec4 shadowSpaceCoords1;
+#if SHADOWS
+	@shadow_texture_unit_declarations
+	@shadow_space_coordinate_declarations
+#endif // SHADOWS
 
 #include "lighting.glsl"
 
@@ -40,9 +42,9 @@ void main(void)
 
     uv = gl_MultiTexCoord0.xy;
 
-	// This matrix has the opposite handedness to the others used here, so multiplication must have the vector to the left. Alternatively it could be transposed after construction, but that's extra work for the GPU just to make the code look a tiny bit cleaner.
-	mat4 eyePlaneMat = mat4(gl_EyePlaneS[shadowTextureUnit0], gl_EyePlaneT[shadowTextureUnit0], gl_EyePlaneR[shadowTextureUnit0], gl_EyePlaneQ[shadowTextureUnit0]);
-	shadowSpaceCoords0 = viewPos * eyePlaneMat;
-	eyePlaneMat = mat4(gl_EyePlaneS[shadowTextureUnit1], gl_EyePlaneT[shadowTextureUnit1], gl_EyePlaneR[shadowTextureUnit1], gl_EyePlaneQ[shadowTextureUnit1]);
-	shadowSpaceCoords1 = viewPos * eyePlaneMat;
+	#if SHADOWS
+		// This matrix has the opposite handedness to the others used here, so multiplication must have the vector to the left. Alternatively it could be transposed after construction, but that's extra work for the GPU just to make the code look a tiny bit cleaner.
+		mat4 eyePlaneMat;
+		@shadow_space_coordinate_calculations
+	#endif // SHADOWS
 }
