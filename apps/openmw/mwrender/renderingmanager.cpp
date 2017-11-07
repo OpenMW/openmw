@@ -16,6 +16,8 @@
 #include <osgUtil/LineSegmentIntersector>
 #include <osgUtil/IncrementalCompileOperation>
 
+#include <osg/ImageUtils>
+
 #include <osgViewer/Viewer>
 
 #include <components/resource/resourcesystem.hpp>
@@ -622,10 +624,37 @@ namespace MWRender
 
     void RenderingManager::screenshot360(osg::Image* image, int w)
     {
-       screenshot(image,w,w); 
+        osg::Vec3 directions[6] = {
+          osg::Vec3(0,0,-1),
+          osg::Vec3(-1,0,0),
+          osg::Vec3(0,0,1),
+          osg::Vec3(1,0,0),
+          osg::Vec3(0,1,0),
+          osg::Vec3(0,-1,0),
+          };
+
+        double fovBackup = mFieldOfView;
+        mFieldOfView = 90.0;             // each side sees 90 degrees
+
+        for (int i = 0; i < 6; i++)      // for each cube side
+        {
+            osg::ref_ptr<osg::Image> sideImage (new osg::Image);
+            screenshot(sideImage.get(),w,w,directions[i]);
+
+            if (i == 0)
+            {
+                image->allocateImage(w * 6,w,sideImage->r(),sideImage->getPixelFormat(),sideImage->getDataType());
+                std::cout << image->s() << " " << image->t() << std::endl;
+            }
+
+            osg::copyImage(sideImage.get(),0,0,0,sideImage->s(),sideImage->t(),sideImage->r(),
+                           image,w * i,0,0);
+        }
+
+        mFieldOfView = fovBackup;
     }
 
-    void RenderingManager::screenshot(osg::Image *image, int w, int h)
+    void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Vec3 direction)
     {
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
         rttCamera->setNodeMask(Mask_RenderToTexture);
@@ -634,7 +663,10 @@ namespace MWRender
         rttCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         rttCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
         rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
-        rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix());
+        rttCamera->setViewMatrix(
+          mViewer->getCamera()->getViewMatrix() * osg::Matrixd::rotate(osg::Vec3(0,0,-1),direction)
+          );
+
         rttCamera->setViewport(0, 0, w, h);
 
         osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
