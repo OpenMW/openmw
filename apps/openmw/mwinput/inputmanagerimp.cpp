@@ -1016,7 +1016,7 @@ namespace MWInput
     void InputManager::screenshot()
     {
         // MOVE THIS ELSEWHERE LATER!
-        int screenshotW = 512;
+        int screenshotW = 1024;
         osg::ref_ptr<osg::Image> screenshot (new osg::Image);
         MWBase::Environment::get().getWorld()->screenshot360(screenshot.get(), screenshotW);
 

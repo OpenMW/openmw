@@ -636,20 +636,23 @@ namespace MWRender
         double fovBackup = mFieldOfView;
         mFieldOfView = 90.0;             // each side sees 90 degrees
 
+        if (mCamera->isFirstPerson())
+            mPlayerAnimation->getObjectRoot()->setNodeMask(0);
+
         for (int i = 0; i < 6; i++)      // for each cube side
         {
             osg::ref_ptr<osg::Image> sideImage (new osg::Image);
             screenshot(sideImage.get(),w,w,directions[i]);
 
             if (i == 0)
-            {
                 image->allocateImage(w * 6,w,sideImage->r(),sideImage->getPixelFormat(),sideImage->getDataType());
-                std::cout << image->s() << " " << image->t() << std::endl;
-            }
 
             osg::copyImage(sideImage.get(),0,0,0,sideImage->s(),sideImage->t(),sideImage->r(),
                            image,w * i,0,0);
         }
+
+        if (mCamera->isFirstPerson())
+            mPlayerAnimation->getObjectRoot()->setNodeMask(1);
 
         mFieldOfView = fovBackup;
     }
@@ -666,6 +669,8 @@ namespace MWRender
         rttCamera->setViewMatrix(
           mViewer->getCamera()->getViewMatrix() * osg::Matrixd::rotate(osg::Vec3(0,0,-1),direction)
           );
+
+// TODO: water reflections have to be transformed as well!!!!!
 
         rttCamera->setViewport(0, 0, w, h);
 
