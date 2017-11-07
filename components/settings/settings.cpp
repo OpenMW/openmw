@@ -1,16 +1,11 @@
 #include "settings.hpp"
 
-#include <sstream>
-#include <iostream>
-
 #include <components/misc/stringops.hpp>
+#include <iostream>
 
 #include <fstream>
 
 #include <experimental/filesystem>
-
-#include <boost/algorithm/string.hpp>
-
 
 
 namespace
@@ -52,7 +47,6 @@ namespace
     {
         return val ? "true" : "false";
     }
-
 }
 
 namespace Settings
@@ -63,6 +57,7 @@ CategorySettingValueMap Manager::mUserSettings = CategorySettingValueMap();
 CategorySettingVector Manager::mChangedSettings = CategorySettingVector();
 
 typedef std::map< CategorySetting, bool > CategorySettingStatusMap;
+
 
 class SettingsFileParser
 {
@@ -97,7 +92,7 @@ public:
                     fail("unterminated category");
 
                 currentCategory = line.substr(i+1, end - (i+1));
-                boost::algorithm::trim(currentCategory);
+                Misc::StringUtils::trim(currentCategory);
                 i = end+1;
             }
 
@@ -112,11 +107,11 @@ public:
                 fail("unterminated setting name");
 
             std::string setting = line.substr(i, (settingEnd-i));
-            boost::algorithm::trim(setting);
+            Misc::StringUtils::trim(setting);
 
             size_t valueBegin = settingEnd+1;
             std::string value = line.substr(valueBegin);
-            boost::algorithm::trim(value);
+            Misc::StringUtils::trim(value);
 
             if (settings.insert(std::make_pair(std::make_pair(currentCategory, setting), value)).second == false)
                 fail(std::string("duplicate setting: [" + currentCategory + "] " + setting));
@@ -201,7 +196,7 @@ public:
 
                 // Update the current category.
                 currentCategory = line.substr(i+1, end - (i+1));
-                boost::algorithm::trim(currentCategory);
+                Misc::StringUtils::trim(currentCategory);
 
                 // Write the (new) current category to the file.
                 ostream << "[" << currentCategory << "]" << std::endl;
@@ -235,12 +230,12 @@ public:
                 continue;
             }
             std::string setting = line.substr(i, (settingEnd-i));
-            boost::algorithm::trim(setting);
+            Misc::StringUtils::trim(setting);
 
             // Get the existing value so we can see if we've changed it.
             size_t valueBegin = settingEnd+1;
             std::string value = line.substr(valueBegin);
-            boost::algorithm::trim(value);
+            Misc::StringUtils::trim(value);
 
             // Construct the setting map key to determine whether the setting has already been
             // written to the file.

@@ -71,7 +71,8 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
         std::experimental::filesystem::path path (name.toUtf8().data());
 
         std::string extension = path.extension().string();
-        boost::algorithm::to_lower(extension);
+
+        std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 
         bool isLegacyPath = (extension == ".esm" ||
                              extension == ".esp");

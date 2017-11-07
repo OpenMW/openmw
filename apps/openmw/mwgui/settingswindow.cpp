@@ -1,4 +1,5 @@
 #include "settingswindow.hpp"
+#include <regex>
 
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Window.h>
@@ -12,6 +13,7 @@
 
 #include <SDL_video.h>
 
+#include <components/misc/stringops.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 #include <components/settings/settings.hpp>
 
@@ -40,8 +42,8 @@ namespace
         std::vector<std::string> split;
         boost::algorithm::split (split, str, boost::is_any_of("@(x"));
         assert (split.size() >= 2);
-        boost::trim(split[0]);
-        boost::trim(split[1]);
+        Misc::StringUtils::trim(split[0]);
+        Misc::StringUtils::trim(split[1]);
         x = MyGUI::utility::parseInt (split[0]);
         y = MyGUI::utility::parseInt (split[1]);
     }
@@ -155,8 +157,10 @@ namespace MWGui
         {
             MyGUI::TextBox* textBox;
             getWidget(textBox, labelWidgetName);
-            std::string labelCaption = scroller->getUserString("SettingLabelCaption");
-            boost::algorithm::replace_all(labelCaption, "%s", value);
+            std::string labelCaption = "";
+            std::regex to_replace("%s");
+            std::regex_replace(std::back_inserter(labelCaption), scroller->getUserString("SettingLabelCaption").begin(),
+                               scroller->getUserString("SettingLabelCaption").end(), to_replace, value);
             textBox->setCaptionWithReplacing(labelCaption);
         }
     }

@@ -1,17 +1,12 @@
 #include "shadermanager.hpp"
 
-#include <fstream>
 #include <iostream>
-#include <algorithm>
-#include <sstream>
+#include <regex>
+#include <fstream>
 
 #include <osg/Program>
 
 #include <experimental/filesystem>
-
-#include <boost/algorithm/string.hpp>
-
-
 
 namespace Shader
 {
@@ -23,7 +18,10 @@ namespace Shader
 
     bool parseIncludes(std::experimental::filesystem::path shaderPath, std::string& source)
     {
-        boost::replace_all(source, "\r\n", "\n");
+        std::string temp = "";
+        std::regex to_replace("\r\n");
+        std::regex_replace(std::back_inserter(temp), source.begin(), source.end(), to_replace, "\n");
+        source = temp;
 
         std::set<std::experimental::filesystem::path> includedFiles;
         size_t foundPos = 0;

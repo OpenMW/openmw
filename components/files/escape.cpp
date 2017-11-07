@@ -33,8 +33,6 @@ namespace Files
 
         static const char escape[] = { escape_hash_filter::sEscape,  escape_hash_filter::sEscapeIdentifier };
         Misc::StringUtils::replaceAll(temp, escape, "@", 2, 1);
-
-        return temp;
     }
 
     EscapeHashString::EscapeHashString() : mData()

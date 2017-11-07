@@ -1,4 +1,9 @@
 #include "formatting.hpp"
+#include <algorithm>
+#include <cctype>
+#include <iostream>
+#include <string>
+
 
 #include <MyGUI_EditText.h>
 #include <MyGUI_Gui.h>
@@ -29,7 +34,7 @@ namespace MWGui
             MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
             mText = Interpreter::fixDefinesBook(mText, interpreterContext);
 
-            boost::algorithm::replace_all(mText, "\r", "");
+            mText.erase(std::remove(mText.begin(), mText.end(), '\r'), mText.end());
 
             registerTag("br", Event_BrTag);
             registerTag("p", Event_PTag);
