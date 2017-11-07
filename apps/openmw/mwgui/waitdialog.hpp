@@ -33,6 +33,8 @@ namespace MWGui
 
         virtual bool exit();
 
+        virtual void clear();
+
         void onFrame(float dt);
 
         bool getSleeping() { return mTimeAdvancer.isRunning() && mSleeping; }
