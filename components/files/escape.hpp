@@ -30,7 +30,6 @@ namespace Files
 
     private:
         std::queue<int> mNext;
-        int mPrevious;
 
         bool mSeenNonWhitespace;
         bool mFinishLine;
@@ -42,11 +41,9 @@ namespace Files
         if (mNext.empty())
         {
             int character = boost::iostreams::get(src);
-            bool record = true;
             if (character == boost::iostreams::WOULD_BLOCK)
             {
                 mNext.push(character);
-                record = false;
             }
             else if (character == EOF)
             {
@@ -82,12 +79,6 @@ namespace Files
             {
                 mNext.push(sEscape);
                 mNext.push(sEscapeIdentifier);
-                record = false;
-            }
-            else if (mPrevious == sEscape)
-            {
-                mNext.push(sEscape);
-                mNext.push(sEscapeIdentifier);
             }
             else
             {
@@ -95,8 +86,6 @@ namespace Files
             }
             if (!mSeenNonWhitespace && !isspace(character))
                 mSeenNonWhitespace = true;
-            if (record)
-                mPrevious = character;
         }
         int retval = mNext.front();
         mNext.pop();
