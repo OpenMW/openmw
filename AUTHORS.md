@@ -129,6 +129,7 @@ Programmers
     Radu-Marius Popovici (rpopovici)
     Rafael Moura (dhustkoder)
     rdimesio
+    rexelion
     riothamus
     Rob Cutmore (rcutmore)
     Robert MacGregor (Ragora)

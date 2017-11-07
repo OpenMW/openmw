@@ -657,12 +657,16 @@ namespace MWGui
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWBase::Environment::get().getWorld()->breakInvisibility(player);
+        
+        if (!object.getRefData().activate())
+            return;
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, object, MWWorld::Ptr(), count);
 
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
         MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
+
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject (object);
 
@@ -735,7 +739,7 @@ namespace MWGui
             }
         }
 
-        if (!found)
+        if (!found || selected == cycled)
             return;
 
         useItem(model.getItem(cycled).mBase);

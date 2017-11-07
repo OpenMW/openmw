@@ -254,6 +254,7 @@ void CharacterController::refreshHitRecoilAnims()
                 || mPtr.getClass().getCreatureStats(mPtr).getFatigue().getBase() == 0)
                 && mAnimation->hasAnimation("knockout"))
         {
+            mTimeUntilWake = Misc::Rng::rollClosedProbability() * 2 + 1; // Wake up after 1 to 3 seconds
             if (isSwimming && mAnimation->hasAnimation("swimknockout"))
             {
                 mHitState = CharState_SwimKnockOut;
@@ -338,7 +339,8 @@ void CharacterController::refreshHitRecoilAnims()
             mPtr.getClass().getCreatureStats(mPtr).setBlock(false);
         mHitState = CharState_None;
     }
-    else if (isKnockedOut() && mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() > 0)
+    else if (isKnockedOut() && mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() > 0 
+            && mTimeUntilWake <= 0)
     {
         mHitState = isSwimming ? CharState_SwimKnockDown : CharState_KnockDown;
         mAnimation->disable(mCurrentHit);
@@ -372,21 +374,29 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
             }
         }
 
-        if(mJumpState == JumpState_InAir)
-        {
-            mAnimation->disable(mCurrentJump);
-            mCurrentJump = jumpAnimName;
-            if (mAnimation->hasAnimation("jump"))
-                mAnimation->play(mCurrentJump, Priority_Jump, jumpmask, false,
-                             1.0f, (startAtLoop?"loop start":"start"), "stop", 0.0f, ~0ul);
-        }
-        else
+        if (!mCurrentJump.empty())
         {
             mAnimation->disable(mCurrentJump);
             mCurrentJump.clear();
-            if (mAnimation->hasAnimation("jump"))
+        }
+
+        if(mJumpState == JumpState_InAir)
+        {
+            if (mAnimation->hasAnimation(jumpAnimName))
+            {
+                mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, false,
+                             1.0f, (startAtLoop?"loop start":"start"), "stop", 0.0f, ~0ul);
+                mCurrentJump = jumpAnimName;
+            }
+        }
+        else if (mJumpState == JumpState_Landing)
+        {
+             if (mAnimation->hasAnimation(jumpAnimName))
+             {
                 mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, true,
                              1.0f, "loop stop", "stop", 0.0f, 0);
+                mCurrentJump = jumpAnimName;
+            }
         }
     }
 }
@@ -759,6 +769,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSecondsOfRunning(0)
     , mTurnAnimationThreshold(0)
     , mAttackingOrSpell(false)
+    , mTimeUntilWake(0.f)
 {
     if(!mAnimation)
         return;
@@ -1628,6 +1639,9 @@ void CharacterController::update(float duration)
     float speed = 0.f;
 
     updateMagicEffects();
+        
+    if (isKnockedOut())
+        mTimeUntilWake -= duration;
 
     bool godmode = mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
 
@@ -1691,7 +1705,6 @@ void CharacterController::update(float duration)
 
         mHasMovedInXY = std::abs(vec.x())+std::abs(vec.y()) > 0.0f;
         isrunning = isrunning && mHasMovedInXY;
-
 
         // advance athletics
         if(mHasMovedInXY && mPtr == getPlayer())
@@ -1847,7 +1860,8 @@ void CharacterController::update(float duration)
         }
         else
         {
-            jumpstate = JumpState_None;
+            jumpstate = mAnimation->isPlaying(mCurrentJump) ? JumpState_Landing : JumpState_None;
+
             vec.z() = 0.0f;
 
             inJump = false;
@@ -1877,9 +1891,15 @@ void CharacterController::update(float duration)
             else if(rot.z() != 0.0f && !sneak && !(mPtr == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson()))
             {
                 if(rot.z() > 0.0f)
+                {
                     movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
+                    mAnimation->disable(mCurrentJump);
+                }
                 else if(rot.z() < 0.0f)
+                {
                     movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
+                    mAnimation->disable(mCurrentJump);
+                }
             }
         }
 
