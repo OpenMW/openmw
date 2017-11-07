@@ -26,7 +26,9 @@ varying vec3 passViewPos;
 varying vec3 passNormal;
 
 uniform sampler2DShadow shadowTexture0;
-varying vec4 shadowSpaceCoords;
+uniform sampler2DShadow shadowTexture1;
+varying vec4 shadowSpaceCoords0;
+varying vec4 shadowSpaceCoords1;
 
 #include "lighting.glsl"
 #include "parallax.glsl"
@@ -68,7 +70,8 @@ void main()
     gl_FragData[0].a *= texture2D(blendMap, blendMapUV).a;
 #endif
 
-	float shadowing = shadow2DProj(shadowTexture0, shadowSpaceCoords).r;
+	float shadowing = shadow2DProj(shadowTexture0, shadowSpaceCoords0).r;
+	shadowing *= shadow2DProj(shadowTexture1, shadowSpaceCoords1).r;
 
 #if !PER_PIXEL_LIGHTING
     gl_FragData[0] *= lighting + vec4(shadowDiffuseLighting * shadowing, 0);

@@ -210,13 +210,13 @@ namespace MWRender
         settings->setReceivesShadowTraversalMask(~0u);
 
         //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::PERSPECTIVE_SHADOW_MAP);
-        settings->setBaseShadowTextureUnit(7);
+        settings->setBaseShadowTextureUnit(8 - MWShadow::numberOfShadowMapsPerLight);
         //settings->setMinimumShadowMapNearFarRatio(0);
-        //settings->setNumShadowMapsPerLight(1);
+        settings->setNumShadowMapsPerLight(MWShadow::numberOfShadowMapsPerLight);
         //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::ORTHOGRAPHIC_SHADOW_MAP);
         //settings->setMultipleShadowMapHint(osgShadow::ShadowSettings::PARALLEL_SPLIT); // ignored
         //settings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
-        //settings->setDebugDraw(true);
+        //settings->setDebugDraw(true); // don't turn this on because it makes everything break
 
         //settings->setPerspectiveShadowMapCutOffAngle(0);
         //settings->setShaderHint(osgShadow::ShadowSettings::PROVIDE_VERTEX_AND_FRAGMENT_SHADER);

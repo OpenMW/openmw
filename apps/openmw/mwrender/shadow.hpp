@@ -8,17 +8,20 @@ namespace MWRender
     class MWShadow : public osgShadow::ViewDependentShadowMap
     {
     public:
+        static const int numberOfShadowMapsPerLight = 2;
+        static const bool debugHud = true;
+
         MWShadow();
 
         virtual void cull(osgUtil::CullVisitor& cv);
     protected:
         const int debugTextureUnit;
 
-        osg::ref_ptr<osg::Camera> debugCamera;
+        std::vector<osg::ref_ptr<osg::Camera>> debugCameras;
 
         osg::ref_ptr<osg::Program> debugProgram;
 
-        osg::ref_ptr<osg::Node> debugGeometry;
+        std::vector<osg::ref_ptr<osg::Node>> debugGeometry;
     };
 }
 

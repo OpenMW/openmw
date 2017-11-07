@@ -15,7 +15,9 @@ varying vec3 passViewPos;
 varying vec3 passNormal;
 
 uniform int shadowTextureUnit0;
-varying vec4 shadowSpaceCoords;
+uniform int shadowTextureUnit1;
+varying vec4 shadowSpaceCoords0;
+varying vec4 shadowSpaceCoords1;
 
 #include "lighting.glsl"
 
@@ -40,5 +42,7 @@ void main(void)
 
 	// This matrix has the opposite handedness to the others used here, so multiplication must have the vector to the left. Alternatively it could be transposed after construction, but that's extra work for the GPU just to make the code look a tiny bit cleaner.
 	mat4 eyePlaneMat = mat4(gl_EyePlaneS[shadowTextureUnit0], gl_EyePlaneT[shadowTextureUnit0], gl_EyePlaneR[shadowTextureUnit0], gl_EyePlaneQ[shadowTextureUnit0]);
-	shadowSpaceCoords = viewPos * eyePlaneMat;
+	shadowSpaceCoords0 = viewPos * eyePlaneMat;
+	eyePlaneMat = mat4(gl_EyePlaneS[shadowTextureUnit1], gl_EyePlaneT[shadowTextureUnit1], gl_EyePlaneR[shadowTextureUnit1], gl_EyePlaneQ[shadowTextureUnit1]);
+	shadowSpaceCoords1 = viewPos * eyePlaneMat;
 }
