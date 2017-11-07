@@ -388,9 +388,6 @@ void NpcAnimation::rebuild()
 {
     updateNpcBase();
 
-    if (mAlpha != 1.f)
-        mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
-
     MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
 }
 
@@ -651,6 +648,9 @@ void NpcAnimation::updateParts()
 
     if (wasArrowAttached)
         attachArrow();
+
+    if (mAlpha != 1.f)
+        mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
 }
 
 
@@ -917,6 +917,8 @@ void NpcAnimation::showWeapons(bool showWeapon)
                     attachArrow();
             }
         }
+        if (mAlpha != 1.f)
+            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
     }
     else
     {
@@ -942,6 +944,8 @@ void NpcAnimation::showCarriedLeft(bool show)
             if (iter->getTypeName() == typeid(ESM::Light).name() && mObjectParts[ESM::PRT_Shield])
                 addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), iter->get<ESM::Light>()->mBase);
         }
+        if (mAlpha != 1.f)
+            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
     }
     else
         removeIndividualPart(ESM::PRT_Shield);
