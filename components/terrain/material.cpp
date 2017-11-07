@@ -116,7 +116,10 @@ namespace Terrain
                 osg::ref_ptr<osg::Shader> vertexShader = shaderManager->getShader("terrain_vertex.glsl", defineMap, osg::Shader::VERTEX);
                 osg::ref_ptr<osg::Shader> fragmentShader = shaderManager->getShader("terrain_fragment.glsl", defineMap, osg::Shader::FRAGMENT);
                 if (!vertexShader || !fragmentShader)
-                    throw std::runtime_error("Unable to create shader");
+                {
+                    // Try again without shader. Error already logged by above
+                    return createPasses(false, forcePerPixelLighting, clampLighting, shaderManager, layers, blendmaps, blendmapScale, layerTileSize);
+                }
 
                 stateset->setAttributeAndModes(shaderManager->getProgram(vertexShader, fragmentShader));
             }
