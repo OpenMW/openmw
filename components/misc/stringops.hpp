@@ -145,26 +145,26 @@ public:
      * @param str The string to operate on.
      * @param what The string to replace.
      * @param with The replacement string.
-     * @param what_len The length of the string to replace.
-     * @param with_len The length of the replacement string.
+     * @param whatLen The length of the string to replace.
+     * @param withLen The length of the replacement string.
      *
      * @return A reference to the string passed in @p str.
      */
     static std::string &replaceAll(std::string &str, const char *what, const char *with,
-                                   std::size_t what_len=std::string::npos, std::size_t with_len=std::string::npos)
+                                   std::size_t whatLen=std::string::npos, std::size_t withLen=std::string::npos)
     {
-        if (what_len == std::string::npos)
-            what_len = strlen(what);
+        if (whatLen == std::string::npos)
+            whatLen = strlen(what);
 
-        if (with_len == std::string::npos)
-            with_len = strlen(with);
+        if (withLen == std::string::npos)
+            withLen = strlen(with);
 
         std::size_t found;
         std::size_t offset = 0;
-        while((found = str.find(what, offset, what_len)) != std::string::npos)
+        while((found = str.find(what, offset, whatLen)) != std::string::npos)
         {
-              str.replace(found, what_len, with, with_len);
-              offset = found + with_len;
+              str.replace(found, whatLen, with, withLen);
+              offset = found + withLen;
         }
         return str;
     }
