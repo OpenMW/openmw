@@ -8,7 +8,7 @@ namespace MWRender
     class MWShadow : public osgShadow::ViewDependentShadowMap
     {
     public:
-        static const int numberOfShadowMapsPerLight = 2;
+        static const int numberOfShadowMapsPerLight = 3;
         static const bool debugHud = true;
 
         MWShadow();

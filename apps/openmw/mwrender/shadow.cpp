@@ -420,11 +420,11 @@ namespace MWRender
         previous_sdl.swap(sdl);
 
         unsigned int numShadowMapsPerLight = settings->getNumShadowMapsPerLight();
-        if (numShadowMapsPerLight>2)
+        /*if (numShadowMapsPerLight>2)
         {
             OSG_NOTICE << "numShadowMapsPerLight of " << numShadowMapsPerLight << " is greater than maximum supported, falling back to 2." << std::endl;
             numShadowMapsPerLight = 2;
-        }
+        }*/
 
         LightDataList& pll = vdd->getLightDataList();
         for (LightDataList::iterator itr = pll.begin();
@@ -596,14 +596,15 @@ namespace MWRender
                 if (numShadowMapsPerLight>1)
                 {
                     // compute the start and end range in non-dimensional coords
-#if 0
+#if 1
                     double r_start = (sm_i == 0) ? -1.0 : (double(sm_i) / double(numShadowMapsPerLight)*2.0 - 1.0);
                     double r_end = (sm_i + 1 == numShadowMapsPerLight) ? 1.0 : (double(sm_i + 1) / double(numShadowMapsPerLight)*2.0 - 1.0);
-#endif
+#else
 
                     // hardwired for 2 splits
                     double r_start = (sm_i == 0) ? -1.0 : splitPoint;
                     double r_end = (sm_i + 1 == numShadowMapsPerLight) ? 1.0 : splitPoint;
+#endif
 
                     // for all by the last shadowmap shift the r_end so that it overlaps slightly with the next shadowmap
                     // to prevent a seam showing through between the shadowmaps
