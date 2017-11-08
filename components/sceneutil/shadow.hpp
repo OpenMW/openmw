@@ -1,9 +1,9 @@
-#ifndef OPENMW_MWRENDER_SHADOW_H
-#define OPENMW_MWRENDER_SHADOW_H
+#ifndef COMPONENTS_SCENEUTIL_SHADOW_H
+#define COMPONENTS_SCENEUTIL_SHADOW_H
 
 #include <osgShadow/ViewDependentShadowMap>
 
-namespace MWRender
+namespace SceneUtil
 {
     class MWShadow : public osgShadow::ViewDependentShadowMap
     {
@@ -27,4 +27,4 @@ namespace MWRender
     };
 }
 
-#endif //OPENMW_MWRENDER_SHADOW_H
+#endif //COMPONENTS_SCENEUTIL_SHADOW_H

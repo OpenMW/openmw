@@ -7,7 +7,7 @@
 #include <osgDB/FileUtils>
 #include <osgDB/ReadFile>
 
-namespace MWRender
+namespace SceneUtil
 {
     using namespace osgShadow;
 

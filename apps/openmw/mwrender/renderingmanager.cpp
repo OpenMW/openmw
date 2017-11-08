@@ -34,6 +34,7 @@
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 #include <components/sceneutil/writescene.hpp>
+#include <components/sceneutil/shadow.hpp>
 
 #include <components/terrain/terraingrid.hpp>
 #include <components/terrain/quadtreeworld.hpp>
@@ -52,7 +53,6 @@
 #include "water.hpp"
 #include "terrainstorage.hpp"
 #include "util.hpp"
-#include "shadow.hpp"
 
 namespace MWRender
 {
@@ -210,9 +210,9 @@ namespace MWRender
         settings->setReceivesShadowTraversalMask(~0u);
 
         //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::PERSPECTIVE_SHADOW_MAP);
-        settings->setBaseShadowTextureUnit(MWShadow::baseShadowTextureUnit);
+        settings->setBaseShadowTextureUnit(SceneUtil::MWShadow::baseShadowTextureUnit);
         //settings->setMinimumShadowMapNearFarRatio(0);
-        settings->setNumShadowMapsPerLight(MWShadow::numberOfShadowMapsPerLight);
+        settings->setNumShadowMapsPerLight(SceneUtil::MWShadow::numberOfShadowMapsPerLight);
         //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::ORTHOGRAPHIC_SHADOW_MAP);
         //settings->setMultipleShadowMapHint(osgShadow::ShadowSettings::PARALLEL_SPLIT); // ignored
         //settings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
@@ -224,7 +224,7 @@ namespace MWRender
         int mapres = 2048;
         settings->setTextureSize(osg::Vec2s(mapres,mapres));
 
-        MWShadow* tech = new MWShadow();
+        SceneUtil::MWShadow* tech = new SceneUtil::MWShadow();
         shadowedScene->setShadowTechnique(tech);
 
         /*tech->setMaxFarPlane(0);
