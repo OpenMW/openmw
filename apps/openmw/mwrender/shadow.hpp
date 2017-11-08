@@ -13,6 +13,8 @@ namespace MWRender
 
         MWShadow();
 
+        const static int baseShadowTextureUnit = 8 - numberOfShadowMapsPerLight;
+
         virtual void cull(osgUtil::CullVisitor& cv);
     protected:
         const int debugTextureUnit;
