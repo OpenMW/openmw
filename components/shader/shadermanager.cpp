@@ -11,6 +11,8 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include "apps/openmw/mwrender/shadow.hpp"
+
 namespace Shader
 {
 
@@ -106,7 +108,7 @@ namespace Shader
         // set up shadows in the shader
         // get these values from settings manager
         bool shadows = true & !disableShadows;
-        int numShadowMaps = 2;
+        int numShadowMaps = MWRender::MWShadow::numberOfShadowMapsPerLight;
         DefineMap definesWithShadows;
         if (shadows)
         {

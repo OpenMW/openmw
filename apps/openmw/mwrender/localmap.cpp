@@ -23,6 +23,7 @@
 #include "../mwworld/cellstore.hpp"
 
 #include "vismask.hpp"
+#include "shadow.hpp"
 
 namespace
 {
@@ -200,6 +201,13 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     lightSource->setLight(light);
 
     lightSource->setStateSetModes(*stateset, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+    osg::ref_ptr<osg::Image> fakeShadowMapImage = new osg::Image();
+    fakeShadowMapImage->allocateImage(1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT);
+    *(float*)fakeShadowMapImage->data() = -std::numeric_limits<float>::infinity(); // this has been tried both positive and negative
+    osg::ref_ptr<osg::Texture> fakeShadowMapTexture = new osg::Texture2D(fakeShadowMapImage);
+    for (int i = MWShadow::baseShadowTextureUnit; i < MWShadow::baseShadowTextureUnit + MWShadow::numberOfShadowMapsPerLight; ++i)
+        stateset->setTextureAttributeAndModes(i, fakeShadowMapTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
 
     camera->addChild(lightSource);
     camera->setStateSet(stateset);
