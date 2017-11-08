@@ -644,12 +644,12 @@ namespace MWRender
 
             for (int j = 0; j < h; ++j)
                 for (int i = 0; i < w; ++i)
-                    dest->setColor(getColorByDirection(sphericalCoords(i / ((float) w), j / ((float) h))),i,j);
+                    dest->setColor(getColorByDirection(smallPlanetCoords(i / ((float) w), j / ((float) h))),i,j);
         }
 
         osg::Vec3d cylindricalCoords(double x, double y)
         {
-            osg::Vec3 result = osg::Vec3d(sin(x * 2 * osg::PI),cos(x * 2 * osg::PI),y * 2.0 - 1.0);
+            osg::Vec3 result = osg::Vec3d(cos(x * 2 * osg::PI),sin(x * 2 * osg::PI),y * 2.0 - 1.0);
             result.normalize();
             return result;
         }
@@ -663,6 +663,21 @@ namespace MWRender
             result = osg::Vec3(cos(x) * result.y(),sin(x) * result.y(),result.z());
 
             return result;
+        }
+
+        osg::Vec3d smallPlanetCoords(double x, double y)
+        {
+            osg::Vec2d fromCenter = osg::Vec2d(x,y) - osg::Vec2d(0.5,0.5);
+
+            double magnitude = fromCenter.length();
+
+            fromCenter.normalize();
+            double dot = fromCenter * osg::Vec2d(0.0,1.0);
+
+            x = x > 0.5 ? 0.5 - (dot + 1) / 4.0 : 0.5 + (dot + 1) / 4.0;
+            y = pow(std::min(1.0,magnitude / 0.5),0.5);
+
+            return sphericalCoords(x,y);
         }
 
         osg::Vec4 getColorByDirection(osg::Vec3d d)
@@ -720,7 +735,7 @@ namespace MWRender
 
             return mImages[side]->getColor(
                 std::min(std::max(int(x * mSize),0),mSize - 1),
-                std::min(std::max(int(y * mSize),0),mSize - 1));       //osg::Vec4(d.x(),d.y(),d.z(),1);
+                std::min(std::max(int(y * mSize),0),mSize - 1));
         }
 
     protected:
@@ -762,7 +777,7 @@ namespace MWRender
         if (mCamera->isFirstPerson())
             mPlayerAnimation->getObjectRoot()->setNodeMask(1);
 
-        s.create(image,1600,768);
+        s.create(image,1600,1600);
 
         mFieldOfView = fovBackup;
     }
