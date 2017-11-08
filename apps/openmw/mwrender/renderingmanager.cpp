@@ -644,13 +644,24 @@ namespace MWRender
 
             for (int j = 0; j < h; ++j)
                 for (int i = 0; i < w; ++i)
-                    dest->setColor(getColorByDirection(cylindricalCoords(i / ((float) w), j / ((float) h))),i,j);
+                    dest->setColor(getColorByDirection(sphericalCoords(i / ((float) w), j / ((float) h))),i,j);
         }
 
         osg::Vec3d cylindricalCoords(double x, double y)
         {
             osg::Vec3 result = osg::Vec3d(sin(x * 2 * osg::PI),cos(x * 2 * osg::PI),y * 2.0 - 1.0);
             result.normalize();
+            return result;
+        }
+
+        osg::Vec3d sphericalCoords(double x, double y)
+        {
+            x = x * 2 * osg::PI;
+            y = (y - 0.5) * osg::PI;
+
+            osg::Vec3 result = osg::Vec3(0.0,cos(y),sin(y));
+            result = osg::Vec3(cos(x) * result.y(),sin(x) * result.y(),result.z());
+
             return result;
         }
 
