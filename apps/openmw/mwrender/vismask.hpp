@@ -51,9 +51,7 @@ namespace MWRender
         Mask_PreCompile = (1<<16),
 
         // Set on a camera's cull mask to enable the LightManager
-        Mask_Lighting = (1<<17),
-
-        Mask_CastsShadows = (1<<18)
+        Mask_Lighting = (1<<17)
     };
 
 }
