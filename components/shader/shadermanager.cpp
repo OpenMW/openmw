@@ -162,7 +162,11 @@ namespace Shader
         {
             std::string shaderSource = templateIt->second;
             if (!parseDefines(shaderSource, definesWithShadows))
+            {
+                // Add to the cache anyway to avoid logging the same error over and over.
+                mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, defines), nullptr));
                 return NULL;
+            }
 
             osg::ref_ptr<osg::Shader> shader (new osg::Shader(shaderType));
             shader->setShaderSource(shaderSource);

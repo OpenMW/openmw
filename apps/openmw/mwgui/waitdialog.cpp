@@ -96,6 +96,12 @@ namespace MWGui
         return (!mTimeAdvancer.isRunning()); //Only exit if not currently waiting
     }
 
+    void WaitDialog::clear()
+    {
+        mSleeping = false;
+        mTimeAdvancer.stop();
+    }
+
     void WaitDialog::onOpen()
     {
         if (mTimeAdvancer.isRunning())
