@@ -210,6 +210,7 @@ target_link_libraries(components
     ${OSGVIEWER_LIBRARIES}
     ${OSGTEXT_LIBRARIES}
     ${OSGGA_LIBRARIES}
+    ${OSGSHADOW_LIBRARIES}
     ${OSGANIMATION_LIBRARIES}
     ${Bullet_LIBRARIES}
     ${SDL2_LIBRARIES}
