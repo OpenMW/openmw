@@ -4,6 +4,7 @@
 #include "../mwgui/mode.hpp"
 
 #include <osg/ref_ptr>
+#include <osgViewer/ViewerEventHandlers>
 
 #include <extern/oics/ICSChannelListener.h>
 #include <extern/oics/ICSInputControlSystem.h>
@@ -13,7 +14,6 @@
 #include <components/sdlutil/events.hpp>
 
 #include "../mwbase/inputmanager.hpp"
-
 
 namespace MWWorld
 {
@@ -74,6 +74,7 @@ namespace MWInput
             SDL_Window* window,
             osg::ref_ptr<osgViewer::Viewer> viewer,
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
+            osgViewer::ScreenCaptureHandler::CaptureOperation *screenCaptureOperation,
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab);
 
@@ -158,6 +159,7 @@ namespace MWInput
         bool mWindowVisible;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
         osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
+        osgViewer::ScreenCaptureHandler::CaptureOperation *mScreenCaptureOperation;
 
         bool mJoystickLastUsed;
         MWWorld::Player* mPlayer;

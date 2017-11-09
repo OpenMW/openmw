@@ -625,6 +625,13 @@ namespace MWRender
     class SphericalScreenshot
     {
     public:
+        typedef enum
+        {
+            MAPPING_CYLINDRICAL = 0,
+            MAPPING_SPHERICAL,
+            MAPPING_SMALL_PLANET
+        } SphericalScreenshotMapping;
+
         SphericalScreenshot(int size) 
         {
             mSize = size;
@@ -638,13 +645,26 @@ namespace MWRender
             return mImages[index].get();
         }
 
-        void create(osg::Image *dest, int w, int h)
+        void create(osg::Image *dest, int w, int h, SphericalScreenshotMapping mapping)
         {
             dest->allocateImage(w,h,mImages[0]->r(),mImages[0]->getPixelFormat(),mImages[0]->getDataType());
 
             for (int j = 0; j < h; ++j)
                 for (int i = 0; i < w; ++i)
-                    dest->setColor(getColorByDirection(sphericalCoords(i / ((float) w), j / ((float) h))),i,j);
+                {
+                    osg::Vec3d coords;
+                    osg::Vec2d normalizedXY = osg::Vec2d(i / ((float) w), j / ((float) h));
+
+                    switch (mapping)
+                    {
+                        case MAPPING_CYLINDRICAL: coords = cylindricalCoords(normalizedXY.x(),normalizedXY.y()); break;
+                        case MAPPING_SPHERICAL: coords = sphericalCoords(normalizedXY.x(),normalizedXY.y()); break;
+                        case MAPPING_SMALL_PLANET: coords = smallPlanetCoords(normalizedXY.x(),normalizedXY.y()); break;
+                        default: break;
+                    }
+                    
+                    dest->setColor(getColorByDirection(coords),i,j);
+                }
         }
 
         osg::Vec3d cylindricalCoords(double x, double y)
@@ -682,18 +702,18 @@ namespace MWRender
 
         osg::Vec4 getColorByDirection(osg::Vec3d d)
         {
+            // for details see OpenGL 4.4 specification page 241
+
             double x, y;
-            double ma;       // see OpenGL 4.4 specification page 241
+            double ma;  
             int side;
 
             double ax, ay, az;
-            ax = d.x() > 0 ? d.x() : -d.x();
+            ax = d.x() > 0 ? d.x() : -d.x();   // abs behaves weirdly for some reason
             ay = d.y() > 0 ? d.y() : -d.y();
             az = d.z() > 0 ? d.z() : -d.z();
 
-
             if (ax > ay)
-            {
                 if (ax > az)
                 {
                     side = d.x() > 0 ? 1 : 3;
@@ -704,9 +724,7 @@ namespace MWRender
                     side = d.z() > 0 ? 5 : 4;
                     ma = az;
                 }
-            }
             else
-            {
                 if (ay > az)
                 {
                     side = d.y() > 0 ? 0 : 2;
@@ -717,12 +735,11 @@ namespace MWRender
                     side = d.z() > 0 ? 5 : 4;
                     ma = az;
                 }
-            }
 
             switch (side)
             {
-                case 0: x = d.x();  y = d.z(); break;
-                case 1: x = -d.y();  y = d.z(); break;
+                case 0: x = d.x(); y = d.z(); break;
+                case 1: x = -d.y(); y = d.z(); break;
                 case 2: x = -d.x(); y = d.z(); break;
                 case 3: x = d.y(); y = d.z(); break;
                 case 4: x = d.x(); y = d.y(); break;
@@ -745,8 +762,10 @@ namespace MWRender
 
     void RenderingManager::screenshot360(osg::Image* image)
     {
-        int w = 1024;
-        SphericalScreenshot s(w);
+        int cubeWidth = 1024;
+        int screenshotWidth = 1600;
+        int screenshotHeight = 1280;
+        SphericalScreenshot s(cubeWidth);
 
         osg::Vec3 directions[6] = {
           osg::Vec3(0,0,-1),
@@ -766,18 +785,18 @@ namespace MWRender
         for (int i = 0; i < 6; i++)      // for each cube side
         {
             osg::Image *sideImage = s.getImage(i);
-            screenshot(sideImage,w,w,directions[i]);
+            screenshot(sideImage,cubeWidth,cubeWidth,directions[i],true);
         }
 
         if (mCamera->isFirstPerson())
             mPlayerAnimation->getObjectRoot()->setNodeMask(1);
 
-        s.create(image,1600,1600);
+        s.create(image,screenshotWidth,screenshotHeight,SphericalScreenshot::MAPPING_SPHERICAL);
 
         mFieldOfView = fovBackup;
     }
 
-    void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Vec3 direction)
+    void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Vec3 direction, bool disableWaterEffects)
     {
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
         rttCamera->setNodeMask(Mask_RenderToTexture);
@@ -786,9 +805,7 @@ namespace MWRender
         rttCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         rttCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
         rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
-        rttCamera->setViewMatrix(
-          mViewer->getCamera()->getViewMatrix() * osg::Matrixd::rotate(osg::Vec3(0,0,-1),direction)
-          );
+        rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * osg::Matrixd::rotate(osg::Vec3(0,0,-1),direction));
 
         rttCamera->setViewport(0, 0, w, h);
 
@@ -816,13 +833,16 @@ namespace MWRender
         // at the time this function is called we are in the middle of a frame,
         // so out of order calls are necessary to get a correct frameNumber for the next frame.
         // refer to the advance() and frame() order in Engine::go()
-        mWater->setEffectsEnabled(false);
+ 
+        if (disableWaterEffects)
+            mWater->setEffectsEnabled(false);
 
         mViewer->eventTraversal();
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
 
-        mWater->setEffectsEnabled(true);
+        if (disableWaterEffects)
+            mWater->setEffectsEnabled(true);
 
         callback->waitTillDone();
 

@@ -37,12 +37,14 @@ namespace MWInput
             SDL_Window* window,
             osg::ref_ptr<osgViewer::Viewer> viewer,
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
+            osgViewer::ScreenCaptureHandler::CaptureOperation *screenCaptureOperation,
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab)
         : mWindow(window)
         , mWindowVisible(true)
         , mViewer(viewer)
         , mScreenCaptureHandler(screenCaptureHandler)
+        , mScreenCaptureOperation(screenCaptureOperation)
         , mJoystickLastUsed(false)
         , mPlayer(NULL)
         , mInputManager(NULL)
@@ -1027,29 +1029,7 @@ namespace MWInput
     {
         osg::ref_ptr<osg::Image> screenshot (new osg::Image);
         MWBase::Environment::get().getWorld()->screenshot360(screenshot.get());
-(*mScreenCaptureHandler->getCaptureOperation())  (*(screenshot.get()),0);
-
-/*
-        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
-
-        if (!readerwriter)
-        {
-            std::cerr << "Error: Unable to write 360 degree screenshot, can't find a jpg ReaderWriter" << std::endl;
-            return;
-        }
-
-        std::ofstream outfile;
-        outfile.open("test.jpg");
-
-        osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*screenshot, outfile);
-
-        if (!result.success())
-        {
-            outfile << "Error: Unable to write screenshot: " << result.message() << " code " << result.status() << std::endl;
-            return;
-        }
-
-        outfile.close(); */
+        (*mScreenCaptureOperation) (*(screenshot.get()),0);
     }
 
     void InputManager::toggleInventory()
