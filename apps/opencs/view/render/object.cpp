@@ -22,6 +22,7 @@
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/commandmacro.hpp"
 #include "../../model/world/cellcoordinates.hpp"
+#include "../../model/prefs/state.hpp"
 
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
@@ -473,6 +474,7 @@ void CSVRender::Object::setSelected(bool selected)
     else
         mRootNode->addChild(mBaseNode);
 
+    mMarkerTransparency = CSMPrefs::get()["3D Scene Input"]["object-marker-alpha"].toDouble();
     updateMarker();
 }
 
