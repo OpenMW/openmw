@@ -1020,20 +1020,21 @@ namespace MWInput
     {
         mScreenCaptureHandler->setFramesToCapture(1);
         mScreenCaptureHandler->captureNextFrame(*mViewer);
-        MWBase::Environment::get().getWindowManager()->messageBox ("Screenshot saved");
+        MWBase::Environment::get().getWindowManager()->messageBox("Screenshot saved");
     }
 
     void InputManager::screenshot360()
     {
-        int screenshotW = 1024;
         osg::ref_ptr<osg::Image> screenshot (new osg::Image);
-        MWBase::Environment::get().getWorld()->screenshot360(screenshot.get(), screenshotW);
+        MWBase::Environment::get().getWorld()->screenshot360(screenshot.get());
+(*mScreenCaptureHandler->getCaptureOperation())  (*(screenshot.get()),0);
 
+/*
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
 
         if (!readerwriter)
         {
-            std::cerr << "Error: Unable to write screenshot, can't find a jpg ReaderWriter" << std::endl;
+            std::cerr << "Error: Unable to write 360 degree screenshot, can't find a jpg ReaderWriter" << std::endl;
             return;
         }
 
@@ -1048,7 +1049,7 @@ namespace MWInput
             return;
         }
 
-        outfile.close();
+        outfile.close(); */
     }
 
     void InputManager::toggleInventory()

@@ -743,8 +743,9 @@ namespace MWRender
         int mSize;
     };
 
-    void RenderingManager::screenshot360(osg::Image* image, int w)
+    void RenderingManager::screenshot360(osg::Image* image)
     {
+        int w = 1024;
         SphericalScreenshot s(w);
 
         osg::Vec3 directions[6] = {

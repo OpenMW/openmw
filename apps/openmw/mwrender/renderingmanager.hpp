@@ -126,7 +126,7 @@ namespace MWRender
 
         /// Take a screenshot of w*h onto the given image, not including the GUI.
         void screenshot(osg::Image* image, int w, int h, osg::Vec3 direction=osg::Vec3(0,0,-1));
-        void screenshot360(osg::Image* image, int w);
+        void screenshot360(osg::Image* image);
 
         struct RayResult
         {

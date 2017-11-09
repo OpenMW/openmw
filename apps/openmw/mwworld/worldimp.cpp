@@ -2281,9 +2281,9 @@ namespace MWWorld
         mRendering->screenshot(image, w, h);
     }
     
-    void World::screenshot360 (osg::Image* image, int w)
+    void World::screenshot360 (osg::Image* image)
     {
-        mRendering->screenshot360(image, w);
+        mRendering->screenshot360(image);
     }
 
     void World::activateDoor(const MWWorld::Ptr& door)
