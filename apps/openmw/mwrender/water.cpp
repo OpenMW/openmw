@@ -207,7 +207,6 @@ osg::ref_ptr<osg::Image> readPngImage (const std::string& file)
     return result.getImage();
 }
 
-
 class Refraction : public osg::Camera
 {
 public:
@@ -221,7 +220,7 @@ public:
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         setName("RefractionCamera");
 
-        setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
+        setupCullMask(true);
         setNodeMask(Mask_RenderToTexture);
         setViewport(0, 0, rttSize, rttSize);
 
@@ -260,6 +259,12 @@ public:
         mRefractionDepthTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
 
         attach(osg::Camera::DEPTH_BUFFER, mRefractionDepthTexture);
+    }
+
+    void setupCullMask(bool enabled)
+    {
+        setCullMask(!enabled ? 0 :
+           Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
     }
 
     void setScene(osg::Node* scene)
@@ -304,9 +309,9 @@ public:
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         setName("ReflectionCamera");
 
-        bool reflectActors = Settings::Manager::getBool("reflect actors", "Water");
+        mReflectActors = Settings::Manager::getBool("reflect actors", "Water");
 
-        setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_ParticleSystem|Mask_Sky|Mask_Player|Mask_Lighting|(reflectActors ? Mask_Actor : 0));
+        setupCullMask(true);
         setNodeMask(Mask_RenderToTexture);
 
         unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
@@ -334,6 +339,12 @@ public:
         addChild(mClipCullNode);
     }
 
+    void setupCullMask(bool enabled)
+    {
+        setCullMask(!enabled ? 0 :
+            Mask_Effect|Mask_Scene|Mask_Terrain|Mask_ParticleSystem|Mask_Sky|Mask_Player|Mask_Lighting|(mReflectActors ? Mask_Actor : 0));
+    }
+
     void setWaterLevel(float waterLevel)
     {
         setViewMatrix(osg::Matrix::scale(1,1,-1) * osg::Matrix::translate(0,0,2 * waterLevel));
@@ -357,6 +368,7 @@ private:
     osg::ref_ptr<osg::Texture2D> mReflectionTexture;
     osg::ref_ptr<ClipCullNode> mClipCullNode;
     osg::ref_ptr<osg::Node> mScene;
+    bool mReflectActors;
 };
 
 /// DepthClampCallback enables GL_DEPTH_CLAMP for the current draw, if supported.
@@ -695,6 +707,15 @@ void Water::removeCell(const MWWorld::CellStore *store)
 void Water::clearRipples()
 {
     mSimulation->clear();
+}
+
+void Water::setEffectsEnabled(bool enabled)
+{
+     if (mReflection)
+       mReflection->setupCullMask(enabled); 
+
+     if (mRefraction)
+       mRefraction->setupCullMask(enabled); 
 }
 
 }

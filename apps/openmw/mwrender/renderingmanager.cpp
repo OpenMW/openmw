@@ -644,7 +644,7 @@ namespace MWRender
 
             for (int j = 0; j < h; ++j)
                 for (int i = 0; i < w; ++i)
-                    dest->setColor(getColorByDirection(smallPlanetCoords(i / ((float) w), j / ((float) h))),i,j);
+                    dest->setColor(getColorByDirection(sphericalCoords(i / ((float) w), j / ((float) h))),i,j);
         }
 
         osg::Vec3d cylindricalCoords(double x, double y)
@@ -766,12 +766,6 @@ namespace MWRender
         {
             osg::Image *sideImage = s.getImage(i);
             screenshot(sideImage,w,w,directions[i]);
-
-          //    if (i == 0)
-                //image->allocateImage(resultW,resultH,sideImage->r(),sideImage->getPixelFormat(),sideImage->getDataType());
-                //image->allocateImage(6 * w,w,sideImage->r(),sideImage->getPixelFormat(),sideImage->getDataType());
-
-          //    osg::copyImage(sideImage,0,0,0,sideImage->s(),sideImage->t(),sideImage->r(),image,w * i,0,0);
         }
 
         if (mCamera->isFirstPerson())
@@ -794,8 +788,6 @@ namespace MWRender
         rttCamera->setViewMatrix(
           mViewer->getCamera()->getViewMatrix() * osg::Matrixd::rotate(osg::Vec3(0,0,-1),direction)
           );
-
-// TODO: water reflections have to be transformed as well!!!!!
 
         rttCamera->setViewport(0, 0, w, h);
 
@@ -823,9 +815,13 @@ namespace MWRender
         // at the time this function is called we are in the middle of a frame,
         // so out of order calls are necessary to get a correct frameNumber for the next frame.
         // refer to the advance() and frame() order in Engine::go()
+        mWater->setEffectsEnabled(false);
+
         mViewer->eventTraversal();
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
+
+        mWater->setEffectsEnabled(true);
 
         callback->waitTillDone();
 
