@@ -504,13 +504,8 @@ namespace MWMechanics
                 targetWeapon = *weaponSlot;
         }
 
-        std::shared_ptr<Action> targetWeaponAction(new ActionWeapon(targetWeapon));
-
         bool isRangedCombat = false;
-        if (targetWeaponAction.get())
-        {
-            rangeAttackOfTarget = targetWeaponAction->getCombatRange(isRangedCombat);
-        }
+        rangeAttackOfTarget = ActionWeapon(targetWeapon).getCombatRange(isRangedCombat);
         
         if (mMovement.mPosition[0] || mMovement.mPosition[1])
         {
