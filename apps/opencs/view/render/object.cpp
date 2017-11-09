@@ -221,7 +221,7 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeMoveOrScaleMarker (int axis)
 
     for (int i=0; i<2; ++i)
     {
-        float length = i ? shaftLength : 0;
+        float length = i ? shaftLength : MarkerShaftWidth;
 
         vertices->push_back (getMarkerPosition (-MarkerShaftWidth/2, -MarkerShaftWidth/2, length, axis));
         vertices->push_back (getMarkerPosition (-MarkerShaftWidth/2, MarkerShaftWidth/2, length, axis));
