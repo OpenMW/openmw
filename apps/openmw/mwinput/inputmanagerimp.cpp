@@ -1029,6 +1029,8 @@ namespace MWInput
     {
         osg::ref_ptr<osg::Image> screenshot (new osg::Image);
         MWBase::Environment::get().getWorld()->screenshot360(screenshot.get());
+
+        // calling mScreenCaptureHandler->getCaptureOperation() here caused segfault for some reason
         (*mScreenCaptureOperation) (*(screenshot.get()),0);
     }
 

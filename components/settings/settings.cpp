@@ -401,6 +401,18 @@ int Manager::getInt (const std::string& setting, const std::string& category)
     return parseInt( getString(setting, category) );
 }
 
+int Manager::tryGetInt (const std::string &setting, const std::string& category, int defaultValue)
+{
+    try
+    {
+        return getInt(setting,category);
+    }
+    catch (std::runtime_error)
+    {
+        return defaultValue;
+    }
+}
+
 bool Manager::getBool (const std::string& setting, const std::string& category)
 {
     return parseBool( getString(setting, category) );

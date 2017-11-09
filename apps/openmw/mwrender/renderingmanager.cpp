@@ -627,8 +627,8 @@ namespace MWRender
     public:
         typedef enum
         {
-            MAPPING_CYLINDRICAL = 0,
-            MAPPING_SPHERICAL,
+            MAPPING_SPHERICAL = 0,
+            MAPPING_CYLINDRICAL,
             MAPPING_SMALL_PLANET
         } SphericalScreenshotMapping;
 
@@ -762,9 +762,12 @@ namespace MWRender
 
     void RenderingManager::screenshot360(osg::Image* image)
     {
-        int cubeWidth = 1024;
-        int screenshotWidth = 1600;
-        int screenshotHeight = 1280;
+        int screenshotWidth = Settings::Manager::tryGetInt("s360 width","Video",mViewer->getCamera()->getViewport()->width());
+        int screenshotHeight = Settings::Manager::tryGetInt("s360 height","Video",mViewer->getCamera()->getViewport()->height());
+        SphericalScreenshot::SphericalScreenshotMapping mapping = static_cast<SphericalScreenshot::SphericalScreenshotMapping>(
+            Settings::Manager::tryGetInt("s360 mapping","Video",SphericalScreenshot::MAPPING_SPHERICAL));
+
+        int cubeWidth = screenshotWidth / 2;
         SphericalScreenshot s(cubeWidth);
 
         osg::Vec3 directions[6] = {
@@ -791,7 +794,7 @@ namespace MWRender
         if (mCamera->isFirstPerson())
             mPlayerAnimation->getObjectRoot()->setNodeMask(1);
 
-        s.create(image,screenshotWidth,screenshotHeight,SphericalScreenshot::MAPPING_SPHERICAL);
+        s.create(image,screenshotWidth,mapping != SphericalScreenshot::MAPPING_SMALL_PLANET ? screenshotHeight : screenshotWidth,mapping);
 
         mFieldOfView = fovBackup;
     }
