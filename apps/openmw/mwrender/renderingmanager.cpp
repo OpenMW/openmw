@@ -782,6 +782,8 @@ namespace MWRender
         double fovBackup = mFieldOfView;
         mFieldOfView = 90.0;             // each side sees 90 degrees
 
+        int maskBackup = mPlayerAnimation->getObjectRoot()->getNodeMask();
+
         if (mCamera->isFirstPerson())
             mPlayerAnimation->getObjectRoot()->setNodeMask(0);
 
@@ -791,11 +793,9 @@ namespace MWRender
             screenshot(sideImage,cubeWidth,cubeWidth,directions[i],true);
         }
 
-        if (mCamera->isFirstPerson())
-            mPlayerAnimation->getObjectRoot()->setNodeMask(1);
-
         s.create(image,screenshotWidth,mapping != SphericalScreenshot::MAPPING_SMALL_PLANET ? screenshotHeight : screenshotWidth,mapping);
 
+        mPlayerAnimation->getObjectRoot()->setNodeMask(maskBackup);
         mFieldOfView = fovBackup;
     }
 
