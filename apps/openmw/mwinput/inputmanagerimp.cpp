@@ -247,6 +247,9 @@ namespace MWInput
             case A_Screenshot:
                 screenshot();
                 break;
+            case A_Screenshot360:
+                screenshot360();
+                break;
             case A_Inventory:
                 toggleInventory ();
                 break;
@@ -1015,7 +1018,13 @@ namespace MWInput
 
     void InputManager::screenshot()
     {
-        // MOVE THIS ELSEWHERE LATER!
+        mScreenCaptureHandler->setFramesToCapture(1);
+        mScreenCaptureHandler->captureNextFrame(*mViewer);
+        MWBase::Environment::get().getWindowManager()->messageBox ("Screenshot saved");
+    }
+
+    void InputManager::screenshot360()
+    {
         int screenshotW = 1024;
         osg::ref_ptr<osg::Image> screenshot (new osg::Image);
         MWBase::Environment::get().getWorld()->screenshot360(screenshot.get(), screenshotW);
@@ -1040,11 +1049,6 @@ namespace MWInput
         }
 
         outfile.close();
-
-//        mScreenCaptureHandler->setFramesToCapture(1);
-//        mScreenCaptureHandler->captureNextFrame(*mViewer);
-
-//        MWBase::Environment::get().getWindowManager()->messageBox ("Screenshot saved");
     }
 
     void InputManager::toggleInventory()
@@ -1230,6 +1234,7 @@ namespace MWInput
         defaultKeyBindings[A_QuickKey9] = SDL_SCANCODE_9;
         defaultKeyBindings[A_QuickKey10] = SDL_SCANCODE_0;
         defaultKeyBindings[A_Screenshot] = SDL_SCANCODE_F12;
+        defaultKeyBindings[A_Screenshot360] = SDL_SCANCODE_F8;
         defaultKeyBindings[A_ToggleHUD] = SDL_SCANCODE_F11;
         defaultKeyBindings[A_ToggleDebug] = SDL_SCANCODE_F10;
         defaultKeyBindings[A_AlwaysRun] = SDL_SCANCODE_CAPSLOCK;
@@ -1364,6 +1369,9 @@ namespace MWInput
 
         if (action == A_Screenshot)
             return "Screenshot";
+
+        if (action == A_Screenshot360)
+            return "Screenshot 360";
 
         descriptions[A_Use] = "sUse";
         descriptions[A_Activate] = "sActivate";
@@ -1526,6 +1534,7 @@ namespace MWInput
         ret.push_back(A_QuickSave);
         ret.push_back(A_QuickLoad);
         ret.push_back(A_Screenshot);
+        ret.push_back(A_Screenshot360);
         ret.push_back(A_QuickKeysMenu);
         ret.push_back(A_QuickKey1);
         ret.push_back(A_QuickKey2);
@@ -1557,6 +1566,7 @@ namespace MWInput
         ret.push_back(A_QuickSave);
         ret.push_back(A_QuickLoad);
         ret.push_back(A_Screenshot);
+        ret.push_back(A_Screenshot360);
         ret.push_back(A_QuickKeysMenu);
         ret.push_back(A_QuickKey1);
         ret.push_back(A_QuickKey2);

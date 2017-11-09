@@ -227,6 +227,7 @@ namespace MWInput
         void toggleInventory();
         void toggleConsole();
         void screenshot();
+        void screenshot360();
         void toggleJournal();
         void activate();
         void toggleWalking();
@@ -256,6 +257,8 @@ namespace MWInput
             A_Unused,
 
             A_Screenshot,     // Take a screenshot
+
+            A_Screenshot360,  // Take a 360 degree screenshot
 
             A_Inventory,      // Toggle inventory screen
 
