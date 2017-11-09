@@ -669,14 +669,14 @@ namespace MWRender
 
         osg::Vec3d cylindricalCoords(double x, double y)
         {
-            osg::Vec3 result = osg::Vec3d(cos(x * 2 * osg::PI),sin(x * 2 * osg::PI),y * 2.0 - 1.0);
+            osg::Vec3 result = osg::Vec3d(cos(-1 * x * 2 * osg::PI),sin(-1 * x * 2 * osg::PI),y * 2.0 - 1.0);
             result.normalize();
             return result;
         }
 
         osg::Vec3d sphericalCoords(double x, double y)
         {
-            x = x * 2 * osg::PI;
+            x = -1 * x * 2 * osg::PI;
             y = (y - 0.5) * osg::PI;
 
             osg::Vec3 result = osg::Vec3(0.0,cos(y),sin(y));
