@@ -74,13 +74,82 @@ namespace Shader
         return true;
     }
 
+    bool parseFors(std::string& source)
+    {
+        const char escapeCharacter = '$';
+        size_t foundPos = 0;
+        while ((foundPos = source.find(escapeCharacter)) != std::string::npos)
+        {
+            size_t endPos = source.find_first_of(" \n\r()[].;,", foundPos);
+            if (endPos == std::string::npos)
+            {
+                std::cerr << "Unexpected EOF" << std::endl;
+                return false;
+            }
+            std::string command = source.substr(foundPos + 1, endPos - (foundPos + 1));
+            if (command != "foreach")
+            {
+                std::cerr << "Unknown shader directive: $" << command << std::endl;
+                return false;
+            }
+
+            size_t iterNameStart = endPos + 1;
+            size_t iterNameEnd = source.find_first_of(" \n\r()[].;,", iterNameStart);
+            if (iterNameEnd == std::string::npos)
+            {
+                std::cerr << "Unexpected EOF" << std::endl;
+                return false;
+            }
+            std::string iteratorName = "$" + source.substr(iterNameStart, iterNameEnd - iterNameStart);
+
+            size_t listStart = iterNameEnd + 1;
+            size_t listEnd = source.find_first_of("\n\r", listStart);
+            if (listEnd == std::string::npos)
+            {
+                std::cerr << "Unexpected EOF" << std::endl;
+                return false;
+            }
+            std::string list = source.substr(listStart, listEnd - listStart);
+            std::vector<std::string> listElements;
+            boost::split(listElements, list, boost::is_any_of(","));
+
+            size_t contentStart = source.find_first_not_of("\n\r", listEnd);
+            size_t contentEnd = source.find("$endforeach", contentStart);
+            if (contentEnd == std::string::npos)
+            {
+                std::cerr << "Unexpected EOF" << std::endl;
+                return false;
+            }
+            std::string content = source.substr(contentStart, contentEnd - contentStart);
+
+            size_t overallEnd = contentEnd + std::string("$endforeach").length();
+            // This will be wrong if there are other #line directives, so that needs fixing
+            int lineNumber = std::count(source.begin(), source.begin() + overallEnd, '\n') + 2;
+
+            std::string replacement = "";
+            for (std::vector<std::string>::const_iterator element = listElements.cbegin(); element != listElements.cend(); element++)
+            {
+                std::string contentInstance = content;
+                size_t foundIterator;
+                while ((foundIterator = contentInstance.find(iteratorName)) != std::string::npos)
+                    contentInstance.replace(foundIterator, iteratorName.length(), *element);
+                replacement += contentInstance;
+            }
+            replacement += "\n#line " + std::to_string(lineNumber);
+            source.replace(foundPos, overallEnd - foundPos, replacement);
+        }
+
+        return true;
+    }
+
     bool parseDefines(std::string& source, const ShaderManager::DefineMap& defines)
     {
         const char escapeCharacter = '@';
         size_t foundPos = 0;
+        std::vector<std::string> forIterators;
         while ((foundPos = source.find(escapeCharacter)) != std::string::npos)
         {
-            size_t endPos = source.find_first_of(" \n\r()[].;", foundPos);
+            size_t endPos = source.find_first_of(" \n\r()[].;,", foundPos);
             if (endPos == std::string::npos)
             {
                 std::cerr << "Unexpected EOF" << std::endl;
@@ -88,7 +157,34 @@ namespace Shader
             }
             std::string define = source.substr(foundPos+1, endPos - (foundPos+1));
             ShaderManager::DefineMap::const_iterator defineFound = defines.find(define);
-            if (defineFound == defines.end())
+            if (define == "foreach")
+            {
+                source.replace(foundPos, 1, "$");
+                size_t iterNameStart = endPos + 1;
+                size_t iterNameEnd = source.find_first_of(" \n\r()[].;,", iterNameStart);
+                if (iterNameEnd == std::string::npos)
+                {
+                    std::cerr << "Unexpected EOF" << std::endl;
+                    return false;
+                }
+                forIterators.push_back(source.substr(iterNameStart, iterNameEnd - iterNameStart));
+            }
+            else if (define == "endforeach")
+            {
+                source.replace(foundPos, 1, "$");
+                if (forIterators.empty())
+                {
+                    std::cerr << "endforeach without foreach" << std::endl;
+                    return false;
+                }
+                else
+                    forIterators.pop_back();
+            }
+            else if (std::find(forIterators.begin(), forIterators.end(), define) != forIterators.end())
+            {
+                source.replace(foundPos, 1, "$");
+            }
+            else if (defineFound == defines.end())
             {
                 std::cerr << "Undefined " << define << std::endl;
                 return false;
@@ -113,23 +209,10 @@ namespace Shader
         if (shadows)
         {
             definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("1")));
-
-            /*definesWithShadows.insert(std::string("shadow_texture_unit_declarations"), std::string(""));
-            definesWithShadows.insert(std::string("shadow_space_coordinate_declarations"), std::string(""));
-            definesWithShadows.insert(std::string("shadow_space_coordinate_calculations"), std::string(""));
-            definesWithShadows.insert(std::string("shadow_texture_sampler_declarations"), std::string(""));
-            definesWithShadows.insert(std::string("shadow_texture_lookup_calculations"), std::string(""));*/
             for (int i = 0; i < numShadowMaps; ++i)
-            {
-                definesWithShadows["shadow_texture_unit_declarations"] += "uniform int shadowTextureUnit" + std::to_string(i) + ";\n";
-                definesWithShadows["shadow_space_coordinate_declarations"] += "varying vec4 shadowSpaceCoords" + std::to_string(i) + ";\n";
-
-                definesWithShadows["shadow_space_coordinate_calculations"] += "eyePlaneMat = mat4(gl_EyePlaneS[shadowTextureUnit" + std::to_string(i) + "], gl_EyePlaneT[shadowTextureUnit" + std::to_string(i) + "], gl_EyePlaneR[shadowTextureUnit" + std::to_string(i) + "], gl_EyePlaneQ[shadowTextureUnit" + std::to_string(i) + "]);\n"
-                    + "shadowSpaceCoords" + std::to_string(i) + " = viewPos * eyePlaneMat;\n";
-
-                definesWithShadows["shadow_texture_sampler_declarations"] += "uniform sampler2DShadow shadowTexture" + std::to_string(i) + ";\n";
-                definesWithShadows["shadow_texture_lookup_calculations"] += "shadowing *= shadow2DProj(shadowTexture" + std::to_string(i) + ", shadowSpaceCoords" + std::to_string(i) + ").r;\n";
-            }
+                definesWithShadows["shadow_texture_unit_list"] += std::to_string(i) + ",";
+            // remove extra comma
+            definesWithShadows["shadow_texture_unit_list"] = definesWithShadows["shadow_texture_unit_list"].substr(0, definesWithShadows["shadow_texture_unit_list"].length() - 1);
         }
 
         definesWithShadows.insert(defines.begin(), defines.end());
@@ -161,7 +244,7 @@ namespace Shader
         if (shaderIt == mShaders.end())
         {
             std::string shaderSource = templateIt->second;
-            if (!parseDefines(shaderSource, definesWithShadows))
+            if (!parseDefines(shaderSource, definesWithShadows) || !parseFors(shaderSource))
             {
                 // Add to the cache anyway to avoid logging the same error over and over.
                 mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, defines), nullptr));

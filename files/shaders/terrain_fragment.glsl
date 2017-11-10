@@ -28,8 +28,10 @@ varying vec3 passViewPos;
 varying vec3 passNormal;
 
 #if SHADOWS
-	@shadow_texture_sampler_declarations
-	@shadow_space_coordinate_declarations
+	@foreach shadow_texture_unit_index @shadow_texture_unit_list
+		uniform sampler2DShadow shadowTexture@shadow_texture_unit_index;
+		varying vec4 shadowSpaceCoords@shadow_texture_unit_index;
+	@endforeach
 #endif // SHADOWS
 
 #include "lighting.glsl"
@@ -74,7 +76,9 @@ void main()
 
 	float shadowing = 1.0;
 #if SHADOWS
-	@shadow_texture_lookup_calculations
+	@foreach shadow_texture_unit_index @shadow_texture_unit_list
+		shadowing *= shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r;
+	@endforeach
 #endif // SHADOWS
 
 #if !PER_PIXEL_LIGHTING

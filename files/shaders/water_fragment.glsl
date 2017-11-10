@@ -1,5 +1,7 @@
 #version 120
 
+//DUMPME
+
 #define REFRACTION @refraction_enabled
 #define SHADOWS @shadows_enabled
 
@@ -144,9 +146,10 @@ uniform vec3 nodePosition;
 uniform float rainIntensity;
 
 #if SHADOWS
-	@shadow_texture_sampler_declarations
-
-	@shadow_space_coordinate_declarations
+	@foreach shadow_texture_unit_index @shadow_texture_unit_list
+		uniform sampler2DShadow shadowTexture@shadow_texture_unit_index;
+		varying vec4 shadowSpaceCoords@shadow_texture_unit_index;
+	@endforeach
 #endif // SHADOWS
 
 float frustumDepth;
@@ -165,15 +168,17 @@ void main(void)
     vec2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
     UV.y *= -1.0;
 
-	#if SHADOWS
-		float shadowing = 1.0;
+#if SHADOWS
+	float shadowing = 1.0;
 
-		@shadow_texture_lookup_calculations
+	@foreach shadow_texture_unit_index @shadow_texture_unit_list
+		shadowing *= shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r;
+	@endforeach
 
-		float shadow = shadowing;
-	#else // NOT SHADOWS
-		float shadow = 1.0;
-	#endif // SHADOWS
+	float shadow = shadowing;
+#else // NOT SHADOWS
+	float shadow = 1.0;
+#endif // SHADOWS
 
     vec2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
     screenCoords.y = (1.0-screenCoords.y);
