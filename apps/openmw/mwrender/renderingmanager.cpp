@@ -780,7 +780,7 @@ namespace MWRender
         int cubeWidth = Settings::Manager::tryGetInt("s360 cubemap size","Video",screenshotWidth / 2);                                    
 
         if (mapping == SphericalScreenshot::MAPPING_CUBEMAP)
-            cubeWidth = screenshotWidth / 6;                  // the image will consist of 6 cube sides in a row
+            screenshotWidth = cubeWidth * 6;                  // the image will consist of 6 cube sides in a row
 
         SphericalScreenshot s(cubeWidth);
 
