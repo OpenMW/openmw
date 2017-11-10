@@ -176,6 +176,8 @@ namespace MWInput
 
     void InputManager::handleGuiArrowKey(int action)
     {
+        if (SDL_IsTextInputActive())
+            return;
         MyGUI::KeyCode key;
         switch (action)
         {
