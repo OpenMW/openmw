@@ -713,16 +713,16 @@ namespace MWRender
 
         osg::Vec4 getColorByDirection(osg::Vec3d d)
         {
-            // for details see OpenGL 4.4 specification page 241
+            // for details see OpenGL 4.4 specification page 225
 
             double x, y;
             double ma;  
             int side;
 
             double ax, ay, az;
-            ax = d.x() > 0 ? d.x() : -d.x();   // abs behaves weirdly for some reason
-            ay = d.y() > 0 ? d.y() : -d.y();
-            az = d.z() > 0 ? d.z() : -d.z();
+            ax = fabs(d.x());
+            ay = fabs(d.y());
+            az = fabs(d.z());
 
             if (ax > ay)
                 if (ax > az)
