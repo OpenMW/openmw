@@ -390,7 +390,7 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
 
 void CSVRender::Object::setupCommonMarkerState(osg::ref_ptr<osg::Geometry> geometry)
 {
-    const int RenderBin = osg::StateSet::TRANSPARENT_BIN - 1;
+    const int RenderBin = osg::StateSet::TRANSPARENT_BIN;
 
     osg::ref_ptr<osg::StateSet> state = geometry->getOrCreateStateSet();
     state->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
