@@ -1113,7 +1113,10 @@ namespace MWInput
     void InputManager::activate()
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
-            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Return, 0);
+        {
+            if (!SDL_IsTextInputActive())
+                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Return, 0);
+        }
         else if (mControlSwitch["playercontrols"])
             mPlayer->activate();
     }
