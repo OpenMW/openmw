@@ -766,8 +766,8 @@ namespace MWRender
         int screenshotHeight = Settings::Manager::tryGetInt("s360 height","Video",mViewer->getCamera()->getViewport()->height());
         SphericalScreenshot::SphericalScreenshotMapping mapping = static_cast<SphericalScreenshot::SphericalScreenshotMapping>(
             Settings::Manager::tryGetInt("s360 mapping","Video",SphericalScreenshot::MAPPING_SPHERICAL));
+        int cubeWidth = Settings::Manager::tryGetInt("s360 cubemap size","Video",screenshotWidth / 2);                                    
 
-        int cubeWidth = screenshotWidth / 2;
         SphericalScreenshot s(cubeWidth);
 
         osg::Vec3 directions[6] = {
