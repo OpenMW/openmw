@@ -771,8 +771,11 @@ namespace MWRender
         int mSize;
     };
 
-    void RenderingManager::screenshot360(osg::Image* image)
+    bool RenderingManager::screenshot360(osg::Image* image)
     {
+        if (mCamera->isVanityOrPreviewModeEnabled())
+            return false;
+
         int screenshotWidth = Settings::Manager::tryGetInt("s360 width","Video",mViewer->getCamera()->getViewport()->width());
         int screenshotHeight = Settings::Manager::tryGetInt("s360 height","Video",mViewer->getCamera()->getViewport()->height());
         SphericalScreenshot::SphericalScreenshotMapping mapping = static_cast<SphericalScreenshot::SphericalScreenshotMapping>(
@@ -811,6 +814,8 @@ namespace MWRender
 
         mPlayerAnimation->getObjectRoot()->setNodeMask(maskBackup);
         mFieldOfView = fovBackup;
+
+        return true;
     }
 
     void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Vec3 direction, bool disableWaterEffects)
