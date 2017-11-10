@@ -807,7 +807,7 @@ namespace MWRender
         for (int i = 0; i < 6; i++)      // for each cube side
         {
             osg::Image *sideImage = s.getImage(i);
-            screenshot(sideImage,cubeWidth,cubeWidth,directions[i],true);
+            screenshot(sideImage,cubeWidth,cubeWidth,directions[i]);
         }
 
         s.create(image,screenshotWidth,mapping != SphericalScreenshot::MAPPING_SMALL_PLANET ? screenshotHeight : screenshotWidth,mapping);
@@ -818,7 +818,7 @@ namespace MWRender
         return true;
     }
 
-    void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Vec3 direction, bool disableWaterEffects)
+    void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Vec3 direction)
     {
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
         rttCamera->setNodeMask(Mask_RenderToTexture);
@@ -844,6 +844,10 @@ namespace MWRender
 
         rttCamera->setUpdateCallback(new NoTraverseCallback);
         rttCamera->addChild(mSceneRoot);
+
+        rttCamera->addChild(mWater->getReflectionCamera());
+        rttCamera->addChild(mWater->getRefractionCamera());
+
         rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~Mask_GUI));
 
         mRootNode->addChild(rttCamera);
@@ -856,15 +860,9 @@ namespace MWRender
         // so out of order calls are necessary to get a correct frameNumber for the next frame.
         // refer to the advance() and frame() order in Engine::go()
  
-        if (disableWaterEffects)
-            mWater->setEffectsEnabled(false);
-
         mViewer->eventTraversal();
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
-
-        if (disableWaterEffects)
-            mWater->setEffectsEnabled(true);
 
         callback->waitTillDone();
 
