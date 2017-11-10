@@ -482,25 +482,25 @@ void NpcAnimation::updateNpcBase()
     {
         const std::string base = "meshes\\xbase_anim.nif";
         if (smodel != base)
-            addAnimSource(base);
+            addAnimSource(base, smodel);
 
-        addAnimSource(smodel);
+        addAnimSource(smodel, smodel);
 
         if(!isWerewolf)
         {
             if(mNpc->mModel.length() > 0)
-                addAnimSource(Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS()));
+                addAnimSource(Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS()), smodel);
             if(Misc::StringUtils::lowerCase(mNpc->mRace).find("argonian") != std::string::npos)
-                addAnimSource("meshes\\xargonian_swimkna.nif");
+                addAnimSource("meshes\\xargonian_swimkna.nif", smodel);
         }
     }
     else
     {
         const std::string base = "meshes\\xbase_anim.1st.nif";
         if (smodel != base)
-            addAnimSource(base);
+            addAnimSource(base, smodel);
 
-        addAnimSource(smodel);
+        addAnimSource(smodel, smodel);
 
         mObjectRoot->setNodeMask(Mask_FirstPerson);
         mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
