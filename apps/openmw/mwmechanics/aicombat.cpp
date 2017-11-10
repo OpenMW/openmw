@@ -491,7 +491,6 @@ namespace MWMechanics
     void AiCombatStorage::startCombatMove(bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
     {
         // get the range of the target's weapon
-        float rangeAttackOfTarget = 0.f;
         MWWorld::Ptr targetWeapon = MWWorld::Ptr();
         const MWWorld::Class& targetClass = target.getClass();
 
@@ -505,7 +504,7 @@ namespace MWMechanics
         }
 
         bool isRangedCombat = false;
-        rangeAttackOfTarget = ActionWeapon(targetWeapon).getCombatRange(isRangedCombat);
+        float rangeAttackOfTarget = ActionWeapon(targetWeapon).getCombatRange(isRangedCombat);
         
         if (mMovement.mPosition[0] || mMovement.mPosition[1])
         {
