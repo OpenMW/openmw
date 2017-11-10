@@ -629,7 +629,8 @@ namespace MWRender
         {
             MAPPING_SPHERICAL = 0,
             MAPPING_CYLINDRICAL,
-            MAPPING_SMALL_PLANET
+            MAPPING_SMALL_PLANET,
+            MAPPING_CUBEMAP
         } SphericalScreenshotMapping;
 
         SphericalScreenshot(int size) 
@@ -647,6 +648,16 @@ namespace MWRender
 
         void create(osg::Image *dest, int w, int h, SphericalScreenshotMapping mapping)
         {
+            if (mapping == MAPPING_CUBEMAP)
+            {    
+                dest->allocateImage(mSize * 6,mSize,mImages[0]->r(),mImages[0]->getPixelFormat(),mImages[0]->getDataType());
+
+                for (int i = 0; i < 6; i++)
+                    osg::copyImage(mImages[i].get(),0,0,0,mImages[i]->s(),mImages[i]->t(),mImages[i]->r(),dest,i * mSize,0,0);
+
+                return;
+            }
+
             dest->allocateImage(w,h,mImages[0]->r(),mImages[0]->getPixelFormat(),mImages[0]->getDataType());
 
             for (int j = 0; j < h; ++j)
@@ -767,6 +778,9 @@ namespace MWRender
         SphericalScreenshot::SphericalScreenshotMapping mapping = static_cast<SphericalScreenshot::SphericalScreenshotMapping>(
             Settings::Manager::tryGetInt("s360 mapping","Video",SphericalScreenshot::MAPPING_SPHERICAL));
         int cubeWidth = Settings::Manager::tryGetInt("s360 cubemap size","Video",screenshotWidth / 2);                                    
+
+        if (mapping == SphericalScreenshot::MAPPING_CUBEMAP)
+            cubeWidth = screenshotWidth / 6;                  // the image will consist of 6 cube sides in a row
 
         SphericalScreenshot s(cubeWidth);
 
