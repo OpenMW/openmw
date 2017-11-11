@@ -39,7 +39,6 @@ namespace Settings
         ///< returns the list of changed settings and then clears it
 
         static int getInt (const std::string& setting, const std::string& category);
-        static int tryGetInt (const std::string &setting, const std::string& category, int defaultValue);
         static float getFloat (const std::string& setting, const std::string& category);
         static std::string getString (const std::string& setting, const std::string& category);
         static bool getBool (const std::string& setting, const std::string& category);
