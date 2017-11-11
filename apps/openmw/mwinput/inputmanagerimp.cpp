@@ -1,7 +1,6 @@
 #include "inputmanagerimp.hpp"
 
 #include <osgViewer/ViewerEventHandlers>
-#include <osgDB/Registry>
 
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
