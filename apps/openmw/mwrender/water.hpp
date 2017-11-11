@@ -107,7 +107,6 @@ namespace MWRender
         void removeCell(const MWWorld::CellStore* store); ///< remove all emitters in this cell
 
         void clearRipples();
-        void setEffectsEnabled(bool enabled);
 
         void changeCell(const MWWorld::CellStore* store);
         void setHeight(const float height);

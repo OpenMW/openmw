@@ -259,8 +259,6 @@ namespace MWInput
 
             A_Screenshot,     // Take a screenshot
 
-            A_Screenshot360,  // Take a 360 degree screenshot
-
             A_Inventory,      // Toggle inventory screen
 
             A_Console,        // Toggle console screen

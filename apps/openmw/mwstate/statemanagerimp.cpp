@@ -655,4 +655,5 @@ void MWState::StateManager::writeScreenshot(std::vector<char> &imageData) const
 
     std::string data = ostream.str();
     imageData = std::vector<char>(data.begin(), data.end());
+
 }
