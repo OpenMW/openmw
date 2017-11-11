@@ -52,10 +52,9 @@ namespace MWGui
 
     void ContainerWindow::onItemSelected(int index)
     {
-        if (mDragAndDrop->mIsOnDragAndDrop)
+        if (mDragAndDrop->mIsOnDragAndDrop && mModel)
         {
-            if (mModel && mModel->allowedToInsertItems())
-                dropItem();
+            dropItem();
             return;
         }
 
@@ -105,7 +104,7 @@ namespace MWGui
 
     void ContainerWindow::onBackgroundSelected()
     {
-        if (mDragAndDrop->mIsOnDragAndDrop && mModel && mModel->allowedToInsertItems())
+        if (mDragAndDrop->mIsOnDragAndDrop && mModel)
             dropItem();
     }
 

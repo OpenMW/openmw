@@ -94,11 +94,6 @@ namespace MWGui
         return true;
     }
 
-    bool ItemModel::allowedToInsertItems() const
-    {
-        return true;
-    }
-
     bool ItemModel::onDropItem(const MWWorld::Ptr &item, int count)
     {
         return true;

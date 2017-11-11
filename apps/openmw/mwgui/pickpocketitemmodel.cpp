@@ -79,12 +79,6 @@ namespace MWGui
         ProxyItemModel::removeItem(item, count);
     }
 
-    bool PickpocketItemModel::allowedToInsertItems() const
-    {
-        // don't allow "reverse pickpocket" (it will be handled by scripts after 1.0)
-        return false;
-    }
-
     bool PickpocketItemModel::onDropItem(const MWWorld::Ptr &item, int count)
     {
         // don't allow "reverse pickpocket" (it will be handled by scripts after 1.0)

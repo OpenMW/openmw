@@ -72,9 +72,6 @@ namespace MWGui
 
         /// Is the player allowed to use items from this item model? (default true)
         virtual bool allowedToUseItems() const;
-
-        /// Is the player allowed to insert items into this model? (default true)
-        virtual bool allowedToInsertItems() const;
         virtual void onClose()
         {
         }
