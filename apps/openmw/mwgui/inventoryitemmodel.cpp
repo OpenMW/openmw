@@ -9,6 +9,9 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+
 namespace MWGui
 {
 
@@ -114,6 +117,18 @@ void InventoryItemModel::update()
 
         mItems.push_back(newItem);
     }
+}
+
+bool InventoryItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
+{
+    // Looting a dead corpse is considered OK
+    if (mActor.getClass().isActor() && mActor.getClass().getCreatureStats(mActor).isDead())
+        return true;
+
+    MWWorld::Ptr player = MWMechanics::getPlayer();
+    MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item, mActor, count);
+
+    return true;
 }
 
 }

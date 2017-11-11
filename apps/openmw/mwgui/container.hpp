@@ -44,8 +44,6 @@ namespace MWGui
     private:
         DragAndDrop* mDragAndDrop;
 
-        bool mPickpocketDetected;
-
         MWGui::ItemView* mItemView;
         SortFilterItemModel* mSortModel;
         ItemModel* mModel;
