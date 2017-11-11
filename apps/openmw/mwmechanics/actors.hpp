@@ -115,14 +115,16 @@ namespace MWMechanics
             bool isRunning(const MWWorld::Ptr& ptr);
             bool isSneaking(const MWWorld::Ptr& ptr);
 
-        void forceStateUpdate(const MWWorld::Ptr &ptr);
+            void forceStateUpdate(const MWWorld::Ptr &ptr);
 
-        bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist=false);
-        void skipAnimation(const MWWorld::Ptr& ptr);
-        bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName);
-        void persistAnimationStates();
+            bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist=false);
+            void skipAnimation(const MWWorld::Ptr& ptr);
+            bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName);
+            void persistAnimationStates();
 
             void getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out);
+
+            bool isAnyObjectInRange(const osg::Vec3f& position, float radius);
 
             void cleanupSummonedCreature (CreatureStats& casterStats, int creatureActorId);
 

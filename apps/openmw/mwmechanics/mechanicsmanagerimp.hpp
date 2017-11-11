@@ -158,6 +158,9 @@ namespace MWMechanics
             virtual void getObjectsInRange (const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& objects);
             virtual void getActorsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects);
 
+            /// Check if there are actors in selected range
+            virtual bool isAnyActorInRange(const osg::Vec3f &position, float radius);
+
             virtual std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor);
             virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
             virtual std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor);

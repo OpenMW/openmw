@@ -799,20 +799,80 @@ namespace MWMechanics
 
         int index = Misc::Rng::rollDice(storage.mAllowedNodes.size());
         ESM::Pathgrid::Point dest = storage.mAllowedNodes[index];
-        state.moveIn(new AiWanderStorage());
+        ESM::Pathgrid::Point worldDest = dest;
+        ToWorldCoordinates(worldDest, actor.getCell()->getCell());
 
-        dest.mX += OffsetToPreventOvercrowding();
-        dest.mY += OffsetToPreventOvercrowding();
+        bool isPathGridOccupied = MWBase::Environment::get().getMechanicsManager()->isAnyActorInRange(PathFinder::MakeOsgVec3(worldDest), 60);
+
+        // add offset only if the selected pathgrid is occupied by another actor
+        if (isPathGridOccupied)
+        {
+            ESM::Pathgrid::PointList points;
+            getNeighbouringNodes(dest, actor.getCell(), points);
+
+            // there are no neighbouring nodes, nowhere to move
+            if (points.empty())
+                return;
+
+            int initialSize = points.size();
+            bool isOccupied = false;
+            // AI will try to move the NPC towards every neighboring node until suitable place will be found
+            for (int i = 0; i < initialSize; i++)
+            {
+                int randomIndex = Misc::Rng::rollDice(points.size());
+                ESM::Pathgrid::Point connDest = points[randomIndex];
+
+                // add an offset towards random neighboring node
+                osg::Vec3f dir = PathFinder::MakeOsgVec3(connDest) - PathFinder::MakeOsgVec3(dest);
+                float length = dir.length();
+                dir.normalize();
+
+                for (int j = 1; j <= 3; j++)
+                {
+                    // move for 5-15% towards random neighboring node
+                    dest = PathFinder::MakePathgridPoint(PathFinder::MakeOsgVec3(dest) + dir * (j * 5 * length / 100.f));
+                    worldDest = dest;
+                    ToWorldCoordinates(worldDest, actor.getCell()->getCell());
+
+                    isOccupied = MWBase::Environment::get().getMechanicsManager()->isAnyActorInRange(PathFinder::MakeOsgVec3(worldDest), 60);
+
+                    if (!isOccupied)
+                        break;
+                }
+
+                if (!isOccupied)
+                    break;
+
+                // Will try an another neighboring node
+                points.erase(points.begin()+randomIndex);
+            }
+
+            // there is no free space, nowhere to move
+            if (isOccupied)
+                return;
+        }
+
+        // place above to prevent moving inside objects, e.g. stairs, because a vector between pathgrids can be underground.
+        // Adding 20 in adjustPosition() is not enough.
+        dest.mZ += 60;
+
         ToWorldCoordinates(dest, actor.getCell()->getCell());
+
+        state.moveIn(new AiWanderStorage());
 
         MWBase::Environment::get().getWorld()->moveObject(actor, static_cast<float>(dest.mX), 
             static_cast<float>(dest.mY), static_cast<float>(dest.mZ));
         actor.getClass().adjustPosition(actor, false);
     }
 
-    int AiWander::OffsetToPreventOvercrowding()
+    void AiWander::getNeighbouringNodes(ESM::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM::Pathgrid::PointList& points)
     {
-        return static_cast<int>(20 * (Misc::Rng::rollProbability() * 2.0f - 1.0f));
+        const ESM::Pathgrid *pathgrid =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*currentCell->getCell());
+
+        int index = PathFinder::GetClosestPoint(pathgrid, PathFinder::MakeOsgVec3(dest));
+
+        currentCell->getNeighbouringPoints(index, points);
     }
 
     void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage)
