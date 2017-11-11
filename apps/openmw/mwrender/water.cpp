@@ -357,7 +357,6 @@ private:
     osg::ref_ptr<osg::Texture2D> mReflectionTexture;
     osg::ref_ptr<ClipCullNode> mClipCullNode;
     osg::ref_ptr<osg::Node> mScene;
-    bool mReflectActors;
 };
 
 /// DepthClampCallback enables GL_DEPTH_CLAMP for the current draw, if supported.

@@ -1019,11 +1019,12 @@ namespace MWInput
     {
         bool regularScreenshot = true;
 
+        std::string settingStr;
+
         try
         {
-            // FIXME: the same string "screenshot type" is queried here AND in renderingmanager.cpp
-            std::string s = Settings::Manager::getString("screenshot type","Video");
-            regularScreenshot = s.size() == 0;
+            settingStr = Settings::Manager::getString("screenshot type","Video");
+            regularScreenshot = settingStr.size() == 0;
         }
         catch (std::runtime_error)
         {
@@ -1039,7 +1040,7 @@ namespace MWInput
         {
             osg::ref_ptr<osg::Image> screenshot (new osg::Image);
 
-            if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get()))
+            if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get(),settingStr))
                 (*mScreenCaptureOperation) (*(screenshot.get()),0);
         }
     }

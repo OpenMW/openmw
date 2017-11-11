@@ -773,53 +773,44 @@ namespace MWRender
         int mSize;
     };
 
-    bool RenderingManager::screenshot360(osg::Image* image)
+    bool RenderingManager::screenshot360(osg::Image* image, std::string settingStr)
     {
         int screenshotW = mViewer->getCamera()->getViewport()->width();
         int screenshotH = mViewer->getCamera()->getViewport()->height();
         SphericalScreenshot::SphericalScreenshotMapping screenshotMapping = SphericalScreenshot::MAPPING_SPHERICAL;
         int cubeSize = screenshotW / 2;    
 
-        try
+        std::vector<std::string> settingArgs;
+        boost::algorithm::split(settingArgs,settingStr,boost::is_any_of(" "));
+
+        if (settingArgs.size() > 0)
         {
-            std::string settingStr = Settings::Manager::getString("screenshot type","Video");
-            std::vector<std::string> settingArgs;
-            boost::algorithm::split(settingArgs,settingStr,boost::is_any_of(" "));
+            std::string typeStrings[4] = {"spherical","cylindrical","planet","cubemap"};
+            bool found = false;
 
-            if (settingArgs.size() > 0)
-            {
-                std::string typeStrings[4] = {"spherical","cylindrical","planet","cubemap"};
-                bool found = false;
-
-                for (int i = 0; i < 4; ++i)
-                    if (settingArgs[0].compare(typeStrings[i]) == 0)
-                    {
-                        screenshotMapping = (SphericalScreenshot::SphericalScreenshotMapping) i;
-                        found = true;
-                        break;
-                    }
-
-                if (!found)
+            for (int i = 0; i < 4; ++i)
+                if (settingArgs[0].compare(typeStrings[i]) == 0)
                 {
-                    std::cerr << "Wrong screenshot type: " << settingArgs[0] << "." << std::endl;
-                    return false;
+                    screenshotMapping = (SphericalScreenshot::SphericalScreenshotMapping) i;
+                    found = true;
+                    break;
                 }
+
+            if (!found)
+            {
+                std::cerr << "Wrong screenshot type: " << settingArgs[0] << "." << std::endl;
+                return false;
             }
-        
-            if (settingArgs.size() > 1)
-                screenshotW = std::min(10000,std::atoi(settingArgs[1].c_str()));
-
-            if (settingArgs.size() > 2)
-                screenshotH = std::min(10000,std::atoi(settingArgs[2].c_str()));
-
-            if (settingArgs.size() > 3)
-                cubeSize = std::min(5000,std::atoi(settingArgs[3].c_str()));
         }
-        catch (std::runtime_error)
-        {
-            std::cerr << "Wrong parameters for screenshot type." << std::endl;
-            return false;
-        }
+    
+        if (settingArgs.size() > 1)
+            screenshotW = std::min(10000,std::atoi(settingArgs[1].c_str()));
+
+        if (settingArgs.size() > 2)
+            screenshotH = std::min(10000,std::atoi(settingArgs[2].c_str()));
+
+        if (settingArgs.size() > 3)
+            cubeSize = std::min(5000,std::atoi(settingArgs[3].c_str()));
 
         if (mCamera->isVanityOrPreviewModeEnabled())
         {
