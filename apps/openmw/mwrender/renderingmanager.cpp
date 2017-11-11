@@ -654,7 +654,7 @@ namespace MWRender
             {    
                 dest->allocateImage(mSize * 6,mSize,mImages[0]->r(),mImages[0]->getPixelFormat(),mImages[0]->getDataType());
 
-                for (int i = 0; i < 6; i++)
+                for (int i = 0; i < 6; ++i)
                     osg::copyImage(mImages[i].get(),0,0,0,mImages[i]->s(),mImages[i]->t(),mImages[i]->r(),dest,i * mSize,0,0);
 
                 return;
@@ -778,7 +778,9 @@ namespace MWRender
         int screenshotW = mViewer->getCamera()->getViewport()->width();
         int screenshotH = mViewer->getCamera()->getViewport()->height();
         SphericalScreenshot::SphericalScreenshotMapping screenshotMapping = SphericalScreenshot::MAPPING_SPHERICAL;
-        int cubeSize = screenshotW / 2;    
+        int cubeSize = screenshotMapping == SphericalScreenshot::SphericalScreenshotMapping::MAPPING_SMALL_PLANET ?
+            screenshotW:         // planet mapping needs higher resolution
+            screenshotW / 2;    
 
         std::vector<std::string> settingArgs;
         boost::algorithm::split(settingArgs,settingStr,boost::is_any_of(" "));
