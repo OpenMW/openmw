@@ -503,8 +503,8 @@ namespace MWMechanics
                 targetWeapon = *weaponSlot;
         }
 
-        bool isRangedCombat = false;
-        float rangeAttackOfTarget = ActionWeapon(targetWeapon).getCombatRange(isRangedCombat);
+        bool targetUsesRanged = false;
+        float rangeAttackOfTarget = ActionWeapon(targetWeapon).getCombatRange(targetUsesRanged);
         
         if (mMovement.mPosition[0] || mMovement.mPosition[1])
         {
@@ -524,16 +524,17 @@ namespace MWMechanics
             }
         }
 
-        // Below behavior for backing up during ranged combat differs from vanilla.
-        // Vanilla is observed as backing up only as far as fCombatDistance or
-        // opponent's weapon range, or not backing up if opponent is also using a ranged weapon
+        // Backing up behaviour
+        // Actor backs up slightly further away than opponent's weapon range
+        // (in vanilla - only as far as oponent's weapon range),
+        // or not at all if opponent is using a ranged weapon
         if (isDistantCombat)
         {
             // actor should not back up into water
             if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(actor), 0.5f))
                 return;
 
-            if (!isRangedCombat && distToTarget <= rangeAttackOfTarget*1.5) // Don't back up if the target is wielding ranged weapon
+            if (!targetUsesRanged && distToTarget <= rangeAttackOfTarget*1.5) // Don't back up if the target is wielding ranged weapon
                 mMovement.mPosition[1] = -1;
         }
     }
