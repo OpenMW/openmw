@@ -1230,8 +1230,13 @@ namespace MWMechanics
                             float sqrHeadTrackDistance = std::numeric_limits<float>::max();
                             MWWorld::Ptr headTrackTarget;
 
+                            MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
+
                             // Unconsious actor can not track target
-                            if (!iter->first.getClass().getCreatureStats(iter->first).getKnockedDown())
+                            // Also actors in combat and pursue mode do not bother to headtrack
+                            if (!stats.getKnockedDown() &&
+                                !stats.getAiSequence().isInCombat() &&
+                                !stats.getAiSequence().hasPackage(AiPackage::TypeIdPursue))
                             {
                                 for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                                 {
@@ -1239,8 +1244,9 @@ namespace MWMechanics
                                         continue;
                                     updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
                                 }
-                                iter->second->getCharacterController()->setHeadTrackTarget(headTrackTarget);
                             }
+
+                            iter->second->getCharacterController()->setHeadTrackTarget(headTrackTarget);
                         }
 
                         if (iter->first.getClass().isNpc() && iter->first != player)
