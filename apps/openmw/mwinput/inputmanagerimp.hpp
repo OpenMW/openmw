@@ -229,7 +229,6 @@ namespace MWInput
         void toggleInventory();
         void toggleConsole();
         void screenshot();
-        void screenshot360();
         void toggleJournal();
         void activate();
         void toggleWalking();

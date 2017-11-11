@@ -41,6 +41,8 @@
 #include <components/esm/loadcell.hpp>
 #include <components/fallback/fallback.hpp>
 
+#include <boost/algorithm/string.hpp>
+
 #include "../mwworld/cellstore.hpp"
 
 #include "sky.hpp"
@@ -773,19 +775,62 @@ namespace MWRender
 
     bool RenderingManager::screenshot360(osg::Image* image)
     {
-        if (mCamera->isVanityOrPreviewModeEnabled())
+        int screenshotW = mViewer->getCamera()->getViewport()->width();
+        int screenshotH = mViewer->getCamera()->getViewport()->height();
+        SphericalScreenshot::SphericalScreenshotMapping screenshotMapping = SphericalScreenshot::MAPPING_SPHERICAL;
+        int cubeSize = screenshotW / 2;    
+
+        try
+        {
+            std::string settingStr = Settings::Manager::getString("screenshot type","Video");
+            std::vector<std::string> settingArgs;
+            boost::algorithm::split(settingArgs,settingStr,boost::is_any_of(" "));
+
+            if (settingArgs.size() > 0)
+            {
+                std::string typeStrings[4] = {"spherical","cylindrical","planet","cubemap"};
+                bool found = false;
+
+                for (int i = 0; i < 4; ++i)
+                    if (settingArgs[0].compare(typeStrings[i]) == 0)
+                    {
+                        screenshotMapping = (SphericalScreenshot::SphericalScreenshotMapping) i;
+                        found = true;
+                        break;
+                    }
+
+                if (!found)
+                {
+                    std::cerr << "Wrong screenshot type: " << settingArgs[0] << "." << std::endl;
+                    return false;
+                }
+            }
+        
+            if (settingArgs.size() > 1)
+                screenshotW = std::min(10000,std::atoi(settingArgs[1].c_str()));
+
+            if (settingArgs.size() > 2)
+                screenshotH = std::min(10000,std::atoi(settingArgs[2].c_str()));
+
+            if (settingArgs.size() > 3)
+                cubeSize = std::min(5000,std::atoi(settingArgs[3].c_str()));
+        }
+        catch (std::runtime_error)
+        {
+            std::cerr << "Wrong parameters for screenshot type." << std::endl;
             return false;
+        }
 
-        int screenshotWidth = Settings::Manager::tryGetInt("s360 width","Video",mViewer->getCamera()->getViewport()->width());
-        int screenshotHeight = Settings::Manager::tryGetInt("s360 height","Video",mViewer->getCamera()->getViewport()->height());
-        SphericalScreenshot::SphericalScreenshotMapping mapping = static_cast<SphericalScreenshot::SphericalScreenshotMapping>(
-            Settings::Manager::tryGetInt("s360 mapping","Video",SphericalScreenshot::MAPPING_SPHERICAL));
-        int cubeWidth = Settings::Manager::tryGetInt("s360 cubemap size","Video",screenshotWidth / 2);                                    
+        if (mCamera->isVanityOrPreviewModeEnabled())
+        {
+            std::cerr << "Spherical screenshots are not allowed in preview mode." << std::endl;
+            return false;
+        }
 
-        if (mapping == SphericalScreenshot::MAPPING_CUBEMAP)
-            screenshotWidth = cubeWidth * 6;                  // the image will consist of 6 cube sides in a row
+        if (screenshotMapping == SphericalScreenshot::MAPPING_CUBEMAP)
+            screenshotW = cubeSize * 6;  // the image will consist of 6 cube sides in a row
 
-        SphericalScreenshot s(cubeWidth);
+        SphericalScreenshot s(cubeSize);
 
         osg::Vec3 directions[6] = {
           osg::Vec3(0,0,-1),
@@ -797,20 +842,20 @@ namespace MWRender
           };
 
         double fovBackup = mFieldOfView;
-        mFieldOfView = 90.0;             // each side sees 90 degrees
+        mFieldOfView = 90.0;             // each cubemap side sees 90 degrees
 
         int maskBackup = mPlayerAnimation->getObjectRoot()->getNodeMask();
 
         if (mCamera->isFirstPerson())
             mPlayerAnimation->getObjectRoot()->setNodeMask(0);
 
-        for (int i = 0; i < 6; i++)      // for each cube side
+        for (int i = 0; i < 6; i++)      // for each cubemap side
         {
             osg::Image *sideImage = s.getImage(i);
-            screenshot(sideImage,cubeWidth,cubeWidth,directions[i]);
+            screenshot(sideImage,cubeSize,cubeSize,directions[i]);
         }
 
-        s.create(image,screenshotWidth,mapping != SphericalScreenshot::MAPPING_SMALL_PLANET ? screenshotHeight : screenshotWidth,mapping);
+        s.create(image,screenshotW,screenshotMapping != SphericalScreenshot::MAPPING_SMALL_PLANET ? screenshotH : screenshotW,screenshotMapping);
 
         mPlayerAnimation->getObjectRoot()->setNodeMask(maskBackup);
         mFieldOfView = fovBackup;

@@ -249,9 +249,6 @@ namespace MWInput
             case A_Screenshot:
                 screenshot();
                 break;
-            case A_Screenshot360:
-                screenshot360();
-                break;
             case A_Inventory:
                 toggleInventory ();
                 break;
@@ -1020,17 +1017,31 @@ namespace MWInput
 
     void InputManager::screenshot()
     {
-        mScreenCaptureHandler->setFramesToCapture(1);
-        mScreenCaptureHandler->captureNextFrame(*mViewer);
-        MWBase::Environment::get().getWindowManager()->messageBox("Screenshot saved");
-    }
+        bool regularScreenshot = true;
 
-    void InputManager::screenshot360()
-    {
-        osg::ref_ptr<osg::Image> screenshot (new osg::Image);
-        if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get()))
-            (*mScreenCaptureOperation) (*(screenshot.get()),0);
-            // calling mScreenCaptureHandler->getCaptureOperation() here caused segfault for some reason
+        try
+        {
+            // FIXME: the same string "screenshot type" is queried here AND in renderingmanager.cpp
+            std::string s = Settings::Manager::getString("screenshot type","Video");
+            regularScreenshot = s.size() == 0;
+        }
+        catch (std::runtime_error)
+        {
+        }
+
+        if (regularScreenshot)
+        {
+            mScreenCaptureHandler->setFramesToCapture(1);
+            mScreenCaptureHandler->captureNextFrame(*mViewer);
+            MWBase::Environment::get().getWindowManager()->messageBox("Screenshot saved");
+        }
+        else
+        {
+            osg::ref_ptr<osg::Image> screenshot (new osg::Image);
+
+            if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get()))
+                (*mScreenCaptureOperation) (*(screenshot.get()),0);
+        }
     }
 
     void InputManager::toggleInventory()
@@ -1216,7 +1227,6 @@ namespace MWInput
         defaultKeyBindings[A_QuickKey9] = SDL_SCANCODE_9;
         defaultKeyBindings[A_QuickKey10] = SDL_SCANCODE_0;
         defaultKeyBindings[A_Screenshot] = SDL_SCANCODE_F12;
-        defaultKeyBindings[A_Screenshot360] = SDL_SCANCODE_F8;
         defaultKeyBindings[A_ToggleHUD] = SDL_SCANCODE_F11;
         defaultKeyBindings[A_ToggleDebug] = SDL_SCANCODE_F10;
         defaultKeyBindings[A_AlwaysRun] = SDL_SCANCODE_CAPSLOCK;
@@ -1351,9 +1361,6 @@ namespace MWInput
 
         if (action == A_Screenshot)
             return "Screenshot";
-
-        if (action == A_Screenshot360)
-            return "Screenshot 360";
 
         descriptions[A_Use] = "sUse";
         descriptions[A_Activate] = "sActivate";
@@ -1516,7 +1523,6 @@ namespace MWInput
         ret.push_back(A_QuickSave);
         ret.push_back(A_QuickLoad);
         ret.push_back(A_Screenshot);
-        ret.push_back(A_Screenshot360);
         ret.push_back(A_QuickKeysMenu);
         ret.push_back(A_QuickKey1);
         ret.push_back(A_QuickKey2);
@@ -1548,7 +1554,6 @@ namespace MWInput
         ret.push_back(A_QuickSave);
         ret.push_back(A_QuickLoad);
         ret.push_back(A_Screenshot);
-        ret.push_back(A_Screenshot360);
         ret.push_back(A_QuickKeysMenu);
         ret.push_back(A_QuickKey1);
         ret.push_back(A_QuickKey2);
