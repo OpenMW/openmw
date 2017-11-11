@@ -238,6 +238,7 @@ namespace MWBase
             /// Has the player stolen this item from the given owner?
             virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid) = 0;
 
+            virtual bool isBoundItem(const MWWorld::Ptr& item) = 0;
             virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, MWWorld::Ptr& victim) = 0;
 
             /// Turn actor into werewolf or normal form.
@@ -250,6 +251,7 @@ namespace MWBase
             virtual void cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId) = 0;
 
             virtual void confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count) = 0;
+            virtual void modifyStolenItemsCount(const MWWorld::Ptr &item, int count, const MWWorld::Ptr& victim) = 0;
 
             virtual bool isAttackPrepairing(const MWWorld::Ptr& ptr) = 0;
             virtual bool isRunning(const MWWorld::Ptr& ptr) = 0;

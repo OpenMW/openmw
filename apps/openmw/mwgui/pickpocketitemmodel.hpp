@@ -15,9 +15,19 @@ namespace MWGui
         virtual bool allowedToUseItems() const;
         virtual ItemStack getItem (ModelIndex index);
         virtual size_t getItemCount();
+        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=true);
         virtual void update();
         virtual void removeItem (const ItemStack& item, size_t count);
         virtual bool allowedToInsertItems() const;
+        virtual void onClose();
+        virtual bool onDropItem(const MWWorld::Ptr &item, int count);
+        virtual bool onTakeItem(const MWWorld::Ptr &item, int count);
+
+    protected:
+        MWWorld::Ptr mActor;
+        bool mAdvanced;
+        bool mPickpocketDetected;
+        bool stealItem(const MWWorld::Ptr &item, int count);
 
     private:
         std::vector<ItemStack> mHiddenItems;

@@ -204,6 +204,8 @@ namespace MWMechanics
             /// Has the player stolen this item from the given owner?
             virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid);
 
+            virtual bool isBoundItem(const MWWorld::Ptr& item);
+
             /// @return is \a ptr allowed to take/use \a target or is it a crime?
             virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, MWWorld::Ptr& victim);
 
@@ -213,6 +215,7 @@ namespace MWMechanics
             virtual void cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId);
 
             virtual void confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count);
+            virtual void modifyStolenItemsCount(const MWWorld::Ptr &item, int count, const MWWorld::Ptr& victim);
 
             virtual bool isAttackPrepairing(const MWWorld::Ptr& ptr);
             virtual bool isRunning(const MWWorld::Ptr& ptr);

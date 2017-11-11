@@ -13,9 +13,10 @@
 namespace MWMechanics
 {
 
-    Pickpocket::Pickpocket(const MWWorld::Ptr &thief, const MWWorld::Ptr &victim)
+    Pickpocket::Pickpocket(const MWWorld::Ptr &thief, const MWWorld::Ptr &victim, bool isAdvanced)
         : mThief(thief)
         , mVictim(victim)
+        , mAdvanced(isAdvanced)
     {
     }
 
@@ -55,7 +56,11 @@ namespace MWMechanics
 
     bool Pickpocket::pick(MWWorld::Ptr item, int count)
     {
-        float stackValue = static_cast<float>(item.getClass().getValue(item) * count);
+        float stackValue = 0.f;
+        if (mAdvanced)
+            stackValue = static_cast<float>(item.getClass().getWeight(item) * count * 3);
+        else
+            stackValue = static_cast<float>(item.getClass().getValue(item) * count);
         float fPickPocketMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                 .find("fPickPocketMod")->getFloat();
         float valueTerm = 10 * fPickPocketMod * stackValue;
