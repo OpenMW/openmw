@@ -294,6 +294,12 @@ namespace MWRender
         const float epsilon = 0.000001f;
         float limit = osg::PI_2 - epsilon;
 
+        // Apply a slightly stricter limit in preview mode so that
+        // it would not be possible to zoom in from below and look inside
+        // the player.
+        if (mPreviewMode && angle >= 0 && mPreviewCam.offset <= 100.f)
+                limit *= std::max(0.5f, mPreviewCam.offset / 100.f);
+
         if(angle > limit)
             angle = limit;
         else if(angle < -limit)
