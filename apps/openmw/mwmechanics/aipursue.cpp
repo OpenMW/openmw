@@ -55,7 +55,7 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
     float pathTolerance = 100.0;
 
     if (pathTo(actor, dest, duration, pathTolerance) &&
-        abs(dest.mZ - aPos.pos[2]) < pathTolerance)      // check the true distance in case the target is far away in Z-direction
+        std::abs(dest.mZ - aPos.pos[2]) < pathTolerance)      // check the true distance in case the target is far away in Z-direction
     {
         target.getClass().activate(target,actor).get()->execute(actor); //Arrest player when reached
         return true;
