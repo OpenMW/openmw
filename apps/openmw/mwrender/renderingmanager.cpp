@@ -890,6 +890,13 @@ namespace MWRender
 
         mRootNode->addChild(rttCamera);
 
+        rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        GLbitfield maskBackup = mViewer->getCamera()->getClearMask();
+        double clearDepthBackup = mViewer->getCamera()->getClearDepth();
+        mViewer->getCamera()->setClearMask(GL_DEPTH_BUFFER_BIT);
+        mViewer->getCamera()->setClearDepth(0);
+
         // The draw needs to complete before we can copy back our image.
         osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
         rttCamera->setFinalDrawCallback(callback);
@@ -906,6 +913,9 @@ namespace MWRender
 
         // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the screenshot is completed
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
+
+        mViewer->getCamera()->setClearMask(maskBackup);
+        mViewer->getCamera()->setClearDepth(clearDepthBackup);
 
         rttCamera->removeChildren(0, rttCamera->getNumChildren());
         mRootNode->removeChild(rttCamera);
