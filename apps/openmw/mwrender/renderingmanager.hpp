@@ -3,6 +3,7 @@
 
 #include <osg/ref_ptr>
 #include <osg/Light>
+#include <osg/Camera>
 
 #include <components/settings/settings.hpp>
 
@@ -213,6 +214,8 @@ namespace MWRender
         void setFogColor(const osg::Vec4f& color);
 
         void reportStats() const;
+
+        void renderCameraToImage(osg::Camera *camera, osg::Image *image, int w, int h);
 
         osg::ref_ptr<osgUtil::IntersectionVisitor> getIntersectionVisitor(osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors);
 

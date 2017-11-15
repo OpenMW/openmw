@@ -12,6 +12,8 @@
 #include <osg/Group>
 #include <osg/UserDataContainer>
 #include <osg/ComputeBoundsVisitor>
+#include <osg/ShapeDrawable>
+#include <osg/TextureCubeMap>
 
 #include <osgUtil/LineSegmentIntersector>
 #include <osgUtil/IncrementalCompileOperation>
@@ -24,6 +26,7 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
+#include <components/shader/shadermanager.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -853,12 +856,93 @@ namespace MWRender
         mPlayerAnimation->getObjectRoot()->setNodeMask(maskBackup);
         mFieldOfView = fovBackup;
 
+
+osg::ref_ptr<osg::TextureCubeMap> cubeTexture (new osg::TextureCubeMap);
+
+for (int i = 0; i < 6; ++i)
+    cubeTexture->setImage(i,s.getImage(i));
+
+osg::ref_ptr<osg::Camera> screenshotCamera (new osg::Camera);
+osg::ref_ptr<osg::ShapeDrawable> quad (new osg::ShapeDrawable(new osg::Box(osg::Vec3(0,0,0),2.0)));
+
+std::map<std::string, std::string> defineMap;
+
+Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
+osg::ref_ptr<osg::Shader> fragmentShader (shaderMgr.getShader("s360_fragment.glsl",defineMap,osg::Shader::FRAGMENT));
+osg::ref_ptr<osg::Shader> vertexShader (shaderMgr.getShader("s360_vertex.glsl", defineMap, osg::Shader::VERTEX));
+osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+
+osg::ref_ptr<osg::Program> program (new osg::Program);
+program->addShader(fragmentShader);
+program->addShader(vertexShader);
+stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
+
+stateset->addUniform(new osg::Uniform("cubeMap",0));
+stateset->setTextureAttributeAndModes(0,cubeTexture,osg::StateAttribute::ON);
+    
+quad->setStateSet(stateset);
+quad->setUpdateCallback(NULL);
+
+screenshotCamera->addChild(quad);
+
+mRootNode->addChild(screenshotCamera);
+
+renderCameraToImage(screenshotCamera,image,1000,640);
+
+
+screenshotCamera->removeChildren(0,screenshotCamera->getNumChildren());
+mRootNode->removeChild(screenshotCamera);
+
+
         return true;
+    }
+
+    void RenderingManager::renderCameraToImage(osg::Camera *camera, osg::Image *image, int w, int h)
+    {
+        camera->setNodeMask(Mask_RenderToTexture);
+        camera->attach(osg::Camera::COLOR_BUFFER, image);
+        camera->setRenderOrder(osg::Camera::PRE_RENDER);
+        camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
+        camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT,osg::Camera::PIXEL_BUFFER_RTT);
+
+        camera->setViewport(0, 0, w, h);
+
+        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
+        texture->setInternalFormat(GL_RGB);
+        texture->setTextureSize(w,h);
+        texture->setResizeNonPowerOfTwoHint(false);
+        texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+        texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        camera->attach(osg::Camera::COLOR_BUFFER,texture);
+
+        image->setDataType(GL_UNSIGNED_BYTE);
+        image->setPixelFormat(texture->getInternalFormat());
+
+        // The draw needs to complete before we can copy back our image.
+        osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
+        camera->setFinalDrawCallback(callback);
+
+        // at the time this function is called we are in the middle of a frame,
+        // so out of order calls are necessary to get a correct frameNumber for the next frame.
+        // refer to the advance() and frame() order in Engine::go()
+ 
+        mViewer->eventTraversal();
+        mViewer->updateTraversal();
+        mViewer->renderingTraversals();
+
+        callback->waitTillDone();
+
+        // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the screenshot is completed
+        mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
     }
 
     void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Vec3 direction)
     {
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
+
+        rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
+        rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * osg::Matrixd::rotate(osg::Vec3(0,0,-1),direction));
+
         rttCamera->setNodeMask(Mask_RenderToTexture);
         rttCamera->attach(osg::Camera::COLOR_BUFFER, image);
         rttCamera->setRenderOrder(osg::Camera::PRE_RENDER);
@@ -897,22 +981,7 @@ namespace MWRender
         mViewer->getCamera()->setClearMask(GL_DEPTH_BUFFER_BIT);
         mViewer->getCamera()->setClearDepth(0);
 
-        // The draw needs to complete before we can copy back our image.
-        osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
-        rttCamera->setFinalDrawCallback(callback);
-
-        // at the time this function is called we are in the middle of a frame,
-        // so out of order calls are necessary to get a correct frameNumber for the next frame.
-        // refer to the advance() and frame() order in Engine::go()
- 
-        mViewer->eventTraversal();
-        mViewer->updateTraversal();
-        mViewer->renderingTraversals();
-
-        callback->waitTillDone();
-
-        // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the screenshot is completed
-        mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
+        renderCameraToImage(rttCamera.get(),image,w,h);
 
         mViewer->getCamera()->setClearMask(maskBackup);
         mViewer->getCamera()->setClearDepth(clearDepthBackup);
