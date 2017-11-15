@@ -627,161 +627,12 @@ namespace MWRender
         mutable bool mDone;
     };
 
-    class SphericalScreenshot
-    {
-    public:
-        typedef enum
-        {
-            MAPPING_SPHERICAL = 0,
-            MAPPING_CYLINDRICAL,
-            MAPPING_SMALL_PLANET,
-            MAPPING_CUBEMAP
-        } SphericalScreenshotMapping;
-
-        SphericalScreenshot(int size) 
-        {
-            mSize = size;
-
-            for (int i = 0; i < 6; ++i)
-                mImages.push_back(new osg::Image);
-        }
-
-        osg::Image *getImage(int index)
-        {
-            return mImages[index].get();
-        }
-
-        void create(osg::Image *dest, int w, int h, SphericalScreenshotMapping mapping)
-        {
-            if (mapping == MAPPING_CUBEMAP)
-            {    
-                dest->allocateImage(mSize * 6,mSize,mImages[0]->r(),mImages[0]->getPixelFormat(),mImages[0]->getDataType());
-
-                for (int i = 0; i < 6; ++i)
-                    osg::copyImage(mImages[i].get(),0,0,0,mImages[i]->s(),mImages[i]->t(),mImages[i]->r(),dest,i * mSize,0,0);
-
-                return;
-            }
-
-            dest->allocateImage(w,h,mImages[0]->r(),mImages[0]->getPixelFormat(),mImages[0]->getDataType());
-
-            for (int j = 0; j < h; ++j)
-                for (int i = 0; i < w; ++i)
-                {
-                    osg::Vec3d coords;
-                    osg::Vec2d normalizedXY = osg::Vec2d(i / ((float) w), j / ((float) h));
-
-                    switch (mapping)
-                    {
-                        case MAPPING_CYLINDRICAL: coords = cylindricalCoords(normalizedXY.x(),normalizedXY.y()); break;
-                        case MAPPING_SPHERICAL: coords = sphericalCoords(normalizedXY.x(),normalizedXY.y()); break;
-                        case MAPPING_SMALL_PLANET: coords = smallPlanetCoords(normalizedXY.x(),normalizedXY.y()); break;
-                        default: break;
-                    }
-                    
-                    dest->setColor(getColorByDirection(coords),i,j);
-                }
-        }
-
-        osg::Vec3d cylindricalCoords(double x, double y)
-        {
-            osg::Vec3 result = osg::Vec3d(cos(-1 * x * 2 * osg::PI),sin(-1 * x * 2 * osg::PI),y * 2.0 - 1.0);
-            result.normalize();
-            return result;
-        }
-
-        osg::Vec3d sphericalCoords(double x, double y)
-        {
-            x = -1 * x * 2 * osg::PI;
-            y = (y - 0.5) * osg::PI;
-
-            osg::Vec3 result = osg::Vec3(0.0,cos(y),sin(y));
-            result = osg::Vec3(cos(x) * result.y(),sin(x) * result.y(),result.z());
-
-            return result;
-        }
-
-        osg::Vec3d smallPlanetCoords(double x, double y)
-        {
-            osg::Vec2d fromCenter = osg::Vec2d(x,y) - osg::Vec2d(0.5,0.5);
-
-            double magnitude = fromCenter.length();
-
-            fromCenter.normalize();
-            double dot = fromCenter * osg::Vec2d(0.0,1.0);
-
-            x = x > 0.5 ? 0.5 - (dot + 1) / 4.0 : 0.5 + (dot + 1) / 4.0;
-            y = pow(std::min(1.0,magnitude / 0.5),0.5);
-
-            return sphericalCoords(x,y);
-        }
-
-        osg::Vec4 getColorByDirection(osg::Vec3d d)
-        {
-            // for details see OpenGL 4.4 specification page 225
-
-            double x, y;
-            double ma;  
-            int side;
-
-            double ax, ay, az;
-            ax = fabs(d.x());
-            ay = fabs(d.y());
-            az = fabs(d.z());
-
-            if (ax > ay)
-                if (ax > az)
-                {
-                    side = d.x() > 0 ? 1 : 3;
-                    ma = ax;
-                }
-                else
-                {
-                    side = d.z() > 0 ? 5 : 4;
-                    ma = az;
-                }
-            else
-                if (ay > az)
-                {
-                    side = d.y() > 0 ? 0 : 2;
-                    ma = ay;
-                } 
-                else
-                {
-                    side = d.z() > 0 ? 5 : 4;
-                    ma = az;
-                }
-
-            switch (side)
-            {
-                case 0: x = d.x(); y = d.z(); break;
-                case 1: x = -d.y(); y = d.z(); break;
-                case 2: x = -d.x(); y = d.z(); break;
-                case 3: x = d.y(); y = d.z(); break;
-                case 4: x = d.x(); y = d.y(); break;
-                case 5: x = d.x(); y = -d.y(); break;
-                default: break;
-            }
-
-            x = 0.5 * (x / ma + 1);
-            y = 0.5 * (y / ma + 1);
-
-            return mImages[side]->getColor(
-                std::min(std::max(int(x * mSize),0),mSize - 1),
-                std::min(std::max(int(y * mSize),0),mSize - 1));
-        }
-
-    protected:
-        std::vector<osg::ref_ptr<osg::Image>> mImages;
-        int mSize;
-    };
-
     bool RenderingManager::screenshot360(osg::Image* image, std::string settingStr)
     {
         int screenshotW = mViewer->getCamera()->getViewport()->width();
         int screenshotH = mViewer->getCamera()->getViewport()->height();
-        SphericalScreenshot::SphericalScreenshotMapping screenshotMapping = SphericalScreenshot::MAPPING_SPHERICAL;
-        int cubeSize = screenshotMapping == SphericalScreenshot::SphericalScreenshotMapping::MAPPING_SMALL_PLANET ?
+        int screenshotMapping = 0;
+        int cubeSize = screenshotMapping == 2 ?
             screenshotW:         // planet mapping needs higher resolution
             screenshotW / 2;    
 
@@ -796,7 +647,7 @@ namespace MWRender
             for (int i = 0; i < 4; ++i)
                 if (settingArgs[0].compare(typeStrings[i]) == 0)
                 {
-                    screenshotMapping = (SphericalScreenshot::SphericalScreenshotMapping) i;
+                    screenshotMapping = i;
                     found = true;
                     break;
                 }
@@ -823,16 +674,23 @@ namespace MWRender
             return false;
         }
 
-        if (screenshotMapping == SphericalScreenshot::MAPPING_CUBEMAP)
-            screenshotW = cubeSize * 6;  // the image will consist of 6 cube sides in a row
+        bool rawCubemap = screenshotMapping == 3;
 
-        SphericalScreenshot s(cubeSize);
+        if (rawCubemap)
+            screenshotW = cubeSize * 6;  // the image will consist of 6 cube sides in a row
+        else if (screenshotMapping == 2)
+            screenshotH = screenshotW;   // use square resolution for planet mapping
+
+        std::vector<osg::ref_ptr<osg::Image>> images;
+
+        for (int i = 0; i < 6; ++i)
+            images.push_back(new osg::Image);
 
         osg::Vec3 directions[6] = {
-            osg::Vec3(0,0,1),
+            rawCubemap ? osg::Vec3(1,0,0) : osg::Vec3(0,0,1),
             osg::Vec3(0,0,-1),  
             osg::Vec3(-1,0,0),   
-            osg::Vec3(1,0,0),
+            rawCubemap ? osg::Vec3(0,0,1) : osg::Vec3(1,0,0),
             osg::Vec3(0,1,0),
             osg::Vec3(0,-1,0)};
 
@@ -854,24 +712,40 @@ namespace MWRender
 
         for (int i = 0; i < 6; i++)      // for each cubemap side
         {
-            osg::Matrixd transform = osg::Matrixd::rotate(osg::Vec3(0,0,-1),directions[i]) * osg::Matrixd::rotate(rotations[i],osg::Vec3(0,0,-1));
-            osg::Image *sideImage = s.getImage(i);
-            screenshot(sideImage,cubeSize,cubeSize,transform);
-            sideImage->flipHorizontal();
-        }
+            osg::Matrixd transform = osg::Matrixd::rotate(osg::Vec3(0,0,-1),directions[i]);
 
-//        s.create(image,screenshotW,screenshotMapping != SphericalScreenshot::MAPPING_SMALL_PLANET ? screenshotH : screenshotW,screenshotMapping);
+            if (!rawCubemap)
+                transform *= osg::Matrixd::rotate(rotations[i],osg::Vec3(0,0,-1));
+
+            osg::Image *sideImage = images[i].get();
+            screenshot(sideImage,cubeSize,cubeSize,transform);
+
+            if (!rawCubemap)
+                sideImage->flipHorizontal();
+        }
 
         mPlayerAnimation->getObjectRoot()->setNodeMask(maskBackup);
         mFieldOfView = fovBackup;
 
+        if (rawCubemap)    // for raw cubemap don't run on GPU, just merge the images
+        {    
+            image->allocateImage(cubeSize * 6,cubeSize,images[0]->r(),images[0]->getPixelFormat(),images[0]->getDataType());
 
+            for (int i = 0; i < 6; ++i)
+                osg::copyImage(images[i].get(),0,0,0,images[i]->s(),images[i]->t(),images[i]->r(),image,i * cubeSize,0,0);
 
+            return true;
+        }
+        
+        // run on GPU now:
 
         osg::ref_ptr<osg::TextureCubeMap> cubeTexture (new osg::TextureCubeMap);
+        
+        cubeTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        cubeTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
         for (int i = 0; i < 6; ++i)
-            cubeTexture->setImage(i,s.getImage(i));
+            cubeTexture->setImage(i,images[i].get());
 
         osg::ref_ptr<osg::Camera> screenshotCamera (new osg::Camera);
         osg::ref_ptr<osg::ShapeDrawable> quad (new osg::ShapeDrawable(new osg::Box(osg::Vec3(0,0,0),2.0)));
@@ -889,6 +763,7 @@ namespace MWRender
         stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
 
         stateset->addUniform(new osg::Uniform("cubeMap",0));
+        stateset->addUniform(new osg::Uniform("mapping",screenshotMapping));
         stateset->setTextureAttributeAndModes(0,cubeTexture,osg::StateAttribute::ON);
             
         quad->setStateSet(stateset);
@@ -898,12 +773,10 @@ namespace MWRender
 
         mRootNode->addChild(screenshotCamera);
 
-        renderCameraToImage(screenshotCamera,image,1000,640);
-
+        renderCameraToImage(screenshotCamera,image,screenshotW,screenshotH);
 
         screenshotCamera->removeChildren(0,screenshotCamera->getNumChildren());
         mRootNode->removeChild(screenshotCamera);
-
 
         return true;
     }
