@@ -829,13 +829,20 @@ namespace MWRender
         SphericalScreenshot s(cubeSize);
 
         osg::Vec3 directions[6] = {
-          osg::Vec3(0,0,-1),
-          osg::Vec3(-1,0,0),
-          osg::Vec3(0,0,1),
-          osg::Vec3(1,0,0),
-          osg::Vec3(0,1,0),
-          osg::Vec3(0,-1,0),
-          };
+            osg::Vec3(0,0,1),
+            osg::Vec3(0,0,-1),  
+            osg::Vec3(-1,0,0),   
+            osg::Vec3(1,0,0),
+            osg::Vec3(0,1,0),
+            osg::Vec3(0,-1,0)};
+
+        double rotations[] = {
+            -osg::PI / 2.0,
+            osg::PI / 2.0,
+            osg::PI,
+            0,
+            osg::PI / 2.0,
+            osg::PI / 2.0};
 
         double fovBackup = mFieldOfView;
         mFieldOfView = 90.0;             // each cubemap side sees 90 degrees
@@ -847,51 +854,55 @@ namespace MWRender
 
         for (int i = 0; i < 6; i++)      // for each cubemap side
         {
+            osg::Matrixd transform = osg::Matrixd::rotate(osg::Vec3(0,0,-1),directions[i]) * osg::Matrixd::rotate(rotations[i],osg::Vec3(0,0,-1));
             osg::Image *sideImage = s.getImage(i);
-            screenshot(sideImage,cubeSize,cubeSize,directions[i]);
+            screenshot(sideImage,cubeSize,cubeSize,transform);
+            sideImage->flipHorizontal();
         }
 
-        s.create(image,screenshotW,screenshotMapping != SphericalScreenshot::MAPPING_SMALL_PLANET ? screenshotH : screenshotW,screenshotMapping);
+//        s.create(image,screenshotW,screenshotMapping != SphericalScreenshot::MAPPING_SMALL_PLANET ? screenshotH : screenshotW,screenshotMapping);
 
         mPlayerAnimation->getObjectRoot()->setNodeMask(maskBackup);
         mFieldOfView = fovBackup;
 
 
-osg::ref_ptr<osg::TextureCubeMap> cubeTexture (new osg::TextureCubeMap);
-
-for (int i = 0; i < 6; ++i)
-    cubeTexture->setImage(i,s.getImage(i));
-
-osg::ref_ptr<osg::Camera> screenshotCamera (new osg::Camera);
-osg::ref_ptr<osg::ShapeDrawable> quad (new osg::ShapeDrawable(new osg::Box(osg::Vec3(0,0,0),2.0)));
-
-std::map<std::string, std::string> defineMap;
-
-Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
-osg::ref_ptr<osg::Shader> fragmentShader (shaderMgr.getShader("s360_fragment.glsl",defineMap,osg::Shader::FRAGMENT));
-osg::ref_ptr<osg::Shader> vertexShader (shaderMgr.getShader("s360_vertex.glsl", defineMap, osg::Shader::VERTEX));
-osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
-
-osg::ref_ptr<osg::Program> program (new osg::Program);
-program->addShader(fragmentShader);
-program->addShader(vertexShader);
-stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
-
-stateset->addUniform(new osg::Uniform("cubeMap",0));
-stateset->setTextureAttributeAndModes(0,cubeTexture,osg::StateAttribute::ON);
-    
-quad->setStateSet(stateset);
-quad->setUpdateCallback(NULL);
-
-screenshotCamera->addChild(quad);
-
-mRootNode->addChild(screenshotCamera);
-
-renderCameraToImage(screenshotCamera,image,1000,640);
 
 
-screenshotCamera->removeChildren(0,screenshotCamera->getNumChildren());
-mRootNode->removeChild(screenshotCamera);
+        osg::ref_ptr<osg::TextureCubeMap> cubeTexture (new osg::TextureCubeMap);
+
+        for (int i = 0; i < 6; ++i)
+            cubeTexture->setImage(i,s.getImage(i));
+
+        osg::ref_ptr<osg::Camera> screenshotCamera (new osg::Camera);
+        osg::ref_ptr<osg::ShapeDrawable> quad (new osg::ShapeDrawable(new osg::Box(osg::Vec3(0,0,0),2.0)));
+
+        std::map<std::string, std::string> defineMap;
+
+        Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
+        osg::ref_ptr<osg::Shader> fragmentShader (shaderMgr.getShader("s360_fragment.glsl",defineMap,osg::Shader::FRAGMENT));
+        osg::ref_ptr<osg::Shader> vertexShader (shaderMgr.getShader("s360_vertex.glsl", defineMap, osg::Shader::VERTEX));
+        osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+
+        osg::ref_ptr<osg::Program> program (new osg::Program);
+        program->addShader(fragmentShader);
+        program->addShader(vertexShader);
+        stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
+
+        stateset->addUniform(new osg::Uniform("cubeMap",0));
+        stateset->setTextureAttributeAndModes(0,cubeTexture,osg::StateAttribute::ON);
+            
+        quad->setStateSet(stateset);
+        quad->setUpdateCallback(NULL);
+
+        screenshotCamera->addChild(quad);
+
+        mRootNode->addChild(screenshotCamera);
+
+        renderCameraToImage(screenshotCamera,image,1000,640);
+
+
+        screenshotCamera->removeChildren(0,screenshotCamera->getNumChildren());
+        mRootNode->removeChild(screenshotCamera);
 
 
         return true;
@@ -936,20 +947,16 @@ mRootNode->removeChild(screenshotCamera);
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
     }
 
-    void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Vec3 direction)
+    void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Matrixd cameraTransform)
     {
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
-
-        rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
-        rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * osg::Matrixd::rotate(osg::Vec3(0,0,-1),direction));
-
         rttCamera->setNodeMask(Mask_RenderToTexture);
         rttCamera->attach(osg::Camera::COLOR_BUFFER, image);
         rttCamera->setRenderOrder(osg::Camera::PRE_RENDER);
         rttCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         rttCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
         rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
-        rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * osg::Matrixd::rotate(osg::Vec3(0,0,-1),direction));
+        rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * cameraTransform);
 
         rttCamera->setViewport(0, 0, w, h);
 
