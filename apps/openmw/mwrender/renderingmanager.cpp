@@ -744,6 +744,9 @@ namespace MWRender
 
         osg::ref_ptr<osg::TextureCubeMap> cubeTexture (new osg::TextureCubeMap);
         cubeTexture->setResizeNonPowerOfTwoHint(false);
+
+        cubeTexture->setFilter(osg::Texture::MIN_FILTER,osg::Texture::LINEAR);
+        cubeTexture->setFilter(osg::Texture::MAG_FILTER,osg::Texture::LINEAR);
         
         cubeTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         cubeTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
