@@ -713,7 +713,7 @@ namespace MWRender
         if (mCamera->isFirstPerson())
             mPlayerAnimation->getObjectRoot()->setNodeMask(0);
 
-        for (int i = 0; i < 6; i++)      // for each cubemap side
+        for (int i = 0; i < 6; ++i)      // for each cubemap side
         {
             osg::Matrixd transform = osg::Matrixd::rotate(osg::Vec3(0,0,-1),directions[i]);
 
