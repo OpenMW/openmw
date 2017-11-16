@@ -79,11 +79,13 @@ void OMW::Engine::executeLocalScripts()
     }
 }
 
-void OMW::Engine::frame(float frametime)
+bool OMW::Engine::frame(float frametime)
 {
     try
     {
         mStartTick = mViewer->getStartTick();
+
+        mEnvironment.setFrameDuration(frametime);
 
         // update input
         mEnvironment.getInputManager()->update(frametime, false);
@@ -92,7 +94,7 @@ void OMW::Engine::frame(float frametime)
         // If we are not currently rendering, then RenderItems will not be reused resulting in a memory leak upon changing widget textures (fixed in MyGUI 3.3.2),
         // and destroyed widgets will not be deleted (not fixed yet, https://github.com/MyGUI/mygui/issues/21)
         if (!mEnvironment.getInputManager()->isWindowVisible())
-            return;
+            return false;
 
         // sound
         if (mUseSound)
@@ -187,8 +189,9 @@ void OMW::Engine::frame(float frametime)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Error in framelistener: " << e.what() << std::endl;
+        std::cerr << "Error in frame: " << e.what() << std::endl;
     }
+    return true;
 }
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
@@ -686,17 +689,9 @@ void OMW::Engine::go()
         frameTimer.setStartTick();
         dt = std::min(dt, 0.2);
 
-        bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
-        if (!guiActive)
-            simulationTime += dt;
-
         mViewer->advance(simulationTime);
 
-        mEnvironment.setFrameDuration(dt);
-
-        frame(dt);
-
-        if (!mEnvironment.getInputManager()->isWindowVisible())
+        if (!frame(dt))
         {
             OpenThreads::Thread::microSleep(5000);
             continue;
@@ -709,6 +704,10 @@ void OMW::Engine::go()
             mEnvironment.getWorld()->updateWindowManager();
 
             mViewer->renderingTraversals();
+
+            bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
+            if (!guiActive)
+                simulationTime += dt;
         }
 
         mEnvironment.limitFrameRate(frameTimer.time_s());

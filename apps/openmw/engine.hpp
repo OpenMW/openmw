@@ -118,7 +118,7 @@ namespace OMW
 
             void executeLocalScripts();
 
-            void frame (float dt);
+            bool frame (float dt);
 
             /// Load settings from various files, returns the path to the user settings file
             std::string loadSettings (Settings::Manager & settings);
