@@ -683,9 +683,6 @@ namespace MWRender
         else if (screenshotMapping == 2)
             screenshotH = screenshotW;   // use square resolution for planet mapping
 
-        if (!rawCubemap)
-            cubeSize = pow(2,round(log2(cubeSize)));   // select closest power of 2 for GPU
-
         std::vector<osg::ref_ptr<osg::Image>> images;
 
         for (int i = 0; i < 6; ++i)
@@ -745,6 +742,7 @@ namespace MWRender
         // run on GPU now:
 
         osg::ref_ptr<osg::TextureCubeMap> cubeTexture (new osg::TextureCubeMap);
+        cubeTexture->setResizeNonPowerOfTwoHint(false);
         
         cubeTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         cubeTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
