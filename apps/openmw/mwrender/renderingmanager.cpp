@@ -683,6 +683,9 @@ namespace MWRender
         else if (screenshotMapping == 2)
             screenshotH = screenshotW;   // use square resolution for planet mapping
 
+        if (!rawCubemap)
+            cubeSize = pow(2,round(log2(cubeSize)));   // select closest power of 2 for GPU
+
         std::vector<osg::ref_ptr<osg::Image>> images;
 
         for (int i = 0; i < 6; ++i)
