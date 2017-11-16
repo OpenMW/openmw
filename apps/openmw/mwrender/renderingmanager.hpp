@@ -224,7 +224,6 @@ namespace MWRender
         osg::ref_ptr<osgViewer::Viewer> mViewer;
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mSceneRoot;
-        osg::ref_ptr<osg::Switch> mSceneSwitch;
         Resource::ResourceSystem* mResourceSystem;
 
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;

@@ -208,9 +208,7 @@ namespace MWRender
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
 
-        mSceneSwitch = new osg::Switch;
-        mSceneSwitch->addChild(sceneRoot);
-        mRootNode->addChild(mSceneSwitch);
+        mRootNode->addChild(mSceneRoot);
 
         mPathgrid.reset(new Pathgrid(mRootNode));
 
