@@ -806,6 +806,11 @@ namespace MWRender
         osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
         camera->setFinalDrawCallback(callback);
 
+        GLbitfield maskBackup = mViewer->getCamera()->getClearMask();
+        double clearDepthBackup = mViewer->getCamera()->getClearDepth();
+        mViewer->getCamera()->setClearMask(GL_DEPTH_BUFFER_BIT);          // don't render the main camera
+        mViewer->getCamera()->setClearDepth(0);
+
         // at the time this function is called we are in the middle of a frame,
         // so out of order calls are necessary to get a correct frameNumber for the next frame.
         // refer to the advance() and frame() order in Engine::go()
@@ -815,6 +820,9 @@ namespace MWRender
         mViewer->renderingTraversals();
 
         callback->waitTillDone();
+
+        mViewer->getCamera()->setClearMask(maskBackup);
+        mViewer->getCamera()->setClearDepth(clearDepthBackup);
 
         // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the screenshot is completed
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
@@ -856,15 +864,7 @@ namespace MWRender
 
         rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        GLbitfield maskBackup = mViewer->getCamera()->getClearMask();
-        double clearDepthBackup = mViewer->getCamera()->getClearDepth();
-        mViewer->getCamera()->setClearMask(GL_DEPTH_BUFFER_BIT);
-        mViewer->getCamera()->setClearDepth(0);
-
         renderCameraToImage(rttCamera.get(),image,w,h);
-
-        mViewer->getCamera()->setClearMask(maskBackup);
-        mViewer->getCamera()->setClearDepth(clearDepthBackup);
 
         rttCamera->removeChildren(0, rttCamera->getNumChildren());
         mRootNode->removeChild(rttCamera);
