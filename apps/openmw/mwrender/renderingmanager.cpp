@@ -47,6 +47,9 @@
 #include <boost/algorithm/string.hpp>
 
 #include "../mwworld/cellstore.hpp"
+#include "../mwgui/loadingscreen.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "sky.hpp"
 #include "effectmanager.hpp"
@@ -809,26 +812,14 @@ namespace MWRender
         osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
         camera->setFinalDrawCallback(callback);
 
-        GLbitfield maskBackup = mViewer->getCamera()->getClearMask();
-        double clearDepthBackup = mViewer->getCamera()->getClearDepth();
-        mViewer->getCamera()->setClearMask(GL_DEPTH_BUFFER_BIT);          // don't render the main camera
-        mViewer->getCamera()->setClearDepth(0);
-
-        // at the time this function is called we are in the middle of a frame,
-        // so out of order calls are necessary to get a correct frameNumber for the next frame.
-        // refer to the advance() and frame() order in Engine::go()
-
-        mSceneSwitch->setAllChildrenOff();    // don't render the scene for main camera
+        MWBase::Environment::get().getWindowManager()->getLoadingScreen()->loadingOn(false);
 
         mViewer->eventTraversal();
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
         callback->waitTillDone();
 
-        mSceneSwitch->setAllChildrenOn();
-
-        mViewer->getCamera()->setClearMask(maskBackup);
-        mViewer->getCamera()->setClearDepth(clearDepthBackup);
+        MWBase::Environment::get().getWindowManager()->getLoadingScreen()->loadingOff();
 
         // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the screenshot is completed
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
