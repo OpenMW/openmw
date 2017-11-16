@@ -205,7 +205,9 @@ namespace MWRender
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
 
-        mRootNode->addChild(sceneRoot);
+        mSceneSwitch = new osg::Switch;
+        mSceneSwitch->addChild(sceneRoot);
+        mRootNode->addChild(mSceneSwitch);
 
         mPathgrid.reset(new Pathgrid(mRootNode));
 
@@ -814,12 +816,15 @@ namespace MWRender
         // at the time this function is called we are in the middle of a frame,
         // so out of order calls are necessary to get a correct frameNumber for the next frame.
         // refer to the advance() and frame() order in Engine::go()
- 
+
+        mSceneSwitch->setAllChildrenOff();    // don't render the scene for main camera
+
         mViewer->eventTraversal();
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
-
         callback->waitTillDone();
+
+        mSceneSwitch->setAllChildrenOn();
 
         mViewer->getCamera()->setClearMask(maskBackup);
         mViewer->getCamera()->setClearDepth(clearDepthBackup);
