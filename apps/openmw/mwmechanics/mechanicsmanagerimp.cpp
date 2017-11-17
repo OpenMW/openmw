@@ -840,6 +840,45 @@ namespace MWMechanics
         mAI = true;
     }
 
+    bool MechanicsManager::isBoundItem(const MWWorld::Ptr& item)
+    {
+        static std::set<std::string> boundItemIDCache;
+
+        // If this is empty then we haven't executed the GMST cache logic yet; or there isn't any sMagicBound* GMST's for some reason
+        if (boundItemIDCache.empty())
+        {
+            // Build a list of known bound item ID's
+            const MWWorld::Store<ESM::GameSetting> &gameSettings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+            for (MWWorld::Store<ESM::GameSetting>::iterator currentIteration = gameSettings.begin(); currentIteration != gameSettings.end(); ++currentIteration)
+            {
+                const ESM::GameSetting &currentSetting = *currentIteration;
+                std::string currentGMSTID = currentSetting.mId;
+                Misc::StringUtils::lowerCaseInPlace(currentGMSTID);
+
+                // Don't bother checking this GMST if it's not a sMagicBound* one.
+                const std::string& toFind = "smagicbound";
+                if (currentGMSTID.compare(0, toFind.length(), toFind) != 0)
+                    continue;
+
+                // All sMagicBound* GMST's should be of type string
+                std::string currentGMSTValue = currentSetting.getString();
+                Misc::StringUtils::lowerCaseInPlace(currentGMSTValue);
+
+                boundItemIDCache.insert(currentGMSTValue);
+            }
+        }
+
+        // Perform bound item check and assign the Flag_Bound bit if it passes
+        std::string tempItemID = item.getCellRef().getRefId();
+        Misc::StringUtils::lowerCaseInPlace(tempItemID);
+
+        if (boundItemIDCache.count(tempItemID) != 0)
+            return true;
+
+        return false;
+    }
+
     bool MechanicsManager::isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, MWWorld::Ptr& victim)
     {
         if (target.isEmpty())
@@ -1024,7 +1063,7 @@ namespace MWMechanics
     }
 
     void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, const MWWorld::Ptr& container,
-                                     int count)
+                                     int count, bool alarm)
     {
         if (ptr != getPlayer())
             return;
@@ -1053,19 +1092,29 @@ namespace MWMechanics
             return;
 
         Owner owner;
-        owner.first = ownerCellRef->getOwner();
         owner.second = false;
-        if (owner.first.empty())
+        if (!container.isEmpty() && container.getClass().isActor())
         {
-            owner.first = ownerCellRef->getFaction();
-            owner.second = true;
+            // "container" is an actor inventory, so just take actor's ID
+            owner.first = ownerCellRef->getRefId();
         }
+        else
+        {
+            owner.first = ownerCellRef->getOwner();
+            if (owner.first.empty())
+            {
+                owner.first = ownerCellRef->getFaction();
+                owner.second = true;
+            }
+        }
+
         Misc::StringUtils::lowerCaseInPlace(owner.first);
 
         if (!Misc::StringUtils::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
             mStolenItems[Misc::StringUtils::lowerCase(item.getCellRef().getRefId())][owner] += count;
 
-        commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
+        if (alarm)
+            commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
 
 

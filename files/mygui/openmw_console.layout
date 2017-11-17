@@ -13,6 +13,7 @@
         <Property key="TextAlign" value="Left Top"/>
         <Property key="TextColour" value="1 1 1"/>
         <Property key="InvertSelected" value="false"/>
+        <Property key="WordWrap" value="true"/>
     </Widget>
 
     <!-- Command line -->

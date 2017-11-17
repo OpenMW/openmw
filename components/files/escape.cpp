@@ -1,6 +1,6 @@
 #include "escape.hpp"
 
-#include <boost/algorithm/string/replace.hpp>
+#include <components/misc/stringops.hpp>
 
 namespace Files
 {
@@ -8,7 +8,7 @@ namespace Files
     const int escape_hash_filter::sEscapeIdentifier = 'a';
     const int escape_hash_filter::sHashIdentifier = 'h';
 
-    escape_hash_filter::escape_hash_filter() : mNext(), mPrevious(), mSeenNonWhitespace(false), mFinishLine(false)
+    escape_hash_filter::escape_hash_filter() : mSeenNonWhitespace(false), mFinishLine(false)
     {
     }
 
@@ -26,8 +26,14 @@ namespace Files
 
     std::string EscapeHashString::processString(const std::string & str)
     {
-        std::string temp = boost::replace_all_copy<std::string>(str, std::string() + (char)escape_hash_filter::sEscape + (char)escape_hash_filter::sHashIdentifier, "#");
-        boost::replace_all(temp, std::string() + (char)escape_hash_filter::sEscape + (char)escape_hash_filter::sEscapeIdentifier, std::string((char)escape_hash_filter::sEscape, 1));
+        std::string temp = str;
+
+        static const char hash[] = { escape_hash_filter::sEscape,  escape_hash_filter::sHashIdentifier };
+        Misc::StringUtils::replaceAll(temp, hash, "#", 2, 1);
+
+        static const char escape[] = { escape_hash_filter::sEscape,  escape_hash_filter::sEscapeIdentifier };
+        Misc::StringUtils::replaceAll(temp, escape, "@", 2, 1);
+
         return temp;
     }
 

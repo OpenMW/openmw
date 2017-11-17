@@ -131,8 +131,9 @@ namespace MWGui
         void onFrame(float dt);
         void clear() { resetReference(); }
 
-    protected:
         void updateTopics();
+
+    protected:
         void updateTopicsPane();
         bool isCompanion(const MWWorld::Ptr& actor);
         bool isCompanion();

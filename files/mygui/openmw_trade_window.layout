@@ -53,18 +53,17 @@
                 <Property key="TextAlign" value="Center"/>
             </Widget>
 
-            <Widget type="AutoSizedButton" skin="MW_Button" position="0 60 60 24" name="MaxSaleButton" align="Left Top">
-                <Property key="Caption" value="#{sMaxSale}"/>
-            </Widget>
-
-            <Widget type="HBox" position="0 60 566 24" align="Right Bottom">
+            <Widget type="HBox" position="0 60 566 24" align="Left Bottom HStretch">
+                <Widget type="AutoSizedButton" skin="MW_Button" name="MaxSaleButton">
+                    <Property key="Caption" value="#{sMaxSale}"/>
+                </Widget>
                 <Widget type="Widget">
                     <UserString key="HStretch" value="true"/>
                 </Widget>
-                <Widget type="AutoSizedButton" skin="MW_Button" name="OfferButton" align="Right Top">
+                <Widget type="AutoSizedButton" skin="MW_Button" name="OfferButton">
                     <Property key="Caption" value="#{sBarterDialog8}"/>
                 </Widget>
-                <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton" align="Right Top">
+                <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
                     <Property key="Caption" value="#{sCancel}"/>
                 </Widget>
             </Widget>
