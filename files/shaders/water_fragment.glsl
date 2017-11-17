@@ -1,7 +1,5 @@
 #version 120
 
-//DUMPME
-
 #define REFRACTION @refraction_enabled
 #define SHADOWS @shadows_enabled
 

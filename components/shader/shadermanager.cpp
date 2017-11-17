@@ -123,8 +123,22 @@ namespace Shader
             std::string content = source.substr(contentStart, contentEnd - contentStart);
 
             size_t overallEnd = contentEnd + std::string("$endforeach").length();
-            // This will be wrong if there are other #line directives, so that needs fixing
-            int lineNumber = std::count(source.begin(), source.begin() + overallEnd, '\n') + 2;
+            
+            size_t lineDirectivePosition = source.rfind("#line", overallEnd);
+            int lineNumber;
+            if (lineDirectivePosition != std::string::npos)
+            {
+                size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
+                size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
+                std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
+                lineNumber = std::stoi(lineNumberString);
+            }
+            else
+            {
+                lineDirectivePosition = 0;
+                lineNumber = 2;
+            }
+            lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + overallEnd, '\n');
 
             std::string replacement = "";
             for (std::vector<std::string>::const_iterator element = listElements.cbegin(); element != listElements.cend(); element++)
