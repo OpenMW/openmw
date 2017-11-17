@@ -295,6 +295,24 @@ namespace MWWorld
         osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(state.mEffects);
         createModel(state, ptr.getClass().getModel(ptr), pos, orient, true, true, lightDiffuseColor, texture);
 
+        // Get the first effect of the spell
+        const ESM::MagicEffect *magicEffect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
+                state.mEffects.mList.at(0).mEffectID);
+
+        const ESM::Weapon* projectile;
+        std::string mesh;
+
+        if (!magicEffect->mBolt.empty())
+        {
+            projectile = MWBase::Environment::get().getWorld()->getStore().get<ESM::Weapon>().find(magicEffect->mBolt);
+            mesh = "meshes\\" + projectile->mModel;
+        }
+        else
+        {
+            mesh = "meshes\\w\\magic_target.nif";
+        }
+
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         for (size_t it = 0; it != state.mSoundIds.size(); it++)
         {
