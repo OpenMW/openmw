@@ -219,8 +219,13 @@ target_link_libraries(components
     )
 
 if (WIN32)
-    target_link_libraries(components
-    ${Boost_LOCALE_LIBRARY})
+    if(MINGW)
+        target_link_libraries(components
+        ${Boost_LOCALE_LIBRARY} iconv)
+    else()
+        target_link_libraries(components
+        ${Boost_LOCALE_LIBRARY})
+    endif()
 endif()
 
 if (USE_QT)
