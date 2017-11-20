@@ -311,29 +311,39 @@ struct JournalViewModelImpl : JournalViewModel
 
         for (MWBase::Journal::TTopicIter i = journal->topicBegin (); i != journal->topicEnd (); ++i)
         {
-            if (i->first.length() < 2)
-                continue;
-
             unsigned char byte1 = i->first[0];
-            unsigned char byte2 = i->first[1];
-
-            // Upper case
-            if (byte1 == 0xd0 && byte2 >= 0xb0 && byte2 < 0xc0)
-                byte2 -= 32;
-
-            if (byte1 == 0xd1 && byte2 >= 0x80 && byte2 < 0x90)
+            // First, check for two-byte UTF-8 symbols, e.g. Cyrillic ones
+            // TODO: check which language journal index is using
+            if ((byte1 == 0xd0 || byte1 == 0xd1) && i->first.length() >= 2)
             {
-                byte1 -= 1;
-                byte2 += 32;
+                unsigned char byte2 = i->first[1];
+
+                std::pair<unsigned char, unsigned char> symbol = Misc::StringUtils::toLower(byte1, byte2);
+
+                // CYRILLIC LETTER A - CYRILLIC LETTER PE
+                // index from 1 to 16
+                if (symbol.first == 0xd0 && symbol.second >= (0xaf + index) && symbol.second < (0xbf + index) && symbol.second == (0xaf + index))
+                {
+                    visitor (i->second.getName());
+                    continue;
+                }
+
+                // CYRILLIC LETTERL R - CYRILLIC LETTER YA
+                // index from 17 to 32
+                if (symbol.first == 0xd1 && symbol.second >= (0x6f + index) && symbol.second < (0x7f + index) && symbol.second == (0x6f + index))
+                {
+                    visitor (i->second.getName());
+                    continue;
+                }
             }
+            else
+            {
+                // Otherwise check for regular Latin symbols, 0x61 = 'a'
+                if (i->first [0] != 0x60 + index)
+                    continue;
 
-            // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
-            // so we can use 0xd08f + index
-            // (index is a position of letter in alphabet, begins from 1)
-            if (byte1 != 0xd0 || byte2 != 0x8f + index)
-                continue;
-
-            visitor (i->second.getName());
+                visitor (i->second.getName());
+            }
         }
     }
 

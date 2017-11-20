@@ -55,6 +55,36 @@ public:
         };
     }
 
+    static std::pair<char, char> toLower(unsigned char byte1, unsigned char byte2)
+    {
+        std::pair<unsigned char, unsigned char> symbol = std::make_pair(byte1, byte2);
+        // CYRILLIC CAPITAL IO
+        if (symbol.first == 0xd0 && symbol.second == 0x01)
+        {
+            symbol.first++;
+            symbol.second = 0x91;
+        }
+        // CYRILLIC CAPITAL A - CYRILLIC CAPITAL PE
+        else if (symbol.first == 0xd0 && symbol.second >= 0x90 && symbol.second < 0xa0)
+        {
+            symbol.second += 0x20;
+        }
+        // CYRILLIC CAPITAL R - CYRILLIC CAPITAL YA
+        else if (symbol.first == 0xd0 && symbol.second >= 0xa0 && symbol.second < 0xb0)
+        {
+            symbol.first++;
+            symbol.second -= 0x20;
+        }
+        // Other symbols
+        else
+        {
+            symbol.first = toLower(symbol.first);
+            symbol.second = toLower(symbol.second);
+        }
+
+        return symbol;
+    }
+
     static bool ciLess(const std::string &x, const std::string &y) {
         return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end(), ci());
     }
