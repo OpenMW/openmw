@@ -218,18 +218,58 @@ book JournalBooks::createQuestBook (const std::string& questName)
 
 book JournalBooks::createTopicIndexBook ()
 {
+    // TODO: determine actual index alphabet
+    bool isRussian = true;
+
+    BookTypesetter::Ptr typesetter = isRussian ? createCyrillicJournalIndex() : createLatinJournalIndex();
+
+    return typesetter->complete ();
+}
+
+BookTypesetter::Ptr JournalBooks::createLatinJournalIndex ()
+{
     BookTypesetter::Ptr typesetter = BookTypesetter::create (92, 250);
 
     typesetter->setSectionAlignment (BookTypesetter::AlignCenter);
 
-    BookTypesetter::Style* body   = typesetter->createStyle ("", MyGUI::Colour::Black);
+    BookTypesetter::Style* body = typesetter->createStyle ("", MyGUI::Colour::Black);
+    for (int i = 0; i < 26; ++i)
+    {
+        char ch = 'A' + i;
+        char buffer [32];
 
+        sprintf (buffer, "( %c )", ch);
+
+        // TODO: find a way to store a multibyte character in the InteractiveId (this is a intptr_t)
+        const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
+        BookTypesetter::Style* style = typesetter->createHotStyle (body, textColours.journalTopic,
+                                                                   textColours.journalTopicOver,
+                                                                   textColours.journalTopicPressed, i+1);
+
+        if (i == 13)
+            typesetter->sectionBreak ();
+
+        typesetter->write (style, to_utf8_span (buffer));
+        typesetter->lineBreak ();
+    }
+
+    return typesetter;
+}
+
+BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex ()
+{
+    BookTypesetter::Ptr typesetter = BookTypesetter::create (92, 250);
+
+    typesetter->setSectionAlignment (BookTypesetter::AlignCenter);
+
+    BookTypesetter::Style* body = typesetter->createStyle ("", MyGUI::Colour::Black);
     for (int i = 0; i < 32; ++i)
     {
         char buffer [32];
 
         sprintf(buffer, "( %c%c )", 0xd0, 0x90 + i); // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
 
+        // TODO: find a way to store a multibyte character in the InteractiveId (this is a intptr_t)
         const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
         BookTypesetter::Style* style = typesetter->createHotStyle (body, textColours.journalTopic,
                                                                    textColours.journalTopicOver,
@@ -246,7 +286,7 @@ book JournalBooks::createTopicIndexBook ()
         typesetter->lineBreak ();
     }
 
-    return typesetter->complete ();
+    return typesetter;
 }
 
 BookTypesetter::Ptr JournalBooks::createTypesetter ()

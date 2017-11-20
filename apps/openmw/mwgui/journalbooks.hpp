@@ -24,6 +24,8 @@ namespace MWGui
 
     private:
         BookTypesetter::Ptr createTypesetter ();
+        BookTypesetter::Ptr createLatinJournalIndex ();
+        BookTypesetter::Ptr createCyrillicJournalIndex ();
     };
 }
 
