@@ -43,9 +43,11 @@
 
             <Widget type="Button" skin="MW_Button" position="0 0 40 24" name="IncreaseButton" align="Left Top">
                 <Property key="Caption" value="+"/>
+                <Property key="NeedKey" value="false"/>
             </Widget>
             <Widget type="Button" skin="MW_Button" position="0 28 40 24" name="DecreaseButton" align="Left Top">
                 <Property key="Caption" value="-"/>
+                <Property key="NeedKey" value="false"/>
             </Widget>
 
             <Widget type="TextBox" skin="SandText" position="48 0 140 24" name="TotalBalanceLabel" align="Left Top "/>
