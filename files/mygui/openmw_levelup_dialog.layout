@@ -156,9 +156,7 @@
 
         <Widget type="HBox" skin="" position="0 0 330 24">
             <UserString key="HStretch" value="true"/>
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
+            <Widget type="Spacer"/>
             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 0 24" name="OkButton">
                 <Property key="Caption" value="#{sOk}"/>
             </Widget>

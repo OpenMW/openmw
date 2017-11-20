@@ -36,9 +36,7 @@
             <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 0 50 50" name="ItemBox">
             </Widget>
 
-            <Widget type="Widget" position="0 0 8 0">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
+            <Widget type="Spacer"/>
 
             <Widget type="AutoSizedTextBox" skin="NormalText">
                 <Property key="Caption" value="#{sSoulGem}"/>
@@ -141,9 +139,7 @@
                 <UserString key="Caption_Text" value="#{sEnchantmentHelp7}"/>
             </Widget>
 
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
+            <Widget type="Spacer"/>
 
             <Widget type="AutoSizedTextBox" skin="NormalText" name="PriceTextLabel">
                 <Property key="Caption" value="#{sBarterDialog7}"/>
