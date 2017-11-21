@@ -393,6 +393,7 @@ namespace MWGui
     void writeFog(MWWorld::CellStore* cell);
 
     virtual const MWGui::TextColours& getTextColours();
+    virtual ToUTF8::FromType getEncoding();
 
   private:
     const MWWorld::ESMStore* mStore;
@@ -514,6 +515,8 @@ namespace MWGui
     std::map<std::string, std::string> mFallbackMap;
     
     int mShowOwned;
+
+    ToUTF8::FromType mEncoding;
 
     std::string mVersionDescription;
 

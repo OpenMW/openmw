@@ -5,6 +5,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include <components/fontloader/fontloader.hpp>
+
 #include "textcolours.hpp"
 
 
@@ -218,8 +220,8 @@ book JournalBooks::createQuestBook (const std::string& questName)
 
 book JournalBooks::createTopicIndexBook ()
 {
-    // TODO: determine actual index alphabet
-    bool isRussian = true;
+    ToUTF8::FromType encoding = MWBase::Environment::get().getWindowManager()->getEncoding();
+    bool isRussian = (encoding == ToUTF8::WINDOWS_1251);
 
     BookTypesetter::Ptr typesetter = isRussian ? createCyrillicJournalIndex() : createLatinJournalIndex();
 

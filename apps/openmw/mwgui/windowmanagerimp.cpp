@@ -205,6 +205,7 @@ namespace MWGui
       , mRestAllowed(true)
       , mFallbackMap(fallbackMap)
       , mShowOwned(0)
+      , mEncoding(encoding)
       , mVersionDescription(versionDescription)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
@@ -2174,4 +2175,8 @@ namespace MWGui
         return mTextColours;
     }
 
+    ToUTF8::FromType WindowManager::getEncoding()
+    {
+        return mEncoding;
+    }
 }

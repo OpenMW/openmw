@@ -9,6 +9,8 @@
 
 #include "../mwgui/mode.hpp"
 
+#include <components/to_utf8/to_utf8.hpp>
+
 namespace Loading
 {
     class Listener;
@@ -365,6 +367,7 @@ namespace MWBase
             virtual void writeFog(MWWorld::CellStore* cell) = 0;
 
             virtual const MWGui::TextColours& getTextColours() = 0;
+            virtual ToUTF8::FromType getEncoding() = 0;
     };
 }
 
