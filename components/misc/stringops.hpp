@@ -1,6 +1,7 @@
 #ifndef MISC_STRINGOPS_H
 #define MISC_STRINGOPS_H
 
+#include <stdint.h>
 #include <cctype>
 #include <cstring>
 #include <string>
