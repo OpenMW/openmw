@@ -37,6 +37,7 @@
             <Widget type="HBox" position="0 0 566 24" align="Left Top HStretch">
                 <Widget type="Button" skin="MW_Button" position="0 0 40 24" name="IncreaseButton" align="Left Top">
                     <Property key="Caption" value="+"/>
+                    <Property key="NeedKey" value="false"/>
                 </Widget>
                 <Widget type="AutoSizedTextBox" skin="SandText" position="48 0 140 24" name="TotalBalanceLabel" align="Left Top">
                     <Property key="TextAlign" value="Left VCenter"/>
@@ -50,6 +51,7 @@
             <Widget type="HBox" position="0 28 566 24" align="Left Top HStretch">
                 <Widget type="Button" skin="MW_Button" position="0 0 40 24" name="DecreaseButton" align="Left Top">
                     <Property key="Caption" value="-"/>
+                    <Property key="NeedKey" value="false"/>
                 </Widget>
                 <Widget type="NumericEditBox" skin="MW_TextEdit" position="48 0 140 24" name="TotalBalance" align="Left Top">
                     <Property key="TextAlign" value="Center"/>
