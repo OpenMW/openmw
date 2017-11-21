@@ -58,7 +58,7 @@ public:
 
     static uint32_t toUpper(uint32_t ch)
     {
-        // Russian alphabete
+        // Russian alphabet
         if (ch >= 0x0430 && ch < 0x0450)
             ch -= 0x20;
 
@@ -66,7 +66,7 @@ public:
         if (ch == 0x0451)
             ch -= 0x50;
 
-        // Latin alphabete
+        // Latin alphabet
         if (ch >= 0x61 && ch < 0x80)
             ch -= 0x20;
 

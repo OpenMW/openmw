@@ -313,8 +313,7 @@ struct JournalViewModelImpl : JournalViewModel
 
         for (MWBase::Journal::TTopicIter i = journal->topicBegin (); i != journal->topicEnd (); ++i)
         {
-            const char * c = i->first.c_str();
-            Utf8Stream stream ((unsigned char*) c,(unsigned char*) c + strlen(c));
+            Utf8Stream stream (i->first.c_str());
             uint32_t first = Misc::StringUtils::toUpper(stream.peek());
 
             if (first != character)

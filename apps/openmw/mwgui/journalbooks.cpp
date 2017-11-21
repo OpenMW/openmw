@@ -239,16 +239,13 @@ BookTypesetter::Ptr JournalBooks::createLatinJournalIndex ()
     {
         char ch = 'A' + i;
         char buffer [32];
-
         sprintf (buffer, "( %c )", ch);
 
         char buffer2 [32];
         sprintf(buffer2, "%c", ch);
-        const char * c = buffer2;
-        Utf8Stream stream ((unsigned char*) c,(unsigned char*) c + strlen(c));
+        Utf8Stream stream (buffer2);
         uint32_t first = stream.peek();
 
-        // TODO: find a way to store a multibyte character in the InteractiveId (this is a intptr_t)
         const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
         BookTypesetter::Style* style = typesetter->createHotStyle (body, textColours.journalTopic,
                                                                    textColours.journalTopicOver,
@@ -274,13 +271,12 @@ BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex ()
     for (int i = 0; i < 32; ++i)
     {
         char buffer [32];
-
         sprintf(buffer, "( %c%c )", 0xd0, 0x90 + i); // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
 
         char buffer2 [32];
         sprintf(buffer2, "%c%c", 0xd0, 0x90 + i);
-        const char * c = buffer2;
-        Utf8Stream stream ((unsigned char*) c,(unsigned char*) c + strlen(c));
+
+        Utf8Stream stream (buffer2);
         uint32_t first = stream.peek();
 
         const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
