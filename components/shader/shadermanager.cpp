@@ -165,7 +165,8 @@ namespace Shader
             }
             std::string list = source.substr(listStart, listEnd - listStart);
             std::vector<std::string> listElements;
-            boost::split(listElements, list, boost::is_any_of(","));
+            if (list != "")
+                boost::split(listElements, list, boost::is_any_of(","));
 
             size_t contentStart = source.find_first_not_of("\n\r", listEnd);
             size_t contentEnd = source.find("$endforeach", contentStart);
@@ -281,6 +282,11 @@ namespace Shader
                 definesWithShadows["shadow_texture_unit_list"] += std::to_string(i) + ",";
             // remove extra comma
             definesWithShadows["shadow_texture_unit_list"] = definesWithShadows["shadow_texture_unit_list"].substr(0, definesWithShadows["shadow_texture_unit_list"].length() - 1);
+        }
+        else
+        {
+            definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("0")));
+            definesWithShadows["shadow_texture_unit_list"] = "";
         }
 
         definesWithShadows.insert(defines.begin(), defines.end());
