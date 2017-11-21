@@ -33,8 +33,8 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr,
         setObjectRoot(model, false, false, true);
 
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))
-            addAnimSource("meshes\\xbase_anim.nif");
-        addAnimSource(model);
+            addAnimSource("meshes\\xbase_anim.nif", model);
+        addAnimSource(model, model);
     }
 }
 
@@ -51,8 +51,8 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const 
         setObjectRoot(model, true, false, true);
 
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))
-            addAnimSource("meshes\\xbase_anim.nif");
-        addAnimSource(model);
+            addAnimSource("meshes\\xbase_anim.nif", model);
+        addAnimSource(model, model);
 
         mPtr.getClass().getInventoryStore(mPtr).setInvListener(this, mPtr);
 
@@ -118,7 +118,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(item.getClass().getModel(item));
 
         const NodeMap& nodeMap = getNodeMap();
-        NodeMap::const_iterator found = getNodeMap().find(Misc::StringUtils::lowerCase(bonename));
+        NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(bonename));
         if (found == nodeMap.end())
             throw std::runtime_error("Can't find attachment node " + bonename);
         osg::ref_ptr<osg::Node> attached = SceneUtil::attach(node, mObjectRoot, bonename, found->second.get());

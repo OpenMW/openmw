@@ -11,11 +11,20 @@ namespace MWGui
     {
     public:
         PickpocketItemModel (const MWWorld::Ptr& thief, ItemModel* sourceModel, bool hideItems=true);
+
+        virtual bool allowedToUseItems() const;
         virtual ItemStack getItem (ModelIndex index);
         virtual size_t getItemCount();
         virtual void update();
         virtual void removeItem (const ItemStack& item, size_t count);
-        virtual bool allowedToInsertItems() const;
+        virtual void onClose();
+        virtual bool onDropItem(const MWWorld::Ptr &item, int count);
+        virtual bool onTakeItem(const MWWorld::Ptr &item, int count);
+
+    protected:
+        MWWorld::Ptr mActor;
+        bool mPickpocketDetected;
+        bool stealItem(const MWWorld::Ptr &item, int count);
 
     private:
         std::vector<ItemStack> mHiddenItems;

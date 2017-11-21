@@ -102,6 +102,7 @@ namespace CSVWorld
             void createRequest();
             void cloneRequest(const std::string& id,
                               const CSMWorld::UniversalId::Type type);
+            void touchRequest(const std::vector<CSMWorld::UniversalId>&);
 
             void extendedDeleteConfigRequest(const std::vector<std::string> &selectedIds);
             void extendedRevertConfigRequest(const std::vector<std::string> &selectedIds);

@@ -21,7 +21,6 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
-#include "widgets.hpp"
 #include "itemwidget.hpp"
 #include "itemchargeview.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -46,11 +45,9 @@ Recharge::Recharge()
     mBox->setDisplayMode(ItemChargeView::DisplayMode_EnchantmentCharge);
 
     mGemIcon->eventMouseButtonClick += MyGUI::newDelegate(this, &Recharge::onSelectItem);
-
-    setVisible(false);
 }
 
-void Recharge::open()
+void Recharge::onOpen()
 {
     center();
 
@@ -62,12 +59,7 @@ void Recharge::open()
     mBox->resetScrollbars();
 }
 
-void Recharge::exit()
-{
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Recharge);
-}
-
-void Recharge::start (const MWWorld::Ptr &item)
+void Recharge::setPtr (const MWWorld::Ptr &item)
 {
     mGemIcon->setItem(item);
     mGemIcon->setUserString("ToolTipType", "ItemPtr");
@@ -107,7 +99,7 @@ void Recharge::updateView()
 
 void Recharge::onCancel(MyGUI::Widget *sender)
 {
-    exit();
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Recharge);
 }
 
 void Recharge::onSelectItem(MyGUI::Widget *sender)

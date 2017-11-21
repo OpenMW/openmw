@@ -12,6 +12,7 @@ namespace VFS
 namespace osg
 {
     class Stats;
+    class State;
 }
 
 namespace Resource
@@ -41,6 +42,10 @@ namespace Resource
         /// @note May be called from any thread if you do not add or remove resource managers at that point.
         void updateCache(double referenceTime);
 
+        /// Indicates to each resource manager to clear the entire cache.
+        /// @note May be called from any thread if you do not add or remove resource managers at that point.
+        void clearCache();
+
         /// Add this ResourceManager to be handled by the ResourceSystem.
         /// @note Does not transfer ownership.
         void addResourceManager(ResourceManager* resourceMgr);
@@ -55,6 +60,9 @@ namespace Resource
         const VFS::Manager* getVFS() const;
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
+
+        /// Call releaseGLObjects for each resource manager.
+        void releaseGLObjects(osg::State* state);
 
     private:
         std::unique_ptr<SceneManager> mSceneManager;

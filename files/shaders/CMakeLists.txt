@@ -4,7 +4,7 @@ endif()
 
 # Copy resource files into the build directory
 set(SDIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(DDIR ${OPENMW_SHADERS_ROOT}/resources/shaders)
+set(DDIRRELATIVE resources/shaders)
 
 set(SHADER_FILES
     water_vertex.glsl
@@ -18,4 +18,4 @@ set(SHADER_FILES
     parallax.glsl
 )
 
-copy_all_files(${CMAKE_CURRENT_SOURCE_DIR} ${DDIR} "${SHADER_FILES}")
+copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_SHADERS_ROOT} ${DDIRRELATIVE} "${SHADER_FILES}")

@@ -57,6 +57,10 @@ namespace MWMechanics
             PtrActorMap::const_iterator begin() { return mActors.begin(); }
             PtrActorMap::const_iterator end() { return mActors.end(); }
 
+            /// Check if the target actor was detected by an observer
+            /// If the observer is a non-NPC, check all actors in AI processing distance as observers
+            bool isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer);
+
             /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
             /// paused we may want to do it manually (after equipping permanent enchantment)
             void updateMagicEffects (const MWWorld::Ptr& ptr);
@@ -107,6 +111,10 @@ namespace MWMechanics
             int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
 
+            bool isAttackPrepairing(const MWWorld::Ptr& ptr);
+            bool isRunning(const MWWorld::Ptr& ptr);
+            bool isSneaking(const MWWorld::Ptr& ptr);
+
         void forceStateUpdate(const MWWorld::Ptr &ptr);
 
         bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist=false);
@@ -147,9 +155,11 @@ namespace MWMechanics
             void clear(); // Clear death counter
 
             bool isReadyToBlock(const MWWorld::Ptr& ptr) const;
+            bool isAttackingOrSpell(const MWWorld::Ptr& ptr) const;
 
     private:
         PtrActorMap mActors;
+        float mTimerDisposeSummonsCorpses;
 
     };
 }

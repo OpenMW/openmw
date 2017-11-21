@@ -8,6 +8,7 @@
 
 #include "alc.h"
 #include "al.h"
+#include "alext.h"
 
 #include "sound_output.hpp"
 
@@ -15,22 +16,36 @@ namespace MWSound
 {
     class SoundManager;
     class Sound;
+    class Stream;
 
     class OpenAL_Output : public Sound_Output
     {
         ALCdevice *mDevice;
         ALCcontext *mContext;
 
+        struct {
+            bool EXT_EFX : 1;
+            bool SOFT_HRTF : 1;
+        } ALC;
+        struct {
+            bool SOFT_source_spatialize : 1;
+        } AL;
+
         typedef std::deque<ALuint> IDDq;
         IDDq mFreeSources;
 
-        typedef std::vector<MWBase::SoundPtr> SoundVec;
+        typedef std::vector<Sound*> SoundVec;
         SoundVec mActiveSounds;
-        typedef std::vector<MWBase::SoundStreamPtr> StreamVec;
+        typedef std::vector<Stream*> StreamVec;
         StreamVec mActiveStreams;
 
         osg::Vec3f mListenerPos;
         Environment mListenerEnv;
+
+        ALuint mWaterFilter;
+        ALuint mWaterEffect;
+        ALuint mDefaultEffect;
+        ALuint mEffectSlot;
 
         struct StreamThread;
         std::unique_ptr<StreamThread> mStreamThread;
@@ -45,31 +60,29 @@ namespace MWSound
 
     public:
         virtual std::vector<std::string> enumerate();
-        virtual void init(const std::string &devname=std::string());
+        virtual bool init(const std::string &devname, const std::string &hrtfname, HrtfMode hrtfmode);
         virtual void deinit();
 
         virtual std::vector<std::string> enumerateHrtf();
-        virtual void enableHrtf(const std::string &hrtfname, bool auto_enable);
-        virtual void disableHrtf();
+        virtual void setHrtf(const std::string &hrtfname, HrtfMode hrtfmode);
 
-        virtual Sound_Handle loadSound(const std::string &fname);
-        virtual void unloadSound(Sound_Handle data);
-        virtual size_t getSoundDataSize(Sound_Handle data) const;
+        virtual std::pair<Sound_Handle,size_t> loadSound(const std::string &fname);
+        virtual size_t unloadSound(Sound_Handle data);
 
-        virtual void playSound(MWBase::SoundPtr sound, Sound_Handle data, float offset);
-        virtual void playSound3D(MWBase::SoundPtr sound, Sound_Handle data, float offset);
-        virtual void finishSound(MWBase::SoundPtr sound);
-        virtual bool isSoundPlaying(MWBase::SoundPtr sound);
-        virtual void updateSound(MWBase::SoundPtr sound);
+        virtual bool playSound(Sound *sound, Sound_Handle data, float offset);
+        virtual bool playSound3D(Sound *sound, Sound_Handle data, float offset);
+        virtual void finishSound(Sound *sound);
+        virtual bool isSoundPlaying(Sound *sound);
+        virtual void updateSound(Sound *sound);
 
-        virtual void streamSound(DecoderPtr decoder, MWBase::SoundStreamPtr sound);
-        virtual void streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound, bool getLoudnessData);
-        virtual void finishStream(MWBase::SoundStreamPtr sound);
-        virtual double getStreamDelay(MWBase::SoundStreamPtr sound);
-        virtual double getStreamOffset(MWBase::SoundStreamPtr sound);
-        virtual float getStreamLoudness(MWBase::SoundStreamPtr sound);
-        virtual bool isStreamPlaying(MWBase::SoundStreamPtr sound);
-        virtual void updateStream(MWBase::SoundStreamPtr sound);
+        virtual bool streamSound(DecoderPtr decoder, Stream *sound);
+        virtual bool streamSound3D(DecoderPtr decoder, Stream *sound, bool getLoudnessData);
+        virtual void finishStream(Stream *sound);
+        virtual double getStreamDelay(Stream *sound);
+        virtual double getStreamOffset(Stream *sound);
+        virtual float getStreamLoudness(Stream *sound);
+        virtual bool isStreamPlaying(Stream *sound);
+        virtual void updateStream(Stream *sound);
 
         virtual void startUpdate();
         virtual void finishUpdate();

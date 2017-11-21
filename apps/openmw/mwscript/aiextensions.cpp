@@ -372,21 +372,14 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWWorld::Ptr observer = R()(runtime);
+                    MWWorld::Ptr observer = R()(runtime, false); // required=false
+
                     std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPtr(actorID, true);
 
-                    if(!actor.getClass().isActor() || !observer.getClass().isActor())
-                    {
-                        runtime.push(0);
-                        return;
-                    }
-
-                    Interpreter::Type_Integer value =
-                            MWBase::Environment::get().getWorld()->getLOS(observer, actor) &&
-                            MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, observer);
+                    Interpreter::Type_Integer value = MWBase::Environment::get().getMechanicsManager()->isActorDetected(actor, observer);
 
                     runtime.push (value);
                 }

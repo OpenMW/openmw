@@ -16,6 +16,7 @@
 #include "../../model/world/idtableproxymodel.hpp"
 #include "../../model/world/idtablebase.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/world/landtexturetableproxymodel.hpp"
 #include "../../model/world/record.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/commanddispatcher.hpp"
@@ -59,6 +60,9 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
             if (mCreateAction)
                 menu.addAction(mCloneAction);
         }
+
+        if (mTouchAction)
+            menu.addAction (mTouchAction);
 
         if (mCreateAction)
             menu.addAction (mCreateAction);
@@ -226,16 +230,21 @@ void CSVWorld::Table::mouseDoubleClickEvent (QMouseEvent *event)
 
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     bool createAndDelete, bool sorting, CSMDoc::Document& document)
-: DragRecordTable(document), mCreateAction (0),
-  mCloneAction(0), mRecordStatusDisplay (0), mJumpToAddedRecord(false), mUnselectAfterJump(false)
+    : DragRecordTable(document), mCreateAction (nullptr), mCloneAction(nullptr), mTouchAction(nullptr),
+    mRecordStatusDisplay (0), mJumpToAddedRecord(false), mUnselectAfterJump(false)
 {
     mModel = &dynamic_cast<CSMWorld::IdTableBase&> (*mDocument.getData().getTableModel (id));
 
     bool isInfoTable = id.getType() == CSMWorld::UniversalId::Type_TopicInfos ||
                        id.getType() == CSMWorld::UniversalId::Type_JournalInfos;
+    bool isLtexTable = (id.getType() == CSMWorld::UniversalId::Type_LandTextures);
     if (isInfoTable)
     {
         mProxyModel = new CSMWorld::InfoTableProxyModel(id.getType(), this);
+    }
+    else if (isLtexTable)
+    {
+        mProxyModel = new CSMWorld::LandTextureTableProxyModel (this);
     }
     else
     {
@@ -300,6 +309,15 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
         addAction(mCloneAction);
         CSMPrefs::Shortcut* cloneShortcut = new CSMPrefs::Shortcut("table-clone", this);
         cloneShortcut->associateAction(mCloneAction);
+    }
+
+    if (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_AllowTouch)
+    {
+        mTouchAction = new QAction(tr("Touch Record"), this);
+        connect(mTouchAction, SIGNAL(triggered()), this, SLOT(touchRecord()));
+        addAction(mTouchAction);
+        CSMPrefs::Shortcut* touchShortcut = new CSMPrefs::Shortcut("table-touch", this);
+        touchShortcut->associateAction(mTouchAction);
     }
 
     mRevertAction = new QAction (tr ("Revert Record"), this);
@@ -439,6 +457,22 @@ void CSVWorld::Table::cloneRecord()
         {
             emit cloneRequest (toClone);
         }
+    }
+}
+
+void CSVWorld::Table::touchRecord()
+{
+    if (!mEditLock && mModel->getFeatures() & CSMWorld::IdTableBase::Feature_AllowTouch)
+    {
+        std::vector<CSMWorld::UniversalId> touchIds;
+
+        QModelIndexList selectedRows = selectionModel()->selectedRows();
+        for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+        {
+            touchIds.push_back(getUniversalId(it->row()));
+        }
+
+        emit touchRequest(touchIds);
     }
 }
 

@@ -118,7 +118,7 @@ namespace OMW
 
             void executeLocalScripts();
 
-            void frame (float dt);
+            bool frame (float dt);
 
             /// Load settings from various files, returns the path to the user settings file
             std::string loadSettings (Settings::Manager & settings);
@@ -148,7 +148,7 @@ namespace OMW
             /// Set resource dir
             void setResourceDir(const boost::filesystem::path& parResDir);
 
-            /// Set start cell name (only interiors for now)
+            /// Set start cell name
             void setCell(const std::string& cellName);
 
             /**

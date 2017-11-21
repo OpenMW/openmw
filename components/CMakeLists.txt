@@ -2,22 +2,28 @@ project (Components)
 
 # Version file
 set (VERSION_IN_FILE "${OpenMW_SOURCE_DIR}/files/version.in")
-set (VERSION_FILE "${OpenMW_BINARY_DIR}/resources/version")
+set (VERSION_FILE_PATH_BASE "${OpenMW_BINARY_DIR}")
+set (VERSION_FILE_PATH_RELATIVE resources/version)
 if (GIT_CHECKOUT)
-  add_custom_target (git-version
+    get_generator_is_multi_config(multi_config)
+    add_custom_target (git-version
        COMMAND ${CMAKE_COMMAND}
             -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
             -DPROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}
             -DVERSION_IN_FILE=${VERSION_IN_FILE}
-            -DVERSION_FILE=${VERSION_FILE}
+            -DVERSION_FILE_PATH_BASE=${VERSION_FILE_PATH_BASE}
+            -DVERSION_FILE_PATH_RELATIVE=${VERSION_FILE_PATH_RELATIVE}
             -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
             -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
             -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
             -DOPENMW_VERSION=${OPENMW_VERSION}
+            -DMACROSFILE=${CMAKE_SOURCE_DIR}/cmake/OpenMWMacros.cmake
+            "-DCMAKE_CONFIGURATION_TYPES=${CMAKE_CONFIGURATION_TYPES}"
+            -Dgenerator_is_multi_config_var=${multi_config}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/GitVersion.cmake
             VERBATIM)
 else (GIT_CHECKOUT)
-    configure_file(${VERSION_IN_FILE} ${VERSION_FILE})
+    configure_resource_file(${VERSION_IN_FILE} ${VERSION_FILE_PATH_BASE} ${VERSION_FILE_PATH_RELATIVE})
 endif (GIT_CHECKOUT)
 
 if (OPENGL_ES)
@@ -49,7 +55,7 @@ add_component_dir (shader
     )
 
 add_component_dir (sceneutil
-    clone attach visitor util statesetupdater controller skeleton riggeometry lightcontroller
+    clone attach visitor util statesetupdater controller skeleton riggeometry morphgeometry lightcontroller
     lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil waterutil writescene serialize optimizer
     )
 

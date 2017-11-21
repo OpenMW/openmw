@@ -84,7 +84,7 @@ namespace
 
             AddEntry::operator () (entry);
 
-            mTypesetter->sectionBreak (10);
+            mTypesetter->sectionBreak (30);
         }
     };
 
@@ -109,7 +109,7 @@ namespace
             mTypesetter->selectContent (mContentId);
             mTypesetter->write (mBodyStyle, 2, 3);// end quote
 
-            mTypesetter->sectionBreak (10);
+            mTypesetter->sectionBreak (30);
         }
     };
 
@@ -123,7 +123,7 @@ namespace
         void operator () (MWGui::JournalViewModel::Utf8Span topicName)
         {
             mTypesetter->write (mBodyStyle, topicName);
-            mTypesetter->sectionBreak (10);
+            mTypesetter->sectionBreak ();
         }
     };
 
@@ -137,7 +137,7 @@ namespace
         void operator () (MWGui::JournalViewModel::Utf8Span topicName)
         {
             mTypesetter->write (mBodyStyle, topicName);
-            mTypesetter->sectionBreak (10);
+            mTypesetter->sectionBreak ();
         }
     };
 }
@@ -294,7 +294,7 @@ BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex ()
 BookTypesetter::Ptr JournalBooks::createTypesetter ()
 {
     //TODO: determine page size from layout...
-    return BookTypesetter::create (240, 300);
+    return BookTypesetter::create (240, 320);
 }
 
 }

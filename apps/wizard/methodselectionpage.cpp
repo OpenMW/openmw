@@ -1,5 +1,4 @@
 #include "methodselectionpage.hpp"
-#include <QDebug>
 #include "mainwizard.hpp"
 
 Wizard::MethodSelectionPage::MethodSelectionPage(QWidget *parent) :
@@ -10,16 +9,16 @@ Wizard::MethodSelectionPage::MethodSelectionPage(QWidget *parent) :
     setupUi(this);
 
 #ifndef OPENMW_USE_UNSHIELD
-    newLocationRadioButton->setEnabled(false);
+    retailDiscRadioButton->setEnabled(false);
     existingLocationRadioButton->setChecked(true);
 #endif
 
-    registerField(QLatin1String("installation.new"), newLocationRadioButton);
+    registerField(QLatin1String("installation.retailDisc"), retailDiscRadioButton);
 }
 
 int Wizard::MethodSelectionPage::nextId() const
 {
-    if (field(QLatin1String("installation.new")).toBool() == true) {
+    if (field(QLatin1String("installation.retailDisc")).toBool() == true) {
         return MainWizard::Page_InstallationTarget;
     } else {
         return MainWizard::Page_ExistingInstallation;

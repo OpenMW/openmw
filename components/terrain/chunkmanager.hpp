@@ -32,7 +32,11 @@ namespace Terrain
 
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, int lod, unsigned int lodFlags);
 
-        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
+        void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
+
+        void clearCache() override;
+
+        void releaseGLObjects(osg::State* state) override;
 
         void setCullingActive(bool active);
 

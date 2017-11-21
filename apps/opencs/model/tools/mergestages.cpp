@@ -8,7 +8,9 @@
 #include "mergestate.hpp"
 
 #include "../doc/document.hpp"
+#include "../world/commands.hpp"
 #include "../world/data.hpp"
+#include "../world/idtable.hpp"
 
 
 CSMTools::StartMergeStage::StartMergeStage (MergeState& state)
@@ -109,102 +111,32 @@ void CSMTools::MergeReferencesStage::perform (int stage, CSMDoc::Messages& messa
 }
 
 
-CSMTools::ListLandTexturesMergeStage::ListLandTexturesMergeStage (MergeState& state)
-: mState (state)
-{}
-
-int CSMTools::ListLandTexturesMergeStage::setup()
+CSMTools::PopulateLandTexturesMergeStage::PopulateLandTexturesMergeStage (MergeState& state)
+    : mState (state)
 {
-    return mState.mSource.getData().getLand().getSize();
 }
 
-void CSMTools::ListLandTexturesMergeStage::perform (int stage, CSMDoc::Messages& messages)
+int CSMTools::PopulateLandTexturesMergeStage::setup()
 {
-    const CSMWorld::Record<CSMWorld::Land>& record =
-        mState.mSource.getData().getLand().getRecord (stage);
-
-    if (!record.isDeleted())
-    {
-        const CSMWorld::Land& land = record.get();
-
-        // make sure record is loaded
-        land.loadData (ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML |
-            ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX);
-
-        if (const ESM::Land::LandData *data = land.getLandData (ESM::Land::DATA_VTEX))
-        {
-            // list texture indices
-            std::pair<uint16_t, int> key;
-            key.second = land.mPlugin;
-
-            for (int i=0; i<ESM::Land::LAND_NUM_TEXTURES; ++i)
-            {
-                key.first = data->mTextures[i];
-
-                mState.mTextureIndices[key] = -1;
-            }
-        }
-    }
-}
-
-
-CSMTools::MergeLandTexturesStage::MergeLandTexturesStage (MergeState& state)
-: mState (state), mNext (mState.mTextureIndices.end())
-{}
-
-int CSMTools::MergeLandTexturesStage::setup()
-{
-    // Should use the size of mState.mTextureIndices instead, but that is not available at this
-    // point. Unless there are any errors in the land and land texture records this will not
-    // make a difference.
     return mState.mSource.getData().getLandTextures().getSize();
 }
 
-void CSMTools::MergeLandTexturesStage::perform (int stage, CSMDoc::Messages& messages)
+void CSMTools::PopulateLandTexturesMergeStage::perform (int stage, CSMDoc::Messages& messages)
 {
-    if (stage==0)
-        mNext = mState.mTextureIndices.begin();
+    const CSMWorld::Record<CSMWorld::LandTexture>& record =
+        mState.mSource.getData().getLandTextures().getRecord (stage);
 
-    bool found = false;
-
-    do
+    if (!record.isDeleted())
     {
-        if (mNext==mState.mTextureIndices.end())
-            return;
-
-        mNext->second = stage+1;
-
-        std::ostringstream stream;
-        stream << mNext->first.first-1 << "_" << mNext->first.second;
-
-        int index = mState.mSource.getData().getLandTextures().searchId (stream.str());
-
-        if (index!=-1)
-        {
-            CSMWorld::LandTexture texture =
-                mState.mSource.getData().getLandTextures().getRecord (index).get();
-
-            stream.clear();
-            stream << mNext->second-1 << "_0";
-
-            texture.mIndex = mNext->second-1;
-            texture.mId = stream.str();
-
-            CSMWorld::Record<CSMWorld::LandTexture> newRecord (
-                CSMWorld::RecordBase::State_ModifiedOnly, 0, &texture);
-
-            mState.mTarget->getData().getLandTextures().appendRecord (newRecord);
-
-            found = true;
-        }
-
-        ++mNext;
+        mState.mTarget->getData().getLandTextures().appendRecord(record);
     }
-    while (!found);
 }
 
 
-CSMTools::MergeLandStage::MergeLandStage (MergeState& state) : mState (state) {}
+CSMTools::MergeLandStage::MergeLandStage (MergeState& state)
+    : mState (state)
+{
+}
 
 int CSMTools::MergeLandStage::setup()
 {
@@ -218,40 +150,66 @@ void CSMTools::MergeLandStage::perform (int stage, CSMDoc::Messages& messages)
 
     if (!record.isDeleted())
     {
-        const CSMWorld::Land& land = record.get();
+        mState.mTarget->getData().getLand().appendRecord (record);
+    }
+}
 
-        land.loadData (ESM::Land::DATA_VCLR | ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML |
-            ESM::Land::DATA_VTEX);
 
-        CSMWorld::Land newLand (land);
+CSMTools::FixLandsAndLandTexturesMergeStage::FixLandsAndLandTexturesMergeStage (MergeState& state)
+    : mState (state)
+{
+}
 
-        newLand.mPlugin = 0;
+int CSMTools::FixLandsAndLandTexturesMergeStage::setup()
+{
+    // We will have no more than the source
+    return mState.mSource.getData().getLand().getSize();
+}
 
-        if (land.mDataTypes & ESM::Land::DATA_VTEX)
-        {
-            // adjust land texture references
-            if (ESM::Land::LandData *data = newLand.getLandData())
-            {
-                std::pair<uint16_t, int> key;
-                key.second = land.mPlugin;
+void CSMTools::FixLandsAndLandTexturesMergeStage::perform (int stage, CSMDoc::Messages& messages)
+{
+    if (stage < mState.mTarget->getData().getLand().getSize())
+    {
+        CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&>(
+            *mState.mTarget->getData().getTableModel(CSMWorld::UniversalId::Type_Lands));
 
-                for (int i=0; i<ESM::Land::LAND_NUM_TEXTURES; ++i)
-                {
-                    key.first = data->mTextures[i];
-                    std::map<std::pair<uint16_t, int>, int>::const_iterator iter =
-                        mState.mTextureIndices.find (key);
+        CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&>(
+            *mState.mTarget->getData().getTableModel(CSMWorld::UniversalId::Type_LandTextures));
 
-                    if (iter!=mState.mTextureIndices.end())
-                        data->mTextures[i] = iter->second;
-                    else
-                        data->mTextures[i] = 0;
-                }
-            }
-        }
+        std::string id = mState.mTarget->getData().getLand().getId(stage);
 
-        CSMWorld::Record<CSMWorld::Land> newRecord (
-            CSMWorld::RecordBase::State_ModifiedOnly, 0, &newLand);
+        CSMWorld::TouchLandCommand cmd(landTable, ltexTable, id);
+        cmd.redo();
 
-        mState.mTarget->getData().getLand().appendRecord (newRecord);
+        // Get rid of base data
+        const CSMWorld::Record<CSMWorld::Land>& oldRecord =
+            mState.mTarget->getData().getLand().getRecord (stage);
+
+        CSMWorld::Record<CSMWorld::Land> newRecord(CSMWorld::RecordBase::State_ModifiedOnly,
+            nullptr, &oldRecord.get());
+
+        mState.mTarget->getData().getLand().setRecord(stage, newRecord);
+    }
+}
+
+CSMTools::CleanupLandTexturesMergeStage::CleanupLandTexturesMergeStage (MergeState& state)
+    : mState (state)
+{
+}
+
+int CSMTools::CleanupLandTexturesMergeStage::setup()
+{
+    return 1;
+}
+
+void CSMTools::CleanupLandTexturesMergeStage::perform (int stage, CSMDoc::Messages& messages)
+{
+    auto& landTextures = mState.mTarget->getData().getLandTextures();
+    for (int i = 0; i < landTextures.getSize(); )
+    {
+        if (!landTextures.getRecord(i).isModified())
+            landTextures.removeRows(i, 1);
+        else
+            ++i;
     }
 }

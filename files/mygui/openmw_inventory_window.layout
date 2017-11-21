@@ -12,7 +12,7 @@
 
             <!-- Avatar -->
             <Widget type="Widget" skin="MW_Box" position="8 38 212 185" name="Avatar" align="Left Top Stretch">
-                <Widget type="ImageBox" skin="ImageBox" position="0 0 212 161" align="Stretch" name="AvatarImage">
+                <Widget type="ImageBox" skin="ImageBox" position="3 3 206 158" align="Stretch" name="AvatarImage">
                     <UserString key="ToolTipType" value="AvatarItemSelection"/>
                 </Widget>
                 <Widget type="TextBox" skin="ProgressText" position="0 161 212 24" align="HStretch Bottom" name="ArmorRating">
@@ -32,18 +32,23 @@
             <Widget type="HBox" position="0 8 350 24" align="Left Top HStretch" name="Categories">
                 <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="AllButton">
                     <Property key="Caption" value="#{sAllTab}"/>
+                    <Property key="NeedKey" value="false"/>
                 </Widget>
                 <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="WeaponButton">
                     <Property key="Caption" value="#{sWeaponTab}"/>
+                    <Property key="NeedKey" value="false"/>
                 </Widget>
                 <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="ApparelButton">
                     <Property key="Caption" value="#{sApparelTab}"/>
+                    <Property key="NeedKey" value="false"/>
                 </Widget>
                 <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="MagicButton">
                     <Property key="Caption" value="#{sMagicTab}"/>
+                    <Property key="NeedKey" value="false"/>
                 </Widget>
                 <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="MiscButton">
                     <Property key="Caption" value="#{sMiscTab}"/>
+                    <Property key="NeedKey" value="false"/>
                 </Widget>
             </Widget>
 

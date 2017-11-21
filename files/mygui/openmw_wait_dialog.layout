@@ -2,7 +2,7 @@
 
 <MyGUI type="Layout">
     <Widget type="VBox" skin="MW_Dialog" layer="Windows" position="0 0 600 200" align="Center" name="_Main">
-        <Property key="Padding" value="12"/>
+        <Property key="Padding" value="8"/>
         <Property key="Spacing" value="8"/>
         <Property key="AutoResize" value="true"/>
 
@@ -26,9 +26,7 @@
 
         <Widget type="HBox">
             <UserString key="HStretch" value="true"/>
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
+            <Widget type="Spacer"/>
 
             <Widget type="AutoSizedButton" skin="MW_Button" name="UntilHealedButton">
                 <Property key="Caption" value="#{sUntilHealed}"/>

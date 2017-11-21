@@ -14,6 +14,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -36,6 +37,7 @@ namespace MWGui
         , mItemSelectionDialog(0)
         , mMagicSelectionDialog(0)
         , mSelectedIndex(-1)
+        , mActivatedIndex(-1)
     {
         getWidget(mOkButton, "OKButton");
         getWidget(mInstructionLabel, "InstructionLabel");
@@ -62,13 +64,10 @@ namespace MWGui
         }
     }
 
-    void QuickKeysMenu::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_QuickKeysMenu);
-    }
-
     void QuickKeysMenu::clear()
     {
+        mActivatedIndex = -1;
+
         for (int i=0; i<10; ++i)
         {
             unassign(mQuickKeyButtons[i], i);
@@ -254,6 +253,15 @@ namespace MWGui
         mMagicSelectionDialog->setVisible(false);
     }
 
+    void QuickKeysMenu::updateActivatedQuickKey()
+    {
+        // there is no delayed action, nothing to do.
+        if (mActivatedIndex < 0)
+            return;
+
+        activateQuickKey(mActivatedIndex);
+    }
+
     void QuickKeysMenu::activateQuickKey(int index)
     {
         assert (index-1 >= 0);
@@ -263,6 +271,27 @@ namespace MWGui
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
+        const MWMechanics::CreatureStats &playerStats = player.getClass().getCreatureStats(player);
+
+        // Delay action executing,
+        // if player is busy for now (casting a spell, attacking someone, etc.)
+        bool isDelayNeeded = MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(player)
+                || playerStats.getKnockedDown()
+                || playerStats.getHitRecovery();
+
+        bool isReturnNeeded = playerStats.isParalyzed() || playerStats.isDead();
+        if (isReturnNeeded && type != Type_Item)
+        {
+            return;
+        }
+
+        if (isDelayNeeded && type != Type_Item)
+        {
+            mActivatedIndex = index;
+            return;
+        }
+        else
+            mActivatedIndex = -1;
 
         if (type == Type_Item || type == Type_MagicItem)
         {
@@ -309,6 +338,22 @@ namespace MWGui
         else if (type == Type_Item)
         {
             MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
+            bool isWeapon = item.getTypeName() == typeid(ESM::Weapon).name();
+            bool isTool = item.getTypeName() == typeid(ESM::Probe).name() || item.getTypeName() == typeid(ESM::Lockpick).name();
+
+            // delay weapon switching if player is busy
+            if (isDelayNeeded && (isWeapon || isTool))
+            {
+                mActivatedIndex = index;
+                return;
+            }
+
+            // disable weapon switching if player is dead or paralyzed
+            if (isReturnNeeded && (isWeapon || isTool))
+            {
+                return;
+            }
+
             MWBase::Environment::get().getWindowManager()->useItem(item);
             MWWorld::ConstContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             // change draw state only if the item is in player's right hand
@@ -397,11 +442,6 @@ namespace MWGui
                               mCancelButton->getHeight());
 
         center();
-    }
-
-    void QuickKeysMenuAssign::exit()
-    {
-        setVisible(false);
     }
 
     void QuickKeysMenu::write(ESM::ESMWriter &writer)
@@ -535,14 +575,15 @@ namespace MWGui
         exit();
     }
 
-    void MagicSelectionDialog::exit()
+    bool MagicSelectionDialog::exit()
     {
         mParent->onAssignMagicCancel();
+        return true;
     }
 
-    void MagicSelectionDialog::open ()
+    void MagicSelectionDialog::onOpen ()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
 
         mMagicList->setModel(new SpellModel(MWMechanics::getPlayer()));
         mMagicList->resetScrollbars();

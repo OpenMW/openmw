@@ -31,6 +31,7 @@
         <!-- World button -->
         <Widget type="AutoSizedButton" skin="MW_Button" position="213 233 61 22" align="Bottom Right" name="WorldButton">
             <Property key="ExpandDirection" value="Left"/>
+            <Property key="NeedKey" value="false"/>
         </Widget>
 
     </Widget>

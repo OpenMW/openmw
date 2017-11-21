@@ -9,6 +9,7 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 namespace MWGui
 {
@@ -23,38 +24,7 @@ namespace MWGui
         if (base.getClass().getEnchantment(base) != "")
             mFlags |= Flag_Enchanted;
 
-        static std::set<std::string> boundItemIDCache;
-
-        // If this is empty then we haven't executed the GMST cache logic yet; or there isn't any sMagicBound* GMST's for some reason
-        if (boundItemIDCache.empty())
-        {
-            // Build a list of known bound item ID's
-            const MWWorld::Store<ESM::GameSetting> &gameSettings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
-            for (MWWorld::Store<ESM::GameSetting>::iterator currentIteration = gameSettings.begin(); currentIteration != gameSettings.end(); ++currentIteration)
-            {
-                const ESM::GameSetting &currentSetting = *currentIteration;
-                std::string currentGMSTID = currentSetting.mId;
-                Misc::StringUtils::lowerCaseInPlace(currentGMSTID);
-
-                // Don't bother checking this GMST if it's not a sMagicBound* one.
-                const std::string& toFind = "smagicbound";
-                if (currentGMSTID.compare(0, toFind.length(), toFind) != 0)
-                    continue;
-
-                // All sMagicBound* GMST's should be of type string
-                std::string currentGMSTValue = currentSetting.getString();
-                Misc::StringUtils::lowerCaseInPlace(currentGMSTValue);
-
-                boundItemIDCache.insert(currentGMSTValue);
-            }
-        }
-
-        // Perform bound item check and assign the Flag_Bound bit if it passes
-        std::string tempItemID = base.getCellRef().getRefId();
-        Misc::StringUtils::lowerCaseInPlace(tempItemID);
-
-        if (boundItemIDCache.count(tempItemID) != 0)
+        if (MWBase::Environment::get().getMechanicsManager()->isBoundItem(base))
             mFlags |= Flag_Bound;
     }
 
@@ -119,7 +89,17 @@ namespace MWGui
         return ret;
     }
 
-    bool ItemModel::allowedToInsertItems() const
+    bool ItemModel::allowedToUseItems() const
+    {
+        return true;
+    }
+
+    bool ItemModel::onDropItem(const MWWorld::Ptr &item, int count)
+    {
+        return true;
+    }
+
+    bool ItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
     {
         return true;
     }
@@ -133,6 +113,11 @@ namespace MWGui
     ProxyItemModel::~ProxyItemModel()
     {
         delete mSourceModel;
+    }
+
+    bool ProxyItemModel::allowedToUseItems() const
+    {
+        return mSourceModel->allowedToUseItems();
     }
 
     MWWorld::Ptr ProxyItemModel::copyItem (const ItemStack& item, size_t count, bool setNewOwner)
@@ -188,4 +173,18 @@ namespace MWGui
         mSourceModel = sourceModel;
     }
 
+    void ProxyItemModel::onClose()
+    {
+        mSourceModel->onClose();
+    }
+
+    bool ProxyItemModel::onDropItem(const MWWorld::Ptr &item, int count)
+    {
+        return mSourceModel->onDropItem(item, count);
+    }
+
+    bool ProxyItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
+    {
+        return mSourceModel->onTakeItem(item, count);
+    }
 }

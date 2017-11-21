@@ -34,6 +34,7 @@
                 <Widget type="AutoSizedEditBox" skin="HeaderText" position="0 0 166 18" name="FavoriteAttributesT" align="Left Top">
                     <Property key="Caption" value="#{sChooseClassMenu2}"/>
                     <Property key="TextAlign" value="Left Top"/>
+                    <Property key="Static" value="true"/>
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="TextToolTip"/>
                     <UserString key="Caption_Text" value="#{sCreateClassMenuHelp2}"/>
@@ -73,9 +74,7 @@
 
         <!-- Dialog buttons -->
         <Widget type="HBox" position="0 276 475 24">
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
+            <Widget type="Spacer"/>
             <Widget type="AutoSizedButton" skin="MW_Button" name="BackButton">
                 <Property key="Caption" value="#{sBack}"/>
             </Widget>

@@ -23,6 +23,11 @@ namespace Resource
         mCache->removeExpiredObjectsInCache(referenceTime - mExpiryDelay);
     }
 
+    void ResourceManager::clearCache()
+    {
+        mCache->clear();
+    }
+
     void ResourceManager::setExpiryDelay(double expiryDelay)
     {
         mExpiryDelay = expiryDelay;
@@ -31,6 +36,11 @@ namespace Resource
     const VFS::Manager* ResourceManager::getVFS() const
     {
         return mVFS;
+    }
+
+    void ResourceManager::releaseGLObjects(osg::State *state)
+    {
+        mCache->releaseGLObjects(state);
     }
 
 }

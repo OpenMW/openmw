@@ -42,6 +42,8 @@ namespace CSVRender
 
             void updateCellData(const CSMWorld::Record<CSMWorld::Cell>& cellRecord);
 
+            void reloadAssets();
+
         private slots:
 
             void cellDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);

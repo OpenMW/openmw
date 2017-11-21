@@ -23,6 +23,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
@@ -387,9 +388,6 @@ void NpcAnimation::rebuild()
 {
     updateNpcBase();
 
-    if (mAlpha != 1.f)
-        mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
-
     MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
 }
 
@@ -484,25 +482,25 @@ void NpcAnimation::updateNpcBase()
     {
         const std::string base = "meshes\\xbase_anim.nif";
         if (smodel != base)
-            addAnimSource(base);
+            addAnimSource(base, smodel);
 
-        addAnimSource(smodel);
+        addAnimSource(smodel, smodel);
 
         if(!isWerewolf)
         {
             if(mNpc->mModel.length() > 0)
-                addAnimSource(Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS()));
+                addAnimSource(Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS()), smodel);
             if(Misc::StringUtils::lowerCase(mNpc->mRace).find("argonian") != std::string::npos)
-                addAnimSource("meshes\\xargonian_swimkna.nif");
+                addAnimSource("meshes\\xargonian_swimkna.nif", smodel);
         }
     }
     else
     {
         const std::string base = "meshes\\xbase_anim.1st.nif";
         if (smodel != base)
-            addAnimSource(base);
+            addAnimSource(base, smodel);
 
-        addAnimSource(smodel);
+        addAnimSource(smodel, smodel);
 
         mObjectRoot->setNodeMask(Mask_FirstPerson);
         mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
@@ -650,6 +648,9 @@ void NpcAnimation::updateParts()
 
     if (wasArrowAttached)
         attachArrow();
+
+    if (mAlpha != 1.f)
+        mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
 }
 
 
@@ -769,8 +770,9 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
             mSoundIds[type] = csi->getClass().getSound(*csi);
             if (!mSoundIds[type].empty())
             {
-                MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, mSoundIds[type], 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
-                    MWBase::SoundManager::Play_Loop);
+                MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, mSoundIds[type],
+                    1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Loop
+                );
             }
         }
     }
@@ -915,10 +917,15 @@ void NpcAnimation::showWeapons(bool showWeapon)
                     attachArrow();
             }
         }
+        if (mAlpha != 1.f)
+            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
     }
     else
     {
         removeIndividualPart(ESM::PRT_Weapon);
+        // If we remove/hide weapon from player, we should reset attack animation as well
+        if (mPtr == MWMechanics::getPlayer())
+            MWBase::Environment::get().getWorld()->getPlayer().setAttackingOrSpell(false);
     }
 }
 
@@ -937,6 +944,8 @@ void NpcAnimation::showCarriedLeft(bool show)
             if (iter->getTypeName() == typeid(ESM::Light).name() && mObjectParts[ESM::PRT_Shield])
                 addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), iter->get<ESM::Light>()->mBase);
         }
+        if (mAlpha != 1.f)
+            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
     }
     else
         removeIndividualPart(ESM::PRT_Shield);

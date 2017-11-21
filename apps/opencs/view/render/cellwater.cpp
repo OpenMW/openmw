@@ -92,6 +92,11 @@ namespace CSVRender
         }
     }
 
+    void CellWater::reloadAssets()
+    {
+        recreate();
+    }
+
     void CellWater::cellDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
     {
         const CSMWorld::Collection<CSMWorld::Cell>& cells = mData.getCells();

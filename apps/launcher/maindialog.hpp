@@ -72,6 +72,7 @@ namespace Launcher
         bool setupLauncherSettings();
         bool setupGameSettings();
         bool setupGraphicsSettings();
+        bool setupGameData();
 
         void setVersionLabel();
 

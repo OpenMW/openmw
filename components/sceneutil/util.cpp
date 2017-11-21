@@ -42,13 +42,4 @@ osg::Vec4f colourFromRGB(unsigned int clr)
     return colour;
 }
 
-osg::Vec4f colourFromRGBA(unsigned int clr)
-{
-    osg::Vec4f colour(((clr >> 0) & 0xFF) / 255.0f,
-                      ((clr >> 8) & 0xFF) / 255.0f,
-                      ((clr >> 16) & 0xFF) / 255.0f,
-                      ((clr >> 24) & 0xFF) / 255.0f);
-    return colour;
-}
-
 }

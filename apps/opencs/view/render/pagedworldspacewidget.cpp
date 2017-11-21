@@ -351,6 +351,72 @@ void CSVRender::PagedWorldspaceWidget::pathgridAdded(const QModelIndex& parent, 
     }
 }
 
+void CSVRender::PagedWorldspaceWidget::landDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    for (int r = topLeft.row(); r <= bottomRight.row(); ++r)
+    {
+        std::string id = mDocument.getData().getLand().getId(r);
+
+        auto cellIt = mCells.find(CSMWorld::CellCoordinates::fromId(id).first);
+        if (cellIt != mCells.end())
+        {
+            cellIt->second->landDataChanged(topLeft, bottomRight);
+            flagAsModified();
+        }
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::landAboutToBeRemoved (const QModelIndex& parent, int start, int end)
+{
+    for (int r = start; r <= end; ++r)
+    {
+        std::string id = mDocument.getData().getLand().getId(r);
+
+        auto cellIt = mCells.find(CSMWorld::CellCoordinates::fromId(id).first);
+        if (cellIt != mCells.end())
+        {
+            cellIt->second->landAboutToBeRemoved(parent, start, end);
+            flagAsModified();
+        }
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::landAdded (const QModelIndex& parent, int start, int end)
+{
+    for (int r = start; r <= end; ++r)
+    {
+        std::string id = mDocument.getData().getLand().getId(r);
+
+        auto cellIt = mCells.find(CSMWorld::CellCoordinates::fromId(id).first);
+        if (cellIt != mCells.end())
+        {
+            cellIt->second->landAdded(parent, start, end);
+            flagAsModified();
+        }
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::landTextureDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    for (auto cellIt : mCells)
+        cellIt.second->landTextureChanged(topLeft, bottomRight);
+    flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::landTextureAboutToBeRemoved (const QModelIndex& parent, int start, int end)
+{
+    for (auto cellIt : mCells)
+        cellIt.second->landTextureAboutToBeRemoved(parent, start, end);
+    flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::landTextureAdded (const QModelIndex& parent, int start, int end)
+{
+    for (auto cellIt : mCells)
+        cellIt.second->landTextureAdded(parent, start, end);
+    flagAsModified();
+}
+
 
 std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
 {
@@ -472,6 +538,27 @@ CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc
     connect (cells, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (cellAdded (const QModelIndex&, int, int)));
 
+    connect (&document.getData(), SIGNAL (assetTablesChanged ()),
+        this, SLOT (assetTablesChanged ()));
+
+    QAbstractItemModel *lands = document.getData().getTableModel (CSMWorld::UniversalId::Type_Lands);
+
+    connect (lands, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+        this, SLOT (landDataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (lands, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
+        this, SLOT (landAboutToBeRemoved (const QModelIndex&, int, int)));
+    connect (lands, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
+        this, SLOT (landAdded (const QModelIndex&, int, int)));
+
+    QAbstractItemModel *ltexs = document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures);
+
+    connect (ltexs, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+        this, SLOT (landTextureDataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (ltexs, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
+        this, SLOT (landTextureAboutToBeRemoved (const QModelIndex&, int, int)));
+    connect (ltexs, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
+        this, SLOT (landTextureAdded (const QModelIndex&, int, int)));
+
     // Shortcuts
     CSMPrefs::Shortcut* loadCameraCellShortcut = new CSMPrefs::Shortcut("scene-load-cam-cell", this);
     connect(loadCameraCellShortcut, SIGNAL(activated()), this, SLOT(loadCameraCell()));
@@ -520,7 +607,7 @@ void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
                 // Loop through all the coordinates to add them to selection
                 while (stream >> ignore1 >> ignore2 >> x >> y)
                     selection.add (CSMWorld::CellCoordinates (x, y));
-                               
+
                 // Mark that camera needs setup
                 mCamPositionSet=false;
             }
@@ -761,6 +848,15 @@ void CSVRender::PagedWorldspaceWidget::cellAdded (const QModelIndex& index, int 
     /// \todo check if no selected cell is affected and do not update, if that is the case
     if (adjustCells())
         flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::assetTablesChanged()
+{
+    std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.begin();
+    for ( ; iter != mCells.end(); ++iter)
+    {
+        iter->second->reloadAssets();
+    }
 }
 
 void CSVRender::PagedWorldspaceWidget::loadCameraCell()

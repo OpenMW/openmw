@@ -12,12 +12,9 @@ namespace MWWorld
             virtual void executeImp (const MWWorld::Ptr& actor);
 
         public:
-            ActionOpen (const Ptr& container, bool loot=false);
+            ActionOpen (const Ptr& container);
             ///< \param container The Container the Player has activated.
-            /// \param loot If true, display the "dispose of corpse" button
 
-        private:
-            bool mLoot;
     };
 }
 

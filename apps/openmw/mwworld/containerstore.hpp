@@ -142,12 +142,12 @@ namespace MWWorld
             ContainerStoreIterator add(const std::string& id, int count, const Ptr& actorPtr);
             ///< Utility to construct a ManualRef and call add(ptr, count, actorPtr, true)
 
-            int remove(const std::string& itemId, int count, const Ptr& actor, bool equipReplacement = true);
+            int remove(const std::string& itemId, int count, const Ptr& actor);
             ///< Remove \a count item(s) designated by \a itemId from this container.
             ///
             /// @return the number of items actually removed
 
-            virtual int remove(const Ptr& item, int count, const Ptr& actor, bool equipReplacement = true);
+            virtual int remove(const Ptr& item, int count, const Ptr& actor);
             ///< Remove \a count item(s) designated by \a item from this inventory.
             ///
             /// @return the number of items actually removed

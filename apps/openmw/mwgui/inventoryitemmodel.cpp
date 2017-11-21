@@ -1,8 +1,16 @@
 #include "inventoryitemmodel.hpp"
 
+#include <sstream>
+
+#include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/npcstats.hpp"
+
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 namespace MWGui
 {
@@ -45,16 +53,33 @@ MWWorld::Ptr InventoryItemModel::copyItem (const ItemStack& item, size_t count, 
     return *mActor.getClass().getContainerStore(mActor).add(item.mBase, count, mActor, setNewOwner);
 }
 
-
 void InventoryItemModel::removeItem (const ItemStack& item, size_t count)
 {
-    MWWorld::ContainerStore& store = mActor.getClass().getContainerStore(mActor);
-    int removed = store.remove(item.mBase, count, mActor);
+    int removed = 0;
+    // Re-equipping makes sense only if a target has inventory
+    if (mActor.getClass().hasInventoryStore(mActor))
+    {
+        MWWorld::InventoryStore& store = mActor.getClass().getInventoryStore(mActor);
+        removed = store.remove(item.mBase, count, mActor, true);
+    }
+    else
+    {
+        MWWorld::ContainerStore& store = mActor.getClass().getContainerStore(mActor);
+        removed = store.remove(item.mBase, count, mActor);
+    }
+
+    std::stringstream error;
 
     if (removed == 0)
-        throw std::runtime_error("Item to remove not found in container store");
+    {
+        error << "Item '" << item.mBase.getCellRef().getRefId() << "' was not found in container store to remove";
+        throw std::runtime_error(error.str());
+    }
     else if (removed < static_cast<int>(count))
-        throw std::runtime_error("Not enough items in the stack to remove");
+    {
+        error << "Not enough items '" << item.mBase.getCellRef().getRefId() << "' in the stack to remove (" << static_cast<int>(count) << " requested, " << removed << " found)";
+        throw std::runtime_error(error.str());
+    }
 }
 
 MWWorld::Ptr InventoryItemModel::moveItem(const ItemStack &item, size_t count, ItemModel *otherModel)
@@ -92,6 +117,18 @@ void InventoryItemModel::update()
 
         mItems.push_back(newItem);
     }
+}
+
+bool InventoryItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
+{
+    // Looting a dead corpse is considered OK
+    if (mActor.getClass().isActor() && mActor.getClass().getCreatureStats(mActor).isDead())
+        return true;
+
+    MWWorld::Ptr player = MWMechanics::getPlayer();
+    MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item, mActor, count);
+
+    return true;
 }
 
 }

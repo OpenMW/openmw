@@ -13,6 +13,7 @@
 #include "companionitemmodel.hpp"
 #include "draganddrop.hpp"
 #include "countdialog.hpp"
+#include "widgets.hpp"
 
 namespace
 {
@@ -103,7 +104,7 @@ void CompanionWindow::onBackgroundSelected()
     }
 }
 
-void CompanionWindow::openCompanion(const MWWorld::Ptr& npc)
+void CompanionWindow::setPtr(const MWWorld::Ptr& npc)
 {
     mPtr = npc;
     updateEncumbranceBar();
@@ -116,8 +117,9 @@ void CompanionWindow::openCompanion(const MWWorld::Ptr& npc)
     setTitle(npc.getClass().getName(npc));
 }
 
-void CompanionWindow::onFrame()
+void CompanionWindow::onFrame(float dt)
 {
+    checkReferenceAvailable();
     updateEncumbranceBar();
 }
 
@@ -139,10 +141,11 @@ void CompanionWindow::updateEncumbranceBar()
 
 void CompanionWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
 {
-    exit();
+    if (exit())
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);
 }
 
-void CompanionWindow::exit()
+bool CompanionWindow::exit()
 {
     if (mModel && mModel->hasProfit(mPtr) && getProfit(mPtr) < 0)
     {
@@ -151,9 +154,9 @@ void CompanionWindow::exit()
         buttons.push_back("#{sCompanionWarningButtonTwo}");
         mMessageBoxManager->createInteractiveMessageBox("#{sCompanionWarningMessage}", buttons);
         mMessageBoxManager->eventButtonPressed += MyGUI::newDelegate(this, &CompanionWindow::onMessageBoxButtonClicked);
+        return false;
     }
-    else
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);
+    return true;
 }
 
 void CompanionWindow::onMessageBoxButtonClicked(int button)
@@ -162,7 +165,7 @@ void CompanionWindow::onMessageBoxButtonClicked(int button)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);
         // Important for Calvus' contract script to work properly
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
     }
 }
 

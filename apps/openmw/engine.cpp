@@ -79,12 +79,13 @@ void OMW::Engine::executeLocalScripts()
     }
 }
 
-void OMW::Engine::frame(float frametime)
+bool OMW::Engine::frame(float frametime)
 {
     try
     {
         mStartTick = mViewer->getStartTick();
-        mEnvironment.setFrameDuration (frametime);
+
+        mEnvironment.setFrameDuration(frametime);
 
         // update input
         mEnvironment.getInputManager()->update(frametime, false);
@@ -93,7 +94,7 @@ void OMW::Engine::frame(float frametime)
         // If we are not currently rendering, then RenderItems will not be reused resulting in a memory leak upon changing widget textures (fixed in MyGUI 3.3.2),
         // and destroyed widgets will not be deleted (not fixed yet, https://github.com/MyGUI/mygui/issues/21)
         if (!mEnvironment.getInputManager()->isWindowVisible())
-            return;
+            return false;
 
         // sound
         if (mUseSound)
@@ -162,11 +163,6 @@ void OMW::Engine::frame(float frametime)
 
         // update GUI
         mEnvironment.getWindowManager()->onFrame(frametime);
-        if (mEnvironment.getStateManager()->getState()!=
-            MWBase::StateManager::State_NoGame)
-        {
-            mEnvironment.getWindowManager()->update();
-        }
 
         unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
         osg::Stats* stats = mViewer->getViewerStats();
@@ -193,8 +189,9 @@ void OMW::Engine::frame(float frametime)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Error in framelistener: " << e.what() << std::endl;
+        std::cerr << "Error in frame: " << e.what() << std::endl;
     }
+    return true;
 }
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
@@ -278,8 +275,7 @@ void OMW::Engine::setResourceDir (const boost::filesystem::path& parResDir)
     mResDir = parResDir;
 }
 
-// Set start cell name (only interiors for now)
-
+// Set start cell name
 void OMW::Engine::setCell (const std::string& cellName)
 {
     mCellName = cellName;
@@ -652,6 +648,8 @@ void OMW::Engine::go()
         Settings::Manager::getString("screenshot format", "General")));
     mViewer->addEventHandler(mScreenCaptureHandler);
 
+    mEnvironment.setFrameRateLimit(Settings::Manager::getFloat("framerate limit", "Video"));
+
     // Create encoder
     ToUTF8::Utf8Encoder encoder (mEncoding);
     mEncoder = &encoder;
@@ -685,22 +683,15 @@ void OMW::Engine::go()
     // Start the main rendering loop
     osg::Timer frameTimer;
     double simulationTime = 0.0;
-    float framerateLimit = Settings::Manager::getFloat("framerate limit", "Video");
     while (!mViewer->done() && !mEnvironment.getStateManager()->hasQuitRequest())
     {
         double dt = frameTimer.time_s();
         frameTimer.setStartTick();
         dt = std::min(dt, 0.2);
 
-        bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
-        if (!guiActive)
-            simulationTime += dt;
-
         mViewer->advance(simulationTime);
 
-        frame(dt);
-
-        if (!mEnvironment.getInputManager()->isWindowVisible())
+        if (!frame(dt))
         {
             OpenThreads::Thread::microSleep(5000);
             continue;
@@ -713,17 +704,13 @@ void OMW::Engine::go()
             mEnvironment.getWorld()->updateWindowManager();
 
             mViewer->renderingTraversals();
+
+            bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
+            if (!guiActive)
+                simulationTime += dt;
         }
 
-        if (framerateLimit > 0.f)
-        {
-            double thisFrameTime = frameTimer.time_s();
-            double minFrameTime = 1.0 / framerateLimit;
-            if (thisFrameTime < minFrameTime)
-            {
-                OpenThreads::Thread::microSleep(1000*1000*(minFrameTime-thisFrameTime));
-            }
-        }
+        mEnvironment.limitFrameRate(frameTimer.time_s());
     }
 
     // Save user settings

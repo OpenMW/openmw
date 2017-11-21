@@ -2118,11 +2118,16 @@ namespace MWWorld
 
         pos.z() += heightRatio*2*mPhysics->getRenderingHalfExtents(object).z();
 
-        return isUnderwater(object.getCell(), pos);
+        const CellStore *currCell = object.isInCell() ? object.getCell() : NULL; // currCell == NULL should only happen for player, during initial startup
+
+        return isUnderwater(currCell, pos);
     }
 
     bool World::isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const
     {
+        if (!cell)
+            return false;
+
         if (!(cell->getCell()->hasWater())) {
             return false;
         }
@@ -2582,7 +2587,25 @@ namespace MWWorld
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-        if (const ESM::Cell *ext = getExterior(name)) {
+        const ESM::Cell *ext = getExterior(name);
+
+        if (!ext && name.find(',') != std::string::npos) {
+            try {
+                int x = std::stoi(name.substr(0, name.find(',')));
+                int y = std::stoi(name.substr(name.find(',')+1));
+                ext = getExterior(x, y)->getCell();
+            }
+            catch (std::invalid_argument)
+            {
+                // This exception can be ignored, as this means that name probably refers to a interior cell instead of comma separated coordinates
+            }
+            catch (std::out_of_range)
+            {
+                throw std::runtime_error("Cell coordinates out of range.");
+            }
+        }
+
+        if (ext) {
             int x = ext->getGridX();
             int y = ext->getGridY();
             indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
@@ -2592,6 +2615,7 @@ namespace MWWorld
 
             return true;
         }
+
         return false;
     }
 
@@ -2797,10 +2821,9 @@ namespace MWWorld
         mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
     }
 
-    void World::launchMagicBolt (const std::string &spellId, bool stack, const ESM::EffectList& effects,
-                                 const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection)
+    void World::launchMagicBolt (const std::string &spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection)
     {
-        mProjectileManager->launchMagicBolt(spellId, stack, effects, caster, sourceName, fallbackDirection);
+        mProjectileManager->launchMagicBolt(spellId, caster, fallbackDirection);
     }
 
     const std::vector<std::string>& World::getContentFiles() const

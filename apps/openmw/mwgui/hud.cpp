@@ -68,7 +68,7 @@ namespace MWGui
 
 
     HUD::HUD(CustomMarkerCollection &customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender)
-        : Layout("openmw_hud.layout")
+        : WindowBase("openmw_hud.layout")
         , LocalMapBase(customMarkers, localMapRender, Settings::Manager::getBool("local map hud fog of war", "Map"))
         , mHealth(NULL)
         , mMagicka(NULL)
@@ -80,7 +80,6 @@ namespace MWGui
         , mSpellStatus(NULL)
         , mEffectBox(NULL)
         , mMinimap(NULL)
-        , mCompass(NULL)
         , mCrosshair(NULL)
         , mCellNameBox(NULL)
         , mDrowningFrame(NULL)
@@ -179,29 +178,33 @@ namespace MWGui
 
     void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
     {
-        int current = std::max(0, static_cast<int>(value.getCurrent()));
+        int current = static_cast<int>(value.getCurrent());
         int modified = static_cast<int>(value.getModified());
+
+        // Fatigue can be negative
+        if (id != "FBar")
+            current = std::max(0, current);
 
         MyGUI::Widget* w;
         std::string valStr = MyGUI::utility::toString(current) + " / " + MyGUI::utility::toString(modified);
         if (id == "HBar")
         {
-            mHealth->setProgressRange(modified);
-            mHealth->setProgressPosition(current);
+            mHealth->setProgressRange(std::max(0, modified));
+            mHealth->setProgressPosition(std::max(0, current));
             getWidget(w, "HealthFrame");
             w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
         }
         else if (id == "MBar")
         {
-            mMagicka->setProgressRange (modified);
-            mMagicka->setProgressPosition (current);
+            mMagicka->setProgressRange(std::max(0, modified));
+            mMagicka->setProgressPosition(std::max(0, current));
             getWidget(w, "MagickaFrame");
             w->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
         }
         else if (id == "FBar")
         {
-            mStamina->setProgressRange (modified);
-            mStamina->setProgressPosition (current);
+            mStamina->setProgressRange(std::max(0, modified));
+            mStamina->setProgressPosition(std::max(0, current));
             getWidget(w, "FatigueFrame");
             w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
         }
@@ -367,6 +370,20 @@ namespace MWGui
 
         if (mIsDrowning)
             mDrowningFlashTheta += dt * osg::PI*2;
+
+        mSpellIcons->updateWidgets(mEffectBox, true);
+
+        if (mEnemyActorId != -1 && mEnemyHealth->getVisible())
+        {
+            updateEnemyHealthBar();
+        }
+
+        if (mIsDrowning)
+        {
+            float intensity = (cos(mDrowningFlashTheta) + 2.0f) / 3.0f;
+
+            mDrowningFlash->setAlpha(intensity);
+        }
     }
 
     void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
@@ -598,23 +615,6 @@ namespace MWGui
 
     }
 
-    void HUD::update()
-    {
-        mSpellIcons->updateWidgets(mEffectBox, true);
-
-        if (mEnemyActorId != -1 && mEnemyHealth->getVisible())
-        {
-            updateEnemyHealthBar();
-        }
-
-        if (mIsDrowning)
-        {
-            float intensity = (cos(mDrowningFlashTheta) + 2.0f) / 3.0f;
-
-            mDrowningFlash->setAlpha(intensity);
-        }
-    }
-
     void HUD::setEnemy(const MWWorld::Ptr &enemy)
     {
         mEnemyActorId = enemy.getClass().getCreatureStats(enemy).getActorId();
@@ -629,6 +629,13 @@ namespace MWGui
     {
         mEnemyActorId = -1;
         mEnemyHealthTimer = -1;
+    }
+
+    void HUD::clear()
+    {
+        unsetSelectedSpell();
+        unsetSelectedWeapon();
+        resetEnemy();
     }
 
     void HUD::customMarkerCreated(MyGUI::Widget *marker)

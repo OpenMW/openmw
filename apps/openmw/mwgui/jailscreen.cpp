@@ -26,8 +26,6 @@ namespace MWGui
     {
         getWidget(mProgressBar, "ProgressBar");
 
-        setVisible(false);
-
         mTimeAdvancer.eventProgressChanged += MyGUI::newDelegate(this, &JailScreen::onJailProgressChanged);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &JailScreen::onJailFinished);
 
@@ -60,6 +58,7 @@ namespace MWGui
         {
             MWWorld::Ptr player = MWMechanics::getPlayer();
             MWBase::Environment::get().getWorld()->teleportToClosestMarker(player, "prisonmarker");
+            MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.f); // override fade-in caused by cell transition
 
             setVisible(true);
             mTimeAdvancer.run(100);
@@ -93,7 +92,7 @@ namespace MWGui
             if (skill == ESM::Skill::Security || skill == ESM::Skill::Sneak)
                 value.setBase(std::min(100, value.getBase()+1));
             else
-                value.setBase(value.getBase()-1);
+                value.setBase(std::max(0, value.getBase()-1));
         }
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();

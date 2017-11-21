@@ -182,7 +182,10 @@ namespace
         void remove()
         {
             for (RemoveVec::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
-                it->second->removeChild(it->first);
+            {
+                if (!it->second->removeChild(it->first))
+                    std::cerr << "error removing " << it->first->getName() << std::endl;
+            }
         }
 
     protected:
@@ -533,7 +536,7 @@ namespace MWRender
         return mKeyframes->mTextKeys;
     }
 
-    void Animation::addAnimSource(const std::string &model)
+    void Animation::addAnimSource(const std::string &model, const std::string& baseModel)
     {
         std::string kfname = model;
         Misc::StringUtils::lowerCaseInPlace(kfname);
@@ -562,7 +565,7 @@ namespace MWRender
             NodeMap::const_iterator found = nodeMap.find(bonename);
             if (found == nodeMap.end())
             {
-                std::cerr << "Warning: addAnimSource: can't find bone '" + bonename << "' in " << model << " (referenced by " << kfname << ")" << std::endl;
+                std::cerr << "Warning: addAnimSource: can't find bone '" + bonename << "' in " << baseModel << " (referenced by " << kfname << ")" << std::endl;
                 continue;
             }
 
@@ -754,8 +757,6 @@ namespace MWRender
                 break;
             }
         }
-        if(iter == mAnimSources.rend())
-            std::cerr<< "Failed to find animation "<<groupname<<" for "<<mPtr.getCellRef().getRefId() <<std::endl;
 
         resetActiveGroups();
     }
@@ -792,7 +793,7 @@ namespace MWRender
               // We have to ignore extra garbage at the end.
               // The Scrib's idle3 animation has "Idle3: Stop." instead of "Idle3: Stop".
               // Why, just why? :(
-              && (stopkey->second.size() < stoptag.size() || stopkey->second.substr(0,stoptag.size()) != stoptag))
+              && (stopkey->second.size() < stoptag.size() || stopkey->second.compare(0,stoptag.size(), stoptag) != 0))
             ++stopkey;
         if(stopkey == keys.rend())
             return false;
@@ -1192,6 +1193,9 @@ namespace MWRender
                 mObjectRoot->addChild(created);
                 mInsert->addChild(mObjectRoot);
             }
+            osg::ref_ptr<SceneUtil::Skeleton> skel = dynamic_cast<SceneUtil::Skeleton*>(mObjectRoot.get());
+            if (skel)
+                mSkeleton = skel.get();
         }
         else
         {
@@ -1664,7 +1668,7 @@ namespace MWRender
         {
             setObjectRoot(model, false, false, false);
             if (animated)
-                addAnimSource(model);
+                addAnimSource(model, model);
 
             if (!ptr.getClass().getEnchantment(ptr).empty())
                 addGlow(mObjectRoot, getEnchantmentColor(ptr));

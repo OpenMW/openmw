@@ -31,6 +31,8 @@ namespace MWGui
 
         ReviewDialog();
 
+        bool exit() { return false; }
+
         void setPlayerName(const std::string &name);
         void setRace(const std::string &raceId);
         void setClass(const ESM::Class& class_);
@@ -45,7 +47,7 @@ namespace MWGui
         void configureSkills(const SkillList& major, const SkillList& minor);
         void setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::SkillValue& value);
 
-        virtual void open();
+        virtual void onOpen();
 
         void onFrame(float duration);
 

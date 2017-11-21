@@ -50,7 +50,7 @@
                     <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_strength.dds"/>
                     <Property key="Caption" value="#{sAttributeStrength}"/>
                 </Widget>
-                <Widget type="AutoSizedTextBox" skin="SandTextButton" name="AttribVal1">
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal1">
                 </Widget>
             </Widget>
 
@@ -64,7 +64,7 @@
                     <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_int.dds"/>
                     <Property key="Caption" value="#{sAttributeIntelligence}"/>
                 </Widget>
-                <Widget type="AutoSizedTextBox" skin="SandTextButton" name="AttribVal2">
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal2">
                 </Widget>
             </Widget>
 
@@ -78,7 +78,7 @@
                     <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_wilpower.dds"/>
                     <Property key="Caption" value="#{sAttributeWillpower}"/>
                 </Widget>
-                <Widget type="AutoSizedTextBox" skin="SandTextButton" name="AttribVal3">
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal3">
                 </Widget>
             </Widget>
 
@@ -92,7 +92,7 @@
                     <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_agility.dds"/>
                     <Property key="Caption" value="#{sAttributeAgility}"/>
                 </Widget>
-                <Widget type="AutoSizedTextBox" skin="SandTextButton" name="AttribVal4">
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal4">
                 </Widget>
             </Widget>
 
@@ -107,7 +107,7 @@
                     <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_speed.dds"/>
                     <Property key="Caption" value="#{sAttributeSpeed}"/>
                 </Widget>
-                <Widget type="AutoSizedTextBox" skin="SandTextButton" name="AttribVal5">
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal5">
                 </Widget>
             </Widget>
 
@@ -121,7 +121,7 @@
                     <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_endurance.dds"/>
                     <Property key="Caption" value="#{sAttributeEndurance}"/>
                 </Widget>
-                <Widget type="AutoSizedTextBox" skin="SandTextButton" name="AttribVal6">
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal6">
                 </Widget>
             </Widget>
 
@@ -135,7 +135,7 @@
                 <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_personality.dds"/>
                     <Property key="Caption" value="#{sAttributePersonality}"/>
                 </Widget>
-                <Widget type="AutoSizedTextBox" skin="SandTextButton" name="AttribVal7">
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal7">
                 </Widget>
             </Widget>
 
@@ -149,16 +149,14 @@
                 <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_luck.dds"/>
                     <Property key="Caption" value="#{sAttributeLuck}"/>
                 </Widget>
-                <Widget type="AutoSizedTextBox" skin="SandTextButton" name="AttribVal8">
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal8">
                 </Widget>
             </Widget>
         </Widget>
 
         <Widget type="HBox" skin="" position="0 0 330 24">
             <UserString key="HStretch" value="true"/>
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
+            <Widget type="Spacer"/>
             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 0 24" name="OkButton">
                 <Property key="Caption" value="#{sOk}"/>
             </Widget>

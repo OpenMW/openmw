@@ -20,6 +20,9 @@
 #include <cstdlib>
 #endif
 
+#if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
+#include <unistd.h>
+#endif
 
 #if (defined(__APPLE__) || (defined(__linux)  &&  !defined(ANDROID)) || (defined(__unix) &&  !defined(ANDROID)) || defined(__posix))
     #define USE_CRASH_CATCHER 1
@@ -191,6 +194,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     std::string local(variables["data-local"].as<Files::EscapeHashString>().toStdString());
     if (!local.empty())
     {
+        if (local.front() == '\"')
+            local = local.substr(1, local.length() - 2);
+
         dataDirs.push_back(Files::PathContainer::value_type(local));
     }
 

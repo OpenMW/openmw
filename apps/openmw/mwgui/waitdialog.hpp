@@ -13,7 +13,7 @@ namespace MWGui
     public:
         WaitDialogProgressBar();
 
-        virtual void open();
+        virtual void onOpen();
 
         void setProgress(int cur, int total);
 
@@ -27,17 +27,21 @@ namespace MWGui
     public:
         WaitDialog();
 
-        virtual void open();
+        void setPtr(const MWWorld::Ptr &ptr);
 
-        virtual void exit();
+        virtual void onOpen();
+
+        virtual bool exit();
+
+        virtual void clear();
 
         void onFrame(float dt);
-
-        void bedActivated() { setCanRest(true); }
 
         bool getSleeping() { return mTimeAdvancer.isRunning() && mSleeping; }
         void wakeUp();
         void autosave();
+
+        WindowBase* getProgressBar() { return &mProgressBar; }
 
     protected:
         MyGUI::TextBox* mDateTimeText;
@@ -63,6 +67,7 @@ namespace MWGui
         void onWaitButtonClicked(MyGUI::Widget* sender);
         void onCancelButtonClicked(MyGUI::Widget* sender);
         void onHourSliderChangedPosition(MyGUI::ScrollBar* sender, size_t position);
+        void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
 
         void onWaitingProgressChanged(int cur, int total);
         void onWaitingInterrupted();

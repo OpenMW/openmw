@@ -101,9 +101,9 @@ namespace MWGui
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onOkClicked);
     }
 
-    void ReviewDialog::open()
+    void ReviewDialog::onOpen()
     {
-        WindowModal::open();
+        WindowModal::onOpen();
         mUpdateSkillArea = true;
     }
 
@@ -180,7 +180,7 @@ namespace MWGui
 
     void ReviewDialog::setFatigue(const MWMechanics::DynamicStat<float>& value)
     {
-        int current = std::max(0, static_cast<int>(value.getCurrent()));
+        int current = static_cast<int>(value.getCurrent());
         int modified = static_cast<int>(value.getModified());
 
         mFatigue->setValue(current, modified);

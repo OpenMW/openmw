@@ -75,4 +75,20 @@ namespace Gui
         setCaption(MyGUI::utility::toString(mValue));
     }
 
+    void NumericEditBox::onKeyButtonPressed(MyGUI::KeyCode key, MyGUI::Char character)
+    {
+        if (key == MyGUI::KeyCode::ArrowUp)
+        {
+            setValue(std::min(mValue+1, mMaxValue));
+            eventValueChanged(mValue);
+        }
+        else if (key == MyGUI::KeyCode::ArrowDown)
+        {
+            setValue(std::max(mValue-1, mMinValue));
+            eventValueChanged(mValue);
+        }
+        else if (character == 0 || (character >= '0' && character <= '9'))
+            Base::onKeyButtonPressed(key, character);
+    }
+
 }

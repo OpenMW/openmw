@@ -54,6 +54,12 @@ namespace
     void addObject(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
                    MWRender::RenderingManager& rendering)
     {
+        if (ptr.getRefData().getBaseNode() || physics.getActor(ptr))
+        {
+            std::cerr << "Warning: Tried to add " << ptr.getCellRef().getRefId() << " to the scene twice" << std::endl;
+            return;
+        }
+
         bool useAnim = ptr.getClass().useAnim();
         std::string model = ptr.getClass().getModel(ptr);
         if (useAnim)
@@ -574,10 +580,16 @@ namespace MWWorld
 
         MWBase::Environment::get().getWorld()->positionToIndex (position.pos[0], position.pos[1], x, y);
 
+        if (changeEvent)
+            MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
+
         changeCellGrid(x, y, changeEvent);
 
         CellStore* current = MWBase::Environment::get().getWorld()->getExterior(x, y);
         changePlayerCell(current, position, adjustPlayerPos);
+
+        if (changeEvent)
+            MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
     }
 
     CellStore* Scene::getCurrentCell ()

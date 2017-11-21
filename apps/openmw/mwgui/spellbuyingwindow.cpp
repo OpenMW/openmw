@@ -31,11 +31,6 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onCancelButtonClicked);
     }
 
-    void SpellBuyingWindow::exit()
-    {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_SpellBuying);
-    }
-
     bool SpellBuyingWindow::sortSpells (const ESM::Spell* left, const ESM::Spell* right)
     {
         std::string leftName = Misc::StringUtils::lowerCase(left->mName);
@@ -88,7 +83,12 @@ namespace MWGui
         mSpellsWidgetMap.clear();
     }
 
-    void SpellBuyingWindow::startSpellBuying(const MWWorld::Ptr& actor, int startOffset)
+    void SpellBuyingWindow::setPtr(const MWWorld::Ptr &actor)
+    {
+        setPtr(actor, 0);
+    }
+
+    void SpellBuyingWindow::setPtr(const MWWorld::Ptr& actor, int startOffset)
     {
         center();
         mPtr = actor;
@@ -161,14 +161,14 @@ namespace MWGui
         MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
-        startSpellBuying(mPtr, mSpellsView->getViewOffset().top);
+        setPtr(mPtr, mSpellsView->getViewOffset().top);
 
         MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
     }
 
     void SpellBuyingWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        exit();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_SpellBuying);
     }
 
     void SpellBuyingWindow::updateLabels()
@@ -187,7 +187,7 @@ namespace MWGui
     {
         // remove both Spells and Dialogue (since you always trade with the NPC/creature that you have previously talked to)
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_SpellBuying);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
     }
 
     void SpellBuyingWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)

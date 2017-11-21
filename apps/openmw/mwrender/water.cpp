@@ -336,8 +336,7 @@ public:
 
     void setWaterLevel(float waterLevel)
     {
-        setViewMatrix(osg::Matrix::translate(0,0,-waterLevel) * osg::Matrix::scale(1,1,-1) * osg::Matrix::translate(0,0,waterLevel));
-
+        setViewMatrix(osg::Matrix::scale(1,1,-1) * osg::Matrix::translate(0,0,2 * waterLevel));
         mClipCullNode->setPlane(osg::Plane(osg::Vec3d(0,0,1), osg::Vec3d(0,0,waterLevel)));
     }
 
@@ -412,12 +411,19 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     createSimpleWaterStateSet(geom2, mFallback->getFallbackFloat("Water_Map_Alpha"));
     geom2->setNodeMask(Mask_SimpleWater);
     mWaterNode->addChild(geom2);
-
+ 
     mSceneRoot->addChild(mWaterNode);
 
     setHeight(mTop);
 
+    mRainIntensityUniform = new osg::Uniform("rainIntensity",(float) 0.0);
+
     updateWaterMaterial();
+}
+
+osg::Uniform *Water::getRainIntensityUniform()
+{
+    return mRainIntensityUniform.get();
 }
 
 void Water::updateWaterMaterial()
@@ -511,6 +517,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     osg::ref_ptr<osg::Shader> fragmentShader (shaderMgr.getShader("water_fragment.glsl", defineMap, osg::Shader::FRAGMENT));
 
     osg::ref_ptr<osg::Texture2D> normalMap (new osg::Texture2D(readPngImage(mResourcePath + "/shaders/water_nm.png")));
+
     if (normalMap->getImage())
         normalMap->getImage()->flipVertical();
     normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
@@ -525,6 +532,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
 
     shaderStateset->setTextureAttributeAndModes(0, normalMap, osg::StateAttribute::ON);
     shaderStateset->setTextureAttributeAndModes(1, reflection->getReflectionTexture(), osg::StateAttribute::ON);
+
     if (refraction)
     {
         shaderStateset->setTextureAttributeAndModes(2, refraction->getRefractionTexture(), osg::StateAttribute::ON);
@@ -545,6 +553,8 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     }
 
     shaderStateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+
+    shaderStateset->addUniform(mRainIntensityUniform.get());
 
     osg::ref_ptr<osg::Program> program (new osg::Program);
     program->addShader(vertexShader);

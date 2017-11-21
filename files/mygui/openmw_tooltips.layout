@@ -32,7 +32,7 @@
         <!-- Faction tooltip -->
         <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 0 0" align="Stretch" name="FactionToolTip">
             <Property key="AutoResize" value="true"/>
-            <Property key="Padding" value="12"/>
+            <Property key="Padding" value="8"/>
 
             <Widget type="AutoSizedEditBox" skin="SandText" position="8 8 436 0" align="Left Top" name="FactionText">
                 <Property key="MultiLine" value="true"/>
@@ -44,7 +44,7 @@
         <!-- Race tooltip -->
         <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 0 56" align="Stretch" name="RaceToolTip">
             <Property key="AutoResize" value="true"/>
-            <Property key="Padding" value="12"/>
+            <Property key="Padding" value="8"/>
             <Property key="Spacing" value="8"/>
 
             <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 284 18" align="Left Top" name="CenteredCaption">
@@ -61,7 +61,7 @@
         <!-- Specialization tooltip -->
         <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 0 56" align="Stretch" name="SpecializationToolTip">
             <Property key="AutoResize" value="true"/>
-            <Property key="Padding" value="12"/>
+            <Property key="Padding" value="8"/>
 
             <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 140 18" align="Left Top" name="Caption">
                 <Property key="TextAlign" value="Center"/>
@@ -77,7 +77,7 @@
         <!-- Class tooltip -->
         <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 0 78" align="Stretch" name="ClassToolTip">
             <Property key="AutoResize" value="true"/>
-            <Property key="Padding" value="12"/>
+            <Property key="Padding" value="8"/>
             <Property key="Spacing" value="8"/>
 
             <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 284 18" align="Left Top" name="ClassName">
@@ -103,9 +103,7 @@
             <Widget type="VBox">
                 <UserString key="VStretch" value="true"/>
                 <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="HandToHandImage"/>
-                <Widget type="Widget">
-                    <UserString key="VStretch" value="true"/>
-                </Widget>
+                <Widget type="Spacer"/>
             </Widget>
 
             <Widget type="AutoSizedTextBox" skin="SandText" position="44 8 248 284" align="Left Top" name="HandToHandText">
@@ -122,9 +120,7 @@
             <Widget type="VBox">
                 <UserString key="VStretch" value="true"/>
                 <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="HealthImage"/>
-                <Widget type="Widget">
-                    <UserString key="VStretch" value="true"/>
-                </Widget>
+                <Widget type="Spacer"/>
             </Widget>
 
             <Widget type="AutoSizedEditBox" skin="SandText" position="44 8 392 0" align="Left Top" name="HealthDescription">
@@ -137,7 +133,7 @@
         <!-- Attribute tooltip -->
         <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 0 0" align="Stretch" name="AttributeToolTip">
             <Property key="AutoResize" value="true"/>
-            <Property key="Padding" value="12"/>
+            <Property key="Padding" value="8"/>
             <Property key="Spacing" value="8"/>
 
             <Widget type="HBox">
@@ -159,7 +155,7 @@
         <!-- Skill tooltip -->
         <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 0 98" align="Stretch" name="SkillToolTip">
             <Property key="AutoResize" value="true"/>
-            <Property key="Padding" value="12"/>
+            <Property key="Padding" value="8"/>
 
             <Widget type="HBox">
                 <UserString key="HStretch" value="true"/>
@@ -211,7 +207,7 @@
         <!-- Skill tooltip (without progress bar) -->
         <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 0 52" align="Stretch" name="SkillNoProgressToolTip">
             <Property key="AutoResize" value="true"/>
-            <Property key="Padding" value="12"/>
+            <Property key="Padding" value="8"/>
 
             <Widget type="HBox">
                 <UserString key="HStretch" value="true"/>
@@ -245,7 +241,7 @@
         <!-- Level tooltip -->
         <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 58" align="HStretch" name="LevelToolTip">
             <Property key="AutoResize" value="true"/>
-            <Property key="Padding" value="12"/>
+            <Property key="Padding" value="8"/>
 
             <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 284 18" align="Left Top">
                 <Property key="Caption" value="#{sLevelProgress}"/>
@@ -277,7 +273,7 @@
         <!-- Magic effect tooltip -->
         <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 0 0" align="Stretch" name="MagicEffectToolTip">
             <Property key="AutoResize" value="true"/>
-            <Property key="Padding" value="12"/>
+            <Property key="Padding" value="8"/>
 
             <Widget type="HBox">
                 <UserString key="HStretch" value="true"/>

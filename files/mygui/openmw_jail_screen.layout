@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Widget" skin="MW_Dialog" layer="LoadingScreen" position="0 0 300 48" align="Center" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="LoadingScreen" position="0 0 300 48" align="Center" name="_Main">
 
-        <Widget type="TextBox" skin="SandText" position="20 8 260 18" align="Stretch" name="LoadingText">
+        <Widget type="TextBox" skin="SandText" position="16 4 260 18" align="Stretch" name="LoadingText">
             <Property key="TextAlign" value="Center"/>
             <Property key="Caption" value="#{sInPrisonTitle}"/>
         </Widget>
 
-        <Widget type="ScrollBar" skin="MW_ProgressScroll_Loading" position="20 30 260 6" name="ProgressBar">
+        <Widget type="ScrollBar" skin="MW_ProgressScroll_Loading" position="16 26 260 6" name="ProgressBar">
         </Widget>
 
     </Widget>

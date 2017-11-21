@@ -1,3 +1,32 @@
+# Apps and tools
+option(BUILD_OPENMW "build OpenMW" ON)
+option(BUILD_BSATOOL "build BSA extractor" ON)
+option(BUILD_ESMTOOL "build ESM inspector" ON)
+option(BUILD_LAUNCHER "build Launcher" ON)
+option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
+option(BUILD_ESSIMPORTER "build ESS (Morrowind save game) importer" ON)
+option(BUILD_OPENCS "build OpenMW Construction Set" ON)
+option(BUILD_WIZARD "build Installation Wizard" ON)
+option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
+option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest" OFF)
+option(BUILD_NIFTEST "build nif file tester" OFF)
+option(BUILD_MYGUI_PLUGIN "build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
+option(BUILD_DOCS        "build documentation." OFF )
+
+if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
+   set(USE_QT FALSE)
+else()
+   set(USE_QT TRUE)
+endif()
+
+if (USE_QT)
+    set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
+    set_property(CACHE DESIRED_QT_VERSION PROPERTY STRINGS 4 5)
+endif()
+
+# set the minimum required version across the board
+cmake_minimum_required(VERSION 3.1.0)
+
 project(OpenMW)
 
 # If the user doesn't supply a CMAKE_BUILD_TYPE via command line, choose one for them.
@@ -25,7 +54,7 @@ endif()
 message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
-set(OPENMW_VERSION_MINOR 41)
+set(OPENMW_VERSION_MINOR 42)
 set(OPENMW_VERSION_RELEASE 0)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -58,21 +87,6 @@ option(OSG_STATIC "Link static build of OpenSceneGraph into the binaries" FALSE)
 option(QT_STATIC "Link static build of QT into the binaries" FALSE)
 
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
-
-# Apps and tools
-option(BUILD_OPENMW "build OpenMW" ON)
-option(BUILD_BSATOOL "build BSA extractor" ON)
-option(BUILD_ESMTOOL "build ESM inspector" ON)
-option(BUILD_LAUNCHER "build Launcher" ON)
-option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
-option(BUILD_ESSIMPORTER "build ESS (Morrowind save game) importer" ON)
-option(BUILD_OPENCS "build OpenMW Construction Set" ON)
-option(BUILD_WIZARD "build Installation Wizard" ON)
-option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
-option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest" OFF)
-option(BUILD_NIFTEST "build nif file tester" OFF)
-option(BUILD_MYGUI_PLUGIN "build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
-option(BUILD_DOCS        "build documentation." OFF )
 
 # what is necessary to build documentation
 IF( BUILD_DOCS )
@@ -120,16 +134,8 @@ if (WIN32)
     option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
 endif()
 
-if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
-   set(USE_QT FALSE)
-else()
-   set(USE_QT TRUE)
-endif()
-
 # Dependencies
 if (USE_QT)
-    set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
-    set_property(CACHE DESIRED_QT_VERSION PROPERTY STRINGS 4 5)
     message(STATUS "Using Qt${DESIRED_QT_VERSION}")
 
     if (DESIRED_QT_VERSION MATCHES 4)
@@ -142,17 +148,6 @@ if (USE_QT)
     # Instruct CMake to run moc automatically when needed.
     #set(CMAKE_AUTOMOC ON)
     endif()
-endif()
-
-if (APPLE)
-    # OS X build process relies on this fix: https://github.com/Kitware/CMake/commit/3df5147043d83aa09acd5c9ce31d5c602efb99db
-    cmake_minimum_required(VERSION 3.1.0)
-elseif (USE_QT AND DESIRED_QT_VERSION MATCHES 5)
-    # 2.8.11+ is required to make Qt5 happy and allow linking QtMain on Windows.
-    cmake_minimum_required(VERSION 2.8.11)
-else()
-    # We probably support older versions than this.
-    cmake_minimum_required(VERSION 2.6)
 endif()
 
 # Sound setup
@@ -207,7 +202,7 @@ if(NOT HAVE_STDINT_H)
 endif()
 
 
-find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgUtil osgFX)
+find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX)
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 set(USED_OSG_PLUGINS
@@ -310,27 +305,28 @@ endif (APPLE)
 
 # Other files
 
-configure_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
-    "${OpenMW_BINARY_DIR}/settings-default.cfg")
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
+    "${OpenMW_BINARY_DIR}" "settings-default.cfg")
 
 if (NOT APPLE)
-    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
-        "${OpenMW_BINARY_DIR}/openmw.cfg")
-    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-        "${OpenMW_BINARY_DIR}/openmw.cfg.install")
+    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
+        "${OpenMW_BINARY_DIR}" "openmw.cfg")
+    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+        "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
 else ()
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
         "${OpenMW_BINARY_DIR}/openmw.cfg")
 endif ()
 
-configure_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
-    "${OpenMW_BINARY_DIR}/openmw-cs.cfg")
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
+    "${OpenMW_BINARY_DIR}" "openmw-cs.cfg")
 
-configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
-    "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
+# Needs the copy version because the configure version assumes the end of the file has been reached when a null character is reached and there are no CMake expressions to evaluate.
+copy_resource_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
+    "${OpenMW_BINARY_DIR}" "resources/defaultfilters")
 
-configure_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb.txt
-    "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt")
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb.txt
+    "${OpenMW_BINARY_DIR}" "gamecontrollerdb.txt")
 
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
@@ -408,7 +404,7 @@ IF(NOT WIN32 AND NOT APPLE)
     #ENDIF(BUILD_MYGUI_PLUGIN)
 
     # Install licenses
-    INSTALL(FILES "docs/license/DejaVu Font License.txt" DESTINATION "${LICDIR}" )
+    INSTALL(FILES "files/mygui/DejaVu Font License.txt" DESTINATION "${LICDIR}" )
 
     # Install icon and desktop file
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "openmw")
@@ -442,9 +438,9 @@ if(WIN32)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "." RENAME "LICENSE.txt")
     INSTALL(FILES
-        "${OpenMW_SOURCE_DIR}/Docs/license/GPL3.txt"
-        "${OpenMW_SOURCE_DIR}/Docs/license/DejaVu Font License.txt"
+        "${OpenMW_SOURCE_DIR}/files/mygui/DejaVu Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt"
         DESTINATION ".")
@@ -494,6 +490,7 @@ if(WIN32)
     SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "openmw-launcher.exe")
+    SET(CPACK_NSIS_MUI_FINISHPAGE_RUN "openmw-launcher.exe")
     SET(CPACK_NSIS_MUI_ICON "${OpenMW_SOURCE_DIR}/files/windows/openmw.ico")
     SET(CPACK_NSIS_MUI_UNIICON "${OpenMW_SOURCE_DIR}/files/windows/openmw.ico")
     SET(CPACK_PACKAGE_ICON "${OpenMW_SOURCE_DIR}\\\\files\\\\openmw.bmp")

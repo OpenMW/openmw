@@ -22,7 +22,7 @@ namespace MWGui
 {
 
     MainMenu::MainMenu(int w, int h, const VFS::Manager* vfs, const std::string& versionDescription)
-        : Layout("openmw_mainmenu.layout")
+        : WindowBase("openmw_mainmenu.layout")
         , mWidth (w), mHeight (h)
         , mVFS(vfs), mButtonBox(0)
         , mBackground(NULL)
@@ -56,15 +56,31 @@ namespace MWGui
         if (visible)
             updateMenu();
 
-        showBackground(
-            MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu) &&
-            MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame);
+        bool isMainMenu =
+                MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu) &&
+                MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
+
+        showBackground(isMainMenu);
+
+        if (visible)
+        {
+            if (isMainMenu)
+            {
+                if (mButtons["loadgame"]->getVisible())
+                    MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mButtons["loadgame"]);
+                else
+                    MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mButtons["newgame"]);
+            }
+            else
+                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mButtons["return"]);
+        }
 
         Layout::setVisible (visible);
     }
 
     void MainMenu::onNewGameConfirmed()
     {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_MainMenu);
         MWBase::Environment::get().getStateManager()->newGame();
     }
 
@@ -182,7 +198,7 @@ namespace MWGui
         }
     }
 
-    void MainMenu::update(float dt)
+    void MainMenu::onFrame(float dt)
     {
         if (mVideo)
         {
@@ -192,6 +208,11 @@ namespace MWGui
                 mVideo->playVideo("video\\menu_background.bik");
             }
         }
+    }
+
+    bool MainMenu::exit()
+    {
+        return MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_Running;
     }
 
     void MainMenu::updateMenu()
@@ -231,7 +252,8 @@ namespace MWGui
         buttons.push_back("exitgame");
 
         // Create new buttons if needed
-        for (std::vector<std::string>::iterator it = buttons.begin(); it != buttons.end(); ++it)
+        std::vector<std::string> allButtons { "return", "newgame", "savegame", "loadgame", "options", "credits", "exitgame"};
+        for (std::vector<std::string>::iterator it = allButtons.begin(); it != allButtons.end(); ++it)
         {
             if (mButtons.find(*it) == mButtons.end())
             {

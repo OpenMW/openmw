@@ -122,6 +122,13 @@ namespace Resource
         {
             return _sharedStateSetList.size();
         }
+
+        void clearCache()
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_listMutex);
+            _sharedTextureList.clear();
+            _sharedStateSetList.clear();
+        }
     };
 
     /// Set texture filtering settings on textures contained in a FlipController.
@@ -237,12 +244,9 @@ namespace Resource
 
     void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node)
     {
-        Shader::ShaderVisitor shaderVisitor(*mShaderManager.get(), *mImageManager, "objects_vertex.glsl", "objects_fragment.glsl");
-        shaderVisitor.setForceShaders(mForceShaders);
-        shaderVisitor.setClampLighting(mClampLighting);
-        shaderVisitor.setForcePerPixelLighting(mForcePerPixelLighting);
-        shaderVisitor.setAllowedToModifyStateSets(false);
-        node->accept(shaderVisitor);
+        osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor());
+        shaderVisitor->setAllowedToModifyStateSets(false);
+        node->accept(*shaderVisitor);
     }
 
     void SceneManager::setClampLighting(bool clamp)
@@ -428,12 +432,17 @@ namespace Resource
 
     bool canOptimize(const std::string& filename)
     {
-        // xmesh.nif can not be optimized because there are keyframes added in post
         size_t slashpos = filename.find_last_of("\\/");
         if (slashpos != std::string::npos && slashpos+1 < filename.size())
         {
             std::string basename = filename.substr(slashpos+1);
+            // xmesh.nif can not be optimized because there are keyframes added in post
             if (!basename.empty() && basename[0] == 'x')
+                return false;
+
+            // NPC skeleton files can not be optimized because of keyframes added in post
+            // (most of them are usually named like 'xbase_anim.nif' anyway, but not all of them :( )
+            if (basename.compare(0, 9, "base_anim") == 0 || basename.compare(0, 4, "skin") == 0)
                 return false;
         }
 
@@ -509,16 +518,8 @@ namespace Resource
             SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
             loaded->accept(setFilterSettingsControllerVisitor);
 
-            Shader::ShaderVisitor shaderVisitor(*mShaderManager.get(), *mImageManager, "objects_vertex.glsl", "objects_fragment.glsl");
-            shaderVisitor.setForceShaders(mForceShaders);
-            shaderVisitor.setClampLighting(mClampLighting);
-            shaderVisitor.setForcePerPixelLighting(mForcePerPixelLighting);
-            shaderVisitor.setAutoUseNormalMaps(mAutoUseNormalMaps);
-            shaderVisitor.setNormalMapPattern(mNormalMapPattern);
-            shaderVisitor.setNormalHeightMapPattern(mNormalHeightMapPattern);
-            shaderVisitor.setAutoUseSpecularMaps(mAutoUseSpecularMaps);
-            shaderVisitor.setSpecularMapPattern(mSpecularMapPattern);
-            loaded->accept(shaderVisitor);
+            osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor (createShaderVisitor());
+            loaded->accept(*shaderVisitor);
 
             // share state
             // do this before optimizing so the optimizer will be able to combine nodes more aggressively
@@ -621,6 +622,11 @@ namespace Resource
     {
         mCache->releaseGLObjects(state);
         mInstanceCache->releaseGLObjects(state);
+
+        mShaderManager->releaseGLObjects(state);
+
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSharedStateMutex);
+        mSharedStateManager->releaseGLObjects(state);
     }
 
     void SceneManager::setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation *ico)
@@ -710,6 +716,15 @@ namespace Resource
         mSharedStateMutex.unlock();
     }
 
+    void SceneManager::clearCache()
+    {
+        ResourceManager::clearCache();
+
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSharedStateMutex);
+        mSharedStateManager->clearCache();
+        mInstanceCache->clear();
+    }
+
     void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
     {
         {
@@ -725,6 +740,20 @@ namespace Resource
 
         stats->setAttribute(frameNumber, "Node", mCache->getCacheSize());
         stats->setAttribute(frameNumber, "Node Instance", mInstanceCache->getCacheSize());
+    }
+
+    Shader::ShaderVisitor *SceneManager::createShaderVisitor()
+    {
+        Shader::ShaderVisitor* shaderVisitor = new Shader::ShaderVisitor(*mShaderManager.get(), *mImageManager, "objects_vertex.glsl", "objects_fragment.glsl");
+        shaderVisitor->setForceShaders(mForceShaders);
+        shaderVisitor->setClampLighting(mClampLighting);
+        shaderVisitor->setForcePerPixelLighting(mForcePerPixelLighting);
+        shaderVisitor->setAutoUseNormalMaps(mAutoUseNormalMaps);
+        shaderVisitor->setNormalMapPattern(mNormalMapPattern);
+        shaderVisitor->setNormalHeightMapPattern(mNormalHeightMapPattern);
+        shaderVisitor->setAutoUseSpecularMaps(mAutoUseSpecularMaps);
+        shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
+        return shaderVisitor;
     }
 
 }

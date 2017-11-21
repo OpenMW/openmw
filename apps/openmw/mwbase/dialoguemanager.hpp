@@ -2,6 +2,8 @@
 #define GAME_MWBASE_DIALOGUEMANAGER_H
 
 #include <string>
+#include <vector>
+#include <list>
 
 #include <stdint.h>
 
@@ -34,6 +36,12 @@ namespace MWBase
 
         public:
 
+            class ResponseCallback
+            {
+            public:
+                virtual void addResponse(const std::string& title, const std::string& text) = 0;
+            };
+
             DialogueManager() {}
 
             virtual void clear() = 0;
@@ -42,24 +50,28 @@ namespace MWBase
 
             virtual bool isInChoice() const = 0;
 
-            virtual void startDialogue (const MWWorld::Ptr& actor) = 0;
+            virtual bool startDialogue (const MWWorld::Ptr& actor, ResponseCallback* callback) = 0;
 
             virtual void addTopic (const std::string& topic) = 0;
 
-            virtual void askQuestion (const std::string& question,int choice) = 0;
+            virtual void addChoice (const std::string& text,int choice) = 0;
+            virtual const std::vector<std::pair<std::string, int> >& getChoices() = 0;
+
+            virtual bool isGoodbye() = 0;
 
             virtual void goodbye() = 0;
 
             virtual void say(const MWWorld::Ptr &actor, const std::string &topic) = 0;
 
-            //calbacks for the GUI
-            virtual void keywordSelected (const std::string& keyword) = 0;
+            virtual void keywordSelected (const std::string& keyword, ResponseCallback* callback) = 0;
             virtual void goodbyeSelected() = 0;
-            virtual void questionAnswered (int answer) = 0;
+            virtual void questionAnswered (int answer, ResponseCallback* callback) = 0;
 
-            virtual bool checkServiceRefused () = 0;
+            virtual std::list<std::string> getAvailableTopics() = 0;
 
-            virtual void persuade (int type) = 0;
+            virtual bool checkServiceRefused (ResponseCallback* callback) = 0;
+
+            virtual void persuade (int type, ResponseCallback* callback) = 0;
             virtual int getTemporaryDispositionChange () const = 0;
 
             /// @note This change is temporary and gets discarded when dialogue ends.

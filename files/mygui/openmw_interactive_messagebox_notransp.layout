@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_DialogNoTransp" layer="MessageBox" position="0 0 500 400" align="Center" name="_Main">
+        <Widget type="EditBox" skin="MW_TextEditClient" position="10 10 490 20" align="Left Top Stretch" name="message">
+            <Property key="FontName" value="Default"/>
+            <Property key="TextAlign" value="Center"/>
+            <Property key="Static" value="true"/>
+            <Property key="WordWrap" value="true"/>
+            <Property key="MultiLine" value="1"/>
+            <Property key="VisibleVScroll" value="1"/>
+            <Property key="NeedKey" value="false"/>
+        </Widget>
+        <Widget type="Widget" skin="" position="0 0 500 400" align="Stretch" name="buttons">
+        </Widget>
+    </Widget>
+</MyGUI>

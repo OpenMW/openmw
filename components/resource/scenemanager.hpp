@@ -31,6 +31,7 @@ namespace osgDB
 namespace Shader
 {
     class ShaderManager;
+    class ShaderVisitor;
 }
 
 namespace Resource
@@ -116,7 +117,7 @@ namespace Resource
 
         /// Manually release created OpenGL objects for the given graphics context. This may be required
         /// in cases where multiple contexts are used over the lifetime of the application.
-        void releaseGLObjects(osg::State* state);
+        void releaseGLObjects(osg::State* state) override;
 
         /// Set up an IncrementalCompileOperation for background compiling of loaded scenes.
         void setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation* ico);
@@ -141,11 +142,15 @@ namespace Resource
         void setUnRefImageDataAfterApply(bool unref);
 
         /// @see ResourceManager::updateCache
-        virtual void updateCache(double referenceTime);
+        void updateCache(double referenceTime) override;
 
-        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
+        void clearCache() override;
+
+        void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 
     private:
+
+        Shader::ShaderVisitor* createShaderVisitor();
 
         std::unique_ptr<Shader::ShaderManager> mShaderManager;
         bool mForceShaders;

@@ -4,6 +4,7 @@
 #include <components/esm/esmreader.hpp>
 
 #include "collection.hpp"
+#include "land.hpp"
 
 namespace CSMWorld
 {
@@ -37,6 +38,22 @@ namespace CSMWorld
                                                             bool& isDeleted)
     {
         record.load (reader, isDeleted);
+    }
+
+    template<>
+    inline void IdCollection<Land, IdAccessor<Land> >::loadRecord (Land& record,
+        ESM::ESMReader& reader, bool& isDeleted)
+    {
+        record.load (reader, isDeleted);
+
+        // Load all land data for now. A future optimisation may only load non-base data
+        // if a suitable mechanism for avoiding race conditions can be established.
+        int flags = ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML |
+            ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX;
+        record.loadData (flags);
+
+        // Prevent data from being reloaded.
+        record.mContext.filename.clear();
     }
 
     template<typename ESXRecordT, typename IdAccessorT>

@@ -49,8 +49,8 @@ namespace MWClass
 
         if (!ref->mBase->mSound.empty() && !(ref->mBase->mData.mFlags & ESM::Light::OffDefault))
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0,
-                                                                      MWBase::SoundManager::Play_TypeSfx,
-                                                                      MWBase::SoundManager::Play_Loop);
+                                                                      MWSound::Type::Sfx,
+                                                                      MWSound::PlayMode::Loop);
     }
 
     bool Light::useAnim() const

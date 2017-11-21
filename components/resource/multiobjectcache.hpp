@@ -25,6 +25,9 @@ namespace Resource
 
         void removeUnreferencedObjectsInCache();
 
+        /** Remove all objects from the cache. */
+        void clear();
+
         void addEntryToObjectCache(const std::string& filename, osg::Object* object);
 
         /** Take an Object from cache. Return NULL if no object found. */

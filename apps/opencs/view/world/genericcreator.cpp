@@ -51,6 +51,11 @@ std::string CSVWorld::GenericCreator::getId() const
     return mId->text().toUtf8().constData();
 }
 
+std::string CSVWorld::GenericCreator::getClonedId() const
+{
+    return mClonedId;
+}
+
 std::string CSVWorld::GenericCreator::getIdValidatorResult() const
 {
     std::string errors;
@@ -252,6 +257,22 @@ void CSVWorld::GenericCreator::cloneMode(const std::string& originId,
     mCloneMode = true;
     mClonedId = originId;
     mClonedType = type;
+}
+
+void CSVWorld::GenericCreator::touch(const std::vector<CSMWorld::UniversalId>& ids)
+{
+    // Combine multiple touch commands into one "macro" command
+    mUndoStack.beginMacro("Touch Records");
+
+    CSMWorld::IdTable& table = dynamic_cast<CSMWorld::IdTable&>(*mData.getTableModel(mListId));
+    for (const CSMWorld::UniversalId& uid : ids)
+    {
+        CSMWorld::TouchCommand* touchCmd = new CSMWorld::TouchCommand(table, uid.getId());
+        mUndoStack.push(touchCmd);
+    }
+
+    // Execute
+    mUndoStack.endMacro();
 }
 
 void CSVWorld::GenericCreator::toggleWidgets(bool active)
