@@ -128,6 +128,9 @@ namespace MWMechanics
 
             float mTimer;
 
+            std::string mTargetActorRefId;
+            mutable int mTargetActorId;
+
             osg::Vec3f mLastActorPos;
 
             short mRotateOnTheRunChecks; // attempts to check rotation to the pathpoint on the run possibility

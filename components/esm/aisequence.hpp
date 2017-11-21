@@ -89,6 +89,7 @@ namespace ESM
     {
         AiEscortData mData;
 
+        int mTargetActorId;
         std::string mTargetId;
         std::string mCellId;
         float mRemainingDuration;
@@ -101,6 +102,7 @@ namespace ESM
     {
         AiEscortData mData;
 
+        int mTargetActorId;
         std::string mTargetId;
         std::string mCellId;
         float mRemainingDuration;
