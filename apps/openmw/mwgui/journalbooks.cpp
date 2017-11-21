@@ -6,9 +6,9 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include <components/fontloader/fontloader.hpp>
+#include <components/misc/utf8stream.hpp>
 
 #include "textcolours.hpp"
-
 
 namespace
 {
@@ -242,11 +242,17 @@ BookTypesetter::Ptr JournalBooks::createLatinJournalIndex ()
 
         sprintf (buffer, "( %c )", ch);
 
+        char buffer2 [32];
+        sprintf(buffer2, "%c", ch);
+        const char * c = buffer2;
+        Utf8Stream stream ((unsigned char*) c,(unsigned char*) c + strlen(c));
+        uint32_t first = stream.peek();
+
         // TODO: find a way to store a multibyte character in the InteractiveId (this is a intptr_t)
         const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
         BookTypesetter::Style* style = typesetter->createHotStyle (body, textColours.journalTopic,
                                                                    textColours.journalTopicOver,
-                                                                   textColours.journalTopicPressed, i+1);
+                                                                   textColours.journalTopicPressed, first);
 
         if (i == 13)
             typesetter->sectionBreak ();
@@ -271,11 +277,16 @@ BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex ()
 
         sprintf(buffer, "( %c%c )", 0xd0, 0x90 + i); // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
 
-        // TODO: find a way to store a multibyte character in the InteractiveId (this is a intptr_t)
+        char buffer2 [32];
+        sprintf(buffer2, "%c%c", 0xd0, 0x90 + i);
+        const char * c = buffer2;
+        Utf8Stream stream ((unsigned char*) c,(unsigned char*) c + strlen(c));
+        uint32_t first = stream.peek();
+
         const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
         BookTypesetter::Style* style = typesetter->createHotStyle (body, textColours.journalTopic,
                                                                    textColours.journalTopicOver,
-                                                                   textColours.journalTopicPressed, i+1);
+                                                                   textColours.journalTopicPressed, first);
 
         // Words can not be started with these characters
         if (i == 26 || i == 28)

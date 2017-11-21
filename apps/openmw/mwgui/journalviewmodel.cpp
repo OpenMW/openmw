@@ -6,6 +6,8 @@
 #include <MyGUI_LanguageManager.h>
 
 #include <components/translation/translation.hpp>
+#include <components/misc/stringops.hpp>
+#include <components/misc/utf8stream.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
@@ -305,45 +307,20 @@ struct JournalViewModelImpl : JournalViewModel
         visitor (toUtf8Span (topic.getName()));
     }
 
-    void visitTopicNamesStartingWith (int index, std::function < void (const std::string&) > visitor) const
+    void visitTopicNamesStartingWith (uint32_t character, std::function < void (const std::string&) > visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
         for (MWBase::Journal::TTopicIter i = journal->topicBegin (); i != journal->topicEnd (); ++i)
         {
-            unsigned char byte1 = i->first[0];
-            // First, check for two-byte UTF-8 symbols, e.g. Cyrillic ones
-            // TODO: check which language journal index is using
-            if ((byte1 == 0xd0 || byte1 == 0xd1) && i->first.length() >= 2)
-            {
-                unsigned char byte2 = i->first[1];
+            const char * c = i->first.c_str();
+            Utf8Stream stream ((unsigned char*) c,(unsigned char*) c + strlen(c));
+            uint32_t first = Misc::StringUtils::toUpper(stream.peek());
 
-                std::pair<unsigned char, unsigned char> symbol = Misc::StringUtils::toLower(byte1, byte2);
+            if (first != character)
+                continue;
 
-                // CYRILLIC LETTER A - CYRILLIC LETTER PE
-                // index from 1 to 16
-                if (symbol.first == 0xd0 && symbol.second >= (0xaf + index) && symbol.second < (0xbf + index) && symbol.second == (0xaf + index))
-                {
-                    visitor (i->second.getName());
-                    continue;
-                }
-
-                // CYRILLIC LETTERL R - CYRILLIC LETTER YA
-                // index from 17 to 32
-                if (symbol.first == 0xd1 && symbol.second >= (0x6f + index) && symbol.second < (0x7f + index) && symbol.second == (0x6f + index))
-                {
-                    visitor (i->second.getName());
-                    continue;
-                }
-            }
-            else
-            {
-                // Otherwise check for regular Latin symbols, 0x61 = 'a'
-                if (i->first [0] != 0x60 + index)
-                    continue;
-
-                visitor (i->second.getName());
-            }
+            visitor (i->second.getName());
         }
     }
 

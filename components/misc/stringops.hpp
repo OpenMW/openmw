@@ -56,34 +56,21 @@ public:
         };
     }
 
-    static std::pair<char, char> toLower(unsigned char byte1, unsigned char byte2)
+    static uint32_t toUpper(uint32_t ch)
     {
-        std::pair<unsigned char, unsigned char> symbol = std::make_pair(byte1, byte2);
-        // CYRILLIC CAPITAL IO
-        if (symbol.first == 0xd0 && symbol.second == 0x01)
-        {
-            symbol.first++;
-            symbol.second = 0x91;
-        }
-        // CYRILLIC CAPITAL A - CYRILLIC CAPITAL PE
-        else if (symbol.first == 0xd0 && symbol.second >= 0x90 && symbol.second < 0xa0)
-        {
-            symbol.second += 0x20;
-        }
-        // CYRILLIC CAPITAL R - CYRILLIC CAPITAL YA
-        else if (symbol.first == 0xd0 && symbol.second >= 0xa0 && symbol.second < 0xb0)
-        {
-            symbol.first++;
-            symbol.second -= 0x20;
-        }
-        // Other symbols
-        else
-        {
-            symbol.first = toLower(symbol.first);
-            symbol.second = toLower(symbol.second);
-        }
+        // Russian alphabete
+        if (ch >= 0x0430 && ch < 0x0450)
+            ch -= 0x20;
 
-        return symbol;
+        // Cyrillic YO character
+        if (ch == 0x0451)
+            ch -= 0x50;
+
+        // Latin alphabete
+        if (ch >= 0x61 && ch < 0x80)
+            ch -= 0x20;
+
+        return ch;
     }
 
     static bool ciLess(const std::string &x, const std::string &y) {
