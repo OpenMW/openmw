@@ -21,6 +21,44 @@ namespace Shader
         mPath = path;
     }
 
+    bool addLineDirectivesAfterConditionalBlocks(std::string& source)
+    {
+        for (size_t position = 0; position < source.length(); )
+        {
+            size_t foundPos = source.find("#endif", position);
+            foundPos = std::min(foundPos, source.find("#elif", position));
+            foundPos = std::min(foundPos, source.find("#else", position));
+
+            if (foundPos == std::string::npos)
+                break;
+
+            foundPos = source.find_first_of("\n\r", foundPos);
+            foundPos = source.find_first_not_of("\n\r", foundPos);
+
+            size_t lineDirectivePosition = source.rfind("#line", foundPos);
+            int lineNumber;
+            if (lineDirectivePosition != std::string::npos)
+            {
+                size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
+                size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
+                std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
+                lineNumber = std::stoi(lineNumberString) - 1;
+            }
+            else
+            {
+                lineDirectivePosition = 0;
+                lineNumber = 1;
+            }
+            lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
+
+            source.replace(foundPos, 0, "#line " + std::to_string(lineNumber) + "\n");
+
+            position = foundPos;
+        }
+
+        return true;
+    }
+
     bool parseIncludes(boost::filesystem::path shaderPath, std::string& source)
     {
         boost::replace_all(source, "\r\n", "\n");
@@ -54,14 +92,30 @@ namespace Shader
 
             std::stringstream buffer;
             buffer << includeFstream.rdbuf();
+            std::string stringRepresentation = buffer.str();
+            addLineDirectivesAfterConditionalBlocks(stringRepresentation);
 
             // insert #line directives so we get correct line numbers in compiler errors
             int includedFileNumber = fileNumber++;
 
-            int lineNumber = std::count(source.begin(), source.begin() + foundPos, '\n');
+            size_t lineDirectivePosition = source.rfind("#line", foundPos);
+            int lineNumber;
+            if (lineDirectivePosition != std::string::npos)
+            {
+                size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
+                size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
+                std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
+                lineNumber = std::stoi(lineNumberString) - 1;
+            }
+            else
+            {
+                lineDirectivePosition = 0;
+                lineNumber = 1;
+            }
+            lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
 
             std::stringstream toInsert;
-            toInsert << "#line 0 " << includedFileNumber << "\n" << buffer.str() << "\n#line " << lineNumber << " 0\n";
+            toInsert << "#line 0 " << includedFileNumber << "\n" << stringRepresentation << "\n#line " << lineNumber << " 0\n";
 
             source.replace(foundPos, (end-foundPos+1), toInsert.str());
 
@@ -248,7 +302,7 @@ namespace Shader
 
             // parse includes
             std::string source = buffer.str();
-            if (!parseIncludes(boost::filesystem::path(mPath), source))
+            if (!addLineDirectivesAfterConditionalBlocks(source) || !parseIncludes(boost::filesystem::path(mPath), source))
                 return NULL;
 
             templateIt = mShaderTemplates.insert(std::make_pair(shaderTemplate, source)).first;
