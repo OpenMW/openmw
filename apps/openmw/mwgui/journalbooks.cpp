@@ -233,28 +233,26 @@ BookTypesetter::Ptr JournalBooks::createLatinJournalIndex ()
 
     typesetter->setSectionAlignment (BookTypesetter::AlignCenter);
 
+    char ch = 'A';
+
     BookTypesetter::Style* body = typesetter->createStyle ("", MyGUI::Colour::Black);
     for (int i = 0; i < 26; ++i)
     {
-        char ch = 'A' + i;
         char buffer [32];
         sprintf (buffer, "( %c )", ch);
-
-        char buffer2 [32];
-        sprintf(buffer2, "%c", ch);
-        Utf8Stream stream (buffer2);
-        uint32_t first = stream.peek();
 
         const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
         BookTypesetter::Style* style = typesetter->createHotStyle (body, textColours.journalTopic,
                                                                    textColours.journalTopicOver,
-                                                                   textColours.journalTopicPressed, first);
+                                                                   textColours.journalTopicPressed, (uint32_t) ch);
 
         if (i == 13)
             typesetter->sectionBreak ();
 
         typesetter->write (style, to_utf8_span (buffer));
         typesetter->lineBreak ();
+
+        ch++;
     }
 
     return typesetter;
@@ -267,15 +265,15 @@ BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex ()
     typesetter->setSectionAlignment (BookTypesetter::AlignCenter);
 
     BookTypesetter::Style* body = typesetter->createStyle ("", MyGUI::Colour::Black);
+
+    unsigned char ch[2] = {0xd0, 0x90}; // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
+
     for (int i = 0; i < 32; ++i)
     {
         char buffer [32];
-        sprintf(buffer, "( %c%c )", 0xd0, 0x90 + i); // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
+        sprintf(buffer, "( %c%c )", ch[0], ch[1]);
 
-        char buffer2 [32];
-        sprintf(buffer2, "%c%c", 0xd0, 0x90 + i);
-
-        Utf8Stream stream (buffer2);
+        Utf8Stream stream ((char*) ch);
         uint32_t first = stream.peek();
 
         const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
@@ -292,6 +290,8 @@ BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex ()
 
         typesetter->write (style, to_utf8_span (buffer));
         typesetter->lineBreak ();
+
+        ch[1]++;
     }
 
     return typesetter;
