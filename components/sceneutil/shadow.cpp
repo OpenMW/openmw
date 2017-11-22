@@ -712,4 +712,28 @@ namespace SceneUtil
 
         // OSG_NOTICE<<"End of shadow setup Projection matrix "<<*cv.getProjectionMatrix()<<std::endl;
     }
+
+    Shader::ShaderManager::DefineMap MWShadow::getShadowDefines()
+    {
+        if (!enableShadows)
+            return getShadowsDisabledDefines();
+
+        Shader::ShaderManager::DefineMap definesWithShadows;
+        definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("1")));
+        for (int i = 0; i < numberOfShadowMapsPerLight; ++i)
+            definesWithShadows["shadow_texture_unit_list"] += std::to_string(i) + ",";
+        // remove extra comma
+        definesWithShadows["shadow_texture_unit_list"] = definesWithShadows["shadow_texture_unit_list"].substr(0, definesWithShadows["shadow_texture_unit_list"].length() - 1);
+
+        return definesWithShadows;
+    }
+
+    Shader::ShaderManager::DefineMap MWShadow::getShadowsDisabledDefines()
+    {
+        Shader::ShaderManager::DefineMap definesWithShadows;
+        definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("0")));
+        definesWithShadows["shadow_texture_unit_list"] = "";
+
+        return definesWithShadows;
+    }
 }

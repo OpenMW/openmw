@@ -26,17 +26,25 @@ namespace Shader
         /// @param shaderTemplate The filename of the shader template.
         /// @param defines Define values that can be retrieved by the shader template.
         /// @param shaderType The type of shader (usually vertex or fragment shader).
-        /// @param disableShadows Whether to disable shadows in the shader regardless of the overall setting. False by default.
         /// @note May return NULL on failure.
         /// @note Thread safe.
-        osg::ref_ptr<osg::Shader> getShader(const std::string& shaderTemplate, const DefineMap& defines, osg::Shader::Type shaderType, bool disableShadows = false);
+        osg::ref_ptr<osg::Shader> getShader(const std::string& shaderTemplate, const DefineMap& defines, osg::Shader::Type shaderType);
 
         osg::ref_ptr<osg::Program> getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader);
+
+        /// Get (a copy of) the DefineMap used to construct all shaders
+        DefineMap getGlobalDefines();
+
+        /// Set the DefineMap used to construct all shaders
+        /// @param defines The DefineMap to use
+        void setGlobalDefines(DefineMap& defines);
 
         void releaseGLObjects(osg::State* state);
 
     private:
         std::string mPath;
+
+        DefineMap mGlobalDefines;
 
         // <name, code>
         typedef std::map<std::string, std::string> TemplateMap;

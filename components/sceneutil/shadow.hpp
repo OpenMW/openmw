@@ -3,12 +3,15 @@
 
 #include <osgShadow/ViewDependentShadowMap>
 
+#include <components/shader/shadermanager.hpp>
+
 namespace SceneUtil
 {
     class MWShadow : public osgShadow::ViewDependentShadowMap
     {
     public:
         static const int numberOfShadowMapsPerLight = 3;
+        static const int enableShadows = true;
         static const bool debugHud = true;
 
         MWShadow();
@@ -16,6 +19,10 @@ namespace SceneUtil
         const static int baseShadowTextureUnit = 8 - numberOfShadowMapsPerLight;
 
         virtual void cull(osgUtil::CullVisitor& cv);
+
+        virtual Shader::ShaderManager::DefineMap getShadowDefines();
+
+        virtual Shader::ShaderManager::DefineMap getShadowsDisabledDefines();
     protected:
         const int debugTextureUnit;
 

@@ -238,6 +238,10 @@ namespace MWRender
         shadowedScene->addChild(sceneRoot);
         mRootNode->addChild(shadowedScene);
 
+        Shader::ShaderManager::DefineMap shadowDefines = tech->getShadowDefines();
+        Shader::ShaderManager::DefineMap globalDefines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
+        globalDefines.insert(shadowDefines.begin(), shadowDefines.end());
+        mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
         mPathgrid.reset(new Pathgrid(mRootNode));
 

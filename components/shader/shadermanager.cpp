@@ -11,8 +11,6 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "components/sceneutil/shadow.hpp"
-
 namespace Shader
 {
 
@@ -211,7 +209,7 @@ namespace Shader
         return true;
     }
 
-    bool parseDefines(std::string& source, const ShaderManager::DefineMap& defines)
+    bool parseDefines(std::string& source, const ShaderManager::DefineMap& defines, const ShaderManager::DefineMap& globalDefines)
     {
         const char escapeCharacter = '@';
         size_t foundPos = 0;
@@ -226,6 +224,7 @@ namespace Shader
             }
             std::string define = source.substr(foundPos+1, endPos - (foundPos+1));
             ShaderManager::DefineMap::const_iterator defineFound = defines.find(define);
+            ShaderManager::DefineMap::const_iterator globalDefineFound = globalDefines.find(define);
             if (define == "foreach")
             {
                 source.replace(foundPos, 1, "$");
@@ -253,43 +252,26 @@ namespace Shader
             {
                 source.replace(foundPos, 1, "$");
             }
-            else if (defineFound == defines.end())
+            else if (defineFound != defines.end())
             {
-                std::cerr << "Undefined " << define << std::endl;
-                return false;
+                source.replace(foundPos, endPos - foundPos, defineFound->second);
+            }
+            else if (globalDefineFound != globalDefines.end())
+            {
+                source.replace(foundPos, endPos - foundPos, globalDefineFound->second);
             }
             else
             {
-                source.replace(foundPos, endPos-foundPos, defineFound->second);
+                std::cerr << "Undefined " << define << std::endl;
+                return false;
             }
         }
         return true;
     }
 
-    osg::ref_ptr<osg::Shader> ShaderManager::getShader(const std::string &shaderTemplate, const ShaderManager::DefineMap &defines, osg::Shader::Type shaderType, bool disableShadows)
+    osg::ref_ptr<osg::Shader> ShaderManager::getShader(const std::string &shaderTemplate, const ShaderManager::DefineMap &defines, osg::Shader::Type shaderType)
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
-
-        // set up shadows in the shader
-        // get these values from settings manager
-        bool shadows = true & !disableShadows;
-        int numShadowMaps = SceneUtil::MWShadow::numberOfShadowMapsPerLight;
-        DefineMap definesWithShadows;
-        if (shadows)
-        {
-            definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("1")));
-            for (int i = 0; i < numShadowMaps; ++i)
-                definesWithShadows["shadow_texture_unit_list"] += std::to_string(i) + ",";
-            // remove extra comma
-            definesWithShadows["shadow_texture_unit_list"] = definesWithShadows["shadow_texture_unit_list"].substr(0, definesWithShadows["shadow_texture_unit_list"].length() - 1);
-        }
-        else
-        {
-            definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("0")));
-            definesWithShadows["shadow_texture_unit_list"] = "";
-        }
-
-        definesWithShadows.insert(defines.begin(), defines.end());
 
         // read the template if we haven't already
         TemplateMap::iterator templateIt = mShaderTemplates.find(shaderTemplate);
@@ -314,11 +296,11 @@ namespace Shader
             templateIt = mShaderTemplates.insert(std::make_pair(shaderTemplate, source)).first;
         }
 
-        ShaderMap::iterator shaderIt = mShaders.find(std::make_pair(shaderTemplate, definesWithShadows));
+        ShaderMap::iterator shaderIt = mShaders.find(std::make_pair(shaderTemplate, defines));
         if (shaderIt == mShaders.end())
         {
             std::string shaderSource = templateIt->second;
-            if (!parseDefines(shaderSource, definesWithShadows) || !parseFors(shaderSource))
+            if (!parseDefines(shaderSource, defines, mGlobalDefines) || !parseFors(shaderSource))
             {
                 // Add to the cache anyway to avoid logging the same error over and over.
                 mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, defines), nullptr));
@@ -331,7 +313,7 @@ namespace Shader
             static unsigned int counter = 0;
             shader->setName(std::to_string(counter++));
 
-            shaderIt = mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, definesWithShadows), shader)).first;
+            shaderIt = mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, defines), shader)).first;
         }
         return shaderIt->second;
     }
@@ -348,6 +330,17 @@ namespace Shader
             found = mPrograms.insert(std::make_pair(std::make_pair(vertexShader, fragmentShader), program)).first;
         }
         return found->second;
+    }
+
+    ShaderManager::DefineMap ShaderManager::getGlobalDefines()
+    {
+        return DefineMap(mGlobalDefines);
+    }
+
+    void ShaderManager::setGlobalDefines(DefineMap & defines)
+    {
+        mGlobalDefines = defines;
+        // TODO: We need to trigger the regeneration of all shaders.
     }
 
     void ShaderManager::releaseGLObjects(osg::State *state)
