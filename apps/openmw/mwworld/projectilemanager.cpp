@@ -316,6 +316,8 @@ namespace MWWorld
         state.mIdArrow = projectile.getCellRef().getRefId();
         state.mCasterHandle = actor;
         state.mAttackStrength = attackStrength;
+        state.mThrown = projectile.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown;
+        state.mTime = 0.0;
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
@@ -453,12 +455,25 @@ namespace MWWorld
             // gravity constant - must be way lower than the gravity affecting actors, since we're not
             // simulating aerodynamics at all
             it->mVelocity -= osg::Vec3f(0, 0, 627.2f * 0.1f) * duration;
+            it->mTime += duration;
 
             osg::Vec3f pos(it->mNode->getPosition());
             osg::Vec3f newPos = pos + it->mVelocity * duration;
 
             osg::Quat orient;
-            orient.makeRotate(osg::Vec3f(0,1,0), it->mVelocity);
+            
+            orient.set(
+                osg::Matrixd::rotate(it->mThrown ? -1 * it->mTime : 0.0,osg::Vec3f(0,0,1)) *
+                osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
+                osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
+                osg::Matrixd::inverse(
+                    osg::Matrixd::lookAt(
+                        osg::Vec3f(0,0,0),
+                        it->mVelocity,
+                        osg::Vec3f(0,0,1))
+                    )
+                );
+
             it->mNode->setAttitude(orient);
             it->mNode->setPosition(newPos);
 
