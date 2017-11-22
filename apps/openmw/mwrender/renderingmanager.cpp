@@ -240,7 +240,10 @@ namespace MWRender
 
         Shader::ShaderManager::DefineMap shadowDefines = tech->getShadowDefines();
         Shader::ShaderManager::DefineMap globalDefines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
-        globalDefines.insert(shadowDefines.begin(), shadowDefines.end());
+
+        for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
+            globalDefines[itr->first] = itr->second;
+
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
         mPathgrid.reset(new Pathgrid(mRootNode));
