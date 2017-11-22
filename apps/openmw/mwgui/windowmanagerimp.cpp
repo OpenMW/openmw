@@ -347,7 +347,7 @@ namespace MWGui
         mGuiModeStates[GM_Console] = GuiModeState(mConsole);
 
         bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
-        JournalWindow* journal = JournalWindow::create(JournalViewModel::create (), questList);
+        JournalWindow* journal = JournalWindow::create(JournalViewModel::create (), questList, mEncoding);
         mWindows.push_back(journal);
         mGuiModeStates[GM_Journal] = GuiModeState(journal);
         mGuiModeStates[GM_Journal].mCloseSound = "book close";
@@ -2032,11 +2032,6 @@ namespace MWGui
     const MWGui::TextColours& WindowManager::getTextColours()
     {
         return mTextColours;
-    }
-
-    ToUTF8::FromType WindowManager::getEncoding()
-    {
-        return mEncoding;
     }
 
     bool WindowManager::injectKeyPress(MyGUI::KeyCode key, unsigned int text)

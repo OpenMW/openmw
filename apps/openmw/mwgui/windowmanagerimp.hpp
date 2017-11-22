@@ -378,7 +378,6 @@ namespace MWGui
     void writeFog(MWWorld::CellStore* cell);
 
     virtual const MWGui::TextColours& getTextColours();
-    virtual ToUTF8::FromType getEncoding();
 
     virtual bool injectKeyPress(MyGUI::KeyCode key, unsigned int text);
 

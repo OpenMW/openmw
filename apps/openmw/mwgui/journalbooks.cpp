@@ -156,8 +156,8 @@ MWGui::BookTypesetter::Utf8Span to_utf8_span (char const * text)
 
 typedef TypesetBook::Ptr book;
 
-JournalBooks::JournalBooks (JournalViewModel::Ptr model) :
-    mModel (model)
+JournalBooks::JournalBooks (JournalViewModel::Ptr model, ToUTF8::FromType encoding) :
+    mModel (model), mEncoding(encoding)
 {
 }
 
@@ -220,8 +220,7 @@ book JournalBooks::createQuestBook (const std::string& questName)
 
 book JournalBooks::createTopicIndexBook ()
 {
-    ToUTF8::FromType encoding = MWBase::Environment::get().getWindowManager()->getEncoding();
-    bool isRussian = (encoding == ToUTF8::WINDOWS_1251);
+    bool isRussian = (mEncoding == ToUTF8::WINDOWS_1251);
 
     BookTypesetter::Ptr typesetter = isRussian ? createCyrillicJournalIndex() : createLatinJournalIndex();
 
