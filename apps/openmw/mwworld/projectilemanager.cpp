@@ -386,7 +386,6 @@ namespace MWWorld
             static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("fTargetSpellMaxSpeed")->getFloat();
             float speed = fTargetSpellMaxSpeed * it->mSpeed;
-
             osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
             direction.normalize();
             osg::Vec3f pos(it->mNode->getPosition());
@@ -466,18 +465,21 @@ namespace MWWorld
             osg::Vec3f newPos = pos + it->mVelocity * duration;
 
             osg::Quat orient;
-            
-            orient.set(
-                osg::Matrixd::rotate(it->mThrown ? -1 * it->mEffectAnimationTime->getTime() * 10.0 : 0.0,osg::Vec3f(0,0,1)) *
-                osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
-                osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
-                osg::Matrixd::inverse(
-                    osg::Matrixd::lookAt(
-                        osg::Vec3f(0,0,0),
-                        it->mVelocity,
-                        osg::Vec3f(0,0,1))
-                    )
-                );
+
+            if (it->mThrown)            
+                orient.set(
+                    osg::Matrixd::rotate(it->mEffectAnimationTime->getTime() * -10.0,osg::Vec3f(0,0,1)) *
+                    osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
+                    osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
+                    osg::Matrixd::inverse(
+                        osg::Matrixd::lookAt(
+                            osg::Vec3f(0,0,0),
+                            it->mVelocity,
+                            osg::Vec3f(0,0,1))
+                        )
+                    );
+            else
+                orient.makeRotate(osg::Vec3f(0,1,0), it->mVelocity);
 
             it->mNode->setAttitude(orient);
             it->mNode->setPosition(newPos);
