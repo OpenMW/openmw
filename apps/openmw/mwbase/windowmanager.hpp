@@ -11,8 +11,6 @@
 
 #include "../mwgui/mode.hpp"
 
-#include <components/to_utf8/to_utf8.hpp>
-
 namespace Loading
 {
     class Listener;
