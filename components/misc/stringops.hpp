@@ -1,7 +1,6 @@
 #ifndef MISC_STRINGOPS_H
 #define MISC_STRINGOPS_H
 
-#include <stdint.h>
 #include <cctype>
 #include <cstring>
 #include <string>
@@ -55,23 +54,6 @@ public:
         case 'Z':return 'z';
         default:return c;
         };
-    }
-
-    static uint32_t toUpper(uint32_t ch)
-    {
-        // Russian alphabet
-        if (ch >= 0x0430 && ch < 0x0450)
-            ch -= 0x20;
-
-        // Cyrillic YO character
-        if (ch == 0x0451)
-            ch -= 0x50;
-
-        // Latin alphabet
-        if (ch >= 0x61 && ch < 0x80)
-            ch -= 0x20;
-
-        return ch;
     }
 
     static bool ciLess(const std::string &x, const std::string &y) {
