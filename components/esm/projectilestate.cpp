@@ -53,7 +53,6 @@ namespace ESM
         esm.writeHNT ("VEL_", mVelocity);
         esm.writeHNT ("STR_", mAttackStrength);
         esm.writeHNT ("THR_", mThrown);
-        esm.writeHNT ("TIM_", mTime);
     }
 
     void ProjectileState::load(ESMReader &esm)
@@ -68,9 +67,6 @@ namespace ESM
 
         mThrown = false;
         esm.getHNOT (mThrown, "THR_"); 
-
-        mTime = 0.f;
-        esm.getHNOT (mTime, "TIM_");
     }
 
 }
