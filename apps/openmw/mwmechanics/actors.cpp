@@ -50,27 +50,36 @@ bool isConscious(const MWWorld::Ptr& ptr)
     return !stats.isDead() && !stats.getKnockedDown();
 }
 
-void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& actor)
+int getBoundItemSlot (const std::string& itemId)
 {
-    if (bound)
+    static std::map<std::string, int> boundItemsMap;
+    if (boundItemsMap.empty())
     {
-        if (actor.getClass().getContainerStore(actor).count(item) == 0)
-        {
-            MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
-            MWWorld::Ptr newPtr = *store.MWWorld::ContainerStore::add(item, 1, actor);
-            MWWorld::ActionEquip action(newPtr);
-            action.execute(actor);
-            MWWorld::ConstContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-            // change draw state only if the item is in player's right hand
-            if (actor == MWMechanics::getPlayer()
-                    && rightHand != store.end() && newPtr == *rightHand)
-            {
-                MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
-            }
-        }
+        std::string boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundBootsID")->getString();
+        boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_Boots;
+
+        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundCuirassID")->getString();
+        boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_Cuirass;
+
+        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundLeftGauntletID")->getString();
+        boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_LeftGauntlet;
+
+        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundRightGauntletID")->getString();
+        boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_RightGauntlet;
+
+        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundHelmID")->getString();
+        boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_Helmet;
+
+        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundShieldID")->getString();
+        boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_CarriedLeft;
     }
-    else
-        actor.getClass().getInventoryStore(actor).remove(item, 1, actor, true);
+
+    int slot = MWWorld::InventoryStore::Slot_CarriedRight;
+    std::map<std::string, int>::iterator it = boundItemsMap.find(itemId);
+    if (it != boundItemsMap.end())
+        slot = it->second;
+
+    return slot;
 }
 
 class CheckActorCommanded : public MWMechanics::EffectSourceVisitor
@@ -139,7 +148,6 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
 
 namespace MWMechanics
 {
-
     const float aiProcessingDistance = 7168;
     const float sqrAiProcessingDistance = aiProcessingDistance*aiProcessingDistance;
 
@@ -226,6 +234,65 @@ namespace MWMechanics
             );
         }
     };
+
+    void Actors::adjustBoundItem (const std::string& itemId, bool bound, const MWWorld::Ptr& actor)
+    {
+        MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
+
+        if (bound)
+        {
+            if (actor.getClass().getContainerStore(actor).count(itemId) != 0)
+                return;
+
+            int slot = getBoundItemSlot(itemId);
+
+            MWWorld::Ptr prevItem = *store.getSlot(slot);
+
+            MWWorld::Ptr boundPtr = *store.MWWorld::ContainerStore::add(itemId, 1, actor);
+            MWWorld::ActionEquip action(boundPtr);
+            action.execute(actor);
+
+            if (actor != MWMechanics::getPlayer())
+                return;
+
+            MWWorld::Ptr newItem = *store.getSlot(slot);
+
+            if (newItem.isEmpty() || boundPtr != newItem)
+                return;
+
+            // change draw state only if the item is in player's right hand
+            if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
+                MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
+
+            mPreviousItems[slot] = std::make_pair(itemId, prevItem.isEmpty() ? "" : prevItem.getCellRef().getRefId());
+        }
+        else
+        {
+            store.remove(itemId, 1, actor, true);
+
+            if (actor != MWMechanics::getPlayer())
+                return;
+
+            int slot = getBoundItemSlot(itemId);
+
+            std::pair<std::string, std::string> prevItem = mPreviousItems[slot];
+
+            if (prevItem.first != itemId)
+                return;
+
+            MWWorld::Ptr ptr = MWWorld::Ptr();
+            if (prevItem.second != "")
+                ptr = store.search (prevItem.second);
+
+            mPreviousItems.erase(slot);
+
+            if (ptr.isEmpty())
+                return;
+
+            MWWorld::ActionEquip action(ptr);
+            action.execute(actor);
+        }
+    }
 
     void Actors::updateActor (const MWWorld::Ptr& ptr, float duration)
     {
@@ -1875,6 +1942,7 @@ namespace MWMechanics
         }
         mActors.clear();
         mDeathCount.clear();
+        mPreviousItems.clear();
     }
 
     void Actors::updateMagicEffects(const MWWorld::Ptr &ptr)
