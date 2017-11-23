@@ -567,6 +567,9 @@ namespace MWWorld
             state.mVelocity = it->mVelocity;
             state.mAttackStrength = it->mAttackStrength;
 
+            state.mThrown = it->mThrown;
+            state.mTime = it->mTime;
+
             state.save(writer);
 
             writer.endRecord(ESM::REC_PROJ);
@@ -604,6 +607,8 @@ namespace MWWorld
             state.mVelocity = esm.mVelocity;
             state.mIdArrow = esm.mId;
             state.mAttackStrength = esm.mAttackStrength;
+            state.mThrown = esm.mThrown;
+            state.mTime = esm.mTime;
 
             std::string model;
             try
