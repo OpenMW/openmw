@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <osg/PositionAttitudeTransform>
+#include <osg/ComputeBoundsVisitor>
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/projectilestate.hpp>
@@ -201,6 +202,12 @@ namespace MWWorld
         }
 
         osg::ref_ptr<osg::Node> projectile = mResourceSystem->getSceneManager()->getInstance(model, attachTo);
+
+        osg::ref_ptr<osg::ComputeBoundsVisitor> boundVisitor = new osg::ComputeBoundsVisitor();
+        projectile->accept(*boundVisitor.get());
+        osg::BoundingBox bb = boundVisitor->getBoundingBox();
+
+        state.mNode->setPivotPoint(bb.center()); 
 
         if (state.mIdMagic.size() > 1)
             for (size_t iter = 1; iter != state.mIdMagic.size(); ++iter)
