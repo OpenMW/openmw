@@ -565,8 +565,6 @@ namespace MWWorld
             state.mVelocity = it->mVelocity;
             state.mAttackStrength = it->mAttackStrength;
 
-            state.mThrown = it->mThrown;
-
             state.save(writer);
 
             writer.endRecord(ESM::REC_PROJ);
@@ -604,7 +602,6 @@ namespace MWWorld
             state.mVelocity = esm.mVelocity;
             state.mIdArrow = esm.mId;
             state.mAttackStrength = esm.mAttackStrength;
-            state.mThrown = esm.mThrown;
 
             std::string model;
             try
@@ -612,6 +609,7 @@ namespace MWWorld
                 MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), esm.mId);
                 MWWorld::Ptr ptr = ref.getPtr();
                 model = ptr.getClass().getModel(ptr);
+                state.mThrown = ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown;
             }
             catch(...)
             {
