@@ -347,7 +347,10 @@ namespace Shader
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
         for (auto shader : mShaders)
-            shader.second->releaseGLObjects(state);
+        {
+            if (shader.second != nullptr)
+                shader.second->releaseGLObjects(state);
+        }
         for (auto program : mPrograms)
             program.second->releaseGLObjects(state);
     }
