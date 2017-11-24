@@ -3,6 +3,8 @@
 
 #include "windowbase.hpp"
 
+#include <components/to_utf8/to_utf8.hpp>
+
 #include <memory>
 
 namespace MWBase { class WindowManager; }
@@ -16,7 +18,7 @@ namespace MWGui
         JournalWindow();
 
         /// construct a new instance of the one JournalWindow implementation
-        static JournalWindow * create (std::shared_ptr <JournalViewModel> Model, bool questList);
+        static JournalWindow * create (std::shared_ptr <JournalViewModel> Model, bool questList, ToUTF8::FromType encoding);
 
         /// destroy this instance of the JournalWindow implementation
         virtual ~JournalWindow () {};

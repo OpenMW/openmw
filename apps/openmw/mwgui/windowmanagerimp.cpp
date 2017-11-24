@@ -193,6 +193,7 @@ namespace MWGui
       , mRestAllowed(true)
       , mFallbackMap(fallbackMap)
       , mShowOwned(0)
+      , mEncoding(encoding)
       , mVersionDescription(versionDescription)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
@@ -346,7 +347,7 @@ namespace MWGui
         mGuiModeStates[GM_Console] = GuiModeState(mConsole);
 
         bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
-        JournalWindow* journal = JournalWindow::create(JournalViewModel::create (), questList);
+        JournalWindow* journal = JournalWindow::create(JournalViewModel::create (), questList, mEncoding);
         mWindows.push_back(journal);
         mGuiModeStates[GM_Journal] = GuiModeState(journal);
         mGuiModeStates[GM_Journal].mCloseSound = "book close";
@@ -2069,5 +2070,4 @@ namespace MWGui
         for (unsigned int i=0; i<mWindows.size(); ++i)
             mWindows[i]->setVisible(visible);
     }
-
 }

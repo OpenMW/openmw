@@ -100,8 +100,8 @@ namespace
             return getWidget <MWGui::BookPage> (name);
         }
 
-        JournalWindowImpl (MWGui::JournalViewModel::Ptr Model, bool questList)
-            : JournalBooks (Model), JournalWindow()
+        JournalWindowImpl (MWGui::JournalViewModel::Ptr Model, bool questList, ToUTF8::FromType encoding)
+            : JournalBooks (Model, encoding), JournalWindow()
         {
             center();
 
@@ -477,7 +477,7 @@ namespace
             MWBase::Environment::get().getWindowManager()->playSound("book page");
         }
 
-        void notifyIndexLinkClicked (MWGui::TypesetBook::InteractiveId character)
+        void notifyIndexLinkClicked (MWGui::TypesetBook::InteractiveId index)
         {
             setVisible (LeftTopicIndex, false);
             setVisible (RightTopicIndex, false);
@@ -490,7 +490,7 @@ namespace
 
             AddNamesToList add(list);
 
-            mModel->visitTopicNamesStartingWith((char) character, add);
+            mModel->visitTopicNamesStartingWith(index, add);
 
             list->adjustSize();
 
@@ -645,9 +645,9 @@ namespace
 }
 
 // glue the implementation to the interface
-MWGui::JournalWindow * MWGui::JournalWindow::create (JournalViewModel::Ptr Model, bool questList)
+MWGui::JournalWindow * MWGui::JournalWindow::create (JournalViewModel::Ptr Model, bool questList, ToUTF8::FromType encoding)
 {
-    return new JournalWindowImpl (Model, questList);
+    return new JournalWindowImpl (Model, questList, encoding);
 }
 
 MWGui::JournalWindow::JournalWindow()
