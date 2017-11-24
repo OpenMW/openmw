@@ -161,6 +161,15 @@ namespace
             Gui::ImageButton* showActiveButton = getWidget<Gui::ImageButton>(ShowActiveBTN);
             Gui::ImageButton* showAllButton = getWidget<Gui::ImageButton>(ShowAllBTN);
             Gui::ImageButton* questsButton = getWidget<Gui::ImageButton>(QuestsBTN);
+
+            Gui::ImageButton* nextButton = getWidget<Gui::ImageButton>(NextPageBTN);
+            if (nextButton->getSize().width == 64)
+            {
+                // english button has a 7 pixel wide strip of garbage on its right edge
+                nextButton->setSize(64-7, nextButton->getSize().height);
+                nextButton->setImageCoord(MyGUI::IntCoord(0,0,64-7,nextButton->getSize().height));
+            }
+
             if (!questList)
             {
                 // If tribunal is not installed (-> no options button), we still want the Topics button available,
@@ -176,6 +185,8 @@ namespace
                 showActiveButton->setVisible(false);
                 showAllButton->setVisible(false);
                 questsButton->setVisible(false);
+
+                adjustButton(TopicsBTN);
             }
             else
             {
@@ -188,33 +199,24 @@ namespace
                 adjustButton(ShowActiveBTN);
                 adjustButton(OptionsBTN);
                 adjustButton(QuestsBTN);
-            }
+                adjustButton(TopicsBTN);
+                int topicsWidth = getWidget<MyGUI::Widget>(TopicsBTN)->getSize().width;
+                int cancelLeft = getWidget<MyGUI::Widget>(CancelBTN)->getPosition().left;
+                int cancelRight = getWidget<MyGUI::Widget>(CancelBTN)->getPosition().left + getWidget<MyGUI::Widget>(CancelBTN)->getSize().width;
 
-            Gui::ImageButton* nextButton = getWidget<Gui::ImageButton>(NextPageBTN);
-            if (nextButton->getSize().width == 64)
-            {
-                // english button has a 7 pixel wide strip of garbage on its right edge
-                nextButton->setSize(64-7, nextButton->getSize().height);
-                nextButton->setImageCoord(MyGUI::IntCoord(0,0,64-7,nextButton->getSize().height));
-            }
+                getWidget<MyGUI::Widget>(QuestsBTN)->setPosition(cancelRight, getWidget<MyGUI::Widget>(QuestsBTN)->getPosition().top);
 
-            adjustButton(TopicsBTN);
-            int topicsWidth = getWidget<MyGUI::Widget>(TopicsBTN)->getSize().width;
-            int cancelLeft = getWidget<MyGUI::Widget>(CancelBTN)->getPosition().left;
-            int cancelRight = getWidget<MyGUI::Widget>(CancelBTN)->getPosition().left + getWidget<MyGUI::Widget>(CancelBTN)->getSize().width;
-
-            getWidget<MyGUI::Widget>(QuestsBTN)->setPosition(cancelRight, getWidget<MyGUI::Widget>(QuestsBTN)->getPosition().top);
-
-            // Usually Topics, Quests, and Cancel buttons have the 64px width, so we can place the Topics left-up from the Cancel button, and the Quests right-up from the Cancel button.
-            // But in some installations, e.g. German one, the Topics button has the 128px width, so we should place it exactly left from the Quests button.
-            if (getWidget<MyGUI::Widget>(TopicsBTN)->getSize().width == 64)
-            {
-                getWidget<MyGUI::Widget>(TopicsBTN)->setPosition(cancelLeft - topicsWidth, getWidget<MyGUI::Widget>(TopicsBTN)->getPosition().top);
-            }
-            else
-            {
-                int questLeft = getWidget<MyGUI::Widget>(QuestsBTN)->getPosition().left;
-                getWidget<MyGUI::Widget>(TopicsBTN)->setPosition(questLeft - topicsWidth, getWidget<MyGUI::Widget>(TopicsBTN)->getPosition().top);
+                // Usually Topics, Quests, and Cancel buttons have the 64px width, so we can place the Topics left-up from the Cancel button, and the Quests right-up from the Cancel button.
+                // But in some installations, e.g. German one, the Topics button has the 128px width, so we should place it exactly left from the Quests button.
+                if (topicsWidth == 64)
+                {
+                    getWidget<MyGUI::Widget>(TopicsBTN)->setPosition(cancelLeft - topicsWidth, getWidget<MyGUI::Widget>(TopicsBTN)->getPosition().top);
+                }
+                else
+                {
+                    int questLeft = getWidget<MyGUI::Widget>(QuestsBTN)->getPosition().left;
+                    getWidget<MyGUI::Widget>(TopicsBTN)->setPosition(questLeft - topicsWidth, getWidget<MyGUI::Widget>(TopicsBTN)->getPosition().top);
+                }
             }
 
             mQuestMode = false;
