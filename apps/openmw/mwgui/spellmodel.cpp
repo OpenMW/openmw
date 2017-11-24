@@ -60,7 +60,7 @@ namespace MWGui
             {
                 newSpell.mType = Spell::Type_Spell;
                 std::string cost = std::to_string(spell->mData.mCost);
-                std::string chance = std::to_string(int(MWMechanics::getSpellSuccessChance(spell, mActor)));
+                std::string chance = std::to_string((stats.getMagicka().getCurrent() >= spell->mData.mCost) ? int(MWMechanics::getSpellSuccessChance(spell, mActor)) : 0);
                 newSpell.mCostColumn = cost + "/" + chance;
             }
             else
