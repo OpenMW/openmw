@@ -12,7 +12,7 @@
 #include "record.hpp"
 
 void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base,
-    std::map<ESM::RefNum, std::string>& cache, CSMDoc::Messages& messages)
+    std::unordered_map<unsigned, std::string>& cache, CSMDoc::Messages& messages)
 {
     Record<Cell> cell = mCells.getRecord (cellIndex);
 
@@ -73,12 +73,8 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             ref.mCell = cell2.mId;
 
         // ignore content file number
-        std::map<ESM::RefNum, std::string>::iterator iter = cache.begin();
-        for (; iter != cache.end(); ++iter)
-        {
-            if (ref.mRefNum.mIndex == iter->first.mIndex)
-                break;
-        }
+        std::unordered_map<unsigned, std::string>::iterator iter;
+        iter = cache.find(ref.mRefNum.mIndex);
 
         if (isDeleted)
         {
@@ -120,7 +116,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
             appendRecord (record);
 
-            cache.insert (std::make_pair (ref.mRefNum, ref.mId));
+            cache.insert (std::make_pair (ref.mRefNum.mIndex, ref.mId));
         }
         else
         {
@@ -140,7 +136,5 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
 std::string CSMWorld::RefCollection::getNewId()
 {
-    std::ostringstream stream;
-    stream << "ref#" << mNextId++;
-    return stream.str();
+    return "ref#" + mNextId++;
 }
