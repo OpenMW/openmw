@@ -126,7 +126,10 @@ namespace MWMechanics
         float castChance = calcSpellBaseSuccessChance(spell, actor, effectiveSchool) + castBonus;
         castChance *= stats.getFatigueTerm();
 
-        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude()&& !godmode)
+        if (godmode)
+            return 100;
+
+        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude())
             return 0;
 
         if (spell->mData.mType == ESM::Spell::ST_Power)
@@ -135,13 +138,11 @@ namespace MWMechanics
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100;
 
+        if (stats.getMagicka().getCurrent() < spell->mData.mCost)
+            return 0;
+
         if (spell->mData.mFlags & ESM::Spell::F_Always)
             return 100;
-
-        if (godmode)
-        {
-            return 100;
-        }
 
         if (!cap)
             return std::max(0.f, castChance);
@@ -888,6 +889,11 @@ namespace MWMechanics
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
                         fail = true;
                     }
+
+                    // Reduce mana
+                    MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
+                    magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
+                    stats.setMagicka(magicka);
                 }
 
                 if (fail)

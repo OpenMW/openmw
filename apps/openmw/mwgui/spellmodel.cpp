@@ -8,7 +8,6 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
-#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -61,11 +60,7 @@ namespace MWGui
             {
                 newSpell.mType = Spell::Type_Spell;
                 std::string cost = std::to_string(spell->mData.mCost);
-                std::string chance = std::to_string(
-                    (stats.getMagicka().getCurrent() >= spell->mData.mCost ||
-                    (mActor == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState())
-                    ) ? int(MWMechanics::getSpellSuccessChance(spell, mActor)) : 0
-                );
+                std::string chance = std::to_string(int(MWMechanics::getSpellSuccessChance(spell, mActor)));
                 newSpell.mCostColumn = cost + "/" + chance;
             }
             else

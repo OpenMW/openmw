@@ -2718,13 +2718,6 @@ namespace MWWorld
                 message = "#{sPowerAlreadyUsed}";
                 fail = true;
             }
-
-            // Reduce mana
-            if (!fail && !godmode)
-            {
-                magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
-                stats.setMagicka(magicka);
-            }
         }
 
         if (isPlayer && fail)
