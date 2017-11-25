@@ -8,7 +8,9 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "widgets.hpp"
 
@@ -70,8 +72,14 @@ namespace MWGui
         updateBirths();
         updateSpells();
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mBirthList);
-    }
 
+        // Show the current birthsign by default
+        const std::string &signId =
+            MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
+
+        if (!signId.empty())
+            setBirthId(signId);
+    }
 
     void BirthDialog::setBirthId(const std::string &birthId)
     {

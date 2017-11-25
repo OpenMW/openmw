@@ -7,6 +7,9 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+
+#include "../mwmechanics/actorutil.hpp"
+
 #include "../mwworld/esmstore.hpp"
 
 #include "tooltips.hpp"
@@ -131,8 +134,16 @@ namespace MWGui
         updateClasses();
         updateStats();
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mClassList);
-    }
 
+        // Show the current class by default
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+
+        const std::string &classId =
+            player.get<ESM::NPC>()->mBase->mClass;
+
+        if (!classId.empty())
+            setClassId(classId);
+    }
 
     void PickClassDialog::setClassId(const std::string &classId)
     {
