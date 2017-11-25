@@ -1,7 +1,7 @@
 #ifndef CSM_WOLRD_REFCOLLECTION_H
 #define CSM_WOLRD_REFCOLLECTION_H
 
-#include <map>
+#include <unordered_map>
 
 #include "../doc/stage.hpp"
 
@@ -27,7 +27,7 @@ namespace CSMWorld
             {}
 
             void load (ESM::ESMReader& reader, int cellIndex, bool base,
-                std::map<ESM::RefNum, std::string>& cache, CSMDoc::Messages& messages);
+                std::unordered_map<unsigned, std::string>& cache, CSMDoc::Messages& messages);
             ///< Load a sequence of references.
 
             std::string getNewId();

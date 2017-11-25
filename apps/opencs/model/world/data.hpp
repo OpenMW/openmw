@@ -2,6 +2,7 @@
 #define CSM_WOLRD_DATA_H
 
 #include <map>
+#include <unordered_map>
 #include <vector>
 
 #include <boost/filesystem/path.hpp>
@@ -117,7 +118,7 @@ namespace CSMWorld
             const ESM::Dialogue *mDialogue; // last loaded dialogue
             bool mBase;
             bool mProject;
-            std::map<std::string, std::map<ESM::RefNum, std::string> > mRefLoadCache;
+            std::map<std::string, std::unordered_map<unsigned, std::string> > mRefLoadCache;
             int mReaderIndex;
 
             bool mFsStrict;

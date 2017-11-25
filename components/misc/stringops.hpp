@@ -103,8 +103,12 @@ public:
     /// Returns lower case copy of input string
     static std::string lowerCase(const std::string &in)
     {
-        std::string out = in;
-        lowerCaseInPlace(out);
+        std::string out;
+        out.reserve(in.size());
+
+        for (unsigned int i=0; i<in.size(); ++i)
+            out[i] = toLower(in[i]);
+
         return out;
     }
 
