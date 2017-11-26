@@ -24,12 +24,26 @@ varying vec4 passColor;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
+varying vec3 worldPos;
+
 #include "lighting.glsl"
 #include "parallax.glsl"
+
+#define CELLSIZE 10000
+#define TB_LINE_WIDTH 10
 
 void main()
 {
     vec2 adjustedUV = (gl_TextureMatrix[0] * vec4(uv, 0.0, 1.0)).xy;
+
+    vec2 cellUV = mod(worldPos.xy,vec2(CELLSIZE,CELLSIZE));
+
+    if (min(cellUV.x,cellUV.y) < TB_LINE_WIDTH)
+    {
+        gl_FragData[0].xyz = vec3(1.0,0.0,0.0);
+    }
+    else
+    {
 
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, adjustedUV);
@@ -82,4 +96,7 @@ void main()
 
     float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
+
+    }
+
 }
