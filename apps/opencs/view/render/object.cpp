@@ -307,11 +307,11 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
 {
     const float Pi = 3.14159265f;
 
-    const float InnerRadius = mBaseNode->getBound().radius();
+    const float InnerRadius = std::max(MarkerShaftBaseLength, mBaseNode->getBound().radius());
     const float OuterRadius = InnerRadius + MarkerShaftWidth;
 
     const float SegmentDistance = 100.f;
-    const size_t SegmentCount = std::min(64, std::max(8, (int)(OuterRadius * 2 * Pi / SegmentDistance)));
+    const size_t SegmentCount = std::min(64, std::max(24, (int)(OuterRadius * 2 * Pi / SegmentDistance)));
     const size_t VerticesPerSegment = 4;
     const size_t IndicesPerSegment = 24;
 
