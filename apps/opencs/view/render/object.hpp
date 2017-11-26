@@ -76,10 +76,7 @@ namespace CSVRender
 
         private:
 
-            static const float MarkerShaftWidth;
             static const float MarkerShaftBaseLength;
-            static const float MarkerHeadWidth;
-            static const float MarkerHeadLength;
 
             CSMWorld::Data& mData;
             std::string mReferenceId;
