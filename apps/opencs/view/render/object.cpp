@@ -336,6 +336,9 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
     osg::ref_ptr<osg::DrawElementsUShort> primitives = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES,
         IndexCount);
 
+    // prevent some depth collision issues from overlaps
+    osg::Vec3f offset = getMarkerPosition(0, MarkerShaftWidth/4, 0, axis);
+
     for (size_t i = 0; i < SegmentCount; ++i)
     {
         size_t index = i * VerticesPerSegment;
@@ -346,10 +349,10 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
         float outerX = OuterRadius * std::cos(i * Angle);
         float outerY = OuterRadius * std::sin(i * Angle);
 
-        vertices->at(index++) = getMarkerPosition(innerX, innerY,  MarkerShaftWidth / 2, axis);
-        vertices->at(index++) = getMarkerPosition(innerX, innerY, -MarkerShaftWidth / 2, axis);
-        vertices->at(index++) = getMarkerPosition(outerX, outerY,  MarkerShaftWidth / 2, axis);
-        vertices->at(index++) = getMarkerPosition(outerX, outerY, -MarkerShaftWidth / 2, axis);
+        vertices->at(index++) = getMarkerPosition(innerX, innerY,  MarkerShaftWidth / 2, axis) + offset;
+        vertices->at(index++) = getMarkerPosition(innerX, innerY, -MarkerShaftWidth / 2, axis) + offset;
+        vertices->at(index++) = getMarkerPosition(outerX, outerY,  MarkerShaftWidth / 2, axis) + offset;
+        vertices->at(index++) = getMarkerPosition(outerX, outerY, -MarkerShaftWidth / 2, axis) + offset;
     }
 
     colors->at(0) = osg::Vec4f (
@@ -390,17 +393,11 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
 
 void CSVRender::Object::setupCommonMarkerState(osg::ref_ptr<osg::Geometry> geometry)
 {
-    const int RenderBin = osg::StateSet::TRANSPARENT_BIN;
-
     osg::ref_ptr<osg::StateSet> state = geometry->getOrCreateStateSet();
     state->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     state->setMode(GL_BLEND, osg::StateAttribute::ON);
 
-    osg::ref_ptr<osg::Depth> depth(new osg::Depth);
-    depth->setWriteMask(false);
-    state->setAttributeAndModes(depth, osg::StateAttribute::ON);
-
-    state->setRenderBinDetails(RenderBin, "RenderBin");
+    state->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 }
 
 osg::Vec3f CSVRender::Object::getMarkerPosition (float x, float y, float z, int axis)
