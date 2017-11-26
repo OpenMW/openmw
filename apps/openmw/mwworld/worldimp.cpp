@@ -1919,6 +1919,11 @@ namespace MWWorld
         return mRendering->toggleRenderMode(MWRender::Render_Scene);
     }
 
+    bool World::toggleBordorders()
+    {
+        return mRendering->toggleRenderMode(MWRender::Render_Borders);
+    }
+
     void World::PCDropped (const Ptr& item)
     {
         std::string script = item.getClass().getScript(item);

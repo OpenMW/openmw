@@ -217,6 +217,7 @@ namespace MWWorld
 
             bool toggleWater() override;
             bool toggleWorld() override;
+            bool toggleBordorders() override;
 
             void adjustSky() override;
 

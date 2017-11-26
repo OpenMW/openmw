@@ -3,6 +3,7 @@
 varying vec2 uv;
 
 uniform sampler2D diffuseMap;
+uniform int borders;
 
 #if @normalMap
 uniform sampler2D normalMap;
@@ -42,7 +43,7 @@ void main()
 
     float borderIntensity = 0.0f;
 
-    if (min(cellUV.x,cellUV.y) < TB_LINE_WIDTH)
+    if (borders == 1 && min(cellUV.x,cellUV.y) < TB_LINE_WIDTH)
         borderIntensity = ( cos(cellUV.x / CELLSIZE * TWO_PI * BORDER_DASHES) *
                             cos(cellUV.y / CELLSIZE * TWO_PI * BORDER_DASHES) + 1.0) / 2.0;
 
