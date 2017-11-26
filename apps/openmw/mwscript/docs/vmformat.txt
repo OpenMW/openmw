@@ -454,5 +454,6 @@ op 0x2000303: Fixme, explicit
 op 0x2000304: Show
 op 0x2000305: Show, explicit
 op 0x2000306: OnActivate, explicit
+op 0x2000307: ToggleBorders, tb
 
-opcodes 0x2000307-0x3ffffff unused
+opcodes 0x2000308-0x3ffffff unused

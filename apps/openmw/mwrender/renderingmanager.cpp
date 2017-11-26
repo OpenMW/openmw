@@ -524,7 +524,6 @@ namespace MWRender
 
     void RenderingManager::update(float dt, bool paused)
     {
-toggleRenderMode(Render_Borders);
         reportStats();
 
         mUnrefQueue->flush(mWorkQueue.get());
