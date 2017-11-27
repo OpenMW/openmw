@@ -264,7 +264,7 @@ namespace MWMechanics
             if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
                 MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
 
-            mPreviousItems[slot] = std::make_pair(itemId, prevItem.isEmpty() ? "" : prevItem.getCellRef().getRefId());
+            mPreviousItems[slot] = std::make_pair(itemId, prevItem);
         }
         else
         {
@@ -275,21 +275,28 @@ namespace MWMechanics
 
             int slot = getBoundItemSlot(itemId);
 
-            std::pair<std::string, std::string> prevItem = mPreviousItems[slot];
+            std::pair<std::string, MWWorld::Ptr> prevItem = mPreviousItems[slot];
 
             if (prevItem.first != itemId)
                 return;
 
-            MWWorld::Ptr ptr = MWWorld::Ptr();
-            if (prevItem.second != "")
-                ptr = store.search (prevItem.second);
-
             mPreviousItems.erase(slot);
 
-            if (ptr.isEmpty())
+            if (prevItem.second.isEmpty())
                 return;
 
-            MWWorld::ActionEquip action(ptr);
+            // check if the item is still in the player's inventory
+            MWWorld::ContainerStoreIterator it = store.begin();
+            for (; it != store.end(); ++it)
+            {
+                if (*it == prevItem.second)
+                    break;
+            }
+
+            if (it == store.end())
+                return;
+
+            MWWorld::ActionEquip action(prevItem.second);
             action.execute(actor);
         }
     }
