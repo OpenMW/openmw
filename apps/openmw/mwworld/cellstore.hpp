@@ -377,6 +377,7 @@ namespace MWWorld
             ///< Check mLastRespawn and respawn references if necessary. This is a no-op if the cell is not loaded.
 
             bool isPointConnected(const int start, const int end) const;
+            void getNeighbouringPoints(const int index, ESM::Pathgrid::PointList &nodes) const;
 
             std::list<ESM::Pathgrid::Point> aStarSearch(const int start, const int end) const;
 

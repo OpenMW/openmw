@@ -942,6 +942,11 @@ namespace MWWorld
         return mPathgridGraph.isPointConnected(start, end);
     }
 
+    void CellStore::getNeighbouringPoints(const int index, ESM::Pathgrid::PointList &nodes) const
+    {
+        return mPathgridGraph.getNeighbouringPoints(index, nodes);
+    }
+
     std::list<ESM::Pathgrid::Point> CellStore::aStarSearch(const int start, const int end) const
     {
         return mPathgridGraph.aStarSearch(start, end);

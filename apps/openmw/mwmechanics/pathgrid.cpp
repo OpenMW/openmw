@@ -214,6 +214,16 @@ namespace MWMechanics
         return (mGraph[start].componentId == mGraph[end].componentId);
     }
 
+    void PathgridGraph::getNeighbouringPoints(const int index, ESM::Pathgrid::PointList &nodes) const
+    {
+        for(int i = 0; i < static_cast<int> (mGraph[index].edges.size()); i++)
+        {
+            int neighbourIndex = mGraph[index].edges[i].index;
+            if (neighbourIndex != index)
+                nodes.push_back(mPathgrid->mPoints[neighbourIndex]);
+        }
+    }
+
     /*
      * NOTE: Based on buildPath2(), please check git history if interested
      *       Should consider using a 3rd party library version (e.g. boost)

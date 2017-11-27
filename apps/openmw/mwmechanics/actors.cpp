@@ -1627,6 +1627,17 @@ namespace MWMechanics
         }
     }
 
+    bool Actors::isAnyObjectInRange(const osg::Vec3f& position, float radius)
+    {
+        for (PtrActorMap::iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
+        {
+            if ((iter->first.getRefData().getPosition().asVec3() - position).length2() <= radius*radius)
+                return true;
+        }
+
+        return false;
+    }
+
     std::list<MWWorld::Ptr> Actors::getActorsSidingWith(const MWWorld::Ptr& actor)
     {
         std::list<MWWorld::Ptr> list;
