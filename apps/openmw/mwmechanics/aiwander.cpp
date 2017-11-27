@@ -17,6 +17,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 
+#include "pathgrid.hpp"
 #include "creaturestats.hpp"
 #include "steering.hpp"
 #include "movement.hpp"
@@ -217,7 +218,7 @@ namespace MWMechanics
             ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(mDestination));
             ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
-            mPathFinder.buildSyncedPath(start, dest, actor.getCell());
+            mPathFinder.buildSyncedPath(start, dest, actor.getCell(), getPathGridGraph(actor.getCell()));
 
             if (mPathFinder.isPathConstructed())
                 storage.setState(Wander_Walking);
@@ -349,7 +350,7 @@ namespace MWMechanics
             ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
             // don't take shortcuts for wandering
-            mPathFinder.buildSyncedPath(start, dest, actor.getCell());
+            mPathFinder.buildSyncedPath(start, dest, actor.getCell(), getPathGridGraph(actor.getCell()));
 
             if (mPathFinder.isPathConstructed())
             {
@@ -383,7 +384,7 @@ namespace MWMechanics
             // Check if land creature will walk onto water or if water creature will swim onto land
             if ((!isWaterCreature && !destinationIsAtWater(actor, mDestination)) ||
                 (isWaterCreature && !destinationThroughGround(currentPositionVec3f, mDestination))) {
-                mPathFinder.buildSyncedPath(currentPosition, destinationPosition, actor.getCell());
+                mPathFinder.buildSyncedPath(currentPosition, destinationPosition, actor.getCell(), getPathGridGraph(actor.getCell()));
                 mPathFinder.addPointToPath(destinationPosition);
 
                 if (mPathFinder.isPathConstructed())
@@ -666,7 +667,7 @@ namespace MWMechanics
         ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(actorPos));
 
         // don't take shortcuts for wandering
-        mPathFinder.buildSyncedPath(start, dest, actor.getCell());
+        mPathFinder.buildSyncedPath(start, dest, actor.getCell(), getPathGridGraph(actor.getCell()));
 
         if (mPathFinder.isPathConstructed())
         {
@@ -872,7 +873,7 @@ namespace MWMechanics
 
         int index = PathFinder::GetClosestPoint(pathgrid, PathFinder::MakeOsgVec3(dest));
 
-        currentCell->getNeighbouringPoints(index, points);
+        getPathGridGraph(currentCell).getNeighbouringPoints(index, points);
     }
 
     void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage)
@@ -913,7 +914,7 @@ namespace MWMechanics
             {
                 osg::Vec3f nodePos(PathFinder::MakeOsgVec3(pathgrid->mPoints[counter]));
                 if((npcPos - nodePos).length2() <= mDistance * mDistance &&
-                   cellStore->isPointConnected(closestPointIndex, counter))
+                   getPathGridGraph(cellStore).isPointConnected(closestPointIndex, counter))
                 {
                     storage.mAllowedNodes.push_back(pathgrid->mPoints[counter]);
                     pointIndex = counter;

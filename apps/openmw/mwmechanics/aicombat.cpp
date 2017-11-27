@@ -13,6 +13,7 @@
 
 #include "../mwrender/animation.hpp"
 
+#include "pathgrid.hpp"
 #include "creaturestats.hpp"
 #include "steering.hpp"
 #include "movement.hpp"
@@ -372,7 +373,7 @@ namespace MWMechanics
                             int closestPointIndex = PathFinder::GetClosestPoint(pathgrid, localPos);
                             for (int i = 0; i < static_cast<int>(pathgrid->mPoints.size()); i++)
                             {
-                                if (i != closestPointIndex && storage.mCell->isPointConnected(closestPointIndex, i))
+                                if (i != closestPointIndex && getPathGridGraph(storage.mCell).isPointConnected(closestPointIndex, i))
                                 {
                                     points.push_back(pathgrid->mPoints[static_cast<size_t>(i)]);
                                 }

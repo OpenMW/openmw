@@ -27,6 +27,7 @@ namespace MWMechanics
     const float AI_REACTION_TIME = 0.25f;
 
     class CharacterController;
+    class PathgridGraph;
 
     /// \brief Base class for AI packages
     class AiPackage
@@ -118,6 +119,8 @@ namespace MWMechanics
             virtual bool doesPathNeedRecalc(const ESM::Pathgrid::Point& newDest, const MWWorld::CellStore* currentCell);
 
             void evadeObstacles(const MWWorld::Ptr& actor, float duration, const ESM::Position& pos);
+
+            const PathgridGraph& getPathGridGraph(const MWWorld::CellStore* cell);
 
             // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;

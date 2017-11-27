@@ -49,7 +49,7 @@ namespace
 
 namespace MWMechanics
 {
-    PathgridGraph::PathgridGraph()
+    PathgridGraph::PathgridGraph(const MWWorld::CellStore *cell)
         : mCell(NULL)
         , mPathgrid(NULL)
         , mIsExterior(0)
@@ -58,6 +58,7 @@ namespace MWMechanics
         , mSCCId(0)
         , mSCCIndex(0)
     {
+        load(cell);
     }
 
     /*
@@ -128,6 +129,11 @@ namespace MWMechanics
         buildConnectedPoints();
         mIsGraphConstructed = true;
         return true;
+    }
+
+    const ESM::Pathgrid *PathgridGraph::getPathgrid() const
+    {
+        return mPathgrid;
     }
 
     // v is the pathgrid point index (some call them vertices)
