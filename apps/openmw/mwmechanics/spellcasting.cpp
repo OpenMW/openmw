@@ -889,11 +889,6 @@ namespace MWMechanics
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
                         fail = true;
                     }
-
-                    // Reduce mana
-                    MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
-                    magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
-                    stats.setMagicka(magicka);
                 }
 
                 if (fail)
