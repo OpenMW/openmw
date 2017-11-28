@@ -265,9 +265,20 @@ namespace MWMechanics
             getAllowedNodes(actor, currentCell->getCell(), storage);
         }
 
+        bool actorCanMoveByZ = (actor.getClass().canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
+            || MWBase::Environment::get().getWorld()->isFlying(actor);
+
+        if(actorCanMoveByZ && mDistance > 0) {
+            // Typically want to idle for a short time before the next wander
+            if (Misc::Rng::rollDice(100) >= 92 && storage.mState != Wander_Walking) {
+                wanderNearStart(actor, storage, mDistance);
+            }
+
+            storage.mCanWanderAlongPathGrid = false;
+        }
         // If the package has a wander distance but no pathgrid is available,
         // randomly idle or wander near spawn point
-        if(storage.mAllowedNodes.empty() && mDistance > 0 && !storage.mIsWanderingManually) {
+        else if(storage.mAllowedNodes.empty() && mDistance > 0 && !storage.mIsWanderingManually) {
             // Typically want to idle for a short time before the next wander
             if (Misc::Rng::rollDice(100) >= 96) {
                 wanderNearStart(actor, storage, mDistance);
@@ -373,7 +384,7 @@ namespace MWMechanics
         do {
             // Determine a random location within radius of original position
             const float pi = 3.14159265359f;
-            const float wanderRadius = Misc::Rng::rollClosedProbability() * wanderDistance;
+            const float wanderRadius = (0.2f + Misc::Rng::rollClosedProbability() * 0.8f) * wanderDistance;
             const float randomDirection = Misc::Rng::rollClosedProbability() * 2.0f * pi;
             const float destinationX = mInitialActorPosition.x() + wanderRadius * std::cos(randomDirection);
             const float destinationY = mInitialActorPosition.y() + wanderRadius * std::sin(randomDirection);
@@ -661,6 +672,7 @@ namespace MWMechanics
     {
         unsigned int randNode = Misc::Rng::rollDice(storage.mAllowedNodes.size());
         ESM::Pathgrid::Point dest(storage.mAllowedNodes[randNode]);
+
         ToWorldCoordinates(dest, storage.mCell->getCell());
 
         // actor position is already in world coordinates
