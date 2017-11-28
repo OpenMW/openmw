@@ -59,7 +59,7 @@ namespace MWMechanics
         float mTargetAngleRadians;
         bool mTurnActorGivingGreetingToFacePlayer;
         float mReaction; // update some actions infrequently
-        
+
         AiWander::GreetingState mSaidGreeting;
         int mGreetingTimer;
 
@@ -70,7 +70,7 @@ namespace MWMechanics
 
         bool mIsWanderingManually;
         bool mCanWanderAlongPathGrid;
-        
+
         unsigned short mIdleAnimation;
         std::vector<unsigned short> mBadIdles; // Idle animations that when called cause errors
 
@@ -86,7 +86,7 @@ namespace MWMechanics
 
         float mDoorCheckDuration;
         int mStuckCount;
-        
+
         AiWanderStorage():
             mTargetAngleRadians(0),
             mTurnActorGivingGreetingToFacePlayer(false),
@@ -111,7 +111,7 @@ namespace MWMechanics
             mIsWanderingManually = isManualWander;
         }
     };
-    
+
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mRemainingDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle),
         mRepeat(repeat), mStoredInitialActorPosition(false), mInitialActorPosition(osg::Vec3f(0, 0, 0)), mHasDestination(false), mDestination(osg::Vec3f(0, 0, 0))
@@ -201,7 +201,18 @@ namespace MWMechanics
             stopWalking(actor, storage);
             currentCell = actor.getCell();
             storage.mPopulateAvailableNodes = true;
-            mStoredInitialActorPosition = false;
+        }
+
+        // Here we should reset an initial position, if a current cell was REALLY changed
+        // We do not store AiStorage in a savegame, so cellChange is not help us in this case
+        // TODO: find a more simple and fast solution, or do not store the mInitialActorPosition at all
+        if (mStoredInitialActorPosition)
+        {
+            int cx,cy;
+            MWBase::Environment::get().getWorld()->positionToIndex(mInitialActorPosition.x(),mInitialActorPosition.y(),cx,cy);
+            MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+            if (cell != currentCell)
+                mStoredInitialActorPosition = false;
         }
 
         mRemainingDuration -= ((duration*MWBase::Environment::get().getWorld()->getTimeScaleFactor()) / 3600);
@@ -223,7 +234,7 @@ namespace MWMechanics
             if (mPathFinder.isPathConstructed())
                 storage.setState(Wander_Walking);
         }
-        
+
         doPerFrameActionsForState(actor, duration, storage, pos);
 
         playIdleDialogueRandomly(actor);
@@ -298,13 +309,6 @@ namespace MWMechanics
         if(mDistance && cellChange)
             mDistance = 0;
 
-        // For stationary NPCs, move back to the starting location if another AiPackage moved us elsewhere
-        if (mDistance == 0 && !cellChange
-            && (pos.asVec3() - mInitialActorPosition).length2() > (DESTINATION_TOLERANCE * DESTINATION_TOLERANCE))
-        {
-            returnToStartLocation(actor, storage, pos);
-        }
-
         // Allow interrupting a walking actor to trigger a greeting
         WanderState& wanderState = storage.mState;
         if ((wanderState == Wander_IdleNow) || (wanderState == Wander_Walking))
@@ -321,7 +325,7 @@ namespace MWMechanics
                 {
                     setPathToAnAllowedNode(actor, storage, pos);
                 }
-            } 
+            }
         } else if (storage.mIsWanderingManually && mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DESTINATION_TOLERANCE)) {
             completeManualWalking(actor, storage);
         }
@@ -330,8 +334,8 @@ namespace MWMechanics
     }
 
     bool AiWander::getRepeat() const
-    { 
-         return mRepeat; 
+    {
+         return mRepeat;
     }
 
 
@@ -348,27 +352,6 @@ namespace MWMechanics
         }
         // if get here, not yet completed
         return false;
-    }
-
-    void AiWander::returnToStartLocation(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos)
-    {
-        if (!mPathFinder.isPathConstructed())
-        {
-            mDestination = mInitialActorPosition;
-            ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(mDestination));
-
-            // actor position is already in world coordinates
-            ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
-
-            // don't take shortcuts for wandering
-            mPathFinder.buildSyncedPath(start, dest, actor.getCell(), getPathGridGraph(actor.getCell()));
-
-            if (mPathFinder.isPathConstructed())
-            {
-                storage.setState(Wander_Walking);
-                mHasDestination = true;
-            }
-        }
     }
 
     /*
@@ -497,7 +480,7 @@ namespace MWMechanics
         }
     }
 
-    void AiWander::onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, 
+    void AiWander::onWalkingStatePerFrameActions(const MWWorld::Ptr& actor,
         float duration, AiWanderStorage& storage, ESM::Position& pos)
     {
         // Is there no destination or are we there yet?
@@ -873,7 +856,7 @@ namespace MWMechanics
 
         state.moveIn(new AiWanderStorage());
 
-        MWBase::Environment::get().getWorld()->moveObject(actor, static_cast<float>(dest.mX), 
+        MWBase::Environment::get().getWorld()->moveObject(actor, static_cast<float>(dest.mX),
             static_cast<float>(dest.mY), static_cast<float>(dest.mZ));
         actor.getClass().adjustPosition(actor, false);
     }
@@ -914,7 +897,7 @@ namespace MWMechanics
             // get NPC's position in local (i.e. cell) coordinates
             osg::Vec3f npcPos(mInitialActorPosition);
             CoordinateConverter(cell).toLocal(npcPos);
-            
+
             // Find closest pathgrid point
             int closestPointIndex = PathFinder::GetClosestPoint(pathgrid, npcPos);
 
@@ -945,7 +928,7 @@ namespace MWMechanics
         storage.mPopulateAvailableNodes = false;
     }
 
-    // When only one path grid point in wander distance, 
+    // When only one path grid point in wander distance,
     // additional points for NPC to wander to are:
     // 1. NPC's initial location
     // 2. Partway along the path between the point and its connected points.
@@ -969,7 +952,7 @@ namespace MWMechanics
         delta.normalize();
 
         int distance = std::max(mDistance / 2, MINIMUM_WANDER_DISTANCE);
-        
+
         // must not travel longer than distance between waypoints or NPC goes past waypoint
         distance = std::min(distance, static_cast<int>(length));
         delta *= distance;
@@ -1041,4 +1024,3 @@ namespace MWMechanics
         init();
     }
 }
-

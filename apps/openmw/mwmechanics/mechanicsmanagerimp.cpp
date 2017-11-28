@@ -22,6 +22,7 @@
 
 #include "aicombat.hpp"
 #include "aipursue.hpp"
+#include "aitravel.hpp"
 #include "spellcasting.hpp"
 #include "autocalcspell.hpp"
 #include "npcstats.hpp"
@@ -1598,9 +1599,22 @@ namespace MWMechanics
 
     void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
     {
-        if (ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(target))
+        MWMechanics::AiSequence& aiSequence = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+
+        if (aiSequence.isInCombat(target))
             return;
-        ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
+
+        // we should return a wandering actor back after combat
+        // TODO: only for stationary wander?
+        if (!aiSequence.isInCombat() && aiSequence.getLastRunTypeId() == MWMechanics::AiPackage::TypeIdWander)
+        {
+            osg::Vec3f pos = ptr.getRefData().getPosition().asVec3();
+
+            MWMechanics::AiTravel travelPackage(pos.x(), pos.y(), pos.z());
+            aiSequence.stack(travelPackage, ptr);
+        }
+
+        aiSequence.stack(MWMechanics::AiCombat(target), ptr);
         if (target == getPlayer())
         {
             // if guard starts combat with player, guards pursuing player should do the same
