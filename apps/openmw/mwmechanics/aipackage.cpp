@@ -101,8 +101,17 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
     {
         bool wasShortcutting = mIsShortcutting;
         bool destInLOS = false;
-        if (getTypeId() != TypeIdWander) // prohibit shortcuts for AiWander
-            mIsShortcutting = shortcutPath(start, dest, actor, &destInLOS); // try to shortcut first
+
+        const MWWorld::Class& actorClass = actor.getClass();
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+
+        // check if actor can move along z-axis
+        bool actorCanMoveByZ = (actorClass.canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
+            || world->isFlying(actor);
+
+        // Prohibit shortcuts for AiWander, if the actor can not move in 3 dimensions.
+        if (actorCanMoveByZ || getTypeId() != TypeIdWander)
+            mIsShortcutting = shortcutPath(start, dest, actor, &destInLOS, actorCanMoveByZ); // try to shortcut first
 
         if (!mIsShortcutting)
         {
@@ -235,20 +244,9 @@ const MWMechanics::PathgridGraph& MWMechanics::AiPackage::getPathGridGraph(const
     return *cache[id].get();
 }
 
-bool MWMechanics::AiPackage::shortcutPath(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor, bool *destInLOS)
+bool MWMechanics::AiPackage::shortcutPath(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor, bool *destInLOS, bool isPathClear)
 {
-    const MWWorld::Class& actorClass = actor.getClass();
-    MWBase::World* world = MWBase::Environment::get().getWorld();
-
-    // check if actor can move along z-axis
-    bool actorCanMoveByZ = (actorClass.canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
-        || world->isFlying(actor);
-
-    // don't use pathgrid when actor can move in 3 dimensions
-    bool isPathClear = actorCanMoveByZ;
-
-    if (!isPathClear
-        && (!mShortcutProhibited || (PathFinder::MakeOsgVec3(mShortcutFailPos) - PathFinder::MakeOsgVec3(startPoint)).length() >= PATHFIND_SHORTCUT_RETRY_DIST))
+    if (!mShortcutProhibited || (PathFinder::MakeOsgVec3(mShortcutFailPos) - PathFinder::MakeOsgVec3(startPoint)).length() >= PATHFIND_SHORTCUT_RETRY_DIST)
     {
         // check if target is clearly visible
         isPathClear = !MWBase::Environment::get().getWorld()->castRay(
