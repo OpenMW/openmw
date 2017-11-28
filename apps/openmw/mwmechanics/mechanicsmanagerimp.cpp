@@ -1611,7 +1611,7 @@ namespace MWMechanics
             osg::Vec3f pos = ptr.getRefData().getPosition().asVec3();
 
             MWMechanics::AiTravel travelPackage(pos.x(), pos.y(), pos.z());
-            aiSequence.stack(travelPackage, ptr);
+            aiSequence.stack(travelPackage, ptr, false);
         }
 
         aiSequence.stack(MWMechanics::AiCombat(target), ptr);

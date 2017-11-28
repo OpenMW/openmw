@@ -298,7 +298,7 @@ void AiSequence::clear()
     mPackages.clear();
 }
 
-void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
+void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor, bool cancelOther)
 {
     if (actor == getPlayer())
         throw std::runtime_error("Can't add AI packages to player");
@@ -308,7 +308,7 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
         stopCombat();
 
     // remove previous packages if required
-    if (package.shouldCancelPreviousAi())
+    if (cancelOther && package.shouldCancelPreviousAi())
     {
         for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end();)
         {
