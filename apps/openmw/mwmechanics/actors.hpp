@@ -81,6 +81,9 @@ namespace MWMechanics
             void dropActors (const MWWorld::CellStore *cellStore, const MWWorld::Ptr& ignore);
             ///< Deregister all actors (except for \a ignore) in the given cell.
 
+            void updateCombatMusic();
+            ///< Update combat music state
+
             void update (float duration, bool paused);
             ///< Update actor stats and store desired velocity vectors in \a movement
 
