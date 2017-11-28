@@ -126,10 +126,7 @@ namespace MWMechanics
         float castChance = calcSpellBaseSuccessChance(spell, actor, effectiveSchool) + castBonus;
         castChance *= stats.getFatigueTerm();
 
-        if (godmode)
-            return 100;
-
-        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude())
+        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude()&& !godmode)
             return 0;
 
         if (spell->mData.mType == ESM::Spell::ST_Power)
@@ -138,11 +135,16 @@ namespace MWMechanics
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100;
 
-        if (stats.getMagicka().getCurrent() < spell->mData.mCost)
+        if (stats.getMagicka().getCurrent() < spell->mData.mCost && !godmode)
             return 0;
 
         if (spell->mData.mFlags & ESM::Spell::F_Always)
             return 100;
+
+        if (godmode)
+        {
+            return 100;
+        }
 
         if (!cap)
             return std::max(0.f, castChance);
