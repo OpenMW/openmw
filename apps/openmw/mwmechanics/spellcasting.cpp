@@ -115,7 +115,7 @@ namespace MWMechanics
         return castChance;
     }
 
-    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap)
+    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
     {
         bool godmode = actor == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
 
@@ -135,7 +135,7 @@ namespace MWMechanics
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100;
 
-        if (stats.getMagicka().getCurrent() < spell->mData.mCost && !godmode)
+        if (checkMagicka && stats.getMagicka().getCurrent() < spell->mData.mCost && !godmode)
             return 0;
 
         if (spell->mData.mFlags & ESM::Spell::F_Always)
@@ -152,11 +152,11 @@ namespace MWMechanics
             return std::max(0.f, std::min(100.f, castChance));
     }
 
-    float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap)
+    float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
     {
         const ESM::Spell* spell =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-        return getSpellSuccessChance(spell, actor, effectiveSchool, cap);
+        return getSpellSuccessChance(spell, actor, effectiveSchool, cap, checkMagicka);
     }
 
 
