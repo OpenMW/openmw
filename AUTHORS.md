@@ -153,6 +153,7 @@ Programmers
     Sylvain Thesnieres (Garvek)
     t6
     terrorfisch
+    thegriglat
     Thomas Luppi (Digmaster)
     Will Herrmann (Thunderforge)
     Tom Mason (wheybags)
