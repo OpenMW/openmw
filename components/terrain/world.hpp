@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "defs.hpp"
+#include <map>
 
 namespace osg
 {
@@ -73,13 +74,11 @@ namespace Terrain
 
         /// Load the cell into the scene graph.
         /// @note Not thread safe.
-        /// @note May be ignored by derived implementations that don't organize the terrain into cells.
-        virtual void loadCell(int x, int y) {}
+        virtual void loadCell(int x, int y);
 
         /// Remove the cell from the scene graph.
         /// @note Not thread safe.
-        /// @note May be ignored by derived implementations that don't organize the terrain into cells.
-        virtual void unloadCell(int x, int y) {}
+        virtual void unloadCell(int x, int y);
 
         virtual void enable(bool enabled) {}
 
@@ -97,8 +96,11 @@ namespace Terrain
 
         Storage* getStorage() { return mStorage; }
 
+typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > CellGrid; 
+
     protected:
         Storage* mStorage;
+CellGrid mCellBorderNodes;
 
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mTerrainRoot;

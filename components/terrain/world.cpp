@@ -11,6 +11,9 @@
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
 
+#include <iostream>
+#include <osg/ShapeDrawable>
+
 namespace Terrain
 {
 
@@ -39,7 +42,6 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     compileRoot->addChild(compositeCam);
 
-
     mCompositeMapRenderer = new CompositeMapRenderer;
     compositeCam->addChild(mCompositeMapRenderer);
 
@@ -50,6 +52,35 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     mResourceSystem->addResourceManager(mChunkManager.get());
     mResourceSystem->addResourceManager(mTextureManager.get());
+}
+
+void World::loadCell(int x, int y)
+{
+osg::ref_ptr<osg::Node> newNode = 
+  new osg::ShapeDrawable(
+    new osg::Sphere (
+      osg::Vec3f(x * 8192 + 4000,y * 8192 + 4000,1000),100.0));
+
+mTerrainRoot->addChild(newNode);
+
+mCellBorderNodes[std::make_pair(x,y)] = newNode;
+
+std::cout << "aaaaa" << std::endl;
+}
+
+void World::unloadCell(int x, int y)
+{
+CellGrid::iterator it = mCellBorderNodes.find(std::make_pair(x,y));
+
+if (it == mCellBorderNodes.end())
+    return;
+
+osg::ref_ptr<osg::Node> borderNode = it->second;
+mTerrainRoot->removeChild(borderNode);
+
+mCellBorderNodes.erase(it);
+
+std::cout << "bbbbb" << std::endl;
 }
 
 World::~World()

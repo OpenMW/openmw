@@ -67,6 +67,8 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
 
 void TerrainGrid::loadCell(int x, int y)
 {
+    Terrain::World::loadCell(x,y);
+
     if (mGrid.find(std::make_pair(x, y)) != mGrid.end())
         return; // already loaded
 
@@ -82,7 +84,7 @@ void TerrainGrid::loadCell(int x, int y)
 
 void TerrainGrid::unloadCell(int x, int y)
 {
-    Grid::iterator it = mGrid.find(std::make_pair(x,y));
+    World::CellGrid::iterator it = mGrid.find(std::make_pair(x,y));
     if (it == mGrid.end())
         return;
 
