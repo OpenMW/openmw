@@ -18,7 +18,7 @@
 namespace Terrain
 {
 
-World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask)
+World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask)
     : mStorage(storage)
     , mParent(parent)
     , mResourceSystem(resourceSystem)
@@ -34,6 +34,7 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     mBorderRoot = new osg::Switch;
     mBorderRoot->setName("Border Root");
+    mBorderRoot->setNodeMask(borderMask);
 
     mTerrainRoot->addChild(mBorderRoot);
 
