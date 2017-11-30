@@ -67,8 +67,6 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
 
 void TerrainGrid::loadCell(int x, int y)
 {
-    Terrain::World::loadCell(x,y);
-
     if (mGrid.find(std::make_pair(x, y)) != mGrid.end())
         return; // already loaded
 
@@ -76,6 +74,8 @@ void TerrainGrid::loadCell(int x, int y)
     osg::ref_ptr<osg::Node> terrainNode = buildTerrain(NULL, 1.f, center);
     if (!terrainNode)
         return; // no terrain defined
+
+    Terrain::World::loadCell(x,y);
 
     mTerrainRoot->addChild(terrainNode);
 

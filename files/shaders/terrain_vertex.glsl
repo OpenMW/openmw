@@ -13,11 +13,7 @@ varying vec4 passColor;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
-varying vec3 worldPos;
-
 #include "lighting.glsl"
-
-uniform mat4 osg_ViewMatrixInverse;
 
 void main(void)
 {
@@ -37,6 +33,4 @@ void main(void)
     passViewPos = viewPos.xyz;
 
     uv = gl_MultiTexCoord0.xy;
-
-    worldPos = (osg_ViewMatrixInverse * gl_ModelViewMatrix * gl_Vertex).xyz;
 }

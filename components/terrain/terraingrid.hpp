@@ -33,7 +33,6 @@ namespace Terrain
         // split each ESM::Cell into mNumSplits*mNumSplits terrain chunks
         unsigned int mNumSplits;
 
-//        typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > Grid;
         World::CellGrid mGrid;
     };
 

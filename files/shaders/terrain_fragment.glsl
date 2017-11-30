@@ -3,7 +3,6 @@
 varying vec2 uv;
 
 uniform sampler2D diffuseMap;
-uniform int borders;
 
 #if @normalMap
 uniform sampler2D normalMap;
@@ -25,27 +24,12 @@ varying vec4 passColor;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
-varying vec3 worldPos;
-
 #include "lighting.glsl"
 #include "parallax.glsl"
-
-#define CELLSIZE 8192
-#define TB_LINE_WIDTH 10
-#define BORDER_DASHES 20
-#define TWO_PI (2 * 3.14159265)
 
 void main()
 {
     vec2 adjustedUV = (gl_TextureMatrix[0] * vec4(uv, 0.0, 1.0)).xy;
-
-    vec2 cellUV = mod(worldPos.xy,vec2(CELLSIZE,CELLSIZE));
-
-    float borderIntensity = 0.0f;
-
-    if (borders == 1 && min(cellUV.x,cellUV.y) < TB_LINE_WIDTH)
-        borderIntensity = ( cos(cellUV.x / CELLSIZE * TWO_PI * BORDER_DASHES) *
-                            cos(cellUV.y / CELLSIZE * TWO_PI * BORDER_DASHES) + 1.0) / 2.0;
 
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, adjustedUV);
@@ -97,7 +81,5 @@ void main()
     gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos), shininess, matSpec);
 
     float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
-    gl_FragData[0].xyz = mix(gl_FragData[0].xyz, vec3(1.0,1.0,0.0), borderIntensity);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
-
 }

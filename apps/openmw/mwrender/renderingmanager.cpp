@@ -61,7 +61,6 @@ namespace MWRender
             : mFogStart(0.f)
             , mFogEnd(0.f)
             , mWireframe(false)
-            , mBorders(false)
         {
         }
 
@@ -80,16 +79,6 @@ namespace MWRender
             }
             else
                 stateset->removeAttribute(osg::StateAttribute::POLYGONMODE);
-
-            osg::Uniform *borderUniform = stateset->getUniform("borders");
-
-            if (!borderUniform)
-            {
-                borderUniform = new osg::Uniform("borders",(int) 0);
-                stateset->addUniform(borderUniform);
-            }
-
-            borderUniform->set((int) mBorders);
         }
 
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
@@ -136,27 +125,12 @@ namespace MWRender
             return mWireframe;
         }
 
-        void setBorders(bool borders)
-        {
-            if (mBorders != borders)
-            {
-                mBorders = borders;
-                reset();
-            }
-        }
-
-        bool getBorders()
-        {
-            return mBorders;
-        }
-
     private:
         osg::Vec4f mAmbientColor;
         osg::Vec4f mFogColor;
         float mFogStart;
         float mFogEnd;
         bool mWireframe;
-        bool mBorders;
     };
 
     class PreloadCommonAssetsWorkItem : public SceneUtil::WorkItem
@@ -485,12 +459,6 @@ namespace MWRender
             bool wireframe = !mStateUpdater->getWireframe();
             mStateUpdater->setWireframe(wireframe);
             return wireframe;
-        }
-        else if (mode == Render_Borders)
-        {
-            bool borders = !mStateUpdater->getBorders();
-            mStateUpdater->setBorders(borders);
-            return borders;
         }
         else if (mode == Render_Water)
         {
