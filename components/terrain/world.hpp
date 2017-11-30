@@ -96,11 +96,14 @@ namespace Terrain
 
         Storage* getStorage() { return mStorage; }
 
-typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > CellGrid; 
+        typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > CellGrid; 
 
     protected:
+        void createCellBorderGeometry(int x, int y);
+        void destroyCellBorderGeometry(int x, int y);
+
         Storage* mStorage;
-CellGrid mCellBorderNodes;
+        CellGrid mCellBorderNodes;
 
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mTerrainRoot;

@@ -57,7 +57,7 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
     mResourceSystem->addResourceManager(mTextureManager.get());
 }
 
-void World::loadCell(int x, int y)
+void World::createCellBorderGeometry(int x, int y)
 {
     const int cellSize = 8192;
     const int borderSegments = 40;
@@ -83,7 +83,12 @@ void World::loadCell(int x, int y)
         pos += osg::Vec3f(0,0,getHeightAt(pos) + offset);
 
         vertices->push_back(pos);
-        colors->push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
+        osg::Vec4f col = i % 2 == 0 ?
+            osg::Vec4f(0,0,0,1) :
+            osg::Vec4f(1,1,0,1);
+
+        colors->push_back(col);
     }
 
     osg::ref_ptr<osg::Geometry> border = new osg::Geometry;
@@ -109,7 +114,7 @@ void World::loadCell(int x, int y)
     mCellBorderNodes[std::make_pair(x,y)] = borderGeode;
 }
 
-void World::unloadCell(int x, int y)
+void World::destroyCellBorderGeometry(int x, int y)
 {
     CellGrid::iterator it = mCellBorderNodes.find(std::make_pair(x,y));
 
@@ -120,6 +125,16 @@ void World::unloadCell(int x, int y)
     mTerrainRoot->removeChild(borderNode);
 
     mCellBorderNodes.erase(it);
+}
+
+void World::loadCell(int x, int y)
+{
+    createCellBorderGeometry(x,y);
+}
+
+void World::unloadCell(int x, int y)
+{
+    destroyCellBorderGeometry(x,y);
 }
 
 World::~World()
