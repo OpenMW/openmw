@@ -11,7 +11,6 @@
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
 
-#include <iostream>
 #include <osg/PolygonMode>
 #include <osg/Geometry>
 #include <osg/Geode>
