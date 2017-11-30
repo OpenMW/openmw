@@ -4,6 +4,7 @@
 #include <osg/ref_ptr>
 #include <osg/Referenced>
 #include <osg/Vec3f>
+#include <osg/Switch>
 
 #include <memory>
 
@@ -82,6 +83,8 @@ namespace Terrain
 
         virtual void enable(bool enabled) {}
 
+        void setBordersVisible(bool visible);
+
         /// Create a View to use with preload feature. The caller is responsible for deleting the view.
         /// @note Thread safe.
         virtual View* createView() { return NULL; }
@@ -107,6 +110,7 @@ namespace Terrain
 
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mTerrainRoot;
+        osg::ref_ptr<osg::Switch> mBorderRoot;
 
         osg::ref_ptr<osg::Group> mCompositeMapCamera;
         osg::ref_ptr<CompositeMapRenderer> mCompositeMapRenderer;

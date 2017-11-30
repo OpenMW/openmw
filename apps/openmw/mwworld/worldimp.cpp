@@ -1921,7 +1921,7 @@ namespace MWWorld
 
     bool World::toggleBordorders()
     {
-        return mRendering->toggleRenderMode(MWRender::Render_Borders);
+        return mRendering->toggleBorders();
     }
 
     void World::PCDropped (const Ptr& item)

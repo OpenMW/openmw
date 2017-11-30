@@ -207,6 +207,7 @@ namespace MWRender
         , mNightEyeFactor(0.f)
         , mFieldOfViewOverride(0.f)
         , mFieldOfViewOverridden(false)
+        , mBorders(false)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
@@ -466,6 +467,13 @@ namespace MWRender
     void RenderingManager::setSkyEnabled(bool enabled)
     {
         mSky->setEnabled(enabled);
+    }
+    
+    bool RenderingManager::toggleBorders()
+    {
+        mBorders = !mBorders;
+        mTerrain->setBordersVisible(mBorders);
+        return mBorders;
     }
 
     bool RenderingManager::toggleRenderMode(RenderMode mode)

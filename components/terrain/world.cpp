@@ -34,6 +34,11 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     mTerrainRoot->setName("Terrain Root");
 
+    mBorderRoot = new osg::Switch;
+    mBorderRoot->setName("Border Root");
+
+    mTerrainRoot->addChild(mBorderRoot);
+
     osg::ref_ptr<osg::Camera> compositeCam = new osg::Camera;
     compositeCam->setRenderOrder(osg::Camera::PRE_RENDER, -1);
     compositeCam->setProjectionMatrix(osg::Matrix::identity());
@@ -55,6 +60,8 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     mResourceSystem->addResourceManager(mChunkManager.get());
     mResourceSystem->addResourceManager(mTextureManager.get());
+
+    setBordersVisible(false);
 }
 
 void World::createCellBorderGeometry(int x, int y)
@@ -109,7 +116,7 @@ void World::createCellBorderGeometry(int x, int y)
     polygonmode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     stateSet->setAttributeAndModes(polygonmode,osg::StateAttribute::ON);
 
-    mTerrainRoot->addChild(borderGeode);
+    mBorderRoot->addChild(borderGeode);
 
     mCellBorderNodes[std::make_pair(x,y)] = borderGeode;
 }
@@ -122,9 +129,17 @@ void World::destroyCellBorderGeometry(int x, int y)
         return;
 
     osg::ref_ptr<osg::Node> borderNode = it->second;
-    mTerrainRoot->removeChild(borderNode);
+    mBorderRoot->removeChild(borderNode);
 
     mCellBorderNodes.erase(it);
+}
+
+void World::setBordersVisible(bool visible)
+{
+    if (visible)
+        mBorderRoot->setAllChildrenOn();
+    else
+        mBorderRoot->setAllChildrenOff();
 }
 
 void World::loadCell(int x, int y)
