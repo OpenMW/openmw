@@ -13,6 +13,9 @@
 
 #include <iostream>
 #include <osg/ShapeDrawable>
+#include <osg/PolygonMode>
+#include <osg/Geometry>
+#include <osg/Geode>
 
 namespace Terrain
 {
@@ -56,31 +59,67 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
 void World::loadCell(int x, int y)
 {
-osg::ref_ptr<osg::Node> newNode = 
-  new osg::ShapeDrawable(
-    new osg::Sphere (
-      osg::Vec3f(x * 8192 + 4000,y * 8192 + 4000,1000),100.0));
+    const int cellSize = 8192;
+    const int borderSegments = 40;
+    const float offset = 10.0;
 
-mTerrainRoot->addChild(newNode);
+    osg::Vec3 cellCorner = osg::Vec3(x * cellSize,y * cellSize,0);
 
-mCellBorderNodes[std::make_pair(x,y)] = newNode;
+    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
+    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
+    osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
 
-std::cout << "aaaaa" << std::endl;
+    normals->push_back(osg::Vec3(0.0f,-1.0f, 0.0f));
+
+    float borderStep = cellSize / ((float) borderSegments);
+
+    for (int i = 0; i <= 2 * borderSegments; ++i)
+    {
+        osg::Vec3f pos = i < borderSegments ?
+            osg::Vec3(i * borderStep,0.0f,0.0f) :
+            osg::Vec3(cellSize,(i - borderSegments) * borderStep,0.0f);
+
+        pos += cellCorner;
+        pos += osg::Vec3f(0,0,getHeightAt(pos) + offset);
+
+        vertices->push_back(pos);
+        colors->push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    }
+
+    osg::ref_ptr<osg::Geometry> border = new osg::Geometry;
+    border->setVertexArray(vertices.get());
+    border->setNormalArray(normals.get());
+    border->setNormalBinding(osg::Geometry::BIND_OVERALL);
+    border->setColorArray(colors.get());
+    border->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+
+    border->addPrimitiveSet(new osg::DrawArrays(GL_LINE_STRIP,0,vertices->size()));
+
+    osg::ref_ptr<osg::Geode> borderGeode = new osg::Geode;
+    borderGeode->addDrawable(border.get());
+
+    osg::StateSet *stateSet = borderGeode->getOrCreateStateSet();
+
+    osg::PolygonMode* polygonmode = new osg::PolygonMode;
+    polygonmode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+    stateSet->setAttributeAndModes(polygonmode,osg::StateAttribute::ON);
+
+    mTerrainRoot->addChild(borderGeode);
+
+    mCellBorderNodes[std::make_pair(x,y)] = borderGeode;
 }
 
 void World::unloadCell(int x, int y)
 {
-CellGrid::iterator it = mCellBorderNodes.find(std::make_pair(x,y));
+    CellGrid::iterator it = mCellBorderNodes.find(std::make_pair(x,y));
 
-if (it == mCellBorderNodes.end())
-    return;
+    if (it == mCellBorderNodes.end())
+        return;
 
-osg::ref_ptr<osg::Node> borderNode = it->second;
-mTerrainRoot->removeChild(borderNode);
+    osg::ref_ptr<osg::Node> borderNode = it->second;
+    mTerrainRoot->removeChild(borderNode);
 
-mCellBorderNodes.erase(it);
-
-std::cout << "bbbbb" << std::endl;
+    mCellBorderNodes.erase(it);
 }
 
 World::~World()
