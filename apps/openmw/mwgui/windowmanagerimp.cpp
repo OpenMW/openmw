@@ -1967,6 +1967,8 @@ namespace MWGui
 
     void WindowManager::createTextures()
     {
+        //FIXME: copy/paste code
+
         {
             MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("white");
             tex->createManual(8, 8, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8);
@@ -1999,6 +2001,20 @@ namespace MWGui
             MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("transparent");
             tex->createManual(8, 8, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8A8);
             setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
+        }
+
+        {
+            MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("yellow");
+            tex->createManual(8, 8, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8);
+            unsigned char* data = reinterpret_cast<unsigned char*>(tex->lock(MyGUI::TextureUsage::Write));
+            for (int x=0; x<8; ++x)
+                for (int y=0; y<8; ++y)
+                {
+                    *(data++) = 255;
+                    *(data++) = 255;
+                    *(data++) = 0;
+                }
+            tex->unlock();
         }
     }
 

@@ -11,6 +11,8 @@
 #include <MyGUI_RotatingSkin.h>
 #include <MyGUI_FactoryManager.h>
 
+#include <MyGUI_Canvas.h>
+
 #include <components/esm/globalmap.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/settings/settings.hpp>
@@ -41,7 +43,8 @@ namespace
         Local_CompassLayer = 1,
         Local_FogLayer = 2,
         Local_MarkerLayer = 3,
-        Local_MapLayer = 4
+        Local_MapLayer = 4,
+        Local_BgLayer = 5
     };
 
     enum GlobalMapWidgetDepth
@@ -201,7 +204,7 @@ namespace MWGui
             for (int my=0; my<mNumCells; ++my)
             {
                 MyGUI::ImageBox* map = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
-                    MyGUI::IntCoord(mx*mMapWidgetSize, my*mMapWidgetSize, mMapWidgetSize, mMapWidgetSize),
+                    MyGUI::IntCoord(mx*mMapWidgetSize, my*mMapWidgetSize, mMapWidgetSize - 1, mMapWidgetSize - 1),
                     MyGUI::Align::Top | MyGUI::Align::Left);
                 map->setDepth(Local_MapLayer);
 
@@ -217,6 +220,13 @@ namespace MWGui
                 mFogWidgets.push_back(fog);
             }
         }
+
+      mBgWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
+          MyGUI::IntCoord(0,0, mMapWidgetSize * mNumCells, mMapWidgetSize * mNumCells),
+          MyGUI::Align::Top | MyGUI::Align::Left);
+
+      mBgWidget->setDepth(Local_BgLayer);
+      mBgWidget->setImageTexture("yellow");
     }
 
     void LocalMapBase::setCellPrefix(const std::string& prefix)
@@ -380,6 +390,7 @@ namespace MWGui
                 MyGUI::ImageBox* box = mMapWidgets[my + mNumCells*mx];
 
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(mapX, mapY);
+
                 if (texture)
                 {
                     std::shared_ptr<MyGUI::ITexture> guiTex (new osgMyGUI::OSGTexture(texture));
