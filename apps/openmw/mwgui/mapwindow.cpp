@@ -176,6 +176,7 @@ namespace MWGui
         , mMarkerUpdateTimer(0.0f)
         , mLastDirectionX(0.0f)
         , mLastDirectionY(0.0f)
+        , mBordersVisible(false)
         , mNeedDoorMarkersUpdate(false)
     {
         mCustomMarkers.eventMarkersChanged += MyGUI::newDelegate(this, &LocalMapBase::updateCustomMarkers);
@@ -229,8 +230,11 @@ namespace MWGui
         mBgWidget->setImageTexture("yellow checkers");
     }
 
-    void LocalMapBase::setCellBordersVisible(bool visible)
+    void LocalMapBase::setCellBordersVisible(bool visible, bool permanent)
     {
+        if (permanent)
+            mBordersVisible = visible;
+
         const int newSize = mMapWidgetSize - (visible ? 1 : 0);
 
         for (int mx=0; mx<mNumCells; ++mx)
@@ -377,6 +381,11 @@ namespace MWGui
 
     void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
     {
+        if (interior)
+            setCellBordersVisible(false,false);
+        else
+            setCellBordersVisible(mBordersVisible,false);
+
         if (x==mCurX && y==mCurY && mInterior==interior && !mChanged)
             return; // don't do anything if we're still in the same cell
 

@@ -81,7 +81,7 @@ namespace MWGui
 
         void onFrame(float dt);
 
-        void setCellBordersVisible(bool visible);
+        void setCellBordersVisible(bool visible, bool permanent=true);
 
         bool toggleFogOfWar();
 
@@ -162,6 +162,7 @@ namespace MWGui
 
         float mLastDirectionX;
         float mLastDirectionY;
+        bool mBordersVisible;
 
     private:
         void updateDoorMarkers();
