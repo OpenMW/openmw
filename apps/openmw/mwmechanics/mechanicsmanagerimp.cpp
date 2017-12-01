@@ -1606,7 +1606,7 @@ namespace MWMechanics
 
         // we should return a wandering actor back after combat
         // the same thing for actors without AI packages
-        if (!aiSequence.isInCombat() && aiSequence.getTypeId() <= MWMechanics::AiPackage::TypeIdWander)
+        if (aiSequence.getTypeId() <= MWMechanics::AiPackage::TypeIdWander)
         {
             int typeId = aiSequence.getTypeId();
             osg::Vec3f dest;
