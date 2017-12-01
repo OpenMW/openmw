@@ -41,13 +41,12 @@ void main(void)
 {
     vec3 c;
 
-    switch (mapping)
-    {
-        case 0: c = sphericalCoords(uv); break;
-        case 1: c = cylindricalCoords(uv); break;
-        case 2: c = planetCoords(uv); break;
-        default: c = sphericalCoords(uv); break;
-    }
+    if (mapping == 0)
+        c = sphericalCoords(uv);
+    else if (mapping == 1)
+        c = cylindricalCoords(uv);
+    else
+        c = planetCoords(uv);
 
     gl_FragData[0] = textureCube(cubeMap,c);
 }
