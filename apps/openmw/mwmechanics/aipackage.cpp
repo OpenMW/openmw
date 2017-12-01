@@ -120,6 +120,9 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
 
     if (!isDestReached && mTimer > AI_REACTION_TIME)
     {
+        if (actor.getClass().isBipedal(actor))
+            openDoors(actor);
+
         bool wasShortcutting = mIsShortcutting;
         bool destInLOS = false;
 
@@ -209,45 +212,43 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
     // first check if obstacle is a door
     static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
 
-    MWWorld::Ptr door = getNearbyDoor(actor, distance);
-    if (door != MWWorld::Ptr() && actor.getClass().isBipedal(actor))
+    const MWWorld::Ptr door = getNearbyDoor(actor, distance);
+    if (!door.isEmpty() && actor.getClass().isBipedal(actor))
     {
-        // note: AiWander currently does not open doors
-        if (getTypeId() != TypeIdWander && !door.getCellRef().getTeleport() && door.getClass().getDoorState(door) == 0)
-        {
-            if ((door.getCellRef().getTrap().empty() && door.getCellRef().getLockLevel() <= 0 ))
-            {
-                MWBase::Environment::get().getWorld()->activate(door, actor);
-                return;
-            }
-
-            std::string keyId = door.getCellRef().getKey();
-            if (keyId.empty())
-                return;
-
-            bool hasKey = false;
-            const MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
-
-            // make key id lowercase
-            Misc::StringUtils::lowerCaseInPlace(keyId);
-            for (MWWorld::ConstContainerStoreIterator it = invStore.cbegin(); it != invStore.cend(); ++it)
-            {
-                std::string refId = it->getCellRef().getRefId();
-                Misc::StringUtils::lowerCaseInPlace(refId);
-                if (refId == keyId)
-                {
-                    hasKey = true;
-                    break;
-                }
-            }
-
-            if (hasKey)
-                MWBase::Environment::get().getWorld()->activate(door, actor);
-        }
+        openDoors(actor);
     }
     else
     {
         mObstacleCheck.takeEvasiveAction(movement);
+    }
+}
+
+void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
+{
+    static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
+
+    const MWWorld::Ptr door = getNearbyDoor(actor, distance);
+    if (door == MWWorld::Ptr())
+        return;
+
+    // note: AiWander currently does not open doors
+    if (getTypeId() != TypeIdWander && !door.getCellRef().getTeleport() && door.getClass().getDoorState(door) == 0)
+    {
+        if ((door.getCellRef().getTrap().empty() && door.getCellRef().getLockLevel() <= 0 ))
+        {
+            MWBase::Environment::get().getWorld()->activate(door, actor);
+            return;
+        }
+
+        const std::string keyId = door.getCellRef().getKey();
+        if (keyId.empty())
+            return;
+
+        MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
+        MWWorld::Ptr keyPtr = invStore.search(keyId);
+
+        if (!keyPtr.isEmpty())
+            MWBase::Environment::get().getWorld()->activate(door, actor);
     }
 }
 

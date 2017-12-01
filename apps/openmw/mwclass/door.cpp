@@ -114,7 +114,7 @@ namespace MWClass
         const std::string lockedSound = "LockedDoor";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
-        const MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
+        MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
 
         bool isLocked = ptr.getCellRef().getLockLevel() > 0;
         bool isTrapped = !ptr.getCellRef().getTrap().empty();
@@ -135,21 +135,14 @@ namespace MWClass
             animation->addSpellCastGlow(effect, 1); // 1 second glow to match the time taken for a door opening or closing
         }
 
-        // make key id lowercase
-        std::string keyId = ptr.getCellRef().getKey();
+        const std::string keyId = ptr.getCellRef().getKey();
         if (!keyId.empty())
         {
-            Misc::StringUtils::lowerCaseInPlace(keyId);
-            for (MWWorld::ConstContainerStoreIterator it = invStore.cbegin(); it != invStore.cend(); ++it)
+            MWWorld::Ptr keyPtr = invStore.search(keyId);
+            if (!keyPtr.isEmpty())
             {
-                std::string refId = it->getCellRef().getRefId();
-                Misc::StringUtils::lowerCaseInPlace(refId);
-                if (refId == keyId)
-                {
-                    hasKey = true;
-                    keyName = it->getClass().getName(*it);
-                    break;
-                }
+                hasKey = true;
+                keyName = keyPtr.getClass().getName(keyPtr);
             }
         }
 
