@@ -335,9 +335,18 @@ namespace MWMechanics
 
     bool AiWander::getRepeat() const
     {
-         return mRepeat;
+        return mRepeat;
     }
 
+    osg::Vec3f AiWander::getDestination(const MWWorld::Ptr& actor) const
+    {
+        if (mHasDestination)
+            return mDestination;
+
+        const ESM::Pathgrid::Point currentPosition = actor.getRefData().getPosition().pos;
+        const osg::Vec3f currentPositionVec3f = osg::Vec3f(currentPosition.mX, currentPosition.mY, currentPosition.mZ);
+        return currentPositionVec3f;
+    }
 
     bool AiWander::isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage)
     {
@@ -346,8 +355,8 @@ namespace MWMechanics
             // End package if duration is complete
             if (mRemainingDuration <= 0)
             {
-                    stopWalking(actor, storage);
-                    return true;
+                stopWalking(actor, storage);
+                return true;
             }
         }
         // if get here, not yet completed

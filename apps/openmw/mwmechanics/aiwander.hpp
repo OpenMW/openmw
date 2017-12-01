@@ -47,9 +47,11 @@ namespace MWMechanics
             virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
             virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
-            
+
             bool getRepeat() const;
-            
+
+            osg::Vec3f getDestination(const MWWorld::Ptr& actor) const;
+
             enum GreetingState {
                 Greet_None,
                 Greet_InProgress,

@@ -1605,12 +1605,22 @@ namespace MWMechanics
             return;
 
         // we should return a wandering actor back after combat
-        // TODO: only for stationary wander?
-        if (!aiSequence.isInCombat() && aiSequence.getLastRunTypeId() == MWMechanics::AiPackage::TypeIdWander)
+        // the same thing for actors without AI packages
+        if (!aiSequence.isInCombat() && aiSequence.getTypeId() <= MWMechanics::AiPackage::TypeIdWander)
         {
-            osg::Vec3f pos = ptr.getRefData().getPosition().asVec3();
+            int typeId = aiSequence.getTypeId();
+            osg::Vec3f dest;
+            if (typeId == MWMechanics::AiPackage::TypeIdNone)
+            {
+                dest = ptr.getRefData().getPosition().asVec3();
+            }
+            else if (typeId == MWMechanics::AiPackage::TypeIdWander)
+            {
+                AiPackage* activePackage = aiSequence.getActivePackage();
+                dest = activePackage->getDestination(ptr);
+            }
 
-            MWMechanics::AiTravel travelPackage(pos.x(), pos.y(), pos.z());
+            MWMechanics::AiTravel travelPackage(dest.x(), dest.y(), dest.z());
             aiSequence.stack(travelPackage, ptr, false);
         }
 
