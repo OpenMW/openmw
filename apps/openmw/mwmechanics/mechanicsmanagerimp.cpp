@@ -1620,7 +1620,7 @@ namespace MWMechanics
                 dest = activePackage->getDestination(ptr);
             }
 
-            MWMechanics::AiTravel travelPackage(dest.x(), dest.y(), dest.z());
+            MWMechanics::AiTravel travelPackage(dest.x(), dest.y(), dest.z(), true);
             aiSequence.stack(travelPackage, ptr, false);
         }
 

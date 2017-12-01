@@ -20,7 +20,7 @@ namespace MWMechanics
     {
         public:
             /// Default constructor
-            AiTravel(float x, float y, float z);
+            AiTravel(float x, float y, float z, bool hidden = false);
             AiTravel(const ESM::AiSequence::AiTravel* travel);
 
             /// Simulates the passing of time
@@ -38,6 +38,8 @@ namespace MWMechanics
             float mX;
             float mY;
             float mZ;
+
+            bool mHidden;
     };
 }
 

@@ -28,15 +28,14 @@ bool isWithinMaxRange(const osg::Vec3f& pos1, const osg::Vec3f& pos2)
 
 namespace MWMechanics
 {
-    AiTravel::AiTravel(float x, float y, float z)
-    : mX(x),mY(y),mZ(z)
+    AiTravel::AiTravel(float x, float y, float z, bool hidden)
+    : mX(x),mY(y),mZ(z),mHidden(hidden)
     {
     }
 
     AiTravel::AiTravel(const ESM::AiSequence::AiTravel *travel)
         : mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ)
     {
-
     }
 
     AiTravel *MWMechanics::AiTravel::clone() const
@@ -64,7 +63,8 @@ namespace MWMechanics
 
     int AiTravel::getTypeId() const
     {
-        return TypeIdTravel;
+        // TODO: store mHidden in the savegame?
+        return mHidden ? TypeIdInternalTravel : TypeIdTravel;
     }
 
     void AiTravel::fastForward(const MWWorld::Ptr& actor, AiState& state)
