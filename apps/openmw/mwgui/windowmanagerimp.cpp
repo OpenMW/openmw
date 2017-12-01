@@ -2004,14 +2004,16 @@ namespace MWGui
         }
 
         {
-            MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("yellow");
-            tex->createManual(8, 8, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8);
+            MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("yellow checkers");
+            tex->createManual(64, 64, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8);
             unsigned char* data = reinterpret_cast<unsigned char*>(tex->lock(MyGUI::TextureUsage::Write));
-            for (int x=0; x<8; ++x)
-                for (int y=0; y<8; ++y)
+            for (int x=0; x<64; ++x)
+                for (int y=0; y<64; ++y)
                 {
-                    *(data++) = 255;
-                    *(data++) = 255;
+                    bool yellow = x % 2 == y % 2;
+
+                    *(data++) = yellow ? 255 : 0;
+                    *(data++) = yellow ? 255 : 0;
                     *(data++) = 0;
                 }
             tex->unlock();

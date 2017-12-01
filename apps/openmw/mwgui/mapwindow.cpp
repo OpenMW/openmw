@@ -226,7 +226,7 @@ namespace MWGui
           MyGUI::Align::Top | MyGUI::Align::Left);
 
       mBgWidget->setDepth(Local_BgLayer);
-      mBgWidget->setImageTexture("yellow");
+      mBgWidget->setImageTexture("yellow checkers");
     }
 
     void LocalMapBase::setCellPrefix(const std::string& prefix)
