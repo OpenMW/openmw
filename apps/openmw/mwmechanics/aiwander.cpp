@@ -201,18 +201,7 @@ namespace MWMechanics
             stopWalking(actor, storage);
             currentCell = actor.getCell();
             storage.mPopulateAvailableNodes = true;
-        }
-
-        // Here we should reset an initial position, if a current cell was REALLY changed
-        // We do not store AiStorage in a savegame, so cellChange is not help us in this case
-        // TODO: find a more simple and fast solution, or do not store the mInitialActorPosition at all
-        if (mStoredInitialActorPosition)
-        {
-            int cx,cy;
-            MWBase::Environment::get().getWorld()->positionToIndex(mInitialActorPosition.x(),mInitialActorPosition.y(),cx,cy);
-            MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
-            if (cell != currentCell)
-                mStoredInitialActorPosition = false;
+            mStoredInitialActorPosition = false;
         }
 
         mRemainingDuration -= ((duration*MWBase::Environment::get().getWorld()->getTimeScaleFactor()) / 3600);
