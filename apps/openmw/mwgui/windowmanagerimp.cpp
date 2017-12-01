@@ -2019,6 +2019,11 @@ namespace MWGui
             tex->unlock();
         }
     }
+ 
+    void WindowManager::setCellBordersVisible(bool visible)
+    {
+        mMap->setCellBordersVisible(visible);
+    }
 
     void WindowManager::setMenuTransparency(float value)
     {

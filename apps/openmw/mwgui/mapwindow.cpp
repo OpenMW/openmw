@@ -204,7 +204,7 @@ namespace MWGui
             for (int my=0; my<mNumCells; ++my)
             {
                 MyGUI::ImageBox* map = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
-                    MyGUI::IntCoord(mx*mMapWidgetSize, my*mMapWidgetSize, mMapWidgetSize - 1, mMapWidgetSize - 1),
+                    MyGUI::IntCoord(mx*mMapWidgetSize, my*mMapWidgetSize, mMapWidgetSize, mMapWidgetSize),
                     MyGUI::Align::Top | MyGUI::Align::Left);
                 map->setDepth(Local_MapLayer);
 
@@ -221,12 +221,21 @@ namespace MWGui
             }
         }
 
-      mBgWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
-          MyGUI::IntCoord(0,0, mMapWidgetSize * mNumCells, mMapWidgetSize * mNumCells),
-          MyGUI::Align::Top | MyGUI::Align::Left);
+        mBgWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
+            MyGUI::IntCoord(0,0, mMapWidgetSize * mNumCells, mMapWidgetSize * mNumCells),
+            MyGUI::Align::Top | MyGUI::Align::Left);
 
-      mBgWidget->setDepth(Local_BgLayer);
-      mBgWidget->setImageTexture("yellow checkers");
+        mBgWidget->setDepth(Local_BgLayer);
+        mBgWidget->setImageTexture("yellow checkers");
+    }
+
+    void LocalMapBase::setCellBordersVisible(bool visible)
+    {
+        const int newSize = mMapWidgetSize - (visible ? 1 : 0);
+
+        for (int mx=0; mx<mNumCells; ++mx)
+            for (int my=0; my<mNumCells; ++my)
+                mMapWidgets[my + mNumCells*mx]->setSize(newSize,newSize);
     }
 
     void LocalMapBase::setCellPrefix(const std::string& prefix)

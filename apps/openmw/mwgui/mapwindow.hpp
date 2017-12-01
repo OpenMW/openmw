@@ -81,6 +81,8 @@ namespace MWGui
 
         void onFrame(float dt);
 
+        void setCellBordersVisible(bool visible);
+
         bool toggleFogOfWar();
 
         struct MarkerUserData
