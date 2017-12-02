@@ -2023,6 +2023,7 @@ namespace MWGui
     void WindowManager::setCellBordersVisible(bool visible)
     {
         mMap->setCellBordersVisible(visible);
+        mHud->setCellBordersVisible(visible);
     }
 
     void WindowManager::setMenuTransparency(float value)
