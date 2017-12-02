@@ -350,9 +350,9 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	fi
 
 	# SDL2
-	download "SDL 2.0.4" \
-		"https://www.libsdl.org/release/SDL2-devel-2.0.4-VC.zip" \
-		"SDL2-2.0.4.zip"
+	download "SDL 2.0.7" \
+		"https://www.libsdl.org/release/SDL2-devel-2.0.7-VC.zip" \
+		"SDL2-2.0.7.zip"
 fi
 
 cd .. #/..
@@ -632,18 +632,18 @@ cd $DEPS
 echo
 
 # SDL2
-printf "SDL 2.0.4... "
+printf "SDL 2.0.7... "
 {
-	if [ -d SDL2-2.0.4 ]; then
+	if [ -d SDL2-2.0.7 ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf SDL2-2.0.4
-		eval 7z x -y SDL2-2.0.4.zip $STRIP
+		rm -rf SDL2-2.0.7
+		eval 7z x -y SDL2-2.0.7.zip $STRIP
 	fi
 
-	export SDL2DIR="$(real_pwd)/SDL2-2.0.4"
+	export SDL2DIR="$(real_pwd)/SDL2-2.0.7"
 
-	add_runtime_dlls "$(pwd)/SDL2-2.0.4/lib/x${ARCHSUFFIX}/SDL2.dll"
+	add_runtime_dlls "$(pwd)/SDL2-2.0.7/lib/x${ARCHSUFFIX}/SDL2.dll"
 
 	echo Done.
 }
