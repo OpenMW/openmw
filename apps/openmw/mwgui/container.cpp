@@ -154,7 +154,8 @@ namespace MWGui
     {
         WindowBase::onClose();
 
-        mModel->onClose();
+        if (mModel)
+            mModel->onClose();
     }
 
     void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
