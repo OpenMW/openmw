@@ -697,6 +697,19 @@ namespace MWMechanics
             }
         }
 
+        // dynamic stats
+        for (int i = 0; i < 3; ++i)
+        {
+            DynamicStat<float> stat = creatureStats.getDynamic(i);
+            stat.setCurrentModifier(effects.get(ESM::MagicEffect::FortifyHealth + i).getMagnitude() -
+                effects.get(ESM::MagicEffect::DrainHealth + i).getMagnitude(),
+                // Magicka can be decreased below zero due to a fortify effect wearing off
+                // Fatigue can be decreased below zero meaning the actor will be knocked out
+                i == 1 || i == 2);
+
+            creatureStats.setDynamic(i, stat);
+        }
+
         // attributes
         for(int i = 0;i < ESM::Attribute::Length;++i)
         {
@@ -726,19 +739,6 @@ namespace MWMechanics
                     }
                 }
             }
-        }
-
-        // dynamic stats
-        for(int i = 0;i < 3;++i)
-        {
-            DynamicStat<float> stat = creatureStats.getDynamic(i);
-            stat.setCurrentModifier(effects.get(ESM::MagicEffect::FortifyHealth+i).getMagnitude() -
-                             effects.get(ESM::MagicEffect::DrainHealth+i).getMagnitude(),
-                             // Magicka can be decreased below zero due to a fortify effect wearing off
-                             // Fatigue can be decreased below zero meaning the actor will be knocked out
-                             i == 1 || i == 2);
-
-            creatureStats.setDynamic(i, stat);
         }
 
         // AI setting modifiers
