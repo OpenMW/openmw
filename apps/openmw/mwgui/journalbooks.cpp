@@ -281,6 +281,8 @@ BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex ()
                                                                    textColours.journalTopicOver,
                                                                    textColours.journalTopicPressed, first);
 
+        ch[1]++;
+
         // Words can not be started with these characters
         if (i == 26 || i == 28)
             continue;
@@ -290,8 +292,6 @@ BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex ()
 
         typesetter->write (style, to_utf8_span (buffer));
         typesetter->lineBreak ();
-
-        ch[1]++;
     }
 
     return typesetter;
