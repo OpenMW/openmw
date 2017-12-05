@@ -1653,6 +1653,12 @@ namespace MWMechanics
 
     bool MechanicsManager::isAggressive(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
     {
+        // Don't become aggressive if a calm effect is active, since it would cause combat to cycle on/off as
+        // combat is activated here and then canceled by the calm effect
+        if ((ptr.getClass().isNpc() && ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::CalmHumanoid).getMagnitude() > 0)
+            || (!ptr.getClass().isNpc() && ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::CalmCreature).getMagnitude() > 0))
+            return false;
+
         int disposition = 50;
         if (ptr.getClass().isNpc())
             disposition = getDerivedDisposition(ptr, true);
