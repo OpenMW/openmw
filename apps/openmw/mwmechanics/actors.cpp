@@ -1009,7 +1009,8 @@ namespace MWMechanics
             if (player.getClass().getNpcStats(player).isWerewolf())
                 return;
 
-            if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue && !creatureStats.getAiSequence().isInCombat())
+            if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue && !creatureStats.getAiSequence().isInCombat()
+                && creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid).getMagnitude() == 0)
             {
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
                 static const int cutoff = esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt();
