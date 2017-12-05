@@ -98,6 +98,12 @@ namespace MWRender
         osg::Vec3d position = worldMat.getTrans();
         if (!isFirstPerson())
             position.z() += mHeight * mHeightScale;
+        else {
+            if (mTrackingPtr.getRefData().getBaseNode() && !mTrackingPtr.getRefData().getBaseNode()->getParentalNodePaths().empty()){
+                osg::Vec3d position_base = osg::computeLocalToWorld(mTrackingPtr.getRefData().getBaseNode()->getParentalNodePaths()[0]).getTrans();
+                position.z() = mHeight * mHeightScale + position_base.z();
+            }
+        }
         return position;
     }
 
