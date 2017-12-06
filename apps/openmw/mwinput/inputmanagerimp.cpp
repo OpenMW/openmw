@@ -1024,7 +1024,7 @@ namespace MWInput
         try
         {
             settingStr = Settings::Manager::getString("screenshot type","Video");
-            regularScreenshot = settingStr.size() == 0;
+            regularScreenshot = settingStr.size() == 0 || settingStr.compare("regular") == 0;
         }
         catch (std::runtime_error)
         {
