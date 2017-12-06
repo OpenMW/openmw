@@ -151,8 +151,7 @@ public:
      * @return A reference to the string passed in @p str.
      */
     static std::string &replaceAll(std::string &str, const char *what, const char *with,
-                                   std::size_t whatLen=std::string::npos, std::size_t withLen=std::string::npos)
-    {
+                                   std::size_t whatLen=std::string::npos, std::size_t withLen=std::string::npos) {
         if (whatLen == std::string::npos)
             whatLen = strlen(what);
 
@@ -161,12 +160,32 @@ public:
 
         std::size_t found;
         std::size_t offset = 0;
-        while((found = str.find(what, offset, whatLen)) != std::string::npos)
+        while ((found = str.find(what, offset, whatLen)) != std::string::npos)
         {
-              str.replace(found, whatLen, with, withLen);
-              offset = found + withLen;
+            str.replace(found, whatLen, with, withLen);
+            offset = found + withLen;
         }
         return str;
+    }
+
+    // trim from start (in place)
+    static inline void ltrim(std::string &s) {
+        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
+            return !std::isspace(ch);
+        }));
+    }
+
+    // trim from end (in place)
+    static inline void rtrim(std::string &s) {
+        s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+            return !std::isspace(ch);
+        }).base(), s.end());
+    }
+
+    // trim from both ends (in place)
+    static inline void trim(std::string &s) {
+        ltrim(s);
+        rtrim(s);
     }
 };
 
