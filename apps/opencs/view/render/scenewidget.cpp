@@ -374,6 +374,13 @@ void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
     {
         mOrbitCamControl->setOrbitSpeedMultiplier(setting->toDouble());
     }
+    else if (*setting=="Rendering/camera-fov")
+    {
+        mView->getCamera()->setProjectionMatrixAsPerspective(
+            setting->toDouble(),
+            static_cast<double>(width())/static_cast<double>(height()),
+            1.0f, 10000.0f);
+    }
 }
 
 void SceneWidget::selectNavigationMode (const std::string& mode)
