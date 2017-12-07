@@ -192,6 +192,9 @@ void CSMPrefs::State::declare()
         setRange (0.001, 100.0);
     declareDouble ("rotate-factor", "Free rotation factor", 0.007).setPrecision(4).setRange(0.0001, 0.1);
 
+    declareCategory ("Rendering");
+    declareDouble ("camera-fov", "Camera FOV", 90.).setPrecision(5).setRange(10.0, 160.0);
+
     declareCategory ("Tooltips");
     declareBool ("scene", "Show Tooltips in 3D scenes", true);
     declareBool ("scene-hide-basic", "Hide basic  3D scenes tooltips", false);
