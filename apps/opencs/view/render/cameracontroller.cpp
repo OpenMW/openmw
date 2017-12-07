@@ -673,12 +673,13 @@ namespace CSVRender
     {
         osg::Vec3d eye, center, up;
         getCamera()->getViewMatrixAsLookAt(eye, center, up);
-        up = osg::Vec3(0,0,1);
+        osg::Vec3 absoluteUp = osg::Vec3(0,0,1);
 
-        osg::Quat rotation = osg::Quat(value, up);
+        osg::Quat rotation = osg::Quat(value, absoluteUp);
         osg::Vec3d oldOffset = eye - mCenter;
         osg::Vec3d newOffset = rotation * oldOffset;
 
+        up = rotation * up;
         getCamera()->setViewMatrixAsLookAt(mCenter + newOffset, mCenter, up);
     }
 
@@ -686,13 +687,14 @@ namespace CSVRender
     {
         osg::Vec3d eye, center, up;
         getCamera()->getViewMatrixAsLookAt(eye, center, up);
-        up = osg::Vec3(0,0,1);
+        osg::Vec3 absoluteUp = osg::Vec3(0,0,1);
 
         osg::Vec3d forward = center - eye;
-        osg::Quat rotation = osg::Quat(value, up ^ forward);
+        osg::Quat rotation = osg::Quat(value, absoluteUp ^ forward);
         osg::Vec3d oldOffset = eye - mCenter;
         osg::Vec3d newOffset = rotation * oldOffset;
 
+        up = rotation * up;
         getCamera()->setViewMatrixAsLookAt(mCenter + newOffset, mCenter, up);
     }
 
