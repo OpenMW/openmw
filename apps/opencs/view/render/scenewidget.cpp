@@ -56,6 +56,7 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     traits->vsync = false;
 
     mView = new osgViewer::View;
+    updateCameraParameters( traits->width / static_cast<double>(traits->height) );
 
     osg::ref_ptr<osgQt::GraphicsWindowQt> window = new osgQt::GraphicsWindowQt(traits.get());
     QLayout* layout = new QHBoxLayout(this);
@@ -66,8 +67,6 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     mView->getCamera()->setGraphicsContext(window);
     mView->getCamera()->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
     mView->getCamera()->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
-
-    updateCameraParameters();
 
     SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
     lightMgr->setStartLight(1);
@@ -188,6 +187,8 @@ SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSyste
     mCurrentCamControl = mFreeCamControl;
 
     mOrbitCamControl->setPickingMask(Mask_Reference | Mask_Terrain);
+
+    mOrbitCamControl->setConstRoll( CSMPrefs::get()["3D Scene Input"]["navi-orbit-const-roll"].isTrue() );
 
     // we handle lighting manually
     mView->setLightingMode(osgViewer::View::NO_LIGHT);
@@ -371,6 +372,10 @@ void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
     {
         mOrbitCamControl->setOrbitSpeedMultiplier(setting->toDouble());
     }
+    else if (*setting=="3D Scene Input/navi-orbit-const-roll")
+    {
+        mOrbitCamControl->setConstRoll(setting->isTrue());
+    }
     else if (*setting=="Rendering/camera-fov" ||
              *setting=="Rendering/camera-ortho" ||
              *setting=="Rendering/camera-ortho-size")
@@ -379,7 +384,7 @@ void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
     }
 }
 
-void RenderWidget::updateCameraParameters()
+void RenderWidget::updateCameraParameters(double overrideAspect)
 {
     const float near = 1.0;
     const float far = 1000.0;
@@ -387,8 +392,9 @@ void RenderWidget::updateCameraParameters()
     if (CSMPrefs::get()["Rendering"]["camera-ortho"].isTrue())
     {
         const float size = CSMPrefs::get()["Rendering"]["camera-ortho-size"].toDouble();
-        const float half_w = size / 100.0 * static_cast<double>(width());
-        const float half_h = size / 100.0 * static_cast<double>(height());
+        const float aspect = overrideAspect >= 0.0 ? overrideAspect : (width() / static_cast<double>(height()));
+        const float half_h = size * 10.0;
+        const float half_w = half_h * aspect;
 
         mView->getCamera()->setProjectionMatrixAsOrtho(
             -half_w, half_w, -half_h, half_h, near, far);

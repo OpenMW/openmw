@@ -668,18 +668,25 @@ namespace CSVRender
 
         mInitialized = true;
     }
+    
+    void OrbitCameraController::setConstRoll(bool enabled)
+    {
+        mConstRoll = enabled;
+    }
 
     void OrbitCameraController::rotateHorizontal(double value)
     {
         osg::Vec3d eye, center, up;
         getCamera()->getViewMatrixAsLookAt(eye, center, up);
-        osg::Vec3 absoluteUp = osg::Vec3(0,0,1);
+        osg::Vec3d absoluteUp = osg::Vec3(0,0,1);
 
-        osg::Quat rotation = osg::Quat(value, absoluteUp);
+        osg::Quat rotation = osg::Quat(value, mConstRoll ? absoluteUp : up);
         osg::Vec3d oldOffset = eye - mCenter;
         osg::Vec3d newOffset = rotation * oldOffset;
 
-        up = rotation * up;
+        if (mConstRoll)
+            up = rotation * up;
+
         getCamera()->setViewMatrixAsLookAt(mCenter + newOffset, mCenter, up);
     }
 
@@ -687,16 +694,22 @@ namespace CSVRender
     {
         osg::Vec3d eye, center, up;
         getCamera()->getViewMatrixAsLookAt(eye, center, up);
-        osg::Vec3 absoluteUp = osg::Vec3(0,0,1);
+        osg::Vec3d absoluteUp = osg::Vec3(0,0,1);
 
         osg::Vec3d forward = center - eye;
 
-        osg::Vec3d axis = absoluteUp ^ forward * (up.z() < 0.0 ? -1.0 : 1.0);
+        osg::Vec3d axis = absoluteUp ^ forward;
+
+        if (mConstRoll && up.z() < 0.0)
+            axis *= -1.0;
+
         osg::Quat rotation = osg::Quat(value,axis);
         osg::Vec3d oldOffset = eye - mCenter;
         osg::Vec3d newOffset = rotation * oldOffset;
+            
+        if (mConstRoll)
+            up = rotation * up;
 
-        up = rotation * up;
         getCamera()->setViewMatrixAsLookAt(mCenter + newOffset, mCenter, up);
     }
 
