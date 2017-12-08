@@ -70,10 +70,10 @@ endif()
 libfind_pkg_detect(SDL2 sdl2
     FIND_PATH SDL.h
         HINTS $ENV{SDL2DIR}
-        PATH_SUFFIXES include SDL2
+        PATH_SUFFIXES include SDL2 include/SDL2
     FIND_LIBRARY SDL2
         HINTS $ENV{SDL2DIR}
-        PATH_SUFFIXES ${_sdl_lib_suffix}
+        PATH_SUFFIXES lib ${_sdl_lib_suffix}
 )
 libfind_version_n_header(SDL2 NAMES SDL_version.h DEFINES SDL_MAJOR_VERSION SDL_MINOR_VERSION SDL_PATCHLEVEL)
 
@@ -85,7 +85,7 @@ IF(NOT SDL2_BUILDING_LIBRARY AND NOT APPLE)
     libfind_pkg_detect(SDL2MAIN sdl2
         FIND_LIBRARY SDL2main
             HINTS $ENV{SDL2DIR}
-            PATH_SUFFIXES ${_sdl_lib_suffix}
+            PATH_SUFFIXES lib ${_sdl_lib_suffix}
     )
     set(SDL2MAIN_FIND_QUIETLY TRUE)
     libfind_process(SDL2MAIN)

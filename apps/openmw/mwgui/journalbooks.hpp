@@ -4,6 +4,8 @@
 #include "bookpage.hpp"
 #include "journalviewmodel.hpp"
 
+#include <components/to_utf8/to_utf8.hpp>
+
 namespace MWGui
 {
     MWGui::BookTypesetter::Utf8Span to_utf8_span (char const * text);
@@ -13,7 +15,7 @@ namespace MWGui
         typedef TypesetBook::Ptr Book;
         JournalViewModel::Ptr mModel;
 
-        JournalBooks (JournalViewModel::Ptr model);
+        JournalBooks (JournalViewModel::Ptr model, ToUTF8::FromType encoding);
 
         Book createEmptyJournalBook ();
         Book createJournalBook ();
@@ -22,8 +24,12 @@ namespace MWGui
         Book createQuestBook (const std::string& questName);
         Book createTopicIndexBook ();
 
+        ToUTF8::FromType mEncoding;
+
     private:
         BookTypesetter::Ptr createTypesetter ();
+        BookTypesetter::Ptr createLatinJournalIndex ();
+        BookTypesetter::Ptr createCyrillicJournalIndex ();
     };
 }
 

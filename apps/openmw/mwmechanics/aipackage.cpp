@@ -14,6 +14,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include "pathgrid.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
 #include "steering.hpp"
@@ -100,14 +101,23 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
     {
         bool wasShortcutting = mIsShortcutting;
         bool destInLOS = false;
-        if (getTypeId() != TypeIdWander) // prohibit shortcuts for AiWander
-            mIsShortcutting = shortcutPath(start, dest, actor, &destInLOS); // try to shortcut first
+
+        const MWWorld::Class& actorClass = actor.getClass();
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+
+        // check if actor can move along z-axis
+        bool actorCanMoveByZ = (actorClass.canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
+            || world->isFlying(actor);
+
+        // Prohibit shortcuts for AiWander, if the actor can not move in 3 dimensions.
+        if (actorCanMoveByZ || getTypeId() != TypeIdWander)
+            mIsShortcutting = shortcutPath(start, dest, actor, &destInLOS, actorCanMoveByZ); // try to shortcut first
 
         if (!mIsShortcutting)
         {
             if (wasShortcutting || doesPathNeedRecalc(dest, actor.getCell())) // if need to rebuild path
             {
-                mPathFinder.buildSyncedPath(start, dest, actor.getCell());
+                mPathFinder.buildSyncedPath(start, dest, actor.getCell(), getPathGridGraph(actor.getCell()));
                 mRotateOnTheRunChecks = 3;
 
                 // give priority to go directly on target if there is minimal opportunity
@@ -220,20 +230,23 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
     }
 }
 
-bool MWMechanics::AiPackage::shortcutPath(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor, bool *destInLOS)
+const MWMechanics::PathgridGraph& MWMechanics::AiPackage::getPathGridGraph(const MWWorld::CellStore *cell)
 {
-    const MWWorld::Class& actorClass = actor.getClass();
-    MWBase::World* world = MWBase::Environment::get().getWorld();
+    const ESM::CellId& id = cell->getCell()->getCellId();
+    // static cache is OK for now, pathgrids can never change during runtime
+    typedef std::map<ESM::CellId, std::unique_ptr<MWMechanics::PathgridGraph> > CacheMap;
+    static CacheMap cache;
+    CacheMap::iterator found = cache.find(id);
+    if (found == cache.end())
+    {
+        cache.insert(std::make_pair(id, std::unique_ptr<MWMechanics::PathgridGraph>(new MWMechanics::PathgridGraph(cell))));
+    }
+    return *cache[id].get();
+}
 
-    // check if actor can move along z-axis
-    bool actorCanMoveByZ = (actorClass.canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
-        || world->isFlying(actor);
-
-    // don't use pathgrid when actor can move in 3 dimensions
-    bool isPathClear = actorCanMoveByZ;
-
-    if (!isPathClear
-        && (!mShortcutProhibited || (PathFinder::MakeOsgVec3(mShortcutFailPos) - PathFinder::MakeOsgVec3(startPoint)).length() >= PATHFIND_SHORTCUT_RETRY_DIST))
+bool MWMechanics::AiPackage::shortcutPath(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor, bool *destInLOS, bool isPathClear)
+{
+    if (!mShortcutProhibited || (PathFinder::MakeOsgVec3(mShortcutFailPos) - PathFinder::MakeOsgVec3(startPoint)).length() >= PATHFIND_SHORTCUT_RETRY_DIST)
     {
         // check if target is clearly visible
         isPathClear = !MWBase::Environment::get().getWorld()->castRay(

@@ -191,6 +191,9 @@ namespace MWBase
             virtual void getObjectsInRange (const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& objects) = 0;
             virtual void getActorsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects) = 0;
 
+            /// Check if there are actors in selected range
+            virtual bool isAnyActorInRange(const osg::Vec3f &position, float radius) = 0;
+
             ///Returns the list of actors which are siding with the given actor in fights
             /**ie AiFollow or AiEscort is active and the target is the actor **/
             virtual std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor) = 0;

@@ -27,6 +27,7 @@ namespace MWMechanics
     const float AI_REACTION_TIME = 0.25f;
 
     class CharacterController;
+    class PathgridGraph;
 
     /// \brief Base class for AI packages
     class AiPackage
@@ -110,7 +111,7 @@ namespace MWMechanics
             /// If a shortcut is possible then path will be cleared and filled with the destination point.
             /// \param destInLOS If not NULL function will return ray cast check result
             /// \return If can shortcut the path
-            bool shortcutPath(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor, bool *destInLOS);
+            bool shortcutPath(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor, bool *destInLOS, bool isPathClear);
 
             /// Check if the way to the destination is clear, taking into account actor speed
             bool checkWayIsClearForActor(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor);
@@ -118,6 +119,8 @@ namespace MWMechanics
             virtual bool doesPathNeedRecalc(const ESM::Pathgrid::Point& newDest, const MWWorld::CellStore* currentCell);
 
             void evadeObstacles(const MWWorld::Ptr& actor, float duration, const ESM::Position& pos);
+
+            const PathgridGraph& getPathGridGraph(const MWWorld::CellStore* cell);
 
             // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;

@@ -14,6 +14,8 @@ namespace MWWorld
 
 namespace MWMechanics
 {
+    class PathgridGraph;
+
     float distance(const ESM::Pathgrid::Point& point, float x, float y, float);
     float distance(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b);
     float getZAngleToDir(const osg::Vec3f& dir);
@@ -54,7 +56,7 @@ namespace MWMechanics
             void clearPath();
 
             void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
-                           const MWWorld::CellStore* cell);
+                           const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
 
             bool checkPathCompleted(float x, float y, float tolerance = PathTolerance);
             ///< \Returns true if we are within \a tolerance units of the last path point.
@@ -89,7 +91,7 @@ namespace MWMechanics
                 Which results in NPC "running in a circle" back to the just passed waypoint.
              */
             void buildSyncedPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
-                const MWWorld::CellStore* cell);
+                const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
 
             void addPointToPath(const ESM::Pathgrid::Point &point)
             {

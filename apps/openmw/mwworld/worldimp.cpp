@@ -2446,6 +2446,11 @@ namespace MWWorld
             if (ptr.getRefData().isDeleted())
                 return true;
 
+            // we should not sell ingrediends from owned organic containers
+            MWWorld::LiveCellRef<ESM::Container>* ref = ptr.get<ESM::Container>();
+            if (ref && (ref->mBase->mFlags & ESM::Container::Organic))
+                return true;
+
             if (Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), mOwner.getCellRef().getRefId()))
                 mOut.push_back(ptr);
 

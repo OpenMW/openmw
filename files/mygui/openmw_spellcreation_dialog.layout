@@ -68,9 +68,7 @@
         <Widget type="HBox" position="0 336 558 60">
             <Property key="Padding" value="16"/>
 
-            <Widget type="Widget" position="0 0 0 0">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
+            <Widget type="Spacer"/>
 
             <Widget type="AutoSizedTextBox" skin="NormalText">
                 <Property key="Caption" value="#{sBarterDialog7}"/>

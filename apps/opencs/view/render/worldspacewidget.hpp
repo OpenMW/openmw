@@ -65,6 +65,7 @@ namespace CSVRender
             QPoint mToolTipPos;
             bool mShowToolTips;
             int mToolTipDelay;
+            bool mInConstructor;
 
         public:
 

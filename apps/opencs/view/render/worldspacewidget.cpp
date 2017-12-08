@@ -51,6 +51,7 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     , mToolTipPos (-1, -1)
     , mShowToolTips(false)
     , mToolTipDelay(0)
+    , mInConstructor(true)
 {
     setAcceptDrops(true);
 
@@ -114,6 +115,8 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
 
     CSMPrefs::Shortcut* abortShortcut = new CSMPrefs::Shortcut("scene-edit-abort", this);
     connect(abortShortcut, SIGNAL(activated()), this, SLOT(abortDrag()));
+
+    mInConstructor = false;
 }
 
 CSVRender::WorldspaceWidget::~WorldspaceWidget ()
@@ -128,6 +131,17 @@ void CSVRender::WorldspaceWidget::settingChanged (const CSMPrefs::Setting *setti
         mDragWheelFactor = setting->toDouble();
     else if (*setting=="3D Scene Input/drag-shift-factor")
         mDragShiftFactor = setting->toDouble();
+    else if (*setting=="3D Scene Input/object-marker-alpha" && !mInConstructor)
+    {
+        float alpha = setting->toDouble();
+        // getSelection is virtual, thus this can not be called from the constructor
+        auto selection = getSelection(Mask_Reference);
+        for (osg::ref_ptr<TagBase> tag : selection)
+        {
+            if (auto objTag = dynamic_cast<ObjectTag*>(tag.get()))
+                objTag->mObject->setMarkerTransparency(alpha);
+        }
+    }
     else if (*setting=="Tooltips/scene-delay")
         mToolTipDelay = setting->toInt();
     else if (*setting=="Tooltips/scene")
