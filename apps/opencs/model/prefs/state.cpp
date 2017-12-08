@@ -194,6 +194,8 @@ void CSMPrefs::State::declare()
 
     declareCategory ("Rendering");
     declareDouble ("camera-fov", "Camera FOV", 90.).setPrecision(5).setRange(10.0, 160.0);
+    declareBool ("camera-ortho", "Orthographic projection for camera", false);
+    declareDouble ("camera-ortho-size", "Orthographic projection size parameter", 100.0).setPrecision(5).setRange(0.0, 1000.0);
 
     declareCategory ("Tooltips");
     declareBool ("scene", "Show Tooltips in 3D scenes", true);

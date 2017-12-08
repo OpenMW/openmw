@@ -64,6 +64,8 @@ namespace CSVRender
             osg::ref_ptr<osgViewer::View> mView;
             osg::ref_ptr<osg::Group> mRootNode;
 
+            void updateCameraParameters();
+
             QTimer mTimer;
 
         protected slots:

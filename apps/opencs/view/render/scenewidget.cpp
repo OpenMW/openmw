@@ -67,10 +67,7 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     mView->getCamera()->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
     mView->getCamera()->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
 
-    mView->getCamera()->setProjectionMatrixAsPerspective(
-        CSMPrefs::get()["Rendering"]["camera-fov"].toDouble(),
-        static_cast<double>(traits->width)/static_cast<double>(traits->height),
-        1.0f, 10000.0f);
+    updateCameraParameters();
 
     SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
     lightMgr->setStartLight(1);
@@ -374,12 +371,34 @@ void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
     {
         mOrbitCamControl->setOrbitSpeedMultiplier(setting->toDouble());
     }
-    else if (*setting=="Rendering/camera-fov")
+    else if (*setting=="Rendering/camera-fov" ||
+             *setting=="Rendering/camera-ortho" ||
+             *setting=="Rendering/camera-ortho-size")
     {
+        updateCameraParameters();
+    }
+}
+
+void RenderWidget::updateCameraParameters()
+{
+    const float near = 1.0;
+    const float far = 1000.0;
+
+    if (CSMPrefs::get()["Rendering"]["camera-ortho"].isTrue())
+    {
+        const float size = CSMPrefs::get()["Rendering"]["camera-ortho-size"].toDouble();
+        const float half_w = size / 100.0 * static_cast<double>(width());
+        const float half_h = size / 100.0 * static_cast<double>(height());
+
+        mView->getCamera()->setProjectionMatrixAsOrtho(
+            -half_w, half_w, -half_h, half_h, near, far);
+    }
+    else
+    { 
         mView->getCamera()->setProjectionMatrixAsPerspective(
-            setting->toDouble(),
+            CSMPrefs::get()["Rendering"]["camera-fov"].toDouble(),
             static_cast<double>(width())/static_cast<double>(height()),
-            1.0f, 10000.0f);
+            near, far);
     }
 }
 
