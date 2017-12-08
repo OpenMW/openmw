@@ -690,7 +690,9 @@ namespace CSVRender
         osg::Vec3 absoluteUp = osg::Vec3(0,0,1);
 
         osg::Vec3d forward = center - eye;
-        osg::Quat rotation = osg::Quat(value, absoluteUp ^ forward);
+
+        osg::Vec3d axis = absoluteUp ^ forward * (up.z() < 0.0 ? -1.0 : 1.0);
+        osg::Quat rotation = osg::Quat(value,axis);
         osg::Vec3d oldOffset = eye - mCenter;
         osg::Vec3d newOffset = rotation * oldOffset;
 
