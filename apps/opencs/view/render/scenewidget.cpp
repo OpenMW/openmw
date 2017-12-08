@@ -386,25 +386,25 @@ void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
 
 void RenderWidget::updateCameraParameters(double overrideAspect)
 {
-    const float near = 1.0;
-    const float far = 1000.0;
+    const float nearDist = 1.0;
+    const float farDist = 1000.0;
 
     if (CSMPrefs::get()["Rendering"]["camera-ortho"].isTrue())
     {
         const float size = CSMPrefs::get()["Rendering"]["camera-ortho-size"].toDouble();
         const float aspect = overrideAspect >= 0.0 ? overrideAspect : (width() / static_cast<double>(height()));
-        const float half_h = size * 10.0;
-        const float half_w = half_h * aspect;
+        const float halfH = size * 10.0;
+        const float halfW = halfH * aspect;
 
         mView->getCamera()->setProjectionMatrixAsOrtho(
-            -half_w, half_w, -half_h, half_h, near, far);
+            -halfW, halfW, -halfH, halfH, nearDist, farDist);
     }
     else
     { 
         mView->getCamera()->setProjectionMatrixAsPerspective(
             CSMPrefs::get()["Rendering"]["camera-fov"].toDouble(),
             static_cast<double>(width())/static_cast<double>(height()),
-            near, far);
+            nearDist, farDist);
     }
 }
 
