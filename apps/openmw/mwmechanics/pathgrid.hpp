@@ -20,13 +20,18 @@ namespace MWMechanics
     class PathgridGraph
     {
         public:
-            PathgridGraph();
+            PathgridGraph(const MWWorld::CellStore* cell);
 
             bool load(const MWWorld::CellStore *cell);
+
+            const ESM::Pathgrid* getPathgrid() const;
 
             // returns true if end point is strongly connected (i.e. reachable
             // from start point) both start and end are pathgrid point indexes
             bool isPointConnected(const int start, const int end) const;
+
+            // get neighbouring nodes for index node and put them to "nodes" vector
+            void getNeighbouringPoints(const int index, ESM::Pathgrid::PointList &nodes) const;
 
             // the input parameters are pathgrid point indexes
             // the output list is in local (internal cells) or world (external

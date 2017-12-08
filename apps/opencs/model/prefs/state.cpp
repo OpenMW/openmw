@@ -192,7 +192,8 @@ void CSMPrefs::State::declare()
         setTooltip ("Acceleration factor during drag operations while holding down shift").
         setRange (0.001, 100.0);
     declareDouble ("rotate-factor", "Free rotation factor", 0.007).setPrecision(4).setRange(0.0001, 0.1);
-    
+    declareDouble ("object-marker-alpha", "Object Marker Transparency", 0.5).setPrecision(2).setRange(0,1);
+
     declareCategory ("Rendering");
     declareDouble ("camera-fov", "Camera FOV", 90.).setPrecision(5).setRange(10.0, 160.0);
     declareBool ("camera-ortho", "Orthographic projection for camera", false);

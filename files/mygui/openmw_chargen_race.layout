@@ -76,9 +76,7 @@
 
         <!-- Dialog buttons -->
         <Widget type="HBox" position="0 393 572 24">
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
+            <Widget type="Spacer"/>
 
             <Widget type="AutoSizedButton" skin="MW_Button" position="471 397 53 23" name="BackButton">
                 <Property key="Caption" value="#{sBack}"/>

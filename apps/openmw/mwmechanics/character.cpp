@@ -1278,7 +1278,16 @@ bool CharacterController::updateWeaponState()
     bool animPlaying;
     if(mAttackingOrSpell)
     {
-        mIdleState = CharState_None;
+        MWWorld::Ptr player = getPlayer();
+
+        // We should reset player's idle animation in the first-person mode.
+        if (mPtr == player && MWBase::Environment::get().getWorld()->isFirstPerson())
+            mIdleState = CharState_None;
+
+        // In other cases we should not break swim and sneak animations
+        if (mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
+            mIdleState = CharState_None;
+
         if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
@@ -1288,7 +1297,7 @@ bool CharacterController::updateWeaponState()
                 // Unset casting flag, otherwise pressing the mouse button down would
                 // continue casting every frame if there is no animation
                 mAttackingOrSpell = false;
-                if (mPtr == getPlayer())
+                if (mPtr == player)
                 {
                     MWBase::Environment::get().getWorld()->getPlayer().setAttackingOrSpell(false);
                 }
@@ -1298,7 +1307,7 @@ bool CharacterController::updateWeaponState()
                 // For the player, set the spell we want to cast
                 // This has to be done at the start of the casting animation,
                 // *not* when selecting a spell in the GUI (otherwise you could change the spell mid-animation)
-                if (mPtr == getPlayer())
+                if (mPtr == player)
                 {
                     std::string selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
                     stats.getSpells().setSelectedSpell(selectedSpell);
@@ -1310,7 +1319,7 @@ bool CharacterController::updateWeaponState()
                     MWMechanics::CastSpell cast(mPtr, NULL);
                     cast.playSpellCastingEffects(spellid);
 
-                    const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);                   
+                    const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
                     const ESM::ENAMstruct &lastEffect = spell->mEffects.mList.back();
                     const ESM::MagicEffect *effect;
 
@@ -1639,7 +1648,7 @@ void CharacterController::update(float duration)
     float speed = 0.f;
 
     updateMagicEffects();
-        
+
     if (isKnockedOut())
         mTimeUntilWake -= duration;
 

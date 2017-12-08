@@ -32,13 +32,12 @@
 #include <components/esm/loadmisc.hpp>
 #include <components/esm/loadbody.hpp>
 
-#include "../mwmechanics/pathgrid.hpp"  // TODO: maybe belongs in mwworld
-
 #include "timestamp.hpp"
 #include "ptr.hpp"
 
 namespace ESM
 {
+    struct Cell;
     struct CellState;
     struct FogState;
     struct CellId;
@@ -376,10 +375,6 @@ namespace MWWorld
             void respawn ();
             ///< Check mLastRespawn and respawn references if necessary. This is a no-op if the cell is not loaded.
 
-            bool isPointConnected(const int start, const int end) const;
-
-            std::list<ESM::Pathgrid::Point> aStarSearch(const int start, const int end) const;
-
         private:
 
             /// Run through references and store IDs
@@ -391,8 +386,6 @@ namespace MWWorld
             ///< Make case-adjustments to \a ref and insert it into the respective container.
             ///
             /// Invalid \a ref objects are silently dropped.
-
-            MWMechanics::PathgridGraph mPathgridGraph;
     };
 
     template<>

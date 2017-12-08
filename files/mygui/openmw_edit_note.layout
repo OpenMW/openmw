@@ -16,9 +16,7 @@
 
         <Widget type="HBox" position="13 200 303 24">
             <Property key="Spacing" value="6"/>
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
+            <Widget type="Spacer"/>
             <Widget type="AutoSizedButton" skin="MW_Button" name="DeleteButton">
                 <Property key="Caption" value="#{sDelete}"/>
             </Widget>

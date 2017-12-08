@@ -3,7 +3,7 @@
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 600 360" name="_Main">
         <Property key="Visible" value="false"/>
-        <Property key="MinSize" value="380 245"/>
+        <Property key="MinSize" value="428 245"/>
 
         <!-- Categories -->
         <Widget type="HBox" position="8 8 566 24" align="Left Top HStretch" name="Categories">
@@ -34,32 +34,39 @@
         </Widget>
 
         <Widget type="Widget" skin="" position="8 231 566 92" name="BottomPane" align="Left Bottom HStretch">
-            <Widget type="TextBox" skin="SandText" position="192 0 374 24" name="PlayerGold" align="Left Top HStretch">
-                <Property key="TextAlign" value="Right"/>
-            </Widget>
-            <Widget type="TextBox" skin="SandText" position="192 28 374 24" name="MerchantGold" align="Left Top HStretch">
-                <Property key="TextAlign" value="Right"/>
+            <Widget type="HBox" position="0 0 566 24" align="Left Top HStretch">
+                <Widget type="Button" skin="MW_Button" position="0 0 40 24" name="IncreaseButton" align="Left Top">
+                    <Property key="Caption" value="+"/>
+                    <Property key="NeedKey" value="false"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" position="48 0 140 24" name="TotalBalanceLabel" align="Left Top">
+                    <Property key="TextAlign" value="Left VCenter"/>
+                </Widget>
+                <Widget type="Spacer" />
+                <Widget type="AutoSizedTextBox" skin="SandText" position="0 0 374 24" name="PlayerGold" align="Right Top">
+                    <Property key="TextAlign" value="Right"/>
+                </Widget>
             </Widget>
 
-            <Widget type="Button" skin="MW_Button" position="0 0 40 24" name="IncreaseButton" align="Left Top">
-                <Property key="Caption" value="+"/>
-            </Widget>
-            <Widget type="Button" skin="MW_Button" position="0 28 40 24" name="DecreaseButton" align="Left Top">
-                <Property key="Caption" value="-"/>
-            </Widget>
-
-            <Widget type="TextBox" skin="SandText" position="48 0 140 24" name="TotalBalanceLabel" align="Left Top "/>
-            <Widget type="NumericEditBox" skin="MW_TextEdit" position="48 28 140 24" name="TotalBalance" align="Left Top">
-                <Property key="TextAlign" value="Center"/>
+            <Widget type="HBox" position="0 28 566 24" align="Left Top HStretch">
+                <Widget type="Button" skin="MW_Button" position="0 0 40 24" name="DecreaseButton" align="Left Top">
+                    <Property key="Caption" value="-"/>
+                    <Property key="NeedKey" value="false"/>
+                </Widget>
+                <Widget type="NumericEditBox" skin="MW_TextEdit" position="48 0 140 24" name="TotalBalance" align="Left Top">
+                    <Property key="TextAlign" value="Center"/>
+                </Widget>
+                <Widget type="Spacer" />
+                <Widget type="AutoSizedTextBox" skin="SandText" position="0 0 374 24" name="MerchantGold" align="Right Top">
+                    <Property key="TextAlign" value="Right"/>
+                </Widget>
             </Widget>
 
             <Widget type="HBox" position="0 60 566 24" align="Left Bottom HStretch">
                 <Widget type="AutoSizedButton" skin="MW_Button" name="MaxSaleButton">
                     <Property key="Caption" value="#{sMaxSale}"/>
                 </Widget>
-                <Widget type="Widget">
-                    <UserString key="HStretch" value="true"/>
-                </Widget>
+                <Widget type="Spacer" />
                 <Widget type="AutoSizedButton" skin="MW_Button" name="OfferButton">
                     <Property key="Caption" value="#{sBarterDialog8}"/>
                 </Widget>

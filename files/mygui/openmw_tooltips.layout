@@ -103,9 +103,7 @@
             <Widget type="VBox">
                 <UserString key="VStretch" value="true"/>
                 <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="HandToHandImage"/>
-                <Widget type="Widget">
-                    <UserString key="VStretch" value="true"/>
-                </Widget>
+                <Widget type="Spacer"/>
             </Widget>
 
             <Widget type="AutoSizedTextBox" skin="SandText" position="44 8 248 284" align="Left Top" name="HandToHandText">
@@ -122,9 +120,7 @@
             <Widget type="VBox">
                 <UserString key="VStretch" value="true"/>
                 <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="HealthImage"/>
-                <Widget type="Widget">
-                    <UserString key="VStretch" value="true"/>
-                </Widget>
+                <Widget type="Spacer"/>
             </Widget>
 
             <Widget type="AutoSizedEditBox" skin="SandText" position="44 8 392 0" align="Left Top" name="HealthDescription">

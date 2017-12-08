@@ -26,9 +26,7 @@
 
         <Widget type="HBox">
             <UserString key="HStretch" value="true"/>
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
+            <Widget type="Spacer"/>
 
             <Widget type="AutoSizedButton" skin="MW_Button" name="UntilHealedButton">
                 <Property key="Caption" value="#{sUntilHealed}"/>

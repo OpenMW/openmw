@@ -33,6 +33,7 @@ Furthermore, we advise to:
 * Feel free to submit incomplete pull requests. Even if the work can not be merged yet, pull requests are a great place to collect early feedback. Just make sure to mark it as *[Incomplete]* or *[Do not merge yet]* in the title.
 * If you plan on contributing often, please read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference) on our wiki, especially the [Policies and Standards](https://wiki.openmw.org/index.php?title=Policies_and_Standards).
 * Make sure each of your changes has a clear objective. Unnecessary changes may lead to merge conflicts, clutter the commit history and slow down review. Code formatting 'fixes' should be avoided, unless you were already changing that particular line anyway.
+* Reference the bug / feature ticket(s) in your commit message (e.g. 'Bug #123') to make it easier to keep track of what we changed for what reason. Our bugtracker will show those commits next to the ticket. If your commit message includes 'Fixes #123', that bug/feature will automatically be set to 'Closed' when your commit is merged.
 
 Guidelines for original engine "fixes"
 =================================
