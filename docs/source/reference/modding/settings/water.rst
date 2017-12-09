@@ -104,4 +104,4 @@ This setting only applies if water shader is on and refractions are enabled. Not
 setting if off, there will still be small refractions caused by the water waves, which however do not cause such significant
 distortion.
 
-TODO: setting via GUI? Interation with rttsize?
+This setting can be edited with the 'Refraction scale' slider in the Water tab of the Video panel of the Options menu.

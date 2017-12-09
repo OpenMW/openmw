@@ -394,8 +394,30 @@
                                     <Property key="Caption" value="Reflect actors"/>
                                 </Widget>
                             </Widget>
+                            <Widget type="TextBox" skin="NormalText" position="4 84 350 18" align="Left Top">
+                              <Property key="Caption" value="Refraction scale"/>
+                            </Widget>
+                            <Widget type="HBox" skin="" position="4 112 350 24">
+                              <Widget type="MWScrollBar" skin="MW_HScroll" position="4 154 200 18" align="Left Top">
+                              <Property key="Range" value="10000"/>
+                              <Property key="Page" value="100"/>
+                              <UserString key="SettingType" value="Slider"/>
+                              <UserString key="SettingCategory" value="Water"/>
+                              <UserString key="SettingName" value="refraction scale"/>
+                              <UserString key="SettingValueType" value="Float"/>
+                              <UserString key="SettingMin" value="0.01"/>
+                              <UserString key="SettingMax" value="1.0"/>
+                              </Widget>
+                            </Widget>
+                            <Widget type="TextBox" skin="SandText" position="4 140 200 18" align="Left Top">
+                              <Property key="Caption" value="0"/>
+                              <Property key="TextAlign" value="Left"/>
+                            </Widget>
+                            <Widget type="TextBox" skin="SandText" position="4 140 200 18" align="Left Top">
+                              <Property key="Caption" value="1"/>
+                              <Property key="TextAlign" value="Right"/>
+                            </Widget>
                         </Widget>
-
                     </Widget>
                     <!--
                     <Widget type="TabItem" skin="" position="0 28 352 268">

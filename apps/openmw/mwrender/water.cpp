@@ -272,7 +272,7 @@ public:
 
     void setWaterLevel(float waterLevel)
     {
-        const float refractionScale = std::min(1.0f,std::max(0.0f,
+        const float refractionScale = std::min(1.0f,std::max(0.01f,     // 0.0 crashes the game
             Settings::Manager::getFloat("refraction scale", "Water")));
 
         setViewMatrix(osg::Matrix::scale(1,1,refractionScale) *
