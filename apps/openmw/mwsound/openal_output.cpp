@@ -948,34 +948,41 @@ std::pair<Sound_Handle,size_t> OpenAL_Output::loadSound(const std::string &fname
 
     DecoderPtr decoder = mManager.getDecoder();
     // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
+    bool succeeded;
     if(decoder->mResourceMgr->exists(fname))
-    {
-        if(!decoder->open(fname))
-            return std::make_pair(nullptr, 0);
-    }
+        succeeded = decoder->open(fname);
     else
     {
         std::string file = fname;
         std::string::size_type pos = file.rfind('.');
         if(pos != std::string::npos)
             file = file.substr(0, pos)+".mp3";
-        if(!decoder->open(file))
-            return std::make_pair(nullptr, 0);
+        succeeded = decoder->open(file);
     }
 
     std::vector<char> data;
-    ChannelConfig chans;
-    SampleType type;
     ALenum format;
     int srate;
 
-    if(!decoder->getInfo(&srate, &chans, &type))
-        return std::make_pair(nullptr, 0);
-    format = getALFormat(chans, type);
-    if(!format) return std::make_pair(nullptr, 0);
-
-    decoder->readAll(data);
+    if(succeeded)
+    {
+        ChannelConfig chans;
+        SampleType type;
+        if(decoder->getInfo(&srate, &chans, &type))
+        {
+            format = getALFormat(chans, type);
+            if(format) decoder->readAll(data);
+        }
+    }
     decoder->close();
+
+    if(data.empty())
+    {
+        // If we failed to get any usable audio, substitute with silence.
+        format = AL_FORMAT_MONO8;
+        srate = 8000;
+        data.assign(8000, -128);
+    }
 
     ALint size;
     ALuint buf = 0;
