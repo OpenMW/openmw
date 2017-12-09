@@ -176,16 +176,16 @@ size_t FFmpeg_Decoder::readAVAudioData(void *data, size_t length)
     return dec;
 }
 
-bool FFmpeg_Decoder::open(const std::string &fname)
+void FFmpeg_Decoder::open(const std::string &fname)
 {
     close();
+    mDataStream = mResourceMgr->get(fname);
+
+    if((mFormatCtx=avformat_alloc_context()) == NULL)
+        throw std::runtime_error("Failed to allocate context");
+
     try
     {
-        mDataStream = mResourceMgr->get(fname);
-
-        if((mFormatCtx=avformat_alloc_context()) == NULL)
-            throw std::runtime_error("Failed to allocate context");
-
         mFormatCtx->pb = avio_alloc_context(NULL, 0, 0, this, readPacket, writePacket, seek);
         if(!mFormatCtx->pb || avformat_open_input(&mFormatCtx, fname.c_str(), NULL, NULL) != 0)
         {
@@ -250,16 +250,8 @@ bool FFmpeg_Decoder::open(const std::string &fname)
         mOutputChannelLayout = (*mStream)->codec->channel_layout;
         if(mOutputChannelLayout == 0)
             mOutputChannelLayout = av_get_default_channel_layout((*mStream)->codec->channels);
-
-        return true;
     }
-    catch(std::exception &e)
-    {
-        std::cerr<< "Could not open audio file: "<<e.what() <<std::endl;
-    }
-
-    if(mFormatCtx)
-    {
+    catch(...) {
         if(mStream)
             avcodec_close((*mStream)->codec);
         mStream = NULL;
@@ -273,8 +265,8 @@ bool FFmpeg_Decoder::open(const std::string &fname)
         mFormatCtx->pb = NULL;
 
         avformat_close_input(&mFormatCtx);
+        throw;
     }
-    return false;
 }
 
 void FFmpeg_Decoder::close()
@@ -316,13 +308,10 @@ std::string FFmpeg_Decoder::getName()
     return mFormatCtx->filename;
 }
 
-bool FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *type)
+void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *type)
 {
     if(!mStream)
-    {
-        std::cerr<< "No audio stream info" <<std::endl;
-        return false;
-    }
+        throw std::runtime_error("No audio stream info");
 
     if(mOutputSampleFormat == AV_SAMPLE_FMT_U8)
         *type = SampleType_UInt8;
@@ -330,6 +319,11 @@ bool FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
         *type = SampleType_Int16;
     else if(mOutputSampleFormat == AV_SAMPLE_FMT_FLT)
         *type = SampleType_Float32;
+    else
+    {
+        mOutputSampleFormat = AV_SAMPLE_FMT_S16;
+        *type = SampleType_Int16;
+    }
 
     if(mOutputChannelLayout == AV_CH_LAYOUT_MONO)
         *chans = ChannelConfig_Mono;
@@ -378,18 +372,10 @@ bool FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
                           0,                              // logging level offset
                           NULL);                          // log context
         if(!mSwr)
-        {
-            std::cerr<< "Couldn't allocate SwrContext" <<std::endl;
-            return false;
-        }
+            throw std::runtime_error("Couldn't allocate SwrContext");
         if(swr_init(mSwr) < 0)
-        {
-            std::cerr<< "Couldn't initialize SwrContext" <<std::endl;
-            return false;
-        }
+            throw std::runtime_error("Couldn't initialize SwrContext");
     }
-
-    return true;
 }
 
 size_t FFmpeg_Decoder::read(char *buffer, size_t bytes)

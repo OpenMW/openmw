@@ -27,10 +27,10 @@ namespace MWSound
     private:
         MWSound::MovieAudioDecoder* mDecoder;
 
-        bool open(const std::string &fname) override;
+        void open(const std::string &fname) override;
         void close() override;
         std::string getName() override;
-        bool getInfo(int *samplerate, ChannelConfig *chans, SampleType *type) override;
+        void getInfo(int *samplerate, ChannelConfig *chans, SampleType *type) override;
         size_t read(char *buffer, size_t bytes) override;
         size_t getSampleOffset() override;
     };
@@ -98,9 +98,9 @@ namespace MWSound
     };
 
 
-    bool MWSoundDecoderBridge::open(const std::string &fname)
+    void MWSoundDecoderBridge::open(const std::string &fname)
     {
-        return false;
+        throw std::runtime_error("Method not implemented");
     }
     void MWSoundDecoderBridge::close() {}
 
@@ -109,7 +109,7 @@ namespace MWSound
         return mDecoder->getStreamName();
     }
 
-    bool MWSoundDecoderBridge::getInfo(int *samplerate, ChannelConfig *chans, SampleType *type)
+    void MWSoundDecoderBridge::getInfo(int *samplerate, ChannelConfig *chans, SampleType *type)
     {
         *samplerate = mDecoder->getOutputSampleRate();
 
@@ -125,10 +125,8 @@ namespace MWSound
         else if (outputChannelLayout == AV_CH_LAYOUT_QUAD)
             *chans = ChannelConfig_Quad;
         else
-        {
-            std::cerr<< "Unsupported channel layout: "<<outputChannelLayout <<std::endl;
-            return false;
-        }
+            throw std::runtime_error("Unsupported channel layout: "+
+                                     std::to_string(outputChannelLayout));
 
         AVSampleFormat outputSampleFormat = mDecoder->getOutputSampleFormat();
         if (outputSampleFormat == AV_SAMPLE_FMT_U8)
@@ -141,11 +139,8 @@ namespace MWSound
         {
             char str[1024];
             av_get_sample_fmt_string(str, sizeof(str), outputSampleFormat);
-            std::cerr<< "Unsupported sample format: "<<str <<std::endl;
-            return false;
+            throw std::runtime_error(std::string("Unsupported sample format: ")+str);
         }
-
-        return true;
     }
 
     size_t MWSoundDecoderBridge::read(char *buffer, size_t bytes)

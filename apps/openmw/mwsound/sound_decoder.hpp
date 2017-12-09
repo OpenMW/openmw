@@ -34,11 +34,11 @@ namespace MWSound
     {
         const VFS::Manager* mResourceMgr;
 
-        virtual bool open(const std::string &fname) = 0;
+        virtual void open(const std::string &fname) = 0;
         virtual void close() = 0;
 
         virtual std::string getName() = 0;
-        virtual bool getInfo(int *samplerate, ChannelConfig *chans, SampleType *type) = 0;
+        virtual void getInfo(int *samplerate, ChannelConfig *chans, SampleType *type) = 0;
 
         virtual size_t read(char *buffer, size_t bytes) = 0;
         virtual void readAll(std::vector<char> &output);

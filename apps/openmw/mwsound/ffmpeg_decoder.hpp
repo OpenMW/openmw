@@ -66,11 +66,11 @@ namespace MWSound
         bool getAVAudioData();
         size_t readAVAudioData(void *data, size_t length);
 
-        bool open(const std::string &fname) override;
+        void open(const std::string &fname) override;
         void close() override;
 
         std::string getName() override;
-        bool getInfo(int *samplerate, ChannelConfig *chans, SampleType *type) override;
+        void getInfo(int *samplerate, ChannelConfig *chans, SampleType *type) override;
 
         size_t read(char *buffer, size_t bytes) override;
         void readAll(std::vector<char> &output) override;

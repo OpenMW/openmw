@@ -411,10 +411,14 @@ bool OpenAL_SoundStream::init(bool getLoudnessData)
     ChannelConfig chans;
     SampleType type;
 
-    if(!mDecoder->getInfo(&mSampleRate, &chans, &type))
+    try {
+        mDecoder->getInfo(&mSampleRate, &chans, &type);
+        mFormat = getALFormat(chans, type);
+    }
+    catch(std::exception &e) {
+        std::cerr<< "Failed to get stream info: "<<e.what() <<std::endl;
         return false;
-    mFormat = getALFormat(chans, type);
-    if(!mFormat) return false;
+    }
 
     switch(type)
     {
@@ -946,35 +950,33 @@ std::pair<Sound_Handle,size_t> OpenAL_Output::loadSound(const std::string &fname
 {
     getALError();
 
-    DecoderPtr decoder = mManager.getDecoder();
-    // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
-    bool succeeded;
-    if(decoder->mResourceMgr->exists(fname))
-        succeeded = decoder->open(fname);
-    else
-    {
-        std::string file = fname;
-        std::string::size_type pos = file.rfind('.');
-        if(pos != std::string::npos)
-            file = file.substr(0, pos)+".mp3";
-        succeeded = decoder->open(file);
-    }
-
     std::vector<char> data;
     ALenum format;
     int srate;
 
-    if(succeeded)
-    {
+    try {
+        DecoderPtr decoder = mManager.getDecoder();
+        // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
+        if(decoder->mResourceMgr->exists(fname))
+            decoder->open(fname);
+        else
+        {
+            std::string file = fname;
+            std::string::size_type pos = file.rfind('.');
+            if(pos != std::string::npos)
+                file = file.substr(0, pos)+".mp3";
+            decoder->open(file);
+        }
+
         ChannelConfig chans;
         SampleType type;
-        if(decoder->getInfo(&srate, &chans, &type))
-        {
-            format = getALFormat(chans, type);
-            if(format) decoder->readAll(data);
-        }
+        decoder->getInfo(&srate, &chans, &type);
+        format = getALFormat(chans, type);
+        if(format) decoder->readAll(data);
     }
-    decoder->close();
+    catch(std::exception &e) {
+        std::cerr<< "Failed to load audio from "<<fname<<": "<<e.what() <<std::endl;
+    }
 
     if(data.empty())
     {
