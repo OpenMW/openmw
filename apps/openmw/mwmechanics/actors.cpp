@@ -1280,6 +1280,8 @@ namespace MWMechanics
                                 {
                                     if (it->first == iter->first)
                                         continue;
+                                    if (iter->first == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson())
+                                        continue;
                                     updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
                                 }
                             }
