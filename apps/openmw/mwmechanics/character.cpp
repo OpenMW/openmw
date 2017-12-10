@@ -2421,10 +2421,6 @@ void CharacterController::updateHeadTracking(float duration)
     if (!head)
         return;
 
-    // Disable head tracking for player in First person mode
-    if (mPtr == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson())
-        return;
-
     float zAngleRadians = 0.f;
     float xAngleRadians = 0.f;
 
