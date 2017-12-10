@@ -968,9 +968,9 @@ namespace MWMechanics
         float y = roll / std::min(x, 100.f);
         y *= 0.25f * x;
         if (magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
-            effect.mDuration = static_cast<int>(y);
-        else
             effect.mDuration = 1;
+        else
+            effect.mDuration = static_cast<int>(y);
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
         {
             if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
