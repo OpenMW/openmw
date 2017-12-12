@@ -3,6 +3,7 @@
 #include <osg/Camera>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/esm/loadcell.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -101,6 +102,8 @@ namespace MWRender
             position.z() += mHeight * mHeightScale;
         else
         {
+            if (!mTrackingPtr.getCell()->getCell()->hasWater())
+                return position;
             const osg::Node* baseNode = mAnimation->getNode("Right Foot");
             if (!baseNode || baseNode->getParentalNodePaths().empty())
                 return position;
