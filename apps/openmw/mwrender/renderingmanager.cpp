@@ -211,7 +211,7 @@ namespace MWRender
 
         //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::PERSPECTIVE_SHADOW_MAP);
         settings->setBaseShadowTextureUnit(SceneUtil::MWShadow::baseShadowTextureUnit);
-        //settings->setMinimumShadowMapNearFarRatio(0);
+        settings->setMinimumShadowMapNearFarRatio(0.25);
         settings->setNumShadowMapsPerLight(SceneUtil::MWShadow::numberOfShadowMapsPerLight);
         //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::ORTHOGRAPHIC_SHADOW_MAP);
         //settings->setMultipleShadowMapHint(osgShadow::ShadowSettings::PARALLEL_SPLIT); // ignored
