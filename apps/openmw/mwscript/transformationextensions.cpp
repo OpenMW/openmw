@@ -227,6 +227,17 @@ namespace MWScript
                     }
                     else if(axis == "z")
                     {
+                        // We should not place actors under ground
+                        if (ptr.getClass().isActor())
+                        {
+                            float terrainHeight = -std::numeric_limits<float>::max();
+                            if (ptr.getCell()->isExterior())
+                                terrainHeight = MWBase::Environment::get().getWorld()->getTerrainHeightAt(osg::Vec3f(ax, ay, az));
+
+                            if (pos < terrainHeight)
+                                pos = terrainHeight;
+                        }
+
                         updated = MWBase::Environment::get().getWorld()->moveObject(ptr,ax,ay,pos);
                     }
                     else
