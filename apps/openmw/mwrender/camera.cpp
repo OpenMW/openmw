@@ -9,6 +9,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/refdata.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "npcanimation.hpp"
 
@@ -100,12 +101,15 @@ namespace MWRender
             position.z() += mHeight * mHeightScale;
         else
         {
-            const osg::Node* baseNode = mTrackingPtr.getRefData().getBaseNode();
-            if (baseNode && !baseNode->getParentalNodePaths().empty())
-            {
-                const osg::Vec3d positionBase = osg::computeLocalToWorld(baseNode->getParentalNodePaths()[0]).getTrans();
-                position.z() = mHeight * mHeightScale + positionBase.z();
-            }
+            const osg::Node* baseNode = mAnimation->getNode("Right Foot");
+            if (!baseNode || baseNode->getParentalNodePaths().empty())
+                return position;
+            const double waterlevel = mTrackingPtr.getCell()->getWaterLevel();
+            const osg::Vec3d positionBase = osg::computeLocalToWorld(baseNode->getParentalNodePaths()[0]).getTrans();
+            if (positionBase.z() < waterlevel &&
+                positionBase.z() + mHeight * mHeightScale > waterlevel &&
+                position.z() < waterlevel)
+                position.z() = waterlevel + 0.5;
         }
         return position;
     }
