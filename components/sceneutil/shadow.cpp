@@ -596,14 +596,34 @@ namespace SceneUtil
                 if (numShadowMapsPerLight>1)
                 {
                     // compute the start and end range in non-dimensional coords
-#if 1
+#if 0
                     double r_start = (sm_i == 0) ? -1.0 : (double(sm_i) / double(numShadowMapsPerLight)*2.0 - 1.0);
                     double r_end = (sm_i + 1 == numShadowMapsPerLight) ? 1.0 : (double(sm_i + 1) / double(numShadowMapsPerLight)*2.0 - 1.0);
-#else
+#elif 0
 
                     // hardwired for 2 splits
                     double r_start = (sm_i == 0) ? -1.0 : splitPoint;
                     double r_end = (sm_i + 1 == numShadowMapsPerLight) ? 1.0 : splitPoint;
+#else
+                    double r_start, r_end;
+                    // Split such that each shadow map covers a quarter of the area of the one after it
+                    if (sm_i == 0)
+                        r_start = -1.0;
+                    else
+                    {
+                        r_start = (1 - pow(4.0, sm_i)) / (1 - pow(4.0, numShadowMapsPerLight));
+                        r_start *= 2.0;
+                        r_start -= 1.0;
+                    }
+
+                    if (sm_i + 1 == numShadowMapsPerLight)
+                        r_end = 1.0;
+                    else
+                    {
+                        r_end = (1 - pow(4.0, sm_i + 1)) / (1 - pow(4.0, numShadowMapsPerLight));
+                        r_end *= 2.0;
+                        r_end -= 1.0;
+                    }
 #endif
 
                     // for all by the last shadowmap shift the r_end so that it overlaps slightly with the next shadowmap
