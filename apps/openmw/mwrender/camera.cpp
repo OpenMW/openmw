@@ -104,13 +104,14 @@ namespace MWRender
         {
             if (!mTrackingPtr.getCell()->getCell()->hasWater())
                 return position;
-            const osg::Node* baseNode = mAnimation->getNode("Right Foot");
+            const SceneUtil::PositionAttitudeTransform* baseNode = mTrackingPtr.getRefData().getBaseNode();
             if (!baseNode || baseNode->getParentalNodePaths().empty())
                 return position;
-            const double waterlevel = mTrackingPtr.getCell()->getWaterLevel();
+            const float waterlevel = mTrackingPtr.getCell()->getWaterLevel();
+            const float scale = baseNode->getScale().z();
             const osg::Vec3d positionBase = osg::computeLocalToWorld(baseNode->getParentalNodePaths()[0]).getTrans();
             if (positionBase.z() < waterlevel &&
-                positionBase.z() + mHeight * mHeightScale > waterlevel &&
+                positionBase.z() + mHeight * scale > waterlevel &&
                 position.z() < waterlevel)
                 position.z() = waterlevel + 0.5;
         }
