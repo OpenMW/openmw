@@ -24,7 +24,7 @@ addons:
       - llvm-toolchain-precise-3.6
     packages: [
       # Dev
-      clang-3.6, libunshield-dev, libtinyxml-dev,
+      cmake, clang-3.6, libunshield-dev, libtinyxml-dev,
       # Tests
       libgtest-dev, google-mock,
       # Boost
