@@ -102,6 +102,8 @@ namespace MWRender
             position.z() += mHeight * mHeightScale;
         else
         {
+            if (mTrackingPtr.getCell()->getState() != MWWorld::CellStore::State_Loaded)
+                return position;
             if (!mTrackingPtr.getCell()->getCell()->hasWater())
                 return position;
             const SceneUtil::PositionAttitudeTransform* baseNode = mTrackingPtr.getRefData().getBaseNode();
