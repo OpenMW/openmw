@@ -202,11 +202,6 @@ namespace MWScript
                     if (!ptr.isInCell())
                         return;
 
-                    if (ptr == MWMechanics::getPlayer())
-                    {
-                        MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
-                    }
-
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                     Interpreter::Type_Float pos = runtime[0].mFloat;
@@ -215,6 +210,8 @@ namespace MWScript
                     float ax = ptr.getRefData().getPosition().pos[0];
                     float ay = ptr.getRefData().getPosition().pos[1];
                     float az = ptr.getRefData().getPosition().pos[2];
+
+                    // Note: SetPos does not skip weather transitions in vanilla engine, so we do not call setTeleported(true) here.
 
                     MWWorld::Ptr updated = ptr;
                     if(axis == "x")
