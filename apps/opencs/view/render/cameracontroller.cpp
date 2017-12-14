@@ -694,7 +694,6 @@ namespace CSVRender
     {
         osg::Vec3d eye, center, up;
         getCamera()->getViewMatrixAsLookAt(eye, center, up);
-        osg::Vec3d absoluteUp = osg::Vec3(0,0,1);
 
         osg::Vec3d forward = center - eye;
         osg::Vec3d axis = up ^ forward;
