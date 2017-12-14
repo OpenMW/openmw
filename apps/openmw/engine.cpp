@@ -121,6 +121,9 @@ bool OMW::Engine::frame(float frametime)
 
                     // global scripts
                     mEnvironment.getScriptManager()->getGlobalScripts().run();
+
+                    // Update list of running scripts in the end of scripts processing
+                    mEnvironment.getScriptManager()->getGlobalScripts().updateState();
                 }
 
                 mEnvironment.getWorld()->markCellAsUnchanged();
