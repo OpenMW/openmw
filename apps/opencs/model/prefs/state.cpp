@@ -196,7 +196,9 @@ void CSMPrefs::State::declare()
     declareCategory ("Rendering");
     declareInt ("camera-fov", "Camera FOV", 90).setRange(10, 170);
     declareBool ("camera-ortho", "Orthographic projection for camera", false);
-    declareInt ("camera-ortho-size", "Orthographic projection size parameter", 100).setRange(10, 10000);
+    declareInt ("camera-ortho-size", "Orthographic projection size parameter", 100).
+        setTooltip("Size of the orthographic frustum, greater value will allow the camera to see more of the world.").
+        setRange(10, 10000);
     declareDouble ("object-marker-alpha", "Object Marker Transparency", 0.5).setPrecision(2).setRange(0,1);
 
     declareCategory ("Tooltips");
