@@ -471,7 +471,7 @@ void CSVRender::Object::setSelected(bool selected)
     else
         mRootNode->addChild(mBaseNode);
 
-    mMarkerTransparency = CSMPrefs::get()["3D Scene Input"]["object-marker-alpha"].toDouble();
+    mMarkerTransparency = CSMPrefs::get()["Rendering"]["object-marker-alpha"].toDouble();
     updateMarker();
 }
 
