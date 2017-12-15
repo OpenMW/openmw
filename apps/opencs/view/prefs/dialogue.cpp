@@ -84,7 +84,6 @@ CSVPrefs::Dialogue::~Dialogue()
 void CSVPrefs::Dialogue::closeEvent (QCloseEvent *event)
 {
     QMainWindow::closeEvent (event);
-
     CSMPrefs::State::get().save();
 }
 

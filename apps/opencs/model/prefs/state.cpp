@@ -180,6 +180,7 @@ void CSMPrefs::State::declare()
     declareDouble ("navi-free-speed-mult", "Free Camera Speed Multiplier (from Modifier)", 8).setRange(0.001, 1000.0);
     declareDouble ("navi-orbit-rot-speed", "Orbital Camera Rotational Speed", 3.14 / 4).setRange(0.001, 6.28);
     declareDouble ("navi-orbit-speed-mult", "Orbital Camera Speed Multiplier (from Modifier)", 4).setRange(0.001, 1000.0);
+    declareBool ("navi-orbit-const-roll", "Keep camera roll constant for orbital camera", true);
     declareSeparator();
     declareBool ("context-select", "Context Sensitive Selection", false);
     declareDouble ("drag-factor", "Mouse sensitivity during drag operations", 1.0).
@@ -192,6 +193,11 @@ void CSMPrefs::State::declare()
         setRange (0.001, 100.0);
     declareDouble ("rotate-factor", "Free rotation factor", 0.007).setPrecision(4).setRange(0.0001, 0.1);
     declareDouble ("object-marker-alpha", "Object Marker Transparency", 0.5).setPrecision(2).setRange(0,1);
+
+    declareCategory ("Rendering");
+    declareDouble ("camera-fov", "Camera FOV", 90.).setPrecision(5).setRange(10.0, 160.0);
+    declareBool ("camera-ortho", "Orthographic projection for camera", false);
+    declareDouble ("camera-ortho-size", "Orthographic projection size parameter", 100.0).setPrecision(5).setRange(0.0, 1000.0);
 
     declareCategory ("Tooltips");
     declareBool ("scene", "Show Tooltips in 3D scenes", true);

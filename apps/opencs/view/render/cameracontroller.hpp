@@ -160,6 +160,8 @@ namespace CSVRender
             /// \brief Flag controller to be re-initialized.
             void reset();
 
+            void setConstRoll(bool enable);
+
         private:
 
             void initialize();
@@ -180,6 +182,8 @@ namespace CSVRender
 
             double mOrbitSpeed;
             double mOrbitSpeedMult;
+
+            bool mConstRoll;
 
         private slots:
 
