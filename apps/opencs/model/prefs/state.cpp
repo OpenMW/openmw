@@ -194,9 +194,9 @@ void CSMPrefs::State::declare()
     declareDouble ("rotate-factor", "Free rotation factor", 0.007).setPrecision(4).setRange(0.0001, 0.1);
 
     declareCategory ("Rendering");
-    declareDouble ("camera-fov", "Camera FOV", 90.).setPrecision(5).setRange(10.0, 160.0);
+    declareInt ("camera-fov", "Camera FOV", 90).setRange(10, 170);
     declareBool ("camera-ortho", "Orthographic projection for camera", false);
-    declareDouble ("camera-ortho-size", "Orthographic projection size parameter", 100.0).setPrecision(5).setRange(0.0, 1000.0);
+    declareInt ("camera-ortho-size", "Orthographic projection size parameter", 100).setRange(10, 10000);
     declareDouble ("object-marker-alpha", "Object Marker Transparency", 0.5).setPrecision(2).setRange(0,1);
 
     declareCategory ("Tooltips");
