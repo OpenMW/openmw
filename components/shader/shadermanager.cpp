@@ -337,12 +337,9 @@ namespace Shader
         return DefineMap(mGlobalDefines);
     }
 
-    void ShaderManager::setGlobalDefines(DefineMap & defines, osg::ref_ptr<osgViewer::Viewer> viewer)
+    void ShaderManager::setGlobalDefines(DefineMap & globalDefines)
     {
-        mGlobalDefines = defines;
-        bool threadsStarted = viewer->areThreadsRunning();
-        if (threadsStarted)
-            viewer->stopThreading();
+        mGlobalDefines = globalDefines;
         for (auto shaderMapElement: mShaders)
         {
             std::string templateId = shaderMapElement.first.first;
@@ -358,8 +355,6 @@ namespace Shader
                 continue;
             shader->setShaderSource(shaderSource);
         }
-        if (threadsStarted)
-            viewer->startThreading();
     }
 
     void ShaderManager::releaseGLObjects(osg::State *state)

@@ -39,7 +39,8 @@ namespace Shader
 
         /// Set the DefineMap used to construct all shaders
         /// @param defines The DefineMap to use
-        void setGlobalDefines(DefineMap & defines, osg::ref_ptr<osgViewer::Viewer> viewer);
+        /// @note This will change the source code for any shaders already created, potentially causing problems if they're being used to render a frame. It is recommended that any associated Viewers have their threading stopped while this function is running if any shaders are in use.
+        void setGlobalDefines(DefineMap & globalDefines);
 
         void releaseGLObjects(osg::State* state);
 

@@ -244,7 +244,8 @@ namespace MWRender
         for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
             globalDefines[itr->first] = itr->second;
 
-        mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines, mViewer);
+        // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
+        mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
         mPathgrid.reset(new Pathgrid(mRootNode));
 
