@@ -604,7 +604,7 @@ namespace SceneUtil
                     // hardwired for 2 splits
                     double r_start = (sm_i == 0) ? -1.0 : splitPoint;
                     double r_end = (sm_i + 1 == numShadowMapsPerLight) ? 1.0 : splitPoint;
-#else
+#elif 0
                     double r_start, r_end;
                     // Split such that each shadow map covers a quarter of the area of the one after it
                     if (sm_i == 0)
@@ -613,6 +613,7 @@ namespace SceneUtil
                     {
                         r_start = (1 - pow(4.0, sm_i)) / (1 - pow(4.0, numShadowMapsPerLight));
                         r_start *= 2.0;
+                        //r_start += double(sm_i) / double(numShadowMapsPerLight);
                         r_start -= 1.0;
                     }
 
@@ -622,7 +623,46 @@ namespace SceneUtil
                     {
                         r_end = (1 - pow(4.0, sm_i + 1)) / (1 - pow(4.0, numShadowMapsPerLight));
                         r_end *= 2.0;
+                        //r_end += double(sm_i + 1) / double(numShadowMapsPerLight);
                         r_end -= 1.0;
+                    }
+#else
+                    double r_start, r_end;
+
+                    // split system based on the original Parallel Split Shadow Maps paper.
+                    double n = (frustum.eye - frustum.centerNearPlane).length();
+                    double f = (frustum.eye - frustum.centerFarPlane).length();
+                    double i = double(sm_i);
+                    double m = double(numShadowMapsPerLight);
+                    double deltaBias = 0;
+                    if (sm_i == 0)
+                        r_start = -1.0;
+                    else
+                    {
+                        // compute the split point in main camera view
+                        double ciLog = n * pow(f / n, i / m);
+                        double ciUniform = n + (f - n) * i / m;
+                        double ci = (ciLog + ciUniform) / 2 + deltaBias;
+
+                        // work out where this is in light space
+                        osg::Vec3d worldSpacePos = frustum.eye + frustum.frustumCenterLine * ci;
+                        osg::Vec3d lightSpacePos = worldSpacePos * viewMatrix * projectionMatrix;
+                        r_start = lightSpacePos.y();
+                    }
+
+                    if (sm_i + 1 == numShadowMapsPerLight)
+                        r_end = 1.0;
+                    else
+                    {
+                        // compute the split point in main camera view
+                        double ciLog = n * pow(f / n, (i + 1) / m);
+                        double ciUniform = n + (f - n) * (i + 1) / m;
+                        double ci = (ciLog + ciUniform) / 2 + deltaBias;
+
+                        // work out where this is in light space
+                        osg::Vec3d worldSpacePos = frustum.eye + frustum.frustumCenterLine * ci;
+                        osg::Vec3d lightSpacePos = worldSpacePos * viewMatrix * projectionMatrix;
+                        r_end = lightSpacePos.y();
                     }
 #endif
 
