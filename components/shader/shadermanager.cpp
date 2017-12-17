@@ -337,10 +337,29 @@ namespace Shader
         return DefineMap(mGlobalDefines);
     }
 
-    void ShaderManager::setGlobalDefines(DefineMap & defines)
+    void ShaderManager::setGlobalDefines(DefineMap & defines, osg::ref_ptr<osgViewer::Viewer> viewer)
     {
         mGlobalDefines = defines;
-        // TODO: We need to trigger the regeneration of all shaders.
+        bool threadsStarted = viewer->areThreadsRunning();
+        if (threadsStarted)
+            viewer->stopThreading();
+        for (auto shaderMapElement: mShaders)
+        {
+            std::string templateId = shaderMapElement.first.first;
+            ShaderManager::DefineMap defines = shaderMapElement.first.second;
+            osg::ref_ptr<osg::Shader> shader = shaderMapElement.second;
+            if (shader == nullptr)
+                // I'm not sure how to handle a shader that was already broken as there's no way to get a potential replacement to the nodes that need it.
+                continue;
+            std::string shaderSource = mShaderTemplates[templateId];
+            if (!parseDefines(shaderSource, defines, mGlobalDefines) || !parseFors(shaderSource))
+                // We just broke the shader and there's no way to force existing objects back to fixed-function mode as we would when creating the shader.
+                // If we put a nullptr in the shader map, we just lose the ability to put a working one in later.
+                continue;
+            shader->setShaderSource(shaderSource);
+        }
+        if (threadsStarted)
+            viewer->startThreading();
     }
 
     void ShaderManager::releaseGLObjects(osg::State *state)

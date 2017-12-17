@@ -8,6 +8,8 @@
 
 #include <osg/Shader>
 
+#include <osgViewer/Viewer>
+
 #include <OpenThreads/Mutex>
 
 namespace Shader
@@ -37,7 +39,7 @@ namespace Shader
 
         /// Set the DefineMap used to construct all shaders
         /// @param defines The DefineMap to use
-        void setGlobalDefines(DefineMap& defines);
+        void setGlobalDefines(DefineMap & defines, osg::ref_ptr<osgViewer::Viewer> viewer);
 
         void releaseGLObjects(osg::State* state);
 

@@ -244,7 +244,7 @@ namespace MWRender
         for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
             globalDefines[itr->first] = itr->second;
 
-        mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
+        mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines, mViewer);
 
         mPathgrid.reset(new Pathgrid(mRootNode));
 
