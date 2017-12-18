@@ -2446,9 +2446,8 @@ namespace MWWorld
             if (ptr.getRefData().isDeleted())
                 return true;
 
-            // we should not sell ingrediends from owned organic containers
-            MWWorld::LiveCellRef<ESM::Container>* ref = ptr.get<ESM::Container>();
-            if (ref && (ref->mBase->mFlags & ESM::Container::Organic))
+            // vanilla Morrowind does not allow to sell items from containers with zero capacity
+            if (ptr.getClass().getCapacity(ptr) <= 0.f)
                 return true;
 
             if (Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), mOwner.getCellRef().getRefId()))
