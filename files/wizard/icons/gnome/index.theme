@@ -1,0 +1,8 @@
+[Icon Theme]
+Name=GNOME Desktop
+Comment=GNOME Desktop icons, licensed under GNU General Public License version 2, see https://commons.wikimedia.org/wiki/GNOME_Desktop_icons
+Inherits=default
+Directories=48x48
+
+[48x48]
+Size=48

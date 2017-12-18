@@ -1,0 +1,8 @@
+[Icon Theme]
+Name=Retailers
+Comment=These icons are simple geometric shapes and/or text and are in the public domain. See for instance https://en.wikipedia.org/wiki/File:Steam_icon_logo.svg
+Inherits=default
+Directories=48x48
+
+[48x48]
+Size=48

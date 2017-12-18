@@ -16,9 +16,11 @@
 #include "componentselectionpage.hpp"
 #include "importpage.hpp"
 #include "conclusionpage.hpp"
+#include "buypage.hpp"
 
 #ifdef OPENMW_USE_UNSHIELD
 #include "installationpage.hpp"
+
 #endif
 
 using namespace Process;
@@ -333,6 +335,7 @@ void Wizard::MainWizard::setupPages()
 #ifdef OPENMW_USE_UNSHIELD
     setPage(Page_Installation, new InstallationPage(this));
 #endif
+    setPage(Page_Buy, new BuyPage(this));
     setPage(Page_Import, new ImportPage(this));
     setPage(Page_Conclusion, new ConclusionPage(this));
     setStartId(Page_Intro);

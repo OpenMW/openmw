@@ -14,13 +14,16 @@ Wizard::MethodSelectionPage::MethodSelectionPage(QWidget *parent) :
 #endif
 
     registerField(QLatin1String("installation.retailDisc"), retailDiscRadioButton);
+    registerField(QLatin1String("installation.existingLocation"), existingLocationRadioButton);
 }
 
 int Wizard::MethodSelectionPage::nextId() const
 {
     if (field(QLatin1String("installation.retailDisc")).toBool() == true) {
         return MainWizard::Page_InstallationTarget;
-    } else {
+    } else if (field(QLatin1String("installation.existingLocation")).toBool() == true) {
         return MainWizard::Page_ExistingInstallation;
+    } else {
+        return MainWizard::Page_Buy;
     }
 }
