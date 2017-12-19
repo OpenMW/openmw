@@ -391,7 +391,7 @@ void RenderWidget::updateCameraParameters(double overrideAspect)
 
     if (CSMPrefs::get()["Rendering"]["camera-ortho"].isTrue())
     {
-        const float size = CSMPrefs::get()["Rendering"]["camera-ortho-size"].toDouble();
+        const float size = CSMPrefs::get()["Rendering"]["camera-ortho-size"].toInt();
         const float aspect = overrideAspect >= 0.0 ? overrideAspect : (width() / static_cast<double>(height()));
         const float halfH = size * 10.0;
         const float halfW = halfH * aspect;
@@ -402,7 +402,7 @@ void RenderWidget::updateCameraParameters(double overrideAspect)
     else
     { 
         mView->getCamera()->setProjectionMatrixAsPerspective(
-            CSMPrefs::get()["Rendering"]["camera-fov"].toDouble(),
+            CSMPrefs::get()["Rendering"]["camera-fov"].toInt(),
             static_cast<double>(width())/static_cast<double>(height()),
             nearDist, farDist);
     }
