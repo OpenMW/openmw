@@ -238,15 +238,14 @@ namespace MWMechanics
     void Actors::adjustBoundItem (const std::string& itemId, bool bound, const MWWorld::Ptr& actor)
     {
         MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
+        int slot = getBoundItemSlot(itemId);
 
         if (bound)
         {
             if (actor.getClass().getContainerStore(actor).count(itemId) != 0)
                 return;
 
-            int slot = getBoundItemSlot(itemId);
-
-            MWWorld::Ptr prevItem = *store.getSlot(slot);
+            MWWorld::ContainerStoreIterator prevItem = store.getSlot(slot);
 
             MWWorld::Ptr boundPtr = *store.MWWorld::ContainerStore::add(itemId, 1, actor);
             MWWorld::ActionEquip action(boundPtr);
@@ -264,39 +263,40 @@ namespace MWMechanics
             if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
                 MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
 
-            mPreviousItems[slot] = std::make_pair(itemId, prevItem);
+            if (prevItem != store.end())
+                mPreviousItems[itemId] = *prevItem;
         }
         else
         {
+            MWWorld::ContainerStoreIterator currentItem = store.getSlot(slot);
+
+            bool wasEquipped = currentItem != store.end() && Misc::StringUtils::ciEqual((*currentItem).getCellRef().getRefId(), itemId);
+
             store.remove(itemId, 1, actor, true);
 
             if (actor != MWMechanics::getPlayer())
                 return;
 
-            int slot = getBoundItemSlot(itemId);
+            MWWorld::Ptr prevItem = mPreviousItems[itemId];
 
-            std::pair<std::string, MWWorld::Ptr> prevItem = mPreviousItems[slot];
+            mPreviousItems.erase(itemId);
 
-            if (prevItem.first != itemId)
-                return;
-
-            mPreviousItems.erase(slot);
-
-            if (prevItem.second.isEmpty())
+            if (prevItem.isEmpty())
                 return;
 
             // check if the item is still in the player's inventory
             MWWorld::ContainerStoreIterator it = store.begin();
             for (; it != store.end(); ++it)
             {
-                if (*it == prevItem.second)
+                if (*it == prevItem)
                     break;
             }
 
-            if (it == store.end())
+            // we should equip previous item only if expired bound item was equipped.
+            if (it == store.end() || !wasEquipped)
                 return;
 
-            MWWorld::ActionEquip action(prevItem.second);
+            MWWorld::ActionEquip action(prevItem);
             action.execute(actor);
         }
     }
@@ -830,9 +830,15 @@ namespace MWMechanics
             float magnitude = effects.get(it->first).getMagnitude();
             if (found != (magnitude > 0))
             {
+                if (magnitude > 0)
+                    creatureStats.mBoundItems.insert(it->first);
+                else
+                    creatureStats.mBoundItems.erase(it->first);
+
                 std::string itemGmst = it->second;
                 std::string item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                             itemGmst)->getString();
+
                 if (it->first == ESM::MagicEffect::BoundGloves)
                 {
                     item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
@@ -844,11 +850,6 @@ namespace MWMechanics
                 }
                 else
                     adjustBoundItem(item, magnitude > 0, ptr);
-
-                if (magnitude > 0)
-                    creatureStats.mBoundItems.insert(it->first);
-                else
-                    creatureStats.mBoundItems.erase(it->first);
             }
         }
 
