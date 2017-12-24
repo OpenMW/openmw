@@ -28,7 +28,8 @@ namespace MWMechanics
             typedef std::map<std::string, MWWorld::Ptr> PreviousItems;
             PreviousItems mPreviousItems;
 
-            void adjustBoundItem (const std::string& itemId, bool bound, const MWWorld::Ptr& actor);
+            void addBoundItem (const std::string& itemId, const MWWorld::Ptr& actor);
+            void removeBoundItem (const std::string& itemId, const MWWorld::Ptr& actor);
 
             void updateNpc(const MWWorld::Ptr &ptr, float duration);
 
