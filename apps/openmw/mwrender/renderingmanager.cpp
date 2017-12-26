@@ -215,7 +215,7 @@ namespace MWRender
         settings->setNumShadowMapsPerLight(SceneUtil::MWShadow::numberOfShadowMapsPerLight);
         //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::ORTHOGRAPHIC_SHADOW_MAP);
         //settings->setMultipleShadowMapHint(osgShadow::ShadowSettings::PARALLEL_SPLIT); // ignored
-        //settings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
+        settings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
         //settings->setDebugDraw(true); // don't turn this on because it makes everything break
 
         //settings->setPerspectiveShadowMapCutOffAngle(0);
