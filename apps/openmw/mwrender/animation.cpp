@@ -625,7 +625,7 @@ namespace MWRender
 
     float Animation::getStartTime(const std::string &groupname) const
     {
-        for(AnimSourceList::const_iterator iter(mAnimSources.begin()); iter != mAnimSources.end(); ++iter)
+        for(AnimSourceList::const_reverse_iterator iter(mAnimSources.rbegin()); iter != mAnimSources.rend(); ++iter)
         {
             const NifOsg::TextKeyMap &keys = (*iter)->getTextKeys();
 
@@ -638,7 +638,7 @@ namespace MWRender
 
     float Animation::getTextKeyTime(const std::string &textKey) const
     {
-        for(AnimSourceList::const_iterator iter(mAnimSources.begin()); iter != mAnimSources.end(); ++iter)
+        for(AnimSourceList::const_reverse_iterator iter(mAnimSources.rbegin()); iter != mAnimSources.rend(); ++iter)
         {
             const NifOsg::TextKeyMap &keys = (*iter)->getTextKeys();
 

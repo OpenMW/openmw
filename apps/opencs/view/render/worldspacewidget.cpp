@@ -131,7 +131,7 @@ void CSVRender::WorldspaceWidget::settingChanged (const CSMPrefs::Setting *setti
         mDragWheelFactor = setting->toDouble();
     else if (*setting=="3D Scene Input/drag-shift-factor")
         mDragShiftFactor = setting->toDouble();
-    else if (*setting=="3D Scene Input/object-marker-alpha" && !mInConstructor)
+    else if (*setting=="Rendering/object-marker-alpha" && !mInConstructor)
     {
         float alpha = setting->toDouble();
         // getSelection is virtual, thus this can not be called from the constructor
