@@ -11,7 +11,7 @@ namespace SceneUtil
     {
     public:
         static const int numberOfShadowMapsPerLight = 3;
-        static const int enableShadows = true;
+        static const bool enableShadows = true;
         static const bool debugHud = true;
 
         MWShadow();

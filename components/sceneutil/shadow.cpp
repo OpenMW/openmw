@@ -321,6 +321,12 @@ namespace SceneUtil
     
     void MWShadow::cull(osgUtil::CullVisitor& cv)
     {
+        if (!enableShadows)
+        {
+            _shadowedScene->osg::Group::traverse(cv);
+            return;
+        }
+        
         OSG_INFO << std::endl << std::endl << "ViewDependentShadowMap::cull(osg::CullVisitor&" << &cv << ")" << std::endl;
 
         if (!_shadowCastingStateSet)
