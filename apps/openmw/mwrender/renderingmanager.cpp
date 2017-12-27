@@ -216,14 +216,6 @@ namespace MWRender
         SceneUtil::MWShadow* tech = new SceneUtil::MWShadow();
         shadowedScene->setShadowTechnique(tech);
 
-        /*tech->setMaxFarPlane(0);
-        tech->setTextureSize(osg::Vec2s(mapres, mapres));
-        tech->setShadowTextureCoordIndex(1);
-        tech->setShadowTextureUnit(1);
-        tech->setBaseTextureCoordIndex(0);
-        tech->setBaseTextureUnit(0);*/
-
-        //mRootNode->addChild(sceneRoot);
         shadowedScene->addChild(sceneRoot);
         mRootNode->addChild(shadowedScene);
 
