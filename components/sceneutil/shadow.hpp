@@ -1,6 +1,7 @@
 #ifndef COMPONENTS_SCENEUTIL_SHADOW_H
 #define COMPONENTS_SCENEUTIL_SHADOW_H
 
+#include <osgShadow/ShadowSettings>
 #include <osgShadow/ViewDependentShadowMap>
 
 #include <components/shader/shadermanager.hpp>
@@ -10,13 +11,11 @@ namespace SceneUtil
     class MWShadow : public osgShadow::ViewDependentShadowMap
     {
     public:
-        static const int numberOfShadowMapsPerLight = 3;
-        static const bool enableShadows = true;
-        static const bool debugHud = true;
+        static void setupShadowSettings(osg::ref_ptr<osgShadow::ShadowSettings> settings, int castsShadowMask);
+
+        static void disableShadowsForStateSet(osg::ref_ptr<osg::StateSet> stateSet);
 
         MWShadow();
-
-        const static int baseShadowTextureUnit = 8 - numberOfShadowMapsPerLight;
 
         virtual void cull(osgUtil::CullVisitor& cv);
 
@@ -31,6 +30,12 @@ namespace SceneUtil
         osg::ref_ptr<osg::Program> debugProgram;
 
         std::vector<osg::ref_ptr<osg::Node>> debugGeometry;
+
+        const int numberOfShadowMapsPerLight;
+        const bool enableShadows;
+        const bool debugHud;
+
+        const int baseShadowTextureUnit;
     };
 }
 

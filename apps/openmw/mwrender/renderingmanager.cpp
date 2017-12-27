@@ -204,26 +204,15 @@ namespace MWRender
 
         osg::ref_ptr<osgShadow::ShadowedScene> shadowedScene (new osgShadow::ShadowedScene);
 
-        osgShadow::ShadowSettings* settings = shadowedScene->getShadowSettings();
-        settings->setLightNum(0);
-        settings->setCastsShadowTraversalMask(Mask_Scene|Mask_Actor|Mask_Player|Mask_Terrain);
-        settings->setReceivesShadowTraversalMask(~0u);
-
-        //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::PERSPECTIVE_SHADOW_MAP);
-        settings->setBaseShadowTextureUnit(SceneUtil::MWShadow::baseShadowTextureUnit);
-        settings->setMinimumShadowMapNearFarRatio(0.25);
-        settings->setNumShadowMapsPerLight(SceneUtil::MWShadow::numberOfShadowMapsPerLight);
-        //settings->setShadowMapProjectionHint(osgShadow::ShadowSettings::ORTHOGRAPHIC_SHADOW_MAP);
-        //settings->setMultipleShadowMapHint(osgShadow::ShadowSettings::PARALLEL_SPLIT); // ignored
-        settings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
-        //settings->setDebugDraw(true); // don't turn this on because it makes everything break
-
-        //settings->setPerspectiveShadowMapCutOffAngle(0);
-        //settings->setShaderHint(osgShadow::ShadowSettings::PROVIDE_VERTEX_AND_FRAGMENT_SHADER);
-
-        int mapres = 2048;
-        settings->setTextureSize(osg::Vec2s(mapres,mapres));
-
+        int shadowCastingTraversalMask = Mask_Scene;
+        if (Settings::Manager::getBool("actor shadows", "Shadows"))
+            shadowCastingTraversalMask |= Mask_Actor;
+        if (Settings::Manager::getBool("player shadows", "Shadows"))
+            shadowCastingTraversalMask |= Mask_Player;
+        if (Settings::Manager::getBool("terrain shadows", "Shadows"))
+            shadowCastingTraversalMask |= Mask_Terrain;
+        SceneUtil::MWShadow::setupShadowSettings(shadowedScene->getShadowSettings(), shadowCastingTraversalMask);
+        
         SceneUtil::MWShadow* tech = new SceneUtil::MWShadow();
         shadowedScene->setShadowTechnique(tech);
 

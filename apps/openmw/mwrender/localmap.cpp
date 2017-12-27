@@ -202,14 +202,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
 
     lightSource->setStateSetModes(*stateset, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
-    osg::ref_ptr<osg::Image> fakeShadowMapImage = new osg::Image();
-    fakeShadowMapImage->allocateImage(1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT);
-    *(float*)fakeShadowMapImage->data() = std::numeric_limits<float>::infinity();
-    osg::ref_ptr<osg::Texture> fakeShadowMapTexture = new osg::Texture2D(fakeShadowMapImage);
-    fakeShadowMapTexture->setShadowComparison(true);
-    fakeShadowMapTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
-    for (int i = SceneUtil::MWShadow::baseShadowTextureUnit; i < SceneUtil::MWShadow::baseShadowTextureUnit + SceneUtil::MWShadow::numberOfShadowMapsPerLight; ++i)
-        stateset->setTextureAttributeAndModes(i, fakeShadowMapTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
+    SceneUtil::MWShadow::disableShadowsForStateSet(stateset);
 
     camera->addChild(lightSource);
     camera->setStateSet(stateset);

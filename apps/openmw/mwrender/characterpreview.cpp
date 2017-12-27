@@ -151,14 +151,7 @@ namespace MWRender
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         stateset->setAttribute(defaultMat);
 
-        osg::ref_ptr<osg::Image> fakeShadowMapImage = new osg::Image();
-        fakeShadowMapImage->allocateImage(1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT);
-        *(float*)fakeShadowMapImage->data() = std::numeric_limits<float>::infinity();
-        osg::ref_ptr<osg::Texture> fakeShadowMapTexture = new osg::Texture2D(fakeShadowMapImage);
-        fakeShadowMapTexture->setShadowComparison(true);
-        fakeShadowMapTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
-        for (int i = SceneUtil::MWShadow::baseShadowTextureUnit; i < SceneUtil::MWShadow::baseShadowTextureUnit + SceneUtil::MWShadow::numberOfShadowMapsPerLight; ++i)
-            stateset->setTextureAttributeAndModes(i, fakeShadowMapTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
+        SceneUtil::MWShadow::disableShadowsForStateSet(stateset);
 
         // assign large value to effectively turn off fog
         // shaders don't respect glDisable(GL_FOG)

@@ -7,6 +7,8 @@
 #include <osgDB/FileUtils>
 #include <osgDB/ReadFile>
 
+#include <components/settings/settings.hpp>
+
 namespace SceneUtil
 {
     using namespace osgShadow;
@@ -46,35 +48,76 @@ namespace SceneUtil
         "    gl_FragColor =  vec4( fS + fH * color, 1 );                         \n"
 #else
         "    gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);                  \n"
-        "    //gl_FragColor = vec4(1.0, 0.5, 0.5, 1.0);                            \n"
 #endif
         "}                                                                       \n";
 
-
-    MWShadow::MWShadow() : debugProgram(new osg::Program), debugTextureUnit(0)
+    void MWShadow::setupShadowSettings(osg::ref_ptr<osgShadow::ShadowSettings> settings, int castsShadowMask)
     {
-        osg::ref_ptr<osg::Shader> vertexShader = new osg::Shader(osg::Shader::VERTEX, debugVertexShaderSource);
-        debugProgram->addShader(vertexShader);
-        osg::ref_ptr<osg::Shader> fragmentShader = new osg::Shader(osg::Shader::FRAGMENT, debugFragmentShaderSource);
-        debugProgram->addShader(fragmentShader);
+        if (!Settings::Manager::getBool("enable shadows", "Shadows"))
+            return;
 
-        for (int i = 0; i < numberOfShadowMapsPerLight; ++i)
+        settings->setLightNum(0);
+        settings->setCastsShadowTraversalMask(castsShadowMask);
+        settings->setReceivesShadowTraversalMask(~0u);
+
+        int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
+        settings->setNumShadowMapsPerLight(numberOfShadowMapsPerLight);
+        settings->setBaseShadowTextureUnit(8 - numberOfShadowMapsPerLight);
+
+        settings->setMinimumShadowMapNearFarRatio(0.25);
+        if (Settings::Manager::getBool("compute tight scene bounds", "Shadows"))
+            settings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
+
+        int mapres = Settings::Manager::getInt("shadow map resolution", "Shadows");
+        settings->setTextureSize(osg::Vec2s(mapres, mapres));
+    }
+
+    void MWShadow::disableShadowsForStateSet(osg::ref_ptr<osg::StateSet> stateset)
+    {
+        int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
+        int baseShadowTextureUnit = 8 - numberOfShadowMapsPerLight;
+        
+        osg::ref_ptr<osg::Image> fakeShadowMapImage = new osg::Image();
+        fakeShadowMapImage->allocateImage(1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT);
+        *(float*)fakeShadowMapImage->data() = std::numeric_limits<float>::infinity();
+        osg::ref_ptr<osg::Texture> fakeShadowMapTexture = new osg::Texture2D(fakeShadowMapImage);
+        fakeShadowMapTexture->setShadowComparison(true);
+        fakeShadowMapTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
+        for (int i = baseShadowTextureUnit; i < baseShadowTextureUnit + numberOfShadowMapsPerLight; ++i)
+            stateset->setTextureAttributeAndModes(i, fakeShadowMapTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
+    }
+
+    MWShadow::MWShadow() : enableShadows(Settings::Manager::getBool("enable shadows", "Shadows")),
+        numberOfShadowMapsPerLight(Settings::Manager::getInt("number of shadow maps", "Shadows")),
+        baseShadowTextureUnit(8 - numberOfShadowMapsPerLight),
+        debugHud(Settings::Manager::getBool("enable debug hud", "Shadows")),
+        debugProgram(new osg::Program), debugTextureUnit(0)
+    {
+        if (debugHud)
         {
-            std::cout << i << std::endl;
-            
-            debugCameras.push_back(new osg::Camera);
-            debugCameras[i]->setViewport(200 * i, 0, 200, 200);
-            debugCameras[i]->setRenderOrder(osg::Camera::POST_RENDER);
-            debugCameras[i]->setClearColor(osg::Vec4(1.0, 1.0, 0.0, 1.0));
-            
-            debugGeometry.push_back(osg::createTexturedQuadGeometry(osg::Vec3(-1, -1, 0), osg::Vec3(2, 0, 0), osg::Vec3(0, 2, 0)));
-            debugGeometry[i]->setCullingActive(false);
-            debugCameras[i]->addChild(debugGeometry[i]);
-            osg::ref_ptr<osg::StateSet> stateSet = debugGeometry[i]->getOrCreateStateSet();
-            stateSet->setAttributeAndModes(debugProgram, osg::StateAttribute::ON);
-            osg::ref_ptr<osg::Uniform> textureUniform = new osg::Uniform("texture", debugTextureUnit);
-            //textureUniform->setType(osg::Uniform::SAMPLER_2D);
-            stateSet->addUniform(textureUniform.get());
+            osg::ref_ptr<osg::Shader> vertexShader = new osg::Shader(osg::Shader::VERTEX, debugVertexShaderSource);
+            debugProgram->addShader(vertexShader);
+            osg::ref_ptr<osg::Shader> fragmentShader = new osg::Shader(osg::Shader::FRAGMENT, debugFragmentShaderSource);
+            debugProgram->addShader(fragmentShader);
+
+            for (int i = 0; i < numberOfShadowMapsPerLight; ++i)
+            {
+                std::cout << i << std::endl;
+
+                debugCameras.push_back(new osg::Camera);
+                debugCameras[i]->setViewport(200 * i, 0, 200, 200);
+                debugCameras[i]->setRenderOrder(osg::Camera::POST_RENDER);
+                debugCameras[i]->setClearColor(osg::Vec4(1.0, 1.0, 0.0, 1.0));
+
+                debugGeometry.push_back(osg::createTexturedQuadGeometry(osg::Vec3(-1, -1, 0), osg::Vec3(2, 0, 0), osg::Vec3(0, 2, 0)));
+                debugGeometry[i]->setCullingActive(false);
+                debugCameras[i]->addChild(debugGeometry[i]);
+                osg::ref_ptr<osg::StateSet> stateSet = debugGeometry[i]->getOrCreateStateSet();
+                stateSet->setAttributeAndModes(debugProgram, osg::StateAttribute::ON);
+                osg::ref_ptr<osg::Uniform> textureUniform = new osg::Uniform("texture", debugTextureUnit);
+                //textureUniform->setType(osg::Uniform::SAMPLER_2D);
+                stateSet->addUniform(textureUniform.get());
+            }
         }
     }
     
