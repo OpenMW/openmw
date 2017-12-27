@@ -31,6 +31,7 @@ The ranges I have included with each setting are the physically possible ranges,
 	game
 	general
 	shaders
+	shadows
 	input
 	saves
 	sound
