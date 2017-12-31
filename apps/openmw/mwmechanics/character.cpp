@@ -1797,7 +1797,7 @@ void CharacterController::update(float duration)
             vec.y() *= factor;
             vec.z()  = 0.0f;
         }
-        else if(vec.z() > 0.0f && mJumpState == JumpState_None)
+        else if(vec.z() > 0.0f && mJumpState != JumpState_InAir)
         {
             // Started a jump.
             float z = cls.getJump(mPtr);
