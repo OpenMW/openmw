@@ -153,12 +153,12 @@ void NiPixelData::read(NIFStream *nif)
     // Unknown
     nif->skip(12);
 
-    number_of_mipmaps = nif->getInt();
+    numberOfMipmaps = nif->getInt();
 
     // Bytes per pixel, should be bpp * 8
     /* int bytes = */ nif->getInt();
 
-    for(int i=0; i<number_of_mipmaps; i++)
+    for(int i=0; i<numberOfMipmaps; i++)
     {
         // Image size and offset in the following data field
         Mipmap m;
