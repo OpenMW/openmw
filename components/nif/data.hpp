@@ -115,7 +115,7 @@ public:
     Format fmt;
 
     unsigned int rmask, gmask, bmask, amask;
-    int bpp, mips;
+    int bpp, number_of_mipmaps;
 
     struct Mipmap
     {
