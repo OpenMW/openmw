@@ -17,7 +17,7 @@ namespace SceneUtil
 
         MWShadow();
 
-        virtual void cull(osgUtil::CullVisitor& cv);
+        virtual void cull(osgUtil::CullVisitor& cv) override;
 
         virtual Shader::ShaderManager::DefineMap getShadowDefines();
 
