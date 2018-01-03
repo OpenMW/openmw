@@ -489,8 +489,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         controllerFileName = "gamecontrollerdb.txt";
     }
 
-    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/controllers/" + controllerFileName;
-    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/controllers/" + controllerFileName;
+    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/" + controllerFileName;
+    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/" + controllerFileName;
     std::string gameControllerdb;
     if (boost::filesystem::exists(localdefault))
         gameControllerdb = localdefault;

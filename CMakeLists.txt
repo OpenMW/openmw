@@ -325,14 +325,14 @@ configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
 copy_resource_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
     "${OpenMW_BINARY_DIR}" "resources/defaultfilters")
 
-configure_resource_file(${OpenMW_SOURCE_DIR}/files/controllers/gamecontrollerdb.txt
-    "${OpenMW_BINARY_DIR}" "controllers/gamecontrollerdb.txt")
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb.txt
+    "${OpenMW_BINARY_DIR}" "gamecontrollerdb.txt")
 
-configure_resource_file(${OpenMW_SOURCE_DIR}/files/controllers/gamecontrollerdb_204.txt
-        "${OpenMW_BINARY_DIR}" "controllers/gamecontrollerdb_204.txt")
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb_204.txt
+        "${OpenMW_BINARY_DIR}" "gamecontrollerdb_204.txt")
 
-configure_resource_file(${OpenMW_SOURCE_DIR}/files/controllers/gamecontrollerdb_205.txt
-        "${OpenMW_BINARY_DIR}" "controllers/gamecontrollerdb_205.txt")
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb_205.txt
+        "${OpenMW_BINARY_DIR}" "gamecontrollerdb_205.txt")
 
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
@@ -426,9 +426,9 @@ IF(NOT WIN32 AND NOT APPLE)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/resources/version" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/controllers/gamecontrollerdb.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/controllers/gamecontrollerdb_204.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/controllers/gamecontrollerdb_205.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb_204.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb_205.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
 
     IF(BUILD_OPENCS)
         INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-cs.cfg" DESTINATION "${SYSCONFDIR}" COMPONENT "opencs")
@@ -454,12 +454,12 @@ if(WIN32)
         DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/Debug/settings-default.cfg" DESTINATION "." CONFIGURATIONS Debug)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/Release/settings-default.cfg" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/Debug/controllers/gamecontrollerdb.txt" DESTINATION "." CONFIGURATIONS Debug)
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/Release/controllers/gamecontrollerdb.txt" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/Debug/controllers/gamecontrollerdb_204.txt" DESTINATION "." CONFIGURATIONS Debug)
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/Release/controllers/gamecontrollerdb_204.txt" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/Debug/controllers/gamecontrollerdb_205.txt" DESTINATION "." CONFIGURATIONS Debug)
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/Release/controllers/gamecontrollerdb_205.txt" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/Debug/gamecontrollerdb.txt" DESTINATION "." CONFIGURATIONS Debug)
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/Release/gamecontrollerdb.txt" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/Debug/gamecontrollerdb_204.txt" DESTINATION "." CONFIGURATIONS Debug)
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/Release/gamecontrollerdb_204.txt" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/Debug/gamecontrollerdb_205.txt" DESTINATION "." CONFIGURATIONS Debug)
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/Release/gamecontrollerdb_205.txt" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
 
     if(BUILD_MYGUI_PLUGIN)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Debug/Plugin_MyGUI_OpenMW_Resources.dll" DESTINATION "." CONFIGURATIONS Debug)
