@@ -619,6 +619,10 @@ public:
         {
             std::cerr << "Error: Can't write screenshot: " << result.message() << " code " << result.status() << std::endl;
         }
+        else
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox ("Screenshot saved");
+        }
     }
 
 private:
