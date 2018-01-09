@@ -1021,6 +1021,8 @@ namespace MWInput
     {
         mScreenCaptureHandler->setFramesToCapture(1);
         mScreenCaptureHandler->captureNextFrame(*mViewer);
+
+        MWBase::Environment::get().getWindowManager()->messageBox ("Screenshot saved");
     }
 
     void InputManager::toggleInventory()
