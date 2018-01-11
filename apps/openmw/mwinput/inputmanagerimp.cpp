@@ -1242,13 +1242,13 @@ namespace MWInput
                 clearAllKeyBindings(control);
 
                 if (defaultKeyBindings.find(i) != defaultKeyBindings.end()
-                        && !mInputBinder->isKeyBound(defaultKeyBindings[i]))
+                        && (force || !mInputBinder->isKeyBound(defaultKeyBindings[i])))
                 {
                     control->setInitialValue(0.0f);
                     mInputBinder->addKeyBinding(control, defaultKeyBindings[i], ICS::Control::INCREASE);
                 }
                 else if (defaultMouseButtonBindings.find(i) != defaultMouseButtonBindings.end()
-                         && !mInputBinder->isMouseButtonBound(defaultMouseButtonBindings[i]))
+                         && (force || !mInputBinder->isMouseButtonBound(defaultMouseButtonBindings[i])))
                 {
                     control->setInitialValue(0.0f);
                     mInputBinder->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
@@ -1322,12 +1322,12 @@ namespace MWInput
                 clearAllControllerBindings(control);
 
                 if (defaultButtonBindings.find(i) != defaultButtonBindings.end()
-                        && !mInputBinder->isJoystickButtonBound(mFakeDeviceID, defaultButtonBindings[i]))
+                        && (force || !mInputBinder->isJoystickButtonBound(mFakeDeviceID, defaultButtonBindings[i])))
                 {
                     control->setInitialValue(0.0f);
                     mInputBinder->addJoystickButtonBinding(control, mFakeDeviceID, defaultButtonBindings[i], ICS::Control::INCREASE);
                 }
-                else if (defaultAxisBindings.find(i) != defaultAxisBindings.end() && !mInputBinder->isJoystickAxisBound(mFakeDeviceID, defaultAxisBindings[i]))
+                else if (defaultAxisBindings.find(i) != defaultAxisBindings.end() && (force || !mInputBinder->isJoystickAxisBound(mFakeDeviceID, defaultAxisBindings[i])))
                 {
                     control->setValue(0.5f);
                     control->setInitialValue(0.5f);
