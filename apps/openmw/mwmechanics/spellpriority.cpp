@@ -1,4 +1,5 @@
 #include "spellpriority.hpp"
+#include "weaponpriority.hpp"
 
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadmgef.hpp>
@@ -332,6 +333,12 @@ namespace MWMechanics
         case ESM::MagicEffect::BoundCuirass:
         case ESM::MagicEffect::BoundGloves:
             if (!actor.getClass().isNpc())
+                return 0.f;
+            break;
+
+        case ESM::MagicEffect::BoundLongbow:
+            // AI should not summon the bow if there is no suitable ammo.
+            if (rateAmmo(actor, enemy, ESM::Weapon::Arrow) <= 0.f)
                 return 0.f;
             break;
 
