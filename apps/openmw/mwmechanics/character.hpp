@@ -292,7 +292,7 @@ public:
     float getAttackStrength() const;
 
     /// @see Animation::setActive
-    void setActive(bool active);
+    void setActive(int active);
 
     /// Make this character turn its head towards \a target. To turn off head tracking, pass an empty Ptr.
     void setHeadTrackTarget(const MWWorld::ConstPtr& target);

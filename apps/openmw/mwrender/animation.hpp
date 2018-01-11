@@ -347,7 +347,8 @@ public:
 
     /// Set active flag on the object skeleton, if one exists.
     /// @see SceneUtil::Skeleton::setActive
-    void setActive(bool active);
+    /// 0 = Inactive, 1 = Active in place, 2 = Active
+    void setActive(int active);
 
     osg::Group* getOrCreateObjectRoot();
 

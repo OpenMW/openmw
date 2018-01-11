@@ -486,10 +486,10 @@ namespace MWRender
         return mPtr;
     }
 
-    void Animation::setActive(bool active)
+    void Animation::setActive(int active)
     {
         if (mSkeleton)
-            mSkeleton->setActive(active);
+            mSkeleton->setActive(static_cast<SceneUtil::Skeleton::ActiveType>(active));
     }
 
     void Animation::updatePtr(const MWWorld::Ptr &ptr)
