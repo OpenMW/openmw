@@ -5,7 +5,7 @@ character
 ---------
 
 :Type:		string
-:Range:		
+:Range:
 :Default:	""
 
 This setting contains the default character name for loading saved games.
@@ -33,5 +33,16 @@ timeplayed
 
 This setting determines whether the amount of the time the player has spent playing will be displayed
 for each saved game in the Load menu.
+
+This setting can only be configured by editing the settings configuration file.
+
+max quicksaves
+----------
+
+:Type:		integer
+:Range:		>0
+:Default:	5
+
+This setting determines how many quicksave and autosave slots you can have at a time.  If greater than 1, quicksaves will be sequentially created each time you quicksave.  Once the maximum number of quicksaves has been reached, the oldest quicksave will be recycled the next time you perform a quicksave.
 
 This setting can only be configured by editing the settings configuration file.
