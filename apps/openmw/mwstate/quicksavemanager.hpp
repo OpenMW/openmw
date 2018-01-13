@@ -1,18 +1,18 @@
 #ifndef GAME_STATE_QUICKSAVEMANAGER_H
 #define GAME_STATE_QUICKSAVEMANAGER_H
 
+#include <string>
+
 #include "character.hpp"
 #include "../mwbase/statemanager.hpp"
 
-#include <string>
-
 namespace MWState{
     class QuickSaveManager{
-        std::string saveName;
-        int maxSaves;
-        int slotsVisited;
-        int oldestSlotId;
-        const Slot *oldestSlotVisited;
+        std::string mSaveName;
+        int mMaxSaves;
+        int mSlotsVisited;
+        int mOldestSlotId;
+        const Slot *mOldestSlotVisited;
     private:
         bool tryExtractSlotId(const std::string &slotName, int &extractedIdll);
         bool isSlotIdValid(int slotId);
