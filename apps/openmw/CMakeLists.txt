@@ -159,9 +159,8 @@ if (ANDROID)
         dl
         z
         ${OPENSCENEGRAPH_LIBRARIES}
-        ${OSG_PLUGINS}
+        freetype
         jpeg
-        gif
     	png
     )
 endif (ANDROID)
