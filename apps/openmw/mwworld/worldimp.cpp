@@ -435,6 +435,7 @@ namespace MWWorld
         gmst["fNPCHealthBarFade"] = ESM::Variant(1.f);
         gmst["fFleeDistance"] = ESM::Variant(3000.f);
         gmst["sMaxSale"] = ESM::Variant("Max Sale");
+        gmst["sAnd"] = ESM::Variant("and");
 
         // Werewolf (BM)
         gmst["fWereWolfRunMult"] = ESM::Variant(1.3f);
