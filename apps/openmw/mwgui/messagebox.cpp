@@ -207,8 +207,6 @@ namespace MWGui
       , mMessageBoxManager(parMessageBoxManager)
       , mButtonPressed(-1)
     {
-        setVisible(true);
-
         int textPadding = 10; // padding between text-widget and main-widget
         int textButtonPadding = 10; // padding between the text-widget und the button-widget
         int buttonLeftPadding = 10; // padding between the buttons if horizontal
@@ -358,7 +356,11 @@ namespace MWGui
             mMessageWidget->setCoord(messageWidgetCoord);
         }
 
-        // Set key focus to "Ok" button
+        setVisible(true);
+    }
+
+    MyGUI::Widget* InteractiveMessageBox::getDefaultKeyFocus()
+    {
         std::vector<std::string> keywords { "sOk", "sYes" };
         for(std::vector<MyGUI::Button*>::const_iterator button = mButtons.begin(); button != mButtons.end(); ++button)
         {
@@ -366,11 +368,11 @@ namespace MWGui
             {
                 if(Misc::StringUtils::ciEqual(MyGUI::LanguageManager::getInstance().replaceTags("#{" + keyword + "}"), (*button)->getCaption()))
                 {
-                    MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(*button);
-                    return;
+                    return *button;
                 }
             }
         }
+        return NULL;
     }
 
     void InteractiveMessageBox::mousePressed (MyGUI::Widget* pressed)
