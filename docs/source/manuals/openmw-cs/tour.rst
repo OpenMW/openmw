@@ -293,6 +293,40 @@ Increase the Count to 1.
 
 Save the addon, then test to ensure it works - e.g. start a new game and lockpick the chest.
 
+Placing in plain sight
+=====================
+
+Let's hide the Ring of Night vision in the cabin of the [Ancient Shipwreck]
+(http://en.uesp.net/wiki/Morrowind:Ancient_Shipwreck), a derelict vessel
+southeast of Dagon Fel. Open the list of Cells (*World* → *Cells*) and find
+"Ancient Shipwreck, Cabin".
+
+This will open a visualization of the cabin. You can navigate around the scene
+just like you would when playing Morrowind. Use the WASD keys to move forward,
+backwards, and sideways. Click and drag with the left mouse button to change the
+direction you are looking. Navigate to the table in the cabin.
+
+If you've closed the Objects table, reopen it via *World* → *Objects*. Navigate
+to your Ring of Night Vision (you can find it easily if you sort by the "Modified"
+column). Drag the ring from the Objects table onto the table in the Cell view.
+
+Now let's move the ring to the precise location we want. Hover over the ring and
+click the middle mouse button. If you don't have a middle mouse button, you can
+select an alternative command by going to *Edit* → *Preferences…* (Windows, Linux)
+or *OpenMW* → *Preferences…* (macOS). Go to the Key Bindings section and choose
+"Scene" from the dropdown menu. Then click on the button for "Primary Select" and
+choose an alternative binding.
+
+After you have switched to movement mode, you will see several arrows. Clicking
+and dragging them with the right mouse button will allow you to move the object
+in the direction you want.
+
+If you'd like an easy way to test this, you can start OpenMW with the [game
+arguments](https://wiki.openmw.org/index.php?title=Testing)
+`--start="Ancient Shipwreck, Cabin" --skip-menu`. This will place you right in
+the cell and allow you to pick up and equip the ring in order to check that it
+works.
+
 Navigation in the CS
 ====================
 This is probably a suitable place to start talking about how navigation differs from TESCS
