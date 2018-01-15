@@ -211,15 +211,11 @@ Adding the ring to the game's world
 
 Now that we have defined the ring it is time add it to the game world so the
 player can find it legitimately. We will add the ring to a merchant, place it
-in a chest and put it somewhere in plain sight. To this end we will have to
+in a chest, and put it somewhere in plain sight. To this end we will have to
 actually modify the contents of the game.
 
-
-Subsection to come...
-=====================
-
-Adding to an npc
-****************
+Adding to an NPC
+================
 
 The simplest way is probably to add it to the inventory of a shopkeeper. 
 An obvious candidate is Arrille in Seyda Neen - he's quick to find in a new game
@@ -257,6 +253,45 @@ to give the ring to the player - the same as used earlier in the console
 
 .. figure:: _static/images/chapter-1/Ring_to_Fargoth_2.png
    :alt: Editing Fargoth to give ring to player
+
+Placing in a chest
+==================
+
+For this example we will use the small chest intended for lockpick practice,
+located in the Census and Excise Office in Seyda Neen.
+
+First we need the ID of the chest - this can be obtained either by clicking on it in the console
+in the game, or by applying a similar process in the CS -
+
+World/Cells
+
+Select "Seyda Neen, Census and Excise Office"
+
+Right-click and select "View"
+
+Use mouse wheel to zoom in/out, and mouse plus WASD keys to navigate
+
+Click on the small chest
+
+Either way, you should find the ID, which is "chest_small_02_lockprac".
+
+Open the Objects table (World/Objects) and scroll down to find this item.
+
+Alternatively use the Edit/Search facility, selecting ID rather than text,
+enter "lockprac" (without the quotes) into the search box, press "Search",
+which should return two rows, then select the "Container" one rather than the "Instance"
+
+Right-click and "Edit Record".
+
+Right-click the "Content" section and select "Add a row"
+
+Set the Item ID of the new row to be your new ring - simplest way is probably to open the Objects
+table if it's not already open, sort on the "Modified" column which should bring the ring,
+with its status of "Added" to the top, then drag and drop to the chest row.
+
+Increase the Count to 1.
+
+Save the addon, then test to ensure it works - e.g. start a new game and lockpick the chest.
 
 Navigation in the CS
 ====================
@@ -304,42 +339,3 @@ already checked. Load a game and make your way to Seyda Neen - or start a new ga
 
 Check whether Arrille has one (or more) for sale, and whether Fargoth give you one
 when you return his healing ring.
-
-Placing in a chest
-******************
-
-For this example we will use the small chest intended for lockpick practice, 
-located in the Census and Excise Office in Seyda Neen.
-
-First we need the ID of the chest - this can be obtained either by clicking on it in the console
-in the game, or by applying a similar process in the CS - 
-
-World/Cells
-
-Select "Seyda Neen, Census and Excise Office"
-
-Right-click and select "View"
-
-Use mouse wheel to zoom in/out, and mouse plus WASD keys to navigate
-
-Click on the small chest
-
-Either way, you should find the ID, which is "chest_small_02_lockprac".
-
-Open the Objects table (World/Objects) and scroll down to find this item.
-
-Alternatively use the Edit/Search facility, selecting ID rather than text, 
-enter "lockprac" (without the quotes) into the search box, press "Search",
-which should return two rows, then select the "Container" one rather than the "Instance"
-
-Right-click and "Edit Record".
-
-Right-click the "Content" section and select "Add a row"
-
-Set the Item ID of the new row to be your new ring - simplest way is probably to open the Objects
-table if it's not already open, sort on the "Modified" column which should bring the ring,
-with its status of "Added" to the top, then drag and drop to the chest row. 
-
-Increase the Count to 1.
-
-Save the addon, then test to ensure it works - e.g. start a new game and lockpick the chest.
