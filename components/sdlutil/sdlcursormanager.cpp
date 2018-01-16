@@ -16,7 +16,7 @@
 
 #include "imagetosurface.hpp"
 
-#ifdef OSG_LIBRARY_STATIC
+#if defined(OSG_LIBRARY_STATIC) && !defined(ANDROID)
 // Sets the default windowing system interface according to the OS.
 // Necessary for OpenSceneGraph to do some things, like decompression.
 USE_GRAPHICSWINDOW()
@@ -220,7 +220,9 @@ namespace SDLUtil
 
     void SDLCursorManager::createCursor(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x, Uint8 hotspot_y)
     {
+#ifndef ANDROID
         _createCursorFromResource(name, rotDegrees, image, hotspot_x, hotspot_y);
+#endif
     }
 
     void SDLCursorManager::_createCursorFromResource(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x, Uint8 hotspot_y)
