@@ -92,9 +92,18 @@ void GraphicsWindowSDL2::init()
     SDL_GLContext oldCtx = SDL_GL_GetCurrentContext();
    
 #if defined(OPENGL_ES) || defined(ANDROID)
-     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);    
+    int major = 1;
+    int minor = 1;
+    char *ver = getenv("OPENMW_GLES_VERSION");
+
+    if (ver && strcmp(ver, "2") == 0) {
+        major = 2;
+        minor = 0;
+    }
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
 #endif
     
     mContext = SDL_GL_CreateContext(mWindow);
