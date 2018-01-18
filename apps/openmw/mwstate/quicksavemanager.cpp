@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-MWState::QuickSaveManager::QuickSaveManager(std::string &saveName, int maxSaves)
+MWState::QuickSaveManager::QuickSaveManager(std::string &saveName, unsigned int maxSaves)
 {
     this->mSaveName = saveName;
     this->mMaxSaves = maxSaves;
@@ -13,7 +13,7 @@ MWState::QuickSaveManager::QuickSaveManager(std::string &saveName, int maxSaves)
 
 void MWState::QuickSaveManager::visitSave(const Slot *saveSlot)
 {
-    int slotId;
+    unsigned int slotId;
     if(tryExtractSlotId(saveSlot->mProfile.mDescription, slotId))
     {
         ++mSlotsVisited;
@@ -32,7 +32,7 @@ bool MWState::QuickSaveManager::isOldestSave(const Slot *compare)
     return (compare->mTimeStamp <= mOldestSlotVisited->mTimeStamp);
 }
 
-bool MWState::QuickSaveManager::tryExtractSlotId(const std::string &slotName, int &extractedId)
+bool MWState::QuickSaveManager::tryExtractSlotId(const std::string &slotName, unsigned int &extractedId)
 {
     std::istringstream formattedExtractor(slotName);
 
@@ -50,7 +50,7 @@ bool MWState::QuickSaveManager::tryExtractSlotId(const std::string &slotName, in
     return false;
 }
 
-bool MWState::QuickSaveManager::isSlotIdValid(int slotId)
+bool MWState::QuickSaveManager::isSlotIdValid(unsigned int slotId)
 {
     return (slotId > 0 && slotId <= mMaxSaves);
 }

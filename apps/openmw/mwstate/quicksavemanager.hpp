@@ -9,18 +9,18 @@
 namespace MWState{
     class QuickSaveManager{
         std::string mSaveName;
-        int mMaxSaves;
-        int mSlotsVisited;
-        int mOldestSlotId;
+        unsigned int mMaxSaves;
+        unsigned int mSlotsVisited;
+        unsigned int mOldestSlotId;
         const Slot *mOldestSlotVisited;
     private:
-        bool tryExtractSlotId(const std::string &slotName, int &extractedIdll);
-        bool isSlotIdValid(int slotId);
+        bool tryExtractSlotId(const std::string &slotName, unsigned int &extractedIdll);
+        bool isSlotIdValid(unsigned int slotId);
         bool shouldCreateNewSlot();
         bool isOldestSave(const Slot *compare);
         int calcNextSlotId();
     public:
-        QuickSaveManager(std::string &saveName, int maxSaves);
+        QuickSaveManager(std::string &saveName, unsigned int maxSaves);
         ///< A utility class to manage multiple quicksave slots
         ///
         /// \param saveName The name of the save ("QuickSave", "AutoSave", etc)
