@@ -1,7 +1,7 @@
 int stderr = 0; // Hack: fix linker error
 
-#ifdef __ANDROID__
 #include "SDL_main.h"
+#include <SDL_gamecontroller.h>
 
 /*******************************************************************************
  Functions called by JNI
@@ -24,6 +24,9 @@ int Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls,
 
     SDL_SetMainReady();
 
+    // On Android, we use a virtual controller with guid="Virtual"
+    SDL_GameControllerAddMapping("5669727475616c000000000000000000,Virtual,a:b0,b:b1,back:b15,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b16,leftshoulder:b6,leftstick:b13,lefttrigger:a5,leftx:a0,lefty:a1,rightshoulder:b7,rightstick:b14,righttrigger:a4,rightx:a2,righty:a3,start:b11,x:b3,y:b4");
+
     /* Run the application code! */
 
     int status;
@@ -35,6 +38,4 @@ int Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls,
 
     return status;
 }
-
-#endif /* __ANDROID__ */
 
