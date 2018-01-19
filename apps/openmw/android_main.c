@@ -2,6 +2,8 @@ int stderr = 0; // Hack: fix linker error
 
 #include "SDL_main.h"
 #include <SDL_gamecontroller.h>
+#include <SDL_mouse.h>
+#include <SDL_events.h>
 
 /*******************************************************************************
  Functions called by JNI
@@ -14,6 +16,25 @@ extern void SDL_Android_Init(JNIEnv* env, jclass cls);
 extern int argcData;
 extern const char **argvData;
 void releaseArgv();
+
+
+int Java_org_libsdl_app_SDLActivity_getMouseX(JNIEnv *env, jclass cls, jobject obj) {
+    int ret = 0;
+    SDL_GetMouseState(&ret, NULL);
+    return ret;
+}
+
+
+int Java_org_libsdl_app_SDLActivity_getMouseY(JNIEnv *env, jclass cls, jobject obj) {
+    int ret = 0;
+    SDL_GetMouseState(NULL, &ret);
+    return ret;
+}
+
+int Java_org_libsdl_app_SDLActivity_isMouseShown(JNIEnv *env, jclass cls, jobject obj) {
+    return SDL_ShowCursor(SDL_QUERY);
+}
+
 
 int Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls,
         jobject obj) {
