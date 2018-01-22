@@ -874,6 +874,22 @@ namespace MWGui
                     window->onFrame(frameDuration);
         }
 
+        // Make sure message boxes are always in front
+        // This is an awful workaround for a series of awfully interwoven issues that couldn't be worked around
+        // in a better way because of an impressive number of even more awfully interwoven issues.
+        if (mMessageBoxManager && mMessageBoxManager->isInteractiveMessageBox() && mCurrentModals.back() != mMessageBoxManager->getInteractiveMessageBox())
+        {
+            std::vector<WindowModal*>::iterator found = std::find(mCurrentModals.begin(), mCurrentModals.end(), mMessageBoxManager->getInteractiveMessageBox());
+            if (found != mCurrentModals.end())
+            {
+                WindowModal* msgbox = *found;
+                std::swap(*found, mCurrentModals.back());
+                MyGUI::InputManager::getInstance().addWidgetModal(msgbox->mMainWidget);
+                mKeyboardNavigation->setModalWindow(msgbox->mMainWidget);
+                mKeyboardNavigation->setDefaultFocus(msgbox->mMainWidget, msgbox->getDefaultKeyFocus());
+            }
+        }
+
         if (!mCurrentModals.empty())
             mCurrentModals.back()->onFrame(frameDuration);
 

@@ -38,6 +38,7 @@ namespace Compiler
             std::string mPutbackName;
             TokenLoc mPutbackLoc;
             bool mStrictKeywords;
+            bool mTolerantNames;
 
         public:
 
@@ -129,6 +130,11 @@ namespace Compiler
             ///
             /// \attention This mode lasts only until the next newline is reached.
             void enableStrictKeywords();
+
+            /// Continue parsing a name when hitting a '.' or a '-'
+            ///
+            /// \attention This mode lasts only until the next newline is reached.
+            void enableTolerantNames();
     };
 }
 

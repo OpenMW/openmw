@@ -36,8 +36,9 @@ private:
 Skeleton::Skeleton()
     : mBoneCacheInit(false)
     , mNeedToUpdateBoneMatrices(true)
-    , mActive(true)
+    , mActive(Active)
     , mLastFrameNumber(0)
+    , mLastCullFrameNumber(0)
 {
 
 }
@@ -48,6 +49,7 @@ Skeleton::Skeleton(const Skeleton &copy, const osg::CopyOp &copyop)
     , mNeedToUpdateBoneMatrices(true)
     , mActive(copy.mActive)
     , mLastFrameNumber(0)
+    , mLastCullFrameNumber(0)
 {
 
 }
@@ -123,14 +125,14 @@ void Skeleton::updateBoneMatrices(unsigned int traversalNumber)
     }
 }
 
-void Skeleton::setActive(bool active)
+void Skeleton::setActive(ActiveType active)
 {
     mActive = active;
 }
 
 bool Skeleton::getActive() const
 {
-    return mActive;
+    return mActive != Inactive;
 }
 
 void Skeleton::markDirty()
@@ -142,8 +144,16 @@ void Skeleton::markDirty()
 
 void Skeleton::traverse(osg::NodeVisitor& nv)
 {
-    if (!getActive() && nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR && mLastFrameNumber != 0)
-        return;
+    if (nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR)
+    {
+        if (mActive == Inactive && mLastFrameNumber != 0)
+            return;
+        if (mActive == SemiActive && mLastFrameNumber != 0 && mLastCullFrameNumber+3 <= nv.getTraversalNumber())
+            return;
+    }
+    else if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+        mLastCullFrameNumber = nv.getTraversalNumber();
+
     osg::Group::traverse(nv);
 }
 

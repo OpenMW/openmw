@@ -268,7 +268,7 @@ namespace NifOsg
                 osg::ref_ptr<SceneUtil::Skeleton> skel = new SceneUtil::Skeleton;
 
                 osg::Group* root = created->asGroup();
-                if (root && root->getDataVariance() == osg::Object::STATIC)
+                if (root && root->getDataVariance() == osg::Object::STATIC && !root->asTransform())
                 {
                     skel->setStateSet(root->getStateSet());
                     skel->setName(root->getName());
@@ -440,7 +440,7 @@ namespace NifOsg
                 // The Root node can be created as a Group if no transformation is required.
                 // This takes advantage of the fact root nodes can't have additional controllers
                 // loaded from an external .kf file (original engine just throws "can't find node" errors if you try).
-                if (!nifNode->parent && nifNode->controller.empty())
+                if (!nifNode->parent && nifNode->controller.empty() && nifNode->trafo.isIdentity())
                 {
                     node = new osg::Group;
                     dataVariance = osg::Object::STATIC;

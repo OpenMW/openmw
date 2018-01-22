@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2015 Alexandre Moine <nobrakal@gmail.com> -->
-<application>
- <id type="desktop">openmw.desktop</id>
+<!--
+Copyright 2015 Alexandre Moine <nobrakal@gmail.com>
+Copyright 2017 Bret Curtis <psi29a@gmail.com>
+-->
+<component>
+ <id>org.openmw.desktop</id>
  <metadata_license>CC0-1.0</metadata_license>
- <project_license> GPL-3.0 and MIT and zlib</project_license>
+ <project_license> GPL-3.0 and MIT</project_license>
  <name>OpenMW</name>
  <summary>Unofficial open source engine re-implementation of the game Morrowind</summary>
  <description>
@@ -32,8 +35,7 @@
    <caption>Vivec seen from Ebonheart on OpenMW</caption>
   </screenshot>
  </screenshots>
-<updatecontact>nobrakal@gmail.com</updatecontact>
  <url type="homepage">https://openmw.org</url>
  <url type="bugtracker">https://bugs.openmw.org/</url>
  <url type="faq">https://openmw.org/faq/</url>
-</application>
+</component>

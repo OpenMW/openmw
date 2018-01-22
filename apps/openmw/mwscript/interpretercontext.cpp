@@ -463,7 +463,7 @@ namespace MWScript
         const MWWorld::Ptr ref = MWBase::Environment::get().getWorld()->getPtr(name, false);
 
         // If the objects are in different worldspaces, return a large value (just like vanilla)
-        if (ref.getCell()->getCell()->getCellId().mWorldspace != ref2.getCell()->getCell()->getCellId().mWorldspace)
+        if (!ref.isInCell() || !ref2.isInCell() || ref.getCell()->getCell()->getCellId().mWorldspace != ref2.getCell()->getCell()->getCellId().mWorldspace)
             return std::numeric_limits<float>::max();
 
         double diff[3];

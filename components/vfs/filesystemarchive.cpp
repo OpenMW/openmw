@@ -1,5 +1,7 @@
 #include "filesystemarchive.hpp"
 
+#include <iostream>
+
 #include <boost/filesystem.hpp>
 
 namespace VFS
@@ -38,7 +40,8 @@ namespace VFS
 
                 std::transform(proper.begin() + prefix, proper.end(), std::back_inserter(searchable), normalize_function);
 
-                mIndex.insert (std::make_pair (searchable, file));
+                if (!mIndex.insert (std::make_pair (searchable, file)).second)
+                    std::cerr << "Warning: found duplicate file for '" << proper << "', please check your file system for two files with the same name in different cases." << std::endl;
             }
 
             mBuiltIndex = true;

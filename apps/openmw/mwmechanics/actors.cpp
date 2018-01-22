@@ -1213,14 +1213,12 @@ namespace MWMechanics
              // AI and magic effects update
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
+                float distSqr = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2();
                 // AI processing is only done within distance of 7168 units to the player. Note the "AI distance" slider doesn't affect this
                 // (it only does some throttling for targets beyond the "AI distance", so doesn't give any guarantees as to whether AI will be enabled or not)
                 // This distance could be made configurable later, but the setting must be marked with a big warning:
                 // using higher values will make a quest in Bloodmoon harder or impossible to complete (bug #1876)
-                bool inProcessingRange = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2()
-                        <= sqrAiProcessingDistance;
-
-                iter->second->getCharacterController()->setActive(inProcessingRange);
+                bool inProcessingRange = distSqr <= sqrAiProcessingDistance;
 
                 if (iter->first == player)
                     iter->second->getCharacterController()->setAttackingOrSpell(MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell());
@@ -1326,9 +1324,24 @@ namespace MWMechanics
             CharacterController* playerCharacter = NULL;
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
-                if (iter->first != player &&
-                        (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2()
-                        > sqrAiProcessingDistance)
+                const float animationDistance = aiProcessingDistance + 400; // Slightly larger than AI distance so there is time to switch back to the idle animation.
+                const float distSqr = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2();
+                bool isPlayer = iter->first == player;
+                bool inAnimationRange = isPlayer || (animationDistance == 0 || distSqr <= animationDistance*animationDistance);
+                int activeFlag = 1; // Can be changed back to '2' to keep updating bounding boxes off screen (more accurate, but slower)
+                if (isPlayer)
+                    activeFlag = 2;
+                int active = inAnimationRange ? activeFlag : 0;
+                bool canFly = iter->first.getClass().canFly(iter->first);
+                if (canFly)
+                {
+                    // Keep animating flying creatures so they don't just hover in-air
+                    inAnimationRange = true;
+                    active = std::max(1, active);
+                }
+                iter->second->getCharacterController()->setActive(active);
+
+                if (!inAnimationRange)
                     continue;
 
                 if (iter->first.getClass().getCreatureStats(iter->first).isParalyzed())

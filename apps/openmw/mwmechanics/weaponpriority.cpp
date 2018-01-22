@@ -8,6 +8,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "npcstats.hpp"
 #include "combat.hpp"
@@ -109,6 +110,33 @@ namespace MWMechanics
             return 0.f;
 
         return rating + bonus;
+    }
+
+    float rateAmmo(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy, MWWorld::Ptr &bestAmmo, ESM::Weapon::Type ammoType)
+    {
+        float bestAmmoRating = 0.f;
+        if (!actor.getClass().hasInventoryStore(actor))
+            return bestAmmoRating;
+
+        MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
+
+        for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+        {
+            float rating = rateWeapon(*it, actor, enemy, ammoType);
+            if (rating > bestAmmoRating)
+            {
+                bestAmmoRating = rating;
+                bestAmmo = *it;
+            }
+        }
+
+        return bestAmmoRating;
+    }
+
+    float rateAmmo(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy, ESM::Weapon::Type ammoType)
+    {
+        MWWorld::Ptr emptyPtr;
+        return rateAmmo(actor, enemy, emptyPtr, ammoType);
     }
 
     float vanillaRateWeaponAndAmmo(const MWWorld::Ptr& weapon, const MWWorld::Ptr& ammo, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy)

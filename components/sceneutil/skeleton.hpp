@@ -47,9 +47,16 @@ namespace SceneUtil
         /// Request an update of bone matrices. May be a no-op if already updated in this frame.
         void updateBoneMatrices(unsigned int traversalNumber);
 
+        enum ActiveType
+        {
+            Inactive=0,
+            SemiActive, /// Like Active, but don't bother with Update (including new bounding box) if we're off-screen
+            Active
+        };
+
         /// Set the skinning active flag. Inactive skeletons will not have their child rigs updated.
         /// You should set this flag to false if you know that bones are not currently moving.
-        void setActive(bool active);
+        void setActive(ActiveType active);
 
         bool getActive() const;
 
@@ -71,9 +78,10 @@ namespace SceneUtil
 
         bool mNeedToUpdateBoneMatrices;
 
-        bool mActive;
+        ActiveType mActive;
 
         unsigned int mLastFrameNumber;
+        unsigned int mLastCullFrameNumber;
     };
 
 }

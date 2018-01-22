@@ -1,3 +1,4 @@
+int stderr = 0; // Hack: fix linker error
 
 #ifdef __ANDROID__
 #include "SDL_main.h"
@@ -16,6 +17,8 @@ void releaseArgv();
 
 int Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls,
         jobject obj) {
+
+    setenv("OPENMW_DECOMPRESS_TEXTURES", "1", 1);
 
     SDL_Android_Init(env, cls);
 

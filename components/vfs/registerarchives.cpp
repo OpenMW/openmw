@@ -1,5 +1,6 @@
 #include "registerarchives.hpp"
 
+#include <set>
 #include <iostream>
 #include <sstream>
 
@@ -33,12 +34,20 @@ namespace VFS
         }
 
         if (useLooseFiles)
+        {
+            std::set<boost::filesystem::path> seen;
             for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
             {
-                std::cout << "Adding data directory " << iter->string() << std::endl;
-                // Last data dir has the highest priority
-                vfs->addArchive(new FileSystemArchive(iter->string()));
+                if (seen.insert(*iter).second)
+                {
+                    std::cout << "Adding data directory " << iter->string() << std::endl;
+                    // Last data dir has the highest priority
+                    vfs->addArchive(new FileSystemArchive(iter->string()));
+                }
+                else
+                    std::cerr << "Ignoring duplicate data directory " << iter->string() << std::endl;
             }
+        }
 
         vfs->buildIndex();
     }

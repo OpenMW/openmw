@@ -290,7 +290,11 @@ private:
 };
 #endif
 
+#ifdef ANDROID
+extern "C" int SDL_main(int argc, char**argv)
+#else
 int main(int argc, char**argv)
+#endif
 {
 #if defined(__APPLE__)
     setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);

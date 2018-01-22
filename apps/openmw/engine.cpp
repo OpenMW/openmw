@@ -477,8 +477,20 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     }
 
     // find correct path to the game controller bindings
-    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/gamecontrollerdb.txt";
-    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/gamecontrollerdb.txt";
+    // File format for controller mappings is different for SDL <= 2.0.4, 2.0.5, and >= 2.0.6
+    SDL_version linkedSdlVersion;
+    SDL_GetVersion(&linkedSdlVersion);
+    std::string controllerFileName;
+    if (linkedSdlVersion.major == 2 && linkedSdlVersion.minor == 0 && linkedSdlVersion.patch <= 4) {
+        controllerFileName = "gamecontrollerdb_204.txt";
+    } else if (linkedSdlVersion.major == 2 && linkedSdlVersion.minor == 0 && linkedSdlVersion.patch == 5) {
+        controllerFileName = "gamecontrollerdb_205.txt";
+    } else {
+        controllerFileName = "gamecontrollerdb.txt";
+    }
+
+    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/" + controllerFileName;
+    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/" + controllerFileName;
     std::string gameControllerdb;
     if (boost::filesystem::exists(localdefault))
         gameControllerdb = localdefault;
