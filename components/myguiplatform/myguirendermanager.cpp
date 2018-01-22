@@ -108,9 +108,6 @@ public:
 
         state->disableAllVertexArrays();
         state->setClientActiveTextureUnit(0);
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glEnableClientState(GL_COLOR_ARRAY);
 
         mReadFrom = (mReadFrom+1)%sNumBuffers;
         const std::vector<Batch>& vec = mBatchVector[mReadFrom];
@@ -134,18 +131,18 @@ public:
             {
                 state->bindVertexBufferObject(bufferobject);
 
-                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL);
-                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)NULL + 12);
-                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL + 16);
+                state->setVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL);
+                state->setColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)NULL + 12);
+                state->setTexCoordPointer(2, 4, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL + 16);
             }
             else
             {
-                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer());
-                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 12);
-                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 16);
+                state->setVertexPointer((osg::Array*)vbo->getArray(0)->getDataPointer());
+                state->setColorPointer((osg::Array*)vbo->getArray(0)->getDataPointer() + 12);
+                state->setTexCoordPointer(2, (osg::Array*)vbo->getArray(0)->getDataPointer() + 16);
             }
 
-            glDrawArrays(GL_TRIANGLES, 0, batch.mVertexCount);
+            state->glDrawArraysInstanced(GL_TRIANGLES, 0, batch.mVertexCount, 0);
 
             if (batch.mStateSet)
             {
@@ -153,10 +150,6 @@ public:
                 state->apply();
             }
         }
-
-        glDisableClientState(GL_VERTEX_ARRAY);
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        glDisableClientState(GL_COLOR_ARRAY);
 
         state->popStateSet();
 
