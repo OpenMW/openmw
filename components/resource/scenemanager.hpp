@@ -166,6 +166,7 @@ namespace Resource
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
         mutable OpenThreads::Mutex mSharedStateMutex;
+        mutable OpenThreads::Mutex mMutex;
 
         Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;
