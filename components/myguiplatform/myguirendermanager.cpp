@@ -133,13 +133,14 @@ public:
 
                 state->setVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL);
                 state->setColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)NULL + 12);
-                state->setTexCoordPointer(2, 4, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL + 16);
+                state->setTexCoordPointer(0, 2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL + 16);
+
             }
             else
             {
-                state->setVertexPointer((osg::Array*)vbo->getArray(0)->getDataPointer());
-                state->setColorPointer((osg::Array*)vbo->getArray(0)->getDataPointer() + 12);
-                state->setTexCoordPointer(2, (osg::Array*)vbo->getArray(0)->getDataPointer() + 16);
+                state->setVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer());
+                state->setColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 12);
+                state->setTexCoordPointer(0, 2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 16);
             }
 
             state->glDrawArraysInstanced(GL_TRIANGLES, 0, batch.mVertexCount, 0);
@@ -150,6 +151,10 @@ public:
                 state->apply();
             }
         }
+
+        state->disableVertexPointer();
+        state->disableTexCoordPointer(0);
+        state->disableColorPointer();
 
         state->popStateSet();
 
