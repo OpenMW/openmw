@@ -75,6 +75,7 @@ namespace SceneUtil
 
         void applyLight(GLenum lightNum, const osg::Light* light) const
         {
+        #ifdef OSG_GL_FIXED_FUNCTION_AVAILABLE
             glLightfv( lightNum, GL_AMBIENT,               light->getAmbient().ptr() );
             glLightfv( lightNum, GL_DIFFUSE,               light->getDiffuse().ptr() );
             glLightfv( lightNum, GL_SPECULAR,              light->getSpecular().ptr() );
@@ -87,6 +88,9 @@ namespace SceneUtil
             glLightf ( lightNum, GL_CONSTANT_ATTENUATION,  light->getConstantAttenuation() );
             glLightf ( lightNum, GL_LINEAR_ATTENUATION,    light->getLinearAttenuation() );
             glLightf ( lightNum, GL_QUADRATIC_ATTENUATION, light->getQuadraticAttenuation() );
+        #else
+            OSG_NOTICE<<"Warning: Light::apply(State&) - not supported."<<std::endl;
+        #endif
         }
 
     private:
