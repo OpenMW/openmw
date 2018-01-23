@@ -350,11 +350,16 @@ public:
         if (cv->getProjectionMatrix()->getPerspective(fov, aspect, zNear, zFar))
         {
             fov = mFov;
-            osg::RefMatrix* newProjectionMatrix = new osg::RefMatrix(*cv->getProjectionMatrix());
+            osg::ref_ptr<osg::RefMatrix> newProjectionMatrix = new osg::RefMatrix();
             newProjectionMatrix->makePerspective(fov, aspect, zNear, zFar);
-            cv->pushProjectionMatrix(newProjectionMatrix);
+            osg::ref_ptr<osg::RefMatrix> invertedOldMatrix = cv->getProjectionMatrix();
+            invertedOldMatrix = new osg::RefMatrix(osg::RefMatrix::inverse(*invertedOldMatrix));
+            osg::ref_ptr<osg::RefMatrix> viewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
+            viewMatrix->postMult(*newProjectionMatrix);
+            viewMatrix->postMult(*invertedOldMatrix);
+            cv->pushModelViewMatrix(viewMatrix, osg::Transform::ReferenceFrame::ABSOLUTE_RF);
             traverse(node, nv);
-            cv->popProjectionMatrix();
+            cv->popModelViewMatrix();
         }
         else
             traverse(node, nv);
