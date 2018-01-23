@@ -89,7 +89,7 @@ namespace SceneUtil
             glLightf ( lightNum, GL_LINEAR_ATTENUATION,    light->getLinearAttenuation() );
             glLightf ( lightNum, GL_QUADRATIC_ATTENUATION, light->getQuadraticAttenuation() );
         #else
-            OSG_NOTICE<<"Warning: Light::apply(State&) - not supported."<<std::endl;
+            OSG_NOTICE<<"Warning: applyLight - not supported." << std::endl;
         #endif
         }
 
