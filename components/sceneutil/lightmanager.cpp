@@ -326,11 +326,14 @@ namespace SceneUtil
 
         virtual void apply(osg::State& state) const
         {
+        #ifdef OSG_GL_FIXED_FUNCTION_AVAILABLE
             int lightNum = GL_LIGHT0 + mIndex;
             glLightfv( lightNum, GL_AMBIENT,               mNull.ptr() );
             glLightfv( lightNum, GL_DIFFUSE,               mNull.ptr() );
             glLightfv( lightNum, GL_SPECULAR,              mNull.ptr() );
-
+        #else
+            OSG_NOTICE<<"Warning: applyLight - not supported." << std::endl;
+        #endif
             LightStateCache* cache = getLightStateCache(state.getContextID());
             cache->lastAppliedLight[mIndex] = NULL;
         }

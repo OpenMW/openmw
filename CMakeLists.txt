@@ -182,11 +182,13 @@ if (NOT WIN32 AND BUILD_WIZARD) # windows users can just run the morrowind insta
     set(OPENMW_USE_UNSHIELD TRUE)
 endif()
 
-option(OPENGL_ES "enable opengl es support" FALSE )
+option(OPENGL_ES1 "Enable OpenGL ES 1 support" FALSE )
+option(OPENGL_ES2 "Enable OpenGL ES 2 support" FALSE )
+option(OPENGL_ES3 "Enable OpenGL ES 2 support" FALSE )
 
-if (OPENGL_ES)
-    add_definitions(-DOPENGL_ES)
-endif(OPENGL_ES)
+if (OPENGL_ES1)
+    add_definitions(-DOPENGL_ES1)
+endif(OPENGL_ES1)
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)

@@ -361,3 +361,11 @@ function (libfind_process PREFIX)
   endif()
 endfunction()
 
+# Get environment variable, define it as ENV_$var and make sure backslashes are converted to forward slashes
+macro(getenv_path VAR)
+  set(ENV_${VAR} $ENV{${VAR}})
+  # replace won't work if var is blank
+  if (ENV_${VAR})
+    string( REGEX REPLACE "\\\\" "/" ENV_${VAR} ${ENV_${VAR}} )
+  endif ()
+endmacro(getenv_path)
