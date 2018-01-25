@@ -87,3 +87,38 @@ Potentially decreases performance.
 
 
 Note: Right now, there is no setting allowing toggling of shadows for statics
+
+Expert settings
+***************
+
+You probably shouldn't be changing these if you haven't read `this paper on Parallel Split Shadow Maps <https://pdfs.semanticscholar.org/15a9/f2a7cf6b1494f45799617c017bd42659d753.pdf>`_ and understood how they interact with the transformation used with Light Space Perspective Shadow Maps.
+If you have, then you may get better results tuning these for your specific view distance.
+
+split point uniform logarithmic ratio
+-------------------------------------
+
+:Type:		float
+:Range:		0.0-1.0 for sensible results. Other values may 'work' but could behave bizarrely.
+:Default:	0.5
+
+Controls the ratio of :math:`C_i^{log}` versus :math:`C_i^{uniform}` used to form the Practical Split Scheme as described in the linked paper.
+
+split point bias
+----------------
+
+:Type:		float
+:Range:		Any value supported by C++ floats on your platform, although undesirable behaviour is more likely to appear the further the value is from zero.
+:Default:	0.0
+
+The :math:`\delta_{bias}` parameter used to form the Practical Split Scheme as described in the linked paper.
+
+minimum lispsm near far ratio
+-----------------------------
+
+:Type:		float
+:Range:		Must be greater than zero.
+:Default:	0.25
+
+Controls the minimum near/far ratio for the Light Space Perspective Shadow Map transformation.
+Helps prevent too much detail being brought towards the camera at the expense of detail further from the camera.
+Increasing this pushes detail further away by moving the frustum apex further from the near plane.
