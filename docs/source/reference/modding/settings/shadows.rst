@@ -1,6 +1,9 @@
 Shadow Settings
 ###############
 
+Main settings
+*************
+
 enable shadows
 --------------
 
