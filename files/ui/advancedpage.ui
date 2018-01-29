@@ -156,7 +156,7 @@
                </item>
                <item>
                 <property name="text">
-                 <string>Tooltip and Crosshair</string>
+                 <string>Tool Tip and Crosshair</string>
                 </property>
                </item>
               </widget>
