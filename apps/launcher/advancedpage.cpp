@@ -41,7 +41,7 @@ bool Launcher::AdvancedPage::loadSettings()
     QString screenshotFormatString = QString::fromStdString(mEngineSettings.getString("screenshot format", "General")).toUpper();
     if (screenshotFormatComboBox->findText(screenshotFormatString) == -1)
         screenshotFormatComboBox->addItem(screenshotFormatString);
-    screenshotFormatComboBox->setCurrentText(screenshotFormatString);
+    screenshotFormatComboBox->setCurrentIndex(screenshotFormatComboBox->findText(screenshotFormatString));
 
     return true;
 }
