@@ -22,6 +22,32 @@ namespace SceneUtil
         virtual Shader::ShaderManager::DefineMap getShadowDefines();
 
         virtual Shader::ShaderManager::DefineMap getShadowsDisabledDefines();
+
+        class ComputeLightSpaceBounds : public osg::NodeVisitor, public osg::CullStack
+        {
+        public:
+            ComputeLightSpaceBounds(osg::Viewport* viewport, const osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix);
+
+            void apply(osg::Node& node);
+
+            void apply(osg::Geode& node);
+
+            void apply(osg::Drawable& drawable);
+
+            void apply(osg::Billboard&);
+
+            void apply(osg::Projection&);
+
+            void apply(osg::Transform& transform);
+
+            void apply(osg::Camera&);
+
+            void updateBound(const osg::BoundingBox& bb);
+
+            void update(const osg::Vec3& v);
+
+            osg::BoundingBox _bb;
+        };
     protected:
         const int debugTextureUnit;
 

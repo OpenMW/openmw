@@ -227,140 +227,134 @@ namespace SceneUtil
         }
     }
 
-    class ComputeLightSpaceBounds : public osg::NodeVisitor, public osg::CullStack
+    MWShadow::ComputeLightSpaceBounds::ComputeLightSpaceBounds(osg::Viewport* viewport, const osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix) :
+        osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN)
     {
-    public:
-        ComputeLightSpaceBounds(osg::Viewport* viewport, const osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix) :
-            osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN)
+        setCullingMode(osg::CullSettings::VIEW_FRUSTUM_CULLING);
+
+        pushViewport(viewport);
+        pushProjectionMatrix(new osg::RefMatrix(projectionMatrix));
+        pushModelViewMatrix(new osg::RefMatrix(viewMatrix), osg::Transform::ABSOLUTE_RF);
+    }
+
+    void MWShadow::ComputeLightSpaceBounds::apply(osg::Node& node)
+    {
+        if (isCulled(node)) return;
+
+        // push the culling mode.
+        pushCurrentMask();
+
+        traverse(node);
+
+        // pop the culling mode.
+        popCurrentMask();
+    }
+
+    void MWShadow::ComputeLightSpaceBounds::apply(osg::Geode& node)
+    {
+        if (isCulled(node)) return;
+
+        // push the culling mode.
+        pushCurrentMask();
+
+        for (unsigned int i = 0; i<node.getNumDrawables(); ++i)
         {
-            setCullingMode(osg::CullSettings::VIEW_FRUSTUM_CULLING);
-
-            pushViewport(viewport);
-            pushProjectionMatrix(new osg::RefMatrix(projectionMatrix));
-            pushModelViewMatrix(new osg::RefMatrix(viewMatrix), osg::Transform::ABSOLUTE_RF);
-        }
-
-        void apply(osg::Node& node)
-        {
-            if (isCulled(node)) return;
-
-            // push the culling mode.
-            pushCurrentMask();
-
-            traverse(node);
-
-            // pop the culling mode.
-            popCurrentMask();
-        }
-
-        void apply(osg::Geode& node)
-        {
-            if (isCulled(node)) return;
-
-            // push the culling mode.
-            pushCurrentMask();
-
-            for (unsigned int i = 0; i<node.getNumDrawables(); ++i)
+            if (node.getDrawable(i))
             {
-                if (node.getDrawable(i))
-                {
-                    updateBound(node.getDrawable(i)->getBoundingBox());
-                }
+                updateBound(node.getDrawable(i)->getBoundingBox());
             }
-
-            // pop the culling mode.
-            popCurrentMask();
         }
 
-        void apply(osg::Drawable& drawable)
+        // pop the culling mode.
+        popCurrentMask();
+    }
+
+    void MWShadow::ComputeLightSpaceBounds::apply(osg::Drawable& drawable)
+    {
+        if (isCulled(drawable)) return;
+
+        // push the culling mode.
+        pushCurrentMask();
+
+        updateBound(drawable.getBoundingBox());
+
+        // pop the culling mode.
+        popCurrentMask();
+    }
+
+    void MWShadow::ComputeLightSpaceBounds::apply(osg::Billboard&)
+    {
+        OSG_INFO << "Warning Billboards not yet supported" << std::endl;
+        return;
+    }
+
+    void MWShadow::ComputeLightSpaceBounds::apply(osg::Projection&)
+    {
+        // projection nodes won't affect a shadow map so their subgraphs should be ignored
+        return;
+    }
+
+    void MWShadow::ComputeLightSpaceBounds::apply(osg::Transform& transform)
+    {
+        if (isCulled(transform)) return;
+
+        // push the culling mode.
+        pushCurrentMask();
+
+        // absolute transforms won't affect a shadow map so their subgraphs should be ignored.
+        if (transform.getReferenceFrame() == osg::Transform::RELATIVE_RF)
         {
-            if (isCulled(drawable)) return;
+            osg::ref_ptr<osg::RefMatrix> matrix = new osg::RefMatrix(*getModelViewMatrix());
+            transform.computeLocalToWorldMatrix(*matrix, this);
+            pushModelViewMatrix(matrix.get(), transform.getReferenceFrame());
 
-            // push the culling mode.
-            pushCurrentMask();
+            traverse(transform);
 
-            updateBound(drawable.getBoundingBox());
-
-            // pop the culling mode.
-            popCurrentMask();
+            popModelViewMatrix();
         }
 
-        void apply(osg::Billboard&)
+        // pop the culling mode.
+        popCurrentMask();
+
+    }
+
+    void MWShadow::ComputeLightSpaceBounds::apply(osg::Camera&)
+    {
+        // camera nodes won't affect a shadow map so their subgraphs should be ignored
+        return;
+    }
+
+    void MWShadow::ComputeLightSpaceBounds::updateBound(const osg::BoundingBox& bb)
+    {
+        if (!bb.valid()) return;
+
+        const osg::Matrix& matrix = *getModelViewMatrix() * *getProjectionMatrix();
+
+        update(bb.corner(0) * matrix);
+        update(bb.corner(1) * matrix);
+        update(bb.corner(2) * matrix);
+        update(bb.corner(3) * matrix);
+        update(bb.corner(4) * matrix);
+        update(bb.corner(5) * matrix);
+        update(bb.corner(6) * matrix);
+        update(bb.corner(7) * matrix);
+    }
+
+    void MWShadow::ComputeLightSpaceBounds::update(const osg::Vec3& v)
+    {
+        if (v.z()<-1.0f)
         {
-            OSG_INFO << "Warning Billboards not yet supported" << std::endl;
+            //OSG_NOTICE<<"discarding("<<v<<")"<<std::endl;
             return;
         }
-
-        void apply(osg::Projection&)
-        {
-            // projection nodes won't affect a shadow map so their subgraphs should be ignored
-            return;
-        }
-
-        void apply(osg::Transform& transform)
-        {
-            if (isCulled(transform)) return;
-
-            // push the culling mode.
-            pushCurrentMask();
-
-            // absolute transforms won't affect a shadow map so their subgraphs should be ignored.
-            if (transform.getReferenceFrame() == osg::Transform::RELATIVE_RF)
-            {
-                osg::ref_ptr<osg::RefMatrix> matrix = new osg::RefMatrix(*getModelViewMatrix());
-                transform.computeLocalToWorldMatrix(*matrix, this);
-                pushModelViewMatrix(matrix.get(), transform.getReferenceFrame());
-
-                traverse(transform);
-
-                popModelViewMatrix();
-            }
-
-            // pop the culling mode.
-            popCurrentMask();
-
-        }
-
-        void apply(osg::Camera&)
-        {
-            // camera nodes won't affect a shadow map so their subgraphs should be ignored
-            return;
-        }
-
-        void updateBound(const osg::BoundingBox& bb)
-        {
-            if (!bb.valid()) return;
-
-            const osg::Matrix& matrix = *getModelViewMatrix() * *getProjectionMatrix();
-
-            update(bb.corner(0) * matrix);
-            update(bb.corner(1) * matrix);
-            update(bb.corner(2) * matrix);
-            update(bb.corner(3) * matrix);
-            update(bb.corner(4) * matrix);
-            update(bb.corner(5) * matrix);
-            update(bb.corner(6) * matrix);
-            update(bb.corner(7) * matrix);
-        }
-
-        void update(const osg::Vec3& v)
-        {
-            if (v.z()<-1.0f)
-            {
-                //OSG_NOTICE<<"discarding("<<v<<")"<<std::endl;
-                return;
-            }
-            float x = v.x();
-            if (x<-1.0f) x = -1.0f;
-            if (x>1.0f) x = 1.0f;
-            float y = v.y();
-            if (y<-1.0f) y = -1.0f;
-            if (y>1.0f) y = 1.0f;
-            _bb.expandBy(osg::Vec3(x, y, v.z()));
-        }
-
-        osg::BoundingBox _bb;
-    };
+        float x = v.x();
+        if (x<-1.0f) x = -1.0f;
+        if (x>1.0f) x = 1.0f;
+        float y = v.y();
+        if (y<-1.0f) y = -1.0f;
+        if (y>1.0f) y = 1.0f;
+        _bb.expandBy(osg::Vec3(x, y, v.z()));
+    }
     
     void MWShadow::cull(osgUtil::CullVisitor& cv)
     {
