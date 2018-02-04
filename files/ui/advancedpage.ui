@@ -12,9 +12,9 @@
   </property>
   <layout class="QVBoxLayout" name="pageVerticalLayout">
    <item>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="pageDescriptionLabel">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;These settings are not available in the game.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This temporary page contains new settings that will be available in-game in a post-1.0 release of OpenMW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </item>
