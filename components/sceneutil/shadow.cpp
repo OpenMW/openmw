@@ -282,6 +282,14 @@ namespace SceneUtil
         popCurrentMask();
     }
 
+    void MWShadow::ComputeLightSpaceBounds::apply(Terrain::QuadTreeWorld & quadTreeWorld)
+    {
+        // For now, just expand the bounds fully as terrain will fill them up and possible ways to detect which terrain definitely won't cast shadows aren't implemented.
+
+        update(osg::Vec3(-1.0, -1.0, 0.0));
+        update(osg::Vec3(1.0, 1.0, 0.0));
+    }
+
     void MWShadow::ComputeLightSpaceBounds::apply(osg::Billboard&)
     {
         OSG_INFO << "Warning Billboards not yet supported" << std::endl;

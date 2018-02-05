@@ -4,6 +4,7 @@
 #include <osgShadow/ShadowSettings>
 #include <osgShadow/ViewDependentShadowMap>
 
+#include <components/terrain/quadtreeworld.hpp>
 #include <components/shader/shadermanager.hpp>
 
 namespace SceneUtil
@@ -33,6 +34,8 @@ namespace SceneUtil
             void apply(osg::Geode& node);
 
             void apply(osg::Drawable& drawable);
+
+            void apply(Terrain::QuadTreeWorld& quadTreeWorld);
 
             void apply(osg::Billboard&);
 

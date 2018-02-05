@@ -4,6 +4,8 @@
 
 #include <sstream>
 
+#include <components/sceneutil/shadow.hpp>
+
 #include "quadtreenode.hpp"
 #include "storage.hpp"
 #include "viewdata.hpp"
@@ -344,7 +346,12 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, ChunkManager* chunk
 void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
     if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
+    {
+        SceneUtil::MWShadow::ComputeLightSpaceBounds* shadowBoundsVisitor = dynamic_cast<SceneUtil::MWShadow::ComputeLightSpaceBounds *>(&nv);
+        if (shadowBoundsVisitor)
+            shadowBoundsVisitor->apply(*this);
         return;
+    }
 
     ViewData* vd = mRootNode->getView(nv);
 
