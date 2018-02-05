@@ -6,6 +6,7 @@ set(LAUNCHER
     playpage.cpp
     textslotmsgbox.cpp
     settingspage.cpp
+    advancedpage.cpp
 
     utils/profilescombobox.cpp
     utils/textinputdialog.cpp
@@ -21,6 +22,7 @@ set(LAUNCHER_HEADER
     playpage.hpp
     textslotmsgbox.hpp
     settingspage.hpp
+    advancedpage.hpp
 
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
@@ -35,6 +37,7 @@ set(LAUNCHER_HEADER_MOC
     playpage.hpp
     textslotmsgbox.hpp
     settingspage.hpp
+    advancedpage.hpp
 
     utils/textinputdialog.hpp
     utils/profilescombobox.hpp
@@ -49,6 +52,7 @@ set(LAUNCHER_UI
     ${CMAKE_SOURCE_DIR}/files/ui/playpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     ${CMAKE_SOURCE_DIR}/files/ui/settingspage.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/advancedpage.ui
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})

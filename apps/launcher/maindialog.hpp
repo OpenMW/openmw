@@ -30,6 +30,7 @@ namespace Launcher
     class DataFilesPage;
     class UnshieldThread;
     class SettingsPage;
+    class AdvancedPage;
 
     enum FirstRunDialogResult
     {
@@ -88,6 +89,7 @@ namespace Launcher
         GraphicsPage *mGraphicsPage;
         DataFilesPage *mDataFilesPage;
         SettingsPage *mSettingsPage;
+        AdvancedPage *mAdvancedPage;
 
         Process::ProcessInvoker *mGameInvoker;
         Process::ProcessInvoker *mWizardInvoker;
