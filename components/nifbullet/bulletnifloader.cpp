@@ -245,11 +245,6 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
 {
     assert(shape != NULL);
 
-    // Interpret flags
-    bool hidden    = (flags&Nif::NiNode::Flag_Hidden) != 0;
-    bool collide   = (flags&Nif::NiNode::Flag_MeshCollision) != 0;
-    bool bbcollide = (flags&Nif::NiNode::Flag_BBoxCollision) != 0;
-
     // If the object was marked "NCO" earlier, it shouldn't collide with
     // anything. So don't do anything.
     if ((flags & 0x800))
@@ -257,10 +252,17 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
         return;
     }
 
+
+    /* this is an improper way to handle NIF flags, see https://bugs.openmw.org/issues/4319#change-22066 for more details
+    // Interpret flags
+    bool hidden = (flags&Nif::NiNode::Flag_Hidden) != 0;
+    bool collide = (flags&Nif::NiNode::Flag_MeshCollision) != 0;
+    bool bbcollide = (flags&Nif::NiNode::Flag_BBoxCollision) != 0;
+
     if (!collide && !bbcollide && hidden)
         // This mesh apparently isn't being used for anything, so don't
         // bother setting it up.
-        return;
+        return;*/
 
     if (!shape->skin.empty())
         isAnimated = false;
