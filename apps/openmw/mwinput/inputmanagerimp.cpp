@@ -174,10 +174,25 @@ namespace MWInput
         }
     }
 
+    bool isLeftOrRightButton(int action, ICS::InputControlSystem* ics, int deviceId, bool joystick)
+    {
+        int mouseBinding = ics->getMouseButtonBinding(ics->getControl(action), ICS::Control::INCREASE);
+        if (mouseBinding != ICS_MAX_DEVICE_BUTTONS)
+            return true;
+        int buttonBinding = ics->getJoystickButtonBinding(ics->getControl(action), deviceId, ICS::Control::INCREASE);
+        if (joystick && (buttonBinding == 0 || buttonBinding == 1))
+            return true;
+        return false;
+    }
+
     void InputManager::handleGuiArrowKey(int action)
     {
         if (SDL_IsTextInputActive())
             return;
+
+        if (isLeftOrRightButton(action, mInputBinder, mFakeDeviceID, mJoystickLastUsed))
+            return;
+
         MyGUI::KeyCode key;
         switch (action)
         {
@@ -1115,7 +1130,7 @@ namespace MWInput
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
-            if (!SDL_IsTextInputActive())
+            if (!SDL_IsTextInputActive() && !isLeftOrRightButton(A_Activate, mInputBinder, mFakeDeviceID, mJoystickLastUsed))
                 MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Return, 0);
         }
         else if (mControlSwitch["playercontrols"])
