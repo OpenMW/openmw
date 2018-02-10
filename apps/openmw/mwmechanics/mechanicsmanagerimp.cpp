@@ -566,9 +566,16 @@ namespace MWMechanics
             {
                 std::string itFaction = playerFactionIt->first;
 
+                // Ignore the faction, if a player was expelled from it.
+                if (playerStats.getExpelled(itFaction))
+                    continue;
+
                 int itReaction = MWBase::Environment::get().getDialogueManager()->getFactionReaction(npcFaction, itFaction);
                 if (playerFactionIt == playerStats.getFactionRanks().begin() || itReaction < reaction)
+                {
                     reaction = static_cast<float>(itReaction);
+                    rank = playerFactionIt->second;
+                }
             }
         }
         else
