@@ -6,6 +6,8 @@
 #include <osg/Texture2D>
 #include <osg/RenderInfo>
 
+#include <algorithm>
+
 namespace Terrain
 {
 
