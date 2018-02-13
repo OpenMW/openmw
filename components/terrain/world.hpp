@@ -57,6 +57,9 @@ namespace Terrain
         World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask);
         virtual ~World();
 
+        /// See CompositeMapRenderer::setTargetFrameRate
+        void setTargetFrameRate(float rate);
+
         /// Apply the scene manager's texture filtering settings to all cached textures.
         /// @note Thread safe.
         void updateTextureFiltering();

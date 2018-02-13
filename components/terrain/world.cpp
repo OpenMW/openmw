@@ -65,6 +65,11 @@ World::~World()
     delete mStorage;
 }
 
+void World::setTargetFrameRate(float rate)
+{
+    mCompositeMapRenderer->setTargetFrameRate(rate);
+}
+
 float World::getHeightAt(const osg::Vec3f &worldPos)
 {
     return mStorage->getHeightAt(worldPos);

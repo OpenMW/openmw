@@ -178,6 +178,14 @@ cache expiry delay
 The amount of time (in seconds) that a preloaded texture or object will stay in cache
 after it is no longer referenced or required, for example, when all cells containing this texture have been unloaded.
 
+target framerate
+----------------
+:Type:          floating point
+:Range:         >0
+:Default:       60
+
+Affects the time to be set aside each frame for graphics preloading operations. The game will distribute the preloading over several frames so as to not go under the specified framerate. For best results, set this value to the monitor's refresh rate. If you still experience stutters on turning around, you can try a lower value, although the framerate during loading will suffer a bit in that case.
+
 pointers cache size
 ------------------
 

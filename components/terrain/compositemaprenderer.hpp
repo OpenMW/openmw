@@ -40,7 +40,10 @@ namespace Terrain
         void compile(CompositeMap& compositeMap, osg::RenderInfo& renderInfo, double* timeLeft) const;
 
         /// Set the available time in seconds for compiling (non-immediate) composite maps each frame
-        void setTimeAvailableForCompile(double time);
+        void setMinimumTimeAvailableForCompile(double time);
+
+        /// If current frame rate is higher than this, the extra time will be set aside to do more compiling
+        void setTargetFrameRate(float framerate);
 
         /// Add a composite map to be rendered
         void addCompositeMap(CompositeMap* map, bool immediate=false);
@@ -51,7 +54,9 @@ namespace Terrain
         unsigned int getCompileSetSize() const;
 
     private:
-        double mTimeAvailable;
+        float mTargetFrameRate;
+        double mMinimumTimeAvailable;
+        mutable osg::Timer mTimer;
 
         typedef std::set<osg::ref_ptr<CompositeMap> > CompileSet;
 

@@ -205,7 +205,10 @@ namespace MWRender
         mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
 
         if (getenv("OPENMW_DONT_PRECOMPILE") == NULL)
+        {
             mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
+            mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
+        }
 
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
@@ -223,6 +226,7 @@ namespace MWRender
         else
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
         mTerrain->setDefaultViewer(mViewer->getCamera());
+        mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
