@@ -41,7 +41,7 @@ max quicksaves
 
 :Type:		integer
 :Range:		>0
-:Default:	5
+:Default:	1
 
 This setting determines how many quicksave and autosave slots you can have at a time.  If greater than 1, quicksaves will be sequentially created each time you quicksave.  Once the maximum number of quicksaves has been reached, the oldest quicksave will be recycled the next time you perform a quicksave.
 
