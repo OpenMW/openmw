@@ -11,20 +11,16 @@ namespace MWState{
         std::string mSaveName;
         unsigned int mMaxSaves;
         unsigned int mSlotsVisited;
-        unsigned int mOldestSlotId;
         const Slot *mOldestSlotVisited;
     private:
-        bool tryExtractSlotId(const std::string &slotName, unsigned int &extractedIdll);
-        bool isSlotIdValid(unsigned int slotId);
         bool shouldCreateNewSlot();
         bool isOldestSave(const Slot *compare);
-        int calcNextSlotId();
     public:
         QuickSaveManager(std::string &saveName, unsigned int maxSaves);
         ///< A utility class to manage multiple quicksave slots
         ///
         /// \param saveName The name of the save ("QuickSave", "AutoSave", etc)
-        /// \param maxSaves The maximum number of save slots to use before recycling old ones
+        /// \param maxSaves The maximum number of save slots to create before recycling old ones
 
         void visitSave(const Slot *saveSlot);
         ///< Visits the given \a slot \a
@@ -33,9 +29,6 @@ namespace MWState{
         ///< Get the slot that the next quicksave should use.
         ///
         ///\return Either the oldest quicksave slot visited, or NULL if a new slot can be made
-
-        std::string getNextQuickSaveName();
-        ///< Get the name that the next quicksave should use ("QuickSave 1", "AutoSave 10", etc)
     };
 }
 

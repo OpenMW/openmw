@@ -344,7 +344,7 @@ void MWState::StateManager::quickSave (std::string name)
 
     //Once all the saves have been visited, the save finder can tell us which
     //one to replace (or create)
-    saveGame(saveFinder.getNextQuickSaveName(), saveFinder.getNextQuickSaveSlot());
+    saveGame(name, saveFinder.getNextQuickSaveSlot());
 }
 
 void MWState::StateManager::loadGame(const std::string& filepath)
