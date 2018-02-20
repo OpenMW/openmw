@@ -20,7 +20,7 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
     loadSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
     loadSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
-    loadSettingBool(showMeleeInfoCheckBox, "show enchant chance", "Game");
+    loadSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
     loadSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
     loadSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
 
@@ -56,7 +56,7 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
     saveSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
     saveSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
-    saveSettingBool(showMeleeInfoCheckBox, "show enchant chance", "Game");
+    saveSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
     saveSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
     saveSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
 
