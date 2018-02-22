@@ -9,8 +9,9 @@ exterior cell load distance
 :Default:	1
 
 This setting determines the number of exterior cells adjacent to the character that will be loaded for rendering.
-Values greater than 1 may significantly affect loading times when exiting interior spaces
-or loading additional exterior cells. Caution is advised when increasing this setting.
+
+.. Warning::
+	Values greater than 1 will significantly affect the frame rate and loading times. This setting is mainly intended for making screenshots of scenic vistas and not for real-time gameplay. Loading more cells can break certain scripts or quests in the game that expect cells to not be loaded until the player is there. These limitations will be addressed in a future version with a separate technique for rendering distant cells.
 
 This setting interacts with viewing distance and field of view settings.
 
@@ -193,4 +194,4 @@ pointers cache size
 :Range:		>0
 :Default:	40
 
-The count of object pointers, that will be saved for a faster search by object ID.
+The count of object pointers that will be saved for a faster search by object ID. This is a temporary setting that can be used to mitigate scripting performance issues with certain game files. If your profiler (press F3 twice) displays a large overhead for the Scripting section, try increasing this setting. 

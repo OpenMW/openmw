@@ -8,9 +8,11 @@ distant terrain
 :Range:		True/False
 :Default:	False
 
-Controls whether the engine will use paging and LOD algorithms to render the terrain of the entire world at all times.
-Otherwise, only the terrain of the loaded cells is displayed.
-This setting is best used together with the 'viewing distance' setting in the camera section.
+Controls whether the engine will use paging and LOD algorithms to load the terrain of the entire world at all times.
+Otherwise, only the terrain of the surrounding cells is loaded.
+
+.. note::
+	When enabling distant terrain, make sure the 'viewing distance' in the camera section is set to a larger value so that you can actually see the additional terrain.
 
 To avoid frame drops as the player moves around, nearby terrain pages are always preloaded in the background,
 regardless of the preloading settings in the 'Cells' section,

@@ -25,7 +25,7 @@ Hand editing the configuration file might result in some fine tuning for alignme
 but the settings will be overwritten if a window is moved.
 
 .. note::
-	To scale the windows, making the widgets proportionally larger, see the scaling factor setting instead.
+	To scale the windows, making the widgets proportionally larger, see the scaling factor setting in the GUI section instead.
 
 :Type:		boolean
 :Range:		True/False
@@ -39,9 +39,6 @@ For example, to pin only the map window, the actual settings will be::
 	spells pin = false
 
 The pinnable window can be pinned/unpinned by clicking on a button in the right upper corner of the window.
-
-.. note::
-	A world/local map switch button on the map window will be shown only in GUI mode.
 
 stats
 -----
