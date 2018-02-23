@@ -262,7 +262,7 @@ namespace MWMechanics
             MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
 
         if (prevItem != store.end())
-            mPreviousItems[itemId] = *prevItem;
+            mPreviousItems[itemId] = (*prevItem).getCellRef().getRefId();
     }
 
     void Actors::removeBoundItem (const std::string& itemId, const MWWorld::Ptr& actor)
@@ -279,26 +279,34 @@ namespace MWMechanics
         if (actor != MWMechanics::getPlayer())
             return;
 
-        MWWorld::Ptr prevItem = mPreviousItems[itemId];
+        std::string prevItemId = mPreviousItems[itemId];
 
         mPreviousItems.erase(itemId);
 
-        if (prevItem.isEmpty())
+        if (prevItemId.empty())
             return;
 
-        // check if the item is still in the player's inventory
-        MWWorld::ContainerStoreIterator it = store.begin();
-        for (; it != store.end(); ++it)
+        // Find the item by id
+        MWWorld::Ptr item;
+        for (MWWorld::ContainerStoreIterator iter = store.begin(); iter != store.end(); ++iter)
         {
-            if (*it == prevItem)
-                break;
+            if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), prevItemId))
+            {
+                if (item.isEmpty() ||
+                    // Prefer the stack with the lowest remaining uses
+                        !item.getClass().hasItemHealth(*iter) ||
+                        iter->getClass().getItemHealth(*iter) < item.getClass().getItemHealth(item))
+                {
+                    item = *iter;
+                }
+            }
         }
 
         // we should equip previous item only if expired bound item was equipped.
-        if (it == store.end() || !wasEquipped)
+        if (item.isEmpty() || !wasEquipped)
             return;
 
-        MWWorld::ActionEquip action(prevItem);
+        MWWorld::ActionEquip action(item);
         action.execute(actor);
     }
 

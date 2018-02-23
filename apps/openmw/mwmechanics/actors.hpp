@@ -25,7 +25,7 @@ namespace MWMechanics
     class Actors
     {
             std::map<std::string, int> mDeathCount;
-            typedef std::map<std::string, MWWorld::Ptr> PreviousItems;
+            typedef std::map<std::string, std::string> PreviousItems;
             PreviousItems mPreviousItems;
 
             void addBoundItem (const std::string& itemId, const MWWorld::Ptr& actor);
