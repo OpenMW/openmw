@@ -449,6 +449,18 @@ namespace SceneUtil
 
         Frustum frustum(&cv, minZNear, maxZFar);
 
+        double reducedNear, reducedFar;
+        if (cv.getComputeNearFarMode() != osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR)
+        {
+            reducedNear = osg::maximum<double>(cv.getCalculatedNearPlane(), minZNear);
+            reducedFar = osg::minimum<double>(cv.getCalculatedFarPlane(), maxZFar);
+        }
+        else
+        {
+            reducedNear = minZNear;
+            reducedFar = maxZFar;
+        }
+
         // return compute near far mode back to it's original settings
         cv.setComputeNearFarMode(cachedNearFarMode);
 
@@ -543,6 +555,20 @@ namespace SceneUtil
 #endif
                     double yMid = (clsb._bb.yMin() + clsb._bb.yMax())*0.5f;
                     double yRange = (clsb._bb.yMax() - clsb._bb.yMin());
+
+                    osg::Matrixd cornerConverter = osg::Matrixd::inverse(projectionMatrix) * osg::Matrixd::inverse(viewMatrix) * *cv.getModelViewMatrix();
+                    double minZ = DBL_MAX;
+                    double maxZ = -DBL_MAX;
+                    for (unsigned int i = 0; i < 8; i++)
+                    {
+                        osg::Vec3 corner = clsb._bb.corner(i);
+                        corner = corner * cornerConverter;
+
+                        maxZ = osg::maximum<double>(maxZ, -corner.z());
+                        minZ = osg::minimum<double>(minZ, -corner.z());
+                    }
+                    reducedNear = osg::maximum<double>(reducedNear, minZ);
+                    reducedFar = osg::minimum<double>(reducedFar, maxZ);
 
                     // OSG_NOTICE<<"  xMid="<<xMid<<", yMid="<<yMid<<", xRange="<<xRange<<", yRange="<<yRange<<std::endl;
 
@@ -679,8 +705,8 @@ namespace SceneUtil
                     double r_start, r_end;
 
                     // split system based on the original Parallel Split Shadow Maps paper.
-                    double n = (frustum.eye - frustum.centerNearPlane).length();
-                    double f = (frustum.eye - frustum.centerFarPlane).length();
+                    double n = reducedNear;
+                    double f = reducedFar;
                     double i = double(sm_i);
                     double m = double(numShadowMapsPerLight);
                     double ratio = Settings::Manager::getFloat("split point uniform logarithmic ratio", "Shadows");
