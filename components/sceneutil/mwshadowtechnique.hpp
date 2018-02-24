@@ -30,14 +30,14 @@
 namespace SceneUtil {
 
     /** ViewDependentShadowMap provides an base implementation of view dependent shadow mapping techniques.*/
-    class OSGSHADOW_EXPORT ViewDependentShadowMap : public osgShadow::ShadowTechnique
+    class OSGSHADOW_EXPORT MWShadowTechnique : public osgShadow::ShadowTechnique
     {
     public:
-        ViewDependentShadowMap();
+        MWShadowTechnique();
 
-        ViewDependentShadowMap(const ViewDependentShadowMap& vdsm, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+        MWShadowTechnique(const MWShadowTechnique& vdsm, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
-        META_Object(SceneUtil, ViewDependentShadowMap);
+        META_Object(SceneUtil, MWShadowTechnique);
 
         /** initialize the ShadowedScene and local cached data structures.*/
         virtual void init();
@@ -129,9 +129,9 @@ namespace SceneUtil {
         class OSGSHADOW_EXPORT ViewDependentData : public osg::Referenced
         {
         public:
-            ViewDependentData(ViewDependentShadowMap* vdsm);
+            ViewDependentData(MWShadowTechnique* vdsm);
 
-            const ViewDependentShadowMap* getViewDependentShadowMap() const { return _viewDependentShadowMap; }
+            const MWShadowTechnique* getViewDependentShadowMap() const { return _viewDependentShadowMap; }
 
             LightDataList& getLightDataList() { return _lightDataList; }
 
@@ -144,7 +144,7 @@ namespace SceneUtil {
         protected:
             virtual ~ViewDependentData() {}
 
-            ViewDependentShadowMap*     _viewDependentShadowMap;
+            MWShadowTechnique*     _viewDependentShadowMap;
 
             osg::ref_ptr<osg::StateSet> _stateset;
 
@@ -177,7 +177,7 @@ namespace SceneUtil {
         virtual osg::StateSet* selectStateSetForRenderingShadow(ViewDependentData& vdd) const;
 
     protected:
-        virtual ~ViewDependentShadowMap();
+        virtual ~MWShadowTechnique();
 
         typedef std::map< osgUtil::CullVisitor*, osg::ref_ptr<ViewDependentData> >  ViewDependentDataMap;
         mutable OpenThreads::Mutex              _viewDependentDataMapMutex;

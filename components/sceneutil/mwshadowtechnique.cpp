@@ -152,7 +152,7 @@ class VDSMCameraCullCallback : public osg::NodeCallback
 {
     public:
 
-        VDSMCameraCullCallback(ViewDependentShadowMap* vdsm, osg::Polytope& polytope);
+        VDSMCameraCullCallback(MWShadowTechnique* vdsm, osg::Polytope& polytope);
 
         virtual void operator()(osg::Node*, osg::NodeVisitor* nv);
 
@@ -161,13 +161,13 @@ class VDSMCameraCullCallback : public osg::NodeCallback
 
     protected:
 
-        ViewDependentShadowMap*                 _vdsm;
+        MWShadowTechnique*                 _vdsm;
         osg::ref_ptr<osg::RefMatrix>            _projectionMatrix;
         osg::ref_ptr<osgUtil::RenderStage>      _renderStage;
         osg::Polytope                           _polytope;
 };
 
-VDSMCameraCullCallback::VDSMCameraCullCallback(ViewDependentShadowMap* vdsm, osg::Polytope& polytope):
+VDSMCameraCullCallback::VDSMCameraCullCallback(MWShadowTechnique* vdsm, osg::Polytope& polytope):
     _vdsm(vdsm),
     _polytope(polytope)
 {
@@ -375,13 +375,13 @@ public:
 //
 // LightData
 //
-ViewDependentShadowMap::LightData::LightData(ViewDependentShadowMap::ViewDependentData* vdd):
+MWShadowTechnique::LightData::LightData(MWShadowTechnique::ViewDependentData* vdd):
     _viewDependentData(vdd),
     directionalLight(false)
 {
 }
 
-void ViewDependentShadowMap::LightData::setLightData(osg::RefMatrix* lm, const osg::Light* l, const osg::Matrixd& modelViewMatrix)
+void MWShadowTechnique::LightData::setLightData(osg::RefMatrix* lm, const osg::Light* l, const osg::Matrixd& modelViewMatrix)
 {
     lightMatrix = lm;
     light = l;
@@ -426,7 +426,7 @@ void ViewDependentShadowMap::LightData::setLightData(osg::RefMatrix* lm, const o
 //
 // ShadowData
 //
-ViewDependentShadowMap::ShadowData::ShadowData(ViewDependentShadowMap::ViewDependentData* vdd):
+MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* vdd):
     _viewDependentData(vdd),
     _textureUnit(0)
 {
@@ -511,9 +511,9 @@ ViewDependentShadowMap::ShadowData::ShadowData(ViewDependentShadowMap::ViewDepen
     }
 }
 
-void ViewDependentShadowMap::ShadowData::releaseGLObjects(osg::State* state) const
+void MWShadowTechnique::ShadowData::releaseGLObjects(osg::State* state) const
 {
-    OSG_INFO<<"ViewDependentShadowMap::ShadowData::releaseGLObjects"<<std::endl;
+    OSG_INFO<<"MWShadowTechnique::ShadowData::releaseGLObjects"<<std::endl;
     _texture->releaseGLObjects(state);
     _camera->releaseGLObjects(state);
 }
@@ -522,7 +522,7 @@ void ViewDependentShadowMap::ShadowData::releaseGLObjects(osg::State* state) con
 //
 // Frustum
 //
-ViewDependentShadowMap::Frustum::Frustum(osgUtil::CullVisitor* cv, double minZNear, double maxZFar):
+MWShadowTechnique::Frustum::Frustum(osgUtil::CullVisitor* cv, double minZNear, double maxZFar):
     corners(8),
     faces(6),
     edges(12)
@@ -651,14 +651,14 @@ ViewDependentShadowMap::Frustum::Frustum(osgUtil::CullVisitor* cv, double minZNe
 //
 // ViewDependentData
 //
-ViewDependentShadowMap::ViewDependentData::ViewDependentData(ViewDependentShadowMap* vdsm):
+MWShadowTechnique::ViewDependentData::ViewDependentData(MWShadowTechnique* vdsm):
     _viewDependentShadowMap(vdsm)
 {
     OSG_INFO<<"ViewDependentData::ViewDependentData()"<<this<<std::endl;
     _stateset = new osg::StateSet;
 }
 
-void ViewDependentShadowMap::ViewDependentData::releaseGLObjects(osg::State* state) const
+void MWShadowTechnique::ViewDependentData::releaseGLObjects(osg::State* state) const
 {
     for(ShadowDataList::const_iterator itr = _shadowDataList.begin();
         itr != _shadowDataList.end();
@@ -670,47 +670,47 @@ void ViewDependentShadowMap::ViewDependentData::releaseGLObjects(osg::State* sta
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //
-// ViewDependentShadowMap
+// MWShadowTechnique
 //
-ViewDependentShadowMap::ViewDependentShadowMap():
+MWShadowTechnique::MWShadowTechnique():
     ShadowTechnique()
 {
     _shadowRecievingPlaceholderStateSet = new osg::StateSet;
 }
 
-ViewDependentShadowMap::ViewDependentShadowMap(const ViewDependentShadowMap& vdsm, const osg::CopyOp& copyop):
+MWShadowTechnique::MWShadowTechnique(const MWShadowTechnique& vdsm, const osg::CopyOp& copyop):
     ShadowTechnique(vdsm,copyop)
 {
     _shadowRecievingPlaceholderStateSet = new osg::StateSet;
 }
 
-ViewDependentShadowMap::~ViewDependentShadowMap()
+MWShadowTechnique::~MWShadowTechnique()
 {
 }
 
 
-void ViewDependentShadowMap::init()
+void MWShadowTechnique::init()
 {
     if (!_shadowedScene) return;
 
-    OSG_INFO<<"ViewDependentShadowMap::init()"<<std::endl;
+    OSG_INFO<<"MWShadowTechnique::init()"<<std::endl;
 
     createShaders();
 
     _dirty = false;
 }
 
-void ViewDependentShadowMap::cleanSceneGraph()
+void MWShadowTechnique::cleanSceneGraph()
 {
-    OSG_INFO<<"ViewDependentShadowMap::cleanSceneGraph()"<<std::endl;
+    OSG_INFO<<"MWShadowTechnique::cleanSceneGraph()"<<std::endl;
 }
 
-ViewDependentShadowMap::ViewDependentData* ViewDependentShadowMap::createViewDependentData(osgUtil::CullVisitor* /*cv*/)
+MWShadowTechnique::ViewDependentData* MWShadowTechnique::createViewDependentData(osgUtil::CullVisitor* /*cv*/)
 {
     return new ViewDependentData(this);
 }
 
-ViewDependentShadowMap::ViewDependentData* ViewDependentShadowMap::getViewDependentData(osgUtil::CullVisitor* cv)
+MWShadowTechnique::ViewDependentData* MWShadowTechnique::getViewDependentData(osgUtil::CullVisitor* cv)
 {
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_viewDependentDataMapMutex);
     ViewDependentDataMap::iterator itr = _viewDependentDataMap.find(cv);
@@ -721,15 +721,15 @@ ViewDependentShadowMap::ViewDependentData* ViewDependentShadowMap::getViewDepend
     return vdd.release();
 }
 
-void ViewDependentShadowMap::update(osg::NodeVisitor& nv)
+void MWShadowTechnique::update(osg::NodeVisitor& nv)
 {
-    OSG_INFO<<"ViewDependentShadowMap::update(osg::NodeVisitor& "<<&nv<<")"<<std::endl;
+    OSG_INFO<<"MWShadowTechnique::update(osg::NodeVisitor& "<<&nv<<")"<<std::endl;
     _shadowedScene->osg::Group::traverse(nv);
 }
 
-void ViewDependentShadowMap::cull(osgUtil::CullVisitor& cv)
+void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 {
-    OSG_INFO<<std::endl<<std::endl<<"ViewDependentShadowMap::cull(osg::CullVisitor&"<<&cv<<")"<<std::endl;
+    OSG_INFO<<std::endl<<std::endl<<"MWShadowTechnique::cull(osg::CullVisitor&"<<&cv<<")"<<std::endl;
 
     if (!_shadowCastingStateSet)
     {
@@ -1104,7 +1104,7 @@ void ViewDependentShadowMap::cull(osgUtil::CullVisitor& cv)
     // OSG_NOTICE<<"End of shadow setup Projection matrix "<<*cv.getProjectionMatrix()<<std::endl;
 }
 
-bool ViewDependentShadowMap::selectActiveLights(osgUtil::CullVisitor* cv, ViewDependentData* vdd) const
+bool MWShadowTechnique::selectActiveLights(osgUtil::CullVisitor* cv, ViewDependentData* vdd) const
 {
     OSG_INFO<<"selectActiveLights"<<std::endl;
 
@@ -1159,9 +1159,9 @@ bool ViewDependentShadowMap::selectActiveLights(osgUtil::CullVisitor* cv, ViewDe
     return !pll.empty();
 }
 
-void ViewDependentShadowMap::createShaders()
+void MWShadowTechnique::createShaders()
 {
-    OSG_INFO<<"ViewDependentShadowMap::createShaders()"<<std::endl;
+    OSG_INFO<<"MWShadowTechnique::createShaders()"<<std::endl;
 
     unsigned int _baseTextureUnit = 0;
 
@@ -1272,7 +1272,7 @@ void ViewDependentShadowMap::createShaders()
     }
 }
 
-osg::Polytope ViewDependentShadowMap::computeLightViewFrustumPolytope(Frustum& frustum, LightData& positionedLight)
+osg::Polytope MWShadowTechnique::computeLightViewFrustumPolytope(Frustum& frustum, LightData& positionedLight)
 {
     OSG_INFO<<"computeLightViewFrustumPolytope()"<<std::endl;
 
@@ -1391,7 +1391,7 @@ osg::Polytope ViewDependentShadowMap::computeLightViewFrustumPolytope(Frustum& f
     return lightVolumePolytope;
 }
 
-bool ViewDependentShadowMap::computeShadowCameraSettings(Frustum& frustum, LightData& positionedLight, osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix)
+bool MWShadowTechnique::computeShadowCameraSettings(Frustum& frustum, LightData& positionedLight, osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix)
 {
     OSG_INFO<<"standardShadowMapCameraSettings()"<<std::endl;
 
@@ -1566,7 +1566,7 @@ struct ConvexHull
 
     bool valid() const { return !_edges.empty(); }
 
-    void setToFrustum(ViewDependentShadowMap::Frustum& frustum)
+    void setToFrustum(MWShadowTechnique::Frustum& frustum)
     {
         _edges.push_back( Edge(frustum.corners[0],frustum.corners[1]) );
         _edges.push_back( Edge(frustum.corners[1],frustum.corners[2]) );
@@ -1963,7 +1963,7 @@ struct RenderLeafBounds
     double min_z, max_z;
 };
 
-bool ViewDependentShadowMap::adjustPerspectiveShadowMapCameraSettings(osgUtil::RenderStage* renderStage, Frustum& frustum, LightData& /*positionedLight*/, osg::Camera* camera)
+bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::RenderStage* renderStage, Frustum& frustum, LightData& /*positionedLight*/, osg::Camera* camera)
 {
     const ShadowSettings* settings = getShadowedScene()->getShadowSettings();
 
@@ -2286,7 +2286,7 @@ bool ViewDependentShadowMap::adjustPerspectiveShadowMapCameraSettings(osgUtil::R
     return true;
 }
 
-bool ViewDependentShadowMap::assignTexGenSettings(osgUtil::CullVisitor* cv, osg::Camera* camera, unsigned int textureUnit, osg::TexGen* texgen)
+bool MWShadowTechnique::assignTexGenSettings(osgUtil::CullVisitor* cv, osg::Camera* camera, unsigned int textureUnit, osg::TexGen* texgen)
 {
     OSG_INFO<<"assignTexGenSettings() textureUnit="<<textureUnit<<" texgen="<<texgen<<std::endl;
 
@@ -2308,7 +2308,7 @@ bool ViewDependentShadowMap::assignTexGenSettings(osgUtil::CullVisitor* cv, osg:
     return true;
 }
 
-void ViewDependentShadowMap::cullShadowReceivingScene(osgUtil::CullVisitor* cv) const
+void MWShadowTechnique::cullShadowReceivingScene(osgUtil::CullVisitor* cv) const
 {
     OSG_INFO<<"cullShadowReceivingScene()"<<std::endl;
 
@@ -2324,7 +2324,7 @@ void ViewDependentShadowMap::cullShadowReceivingScene(osgUtil::CullVisitor* cv) 
     return;
 }
 
-void ViewDependentShadowMap::cullShadowCastingScene(osgUtil::CullVisitor* cv, osg::Camera* camera) const
+void MWShadowTechnique::cullShadowCastingScene(osgUtil::CullVisitor* cv, osg::Camera* camera) const
 {
     OSG_INFO<<"cullShadowCastingScene()"<<std::endl;
 
@@ -2340,7 +2340,7 @@ void ViewDependentShadowMap::cullShadowCastingScene(osgUtil::CullVisitor* cv, os
     return;
 }
 
-osg::StateSet* ViewDependentShadowMap::selectStateSetForRenderingShadow(ViewDependentData& vdd) const
+osg::StateSet* MWShadowTechnique::selectStateSetForRenderingShadow(ViewDependentData& vdd) const
 {
     OSG_INFO<<"   selectStateSetForRenderingShadow() "<<vdd.getStateSet()<<std::endl;
 
@@ -2416,12 +2416,12 @@ osg::StateSet* ViewDependentShadowMap::selectStateSetForRenderingShadow(ViewDepe
     return vdd.getStateSet();
 }
 
-void ViewDependentShadowMap::resizeGLObjectBuffers(unsigned int /*maxSize*/)
+void MWShadowTechnique::resizeGLObjectBuffers(unsigned int /*maxSize*/)
 {
     // the way that ViewDependentData is mapped shouldn't
 }
 
-void ViewDependentShadowMap::releaseGLObjects(osg::State* state) const
+void MWShadowTechnique::releaseGLObjects(osg::State* state) const
 {
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_viewDependentDataMapMutex);
     for(ViewDependentDataMap::const_iterator itr = _viewDependentDataMap.begin();
