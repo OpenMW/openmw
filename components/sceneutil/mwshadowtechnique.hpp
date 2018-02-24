@@ -16,8 +16,8 @@
 * OpenSceneGraph Public License for more details.
 */
 
-#ifndef OSGSHADOW_VIEWDEPENDENTSHADOWMAP
-#define OSGSHADOW_VIEWDEPENDENTSHADOWMAP 1
+#ifndef COMPONENTS_SCENEUTIL_MWSHADOWTECHNIQUE_H
+#define COMPONENTS_SCENEUTIL_MWSHADOWTECHNIQUE_H 1
 
 #include <osg/Camera>
 #include <osg/Material>
@@ -27,10 +27,10 @@
 
 #include <osgShadow/ShadowTechnique>
 
-namespace osgShadow {
+namespace SceneUtil {
 
     /** ViewDependentShadowMap provides an base implementation of view dependent shadow mapping techniques.*/
-    class OSGSHADOW_EXPORT ViewDependentShadowMap : public ShadowTechnique
+    class OSGSHADOW_EXPORT ViewDependentShadowMap : public osgShadow::ShadowTechnique
     {
     public:
         ViewDependentShadowMap();

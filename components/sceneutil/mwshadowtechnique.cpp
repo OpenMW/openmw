@@ -16,7 +16,8 @@
  * OpenSceneGraph Public License for more details.
 */
 
-#include <osgShadow/ViewDependentShadowMap>
+#include "mwshadowtechnique.hpp"
+
 #include <osgShadow/ShadowedScene>
 #include <osg/CullFace>
 #include <osg/Geode>
@@ -25,6 +26,7 @@
 #include <sstream>
 
 using namespace osgShadow;
+using namespace SceneUtil;
 
 //////////////////////////////////////////////////////////////////
 // fragment shader
