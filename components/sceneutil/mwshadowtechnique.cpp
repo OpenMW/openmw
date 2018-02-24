@@ -168,7 +168,7 @@ VDSMCameraCullCallback::VDSMCameraCullCallback(ViewDependentShadowMap* vdsm, osg
 
 void VDSMCameraCullCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
-    osgUtil::CullVisitor* cv = nv->asCullVisitor();
+    osgUtil::CullVisitor* cv = dynamic_cast<osgUtil::CullVisitor*>(nv);
     osg::Camera* camera = node->asCamera();
     OSG_INFO<<"VDSMCameraCullCallback::operator()(osg::Node* "<<camera<<", osg::NodeVisitor* "<<cv<<")"<<std::endl;
 
