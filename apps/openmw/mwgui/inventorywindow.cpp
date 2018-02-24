@@ -1,5 +1,7 @@
 #include "inventorywindow.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 #include <MyGUI_Window.h>
@@ -598,7 +600,7 @@ namespace MWGui
         float capacity = player.getClass().getCapacity(player);
         float encumbrance = player.getClass().getEncumbrance(player);
         mTradeModel->adjustEncumbrance(encumbrance);
-        mEncumbranceBar->setValue(static_cast<int>(encumbrance), static_cast<int>(capacity));
+        mEncumbranceBar->setValue(std::min(INT_MAX-1, std::ceil(encumbrance)), static_cast<int>(capacity));
     }
 
     void InventoryWindow::onFrame(float dt)
