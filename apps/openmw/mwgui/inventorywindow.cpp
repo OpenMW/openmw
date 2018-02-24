@@ -599,10 +599,7 @@ namespace MWGui
         float capacity = player.getClass().getCapacity(player);
         float encumbrance = player.getClass().getEncumbrance(player);
         mTradeModel->adjustEncumbrance(encumbrance);
-        if (encumbrance != 0.f)
-            mEncumbranceBar->setValue(static_cast<int>(std::round(encumbrance+0.5)), static_cast<int>(capacity));
-        else
-            mEncumbranceBar->setValue(0, static_cast<int>(capacity));
+        mEncumbranceBar->setValue(std::ceil(encumbrance), static_cast<int>(capacity));
     }
 
     void InventoryWindow::onFrame(float dt)
