@@ -1,3 +1,8 @@
+/* This file is based on OpenSceneGraph's src/osgShadow/ViewDependentShadowMap.cpp.
+ * Where applicable, any changes made are covered by OpenMW's GPL 3 license, not the OSGPL.
+ * The original copyright notice is listed below.
+ */
+
 /* -*-c++-*- OpenSceneGraph - Copyright (C) 1998-2011 Robert Osfield
  *
  * This library is open source and may be redistributed and/or modified under
