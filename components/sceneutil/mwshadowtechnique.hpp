@@ -37,7 +37,7 @@ namespace SceneUtil {
 
         ViewDependentShadowMap(const ViewDependentShadowMap& vdsm, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
-        META_Object(osgShadow, ViewDependentShadowMap);
+        META_Object(SceneUtil, ViewDependentShadowMap);
 
         /** initialize the ShadowedScene and local cached data structures.*/
         virtual void init();
