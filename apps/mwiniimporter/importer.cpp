@@ -22,8 +22,6 @@ MwIniImporter::MwIniImporter()
     const char *fallback[] = {
 
         // light
-        "LightAttenuation:UseConstant",
-        "LightAttenuation:ConstantValue",
         "LightAttenuation:UseLinear",
         "LightAttenuation:LinearMethod",
         "LightAttenuation:LinearValue",
@@ -73,8 +71,6 @@ MwIniImporter::MwIniImporter()
         "Water:RippleScale",
         "Water:RippleRotSpeed",
         "Water:RippleAlphas",
-        "Water:PSWaterReflectTerrain",
-        "Water:PSWaterReflectUpdate",
         "Water:NearWaterRadius",
         "Water:NearWaterPoints",
         "Water:NearWaterUnderwaterFreq",
@@ -90,11 +86,6 @@ MwIniImporter::MwIniImporter()
         "Water:UnderwaterIndoorFog",
         "Water:UnderwaterColor",
         "Water:UnderwaterColorWeight",
-
-        // pixelwater
-        "PixelWater:SurfaceFPS",
-        "PixelWater:TileCount",
-        "PixelWater:Resolution",
 
         // fonts
         "Fonts:Font 0",
@@ -622,17 +613,6 @@ MwIniImporter::MwIniImporter()
         "Moons:Masser Fade Out Start",
         "Moons:Masser Fade Out Finish",
         "Moons:Script Color",
-
-        // blood
-        "Blood:Model 0",
-        "Blood:Model 1",
-        "Blood:Model 2",
-        "Blood:Texture 0",
-        "Blood:Texture 1",
-        "Blood:Texture 2",
-        "Blood:Texture Name 0",
-        "Blood:Texture Name 1",
-        "Blood:Texture Name 2",
 
         // werewolf (Bloodmoon)
         "General:Werewolf FOV",
