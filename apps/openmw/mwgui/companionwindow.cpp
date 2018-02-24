@@ -132,7 +132,7 @@ void CompanionWindow::updateEncumbranceBar()
         return;
     float capacity = mPtr.getClass().getCapacity(mPtr);
     float encumbrance = mPtr.getClass().getEncumbrance(mPtr);
-    mEncumbranceBar->setValue(std::max(INT_MAX-1, std::ceil(encumbrance)), static_cast<int>(capacity));
+    mEncumbranceBar->setValue(std::min(INT_MAX-1, std::ceil(encumbrance)), static_cast<int>(capacity));
 
     if (mModel && mModel->hasProfit(mPtr))
     {
