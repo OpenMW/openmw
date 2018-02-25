@@ -376,6 +376,34 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 
     bool weaponSkillVisited[weaponSkillsLength] = { false };
 
+    // give arrows/bolt with max damage by default
+    int arrowMax = 0;
+    int boltMax = 0;
+    ContainerStoreIterator arrow(end());
+    ContainerStoreIterator bolt(end());
+
+    for (ContainerStoreIterator iter(begin(ContainerStore::Type_Weapon)); iter!=end(); ++iter)
+    {
+        const ESM::Weapon* esmWeapon = iter->get<ESM::Weapon>()->mBase;
+
+        if (esmWeapon->mData.mType == ESM::Weapon::Arrow)
+        {
+            if (esmWeapon->mData.mChop[1] >= arrowMax)
+            {
+                arrowMax = esmWeapon->mData.mChop[1];
+                arrow = iter;
+            }
+        }
+        else if (esmWeapon->mData.mType == ESM::Weapon::Bolt)
+        {
+            if (esmWeapon->mData.mChop[1] >= boltMax)
+            {
+                boltMax = esmWeapon->mData.mChop[1];
+                bolt = iter;
+            }
+        }
+    }
+
     for (int i = 0; i < static_cast<int>(weaponSkillsLength); ++i)
     {
         int max = 0;
@@ -430,26 +458,61 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
             }
         }
 
+        bool isBow = false;
+        bool isCrossbow = false;
+        if (weapon != end())
+        {
+            const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
+            ESM::Weapon::Type type = (ESM::Weapon::Type)ref->mBase->mData.mType;
+
+            if (type == ESM::Weapon::MarksmanBow)
+                isBow = true;
+            else if (type == ESM::Weapon::MarksmanCrossbow)
+                isCrossbow = true;
+        }
+
         if (weapon != end() && weapon->getClass().canBeEquipped(*weapon, actor).first)
         {
-            std::pair<std::vector<int>, bool> itemsSlots =
-                weapon->getClass().getEquipmentSlots (*weapon);
-
-            if (!itemsSlots.first.empty())
+            // Do not equip ranged weapons, if there is no suitable ammo
+            bool hasAmmo = true;
+            if (isBow == true)
             {
-                if (!itemsSlots.second)
-                {
-                    if (weapon->getRefData().getCount() > 1)
-                    {
-                        unstack(*weapon, actor);
-                    }
-                }
-
-                int slot = itemsSlots.first.front();
-                slots_[slot] = weapon;
+                if (arrow == end())
+                    hasAmmo = false;
+                else
+                    slots_[Slot_Ammunition] = arrow;
+            }
+            if (isCrossbow == true)
+            {
+                if (bolt == end())
+                    hasAmmo = false;
+                else
+                    slots_[Slot_Ammunition] = bolt;
             }
 
-            break;
+            if (hasAmmo)
+            {
+                std::pair<std::vector<int>, bool> itemsSlots = weapon->getClass().getEquipmentSlots (*weapon);
+
+                if (!itemsSlots.first.empty())
+                {
+                    if (!itemsSlots.second)
+                    {
+                        if (weapon->getRefData().getCount() > 1)
+                        {
+                            unstack(*weapon, actor);
+                        }
+                    }
+
+                    int slot = itemsSlots.first.front();
+                    slots_[slot] = weapon;
+
+                    if (!isBow && !isCrossbow)
+                        slots_[Slot_Ammunition] = end();
+                }
+
+                break;
+            }
         }
 
         weaponSkillVisited[maxWeaponSkill] = true;
