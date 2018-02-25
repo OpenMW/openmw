@@ -917,7 +917,7 @@ namespace MWMechanics
         }
 
         const std::string& owner = cellref.getOwner();
-        bool isOwned = !owner.empty() && !owner.getClass().getCreatureStats(owner).isDead() && owner != "player";
+        bool isOwned = !owner.empty() && owner != "player";
 
         const std::string& faction = cellref.getFaction();
         bool isFactionOwned = false;
@@ -938,7 +938,11 @@ namespace MWMechanics
         }
 
         if (!cellref.getOwner().empty())
+        {
             victim = MWBase::Environment::get().getWorld()->searchPtr(cellref.getOwner(), true);
+            if (victim.getClass().getCreatureStats(victim).isDead() && isOwned == true)
+                isOwned = false;
+        }
 
         return (!isOwned && !isFactionOwned);
     }
