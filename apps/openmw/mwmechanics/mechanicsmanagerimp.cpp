@@ -917,7 +917,7 @@ namespace MWMechanics
         }
 
         const std::string& owner = cellref.getOwner();
-        bool isOwned = !owner.empty() && owner != "player";
+        bool isOwned = !owner.empty() && !owner.getClass().getCreatureStats(owner).isDead() && owner != "player";
 
         const std::string& faction = cellref.getFaction();
         bool isFactionOwned = false;
