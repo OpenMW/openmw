@@ -76,9 +76,7 @@
 
         <Widget type="HBox" skin="" position="110 374 452 24" align="Bottom Right">
 
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
+            <Widget type="Spacer"/>
 
             <Widget type="AutoSizedButton" skin="MW_Button" name="CreateButton">
                 <Property key="Caption" value="#{sCreate}"/>

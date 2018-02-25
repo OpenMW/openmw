@@ -63,6 +63,7 @@ namespace Compiler
         if (mState==BeginState && keyword==Scanner::K_begin)
         {
             mState = NameState;
+            scanner.enableTolerantNames(); /// \todo disable
             return true;
         }
 

@@ -193,6 +193,7 @@ namespace MWGui
       , mRestAllowed(true)
       , mFallbackMap(fallbackMap)
       , mShowOwned(0)
+      , mEncoding(encoding)
       , mVersionDescription(versionDescription)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
@@ -346,7 +347,7 @@ namespace MWGui
         mGuiModeStates[GM_Console] = GuiModeState(mConsole);
 
         bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
-        JournalWindow* journal = JournalWindow::create(JournalViewModel::create (), questList);
+        JournalWindow* journal = JournalWindow::create(JournalViewModel::create (), questList, mEncoding);
         mWindows.push_back(journal);
         mGuiModeStates[GM_Journal] = GuiModeState(journal);
         mGuiModeStates[GM_Journal].mCloseSound = "book close";
@@ -530,6 +531,7 @@ namespace MWGui
         delete mDragAndDrop;
         delete mSoulgemDialog;
         delete mCursorManager;
+        delete mToolTips;
 
         cleanupGarbage();
 
@@ -870,6 +872,22 @@ namespace MWGui
             for (WindowBase* window : mGuiModeStates[GM_Inventory].mWindows)
                 if (window->isVisible())
                     window->onFrame(frameDuration);
+        }
+
+        // Make sure message boxes are always in front
+        // This is an awful workaround for a series of awfully interwoven issues that couldn't be worked around
+        // in a better way because of an impressive number of even more awfully interwoven issues.
+        if (mMessageBoxManager && mMessageBoxManager->isInteractiveMessageBox() && mCurrentModals.back() != mMessageBoxManager->getInteractiveMessageBox())
+        {
+            std::vector<WindowModal*>::iterator found = std::find(mCurrentModals.begin(), mCurrentModals.end(), mMessageBoxManager->getInteractiveMessageBox());
+            if (found != mCurrentModals.end())
+            {
+                WindowModal* msgbox = *found;
+                std::swap(*found, mCurrentModals.back());
+                MyGUI::InputManager::getInstance().addWidgetModal(msgbox->mMainWidget);
+                mKeyboardNavigation->setModalWindow(msgbox->mMainWidget);
+                mKeyboardNavigation->setDefaultFocus(msgbox->mMainWidget, msgbox->getDefaultKeyFocus());
+            }
         }
 
         if (!mCurrentModals.empty())
@@ -2068,5 +2086,4 @@ namespace MWGui
         for (unsigned int i=0; i<mWindows.size(); ++i)
             mWindows[i]->setVisible(visible);
     }
-
 }

@@ -1,5 +1,6 @@
 #include "inventorywindow.hpp"
 
+#include <cmath>
 #include <stdexcept>
 
 #include <MyGUI_Window.h>
@@ -598,7 +599,7 @@ namespace MWGui
         float capacity = player.getClass().getCapacity(player);
         float encumbrance = player.getClass().getEncumbrance(player);
         mTradeModel->adjustEncumbrance(encumbrance);
-        mEncumbranceBar->setValue(static_cast<int>(encumbrance), static_cast<int>(capacity));
+        mEncumbranceBar->setValue(std::ceil(encumbrance), static_cast<int>(capacity));
     }
 
     void InventoryWindow::onFrame(float dt)
@@ -657,12 +658,16 @@ namespace MWGui
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWBase::Environment::get().getWorld()->breakInvisibility(player);
+        
+        if (!object.getRefData().activate())
+            return;
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, object, MWWorld::Ptr(), count);
 
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
         MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
+
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject (object);
 

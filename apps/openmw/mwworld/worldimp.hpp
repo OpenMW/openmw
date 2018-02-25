@@ -74,17 +74,11 @@ namespace MWWorld
             Resource::ResourceSystem* mResourceSystem;
 
             Fallback::Map mFallback;
-            MWRender::RenderingManager* mRendering;
 
-            MWWorld::WeatherManager* mWeatherManager;
-
-            MWWorld::Scene *mWorldScene;
-            MWWorld::Player *mPlayer;
             std::vector<ESM::ESMReader> mEsm;
             MWWorld::ESMStore mStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals mGlobalVariables;
-            MWPhysics::PhysicsSystem *mPhysics;
             bool mSky;
 
             ESM::Variant* mGameHour;
@@ -98,6 +92,11 @@ namespace MWWorld
 
             std::string mCurrentWorldSpace;
 
+            std::unique_ptr<MWWorld::Player> mPlayer;
+            std::unique_ptr<MWPhysics::PhysicsSystem> mPhysics;
+            std::unique_ptr<MWRender::RenderingManager> mRendering;
+            std::unique_ptr<MWWorld::Scene> mWorldScene;
+            std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
             std::shared_ptr<ProjectileManager> mProjectileManager;
 
             bool mGodMode;

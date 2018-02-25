@@ -135,7 +135,7 @@ namespace MWMechanics
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             /// @param container The container the item is in; may be empty for an item in the world
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, const MWWorld::Ptr& container,
-                                    int count);
+                                    int count, bool alarm = true);
             /// Utility to check if opening (i.e. unlocking) this object is illegal and calling commitCrime if so
             virtual void objectOpened (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item);
             /// Attempt sleeping in a bed. If this is illegal, call commitCrime.
@@ -157,6 +157,9 @@ namespace MWMechanics
 
             virtual void getObjectsInRange (const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& objects);
             virtual void getActorsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects);
+
+            /// Check if there are actors in selected range
+            virtual bool isAnyActorInRange(const osg::Vec3f &position, float radius);
 
             virtual std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor);
             virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
@@ -203,6 +206,8 @@ namespace MWMechanics
 
             /// Has the player stolen this item from the given owner?
             virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid);
+
+            virtual bool isBoundItem(const MWWorld::Ptr& item);
 
             /// @return is \a ptr allowed to take/use \a target or is it a crime?
             virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, MWWorld::Ptr& victim);

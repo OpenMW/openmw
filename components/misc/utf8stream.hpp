@@ -18,6 +18,11 @@ public:
     {
     }
 
+    Utf8Stream (const char * str) :
+        cur ((unsigned char*) str), nxt ((unsigned char*) str), end ((unsigned char*) str + strlen(str)), val(Utf8Stream::sBadChar())
+    {
+    }
+
     Utf8Stream (std::pair <Point, Point> range) :
         cur (range.first), nxt (range.first), end (range.second), val(Utf8Stream::sBadChar())
     {

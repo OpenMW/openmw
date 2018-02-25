@@ -79,11 +79,13 @@ void OMW::Engine::executeLocalScripts()
     }
 }
 
-void OMW::Engine::frame(float frametime)
+bool OMW::Engine::frame(float frametime)
 {
     try
     {
         mStartTick = mViewer->getStartTick();
+
+        mEnvironment.setFrameDuration(frametime);
 
         // update input
         mEnvironment.getInputManager()->update(frametime, false);
@@ -92,7 +94,7 @@ void OMW::Engine::frame(float frametime)
         // If we are not currently rendering, then RenderItems will not be reused resulting in a memory leak upon changing widget textures (fixed in MyGUI 3.3.2),
         // and destroyed widgets will not be deleted (not fixed yet, https://github.com/MyGUI/mygui/issues/21)
         if (!mEnvironment.getInputManager()->isWindowVisible())
-            return;
+            return false;
 
         // sound
         if (mUseSound)
@@ -187,8 +189,9 @@ void OMW::Engine::frame(float frametime)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Error in framelistener: " << e.what() << std::endl;
+        std::cerr << "Error in frame: " << e.what() << std::endl;
     }
+    return true;
 }
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
@@ -474,8 +477,20 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     }
 
     // find correct path to the game controller bindings
-    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/gamecontrollerdb.txt";
-    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/gamecontrollerdb.txt";
+    // File format for controller mappings is different for SDL <= 2.0.4, 2.0.5, and >= 2.0.6
+    SDL_version linkedSdlVersion;
+    SDL_GetVersion(&linkedSdlVersion);
+    std::string controllerFileName;
+    if (linkedSdlVersion.major == 2 && linkedSdlVersion.minor == 0 && linkedSdlVersion.patch <= 4) {
+        controllerFileName = "gamecontrollerdb_204.txt";
+    } else if (linkedSdlVersion.major == 2 && linkedSdlVersion.minor == 0 && linkedSdlVersion.patch == 5) {
+        controllerFileName = "gamecontrollerdb_205.txt";
+    } else {
+        controllerFileName = "gamecontrollerdb.txt";
+    }
+
+    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/" + controllerFileName;
+    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/" + controllerFileName;
     std::string gameControllerdb;
     if (boost::filesystem::exists(localdefault))
         gameControllerdb = localdefault;
@@ -689,17 +704,9 @@ void OMW::Engine::go()
         frameTimer.setStartTick();
         dt = std::min(dt, 0.2);
 
-        bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
-        if (!guiActive)
-            simulationTime += dt;
-
         mViewer->advance(simulationTime);
 
-        mEnvironment.setFrameDuration(dt);
-
-        frame(dt);
-
-        if (!mEnvironment.getInputManager()->isWindowVisible())
+        if (!frame(dt))
         {
             OpenThreads::Thread::microSleep(5000);
             continue;
@@ -712,6 +719,10 @@ void OMW::Engine::go()
             mEnvironment.getWorld()->updateWindowManager();
 
             mViewer->renderingTraversals();
+
+            bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
+            if (!guiActive)
+                simulationTime += dt;
         }
 
         mEnvironment.limitFrameRate(frameTimer.time_s());

@@ -254,6 +254,7 @@ void CharacterController::refreshHitRecoilAnims()
                 || mPtr.getClass().getCreatureStats(mPtr).getFatigue().getBase() == 0)
                 && mAnimation->hasAnimation("knockout"))
         {
+            mTimeUntilWake = Misc::Rng::rollClosedProbability() * 2 + 1; // Wake up after 1 to 3 seconds
             if (isSwimming && mAnimation->hasAnimation("swimknockout"))
             {
                 mHitState = CharState_SwimKnockOut;
@@ -338,7 +339,8 @@ void CharacterController::refreshHitRecoilAnims()
             mPtr.getClass().getCreatureStats(mPtr).setBlock(false);
         mHitState = CharState_None;
     }
-    else if (isKnockedOut() && mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() > 0)
+    else if (isKnockedOut() && mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() > 0 
+            && mTimeUntilWake <= 0)
     {
         mHitState = isSwimming ? CharState_SwimKnockDown : CharState_KnockDown;
         mAnimation->disable(mCurrentHit);
@@ -372,21 +374,29 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
             }
         }
 
-        if(mJumpState == JumpState_InAir)
-        {
-            mAnimation->disable(mCurrentJump);
-            mCurrentJump = jumpAnimName;
-            if (mAnimation->hasAnimation("jump"))
-                mAnimation->play(mCurrentJump, Priority_Jump, jumpmask, false,
-                             1.0f, (startAtLoop?"loop start":"start"), "stop", 0.0f, ~0ul);
-        }
-        else
+        if (!mCurrentJump.empty())
         {
             mAnimation->disable(mCurrentJump);
             mCurrentJump.clear();
-            if (mAnimation->hasAnimation("jump"))
+        }
+
+        if(mJumpState == JumpState_InAir)
+        {
+            if (mAnimation->hasAnimation(jumpAnimName))
+            {
+                mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, false,
+                             1.0f, (startAtLoop?"loop start":"start"), "stop", 0.0f, ~0ul);
+                mCurrentJump = jumpAnimName;
+            }
+        }
+        else if (mJumpState == JumpState_Landing)
+        {
+             if (mAnimation->hasAnimation(jumpAnimName))
+             {
                 mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, true,
                              1.0f, "loop stop", "stop", 0.0f, 0);
+                mCurrentJump = jumpAnimName;
+            }
         }
     }
 }
@@ -759,6 +769,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSecondsOfRunning(0)
     , mTurnAnimationThreshold(0)
     , mAttackingOrSpell(false)
+    , mTimeUntilWake(0.f)
 {
     if(!mAnimation)
         return;
@@ -1267,7 +1278,16 @@ bool CharacterController::updateWeaponState()
     bool animPlaying;
     if(mAttackingOrSpell)
     {
-        mIdleState = CharState_None;
+        MWWorld::Ptr player = getPlayer();
+
+        // We should reset player's idle animation in the first-person mode.
+        if (mPtr == player && MWBase::Environment::get().getWorld()->isFirstPerson())
+            mIdleState = CharState_None;
+
+        // In other cases we should not break swim and sneak animations
+        if (mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
+            mIdleState = CharState_None;
+
         if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
@@ -1277,7 +1297,7 @@ bool CharacterController::updateWeaponState()
                 // Unset casting flag, otherwise pressing the mouse button down would
                 // continue casting every frame if there is no animation
                 mAttackingOrSpell = false;
-                if (mPtr == getPlayer())
+                if (mPtr == player)
                 {
                     MWBase::Environment::get().getWorld()->getPlayer().setAttackingOrSpell(false);
                 }
@@ -1287,7 +1307,7 @@ bool CharacterController::updateWeaponState()
                 // For the player, set the spell we want to cast
                 // This has to be done at the start of the casting animation,
                 // *not* when selecting a spell in the GUI (otherwise you could change the spell mid-animation)
-                if (mPtr == getPlayer())
+                if (mPtr == player)
                 {
                     std::string selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
                     stats.getSpells().setSelectedSpell(selectedSpell);
@@ -1299,7 +1319,7 @@ bool CharacterController::updateWeaponState()
                     MWMechanics::CastSpell cast(mPtr, NULL);
                     cast.playSpellCastingEffects(spellid);
 
-                    const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);                   
+                    const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
                     const ESM::ENAMstruct &lastEffect = spell->mEffects.mList.back();
                     const ESM::MagicEffect *effect;
 
@@ -1629,6 +1649,9 @@ void CharacterController::update(float duration)
 
     updateMagicEffects();
 
+    if (isKnockedOut())
+        mTimeUntilWake -= duration;
+
     bool godmode = mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
 
     if(!cls.isActor())
@@ -1691,7 +1714,6 @@ void CharacterController::update(float duration)
 
         mHasMovedInXY = std::abs(vec.x())+std::abs(vec.y()) > 0.0f;
         isrunning = isrunning && mHasMovedInXY;
-
 
         // advance athletics
         if(mHasMovedInXY && mPtr == getPlayer())
@@ -1775,7 +1797,7 @@ void CharacterController::update(float duration)
             vec.y() *= factor;
             vec.z()  = 0.0f;
         }
-        else if(vec.z() > 0.0f && mJumpState == JumpState_None)
+        else if(vec.z() > 0.0f && mJumpState != JumpState_InAir)
         {
             // Started a jump.
             float z = cls.getJump(mPtr);
@@ -1847,7 +1869,8 @@ void CharacterController::update(float duration)
         }
         else
         {
-            jumpstate = JumpState_None;
+            jumpstate = mAnimation->isPlaying(mCurrentJump) ? JumpState_Landing : JumpState_None;
+
             vec.z() = 0.0f;
 
             inJump = false;
@@ -1877,9 +1900,15 @@ void CharacterController::update(float duration)
             else if(rot.z() != 0.0f && !sneak && !(mPtr == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson()))
             {
                 if(rot.z() > 0.0f)
+                {
                     movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
+                    mAnimation->disable(mCurrentJump);
+                }
                 else if(rot.z() < 0.0f)
+                {
                     movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
+                    mAnimation->disable(mCurrentJump);
+                }
             }
         }
 
@@ -2363,7 +2392,7 @@ float CharacterController::getAttackStrength() const
     return mAttackStrength;
 }
 
-void CharacterController::setActive(bool active)
+void CharacterController::setActive(int active)
 {
     mAnimation->setActive(active);
 }

@@ -77,6 +77,7 @@ namespace MWDialogue
 
     void DialogueManager::parseText (const std::string& text)
     {
+        updateActorKnownTopics();
         std::vector<HyperTextParser::Token> hypertext = HyperTextParser::parseHyperText(text);
 
         for (std::vector<HyperTextParser::Token>::iterator tok = hypertext.begin(); tok != hypertext.end(); ++tok)
@@ -145,18 +146,12 @@ namespace MWDialogue
                         // TODO play sound
                     }
 
-                    // first topics update so that parseText knows the keywords to highlight
-                    updateActorKnownTopics();
-
-                    parseText (info->mResponse);
-
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                     callback->addResponse("", Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
                     executeScript (info->mResultScript, mActor);
                     mLastTopic = it->mId;
 
-                    // update topics again to accommodate changes resulting from executeScript
-                    updateActorKnownTopics();
+                    parseText (info->mResponse);
 
                     return true;
                 }
@@ -252,8 +247,6 @@ namespace MWDialogue
         const ESM::DialInfo* info = filter.search(dialogue, true);
         if (info)
         {
-            parseText (info->mResponse);
-
             std::string title;
             if (dialogue.mType==ESM::Dialogue::Persuasion)
             {
@@ -291,6 +284,8 @@ namespace MWDialogue
             }
 
             executeScript (info->mResultScript, mActor);
+
+            parseText (info->mResponse);
 
             mLastTopic = topic;
         }
@@ -391,7 +386,7 @@ namespace MWDialogue
         {
             Filter filter (mActor, mChoice, mTalkedTo);
 
-            if (dialogue->mType == ESM::Dialogue::Topic || dialogue->mType  == ESM::Dialogue::Greeting)
+            if (dialogue->mType == ESM::Dialogue::Topic || dialogue->mType == ESM::Dialogue::Greeting)
             {
                 if (const ESM::DialInfo *info = filter.search (*dialogue, true))
                 {
@@ -405,15 +400,18 @@ namespace MWDialogue
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                     callback->addResponse("", Interpreter::fixDefinesDialog(text, interpreterContext));
 
-                    // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
-                    // in which case it should not be added to the journal.
-                    for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue->mInfo.begin();
-                        iter!=dialogue->mInfo.end(); ++iter)
+                    if (dialogue->mType == ESM::Dialogue::Topic)
                     {
-                        if (iter->mId == info->mId)
+                        // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
+                        // in which case it should not be added to the journal
+                        for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue->mInfo.begin();
+                            iter!=dialogue->mInfo.end(); ++iter)
                         {
-                            MWBase::Environment::get().getJournal()->addTopic (Misc::StringUtils::lowerCase(mLastTopic), info->mId, mActor);
-                            break;
+                            if (iter->mId == info->mId)
+                            {
+                                MWBase::Environment::get().getJournal()->addTopic (Misc::StringUtils::lowerCase(mLastTopic), info->mId, mActor);
+                                break;
+                            }
                         }
                     }
 

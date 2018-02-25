@@ -81,6 +81,5 @@ moc_*.cxx
 *ui_playpage.h
 *.[ao]
 *.so
-gamecontrollerdb.txt
 openmw.appdata.xml
 venv/

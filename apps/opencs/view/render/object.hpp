@@ -4,6 +4,7 @@
 #include <string>
 
 #include <osg/ref_ptr>
+#include <osg/Geometry>
 #include <osg/Referenced>
 
 #include <components/esm/defs.hpp>
@@ -96,6 +97,7 @@ namespace CSVRender
             int mOverrideFlags;
             osg::ref_ptr<osg::Node> mMarker[3];
             int mSubMode;
+            float mMarkerTransparency;
 
             /// Not implemented
             Object (const Object&);
@@ -120,6 +122,9 @@ namespace CSVRender
 
             osg::ref_ptr<osg::Node> makeMoveOrScaleMarker (int axis);
             osg::ref_ptr<osg::Node> makeRotateMarker (int axis);
+
+            /// Sets up a stateset with properties common to all marker types.
+            void setupCommonMarkerState(osg::ref_ptr<osg::Geometry> geometry);
 
             osg::Vec3f getMarkerPosition (float x, float y, float z, int axis);
 
@@ -178,6 +183,8 @@ namespace CSVRender
 
             /// Set override scale
             void setScale (float scale);
+
+            void setMarkerTransparency(float value);
 
             /// Apply override changes via command and end edit mode
             void apply (CSMWorld::CommandMacro& commands);

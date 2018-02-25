@@ -705,7 +705,7 @@ namespace MWPhysics
             if (physFramerate > 0)
             {
                 mPhysicsDt = 1.f / physFramerate;
-                std::cerr << "Warning: physics framerate was overriden (a new value is " << physFramerate << ")."  << std::endl;
+                std::cerr << "Warning: physics framerate was overridden (a new value is " << physFramerate << ")."  << std::endl;
             }
         }
     }

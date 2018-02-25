@@ -1203,6 +1203,18 @@ void SkyManager::create()
     mCreated = true;
 }
 
+class RainCounter : public osgParticle::ConstantRateCounter
+{
+public:
+    virtual int numParticlesToCreate(double dt) const
+    {
+        // limit dt to avoid large particle emissions if there are jumps in the simulation time
+        // 0.2 seconds is the same cap as used in Engine's frame loop
+        dt = std::min(dt, 0.2);
+        return ConstantRateCounter::numParticlesToCreate(dt);
+    }
+};
+
 class RainShooter : public osgParticle::Shooter
 {
 public:
@@ -1473,7 +1485,7 @@ void SkyManager::createRain()
     placer->setZRange(300, 300);
     emitter->setPlacer(placer);
 
-    osg::ref_ptr<osgParticle::ConstantRateCounter> counter (new osgParticle::ConstantRateCounter);
+    osg::ref_ptr<RainCounter> counter (new RainCounter);
     counter->setNumberOfParticlesPerSecondToCreate(600.0);
     emitter->setCounter(counter);
 

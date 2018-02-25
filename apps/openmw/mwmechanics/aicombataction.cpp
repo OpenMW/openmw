@@ -115,6 +115,7 @@ namespace MWMechanics
         isRanged = false;
 
         static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
+        static const float fProjectileMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMaxSpeed")->getFloat();
 
         if (mWeapon.isEmpty())
         {
@@ -128,7 +129,7 @@ namespace MWMechanics
         if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
         {
             isRanged = true;
-            return 1000.f;
+            return fProjectileMaxSpeed;
         }
         else
             return weapon->mData.mReach * fCombatDistance;
@@ -181,29 +182,11 @@ namespace MWMechanics
                 }
             }
 
-            float bestArrowRating = 0;
             MWWorld::Ptr bestArrow;
-            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
-            {
-                float rating = rateWeapon(*it, actor, enemy, ESM::Weapon::Arrow);
-                if (rating > bestArrowRating)
-                {
-                    bestArrowRating = rating;
-                    bestArrow = *it;
-                }
-            }
+            float bestArrowRating = rateAmmo(actor, enemy, bestArrow, ESM::Weapon::Arrow);
 
-            float bestBoltRating = 0;
             MWWorld::Ptr bestBolt;
-            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
-            {
-                float rating = rateWeapon(*it, actor, enemy, ESM::Weapon::Bolt);
-                if (rating > bestBoltRating)
-                {
-                    bestBoltRating = rating;
-                    bestBolt = *it;
-                }
-            }
+            float bestBoltRating = rateAmmo(actor, enemy, bestBolt, ESM::Weapon::Bolt);
 
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {
@@ -276,25 +259,9 @@ namespace MWMechanics
                 }
             }
 
-            float bestArrowRating = 0;
-            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
-            {
-                float rating = rateWeapon(*it, actor, enemy, ESM::Weapon::Arrow);
-                if (rating > bestArrowRating)
-                {
-                    bestArrowRating = rating;
-                }
-            }
+            float bestArrowRating = rateAmmo(actor, enemy, ESM::Weapon::Arrow);
 
-            float bestBoltRating = 0;
-            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
-            {
-                float rating = rateWeapon(*it, actor, enemy, ESM::Weapon::Bolt);
-                if (rating > bestBoltRating)
-                {
-                    bestBoltRating = rating;
-                }
-            }
+            float bestBoltRating = rateAmmo(actor, enemy, ESM::Weapon::Bolt);
 
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {

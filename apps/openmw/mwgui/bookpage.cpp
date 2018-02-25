@@ -16,6 +16,7 @@ class BookPageImpl;
 
 static bool ucsSpace (int codePoint);
 static bool ucsLineBreak (int codePoint);
+static bool ucsCarriageReturn (int codePoint);
 static bool ucsBreakingSpace (int codePoint);
 
 struct BookTypesetter::Style { virtual ~Style () {} };
@@ -280,7 +281,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         style.mActiveColour = fontColour;
         style.mNormalColour = fontColour;
         style.mInteractiveId = 0;
-                
+
         return &style;
     }
 
@@ -342,7 +343,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
         writeImpl (static_cast <StyleImpl*> (style), begin_, end_);
     }
-    
+
     void lineBreak (float margin)
     {
         assert (margin == 0); //TODO: figure out proper behavior here...
@@ -352,7 +353,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         mRun = NULL;
         mLine = NULL;
     }
-    
+
     void sectionBreak (int margin)
     {
         add_partial_text();
@@ -1188,6 +1189,9 @@ public:
             {
                 Utf8Stream::UnicodeChar code_point = stream.consume ();
 
+                if (ucsCarriageReturn (code_point))
+                    continue;
+
                 if (!ucsSpace (code_point))
                     glyphStream.emitGlyph (code_point);
                 else
@@ -1329,6 +1333,11 @@ void BookPage::registerMyGUIComponents ()
 static bool ucsLineBreak (int codePoint)
 {
     return codePoint == '\n';
+}
+
+static bool ucsCarriageReturn (int codePoint)
+{
+    return codePoint == '\r';
 }
 
 static bool ucsSpace (int codePoint)

@@ -486,10 +486,10 @@ namespace MWRender
         return mPtr;
     }
 
-    void Animation::setActive(bool active)
+    void Animation::setActive(int active)
     {
         if (mSkeleton)
-            mSkeleton->setActive(active);
+            mSkeleton->setActive(static_cast<SceneUtil::Skeleton::ActiveType>(active));
     }
 
     void Animation::updatePtr(const MWWorld::Ptr &ptr)
@@ -536,7 +536,7 @@ namespace MWRender
         return mKeyframes->mTextKeys;
     }
 
-    void Animation::addAnimSource(const std::string &model)
+    void Animation::addAnimSource(const std::string &model, const std::string& baseModel)
     {
         std::string kfname = model;
         Misc::StringUtils::lowerCaseInPlace(kfname);
@@ -565,7 +565,7 @@ namespace MWRender
             NodeMap::const_iterator found = nodeMap.find(bonename);
             if (found == nodeMap.end())
             {
-                std::cerr << "Warning: addAnimSource: can't find bone '" + bonename << "' in " << model << " (referenced by " << kfname << ")" << std::endl;
+                std::cerr << "Warning: addAnimSource: can't find bone '" + bonename << "' in " << baseModel << " (referenced by " << kfname << ")" << std::endl;
                 continue;
             }
 
@@ -625,7 +625,7 @@ namespace MWRender
 
     float Animation::getStartTime(const std::string &groupname) const
     {
-        for(AnimSourceList::const_iterator iter(mAnimSources.begin()); iter != mAnimSources.end(); ++iter)
+        for(AnimSourceList::const_reverse_iterator iter(mAnimSources.rbegin()); iter != mAnimSources.rend(); ++iter)
         {
             const NifOsg::TextKeyMap &keys = (*iter)->getTextKeys();
 
@@ -638,7 +638,7 @@ namespace MWRender
 
     float Animation::getTextKeyTime(const std::string &textKey) const
     {
-        for(AnimSourceList::const_iterator iter(mAnimSources.begin()); iter != mAnimSources.end(); ++iter)
+        for(AnimSourceList::const_reverse_iterator iter(mAnimSources.rbegin()); iter != mAnimSources.rend(); ++iter)
         {
             const NifOsg::TextKeyMap &keys = (*iter)->getTextKeys();
 
@@ -1668,7 +1668,7 @@ namespace MWRender
         {
             setObjectRoot(model, false, false, false);
             if (animated)
-                addAnimSource(model);
+                addAnimSource(model, model);
 
             if (!ptr.getClass().getEnchantment(ptr).empty())
                 addGlow(mObjectRoot, getEnchantmentColor(ptr));

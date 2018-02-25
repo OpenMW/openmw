@@ -293,6 +293,7 @@ namespace MWWorld
         const ESM::Cell *find(const std::string &id) const;
         const ESM::Cell *find(int x, int y) const;
 
+        virtual void clearDynamic();
         void setUp();
 
         RecordId load(ESM::ESMReader &esm);

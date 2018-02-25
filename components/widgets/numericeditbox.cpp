@@ -87,7 +87,7 @@ namespace Gui
             setValue(std::max(mValue-1, mMinValue));
             eventValueChanged(mValue);
         }
-        else
+        else if (character == 0 || (character >= '0' && character <= '9'))
             Base::onKeyButtonPressed(key, character);
     }
 

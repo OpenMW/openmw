@@ -75,9 +75,7 @@
 
         <!-- Dialog buttons -->
         <Widget type="HBox" position="0 158 482 24">
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
+            <Widget type="Spacer"/>
             <Widget type="AutoSizedButton" skin="MW_Button" name="DescriptionButton">
                 <Property key="Caption" value="#{sCreateClassMenu1}"/>
             </Widget>

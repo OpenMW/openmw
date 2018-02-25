@@ -129,6 +129,7 @@ Programmers
     Radu-Marius Popovici (rpopovici)
     Rafael Moura (dhustkoder)
     rdimesio
+    rexelion
     riothamus
     Rob Cutmore (rcutmore)
     Robert MacGregor (Ragora)
@@ -152,6 +153,7 @@ Programmers
     Sylvain Thesnieres (Garvek)
     t6
     terrorfisch
+    thegriglat
     Thomas Luppi (Digmaster)
     Will Herrmann (Thunderforge)
     Tom Mason (wheybags)

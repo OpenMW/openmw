@@ -607,6 +607,11 @@ namespace MWWorld
         }
         return ptr;
     }
+    void Store<ESM::Cell>::clearDynamic()
+    {
+        setUp();
+    }
+
     void Store<ESM::Cell>::setUp()
     {
         typedef DynamicExt::iterator ExtIterator;

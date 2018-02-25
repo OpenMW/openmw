@@ -163,7 +163,6 @@ namespace MWGui
         if (mViewer->getIncrementalCompileOperation())
         {
             mViewer->getIncrementalCompileOperation()->setMaximumNumOfObjectsToCompilePerFrame(100);
-            mViewer->getIncrementalCompileOperation()->setTargetFrameRate(getTargetFrameRate());
         }
 
         // Assign dummy bounding sphere callback to avoid the bounding sphere of the entire scene being recomputed after each frame of loading

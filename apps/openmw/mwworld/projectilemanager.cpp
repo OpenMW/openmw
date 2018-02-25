@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <osg/PositionAttitudeTransform>
+#include <osg/ComputeBoundsVisitor>
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/projectilestate.hpp>
@@ -202,6 +203,12 @@ namespace MWWorld
 
         osg::ref_ptr<osg::Node> projectile = mResourceSystem->getSceneManager()->getInstance(model, attachTo);
 
+        osg::ref_ptr<osg::ComputeBoundsVisitor> boundVisitor = new osg::ComputeBoundsVisitor();
+        projectile->accept(*boundVisitor.get());
+        osg::BoundingBox bb = boundVisitor->getBoundingBox();
+
+        state.mNode->setPivotPoint(bb.center()); 
+
         if (state.mIdMagic.size() > 1)
             for (size_t iter = 1; iter != state.mIdMagic.size(); ++iter)
             {
@@ -316,6 +323,7 @@ namespace MWWorld
         state.mIdArrow = projectile.getCellRef().getRefId();
         state.mCasterHandle = actor;
         state.mAttackStrength = attackStrength;
+        state.mThrown = projectile.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown;
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
@@ -378,7 +386,6 @@ namespace MWWorld
             static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("fTargetSpellMaxSpeed")->getFloat();
             float speed = fTargetSpellMaxSpeed * it->mSpeed;
-
             osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
             direction.normalize();
             osg::Vec3f pos(it->mNode->getPosition());
@@ -458,7 +465,22 @@ namespace MWWorld
             osg::Vec3f newPos = pos + it->mVelocity * duration;
 
             osg::Quat orient;
-            orient.makeRotate(osg::Vec3f(0,1,0), it->mVelocity);
+
+            if (it->mThrown)            
+                orient.set(
+                    osg::Matrixd::rotate(it->mEffectAnimationTime->getTime() * -10.0,osg::Vec3f(0,0,1)) *
+                    osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
+                    osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
+                    osg::Matrixd::inverse(
+                        osg::Matrixd::lookAt(
+                            osg::Vec3f(0,0,0),
+                            it->mVelocity,
+                            osg::Vec3f(0,0,1))
+                        )
+                    );
+            else
+                orient.makeRotate(osg::Vec3f(0,1,0), it->mVelocity);
+
             it->mNode->setAttitude(orient);
             it->mNode->setPosition(newPos);
 
@@ -596,6 +618,7 @@ namespace MWWorld
                 MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), esm.mId);
                 MWWorld::Ptr ptr = ref.getPtr();
                 model = ptr.getClass().getModel(ptr);
+                state.mThrown = ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown;
             }
             catch(...)
             {

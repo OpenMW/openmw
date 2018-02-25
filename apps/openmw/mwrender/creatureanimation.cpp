@@ -33,8 +33,8 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr,
         setObjectRoot(model, false, false, true);
 
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))
-            addAnimSource("meshes\\xbase_anim.nif");
-        addAnimSource(model);
+            addAnimSource("meshes\\xbase_anim.nif", model);
+        addAnimSource(model, model);
     }
 }
 
@@ -51,8 +51,8 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const 
         setObjectRoot(model, true, false, true);
 
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))
-            addAnimSource("meshes\\xbase_anim.nif");
-        addAnimSource(model);
+            addAnimSource("meshes\\xbase_anim.nif", model);
+        addAnimSource(model, model);
 
         mPtr.getClass().getInventoryStore(mPtr).setInvListener(this, mPtr);
 

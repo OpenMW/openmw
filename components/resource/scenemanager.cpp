@@ -432,12 +432,17 @@ namespace Resource
 
     bool canOptimize(const std::string& filename)
     {
-        // xmesh.nif can not be optimized because there are keyframes added in post
         size_t slashpos = filename.find_last_of("\\/");
         if (slashpos != std::string::npos && slashpos+1 < filename.size())
         {
             std::string basename = filename.substr(slashpos+1);
+            // xmesh.nif can not be optimized because there are keyframes added in post
             if (!basename.empty() && basename[0] == 'x')
+                return false;
+
+            // NPC skeleton files can not be optimized because of keyframes added in post
+            // (most of them are usually named like 'xbase_anim.nif' anyway, but not all of them :( )
+            if (basename.compare(0, 9, "base_anim") == 0 || basename.compare(0, 4, "skin") == 0)
                 return false;
         }
 

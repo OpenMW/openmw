@@ -88,3 +88,20 @@ This setting will have no effect if the shader setting is false,
 or the 'small feature culling' (in the 'Camera' section) is disabled.
 
 This setting can only be configured by editing the settings configuration file.
+
+refraction scale
+----------------
+
+:Type:		floating point
+:Range:		0 to 1
+:Default:	1.0
+
+Simulates light rays refracting when transitioning from air to water, which causes the space under water look scaled down
+in height when viewed from above the water surface. Though adding realism, the setting can cause distortion which can
+make for example aiming at enemies in water more challenging, so it is off by default (i.e. set to 1.0). To get a realistic
+look of real-life water, set the value to 0.75.
+
+This setting only applies if water shader is on and refractions are enabled. Note that if refractions are enabled and this
+setting if off, there will still be small refractions caused by the water waves, which however do not cause such significant
+distortion.
+

@@ -148,16 +148,16 @@ namespace MWWorld
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
         int activationDistanceOverride, const std::string& startCell, const std::string& startupScript,
             const std::string& resourcePath, const std::string& userDataPath)
-    : mResourceSystem(resourceSystem), mFallback(fallbackMap), mPlayer (0), mLocalScripts (mStore),
+    : mResourceSystem(resourceSystem), mFallback(fallbackMap), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
       mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles), mUserDataPath(userDataPath),
       mActivationDistanceOverride (activationDistanceOverride), mStartupScript(startupScript),
       mStartCell (startCell), mDistanceToFacedObject(-1), mTeleportEnabled(true),
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0), mSpellPreloadTimer(0.f)
     {
-        mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
-        mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath);
-        mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering, mPhysics));
+        mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
+        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath));
+        mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));
 
         mRendering->preloadCommonAssets();
 
@@ -189,9 +189,9 @@ namespace MWWorld
 
         mSwimHeightScale = mStore.get<ESM::GameSetting>().find("fSwimHeightScale")->getFloat();
 
-        mWeatherManager = new MWWorld::WeatherManager(*mRendering, mFallback, mStore);
+        mWeatherManager.reset(new MWWorld::WeatherManager(*mRendering, mFallback, mStore));
 
-        mWorldScene = new Scene(*mRendering, mPhysics);
+        mWorldScene.reset(new Scene(*mRendering.get(), mPhysics.get()));
     }
 
     void World::fillGlobalVariables()
@@ -224,8 +224,8 @@ namespace MWWorld
 
         // we don't want old weather to persist on a new game
         // Note that if reset later, the initial ChangeWeather that the chargen script calls will be lost.
-        delete mWeatherManager;
-        mWeatherManager = new MWWorld::WeatherManager(*mRendering, mFallback, mStore);
+        mWeatherManager.reset();
+        mWeatherManager.reset(new MWWorld::WeatherManager(*mRendering.get(), mFallback, mStore));
 
         if (!bypass)
         {
@@ -295,7 +295,6 @@ namespace MWWorld
         mWorldScene->clear();
 
         mStore.clearDynamic();
-        mStore.setUp();
 
         if (mPlayer)
         {
@@ -435,6 +434,7 @@ namespace MWWorld
         gmst["fNPCHealthBarFade"] = ESM::Variant(1.f);
         gmst["fFleeDistance"] = ESM::Variant(3000.f);
         gmst["sMaxSale"] = ESM::Variant("Max Sale");
+        gmst["sAnd"] = ESM::Variant("and");
 
         // Werewolf (BM)
         gmst["fWereWolfRunMult"] = ESM::Variant(1.3f);
@@ -491,12 +491,6 @@ namespace MWWorld
     {
         // Must be cleared before mRendering is destroyed
         mProjectileManager->clear();
-        delete mWeatherManager;
-        delete mWorldScene;
-        delete mRendering;
-        delete mPhysics;
-
-        delete mPlayer;
     }
 
     const ESM::Cell *World::getExterior (const std::string& cellName) const
@@ -1757,19 +1751,26 @@ namespace MWWorld
 
     void World::updateWindowManager ()
     {
-        // inform the GUI about focused object
-        MWWorld::Ptr object = getFacedObject ();
-
-        // retrieve object dimensions so we know where to place the floating label
-        if (!object.isEmpty ())
+        try
         {
-            osg::Vec4f screenBounds = mRendering->getScreenBounds(object);
+            // inform the GUI about focused object
+            MWWorld::Ptr object = getFacedObject ();
 
-            MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(
-                screenBounds.x(), screenBounds.y(), screenBounds.z(), screenBounds.w());
+            // retrieve object dimensions so we know where to place the floating label
+            if (!object.isEmpty ())
+            {
+                osg::Vec4f screenBounds = mRendering->getScreenBounds(object);
+
+                MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(
+                    screenBounds.x(), screenBounds.y(), screenBounds.z(), screenBounds.w());
+            }
+
+            MWBase::Environment::get().getWindowManager()->setFocusObject(object);
         }
-
-        MWBase::Environment::get().getWindowManager()->setFocusObject(object);
+        catch (std::exception& e)
+        {
+            std::cerr << "Error updating window manager: " << e.what() << std::endl;
+        }
     }
 
     MWWorld::Ptr World::getFacedObject(float maxDistance, bool ignorePlayer)
@@ -2206,7 +2207,7 @@ namespace MWWorld
     {
         const ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
         if (!mPlayer)
-            mPlayer = new MWWorld::Player(player);
+            mPlayer.reset(new MWWorld::Player(player));
         else
         {
             // Remove the old CharacterController
@@ -2449,6 +2450,10 @@ namespace MWWorld
         bool operator()(const MWWorld::Ptr& ptr)
         {
             if (ptr.getRefData().isDeleted())
+                return true;
+
+            // vanilla Morrowind does not allow to sell items from containers with zero capacity
+            if (ptr.getClass().getCapacity(ptr) <= 0.f)
                 return true;
 
             if (Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), mOwner.getCellRef().getRefId()))
@@ -3471,17 +3476,17 @@ namespace MWWorld
 
             if (MWMechanics::isSummoningEffect(it->mEffectID))
             {
-                preload(mWorldScene, mStore, "VFX_Summon_Start");
-                preload(mWorldScene, mStore, MWMechanics::getSummonedCreature(it->mEffectID));
+                preload(mWorldScene.get(), mStore, "VFX_Summon_Start");
+                preload(mWorldScene.get(), mStore, MWMechanics::getSummonedCreature(it->mEffectID));
             }
 
-            preload(mWorldScene, mStore, effect->mCasting);
-            preload(mWorldScene, mStore, effect->mHit);
+            preload(mWorldScene.get(), mStore, effect->mCasting);
+            preload(mWorldScene.get(), mStore, effect->mHit);
 
             if (it->mArea > 0)
-                preload(mWorldScene, mStore, effect->mArea);
+                preload(mWorldScene.get(), mStore, effect->mArea);
             if (it->mRange == ESM::RT_Target)
-                preload(mWorldScene, mStore, effect->mBolt);
+                preload(mWorldScene.get(), mStore, effect->mBolt);
         }
     }
 

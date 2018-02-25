@@ -272,6 +272,12 @@ public:
 
     void setWaterLevel(float waterLevel)
     {
+        const float refractionScale = std::min(1.0f,std::max(0.0f,
+            Settings::Manager::getFloat("refraction scale", "Water")));
+
+        setViewMatrix(osg::Matrix::scale(1,1,refractionScale) *
+            osg::Matrix::translate(0,0,(1.0 - refractionScale) * waterLevel));
+
         mClipCullNode->setPlane(osg::Plane(osg::Vec3d(0,0,-1), osg::Vec3d(0,0, waterLevel)));
     }
 
