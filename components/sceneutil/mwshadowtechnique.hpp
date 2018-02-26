@@ -227,6 +227,27 @@ namespace SceneUtil {
         osg::ref_ptr<osg::Program>              _program;
 
         bool                                    _enableShadows;
+
+        // TODO: actually construct this
+        class DebugHUD : public osg::Referenced
+        {
+        public:
+            DebugHUD(int numberOfShadowMapsPerLight);
+
+            void draw();
+
+            virtual void draw(osg::ref_ptr<osg::Texture2D> texture, unsigned int shadowMapNumber, osgUtil::CullVisitor& cv);
+
+            virtual void releaseGLObjects(osg::State* state = 0) const;
+        protected:
+            static const int sDebugTextureUnit;
+
+            std::vector<osg::ref_ptr<osg::Camera>> mDebugCameras;
+            osg::ref_ptr<osg::Program> mDebugProgram;
+            std::vector<osg::ref_ptr<osg::Node>> mDebugGeometry;
+        };
+
+        osg::ref_ptr<DebugHUD>                  _debugHud;
     };
 
 }

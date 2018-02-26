@@ -20,7 +20,7 @@
 
 #include <osgShadow/ShadowedScene>
 #include <osg/CullFace>
-#include <osg/Geode>
+#include <osg/Geometry>
 #include <osg/io_utils>
 
 #include <sstream>
@@ -1043,21 +1043,8 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 previous_sdl.erase(previous_sdl.begin());
             }
 
-            /* TODO: if (debugHud)
-            {
-                osg::ref_ptr<osg::Texture2D> texture = sd->_texture;
-                osg::ref_ptr<osg::StateSet> stateSet = debugGeometry[sm_i]->getOrCreateStateSet();
-                stateSet->setTextureAttributeAndModes(debugTextureUnit, texture, osg::StateAttribute::ON);
-
-                unsigned int traversalMask = cv.getTraversalMask();
-                cv.setTraversalMask(debugGeometry[sm_i]->getNodeMask());
-                cv.pushStateSet(stateSet);
-                debugCameras[sm_i]->accept(cv);
-                cv.popStateSet();
-                cv.setTraversalMask(traversalMask);
-
-                cv.getState()->setCheckForGLErrors(osg::State::ONCE_PER_ATTRIBUTE);
-            }*/
+            if (_debugHud)
+                _debugHud->draw(sd->_texture, sm_i, cv);
 
             osg::ref_ptr<osg::Camera> camera = sd->_camera;
 
@@ -2566,4 +2553,56 @@ void MWShadowTechnique::releaseGLObjects(osg::State* state) const
             vdd->releaseGLObjects(state);
         }
     }
+    if (_debugHud)
+        _debugHud->releaseGLObjects(state);
+}
+
+SceneUtil::MWShadowTechnique::DebugHUD::DebugHUD(int numberOfShadowMapsPerLight)
+{
+    osg::ref_ptr<osg::Shader> vertexShader = new osg::Shader(osg::Shader::VERTEX, debugVertexShaderSource);
+    mDebugProgram->addShader(vertexShader);
+    osg::ref_ptr<osg::Shader> fragmentShader = new osg::Shader(osg::Shader::FRAGMENT, debugFragmentShaderSource);
+    mDebugProgram->addShader(fragmentShader);
+
+    for (int i = 0; i < numberOfShadowMapsPerLight; ++i)
+    {
+        mDebugCameras.push_back(new osg::Camera);
+        mDebugCameras[i]->setViewport(200 * i, 0, 200, 200);
+        mDebugCameras[i]->setRenderOrder(osg::Camera::POST_RENDER);
+        mDebugCameras[i]->setClearColor(osg::Vec4(1.0, 1.0, 0.0, 1.0));
+
+        mDebugGeometry.push_back(osg::createTexturedQuadGeometry(osg::Vec3(-1, -1, 0), osg::Vec3(2, 0, 0), osg::Vec3(0, 2, 0)));
+        mDebugGeometry[i]->setCullingActive(false);
+        mDebugCameras[i]->addChild(mDebugGeometry[i]);
+        osg::ref_ptr<osg::StateSet> stateSet = mDebugGeometry[i]->getOrCreateStateSet();
+        stateSet->setAttributeAndModes(mDebugProgram, osg::StateAttribute::ON);
+        osg::ref_ptr<osg::Uniform> textureUniform = new osg::Uniform("texture", sDebugTextureUnit);
+        //textureUniform->setType(osg::Uniform::SAMPLER_2D);
+        stateSet->addUniform(textureUniform.get());
+    }
+}
+
+void SceneUtil::MWShadowTechnique::DebugHUD::draw(osg::ref_ptr<osg::Texture2D> texture, unsigned int shadowMapNumber, osgUtil::CullVisitor& cv)
+{
+    osg::ref_ptr<osg::StateSet> stateSet = mDebugGeometry[shadowMapNumber]->getOrCreateStateSet();
+    stateSet->setTextureAttributeAndModes(sDebugTextureUnit, texture, osg::StateAttribute::ON);
+
+    // Some of these calls may be superfluous.
+    unsigned int traversalMask = cv.getTraversalMask();
+    cv.setTraversalMask(mDebugGeometry[shadowMapNumber]->getNodeMask());
+    cv.pushStateSet(stateSet);
+    mDebugCameras[shadowMapNumber]->accept(cv);
+    cv.popStateSet();
+    cv.setTraversalMask(traversalMask);
+
+    // cv.getState()->setCheckForGLErrors(osg::State::ONCE_PER_ATTRIBUTE);
+}
+
+void SceneUtil::MWShadowTechnique::DebugHUD::releaseGLObjects(osg::State* state) const
+{
+    for (auto const& camera : mDebugCameras)
+        camera->releaseGLObjects(state);
+    mDebugProgram->releaseGLObjects(state);
+    for (auto const& node : mDebugGeometry)
+        node->releaseGLObjects(state);
 }
