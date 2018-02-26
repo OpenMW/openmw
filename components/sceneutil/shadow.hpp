@@ -9,14 +9,14 @@
 
 namespace SceneUtil
 {
-    class MWShadow : public osgShadow::ViewDependentShadowMap
+    class ShadowManager : public osgShadow::ViewDependentShadowMap
     {
     public:
         static void setupShadowSettings(osg::ref_ptr<osgShadow::ShadowSettings> settings, int castsShadowMask);
 
         static void disableShadowsForStateSet(osg::ref_ptr<osg::StateSet> stateSet);
 
-        MWShadow();
+        ShadowManager();
 
         virtual void cull(osgUtil::CullVisitor& cv) override;
 

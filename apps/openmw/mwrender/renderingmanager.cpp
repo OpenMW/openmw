@@ -211,9 +211,9 @@ namespace MWRender
             shadowCastingTraversalMask |= Mask_Player;
         if (Settings::Manager::getBool("terrain shadows", "Shadows"))
             shadowCastingTraversalMask |= Mask_Terrain;
-        SceneUtil::MWShadow::setupShadowSettings(shadowedScene->getShadowSettings(), shadowCastingTraversalMask);
+        SceneUtil::ShadowManager::setupShadowSettings(shadowedScene->getShadowSettings(), shadowCastingTraversalMask);
         
-        SceneUtil::MWShadow* tech = new SceneUtil::MWShadow();
+        SceneUtil::ShadowManager* tech = new SceneUtil::ShadowManager();
         shadowedScene->setShadowTechnique(tech);
 
         shadowedScene->addChild(sceneRoot);

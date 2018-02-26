@@ -347,7 +347,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
     if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
     {
-        SceneUtil::MWShadow::ComputeLightSpaceBounds* shadowBoundsVisitor = dynamic_cast<SceneUtil::MWShadow::ComputeLightSpaceBounds *>(&nv);
+        SceneUtil::ShadowManager::ComputeLightSpaceBounds* shadowBoundsVisitor = dynamic_cast<SceneUtil::ShadowManager::ComputeLightSpaceBounds *>(&nv);
         if (shadowBoundsVisitor)
             shadowBoundsVisitor->apply(*this);
         return;

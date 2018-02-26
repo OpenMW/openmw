@@ -202,7 +202,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
 
     lightSource->setStateSetModes(*stateset, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
-    SceneUtil::MWShadow::disableShadowsForStateSet(stateset);
+    SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
 
     camera->addChild(lightSource);
     camera->setStateSet(stateset);

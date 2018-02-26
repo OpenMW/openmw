@@ -51,7 +51,7 @@ namespace SceneUtil
 #endif
         "}                                                                       \n";
 
-    void MWShadow::setupShadowSettings(osg::ref_ptr<osgShadow::ShadowSettings> settings, int castsShadowMask)
+    void ShadowManager::setupShadowSettings(osg::ref_ptr<osgShadow::ShadowSettings> settings, int castsShadowMask)
     {
         if (!Settings::Manager::getBool("enable shadows", "Shadows"))
             return;
@@ -72,7 +72,7 @@ namespace SceneUtil
         settings->setTextureSize(osg::Vec2s(mapres, mapres));
     }
 
-    void MWShadow::disableShadowsForStateSet(osg::ref_ptr<osg::StateSet> stateset)
+    void ShadowManager::disableShadowsForStateSet(osg::ref_ptr<osg::StateSet> stateset)
     {
         int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
         int baseShadowTextureUnit = 8 - numberOfShadowMapsPerLight;
@@ -87,7 +87,7 @@ namespace SceneUtil
             stateset->setTextureAttributeAndModes(i, fakeShadowMapTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
     }
 
-    MWShadow::MWShadow() : enableShadows(Settings::Manager::getBool("enable shadows", "Shadows")),
+    ShadowManager::ShadowManager() : enableShadows(Settings::Manager::getBool("enable shadows", "Shadows")),
         numberOfShadowMapsPerLight(Settings::Manager::getInt("number of shadow maps", "Shadows")),
         baseShadowTextureUnit(8 - numberOfShadowMapsPerLight),
         debugHud(Settings::Manager::getBool("enable debug hud", "Shadows")),
@@ -227,7 +227,7 @@ namespace SceneUtil
         }
     }
 
-    MWShadow::ComputeLightSpaceBounds::ComputeLightSpaceBounds(osg::Viewport* viewport, const osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix) :
+    ShadowManager::ComputeLightSpaceBounds::ComputeLightSpaceBounds(osg::Viewport* viewport, const osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix) :
         osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN)
     {
         setCullingMode(osg::CullSettings::VIEW_FRUSTUM_CULLING);
@@ -237,7 +237,7 @@ namespace SceneUtil
         pushModelViewMatrix(new osg::RefMatrix(viewMatrix), osg::Transform::ABSOLUTE_RF);
     }
 
-    void MWShadow::ComputeLightSpaceBounds::apply(osg::Node& node)
+    void ShadowManager::ComputeLightSpaceBounds::apply(osg::Node& node)
     {
         if (isCulled(node)) return;
 
@@ -250,7 +250,7 @@ namespace SceneUtil
         popCurrentMask();
     }
 
-    void MWShadow::ComputeLightSpaceBounds::apply(osg::Geode& node)
+    void ShadowManager::ComputeLightSpaceBounds::apply(osg::Geode& node)
     {
         if (isCulled(node)) return;
 
@@ -269,7 +269,7 @@ namespace SceneUtil
         popCurrentMask();
     }
 
-    void MWShadow::ComputeLightSpaceBounds::apply(osg::Drawable& drawable)
+    void ShadowManager::ComputeLightSpaceBounds::apply(osg::Drawable& drawable)
     {
         if (isCulled(drawable)) return;
 
@@ -282,7 +282,7 @@ namespace SceneUtil
         popCurrentMask();
     }
 
-    void MWShadow::ComputeLightSpaceBounds::apply(Terrain::QuadTreeWorld & quadTreeWorld)
+    void ShadowManager::ComputeLightSpaceBounds::apply(Terrain::QuadTreeWorld & quadTreeWorld)
     {
         // For now, just expand the bounds fully as terrain will fill them up and possible ways to detect which terrain definitely won't cast shadows aren't implemented.
 
@@ -290,19 +290,19 @@ namespace SceneUtil
         update(osg::Vec3(1.0, 1.0, 0.0));
     }
 
-    void MWShadow::ComputeLightSpaceBounds::apply(osg::Billboard&)
+    void ShadowManager::ComputeLightSpaceBounds::apply(osg::Billboard&)
     {
         OSG_INFO << "Warning Billboards not yet supported" << std::endl;
         return;
     }
 
-    void MWShadow::ComputeLightSpaceBounds::apply(osg::Projection&)
+    void ShadowManager::ComputeLightSpaceBounds::apply(osg::Projection&)
     {
         // projection nodes won't affect a shadow map so their subgraphs should be ignored
         return;
     }
 
-    void MWShadow::ComputeLightSpaceBounds::apply(osg::Transform& transform)
+    void ShadowManager::ComputeLightSpaceBounds::apply(osg::Transform& transform)
     {
         if (isCulled(transform)) return;
 
@@ -326,13 +326,13 @@ namespace SceneUtil
 
     }
 
-    void MWShadow::ComputeLightSpaceBounds::apply(osg::Camera&)
+    void ShadowManager::ComputeLightSpaceBounds::apply(osg::Camera&)
     {
         // camera nodes won't affect a shadow map so their subgraphs should be ignored
         return;
     }
 
-    void MWShadow::ComputeLightSpaceBounds::updateBound(const osg::BoundingBox& bb)
+    void ShadowManager::ComputeLightSpaceBounds::updateBound(const osg::BoundingBox& bb)
     {
         if (!bb.valid()) return;
 
@@ -348,7 +348,7 @@ namespace SceneUtil
         update(bb.corner(7) * matrix);
     }
 
-    void MWShadow::ComputeLightSpaceBounds::update(const osg::Vec3& v)
+    void ShadowManager::ComputeLightSpaceBounds::update(const osg::Vec3& v)
     {
         if (v.z()<-1.0f)
         {
@@ -364,7 +364,7 @@ namespace SceneUtil
         _bb.expandBy(osg::Vec3(x, y, v.z()));
     }
     
-    void MWShadow::cull(osgUtil::CullVisitor& cv)
+    void ShadowManager::cull(osgUtil::CullVisitor& cv)
     {
         if (!enableShadows)
         {
@@ -851,7 +851,7 @@ namespace SceneUtil
         // OSG_NOTICE<<"End of shadow setup Projection matrix "<<*cv.getProjectionMatrix()<<std::endl;
     }
 
-    Shader::ShaderManager::DefineMap MWShadow::getShadowDefines()
+    Shader::ShaderManager::DefineMap ShadowManager::getShadowDefines()
     {
         if (!enableShadows)
             return getShadowsDisabledDefines();
@@ -866,7 +866,7 @@ namespace SceneUtil
         return definesWithShadows;
     }
 
-    Shader::ShaderManager::DefineMap MWShadow::getShadowsDisabledDefines()
+    Shader::ShaderManager::DefineMap ShadowManager::getShadowsDisabledDefines()
     {
         Shader::ShaderManager::DefineMap definesWithShadows;
         definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("0")));
