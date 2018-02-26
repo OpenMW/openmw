@@ -202,8 +202,6 @@ namespace MWRender
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
 
-        osg::ref_ptr<osgShadow::ShadowedScene> shadowedScene (new osgShadow::ShadowedScene);
-
         int shadowCastingTraversalMask = Mask_Scene;
         if (Settings::Manager::getBool("actor shadows", "Shadows"))
             shadowCastingTraversalMask |= Mask_Actor;
@@ -211,15 +209,11 @@ namespace MWRender
             shadowCastingTraversalMask |= Mask_Player;
         if (Settings::Manager::getBool("terrain shadows", "Shadows"))
             shadowCastingTraversalMask |= Mask_Terrain;
-        SceneUtil::ShadowManager::setupShadowSettings(shadowedScene->getShadowSettings(), shadowCastingTraversalMask);
         
-        SceneUtil::ShadowManager* tech = new SceneUtil::ShadowManager();
-        shadowedScene->setShadowTechnique(tech);
+        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode));
+        mShadowManager->setupShadowSettings(shadowCastingTraversalMask);
 
-        shadowedScene->addChild(sceneRoot);
-        mRootNode->addChild(shadowedScene);
-
-        Shader::ShaderManager::DefineMap shadowDefines = tech->getShadowDefines();
+        Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
         Shader::ShaderManager::DefineMap globalDefines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
 
         for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)

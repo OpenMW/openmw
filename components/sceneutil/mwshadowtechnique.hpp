@@ -32,7 +32,7 @@
 namespace SceneUtil {
 
     /** ViewDependentShadowMap provides an base implementation of view dependent shadow mapping techniques.*/
-    class OSGSHADOW_EXPORT MWShadowTechnique : public osgShadow::ShadowTechnique
+    class MWShadowTechnique : public osgShadow::ShadowTechnique
     {
     public:
         MWShadowTechnique();
@@ -95,7 +95,7 @@ namespace SceneUtil {
             osg::BoundingBox _bb;
         };
 
-        struct OSGSHADOW_EXPORT Frustum
+        struct Frustum
         {
             Frustum(osgUtil::CullVisitor* cv, double minZNear, double maxZFar);
 
@@ -122,7 +122,7 @@ namespace SceneUtil {
         // forward declare
         class ViewDependentData;
 
-        struct OSGSHADOW_EXPORT LightData : public osg::Referenced
+        struct LightData : public osg::Referenced
         {
             LightData(ViewDependentData* vdd);
 
@@ -144,7 +144,7 @@ namespace SceneUtil {
 
         typedef std::list< osg::ref_ptr<LightData> > LightDataList;
 
-        struct OSGSHADOW_EXPORT ShadowData : public osg::Referenced
+        struct ShadowData : public osg::Referenced
         {
             ShadowData(ViewDependentData* vdd);
 
@@ -161,7 +161,7 @@ namespace SceneUtil {
         typedef std::list< osg::ref_ptr<ShadowData> > ShadowDataList;
 
 
-        class OSGSHADOW_EXPORT ViewDependentData : public osg::Referenced
+        class ViewDependentData : public osg::Referenced
         {
         public:
             ViewDependentData(MWShadowTechnique* vdsm);
@@ -245,7 +245,7 @@ namespace SceneUtil {
         protected:
             virtual void addAnotherShadowMap();
 
-            static const int sDebugTextureUnit;
+            static const int sDebugTextureUnit = 0;
 
             std::vector<osg::ref_ptr<osg::Camera>> mDebugCameras;
             osg::ref_ptr<osg::Program> mDebugProgram;

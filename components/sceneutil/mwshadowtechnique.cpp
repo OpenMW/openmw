@@ -713,7 +713,9 @@ void MWShadowTechnique::ViewDependentData::releaseGLObjects(osg::State* state) c
 // MWShadowTechnique
 //
 MWShadowTechnique::MWShadowTechnique():
-    ShadowTechnique()
+    ShadowTechnique(),
+    _enableShadows(false),
+    _debugHud(nullptr)
 {
     _shadowRecievingPlaceholderStateSet = new osg::StateSet;
 }
@@ -750,7 +752,7 @@ void MWShadowTechnique::enableShadows()
     _enableShadows = true;
 }
 
-void MWShadowTechnique::enableShadows()
+void MWShadowTechnique::disableShadows()
 {
     _enableShadows = false;
 }
@@ -2567,7 +2569,7 @@ void MWShadowTechnique::releaseGLObjects(osg::State* state) const
         _debugHud->releaseGLObjects(state);
 }
 
-SceneUtil::MWShadowTechnique::DebugHUD::DebugHUD(int numberOfShadowMapsPerLight)
+SceneUtil::MWShadowTechnique::DebugHUD::DebugHUD(int numberOfShadowMapsPerLight) : mDebugProgram(new osg::Program)
 {
     osg::ref_ptr<osg::Shader> vertexShader = new osg::Shader(osg::Shader::VERTEX, debugVertexShaderSource);
     mDebugProgram->addShader(vertexShader);

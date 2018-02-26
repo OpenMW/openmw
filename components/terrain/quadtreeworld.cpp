@@ -4,7 +4,7 @@
 
 #include <sstream>
 
-#include <components/sceneutil/shadow.hpp>
+#include <components/sceneutil/mwshadowtechnique.hpp>
 
 #include "quadtreenode.hpp"
 #include "storage.hpp"
@@ -347,7 +347,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
     if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
     {
-        SceneUtil::ShadowManager::ComputeLightSpaceBounds* shadowBoundsVisitor = dynamic_cast<SceneUtil::ShadowManager::ComputeLightSpaceBounds *>(&nv);
+        SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds* shadowBoundsVisitor = dynamic_cast<SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds *>(&nv);
         if (shadowBoundsVisitor)
             shadowBoundsVisitor->apply(*this);
         return;
