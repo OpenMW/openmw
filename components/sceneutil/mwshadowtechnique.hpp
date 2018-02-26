@@ -65,6 +65,10 @@ namespace SceneUtil {
 
         virtual void disableShadows();
 
+        virtual void enableDebugHUD();
+
+        virtual void disableDebugHUD();
+
         class ComputeLightSpaceBounds : public osg::NodeVisitor, public osg::CullStack
         {
         public:

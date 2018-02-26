@@ -755,6 +755,16 @@ void MWShadowTechnique::enableShadows()
     _enableShadows = false;
 }
 
+void SceneUtil::MWShadowTechnique::enableDebugHUD()
+{
+    _debugHud = new DebugHUD(getShadowedScene()->getShadowSettings()->getNumShadowMapsPerLight());
+}
+
+void SceneUtil::MWShadowTechnique::disableDebugHUD()
+{
+    _debugHud = nullptr;
+}
+
 MWShadowTechnique::ViewDependentData* MWShadowTechnique::createViewDependentData(osgUtil::CullVisitor* /*cv*/)
 {
     return new ViewDependentData(this);
