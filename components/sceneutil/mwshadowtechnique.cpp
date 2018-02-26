@@ -77,6 +77,45 @@ static const char fragmentShaderSource_withBaseTexture_twoShadowMaps[] =
         "} \n";
 #endif
 
+std::string debugVertexShaderSource = "void main(void){gl_Position = gl_Vertex; gl_TexCoord[0]=gl_MultiTexCoord0;}";
+std::string debugFragmentShaderSource =
+        "uniform sampler2D texture;                                              \n"
+        "                                                                        \n"
+        "void main(void)                                                         \n"
+        "{                                                                       \n"
+#if 1
+        "    float f = texture2D(texture, gl_TexCoord[0].xy).r;                  \n"
+        "                                                                        \n"
+        "    f = 256.0 * f;                                                      \n"
+        "    float fC = floor( f ) / 256.0;                                      \n"
+        "                                                                        \n"
+        "    f = 256.0 * fract( f );                                             \n"
+        "    float fS = floor( f ) / 256.0;                                      \n"
+        "                                                                        \n"
+        "    f = 256.0 * fract( f );                                             \n"
+        "    float fH = floor( f ) / 256.0;                                      \n"
+        "                                                                        \n"
+        "    fS *= 0.5;                                                          \n"
+        "    fH = ( fH  * 0.34 + 0.66 ) * ( 1.0 - fS );                          \n"
+        "                                                                        \n"
+        "    vec3 rgb = vec3( ( fC > 0.5 ? ( 1.0 - fC ) : fC ),                  \n"
+        "                     abs( fC - 0.333333 ),                              \n"
+        "                     abs( fC - 0.666667 ) );                            \n"
+        "                                                                        \n"
+        "    rgb = min( vec3( 1.0, 1.0, 1.0 ), 3.0 * rgb );                      \n"
+        "                                                                        \n"
+        "    float fMax = max( max( rgb.r, rgb.g ), rgb.b );                     \n"
+        "    fMax = 1.0 / fMax;                                                  \n"
+        "                                                                        \n"
+        "    vec3 color = fMax * rgb;                                            \n"
+        "                                                                        \n"
+        "    gl_FragColor =  vec4( fS + fH * color, 1 );                         \n"
+#else
+        "    gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);               \n"
+#endif
+        "}                                                                       \n";
+
+
 template<class T>
 class RenderLeafTraverser : public T
 {
