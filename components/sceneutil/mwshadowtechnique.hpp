@@ -61,6 +61,10 @@ namespace SceneUtil {
         /** Clean scene graph from any shadow technique specific nodes, state and drawables.*/
         virtual void cleanSceneGraph();
 
+        virtual void enableShadows();
+
+        virtual void disableShadows();
+
         class ComputeLightSpaceBounds : public osg::NodeVisitor, public osg::CullStack
         {
         public:
@@ -221,6 +225,8 @@ namespace SceneUtil {
         mutable OpenThreads::Mutex              _accessUniformsAndProgramMutex;
         Uniforms                                _uniforms;
         osg::ref_ptr<osg::Program>              _program;
+
+        bool                                    _enableShadows;
     };
 
 }

@@ -745,6 +745,16 @@ void MWShadowTechnique::cleanSceneGraph()
     OSG_INFO<<"MWShadowTechnique::cleanSceneGraph()"<<std::endl;
 }
 
+void MWShadowTechnique::enableShadows()
+{
+    _enableShadows = true;
+}
+
+void MWShadowTechnique::enableShadows()
+{
+    _enableShadows = false;
+}
+
 MWShadowTechnique::ViewDependentData* MWShadowTechnique::createViewDependentData(osgUtil::CullVisitor* /*cv*/)
 {
     return new ViewDependentData(this);
@@ -769,11 +779,11 @@ void MWShadowTechnique::update(osg::NodeVisitor& nv)
 
 void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 {
-    /* TODO: if (!enableShadows)
+    if (!_enableShadows)
     {
         _shadowedScene->osg::Group::traverse(cv);
         return;
-    }*/
+    }
 
     OSG_INFO<<std::endl<<std::endl<<"MWShadowTechnique::cull(osg::CullVisitor&"<<&cv<<")"<<std::endl;
 
