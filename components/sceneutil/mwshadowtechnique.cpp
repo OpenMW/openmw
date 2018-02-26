@@ -2575,25 +2575,15 @@ SceneUtil::MWShadowTechnique::DebugHUD::DebugHUD(int numberOfShadowMapsPerLight)
     mDebugProgram->addShader(fragmentShader);
 
     for (int i = 0; i < numberOfShadowMapsPerLight; ++i)
-    {
-        mDebugCameras.push_back(new osg::Camera);
-        mDebugCameras[i]->setViewport(200 * i, 0, 200, 200);
-        mDebugCameras[i]->setRenderOrder(osg::Camera::POST_RENDER);
-        mDebugCameras[i]->setClearColor(osg::Vec4(1.0, 1.0, 0.0, 1.0));
-
-        mDebugGeometry.push_back(osg::createTexturedQuadGeometry(osg::Vec3(-1, -1, 0), osg::Vec3(2, 0, 0), osg::Vec3(0, 2, 0)));
-        mDebugGeometry[i]->setCullingActive(false);
-        mDebugCameras[i]->addChild(mDebugGeometry[i]);
-        osg::ref_ptr<osg::StateSet> stateSet = mDebugGeometry[i]->getOrCreateStateSet();
-        stateSet->setAttributeAndModes(mDebugProgram, osg::StateAttribute::ON);
-        osg::ref_ptr<osg::Uniform> textureUniform = new osg::Uniform("texture", sDebugTextureUnit);
-        //textureUniform->setType(osg::Uniform::SAMPLER_2D);
-        stateSet->addUniform(textureUniform.get());
-    }
+        addAnotherShadowMap();
 }
 
 void SceneUtil::MWShadowTechnique::DebugHUD::draw(osg::ref_ptr<osg::Texture2D> texture, unsigned int shadowMapNumber, osgUtil::CullVisitor& cv)
 {
+    // It might be possible to change shadow settings at runtime
+    if (shadowMapNumber > mDebugCameras.size())
+        addAnotherShadowMap();
+    
     osg::ref_ptr<osg::StateSet> stateSet = mDebugGeometry[shadowMapNumber]->getOrCreateStateSet();
     stateSet->setTextureAttributeAndModes(sDebugTextureUnit, texture, osg::StateAttribute::ON);
 
@@ -2615,4 +2605,23 @@ void SceneUtil::MWShadowTechnique::DebugHUD::releaseGLObjects(osg::State* state)
     mDebugProgram->releaseGLObjects(state);
     for (auto const& node : mDebugGeometry)
         node->releaseGLObjects(state);
+}
+
+void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
+{
+    unsigned int shadowMapNumber = mDebugCameras.size();
+
+    mDebugCameras.push_back(new osg::Camera);
+    mDebugCameras[shadowMapNumber]->setViewport(200 * shadowMapNumber, 0, 200, 200);
+    mDebugCameras[shadowMapNumber]->setRenderOrder(osg::Camera::POST_RENDER);
+    mDebugCameras[shadowMapNumber]->setClearColor(osg::Vec4(1.0, 1.0, 0.0, 1.0));
+
+    mDebugGeometry.push_back(osg::createTexturedQuadGeometry(osg::Vec3(-1, -1, 0), osg::Vec3(2, 0, 0), osg::Vec3(0, 2, 0)));
+    mDebugGeometry[shadowMapNumber]->setCullingActive(false);
+    mDebugCameras[shadowMapNumber]->addChild(mDebugGeometry[shadowMapNumber]);
+    osg::ref_ptr<osg::StateSet> stateSet = mDebugGeometry[shadowMapNumber]->getOrCreateStateSet();
+    stateSet->setAttributeAndModes(mDebugProgram, osg::StateAttribute::ON);
+    osg::ref_ptr<osg::Uniform> textureUniform = new osg::Uniform("texture", sDebugTextureUnit);
+    //textureUniform->setType(osg::Uniform::SAMPLER_2D);
+    stateSet->addUniform(textureUniform.get());
 }

@@ -244,6 +244,8 @@ namespace SceneUtil {
 
             virtual void releaseGLObjects(osg::State* state = 0) const;
         protected:
+            virtual void addAnotherShadowMap();
+
             static const int sDebugTextureUnit;
 
             std::vector<osg::ref_ptr<osg::Camera>> mDebugCameras;
