@@ -232,7 +232,6 @@ namespace SceneUtil {
 
         bool                                    _enableShadows;
 
-        // TODO: actually construct this
         class DebugHUD : public osg::Referenced
         {
         public:
