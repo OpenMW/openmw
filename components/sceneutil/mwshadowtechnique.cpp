@@ -769,6 +769,12 @@ void MWShadowTechnique::update(osg::NodeVisitor& nv)
 
 void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 {
+    /* TODO: if (!enableShadows)
+    {
+        _shadowedScene->osg::Group::traverse(cv);
+        return;
+    }*/
+
     OSG_INFO<<std::endl<<std::endl<<"MWShadowTechnique::cull(osg::CullVisitor&"<<&cv<<")"<<std::endl;
 
     if (!_shadowCastingStateSet)
@@ -848,6 +854,18 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
     Frustum frustum(&cv, minZNear, maxZFar);
 
+    double reducedNear, reducedFar;
+    if (cv.getComputeNearFarMode() != osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR)
+    {
+        reducedNear = osg::maximum<double>(cv.getCalculatedNearPlane(), minZNear);
+        reducedFar = osg::minimum<double>(cv.getCalculatedFarPlane(), maxZFar);
+    }
+    else
+    {
+        reducedNear = minZNear;
+        reducedFar = maxZFar;
+    }
+
     // return compute near far mode back to it's original settings
     cv.setComputeNearFarMode(cachedNearFarMode);
 
@@ -868,11 +886,6 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
     previous_sdl.swap(sdl);
 
     unsigned int numShadowMapsPerLight = settings->getNumShadowMapsPerLight();
-    if (numShadowMapsPerLight>2)
-    {
-        OSG_NOTICE<<"numShadowMapsPerLight of "<<numShadowMapsPerLight<<" is greater than maximum supported, falling back to 2."<<std::endl;
-        numShadowMapsPerLight = 2;
-    }
 
     LightDataList& pll = vdd->getLightDataList();
     for(LightDataList::iterator itr = pll.begin();
@@ -943,6 +956,20 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 double yMid = (clsb._bb.yMin()+clsb._bb.yMax())*0.5f;
                 double yRange = (clsb._bb.yMax()-clsb._bb.yMin());
 
+                osg::Matrixd cornerConverter = osg::Matrixd::inverse(projectionMatrix) * osg::Matrixd::inverse(viewMatrix) * *cv.getModelViewMatrix();
+                double minZ = DBL_MAX;
+                double maxZ = -DBL_MAX;
+                for (unsigned int i = 0; i < 8; i++)
+                {
+                    osg::Vec3 corner = clsb._bb.corner(i);
+                    corner = corner * cornerConverter;
+
+                    maxZ = osg::maximum<double>(maxZ, -corner.z());
+                    minZ = osg::minimum<double>(minZ, -corner.z());
+                }
+                reducedNear = osg::maximum<double>(reducedNear, minZ);
+                reducedFar = osg::minimum<double>(reducedFar, maxZ);
+
                 // OSG_NOTICE<<"  xMid="<<xMid<<", yMid="<<yMid<<", xRange="<<xRange<<", yRange="<<yRange<<std::endl;
 
                 projectionMatrix =
@@ -1006,6 +1033,22 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 previous_sdl.erase(previous_sdl.begin());
             }
 
+            /* TODO: if (debugHud)
+            {
+                osg::ref_ptr<osg::Texture2D> texture = sd->_texture;
+                osg::ref_ptr<osg::StateSet> stateSet = debugGeometry[sm_i]->getOrCreateStateSet();
+                stateSet->setTextureAttributeAndModes(debugTextureUnit, texture, osg::StateAttribute::ON);
+
+                unsigned int traversalMask = cv.getTraversalMask();
+                cv.setTraversalMask(debugGeometry[sm_i]->getNodeMask());
+                cv.pushStateSet(stateSet);
+                debugCameras[sm_i]->accept(cv);
+                cv.popStateSet();
+                cv.setTraversalMask(traversalMask);
+
+                cv.getState()->setCheckForGLErrors(osg::State::ONCE_PER_ATTRIBUTE);
+            }*/
+
             osg::ref_ptr<osg::Camera> camera = sd->_camera;
 
             camera->setProjectionMatrix(projectionMatrix);
@@ -1031,12 +1074,51 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 #if 0
                 double r_start = (sm_i==0) ? -1.0 : (double(sm_i)/double(numShadowMapsPerLight)*2.0-1.0);
                 double r_end = (sm_i+1==numShadowMapsPerLight) ? 1.0 : (double(sm_i+1)/double(numShadowMapsPerLight)*2.0-1.0);
-#endif
+#elif 0
 
                 // hardwired for 2 splits
                 double r_start = (sm_i==0) ? -1.0 : splitPoint;
                 double r_end = (sm_i+1==numShadowMapsPerLight) ? 1.0 : splitPoint;
+#else
+                double r_start, r_end;
 
+                // split system based on the original Parallel Split Shadow Maps paper.
+                double n = reducedNear;
+                double f = reducedFar;
+                double i = double(sm_i);
+                double m = double(numShadowMapsPerLight);
+                double ratio = 0.5; // TODO: Settings::Manager::getFloat("split point uniform logarithmic ratio", "Shadows");
+                double deltaBias = 0.0; // TODO: Settings::Manager::getFloat("split point bias", "Shadows");
+                if (sm_i == 0)
+                    r_start = -1.0;
+                else
+                {
+                    // compute the split point in main camera view
+                    double ciLog = n * pow(f / n, i / m);
+                    double ciUniform = n + (f - n) * i / m;
+                    double ci = ratio * ciLog + (1.0 - ratio) * ciUniform + deltaBias;
+
+                    // work out where this is in light space
+                    osg::Vec3d worldSpacePos = frustum.eye + frustum.frustumCenterLine * ci;
+                    osg::Vec3d lightSpacePos = worldSpacePos * viewMatrix * projectionMatrix;
+                    r_start = lightSpacePos.y();
+                }
+
+                if (sm_i + 1 == numShadowMapsPerLight)
+                    r_end = 1.0;
+                else
+                {
+                    // compute the split point in main camera view
+                    double ciLog = n * pow(f / n, (i + 1) / m);
+                    double ciUniform = n + (f - n) * (i + 1) / m;
+                    double ci = ratio * ciLog + (1.0 - ratio) * ciUniform + deltaBias;
+
+                    // work out where this is in light space
+                    osg::Vec3d worldSpacePos = frustum.eye + frustum.frustumCenterLine * ci;
+                    osg::Vec3d lightSpacePos = worldSpacePos * viewMatrix * projectionMatrix;
+                    r_end = lightSpacePos.y();
+                }
+#endif
                 // for all by the last shadowmap shift the r_end so that it overlaps slightly with the next shadowmap
                 // to prevent a seam showing through between the shadowmaps
                 if (sm_i+1<numShadowMapsPerLight) r_end+=0.01;
