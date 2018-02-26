@@ -938,7 +938,12 @@ namespace MWMechanics
         }
 
         if (!cellref.getOwner().empty())
+        {
             victim = MWBase::Environment::get().getWorld()->searchPtr(cellref.getOwner(), true);
+            const bool ownerIsDead = victim.getClass().getCreatureStats(victim).isDead();
+            if (ownerIsDead && isOwned)
+                isOwned = false;
+        }
 
         return (!isOwned && !isFactionOwned);
     }
