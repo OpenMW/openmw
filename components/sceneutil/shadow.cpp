@@ -15,30 +15,30 @@ namespace SceneUtil
 
     void ShadowManager::setupShadowSettings(int castsShadowMask)
     {
-        if (!Settings::Manager::getBool("enable shadows", "Shadows"))
+        mEnableShadows = Settings::Manager::getBool("enable shadows", "Shadows");
+
+        if (!mEnableShadows)
         {
             mShadowTechnique->disableShadows();
             return;
         }
-        else
-            mShadowTechnique->enableShadows();
+        
+        mShadowTechnique->enableShadows();
 
-        osg::ref_ptr<osgShadow::ShadowSettings> settings = mShadowedScene->getShadowSettings();
-
-        settings->setLightNum(0);
-        settings->setCastsShadowTraversalMask(castsShadowMask);
-        settings->setReceivesShadowTraversalMask(~0u);
+        mShadowSettings->setLightNum(0);
+        mShadowSettings->setCastsShadowTraversalMask(castsShadowMask);
+        mShadowSettings->setReceivesShadowTraversalMask(~0u);
 
         int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
-        settings->setNumShadowMapsPerLight(numberOfShadowMapsPerLight);
-        settings->setBaseShadowTextureUnit(8 - numberOfShadowMapsPerLight);
+        mShadowSettings->setNumShadowMapsPerLight(numberOfShadowMapsPerLight);
+        mShadowSettings->setBaseShadowTextureUnit(8 - numberOfShadowMapsPerLight);
 
-        settings->setMinimumShadowMapNearFarRatio(Settings::Manager::getFloat("minimum lispsm near far ratio", "Shadows"));
+        mShadowSettings->setMinimumShadowMapNearFarRatio(Settings::Manager::getFloat("minimum lispsm near far ratio", "Shadows"));
         if (Settings::Manager::getBool("compute tight scene bounds", "Shadows"))
-            settings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
+            mShadowSettings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
 
         int mapres = Settings::Manager::getInt("shadow map resolution", "Shadows");
-        settings->setTextureSize(osg::Vec2s(mapres, mapres));
+        mShadowSettings->setTextureSize(osg::Vec2s(mapres, mapres));
 
         mShadowTechnique->setSplitPointUniformLogarithmicRatio(Settings::Manager::getFloat("split point uniform logarithmic ratio", "Shadows"));
         mShadowTechnique->setSplitPointDeltaBias(Settings::Manager::getFloat("split point bias", "Shadows"));
@@ -64,25 +64,25 @@ namespace SceneUtil
             stateset->setTextureAttributeAndModes(i, fakeShadowMapTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
     }
 
-    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode) : enableShadows(Settings::Manager::getBool("enable shadows", "Shadows")),
-        numberOfShadowMapsPerLight(Settings::Manager::getInt("number of shadow maps", "Shadows")),
-        baseShadowTextureUnit(8 - numberOfShadowMapsPerLight),
-        mShadowedScene(new osgShadow::ShadowedScene),
+    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode) : mShadowedScene(new osgShadow::ShadowedScene),
         mShadowTechnique(new MWShadowTechnique)
     {
         mShadowedScene->setShadowTechnique(mShadowTechnique);
+
         mShadowedScene->addChild(sceneRoot);
         rootNode->addChild(mShadowedScene);
+
+        mShadowSettings = mShadowedScene->getShadowSettings();
     }
 
     Shader::ShaderManager::DefineMap ShadowManager::getShadowDefines()
     {
-        if (!enableShadows)
+        if (!mEnableShadows)
             return getShadowsDisabledDefines();
 
         Shader::ShaderManager::DefineMap definesWithShadows;
         definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("1")));
-        for (int i = 0; i < numberOfShadowMapsPerLight; ++i)
+        for (int i = 0; i < mShadowSettings->getNumShadowMapsPerLight(); ++i)
             definesWithShadows["shadow_texture_unit_list"] += std::to_string(i) + ",";
         // remove extra comma
         definesWithShadows["shadow_texture_unit_list"] = definesWithShadows["shadow_texture_unit_list"].substr(0, definesWithShadows["shadow_texture_unit_list"].length() - 1);

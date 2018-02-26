@@ -23,13 +23,10 @@ namespace SceneUtil
 
         virtual Shader::ShaderManager::DefineMap getShadowsDisabledDefines();
     protected:
-        const int numberOfShadowMapsPerLight;
-        const bool enableShadows;
-
-        const int baseShadowTextureUnit;
+        bool mEnableShadows;
 
         osg::ref_ptr<osgShadow::ShadowedScene> mShadowedScene;
-
+        osg::ref_ptr<osgShadow::ShadowSettings> mShadowSettings;
         osg::ref_ptr<MWShadowTechnique> mShadowTechnique;
     };
 }
