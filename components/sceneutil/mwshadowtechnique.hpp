@@ -144,7 +144,7 @@ namespace SceneUtil {
         protected:
             virtual ~ViewDependentData() {}
 
-            MWShadowTechnique*     _viewDependentShadowMap;
+            MWShadowTechnique*          _viewDependentShadowMap;
 
             osg::ref_ptr<osg::StateSet> _stateset;
 

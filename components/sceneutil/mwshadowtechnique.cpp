@@ -200,7 +200,7 @@ class VDSMCameraCullCallback : public osg::NodeCallback
 
     protected:
 
-        MWShadowTechnique*                 _vdsm;
+        MWShadowTechnique*                      _vdsm;
         osg::ref_ptr<osg::RefMatrix>            _projectionMatrix;
         osg::ref_ptr<osgUtil::RenderStage>      _renderStage;
         osg::Polytope                           _polytope;
