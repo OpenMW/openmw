@@ -40,6 +40,9 @@ namespace SceneUtil
         int mapres = Settings::Manager::getInt("shadow map resolution", "Shadows");
         settings->setTextureSize(osg::Vec2s(mapres, mapres));
 
+        mShadowTechnique->setSplitPointUniformLogarithmicRatio(Settings::Manager::getFloat("split point uniform logarithmic ratio", "Shadows"));
+        mShadowTechnique->setSplitPointDeltaBias(Settings::Manager::getFloat("split point bias", "Shadows"));
+
         if (Settings::Manager::getBool("enable debug hud", "Shadows"))
             mShadowTechnique->enableDebugHUD();
         else

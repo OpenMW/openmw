@@ -69,6 +69,10 @@ namespace SceneUtil {
 
         virtual void disableDebugHUD();
 
+        virtual void setSplitPointUniformLogarithmicRatio(double ratio);
+
+        virtual void setSplitPointDeltaBias(double bias);
+
         class ComputeLightSpaceBounds : public osg::NodeVisitor, public osg::CullStack
         {
         public:
@@ -231,6 +235,9 @@ namespace SceneUtil {
         osg::ref_ptr<osg::Program>              _program;
 
         bool                                    _enableShadows;
+
+        double                                  _splitPointUniformLogRatio = 0.5;
+        double                                  _splitPointDeltaBias = 0.0;
 
         class DebugHUD : public osg::Referenced
         {

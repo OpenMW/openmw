@@ -767,6 +767,16 @@ void SceneUtil::MWShadowTechnique::disableDebugHUD()
     _debugHud = nullptr;
 }
 
+void SceneUtil::MWShadowTechnique::setSplitPointUniformLogarithmicRatio(double ratio)
+{
+    _splitPointUniformLogRatio = ratio;
+}
+
+void SceneUtil::MWShadowTechnique::setSplitPointDeltaBias(double bias)
+{
+    _splitPointDeltaBias = bias;
+}
+
 MWShadowTechnique::ViewDependentData* MWShadowTechnique::createViewDependentData(osgUtil::CullVisitor* /*cv*/)
 {
     return new ViewDependentData(this);
@@ -1096,8 +1106,6 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 double f = reducedFar;
                 double i = double(sm_i);
                 double m = double(numShadowMapsPerLight);
-                double ratio = 0.5; // TODO: Settings::Manager::getFloat("split point uniform logarithmic ratio", "Shadows");
-                double deltaBias = 0.0; // TODO: Settings::Manager::getFloat("split point bias", "Shadows");
                 if (sm_i == 0)
                     r_start = -1.0;
                 else
@@ -1105,7 +1113,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                     // compute the split point in main camera view
                     double ciLog = n * pow(f / n, i / m);
                     double ciUniform = n + (f - n) * i / m;
-                    double ci = ratio * ciLog + (1.0 - ratio) * ciUniform + deltaBias;
+                    double ci = _splitPointUniformLogRatio * ciLog + (1.0 - _splitPointUniformLogRatio) * ciUniform + _splitPointDeltaBias;
 
                     // work out where this is in light space
                     osg::Vec3d worldSpacePos = frustum.eye + frustum.frustumCenterLine * ci;
@@ -1120,7 +1128,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                     // compute the split point in main camera view
                     double ciLog = n * pow(f / n, (i + 1) / m);
                     double ciUniform = n + (f - n) * (i + 1) / m;
-                    double ci = ratio * ciLog + (1.0 - ratio) * ciUniform + deltaBias;
+                    double ci = _splitPointUniformLogRatio * ciLog + (1.0 - _splitPointUniformLogRatio) * ciUniform + _splitPointDeltaBias;
 
                     // work out where this is in light space
                     osg::Vec3d worldSpacePos = frustum.eye + frustum.frustumCenterLine * ci;
