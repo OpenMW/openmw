@@ -89,7 +89,7 @@ add_openmw_dir (mwmechanics
     )
 
 add_openmw_dir (mwstate
-    statemanagerimp charactermanager character
+    statemanagerimp charactermanager character quicksavemanager
     )
 
 add_openmw_dir (mwbase
@@ -222,4 +222,3 @@ endif (MSVC)
 if (WIN32)
     INSTALL(TARGETS openmw RUNTIME DESTINATION ".")
 endif (WIN32)
-
