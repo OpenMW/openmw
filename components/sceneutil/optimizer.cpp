@@ -800,6 +800,13 @@ bool Optimizer::RemoveRedundantNodesVisitor::isOperationPermissible(osg::Node& n
            isOperationPermissibleForObject(&node);
 }
 
+void Optimizer::RemoveRedundantNodesVisitor::apply(osg::LOD& lod)
+{
+    // don't remove any direct children of the LOD because they are used to define each LOD level.
+    for (unsigned int i=0; i<lod.getNumChildren(); ++i)
+        traverse(*lod.getChild(i));
+}
+
 void Optimizer::RemoveRedundantNodesVisitor::apply(osg::Group& group)
 {
     if (typeid(group)==typeid(osg::Group) &&
@@ -1847,6 +1854,12 @@ bool Optimizer::MergeGroupsVisitor::isOperationPermissible(osg::Group& node)
            !node.getEventCallback() &&
            !node.getUpdateCallback() &&
             isOperationPermissibleForObject(&node);
+}
+
+void Optimizer::MergeGroupsVisitor::apply(osg::LOD &lod)
+{
+    // don't merge the direct children of the LOD because they are used to define each LOD level.
+    traverse(lod);
 }
 
 void Optimizer::MergeGroupsVisitor::apply(osg::Group &group)

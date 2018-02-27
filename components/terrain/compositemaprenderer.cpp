@@ -6,11 +6,14 @@
 #include <osg/Texture2D>
 #include <osg/RenderInfo>
 
+#include <algorithm>
+
 namespace Terrain
 {
 
 CompositeMapRenderer::CompositeMapRenderer()
-    : mTimeAvailable(0.0005)
+    : mTargetFrameRate(120)
+    , mMinimumTimeAvailable(0.0025)
 {
     setSupportsDisplayList(false);
     setCullingActive(false);
@@ -22,6 +25,14 @@ CompositeMapRenderer::CompositeMapRenderer()
 
 void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
 {
+    double dt = mTimer.time_s();
+    dt = std::min(dt, 0.2);
+    mTimer.setStartTick();
+    double targetFrameTime = 1.0/static_cast<double>(mTargetFrameRate);
+    double conservativeTimeRatio(0.75);
+    double availableTime = std::max((targetFrameTime - dt)*conservativeTimeRatio,
+                                    mMinimumTimeAvailable);
+
     mCompiled.clear();
 
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
@@ -39,7 +50,7 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
         mImmediateCompileSet.erase(mImmediateCompileSet.begin());
     }
 
-    double timeLeft = mTimeAvailable;
+    double timeLeft = availableTime;
 
     while (!mCompileSet.empty() && timeLeft > 0)
     {
@@ -53,6 +64,7 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
             mCompileSet.erase(mCompileSet.begin());
         }
     }
+    mTimer.setStartTick();
 }
 
 void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &renderInfo, double* timeLeft) const
@@ -126,9 +138,14 @@ void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &
     ext->glBindFramebuffer(GL_FRAMEBUFFER_EXT, fboId);
 }
 
-void CompositeMapRenderer::setTimeAvailableForCompile(double time)
+void CompositeMapRenderer::setMinimumTimeAvailableForCompile(double time)
 {
-    mTimeAvailable = time;
+    mMinimumTimeAvailable = time;
+}
+
+void CompositeMapRenderer::setTargetFrameRate(float framerate)
+{
+    mTargetFrameRate = framerate;
 }
 
 void CompositeMapRenderer::addCompositeMap(CompositeMap* compositeMap, bool immediate)

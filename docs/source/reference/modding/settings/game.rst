@@ -16,7 +16,7 @@ If the setting is 2, the crosshair is the color of the color crosshair owned set
 If the setting is 3, both the tool tip background and the crosshair are colored.
 The crosshair is not visible if crosshair is false.
 
-The default value is 0 (no clues). This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
 
 show projectile damage
 ----------------------
@@ -25,9 +25,9 @@ show projectile damage
 :Range:		True/False
 :Default:	False
 
-If this setting is true, damage bonus of arrows and bolts will be showed on item tooltip.
+If this setting is true, the damage bonus of arrows and bolts will show on their tooltip.
 
-The default value is false. This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
 
 show melee info
 ---------------
@@ -36,9 +36,9 @@ show melee info
 :Range:		True/False
 :Default:	False
 
-If this setting is true, melee weapons reach and speed will be showed on item tooltip.
+If this setting is true, the reach and speed of melee weapons will show on their tooltip.
 
-The default value is false. This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
 
 show enchant chance
 -------------------
@@ -49,7 +49,7 @@ show enchant chance
 
 Whether or not the chance of success will be displayed in the enchanting menu.
 
-The default value is false. This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
 
 best attack
 -----------
@@ -62,7 +62,6 @@ If this setting is true, the player character will always use the most powerful 
 (chop, slash or thrust). If this setting is false,
 the type of attack is determined by the direction that the character is moving at the time the attack begins.
 
-The default value is false.
 This setting can be toggled with the Always Use Best Attack button in the Prefs panel of the Options menu.
 
 can loot during death animation
@@ -79,7 +78,7 @@ This is how original Morrowind behaves.
 If this setting is false, player has to wait until end of death animation in all cases.
 This case is more safe, but makes using of summoned creatures exploit (looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder.
 
-The default value is true. This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
 
 difficulty
 ----------
@@ -107,7 +106,7 @@ show effect duration
 Show the remaining duration of magic effects and lights if this setting is true.
 The remaining duration is displayed in the tooltip by hovering over the magical effect.
 
-The default value is false. This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
 
 prevent merchant equipping
 --------------------------
@@ -118,6 +117,8 @@ prevent merchant equipping
 
 Prevents merchants from equipping items that are sold to them.
 
+This setting can only be configured by editing the settings configuration file.
+
 followers attack on sight
 -------------------------
 
@@ -127,3 +128,6 @@ followers attack on sight
 
 Makes player followers and escorters start combat with enemies who have started combat with them or the player.
 Otherwise they wait for the enemies or the player to do an attack first.
+Please note this setting has not been extensively tested and could have side effects with certain quests.
+
+This setting can only be configured by editing the settings configuration file.

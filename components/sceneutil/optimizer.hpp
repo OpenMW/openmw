@@ -339,6 +339,7 @@ class Optimizer
 
                 virtual void apply(osg::Group& group);
                 virtual void apply(osg::Transform& transform);
+                virtual void apply(osg::LOD& lod);
 
                 bool isOperationPermissible(osg::Node& node);
 
@@ -358,6 +359,7 @@ class Optimizer
             bool isOperationPermissible(osg::Group& node);
 
             virtual void apply(osg::Group& group);
+            virtual void apply(osg::LOD& lod);
         };
 
         class MergeGeometryVisitor : public BaseOptimizerVisitor

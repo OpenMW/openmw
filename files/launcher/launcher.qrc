@@ -9,8 +9,9 @@
 </qresource>
 <qresource prefix="icons/tango">
     <file alias="index.theme">icons/tango/index.theme</file>
-    <file alias="48x48/video-display.png">icons/tango/48x48/video-display.png</file>
+    <file alias="48x48/emblem-system.png">icons/tango/48x48/emblem-system.png</file>
     <file alias="48x48/preferences-system.png">icons/tango/48x48/preferences-system.png</file>
+    <file alias="48x48/video-display.png">icons/tango/48x48/video-display.png</file>
     <file alias="16x16/document-new.png">icons/tango/16x16/document-new.png</file>
     <file alias="16x16/edit-copy.png">icons/tango/16x16/edit-copy.png</file>
     <file alias="16x16/edit-delete.png">icons/tango/16x16/edit-delete.png</file>
