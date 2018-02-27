@@ -13,8 +13,6 @@
 #include <osg/UserDataContainer>
 #include <osg/ComputeBoundsVisitor>
 
-#include <osgShadow/ShadowedScene>
-
 #include <osgUtil/LineSegmentIntersector>
 #include <osgUtil/IncrementalCompileOperation>
 
