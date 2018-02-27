@@ -109,6 +109,12 @@ public:
         state->disableAllVertexArrays();
         state->setClientActiveTextureUnit(0);
 
+#ifdef OSG_GL_FIXED_FUNCTION_AVAILABLE
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
+#endif
+
         mReadFrom = (mReadFrom+1)%sNumBuffers;
         const std::vector<Batch>& vec = mBatchVector[mReadFrom];
         for (std::vector<Batch>::const_iterator it = vec.begin(); it != vec.end(); ++it)
@@ -131,10 +137,23 @@ public:
             {
                 state->bindVertexBufferObject(bufferobject);
 
+#ifdef OSG_GL_FIXED_FUNCTION_AVAILABLE
+                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL);
+                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)NULL + 12);
+                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL + 16);
+                   }
+             else
+            {
+                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char *) vbo->getArray(0)->getDataPointer());
+                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex),
+                               (char *) vbo->getArray(0)->getDataPointer() + 12);
+                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char *) vbo->getArray(0)->getDataPointer() + 16);
+            }
+            glDrawArrays(GL_TRIANGLES, 0, batch.mVertexCount);
+#else
                 state->setVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL);
                 state->setColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)NULL + 12);
                 state->setTexCoordPointer(0, 2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL + 16);
-
             }
             else
             {
@@ -142,8 +161,8 @@ public:
                 state->setColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 12);
                 state->setTexCoordPointer(0, 2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 16);
             }
-
             state->glDrawArraysInstanced(GL_TRIANGLES, 0, batch.mVertexCount, 0);
+#endif
 
             if (batch.mStateSet)
             {

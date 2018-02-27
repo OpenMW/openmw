@@ -26,15 +26,15 @@
 IF (WIN32)
     IF (CYGWIN)
 
-        FIND_PATH(OPENGLES3_INCLUDE_DIR GLES3/gl3.h )
+        FIND_PATH(OPENGLES3_INCLUDE_DIR GLES3/gl3.h)
 
-        FIND_LIBRARY(OPENGLES3_gl_LIBRARY libGLESv2 )
+        FIND_LIBRARY(OPENGLES3_gl_LIBRARY libGLESv2)
 
     ELSE (CYGWIN)
 
-        IF(BORLAND)
-            SET (OPENGLES3_gl_LIBRARY import32 CACHE STRING "OpenGL ES 3.x library for win32")
-        ELSE(BORLAND)
+        IF (BORLAND)
+            SET(OPENGLES3_gl_LIBRARY import32 CACHE STRING "OpenGL ES 3.x library for win32")
+        ELSE (BORLAND)
             getenv_path(AMD_SDK_ROOT)
             getenv_path(MALI_SDK_ROOT)
 
@@ -64,7 +64,7 @@ IF (WIN32)
                     ${ENV_MALI_SDK_ROOT}/bin
                     ${POWERVR_SDK_PATH}/Windows/x86_32/Lib
                     )
-        ENDIF(BORLAND)
+        ENDIF (BORLAND)
 
     ENDIF (CYGWIN)
 
@@ -76,11 +76,11 @@ ELSE (WIN32)
         findpkg_framework(OpenGLES3)
         set(OPENGLES3_gl_LIBRARY "-framework OpenGLES")
 
-    ELSE(APPLE)
+    ELSE (APPLE)
         getenv_path(AMD_SDK_ROOT)
         getenv_path(MALI_SDK_ROOT)
 
-        FIND_PATH(OPENGLES2_INCLUDE_DIR GLES3/gl3.h
+        FIND_PATH(OPENGLES3_INCLUDE_DIR GLES3/gl3.h
                 ${ENV_AMD_SDK_ROOT}/include
                 ${ENV_MALI_SDK_ROOT}/include
                 /opt/Imagination/PowerVR/GraphicsSDK/SDK_3.1/Builds/Include
@@ -126,29 +126,29 @@ ELSE (WIN32)
         # It's not true on OSX.
 
         IF (OPENGLES3_gl_LIBRARY)
-            IF(NOT X11_FOUND)
+            IF (NOT X11_FOUND)
                 INCLUDE(FindX11)
-            ENDIF(NOT X11_FOUND)
+            ENDIF (NOT X11_FOUND)
             IF (X11_FOUND)
                 IF (NOT APPLE)
-                    SET (OPENGLES3_LIBRARIES ${X11_LIBRARIES})
+                    SET(OPENGLES3_LIBRARIES ${X11_LIBRARIES})
                 ENDIF (NOT APPLE)
             ENDIF (X11_FOUND)
         ENDIF (OPENGLES3_gl_LIBRARY)
 
-    ENDIF(APPLE)
+    ENDIF (APPLE)
 ENDIF (WIN32)
 
-SET( OPENGLES3_FOUND "YES" )
-IF(OPENGLES3_gl_LIBRARY)
+SET(OPENGLES3_FOUND "YES")
+IF (OPENGLES3_gl_LIBRARY)
 
-    SET( OPENGLES3_LIBRARIES ${OPENGLES3_gl_LIBRARY} ${OPENGLES3_LIBRARIES})
-    IF(EGL_egl_LIBRARY)
-        SET( EGL_LIBRARIES ${EGL_egl_LIBRARY} ${EGL_LIBRARIES})
-    ENDIF()
-    SET( OPENGLES3_FOUND "YES" )
+    SET(OPENGLES3_LIBRARIES ${OPENGLES3_gl_LIBRARY} ${OPENGLES3_LIBRARIES})
+    IF (EGL_egl_LIBRARY)
+        SET(EGL_LIBRARIES ${EGL_egl_LIBRARY} ${EGL_LIBRARIES})
+    ENDIF ()
+    SET(OPENGLES3_FOUND "YES")
 
-ENDIF(OPENGLES3_gl_LIBRARY)
+ENDIF (OPENGLES3_gl_LIBRARY)
 
 MARK_AS_ADVANCED(
         OPENGLES3_INCLUDE_DIR

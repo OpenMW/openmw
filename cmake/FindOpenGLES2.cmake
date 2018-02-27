@@ -20,33 +20,23 @@
 
 IF (WIN32)
     IF (CYGWIN)
-
-        FIND_PATH(OPENGLES2_INCLUDE_DIR GLES2/gl2.h )
-
-        FIND_LIBRARY(OPENGLES2_gl_LIBRARY libGLESv2 )
-
+        FIND_PATH(OPENGLES2_INCLUDE_DIR GLES2/gl2.h)
+        FIND_LIBRARY(OPENGLES2_gl_LIBRARY libGLESv2)
     ELSE (CYGWIN)
-
-        IF(BORLAND)
-            SET (OPENGLES2_gl_LIBRARY import32 CACHE STRING "OpenGL ES 2.x library for win32")
-        ELSE(BORLAND)
+        IF (BORLAND)
+            SET(OPENGLES2_gl_LIBRARY import32 CACHE STRING "OpenGL ES 2.x library for win32")
+        ELSE (BORLAND)
             #MS compiler - todo - fix the following line:
-            SET (OPENGLES2_gl_LIBRARY ${OGRE_DEPENDENCIES_DIR}/lib/release/libGLESv2.lib CACHE STRING "OpenGL ES 2.x library for win32")
-            SET (EGL_egl_LIBRARY      ${OGRE_DEPENDENCIES_DIR}/lib/release/libEGL.lib CACHE STRING "EGL library for win32")
-        ENDIF(BORLAND)
-
+            SET(OPENGLES2_gl_LIBRARY ${OGRE_DEPENDENCIES_DIR}/lib/release/libGLESv2.lib CACHE STRING "OpenGL ES 2.x library for win32")
+            SET(EGL_egl_LIBRARY ${OGRE_DEPENDENCIES_DIR}/lib/release/libEGL.lib CACHE STRING "EGL library for win32")
+        ENDIF (BORLAND)
     ENDIF (CYGWIN)
-
 ELSE (WIN32)
-
     IF (APPLE)
-
         create_search_paths(/Developer/Platforms)
         findpkg_framework(OpenGLES2)
         set(OPENGLES2_gl_LIBRARY "-framework OpenGLES")
-
-    ELSE(APPLE)
-
+    ELSE (APPLE)
         FIND_PATH(OPENGLES2_INCLUDE_DIR GLES2/gl2.h
                 /usr/openwin/share/include
                 /opt/graphics/OpenGL/include /usr/X11R6/include
@@ -81,27 +71,27 @@ ELSE (WIN32)
         # It's not true on OSX.
 
         IF (OPENGLES2_gl_LIBRARY)
-            IF(NOT X11_FOUND)
+            IF (NOT X11_FOUND)
                 INCLUDE(FindX11)
-            ENDIF(NOT X11_FOUND)
+            ENDIF (NOT X11_FOUND)
             IF (X11_FOUND)
                 IF (NOT APPLE)
-                    SET (OPENGLES2_LIBRARIES ${X11_LIBRARIES})
+                    SET(OPENGLES2_LIBRARIES ${X11_LIBRARIES})
                 ENDIF (NOT APPLE)
             ENDIF (X11_FOUND)
         ENDIF (OPENGLES2_gl_LIBRARY)
 
-    ENDIF(APPLE)
+    ENDIF (APPLE)
 ENDIF (WIN32)
 
-SET( OPENGLES2_FOUND "YES" )
-IF(OPENGLES2_gl_LIBRARY AND EGL_egl_LIBRARY)
+SET(OPENGLES2_FOUND "YES")
+IF (OPENGLES2_gl_LIBRARY AND EGL_egl_LIBRARY)
 
-    SET( OPENGLES2_LIBRARIES ${OPENGLES2_gl_LIBRARY} ${OPENGLES2_LIBRARIES})
-    SET( EGL_LIBRARIES ${EGL_egl_LIBRARY} ${EGL_LIBRARIES})
-    SET( OPENGLES2_FOUND "YES" )
+    SET(OPENGLES2_LIBRARIES ${OPENGLES2_gl_LIBRARY} ${OPENGLES2_LIBRARIES})
+    SET(EGL_LIBRARIES ${EGL_egl_LIBRARY} ${EGL_LIBRARIES})
+    SET(OPENGLES2_FOUND "YES")
 
-ENDIF(OPENGLES2_gl_LIBRARY AND EGL_egl_LIBRARY)
+ENDIF (OPENGLES2_gl_LIBRARY AND EGL_egl_LIBRARY)
 
 MARK_AS_ADVANCED(
         OPENGLES2_INCLUDE_DIR
