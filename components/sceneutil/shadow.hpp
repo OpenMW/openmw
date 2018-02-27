@@ -2,6 +2,7 @@
 #define COMPONENTS_SCENEUTIL_SHADOW_H
 
 #include <osgShadow/ShadowSettings>
+#include <osgShadow/ShadowedScene>
 
 #include <components/terrain/quadtreeworld.hpp>
 #include <components/shader/shadermanager.hpp>
