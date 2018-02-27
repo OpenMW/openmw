@@ -13,7 +13,7 @@ namespace SceneUtil
 {
     using namespace osgShadow;
 
-    void ShadowManager::setupShadowSettings(int castsShadowMask)
+    void ShadowManager::setupShadowSettings()
     {
         mEnableShadows = Settings::Manager::getBool("enable shadows", "Shadows");
 
@@ -26,7 +26,6 @@ namespace SceneUtil
         mShadowTechnique->enableShadows();
 
         mShadowSettings->setLightNum(0);
-        mShadowSettings->setCastsShadowTraversalMask(castsShadowMask);
         mShadowSettings->setReceivesShadowTraversalMask(~0u);
 
         int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
@@ -64,8 +63,10 @@ namespace SceneUtil
             stateset->setTextureAttributeAndModes(i, fakeShadowMapTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
     }
 
-    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode) : mShadowedScene(new osgShadow::ShadowedScene),
-        mShadowTechnique(new MWShadowTechnique)
+    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask) : mShadowedScene(new osgShadow::ShadowedScene),
+        mShadowTechnique(new MWShadowTechnique),
+        mOutdoorShadowCastingMask(outdoorShadowCastingMask),
+        mIndoorShadowCastingMask(indoorShadowCastingMask)
     {
         mShadowedScene->setShadowTechnique(mShadowTechnique);
 
@@ -73,6 +74,9 @@ namespace SceneUtil
         rootNode->addChild(mShadowedScene);
 
         mShadowSettings = mShadowedScene->getShadowSettings();
+        setupShadowSettings();
+
+        enableOutdoorMode();
     }
 
     Shader::ShaderManager::DefineMap ShadowManager::getShadowDefines()
@@ -97,5 +101,13 @@ namespace SceneUtil
         definesWithShadows["shadow_texture_unit_list"] = "";
 
         return definesWithShadows;
+    }
+    void ShadowManager::enableIndoorMode()
+    {
+        mShadowSettings->setCastsShadowTraversalMask(mIndoorShadowCastingMask);
+    }
+    void ShadowManager::enableOutdoorMode()
+    {
+        mShadowSettings->setCastsShadowTraversalMask(mOutdoorShadowCastingMask);
     }
 }

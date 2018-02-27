@@ -202,7 +202,7 @@ namespace MWRender
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
 
-        int shadowCastingTraversalMask = Mask_Scene;
+        int shadowCastingTraversalMask = 0;
         if (Settings::Manager::getBool("actor shadows", "Shadows"))
             shadowCastingTraversalMask |= Mask_Actor;
         if (Settings::Manager::getBool("player shadows", "Shadows"))
@@ -210,8 +210,7 @@ namespace MWRender
         if (Settings::Manager::getBool("terrain shadows", "Shadows"))
             shadowCastingTraversalMask |= Mask_Terrain;
         
-        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode));
-        mShadowManager->setupShadowSettings(shadowCastingTraversalMask);
+        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, Mask_Scene | shadowCastingTraversalMask, shadowCastingTraversalMask));
 
         Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
         Shader::ShaderManager::DefineMap globalDefines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
@@ -462,6 +461,10 @@ namespace MWRender
     void RenderingManager::setSkyEnabled(bool enabled)
     {
         mSky->setEnabled(enabled);
+        if (enabled)
+            mShadowManager->enableOutdoorMode();
+        else
+            mShadowManager->enableIndoorMode();
     }
 
     bool RenderingManager::toggleRenderMode(RenderMode mode)
