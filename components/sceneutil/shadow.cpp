@@ -86,7 +86,7 @@ namespace SceneUtil
 
         Shader::ShaderManager::DefineMap definesWithShadows;
         definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("1")));
-        for (int i = 0; i < mShadowSettings->getNumShadowMapsPerLight(); ++i)
+        for (unsigned int i = 0; i < mShadowSettings->getNumShadowMapsPerLight(); ++i)
             definesWithShadows["shadow_texture_unit_list"] += std::to_string(i) + ",";
         // remove extra comma
         definesWithShadows["shadow_texture_unit_list"] = definesWithShadows["shadow_texture_unit_list"].substr(0, definesWithShadows["shadow_texture_unit_list"].length() - 1);
