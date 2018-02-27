@@ -60,13 +60,29 @@ copyright = u'2017, OpenMW Team'
 # The short X.Y version.
 # The full version, including alpha/beta/rc tags.
 
+def get_openmw_version(haystack):
+    needle = 'OPENMW_VERSION_MAJOR'
+    line_counter = 0
+    for hay in haystack:
+        if needle in str(hay):
+            break
+        line_counter += 1
+
+    if line_counter == 0:
+        raise ImportError('Unable to find OpenMW Version')
+
+    version = '.'.join([haystack[line_counter][1][1].contents,
+                        haystack[line_counter+1][1][1].contents,
+                        haystack[line_counter+2][1][1].contents])
+    return version
+
+
 try:
     from parse_cmake import parsing
     cmake_raw = open(project_root+'/CMakeLists.txt', 'r').read()
     cmake_data = parsing.parse(cmake_raw)
-    release = version = '.'.join([cmake_data[24][1][1].contents,
-                                 cmake_data[25][1][1].contents,
-                                 cmake_data[26][1][1].contents])
+    release = version = get_openmw_version(cmake_data)
+
 except ImportError:
     release = "UNRELEASED"
     print("WARNING: Unable to import parse_cmake, version will be set to: {0}.".format(release))
