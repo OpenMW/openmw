@@ -1120,7 +1120,7 @@ namespace MWMechanics
         if (!Misc::StringUtils::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
         {
             const MWWorld::Ptr victimRef = MWBase::Environment::get().getWorld()->searchPtr(item.getCellRef().getOwner(), true);
-            if (!victimRef.getClass().getCreatureStats(victimRef).isDead())
+            if (victimRef.isEmpty() || !victimRef.getClass().getCreatureStats(victimRef).isDead())
                 mStolenItems[Misc::StringUtils::lowerCase(item.getCellRef().getRefId())][owner] += count;
         }
         if (alarm)
