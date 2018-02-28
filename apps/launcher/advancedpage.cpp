@@ -40,7 +40,6 @@ bool Launcher::AdvancedPage::loadSettings()
     maximumQuicksavesComboBox->setValue(mEngineSettings.getInt("max quicksaves", "Saves"));
 
     // Other Settings
-
     QString screenshotFormatString = QString::fromStdString(mEngineSettings.getString("screenshot format", "General")).toUpper();
     if (screenshotFormatComboBox->findText(screenshotFormatString) == -1)
         screenshotFormatComboBox->addItem(screenshotFormatString);
