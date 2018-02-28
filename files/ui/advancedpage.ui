@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>434</width>
+    <width>671</width>
     <height>373</height>
    </rect>
   </property>
@@ -27,9 +27,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
-        <width>393</width>
-        <height>437</height>
+        <y>-187</y>
+        <width>630</width>
+        <height>510</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="scrollAreaVerticalLayout">
@@ -139,6 +139,9 @@
              </item>
              <item>
               <widget class="QComboBox" name="showOwnedComboBox">
+               <property name="currentIndex">
+                <number>1</number>
+               </property>
                <item>
                 <property name="text">
                  <string>Off</string>
@@ -207,11 +210,11 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="otherGroup">
+        <widget class="QGroupBox" name="savesGroup">
          <property name="title">
-          <string>Other</string>
+          <string>Saves</string>
          </property>
-         <layout class="QVBoxLayout" name="otherGroupVerticalLayout">
+         <layout class="QVBoxLayout" name="savesGroupVerticalLayout">
           <item>
            <widget class="QCheckBox" name="timePlayedCheckbox">
             <property name="toolTip">
@@ -223,11 +226,58 @@
            </widget>
           </item>
           <item alignment="Qt::AlignLeft">
+           <widget class="QWidget" name="maximumQuicksavesGroup" native="true">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting determines how many quicksave and autosave slots you can have at a time. If greater than 1, quicksaves will be sequentially created each time you quicksave. Once the maximum number of quicksaves has been reached, the oldest quicksave will be recycled the next time you perform a quicksave.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <layout class="QHBoxLayout" name="maximumQuicksavesLayout">
+             <property name="spacing">
+              <number>-1</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="maximumQuicksavesLabel">
+               <property name="text">
+                <string>Maximum Quicksaves</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="maximumQuicksavesComboBox">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="otherGroup">
+         <property name="title">
+          <string>Other</string>
+         </property>
+         <layout class="QVBoxLayout" name="otherGroupVerticalLayout">
+          <item alignment="Qt::AlignLeft">
            <widget class="QWidget" name="screenshotFormatGroup" native="true">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the format for screen shots taken by pressing the screen shot key (bound to F12 by default). This setting should be the file extension commonly associated with the desired format. The formats supported will be determined at compilation, but “jpg”, “png”, and “tga” should be allowed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <layout class="QHBoxLayout" name="screenshotFormatLayout">
              <property name="spacing">
               <number>-1</number>
              </property>
