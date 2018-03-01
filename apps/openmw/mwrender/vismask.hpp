@@ -33,6 +33,7 @@ namespace MWRender
         Mask_SimpleWater = (1<<7),
         Mask_Terrain = (1<<8),
         Mask_FirstPerson = (1<<9),
+        Mask_Object = (1<<18), // TODO: get Scrawl or Zini to decide if we want this to be (1<<10) and to shift all of the other masks by one.
 
         // child of Sky
         Mask_Sun = (1<<10),
