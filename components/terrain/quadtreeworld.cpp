@@ -347,9 +347,16 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
     if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
     {
-        SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds* shadowBoundsVisitor = dynamic_cast<SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds *>(&nv);
-        if (shadowBoundsVisitor)
-            shadowBoundsVisitor->apply(*this);
+        if (nv.getName().find("AcceptedByComponentsTerrainQuadTreeWorld") != std::string::npos)
+        {
+            if (nv.getName().find("SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds") != std::string::npos)
+            {
+                SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds* clsb = static_cast<SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds*>(&nv);
+                clsb->apply(*this);
+            }
+            else
+                nv.apply(*mRootNode);
+        }
         return;
     }
 

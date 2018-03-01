@@ -301,6 +301,8 @@ MWShadowTechnique::ComputeLightSpaceBounds::ComputeLightSpaceBounds(osg::Viewpor
     pushViewport(viewport);
     pushProjectionMatrix(new osg::RefMatrix(projectionMatrix));
     pushModelViewMatrix(new osg::RefMatrix(viewMatrix), osg::Transform::ABSOLUTE_RF);
+
+    setName("SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds,AcceptedByComponentsTerrainQuadTreeWorld");
 }
 
 void MWShadowTechnique::ComputeLightSpaceBounds::apply(osg::Node& node)
