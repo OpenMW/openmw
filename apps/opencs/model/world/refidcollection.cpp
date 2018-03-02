@@ -184,11 +184,11 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_PosZ, CSMWorld::ColumnBase::Display_Float));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_RotX, CSMWorld::ColumnBase::Display_Float));
+            new RefIdColumn (Columns::ColumnId_RotX, CSMWorld::ColumnBase::Display_Double));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_RotY, CSMWorld::ColumnBase::Display_Float));
+            new RefIdColumn (Columns::ColumnId_RotY, CSMWorld::ColumnBase::Display_Double));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_RotZ, CSMWorld::ColumnBase::Display_Float));
+            new RefIdColumn (Columns::ColumnId_RotZ, CSMWorld::ColumnBase::Display_Double));
 
     // Nested table
     mColumns.push_back(RefIdColumn (Columns::ColumnId_AiPackageList,

@@ -88,6 +88,7 @@ namespace CSMWorld
             Display_UnsignedInteger8,
             Display_Integer,
             Display_Float,
+            Display_Double,
             Display_Var,
             Display_GmstVarType,
             Display_GlobalVarType,
