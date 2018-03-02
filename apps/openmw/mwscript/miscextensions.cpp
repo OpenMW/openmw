@@ -261,7 +261,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     bool enabled =
-                        MWBase::Environment::get().getWorld()->toggleBordorders();
+                        MWBase::Environment::get().getWorld()->toggleBorders();
 
                     runtime.getContext().report (enabled ?
                         "Border Rendering -> On" : "Border Rendering -> Off");

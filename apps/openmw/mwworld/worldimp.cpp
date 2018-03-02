@@ -1919,7 +1919,7 @@ namespace MWWorld
         return mRendering->toggleRenderMode(MWRender::Render_Scene);
     }
 
-    bool World::toggleBordorders()
+    bool World::toggleBorders()
     {
         return mRendering->toggleBorders();
     }
