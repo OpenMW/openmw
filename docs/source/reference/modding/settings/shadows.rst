@@ -13,9 +13,8 @@ enable shadows
 
 Enable or disable the rendering of shadows.
 Unlike in the original Morrowind engine, 'Shadow Mapping' is used, which can have a performance impact, but has more realistic results.
-When used in fixed-function mode, shadowed regions will appear completely black.
-To prevent this, enable :ref:`force-shaders-label`.
-A keen developer may be able to implement something better using the advice of `this post <https://github.com/OpenMW/openmw/pull/1547#issuecomment-369657381>`_, but it may be more difficult than it seems.
+Bear in mind that this will force OpenMW to use shaders as if :ref:`force-shaders-label` was enabled.
+A keen developer may be able to implement compatibility with fixed-function mode using the advice of `this post <https://github.com/OpenMW/openmw/pull/1547#issuecomment-369657381>`_, but it may be more difficult than it seems.
 
 
 number of shadow maps
