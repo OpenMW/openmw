@@ -21,6 +21,8 @@
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include <components/nifosg/nifloader.hpp> // TextKeyMapHolder
 
 #include "../mwworld/esmstore.hpp"
@@ -308,6 +310,12 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     if(mViewMode == viewMode)
         return;
 
+    // Disable weapon sheathing in the 1st-person mode
+    if (viewMode == VM_FirstPerson)
+        mWeaponSheathing = false;
+    else
+        mWeaponSheathing = Settings::Manager::getBool("weapon sheathing", "Game");
+
     mViewMode = viewMode;
     rebuild();
 
@@ -389,6 +397,7 @@ void NpcAnimation::setRenderBin()
 
 void NpcAnimation::rebuild()
 {
+    mScabbard.reset();
     updateNpcBase();
 
     MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
@@ -460,6 +469,11 @@ void NpcAnimation::updateNpcBase()
 
     setObjectRoot(smodel, true, true, false);
 
+    if (mWeaponSheathing)
+        injectWeaponBones();
+
+    updateParts();
+
     if(!is1stPerson)
     {
         const std::string base = "meshes\\xbase_anim.nif";
@@ -487,8 +501,6 @@ void NpcAnimation::updateNpcBase()
         mObjectRoot->setNodeMask(Mask_FirstPerson);
         mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
     }
-
-    updateParts();
 
     mWeaponAnimationTime->updateStartTime();
 }
@@ -899,7 +911,8 @@ void NpcAnimation::showWeapons(bool showWeapon)
                     attachArrow();
             }
         }
-        if (mAlpha != 1.f)
+        // Note: we will need to recreate shaders later if we use weapon sheathing anyway, so there is no point to update them here
+        if (mAlpha != 1.f && !mWeaponSheathing)
             mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
     }
     else
@@ -909,6 +922,9 @@ void NpcAnimation::showWeapons(bool showWeapon)
         if (mPtr == MWMechanics::getPlayer())
             MWBase::Environment::get().getWorld()->getPlayer().setAttackingOrSpell(false);
     }
+
+    updateHolsteredWeapon(!mShowWeapons);
+    updateQuiver();
 }
 
 void NpcAnimation::showCarriedLeft(bool show)
@@ -936,11 +952,13 @@ void NpcAnimation::showCarriedLeft(bool show)
 void NpcAnimation::attachArrow()
 {
     WeaponAnimation::attachArrow(mPtr);
+    updateQuiver();
 }
 
 void NpcAnimation::releaseArrow(float attackStrength)
 {
     WeaponAnimation::releaseArrow(mPtr, attackStrength);
+    updateQuiver();
 }
 
 osg::Group* NpcAnimation::getArrowBone()
@@ -1183,6 +1201,11 @@ const std::vector<const ESM::BodyPart *>& NpcAnimation::getBodyParts(const std::
 void NpcAnimation::setAccurateAiming(bool enabled)
 {
     mAccurateAiming = enabled;
+}
+
+bool NpcAnimation::isArrowAttached() const
+{
+    return mAmmunition != nullptr;
 }
 
 }
