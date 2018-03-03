@@ -1015,6 +1015,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
         }
 
+#if 0
         double splitPoint = 0.0;
 
         if (numShadowMapsPerLight>1)
@@ -1049,6 +1050,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 OSG_INFO<<"  n="<<n<<", f="<<f<<", sqrt_nf="<<sqrt_nf<<" mid="<<mid<<std::endl;
             }
         }
+#endif
 
         // 4. For each light/shadow map
         for (unsigned int sm_i=0; sm_i<numShadowMapsPerLight; ++sm_i)
