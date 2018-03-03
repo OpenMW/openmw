@@ -207,8 +207,12 @@ namespace MWRender
             shadowCastingTraversalMask |= Mask_Player;
         if (Settings::Manager::getBool("terrain shadows", "Shadows"))
             shadowCastingTraversalMask |= Mask_Terrain;
+
+        int indoorShadowCastingTraversalMask = shadowCastingTraversalMask;
+        if (Settings::Manager::getBool("object shadows", "Shadows"))
+            shadowCastingTraversalMask |= Mask_Object;
         
-        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, Mask_Object | shadowCastingTraversalMask, shadowCastingTraversalMask));
+        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, shadowCastingTraversalMask, indoorShadowCastingTraversalMask));
 
         Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
         Shader::ShaderManager::DefineMap globalDefines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
