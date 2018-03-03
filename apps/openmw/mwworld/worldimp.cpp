@@ -2847,11 +2847,13 @@ namespace MWWorld
         MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(actor);
     }
 
-    bool World::isDark() const
+    bool World::useTorches() const
     {
+        // If we are in exterior, check the weather manager.
+        // In interiors there are no precipitations and sun, so check the ambient
         MWWorld::CellStore* cell = mPlayer->getPlayer().getCell();
         if (cell->isExterior())
-            return mWeatherManager->isDark();
+            return mWeatherManager->useTorches();
         else
         {
             uint32_t ambient = cell->getCell()->mAmbi.mAmbient;

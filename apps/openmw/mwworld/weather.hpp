@@ -240,8 +240,7 @@ namespace MWWorld
 
         unsigned int getWeatherID() const;
 
-        /// @see World::isDark
-        bool isDark() const;
+        bool useTorches() const;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress);
 
@@ -275,6 +274,7 @@ namespace MWWorld
 
         float mWindSpeed;
         bool mIsStorm;
+        bool mPrecipitation;
         osg::Vec3f mStormDirection;
 
         std::string mCurrentRegion;

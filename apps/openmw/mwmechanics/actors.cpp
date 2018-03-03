@@ -900,7 +900,7 @@ namespace MWMechanics
             stats.setTimeToStartDrowning(fHoldBreathTime);
     }
 
-    void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
+    void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration, bool mayEquip)
     {
         bool isPlayer = (ptr == getPlayer());
 
@@ -922,7 +922,7 @@ namespace MWMechanics
                 }
             }
 
-            if (MWBase::Environment::get().getWorld()->isDark())
+            if (mayEquip)
             {
                 if (torch != inventoryStore.end())
                 {
@@ -1199,6 +1199,9 @@ namespace MWMechanics
             if (mTimerDisposeSummonsCorpses >= 0.2f) mTimerDisposeSummonsCorpses = 0;
             if (timerUpdateEquippedLight >= updateEquippedLightInterval) timerUpdateEquippedLight = 0;
 
+            // show torches only when there are darkness and no precipitations
+            bool showTorches = MWBase::Environment::get().getWorld()->useTorches();
+
             MWWorld::Ptr player = getPlayer();
 
             /// \todo move update logic to Actor class where appropriate
@@ -1297,7 +1300,7 @@ namespace MWMechanics
                         updateNpc(iter->first, duration);
 
                         if (timerUpdateEquippedLight == 0)
-                            updateEquippedLight(iter->first, updateEquippedLightInterval);
+                            updateEquippedLight(iter->first, updateEquippedLightInterval, showTorches);
                     }
                 }
             }

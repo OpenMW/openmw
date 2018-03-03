@@ -495,8 +495,8 @@ namespace MWBase
 
             virtual void breakInvisibility (const MWWorld::Ptr& actor) = 0;
 
-            // Are we in an exterior or pseudo-exterior cell and it's night?
-            virtual bool isDark() const = 0;
+            // Allow NPCs to use torches?
+            virtual bool useTorches() const = 0;
 
             virtual bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result) = 0;
 

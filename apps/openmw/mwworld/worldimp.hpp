@@ -604,12 +604,11 @@ namespace MWWorld
             void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength) override;
 
-
             const std::vector<std::string>& getContentFiles() const override;
-
             void breakInvisibility (const MWWorld::Ptr& actor) override;
-            // Are we in an exterior or pseudo-exterior cell and it's night?
-            bool isDark() const override;
+
+            // Allow NPCs to use torches?
+            bool useTorches() const override;
 
             bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result) override;
 

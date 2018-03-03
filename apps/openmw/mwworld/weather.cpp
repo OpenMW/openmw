@@ -520,6 +520,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const Fall
     , mSecunda("Secunda", fallback)
     , mWindSpeed(0.f)
     , mIsStorm(false)
+    , mPrecipitation(false)
     , mStormDirection(0,1,0)
     , mCurrentRegion()
     , mTimePassed(0)
@@ -660,6 +661,10 @@ void WeatherManager::update(float duration, bool paused)
     mWindSpeed = mResult.mWindSpeed;
     mIsStorm = mResult.mIsStorm;
 
+    // For some reason Ash Storm is not considered as a precipitation weather in game
+    mPrecipitation = !(mResult.mParticleEffect.empty() && mResult.mRainEffect.empty())
+                                    && mResult.mParticleEffect != "meshes\\ashcloud.nif";
+
     if (mIsStorm)
     {
         osg::Vec3f playerPos (player.getRefData().getPosition().asVec3());
@@ -777,12 +782,12 @@ unsigned int WeatherManager::getWeatherID() const
     return mCurrentWeather;
 }
 
-bool WeatherManager::isDark() const
+bool WeatherManager::useTorches() const
 {
     TimeStamp time = MWBase::Environment::get().getWorld()->getTimeStamp();
-    bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior()
-                     || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
-    return exterior && (time.getHour() < mSunriseTime || time.getHour() > mTimeSettings.mNightStart - 1);
+    bool isDark = time.getHour() < mSunriseTime || time.getHour() > mTimeSettings.mNightStart - 1;
+
+    return isDark && !mPrecipitation;
 }
 
 void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
