@@ -32,12 +32,12 @@ namespace SceneUtil
     protected:
         bool mEnableShadows;
 
-        unsigned int mOutdoorShadowCastingMask;
-        unsigned int mIndoorShadowCastingMask;
-
         osg::ref_ptr<osgShadow::ShadowedScene> mShadowedScene;
         osg::ref_ptr<osgShadow::ShadowSettings> mShadowSettings;
         osg::ref_ptr<MWShadowTechnique> mShadowTechnique;
+
+        unsigned int mOutdoorShadowCastingMask;
+        unsigned int mIndoorShadowCastingMask;
     };
 }
 
