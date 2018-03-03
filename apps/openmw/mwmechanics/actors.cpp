@@ -931,16 +931,11 @@ namespace MWMechanics
                         // For non-hostile NPCs, unequip whatever is in the left slot in favor of a light.
                         if (heldIter != inventoryStore.end() && heldIter->getTypeName() != typeid(ESM::Light).name())
                             inventoryStore.unequipItem(*heldIter, ptr);
-
-                        // Also unequip twohanded weapons which conflict with anything in CarriedLeft
-                        if (torch->getClass().canBeEquipped(*torch, ptr).first == 3)
-                            inventoryStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, ptr);
                     }
 
                     heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
-                    // If we have a torch and can equip it (left slot free, no
-                    // twohanded weapon in right slot), then equip it now.
+                    // If we have a torch and can equip it, then equip it now.
                     if (heldIter == inventoryStore.end()
                             && torch->getClass().canBeEquipped(*torch, ptr).first == 1)
                     {
