@@ -416,7 +416,7 @@ namespace MWRender
         osg::Vec4f diffuse = SceneUtil::colourFromRGB(cell->mAmbi.mSunlight);
         mSunLight->setDiffuse(diffuse);
         mSunLight->setSpecular(diffuse);
-        mSunLight->setDirection(osg::Vec3f(1.f,-1.f,-1.f));
+        mSunLight->setPosition(osg::Vec4f(-1.f, 1.f, 1.f, 0.f));
     }
 
     void RenderingManager::setSunColour(const osg::Vec4f& diffuse, const osg::Vec4f& specular)
