@@ -11,8 +11,6 @@
 #include <MyGUI_RotatingSkin.h>
 #include <MyGUI_FactoryManager.h>
 
-#include <MyGUI_Canvas.h>
-
 #include <components/esm/globalmap.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/settings/settings.hpp>
@@ -43,8 +41,7 @@ namespace
         Local_CompassLayer = 1,
         Local_FogLayer = 2,
         Local_MarkerLayer = 3,
-        Local_MapLayer = 4,
-        Local_BgLayer = 5
+        Local_MapLayer = 4
     };
 
     enum GlobalMapWidgetDepth
@@ -176,7 +173,6 @@ namespace MWGui
         , mMarkerUpdateTimer(0.0f)
         , mLastDirectionX(0.0f)
         , mLastDirectionY(0.0f)
-        , mBordersVisible(false)
         , mNeedDoorMarkersUpdate(false)
     {
         mCustomMarkers.eventMarkersChanged += MyGUI::newDelegate(this, &LocalMapBase::updateCustomMarkers);
@@ -221,25 +217,6 @@ namespace MWGui
                 mFogWidgets.push_back(fog);
             }
         }
-
-        mBgWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
-            MyGUI::IntCoord(0,0, mMapWidgetSize * mNumCells, mMapWidgetSize * mNumCells),
-            MyGUI::Align::Top | MyGUI::Align::Left);
-
-        mBgWidget->setDepth(Local_BgLayer);
-        mBgWidget->setImageTexture("yellow checkers");
-    }
-
-    void LocalMapBase::setCellBordersVisible(bool visible, bool permanent)
-    {
-        if (permanent)
-            mBordersVisible = visible;
-
-        const int newSize = mMapWidgetSize - (visible ? 1 : 0);
-
-        for (int mx=0; mx<mNumCells; ++mx)
-            for (int my=0; my<mNumCells; ++my)
-                mMapWidgets[my + mNumCells*mx]->setSize(newSize,newSize);
     }
 
     void LocalMapBase::setCellPrefix(const std::string& prefix)
@@ -381,11 +358,6 @@ namespace MWGui
 
     void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
     {
-        if (interior)
-            setCellBordersVisible(false,false);
-        else
-            setCellBordersVisible(mBordersVisible,false);
-
         if (x==mCurX && y==mCurY && mInterior==interior && !mChanged)
             return; // don't do anything if we're still in the same cell
 
@@ -408,7 +380,6 @@ namespace MWGui
                 MyGUI::ImageBox* box = mMapWidgets[my + mNumCells*mx];
 
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(mapX, mapY);
-
                 if (texture)
                 {
                     std::shared_ptr<MyGUI::ITexture> guiTex (new osgMyGUI::OSGTexture(texture));

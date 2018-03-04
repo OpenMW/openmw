@@ -81,8 +81,6 @@ namespace MWGui
 
         void onFrame(float dt);
 
-        void setCellBordersVisible(bool visible, bool permanent=true);
-
         bool toggleFogOfWar();
 
         struct MarkerUserData
@@ -129,8 +127,6 @@ namespace MWGui
 
         std::vector<MyGUI::ImageBox*> mMapWidgets;
         std::vector<MyGUI::ImageBox*> mFogWidgets;
-
-        MyGUI::ImageBox *mBgWidget;
 
         typedef std::vector<std::shared_ptr<MyGUI::ITexture> > TextureVector;
         TextureVector mMapTextures;

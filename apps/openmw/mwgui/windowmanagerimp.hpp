@@ -167,8 +167,6 @@ namespace MWGui
 
     virtual void toggleVisible(GuiWindow wnd);
     
-    virtual void setCellBordersVisible(bool visible);
-
     virtual void forceHide(MWGui::GuiWindow wnd);
     virtual void unsetForceHide(MWGui::GuiWindow wnd);
 

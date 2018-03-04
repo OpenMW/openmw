@@ -40,8 +40,6 @@
 #include <components/fallback/fallback.hpp>
 
 #include "../mwworld/cellstore.hpp"
-#include "../mwbase/environment.hpp"
-#include "../mwbase/windowmanager.hpp"
 
 #include "sky.hpp"
 #include "effectmanager.hpp"
@@ -450,7 +448,6 @@ namespace MWRender
     {
         mBorders = !mBorders;
         mTerrain->setBordersVisible(mBorders);
-        MWBase::Environment::get().getWindowManager()->setCellBordersVisible(mBorders);
         return mBorders;
     }
 

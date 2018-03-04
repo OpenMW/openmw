@@ -1967,8 +1967,6 @@ namespace MWGui
 
     void WindowManager::createTextures()
     {
-        //FIXME: copy/paste code
-
         {
             MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("white");
             tex->createManual(8, 8, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8);
@@ -2002,28 +2000,6 @@ namespace MWGui
             tex->createManual(8, 8, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8A8);
             setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
         }
-
-        {
-            MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("yellow checkers");
-            tex->createManual(64, 64, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8);
-            unsigned char* data = reinterpret_cast<unsigned char*>(tex->lock(MyGUI::TextureUsage::Write));
-            for (int x=0; x<64; ++x)
-                for (int y=0; y<64; ++y)
-                {
-                    bool yellow = x % 2 == y % 2;
-
-                    *(data++) = yellow ? 255 : 0;
-                    *(data++) = yellow ? 255 : 0;
-                    *(data++) = 0;
-                }
-            tex->unlock();
-        }
-    }
- 
-    void WindowManager::setCellBordersVisible(bool visible)
-    {
-        mMap->setCellBordersVisible(visible);
-        mHud->setCellBordersVisible(visible);
     }
 
     void WindowManager::setMenuTransparency(float value)
