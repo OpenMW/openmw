@@ -166,7 +166,7 @@ namespace MWGui
     virtual bool isConsoleMode() const;
 
     virtual void toggleVisible(GuiWindow wnd);
-    
+
     virtual void forceHide(MWGui::GuiWindow wnd);
     virtual void unsetForceHide(MWGui::GuiWindow wnd);
 

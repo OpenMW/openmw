@@ -158,7 +158,6 @@ namespace MWGui
 
         float mLastDirectionX;
         float mLastDirectionY;
-        bool mBordersVisible;
 
     private:
         void updateDoorMarkers();
