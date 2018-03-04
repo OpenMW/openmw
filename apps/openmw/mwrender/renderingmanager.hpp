@@ -254,7 +254,6 @@ namespace MWRender
         float mNightEyeFactor;
 
         float mNearClip;
-        float mFarClip;
         float mViewDistance;
         bool mDistantFog : 1;
         bool mDistantTerrain : 1;

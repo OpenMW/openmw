@@ -53,7 +53,6 @@
 
 namespace
 {
-    float DLRenderDistance;
     float DLLandFogStart;
     float DLLandFogEnd;
     float DLUnderwaterFogStart;
@@ -231,7 +230,6 @@ namespace MWRender
 
         mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
 
-        DLRenderDistance = Settings::Manager::getFloat("distant viewing distance", "Camera");
         DLLandFogStart = Settings::Manager::getFloat("distant land fog start", "Fog");
         DLLandFogEnd = Settings::Manager::getFloat("distant land fog end", "Fog");
         DLUnderwaterFogStart = Settings::Manager::getFloat("distant underwater fog start", "Fog");
@@ -312,10 +310,8 @@ namespace MWRender
         mFirstPersonFieldOfView = Settings::Manager::getFloat("first person field of view", "Camera");
         mStateUpdater->setFogEnd(mViewDistance);
 
-        mFarClip = mDistantTerrain ? DLRenderDistance : mViewDistance;
-
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
-        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mFarClip));
+        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
 
         mUniformNear = mRootNode->getOrCreateStateSet()->getUniform("near");
         mUniformFar = mRootNode->getOrCreateStateSet()->getUniform("far");
@@ -680,7 +676,7 @@ namespace MWRender
         rttCamera->setRenderOrder(osg::Camera::PRE_RENDER);
         rttCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         rttCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
-        rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mFarClip);
+        rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
         rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix());
         rttCamera->setViewport(0, 0, w, h);
 
@@ -945,10 +941,10 @@ namespace MWRender
         float fov = mFieldOfView;
         if (mFieldOfViewOverridden)
             fov = mFieldOfViewOverride;
-        mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mFarClip);
+        mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance);
 
         mUniformNear->set(mNearClip);
-        mUniformFar->set(mFarClip);
+        mUniformFar->set(mViewDistance);
     }
 
     void RenderingManager::updateTextureFiltering()
@@ -1008,8 +1004,6 @@ namespace MWRender
             else if (it->first == "Camera" && it->second == "viewing distance")
             {
                 mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
-                if(!mDistantTerrain)
-                    mFarClip = mViewDistance;
                 if(!mDistantFog)
                     mStateUpdater->setFogEnd(mViewDistance);
                 updateProjectionMatrix();
