@@ -177,6 +177,28 @@ void Launcher::SettingsPage::on_browseButton_clicked()
     }
 }
 
+void Launcher::SettingsPage::on_runScriptAfterStartupBrowseButton_clicked()
+{
+    QString scriptFile = QFileDialog::getOpenFileName(
+            this,
+            QObject::tr("Select script file"),
+            QDir::currentPath(),
+            QString(tr("Text file (*.txt)")));
+
+
+    if (scriptFile.isEmpty())
+        return;
+
+    QFileInfo info(scriptFile);
+
+    if (!info.exists() || !info.isReadable())
+        return;
+
+    const QString path(QDir::toNativeSeparators(info.absoluteFilePath()));
+
+    runScriptAfterStartupField->setText(path);
+}
+
 void Launcher::SettingsPage::wizardStarted()
 {
     mMain->hide(); // Hide the launcher
@@ -260,6 +282,19 @@ void Launcher::SettingsPage::saveSettings()
     }  else {
         mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1252"));
     }
+
+    // Testing
+    int skipMenu = skipMenuCheckBox->checkState() == Qt::Checked;
+    if (skipMenu != mGameSettings.value("skip-menu").toInt())
+        mGameSettings.setValue("skip-menu", QString::number(skipMenu));
+
+    QString startCell = startDefaultCharacterAtField->text();
+    if (startCell != mGameSettings.value("start")) {
+        mGameSettings.setValue("start", startCell);
+    }
+    QString scriptRun = runScriptAfterStartupField->text();
+    if (scriptRun != mGameSettings.value("script-run"))
+        mGameSettings.setValue("script-run", scriptRun);
 }
 
 bool Launcher::SettingsPage::loadSettings()
@@ -270,6 +305,13 @@ bool Launcher::SettingsPage::loadSettings()
 
     if (index != -1)
         languageComboBox->setCurrentIndex(index);
+
+    // Testing
+    if (mGameSettings.value("skip-menu").toInt() == 1)
+        skipMenuCheckBox->setCheckState(Qt::Checked);
+
+    startDefaultCharacterAtField->setText(mGameSettings.value("start"));
+    runScriptAfterStartupField->setText(mGameSettings.value("script-run"));
 
     return true;
 }

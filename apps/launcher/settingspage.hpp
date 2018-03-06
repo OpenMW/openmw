@@ -38,6 +38,7 @@ namespace Launcher
         void on_wizardButton_clicked();
         void on_importerButton_clicked();
         void on_browseButton_clicked();
+        void on_runScriptAfterStartupBrowseButton_clicked();
 
         void wizardStarted();
         void wizardFinished(int exitCode, QProcess::ExitStatus exitStatus);
