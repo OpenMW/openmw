@@ -312,7 +312,7 @@ bool Launcher::SettingsPage::loadSettings()
         languageComboBox->setCurrentIndex(index);
 
     // Testing
-    bool skipMenu = mGameSettings.value("skip-menu").toInt() == Qt::Checked;
+    bool skipMenu = mGameSettings.value("skip-menu").toInt() == 1;
     if (skipMenu) {
         skipMenuCheckBox->setCheckState(Qt::Checked);
     }
