@@ -34,7 +34,7 @@ namespace MWGui
     private:
         std::vector<MWWorld::Ptr> mItemSources;
         std::vector<MWWorld::Ptr> mWorldItems;
-
+        bool mIsForTrading;
         std::vector<ItemStack> mItems;
     };
 

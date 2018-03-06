@@ -208,7 +208,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::
 
     for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
     {
-        if (stacks(*iter, item))
+        if (stacks(*iter, item, true))
         {
             iter->getRefData().setCount(iter->getRefData().getCount() + item.getRefData().getCount());
             item.getRefData().setCount(0);
@@ -219,7 +219,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::
     return retval;
 }
 
-bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const
+bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2, bool respectOwnership) const
 {
     const MWWorld::Class& cls1 = ptr1.getClass();
     const MWWorld::Class& cls2 = ptr2.getClass();
@@ -240,7 +240,7 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
     }
 
     return ptr1 != ptr2 // an item never stacks onto itself
-        && ptr1.getCellRef().getOwner() == ptr2.getCellRef().getOwner()
+        && (!respectOwnership || (ptr1.getCellRef().getOwner() == ptr2.getCellRef().getOwner()))
         && ptr1.getCellRef().getSoul() == ptr2.getCellRef().getSoul()
 
         && ptr1.getClass().getRemainingUsageTime(ptr1) == ptr2.getClass().getRemainingUsageTime(ptr2)
@@ -369,7 +369,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
     // determine whether to stack or not
     for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
     {
-        if (stacks(*iter, ptr))
+        if (stacks(*iter, ptr, true))
         {
             // stack
             iter->getRefData().setCount( iter->getRefData().getCount() + count );
@@ -1039,7 +1039,7 @@ bool MWWorld::ContainerStoreIteratorBase<PtrType>::isEqual (const ContainerStore
         case -1: return true;
     }
 
-    return false;  
+    return false;
 }
 
 template<class PtrType>

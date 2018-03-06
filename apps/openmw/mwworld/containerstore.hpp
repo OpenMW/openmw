@@ -37,7 +37,7 @@ namespace MWWorld
     typedef ContainerStoreIteratorBase<Ptr> ContainerStoreIterator;
     typedef ContainerStoreIteratorBase<ConstPtr> ConstContainerStoreIterator;
 
-    
+
     class ContainerStoreListener
     {
         public:
@@ -123,7 +123,7 @@ namespace MWWorld
             ConstContainerStoreIterator cend() const;
             ConstContainerStoreIterator begin (int mask = Type_All) const;
             ConstContainerStoreIterator end() const;
-            
+
             ContainerStoreIterator begin (int mask = Type_All);
             ContainerStoreIterator end();
 
@@ -180,8 +180,10 @@ namespace MWWorld
 
         public:
 
-            virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
-            ///< @return true if the two specified objects can stack with each other
+        virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2, bool respectOwnership) const;
+            ///< @return true if the two specified objects can stack with each other.
+            /// Setting respectOwnership to false will allow objects whose owners don't match
+            /// to stack together
 
             void fill (const ESM::InventoryList& items, const std::string& owner);
             ///< Insert items into *this.
@@ -208,7 +210,7 @@ namespace MWWorld
             friend class ContainerStoreIteratorBase<ConstPtr>;
     };
 
-    
+
     template<class PtrType>
     class ContainerStoreIteratorBase
         : public std::iterator<std::forward_iterator_tag, PtrType, std::ptrdiff_t, PtrType *, PtrType&>
@@ -247,7 +249,7 @@ namespace MWWorld
         {
             typedef ContainerStore* type;
         };
-        
+
         template<class Dummy>
         struct ContainerStoreTrait<ConstPtr, Dummy>
         {
@@ -296,9 +298,9 @@ namespace MWWorld
 
         template<class T>
         void copy (const ContainerStoreIteratorBase<T>& src);
-        
+
         void incType ();
-        
+
         void nextType ();
 
         bool resetIterator ();

@@ -43,16 +43,16 @@ namespace MWGui
 
         // If one of the items is in an inventory and currently equipped, we need to check stacking both ways to be sure
         if (mBase.getContainerStore() && other.mBase.getContainerStore())
-            return mBase.getContainerStore()->stacks(mBase, other.mBase)
-                    && other.mBase.getContainerStore()->stacks(mBase, other.mBase);
+            return mBase.getContainerStore()->stacks(mBase, other.mBase, true)
+                && other.mBase.getContainerStore()->stacks(mBase, other.mBase, true);
 
         if (mBase.getContainerStore())
-            return mBase.getContainerStore()->stacks(mBase, other.mBase);
+            return mBase.getContainerStore()->stacks(mBase, other.mBase, true);
         if (other.mBase.getContainerStore())
-            return other.mBase.getContainerStore()->stacks(mBase, other.mBase);
+            return other.mBase.getContainerStore()->stacks(mBase, other.mBase, true);
 
         MWWorld::ContainerStore store;
-        return store.stacks(mBase, other.mBase);
+        return store.stacks(mBase, other.mBase, true);
 
     }
 
@@ -66,16 +66,16 @@ namespace MWGui
 
         // If one of the items is in an inventory and currently equipped, we need to check stacking both ways to be sure
         if (left.mBase.getContainerStore() && right.mBase.getContainerStore())
-            return left.mBase.getContainerStore()->stacks(left.mBase, right.mBase)
-                    && right.mBase.getContainerStore()->stacks(left.mBase, right.mBase);
+            return left.mBase.getContainerStore()->stacks(left.mBase, right.mBase, true)
+                && right.mBase.getContainerStore()->stacks(left.mBase, right.mBase, true);
 
         if (left.mBase.getContainerStore())
-            return left.mBase.getContainerStore()->stacks(left.mBase, right.mBase);
+            return left.mBase.getContainerStore()->stacks(left.mBase, right.mBase, true);
         if (right.mBase.getContainerStore())
-            return right.mBase.getContainerStore()->stacks(left.mBase, right.mBase);
+            return right.mBase.getContainerStore()->stacks(left.mBase, right.mBase, true);
 
         MWWorld::ContainerStore store;
-        return store.stacks(left.mBase, right.mBase);
+        return store.stacks(left.mBase, right.mBase, true);
     }
 
     ItemModel::ItemModel()

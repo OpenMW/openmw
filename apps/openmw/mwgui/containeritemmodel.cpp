@@ -18,23 +18,23 @@
 namespace
 {
 
-    bool stacks (const MWWorld::Ptr& left, const MWWorld::Ptr& right)
+    bool stacks (const MWWorld::Ptr& left, const MWWorld::Ptr& right, bool respectOwnership)
     {
         if (left == right)
             return true;
 
         // If one of the items is in an inventory and currently equipped, we need to check stacking both ways to be sure
         if (left.getContainerStore() && right.getContainerStore())
-            return left.getContainerStore()->stacks(left, right)
-                    && right.getContainerStore()->stacks(left, right);
+            return left.getContainerStore()->stacks(left, right, respectOwnership)
+                && right.getContainerStore()->stacks(left, right, respectOwnership);
 
         if (left.getContainerStore())
-            return left.getContainerStore()->stacks(left, right);
+            return left.getContainerStore()->stacks(left, right, respectOwnership);
         if (right.getContainerStore())
-            return right.getContainerStore()->stacks(left, right);
+            return right.getContainerStore()->stacks(left, right, respectOwnership);
 
         MWWorld::ContainerStore store;
-        return store.stacks(left, right);
+        return store.stacks(left, right, respectOwnership);
     }
 
 }
@@ -46,11 +46,13 @@ ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSour
     : mItemSources(itemSources)
     , mWorldItems(worldItems)
 {
+    mIsForTrading = true;
     assert (!mItemSources.empty());
 }
 
 ContainerItemModel::ContainerItemModel (const MWWorld::Ptr& source)
 {
+    mIsForTrading = false;
     mItemSources.push_back(source);
 }
 
@@ -111,7 +113,7 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
 
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
-            if (stacks(*it, item.mBase))
+            if (stacks(*it, item.mBase, !mIsForTrading))
             {
                 toRemove -= store.remove(*it, toRemove, *source);
                 if (toRemove <= 0)
@@ -121,7 +123,7 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
     }
     for (std::vector<MWWorld::Ptr>::iterator source = mWorldItems.begin(); source != mWorldItems.end(); ++source)
     {
-        if (stacks(*source, item.mBase))
+        if (stacks(*source, item.mBase, !mIsForTrading))
         {
             int refCount = source->getRefData().getCount();
             if (refCount - toRemove <= 0)
@@ -152,7 +154,7 @@ void ContainerItemModel::update()
             std::vector<ItemStack>::iterator itemStack = mItems.begin();
             for (; itemStack != mItems.end(); ++itemStack)
             {
-                if (stacks(*it, itemStack->mBase))
+                if (stacks(*it, itemStack->mBase, !mIsForTrading))
                 {
                     // we already have an item stack of this kind, add to it
                     itemStack->mCount += it->getRefData().getCount();
@@ -173,7 +175,7 @@ void ContainerItemModel::update()
         std::vector<ItemStack>::iterator itemStack = mItems.begin();
         for (; itemStack != mItems.end(); ++itemStack)
         {
-            if (stacks(*source, itemStack->mBase))
+            if (stacks(*source, itemStack->mBase, !mIsForTrading))
             {
                 // we already have an item stack of this kind, add to it
                 itemStack->mCount += source->getRefData().getCount();
