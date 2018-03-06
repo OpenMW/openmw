@@ -73,7 +73,10 @@ void Launcher::AdvancedPage::saveSettings()
 
     // Saves Settings
     saveSettingBool(timePlayedCheckbox, "timeplayed", "Saves");
-    mEngineSettings.setInt("max quicksaves", "Saves", maximumQuicksavesComboBox->value());
+    int maximumQuicksaves = maximumQuicksavesComboBox->value();
+    if (maximumQuicksaves != mEngineSettings.getInt("max quicksaves", "Saves")) {
+        mEngineSettings.setInt("max quicksaves", "Saves", maximumQuicksaves);
+    }
 
     // Other Settings
     std::string screenshotFormatString = screenshotFormatComboBox->currentText().toLower().toStdString();
