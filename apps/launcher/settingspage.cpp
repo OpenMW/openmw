@@ -177,28 +177,6 @@ void Launcher::SettingsPage::on_browseButton_clicked()
     }
 }
 
-void Launcher::SettingsPage::on_runScriptAfterStartupBrowseButton_clicked()
-{
-    QString scriptFile = QFileDialog::getOpenFileName(
-            this,
-            QObject::tr("Select script file"),
-            QDir::currentPath(),
-            QString(tr("Text file (*.txt)")));
-
-
-    if (scriptFile.isEmpty())
-        return;
-
-    QFileInfo info(scriptFile);
-
-    if (!info.exists() || !info.isReadable())
-        return;
-
-    const QString path(QDir::toNativeSeparators(info.absoluteFilePath()));
-
-    runScriptAfterStartupField->setText(path);
-}
-
 void Launcher::SettingsPage::wizardStarted()
 {
     mMain->hide(); // Hide the launcher
@@ -269,6 +247,33 @@ void Launcher::SettingsPage::updateOkButton(const QString &text)
             : mProfileDialog->setOkButtonEnabled(true);
 }
 
+void Launcher::SettingsPage::on_skipMenuCheckBox_stateChanged(int state) {
+    startDefaultCharacterAtLabel->setEnabled(state == Qt::Checked);
+    startDefaultCharacterAtField->setEnabled(state == Qt::Checked);
+}
+
+void Launcher::SettingsPage::on_runScriptAfterStartupBrowseButton_clicked()
+{
+    QString scriptFile = QFileDialog::getOpenFileName(
+            this,
+            QObject::tr("Select script file"),
+            QDir::currentPath(),
+            QString(tr("Text file (*.txt)")));
+
+
+    if (scriptFile.isEmpty())
+        return;
+
+    QFileInfo info(scriptFile);
+
+    if (!info.exists() || !info.isReadable())
+        return;
+
+    const QString path(QDir::toNativeSeparators(info.absoluteFilePath()));
+
+    runScriptAfterStartupField->setText(path);
+}
+
 void Launcher::SettingsPage::saveSettings()
 {
     QString language(languageComboBox->currentText());
@@ -307,8 +312,12 @@ bool Launcher::SettingsPage::loadSettings()
         languageComboBox->setCurrentIndex(index);
 
     // Testing
-    if (mGameSettings.value("skip-menu").toInt() == 1)
+    bool skipMenu = mGameSettings.value("skip-menu").toInt() == Qt::Checked;
+    if (skipMenu) {
         skipMenuCheckBox->setCheckState(Qt::Checked);
+    }
+    startDefaultCharacterAtLabel->setEnabled(skipMenu);
+    startDefaultCharacterAtField->setEnabled(skipMenu);
 
     startDefaultCharacterAtField->setText(mGameSettings.value("start"));
     runScriptAfterStartupField->setText(mGameSettings.value("script-run"));
