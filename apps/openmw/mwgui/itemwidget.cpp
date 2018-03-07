@@ -18,11 +18,11 @@ namespace
             return "";
 
         if (count > 999999999)
-            return MyGUI::utility::toString(int(count/1000000000.f)) + "b";
+            return MyGUI::utility::toString(count/1000000000) + "b";
         else if (count > 999999)
-            return MyGUI::utility::toString(int(count/1000000.f)) + "m";
+            return MyGUI::utility::toString(count/1000000) + "m";
         else if (count > 9999)
-            return MyGUI::utility::toString(int(count/1000.f)) + "k";
+            return MyGUI::utility::toString(count/1000) + "k";
         else
             return MyGUI::utility::toString(count);
     }
