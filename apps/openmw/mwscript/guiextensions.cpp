@@ -120,7 +120,7 @@ namespace MWScript
                 runtime.pop();
 
                 // "Will match complete or partial cells, so ShowMap, "Vivec" will show cells Vivec and Vivec, Fred's House as well."
-                // http://www.uesp.net/wiki/Tes3Mod:ShowMap
+                // https://www.uesp.net/wiki/Tes3Mod:ShowMap
 
                 const MWWorld::Store<ESM::Cell> &cells =
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>();
