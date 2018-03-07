@@ -48,7 +48,7 @@ namespace
     {
         const char *id;
         // Specialization points to match, in order: Stealth, Combat, Magic
-        // Note: Order is taken from http://www.uesp.net/wiki/Morrowind:Class_Quiz
+        // Note: Order is taken from https://www.uesp.net/wiki/Morrowind:Class_Quiz
         unsigned int points[3];
     };
 
