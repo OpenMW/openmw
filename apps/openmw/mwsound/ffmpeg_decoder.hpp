@@ -21,7 +21,7 @@ extern "C"
 
 // From version 54.56 binkaudio encoding format changed from S16 to FLTP. See:
 // https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d
-// http://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
+// https://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
 #include <libswresample/swresample.h>
 }
 

@@ -3,7 +3,7 @@ How to contribute to OpenMW
 
 Not sure what to do with all your free time? Pick out a task from here:
 
-http://bugs.openmw.org/
+https://bugs.openmw.org/
 
 Currently, we are focused on completing the MW game experience and general polishing. Features out of this scope may be approved in some cases, but you should probably start a discussion first.
 

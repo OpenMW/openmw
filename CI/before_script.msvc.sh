@@ -303,25 +303,25 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	# Boost
 	if [ -z $APPVEYOR ]; then
 		download "Boost 1.61.0" \
-			"http://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-msvc-${MSVC_VER}.0-${BITS}.exe" \
+			"https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-msvc-${MSVC_VER}.0-${BITS}.exe" \
 			"boost-1.61.0-msvc${MSVC_YEAR}-win${BITS}.exe"
 	fi
 
 	# Bullet
 	download "Bullet 2.86" \
-		"http://www.lysator.liu.se/~ace/OpenMW/deps/Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}.7z" \
+		"https://www.lysator.liu.se/~ace/OpenMW/deps/Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}.7z" \
 		"Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}.7z"
 
 	# FFmpeg
 	download "FFmpeg 3.2.4" \
-		"http://ffmpeg.zeranoe.com/builds/win${BITS}/shared/ffmpeg-3.2.4-win${BITS}-shared.zip" \
+		"https://ffmpeg.zeranoe.com/builds/win${BITS}/shared/ffmpeg-3.2.4-win${BITS}-shared.zip" \
 		"ffmpeg-3.2.4-win${BITS}.zip" \
-		"http://ffmpeg.zeranoe.com/builds/win${BITS}/dev/ffmpeg-3.2.4-win${BITS}-dev.zip" \
+		"https://ffmpeg.zeranoe.com/builds/win${BITS}/dev/ffmpeg-3.2.4-win${BITS}-dev.zip" \
 		"ffmpeg-3.2.4-dev-win${BITS}.zip"
 
 	# MyGUI
 	download "MyGUI 3.2.2" \
-		"http://www.lysator.liu.se/~ace/OpenMW/deps/MyGUI-3.2.2-msvc${MSVC_YEAR}-win${BITS}.7z" \
+		"https://www.lysator.liu.se/~ace/OpenMW/deps/MyGUI-3.2.2-msvc${MSVC_YEAR}-win${BITS}.7z" \
 		"MyGUI-3.2.2-msvc${MSVC_YEAR}-win${BITS}.7z"
 
 	# OpenAL
@@ -331,7 +331,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# OSG
 	download "OpenSceneGraph 3.4.1-scrawl" \
-		"http://www.lysator.liu.se/~ace/OpenMW/deps/OSG-3.4.1-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z" \
+		"https://www.lysator.liu.se/~ace/OpenMW/deps/OSG-3.4.1-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z" \
 		"OSG-3.4.1-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z"
 
 	# Qt
@@ -343,9 +343,9 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		fi
 
 		download "Qt 5.7.2" \
-			"http://download.qt.io/official_releases/qt/5.7/5.7.0/qt-opensource-windows-x86-msvc${MSVC_YEAR}${QT_SUFFIX}-5.7.0.exe" \
+			"https://download.qt.io/official_releases/qt/5.7/5.7.0/qt-opensource-windows-x86-msvc${MSVC_YEAR}${QT_SUFFIX}-5.7.0.exe" \
 			"qt-5.7.0-msvc${MSVC_YEAR}-win${BITS}.exe" \
-			"http://www.lysator.liu.se/~ace/OpenMW/deps/qt-5-install.qs" \
+			"https://www.lysator.liu.se/~ace/OpenMW/deps/qt-5-install.qs" \
 			"qt-5-install.qs"
 	fi
 
