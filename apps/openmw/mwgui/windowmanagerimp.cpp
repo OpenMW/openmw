@@ -237,7 +237,10 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::ResourceManager::getInstance().load("core.xml");
 
+        bool keyboardNav = Settings::Manager::getBool("keyboard navigation", "GUI");
         mKeyboardNavigation.reset(new KeyboardNavigation());
+        mKeyboardNavigation->setEnabled(keyboardNav);
+        Gui::ImageButton::setDefaultNeedKeyFocus(keyboardNav);
 
         mLoadingScreen = new LoadingScreen(mResourceSystem->getVFS(), mViewer);
         mWindows.push_back(mLoadingScreen);
