@@ -83,8 +83,9 @@ namespace MWClass
 
         if (ptr.getCellRef().getSoul() != "")
         {
-            const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(ref->mRef.getSoul());
-            value *= creature->mData.mSoul;
+            const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ref->mRef.getSoul());
+            if (creature)
+                value *= creature->mData.mSoul;
         }
 
         return value;
@@ -148,8 +149,9 @@ namespace MWClass
 
         if (ref->mRef.getSoul() != "")
         {
-            const ESM::Creature *creature = store.get<ESM::Creature>().find(ref->mRef.getSoul());
-            info.caption += " (" + creature->mName + ")";
+            const ESM::Creature *creature = store.get<ESM::Creature>().search(ref->mRef.getSoul());
+            if (creature)
+                info.caption += " (" + creature->mName + ")";
         }
 
         std::string text;
@@ -210,7 +212,7 @@ namespace MWClass
 
     std::shared_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr) const
     {
-        if (ptr.getCellRef().getSoul().empty())
+        if (ptr.getCellRef().getSoul().empty() || !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ptr.getCellRef().getSoul()))
             return std::shared_ptr<MWWorld::Action>(new MWWorld::NullAction());
         else
             return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionSoulgem(ptr));
