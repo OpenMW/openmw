@@ -23,9 +23,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
+        <y>-44</y>
         <width>473</width>
-        <height>510</height>
+        <height>567</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -170,6 +170,23 @@
           <string>Testing</string>
          </property>
          <layout class="QVBoxLayout" name="testingGroupVerticalLayout">
+          <item>
+           <widget class="QLabel" name="testingLabel">
+            <property name="text">
+             <string>These settings are intended for testing mods and may cause issues if used for normal gameplay.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="testingLine">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
           <item>
            <widget class="QCheckBox" name="skipMenuCheckBox">
             <property name="text">
