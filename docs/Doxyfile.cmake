@@ -328,7 +328,7 @@ BUILTIN_STL_SUPPORT    = YES
 CPP_CLI_SUPPORT        = NO
 
 # Set the SIP_SUPPORT tag to YES if your project consists of sip (see:
-# http://www.riverbankcomputing.co.uk/software/sip/intro) sources only. Doxygen
+# https://riverbankcomputing.com/software/sip/intro) sources only. Doxygen
 # will parse them like normal C++ but will assume all classes use public instead
 # of private inheritance when no explicit protection keyword is present.
 # The default value is: NO.
@@ -1194,7 +1194,7 @@ HTML_INDEX_NUM_ENTRIES = 100
 
 # If the GENERATE_DOCSET tag is set to YES, additional index files will be
 # generated that can be used as input for Apple's Xcode 3 integrated development
-# environment (see: http://developer.apple.com/tools/xcode/), introduced with
+# environment (see: https://developer.apple.com/xcode/), introduced with
 # OSX 10.5 (Leopard). To create a documentation set, doxygen will generate a
 # Makefile in the HTML output directory. Running make will produce the docset in
 # that directory and running make install will install the docset in
@@ -1315,7 +1315,7 @@ QCH_FILE               =
 
 # The QHP_NAMESPACE tag specifies the namespace to use when generating Qt Help
 # Project output. For more information please see Qt Help Project / Namespace
-# (see: http://qt-project.org/doc/qt-4.8/qthelpproject.html#namespace).
+# (see: https://doc.qt.io/archives/qt-4.8/qthelpproject.html#namespace).
 # The default value is: org.doxygen.Project.
 # This tag requires that the tag GENERATE_QHP is set to YES.
 
@@ -1323,8 +1323,7 @@ QHP_NAMESPACE          = org.openmw
 
 # The QHP_VIRTUAL_FOLDER tag specifies the namespace to use when generating Qt
 # Help Project output. For more information please see Qt Help Project / Virtual
-# Folders (see: http://qt-project.org/doc/qt-4.8/qthelpproject.html#virtual-
-# folders).
+# Folders (see: https://doc.qt.io/archives/qt-4.8/qthelpproject.html#virtual-folders).
 # The default value is: doc.
 # This tag requires that the tag GENERATE_QHP is set to YES.
 
@@ -1332,23 +1331,21 @@ QHP_VIRTUAL_FOLDER     = doc
 
 # If the QHP_CUST_FILTER_NAME tag is set, it specifies the name of a custom
 # filter to add. For more information please see Qt Help Project / Custom
-# Filters (see: http://qt-project.org/doc/qt-4.8/qthelpproject.html#custom-
-# filters).
+# Filters (see: https://doc.qt.io/archives/qt-4.8/qthelpproject.html#custom-filters).
 # This tag requires that the tag GENERATE_QHP is set to YES.
 
 QHP_CUST_FILTER_NAME   =
 
 # The QHP_CUST_FILTER_ATTRS tag specifies the list of the attributes of the
 # custom filter to add. For more information please see Qt Help Project / Custom
-# Filters (see: http://qt-project.org/doc/qt-4.8/qthelpproject.html#custom-
-# filters).
+# Filters (see: https://doc.qt.io/archives/qt-4.8/qthelpproject.html#custom-filters).
 # This tag requires that the tag GENERATE_QHP is set to YES.
 
 QHP_CUST_FILTER_ATTRS  =
 
 # The QHP_SECT_FILTER_ATTRS tag specifies the list of the attributes this
 # project's filter section matches. Qt Help Project / Filter Attributes (see:
-# http://qt-project.org/doc/qt-4.8/qthelpproject.html#filter-attributes).
+# https://doc.qt.io/archives/qt-4.8/qthelpproject.html#filter-attributes).
 # This tag requires that the tag GENERATE_QHP is set to YES.
 
 QHP_SECT_FILTER_ATTRS  =
@@ -1882,7 +1879,7 @@ DOCBOOK_OUTPUT         = docbook
 #---------------------------------------------------------------------------
 
 # If the GENERATE_AUTOGEN_DEF tag is set to YES doxygen will generate an AutoGen
-# Definitions (see http://autogen.sf.net) file that captures the structure of
+# Definitions (see http://autogen.sourceforge.net) file that captures the structure of
 # the code including all documentation. Note that this feature is still
 # experimental and incomplete at the moment.
 # The default value is: NO.

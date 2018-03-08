@@ -928,30 +928,30 @@ QCH_FILE               =
 
 # The QHP_NAMESPACE tag specifies the namespace to use when generating
 # Qt Help Project output. For more information please see
-# http://doc.trolltech.com/qthelpproject.html#namespace
+# https://doc.qt.io/archives/qt-4.8/qthelpproject.html#namespace
 
 QHP_NAMESPACE          =
 
 # The QHP_VIRTUAL_FOLDER tag specifies the namespace to use when generating
 # Qt Help Project output. For more information please see
-# http://doc.trolltech.com/qthelpproject.html#virtual-folders
+# https://doc.qt.io/archives/qt-4.8/qthelpproject.html#virtual-folders
 
 QHP_VIRTUAL_FOLDER     = doc
 
 # If QHP_CUST_FILTER_NAME is set, it specifies the name of a custom filter to add.
 # For more information please see
-# http://doc.trolltech.com/qthelpproject.html#custom-filters
+# https://doc.qt.io/archives/qt-4.8/qthelpproject.html#custom-filters
 
 QHP_CUST_FILTER_NAME   =
 
 # The QHP_CUST_FILT_ATTRS tag specifies the list of the attributes of the custom filter to add.For more information please see
-# <a href="http://doc.trolltech.com/qthelpproject.html#custom-filters">Qt Help Project / Custom Filters</a>.
+# <a href="https://doc.qt.io/archives/qt-4.8/qthelpproject.html#custom-filters">Qt Help Project / Custom Filters</a>.
 
 QHP_CUST_FILTER_ATTRS  =
 
 # The QHP_SECT_FILTER_ATTRS tag specifies the list of the attributes this project's
 # filter section matches.
-# <a href="http://doc.trolltech.com/qthelpproject.html#filter-attributes">Qt Help Project / Filter Attributes</a>.
+# <a href="https://doc.qt.io/archives/qt-4.8/qthelpproject.html#filter-attributes">Qt Help Project / Filter Attributes</a>.
 
 QHP_SECT_FILTER_ATTRS  =
 
