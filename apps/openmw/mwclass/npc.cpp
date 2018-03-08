@@ -144,7 +144,7 @@ namespace
     /**
      * @brief autoCalculateSkills
      *
-     * Skills are calculated with following formulae ( https://www.uesp.net/wiki/Morrowind:NPCs#Skills ):
+     * Skills are calculated with following formulae ( http://www.uesp.net/wiki/Morrowind:NPCs#Skills ):
      *
      * Skills: (Level - 1) × (Majority Multiplier + Specialization Multiplier)
      *
@@ -406,7 +406,7 @@ namespace MWClass
             // store
             ptr.getRefData().setCustomData (data.release());
 
-            getInventoryStore(ptr).autoEquip(ptr); 
+            getInventoryStore(ptr).autoEquip(ptr);
         }
     }
 

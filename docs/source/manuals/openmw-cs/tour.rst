@@ -3,7 +3,7 @@ A Tour through OpenMW CS: making a magic ring
 
 In this first chapter we will create a mod that adds a new ring with a simple
 enchantment to the game. The ring will give its wearer a permanent Night Vision
-effect while being worn. You do not need previous Morrowind modding experience, 
+effect while being worn. You do not need previous Morrowind modding experience,
 but you should be familiar with the game itself. There will be no
 scripting necessary, we can achieve everything using just what the base game
 offers out of the box. Before continuing make sure that OpenMW is properly
@@ -133,7 +133,7 @@ the filter directly into the filter field rather than the name of an existing
 filter. To signify that we are using an instant filter the have to use `!` as
 the first character. Type the following into the field:
 
-.. code:: 
+.. code::
 
    !string("id", ".*ring.*")
 
@@ -217,20 +217,20 @@ actually modify the contents of the game.
 Adding to an NPC
 ================
 
-The simplest way is probably to add it to the inventory of a shopkeeper. 
+The simplest way is probably to add it to the inventory of a shopkeeper.
 An obvious candidate is Arrille in Seyda Neen - he's quick to find in a new game
 and he's easy to find in the CS as his name comes early alphabetically.
 
 .. figure:: _static/images/chapter-1/Ring_to_Arrille.png
    :alt: Putting the ring into Arrille's inventory
-   
-Open the CS and open the *Objects* table (*World* → *Objects*). 
+
+Open the CS and open the *Objects* table (*World* → *Objects*).
 Scroll down to Arrille, or use a filter like !string("ID","arrille").
 
-Open another pane to edit him - either right click and select edit or use the 
+Open another pane to edit him - either right click and select edit or use the
 shortcut (default is shift double-click). Scroll down to the inventory section
-and right click to add a new row. Type in the id of the ring (or find it in the 
-object pane, and drag and drop). Set the number of rings for him to stock - with 
+and right click to add a new row. Type in the id of the ring (or find it in the
+object pane, and drag and drop). Set the number of rings for him to stock - with
 a negative number indicating that he will restock again to maintain that level.
 
 However, it's an attractive item, so he will probably wear it rather than sell it.
@@ -241,7 +241,7 @@ Fargoth to give it to the player in exchange for his healing ring.
 
 .. figure:: _static/images/chapter-1/Ring_to_Fargoth_1.png
    :alt: Editing Fargoth to give ring to player
-   
+
 Open the *Topicinfo* Table (*Characters* → *Topic Infos*). Use a filter !string(Topic,ring)
 and select the row with a response starting with "You found it!". Edit the record,
 firstly by adding a bit more to the response, then by adding a line to the script
@@ -297,7 +297,7 @@ Placing in plain sight
 =====================
 
 Let's hide the Ring of Night vision in the cabin of the [Ancient Shipwreck]
-(http://en.uesp.net/wiki/Morrowind:Ancient_Shipwreck), a derelict vessel
+(https://en.uesp.net/wiki/Morrowind:Ancient_Shipwreck), a derelict vessel
 southeast of Dagon Fel. Open the list of Cells (*World* → *Cells*) and find
 "Ancient Shipwreck, Cabin".
 
@@ -333,8 +333,8 @@ This is probably a suitable place to start talking about how navigation differs 
 in vanilla Morrowind.
 
 There is advice in Scripting for Dummies, the definitive manual for Morrowind Scripting:
-"If you give your scripts a common tag, that will make it easier to jump between the 
-different scripts of your project, e.g. start every script name with AA_Scriptname 
+"If you give your scripts a common tag, that will make it easier to jump between the
+different scripts of your project, e.g. start every script name with AA_Scriptname
 this will put them right at the beginning of the list and keep them neatly together."
 
 This is valid for the rather poorer navigation facilities there, but it's not sensible for
@@ -359,12 +359,12 @@ the base game.
 
 "Modified" status will cover items from the base game which have been modified in this addon.
 
-Click on the top of the column to toggle between ascending and descending order - thus between "Added" 
-and "Modified" at the top. Or put your desired modified status into a filter then sort alpabetically 
+Click on the top of the column to toggle between ascending and descending order - thus between "Added"
+and "Modified" at the top. Or put your desired modified status into a filter then sort alpabetically
 on a different column.
 
 
-   
+
 Checking your new addon
 =======================
 
