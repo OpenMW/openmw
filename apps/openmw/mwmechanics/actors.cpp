@@ -262,7 +262,10 @@ namespace MWMechanics
             MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
 
         if (prevItem != store.end())
-            mPreviousItems[itemId] = (*prevItem).getCellRef().getRefId();
+        {
+            MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
+            player->setPreviousItem(itemId, prevItem->getCellRef().getRefId());
+        }
     }
 
     void Actors::removeBoundItem (const std::string& itemId, const MWWorld::Ptr& actor)
@@ -272,16 +275,16 @@ namespace MWMechanics
 
         MWWorld::ContainerStoreIterator currentItem = store.getSlot(slot);
 
-        bool wasEquipped = currentItem != store.end() && Misc::StringUtils::ciEqual((*currentItem).getCellRef().getRefId(), itemId);
+        bool wasEquipped = currentItem != store.end() && Misc::StringUtils::ciEqual(currentItem->getCellRef().getRefId(), itemId);
 
         store.remove(itemId, 1, actor, true);
 
         if (actor != MWMechanics::getPlayer())
             return;
 
-        std::string prevItemId = mPreviousItems[itemId];
-
-        mPreviousItems.erase(itemId);
+        MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
+        std::string prevItemId = player->getPreviousItem(itemId);
+        player->erasePreviousItem(itemId);
 
         if (prevItemId.empty())
             return;
@@ -1956,7 +1959,6 @@ namespace MWMechanics
         }
         mActors.clear();
         mDeathCount.clear();
-        mPreviousItems.clear();
     }
 
     void Actors::updateMagicEffects(const MWWorld::Ptr &ptr)
