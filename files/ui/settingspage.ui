@@ -173,7 +173,7 @@
           <item>
            <widget class="QLabel" name="testingLabel">
             <property name="text">
-             <string>These settings are intended for testing mods and may cause issues if used for normal gameplay.</string>
+             <string>These settings are intended for testing mods and will cause issues if used for normal gameplay.</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
