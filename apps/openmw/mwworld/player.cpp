@@ -342,6 +342,8 @@ namespace MWWorld
         for (int i=0; i<ESM::Skill::Length; ++i)
             mSaveSkills[i].writeState(player.mSaveSkills[i]);
 
+        player.mPreviousItems = mPreviousItems;
+
         writer.startRecord (ESM::REC_PLAY);
         player.save (writer);
         writer.endRecord (ESM::REC_PLAY);
@@ -441,6 +443,8 @@ namespace MWWorld
 
             mForwardBackward = 0;
             mTeleported = false;
+
+            mPreviousItems = player.mPreviousItems;
 
             return true;
         }
