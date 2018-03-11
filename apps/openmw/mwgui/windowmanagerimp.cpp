@@ -1916,11 +1916,16 @@ namespace MWGui
             mInventoryWindow->cycle(next);
     }
 
-    void WindowManager::playSound(const std::string& soundId, float volume, float pitch)
+    void WindowManager::playSound(const std::string& soundId, bool preventOverlapping, float volume, float pitch)
     {
         if (soundId.empty())
             return;
-        MWBase::Environment::get().getSoundManager()->playSound(soundId, volume, pitch, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
+
+        MWBase::SoundManager *sndmgr = MWBase::Environment::get().getSoundManager();
+        if (preventOverlapping && sndmgr->getSoundPlaying(MWWorld::Ptr(), soundId))
+            return;
+
+        sndmgr->playSound(soundId, volume, pitch, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
     }
 
     void WindowManager::updateSpellWindow()
