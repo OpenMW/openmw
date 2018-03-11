@@ -775,7 +775,7 @@ namespace MWMechanics
             if (item.getCellRef().getEnchantmentCharge() == -1)
                 item.getCellRef().setEnchantmentCharge(static_cast<float>(enchantment->mData.mCharge));
 
-            if (godmode)
+            if (godmode || mFromProjectile)
                 castCost = 0;
 
             if (item.getCellRef().getEnchantmentCharge() < castCost)

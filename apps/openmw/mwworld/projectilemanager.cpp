@@ -15,6 +15,7 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
@@ -152,7 +153,7 @@ namespace MWWorld
         , mPhysics(physics)
         , mCleanupTimer(0.0f)
     {
-
+        mRestoreProjectiles = Settings::Manager::getBool("restore projectiles", "Game");
     }
 
     /// Rotates an osg::PositionAttitudeTransform over time.
@@ -336,7 +337,7 @@ namespace MWWorld
     void ProjectileManager::update(float dt)
     {
         periodicCleanup(dt);
-        moveProjectiles(dt);
+        mRestoreProjectiles ? enhancedMoveProjectiles(dt) : moveProjectiles(dt);
         moveMagicBolts(dt);
     }
 
@@ -466,7 +467,7 @@ namespace MWWorld
 
             osg::Quat orient;
 
-            if (it->mThrown)            
+            if (it->mThrown)
                 orient.set(
                     osg::Matrixd::rotate(it->mEffectAnimationTime->getTime() * -10.0,osg::Vec3f(0,0,1)) *
                     osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
@@ -521,6 +522,143 @@ namespace MWWorld
                 if (underwater)
                     mRendering->emitWaterRipple(newPos);
 
+                mParent->removeChild(it->mNode);
+                it = mProjectiles.erase(it);
+                continue;
+            }
+
+            ++it;
+        }
+    }
+
+    void ProjectileManager::enhancedMoveProjectiles(float duration)
+    {
+        for (std::vector<ProjectileState>::iterator it = mProjectiles.begin(); it != mProjectiles.end();)
+        {
+            // gravity constant - must be way lower than the gravity affecting actors, since we're not
+            // simulating aerodynamics at all
+            it->mVelocity -= osg::Vec3f(0, 0, 627.2f * 0.1f) * duration;
+
+            osg::Vec3f pos(it->mNode->getPosition());
+            osg::Vec3f newPos = pos + it->mVelocity * duration;
+
+            osg::Quat orient;
+
+            if (it->mThrown)
+                orient.set(
+                    osg::Matrixd::rotate(it->mEffectAnimationTime->getTime() * -10.0,osg::Vec3f(0,0,1)) *
+                    osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
+                    osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
+                    osg::Matrixd::inverse(
+                        osg::Matrixd::lookAt(
+                            osg::Vec3f(0,0,0),
+                            it->mVelocity,
+                            osg::Vec3f(0,0,1))
+                        )
+                    );
+            else
+                orient.makeRotate(osg::Vec3f(0,1,0), it->mVelocity);
+
+            it->mNode->setAttitude(orient);
+            it->mNode->setPosition(newPos);
+
+            update(*it, duration);
+
+            MWWorld::Ptr caster = it->getCaster();
+
+            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+            std::vector<MWWorld::Ptr> targetActors;
+            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
+                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
+
+            // Check for impact
+            // TODO: use a proper btRigidBody / btGhostObject?
+            MWPhysics::PhysicsSystem::RayResult result1 = mPhysics->castRay(pos, newPos, caster, targetActors, MWPhysics::CollisionType_Actor);
+            MWRender::RenderingManager::RayResult result2 = mRendering->castRay(pos, newPos, true, true);
+
+            bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos);
+
+            if (result1.mHit || result2.mHit || underwater)
+            {
+                MWWorld::Ptr hitObject = MWWorld::Ptr();
+                if (result1.mHit)
+                    hitObject = result1.mHitObject;
+                else if (result2.mHit)
+                    hitObject = result2.mHitObject;
+
+                osg::Vec3f hitPos = newPos;
+                if (result1.mHit)
+                    hitPos = result1.mHitPos;
+                else if (result2.mHit)
+                    hitPos = result2.mHitPointWorld;
+
+                MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
+
+                // Try to get a Ptr to the bow that was used. It might no longer exist.
+                MWWorld::Ptr bow = projectileRef.getPtr();
+                if (!caster.isEmpty() && it->mIdArrow != it->mBowId)
+                {
+                    MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
+                    MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                    if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
+                        bow = *invIt;
+                }
+
+                if (caster.isEmpty())
+                    caster = hitObject;
+
+                MWMechanics::projectileHit(caster, hitObject, bow, projectileRef.getPtr(), hitPos, it->mAttackStrength);
+
+                if (underwater)
+                    mRendering->emitWaterRipple(newPos);
+
+                // If we did not hit an actor or lava, we can restore the projectile
+                bool restore = hitObject.isEmpty() || (!hitObject.getClass().isActor() && hitObject.getClass().getScript(hitObject) != "lava");
+
+                // We should prevent an engine from spawning projectile at the end of other projectile to prevent long lines of arrows (->->->->)
+                bool targetIsProjectile = false;
+                if (!hitObject.isEmpty() && hitObject.getClass().getTypeName() == typeid(ESM::Weapon).name())
+                {
+                    int type = hitObject.get<ESM::Weapon>()->mBase->mData.mType;
+                    targetIsProjectile = (type == ESM::Weapon::MarksmanThrown ||
+                                            type == ESM::Weapon::Arrow ||
+                                            type == ESM::Weapon::Bolt);
+                }
+                if (targetIsProjectile) continue;
+
+                if (!underwater && restore)
+                {
+                    // dive projectile to target a bit
+                    it->mVelocity.normalize();
+                    hitPos += it->mVelocity * 2.5f;
+                    ESM::Position position = ESM::Position();
+                    position.pos[0] = hitPos.x();
+                    position.pos[1] = hitPos.y();
+                    position.pos[2] = hitPos.z();
+
+                    MWBase::Environment::get().getSoundManager()->playSound3D(hitPos, "Missile Hit", 1.f, 1.f);
+                    MWWorld::Ptr arrow = MWBase::Environment::get().getWorld()->placeObject(projectileRef.getPtr(), caster.getCell(), position);
+
+                    // We should orient throwing weapon manually because of its rotation
+                    if (it->mIdArrow == it->mBowId)
+                    {
+                        osg::Quat throwOrient;
+                        throwOrient.set(
+                            osg::Matrixd::rotate(osg::PI, osg::Vec3f(0,0,1)) *
+                            osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
+                            osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
+                            osg::Matrixd::inverse(
+                                osg::Matrixd::lookAt(
+                                    osg::Vec3f(0,0,0),
+                                    it->mVelocity,
+                                    osg::Vec3f(0,0,1))
+                                )
+                            );
+                        arrow.getRefData().getBaseNode()->setAttitude(throwOrient);
+                    }
+                    else
+                        arrow.getRefData().getBaseNode()->setAttitude(it->mNode->getAttitude());
+                }
                 mParent->removeChild(it->mNode);
                 it = mProjectiles.erase(it);
                 continue;
