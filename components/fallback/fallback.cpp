@@ -53,7 +53,7 @@ namespace Fallback
     {
         std::string sum=getFallbackString(fall);
         if(sum.empty())
-            return osg::Vec4f(0.f,0.f,0.f,1.f);
+            return osg::Vec4f(0.5f,0.5f,0.5f,1.f);
         else
         {
             std::string ret[3];
