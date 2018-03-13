@@ -1,0 +1,34 @@
+#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_CACHEDRECASTMESHMANAGER_H
+#define OPENMW_COMPONENTS_DETOURNAVIGATOR_CACHEDRECASTMESHMANAGER_H
+
+#include "recastmeshmanager.hpp"
+
+#include <boost/optional.hpp>
+
+namespace DetourNavigator
+{
+    class CachedRecastMeshManager
+    {
+    public:
+        CachedRecastMeshManager(const Settings& settings);
+
+        template <class T>
+        bool addObject(std::size_t id, const T& shape, const btTransform& transform)
+        {
+            if (!mImpl.addObject(id, shape, transform))
+                return false;
+            mCached.reset();
+            return true;
+        }
+
+        bool removeObject(std::size_t id);
+
+        std::shared_ptr<RecastMesh> getMesh();
+
+    private:
+        RecastMeshManager mImpl;
+        std::shared_ptr<RecastMesh> mCached;
+    };
+}
+
+#endif

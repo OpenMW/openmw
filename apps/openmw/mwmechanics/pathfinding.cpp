@@ -1,6 +1,12 @@
 #include "pathfinding.hpp"
 
+#include <iterator>
 #include <limits>
+
+#include <components/detournavigator/exceptions.hpp>
+#include <components/detournavigator/debug.hpp>
+#include <components/detournavigator/navigator.hpp>
+#include <components/debug/debuglog.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -280,6 +286,25 @@ namespace MWMechanics
                     mPath.pop_front();
                 }
             }
+        }
+    }
+
+    void PathFinder::buildPathByNavigator(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+        const osg::Vec3f& halfExtents)
+    {
+        try
+        {
+            mPath.clear();
+
+            const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
+            navigator->findPath(halfExtents, startPoint, endPoint, std::back_inserter(mPath));
+
+            mConstructed = true;
+        }
+        catch (const DetourNavigator::NavigatorException& exception)
+        {
+            DetourNavigator::log("PathFinder::buildPathByNavigator navigator exception: ", exception.what());
+            Log(Debug::Error) << "Build path by navigator exception: " << exception.what();
         }
     }
 }

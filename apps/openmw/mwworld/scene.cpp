@@ -2,12 +2,16 @@
 
 #include <limits>
 
+#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+
 #include <components/debug/debuglog.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/resource/bulletshape.hpp>
+#include <components/detournavigator/navigator.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -19,6 +23,9 @@
 #include "../mwrender/landmanager.hpp"
 
 #include "../mwphysics/physicssystem.hpp"
+#include "../mwphysics/actor.hpp"
+#include "../mwphysics/object.hpp"
+#include "../mwphysics/heightfield.hpp"
 
 #include "player.hpp"
 #include "localscripts.hpp"
@@ -73,6 +80,21 @@ namespace
         setNodeRotation(ptr, rendering, false);
 
         ptr.getClass().insertObject (ptr, model, physics);
+
+        if (const auto object = physics.getObject(ptr))
+        {
+            if (const auto concaveShape = dynamic_cast<const btConcaveShape*>(object->getShapeInstance()->mCollisionShape))
+            {
+                const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
+                navigator->addObject(reinterpret_cast<std::size_t>(object), *concaveShape,
+                    object->getCollisionObject()->getWorldTransform());
+            }
+        }
+        else if (const auto actor = physics.getActor(ptr))
+        {
+            const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
+            navigator->addAgent(actor->getHalfExtents());
+        }
 
         if (useAnim)
             MWBase::Environment::get().getMechanicsManager()->add(ptr);
@@ -233,13 +255,18 @@ namespace MWWorld
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
         Log(Debug::Info) << "Unloading cell " << (*iter)->getCell()->getDescription();
+
+        const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         ListAndResetObjectsVisitor visitor;
 
         (*iter)->forEach<ListAndResetObjectsVisitor>(visitor);
-        for (std::vector<MWWorld::Ptr>::const_iterator iter2 (visitor.mObjects.begin());
-            iter2!=visitor.mObjects.end(); ++iter2)
+        for (const auto& ptr : visitor.mObjects)
         {
-            mPhysics->remove(*iter2);
+            if (const auto object = mPhysics->getObject(ptr))
+                navigator->removeObject(reinterpret_cast<std::size_t>(object));
+            else if (const auto actor = mPhysics->getActor(ptr))
+                navigator->removeAgent(actor->getHalfExtents());
+            mPhysics->remove(ptr);
         }
 
         if ((*iter)->getCell()->isExterior())
@@ -250,7 +277,13 @@ namespace MWWorld
                     (*iter)->getCell()->getGridY()
                 );
             if (land && land->mDataTypes&ESM::Land::DATA_VHGT)
-                mPhysics->removeHeightField ((*iter)->getCell()->getGridX(), (*iter)->getCell()->getGridY());
+            {
+                const auto cellX = (*iter)->getCell()->getGridX();
+                const auto cellY = (*iter)->getCell()->getGridY();
+                if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
+                    navigator->removeObject(reinterpret_cast<std::size_t>(heightField));
+                mPhysics->removeHeightField(cellX, cellY);
+            }
         }
 
         MWBase::Environment::get().getMechanicsManager()->drop (*iter);
@@ -275,6 +308,8 @@ namespace MWWorld
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
 
+            const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
+
             // Load terrain physics first...
             if (cell->getCell()->isExterior())
             {
@@ -292,6 +327,10 @@ namespace MWWorld
                     defaultHeight.resize(verts*verts, ESM::Land::DEFAULT_HEIGHT);
                     mPhysics->addHeightField (&defaultHeight[0], cell->getCell()->getGridX(), cell->getCell()->getGridY(), worldsize / (verts-1), verts, ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
                 }
+
+                if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
+                    navigator->addObject(reinterpret_cast<std::size_t>(heightField), *heightField->getShape(),
+                            heightField->getCollisionObject()->getWorldTransform());
             }
 
             // register local scripts
@@ -316,6 +355,8 @@ namespace MWWorld
             }
             else
                 mPhysics->disableWater();
+
+            navigator->update();
 
             if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
                 mRendering.configureAmbient(cell->getCell());
@@ -631,6 +672,11 @@ namespace MWWorld
     {
         MWBase::Environment::get().getMechanicsManager()->remove (ptr);
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
+        const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
+        if (const auto object = mPhysics->getObject(ptr))
+            navigator->removeObject(reinterpret_cast<std::size_t>(object));
+        else if (const auto actor = mPhysics->getActor(ptr))
+            navigator->removeAgent(actor->getHalfExtents());
         mPhysics->remove(ptr);
         mRendering.removeObject (ptr);
         if (ptr.getClass().isActor())

@@ -19,6 +19,8 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
+#include <components/detournavigator/navigator.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -162,6 +164,26 @@ namespace MWWorld
         mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
         mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath));
         mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));
+
+        DetourNavigator::Settings navigatorSettings;
+        navigatorSettings.mCellHeight = Settings::Manager::getFloat("cell height", "Navigator");
+        navigatorSettings.mCellSize = Settings::Manager::getFloat("cell size", "Navigator");
+        navigatorSettings.mDetailSampleDist = Settings::Manager::getFloat("detail sample dist", "Navigator");
+        navigatorSettings.mDetailSampleMaxError = Settings::Manager::getFloat("detail sample max error", "Navigator");
+        navigatorSettings.mMaxClimb = MWPhysics::sStepSizeUp;
+        navigatorSettings.mMaxSimplificationError = Settings::Manager::getFloat("max simplification error", "Navigator");
+        navigatorSettings.mMaxSlope = MWPhysics::sMaxSlope;
+        navigatorSettings.mRecastScaleFactor = Settings::Manager::getFloat("recast scale factor", "Navigator");
+        navigatorSettings.mMaxEdgeLen = Settings::Manager::getInt("max edge len", "Navigator");
+        navigatorSettings.mMaxNavMeshQueryNodes = Settings::Manager::getInt("max nav mesh query nodes", "Navigator");
+        navigatorSettings.mMaxVertsPerPoly = Settings::Manager::getInt("max verts per poly", "Navigator");
+        navigatorSettings.mRegionMergeSize = Settings::Manager::getInt("region merge size", "Navigator");
+        navigatorSettings.mRegionMinSize = Settings::Manager::getInt("region min size", "Navigator");
+        navigatorSettings.mTileSize = Settings::Manager::getInt("tile size", "Navigator");
+        navigatorSettings.mMaxPolygonPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max polygon path size", "Navigator"));
+        navigatorSettings.mMaxSmoothPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max smooth path size", "Navigator"));
+        navigatorSettings.mTrianglesPerChunk = static_cast<std::size_t>(Settings::Manager::getInt("triangles per chunk", "Navigator"));
+        mNavigator.reset(new DetourNavigator::Navigator(navigatorSettings));
 
         mRendering->preloadCommonAssets();
 
@@ -3682,6 +3704,11 @@ namespace MWWorld
             if (it->mRange == ESM::RT_Target)
                 preload(mWorldScene.get(), mStore, effect->mBolt);
         }
+    }
+
+    DetourNavigator::Navigator* World::getNavigator() const
+    {
+        return mNavigator.get();
     }
 
 }

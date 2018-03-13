@@ -175,6 +175,9 @@ namespace MWMechanics
                 return closestIndex;
             }
 
+            void buildPathByNavigator(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+                const osg::Vec3f& halfExtents);
+
         private:
             bool mConstructed;
             std::deque<osg::Vec3f> mPath;

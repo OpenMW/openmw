@@ -98,6 +98,7 @@ namespace MWWorld
             std::unique_ptr<MWWorld::Scene> mWorldScene;
             std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
             std::shared_ptr<ProjectileManager> mProjectileManager;
+            std::unique_ptr<DetourNavigator::Navigator> mNavigator;
 
             bool mGodMode;
             bool mScriptsEnabled;
@@ -688,6 +689,8 @@ namespace MWWorld
 
             /// Preload VFX associated with this effect list
             void preloadEffects(const ESM::EffectList* effectList) override;
+
+            DetourNavigator::Navigator* getNavigator() const override;
     };
 }
 
