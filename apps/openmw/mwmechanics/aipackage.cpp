@@ -25,7 +25,7 @@
 
 MWMechanics::AiPackage::~AiPackage() {}
 
-MWMechanics::AiPackage::AiPackage() : 
+MWMechanics::AiPackage::AiPackage() :
     mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
     mTargetActorRefId(""),
     mTargetActorId(-1),
@@ -100,7 +100,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
 {
     mTimer += duration; //Update timer
 
-    ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
+    const ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 
     /// Stops the actor when it gets too close to a unloaded cell
     //... At current time, this test is unnecessary. AI shuts down when actor is more than 7168
@@ -113,17 +113,17 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
     }
 
     // handle path building and shortcutting
-    ESM::Pathgrid::Point start = pos.pos;
+    const ESM::Pathgrid::Point start = pos.pos;
 
-    float distToTarget = distance(start, dest);
-    bool isDestReached = (distToTarget <= destTolerance);
+    const float distToTarget = distance(start, dest);
+    const bool isDestReached = (distToTarget <= destTolerance);
 
     if (!isDestReached && mTimer > AI_REACTION_TIME)
     {
         if (actor.getClass().isBipedal(actor))
             openDoors(actor);
 
-        bool wasShortcutting = mIsShortcutting;
+        const bool wasShortcutting = mIsShortcutting;
         bool destInLOS = false;
 
         const MWWorld::Class& actorClass = actor.getClass();
@@ -381,7 +381,7 @@ bool MWMechanics::AiPackage::isReachableRotatingOnTheRun(const MWWorld::Ptr& act
     osg::Vec3f radiusDir = dir ^ osg::Z_AXIS; // radius is perpendicular to a tangent
     radiusDir.normalize();
     radiusDir *= radius;
-    
+
     // pick up the nearest center candidate
     osg::Vec3f dest_ = PathFinder::MakeOsgVec3(dest);
     osg::Vec3f pos = actor.getRefData().getPosition().asVec3();
