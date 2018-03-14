@@ -79,7 +79,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
 {
     mTimer += duration; //Update timer
 
-    ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
+    const ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 
     /// Stops the actor when it gets too close to a unloaded cell
     //... At current time, this test is unnecessary. AI shuts down when actor is more than 7168
@@ -92,14 +92,14 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
     }
 
     // handle path building and shortcutting
-    ESM::Pathgrid::Point start = pos.pos;
+    const ESM::Pathgrid::Point start = pos.pos;
 
-    float distToTarget = distance(start, dest);
-    bool isDestReached = (distToTarget <= destTolerance);
+    const float distToTarget = distance(start, dest);
+    const bool isDestReached = (distToTarget <= destTolerance);
 
     if (!isDestReached && mTimer > AI_REACTION_TIME)
     {
-        bool wasShortcutting = mIsShortcutting;
+        const bool wasShortcutting = mIsShortcutting;
         bool destInLOS = false;
 
         const MWWorld::Class& actorClass = actor.getClass();
