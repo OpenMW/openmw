@@ -247,33 +247,6 @@ void Launcher::SettingsPage::updateOkButton(const QString &text)
             : mProfileDialog->setOkButtonEnabled(true);
 }
 
-void Launcher::SettingsPage::on_skipMenuCheckBox_stateChanged(int state) {
-    startDefaultCharacterAtLabel->setEnabled(state == Qt::Checked);
-    startDefaultCharacterAtField->setEnabled(state == Qt::Checked);
-}
-
-void Launcher::SettingsPage::on_runScriptAfterStartupBrowseButton_clicked()
-{
-    QString scriptFile = QFileDialog::getOpenFileName(
-            this,
-            QObject::tr("Select script file"),
-            QDir::currentPath(),
-            QString(tr("Text file (*.txt)")));
-
-
-    if (scriptFile.isEmpty())
-        return;
-
-    QFileInfo info(scriptFile);
-
-    if (!info.exists() || !info.isReadable())
-        return;
-
-    const QString path(QDir::toNativeSeparators(info.absoluteFilePath()));
-
-    runScriptAfterStartupField->setText(path);
-}
-
 void Launcher::SettingsPage::saveSettings()
 {
     QString language(languageComboBox->currentText());
@@ -287,19 +260,6 @@ void Launcher::SettingsPage::saveSettings()
     }  else {
         mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1252"));
     }
-
-    // Testing
-    int skipMenu = skipMenuCheckBox->checkState() == Qt::Checked;
-    if (skipMenu != mGameSettings.value("skip-menu").toInt())
-        mGameSettings.setValue("skip-menu", QString::number(skipMenu));
-
-    QString startCell = startDefaultCharacterAtField->text();
-    if (startCell != mGameSettings.value("start")) {
-        mGameSettings.setValue("start", startCell);
-    }
-    QString scriptRun = runScriptAfterStartupField->text();
-    if (scriptRun != mGameSettings.value("script-run"))
-        mGameSettings.setValue("script-run", scriptRun);
 }
 
 bool Launcher::SettingsPage::loadSettings()
@@ -310,17 +270,6 @@ bool Launcher::SettingsPage::loadSettings()
 
     if (index != -1)
         languageComboBox->setCurrentIndex(index);
-
-    // Testing
-    bool skipMenu = mGameSettings.value("skip-menu").toInt() == 1;
-    if (skipMenu) {
-        skipMenuCheckBox->setCheckState(Qt::Checked);
-    }
-    startDefaultCharacterAtLabel->setEnabled(skipMenu);
-    startDefaultCharacterAtField->setEnabled(skipMenu);
-
-    startDefaultCharacterAtField->setText(mGameSettings.value("start"));
-    runScriptAfterStartupField->setText(mGameSettings.value("script-run"));
 
     return true;
 }

@@ -47,9 +47,6 @@ namespace Launcher
 
         void updateOkButton(const QString &text);
 
-        void on_skipMenuCheckBox_stateChanged(int state);
-        void on_runScriptAfterStartupBrowseButton_clicked();
-
     private:
 
         Process::ProcessInvoker *mWizardInvoker;
