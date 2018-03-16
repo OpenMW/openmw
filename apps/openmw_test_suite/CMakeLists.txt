@@ -1,7 +1,7 @@
 find_package(GTest REQUIRED)
 
 if (GTEST_FOUND)
-    include_directories(${GTEST_INCLUDE_DIRS})
+    include_directories(SYSTEM ${GTEST_INCLUDE_DIRS})
 
     file(GLOB UNITTEST_SRC_FILES
         ../openmw/mwworld/store.cpp
