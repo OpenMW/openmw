@@ -14,18 +14,48 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include "../mwphysics/physicssystem.hpp"
+#include "../mwphysics/actor.hpp"
+#include "../mwphysics/convert.hpp"
+
 #include "pathgrid.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
 #include "steering.hpp"
 #include "actorutil.hpp"
 #include "coordinateconverter.hpp"
+#include "findoptimalpath.hpp"
 
 #include <osg/Quat>
 
+#include <LinearMath/btVector3.h>
+#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
+
+#include <osg/Timer>
+
+#include <iostream>
+#include <iomanip>
+#include <chrono>
+
+inline std::ostream& operator <<(std::ostream& stream, const btVector3& value) {
+    return stream << std::setprecision(std::numeric_limits<btScalar>::digits)
+        << "(" << value.x() << ", " << value.y() << ", " << value.z() << ")";
+}
+
+template <class T>
+inline std::ostream& operator <<(std::ostream& stream, const std::vector<T>& value) {
+    stream << "{";
+    for (const auto& v : value) {
+        stream << v << ", ";
+    }
+    return stream << "}";
+}
+
 MWMechanics::AiPackage::~AiPackage() {}
 
-MWMechanics::AiPackage::AiPackage() : 
+MWMechanics::AiPackage::AiPackage() :
     mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
     mRotateOnTheRunChecks(0),
     mIsShortcutting(false),
@@ -79,7 +109,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
 {
     mTimer += duration; //Update timer
 
-    ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
+    const ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 
     /// Stops the actor when it gets too close to a unloaded cell
     //... At current time, this test is unnecessary. AI shuts down when actor is more than 7168
@@ -92,14 +122,14 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
     }
 
     // handle path building and shortcutting
-    ESM::Pathgrid::Point start = pos.pos;
+    const ESM::Pathgrid::Point start = pos.pos;
 
-    float distToTarget = distance(start, dest);
-    bool isDestReached = (distToTarget <= destTolerance);
+    const float distToTarget = distance(start, dest);
+    const bool isDestReached = (distToTarget <= destTolerance);
 
     if (!isDestReached && mTimer > AI_REACTION_TIME)
     {
-        bool wasShortcutting = mIsShortcutting;
+        const bool wasShortcutting = mIsShortcutting;
         bool destInLOS = false;
 
         const MWWorld::Class& actorClass = actor.getClass();
@@ -117,22 +147,25 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
         {
             if (wasShortcutting || doesPathNeedRecalc(dest, actor.getCell())) // if need to rebuild path
             {
-                mPathFinder.buildSyncedPath(start, dest, actor.getCell(), getPathGridGraph(actor.getCell()));
-                mRotateOnTheRunChecks = 3;
-
-                // give priority to go directly on target if there is minimal opportunity
-                if (destInLOS && mPathFinder.getPath().size() > 1)
+                if (!buildOptimalPath(dest, actor))
                 {
-                    // get point just before dest
-                    std::list<ESM::Pathgrid::Point>::const_iterator pPointBeforeDest = mPathFinder.getPath().end();
-                    --pPointBeforeDest;
-                    --pPointBeforeDest;
+                    mPathFinder.buildSyncedPath(start, dest, actor.getCell(), getPathGridGraph(actor.getCell()));
+                    mRotateOnTheRunChecks = 3;
 
-                    // if start point is closer to the target then last point of path (excluding target itself) then go straight on the target
-                    if (distance(start, dest) <= distance(dest, *pPointBeforeDest))
+                    // give priority to go directly on target if there is minimal opportunity
+                    if (destInLOS && mPathFinder.getPath().size() > 1)
                     {
-                        mPathFinder.clearPath();
-                        mPathFinder.addPointToPath(dest);
+                        // get point just before dest
+                        std::list<ESM::Pathgrid::Point>::const_iterator pPointBeforeDest = mPathFinder.getPath().end();
+                        --pPointBeforeDest;
+                        --pPointBeforeDest;
+
+                        // if start point is closer to the target then last point of path (excluding target itself) then go straight on the target
+                        if (distance(start, dest) <= distance(dest, *pPointBeforeDest))
+                        {
+                            mPathFinder.clearPath();
+                            mPathFinder.addPointToPath(dest);
+                        }
                     }
                 }
             }
@@ -359,7 +392,7 @@ bool MWMechanics::AiPackage::isReachableRotatingOnTheRun(const MWWorld::Ptr& act
     osg::Vec3f radiusDir = dir ^ osg::Z_AXIS; // radius is perpendicular to a tangent
     radiusDir.normalize();
     radiusDir *= radius;
-    
+
     // pick up the nearest center candidate
     osg::Vec3f dest_ = PathFinder::MakeOsgVec3(dest);
     osg::Vec3f pos = actor.getRefData().getPosition().asVec3();
@@ -372,4 +405,33 @@ bool MWMechanics::AiPackage::isReachableRotatingOnTheRun(const MWWorld::Ptr& act
     // if pathpoint is reachable for the actor rotating on the run:
     // no points of actor's circle should be farther from the center than destination point
     return (radius <= distToDest);
+}
+
+bool MWMechanics::AiPackage::buildOptimalPath(const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor)
+{
+    const auto& physics = MWBase::Environment::get().getWorld()->getPhysicsSystem();
+    const auto object = physics.getActor(actor)->getCollisionObject();
+    const auto source = object->getWorldTransform().getOrigin() + btVector3(0, 0, 0.5);
+    const auto halfExtents = MWPhysics::toBullet(physics.getActor(actor)->getHalfExtents());
+    const auto halfExtentZ = halfExtents.z();
+    const auto target = btVector3(endPoint.mX, endPoint.mY, endPoint.mZ + halfExtentZ);
+
+    FindOptimalPathConfig config;
+    config.mActorHalfExtents = halfExtents;
+    config.mMaxDepth = 10;
+    config.mMaxIterations = 100;
+
+    const auto path = findOptimalPath(physics.getCollisionWorld(), *object, source, target, config);
+
+    if (path.mPoints.empty())
+        return false;
+
+    mPathFinder.clearPath();
+    for (const auto point : path.mPoints)
+    {
+        const float coordinates[] = {point.x(), point.y(), point.z()};
+        mPathFinder.addPointToPath(ESM::Pathgrid::Point(coordinates));
+    }
+
+    return true;
 }

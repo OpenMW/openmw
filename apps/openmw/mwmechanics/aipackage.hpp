@@ -122,6 +122,8 @@ namespace MWMechanics
 
             const PathgridGraph& getPathGridGraph(const MWWorld::CellStore* cell);
 
+            bool buildOptimalPath(const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor);
+
             // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;
             ObstacleCheck mObstacleCheck;

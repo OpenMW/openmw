@@ -3485,4 +3485,8 @@ namespace MWWorld
         }
     }
 
+    MWPhysics::PhysicsSystem& World::getPhysicsSystem() const
+    {
+        return *mPhysics;
+    }
 }

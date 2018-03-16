@@ -1546,4 +1546,9 @@ namespace MWPhysics
         mCollisionWorld->addCollisionObject(mWaterCollisionObject.get(), CollisionType_Water,
                                                     CollisionType_Actor);
     }
+
+    btCollisionWorld& PhysicsSystem::getCollisionWorld() const
+    {
+        return *mCollisionWorld;
+    }
 }
