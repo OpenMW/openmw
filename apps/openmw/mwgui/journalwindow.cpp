@@ -616,7 +616,7 @@ namespace
 
                 if (page+2 < book->pageCount())
                 {
-                    MWBase::Environment::get().getWindowManager()->playSound("book page");
+                    MWBase::Environment::get().getWindowManager()->playSound("book page", true);
 
                     page += 2;
                     updateShowingPages ();
@@ -634,7 +634,7 @@ namespace
 
                 if(page >= 2)
                 {
-                    MWBase::Environment::get().getWindowManager()->playSound("book page");
+                    MWBase::Environment::get().getWindowManager()->playSound("book page", true);
 
                     page -= 2;
                     updateShowingPages ();
