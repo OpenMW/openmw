@@ -6,6 +6,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "magiceffects.hpp"
+
 namespace ESM
 {
     struct Spell;
@@ -119,6 +121,21 @@ namespace MWMechanics
         bool applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const MWMechanics::EffectKey& effect, float magnitude);
     };
 
+    class ApplyLoopingParticlesVisitor : public EffectSourceVisitor
+    {
+    private:
+        MWWorld::Ptr mActor;
+
+    public:
+        ApplyLoopingParticlesVisitor(const MWWorld::Ptr& actor)
+            : mActor(actor)
+        {
+        }
+
+        virtual void visit (MWMechanics::EffectKey key,
+                            const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
+                            float /*magnitude*/, float /*remainingTime*/ = -1, float /*totalTime*/ = -1);
+    };
 }
 
 #endif

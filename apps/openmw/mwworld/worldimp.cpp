@@ -2244,6 +2244,8 @@ namespace MWWorld
         model = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
         mPhysics->remove(getPlayerPtr());
         mPhysics->addActor(getPlayerPtr(), model);
+
+        applyLoopingParticles(player);
     }
 
     int World::canRest ()
@@ -2829,6 +2831,19 @@ namespace MWWorld
     void World::launchMagicBolt (const std::string &spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection)
     {
         mProjectileManager->launchMagicBolt(spellId, caster, fallbackDirection);
+    }
+
+    void World::applyLoopingParticles(const MWWorld::Ptr& ptr)
+    {
+        const MWWorld::Class &cls = ptr.getClass();
+        if (cls.isActor())
+        {
+            MWMechanics::ApplyLoopingParticlesVisitor visitor(ptr);
+            cls.getCreatureStats(ptr).getActiveSpells().visitEffectSources(visitor);
+            cls.getCreatureStats(ptr).getSpells().visitEffectSources(visitor);
+            if (cls.hasInventoryStore(ptr))
+                cls.getInventoryStore(ptr).visitEffectSources(visitor);
+        }
     }
 
     const std::vector<std::string>& World::getContentFiles() const
