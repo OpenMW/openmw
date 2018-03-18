@@ -70,7 +70,7 @@ add_openmw_dir (mwworld
     )
 
 add_openmw_dir (mwphysics
-    physicssystem trace collisiontype actor convert
+    physicssystem trace collisiontype actor convert object heightfield
     )
 
 add_openmw_dir (mwclass
