@@ -9,7 +9,6 @@
 #include <components/fallback/fallback.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
@@ -609,14 +608,11 @@ void WeatherManager::modRegion(const std::string& regionID, const std::vector<ch
     }
 }
 
-void WeatherManager::playerTeleported()
+void WeatherManager::playerTeleported(const std::string& playerRegion, bool isExterior)
 {
     // If the player teleports to an outdoors cell in a new region (for instance, by travelling), the weather needs to
     // be changed immediately, and any transitions for the previous region discarded.
-    MWBase::World* world = MWBase::Environment::get().getWorld();
-    if(world->isCellExterior() || world->isCellQuasiExterior())
     {
-        std::string playerRegion = Misc::StringUtils::lowerCase(world->getPlayerPtr().getCell()->getCell()->mRegion);
         std::map<std::string, RegionWeather>::iterator it = mRegions.find(playerRegion);
         if(it != mRegions.end() && playerRegion != mCurrentRegion)
         {
@@ -626,11 +622,9 @@ void WeatherManager::playerTeleported()
     }
 }
 
-void WeatherManager::update(float duration, bool paused)
+void WeatherManager::update(float duration, bool paused, const TimeStamp& time, bool isExterior)
 {
     MWWorld::ConstPtr player = MWMechanics::getPlayer();
-    MWBase::World& world = *MWBase::Environment::get().getWorld();
-    TimeStamp time = world.getTimeStamp();
 
     if(!paused || mFastForward)
     {
@@ -648,8 +642,7 @@ void WeatherManager::update(float duration, bool paused)
         updateWeatherTransitions(duration);
     }
 
-    const bool exterior = (world.isCellExterior() || world.isCellQuasiExterior());
-    if(!exterior)
+    if(!isExterior)
     {
         mRendering.setSkyEnabled(false);
         stopSounds();
@@ -782,10 +775,9 @@ unsigned int WeatherManager::getWeatherID() const
     return mCurrentWeather;
 }
 
-bool WeatherManager::useTorches() const
+bool WeatherManager::useTorches(float hour) const
 {
-    TimeStamp time = MWBase::Environment::get().getWorld()->getTimeStamp();
-    bool isDark = time.getHour() < mSunriseTime || time.getHour() > mTimeSettings.mNightStart - 1;
+    bool isDark = hour < mSunriseTime || hour > mTimeSettings.mNightStart - 1;
 
     return isDark && !mPrecipitation;
 }

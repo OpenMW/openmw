@@ -2851,9 +2851,13 @@ namespace MWWorld
     {
         // If we are in exterior, check the weather manager.
         // In interiors there are no precipitations and sun, so check the ambient
+        // Looks like pseudo-exteriors considered as interiors in this case
         MWWorld::CellStore* cell = mPlayer->getPlayer().getCell();
         if (cell->isExterior())
-            return mWeatherManager->useTorches();
+        {
+            float hour = getTimeStamp().getHour();
+            return mWeatherManager->useTorches(hour);
+        }
         else
         {
             uint32_t ambient = cell->getCell()->mAmbi.mAmbient;
@@ -3014,13 +3018,17 @@ namespace MWWorld
 
     void World::updateWeather(float duration, bool paused)
     {
+        bool isExterior = isCellExterior() || isCellQuasiExterior();
         if (mPlayer->wasTeleported())
         {
             mPlayer->setTeleported(false);
-            mWeatherManager->playerTeleported();
+
+            const std::string playerRegion = Misc::StringUtils::lowerCase(getPlayerPtr().getCell()->getCell()->mRegion);
+            mWeatherManager->playerTeleported(playerRegion, isExterior);
         }
 
-        mWeatherManager->update(duration, paused);
+        const TimeStamp time = getTimeStamp();
+        mWeatherManager->update(duration, paused, time, isExterior);
     }
 
     struct AddDetectedReferenceVisitor
