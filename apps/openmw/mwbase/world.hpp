@@ -491,6 +491,8 @@ namespace MWBase
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength) = 0;
 
+            virtual void applyLoopingParticles(const MWWorld::Ptr& ptr) = 0;
+
             virtual const std::vector<std::string>& getContentFiles() const = 0;
 
             virtual void breakInvisibility (const MWWorld::Ptr& actor) = 0;
