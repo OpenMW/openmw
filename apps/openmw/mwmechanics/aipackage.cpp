@@ -189,7 +189,7 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
     static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
 
     MWWorld::Ptr door = getNearbyDoor(actor, distance);
-    if (door != MWWorld::Ptr())
+    if (door != MWWorld::Ptr() && actor.getClass().isBipedal(actor))
     {
         // note: AiWander currently does not open doors
         if (getTypeId() != TypeIdWander && !door.getCellRef().getTeleport() && door.getClass().getDoorState(door) == 0)
@@ -224,7 +224,7 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
                 MWBase::Environment::get().getWorld()->activate(door, actor);
         }
     }
-    else // any other obstacle (NPC, crate, etc.)
+    else
     {
         mObstacleCheck.takeEvasiveAction(movement);
     }
