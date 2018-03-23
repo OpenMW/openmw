@@ -41,7 +41,7 @@ namespace MWMechanics
 
             void updateEquippedLight (const MWWorld::Ptr& ptr, float duration, bool mayEquip);
 
-            void updateCrimePersuit (const MWWorld::Ptr& ptr, float duration);
+            void updateCrimePursuit (const MWWorld::Ptr& ptr, float duration);
 
             void killDeadActors ();
 

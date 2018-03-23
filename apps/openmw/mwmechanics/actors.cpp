@@ -992,7 +992,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::updateCrimePersuit(const MWWorld::Ptr& ptr, float duration)
+    void Actors::updateCrimePursuit(const MWWorld::Ptr& ptr, float duration)
     {
         MWWorld::Ptr player = getPlayer();
         if (ptr != player && ptr.getClass().isNpc())
@@ -1285,7 +1285,7 @@ namespace MWMechanics
                         }
 
                         if (iter->first.getClass().isNpc() && iter->first != player)
-                            updateCrimePersuit(iter->first, duration);
+                            updateCrimePursuit(iter->first, duration);
 
                         if (iter->first != player)
                         {
