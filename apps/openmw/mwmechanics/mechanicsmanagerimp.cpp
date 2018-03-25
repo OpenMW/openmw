@@ -629,22 +629,12 @@ namespace MWMechanics
         float d = static_cast<float>(std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100));
         float e = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-
         float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
         float npcTerm = (d + e + f) * sellerStats.getFatigueTerm();
-        float buyTerm = 0.01f * (100 - 0.5f * (pcTerm - npcTerm));
-        float sellTerm = 0.01f * (50 - 0.5f * (npcTerm - pcTerm));
-
-        float x;
-        if(buying) x = buyTerm;
-        else x = std::min(buyTerm, sellTerm);
-        int offerPrice;
-        if (x < 1)
-            offerPrice = int(x * basePrice);
-        else
-            offerPrice = basePrice + int((x - 1) * basePrice);
-        offerPrice = std::max(1, offerPrice);
-        return offerPrice;
+        float buyTerm = 0.01f * std::max(75.f, (100 - 0.5f * (pcTerm - npcTerm)));
+        float sellTerm = 0.01f * std::min(75.f, (50 - 0.5f * (npcTerm - pcTerm)));
+        int offerPrice = int(basePrice * (buying ? buyTerm : sellTerm));
+        return std::max(1, offerPrice);
     }
 
     int MechanicsManager::countDeaths (const std::string& id) const
