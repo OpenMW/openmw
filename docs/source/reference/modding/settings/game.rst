@@ -127,3 +127,15 @@ followers attack on sight
 
 Makes player followers and escorters start combat with enemies who have started combat with them or the player.
 Otherwise they wait for the enemies or the player to do an attack first.
+
+classic reflect absorb attribute behavior
+-----------------------------------------
+
+:Type:		boolean
+:Range:     True/False
+:Default:   True
+
+If this setting is true, "Absorb Attribute" spells which were reflected by the target are not "mirrored",
+and the caster will absorb their own attribute resulting in no effect on both the caster and the target.
+This makes the gameplay as a mage easier, but these spells become imbalanced.
+This is how original Morrowind behaves.
