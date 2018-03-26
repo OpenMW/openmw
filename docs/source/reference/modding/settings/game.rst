@@ -131,3 +131,17 @@ Otherwise they wait for the enemies or the player to do an attack first.
 Please note this setting has not been extensively tested and could have side effects with certain quests.
 
 This setting can only be configured by editing the settings configuration file.
+
+classic reflect absorb attribute behavior
+-----------------------------------------
+
+:Type:		boolean
+:Range:     True/False
+:Default:   True
+
+If this setting is true, "Absorb Attribute" spells which were reflected by the target are not "mirrored",
+and the caster will absorb their own attribute resulting in no effect on both the caster and the target.
+This makes the gameplay as a mage easier, but these spells become imbalanced.
+This is how the original Morrowind behaves.
+
+This setting can only be configured by editing the settings configuration file.
