@@ -1,5 +1,7 @@
 #include "companionwindow.hpp"
 
+#include <cmath>
+
 #include <MyGUI_InputManager.h>
 
 #include "../mwbase/environment.hpp"
@@ -129,7 +131,7 @@ void CompanionWindow::updateEncumbranceBar()
         return;
     float capacity = mPtr.getClass().getCapacity(mPtr);
     float encumbrance = mPtr.getClass().getEncumbrance(mPtr);
-    mEncumbranceBar->setValue(static_cast<int>(encumbrance), static_cast<int>(capacity));
+    mEncumbranceBar->setValue(std::ceil(encumbrance), static_cast<int>(capacity));
 
     if (mModel && mModel->hasProfit(mPtr))
     {

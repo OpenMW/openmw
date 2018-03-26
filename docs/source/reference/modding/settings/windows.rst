@@ -25,7 +25,7 @@ Hand editing the configuration file might result in some fine tuning for alignme
 but the settings will be overwritten if a window is moved.
 
 .. note::
-	To scale the windows, making the widgets proportionally larger, see the scaling factor setting instead.
+	To scale the windows, making the widgets proportionally larger, see the scaling factor setting in the GUI section instead.
 
 :Type:		boolean
 :Range:		True/False
@@ -40,18 +40,15 @@ For example, to pin only the map window, the actual settings will be::
 
 The pinnable window can be pinned/unpinned by clicking on a button in the right upper corner of the window.
 
-.. note::
-	A world/local map switch button on the map window will be shown only in GUI mode.
-
 stats
 -----
 
 :Default:
-	x = 0.0
+	x = 0.015
 
-	y = 0.0
+	y = 0.015
 
-	h = 0.375
+	h = 0.45
 
 	w = 0.4275
 
@@ -64,13 +61,13 @@ spells
 ------
 
 :Default:
-	x = 0.625
+	x = 0.63
 
-	y = 0.5725
+	y = 0.39
 
-	h = 0.375
+	h = 0.36
 
-	w = 0.4275
+	w = 0.51
 
 	pin = false
 
@@ -81,13 +78,13 @@ map
 ---
 
 :Default:
-	x = 0.625
+	x = 0.63
 
-	y = 0.0
+	y = 0.015
 
-	h = 0.375
+	h = 0.36
 
-	w = 0.5725
+	w = 0.37
 
 	pin = false
 
@@ -98,13 +95,13 @@ inventory
 ---------
 
 :Default:
-	x = 0.0
+	x = 0.015
 
-	y = 0.4275
+	y = 0.54
 
-	h = 0.6225
+	h = 0.45
 
-	w = 0.5725
+	w = 0.38
 
 	pin = false
 
@@ -115,14 +112,13 @@ inventory container
 -------------------
 
 :Default:
-	x = 0.0
+	x = 0.015
 
-	y = 0.4275
+	y = 0.54
 
-	h = 0.6225
+	h = 0.45
 
-	w = 0.5725
-
+	w = 0.38
 
 The player's inventory window while searching a container, showing the contents of the character's inventory.
 Activated by clicking on a container. The same window is used for searching dead bodies, and pickpocketing people.
@@ -131,13 +127,13 @@ inventory barter
 ----------------
 
 :Default:
-	x = 0.0
+	x = 0.015
 
-	y = 0.4275
+	y = 0.54
 
-	h = 0.6225
+	h = 0.45
 
-	w = 0.5725
+	w = 0.38
 
 The player's inventory window while bartering. It displays goods owned by the character while bartering.
 Activated by clicking on the Barter choice in the dialog window for an NPC.
@@ -146,13 +142,13 @@ inventory companion
 -------------------
 
 :Default:
-	x = 0.0
+	x = 0.015
 
-	y = 0.4275
+	y = 0.54
 
-	h = 0.6225
+	h = 0.45
 
-	w = 0.5725
+	w = 0.38
 
 The player's inventory window while interacting with a companion.
 The companion windows were added in the Tribunal expansion, but are available everywhere in the OpenMW engine.
@@ -161,13 +157,13 @@ container
 ---------
 
 :Default:
-	x = 0.25
+	x = 0.49
 
-	y = 0.0
+	y = 0.54
 
-	h = 0.75
+	h = 0.39
 
-	w = 0.375
+	w = 0.38
 
 The container window, showing the contents of the container. Activated by clicking on a container.
 The same window is used for searching dead bodies, and pickpocketing people.
@@ -176,13 +172,13 @@ barter
 ------
 
 :Default:
-	x = 0.25
+	x = 0.6
 
-	y = 0.0
+	y = 0.27
 
-	h = 0.75
+	h = 0.38
 
-	w = 0.375
+	w = 0.63
 
 The NPC bartering window, displaying goods owned by the shopkeeper while bartering.
 Activated by clicking on the Barter choice in the dialog window for an NPC.
@@ -191,13 +187,13 @@ companion
 ---------
 
 :Default:
-	x = 0.25
+	x = 0.6
 
-	y = 0.0
+	y = 0.27
 
-	h = 0.75
+	h = 0.38
 
-	w = 0.375
+	w = 0.63
 
 The NPC's inventory window while interacting with a companion.
 The companion windows were added in the Tribunal expansion, but are available everywhere in the OpenMW engine.
@@ -206,13 +202,13 @@ dialogue
 --------
 
 :Default:
-	x = 0.095
+	x = 0.15
 
-	y = 0.095
+	y = 0.5
 
-	h = 0.810
+	h = 0.7
 
-	w = 0.810
+	w = 0.45
 
 The dialog window, for talking with NPCs.
 Activated by clicking on a NPC.
@@ -237,9 +233,9 @@ console
 -------
 
 :Default:
-	x = 0.0
+	x = 0.015
 
-	y = 0.0
+	y = 0.015
 
 	h = 1.0
 

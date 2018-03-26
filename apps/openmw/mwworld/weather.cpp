@@ -9,7 +9,6 @@
 #include <components/fallback/fallback.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
@@ -520,6 +519,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const Fall
     , mSecunda("Secunda", fallback)
     , mWindSpeed(0.f)
     , mIsStorm(false)
+    , mPrecipitation(false)
     , mStormDirection(0,1,0)
     , mCurrentRegion()
     , mTimePassed(0)
@@ -608,14 +608,11 @@ void WeatherManager::modRegion(const std::string& regionID, const std::vector<ch
     }
 }
 
-void WeatherManager::playerTeleported()
+void WeatherManager::playerTeleported(const std::string& playerRegion, bool isExterior)
 {
     // If the player teleports to an outdoors cell in a new region (for instance, by travelling), the weather needs to
     // be changed immediately, and any transitions for the previous region discarded.
-    MWBase::World* world = MWBase::Environment::get().getWorld();
-    if(world->isCellExterior() || world->isCellQuasiExterior())
     {
-        std::string playerRegion = Misc::StringUtils::lowerCase(world->getPlayerPtr().getCell()->getCell()->mRegion);
         std::map<std::string, RegionWeather>::iterator it = mRegions.find(playerRegion);
         if(it != mRegions.end() && playerRegion != mCurrentRegion)
         {
@@ -625,11 +622,9 @@ void WeatherManager::playerTeleported()
     }
 }
 
-void WeatherManager::update(float duration, bool paused)
+void WeatherManager::update(float duration, bool paused, const TimeStamp& time, bool isExterior)
 {
     MWWorld::ConstPtr player = MWMechanics::getPlayer();
-    MWBase::World& world = *MWBase::Environment::get().getWorld();
-    TimeStamp time = world.getTimeStamp();
 
     if(!paused || mFastForward)
     {
@@ -647,8 +642,7 @@ void WeatherManager::update(float duration, bool paused)
         updateWeatherTransitions(duration);
     }
 
-    const bool exterior = (world.isCellExterior() || world.isCellQuasiExterior());
-    if(!exterior)
+    if(!isExterior)
     {
         mRendering.setSkyEnabled(false);
         stopSounds();
@@ -659,6 +653,10 @@ void WeatherManager::update(float duration, bool paused)
 
     mWindSpeed = mResult.mWindSpeed;
     mIsStorm = mResult.mIsStorm;
+
+    // For some reason Ash Storm is not considered as a precipitation weather in game
+    mPrecipitation = !(mResult.mParticleEffect.empty() && mResult.mRainEffect.empty())
+                                    && mResult.mParticleEffect != "meshes\\ashcloud.nif";
 
     if (mIsStorm)
     {
@@ -777,12 +775,11 @@ unsigned int WeatherManager::getWeatherID() const
     return mCurrentWeather;
 }
 
-bool WeatherManager::isDark() const
+bool WeatherManager::useTorches(float hour) const
 {
-    TimeStamp time = MWBase::Environment::get().getWorld()->getTimeStamp();
-    bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior()
-                     || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
-    return exterior && (time.getHour() < mSunriseTime || time.getHour() > mTimeSettings.mNightStart - 1);
+    bool isDark = hour < mSunriseTime || hour > mTimeSettings.mNightStart - 1;
+
+    return isDark && !mPrecipitation;
 }
 
 void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)

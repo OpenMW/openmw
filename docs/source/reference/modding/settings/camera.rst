@@ -13,8 +13,7 @@ Values greater than approximately 18.0 will occasionally clip objects in the wor
 Values greater than approximately 8.0 will clip the character's hands in first person view
 and/or the back of their head in third person view.
 
-The default value is 1.0. This setting can only be configured by editing the settings configuration file.
-The value must be greater than 0.0, but it's unclear if the engine enforces this limitation.
+This setting can only be configured by editing the settings configuration file.
 
 small feature culling
 ---------------------
@@ -28,7 +27,7 @@ It generally improves performance to enable this feature,
 and by definition the culled objects will be very small on screen.
 The size in pixels for an object to be considered 'small' is controlled by a separate setting.
 
-The default value is true. This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
 
 small feature culling pixel size
 --------------------------------
@@ -88,7 +87,6 @@ Enabling the distant terrain setting is an alternative to increasing exterior ce
 Note that the distant land setting does not include rendering of distant static objects,
 so the resulting visual effect is not the same.
 
-The default value is 6666.0.
 This setting can be adjusted in game from the ridiculously low value of 2000.0 to a maximum of 6666.0
 using the View Distance slider in the Detail tab of the Video panel of the Options menu.
 
@@ -105,8 +103,7 @@ while large values cause distortion at the edges of the screen.
 The "field of view" setting interacts with aspect ratio of your video resolution in that more square aspect ratios
 (e.g. 4:3) need a wider field of view to more resemble the same field of view on a widescreen (e.g. 16:9) monitor.
 
-The default value is 55.0. This setting can be changed in game using the Field of View slider
-from the Video tab of the Video panel of the Options menu.
+This setting can be changed in game using the Field of View slider from the Video tab of the Video panel of the Options menu.
 
 first person field of view
 --------------------------
@@ -120,4 +117,4 @@ It is not recommended to change this value from its default value
 because the Bethesda provided Morrowind assets do not adapt well to large values,
 while small values can result in the hands not being visible.
 
-The default value is 55.0. This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.

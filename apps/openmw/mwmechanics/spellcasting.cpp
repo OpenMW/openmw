@@ -25,7 +25,6 @@
 
 #include "../mwrender/animation.hpp"
 
-#include "magiceffects.hpp"
 #include "npcstats.hpp"
 #include "actorutil.hpp"
 #include "aifollow.hpp"
@@ -614,7 +613,6 @@ namespace MWMechanics
 
                     std::string texture = magicEffect->mParticle;
 
-                    // TODO: VFX are no longer active after saving/reloading the game
                     bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
                     // Note: in case of non actor, a free effect should be fine as well
                     MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(target);
@@ -1319,4 +1317,24 @@ namespace MWMechanics
             return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(it->second)->getString();
     }
 
+    void ApplyLoopingParticlesVisitor::visit (MWMechanics::EffectKey key,
+                        const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
+                        float /*magnitude*/, float /*remainingTime*/, float /*totalTime*/)
+    {
+        const ESM::MagicEffect *magicEffect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(key.mId);
+
+        const ESM::Static* castStatic;
+        if (!magicEffect->mHit.empty())
+            castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
+        else
+            castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_DefaultHit");
+
+        std::string texture = magicEffect->mParticle;
+
+        bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
+        MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mActor);
+        if (anim && loop)
+            anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "", texture);
+    }
 }

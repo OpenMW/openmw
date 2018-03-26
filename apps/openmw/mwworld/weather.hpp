@@ -218,14 +218,14 @@ namespace MWWorld
          */
         void changeWeather(const std::string& regionID, const unsigned int weatherID);
         void modRegion(const std::string& regionID, const std::vector<char>& chances);
-        void playerTeleported();
+        void playerTeleported(const std::string& playerRegion, bool isExterior);
 
         /**
          * Per-frame update
          * @param duration
          * @param paused
          */
-        void update(float duration, bool paused = false);
+        void update(float duration, bool paused, const TimeStamp& time, bool isExterior);
 
         void stopSounds();
 
@@ -240,8 +240,7 @@ namespace MWWorld
 
         unsigned int getWeatherID() const;
 
-        /// @see World::isDark
-        bool isDark() const;
+        bool useTorches(float hour) const;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress);
 
@@ -275,6 +274,7 @@ namespace MWWorld
 
         float mWindSpeed;
         bool mIsStorm;
+        bool mPrecipitation;
         osg::Vec3f mStormDirection;
 
         std::string mCurrentRegion;

@@ -39,6 +39,7 @@ void getKeyFocusWidgets(MyGUI::Widget* parent, std::vector<MyGUI::Widget*>& resu
 KeyboardNavigation::KeyboardNavigation()
     : mCurrentFocus(nullptr)
     , mModalWindow(nullptr)
+    , mEnabled(true)
 {
     MyGUI::WidgetManager::getInstance().registerUnlinker(this);
 }
@@ -101,6 +102,9 @@ bool isRootParent(MyGUI::Widget* widget, MyGUI::Widget* root)
 
 void KeyboardNavigation::onFrame()
 {
+    if (!mEnabled)
+        return;
+
     MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
 
     if (focus == mCurrentFocus)
@@ -150,6 +154,11 @@ void KeyboardNavigation::setModalWindow(MyGUI::Widget *window)
     mModalWindow = window;
 }
 
+void KeyboardNavigation::setEnabled(bool enabled)
+{
+    mEnabled = enabled;
+}
+
 enum Direction
 {
     D_Left,
@@ -162,6 +171,9 @@ enum Direction
 
 bool KeyboardNavigation::injectKeyPress(MyGUI::KeyCode key, unsigned int text)
 {
+    if (!mEnabled)
+        return false;
+
     switch (key.getValue())
     {
     case MyGUI::KeyCode::ArrowLeft:

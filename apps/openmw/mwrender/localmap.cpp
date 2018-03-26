@@ -8,6 +8,7 @@
 #include <osg/Texture2D>
 #include <osg/ComputeBoundsVisitor>
 #include <osg/LightSource>
+#include <osg/PolygonMode>
 
 #include <osgDB/ReadFile>
 
@@ -174,6 +175,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     camera->setNodeMask(Mask_RenderToTexture);
 
     osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+    stateset->setAttribute(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL), osg::StateAttribute::OVERRIDE);
 
     // assign large value to effectively turn off fog
     // shaders don't respect glDisable(GL_FOG)
