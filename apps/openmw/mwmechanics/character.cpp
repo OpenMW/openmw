@@ -801,7 +801,9 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             mAnimation->showCarriedLeft(updateCarriedLeftVisible(mWeaponType));
         }
 
-        if(!cls.getCreatureStats(mPtr).isDead())
+        const MWMechanics::CreatureStats& cStats = cls.getCreatureStats(mPtr);
+
+        if(!cStats.isDead())
             mIdleState = CharState_Idle;
         else
         {
@@ -2214,6 +2216,8 @@ CharacterController::KillResult CharacterController::kill()
     if (!cStats.isDeathAnimationFinished())
     {
         cStats.setDeathAnimationFinished(true);
+        MWWorld::TimeStamp mTimeOfDeath = MWBase::Environment::get().getWorld()->getTimeStamp();
+        cStats.setTimeOfDeath(mTimeOfDeath);
         return Result_DeathAnimJustFinished;
     }
     return Result_DeathAnimFinished;
