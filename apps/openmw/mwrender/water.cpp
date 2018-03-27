@@ -503,13 +503,11 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
 
     // use a shader to render the simple water, ensuring that fog is applied per pixel as required.
     // this could be removed if a more detailed water mesh, using some sort of paging solution, is implemented.
-#if !defined(OPENGL_ES) && !defined(ANDROID)
     Resource::SceneManager* sceneManager = mResourceSystem->getSceneManager();
     bool oldValue = sceneManager->getForceShaders();
     sceneManager->setForceShaders(true);
     sceneManager->recreateShaders(node);
     sceneManager->setForceShaders(oldValue);
-#endif
 }
 
 void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, Refraction* refraction)
