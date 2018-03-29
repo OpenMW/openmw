@@ -395,6 +395,7 @@ namespace MWSound
     {
         std::vector<std::string> filelist;
         auto &tracklist = mMusicToPlay[mCurrentPlaylist];
+        // Find all tracks within the playlist
         if (mMusicFiles.find(mCurrentPlaylist) == mMusicFiles.end())
         {
             const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
@@ -417,8 +418,20 @@ namespace MWSound
         else
             filelist = mMusicFiles[mCurrentPlaylist];
 
+        // If there are no tracks, switch to the other playlist if it exists
         if(filelist.empty())
-            return;
+        {
+            if(mCurrentPlaylist == "Combat" && tracklist.find("Explore") != tracklist.end())
+            {
+                mCurrentPlaylist == "Explore";
+                startRandomTitle();
+            }
+            else if (mCurrentPlaylist == "Explore" && tracklist.find("Combat") != tracklist.end())
+            {
+                mCurrentPlaylist == "Combat";
+                startRandomTitle();
+            }
+        }
 
         // Do a Fisher-Yates shuffle
 
