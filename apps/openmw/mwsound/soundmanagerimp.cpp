@@ -418,17 +418,17 @@ namespace MWSound
         else
             filelist = mMusicFiles[mCurrentPlaylist];
 
-        // If there are no tracks, switch to the other playlist if it exists
+        // If there are no tracks and the other playlist is populated, switch to the other playlist if it exists
         if(filelist.empty())
         {
-            if(mCurrentPlaylist == "Combat" && tracklist.find("Explore") != tracklist.end())
+            if(mCurrentPlaylist == "Combat" && tracklist.find("Explore") != tracklist.end() && !tracklist["Explore"].empty())
             {
-                mCurrentPlaylist == "Explore";
+                mCurrentPlaylist = "Explore";
                 startRandomTitle();
             }
-            else if (mCurrentPlaylist == "Explore" && tracklist.find("Combat") != tracklist.end())
+            else if (mCurrentPlaylist == "Explore" && tracklist.find("Combat") != tracklist.end() && !tracklist["Combat"].empty())
             {
-                mCurrentPlaylist == "Combat";
+                mCurrentPlaylist = "Combat";
                 startRandomTitle();
             }
         }
