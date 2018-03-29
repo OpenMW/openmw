@@ -613,8 +613,7 @@ fi
 			SUFFIX=""
 		fi
 
-		add_runtime_dlls "$(pwd)/bin/lib"{EGL,GLESv2}${SUFFIX}.dll \
-			"$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${SUFFIX}.dll
+		add_runtime_dlls "$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${SUFFIX}.dll
 		add_qt_platform_dlls "$(pwd)/plugins/platforms/qwindows${SUFFIX}.dll"
 
 		echo Done.
