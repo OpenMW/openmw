@@ -109,6 +109,18 @@ The remaining duration is displayed in the tooltip by hovering over the magical 
 
 The default value is false. This setting can only be configured by editing the settings configuration file.
 
+enchanted weapons are magical
+-----------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Makes enchanted weapons without Magical flag bypass normal weapons resistance (and weakness) certain creatures have.
+This is how original Morrowind behaves.
+
+This setting can only be configured by editing the settings configuration file.
+
 prevent merchant equipping
 --------------------------
 
