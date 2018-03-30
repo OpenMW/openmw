@@ -222,45 +222,42 @@ namespace MWMechanics
             magicEffects = effects;
 
         float resisted = 0;
-        if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
+        // Effects with no resistance attribute belonging to them can not be resisted
+        if (ESM::MagicEffect::getResistanceEffect(effectId) == -1)
+            return 0.f;
+
+        float resistance = getEffectResistanceAttribute(effectId, magicEffects);
+
+        int willpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
+        float luck = static_cast<float>(stats.getAttribute(ESM::Attribute::Luck).getModified());
+        float x = (willpower + 0.1f * luck) * stats.getFatigueTerm();
+
+        // This makes spells that are easy to cast harder to resist and vice versa
+        float castChance = 100.f;
+        if (spell != NULL && !caster.isEmpty() && caster.getClass().isActor())
         {
-            // Effects with no resistance attribute belonging to them can not be resisted
-            if (ESM::MagicEffect::getResistanceEffect(effectId) == -1)
-                return 0.f;
-
-            float resistance = getEffectResistanceAttribute(effectId, magicEffects);
-
-            int willpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
-            float luck = static_cast<float>(stats.getAttribute(ESM::Attribute::Luck).getModified());
-            float x = (willpower + 0.1f * luck) * stats.getFatigueTerm();
-
-            // This makes spells that are easy to cast harder to resist and vice versa
-            float castChance = 100.f;
-            if (spell != NULL && !caster.isEmpty() && caster.getClass().isActor())
-            {
-                castChance = getSpellSuccessChance(spell, caster, NULL, false); // Uncapped casting chance
-            }
-            if (castChance > 0)
-                x *= 50 / castChance;
-
-            float roll = Misc::Rng::rollClosedProbability() * 100;
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude)
-                roll -= resistance;
-
-            if (x <= roll)
-                x = 0;
-            else
-            {
-                if (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude)
-                    x = 100;
-                else
-                    x = roll / std::min(x, 100.f);
-            }
-
-            x = std::min(x + resistance, 100.f);
-
-            resisted = x;
+            castChance = getSpellSuccessChance(spell, caster, NULL, false); // Uncapped casting chance
         }
+        if (castChance > 0)
+            x *= 50 / castChance;
+
+        float roll = Misc::Rng::rollClosedProbability() * 100;
+        if (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude)
+            roll -= resistance;
+
+        if (x <= roll)
+            x = 0;
+        else
+        {
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude)
+                x = 100;
+            else
+                x = roll / std::min(x, 100.f);
+        }
+
+        x = std::min(x + resistance, 100.f);
+
+        resisted = x;
 
         return resisted;
     }
@@ -458,13 +455,11 @@ namespace MWMechanics
             }
 
             float magnitudeMult = 1;
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && target.getClass().isActor())
-            {
-                if (absorbed)
-                    continue;
 
-                // Try reflecting
-                if (!reflected && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
+            if (!absorbed)
+            {
+                // Reflect harmful effects
+                if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && !reflected && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
                 {
                     float reflect = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Reflect).getMagnitude();
                     bool isReflected = (Misc::Rng::roll0to99() < reflect);
@@ -488,13 +483,14 @@ namespace MWMechanics
                     else if (castByPlayer)
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
                 }
-
-                // If player is attempting to cast a harmful spell, show the target's HP bar
-                if (castByPlayer && target != caster)
+                else if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && castByPlayer && target != caster)
+                {
+                    // If player is attempting to cast a harmful spell and it wasn't fully resisted, show the target's HP bar
                     MWBase::Environment::get().getWindowManager()->setEnemy(target);
+                }
 
                 // Notify the target actor they've been hit
-                if (target != caster && !caster.isEmpty())
+                if (target != caster && !caster.isEmpty() && magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
                     target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
             }
 
