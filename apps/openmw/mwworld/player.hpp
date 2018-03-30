@@ -46,7 +46,7 @@ namespace MWWorld
         int                     mCurrentCrimeId;    // the id assigned witnesses
         int                     mPaidCrimeId;      // the last id paid off (0 bounty)
 
-        // Saved skills and attributes prior to becoming a werewolf
+        // Saved stats prior to becoming a werewolf
         MWMechanics::SkillValue mSaveSkills[ESM::Skill::Length];
         MWMechanics::AttributeValue mSaveAttributes[ESM::Attribute::Length];
 
@@ -56,9 +56,9 @@ namespace MWWorld
 
         Player(const ESM::NPC *player);
 
-        void saveSkillsAttributes();
-        void restoreSkillsAttributes();
-        void setWerewolfSkillsAttributes();
+        void saveStats();
+        void restoreStats();
+        void setWerewolfStats();
 
         // For mark/recall magic effects
         void markPosition (CellStore* markedCell, const ESM::Position& markedPosition);
