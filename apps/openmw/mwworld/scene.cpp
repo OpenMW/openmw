@@ -284,7 +284,7 @@ namespace MWWorld
                 const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : 0;
                 if (data)
                 {
-                    mPhysics->addHeightField (data->mHeights, cellX, cell->getCell()->getGridY(), worldsize / (verts-1), verts, data->mMinHeight, data->mMaxHeight, land.get());
+                    mPhysics->addHeightField (data->mHeights, cellX, cellY, worldsize / (verts-1), verts, data->mMinHeight, data->mMaxHeight, land.get());
                 }
                 else
                 {
