@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_ASYNCNAVMESHUPDATER_H
 
 #include "recastmesh.hpp"
+#include "sharednavmesh.hpp"
 #include "tileposition.hpp"
 
 #include <osg/Vec3f>
@@ -13,6 +14,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <set>
 #include <thread>
 
@@ -20,11 +22,9 @@ class dtNavMesh;
 
 namespace DetourNavigator
 {
-    using NavMeshPtr = std::shared_ptr<dtNavMesh>;
-
     struct NavMeshCacheItem
     {
-        NavMeshPtr mValue;
+        SharedNavMesh mValue;
         std::size_t mRevision;
     };
 
@@ -35,7 +35,8 @@ namespace DetourNavigator
         ~AsyncNavMeshUpdater();
 
         void post(const osg::Vec3f& agentHalfExtents, const std::shared_ptr<RecastMesh>& recastMesh,
-            const std::shared_ptr<NavMeshCacheItem>& mNavMeshCacheItem, std::set<TilePosition>&& changedTiles);
+            const std::shared_ptr<NavMeshCacheItem>& navMeshCacheItem, const TilePosition& playerTile,
+            const std::set<TilePosition>& changedTiles);
 
         void wait();
 
@@ -45,10 +46,16 @@ namespace DetourNavigator
             osg::Vec3f mAgentHalfExtents;
             std::shared_ptr<RecastMesh> mRecastMesh;
             std::shared_ptr<NavMeshCacheItem> mNavMeshCacheItem;
-            std::set<TilePosition> mChangedTiles;
+            TilePosition mChangedTile;
+            std::pair<int, int> mPriority;
+
+            friend inline bool operator <(const Job& lhs, const Job& rhs)
+            {
+                return lhs.mPriority > rhs.mPriority;
+            }
         };
 
-        using Jobs = std::map<osg::Vec3f, Job>;
+        using Jobs = std::priority_queue<Job, std::deque<Job>>;
 
         std::reference_wrapper<const Settings> mSettings;
         std::atomic_bool mShouldStop;

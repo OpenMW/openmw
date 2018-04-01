@@ -363,7 +363,8 @@ namespace MWWorld
             else
                 mPhysics->disableWater();
 
-            navigator->update();
+            const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            navigator->update(player.getRefData().getPosition().asVec3());
 
             if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
                 mRendering.configureAmbient(cell->getCell());

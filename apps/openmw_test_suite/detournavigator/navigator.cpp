@@ -56,6 +56,32 @@ namespace
         }
     };
 
+    TEST_F(DetourNavigatorNavigatorTest, find_path_for_empty_should_throw_exception)
+    {
+        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut), InvalidArgument);
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, find_path_for_existing_agent_with_no_navmesh_should_throw_exception)
+    {
+        mNavigator->addAgent(mAgentHalfExtents);
+        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut), NavigatorException);
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, find_path_for_removed_agent_should_throw_exception)
+    {
+        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->removeAgent(mAgentHalfExtents);
+        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut), InvalidArgument);
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, add_agent_should_count_each_agent)
+    {
+        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->removeAgent(mAgentHalfExtents);
+        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut), NavigatorException);
+    }
+
     TEST_F(DetourNavigatorNavigatorTest, update_then_find_path_should_return_path)
     {
         const std::array<btScalar, 5 * 5> heightfieldData {{
@@ -70,7 +96,7 @@ namespace
 
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addObject(1, shape, btTransform::getIdentity());
-        mNavigator->update();
+        mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
         mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut);
@@ -127,7 +153,7 @@ namespace
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addObject(1, shape, btTransform::getIdentity());
         mNavigator->addObject(2, shape2, btTransform::getIdentity());
-        mNavigator->update();
+        mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
         mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut);

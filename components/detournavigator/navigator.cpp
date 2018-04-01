@@ -13,6 +13,7 @@ namespace DetourNavigator
     void Navigator::addAgent(const osg::Vec3f& agentHalfExtents)
     {
         ++mAgents[agentHalfExtents];
+        mNavMeshManager.addAgent(agentHalfExtents);
     }
 
     void Navigator::removeAgent(const osg::Vec3f& agentHalfExtents)
@@ -29,10 +30,10 @@ namespace DetourNavigator
         return mNavMeshManager.removeObject(id);
     }
 
-    void Navigator::update()
+    void Navigator::update(const osg::Vec3f& playerPosition)
     {
         for (const auto& v : mAgents)
-            mNavMeshManager.update(v.first);
+            mNavMeshManager.update(playerPosition, v.first);
     }
 
     void Navigator::wait()

@@ -10,6 +10,12 @@ namespace DetourNavigator
         NavigatorException(const std::string& message) : std::runtime_error(message) {}
         NavigatorException(const char* message) : std::runtime_error(message) {}
     };
+
+    struct InvalidArgument : std::invalid_argument
+    {
+        InvalidArgument(const std::string& message) : std::invalid_argument(message) {}
+        InvalidArgument(const char* message) : std::invalid_argument(message) {}
+    };
 }
 
 #endif

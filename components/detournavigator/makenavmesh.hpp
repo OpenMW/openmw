@@ -13,18 +13,15 @@ class dtNavMesh;
 namespace DetourNavigator
 {
     class RecastMesh;
+    class SharedNavMesh;
     struct Settings;
 
     using NavMeshPtr = std::shared_ptr<dtNavMesh>;
 
-    NavMeshPtr makeEmptyNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
-            const Settings& settings);
-
-    NavMeshPtr makeNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
-            const Settings& settings);
+    NavMeshPtr makeEmptyNavMesh(const Settings& settings);
 
     void updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
-            const std::set<TilePosition>& changedTiles, const Settings& settings, dtNavMesh& navMesh);
+            const TilePosition& changedTile, const Settings& settings, SharedNavMesh& navMesh);
 }
 
 #endif

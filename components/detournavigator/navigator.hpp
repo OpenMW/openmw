@@ -25,7 +25,7 @@ namespace DetourNavigator
 
         bool removeObject(std::size_t id);
 
-        void update();
+        void update(const osg::Vec3f& playerPosition);
 
         void wait();
 
@@ -34,9 +34,7 @@ namespace DetourNavigator
             const osg::Vec3f& end, OutputIterator out) const
         {
             const auto navMesh = mNavMeshManager.getNavMesh(agentHalfExtents);
-            if (!navMesh)
-                return out;
-            return findSmoothPath(*navMesh, toNavMeshCoordinates(mSettings, agentHalfExtents),
+            return findSmoothPath(*navMesh.lock(), toNavMeshCoordinates(mSettings, agentHalfExtents),
                 toNavMeshCoordinates(mSettings, start), toNavMeshCoordinates(mSettings, end), mSettings, out);
         }
 

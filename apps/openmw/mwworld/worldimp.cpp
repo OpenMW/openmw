@@ -19,6 +19,7 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
+#include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/debug.hpp>
 
