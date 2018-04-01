@@ -1,4 +1,5 @@
 #!/bin/sh
+# explicitly use clang5
 sudo ln -s /usr/bin/clang-5.0 /usr/local/bin/clang
 sudo ln -s /usr/bin/clang++-5.0 /usr/local/bin/clang++
 
