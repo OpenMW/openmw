@@ -379,7 +379,7 @@ namespace MWWorld
             unloadCell (active++);
         }
 
-        int refsToLoad = 0;
+        std::size_t refsToLoad = 0;
         // get the number of refs to load
         for (int x=X-mHalfGridSize; x<=X+mHalfGridSize; ++x)
         {
@@ -553,8 +553,7 @@ namespace MWWorld
         while (active!=mActiveCells.end())
             unloadCell (active++);
 
-        int refsToLoad = cell->count();
-        loadingListener->setProgressRange(refsToLoad);
+        loadingListener->setProgressRange(cell->count());
 
         // Load cell.
         loadCell (cell, loadingListener, changeEvent);

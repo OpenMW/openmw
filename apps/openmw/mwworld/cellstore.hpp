@@ -240,7 +240,7 @@ namespace MWWorld
 
             ESM::FogState* getFog () const;
 
-            int count() const;
+            std::size_t count() const;
             ///< Return total number of references, including deleted ones.
 
             void load ();

@@ -432,7 +432,7 @@ namespace MWWorld
         mHasState = true;
     }
 
-    int CellStore::count() const
+    std::size_t CellStore::count() const
     {
         return mMergedRefs.size();
     }
