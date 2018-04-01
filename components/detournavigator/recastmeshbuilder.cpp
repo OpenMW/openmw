@@ -1,4 +1,5 @@
 #include "recastmeshbuilder.hpp"
+#include "chunkytrimesh.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"
 

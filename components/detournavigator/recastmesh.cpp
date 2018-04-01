@@ -1,4 +1,5 @@
 #include "recastmesh.hpp"
+#include "chunkytrimesh.hpp"
 #include "settings.hpp"
 
 namespace DetourNavigator

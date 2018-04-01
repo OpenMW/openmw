@@ -33,6 +33,8 @@ namespace
             , mEnd(215, -215, 1)
             , mOut(mPath)
         {
+            mSettings.mEnableWriteRecastMeshToFile = false;
+            mSettings.mEnableWriteNavMeshToFile = false;
             mSettings.mCellHeight = 0.2f;
             mSettings.mCellSize = 0.2f;
             mSettings.mDetailSampleDist = 6;

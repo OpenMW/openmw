@@ -1,12 +1,14 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_SETTINGS_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_SETTINGS_H
 
-#include <cstdint>
+#include <string>
 
 namespace DetourNavigator
 {
     struct Settings
     {
+        bool mEnableWriteRecastMeshToFile;
+        bool mEnableWriteNavMeshToFile;
         float mCellHeight;
         float mCellSize;
         float mDetailSampleDist;
@@ -24,6 +26,8 @@ namespace DetourNavigator
         std::size_t mMaxPolygonPathSize;
         std::size_t mMaxSmoothPathSize;
         std::size_t mTrianglesPerChunk;
+        std::string mRecastMeshPathPrefix;
+        std::string mNavMeshPathPrefix;
     };
 }
 

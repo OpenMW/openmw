@@ -13,6 +13,9 @@
 #include <Recast.h>
 #include <RecastAlloc.h>
 
+#include <iomanip>
+#include <limits>
+
 namespace
 {
     using namespace DetourNavigator;

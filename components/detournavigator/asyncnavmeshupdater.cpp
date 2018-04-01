@@ -108,11 +108,13 @@ namespace DetourNavigator
 
     void AsyncNavMeshUpdater::writeDebugFiles(const Job& job) const
     {
-#ifdef OPENMW_WRITE_TO_FILE
-        const auto revision = std::to_string((std::chrono::steady_clock::now()
-            - std::chrono::steady_clock::time_point()).count());
-        writeToFile(*job.mRecastMesh, revision);
-        writeToFile(*job.mNavMeshCacheItem->mValue, revision);
-#endif
+        std::string revision;
+        if (mSettings.get().mEnableWriteNavMeshToFile || mSettings.get().mEnableWriteRecastMeshToFile)
+            revision = std::to_string((std::chrono::steady_clock::now()
+                - std::chrono::steady_clock::time_point()).count());
+        if (mSettings.get().mEnableWriteRecastMeshToFile)
+            writeToFile(*job.mRecastMesh, mSettings.get().mRecastMeshPathPrefix, revision);
+        if (mSettings.get().mEnableWriteNavMeshToFile)
+            writeToFile(*job.mNavMeshCacheItem->mValue, mSettings.get().mNavMeshPathPrefix, revision);
     }
 }
