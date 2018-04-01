@@ -4,6 +4,8 @@
 #include "asyncnavmeshupdater.hpp"
 #include "cachedrecastmeshmanager.hpp"
 
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+
 #include <osg/Vec3f>
 
 #include <map>
@@ -13,6 +15,8 @@ class dtNavMesh;
 
 namespace DetourNavigator
 {
+    using NavMeshConstPtr = std::shared_ptr<const dtNavMesh>;
+
     class NavMeshManager
     {
     public:
@@ -24,6 +28,7 @@ namespace DetourNavigator
             if (!mRecastMeshManager.addObject(id, shape, transform))
                 return false;
             ++mRevision;
+            addChangedTiles(shape, transform);
             return true;
         }
 
@@ -39,9 +44,13 @@ namespace DetourNavigator
 
     private:
         std::size_t mRevision = 0;
+        const Settings& mSettings;
         CachedRecastMeshManager mRecastMeshManager;
         std::map<osg::Vec3f, std::shared_ptr<NavMeshCacheItem>> mCache;
+        std::map<osg::Vec3f, std::set<TilePosition>> mChangedTiles;
         AsyncNavMeshUpdater mAsyncNavMeshUpdater;
+
+        void addChangedTiles(const btCollisionShape& shape, const btTransform& transform);
     };
 }
 

@@ -21,7 +21,7 @@ namespace DetourNavigator
             return true;
         }
 
-        bool removeObject(std::size_t id);
+        boost::optional<RecastMeshManager::Object> removeObject(std::size_t id);
 
         std::shared_ptr<RecastMesh> getMesh();
 

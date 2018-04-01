@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_ASYNCNAVMESHUPDATER_H
 
 #include "recastmesh.hpp"
+#include "tileposition.hpp"
 
 #include <osg/Vec3f>
 
@@ -12,22 +13,19 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <thread>
 
 class dtNavMesh;
 
 namespace DetourNavigator
 {
-    using NavMeshConstPtr = std::shared_ptr<const dtNavMesh>;
+    using NavMeshPtr = std::shared_ptr<dtNavMesh>;
 
     struct NavMeshCacheItem
     {
-        NavMeshConstPtr mValue = nullptr;
+        NavMeshPtr mValue;
         std::size_t mRevision;
-
-        NavMeshCacheItem(std::size_t mRevision)
-            : mRevision(mRevision)
-        {}
     };
 
     class AsyncNavMeshUpdater
@@ -37,7 +35,7 @@ namespace DetourNavigator
         ~AsyncNavMeshUpdater();
 
         void post(const osg::Vec3f& agentHalfExtents, const std::shared_ptr<RecastMesh>& recastMesh,
-                  const std::shared_ptr<NavMeshCacheItem>& navMeshCacheItem);
+            const std::shared_ptr<NavMeshCacheItem>& mNavMeshCacheItem, std::set<TilePosition>&& changedTiles);
 
         void wait();
 
@@ -47,12 +45,12 @@ namespace DetourNavigator
             osg::Vec3f mAgentHalfExtents;
             std::shared_ptr<RecastMesh> mRecastMesh;
             std::shared_ptr<NavMeshCacheItem> mNavMeshCacheItem;
+            std::set<TilePosition> mChangedTiles;
         };
 
         using Jobs = std::map<osg::Vec3f, Job>;
 
         std::reference_wrapper<const Settings> mSettings;
-        std::atomic_size_t mMaxRevision;
         std::atomic_bool mShouldStop;
         std::mutex mMutex;
         std::condition_variable mHasJob;

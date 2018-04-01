@@ -5,13 +5,16 @@
 #include "recastmesh.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"
+#include "debug.hpp"
 
 #include <DetourNavMesh.h>
 #include <DetourNavMeshBuilder.h>
 #include <Recast.h>
 #include <RecastAlloc.h>
 
-#include <boost/optional.hpp>
+#include <iostream>
+#include <iomanip>
+#include <limits>
 
 namespace
 {
@@ -211,22 +214,57 @@ namespace
 
         return NavMeshData(navMeshData, navMeshDataSize);
     }
+}
 
-    int nextPow2(int v)
+namespace DetourNavigator
+{
+    NavMeshPtr makeEmptyNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
+            const Settings& settings)
     {
-        v--;
-        v |= v >> 1;
-        v |= v >> 2;
-        v |= v >> 4;
-        v |= v >> 8;
-        v |= v >> 16;
-        v++;
-        return v;
+        log("build empty NavMesh:",
+            " agentHeight=", std::setprecision(std::numeric_limits<float>::max_exponent10),
+            getHeight(settings, agentHalfExtents),
+            " agentMaxClimb=", std::setprecision(std::numeric_limits<float>::max_exponent10),
+            getMaxClimb(settings),
+            " agentRadius=", std::setprecision(std::numeric_limits<float>::max_exponent10),
+            getRadius(settings, agentHalfExtents));
+
+        osg::Vec3f boundsMin;
+        osg::Vec3f boundsMax;
+        rcCalcBounds(recastMesh.getVertices().data(), static_cast<int>(recastMesh.getVerticesCount()),
+            boundsMin.ptr(), boundsMax.ptr());
+
+        // Max tiles and max polys affect how the tile IDs are caculated.
+        // There are 22 bits available for identifying a tile and a polygon.
+        const auto tileBits = 10;
+        const auto polyBits = 22 - tileBits;
+        const auto maxTiles = 1 << tileBits;
+        const auto maxPolysPerTile = 1 << polyBits;
+
+        dtNavMeshParams params;
+        rcVcopy(params.orig, boundsMin.ptr());
+        params.tileWidth = settings.mTileSize * settings.mCellSize;
+        params.tileHeight = settings.mTileSize * settings.mCellSize;
+        params.maxTiles = maxTiles;
+        params.maxPolys = maxPolysPerTile;
+
+        NavMeshPtr navMesh(dtAllocNavMesh(), &dtFreeNavMesh);
+        OPENMW_CHECK_DT_STATUS(navMesh->init(&params));
+
+        return navMesh;
     }
 
-    NavMeshPtr makeNavMeshWithMultiTiles(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
+    NavMeshPtr makeNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
         const Settings& settings)
     {
+        log("build NavMesh with mutiple tiles:",
+            " agentHeight=", std::setprecision(std::numeric_limits<float>::max_exponent10),
+            getHeight(settings, agentHalfExtents),
+            " agentMaxClimb=", std::setprecision(std::numeric_limits<float>::max_exponent10),
+            getMaxClimb(settings),
+            " agentRadius=", std::setprecision(std::numeric_limits<float>::max_exponent10),
+            getRadius(settings, agentHalfExtents));
+
         osg::Vec3f boundsMin;
         osg::Vec3f boundsMax;
         rcCalcBounds(recastMesh.getVertices().data(), static_cast<int>(recastMesh.getVerticesCount()),
@@ -235,12 +273,9 @@ namespace
         const auto minTilePosition = getTilePosition(settings, boundsMin);
         const auto maxTilePosition = getTilePosition(settings, boundsMax);
 
-        const auto tileWidth = maxTilePosition.x() - minTilePosition.x() + 1;
-        const auto tileHeight = maxTilePosition.y() - minTilePosition.y() + 1;
-
         // Max tiles and max polys affect how the tile IDs are caculated.
         // There are 22 bits available for identifying a tile and a polygon.
-        const auto tileBits = std::min(static_cast<int>(std::log2(nextPow2(tileWidth * tileHeight))), 14);
+        const auto tileBits = 10;
         const auto polyBits = 22 - tileBits;
         const auto maxTiles = 1 << tileBits;
         const auto maxPolysPerTile = 1 << polyBits;
@@ -277,12 +312,47 @@ namespace
 
         return navMesh;
     }
-}
 
-namespace DetourNavigator
-{
-    NavMeshPtr makeNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh, const Settings& settings)
+    void updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
+            const std::set<TilePosition>& changedTiles, const Settings& settings, dtNavMesh& navMesh)
     {
-        return makeNavMeshWithMultiTiles(agentHalfExtents, recastMesh, settings);
+        log("update NavMesh with mutiple tiles:",
+            " agentHeight=", std::setprecision(std::numeric_limits<float>::max_exponent10),
+            getHeight(settings, agentHalfExtents),
+            " agentMaxClimb=", std::setprecision(std::numeric_limits<float>::max_exponent10),
+            getMaxClimb(settings),
+            " agentRadius=", std::setprecision(std::numeric_limits<float>::max_exponent10),
+            getRadius(settings, agentHalfExtents),
+            " changedTiles.size()=", changedTiles.size());
+
+        osg::Vec3f boundsMin;
+        osg::Vec3f boundsMax;
+        rcCalcBounds(recastMesh.getVertices().data(), int(recastMesh.getVerticesCount()),
+            boundsMin.ptr(), boundsMax.ptr());
+
+        const auto& params = *navMesh.getParams();
+        const osg::Vec3f origin(params.orig[0], params.orig[1], params.orig[2]);
+
+        for (const auto& tilePosition : changedTiles)
+        {
+            const auto x = tilePosition.x();
+            const auto y = tilePosition.y();
+
+            navMesh.removeTile(navMesh.getTileRefAt(x, y, 0), nullptr, nullptr);
+
+            const auto tileBounds = makeTileBounds(settings, tilePosition);
+            const osg::Vec3f tileBorderMin(tileBounds.mMin.x(), boundsMin.y() - 1, tileBounds.mMin.y());
+            const osg::Vec3f tileBorderMax(tileBounds.mMax.x(), boundsMax.y() + 1, tileBounds.mMax.y());
+
+            auto navMeshData = makeNavMeshTileData(agentHalfExtents, recastMesh, x, y,
+                tileBorderMin, tileBorderMax, settings);
+
+            if (!navMeshData.mValue)
+                continue;
+
+            OPENMW_CHECK_DT_STATUS(navMesh.addTile(navMeshData.mValue.get(), navMeshData.mSize,
+                                                    DT_TILE_FREE_DATA, 0, 0));
+            navMeshData.mValue.release();
+        }
     }
 }

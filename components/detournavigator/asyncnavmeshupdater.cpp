@@ -10,8 +10,7 @@
 namespace DetourNavigator
 {
     AsyncNavMeshUpdater::AsyncNavMeshUpdater(const Settings& settings)
-        : mSettings(settings)
-        , mMaxRevision(0)
+        : mSettings(std::cref(settings))
         , mShouldStop()
         , mThread([&] { process(); })
     {
@@ -28,10 +27,19 @@ namespace DetourNavigator
     }
 
     void AsyncNavMeshUpdater::post(const osg::Vec3f& agentHalfExtents, const std::shared_ptr<RecastMesh>& recastMesh,
-        const std::shared_ptr<NavMeshCacheItem>& navMeshCacheItem)
+        const std::shared_ptr<NavMeshCacheItem>& navMeshCacheItem, std::set<TilePosition>&& changedTiles)
     {
         const std::lock_guard<std::mutex> lock(mMutex);
-        mJobs[agentHalfExtents] = Job {agentHalfExtents, recastMesh, navMeshCacheItem};
+        const auto job = mJobs.find(agentHalfExtents);
+        if (job == mJobs.end() || job->second.mChangedTiles.empty())
+        {
+            mJobs[agentHalfExtents] = Job {agentHalfExtents, recastMesh, navMeshCacheItem, std::move(changedTiles)};
+        }
+        else
+        {
+            job->second.mRecastMesh = recastMesh;
+            job->second.mChangedTiles.insert(changedTiles.begin(), changedTiles.end());
+        }
         mHasJob.notify_all();
     }
 
@@ -62,18 +70,15 @@ namespace DetourNavigator
 
     void AsyncNavMeshUpdater::processJob(const Job& job)
     {
-        log("process job for agent=", job.mAgentHalfExtents,
-            " revision=", job.mNavMeshCacheItem->mRevision,
-            " max_revision=", mMaxRevision);
-
-        if (job.mNavMeshCacheItem->mRevision < mMaxRevision)
-            return;
-
-        mMaxRevision = job.mNavMeshCacheItem->mRevision;
+        log("process job for agent=", job.mAgentHalfExtents);
 
         const auto start = std::chrono::steady_clock::now();
 
-        job.mNavMeshCacheItem->mValue = makeNavMesh(job.mAgentHalfExtents, *job.mRecastMesh, mSettings);
+        if (job.mNavMeshCacheItem->mValue && !job.mChangedTiles.empty())
+            updateNavMesh(job.mAgentHalfExtents, *job.mRecastMesh, job.mChangedTiles, mSettings,
+                *job.mNavMeshCacheItem->mValue);
+        else
+            job.mNavMeshCacheItem->mValue = makeNavMesh(job.mAgentHalfExtents, *job.mRecastMesh, mSettings);
 
         const auto finish = std::chrono::steady_clock::now();
 

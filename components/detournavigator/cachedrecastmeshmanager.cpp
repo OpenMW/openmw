@@ -8,12 +8,12 @@ namespace DetourNavigator
     {
     }
 
-    bool CachedRecastMeshManager::removeObject(std::size_t id)
+    boost::optional<RecastMeshManager::Object> CachedRecastMeshManager::removeObject(std::size_t id)
     {
-        if (!mImpl.removeObject(id))
-            return false;
-        mCached.reset();
-        return true;
+        const auto object = mImpl.removeObject(id);
+        if (object)
+            mCached.reset();
+        return object;
     }
 
     std::shared_ptr<RecastMesh> CachedRecastMeshManager::getMesh()
@@ -21,5 +21,5 @@ namespace DetourNavigator
         if (!mCached)
             mCached = mImpl.getMesh();
         return mCached;
-    }
+}
 }
