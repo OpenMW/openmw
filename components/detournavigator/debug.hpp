@@ -39,6 +39,37 @@ namespace DetourNavigator
     void writeToFile(const dtNavMesh& navMesh, const std::string& revision);
 #endif
 
+    class Log
+    {
+    public:
+        Log() : mEnabled(false) {}
+
+        void setEnabled(bool value)
+        {
+            mEnabled = value;
+        }
+
+        bool isEnabled() const
+        {
+            return mEnabled;
+        }
+
+        void write(const std::string& text)
+        {
+            if (mEnabled)
+                std::cout << text;
+        }
+
+        static Log& instance()
+        {
+            static Log value;
+            return value;
+        }
+
+    private:
+        bool mEnabled;
+    };
+
     inline void write(std::ostream& stream)
     {
         stream << '\n';
@@ -54,9 +85,12 @@ namespace DetourNavigator
     template <class ... Ts>
     void log(Ts&& ... values)
     {
+        auto& log = Log::instance();
+        if (!log.isEnabled())
+            return;
         std::ostringstream stream;
         write(stream, std::forward<Ts>(values) ...);
-        std::cout << stream.str();
+        log.write(stream.str());
     }
 }
 

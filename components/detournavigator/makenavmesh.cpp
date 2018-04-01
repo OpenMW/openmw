@@ -1,5 +1,6 @@
 #include "makenavmesh.hpp"
 #include "chunkytrimesh.hpp"
+#include "debug.hpp"
 #include "dtstatus.hpp"
 #include "exceptions.hpp"
 #include "recastmesh.hpp"
@@ -11,10 +12,6 @@
 #include <DetourNavMeshBuilder.h>
 #include <Recast.h>
 #include <RecastAlloc.h>
-
-#include <iostream>
-#include <iomanip>
-#include <limits>
 
 namespace
 {

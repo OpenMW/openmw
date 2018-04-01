@@ -20,6 +20,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/debug.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -183,6 +184,7 @@ namespace MWWorld
         navigatorSettings.mMaxPolygonPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max polygon path size", "Navigator"));
         navigatorSettings.mMaxSmoothPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max smooth path size", "Navigator"));
         navigatorSettings.mTrianglesPerChunk = static_cast<std::size_t>(Settings::Manager::getInt("triangles per chunk", "Navigator"));
+        DetourNavigator::Log::instance().setEnabled(Settings::Manager::getBool("enable log", "Navigator"));
         mNavigator.reset(new DetourNavigator::Navigator(navigatorSettings));
 
         mRendering->preloadCommonAssets();
