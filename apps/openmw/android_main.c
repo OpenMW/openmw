@@ -35,6 +35,17 @@ int Java_org_libsdl_app_SDLActivity_isMouseShown(JNIEnv *env, jclass cls, jobjec
     return SDL_ShowCursor(SDL_QUERY);
 }
 
+extern SDL_Window *Android_Window;
+int SDL_SendMouseMotion(SDL_Window * window, int mouseID, int relative, int x, int y);
+void Java_org_libsdl_app_SDLActivity_sendRelativeMouseMotion(JNIEnv *env, jclass cls, int x, int y) {
+    SDL_SendMouseMotion(Android_Window, 0, 1, x, y);
+}
+
+int SDL_SendMouseButton(SDL_Window * window, int mouseID, Uint8 state, Uint8 button);
+void Java_org_libsdl_app_SDLActivity_sendMouseButton(JNIEnv *env, jclass cls, int state, int button) {
+    SDL_SendMouseButton(Android_Window, 0, state, button);
+}
+
 int Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls, jobject obj) {
     setenv("OPENMW_DECOMPRESS_TEXTURES", "1", 1);
 
