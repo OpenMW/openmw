@@ -1,6 +1,7 @@
 #include "recastmesh.hpp"
-#include "chunkytrimesh.hpp"
 #include "settings.hpp"
+
+#include <Recast.h>
 
 namespace DetourNavigator
 {
@@ -9,5 +10,6 @@ namespace DetourNavigator
         , mVertices(std::move(vertices))
         , mChunkyTriMesh(mVertices, mIndices, settings.mTrianglesPerChunk)
     {
+        rcCalcBounds(mVertices.data(), static_cast<int>(getVerticesCount()), mBoundsMin.ptr(), mBoundsMax.ptr());
     }
 }
