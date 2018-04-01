@@ -25,6 +25,8 @@ namespace SceneUtil
     class ControllerFunction
     {
     public:
+        virtual ~ControllerFunction() = default;
+
         virtual float calculate(float input) const = 0;
 
         /// Get the "stop time" of the controller function, typically the maximum of the calculate() function.
