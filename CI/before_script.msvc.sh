@@ -75,7 +75,7 @@ Options:
 		Set the build platform, can also be set with environment variable PLATFORM.
 	-u
 		Configure for unity builds.
-	-v <2013/2015/2017>
+	-v <2015/2017>
 		Choose the Visual Studio version to use.
 	-V
 		Run verbosely
@@ -227,14 +227,6 @@ case $VS_VERSION in
 		MSVC_VER="14"
 		MSVC_YEAR="2015"
 		MSVC_DISPLAY_YEAR="2015"
-		;;
-
-	12|12.0|2013 )
-		GENERATOR="Visual Studio 12 2013"
-		TOOLSET="vc120"
-		MSVC_VER="12"
-		MSVC_YEAR="2013"
-		MSVC_DISPLAY_YEAR="2013"
 		;;
 esac
 

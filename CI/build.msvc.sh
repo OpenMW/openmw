@@ -22,13 +22,6 @@ case $VS_VERSION in
 		MSVC_YEAR="2015"
 		MSVC_VER="14.0"
 		;;
-
-#	12|2013|
-	* )
-		GENERATOR="Visual Studio 12 2013"
-		MSVC_YEAR="2013"
-		MVSC_VER="12.0"
-		;;
 esac
 
 case $PLATFORM in
