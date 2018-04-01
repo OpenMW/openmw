@@ -4,7 +4,7 @@ os:
 osx_image: xcode8.3
 language: cpp
 sudo: required
-dist: trusty
+dist: xenial
 branches:
   only:
     - master
@@ -21,10 +21,9 @@ addons:
     sources:
       - sourceline: 'ppa:openmw/openmw'
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-precise-3.6
     packages: [
       # Dev
-      cmake, clang-3.6, libunshield-dev, libtinyxml-dev,
+      cmake, clang-3.8, libunshield-dev, libtinyxml-dev,
       # Tests
       libgtest-dev, google-mock,
       # Boost
@@ -49,10 +48,10 @@ matrix:
   include:
     - os: linux
       env:
-        ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
+        ANALYZE="scan-build-3.8 --use-cc clang-3.8 --use-c++ clang++-3.8 "
       compiler: clang
   allow_failures:
-    - env: ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
+    - env: ANALYZE="scan-build-3.8 --use-cc clang-3.8 --use-c++ clang++-3.8 "
 
 before_install: ./CI/before_install.${TRAVIS_OS_NAME}.sh
 before_script: ./CI/before_script.${TRAVIS_OS_NAME}.sh
