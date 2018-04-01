@@ -201,6 +201,11 @@ namespace
         }
     };
 
+    int getCellPositionDistanceToOrigin(const std::pair<int, int>& cellPosition)
+    {
+        return std::abs(cellPosition.first) + std::abs(cellPosition.second);
+    }
+
 }
 
 
@@ -398,7 +403,7 @@ namespace MWWorld
         }
     }
 
-    void Scene::changeCellGrid (int X, int Y, bool changeEvent)
+    void Scene::changeCellGrid (int playerCellX, int playerCellY, bool changeEvent)
     {
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
@@ -411,8 +416,8 @@ namespace MWWorld
         {
             if ((*active)->getCell()->isExterior())
             {
-                if (std::abs (X-(*active)->getCell()->getGridX())<=mHalfGridSize &&
-                    std::abs (Y-(*active)->getCell()->getGridY())<=mHalfGridSize)
+                if (std::abs (playerCellX-(*active)->getCell()->getGridX())<=mHalfGridSize &&
+                    std::abs (playerCellY-(*active)->getCell()->getGridY())<=mHalfGridSize)
                 {
                     // keep cells within the new grid
                     ++active;
@@ -423,10 +428,11 @@ namespace MWWorld
         }
 
         std::size_t refsToLoad = 0;
+        std::vector<std::pair<int, int>> cellsPositionsToLoad;
         // get the number of refs to load
-        for (int x=X-mHalfGridSize; x<=X+mHalfGridSize; ++x)
+        for (int x = playerCellX - mHalfGridSize; x <= playerCellX + mHalfGridSize; ++x)
         {
-            for (int y=Y-mHalfGridSize; y<=Y+mHalfGridSize; ++y)
+            for (int y = playerCellY - mHalfGridSize; y <= playerCellY + mHalfGridSize; ++y)
             {
                 CellStoreCollection::iterator iter = mActiveCells.begin();
 
@@ -442,40 +448,58 @@ namespace MWWorld
                 }
 
                 if (iter==mActiveCells.end())
+                {
                     refsToLoad += MWBase::Environment::get().getWorld()->getExterior(x, y)->count();
+                    cellsPositionsToLoad.push_back(std::make_pair(x, y));
+                }
             }
         }
 
         loadingListener->setProgressRange(refsToLoad);
 
-        // Load cells
-        for (int x=X-mHalfGridSize; x<=X+mHalfGridSize; ++x)
+        const auto getDistanceToPlayerCell = [&] (const std::pair<int, int>& cellPosition)
         {
-            for (int y=Y-mHalfGridSize; y<=Y+mHalfGridSize; ++y)
+            return std::abs(cellPosition.first - playerCellX) + std::abs(cellPosition.second - playerCellY);
+        };
+
+        const auto getCellPositionPriority = [&] (const std::pair<int, int>& cellPosition)
+        {
+            return std::make_pair(getDistanceToPlayerCell(cellPosition), getCellPositionDistanceToOrigin(cellPosition));
+        };
+
+        std::sort(cellsPositionsToLoad.begin(), cellsPositionsToLoad.end(),
+            [&] (const std::pair<int, int>& lhs, const std::pair<int, int>& rhs) {
+                return getCellPositionPriority(lhs) < getCellPositionPriority(rhs);
+            });
+
+        // Load cells
+        for (const auto& cellPosition : cellsPositionsToLoad)
+        {
+            const auto x = cellPosition.first;
+            const auto y = cellPosition.second;
+
+            CellStoreCollection::iterator iter = mActiveCells.begin();
+
+            while (iter != mActiveCells.end())
             {
-                CellStoreCollection::iterator iter = mActiveCells.begin();
+                assert ((*iter)->getCell()->isExterior());
 
-                while (iter!=mActiveCells.end())
-                {
-                    assert ((*iter)->getCell()->isExterior());
+                if (x == (*iter)->getCell()->getGridX() &&
+                    y == (*iter)->getCell()->getGridY())
+                    break;
 
-                    if (x==(*iter)->getCell()->getGridX() &&
-                        y==(*iter)->getCell()->getGridY())
-                        break;
+                ++iter;
+            }
 
-                    ++iter;
-                }
+            if (iter == mActiveCells.end())
+            {
+                CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(x, y);
 
-                if (iter==mActiveCells.end())
-                {
-                    CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(x, y);
-
-                    loadCell (cell, loadingListener, changeEvent);
-                }
+                loadCell (cell, loadingListener, changeEvent);
             }
         }
 
-        CellStore* current = MWBase::Environment::get().getWorld()->getExterior(X,Y);
+        CellStore* current = MWBase::Environment::get().getWorld()->getExterior(playerCellX, playerCellY);
         MWBase::Environment::get().getWindowManager()->changeCell(current);
 
         if (changeEvent)
