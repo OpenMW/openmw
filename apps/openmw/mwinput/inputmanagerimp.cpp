@@ -524,30 +524,29 @@ namespace MWInput
                 isRunning = xAxis > .75 || xAxis < .25 || yAxis > .75 || yAxis < .25;
                 if(triedToMove) resetIdleTime();
 
-                if (actionIsActive(A_MoveLeft))
+                if (actionIsActive(A_MoveLeft) && !actionIsActive(A_MoveRight))
                 {
                     triedToMove = true;
                     mPlayer->setLeftRight (-1);
                 }
-                else if (actionIsActive(A_MoveRight))
+                else if (actionIsActive(A_MoveRight) && !actionIsActive(A_MoveLeft))
                 {
                     triedToMove = true;
                     mPlayer->setLeftRight (1);
                 }
 
-                if (actionIsActive(A_MoveForward))
+                if (actionIsActive(A_MoveForward) && !actionIsActive(A_MoveBackward))
                 {
                     triedToMove = true;
                     mPlayer->setAutoMove (false);
                     mPlayer->setForwardBackward (1);
                 }
-                else if (actionIsActive(A_MoveBackward))
+                else if (actionIsActive(A_MoveBackward) && !actionIsActive(A_MoveForward))
                 {
                     triedToMove = true;
                     mPlayer->setAutoMove (false);
                     mPlayer->setForwardBackward (-1);
                 }
-
                 else if(mPlayer->getAutoMove())
                 {
                     triedToMove = true;
