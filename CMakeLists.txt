@@ -840,3 +840,10 @@ if (DOXYGEN_FOUND)
         COMMENT "Generating documentation for the github-pages at ${DOXYGEN_PAGES_OUTPUT_DIR}" VERBATIM)
 endif ()
 
+# Testing for OSX Signing
+set_target_properties(openmw PROPERTIES
+    set(DEVELOPMENT_TEAM "8HY898Y2MS")
+    set(CODE_SIGN_IDENTITY "iPhone Developer")
+    XCODE_ATTRIBUTE_DEVELOPMENT_TEAM ${DEVELOPMENT_TEAM}
+    XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ${CODE_SIGN_IDENTITY}
+        )
