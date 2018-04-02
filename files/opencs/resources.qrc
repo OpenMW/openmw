@@ -128,5 +128,9 @@
         <file alias="scene-view-marker-c5">scene-exterior-status-5.png</file>
         <file alias="scene-view-marker-c6">scene-exterior-status-6.png</file>
         <file alias="scene-view-marker-c7">scene-exterior-status-7.png</file>
+        <file alias="brush-point">brush-point.png</file>
+        <file alias="brush-square">brush-square.png</file>
+        <file alias="brush-circle">brush-circle.png</file>
+        <file alias="brush-custom">brush-custom.png</file>
     </qresource>
 </RCC>
