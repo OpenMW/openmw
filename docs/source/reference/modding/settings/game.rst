@@ -90,9 +90,9 @@ difficulty
 This setting adjusts the difficulty of the game and is intended to be in the range -100 to 100 inclusive.
 Given the default game setting for fDifficultyMult of 5.0,
 a value of -100 results in the player taking 80% of the usual damage, doing 6 times the normal damage.
-A value of 100 results in the player taking 6 times as much damage, but inflicting only 80% of the usual damage.
-Values less than -500 will result in the player receiving no damage,
-and values greater than 500 will result in the player inflicting no damage.
+A value of 100 results in the player taking 6 times as much damage, while inflicting only 80% of the usual damage.
+Values below -500 will result in the player receiving no damage,
+and values above 500 will result in the player inflicting no damage.
 
 This setting can be controlled in game with the Difficulty slider in the Prefs panel of the Options menu.
 
