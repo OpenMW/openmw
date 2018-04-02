@@ -1,4 +1,8 @@
 #!/bin/sh
+# explicitly use gcc5
+sudo ln -s /usr/bin/gcc-5 /usr/local/bin/gcc
+sudo ln -s /usr/bin/g++-5 /usr/local/bin/g++
+
 # explicitly use clang5
 sudo ln -s /usr/bin/clang-5.0 /usr/local/bin/clang
 sudo ln -s /usr/bin/clang++-5.0 /usr/local/bin/clang++

@@ -53,7 +53,7 @@ matrix:
     - os: linux
       env:
         ANALYZE="scan-build-5.0 --use-cc clang-5.0 --use-c++ clang++-5.0 "
-      compiler: clang
+      compiler: clang-5.0
   allow_failures:
     - env: ANALYZE="scan-build-5.0 --use-cc clang-5.0 --use-c++ clang++-5.0 "
 
