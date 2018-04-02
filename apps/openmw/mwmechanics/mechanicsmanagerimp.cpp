@@ -1445,7 +1445,20 @@ namespace MWMechanics
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
             // Note: accidental or collateral damage attacks are ignored.
             if (!target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
-                startCombat(target, attacker);
+            {
+                // If an actor has OnPCHitMe declared in his script, his Fight = 0 and the attacker is player,
+                // he will attack the player only if we will force him (e.g. via StartCombat console command)
+                bool peaceful = false;
+                std::string script = target.getClass().getScript(target);
+                if (!script.empty() && target.getRefData().getLocals().hasVar(script, "onpchitme") && attacker == getPlayer())
+                {
+                    int fight = std::max(0, target.getClass().getCreatureStats(target).getAiSetting(CreatureStats::AI_Fight).getModified());
+                    peaceful = (fight == 0);
+                }
+
+                if (!peaceful)
+                    startCombat(target, attacker);
+            }
         }
 
         return true;
