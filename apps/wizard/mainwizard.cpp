@@ -62,10 +62,11 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
     setupInstallations();
     setupPages();
 
-    const boost::filesystem::path& installedPath = mCfgMgr.getInstallPath();
-    if (!installedPath.empty())
+    const boost::filesystem::path& installationPath = mCfgMgr.getInstallPath();
+    if (!installationPath.empty())
     {
-        addInstallation(toQString(installedPath));
+        const boost::filesystem::path& dataPath = installationPath / "Data Files";
+        addInstallation(toQString(dataPath));
     }
 }
 
