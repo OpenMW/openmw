@@ -1,7 +1,9 @@
 #!/bin/sh
-
 export CXX=clang++
 export CC=clang
+
+# echo available SDKs
+ls /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/
 
 DEPENDENCIES_ROOT="/private/tmp/openmw-deps/openmw-deps"
 QT_PATH=`brew --prefix $macos_qt_formula`
