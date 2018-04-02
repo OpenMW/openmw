@@ -1722,11 +1722,11 @@ namespace MWMechanics
         {
             if (werewolf)
             {
-                player->saveSkillsAttributes();
-                player->setWerewolfSkillsAttributes();
+                player->saveStats();
+                player->setWerewolfStats();
             }
             else
-                player->restoreSkillsAttributes();
+                player->restoreStats();
         }
 
         // Werewolfs can not cast spells, so we need to unset the prepared spell if there is one.
