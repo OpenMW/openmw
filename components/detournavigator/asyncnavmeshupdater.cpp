@@ -117,12 +117,21 @@ namespace DetourNavigator
     void AsyncNavMeshUpdater::writeDebugFiles(const Job& job) const
     {
         std::string revision;
-        if (mSettings.get().mEnableWriteNavMeshToFile || mSettings.get().mEnableWriteRecastMeshToFile)
-            revision = std::to_string((std::chrono::steady_clock::now()
+        std::string recastMeshRevision;
+        std::string navMeshRevision;
+        if ((mSettings.get().mEnableWriteNavMeshToFile || mSettings.get().mEnableWriteRecastMeshToFile)
+                && (mSettings.get().mEnableRecastMeshFileNameRevision || mSettings.get().mEnableNavMeshFileNameRevision))
+        {
+            revision = "." + std::to_string((std::chrono::steady_clock::now()
                 - std::chrono::steady_clock::time_point()).count());
+            if (mSettings.get().mEnableRecastMeshFileNameRevision)
+                recastMeshRevision = revision;
+            if (mSettings.get().mEnableNavMeshFileNameRevision)
+                navMeshRevision = revision;
+        }
         if (mSettings.get().mEnableWriteRecastMeshToFile)
-            writeToFile(*job.mRecastMesh, mSettings.get().mRecastMeshPathPrefix, revision);
+            writeToFile(*job.mRecastMesh, mSettings.get().mRecastMeshPathPrefix, recastMeshRevision);
         if (mSettings.get().mEnableWriteNavMeshToFile)
-            writeToFile(*job.mNavMeshCacheItem->mValue.lock(), mSettings.get().mNavMeshPathPrefix, revision);
+            writeToFile(*job.mNavMeshCacheItem->mValue.lock(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
     }
 }

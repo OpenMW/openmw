@@ -189,6 +189,8 @@ namespace MWWorld
         navigatorSettings.mEnableWriteNavMeshToFile = Settings::Manager::getBool("enable write nav mesh to file", "Navigator");
         navigatorSettings.mRecastMeshPathPrefix = Settings::Manager::getString("recast mesh path prefix", "Navigator");
         navigatorSettings.mNavMeshPathPrefix = Settings::Manager::getString("nav mesh path prefix", "Navigator");
+        navigatorSettings.mEnableRecastMeshFileNameRevision = Settings::Manager::getBool("enable recast mesh file name revision", "Navigator");
+        navigatorSettings.mEnableNavMeshFileNameRevision = Settings::Manager::getBool("enable nav mesh file name revision", "Navigator");
         DetourNavigator::Log::instance().setEnabled(Settings::Manager::getBool("enable log", "Navigator"));
         mNavigator.reset(new DetourNavigator::Navigator(navigatorSettings));
 

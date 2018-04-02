@@ -10,7 +10,7 @@ namespace DetourNavigator
 {
     void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix, const std::string& revision)
     {
-        const auto path = pathPrefix + "recastmesh." + revision + ".obj";
+        const auto path = pathPrefix + "recastmesh" + revision + ".obj";
         std::ofstream file(path);
         if (!file.is_open())
             throw NavigatorException("Open file failed: " + path);
@@ -63,7 +63,7 @@ namespace DetourNavigator
             int dataSize;
         };
 
-        const auto path = pathPrefix + "navmesh." + revision + ".bin";
+        const auto path = pathPrefix + "all_tiles_navmesh" + revision + ".bin";
         std::ofstream file(path, std::ios::binary);
         if (!file.is_open())
             throw NavigatorException("Open file failed: " + path);

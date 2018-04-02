@@ -9,6 +9,8 @@ namespace DetourNavigator
     {
         bool mEnableWriteRecastMeshToFile;
         bool mEnableWriteNavMeshToFile;
+        bool mEnableRecastMeshFileNameRevision;
+        bool mEnableNavMeshFileNameRevision;
         float mCellHeight;
         float mCellSize;
         float mDetailSampleDist;
