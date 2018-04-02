@@ -488,6 +488,9 @@ namespace MWMechanics
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
                 }
 
+                if (target == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState())
+                    magnitudeMult = 0;
+
                 // If player is attempting to cast a harmful spell, show the target's HP bar
                 if (castByPlayer && target != caster)
                     MWBase::Environment::get().getWindowManager()->setEnemy(target);
@@ -875,20 +878,18 @@ namespace MWMechanics
                 const float normalizedEncumbrance = mCaster.getClass().getNormalizedEncumbrance(mCaster);
 
                 float fatigueLoss = spell->mData.mCost * (fFatigueSpellBase + normalizedEncumbrance * fFatigueSpellMult);
-                fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss); stats.setFatigue(fatigue);
+                fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss); 
+                stats.setFatigue(fatigue);
 
                 bool fail = false;
 
                 // Check success
-                if (!(mCaster == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState()))
+                float successChance = getSpellSuccessChance(spell, mCaster);
+                if (Misc::Rng::roll0to99() >= successChance)
                 {
-                    float successChance = getSpellSuccessChance(spell, mCaster);
-                    if (Misc::Rng::roll0to99() >= successChance)
-                    {
-                        if (mCaster == getPlayer())
-                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
-                        fail = true;
-                    }
+                    if (mCaster == getPlayer())
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
+                    fail = true;
                 }
 
                 if (fail)
@@ -1109,8 +1110,6 @@ namespace MWMechanics
 
         bool receivedMagicDamage = false;
 
-        bool godmode = actor == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState(); 
-
         switch (effectKey.mId)
         {
         case ESM::MagicEffect::DamageAttribute:
@@ -1133,40 +1132,25 @@ namespace MWMechanics
             adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::RestoreHealth, magnitude);
             break;
         case ESM::MagicEffect::DamageHealth:
-            if (!godmode)
-            {
-                receivedMagicDamage = true;
-                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
-            }
-
+            receivedMagicDamage = true;
+            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
             break;
 
         case ESM::MagicEffect::DamageMagicka:
         case ESM::MagicEffect::DamageFatigue:
-            if (!godmode)
-            {
-                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
-            }
-
+            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
             break;
 
         case ESM::MagicEffect::AbsorbHealth:
-            if (!godmode)
-            {
-                if (magnitude > 0.f)
-                    receivedMagicDamage = true;
-                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
-            }
+            if (magnitude > 0.f)
+                receivedMagicDamage = true;
+            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
 
             break;
 
         case ESM::MagicEffect::AbsorbMagicka:
         case ESM::MagicEffect::AbsorbFatigue:
-            if (!godmode)
-            {
-                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
-            }
-
+            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
             break;
 
         case ESM::MagicEffect::DisintegrateArmor:
@@ -1189,6 +1173,7 @@ namespace MWMechanics
                 if (disintegrateSlot(actor, priorities[i], magnitude))
                     break;
             }
+
             break;
         }
         case ESM::MagicEffect::DisintegrateWeapon:
@@ -1211,12 +1196,9 @@ namespace MWMechanics
             if (weather > 1)
                 damageScale *= fMagicSunBlockedMult;
 
-            if (!godmode)
-            {
-                adjustDynamicStat(creatureStats, 0, -magnitude * damageScale);
-                if (magnitude * damageScale > 0.f)
-                    receivedMagicDamage = true;
-            }
+            adjustDynamicStat(creatureStats, 0, -magnitude * damageScale);
+            if (magnitude * damageScale > 0.f)
+                receivedMagicDamage = true;
 
             break;
         }
@@ -1226,12 +1208,8 @@ namespace MWMechanics
         case ESM::MagicEffect::FrostDamage:
         case ESM::MagicEffect::Poison:
         {
-            if (!godmode)
-            {
-                adjustDynamicStat(creatureStats, 0, -magnitude);
-                receivedMagicDamage = true;
-            }
-
+            adjustDynamicStat(creatureStats, 0, -magnitude);
+            receivedMagicDamage = true;
             break;
         }
 
