@@ -391,7 +391,7 @@ namespace MWMechanics
             {
                 // Player followers and escorters with high fight should not initiate combat with the player or with
                 // other player followers or escorters
-                if (std::find(playerAllies.begin(), playerAllies.end(), actor1) == playerAllies.end())
+                if (!isPlayerFollowerOrEscorter)
                     aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
             }
         }
