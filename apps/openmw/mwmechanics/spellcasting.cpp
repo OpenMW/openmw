@@ -7,6 +7,7 @@
 #include <boost/format.hpp>
 
 #include <components/misc/rng.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -569,9 +570,12 @@ namespace MWMechanics
                                     ActiveSpells::ActiveEffect effect_ = effect;
                                     effect_.mMagnitude *= -1;
                                     absorbEffects.push_back(effect_);
-                                    // Also make sure to set casterActorId = target, so that the effect on the caster gets purged when the target dies
-                                    caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
-                                                absorbEffects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
+                                    if (reflected && Settings::Manager::getBool("classic reflected absorb attribute behavior", "Game"))
+                                        target.getClass().getCreatureStats(target).getActiveSpells().addSpell("", true,
+                                            absorbEffects, mSourceName, caster.getClass().getCreatureStats(caster).getActorId());
+                                    else
+                                        caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
+                                            absorbEffects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
                                 }
                             }
                         }

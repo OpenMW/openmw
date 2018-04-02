@@ -96,6 +96,20 @@ and values above 500 will result in the player inflicting no damage.
 
 This setting can be controlled in game with the Difficulty slider in the Prefs panel of the Options menu.
 
+classic reflect absorb attribute behavior
+-----------------------------------------
+
+:Type:		boolean
+:Range: 	True/False
+:Default:	True
+
+If this setting is true, "Absorb Attribute" spells which were reflected by the target are not "mirrored",
+and the caster will absorb their own attribute resulting in no effect on both the caster and the target.
+This makes the gameplay as a mage easier, but these spells become imbalanced.
+This is how the original Morrowind behaves.
+
+This setting can only be configured by editing the settings configuration file.
+
 show effect duration
 --------------------
 
