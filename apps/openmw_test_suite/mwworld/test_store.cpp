@@ -1,6 +1,5 @@
+#include <fstream>
 #include <gtest/gtest.h>
-
-#include <boost/filesystem/fstream.hpp>
 
 #include <components/files/configurationmanager.hpp>
 #include <components/esm/esmreader.hpp>
@@ -25,7 +24,7 @@ struct ContentFileTest : public ::testing::Test
         readerList.resize(mContentFiles.size());
 
         int index=0;
-        for (std::vector<boost::filesystem::path>::const_iterator it = mContentFiles.begin(); it != mContentFiles.end(); ++it)
+        for (std::vector<sfs::path>::const_iterator it = mContentFiles.begin(); it != mContentFiles.end(); ++it)
         {
             ESM::ESMReader lEsm;
             lEsm.setEncoder(NULL);
@@ -87,7 +86,7 @@ struct ContentFileTest : public ::testing::Test
 protected:
     Files::ConfigurationManager mConfigurationManager;
     MWWorld::ESMStore mEsmStore;
-    std::vector<boost::filesystem::path> mContentFiles;
+    std::vector<sfs::path> mContentFiles;
 };
 
 /// Print results of the dialogue merging process, i.e. the resulting linked list.
@@ -101,7 +100,7 @@ TEST_F(ContentFileTest, dialogue_merging_test)
 
     const std::string file = "test_dialogue_merging.txt";
 
-    boost::filesystem::ofstream stream;
+    std::ofstream stream;
     stream.open(file);
 
     const MWWorld::Store<ESM::Dialogue>& dialStore = mEsmStore.get<ESM::Dialogue>();
@@ -185,7 +184,7 @@ TEST_F(ContentFileTest, content_diagnostics_test)
 
     const std::string file = "test_content_diagnostics.txt";
 
-    boost::filesystem::ofstream stream;
+    std::ofstream stream;
     stream.open(file);
 
     RUN_TEST_FOR_TYPES(printRecords, mEsmStore, stream);

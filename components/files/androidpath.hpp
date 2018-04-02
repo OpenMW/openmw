@@ -3,11 +3,12 @@
 
 #if defined(__ANDROID__)
 
-#include <boost/filesystem.hpp>
+#include <experimental/filesystem>
 /**
  * \namespace Files
  */
 
+namespace sfs = std::experimental::filesystem;
 
 namespace Files
 {
@@ -20,32 +21,32 @@ struct AndroidPath
     /**
      * \brief Return path to the user directory.
      */
-    boost::filesystem::path getUserConfigPath() const;
+    sfs::path getUserConfigPath() const;
 
-    boost::filesystem::path getUserDataPath() const;
+    sfs::path getUserDataPath() const;
 
     /**
      * \brief Return path to the global (system) directory where config files can be placed.
      */
-    boost::filesystem::path getGlobalConfigPath() const;
+    sfs::path getGlobalConfigPath() const;
 
     /**
      * \brief Return path to the runtime configuration directory which is the
      * place where an application was started.
      */
-    boost::filesystem::path getLocalPath() const;
+    sfs::path getLocalPath() const;
 
     /**
      * \brief Return path to the global (system) directory where game files can be placed.
      */
-    boost::filesystem::path getGlobalDataPath() const;
+    sfs::path getGlobalDataPath() const;
 
     /**
      * \brief
      */
-    boost::filesystem::path getCachePath() const;
+    sfs::path getCachePath() const;
 
-    boost::filesystem::path getInstallPath() const;
+    sfs::path getInstallPath() const;
 
     std::string mName;
 };

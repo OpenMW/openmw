@@ -23,17 +23,15 @@
 
 #include "bsa_file.hpp"
 
+#include <experimental/filesystem>
+#include <fstream>
 #include <cassert>
 
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/fstream.hpp>
-
-using namespace std;
 using namespace Bsa;
 
 
 /// Error handling
-void BSAFile::fail(const string &msg)
+void BSAFile::fail(const std::string &msg)
 {
     throw std::runtime_error("BSA Error: " + msg + "\nArchive: " + filename);
 }
@@ -73,8 +71,8 @@ void BSAFile::readHeader()
      */
     assert(!isLoaded);
 
-    namespace bfs = boost::filesystem;
-    bfs::ifstream input(bfs::path(filename), std::ios_base::binary);
+    namespace sfs = std::experimental::filesystem;
+    std::ifstream input(sfs::path(filename), std::ios_base::binary);
 
     // Total archive size
     std::streamoff fsize = 0;
@@ -160,7 +158,7 @@ int BSAFile::getIndex(const char *str) const
 }
 
 /// Open an archive file.
-void BSAFile::open(const string &file)
+void BSAFile::open(const std::string &file)
 {
     filename = file;
     readHeader();
@@ -171,7 +169,7 @@ Files::IStreamPtr BSAFile::getFile(const char *file)
     assert(file);
     int i = getIndex(file);
     if(i == -1)
-        fail("File not found: " + string(file));
+        fail("File not found: " + std::string(file));
 
     const FileStruct &fs = files[i];
 

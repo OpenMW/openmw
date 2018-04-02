@@ -6,6 +6,7 @@
 #include <set>
 #include <fstream>
 #include <cmath>
+#include <experimental/filesystem>
 
 #include <boost/program_options.hpp>
 
@@ -19,6 +20,8 @@
 
 // Create a local alias for brevity
 namespace bpo = boost::program_options;
+
+namespace sfs = std::experimental::filesystem;
 
 struct ESMData
 {

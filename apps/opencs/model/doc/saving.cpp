@@ -7,7 +7,7 @@
 #include "savingstages.hpp"
 #include "document.hpp"
 
-CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& projectPath,
+CSMDoc::Saving::Saving (Document& document, const sfs::path& projectPath,
     ToUTF8::FromType encoding)
 : Operation (State_Saving, true, true), mDocument (document), mState (*this, projectPath, encoding)
 {

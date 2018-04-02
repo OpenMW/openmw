@@ -7,8 +7,8 @@
 #include <pwd.h>
 #include "androidpath.h"
 #include <unistd.h>
-#include <boost/filesystem/fstream.hpp>
 
+namespace sfs = std::experimental::filesystem;
 
 class Buffer {
     public:
@@ -37,7 +37,7 @@ JNIEXPORT void JNICALL Java_ui_activity_GameActivity_getPathToJni(JNIEnv *env, j
 namespace
 {
 
-    boost::filesystem::path getUserHome()
+    sfs::path getUserHome()
     {
         const char* dir = getenv("HOME");
         if (dir == NULL)
@@ -49,17 +49,17 @@ namespace
             }
         }
         if (dir == NULL)
-            return boost::filesystem::path();
+            return sfs::path();
         else
-            return boost::filesystem::path(dir);
+            return sfs::path(dir);
     }
 
-    boost::filesystem::path getEnv(const std::string& envVariable, const boost::filesystem::path& fallback)
+    sfs::path getEnv(const std::string& envVariable, const sfs::path& fallback)
     {
         const char* result = getenv(envVariable.c_str());
         if (!result)
             return fallback;
-        boost::filesystem::path dir(result);
+        sfs::path dir(result);
         if (dir.empty())
             return fallback;
         else
@@ -78,51 +78,51 @@ AndroidPath::AndroidPath(const std::string& application_name)
 {
 }
 
-boost::filesystem::path AndroidPath::getUserConfigPath() const
+sfs::path AndroidPath::getUserConfigPath() const
 {
     std::string buffer = ""; 
     buffer = buffer + Buffer::getData() +"/config";
     return getEnv("XDG_CONFIG_HOME", buffer) / mName;
 }
 
-boost::filesystem::path AndroidPath::getUserDataPath() const
+sfs::path AndroidPath::getUserDataPath() const
 {
     std::string buffer = ""; 
     buffer = buffer + Buffer::getData() +"/share";
     return getEnv("XDG_DATA_HOME", buffer) / mName;
 }
 
-boost::filesystem::path AndroidPath::getCachePath() const
+sfs::path AndroidPath::getCachePath() const
 {
     std::string buffer = ""; 
     buffer = buffer + Buffer::getData() +"/cache";
     return getEnv("XDG_CACHE_HOME", buffer) / mName;
 }
 
-boost::filesystem::path AndroidPath::getGlobalConfigPath() const
+sfs::path AndroidPath::getGlobalConfigPath() const
 {
     std::string buffer = ""; 
     buffer = buffer + Buffer::getData() +"/";
-    boost::filesystem::path globalPath(buffer); 
+    sfs::path globalPath(buffer);
     return globalPath / mName;
 }
 
-boost::filesystem::path AndroidPath::getLocalPath() const
+sfs::path AndroidPath::getLocalPath() const
 {
-    return boost::filesystem::path("./");
+    return sfs::path("./");
 }
 
-boost::filesystem::path AndroidPath::getGlobalDataPath() const
+sfs::path AndroidPath::getGlobalDataPath() const
 {
     std::string buffer = ""; 
     buffer = buffer + Buffer::getData() +"/data";
-    boost::filesystem::path globalDataPath(buffer);
+    sfs::path globalDataPath(buffer);
     return globalDataPath / mName;
 }
 
-boost::filesystem::path AndroidPath::getInstallPath() const
+sfs::path AndroidPath::getInstallPath() const
 {
-    return boost::filesystem::path();
+    return sfs::path();
 }
 
 

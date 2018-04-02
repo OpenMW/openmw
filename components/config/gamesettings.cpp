@@ -12,21 +12,7 @@
 
 #include <boost/version.hpp>
 
-/**
- * Workaround for problems with whitespaces in paths in older versions of Boost library
- */
-#if (BOOST_VERSION <= 104600)
-namespace boost
-{
-
-    template<>
-    inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string>(const std::string& arg)
-    {
-        return boost::filesystem::path(arg);
-    }
-
-} /* namespace boost */
-#endif /* (BOOST_VERSION <= 104600) */
+namespace sfs = std::experimental::filesystem;
 
 const char Config::GameSettings::sContentKey[] = "content";
 
@@ -177,7 +163,7 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
     while (i.hasPrevious()) {
         i.previous();
 
-        // 'data=...' lines need quotes and ampersands escaping to match how boost::filesystem::path uses boost::io::quoted
+        // 'data=...' lines need quotes and ampersands escaping to match how sfs::path uses boost::io::quoted
         if (i.key() == QLatin1String("data"))
         {
             stream << i.key() << "=";

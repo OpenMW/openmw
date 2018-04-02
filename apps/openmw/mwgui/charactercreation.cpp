@@ -553,7 +553,7 @@ namespace MWGui
     {
         if (mGenerateClassStep == 10)
         {
-            static boost::array<ClassPoint, 23> classes = { {
+            static std::array<ClassPoint, 23> classes = { {
                 {"Acrobat",     {6, 2, 2}},
                 {"Agent",       {6, 1, 3}},
                 {"Archer",      {3, 5, 2}},

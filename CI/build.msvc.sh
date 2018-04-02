@@ -17,17 +17,17 @@ if [ -z $CONFIGURATION ]; then
 fi
 
 case $VS_VERSION in
+	15|15.0|2017 )
+		GENERATOR="Visual Studio 15 2017"
+		MSVC_YEAR="2017"
+		MSVC_VER="15"
+		MSVC_DISPLAY_YEAR="2017"
+		;;
+
 	14|14.0|2015 )
 		GENERATOR="Visual Studio 14 2015"
 		MSVC_YEAR="2015"
 		MSVC_VER="14.0"
-		;;
-
-#	12|2013|
-	* )
-		GENERATOR="Visual Studio 12 2013"
-		MSVC_YEAR="2013"
-		MVSC_VER="12.0"
 		;;
 esac
 

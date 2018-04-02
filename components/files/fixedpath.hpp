@@ -2,7 +2,9 @@
 #define COMPONENTS_FILES_FIXEDPATH_HPP
 
 #include <string>
-#include <boost/filesystem.hpp>
+#include <experimental/filesystem>
+
+namespace sfs = std::experimental::filesystem;
 
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__OpenBSD__)
 #ifndef ANDROID
@@ -65,12 +67,12 @@ struct FixedPath
     /**
      * \brief Return path pointing to the user local configuration directory.
      */
-    const boost::filesystem::path& getUserConfigPath() const
+    const sfs::path& getUserConfigPath() const
     {
         return mUserConfigPath;
     }
 
-    const boost::filesystem::path& getUserDataPath() const
+    const sfs::path& getUserDataPath() const
     {
         return mUserDataPath;
     }
@@ -78,7 +80,7 @@ struct FixedPath
     /**
      * \brief Return path pointing to the global (system) configuration directory.
      */
-    const boost::filesystem::path& getGlobalConfigPath() const
+    const sfs::path& getGlobalConfigPath() const
     {
         return mGlobalConfigPath;
     }
@@ -86,23 +88,23 @@ struct FixedPath
     /**
      * \brief Return path pointing to the directory where application was started.
      */
-    const boost::filesystem::path& getLocalPath() const
+    const sfs::path& getLocalPath() const
     {
         return mLocalPath;
     }
 
 
-    const boost::filesystem::path& getInstallPath() const
+    const sfs::path& getInstallPath() const
     {
         return mInstallPath;
     }
 
-    const boost::filesystem::path& getGlobalDataPath() const
+    const sfs::path& getGlobalDataPath() const
     {
         return mGlobalDataPath;
     }
 
-    const boost::filesystem::path& getCachePath() const
+    const sfs::path& getCachePath() const
     {
         return mCachePath;
     }
@@ -110,16 +112,16 @@ struct FixedPath
     private:
         PathType mPath;
 
-        boost::filesystem::path mUserConfigPath;       /**< User path  */
-        boost::filesystem::path mUserDataPath;
-        boost::filesystem::path mGlobalConfigPath;     /**< Global path */
-        boost::filesystem::path mLocalPath;      /**< It is the same directory where application was run */
+        sfs::path mUserConfigPath;       /**< User path  */
+        sfs::path mUserDataPath;
+        sfs::path mGlobalConfigPath;     /**< Global path */
+        sfs::path mLocalPath;      /**< It is the same directory where application was run */
 
-        boost::filesystem::path mGlobalDataPath;        /**< Global application data path */
+        sfs::path mGlobalDataPath;        /**< Global application data path */
 
-        boost::filesystem::path mCachePath;
+        sfs::path mCachePath;
 
-        boost::filesystem::path mInstallPath;
+        sfs::path mInstallPath;
 
 };
 

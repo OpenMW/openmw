@@ -59,8 +59,8 @@ namespace Wizard
         void addLogText(const QString &text);
 
     private:
-        /// convert boost::filesystem::path to QString
-        QString toQString(const boost::filesystem::path& path);
+        /// convert sfs::path to QString
+        QString toQString(const sfs::path& path);
 
         void setupLog();
         void setupGameSettings();

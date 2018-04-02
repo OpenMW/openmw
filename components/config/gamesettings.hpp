@@ -7,11 +7,13 @@
 #include <QFile>
 #include <QMap>
 
-#include <boost/filesystem/path.hpp>
+#include <experimental/filesystem>
+
+namespace sfs = std::experimental::filesystem;
 
 namespace Files
 {
-  typedef std::vector<boost::filesystem::path> PathContainer;
+  typedef std::vector<sfs::path> PathContainer;
   struct ConfigurationManager;
 }
 

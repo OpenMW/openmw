@@ -1,8 +1,10 @@
 #include "filesystemarchive.hpp"
 
 #include <iostream>
+#include <algorithm>
+#include <experimental/filesystem>
 
-#include <boost/filesystem.hpp>
+namespace sfs = std::experimental::filesystem;
 
 namespace VFS
 {
@@ -18,7 +20,7 @@ namespace VFS
     {
         if (!mBuiltIndex)
         {
-            typedef boost::filesystem::recursive_directory_iterator directory_iterator;
+            typedef sfs::recursive_directory_iterator directory_iterator;
 
             directory_iterator end;
 
@@ -29,7 +31,7 @@ namespace VFS
 
             for (directory_iterator i (mPath); i != end; ++i)
             {
-                if(boost::filesystem::is_directory (*i))
+                if(sfs::is_directory (*i))
                     continue;
 
                 std::string proper = i->path ().string ();

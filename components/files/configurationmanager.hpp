@@ -2,11 +2,14 @@
 #define COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 
 #include <map>
+#include <experimental/filesystem>
 
 #include <boost/program_options.hpp>
 
 #include <components/files/fixedpath.hpp>
 #include <components/files/collections.hpp>
+
+namespace sfs = std::experimental::filesystem;
 
 /**
  * \namespace Files
@@ -29,26 +32,26 @@ struct ConfigurationManager
     ///< \param create Try creating the directory, if it does not exist.
 
     /**< Fixed paths */
-    const boost::filesystem::path& getGlobalPath() const;
-    const boost::filesystem::path& getUserConfigPath() const;
-    const boost::filesystem::path& getLocalPath() const;
+    const sfs::path& getGlobalPath() const;
+    const sfs::path& getUserConfigPath() const;
+    const sfs::path& getLocalPath() const;
 
-    const boost::filesystem::path& getGlobalDataPath() const;
-    const boost::filesystem::path& getUserDataPath() const;
-    const boost::filesystem::path& getLocalDataPath() const;
-    const boost::filesystem::path& getInstallPath() const;
+    const sfs::path& getGlobalDataPath() const;
+    const sfs::path& getUserDataPath() const;
+    const sfs::path& getLocalDataPath() const;
+    const sfs::path& getInstallPath() const;
 
-    const boost::filesystem::path& getCachePath() const;
+    const sfs::path& getCachePath() const;
 
-    const boost::filesystem::path& getLogPath() const;
+    const sfs::path& getLogPath() const;
 
     private:
         typedef Files::FixedPath<> FixedPathType;
 
-        typedef const boost::filesystem::path& (FixedPathType::*path_type_f)() const;
+        typedef const sfs::path& (FixedPathType::*path_type_f)() const;
         typedef std::map<std::string, path_type_f> TokensMappingContainer;
 
-        bool loadConfig(const boost::filesystem::path& path,
+        bool loadConfig(const sfs::path& path,
             boost::program_options::variables_map& variables,
             boost::program_options::options_description& description);
 
@@ -56,7 +59,7 @@ struct ConfigurationManager
 
         FixedPathType mFixedPath;
 
-        boost::filesystem::path mLogPath;
+        sfs::path mLogPath;
 
         TokensMappingContainer mTokensMapping;
 

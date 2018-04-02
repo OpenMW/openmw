@@ -5,13 +5,13 @@
 #include <cstdlib>
 #include <pwd.h>
 #include <unistd.h>
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
 
 #include <components/misc/stringops.hpp>
 
 namespace
 {
-    boost::filesystem::path getUserHome()
+    sfs::path getUserHome()
     {
         const char* dir = getenv("HOME");
         if (dir == NULL)
@@ -23,9 +23,9 @@ namespace
             }
         }
         if (dir == NULL)
-            return boost::filesystem::path();
+            return sfs::path();
         else
-            return boost::filesystem::path(dir);
+            return sfs::path(dir);
     }
 }
 
@@ -37,60 +37,60 @@ MacOsPath::MacOsPath(const std::string& application_name)
 {
 }
 
-boost::filesystem::path MacOsPath::getUserConfigPath() const
+sfs::path MacOsPath::getUserConfigPath() const
 {
-    boost::filesystem::path userPath (getUserHome());
+    sfs::path userPath (getUserHome());
     userPath /= "Library/Preferences/";
 
     return userPath / mName;
 }
 
-boost::filesystem::path MacOsPath::getUserDataPath() const
+sfs::path MacOsPath::getUserDataPath() const
 {
-    boost::filesystem::path userPath (getUserHome());
+    sfs::path userPath (getUserHome());
     userPath /= "Library/Application Support/";
 
     return userPath / mName;
 }
 
-boost::filesystem::path MacOsPath::getGlobalConfigPath() const
+sfs::path MacOsPath::getGlobalConfigPath() const
 {
-    boost::filesystem::path globalPath("/Library/Preferences/");
+    sfs::path globalPath("/Library/Preferences/");
     return globalPath / mName;
 }
 
-boost::filesystem::path MacOsPath::getCachePath() const
+sfs::path MacOsPath::getCachePath() const
 {
-    boost::filesystem::path userPath (getUserHome());
+    sfs::path userPath (getUserHome());
     userPath /= "Library/Caches";
     return userPath / mName;
 }
 
-boost::filesystem::path MacOsPath::getLocalPath() const
+sfs::path MacOsPath::getLocalPath() const
 {
-    return boost::filesystem::path("../Resources/");
+    return sfs::path("../Resources/");
 }
 
-boost::filesystem::path MacOsPath::getGlobalDataPath() const
+sfs::path MacOsPath::getGlobalDataPath() const
 {
-    boost::filesystem::path globalDataPath("/Library/Application Support/");
+    sfs::path globalDataPath("/Library/Application Support/");
     return globalDataPath / mName;
 }
 
-boost::filesystem::path MacOsPath::getInstallPath() const
+sfs::path MacOsPath::getInstallPath() const
 {
-    boost::filesystem::path installPath;
+    sfs::path installPath;
 
-    boost::filesystem::path homePath = getUserHome();
+    sfs::path homePath = getUserHome();
 
     if (!homePath.empty())
     {
-        boost::filesystem::path wineDefaultRegistry(homePath);
+        sfs::path wineDefaultRegistry(homePath);
         wineDefaultRegistry /= ".wine/system.reg";
 
-        if (boost::filesystem::is_regular_file(wineDefaultRegistry))
+        if (sfs::is_regular_file(wineDefaultRegistry))
         {
-            boost::filesystem::ifstream file(wineDefaultRegistry);
+            sfs::ifstream file(wineDefaultRegistry);
             bool isRegEntry = false;
             std::string line;
             std::string mwpath;
@@ -136,7 +136,7 @@ boost::filesystem::path MacOsPath::getInstallPath() const
                 installPath /= ".wine/dosdevices/";
                 installPath /= mwpath;
 
-                if (!boost::filesystem::is_directory(installPath))
+                if (!sfs::is_directory(installPath))
                 {
                     installPath.clear();
                 }

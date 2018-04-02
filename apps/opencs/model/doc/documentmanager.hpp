@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include <boost/filesystem/path.hpp>
+#include <experimental/filesystem>
 
 #include <QObject>
 #include <QThread>
@@ -40,7 +40,7 @@ namespace CSMDoc
             ToUTF8::FromType mEncoding;
             std::vector<std::string> mBlacklistedScripts;
 
-            boost::filesystem::path mResDir;
+            sfs::path mResDir;
             Fallback::Map mFallbackMap;
 
             bool mFsStrict;
@@ -56,8 +56,8 @@ namespace CSMDoc
 
             ~DocumentManager();
 
-            void addDocument (const std::vector< boost::filesystem::path >& files,
-                const boost::filesystem::path& savePath, bool new_);
+            void addDocument (const std::vector< sfs::path >& files,
+                const sfs::path& savePath, bool new_);
             ///< \param new_ Do not load the last content file in \a files and instead create in an
             /// appropriate way.
 
@@ -67,10 +67,10 @@ namespace CSMDoc
             ///
             /// \param new_ Do not load the last content file in \a files and instead create in an
             /// appropriate way.
-            Document *makeDocument (const std::vector< boost::filesystem::path >& files,
-                const boost::filesystem::path& savePath, bool new_);
+            Document *makeDocument (const std::vector< sfs::path >& files,
+                const sfs::path& savePath, bool new_);
 
-            void setResourceDir (const boost::filesystem::path& parResDir);
+            void setResourceDir (const sfs::path& parResDir);
 
             void setFallbackMap (const std::map<std::string, std::string>& fallbackMap);
 

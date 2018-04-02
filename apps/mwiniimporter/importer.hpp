@@ -6,9 +6,11 @@
 #include <vector>
 #include <exception>
 #include <iosfwd>
-#include <boost/filesystem/path.hpp>
+#include <experimental/filesystem>
 
 #include <components/to_utf8/to_utf8.hpp>
+
+namespace sfs = std::experimental::filesystem;
 
 class MwIniImporter {
   public:
@@ -18,12 +20,12 @@ class MwIniImporter {
     MwIniImporter();
     void    setInputEncoding(const ToUTF8::FromType& encoding);
     void    setVerbose(bool verbose);
-    multistrmap  loadIniFile(const boost::filesystem::path& filename) const;
-    static multistrmap  loadCfgFile(const boost::filesystem::path& filename);
+    multistrmap  loadIniFile(const sfs::path& filename) const;
+    static multistrmap  loadCfgFile(const sfs::path& filename);
     void    merge(multistrmap &cfg, const multistrmap &ini) const;
     void    mergeFallback(multistrmap &cfg, const multistrmap &ini) const;
     void    importGameFiles(multistrmap &cfg, const multistrmap &ini, 
-        const boost::filesystem::path& iniFilename) const;
+        const sfs::path& iniFilename) const;
     void    importArchives(multistrmap &cfg, const multistrmap &ini) const;
     static void    writeToFile(std::ostream &out, const multistrmap &cfg);
 
@@ -32,7 +34,7 @@ class MwIniImporter {
     static std::string numberToString(int n);
 
     /// \return file's "last modified time", used in original MW to determine plug-in load order
-    static std::time_t lastWriteTime(const boost::filesystem::path& filename, std::time_t defaultTime);
+    static std::time_t lastWriteTime(const sfs::path& filename, std::time_t defaultTime);
 
     bool mVerbose;
     strmap mMergeMap;

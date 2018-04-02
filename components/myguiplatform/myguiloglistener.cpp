@@ -2,11 +2,16 @@
 
 #include <iomanip>
 
+#include <experimental/filesystem>
+
+namespace sfs = std::experimental::filesystem;
+
+
 namespace osgMyGUI
 {
     void CustomLogListener::open()
     {
-        mStream.open(boost::filesystem::path(mFileName), std::ios_base::out);
+        mStream.open(sfs::path(mFileName), std::ios_base::out);
     }
 
     void CustomLogListener::close()

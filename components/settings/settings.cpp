@@ -5,8 +5,13 @@
 
 #include <components/misc/stringops.hpp>
 
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
+
+#include <experimental/filesystem>
+
 #include <boost/algorithm/string.hpp>
+
+namespace sfs = std::experimental::filesystem;
 
 namespace
 {
@@ -67,8 +72,8 @@ public:
     void loadSettingsFile (const std::string& file, CategorySettingValueMap& settings)
     {
         mFile = file;
-        boost::filesystem::ifstream stream;
-        stream.open(boost::filesystem::path(file));
+        std::ifstream stream;
+        stream.open(sfs::path(file));
         std::cout << "Loading settings file: " << file << std::endl;
         std::string currentCategory;
         mLine = 0;
@@ -138,8 +143,8 @@ public:
         // Open the existing settings.cfg file to copy comments.  This might not be the same file
         // as the output file if we're copying the setting from the default settings.cfg for the
         // first time.  A minor change in API to pass the source file might be in order here.
-        boost::filesystem::ifstream istream;
-        boost::filesystem::path ipath(file);
+        std::ifstream istream;
+        sfs::path ipath(file);
         istream.open(ipath);
 
         // Create a new string stream to write the current settings to.  It's likely that the
@@ -320,7 +325,7 @@ public:
         // Now install the newly written file in the requested place.
         if (changed) {
             std::cout << "Updating settings file: " << ipath << std::endl;
-            boost::filesystem::ofstream ofstream;
+            std::ofstream ofstream;
             ofstream.open(ipath);
             ofstream << ostream.rdbuf();
             ofstream.close();

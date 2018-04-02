@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_FALLBACK_VALIDATE_H
 #define OPENMW_COMPONENTS_FALLBACK_VALIDATE_H
 
+#include <experimental/any>
 #include <boost/program_options.hpp>
 
 #include <components/files/escape.hpp>
