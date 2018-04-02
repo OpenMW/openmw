@@ -17,11 +17,7 @@ namespace DetourNavigator
 
         void removeAgent(const osg::Vec3f& agentHalfExtents);
 
-        template <class T>
-        bool addObject(std::size_t id, const T& shape, const btTransform& transform)
-        {
-            return mNavMeshManager.addObject(id, shape, transform);
-        }
+        bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
 
         bool removeObject(std::size_t id);
 

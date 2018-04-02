@@ -25,6 +25,11 @@ namespace DetourNavigator
         mNavMeshManager.reset(agentHalfExtents);
     }
 
+    bool Navigator::addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
+    {
+        return mNavMeshManager.addObject(id, shape, transform);
+    }
+
     bool Navigator::removeObject(std::size_t id)
     {
         return mNavMeshManager.removeObject(id);

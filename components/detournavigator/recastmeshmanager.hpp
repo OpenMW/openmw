@@ -24,9 +24,7 @@ namespace DetourNavigator
 
         RecastMeshManager(const Settings& settings);
 
-        bool addObject(std::size_t id, const btHeightfieldTerrainShape& shape, const btTransform& transform);
-
-        bool addObject(std::size_t id, const btConcaveShape& shape, const btTransform& transform);
+        bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
 
         boost::optional<Object> removeObject(std::size_t id);
 

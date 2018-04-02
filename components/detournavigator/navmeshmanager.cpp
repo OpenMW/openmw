@@ -19,6 +19,15 @@ namespace DetourNavigator
         , mAsyncNavMeshUpdater(settings)
     {}
 
+    bool NavMeshManager::addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
+    {
+        if (!mRecastMeshManager.addObject(id, shape, transform))
+            return false;
+        ++mRevision;
+        addChangedTiles(shape, transform);
+        return true;
+    }
+
     bool NavMeshManager::removeObject(std::size_t id)
     {
         const auto object = mRecastMeshManager.removeObject(id);

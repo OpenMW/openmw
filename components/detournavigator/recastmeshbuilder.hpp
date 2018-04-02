@@ -3,6 +3,8 @@
 
 #include "recastmesh.hpp"
 
+class btCollisionShape;
+class btCompoundShape;
 class btConcaveShape;
 class btHeightfieldTerrainShape;
 class btTransform;
@@ -15,6 +17,10 @@ namespace DetourNavigator
     {
     public:
         RecastMeshBuilder(const Settings& settings);
+
+        void addObject(const btCollisionShape& shape, const btTransform& transform);
+
+        void addObject(const btCompoundShape& shape, const btTransform& transform);
 
         void addObject(const btConcaveShape& shape, const btTransform& transform);
 

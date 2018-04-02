@@ -23,15 +23,7 @@ namespace DetourNavigator
     public:
         NavMeshManager(const Settings& settings);
 
-        template <class T>
-        bool addObject(std::size_t id, const T& shape, const btTransform& transform)
-        {
-            if (!mRecastMeshManager.addObject(id, shape, transform))
-                return false;
-            ++mRevision;
-            addChangedTiles(shape, transform);
-            return true;
-        }
+        bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
 
         bool removeObject(std::size_t id);
 

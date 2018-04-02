@@ -12,14 +12,7 @@ namespace DetourNavigator
     public:
         CachedRecastMeshManager(const Settings& settings);
 
-        template <class T>
-        bool addObject(std::size_t id, const T& shape, const btTransform& transform)
-        {
-            if (!mImpl.addObject(id, shape, transform))
-                return false;
-            mCached.reset();
-            return true;
-        }
+        bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
 
         boost::optional<RecastMeshManager::Object> removeObject(std::size_t id);
 

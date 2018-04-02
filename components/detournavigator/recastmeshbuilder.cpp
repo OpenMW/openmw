@@ -1,12 +1,15 @@
 #include "recastmeshbuilder.hpp"
 #include "chunkytrimesh.hpp"
+#include "debug.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"
+#include "exceptions.hpp"
 
 #include <components/bullethelpers/processtrianglecallback.hpp>
 
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionShapes/btConcaveShape.h>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 namespace
 {
@@ -22,7 +25,25 @@ namespace DetourNavigator
 
     RecastMeshBuilder::RecastMeshBuilder(const Settings& settings)
         : mSettings(settings)
+    {}
+
+    void RecastMeshBuilder::addObject(const btCollisionShape& shape, const btTransform& transform)
     {
+        if (shape.isCompound())
+            return addObject(static_cast<const btCompoundShape&>(shape), transform);
+        else if (shape.getShapeType() == TERRAIN_SHAPE_PROXYTYPE)
+            return addObject(static_cast<const btHeightfieldTerrainShape&>(shape), transform);
+        else if (shape.isConcave())
+            return addObject(static_cast<const btConcaveShape&>(shape), transform);
+        std::ostringstream message;
+        message << "Unsupported shape type: " << BroadphaseNativeTypes(shape.getShapeType());
+        throw InvalidArgument(message.str());
+    }
+
+    void RecastMeshBuilder::addObject(const btCompoundShape& shape, const btTransform& transform)
+    {
+        for (int i = 0, num = shape.getNumChildShapes(); i < num; ++i)
+            addObject(*shape.getChildShape(i), transform * shape.getChildTransform(i));
     }
 
     void RecastMeshBuilder::addObject(const btConcaveShape& shape, const btTransform& transform)
