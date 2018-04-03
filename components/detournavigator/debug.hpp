@@ -6,8 +6,11 @@
 #include <components/bullethelpers/operators.hpp>
 #include <components/osghelpers/operators.hpp>
 
+#include <atomic>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <mutex>
 #include <sstream>
 #include <string>
 
@@ -25,7 +28,11 @@ namespace DetourNavigator
     class Log
     {
     public:
-        Log() : mEnabled(false) {}
+        Log()
+            : mEnabled()
+        {
+            mFile.exceptions(std::ios::failbit | std::ios::badbit);
+        }
 
         void setEnabled(bool value)
         {
@@ -40,7 +47,14 @@ namespace DetourNavigator
         void write(const std::string& text)
         {
             if (mEnabled)
-                std::cout << text;
+            {
+                const std::lock_guard<std::mutex> lock(mMutex);
+                if (!mFile.is_open())
+                {
+                    mFile.open("detournavigator.log");
+                }
+                mFile << text << std::flush;
+            }
         }
 
         static Log& instance()
@@ -50,7 +64,9 @@ namespace DetourNavigator
         }
 
     private:
-        bool mEnabled;
+        std::mutex mMutex;
+        std::ofstream mFile;
+        std::atomic_bool mEnabled;
     };
 
     inline void write(std::ostream& stream)
