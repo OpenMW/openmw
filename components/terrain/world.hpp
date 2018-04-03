@@ -4,10 +4,12 @@
 #include <osg/ref_ptr>
 #include <osg/Referenced>
 #include <osg/Vec3f>
+#include <osg/Switch>
 
 #include <memory>
 
 #include "defs.hpp"
+#include <map>
 
 namespace osg
 {
@@ -54,7 +56,7 @@ namespace Terrain
         /// @param storage Storage instance to get terrain data from (heights, normals, colors, textures..)
         /// @param nodeMask mask for the terrain root
         /// @param preCompileMask mask for pre compiling textures
-        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask);
+        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask);
         virtual ~World();
 
         /// See CompositeMapRenderer::setTargetFrameRate
@@ -76,15 +78,15 @@ namespace Terrain
 
         /// Load the cell into the scene graph.
         /// @note Not thread safe.
-        /// @note May be ignored by derived implementations that don't organize the terrain into cells.
-        virtual void loadCell(int x, int y) {}
+        virtual void loadCell(int x, int y);
 
         /// Remove the cell from the scene graph.
         /// @note Not thread safe.
-        /// @note May be ignored by derived implementations that don't organize the terrain into cells.
-        virtual void unloadCell(int x, int y) {}
+        virtual void unloadCell(int x, int y);
 
         virtual void enable(bool enabled) {}
+
+        void setBordersVisible(bool visible);
 
         /// Create a View to use with preload feature. The caller is responsible for deleting the view.
         /// @note Thread safe.
@@ -100,11 +102,18 @@ namespace Terrain
 
         Storage* getStorage() { return mStorage; }
 
+        typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > CellGrid; 
+
     protected:
+        void createCellBorderGeometry(int x, int y);
+        void destroyCellBorderGeometry(int x, int y);
+
         Storage* mStorage;
+        CellGrid mCellBorderNodes;
 
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mTerrainRoot;
+        osg::ref_ptr<osg::Switch> mBorderRoot;
 
         osg::ref_ptr<osg::Group> mCompositeMapCamera;
         osg::ref_ptr<CompositeMapRenderer> mCompositeMapRenderer;

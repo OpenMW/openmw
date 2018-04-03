@@ -19,7 +19,7 @@ namespace Terrain
     class QuadTreeWorld : public Terrain::World
     {
     public:
-        QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask=~0);
+        QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask=~0, int borderMask=0);
         ~QuadTreeWorld();
 
         void accept(osg::NodeVisitor& nv);

@@ -181,6 +181,7 @@ namespace MWRender
         , mNightEyeFactor(0.f)
         , mFieldOfViewOverride(0.f)
         , mFieldOfViewOverridden(false)
+        , mBorders(false)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
@@ -222,9 +223,10 @@ namespace MWRender
                                              Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
 
         if (distantTerrain)
-            mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
+            mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
         else
-            mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
+            mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
+
         mTerrain->setDefaultViewer(mViewer->getCamera());
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
 
@@ -444,6 +446,13 @@ namespace MWRender
     void RenderingManager::setSkyEnabled(bool enabled)
     {
         mSky->setEnabled(enabled);
+    }
+    
+    bool RenderingManager::toggleBorders()
+    {
+        mBorders = !mBorders;
+        mTerrain->setBordersVisible(mBorders);
+        return mBorders;
     }
 
     bool RenderingManager::toggleRenderMode(RenderMode mode)

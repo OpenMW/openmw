@@ -17,8 +17,8 @@ public:
     virtual void reset(unsigned int frame) {}
 };
 
-TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask)
-    : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask)
+TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask)
+    : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
     , mNumSplits(4)
 {
 }
@@ -75,6 +75,8 @@ void TerrainGrid::loadCell(int x, int y)
     if (!terrainNode)
         return; // no terrain defined
 
+    Terrain::World::loadCell(x,y);
+
     mTerrainRoot->addChild(terrainNode);
 
     mGrid[std::make_pair(x,y)] = terrainNode;
@@ -82,7 +84,9 @@ void TerrainGrid::loadCell(int x, int y)
 
 void TerrainGrid::unloadCell(int x, int y)
 {
-    Grid::iterator it = mGrid.find(std::make_pair(x,y));
+    World::unloadCell(x,y);
+
+    World::CellGrid::iterator it = mGrid.find(std::make_pair(x,y));
     if (it == mGrid.end())
         return;
 
