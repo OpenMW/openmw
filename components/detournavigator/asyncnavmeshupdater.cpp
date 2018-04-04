@@ -45,12 +45,16 @@ namespace DetourNavigator
         const std::shared_ptr<NavMeshCacheItem>& navMeshCacheItem, const TilePosition& playerTile,
         const std::set<TilePosition>& changedTiles)
     {
+        setRecastMesh(recastMesh);
+
+        if (changedTiles.empty())
+            return;
+
         const std::lock_guard<std::mutex> lock(mMutex);
+
         for (const auto& changedTile : changedTiles)
-        {
-            mJobs.push(Job {agentHalfExtents, recastMesh, navMeshCacheItem, changedTile,
-                            makePriority(changedTile, playerTile)});
-        }
+            mJobs.push(Job {agentHalfExtents, navMeshCacheItem, changedTile, makePriority(changedTile, playerTile)});
+
         mHasJob.notify_all();
     }
 
@@ -85,12 +89,14 @@ namespace DetourNavigator
 
         const auto start = std::chrono::steady_clock::now();
 
-        updateNavMesh(job.mAgentHalfExtents, *job.mRecastMesh, job.mChangedTile, mSettings,
+        const auto recastMesh = getRecastMesh();
+
+        updateNavMesh(job.mAgentHalfExtents, *recastMesh, job.mChangedTile, mSettings,
             job.mNavMeshCacheItem->mValue);
 
         const auto finish = std::chrono::steady_clock::now();
 
-        writeDebugFiles(job);
+        writeDebugFiles(job, *recastMesh);
 
         using FloatMs = std::chrono::duration<float, std::milli>;
 
@@ -114,7 +120,7 @@ namespace DetourNavigator
         return job;
     }
 
-    void AsyncNavMeshUpdater::writeDebugFiles(const Job& job) const
+    void AsyncNavMeshUpdater::writeDebugFiles(const Job& job, const RecastMesh& recastMesh) const
     {
         std::string revision;
         std::string recastMeshRevision;
@@ -130,8 +136,20 @@ namespace DetourNavigator
                 navMeshRevision = revision;
         }
         if (mSettings.get().mEnableWriteRecastMeshToFile)
-            writeToFile(*job.mRecastMesh, mSettings.get().mRecastMeshPathPrefix, recastMeshRevision);
+            writeToFile(recastMesh, mSettings.get().mRecastMeshPathPrefix, recastMeshRevision);
         if (mSettings.get().mEnableWriteNavMeshToFile)
             writeToFile(*job.mNavMeshCacheItem->mValue.lock(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
+    }
+
+    std::shared_ptr<RecastMesh> AsyncNavMeshUpdater::getRecastMesh()
+    {
+        const std::lock_guard<std::mutex> lock(mRecastMeshMutex);
+        return mRecastMesh;
+    }
+
+    void AsyncNavMeshUpdater::setRecastMesh(const std::shared_ptr<RecastMesh>& value)
+    {
+        const std::lock_guard<std::mutex> lock(mRecastMeshMutex);
+        mRecastMesh = value;
     }
 }
