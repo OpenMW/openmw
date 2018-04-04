@@ -32,7 +32,6 @@ namespace MWMechanics
 
         // Is the player buying?
         bool buying = (merchantOffer < 0);
-
         int a = std::abs(merchantOffer);
         int b = std::abs(playerOffer);
         int d = (buying)
@@ -56,7 +55,7 @@ namespace MWMechanics
         float npcTerm = (d1 + e1 + f1) * merchantStats.getFatigueTerm();
         float x = gmst.find("fBargainOfferMulti")->getFloat() * d
             + gmst.find("fBargainOfferBase")->getFloat()
-            + std::abs(int(pcTerm - npcTerm));
+            + int(pcTerm - npcTerm);
 
         int roll = Misc::Rng::rollDice(100) + 1;
 
