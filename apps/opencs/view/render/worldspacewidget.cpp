@@ -5,7 +5,6 @@
 #include <QEvent>
 #include <QDragEnterEvent>
 #include <QDragMoveEvent>
-#include <QObject>
 #include <QDropEvent>
 #include <QMouseEvent>
 #include <QKeyEvent>
