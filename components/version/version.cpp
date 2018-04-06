@@ -25,8 +25,7 @@ std::string Version::describe()
     std::string rev = mCommitHash;
     if (!rev.empty())
     {
-        rev = rev.substr(0, 10);
-        str += "\nRevision: " + rev;
+        str += "\nRevision: " + rev.substr(0, 10);
     }
     return str;
 }

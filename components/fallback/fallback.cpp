@@ -37,10 +37,7 @@ namespace Fallback
     int Map::getFallbackInt(const std::string& fall) const
     {
         std::string fallback=getFallbackString(fall);
-        if (fallback.empty())
-            return 0;
-        else
-            return std::stoi(fallback);
+        return fallback.empty() ? 0 : std::stoi(fallback);
     }
 
     bool Map::getFallbackBool(const std::string& fall) const
