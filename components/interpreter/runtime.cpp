@@ -40,10 +40,12 @@ namespace Interpreter
 
         int offset = 0;
 
-        for (; index; --index)
+		while(index > 0)
         {
             offset += std::strlen (literalBlock+offset) + 1;
             assert (offset/4<static_cast<int> (mCode[3]));
+			
+			--index;
         }
 
         return literalBlock+offset;
@@ -51,8 +53,8 @@ namespace Interpreter
 
     void Runtime::configure (const Type_Code *code, int codeSize, Context& context)
     {
-        clear();
-
+        mStack.clear();
+		
         mContext = &context;
         mCode = code;
         mCodeSize = codeSize;

@@ -175,17 +175,14 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
 
     case Qt::TextAlignmentRole:
     {
-        switch (column)
-        {
-        case 0:
-        case 1:
-            return Qt::AlignLeft + Qt::AlignVCenter;
-        case 2:
-        case 3:
+		if((column == 2) && (column == 3))
+		{
             return Qt::AlignRight + Qt::AlignVCenter;
-        default:
+		}
+		else
+		{
             return Qt::AlignLeft + Qt::AlignVCenter;
-        }
+		}
     }
 
     case Qt::ToolTipRole:
