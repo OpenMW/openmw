@@ -29,47 +29,44 @@ namespace CSVWidget
 
 namespace CSVRender
 {
+    class TextureBrushButton : public QPushButton
+    {
+        Q_OBJECT
 
-    class BrushWindow : public QWidget {
+        public:
+            TextureBrushButton (const QIcon& icon, const QString& tooltip = "",
+                QWidget *parent = 0);
+            virtual void dragEnterEvent (QDragEnterEvent *event);
+            virtual void dropEvent (QDropEvent *event);
+        signals:
+            void passBrushTexture(std::string brushTexture);
 
+    };
+
+    class TextureBrushWindow : public QWidget
+    {
         Q_OBJECT
 
         int mButtonSize;
         int mIconSize;
         WorldspaceWidget *mWorldspaceWidget;
-        std::string *mBrushTexture;
+        std::string mBrushTexture;
+        std::string mBrushTextureLabel;
 
         public:
 
-            BrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent = 0);
-
-            class BrushButton : public QPushButton
-            {
-                public:
-                    std::string *mBrushTexture;
-                    BrushButton (const QIcon& icon, const QString& tooltip = "",
-                        QWidget *parent = 0);
-                    virtual void dragEnterEvent (QDragEnterEvent *event);
-                    virtual void dropEvent (QDropEvent *event);
-            };
-
-            void configureButtonInitialSettings(BrushButton *button);
+            TextureBrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent = 0);
+            void configureButtonInitialSettings(TextureBrushButton *button);
 
         private:
             QLabel *label;
 
         public slots:
-
+            void getBrushTexture(std::string brushTexture);
     };
-
-
     class TerrainTextureMode : public EditMode
     {
-            Q_OBJECT
-
-            CSVWidget::SceneToolMode *mSubMode;
-            std::string mSubModeId;
-            BrushWindow *brushWindow;
+        Q_OBJECT
 
         public:
             std::string mBrushTexture;
@@ -95,15 +92,14 @@ namespace CSVRender
             virtual void dropEvent (QDropEvent *event);
             virtual void dragMoveEvent (QDragMoveEvent *event);
 
-            int getSubModeFromId (const std::string& id) const;
-            void subModeChanged (const std::string& id);
-
         private:
+            TextureBrushWindow *textureBrushWindow;
 
         signals:
+            //void passBrushTexture(std::string brushTexture);
 
-        private slots:
-
+        public slots:
+            //void getBrushTexture(std::string brushTexture);
     };
 }
 
