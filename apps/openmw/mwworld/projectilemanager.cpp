@@ -280,6 +280,42 @@ namespace MWWorld
         update(state, duration);
     }
 
+    void ProjectileManager::restoreProjectile(ProjectileState& state, osg::Vec3f& hitPos)
+    {
+        // dive projectile to target a bit
+        state.mVelocity.normalize();
+        hitPos += state.mVelocity * 2.5f;
+        ESM::Position position = ESM::Position();
+        position.pos[0] = hitPos.x();
+        position.pos[1] = hitPos.y();
+        position.pos[2] = hitPos.z();
+
+        MWBase::Environment::get().getSoundManager()->playSound3D(hitPos, "Missile Hit", 1.f, 1.f);
+        MWWorld::Ptr caster = state.getCaster();
+        MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), state.mIdArrow);
+        MWWorld::Ptr arrow = MWBase::Environment::get().getWorld()->placeObject(projectileRef.getPtr(), caster.getCell(), position);
+
+        // We should orient throwing weapon manually because of its rotation
+        if (state.mIdArrow == state.mBowId)
+        {
+            osg::Quat throwOrient;
+            throwOrient.set(
+                osg::Matrixd::rotate(osg::PI, osg::Vec3f(0,0,1)) *
+                osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
+                osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
+                osg::Matrixd::inverse(
+                    osg::Matrixd::lookAt(
+                        osg::Vec3f(0,0,0),
+                        state.mVelocity,
+                        osg::Vec3f(0,0,1))
+                    )
+                );
+            arrow.getRefData().getBaseNode()->setAttitude(throwOrient);
+        }
+        else
+            arrow.getRefData().getBaseNode()->setAttitude(state.mNode->getAttitude());
+    }
+
     void ProjectileManager::update(State& state, float duration)
     {
         state.mEffectAnimationTime->addTime(duration);
@@ -614,36 +650,7 @@ namespace MWWorld
 
                 if (!underwater && restore)
                 {
-                    // dive projectile to target a bit
-                    it->mVelocity.normalize();
-                    hitPos += it->mVelocity * 2.5f;
-                    ESM::Position position = ESM::Position();
-                    position.pos[0] = hitPos.x();
-                    position.pos[1] = hitPos.y();
-                    position.pos[2] = hitPos.z();
-
-                    MWBase::Environment::get().getSoundManager()->playSound3D(hitPos, "Missile Hit", 1.f, 1.f);
-                    MWWorld::Ptr arrow = MWBase::Environment::get().getWorld()->placeObject(projectileRef.getPtr(), caster.getCell(), position);
-
-                    // We should orient throwing weapon manually because of its rotation
-                    if (it->mIdArrow == it->mBowId)
-                    {
-                        osg::Quat throwOrient;
-                        throwOrient.set(
-                            osg::Matrixd::rotate(osg::PI, osg::Vec3f(0,0,1)) *
-                            osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
-                            osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
-                            osg::Matrixd::inverse(
-                                osg::Matrixd::lookAt(
-                                    osg::Vec3f(0,0,0),
-                                    it->mVelocity,
-                                    osg::Vec3f(0,0,1))
-                                )
-                            );
-                        arrow.getRefData().getBaseNode()->setAttitude(throwOrient);
-                    }
-                    else
-                        arrow.getRefData().getBaseNode()->setAttitude(it->mNode->getAttitude());
+                    restoreProjectile(*it, hitPos);
                 }
                 mParent->removeChild(it->mNode);
                 it = mProjectiles.erase(it);

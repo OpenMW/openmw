@@ -131,6 +131,7 @@ namespace MWWorld
                             bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, std::string texture = "");
 
         void updateProjectileRotation(ProjectileState& state, float duration);
+        void restoreProjectile(ProjectileState& state, osg::Vec3f& hitPos);
         void update (State& state, float duration);
 
         void operator=(const ProjectileManager&);
