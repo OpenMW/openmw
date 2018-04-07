@@ -123,7 +123,6 @@ namespace MWWorld
         void cleanupMagicBolt(MagicBoltState& state);
         void periodicCleanup(float dt);
 
-        void enhancedMoveProjectiles(float dt);
         void moveProjectiles(float dt);
         void moveMagicBolts(float dt);
 

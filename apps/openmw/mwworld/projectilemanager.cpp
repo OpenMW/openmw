@@ -397,7 +397,7 @@ namespace MWWorld
     void ProjectileManager::update(float dt)
     {
         periodicCleanup(dt);
-        mRestoreProjectiles ? enhancedMoveProjectiles(dt) : moveProjectiles(dt);
+        moveProjectiles(dt);
         moveMagicBolts(dt);
     }
 
@@ -523,7 +523,7 @@ namespace MWWorld
             MWWorld::Ptr caster = it->getCaster();
             MWWorld::Ptr hitObject = MWWorld::Ptr();
             osg::Vec3f hitPos = newPos;
-            bool hasHit = checkImpact(caster, pos, newPos, hitPos, hitObject);
+            bool hasHit = checkImpact(caster, pos, newPos, hitPos, hitObject, mRestoreProjectiles);
 
             bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos);
 
@@ -543,82 +543,34 @@ namespace MWWorld
 
                 if (caster.isEmpty())
                     caster = hitObject;
+
+                if (mRestoreProjectiles)
+                {
+                    // We should prevent an engine from spawning projectile at the end of other projectile to prevent long lines of arrows (->->->->)
+                    bool targetIsProjectile = false;
+                    if (!hitObject.isEmpty() && hitObject.getClass().getTypeName() == typeid(ESM::Weapon).name())
+                    {
+                        int type = hitObject.get<ESM::Weapon>()->mBase->mData.mType;
+                        targetIsProjectile = (type == ESM::Weapon::MarksmanThrown ||
+                                                type == ESM::Weapon::Arrow ||
+                                                type == ESM::Weapon::Bolt);
+                    }
+                    if (targetIsProjectile) continue;
+
+                    // If we did not hit an actor or lava, we can restore the projectile
+                    bool restore = hitObject.isEmpty() || (!hitObject.getClass().isActor() && hitObject.getClass().getScript(hitObject) != "lava");
+
+                    if (!underwater && restore)
+                    {
+                        restoreProjectile(*it, hitPos);
+                    }
+                }
 
                 MWMechanics::projectileHit(caster, hitObject, bow, projectileRef.getPtr(), hasHit ? hitPos : newPos, it->mAttackStrength);
 
                 if (underwater)
                     mRendering->emitWaterRipple(newPos);
 
-                mParent->removeChild(it->mNode);
-                it = mProjectiles.erase(it);
-                continue;
-            }
-
-            ++it;
-        }
-    }
-
-    void ProjectileManager::enhancedMoveProjectiles(float duration)
-    {
-        for (std::vector<ProjectileState>::iterator it = mProjectiles.begin(); it != mProjectiles.end();)
-        {
-            // gravity constant - must be way lower than the gravity affecting actors, since we're not
-            // simulating aerodynamics at all
-            it->mVelocity -= osg::Vec3f(0, 0, 627.2f * 0.1f) * duration;
-
-            osg::Vec3f pos(it->mNode->getPosition());
-            osg::Vec3f newPos = pos + it->mVelocity * duration;
-
-            updateProjectileRotation(*it, duration);
-            it->mNode->setPosition(newPos);
-
-            MWWorld::Ptr caster = it->getCaster();
-            MWWorld::Ptr hitObject = MWWorld::Ptr();
-            osg::Vec3f hitPos = newPos;
-            bool hasHit = checkImpact(caster, pos, newPos, hitPos, hitObject, true);
-
-            bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos);
-
-            if (hasHit || underwater)
-            {
-                MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
-
-                // Try to get a Ptr to the bow that was used. It might no longer exist.
-                MWWorld::Ptr bow = projectileRef.getPtr();
-                if (!caster.isEmpty() && it->mIdArrow != it->mBowId)
-                {
-                    MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
-                    MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                    if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
-                        bow = *invIt;
-                }
-
-                if (caster.isEmpty())
-                    caster = hitObject;
-
-                // We should prevent an engine from spawning projectile at the end of other projectile to prevent long lines of arrows (->->->->)
-                bool targetIsProjectile = false;
-                if (!hitObject.isEmpty() && hitObject.getClass().getTypeName() == typeid(ESM::Weapon).name())
-                {
-                    int type = hitObject.get<ESM::Weapon>()->mBase->mData.mType;
-                    targetIsProjectile = (type == ESM::Weapon::MarksmanThrown ||
-                                            type == ESM::Weapon::Arrow ||
-                                            type == ESM::Weapon::Bolt);
-                }
-                if (targetIsProjectile) continue;
-
-                MWMechanics::projectileHit(caster, hitObject, bow, projectileRef.getPtr(), hitPos, it->mAttackStrength);
-
-                if (underwater)
-                    mRendering->emitWaterRipple(hitPos);
-
-                // If we did not hit an actor or lava, we can restore the projectile
-                bool restore = hitObject.isEmpty() || (!hitObject.getClass().isActor() && hitObject.getClass().getScript(hitObject) != "lava");
-
-                if (!underwater && restore)
-                {
-                    restoreProjectile(*it, hitPos);
-                }
                 mParent->removeChild(it->mNode);
                 it = mProjectiles.erase(it);
                 continue;
