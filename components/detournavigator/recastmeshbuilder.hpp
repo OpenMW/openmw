@@ -3,6 +3,7 @@
 
 #include "recastmesh.hpp"
 
+class btBoxShape;
 class btCollisionShape;
 class btCompoundShape;
 class btConcaveShape;
@@ -26,6 +27,8 @@ namespace DetourNavigator
 
         void addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform);
 
+        void addObject(const btBoxShape& shape, const btTransform& transform);
+
         std::shared_ptr<RecastMesh> create() const;
 
         void reset();
@@ -36,6 +39,8 @@ namespace DetourNavigator
         std::vector<float> mVertices;
 
         void addObject(const btConcaveShape& shape, btTriangleCallback&& callback);
+
+        void addTriangleVertex(const btVector3& worldPosition);
 
         void addVertex(const btVector3& worldPosition);
     };

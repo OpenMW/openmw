@@ -1,4 +1,5 @@
 #include "chunkytrimesh.hpp"
+#include "exceptions.hpp"
 
 #include <osg/Vec2f>
 
@@ -119,7 +120,7 @@ namespace DetourNavigator
         const auto trianglesCount = indices.size() / 3;
 
         if (trianglesCount == 0)
-            return;
+            throw InvalidArgument("ChunkyTriMesh tris should contain at least 3 values");
 
         const auto nchunks = (trianglesCount + trisPerChunk - 1) / trisPerChunk;
 

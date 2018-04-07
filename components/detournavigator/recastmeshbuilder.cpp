@@ -7,9 +7,13 @@
 
 #include <components/bullethelpers/processtrianglecallback.hpp>
 
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionShapes/btConcaveShape.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <LinearMath/btTransform.h>
+
+#include <algorithm>
 
 namespace
 {
@@ -35,6 +39,8 @@ namespace DetourNavigator
             return addObject(static_cast<const btHeightfieldTerrainShape&>(shape), transform);
         else if (shape.isConcave())
             return addObject(static_cast<const btConcaveShape&>(shape), transform);
+        else if (shape.getShapeType() == BOX_SHAPE_PROXYTYPE)
+            return addObject(static_cast<const btBoxShape&>(shape), transform);
         std::ostringstream message;
         message << "Unsupported shape type: " << BroadphaseNativeTypes(shape.getShapeType());
         throw InvalidArgument(message.str());
@@ -51,7 +57,7 @@ namespace DetourNavigator
         return addObject(shape, makeProcessTriangleCallback([&] (btVector3* triangle, int, int)
         {
             for (std::size_t i = 3; i > 0; --i)
-                addVertex(transform(triangle[i - 1]));
+                addTriangleVertex(transform(triangle[i - 1]));
         }));
     }
 
@@ -60,8 +66,38 @@ namespace DetourNavigator
         return addObject(shape, makeProcessTriangleCallback([&] (btVector3* triangle, int, int)
         {
             for (std::size_t i = 0; i < 3; ++i)
-                addVertex(transform(triangle[i]));
+                addTriangleVertex(transform(triangle[i]));
         }));
+    }
+
+    void RecastMeshBuilder::addObject(const btBoxShape& shape, const btTransform& transform)
+    {
+        const auto indexOffset = int(mVertices.size() / 3);
+
+        for (int vertex = 0; vertex < shape.getNumVertices(); ++vertex)
+        {
+            btVector3 position;
+            shape.getVertex(vertex, position);
+            addVertex(transform(position));
+        }
+
+        static const std::array<int, 36> indices {{
+            0, 2, 3,
+            3, 1, 0,
+            0, 4, 6,
+            6, 2, 0,
+            0, 1, 5,
+            5, 4, 0,
+            7, 5, 1,
+            1, 3, 7,
+            7, 3, 2,
+            2, 6, 7,
+            7, 6, 4,
+            4, 5, 7,
+        }};
+
+        std::transform(indices.begin(), indices.end(), std::back_inserter(mIndices),
+            [&] (int index) { return index + indexOffset; });
     }
 
     std::shared_ptr<RecastMesh> RecastMeshBuilder::create() const
@@ -83,10 +119,15 @@ namespace DetourNavigator
         shape.processAllTriangles(&callback, aabbMin, aabbMax);
     }
 
+    void RecastMeshBuilder::addTriangleVertex(const btVector3& worldPosition)
+    {
+        mIndices.push_back(static_cast<int>(mVertices.size() / 3));
+        addVertex(worldPosition);
+    }
+
     void RecastMeshBuilder::addVertex(const btVector3& worldPosition)
     {
         const auto navMeshPosition = toNavMeshCoordinates(mSettings, makeOsgVec3f(worldPosition));
-        mIndices.push_back(static_cast<int>(mIndices.size()));
         mVertices.push_back(navMeshPosition.x());
         mVertices.push_back(navMeshPosition.y());
         mVertices.push_back(navMeshPosition.z());
