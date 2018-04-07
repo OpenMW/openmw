@@ -256,6 +256,30 @@ namespace MWWorld
         MWRender::overrideFirstRootTexture(texture, mResourceSystem, projectile);
     }
 
+    void ProjectileManager::updateProjectileRotation(ProjectileState& state, float duration)
+    {
+        osg::Quat orient;
+
+        if (state.mThrown)
+            orient.set(
+                osg::Matrixd::rotate(state.mEffectAnimationTime->getTime() * -10.0,osg::Vec3f(0,0,1)) *
+                osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
+                osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
+                osg::Matrixd::inverse(
+                    osg::Matrixd::lookAt(
+                        osg::Vec3f(0,0,0),
+                        state.mVelocity,
+                        osg::Vec3f(0,0,1))
+                    )
+                );
+        else
+            orient.makeRotate(osg::Vec3f(0,1,0), state.mVelocity);
+
+        state.mNode->setAttitude(orient);
+
+        update(state, duration);
+    }
+
     void ProjectileManager::update(State& state, float duration)
     {
         state.mEffectAnimationTime->addTime(duration);
@@ -465,27 +489,8 @@ namespace MWWorld
             osg::Vec3f pos(it->mNode->getPosition());
             osg::Vec3f newPos = pos + it->mVelocity * duration;
 
-            osg::Quat orient;
-
-            if (it->mThrown)
-                orient.set(
-                    osg::Matrixd::rotate(it->mEffectAnimationTime->getTime() * -10.0,osg::Vec3f(0,0,1)) *
-                    osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
-                    osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
-                    osg::Matrixd::inverse(
-                        osg::Matrixd::lookAt(
-                            osg::Vec3f(0,0,0),
-                            it->mVelocity,
-                            osg::Vec3f(0,0,1))
-                        )
-                    );
-            else
-                orient.makeRotate(osg::Vec3f(0,1,0), it->mVelocity);
-
-            it->mNode->setAttitude(orient);
+            updateProjectileRotation(*it, duration);
             it->mNode->setPosition(newPos);
-
-            update(*it, duration);
 
             MWWorld::Ptr caster = it->getCaster();
 
@@ -542,27 +547,8 @@ namespace MWWorld
             osg::Vec3f pos(it->mNode->getPosition());
             osg::Vec3f newPos = pos + it->mVelocity * duration;
 
-            osg::Quat orient;
-
-            if (it->mThrown)
-                orient.set(
-                    osg::Matrixd::rotate(it->mEffectAnimationTime->getTime() * -10.0,osg::Vec3f(0,0,1)) *
-                    osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
-                    osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
-                    osg::Matrixd::inverse(
-                        osg::Matrixd::lookAt(
-                            osg::Vec3f(0,0,0),
-                            it->mVelocity,
-                            osg::Vec3f(0,0,1))
-                        )
-                    );
-            else
-                orient.makeRotate(osg::Vec3f(0,1,0), it->mVelocity);
-
-            it->mNode->setAttitude(orient);
+            updateProjectileRotation(*it, duration);
             it->mNode->setPosition(newPos);
-
-            update(*it, duration);
 
             MWWorld::Ptr caster = it->getCaster();
 
