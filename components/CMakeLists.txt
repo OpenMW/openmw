@@ -51,7 +51,7 @@ add_component_dir (shader
 add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry morphgeometry lightcontroller
     lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil waterutil writescene serialize optimizer
-    actorutil
+    actorutil detourdebugdraw navmesh
     )
 
 add_component_dir (nif
@@ -210,7 +210,7 @@ include_directories(${Bullet_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
-find_package(RecastNavigation COMPONENTS Detour Recast REQUIRED)
+find_package(RecastNavigation COMPONENTS DebugUtils Detour Recast REQUIRED)
 
 include_directories(SYSTEM ${RecastNavigation_INCLUDE_DIRS})
 

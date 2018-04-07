@@ -10,7 +10,8 @@ namespace MWRender
         Render_Wireframe,
         Render_Pathgrid,
         Render_Water,
-        Render_Scene
+        Render_Scene,
+        Render_NavMesh,
     };
 
 }

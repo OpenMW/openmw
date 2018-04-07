@@ -1317,6 +1317,20 @@ namespace MWScript
             }
         };
 
+        class OpToggleNavMesh : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    bool enabled =
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_NavMesh);
+
+                    runtime.getContext().report (enabled ?
+                        "Navigation Mesh Rendering -> On" : "Navigation Mesh Rendering -> Off");
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -1417,6 +1431,7 @@ namespace MWScript
             interpreter.installSegment3 (Compiler::Misc::opcodeShowSceneGraph, new OpShowSceneGraph<ImplicitRef>);
             interpreter.installSegment3 (Compiler::Misc::opcodeShowSceneGraphExplicit, new OpShowSceneGraph<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleBorders, new OpToggleBorders);
+            interpreter.installSegment5 (Compiler::Misc::opcodeToggleNavMesh, new OpToggleNavMesh);
         }
     }
 }

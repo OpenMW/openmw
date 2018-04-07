@@ -45,4 +45,14 @@ namespace DetourNavigator
     {
         mNavMeshManager.wait();
     }
+
+    std::map<osg::Vec3f, std::shared_ptr<NavMeshCacheItem>> Navigator::getNavMeshes() const
+    {
+        return mNavMeshManager.getNavMeshes();
+    }
+
+    const Settings& Navigator::getSettings() const
+    {
+        return mSettings;
+    }
 }

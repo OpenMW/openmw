@@ -44,7 +44,7 @@ namespace DetourNavigator
         if (cached != mCache.end())
             return;
         mCache.insert(std::make_pair(agentHalfExtents,
-            std::make_shared<NavMeshCacheItem>(NavMeshCacheItem {makeEmptyNavMesh(mSettings), mRevision}))
+            std::make_shared<NavMeshCacheItem>(makeEmptyNavMesh(mSettings), mRevision))
         );
         log("cache add for agent=", agentHalfExtents);
     }
@@ -57,9 +57,9 @@ namespace DetourNavigator
     void NavMeshManager::update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents)
     {
         const auto& cached = getCached(agentHalfExtents);
-        if (cached->mRevision >= mRevision)
+        if (cached->mRecastMeshRevision >= mRevision)
             return;
-        cached->mRevision = mRevision;
+        cached->mRecastMeshRevision = mRevision;
         const auto changedTiles = mChangedTiles.find(agentHalfExtents);
         if (changedTiles != mChangedTiles.end())
         {
@@ -82,6 +82,11 @@ namespace DetourNavigator
     SharedNavMesh NavMeshManager::getNavMesh(const osg::Vec3f& agentHalfExtents) const
     {
         return getCached(agentHalfExtents)->mValue;
+    }
+
+    std::map<osg::Vec3f, std::shared_ptr<NavMeshCacheItem>> NavMeshManager::getNavMeshes() const
+    {
+        return mCache;
     }
 
     void NavMeshManager::addChangedTiles(const btCollisionShape& shape, const btTransform& transform)

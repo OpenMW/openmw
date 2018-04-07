@@ -94,6 +94,8 @@ namespace DetourNavigator
         updateNavMesh(job.mAgentHalfExtents, *recastMesh, job.mChangedTile, mSettings,
             job.mNavMeshCacheItem->mValue);
 
+        ++job.mNavMeshCacheItem->mNavMeshRevision;
+
         const auto finish = std::chrono::steady_clock::now();
 
         writeDebugFiles(job, *recastMesh);

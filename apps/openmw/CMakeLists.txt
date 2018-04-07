@@ -21,7 +21,7 @@ add_openmw_dir (mwrender
     actors objects renderingmanager animation rotatecontroller sky npcanimation vismask
     creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation
     bulletdebugdraw globalmap characterpreview camera localmap water terrainstorage ripplesimulation
-    renderbin actoranimation landmanager
+    renderbin actoranimation landmanager navmesh
     )
 
 add_openmw_dir (mwinput
@@ -117,7 +117,7 @@ include_directories(
     ${FFmpeg_INCLUDE_DIRS}
 )
 
-find_package(RecastNavigation COMPONENTS Detour Recast REQUIRED)
+find_package(RecastNavigation COMPONENTS DebugUtils Detour Recast REQUIRED)
 
 include_directories(SYSTEM ${RecastNavigation_INCLUDE_DIRS})
 

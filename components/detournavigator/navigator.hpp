@@ -34,6 +34,10 @@ namespace DetourNavigator
                 toNavMeshCoordinates(mSettings, start), toNavMeshCoordinates(mSettings, end), mSettings, out);
         }
 
+        std::map<osg::Vec3f, std::shared_ptr<NavMeshCacheItem>> getNavMeshes() const;
+
+        const Settings& getSettings() const;
+
     private:
         Settings mSettings;
         NavMeshManager mNavMeshManager;

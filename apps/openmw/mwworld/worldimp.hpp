@@ -94,11 +94,11 @@ namespace MWWorld
 
             std::unique_ptr<MWWorld::Player> mPlayer;
             std::unique_ptr<MWPhysics::PhysicsSystem> mPhysics;
+            std::unique_ptr<DetourNavigator::Navigator> mNavigator;
             std::unique_ptr<MWRender::RenderingManager> mRendering;
             std::unique_ptr<MWWorld::Scene> mWorldScene;
             std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
             std::shared_ptr<ProjectileManager> mProjectileManager;
-            std::unique_ptr<DetourNavigator::Navigator> mNavigator;
 
             bool mGodMode;
             bool mScriptsEnabled;
