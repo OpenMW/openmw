@@ -130,6 +130,7 @@ namespace MWWorld
         void createModel (State& state, const std::string& model, const osg::Vec3f& pos, const osg::Quat& orient,
                             bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, std::string texture = "");
 
+        bool checkImpact(const MWWorld::Ptr& caster, const osg::Vec3f& pos, const osg::Vec3f& newPos, osg::Vec3f& hitPos, MWWorld::Ptr& hitObject, bool checkMeshDimensions = false);
         void updateProjectileRotation(ProjectileState& state, float duration);
         void restoreProjectile(ProjectileState& state, osg::Vec3f& hitPos);
         void update (State& state, float duration);

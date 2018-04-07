@@ -462,42 +462,34 @@ namespace MWWorld
             update(*it, duration);
 
             MWWorld::Ptr caster = it->getCaster();
+            MWWorld::Ptr hitObject = MWWorld::Ptr();
+            osg::Vec3f hitPos = newPos;
+            bool hasHit = checkImpact(caster, pos, newPos, hitPos, hitObject);
 
-            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
-            std::vector<MWWorld::Ptr> targetActors;
-            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
-                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
-
-            // Check for impact
-            // TODO: use a proper btRigidBody / btGhostObject?
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
-
-            bool hit = false;
-            if (result.mHit)
+            if (hasHit)
             {
-                hit = true;
-                if (result.mHitObject.isEmpty())
+                if (hitObject.isEmpty())
                 {
                     // terrain
                 }
                 else
                 {
-                    MWMechanics::CastSpell cast(caster, result.mHitObject);
+                    MWMechanics::CastSpell cast(caster, hitObject);
                     cast.mHitPosition = pos;
                     cast.mId = it->mSpellId;
                     cast.mSourceName = it->mSourceName;
                     cast.mStack = false;
-                    cast.inflict(result.mHitObject, caster, it->mEffects, ESM::RT_Target, false, true);
+                    cast.inflict(hitObject, caster, it->mEffects, ESM::RT_Target, false, true);
                 }
             }
 
             // Explodes when hitting water
             if (MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos))
-                hit = true;
+                hasHit = true;
 
-            if (hit)
+            if (hasHit)
             {
-                MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, result.mHitObject,
+                MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, hitObject,
                                                                     ESM::RT_Target, it->mSpellId, it->mSourceName);
 
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -529,19 +521,13 @@ namespace MWWorld
             it->mNode->setPosition(newPos);
 
             MWWorld::Ptr caster = it->getCaster();
-
-            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
-            std::vector<MWWorld::Ptr> targetActors;
-            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
-                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
-
-            // Check for impact
-            // TODO: use a proper btRigidBody / btGhostObject?
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+            MWWorld::Ptr hitObject = MWWorld::Ptr();
+            osg::Vec3f hitPos = newPos;
+            bool hasHit = checkImpact(caster, pos, newPos, hitPos, hitObject);
 
             bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos);
 
-            if (result.mHit || underwater)
+            if (hasHit || underwater)
             {
                 MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
 
@@ -556,9 +542,9 @@ namespace MWWorld
                 }
 
                 if (caster.isEmpty())
-                    caster = result.mHitObject;
+                    caster = hitObject;
 
-                MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHit ? result.mHitPos : newPos, it->mAttackStrength);
+                MWMechanics::projectileHit(caster, hitObject, bow, projectileRef.getPtr(), hasHit ? hitPos : newPos, it->mAttackStrength);
 
                 if (underwater)
                     mRendering->emitWaterRipple(newPos);
@@ -587,33 +573,14 @@ namespace MWWorld
             it->mNode->setPosition(newPos);
 
             MWWorld::Ptr caster = it->getCaster();
-
-            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
-            std::vector<MWWorld::Ptr> targetActors;
-            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
-                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
-
-            // Check for impact
-            // TODO: use a proper btRigidBody / btGhostObject?
-            MWPhysics::PhysicsSystem::RayResult result1 = mPhysics->castRay(pos, newPos, caster, targetActors, MWPhysics::CollisionType_Actor);
-            MWRender::RenderingManager::RayResult result2 = mRendering->castRay(pos, newPos, true, true);
+            MWWorld::Ptr hitObject = MWWorld::Ptr();
+            osg::Vec3f hitPos = newPos;
+            bool hasHit = checkImpact(caster, pos, newPos, hitPos, hitObject, true);
 
             bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos);
 
-            if (result1.mHit || result2.mHit || underwater)
+            if (hasHit || underwater)
             {
-                MWWorld::Ptr hitObject = MWWorld::Ptr();
-                if (result1.mHit)
-                    hitObject = result1.mHitObject;
-                else if (result2.mHit)
-                    hitObject = result2.mHitObject;
-
-                osg::Vec3f hitPos = newPos;
-                if (result1.mHit)
-                    hitPos = result1.mHitPos;
-                else if (result2.mHit)
-                    hitPos = result2.mHitPointWorld;
-
                 MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
 
                 // Try to get a Ptr to the bow that was used. It might no longer exist.
@@ -629,14 +596,6 @@ namespace MWWorld
                 if (caster.isEmpty())
                     caster = hitObject;
 
-                MWMechanics::projectileHit(caster, hitObject, bow, projectileRef.getPtr(), hitPos, it->mAttackStrength);
-
-                if (underwater)
-                    mRendering->emitWaterRipple(newPos);
-
-                // If we did not hit an actor or lava, we can restore the projectile
-                bool restore = hitObject.isEmpty() || (!hitObject.getClass().isActor() && hitObject.getClass().getScript(hitObject) != "lava");
-
                 // We should prevent an engine from spawning projectile at the end of other projectile to prevent long lines of arrows (->->->->)
                 bool targetIsProjectile = false;
                 if (!hitObject.isEmpty() && hitObject.getClass().getTypeName() == typeid(ESM::Weapon).name())
@@ -647,6 +606,14 @@ namespace MWWorld
                                             type == ESM::Weapon::Bolt);
                 }
                 if (targetIsProjectile) continue;
+
+                MWMechanics::projectileHit(caster, hitObject, bow, projectileRef.getPtr(), hitPos, it->mAttackStrength);
+
+                if (underwater)
+                    mRendering->emitWaterRipple(hitPos);
+
+                // If we did not hit an actor or lava, we can restore the projectile
+                bool restore = hitObject.isEmpty() || (!hitObject.getClass().isActor() && hitObject.getClass().getScript(hitObject) != "lava");
 
                 if (!underwater && restore)
                 {
@@ -659,6 +626,39 @@ namespace MWWorld
 
             ++it;
         }
+    }
+
+    bool ProjectileManager::checkImpact(const MWWorld::Ptr& caster, const osg::Vec3f& pos, const osg::Vec3f& newPos, osg::Vec3f& hitPos, MWWorld::Ptr& hitObject, bool checkMeshDimensions)
+    {
+        // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+        std::vector<MWWorld::Ptr> targetActors;
+        if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
+            caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
+
+        // Check for impact
+        // TODO: use a proper btRigidBody / btGhostObject?
+        MWPhysics::PhysicsSystem::RayResult result1 = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, checkMeshDimensions ? MWPhysics::CollisionType_Actor : MWPhysics::CollisionType_Projectile);
+        if (result1.mHit)
+        {
+            hitObject = result1.mHitObject;
+            hitPos = result1.mHitPos;
+
+            return true;
+        }
+
+        if (!checkMeshDimensions)
+            return false;
+
+        MWRender::RenderingManager::RayResult result2 = mRendering->castRay(pos, newPos, true, true);
+        if (result2.mHit)
+        {
+            hitObject = result2.mHitObject;
+            hitPos = result2.mHitPointWorld;
+
+            return true;
+        }
+
+        return false;
     }
 
     void ProjectileManager::cleanupProjectile(ProjectileManager::ProjectileState& state)
