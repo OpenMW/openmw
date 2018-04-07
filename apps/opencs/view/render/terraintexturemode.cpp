@@ -62,8 +62,7 @@ void CSVRender::TextureBrushButton::dropEvent (QDropEvent *event)
           std::string mBrushTexture(uid.getId());
           emit passBrushTexture(mBrushTexture);
       }
-  }
-      else
+  }      
 }
 
 CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent)
