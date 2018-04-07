@@ -597,7 +597,12 @@ namespace MWWorld
 
         // Check for impact
         // TODO: use a proper btRigidBody / btGhostObject?
-        MWPhysics::PhysicsSystem::RayResult result1 = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, checkMeshDimensions ? MWPhysics::CollisionType_Actor : MWPhysics::CollisionType_Projectile);
+        MWPhysics::PhysicsSystem::RayResult result1;
+        if (checkMeshDimensions)
+            result1 = mPhysics->castRay(pos, newPos, caster, targetActors, MWPhysics::CollisionType_Actor);
+        else
+            result1 = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+
         if (result1.mHit)
         {
             hitObject = result1.mHitObject;
