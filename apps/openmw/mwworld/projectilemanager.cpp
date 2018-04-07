@@ -529,32 +529,13 @@ namespace MWWorld
 
             if (hasHit || underwater)
             {
-                MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
-
-                // Try to get a Ptr to the bow that was used. It might no longer exist.
-                MWWorld::Ptr bow = projectileRef.getPtr();
-                if (!caster.isEmpty() && it->mIdArrow != it->mBowId)
-                {
-                    MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
-                    MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                    if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
-                        bow = *invIt;
-                }
-
                 if (caster.isEmpty())
                     caster = hitObject;
 
                 if (mRestoreProjectiles)
                 {
                     // We should prevent an engine from spawning projectile at the end of other projectile to prevent long lines of arrows (->->->->)
-                    bool targetIsProjectile = false;
-                    if (!hitObject.isEmpty() && hitObject.getClass().getTypeName() == typeid(ESM::Weapon).name())
-                    {
-                        int type = hitObject.get<ESM::Weapon>()->mBase->mData.mType;
-                        targetIsProjectile = (type == ESM::Weapon::MarksmanThrown ||
-                                                type == ESM::Weapon::Arrow ||
-                                                type == ESM::Weapon::Bolt);
-                    }
+                    bool targetIsProjectile = isProjectile(hitObject);
                     if (targetIsProjectile) continue;
 
                     // If we did not hit an actor or lava, we can restore the projectile
@@ -566,7 +547,20 @@ namespace MWWorld
                     }
                 }
 
-                MWMechanics::projectileHit(caster, hitObject, bow, projectileRef.getPtr(), hasHit ? hitPos : newPos, it->mAttackStrength);
+                MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
+
+                // Try to get a Ptr to the bow that was used. It might no longer exist.
+                MWWorld::Ptr projectile = projectileRef.getPtr();
+                MWWorld::Ptr bow = projectile;
+                if (!caster.isEmpty() && it->mIdArrow != it->mBowId)
+                {
+                    MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
+                    MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                    if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
+                        bow = *invIt;
+                }
+
+                MWMechanics::projectileHit(caster, hitObject, bow, projectile, hasHit ? hitPos : newPos, it->mAttackStrength);
 
                 if (underwater)
                     mRendering->emitWaterRipple(newPos);
@@ -578,6 +572,20 @@ namespace MWWorld
 
             ++it;
         }
+    }
+
+    bool ProjectileManager::isProjectile(const MWWorld::Ptr& ptr) const
+    {
+        bool isProjectile = false;
+        if (!ptr.isEmpty() && ptr.getClass().getTypeName() == typeid(ESM::Weapon).name())
+        {
+            int type = ptr.get<ESM::Weapon>()->mBase->mData.mType;
+            isProjectile = (type == ESM::Weapon::MarksmanThrown ||
+                                    type == ESM::Weapon::Arrow ||
+                                    type == ESM::Weapon::Bolt);
+        }
+
+        return isProjectile;
     }
 
     bool ProjectileManager::checkImpact(const MWWorld::Ptr& caster, const osg::Vec3f& pos, const osg::Vec3f& newPos, osg::Vec3f& hitPos, MWWorld::Ptr& hitObject, bool checkMeshDimensions)
