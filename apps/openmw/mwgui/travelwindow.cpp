@@ -4,6 +4,8 @@
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -72,7 +74,10 @@ namespace MWGui
         MWWorld::ActionTeleport::getFollowersToTeleport(player, followers);
 
         // Apply followers cost, in vanilla one follower travels for free
-        price *= std::max(1, static_cast<int>(followers.size()));
+        if (Settings::Manager::getBool("charge for every follower travelling", "Game"))
+            price *= 1 + static_cast<int>(followers.size());
+        else
+            price *= std::max(1, static_cast<int>(followers.size()));
 
         MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>("SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
         toAdd->setEnabled(price <= playerGold);
