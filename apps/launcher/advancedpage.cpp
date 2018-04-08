@@ -1,7 +1,12 @@
 #include "advancedpage.hpp"
 
 #include <components/config/gamesettings.hpp>
+#include <components/config/launchersettings.hpp>
+#include <apps/launcher/utils/cellnameloader.hpp>
 #include <QFileDialog>
+#include <QCompleter>
+#include <components/contentselector/view/contentselector.hpp>
+#include <components/contentselector/model/esmfile.hpp>
 
 Launcher::AdvancedPage::AdvancedPage(Files::ConfigurationManager &cfg,
                                      Config::GameSettings &gameSettings,
@@ -15,6 +20,19 @@ Launcher::AdvancedPage::AdvancedPage(Files::ConfigurationManager &cfg,
     setupUi(this);
 
     loadSettings();
+}
+
+void Launcher::AdvancedPage::loadCellsForAutocomplete(QStringList filePaths) {
+    CellNameLoader cellNameLoader;
+    QStringList cellNamesList = QStringList::fromSet(cellNameLoader.getCellNames(filePaths));
+    std::sort(cellNamesList.begin(), cellNamesList.end());
+
+    // Set up an auto-completer for the "Start default character at" field
+    auto *completer = new QCompleter(cellNamesList);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    completer->setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
+    startDefaultCharacterAtField->setCompleter(completer);
+
 }
 
 void Launcher::AdvancedPage::on_skipMenuCheckBox_stateChanged(int state) {

@@ -142,6 +142,17 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
     mGameSettings.setContentList(fileNames);
 }
 
+QStringList Launcher::DataFilesPage::selectedFilePaths()
+{
+    //retrieve the files selected for the profile
+    ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
+    QStringList filePaths;
+    foreach(const ContentSelectorModel::EsmFile *item, items) {
+        filePaths.append(item->filePath());
+    }
+    return filePaths;
+}
+
 void Launcher::DataFilesPage::removeProfile(const QString &profile)
 {
     mLauncherSettings.removeContentList(profile);

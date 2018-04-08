@@ -41,6 +41,12 @@ namespace Launcher
         void saveSettings(const QString &profile = "");
         bool loadSettings();
 
+        /**
+         * Returns the file paths of all selected content files
+         * @return the file paths of all selected content files
+         */
+        QStringList selectedFilePaths();
+
     signals:
         void signalProfileChanged (int index);
 

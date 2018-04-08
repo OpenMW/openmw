@@ -23,6 +23,12 @@ namespace Launcher
         bool loadSettings();
         void saveSettings();
 
+        /**
+         * Load the cells associated with the given content files for use in autocomplete
+         * @param filePaths the file paths of the content files to be examined
+         */
+        void loadCellsForAutocomplete(QStringList filePaths);
+
     private slots:
         void on_skipMenuCheckBox_stateChanged(int state);
         void on_runScriptAfterStartupBrowseButton_clicked();
