@@ -108,9 +108,11 @@ CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWi
     TextureBrushButton *buttonCustom = new TextureBrushButton(QIcon (QPixmap (iconCustom.c_str())), "", this);
 
     QVBoxLayout *layoutMain = new QVBoxLayout;
+    layoutMain->setSpacing(0);
 
     QHBoxLayout *layoutHorizontal = new QHBoxLayout;
     layoutHorizontal->setContentsMargins (QMargins (0, 0, 0, 0));
+    layoutHorizontal->setSpacing(0);
 
     configureButtonInitialSettings(buttonPoint);
     configureButtonInitialSettings(buttonSquare);
@@ -195,15 +197,12 @@ CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceW
 : EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-texture"}, Mask_Terrain | Mask_Reference, "Terrain texture editing", parent)
 , textureBrushWindow(new TextureBrushWindow(worldspaceWidget, this))
 {
-    setAcceptDrops(true);
 }
 
 void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
     EditMode::activate(toolbar);
 
-    textureBrushWindow->setWindowTitle("Texture brush settings");
-    textureBrushWindow->show();
 }
 
 void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
@@ -213,6 +212,8 @@ void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
 
 void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResult& hit)
 {
+      textureBrushWindow->setWindowTitle("Texture brush settings");
+      textureBrushWindow->show();
 }
 
 void CSVRender::TerrainTextureMode::secondarySelectPressed(const WorldspaceHitResult& hit)
