@@ -12,13 +12,16 @@
 #include <QWidget>
 #include <QIcon>
 #include <QPainter>
+#include <QSpinBox>
+#include <QGroupBox>
+#include <QSlider>
 #include <QEvent>
 #include <QDropEvent>
 #include <QColor>
 #include <QButtonGroup>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QDragEnterEvent>
-#include <QFrame>
 #include <QDrag>
 
 #include "../widget/modebutton.hpp"
@@ -35,6 +38,29 @@
 #include "../../model/world/resourcetable.hpp"
 
 #include "pagedworldspacewidget.hpp"
+
+
+CSVRender::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *parent)
+    : QGroupBox(title, parent)
+{
+    brushSizeSlider = new QSlider(Qt::Horizontal);
+    brushSizeSlider->setTickPosition(QSlider::TicksBothSides);
+    brushSizeSlider->setTickInterval(10);
+    brushSizeSlider->setSingleStep(1);
+
+    brushSizeSpinBox = new QSpinBox;
+    brushSizeSpinBox->setRange(1, 100);
+    brushSizeSpinBox->setSingleStep(1);
+
+    layoutSliderSize = new QHBoxLayout;
+    layoutSliderSize->addWidget(brushSizeSlider);
+    layoutSliderSize->addWidget(brushSizeSpinBox);
+
+    connect(brushSizeSlider, SIGNAL(valueChanged(int)), brushSizeSpinBox, SLOT(setValue(int)));
+    connect(brushSizeSpinBox, SIGNAL(valueChanged(int)), brushSizeSlider, SLOT(setValue(int)));
+
+    setLayout(layoutSliderSize);
+}
 
 CSVRender::TextureBrushButton::TextureBrushButton (const QIcon & icon, const QString & text, QWidget * parent)
     : QPushButton(icon, text, parent)
@@ -62,58 +88,63 @@ void CSVRender::TextureBrushButton::dropEvent (QDropEvent *event)
           std::string mBrushTexture(uid.getId());
           emit passBrushTexture(mBrushTexture);
       }
-  }      
+  }
 }
 
 CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent)
     : QWidget(parent), mWorldspaceWidget (worldspaceWidget)
 {
-    //Get landtexture-data via document
-    CSMDoc::Document& document = mWorldspaceWidget->getDocument();
-    CSMWorld::IdTable& ltexs = dynamic_cast<CSMWorld::IdTable&> (
-        *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
-
     mBrushTextureLabel = "Brush: " + mBrushTexture;
-    label = new QLabel(QString::fromUtf8(mBrushTextureLabel.c_str()), this);
+    selectedBrush = new QLabel(QString::fromUtf8(mBrushTextureLabel.c_str()), this);
 
     const std::string& iconPoint = ":scenetoolbar/brush-point";
     const std::string& iconSquare = ":scenetoolbar/brush-square";
     const std::string& iconCircle = ":scenetoolbar/brush-circle";
     const std::string& iconCustom = ":scenetoolbar/brush-custom";
 
-    TextureBrushButton *button1 = new TextureBrushButton(QIcon (QPixmap (iconPoint.c_str())), "", this);
-    TextureBrushButton *button2 = new TextureBrushButton(QIcon (QPixmap (iconSquare.c_str())), "", this);
-    TextureBrushButton *button3 = new TextureBrushButton(QIcon (QPixmap (iconCircle.c_str())), "", this);
-    TextureBrushButton *button4 = new TextureBrushButton(QIcon (QPixmap (iconCustom.c_str())), "", this);
+    TextureBrushButton *buttonPoint = new TextureBrushButton(QIcon (QPixmap (iconPoint.c_str())), "", this);
+    TextureBrushButton *buttonSquare = new TextureBrushButton(QIcon (QPixmap (iconSquare.c_str())), "", this);
+    TextureBrushButton *buttonCircle = new TextureBrushButton(QIcon (QPixmap (iconCircle.c_str())), "", this);
+    TextureBrushButton *buttonCustom = new TextureBrushButton(QIcon (QPixmap (iconCustom.c_str())), "", this);
 
-    QHBoxLayout *layout = new QHBoxLayout;
-    layout->setContentsMargins (QMargins (0, 0, 0, 0));
+    QVBoxLayout *layoutMain = new QVBoxLayout;
 
-    configureButtonInitialSettings(button1);
-    configureButtonInitialSettings(button2);
-    configureButtonInitialSettings(button3);
-    configureButtonInitialSettings(button4);
+    QHBoxLayout *layoutHorizontal = new QHBoxLayout;
+    layoutHorizontal->setContentsMargins (QMargins (0, 0, 0, 0));
 
-    layout->addWidget(label);
-    layout->addWidget(button1);
-    layout->addWidget(button2);
-    layout->addWidget(button3);
-    layout->addWidget(button4);
-
-    setLayout(layout);
+    configureButtonInitialSettings(buttonPoint);
+    configureButtonInitialSettings(buttonSquare);
+    configureButtonInitialSettings(buttonCircle);
+    configureButtonInitialSettings(buttonCustom);
 
     QButtonGroup* brushButtonGroup = new QButtonGroup(this);
-    brushButtonGroup->addButton(button1);
-    brushButtonGroup->addButton(button2);
-    brushButtonGroup->addButton(button3);
-    brushButtonGroup->addButton(button4);
+    brushButtonGroup->addButton(buttonPoint);
+    brushButtonGroup->addButton(buttonSquare);
+    brushButtonGroup->addButton(buttonCircle);
+    brushButtonGroup->addButton(buttonCustom);
 
     brushButtonGroup->setExclusive(true);
 
-    connect(button1, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
-    connect(button2, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
-    connect(button3, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
-    connect(button4, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
+    layoutHorizontal->addWidget(buttonPoint);
+    layoutHorizontal->addWidget(buttonSquare);
+    layoutHorizontal->addWidget(buttonCircle);
+    layoutHorizontal->addWidget(buttonCustom);
+
+    horizontalGroupBox = new QGroupBox(tr(""));
+    horizontalGroupBox->setLayout(layoutHorizontal);
+
+    BrushSizeControls* sizeSliders = new BrushSizeControls(tr(""), this);
+
+    layoutMain->addWidget(horizontalGroupBox);
+    layoutMain->addWidget(sizeSliders);
+    layoutMain->addWidget(selectedBrush);
+
+    setLayout(layoutMain);
+
+    connect(buttonPoint, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
+    connect(buttonSquare, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
+    connect(buttonCircle, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
+    connect(buttonCustom, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
 
     setWindowFlags(Qt::Window);
 }
@@ -132,7 +163,7 @@ void CSVRender::TextureBrushWindow::getBrushTexture(std::string brushTexture)
 {
     mBrushTexture = brushTexture;
     mBrushTextureLabel = "Brush:" + mBrushTexture;
-    label->setText(QString::fromUtf8(mBrushTextureLabel.c_str()));
+    selectedBrush->setText(QString::fromUtf8(mBrushTextureLabel.c_str()));
 }
 
 // This function should eventually load brush texture as bitmap and set it as overlay

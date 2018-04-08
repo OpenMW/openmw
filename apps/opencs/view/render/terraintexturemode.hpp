@@ -7,10 +7,14 @@
 #include <string>
 
 #include <QLabel>
+#include <QSpinBox>
+#include <QGroupBox>
+#include <QSlider>
 #include <QWidget>
 #include <QIcon>
 #include <QFrame>
 #include <QEvent>
+#include <QHBoxLayout>
 
 #include <QPushButton>
 #include <osg/Geometry>
@@ -29,6 +33,19 @@ namespace CSVWidget
 
 namespace CSVRender
 {
+    class BrushSizeControls : public QGroupBox
+    {
+        Q_OBJECT
+
+        public:
+            BrushSizeControls(const QString &title, QWidget *parent);
+
+        private:
+            QSlider *brushSizeSlider;
+            QSpinBox *brushSizeSpinBox;
+            QHBoxLayout *layoutSliderSize;
+    };
+
     class TextureBrushButton : public QPushButton
     {
         Q_OBJECT
@@ -38,6 +55,7 @@ namespace CSVRender
                 QWidget *parent = 0);
             virtual void dragEnterEvent (QDragEnterEvent *event);
             virtual void dropEvent (QDropEvent *event);
+
         signals:
             void passBrushTexture(std::string brushTexture);
 
@@ -47,23 +65,23 @@ namespace CSVRender
     {
         Q_OBJECT
 
-        int mButtonSize;
-        int mIconSize;
-        WorldspaceWidget *mWorldspaceWidget;
-        std::string mBrushTexture;
-        std::string mBrushTextureLabel;
-
         public:
-
             TextureBrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent = 0);
             void configureButtonInitialSettings(TextureBrushButton *button);
 
         private:
-            QLabel *label;
+            QLabel *selectedBrush;
+            QGroupBox *horizontalGroupBox;
+            int mButtonSize;
+            int mIconSize;
+            WorldspaceWidget *mWorldspaceWidget;
+            std::string mBrushTexture;
+            std::string mBrushTextureLabel;
 
         public slots:
             void getBrushTexture(std::string brushTexture);
     };
+
     class TerrainTextureMode : public EditMode
     {
         Q_OBJECT
@@ -94,12 +112,6 @@ namespace CSVRender
 
         private:
             TextureBrushWindow *textureBrushWindow;
-
-        signals:
-            //void passBrushTexture(std::string brushTexture);
-
-        public slots:
-            //void getBrushTexture(std::string brushTexture);
     };
 }
 
