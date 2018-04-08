@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_MISC_RNG_H
 
 #include <cassert>
+#include <random>
 
 namespace Misc
 {
@@ -12,6 +13,9 @@ namespace Misc
 class Rng
 {
 public:
+
+    /// create a RNG
+    static std::mt19937 generator;
 
     /// seed the RNG
     static void init();
