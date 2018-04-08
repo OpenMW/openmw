@@ -6,6 +6,7 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/resource/bulletshape.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwworld/class.hpp"
 
@@ -23,13 +24,15 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
   , mExternalCollisionMode(true)
   , mCollisionWorld(world)
 {
+    static bool allowCapsuleShape = Settings::Manager::getBool("allow capsule shape", "Game");
+
     mPtr = ptr;
 
     mHalfExtents = shape->mCollisionBoxHalfExtents;
     mMeshTranslation = shape->mCollisionBoxTranslate;
 
     // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
-    if (std::abs(mHalfExtents.x()-mHalfExtents.y())<mHalfExtents.x()*0.05 && mHalfExtents.z() >= mHalfExtents.x())
+    if (allowCapsuleShape && std::abs(mHalfExtents.x()-mHalfExtents.y())<mHalfExtents.x()*0.05 && mHalfExtents.z() >= mHalfExtents.x())
     {
         mShape.reset(new btCapsuleShapeZ(mHalfExtents.x(), 2*mHalfExtents.z() - 2*mHalfExtents.x()));
         mRotationallyInvariant = true;
