@@ -173,10 +173,10 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
     }
 
     if (!inInventory)
+    {
         esm.writeHNOCString ("KNAM", mKey);
-
-    if (!inInventory)
         esm.writeHNOCString ("TNAM", mTrap);
+    }
 
     if (mReferenceBlocked != -1)
         esm.writeHNT("UNAM", mReferenceBlocked);
@@ -188,7 +188,7 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
 void ESM::CellRef::blank()
 {
     mRefNum.unset();
-    mRefID.clear();    
+    mRefID.clear();
     mScale = 1;
     mOwner.clear();
     mGlobalVariable.clear();
@@ -205,7 +205,7 @@ void ESM::CellRef::blank()
     mTrap.clear();
     mReferenceBlocked = -1;
     mTeleport = false;
-    
+
     for (int i=0; i<3; ++i)
     {
         mDoorDest.pos[i] = 0;

@@ -694,7 +694,7 @@ void Record<ESM::Dialogue>::print()
     // loads, rather than loading and then dumping. :-( Anyone mind if
     // I change this?
     ESM::Dialogue::InfoContainer::iterator iit;
-    for (iit = mData.mInfo.begin(); iit != mData.mInfo.end(); iit++)
+    for (iit = mData.mInfo.begin(); iit != mData.mInfo.end(); ++iit)
         std::cout << "INFO!" << iit->mId << std::endl;
 }
 
@@ -1123,7 +1123,7 @@ void Record<ESM::Pathgrid>::print()
 
     int i = 0;
     ESM::Pathgrid::PointList::iterator pit;
-    for (pit = mData.mPoints.begin(); pit != mData.mPoints.end(); pit++)
+    for (pit = mData.mPoints.begin(); pit != mData.mPoints.end(); ++pit)
     {
         std::cout << "  Point[" << i << "]:" << std::endl;
         std::cout << "    Coordinates: (" << pit->mX << ","
@@ -1135,7 +1135,7 @@ void Record<ESM::Pathgrid>::print()
     }
     i = 0;
     ESM::Pathgrid::EdgeList::iterator eit;
-    for (eit = mData.mEdges.begin(); eit != mData.mEdges.end(); eit++)
+    for (eit = mData.mEdges.begin(); eit != mData.mEdges.end(); ++eit)
     {
         std::cout << "  Edge[" << i << "]: " << eit->mV0 << " -> " << eit->mV1 << std::endl;
         if (eit->mV0 >= mData.mData.mS2 || eit->mV1 >= mData.mData.mS2)

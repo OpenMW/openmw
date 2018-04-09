@@ -25,7 +25,7 @@ void WindowBase::setVisible(bool visible)
 
     if (visible)
         onOpen();
-    else if (wasVisible && !visible)
+    else if (wasVisible)
         onClose();
 
     // This is needed as invisible widgets can retain key focus.

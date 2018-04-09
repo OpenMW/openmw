@@ -460,8 +460,7 @@ namespace MWWorld
             float z = pos.rot[2];
             world->rotateObject(player, x, y, z);
 
-            if (adjustPlayerPos)
-                player.getClass().adjustPosition(player, true);
+            player.getClass().adjustPosition(player, true);
         }
 
         MWBase::MechanicsManager *mechMgr =

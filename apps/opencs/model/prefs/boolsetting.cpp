@@ -22,6 +22,8 @@ CSMPrefs::BoolSetting& CSMPrefs::BoolSetting::setTooltip (const std::string& too
 
 std::pair<QWidget *, QWidget *> CSMPrefs::BoolSetting::makeWidgets (QWidget *parent)
 {
+    if (mWidget != nullptr)
+        delete mWidget;
     mWidget = new QCheckBox (QString::fromUtf8 (getLabel().c_str()), parent);
     mWidget->setCheckState (mDefault ? Qt::Checked : Qt::Unchecked);
 
