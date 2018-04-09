@@ -214,7 +214,7 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
     }
 }
 
-void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &class_, bool preserveProgress)
+void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &class_, bool preserveProgress, bool readBook)
 {
     int base = getSkill (skillIndex).getBase();
 
@@ -256,9 +256,14 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     MWBase::Environment::get().getWindowManager()->playSound("skillraise");
 
     std::stringstream message;
+
+    if (readBook)
+        message << std::string("#{sBookSkillMessage}\n");
+
     message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
                % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
                % static_cast<int> (base);
+    
     MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), MWGui::ShowInDialogueMode_Never);
 
     if (mLevelProgress >= gmst.find("iLevelUpTotal")->getInt())
