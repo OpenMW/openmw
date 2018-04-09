@@ -20,7 +20,7 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
     loadSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
     loadSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
-    loadSettingBool(showMeleeInfoCheckBox, "show enchant chance", "Game");
+    loadSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
     loadSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
     loadSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
 
@@ -35,9 +35,11 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(grabCursorCheckBox, "grab cursor", "Input");
     loadSettingBool(toggleSneakCheckBox, "toggle sneak", "Input");
 
-    // Other Settings
+    // Saves Settings
     loadSettingBool(timePlayedCheckbox, "timeplayed", "Saves");
+    maximumQuicksavesComboBox->setValue(mEngineSettings.getInt("max quicksaves", "Saves"));
 
+    // Other Settings
     QString screenshotFormatString = QString::fromStdString(mEngineSettings.getString("screenshot format", "General")).toUpper();
     if (screenshotFormatComboBox->findText(screenshotFormatString) == -1)
         screenshotFormatComboBox->addItem(screenshotFormatString);
@@ -56,7 +58,7 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
     saveSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
     saveSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
-    saveSettingBool(showMeleeInfoCheckBox, "show enchant chance", "Game");
+    saveSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
     saveSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
     saveSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
 
@@ -69,9 +71,14 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(grabCursorCheckBox, "grab cursor", "Input");
     saveSettingBool(toggleSneakCheckBox, "toggle sneak", "Input");
 
-    // Other Settings
+    // Saves Settings
     saveSettingBool(timePlayedCheckbox, "timeplayed", "Saves");
+    int maximumQuicksaves = maximumQuicksavesComboBox->value();
+    if (maximumQuicksaves != mEngineSettings.getInt("max quicksaves", "Saves")) {
+        mEngineSettings.setInt("max quicksaves", "Saves", maximumQuicksaves);
+    }
 
+    // Other Settings
     std::string screenshotFormatString = screenshotFormatComboBox->currentText().toLower().toStdString();
     if (screenshotFormatString != mEngineSettings.getString("screenshot format", "General"))
         mEngineSettings.setString("screenshot format", "General", screenshotFormatString);

@@ -10,7 +10,7 @@ resolution x
 
 This setting determines the horizontal resolution of the OpenMW game window.
 Larger values produce more detailed images within the constraints of your graphics hardware,
-but also significantly reduce the frame rate.
+but may reduce the frame rate.
 
 The window resolution can be selected from a menu of common screen sizes
 in the Video tab of the Video Panel of the Options menu, or in the Graphics tab of the OpenMW Launcher.
@@ -25,7 +25,7 @@ resolution y
 
 This setting determines the vertical resolution of the OpenMW game window.
 Larger values produce more detailed images within the constraints of your graphics hardware,
-but also significantly reduce the frame rate.
+but may reduce the frame rate.
 
 The window resolution can be selected from a menu of common screen sizes
 in the Video tab of the Video Panel of the Options menu, or in the Graphics tab of the OpenMW Launcher.
@@ -128,9 +128,9 @@ vsync
 This setting determines whether frame draws are synchronized with the vertical refresh rate of your monitor.
 Enabling this setting can reduce screen tearing,
 a visual defect caused by updating the image buffer in the middle of a screen draw.
-Enabling this option typically implies limiting the framerate to 60 frames per second,
+Enabling this option typically implies limiting the framerate to the refresh rate of your monitor,
 but may also introduce additional delays caused by having to wait until the appropriate time
-(the vertical blanking interval) to draw a frame.
+(the vertical blanking interval) to draw a frame, and a loss in mouse responsiveness known as 'input lag'.
 
 This setting can be adjusted in game using the VSync button in the Video tab of the Video panel in the Options menu.
 It can also be changed by toggling the Vertical Sync check box in the Graphics tab of the OpenMW Launcher.
@@ -170,8 +170,7 @@ contrast
 
 This setting controls the contrast correction for all video in the game.
 
-This setting can only be configured by editing the settings configuration file.
-This setting does not currently work under Linux.
+This setting can only be configured by editing the settings configuration file. It has been reported to not work on some Linux systems.
 
 gamma
 -----
@@ -184,4 +183,4 @@ This setting controls the gamma correction for all video in the game.
 Gamma is an exponent that makes colors brighter if greater than 1.0 and darker if less than 1.0.
 
 This setting can be changed in the Detail tab of the Video panel of the Options menu.
-This setting does not currently work under Linux, and the in-game setting in the Options menu has been disabled.
+It has been reported to not work on some Linux systems, and therefore the in-game setting in the Options menu has been disabled on Linux systems.

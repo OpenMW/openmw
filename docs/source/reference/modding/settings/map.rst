@@ -8,9 +8,7 @@ global
 :Range:		True/False
 :Default:	False
 
-If this setting is true, a world map on a map window will be displayed, otherwise a local map will be displayed.
-
-This setting can be toggled with the local/world map switch button on the map window.
+If this value is true, the map window will display the world map, otherwise the local map. The setting updates automatically when pressing the local/world map switch button on the map window.
 
 global map cell size
 --------------------
@@ -112,5 +110,4 @@ local map cell distance
 :Range:		>= 1
 :Default:	1
 
-Similar to "[Cells] exterior cell load distance", controls how many cells are rendered on the local map.
-Values higher than the default may result in longer loading times.
+Similar to "exterior cell load distance" in the Cells section, controls how many cells are rendered on the local map. Values higher than the default may result in longer loading times. Please note that only loaded cells can be rendered, so this setting must be lower or equal to "exterior cell load distance" to work properly.

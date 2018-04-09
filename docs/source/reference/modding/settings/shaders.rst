@@ -12,6 +12,8 @@ Force rendering with shaders. By default, only bump-mapped objects will use shad
 Enabling this option may cause slightly different visuals if the "clamp lighting" option is set to false.
 Otherwise, there should not be a visual difference.
 
+Please note enabling shaders has a significant performance impact on most systems.
+
 force per pixel lighting
 ------------------------
 
@@ -21,7 +23,7 @@ force per pixel lighting
 
 Force the use of per pixel lighting. By default, only bump mapped objects use per-pixel lighting.
 Has no effect if the 'force shaders' option is false.
-Enabling per-pixel lighting can result in visual differences to the original MW engine.
+Enabling per-pixel lighting results in visual differences to the original MW engine.
 It is not recommended to enable this option when using vanilla Morrowind files,
 because certain lights in Morrowind rely on vertex lighting to look as intended.
 
@@ -34,9 +36,10 @@ clamp lighting
 
 Restrict the amount of lighting that an object can receive to a maximum of (1,1,1).
 Only affects objects that render with shaders (see 'force shaders' option).
-Always affects terrain. Setting this option to 'true' results in fixed-function compatible lighting,
-but the lighting may appear 'dull' and there might be color shifts.
-Setting this option to 'false' results in more realistic lighting.
+Always affects terrain.
+
+Leaving this option at its default makes the lighting compatible with Morrowind's fixed-function method,
+but the lighting may appear dull and there might be color shifts. Setting this option to 'false' results in more dynamic lighting.
 
 auto use object normal maps
 ---------------------------

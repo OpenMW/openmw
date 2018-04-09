@@ -339,52 +339,76 @@ namespace Gui
                                + MyGUI::utility::toString((fontSize-data[i].ascent)));
             code->addAttribute("size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
 
-            // More hacks! The french game uses several win1252 characters that are not included
-            // in the cp437 encoding of the font. Fall back to similar available characters.
-            if (mEncoding == ToUTF8::CP437)
+            // Fall back from unavailable Windows-1252 encoding symbols to similar characters available in the game fonts
+            std::multimap<int, int> additional; // fallback glyph index, unicode
+            additional.insert(std::make_pair(156, 0x00A2)); // cent sign
+            additional.insert(std::make_pair(89, 0x00A5)); // yen sign
+            additional.insert(std::make_pair(221, 0x00A6)); // broken bar
+            additional.insert(std::make_pair(99, 0x00A9)); // copyright sign
+            additional.insert(std::make_pair(97, 0x00AA)); // prima ordinal indicator
+            additional.insert(std::make_pair(60, 0x00AB)); // double left-pointing angle quotation mark
+            additional.insert(std::make_pair(45, 0x00AD)); // soft hyphen
+            additional.insert(std::make_pair(114, 0x00AE)); // registered trademark symbol
+            additional.insert(std::make_pair(45, 0x00AF)); // macron
+            additional.insert(std::make_pair(241, 0x00B1)); // plus-minus sign
+            additional.insert(std::make_pair(50, 0x00B2)); // superscript two
+            additional.insert(std::make_pair(51, 0x00B3)); // superscript three
+            additional.insert(std::make_pair(44, 0x00B8)); // cedilla
+            additional.insert(std::make_pair(49, 0x00B9)); // superscript one
+            additional.insert(std::make_pair(111, 0x00BA)); // primo ordinal indicator
+            additional.insert(std::make_pair(62, 0x00BB)); // double right-pointing angle quotation mark
+            additional.insert(std::make_pair(63, 0x00BF)); // inverted question mark
+            additional.insert(std::make_pair(65, 0x00C6)); // latin capital ae ligature
+            additional.insert(std::make_pair(79, 0x00D8)); // latin capital o with stroke
+            additional.insert(std::make_pair(97, 0x00E6)); // latin small ae ligature
+            additional.insert(std::make_pair(111, 0x00F8)); // latin small o with stroke
+            additional.insert(std::make_pair(79, 0x0152)); // latin capital oe ligature
+            additional.insert(std::make_pair(111, 0x0153)); // latin small oe ligature
+            additional.insert(std::make_pair(83, 0x015A)); // latin capital s with caron
+            additional.insert(std::make_pair(115, 0x015B)); // latin small s with caron
+            additional.insert(std::make_pair(89, 0x0178)); // latin capital y with diaresis
+            additional.insert(std::make_pair(90, 0x017D)); // latin capital z with caron
+            additional.insert(std::make_pair(122, 0x017E)); // latin small z with caron
+            additional.insert(std::make_pair(102, 0x0192)); // latin small f with hook
+            additional.insert(std::make_pair(94, 0x02C6)); // circumflex modifier
+            additional.insert(std::make_pair(126, 0x02DC)); // small tilde
+            additional.insert(std::make_pair(69, 0x0401)); // cyrillic capital io (no diaeresis latin e is available)
+            additional.insert(std::make_pair(137, 0x0451)); // cyrillic small io
+            additional.insert(std::make_pair(45, 0x2012)); // figure dash
+            additional.insert(std::make_pair(45, 0x2013)); // en dash
+            additional.insert(std::make_pair(45, 0x2014)); // em dash
+            additional.insert(std::make_pair(39, 0x2018)); // left single quotation mark
+            additional.insert(std::make_pair(39, 0x2019)); // right single quotation mark
+            additional.insert(std::make_pair(44, 0x201A)); // single low quotation mark
+            additional.insert(std::make_pair(39, 0x201B)); // single high quotation mark (reversed)
+            additional.insert(std::make_pair(34, 0x201C)); // left double quotation mark
+            additional.insert(std::make_pair(34, 0x201D)); // right double quotation mark
+            additional.insert(std::make_pair(44, 0x201E)); // double low quotation mark
+            additional.insert(std::make_pair(34, 0x201F)); // double high quotation mark (reversed)
+            additional.insert(std::make_pair(43, 0x2020)); // dagger
+            additional.insert(std::make_pair(216, 0x2021)); // double dagger (note: this glyph is not available)
+            additional.insert(std::make_pair(46, 0x2026)); // ellipsis
+            additional.insert(std::make_pair(37, 0x2030)); // per mille sign
+            additional.insert(std::make_pair(60, 0x2039)); // single left-pointing angle quotation mark
+            additional.insert(std::make_pair(62, 0x203A)); // single right-pointing angle quotation mark
+            additional.insert(std::make_pair(101, 0x20AC)); // euro sign
+            additional.insert(std::make_pair(84, 0x2122)); // trademark sign
+            additional.insert(std::make_pair(45, 0x2212)); // minus sign
+
+            for (std::multimap<int, int>::iterator it = additional.begin(); it != additional.end(); ++it)
             {
-                std::multimap<int, int> additional; // <cp437, unicode>
-                additional.insert(std::make_pair(39, 0x2019)); // apostrophe
-                additional.insert(std::make_pair(45, 0x2013)); // dash
-                additional.insert(std::make_pair(45, 0x2014)); // dash
-                additional.insert(std::make_pair(34, 0x201D)); // right double quotation mark
-                additional.insert(std::make_pair(34, 0x201C)); // left double quotation mark
-                additional.insert(std::make_pair(44, 0x201A));
-                additional.insert(std::make_pair(44, 0x201E));
-                additional.insert(std::make_pair(43, 0x2020));
-                additional.insert(std::make_pair(94, 0x02C6));
-                additional.insert(std::make_pair(37, 0x2030));
-                additional.insert(std::make_pair(83, 0x0160));
-                additional.insert(std::make_pair(60, 0x2039));
-                additional.insert(std::make_pair(79, 0x0152));
-                additional.insert(std::make_pair(90, 0x017D));
-                additional.insert(std::make_pair(39, 0x2019));
-                additional.insert(std::make_pair(126, 0x02DC));
-                additional.insert(std::make_pair(84, 0x2122));
-                additional.insert(std::make_pair(83, 0x0161));
-                additional.insert(std::make_pair(62, 0x203A));
-                additional.insert(std::make_pair(111, 0x0153));
-                additional.insert(std::make_pair(122, 0x017E));
-                additional.insert(std::make_pair(89, 0x0178));
-                additional.insert(std::make_pair(156, 0x00A2));
-                additional.insert(std::make_pair(46, 0x2026));
-
-                for (std::multimap<int, int>::iterator it = additional.begin(); it != additional.end(); ++it)
-                {
-                    if (it->first != i)
-                        continue;
-
-                    code = codes->createChild("Code");
-                    code->addAttribute("index", it->second);
-                    code->addAttribute("coord", MyGUI::utility::toString(x1) + " "
-                                                + MyGUI::utility::toString(y1) + " "
-                                                + MyGUI::utility::toString(w) + " "
-                                                + MyGUI::utility::toString(h));
-                    code->addAttribute("advance", data[i].width);
-                    code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
-                                       + MyGUI::utility::toString((fontSize-data[i].ascent)));
-                    code->addAttribute("size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
-                }
+                if (it->first != i)
+                    continue;
+                code = codes->createChild("Code");
+                code->addAttribute("index", it->second);
+                code->addAttribute("coord", MyGUI::utility::toString(x1) + " "
+                                            + MyGUI::utility::toString(y1) + " "
+                                            + MyGUI::utility::toString(w) + " "
+                                            + MyGUI::utility::toString(h));
+                code->addAttribute("advance", data[i].width);
+                code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
+                                   + MyGUI::utility::toString((fontSize-data[i].ascent)));
+                code->addAttribute("size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
             }
 
             // ASCII vertical bar, use this as text input cursor

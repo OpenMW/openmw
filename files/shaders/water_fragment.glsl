@@ -2,7 +2,7 @@
 
 #define REFRACTION @refraction_enabled
 
-// Inspired by Blender GLSL Water by martinsh ( http://devlog-martinsh.blogspot.de/2012/07/waterundewater-shader-wip.html )
+// Inspired by Blender GLSL Water by martinsh ( https://devlog-martinsh.blogspot.de/2012/07/waterundewater-shader-wip.html )
 
 // tweakables -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
@@ -67,16 +67,16 @@ vec4 circle(vec2 coords, vec2 i_part, float phase)
   float d = length(toCenter);
 
   float r = RAIN_RIPPLE_RADIUS * phase;
-        
+
   if (d > r)
     return vec4(0.0,0.0,1.0,0.0);
-        
+
   float sinValue = (sin(d / r * 1.2) + 0.7) / 2.0;
 
   float height = (1.0 - abs(phase)) * pow(sinValue,3.0);
 
   vec3 normal = normalize(mix(vec3(0.0,0.0,1.0),vec3(normalize(toCenter),0.0),height));
-        
+
   return vec4(normal,height);
 }
 
@@ -93,7 +93,7 @@ vec4 rainCombined(vec2 uv, float time)     // returns ripple normal in xyz and r
     rain(uv,time) +
     rain(uv + vec2(10.5,5.7),time) +
     rain(uv * 0.75 + vec2(3.7,18.9),time) +
-    rain(uv * 0.9 + vec2(5.7,30.1),time) +   
+    rain(uv * 0.9 + vec2(5.7,30.1),time) +
     rain(uv * 0.8 + vec2(1.2,3.0),time);
 }
 
@@ -120,7 +120,7 @@ float fresnel_dielectric(vec3 Incoming, vec3 Normal, float eta)
 vec2 normalCoords(vec2 uv, float scale, float speed, float time, float timer1, float timer2, vec3 previousNormal)
   {
     return uv * (WAVE_SCALE * scale) + WIND_DIR * time * (WIND_SPEED * speed) -(previousNormal.xy/previousNormal.zz) * WAVE_CHOPPYNESS + vec2(time * timer1,time * timer2);
-  } 
+  }
 
 varying vec3 screenCoordsPassthrough;
 varying vec4 position;
@@ -133,7 +133,7 @@ uniform sampler2D reflectionMap;
 uniform sampler2D refractionMap;
 uniform sampler2D refractionDepthMap;
 #endif
-                
+
 uniform float osg_SimulationTime;
 
 uniform float near;
@@ -167,7 +167,7 @@ void main(void)
 
     #define waterTimer osg_SimulationTime
 
-    vec3 normal0 = 2.0 * texture2D(normalMap,normalCoords(UV, 0.05, 0.04, waterTimer, -0.015, -0.005, vec3(0.0,0.0,0.0))).rgb - 1.0; 
+    vec3 normal0 = 2.0 * texture2D(normalMap,normalCoords(UV, 0.05, 0.04, waterTimer, -0.015, -0.005, vec3(0.0,0.0,0.0))).rgb - 1.0;
     vec3 normal1 = 2.0 * texture2D(normalMap,normalCoords(UV, 0.1,  0.08, waterTimer,  0.02,   0.015, normal0)).rgb - 1.0;
     vec3 normal2 = 2.0 * texture2D(normalMap,normalCoords(UV, 0.25, 0.07, waterTimer, -0.04,  -0.03,  normal1)).rgb - 1.0;
     vec3 normal3 = 2.0 * texture2D(normalMap,normalCoords(UV, 0.5,  0.09, waterTimer,  0.03,   0.04,  normal2)).rgb - 1.0;
@@ -180,7 +180,7 @@ void main(void)
       rainRipple = rainCombined(position.xy / 1000.0,waterTimer) * clamp(rainIntensity,0.0,1.0);
     else
       rainRipple = vec4(0.0,0.0,0.0,0.0);
- 
+
     vec3 rippleAdd = rainRipple.xyz * rainRipple.w * 10.0;
 
     vec3 normal = (normal0 * BIG_WAVES_X + normal1 * BIG_WAVES_Y +
@@ -231,7 +231,7 @@ void main(void)
     float depthSample = linearizeDepth(texture2D(refractionDepthMap,screenCoords).x) * normalization;
     float depthSampleDistorted = linearizeDepth(texture2D(refractionDepthMap,screenCoords-(normal.xy*REFR_BUMP)).x) * normalization;
     float surfaceDepth = linearizeDepth(gl_FragCoord.z) * normalization;
-    float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum 
+    float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
     float shore = clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH,0,1);
 #else
     float shore = 1.0;

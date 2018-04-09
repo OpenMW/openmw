@@ -41,6 +41,7 @@ Programmers
     Cory F. Cohen (cfcohen)
     Cris Mihalache (Mirceam)
     crussell187
+    DanielVukelich
     darkf
     devnexen
     Dieho

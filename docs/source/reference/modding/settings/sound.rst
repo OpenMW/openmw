@@ -13,67 +13,62 @@ which should usually be sufficient, but if you need to explicitly specify a devi
 
 The names of detected devices can be found in the openmw.log file in your configuration directory.
 
-The default value is the empty string. This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
 
 master volume
 -------------
 
 :Type:		floating point
-:Range:		0.0 to 1.0
+:Range:		0.0 (silent) to 1.0 (maximum volume)
 :Default:	1.0
 
 This setting controls the overall volume.
-The master volume is multiplied with all other volume settings to determine the final volume.
+The master volume is multiplied with specific volume settings to determine the final volume.
 
-The default value is 1.0. Valid values range from 0.0 (silent) to 1.0 (maximum volume).
 This setting can be changed in game using the Master slider from the Audio panel of the Options menu.
 
 footsteps volume
 ----------------
 
 :Type:		floating point
-:Range:		0.0 to 1.0
+:Range:		0.0 (silent) to 1.0 (maximum volume)
 :Default:	0.2
 
 This setting controls the volume of footsteps from the character and other actors.
 
-Valid values range from 0.0 (silent) to 1.0 (maximum volume).
 This setting can be changed in game using the Footsteps slider from the Audio panel of the Options menu.
 
 music volume
 ------------
 
 :Type:		floating point
-:Range:		0.0 to 1.0
+:Range:		0.0 (silent) to 1.0 (maximum volume)
 :Default:	0.5
 
 This setting controls the volume for music tracks.
 
-The default value is 0.5. Valid values range from 0.0 (silent) to 1.0 (maximum volume).
 This setting can be changed in game using the Music slider from the Audio panel of the Options menu.
 
 sfx volume
 ----------
 
 :Type:		floating point
-:Range:		0.0 to 1.0
+:Range:		0.0 (silent) to 1.0 (maximum volume)
 :Default:	1.0
 
 This setting controls the volume for special sound effects such as combat noises.
 
-Valid values range from 0.0 (silent) to 1.0 (maximum volume).
 This setting can be changed in game using the Effects slider from the Audio panel of the Options menu.
 
 voice volume
 ------------
 
 :Type:		floating point
-:Range:		0.0 to 1.0
+:Range:		0.0 (silent) to 1.0 (maximum volume)
 :Default:	0.8
 
 This setting controls the volume for spoken dialog from NPCs.
 
-Valid values range from 0.0 (silent) to 1.0 (maximum volume).
 This setting can be changed in game using the Voice slider from the Audio panel of the Options menu.
 
 buffer cache min
@@ -129,5 +124,5 @@ This setting specifies which HRTF profile to use when HRTF is enabled. Blank mea
 This setting has no effect if HRTF is not enabled based on the hrtf enable setting.
 Allowed values for this field are enumerated in openmw.log file is an HRTF enabled ausio system is installed.
 
-The default value is the empty string, which uses the default profile.
+The default value is empty, which uses the default profile.
 This setting can only be configured by editing the settings configuration file.

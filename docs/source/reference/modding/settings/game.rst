@@ -16,7 +16,7 @@ If the setting is 2, the crosshair is the color of the color crosshair owned set
 If the setting is 3, both the tool tip background and the crosshair are colored.
 The crosshair is not visible if crosshair is false.
 
-The default value is 0 (no clues). This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
 
 show projectile damage
 ----------------------
@@ -25,9 +25,9 @@ show projectile damage
 :Range:		True/False
 :Default:	False
 
-If this setting is true, damage bonus of arrows and bolts will be showed on item tooltip.
+If this setting is true, the damage bonus of arrows and bolts will show on their tooltip.
 
-The default value is false. This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
 
 show melee info
 ---------------
@@ -36,9 +36,9 @@ show melee info
 :Range:		True/False
 :Default:	False
 
-If this setting is true, melee weapons reach and speed will be showed on item tooltip.
+If this setting is true, the reach and speed of melee weapons will show on their tooltip.
 
-The default value is false. This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
 
 show enchant chance
 -------------------
@@ -49,7 +49,7 @@ show enchant chance
 
 Whether or not the chance of success will be displayed in the enchanting menu.
 
-The default value is false. This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
 
 best attack
 -----------
@@ -62,7 +62,6 @@ If this setting is true, the player character will always use the most powerful 
 (chop, slash or thrust). If this setting is false,
 the type of attack is determined by the direction that the character is moving at the time the attack begins.
 
-The default value is false.
 This setting can be toggled with the Always Use Best Attack button in the Prefs panel of the Options menu.
 
 can loot during death animation
@@ -79,7 +78,7 @@ This is how original Morrowind behaves.
 If this setting is false, player has to wait until end of death animation in all cases.
 This case is more safe, but makes using of summoned creatures exploit (looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder.
 
-The default value is true. This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
 
 difficulty
 ----------
@@ -91,11 +90,25 @@ difficulty
 This setting adjusts the difficulty of the game and is intended to be in the range -100 to 100 inclusive.
 Given the default game setting for fDifficultyMult of 5.0,
 a value of -100 results in the player taking 80% of the usual damage, doing 6 times the normal damage.
-A value of 100 results in the player taking 6 times as much damage, but inflicting only 80% of the usual damage.
-Values less than -500 will result in the player receiving no damage,
-and values greater than 500 will result in the player inflicting no damage.
+A value of 100 results in the player taking 6 times as much damage, while inflicting only 80% of the usual damage.
+Values below -500 will result in the player receiving no damage,
+and values above 500 will result in the player inflicting no damage.
 
 This setting can be controlled in game with the Difficulty slider in the Prefs panel of the Options menu.
+
+classic reflect absorb attribute behavior
+-----------------------------------------
+
+:Type:		boolean
+:Range: 	True/False
+:Default:	True
+
+If this setting is true, "Absorb Attribute" spells which were reflected by the target are not "mirrored",
+and the caster will absorb their own attribute resulting in no effect on both the caster and the target.
+This makes the gameplay as a mage easier, but these spells become imbalanced.
+This is how the original Morrowind behaves.
+
+This setting can only be configured by editing the settings configuration file.
 
 show effect duration
 --------------------
@@ -107,7 +120,19 @@ show effect duration
 Show the remaining duration of magic effects and lights if this setting is true.
 The remaining duration is displayed in the tooltip by hovering over the magical effect.
 
-The default value is false. This setting can only be configured by editing the settings configuration file.
+This setting can only be configured by editing the settings configuration file.
+
+enchanted weapons are magical
+-----------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Makes enchanted weapons without Magical flag bypass normal weapons resistance (and weakness) certain creatures have.
+This is how original Morrowind behaves.
+
+This setting can only be configured by editing the settings configuration file.
 
 prevent merchant equipping
 --------------------------
@@ -118,6 +143,8 @@ prevent merchant equipping
 
 Prevents merchants from equipping items that are sold to them.
 
+This setting can only be configured by editing the settings configuration file.
+
 followers attack on sight
 -------------------------
 
@@ -127,3 +154,6 @@ followers attack on sight
 
 Makes player followers and escorters start combat with enemies who have started combat with them or the player.
 Otherwise they wait for the enemies or the player to do an attack first.
+Please note this setting has not been extensively tested and could have side effects with certain quests.
+
+This setting can only be configured by editing the settings configuration file.

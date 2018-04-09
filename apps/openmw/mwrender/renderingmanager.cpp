@@ -51,6 +51,16 @@
 #include "terrainstorage.hpp"
 #include "util.hpp"
 
+namespace
+{
+    float DLLandFogStart;
+    float DLLandFogEnd;
+    float DLUnderwaterFogStart;
+    float DLUnderwaterFogEnd;
+    float DLInteriorFogStart;
+    float DLInteriorFogEnd;
+}
+
 namespace MWRender
 {
 
@@ -173,14 +183,18 @@ namespace MWRender
         , mResourceSystem(resourceSystem)
         , mWorkQueue(workQueue)
         , mUnrefQueue(new SceneUtil::UnrefQueue)
-        , mFogDepth(0.f)
+        , mLandFogStart(0.f)
+        , mLandFogEnd(std::numeric_limits<float>::max())
+        , mUnderwaterFogStart(0.f)
+        , mUnderwaterFogEnd(std::numeric_limits<float>::max())
         , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
         , mUnderwaterWeight(fallback->getFallbackFloat("Water_UnderwaterColorWeight"))
-        , mUnderwaterFog(0.f)
         , mUnderwaterIndoorFog(fallback->getFallbackFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
-        , mFieldOfViewOverride(0.f)
+        , mDistantFog(false)
+        , mDistantTerrain(false)
         , mFieldOfViewOverridden(false)
+        , mFieldOfViewOverride(0.f)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
@@ -216,12 +230,20 @@ namespace MWRender
 
         mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
 
-        const bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
+        DLLandFogStart = Settings::Manager::getFloat("distant land fog start", "Fog");
+        DLLandFogEnd = Settings::Manager::getFloat("distant land fog end", "Fog");
+        DLUnderwaterFogStart = Settings::Manager::getFloat("distant underwater fog start", "Fog");
+        DLUnderwaterFogEnd = Settings::Manager::getFloat("distant underwater fog end", "Fog");
+        DLInteriorFogStart = Settings::Manager::getFloat("distant interior fog start", "Fog");
+        DLInteriorFogEnd = Settings::Manager::getFloat("distant interior fog end", "Fog");
+
+        mDistantFog = Settings::Manager::getBool("use distant fog", "Fog");
+        mDistantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
         mTerrainStorage = new TerrainStorage(mResourceSystem, Settings::Manager::getString("normal map pattern", "Shaders"), Settings::Manager::getString("normal height map pattern", "Shaders"),
-                                            Settings::Manager::getBool("auto use terrain normal maps", "Shaders"), Settings::Manager::getString("terrain specular map pattern", "Shaders"),
+                                             Settings::Manager::getBool("auto use terrain normal maps", "Shaders"), Settings::Manager::getString("terrain specular map pattern", "Shaders"),
                                              Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
 
-        if (distantTerrain)
+        if (mDistantTerrain)
             mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
         else
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
@@ -479,14 +501,44 @@ namespace MWRender
     {
         osg::Vec4f color = SceneUtil::colourFromRGB(cell->mAmbi.mFog);
 
-        configureFog (cell->mAmbi.mFogDensity, mUnderwaterIndoorFog, color);
+        if(mDistantFog)
+        {
+            float density = std::max(0.2f, cell->mAmbi.mFogDensity);
+            mLandFogStart = (DLInteriorFogEnd*(1.0f-density) + DLInteriorFogStart*density);
+            mLandFogEnd = DLInteriorFogEnd;
+            mUnderwaterFogStart = DLUnderwaterFogStart;
+            mUnderwaterFogEnd = DLUnderwaterFogEnd;
+            mFogColor = color;
+        }
+        else
+            configureFog(cell->mAmbi.mFogDensity, mUnderwaterIndoorFog, 1.0f, 0.0f, color);
     }
 
-    void RenderingManager::configureFog(float fogDepth, float underwaterFog, const osg::Vec4f &color)
+    void RenderingManager::configureFog(float fogDepth, float underwaterFog, float dlFactor, float dlOffset, const osg::Vec4f &color)
     {
-        mFogDepth = fogDepth;
+        if(mDistantFog)
+        {
+            mLandFogStart = dlFactor * (DLLandFogStart - dlOffset*DLLandFogEnd);
+            mLandFogEnd = dlFactor * (1.0f-dlOffset) * DLLandFogEnd;
+            mUnderwaterFogStart = DLUnderwaterFogStart;
+            mUnderwaterFogEnd = DLUnderwaterFogEnd;
+        }
+        else
+        {
+            if(fogDepth == 0.0)
+            {
+                mLandFogStart = 0.0f;
+                mLandFogEnd = std::numeric_limits<float>::max();
+            }
+            else
+            {
+                mLandFogStart = mViewDistance * (1 - fogDepth);
+                mLandFogEnd = mViewDistance;
+            }
+            mUnderwaterFogStart = mViewDistance * (1 - underwaterFog);
+            mUnderwaterFogEnd = mViewDistance;
+        }
         mFogColor = color;
-        mUnderwaterFog = underwaterFog;
     }
 
     SkyManager* RenderingManager::getSkyManager()
@@ -517,23 +569,15 @@ namespace MWRender
             float viewDistance = mViewDistance;
             viewDistance = std::min(viewDistance, 6666.f);
             setFogColor(mUnderwaterColor * mUnderwaterWeight + mFogColor * (1.f-mUnderwaterWeight));
-            mStateUpdater->setFogStart(viewDistance * (1 - mUnderwaterFog));
-            mStateUpdater->setFogEnd(viewDistance);
+            mStateUpdater->setFogStart(mUnderwaterFogStart);
+            mStateUpdater->setFogEnd(mUnderwaterFogEnd);
         }
         else
         {
             setFogColor(mFogColor);
 
-            if (mFogDepth == 0.f)
-            {
-                mStateUpdater->setFogStart(0.f);
-                mStateUpdater->setFogEnd(std::numeric_limits<float>::max());
-            }
-            else
-            {
-                mStateUpdater->setFogStart(mViewDistance * (1 - mFogDepth));
-                mStateUpdater->setFogEnd(mViewDistance);
-            }
+            mStateUpdater->setFogStart(mLandFogStart);
+            mStateUpdater->setFogEnd(mLandFogEnd);
         }
     }
 
@@ -960,7 +1004,8 @@ namespace MWRender
             else if (it->first == "Camera" && it->second == "viewing distance")
             {
                 mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
-                mStateUpdater->setFogEnd(mViewDistance);
+                if(!mDistantFog)
+                    mStateUpdater->setFogEnd(mViewDistance);
                 updateProjectionMatrix();
             }
             else if (it->first == "General" && (it->second == "texture filter" ||

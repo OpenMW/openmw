@@ -75,7 +75,7 @@ camera sensitivity
 
 This setting controls the overall camera/mouse sensitivity when not in GUI mode.
 The default sensitivity is 1.0, with smaller values requiring more mouse movement,
-and larger values requiring less. This setting is multiplicative in magnitude.
+and larger values requiring less.
 This setting does not affect mouse speed in GUI mode,
 which is instead controlled by your operating system mouse speed setting.
 

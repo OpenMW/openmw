@@ -256,11 +256,7 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &id, int count, const Ptr &actorPtr)
 {
     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
-    // a bit pointless to set owner for the player
-    if (actorPtr != MWMechanics::getPlayer())
-        return add(ref.getPtr(), count, actorPtr, true);
-    else
-        return add(ref.getPtr(), count, actorPtr, false);
+    return add(ref.getPtr(), count, actorPtr, true);
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)

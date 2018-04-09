@@ -15,7 +15,7 @@ Unlike vanilla Morrowind, OpenMW directly supports TrueType (``.ttf``) fonts. Th
 
 -	To replace the primary "Magic Cards" font:
 
-	#.	Download `Pelagiad <http://isaskar.github.io/Pelagiad/>`_ by Isak Larborn (aka Isaskar).
+	#.	Download `Pelagiad <https://isaskar.github.io/Pelagiad/>`_ by Isak Larborn (aka Isaskar).
 	#.	Install the ``openmw_font.xml`` file into ``resources/mygui/openmw_font.xml`` in your OpenMW installation.
 	#.	Copy ``Pelagiad.ttf`` into ``resources/mygui/`` as well.
 	#.	If desired, you can now delete the original ``Magic_Cards.*`` files from your Data Files/Fonts directory.
