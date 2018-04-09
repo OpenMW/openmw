@@ -406,7 +406,6 @@ namespace MWWorld
         gmst["sCompanionWarningMessage"] = ESM::Variant("Warning message");
         gmst["sCompanionWarningButtonOne"] = ESM::Variant("Button 1");
         gmst["sCompanionWarningButtonTwo"] = ESM::Variant("Button 2");
-        gmst["sCompanionShare"] = ESM::Variant("Companion Share");
         gmst["sProfitValue"] = ESM::Variant("Profit Value");
         gmst["sTeleportDisabled"] = ESM::Variant("Teleport disabled");
         gmst["sLevitateDisabled"] = ESM::Variant("Levitate disabled");
