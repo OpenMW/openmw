@@ -73,6 +73,8 @@ namespace MWWorld
                 const Fallback::Map& fallback,
                 float stormWindSpeed,
                 float rainSpeed,
+                float dlFactor,
+                float dlOffset,
                 const std::string& particleEffect);
 
         std::string mCloudTexture;
@@ -101,6 +103,12 @@ namespace MWWorld
         // Value between 0 and 1, defines the strength of the sun glare effect.
         // Also appears to modify how visible the sun, moons, and stars are for various weather effects.
         float mGlareView;
+
+        // Fog factor and offset used with distant land rendering.
+        struct {
+            float FogFactor;
+            float FogOffset;
+        } mDL;
 
         // Sound effect
         // This is used for Blight, Ashstorm and Blizzard (Bloodmoon)
@@ -293,6 +301,7 @@ namespace MWWorld
 
         void addWeather(const std::string& name,
                         const Fallback::Map& fallback,
+                        float dlFactor, float dlOffset,
                         const std::string& particleEffect = "");
 
         void importRegions();
