@@ -189,11 +189,6 @@ namespace MWMechanics
 
         if (index==0 && mDynamic[index].getCurrent()<1)
         {
-            if (!mDead)
-                mTimeOfDeath = MWBase::Environment::get().getWorld()->getTimeStamp();
-
-            mDead = true;
-
             mDynamic[index].setModifier(0);
             mDynamic[index].setCurrent(0);
 
@@ -657,6 +652,11 @@ namespace MWMechanics
     MWWorld::TimeStamp CreatureStats::getTimeOfDeath() const
     {
         return mTimeOfDeath;
+    }
+
+    void CreatureStats::setTimeOfDeath(MWWorld::TimeStamp time)
+    {
+        mTimeOfDeath = time;
     }
 
     std::map<CreatureStats::SummonKey, int>& CreatureStats::getSummonedCreatureMap()

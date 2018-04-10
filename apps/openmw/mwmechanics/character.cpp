@@ -801,13 +801,18 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             mAnimation->showCarriedLeft(updateCarriedLeftVisible(mWeaponType));
         }
 
-        if(!cls.getCreatureStats(mPtr).isDead())
+        const MWMechanics::CreatureStats& cStats = cls.getCreatureStats(mPtr);
+
+        if(!cStats.isDead() && cls.getCreatureStats(mPtr).getHealth().getCurrent() > 0.f)
             mIdleState = CharState_Idle;
         else
         {
             const MWMechanics::CreatureStats& cStats = mPtr.getClass().getCreatureStats(mPtr);
             if (cStats.isDeathAnimationFinished())
             {
+                MWWorld::TimeStamp timeOfDeath = MWBase::Environment::get().getWorld()->getTimeStamp();
+                cls.getCreatureStats(mPtr).setTimeOfDeath(timeOfDeath);
+                cls.getCreatureStats(mPtr).notifyDied();
                 // Set the death state, but don't play it yet
                 // We will play it in the first frame, but only if no script set the skipAnim flag
                 signed char deathanim = cStats.getDeathAnimation();
@@ -818,7 +823,6 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 
                 mFloatToSurface = false;
             }
-            // else: nothing to do, will detect death in the next frame and start playing death animation
         }
     }
     else
@@ -1656,7 +1660,7 @@ void CharacterController::update(float duration)
 
     if(!cls.isActor())
         updateAnimQueue();
-    else if(!cls.getCreatureStats(mPtr).isDead())
+    else if(!cls.getCreatureStats(mPtr).isDead() && cls.getCreatureStats(mPtr).getHealth().getCurrent() > 0.f)
     {
         bool onground = world->isOnGround(mPtr);
         bool inwater = world->isSwimming(mPtr);
@@ -1985,15 +1989,19 @@ void CharacterController::update(float duration)
         if (!mSkipAnim)
             updateHeadTracking(duration);
     }
-    else if(cls.getCreatureStats(mPtr).isDead())
+    else if(!cls.getCreatureStats(mPtr).isDead() && cls.getCreatureStats(mPtr).getHealth().getCurrent() == 0.f)
     {
         // initial start of death animation for actors that started the game as dead
         // not done in constructor since we need to give scripts a chance to set the mSkipAnim flag
-        if (!mSkipAnim && mDeathState != CharState_None && mCurrentDeath.empty())
+        if (!mSkipAnim)
         {
             playDeath(1.f, mDeathState);
         }
         // We must always queue movement, even if there is none, to apply gravity.
+        world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
+    }
+    else if (cls.getCreatureStats(mPtr).isDead())
+    {
         world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
     }
 
@@ -2214,6 +2222,9 @@ CharacterController::KillResult CharacterController::kill()
     if (!cStats.isDeathAnimationFinished())
     {
         cStats.setDeathAnimationFinished(true);
+        MWWorld::TimeStamp timeOfDeath = MWBase::Environment::get().getWorld()->getTimeStamp();
+        cStats.setTimeOfDeath(timeOfDeath);
+        cStats.notifyDied();
         return Result_DeathAnimJustFinished;
     }
     return Result_DeathAnimFinished;

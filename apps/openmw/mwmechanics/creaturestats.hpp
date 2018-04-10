@@ -270,6 +270,7 @@ namespace MWMechanics
         void setDeathAnimation(signed char index);
 
         MWWorld::TimeStamp getTimeOfDeath() const;
+        void setTimeOfDeath(MWWorld::TimeStamp time);
 
         int getActorId();
         ///< Will generate an actor ID, if the actor does not have one yet.
