@@ -121,7 +121,7 @@ namespace
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_SoundGen, "Sound Generator", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_MagicEffect, "Magic Effect", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Land, "Land", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_LandTexture, "LandTexture", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_LandTexture, "LandTexture", ":./landtexture.png" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Pathgrid, "Pathgrid", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_StartScript, "Start Script", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_MetaData, "Meta Data", 0 },
