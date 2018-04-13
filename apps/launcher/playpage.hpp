@@ -22,14 +22,14 @@ namespace Launcher
     signals:
         void signalProfileChanged(int index);
         void playButtonClicked();
+        void csButtonClicked();
 
     public slots:
         void setProfilesIndex(int index);
 
     private slots:
         void slotPlayClicked();
-
-
+        void slotCSClicked();
 
     };
 }
