@@ -194,9 +194,8 @@
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">#playButton {
+         <string notr="true">#csButton {
     height: 50px;
-    margin-bottom: 30px;
 
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
         stop:0 rgba(255, 255, 255, 200),
@@ -206,7 +205,7 @@
         stop:0.9 rgba(0, 0, 0, 55),
         stop:1 rgba(0, 0, 0, 100));
 
-    font-size: 26pt;
+    font-size: 9pt;
     color: black;
 
     border-right: 1px solid rgba(0, 0, 0, 155);
@@ -217,7 +216,7 @@
     border-radius: 5px;
 }
 
-#playButton:hover {
+#csButton:hover {
     border-bottom: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgba(164, 192, 228, 255), stop:1 rgba(255, 255, 255, 0));
     border-top: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(164, 192, 228, 255), stop:1 rgba(255, 255, 255, 0));
     border-right: qlineargradient(spread:pad, x1:1, y1:0, x2:0, y2:0, stop:0 rgba(164, 192, 228, 255), stop:1 rgba(255, 255, 255, 0));
@@ -226,7 +225,7 @@
     border-style: solid;
 }
 
-#playButton:pressed {
+#csButton:pressed {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
         stop:0 rgba(0, 0, 0, 75),
         stop:0.1 rgba(0, 0, 0, 15),
