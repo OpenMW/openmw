@@ -11,7 +11,6 @@ Launcher::PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 
     connect(profilesComboBox, SIGNAL(activated(int)), this, SIGNAL (signalProfileChanged(int)));
     connect(playButton, SIGNAL(clicked()), this, SLOT(slotPlayClicked()));
-
 }
 
 void Launcher::PlayPage::setProfilesModel(QAbstractItemModel *model)

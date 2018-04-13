@@ -57,8 +57,12 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     QPushButton *playButton = new QPushButton(tr("Play"));
     buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
 
+    QPushButton *csButton = new QPushButton(tr("Construction Set"));
+    buttonBox->addButton(csButton, QDialogButtonBox::HelpRole);
+
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
+    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(cs()));
 
     // Remove what's this? button
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -136,6 +140,7 @@ void Launcher::MainDialog::createPages()
     iconWidget->setCurrentItem(iconWidget->item(0), QItemSelectionModel::Select);
 
     connect(mPlayPage, SIGNAL(playButtonClicked()), this, SLOT(play()));
+    connect(mPlayPage, SIGNAL(csButtonClicked()), this, SLOT(cs()));
 
     connect(mPlayPage, SIGNAL(signalProfileChanged(int)), mDataFilesPage, SLOT(slotProfileChanged(int)));
     connect(mDataFilesPage, SIGNAL(signalProfileChanged(int)), mPlayPage, SLOT(setProfilesIndex(int)));
@@ -598,5 +603,13 @@ void Launcher::MainDialog::play()
     // Launch the game detached
 
     if (mGameInvoker->startProcess(QLatin1String("openmw"), true))
+        return qApp->quit();
+}
+
+void Launcher::MainDialog::cs()
+{
+    // Launch the cs detached
+
+    if (mGameInvoker->startProcess(QLatin1String("openmw-cs"), true))
         return qApp->quit();
 }

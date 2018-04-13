@@ -29,8 +29,6 @@ namespace Launcher
     private slots:
         void slotPlayClicked();
 
-
-
     };
 }
 #endif
