@@ -10,8 +10,7 @@ Currently, we are focused on completing the MW game experience and general polis
 Note:
 * Tasks set to 'openmw-future' are usually out of the current scope of the project and can't be started yet.
 * Bugs that are not 'Confirmed' should be confirmed first.
-* Larger Features should have a discussion before you start implementing.
-* In many cases, it's best to have a discussion about possible solutions before you jump into coding.
+* Often, it's best to start a discussion about possible solutions before you jump into coding, especially for larger features.
 
 Aside from coding, you can also help by triaging the issues list. Check for bugs that are 'Unconfirmed' and try to confirm them on your end, working out any details that may be necessary. Check for bugs that do not conform to [Bug reporting guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) and improve them to do so!
 
@@ -22,7 +21,7 @@ Pull Request Guidelines
 
 To facilitate the review process, your pull request description should include the following, if applicable:
 
-* A link back to the bug report or forum discussion that prompted the change
+* A link back to the bug report or forum discussion that prompted the change. Note: when linking bugs, use the syntax ```[Bug #xyz](https://bugs.openmw.org/issues/#xyz)``` to create a clickable link. Writing only 'Bug #xyz' will unfortunately create a link to the Github pull request with that number instead.
 * Summary of the changes made
 * Reasoning / motivation behind the change
 * What testing you have carried out to verify the change
@@ -48,7 +47,7 @@ Unfortunately, the definition of what is a "bug" is not so clear. Consider that 
 * Many people will actually <i>like</i> these "bugs" because that is what they remember the game for.
 * Exploits may be part of the fun of an open-world game - they reward knowledge with power. There are too many of them to plug them all, anyway.
 
-OpenMW, in its default configuration, is meant to be a faithful reimplementation of Morrowind, minus things like crash bugs, stability issues and design errors. However, we try to avoid touching anything that affects the core gameplay, the balancing of the game or introduces incompatibilities with existing mod content.
+OpenMW, in its default configuration, is meant to be a faithful reimplementation of Morrowind, minus things like crash bugs, stability issues and severe design errors. However, we try to avoid touching anything that affects the core gameplay, the balancing of the game or introduces incompatibilities with existing mod content.
 
 That said, we may sometimes evaluate such issues on an individual basis. Common exceptions to the above would be:
 
@@ -102,7 +101,7 @@ Merging
 
 To be able to merge PRs, commit priviledges are required. If you do not have the priviledges, just ping someone that does have them with a short comment like "Looks good to me @user".
 
-The person to merge the PR may either use github's Merge button or if using the command line, use the ```--no-ff``` flag and include the pull request number in the commit description.
+The person to merge the PR may either use github's Merge button or if using the command line, use the ```--no-ff``` flag (so a merge commit is created, just like with Github's merge button) and include the pull request number in the commit description.
 
 
 Other resources
