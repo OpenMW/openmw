@@ -577,6 +577,9 @@ void CSVRender::WorldspaceWidget::debugProfileAboutToBeRemoved (const QModelInde
 void CSVRender::WorldspaceWidget::editModeChanged (const std::string& id)
 {
     dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).setEditLock (mLocked);
+    if (mEditMode->getCurrentId() == "terrain-texture") mEditMode->setAcceptDrops(true);
+        else mEditMode->setAcceptDrops(false);
+
     mDragging = false;
     mDragMode = InteractionType_None;
 }

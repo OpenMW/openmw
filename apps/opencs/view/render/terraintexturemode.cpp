@@ -5,19 +5,15 @@
 #include "terraintexturemode.hpp"
 #include "editmode.hpp"
 
-#include <iostream>
 #include <string>
 
-//Some includes are not needed (have to clean this up later)
 #include <QWidget>
 #include <QIcon>
-#include <QPainter>
 #include <QSpinBox>
 #include <QGroupBox>
 #include <QSlider>
 #include <QEvent>
 #include <QDropEvent>
-#include <QColor>
 #include <QButtonGroup>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -25,17 +21,10 @@
 #include <QDrag>
 
 #include "../widget/modebutton.hpp"
-#include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetoolbar.hpp"
 
-#include "../../model/doc/document.hpp"
-#include "../../model/world/land.hpp"
-#include "../../model/world/landtexture.hpp"
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/tablemimedata.hpp"
-#include "../../model/world/idtable.hpp"
-#include "../../model/world/columnbase.hpp"
-#include "../../model/world/resourcetable.hpp"
 
 #include "pagedworldspacewidget.hpp"
 
@@ -67,32 +56,8 @@ CSVRender::TextureBrushButton::TextureBrushButton (const QIcon & icon, const QSt
 {
 }
 
-void CSVRender::TextureBrushButton::dragEnterEvent (QDragEnterEvent *event)
-{
-  event->accept();
-}
-
-void CSVRender::TextureBrushButton::dropEvent (QDropEvent *event)
-{
-  const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
-
-  if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
-      return;
-
-  if (mime->holdsType (CSMWorld::UniversalId::Type_LandTexture))
-  {
-      const std::vector<CSMWorld::UniversalId> ids = mime->getData();
-
-      for (const CSMWorld::UniversalId& uid : ids)
-      {
-          std::string mBrushTexture(uid.getId());
-          emit passBrushTexture(mBrushTexture);
-      }
-  }
-}
-
 CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent)
-    : QWidget(parent), mWorldspaceWidget (worldspaceWidget)
+    : QFrame(parent, Qt::Popup), mWorldspaceWidget (worldspaceWidget)
 {
     mBrushTextureLabel = "Brush: " + mBrushTexture;
     selectedBrush = new QLabel(QString::fromUtf8(mBrushTextureLabel.c_str()), this);
@@ -143,12 +108,7 @@ CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWi
 
     setLayout(layoutMain);
 
-    connect(buttonPoint, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
-    connect(buttonSquare, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
-    connect(buttonCircle, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
-    connect(buttonCustom, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
-
-    setWindowFlags(Qt::Window);
+    connect(parent, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
 }
 
 void CSVRender::TextureBrushWindow::configureButtonInitialSettings(TextureBrushButton *button)
@@ -168,41 +128,17 @@ void CSVRender::TextureBrushWindow::getBrushTexture(std::string brushTexture)
     selectedBrush->setText(QString::fromUtf8(mBrushTextureLabel.c_str()));
 }
 
-// This function should eventually load brush texture as bitmap and set it as overlay
-// Currently only holds very basic code for icon drawing and landtexture loading
-QIcon CSVRender::TerrainTextureMode::drawIconTexture()
-{
-    // Just use brush-square until feature is developed
-    QPixmap pixmapimage = QPixmap(":scenetoolbar/brush-square");
-    QPainter painter(&pixmapimage);
-    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-
-    //Load Land Texture Data
-    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-    CSMWorld::IdTable& ltexs = dynamic_cast<CSMWorld::IdTable&> (
-        *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
-
-    // Sample Icon code, placeholder, to-do: texture overlay to icon
-    QColor color(255,0,0,100);
-    painter.setBrush(color);
-    painter.setPen(color);
-    painter.drawRect(pixmapimage.rect());
-
-    // Create and return changed Icon
-    QIcon brushIcon(pixmapimage);
-    return brushIcon;
-}
-
 CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-texture"}, Mask_Terrain | Mask_Reference, "Terrain texture editing", parent)
 , textureBrushWindow(new TextureBrushWindow(worldspaceWidget, this))
 {
+    connect(parent, SIGNAL(passEvent(QDragEnterEvent*)), this, SLOT(handleDragEnterEvent(QDragEnterEvent*)));
+    connect(parent, SIGNAL(passEvent(QDropEvent*)), this, SLOT(handleDropEvent(QDropEvent*)));
 }
 
 void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
     EditMode::activate(toolbar);
-
 }
 
 void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
@@ -212,7 +148,8 @@ void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
 
 void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResult& hit)
 {
-      textureBrushWindow->setWindowTitle("Texture brush settings");
+      QPoint position = QCursor::pos();
+      textureBrushWindow->move (position);
       textureBrushWindow->show();
 }
 
@@ -251,10 +188,26 @@ void CSVRender::TerrainTextureMode::dragAborted() {
 
 void CSVRender::TerrainTextureMode::dragWheel (int diff, double speedFactor) {}
 
-void CSVRender::TerrainTextureMode::dragEnterEvent (QDragEnterEvent *event) {
+void CSVRender::TerrainTextureMode::handleDragEnterEvent (QDragEnterEvent *event) {
+    event->accept();
 }
 
-void CSVRender::TerrainTextureMode::dropEvent (QDropEvent *event) {
+void CSVRender::TerrainTextureMode::handleDropEvent (QDropEvent *event) {
+  const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+
+  if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
+      return;
+
+  if (mime->holdsType (CSMWorld::UniversalId::Type_LandTexture))
+  {
+      const std::vector<CSMWorld::UniversalId> ids = mime->getData();
+
+      for (const CSMWorld::UniversalId& uid : ids)
+      {
+          mBrushTexture = uid.getId();
+          emit passBrushTexture(mBrushTexture);
+      }
+  }
 }
 
 void CSVRender::TerrainTextureMode::dragMoveEvent (QDragMoveEvent *event) {

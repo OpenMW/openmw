@@ -3,28 +3,18 @@
 
 #include "editmode.hpp"
 
-#include <iostream>
 #include <string>
 
+#include <QWidget>
 #include <QLabel>
 #include <QSpinBox>
 #include <QGroupBox>
 #include <QSlider>
-#include <QWidget>
 #include <QIcon>
 #include <QFrame>
 #include <QEvent>
 #include <QHBoxLayout>
-
 #include <QPushButton>
-#include <osg/Geometry>
-#include <osg/Vec3>
-
-#include "../widget/modebutton.hpp"
-#include "../../model/world/cellcoordinates.hpp"
-#include "../../model/world/cell.hpp"
-#include "../../model/world/universalid.hpp"
-#include "../../model/world/idtable.hpp"
 
 namespace CSVWidget
 {
@@ -53,15 +43,9 @@ namespace CSVRender
         public:
             TextureBrushButton (const QIcon& icon, const QString& tooltip = "",
                 QWidget *parent = 0);
-            virtual void dragEnterEvent (QDragEnterEvent *event);
-            virtual void dropEvent (QDropEvent *event);
-
-        signals:
-            void passBrushTexture(std::string brushTexture);
-
     };
 
-    class TextureBrushWindow : public QWidget
+    class TextureBrushWindow : public QFrame
     {
         Q_OBJECT
 
@@ -96,7 +80,6 @@ namespace CSVRender
 
             void activate(CSVWidget::SceneToolbar*);
             void deactivate(CSVWidget::SceneToolbar*);
-            QIcon drawIconTexture();
 
             virtual bool primaryEditStartDrag (const QPoint& pos);
             virtual bool secondaryEditStartDrag (const QPoint& pos);
@@ -106,12 +89,18 @@ namespace CSVRender
             virtual void dragCompleted(const QPoint& pos);
             virtual void dragAborted();
             virtual void dragWheel (int diff, double speedFactor);
-            virtual void dragEnterEvent (QDragEnterEvent *event);
-            virtual void dropEvent (QDropEvent *event);
             virtual void dragMoveEvent (QDragMoveEvent *event);
 
         private:
             TextureBrushWindow *textureBrushWindow;
+
+        signals:
+
+            void passBrushTexture(std::string brushTexture);
+
+        public slots:
+            void handleDragEnterEvent (QDragEnterEvent *event);
+            void handleDropEvent(QDropEvent *event);
     };
 }
 
