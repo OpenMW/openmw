@@ -22,13 +22,15 @@ namespace DetourNavigator
             btTransform mTransform;
         };
 
-        RecastMeshManager(const Settings& settings);
+        RecastMeshManager(const Settings& settings, const TileBounds& bounds);
 
         bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
 
         boost::optional<Object> removeObject(std::size_t id);
 
         std::shared_ptr<RecastMesh> getMesh();
+
+        bool isEmpty() const;
 
     private:
         bool mShouldRebuild;

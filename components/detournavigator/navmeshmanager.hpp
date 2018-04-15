@@ -40,9 +40,8 @@ namespace DetourNavigator
         std::map<osg::Vec3f, std::shared_ptr<NavMeshCacheItem>> getNavMeshes() const;
 
     private:
-        std::size_t mRevision = 0;
         const Settings& mSettings;
-        CachedRecastMeshManager mRecastMeshManager;
+        TileCachedRecastMeshManager mRecastMeshManager;
         std::map<osg::Vec3f, std::shared_ptr<NavMeshCacheItem>> mCache;
         std::map<osg::Vec3f, std::set<TilePosition>> mChangedTiles;
         AsyncNavMeshUpdater mAsyncNavMeshUpdater;

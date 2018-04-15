@@ -10,13 +10,15 @@ namespace DetourNavigator
     class CachedRecastMeshManager
     {
     public:
-        CachedRecastMeshManager(const Settings& settings);
+        CachedRecastMeshManager(const Settings& settings, const TileBounds& bounds);
 
         bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
 
         boost::optional<RecastMeshManager::Object> removeObject(std::size_t id);
 
         std::shared_ptr<RecastMesh> getMesh();
+
+        bool isEmpty() const;
 
     private:
         RecastMeshManager mImpl;

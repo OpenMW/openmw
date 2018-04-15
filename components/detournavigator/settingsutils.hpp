@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_SETTINGSUTILS_H
 
 #include "settings.hpp"
+#include "tilebounds.hpp"
 #include "tileposition.hpp"
 #include "tilebounds.hpp"
 

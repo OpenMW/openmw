@@ -11,11 +11,10 @@ namespace DetourNavigator
     {
         SharedNavMesh mValue;
         std::size_t mGeneration;
-        std::size_t mRecastMeshRevision;
         std::atomic_size_t mNavMeshRevision;
 
-        NavMeshCacheItem(const NavMeshPtr& value, std::size_t generation, std::size_t revision)
-            : mValue(value), mGeneration(generation), mRecastMeshRevision(revision), mNavMeshRevision(0) {}
+        NavMeshCacheItem(const NavMeshPtr& value, std::size_t generation)
+            : mValue(value), mGeneration(generation), mNavMeshRevision(0) {}
     };
 }
 

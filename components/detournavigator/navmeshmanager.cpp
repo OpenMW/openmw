@@ -3,6 +3,7 @@
 #include "exceptions.hpp"
 #include "gettilespositions.hpp"
 #include "makenavmesh.hpp"
+#include "navmeshcacheitem.hpp"
 #include "settings.hpp"
 #include "sharednavmesh.hpp"
 
@@ -17,14 +18,14 @@ namespace DetourNavigator
     NavMeshManager::NavMeshManager(const Settings& settings)
         : mSettings(settings)
         , mRecastMeshManager(settings)
-        , mAsyncNavMeshUpdater(settings)
-    {}
+        , mAsyncNavMeshUpdater(settings, mRecastMeshManager)
+    {
+    }
 
     bool NavMeshManager::addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
     {
         if (!mRecastMeshManager.addObject(id, shape, transform))
             return false;
-        ++mRevision;
         addChangedTiles(shape, transform);
         return true;
     }
@@ -34,7 +35,6 @@ namespace DetourNavigator
         const auto object = mRecastMeshManager.removeObject(id);
         if (!object)
             return false;
-        ++mRevision;
         addChangedTiles(*object->mShape, object->mTransform);
         return true;
     }
@@ -45,8 +45,7 @@ namespace DetourNavigator
         if (cached != mCache.end())
             return;
         mCache.insert(std::make_pair(agentHalfExtents,
-            std::make_shared<NavMeshCacheItem>(makeEmptyNavMesh(mSettings), ++mGenerationCounter, mRevision))
-        );
+            std::make_shared<NavMeshCacheItem>(makeEmptyNavMesh(mSettings), ++mGenerationCounter)));
         log("cache add for agent=", agentHalfExtents);
     }
 
@@ -58,18 +57,15 @@ namespace DetourNavigator
     void NavMeshManager::update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents)
     {
         const auto& cached = getCached(agentHalfExtents);
-        if (cached->mRecastMeshRevision >= mRevision)
-            return;
-        cached->mRecastMeshRevision = mRevision;
         const auto changedTiles = mChangedTiles.find(agentHalfExtents);
         if (changedTiles != mChangedTiles.end())
         {
             playerPosition *= mSettings.mRecastScaleFactor;
             std::swap(playerPosition.y(), playerPosition.z());
-            mAsyncNavMeshUpdater.post(agentHalfExtents, mRecastMeshManager.getMesh(), cached,
-                                      getTilePosition(mSettings, playerPosition), changedTiles->second);
+            mAsyncNavMeshUpdater.post(agentHalfExtents, cached, getTilePosition(mSettings, playerPosition),
+                                      changedTiles->second);
+            log("cache update posted for agent=", agentHalfExtents, " changedTiles=", changedTiles->second.size());
             mChangedTiles.erase(changedTiles);
-            log("cache update posted for agent=", agentHalfExtents);
         }
     }
 

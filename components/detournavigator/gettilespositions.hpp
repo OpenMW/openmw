@@ -17,7 +17,7 @@ namespace DetourNavigator
 
     template <class Callback>
     void getTilesPositions(const osg::Vec3f& aabbMin, const osg::Vec3f& aabbMax,
-                           const Settings& settings, Callback&& callback)
+        const Settings& settings, Callback&& callback)
     {
         auto min = toNavMeshCoordinates(settings, aabbMin);
         auto max = toNavMeshCoordinates(settings, aabbMax);
@@ -42,7 +42,7 @@ namespace DetourNavigator
 
     template <class Callback>
     void getTilesPositions(const btCollisionShape& shape, const btTransform& transform,
-                           const Settings& settings, Callback&& callback)
+        const Settings& settings, Callback&& callback)
     {
         btVector3 aabbMin;
         btVector3 aabbMax;

@@ -4,6 +4,7 @@
 #include "settings.hpp"
 #include "navmeshcacheitem.hpp"
 #include "tileposition.hpp"
+#include "tilebounds.hpp"
 
 #include <osg/Vec3f>
 
@@ -30,8 +31,8 @@ namespace DetourNavigator
 
     NavMeshPtr makeEmptyNavMesh(const Settings& settings);
 
-    UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
-            const TilePosition& changedTile, const Settings& settings, NavMeshCacheItem& navMeshCacheItem);
+    UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh* recastMesh,
+        const TilePosition& changedTile, const Settings& settings, NavMeshCacheItem& navMeshCacheItem);
 }
 
 #endif

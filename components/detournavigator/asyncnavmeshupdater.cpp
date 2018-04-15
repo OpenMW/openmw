@@ -40,8 +40,9 @@ namespace DetourNavigator
         return stream << "unknown";
     }
 
-    AsyncNavMeshUpdater::AsyncNavMeshUpdater(const Settings& settings)
-        : mSettings(std::cref(settings))
+    AsyncNavMeshUpdater::AsyncNavMeshUpdater(const Settings& settings, TileCachedRecastMeshManager& recastMeshManager)
+        : mSettings(settings)
+        , mRecastMeshManager(recastMeshManager)
         , mShouldStop()
         , mThread([&] { process(); })
     {
@@ -57,11 +58,11 @@ namespace DetourNavigator
         mThread.join();
     }
 
-    void AsyncNavMeshUpdater::post(const osg::Vec3f& agentHalfExtents, const std::shared_ptr<RecastMesh>& recastMesh,
+    void AsyncNavMeshUpdater::post(const osg::Vec3f& agentHalfExtents,
         const std::shared_ptr<NavMeshCacheItem>& navMeshCacheItem, const TilePosition& playerTile,
         const std::set<TilePosition>& changedTiles)
     {
-        setRecastMesh(recastMesh);
+        log("post jobs playerTile=", playerTile);
 
         if (changedTiles.empty())
             return;
@@ -107,9 +108,9 @@ namespace DetourNavigator
 
         setFirstStart(start);
 
-        const auto recastMesh = getRecastMesh();
+        const auto recastMesh = mRecastMeshManager.get().getMesh(job.mChangedTile);
 
-        const auto status = updateNavMesh(job.mAgentHalfExtents, *recastMesh, job.mChangedTile, mSettings,
+        const auto status = updateNavMesh(job.mAgentHalfExtents, recastMesh.get(), job.mChangedTile, mSettings,
             *job.mNavMeshCacheItem);
 
         const auto finish = std::chrono::steady_clock::now();
@@ -160,18 +161,6 @@ namespace DetourNavigator
             writeToFile(recastMesh, mSettings.get().mRecastMeshPathPrefix, recastMeshRevision);
         if (mSettings.get().mEnableWriteNavMeshToFile)
             writeToFile(*job.mNavMeshCacheItem->mValue.lock(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
-    }
-
-    std::shared_ptr<RecastMesh> AsyncNavMeshUpdater::getRecastMesh()
-    {
-        const std::lock_guard<std::mutex> lock(mRecastMeshMutex);
-        return mRecastMesh;
-    }
-
-    void AsyncNavMeshUpdater::setRecastMesh(const std::shared_ptr<RecastMesh>& value)
-    {
-        const std::lock_guard<std::mutex> lock(mRecastMeshMutex);
-        mRecastMesh = value;
     }
 
     std::chrono::steady_clock::time_point AsyncNavMeshUpdater::getFirstStart()

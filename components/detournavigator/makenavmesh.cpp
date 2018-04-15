@@ -7,6 +7,7 @@
 #include "settings.hpp"
 #include "settingsutils.hpp"
 #include "sharednavmesh.hpp"
+#include "settingsutils.hpp"
 
 #include <DetourNavMesh.h>
 #include <DetourNavMeshBuilder.h>
@@ -269,8 +270,9 @@ namespace DetourNavigator
         return navMesh;
     }
 
-    UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
-        const TilePosition& changedTile, const Settings& settings, NavMeshCacheItem& navMeshCacheItem)
+    UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents,
+        const RecastMesh* recastMesh, const TilePosition& changedTile, const Settings& settings,
+        NavMeshCacheItem& navMeshCacheItem)
     {
         log("update NavMesh with mutiple tiles:",
             " agentHeight=", std::setprecision(std::numeric_limits<float>::max_exponent10),
@@ -298,8 +300,14 @@ namespace DetourNavigator
 
         incRev.mNavMeshChanged = removed;
 
-        const auto& boundsMin = recastMesh.getBoundsMin();
-        const auto& boundsMax = recastMesh.getBoundsMax();
+        if (!recastMesh)
+        {
+            log("ignore add tile: recastMesh is null");
+            return makeUpdateNavMeshStatus(removed, false);
+        }
+
+        const auto& boundsMin = recastMesh->getBoundsMin();
+        const auto& boundsMax = recastMesh->getBoundsMax();
 
         if (boundsMin == boundsMax)
         {
@@ -311,7 +319,7 @@ namespace DetourNavigator
         const osg::Vec3f tileBorderMin(tileBounds.mMin.x(), boundsMin.y() - 1, tileBounds.mMin.y());
         const osg::Vec3f tileBorderMax(tileBounds.mMax.x(), boundsMax.y() + 1, tileBounds.mMax.y());
 
-        auto navMeshData = makeNavMeshTileData(agentHalfExtents, recastMesh, x, y,
+        auto navMeshData = makeNavMeshTileData(agentHalfExtents, *recastMesh, x, y,
             tileBorderMin, tileBorderMax, settings);
 
         if (!navMeshData.mValue)

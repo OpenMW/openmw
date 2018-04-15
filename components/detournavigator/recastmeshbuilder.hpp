@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTMESHBUILDER_H
 
 #include "recastmesh.hpp"
+#include "tilebounds.hpp"
 
 class btBoxShape;
 class btCollisionShape;
@@ -17,7 +18,7 @@ namespace DetourNavigator
     class RecastMeshBuilder
     {
     public:
-        RecastMeshBuilder(const Settings& settings);
+        RecastMeshBuilder(const Settings& settings, const TileBounds& bounds);
 
         void addObject(const btCollisionShape& shape, const btTransform& transform);
 
@@ -35,10 +36,11 @@ namespace DetourNavigator
 
     private:
         std::reference_wrapper<const Settings> mSettings;
+        TileBounds mBounds;
         std::vector<int> mIndices;
         std::vector<float> mVertices;
 
-        void addObject(const btConcaveShape& shape, btTriangleCallback&& callback);
+        void addObject(const btConcaveShape& shape, const btTransform& transform, btTriangleCallback&& callback);
 
         void addTriangleVertex(const btVector3& worldPosition);
 

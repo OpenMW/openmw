@@ -3,9 +3,10 @@
 
 namespace DetourNavigator
 {
-    CachedRecastMeshManager::CachedRecastMeshManager(const Settings& settings)
-        : mImpl(settings)
-    {}
+    CachedRecastMeshManager::CachedRecastMeshManager(const Settings& settings, const TileBounds& bounds)
+        : mImpl(settings, bounds)
+    {
+    }
 
     bool CachedRecastMeshManager::addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
     {
@@ -28,5 +29,10 @@ namespace DetourNavigator
         if (!mCached)
             mCached = mImpl.getMesh();
         return mCached;
+    }
+
+    bool CachedRecastMeshManager::isEmpty() const
+    {
+        return mImpl.isEmpty();
     }
 }
