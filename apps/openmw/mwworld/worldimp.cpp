@@ -166,6 +166,7 @@ namespace MWWorld
         mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
 
         DetourNavigator::Settings navigatorSettings;
+        navigatorSettings.mBorderSize = Settings::Manager::getInt("border size", "Navigator");
         navigatorSettings.mCellHeight = Settings::Manager::getFloat("cell height", "Navigator");
         navigatorSettings.mCellSize = Settings::Manager::getFloat("cell size", "Navigator");
         navigatorSettings.mDetailSampleDist = Settings::Manager::getFloat("detail sample dist", "Navigator");

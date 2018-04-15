@@ -82,15 +82,15 @@ namespace
         config.maxVertsPerPoly = settings.mMaxVertsPerPoly;
         config.detailSampleDist = settings.mDetailSampleDist < 0.9f ? 0 : config.cs * settings.mDetailSampleDist;
         config.detailSampleMaxError = config.ch * settings.mDetailSampleMaxError;
-        config.borderSize = config.walkableRadius + 3;
+        config.borderSize = settings.mBorderSize;
         config.width = settings.mTileSize + config.borderSize * 2;
         config.height = settings.mTileSize + config.borderSize * 2;
         rcVcopy(config.bmin, boundsMin.ptr());
         rcVcopy(config.bmax, boundsMax.ptr());
-        config.bmin[0] -= config.borderSize * config.cs;
-        config.bmin[2] -= config.borderSize * config.cs;
-        config.bmax[0] += config.borderSize * config.cs;
-        config.bmax[2] += config.borderSize * config.cs;
+        config.bmin[0] -= getBorderSize(settings);
+        config.bmin[2] -= getBorderSize(settings);
+        config.bmax[0] += getBorderSize(settings);
+        config.bmax[2] += getBorderSize(settings);
 
         rcHeightfield solid;
         OPENMW_CHECK_DT_RESULT(rcCreateHeightfield(nullptr, solid, config.width, config.height,

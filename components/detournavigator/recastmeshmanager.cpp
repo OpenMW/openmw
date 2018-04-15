@@ -7,7 +7,8 @@ namespace DetourNavigator
     RecastMeshManager::RecastMeshManager(const Settings& settings)
         : mShouldRebuild(false)
         , mMeshBuilder(settings)
-    {}
+    {
+    }
 
     bool RecastMeshManager::addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
     {
@@ -40,12 +41,7 @@ namespace DetourNavigator
             return;
         mMeshBuilder.reset();
         for (const auto& v : mObjects)
-        {
-            if (v.second.mShape->getShapeType() == TERRAIN_SHAPE_PROXYTYPE)
-                mMeshBuilder.addObject(*static_cast<const btHeightfieldTerrainShape*>(v.second.mShape), v.second.mTransform);
-            else if (v.second.mShape->isConcave())
-                mMeshBuilder.addObject(*static_cast<const btConcaveShape*>(v.second.mShape), v.second.mTransform);
-        }
+            mMeshBuilder.addObject(*v.second.mShape, v.second.mTransform);
         mShouldRebuild = false;
     }
 }

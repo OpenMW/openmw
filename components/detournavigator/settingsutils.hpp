@@ -60,6 +60,11 @@ namespace DetourNavigator
             osg::Vec2f(tilePosition.x() + 1, tilePosition.y() + 1) * getTileSize(settings),
         };
     }
+
+    inline float getBorderSize(const Settings& settings)
+    {
+        return settings.mBorderSize * settings.mCellSize;
+    }
 }
 
 #endif

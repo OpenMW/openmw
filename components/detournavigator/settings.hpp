@@ -19,6 +19,7 @@ namespace DetourNavigator
         float mMaxSimplificationError;
         float mMaxSlope;
         float mRecastScaleFactor;
+        int mBorderSize;
         int mMaxEdgeLen;
         int mMaxNavMeshQueryNodes;
         int mMaxVertsPerPoly;

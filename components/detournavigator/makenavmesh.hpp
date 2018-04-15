@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_MAKENAVMESH_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_MAKENAVMESH_H
 
+#include "settings.hpp"
 #include "tileposition.hpp"
 
 #include <osg/Vec3f>

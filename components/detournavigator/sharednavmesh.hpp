@@ -44,11 +44,6 @@ namespace DetourNavigator
             return LockedSharedNavMesh(*mMutex, mValue);
         }
 
-        NavMeshPtr raw() const
-        {
-            return mValue;
-        }
-
     private:
         std::shared_ptr<std::mutex> mMutex;
         NavMeshPtr mValue;
