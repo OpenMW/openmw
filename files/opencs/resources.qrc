@@ -64,6 +64,12 @@
         <file alias="edit-preview">record-preview.png</file>
         <file alias="edit-clone">record-clone.png</file>
         <file alias="edit-add">record-add.png</file>
+        <file alias="resources-icon">resources-icon.png</file>        
+        <file alias="resources-mesh">resources-mesh.png</file>
+        <file alias="resources-music">resources-music.png</file>
+        <file alias="resources-sound">resources-sound.png</file>
+        <file alias="resources-texture">resources-texture.png</file>
+        <file alias="resources-video">resources-video.png</file>
         <file alias="placeholder">placeholder.png</file>
     </qresource>
     <qresource prefix="/startup">
