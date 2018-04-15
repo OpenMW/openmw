@@ -545,11 +545,6 @@ endif()
 # Components
 add_subdirectory (components)
 
-# Plugins
-#if (BUILD_MYGUI_PLUGIN)
-#    add_subdirectory(plugins/mygui_resource_plugin)
-#endif()
-
 # Apps and tools
 if (BUILD_OPENMW)
     add_subdirectory( apps/openmw )
