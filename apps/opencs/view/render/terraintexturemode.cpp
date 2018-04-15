@@ -206,8 +206,8 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
   CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(cellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
   CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
 
-  int xInCell {(hit.worldPos.x() - (stoi(slicedX)* cellSize)) * landTextureSize / cellSize};
-  int yInCell {(hit.worldPos.y() - (stoi(slicedY)* cellSize)) * landTextureSize / cellSize};
+  int xInCell ((hit.worldPos.x() - (stoi(slicedX)* cellSize)) * landTextureSize / cellSize);
+  int yInCell ((hit.worldPos.y() - (stoi(slicedY)* cellSize)) * landTextureSize / cellSize);
 
   hashlocation = mBrushTexture.find(hash);
   std::string mBrushTextureInt = mBrushTexture.substr (hashlocation+1);
@@ -225,12 +225,11 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
           }
       }
   }
-  float distance = 0;
+  float distance = 1;
   if (mBrushShape == 2)
   {
     float rf = mBrushSize/2;
-    int r = (mBrushSize/2)+1;
-    int r2 = r * r;
+    int r = (mBrushSize/2)+1;    
     for(int i = -r; i < r; i++)
     {
         for(int j = -r; j < r; j++)
