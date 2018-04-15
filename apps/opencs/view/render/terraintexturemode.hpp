@@ -16,6 +16,9 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 
+#include "../../model/world/data.hpp"
+#include "../../model/world/land.hpp"
+
 namespace CSVWidget
 {
     class SceneToolMode;
@@ -29,9 +32,9 @@ namespace CSVRender
 
         public:
             BrushSizeControls(const QString &title, QWidget *parent);
+            QSlider *brushSizeSlider;
 
         private:
-            QSlider *brushSizeSlider;
             QSpinBox *brushSizeSpinBox;
             QHBoxLayout *layoutSliderSize;
     };
@@ -53,10 +56,17 @@ namespace CSVRender
             TextureBrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent = 0);
             void configureButtonInitialSettings(TextureBrushButton *button);
 
+            TextureBrushButton *buttonPoint = new TextureBrushButton(QIcon (QPixmap (":scenetoolbar/brush-point")), "", this);
+            TextureBrushButton *buttonSquare = new TextureBrushButton(QIcon (QPixmap (":scenetoolbar/brush-square")), "", this);
+            TextureBrushButton *buttonCircle = new TextureBrushButton(QIcon (QPixmap (":scenetoolbar/brush-circle")), "", this);
+            TextureBrushButton *buttonCustom = new TextureBrushButton(QIcon (QPixmap (":scenetoolbar/brush-custom")), "", this);
+
         private:
             QLabel *selectedBrush;
             QGroupBox *horizontalGroupBox;
             int mButtonSize;
+            int mBrushSize = 0;
+            int mBrushShape = 0;
             int mIconSize;
             WorldspaceWidget *mWorldspaceWidget;
             std::string mBrushTexture;
@@ -64,6 +74,12 @@ namespace CSVRender
 
         public slots:
             void getBrushTexture(std::string brushTexture);
+            void setBrushShape();
+            void setBrushSize(int brushSize);
+
+        signals:
+            void passBrushSize (int brushSize);
+            void passBrushShape(int brushShape);
     };
 
     class TerrainTextureMode : public EditMode
@@ -71,9 +87,10 @@ namespace CSVRender
         Q_OBJECT
 
         public:
-            std::string mBrushTexture;
 
             TerrainTextureMode(WorldspaceWidget*, QWidget* parent = nullptr);
+
+            void primaryEditPressed (const WorldspaceHitResult& hit);
 
             void primarySelectPressed(const WorldspaceHitResult&);
             void secondarySelectPressed(const WorldspaceHitResult&);
@@ -93,14 +110,24 @@ namespace CSVRender
 
         private:
             TextureBrushWindow *textureBrushWindow;
+            std::string cellId;
+            std::string mBrushTexture = "#0";
+            int mBrushSize = 0;
+            int mBrushShape = 0;
+
+            const int cellSize {ESM::Land::REAL_SIZE};
+            const int landSize {ESM::Land::LAND_SIZE};
+            const int landTextureSize {ESM::Land::LAND_TEXTURE_SIZE};
 
         signals:
-
             void passBrushTexture(std::string brushTexture);
 
         public slots:
             void handleDragEnterEvent (QDragEnterEvent *event);
             void handleDropEvent(QDropEvent *event);
+            void setBrushSize(int brushSize);
+            void setBrushShape(int brushShape);
+
     };
 }
 

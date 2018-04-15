@@ -25,8 +25,33 @@
 
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/tablemimedata.hpp"
+#include "../../model/world/idtable.hpp"
 
 #include "pagedworldspacewidget.hpp"
+
+
+#include "../../model/doc/document.hpp"
+#include "../../model/world/land.hpp"
+#include "../../model/world/landtexture.hpp"
+//#include "../../model/world/universalid.hpp"
+//#include "../../model/world/tablemimedata.hpp"
+//#include "../../model/world/idtable.hpp"
+
+#include "../../model/world/columnbase.hpp"
+#include "../../model/world/resourcetable.hpp"
+#include "../../model/world/commandmacro.hpp"
+#include "../../model/world/data.hpp"
+#include "../../model/world/commands.hpp"
+
+//#include <osg/ref_ptr>
+//#include <osg/Image>
+
+//#include <components/resource/imagemanager.hpp>
+#include <components/esm/loadland.hpp>
+//#include <extern/osgQt/GraphicsWindowQt>
+//#include <components/fallback/fallback.hpp>
+//#include <components/misc/stringops.hpp>
+
 
 
 CSVRender::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *parent)
@@ -61,16 +86,6 @@ CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWi
 {
     mBrushTextureLabel = "Brush: " + mBrushTexture;
     selectedBrush = new QLabel(QString::fromUtf8(mBrushTextureLabel.c_str()), this);
-
-    const std::string& iconPoint = ":scenetoolbar/brush-point";
-    const std::string& iconSquare = ":scenetoolbar/brush-square";
-    const std::string& iconCircle = ":scenetoolbar/brush-circle";
-    const std::string& iconCustom = ":scenetoolbar/brush-custom";
-
-    TextureBrushButton *buttonPoint = new TextureBrushButton(QIcon (QPixmap (iconPoint.c_str())), "", this);
-    TextureBrushButton *buttonSquare = new TextureBrushButton(QIcon (QPixmap (iconSquare.c_str())), "", this);
-    TextureBrushButton *buttonCircle = new TextureBrushButton(QIcon (QPixmap (iconCircle.c_str())), "", this);
-    TextureBrushButton *buttonCustom = new TextureBrushButton(QIcon (QPixmap (iconCustom.c_str())), "", this);
 
     QVBoxLayout *layoutMain = new QVBoxLayout;
     layoutMain->setSpacing(0);
@@ -108,6 +123,13 @@ CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWi
 
     setLayout(layoutMain);
 
+    connect(buttonPoint, SIGNAL(clicked()), this, SLOT(setBrushShape()));
+    connect(buttonSquare, SIGNAL(clicked()), this, SLOT(setBrushShape()));
+    connect(buttonCircle, SIGNAL(clicked()), this, SLOT(setBrushShape()));
+    connect(buttonCustom, SIGNAL(clicked()), this, SLOT(setBrushShape()));
+
+    connect(sizeSliders->brushSizeSlider, SIGNAL(valueChanged(int)), parent, SLOT(setBrushSize(int)));
+
     connect(parent, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
 }
 
@@ -128,12 +150,29 @@ void CSVRender::TextureBrushWindow::getBrushTexture(std::string brushTexture)
     selectedBrush->setText(QString::fromUtf8(mBrushTextureLabel.c_str()));
 }
 
+void CSVRender::TextureBrushWindow::setBrushSize(int brushSize)
+{
+    mBrushSize = brushSize;
+    emit passBrushSize(mBrushSize);
+}
+
+void CSVRender::TextureBrushWindow::setBrushShape()
+{
+    if(buttonPoint->isChecked()) mBrushShape = 0;
+    if(buttonSquare->isChecked()) mBrushShape = 1;
+    if(buttonCircle->isChecked()) mBrushShape = 2;
+    if(buttonCustom->isChecked()) mBrushShape = 3;
+    emit passBrushShape(mBrushShape);
+}
+
 CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-texture"}, Mask_Terrain | Mask_Reference, "Terrain texture editing", parent)
 , textureBrushWindow(new TextureBrushWindow(worldspaceWidget, this))
 {
     connect(parent, SIGNAL(passEvent(QDragEnterEvent*)), this, SLOT(handleDragEnterEvent(QDragEnterEvent*)));
     connect(parent, SIGNAL(passEvent(QDropEvent*)), this, SLOT(handleDropEvent(QDropEvent*)));
+    connect(textureBrushWindow, SIGNAL(passBrushSize(int)), this, SLOT(setBrushSize(int)));
+    connect(textureBrushWindow, SIGNAL(passBrushShape(int)), this, SLOT(setBrushShape(int)));
 }
 
 void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
@@ -144,6 +183,83 @@ void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
 void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
 {
     EditMode::deactivate(toolbar);
+}
+
+void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult& hit) // Apply changes here
+{
+  cellId = getWorldspaceWidget().getCellId (hit.worldPos);
+  std::string hash = "#";
+  std::string space = " ";
+  std::size_t hashlocation = cellId.find(hash);
+  std::size_t spacelocation = cellId.find(space);
+  std::string slicedX = cellId.substr (hashlocation+1, spacelocation-hashlocation);
+  std::string slicedY = cellId.substr (spacelocation+1);
+  CSMWorld::CellCoordinates mCoordinates(stoi(slicedX), stoi(slicedY));
+
+  CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+  CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
+*document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+  /*CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+*document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));*/
+
+  int textureColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandTexturesIndex);
+  CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(cellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+  CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
+
+  int xInCell {(hit.worldPos.x() - (stoi(slicedX)* cellSize)) * landTextureSize / cellSize};
+  int yInCell {(hit.worldPos.y() - (stoi(slicedY)* cellSize)) * landTextureSize / cellSize};
+
+  hashlocation = mBrushTexture.find(hash);
+  std::string mBrushTextureInt = mBrushTexture.substr (hashlocation+1);
+  int brushInt = stoi(mBrushTexture.substr (hashlocation+1));
+
+  if (mBrushShape == 0) mNew[yInCell*landTextureSize+xInCell] = brushInt;
+  if (mBrushShape == 1)
+  {
+      for(int i=-mBrushSize/2;i<mBrushSize/2;i++)
+      {
+          for(int j=-mBrushSize/2;j<mBrushSize/2;j++)
+          {
+              if (xInCell+i >= 0 && yInCell+j >= 0 && xInCell+i <= 15 && yInCell+j <= 15)
+                  mNew[(yInCell+j)*landTextureSize+(xInCell+i)] = brushInt;
+          }
+      }
+  }
+  float distance = 0;
+  if (mBrushShape == 2)
+  {
+    float rf = mBrushSize/2;
+    int r = (mBrushSize/2)+1;
+    int r2 = r * r;
+    for(int i = -r; i < r; i++)
+    {
+        for(int j = -r; j < r; j++)
+        {
+            distance = std::round(sqrt(pow((xInCell+i)-xInCell, 2) + pow((yInCell+j)-yInCell, 2)));
+            if (xInCell+i >= 0 && yInCell+j >= 0 && xInCell+i <= 15 && yInCell+j <= 15 && distance <= rf)
+                mNew[(yInCell+j)*landTextureSize+(xInCell+i)] = brushInt;
+        }
+    }
+  }
+  if (mBrushShape == 3)
+  {
+    // Not implemented
+  }
+
+  // Modify data, this should be done via command system!
+  QVariant variant;
+  variant.setValue(mNew);
+  landTable.setData(landTable.getModelIndex(cellId, textureColumn), variant);
+
+  // Reference
+  /*CSMWorld::ModifyLandTexturesCommand::ModifyLandTexturesCommand(IdTable& landTable,
+      IdTable& ltexTable, QUndoCommand* parent)*/
+
+  // Reference
+  /*CSMWorld::DeleteCommand* command = new CSMWorld::DeleteCommand(referencesTable,
+      static_cast<ObjectTag*>(iter->get())->mObject->getReferenceId());
+
+  getWorldspaceWidget().getDocument().getUndoStack().push(command);*/
 }
 
 void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResult& hit)
@@ -211,4 +327,14 @@ void CSVRender::TerrainTextureMode::handleDropEvent (QDropEvent *event) {
 }
 
 void CSVRender::TerrainTextureMode::dragMoveEvent (QDragMoveEvent *event) {
+}
+
+void CSVRender::TerrainTextureMode::setBrushSize(int brushSize)
+{
+    mBrushSize = brushSize;
+}
+
+void CSVRender::TerrainTextureMode::setBrushShape(int brushShape)
+{
+    mBrushShape = brushShape;
 }
