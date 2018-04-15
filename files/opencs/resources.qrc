@@ -68,7 +68,7 @@
         <file alias="edit-preview">record-preview.png</file>
         <file alias="edit-clone">record-clone.png</file>
         <file alias="edit-add">record-add.png</file>
-        <file alias="resources-icon">resources-icon.png</file>        
+        <file alias="resources-icon">resources-icon.png</file>
         <file alias="resources-mesh">resources-mesh.png</file>
         <file alias="resources-music">resources-music.png</file>
         <file alias="resources-sound">resources-sound.png</file>
@@ -149,6 +149,10 @@
         <file alias="transform-scale">transform-scale.png</file>
         <file alias="selection-mode-cube">selection-mode-cube.png</file>
         <file alias="selection-mode-cube-corner">selection-mode-cube-corner.png</file>
-        <file alias="selection-mode-cube-sphere">selection-mode-cube-sphere.png</file>        
+        <file alias="selection-mode-cube-sphere">selection-mode-cube-sphere.png</file>
+        <file alias="brush-point">brush-point.png</file>
+        <file alias="brush-square">brush-square.png</file>
+        <file alias="brush-circle">brush-circle.png</file>
+        <file alias="brush-custom">brush-custom.png</file>
     </qresource>
 </RCC>
