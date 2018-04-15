@@ -21,6 +21,7 @@
 #include "mask.hpp"
 #include "cameracontroller.hpp"
 #include "cellarrow.hpp"
+#include "terraintexturemode.hpp"
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
@@ -136,7 +137,7 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
         new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain shape editing"),
         "terrain-shape");
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain texture editing"),
+        new TerrainTextureMode (this, tool),
         "terrain-texture");
     tool->addButton (
         new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain vertex paint editing"),
