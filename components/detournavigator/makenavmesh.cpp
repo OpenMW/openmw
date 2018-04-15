@@ -269,9 +269,6 @@ namespace DetourNavigator
             getRadius(settings, agentHalfExtents),
             " changedTile=", changedTile);
 
-        const auto& boundsMin = recastMesh.getBoundsMin();
-        const auto& boundsMax = recastMesh.getBoundsMax();
-
         auto& navMesh = navMeshCacheItem.mValue;
         const auto& params = *navMesh.lock()->getParams();
         const osg::Vec3f origin(params.orig[0], params.orig[1], params.orig[2]);
@@ -285,6 +282,15 @@ namespace DetourNavigator
             const auto locked = navMesh.lock();
             incRev.mNavMeshChanged = dtStatusSucceed(locked->removeTile(locked->getTileRefAt(x, y, 0),
                                                                         nullptr, nullptr));
+        }
+
+        const auto& boundsMin = recastMesh.getBoundsMin();
+        const auto& boundsMax = recastMesh.getBoundsMax();
+
+        if (boundsMin == boundsMax)
+        {
+            log("ignore add tile: recastMesh is empty");
+            return;
         }
 
         const auto tileBounds = makeTileBounds(settings, changedTile);
@@ -307,5 +313,5 @@ namespace DetourNavigator
         else
             log("failed to add tile with status=", WriteDtStatus {status});
         navMeshData.mValue.release();
-    }
+}
 }

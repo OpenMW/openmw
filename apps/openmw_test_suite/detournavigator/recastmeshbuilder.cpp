@@ -31,9 +31,11 @@ namespace
         }
     };
 
-    TEST_F(DetourNavigatorRecastMeshBuilderTest, create_for_empty_should_throw_exception)
+    TEST_F(DetourNavigatorRecastMeshBuilderTest, create_for_empty_should_return_empty)
     {
-        EXPECT_THROW(mBuilder.create(), std::invalid_argument);
+        const auto recastMesh = mBuilder.create();
+        EXPECT_EQ(recastMesh->getVertices(), std::vector<float>());
+        EXPECT_EQ(recastMesh->getIndices(), std::vector<int>());
     }
 
     TEST_F(DetourNavigatorRecastMeshBuilderTest, add_bhv_triangle_mesh_shape)

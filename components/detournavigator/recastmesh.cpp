@@ -10,6 +10,7 @@ namespace DetourNavigator
         , mVertices(std::move(vertices))
         , mChunkyTriMesh(mVertices, mIndices, settings.mTrianglesPerChunk)
     {
-        rcCalcBounds(mVertices.data(), static_cast<int>(getVerticesCount()), mBoundsMin.ptr(), mBoundsMax.ptr());
+        if (getVerticesCount())
+            rcCalcBounds(mVertices.data(), static_cast<int>(getVerticesCount()), mBoundsMin.ptr(), mBoundsMax.ptr());
     }
 }

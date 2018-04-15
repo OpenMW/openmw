@@ -120,7 +120,7 @@ namespace DetourNavigator
         const auto trianglesCount = indices.size() / 3;
 
         if (trianglesCount == 0)
-            throw InvalidArgument("ChunkyTriMesh tris should contain at least 3 values");
+            return;
 
         const auto nchunks = (trianglesCount + trisPerChunk - 1) / trisPerChunk;
 
