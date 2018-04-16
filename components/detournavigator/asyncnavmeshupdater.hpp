@@ -1,8 +1,8 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_ASYNCNAVMESHUPDATER_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_ASYNCNAVMESHUPDATER_H
 
+#include "navmeshcacheitem.hpp"
 #include "recastmesh.hpp"
-#include "sharednavmesh.hpp"
 #include "tileposition.hpp"
 
 #include <osg/Vec3f>
@@ -22,16 +22,6 @@ class dtNavMesh;
 
 namespace DetourNavigator
 {
-    struct NavMeshCacheItem
-    {
-        SharedNavMesh mValue;
-        std::size_t mRecastMeshRevision;
-        std::atomic_size_t mNavMeshRevision;
-
-        NavMeshCacheItem(const NavMeshPtr& value, std::size_t revision)
-            : mValue(value), mRecastMeshRevision(revision), mNavMeshRevision(0) {}
-    };
-
     class AsyncNavMeshUpdater
     {
     public:

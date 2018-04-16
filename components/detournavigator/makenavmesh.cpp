@@ -214,6 +214,23 @@ namespace
 
         return NavMeshData(navMeshData, navMeshDataSize);
     }
+
+    struct AutoIncrementRevision
+    {
+        std::atomic_size_t& mNavMeshRevision;
+        bool mNavMeshChanged;
+
+        AutoIncrementRevision(std::atomic_size_t& navMeshRevision)
+            : mNavMeshRevision(navMeshRevision)
+            , mNavMeshChanged(false)
+        {}
+
+        ~AutoIncrementRevision()
+        {
+            if (mNavMeshChanged)
+                ++mNavMeshRevision;
+        }
+    };
 }
 
 namespace DetourNavigator
@@ -241,7 +258,7 @@ namespace DetourNavigator
     }
 
     void updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
-        const TilePosition& changedTile, const Settings& settings, SharedNavMesh& navMesh)
+        const TilePosition& changedTile, const Settings& settings, NavMeshCacheItem& navMeshCacheItem)
     {
         log("update NavMesh with mutiple tiles:",
             " agentHeight=", std::setprecision(std::numeric_limits<float>::max_exponent10),
@@ -255,15 +272,19 @@ namespace DetourNavigator
         const auto& boundsMin = recastMesh.getBoundsMin();
         const auto& boundsMax = recastMesh.getBoundsMax();
 
+        auto& navMesh = navMeshCacheItem.mValue;
         const auto& params = *navMesh.lock()->getParams();
         const osg::Vec3f origin(params.orig[0], params.orig[1], params.orig[2]);
 
         const auto x = changedTile.x();
         const auto y = changedTile.y();
 
+        AutoIncrementRevision incRev(navMeshCacheItem.mNavMeshRevision);
+
         {
             const auto locked = navMesh.lock();
-            locked->removeTile(locked->getTileRefAt(x, y, 0), nullptr, nullptr);
+            incRev.mNavMeshChanged = dtStatusSucceed(locked->removeTile(locked->getTileRefAt(x, y, 0),
+                                                                        nullptr, nullptr));
         }
 
         const auto tileBounds = makeTileBounds(settings, changedTile);
@@ -274,10 +295,17 @@ namespace DetourNavigator
             tileBorderMin, tileBorderMax, settings);
 
         if (!navMeshData.mValue)
+        {
+            log("ignore add tile: NavMeshData is null");
             return;
+        }
 
-        OPENMW_CHECK_DT_STATUS(navMesh.lock()->addTile(navMeshData.mValue.get(), navMeshData.mSize,
-                                                        DT_TILE_FREE_DATA, 0, 0));
+        const auto status = navMesh.lock()->addTile(navMeshData.mValue.get(), navMeshData.mSize,
+                                                    DT_TILE_FREE_DATA, 0, 0);
+        if (dtStatusSucceed(status))
+            incRev.mNavMeshChanged = true;
+        else
+            log("failed to add tile with status=", WriteDtStatus {status});
         navMeshData.mValue.release();
     }
 }

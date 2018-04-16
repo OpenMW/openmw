@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_MAKENAVMESH_H
 
 #include "settings.hpp"
+#include "navmeshcacheitem.hpp"
 #include "tileposition.hpp"
 
 #include <osg/Vec3f>
@@ -22,7 +23,7 @@ namespace DetourNavigator
     NavMeshPtr makeEmptyNavMesh(const Settings& settings);
 
     void updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
-            const TilePosition& changedTile, const Settings& settings, SharedNavMesh& navMesh);
+            const TilePosition& changedTile, const Settings& settings, NavMeshCacheItem& navMeshCacheItem);
 }
 
 #endif
