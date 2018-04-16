@@ -211,7 +211,7 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
 
   hashlocation = mBrushTexture.find(hash);
   std::string mBrushTextureInt = mBrushTexture.substr (hashlocation+1);
-  int brushInt = stoi(mBrushTexture.substr (hashlocation+1));
+  int brushInt = stoi(mBrushTexture.substr (hashlocation+1))+1; // All indices are offset by +1
 
   if (mBrushShape == 0) mNew[yInCell*landTextureSize+xInCell] = brushInt;
   if (mBrushShape == 1)
@@ -225,7 +225,7 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
           }
       }
   }
-  float distance = 1;
+  float distance = 0;
   if (mBrushShape == 2)
   {
     float rf = mBrushSize/2;
