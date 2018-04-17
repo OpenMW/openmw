@@ -216,7 +216,7 @@ if (USE_QT)
         ${QT_QTCORE_LIBRARY}
         ${QT_QTGUI_LIBRARY})
     else()
-        qt5_use_modules(components Widgets Core)
+        target_link_libraries(components Qt5::Widgets Qt5::Core)
     endif()
 endif()
 
