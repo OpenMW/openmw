@@ -277,7 +277,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
         {
             for(int j=-mBrushSize/2;j<mBrushSize/2;j++)
             {
-                if (xInCell+i >= 0 && yInCell+j >= 0 && xInCell+i <= 15 && yInCell+j <= 15)
+                if (xInCell+i >= 0 && yInCell+j >= 0 && xInCell+i <= landTextureSize  - 1 && yInCell+j <= landTextureSize - 1)
                     mNew[(yInCell+j)*landTextureSize+(xInCell+i)] = brushInt;
             }
         }
@@ -292,7 +292,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
             for(int j = -r; j < r; j++)
             {
                 distance = std::round(sqrt(pow((xInCell+i)-xInCell, 2) + pow((yInCell+j)-yInCell, 2)));
-                if (xInCell+i >= 0 && yInCell+j >= 0 && xInCell+i <= 15 && yInCell+j <= 15 && distance <= rf)
+                if (xInCell+i >= 0 && yInCell+j >= 0 && xInCell+i <= landTextureSize - 1 && yInCell+j <= landTextureSize  - 1 && distance <= rf)
                     mNew[(yInCell+j)*landTextureSize+(xInCell+i)] = brushInt;
             }
         }
