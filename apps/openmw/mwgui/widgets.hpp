@@ -315,6 +315,9 @@ namespace MWGui
             virtual void initialiseOverride();
             void repeatClick(MyGUI::Widget* _widget, MyGUI::ControllerItem* _controller);
 
+            bool mEnableRepeat;
+            float mRepeatTriggerTime;
+            float mRepeatStepTime;
             bool mIsIncreasing;
 
         private:

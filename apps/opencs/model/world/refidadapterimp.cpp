@@ -1373,7 +1373,7 @@ QVariant CSMWorld::CreatureAttackRefIdAdapter::getNestedData (const RefIdColumn 
 
     if (subColIndex == 0)
         return subRowIndex + 1;
-    else // 1 or 2
+    else if (subColIndex < 3) // 1 or 2
         return creature.mData.mAttack[(subRowIndex * 2) + (subColIndex - 1)];
 }
 
