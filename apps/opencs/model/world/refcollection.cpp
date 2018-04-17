@@ -24,7 +24,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
     bool isDeleted = false;
 
     // hack to initialise mindex
-    while (!(mref.mRefNum.mIndex == 0) && ESM::Cell::getNextRef(reader, ref, isDeleted, true, &mref))
+    while (!(mref.mRefNum.mIndex = 0) && ESM::Cell::getNextRef(reader, ref, isDeleted, true, &mref))
     {
         // Keep mOriginalCell empty when in modified (as an indicator that the
         // original cell will always be equal the current cell).

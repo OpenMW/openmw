@@ -558,7 +558,7 @@ namespace
             if (mAllQuests)
             {
                 SetNamesInactive setInactive(list);
-                mModel->visitQuestNames(false, setInactive);
+                mModel->visitQuestNames(!mAllQuests, setInactive);
             }
 
             MWBase::Environment::get().getWindowManager()->playSound("book page");

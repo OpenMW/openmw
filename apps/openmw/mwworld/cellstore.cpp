@@ -677,7 +677,6 @@ namespace MWWorld
         if (mCell->mData.mFlags & ESM::Cell::Interior && mCell->mData.mFlags & ESM::Cell::HasWater)
             mWaterLevel = state.mWaterLevel;
 
-        mWaterLevel = state.mWaterLevel;
         mLastRespawn = MWWorld::TimeStamp(state.mLastRespawn);
     }
 
@@ -685,10 +684,9 @@ namespace MWWorld
     {
         state.mId = mCell->getCellId();
 
-        // if (mCell->mData.mFlags & ESM::Cell::Interior && mCell->mData.mFlags & ESM::Cell::HasWater)
-        //     state.mWaterLevel = mWaterLevel;
+        if (mCell->mData.mFlags & ESM::Cell::Interior && mCell->mData.mFlags & ESM::Cell::HasWater)
+            state.mWaterLevel = mWaterLevel;
 
-        state.mWaterLevel = mWaterLevel;
         state.mHasFogOfWar = (mFogState.get() ? 1 : 0);
         state.mLastRespawn = mLastRespawn.toEsm();
     }
