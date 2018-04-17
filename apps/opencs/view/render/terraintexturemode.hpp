@@ -108,9 +108,11 @@ namespace CSVRender
             virtual void dragWheel (int diff, double speedFactor);
             virtual void dragMoveEvent (QDragMoveEvent *event);
 
+            void editTerrainTextureGrid (const WorldspaceHitResult& hit);
+
         private:
             TextureBrushWindow *textureBrushWindow;
-            std::string cellId;
+            std::string mCellId;
             std::string mBrushTexture = "#0";
             int mBrushSize = 0;
             int mBrushShape = 0;
