@@ -199,8 +199,8 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
   CSMDoc::Document& document = getWorldspaceWidget().getDocument();
   CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
 *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
-  /*CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
-*document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));*/
+  CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+*document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
 
   int textureColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandTexturesIndex);
   CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(cellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
@@ -245,20 +245,16 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
     // Not implemented
   }
 
-  // Modify data, this should be done via command system!
   QVariant variant;
   variant.setValue(mNew);
-  landTable.setData(landTable.getModelIndex(cellId, textureColumn), variant);
 
-  // Reference
-  /*CSMWorld::ModifyLandTexturesCommand::ModifyLandTexturesCommand(IdTable& landTable,
-      IdTable& ltexTable, QUndoCommand* parent)*/
+  CSMWorld::CommandMacro macro (document.getUndoStack(), "Edit texture records");
+  QModelIndex index(landTable.getModelIndex (cellId, landTable.findColumnIndex (CSMWorld::Columns::ColumnId_LandTexturesIndex)));
 
-  // Reference
-  /*CSMWorld::DeleteCommand* command = new CSMWorld::DeleteCommand(referencesTable,
-      static_cast<ObjectTag*>(iter->get())->mObject->getReferenceId());
-
-  getWorldspaceWidget().getDocument().getUndoStack().push(command);*/
+  CSMWorld::TouchLandCommand* ltexTouch = new CSMWorld::TouchLandCommand(landTable, ltexTable, cellId);
+  CSMWorld::ModifyCommand* ltexModify = new CSMWorld::ModifyCommand(landTable, index, variant);
+  macro.push (ltexTouch);
+  macro.push (ltexModify);
 }
 
 void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResult& hit)
