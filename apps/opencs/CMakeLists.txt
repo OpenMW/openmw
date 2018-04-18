@@ -246,7 +246,7 @@ if (DESIRED_QT_VERSION MATCHES 4)
         target_link_libraries(openmw-cs ${QT_QTMAIN_LIBRARY})
     endif()
 else()
-    qt5_use_modules(openmw-cs Widgets Core Network OpenGL)
+    target_link_libraries(openmw-cs Qt5::Widgets Qt5::Core Qt5::Network Qt5::OpenGL)
 endif()
 
 if (WIN32)
