@@ -1,7 +1,7 @@
 #include "terraintexturemode.hpp"
-#include "editmode.hpp"
 
 #include <string>
+#include <sstream>
 
 #include <QWidget>
 #include <QIcon>
@@ -16,13 +16,10 @@
 #include <QDragEnterEvent>
 #include <QDrag>
 
+#include <components/esm/loadland.hpp>
+
 #include "../widget/modebutton.hpp"
 #include "../widget/scenetoolbar.hpp"
-
-#include "pagedworldspacewidget.hpp"
-#include "mask.hpp"
-#include "object.hpp" // Something small needed regarding pointers from here ()
-#include "worldspacewidget.hpp"
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/columnbase.hpp"
@@ -36,8 +33,11 @@
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/universalid.hpp"
 
-
-#include <components/esm/loadland.hpp>
+#include "editmode.hpp"
+#include "pagedworldspacewidget.hpp"
+#include "mask.hpp"
+#include "object.hpp" // Something small needed regarding pointers from here ()
+#include "worldspacewidget.hpp"
 
 
 CSVRender::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *parent)
@@ -68,7 +68,10 @@ CSVRender::TextureBrushButton::TextureBrushButton (const QIcon & icon, const QSt
 }
 
 CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent)
-    : QFrame(parent, Qt::Popup), mWorldspaceWidget (worldspaceWidget)
+    : QFrame(parent, Qt::Popup),
+    mWorldspaceWidget (worldspaceWidget),
+    mBrushSize(0),
+    mBrushShape(0)
 {
     mBrushTextureLabel = "Brush: " + mBrushTexture;
     selectedBrush = new QLabel(QString::fromUtf8(mBrushTextureLabel.c_str()), this);
@@ -116,7 +119,7 @@ CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWi
 
     connect(sizeSliders->brushSizeSlider, SIGNAL(valueChanged(int)), parent, SLOT(setBrushSize(int)));
 
-    connect(parent, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
+    connect(parent, SIGNAL(passBrushTexture(std::string)), this, SLOT(setBrushTexture(std::string)));
 }
 
 void CSVRender::TextureBrushWindow::configureButtonInitialSettings(TextureBrushButton *button)
@@ -129,7 +132,7 @@ void CSVRender::TextureBrushWindow::configureButtonInitialSettings(TextureBrushB
   button->setCheckable(true);
 }
 
-void CSVRender::TextureBrushWindow::getBrushTexture(std::string brushTexture)
+void CSVRender::TextureBrushWindow::setBrushTexture(std::string brushTexture)
 {
     mBrushTexture = brushTexture;
     mBrushTextureLabel = "Brush:" + mBrushTexture;
@@ -152,8 +155,11 @@ void CSVRender::TextureBrushWindow::setBrushShape()
 }
 
 CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
-: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-texture"}, Mask_Terrain | Mask_Reference, "Terrain texture editing", parent)
-, textureBrushWindow(new TextureBrushWindow(worldspaceWidget, this))
+: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-texture"}, Mask_Terrain | Mask_Reference, "Terrain texture editing", parent),
+    textureBrushWindow(new TextureBrushWindow(worldspaceWidget, this)),
+    mBrushTexture("#0"),
+    mBrushSize(0),
+    mBrushShape(0)
 {
     connect(parent, SIGNAL(passEvent(QDragEnterEvent*)), this, SLOT(handleDragEnterEvent(QDragEnterEvent*)));
     connect(parent, SIGNAL(passEvent(QDropEvent*)), this, SLOT(handleDropEvent(QDropEvent*)));
@@ -245,13 +251,12 @@ void CSVRender::TerrainTextureMode::handleDropEvent (QDropEvent *event) {
 void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitResult& hit)
 {
     mCellId = getWorldspaceWidget().getCellId (hit.worldPos);
-    std::string hash = "#";
-    std::string space = " ";
-    std::size_t hashlocation = mCellId.find(hash);
-    std::size_t spacelocation = mCellId.find(space);
-    std::string slicedX = mCellId.substr (hashlocation+1, spacelocation-hashlocation);
-    std::string slicedY = mCellId.substr (spacelocation+1);
-    CSMWorld::CellCoordinates mCoordinates(stoi(slicedX), stoi(slicedY));
+
+    std::istringstream streamCoord (mCellId);
+    char ignore;
+    int cellX = 0;
+    int cellY = 0;
+    streamCoord >> ignore >> cellX >> cellY;
 
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
@@ -263,10 +268,10 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
     CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(mCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
     CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
 
-    int xInCell ((hit.worldPos.x() - (stoi(slicedX)* cellSize)) * landTextureSize / cellSize);
-    int yInCell ((hit.worldPos.y() - (stoi(slicedY)* cellSize)) * landTextureSize / cellSize);
+    int xInCell ((hit.worldPos.x() - (cellX* cellSize)) * landTextureSize / cellSize);
+    int yInCell ((hit.worldPos.y() - (cellY* cellSize)) * landTextureSize / cellSize);
 
-    hashlocation = mBrushTexture.find(hash);
+    std::size_t hashlocation = mBrushTexture.find("#");
     std::string mBrushTextureInt = mBrushTexture.substr (hashlocation+1);
     int brushInt = stoi(mBrushTexture.substr (hashlocation+1))+1; // All indices are offset by +1
 
@@ -307,11 +312,9 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
 
     CSMWorld::CommandMacro macro (document.getUndoStack(), "Edit texture records");
     QModelIndex index(landTable.getModelIndex (mCellId, landTable.findColumnIndex (CSMWorld::Columns::ColumnId_LandTexturesIndex)));
-
-    CSMWorld::TouchLandCommand* ltexTouch = new CSMWorld::TouchLandCommand(landTable, ltexTable, mCellId);
-    CSMWorld::ModifyCommand* ltexModify = new CSMWorld::ModifyCommand(landTable, index, changedLand);
-    macro.push (ltexTouch);
-    macro.push (ltexModify);
+    
+    macro.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, mCellId));
+    macro.push (new CSMWorld::ModifyCommand(landTable, index, changedLand));
 }
 
 void CSVRender::TerrainTextureMode::dragMoveEvent (QDragMoveEvent *event) {

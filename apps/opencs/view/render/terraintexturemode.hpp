@@ -64,16 +64,14 @@ namespace CSVRender
         private:
             QLabel *selectedBrush;
             QGroupBox *horizontalGroupBox;
-            int mButtonSize;
-            int mBrushSize = 0;
-            int mBrushShape = 0;
-            int mIconSize;
             WorldspaceWidget *mWorldspaceWidget;
+            int mBrushSize;
+            int mBrushShape;
             std::string mBrushTexture;
             std::string mBrushTextureLabel;
 
         public slots:
-            void getBrushTexture(std::string brushTexture);
+            void setBrushTexture(std::string brushTexture);
             void setBrushShape();
             void setBrushSize(int brushSize);
 
@@ -113,9 +111,9 @@ namespace CSVRender
         private:
             TextureBrushWindow *textureBrushWindow;
             std::string mCellId;
-            std::string mBrushTexture = "#0";
-            int mBrushSize = 0;
-            int mBrushShape = 0;
+            std::string mBrushTexture;
+            int mBrushSize;
+            int mBrushShape;
 
             const int cellSize {ESM::Land::REAL_SIZE};
             const int landSize {ESM::Land::LAND_SIZE};
