@@ -1,11 +1,11 @@
 #include "quicksavemanager.hpp"
 
 MWState::QuickSaveManager::QuickSaveManager(std::string &saveName, unsigned int maxSaves)
+  : mSaveName(saveName)
+  , mMaxSaves(maxSaves)
+  , mOldestSlotVisited(NULL)
+  , mSlotsVisited(0)
 {
-    this->mSaveName = saveName;
-    this->mMaxSaves = maxSaves;
-    this->mOldestSlotVisited = NULL;
-    this->mSlotsVisited = 0;
 }
 
 void MWState::QuickSaveManager::visitSave(const Slot *saveSlot)

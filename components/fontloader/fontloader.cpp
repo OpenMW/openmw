@@ -448,7 +448,7 @@ namespace Gui
             MyGUI::FontCodeType::Enum type;
             if(i == 0)
                 type = MyGUI::FontCodeType::Selected;
-            else if (i == 1)
+            else // if (i == 1)
                 type = MyGUI::FontCodeType::SelectedBack;
 
             MyGUI::xml::ElementPtr cursorCode = codes->createChild("Code");

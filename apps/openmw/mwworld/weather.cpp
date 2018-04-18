@@ -1134,7 +1134,6 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
         mResult.mIsStorm = current.mIsStorm;
         mResult.mParticleEffect = current.mParticleEffect;
         mResult.mRainEffect = current.mRainEffect;
-        mResult.mParticleEffect = current.mParticleEffect;
         mResult.mRainSpeed = current.mRainSpeed;
         mResult.mRainFrequency = current.mRainFrequency;
         mResult.mAmbientSoundVolume = 1-(factor*2);
@@ -1146,7 +1145,6 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
         mResult.mIsStorm = other.mIsStorm;
         mResult.mParticleEffect = other.mParticleEffect;
         mResult.mRainEffect = other.mRainEffect;
-        mResult.mParticleEffect = other.mParticleEffect;
         mResult.mRainSpeed = other.mRainSpeed;
         mResult.mRainFrequency = other.mRainFrequency;
         mResult.mAmbientSoundVolume = 2*(factor-0.5f);

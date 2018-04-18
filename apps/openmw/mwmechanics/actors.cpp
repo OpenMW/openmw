@@ -1422,7 +1422,7 @@ namespace MWMechanics
                                 MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
                                 break;
                             }
-                            else if (!detected)
+                            else
                                 avoidedNotice = true;
                         }
                     }

@@ -1375,8 +1375,6 @@ QVariant CSMWorld::CreatureAttackRefIdAdapter::getNestedData (const RefIdColumn 
         return subRowIndex + 1;
     else if (subColIndex < 3) // 1 or 2
         return creature.mData.mAttack[(subRowIndex * 2) + (subColIndex - 1)];
-    else
-        return QVariant(); // throw an exception here?
 }
 
 void CSMWorld::CreatureAttackRefIdAdapter::setNestedData (const RefIdColumn *column,
