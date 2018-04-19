@@ -19,6 +19,11 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/land.hpp"
 
+#include "../../model/doc/document.hpp"
+#include "../../model/world/commands.hpp"
+#include "../../model/world/idtable.hpp"
+#include "../../model/world/landtexture.hpp"
+
 namespace CSVWidget
 {
     class SceneToolMode;
@@ -107,6 +112,8 @@ namespace CSVRender
             virtual void dragMoveEvent (QDragMoveEvent *event);
 
             void editTerrainTextureGrid (const WorldspaceHitResult& hit);
+            void pushEditToCommand (CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,
+                CSMWorld::IdTable& landTable, CSMWorld::IdTable& ltexTable, std::string cellId);
 
         private:
             TextureBrushWindow *textureBrushWindow;
