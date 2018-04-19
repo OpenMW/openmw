@@ -557,11 +557,20 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
 void MWState::StateManager::quickLoad()
 {
-    if (Character* currentCharacter = getCurrentCharacter ())
+    if (const Character* currentCharacter = getCurrentCharacter())
     {
-        if (currentCharacter->begin() == currentCharacter->end())
+        // Search for a newest quick save
+        Character::SlotIterator it;
+        for (it = currentCharacter->begin(); it != currentCharacter->end(); ++it)
+        {
+            if (it->mProfile.mDescription == "Quicksave")
+                break;
+        }
+
+        if (it == currentCharacter->end())
             return;
-        loadGame (currentCharacter, currentCharacter->begin()->mPath.string()); //Get newest save
+
+        loadGame (currentCharacter, it->mPath.string());
     }
 }
 
