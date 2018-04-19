@@ -330,7 +330,12 @@ namespace MWGui
             MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
             MWMechanics::Spells& spells = stats.getSpells();
             if (!spells.hasSpell(spellId))
+            {
+                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+                MWBase::Environment::get().getWindowManager()->messageBox (
+                            "#{sQuickMenu5} " + spell->mName);
                 return;
+            }
             store.setSelectedEnchantItem(store.end());
             MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
             MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Spell);
