@@ -20,11 +20,24 @@ namespace DetourNavigator
 
         std::shared_ptr<RecastMesh> getMesh(const TilePosition& tilePosition);
 
+        bool hasTile(const TilePosition& tilePosition);
+
+        template <class Function>
+        void forEachTilePosition(Function&& function)
+        {
+            const std::lock_guard<std::mutex> lock(mTilesMutex);
+            for (const auto& tile : mTiles)
+                function(tile.first);
+        }
+
+        std::size_t getRevision() const;
+
     private:
         const Settings& mSettings;
         std::mutex mTilesMutex;
         std::map<TilePosition, CachedRecastMeshManager> mTiles;
         std::unordered_map<std::size_t, std::vector<TilePosition>> mObjectsTilesPositions;
+        std::size_t mRevision = 0;
     };
 }
 

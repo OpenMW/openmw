@@ -29,10 +29,27 @@ namespace DetourNavigator
         replaced
     };
 
+    inline float getLength(const osg::Vec2i& value)
+    {
+        return std::sqrt(float(osg::square(value.x()) + osg::square(value.y())));
+    }
+
+    inline float getDistance(const TilePosition& lhs, const TilePosition& rhs)
+    {
+        return getLength(lhs - rhs);
+    }
+
+    inline bool shouldAddTile(const TilePosition& changedTile, const TilePosition& playerTile, int maxTiles)
+    {
+        const auto expectedTilesCount = std::ceil(osg::PI * osg::square(getDistance(changedTile, playerTile)));
+        return expectedTilesCount * 3 <= maxTiles;
+    }
+
     NavMeshPtr makeEmptyNavMesh(const Settings& settings);
 
     UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh* recastMesh,
-        const TilePosition& changedTile, const Settings& settings, NavMeshCacheItem& navMeshCacheItem);
+        const TilePosition& changedTile, const TilePosition& playerTile, const Settings& settings,
+        NavMeshCacheItem& navMeshCacheItem);
 }
 
 #endif

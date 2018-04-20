@@ -3,6 +3,7 @@
 
 #include "settings.hpp"
 #include "settingsutils.hpp"
+#include "tileposition.hpp"
 
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 

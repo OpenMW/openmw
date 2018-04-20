@@ -6,6 +6,8 @@
 #include "tileposition.hpp"
 #include "tilebounds.hpp"
 
+#include <osg/Vec2f>
+#include <osg/Vec2i>
 #include <osg/Vec3f>
 
 #include <utility>

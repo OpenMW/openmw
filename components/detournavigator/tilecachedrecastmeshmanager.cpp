@@ -35,6 +35,8 @@ namespace DetourNavigator
                     result = true;
                 }
             });
+        if (result)
+            ++mRevision;
         return result;
     }
 
@@ -57,6 +59,8 @@ namespace DetourNavigator
             if (tileResult && !result)
                 result = tileResult;
         }
+        if (result)
+            ++mRevision;
         return result;
     }
 
@@ -67,5 +71,16 @@ namespace DetourNavigator
         if (it == mTiles.end())
             return nullptr;
         return it->second.getMesh();
+    }
+
+    bool TileCachedRecastMeshManager::hasTile(const TilePosition& tilePosition)
+    {
+        const std::lock_guard<std::mutex> lock(mTilesMutex);
+        return mTiles.count(tilePosition);
+    }
+
+    std::size_t TileCachedRecastMeshManager::getRevision() const
+    {
+        return mRevision;
     }
 }

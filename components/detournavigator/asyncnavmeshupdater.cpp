@@ -64,13 +64,19 @@ namespace DetourNavigator
     {
         log("post jobs playerTile=", playerTile);
 
+        setPlayerTile(playerTile);
+
         if (changedTiles.empty())
             return;
 
         const std::lock_guard<std::mutex> lock(mMutex);
 
         for (const auto& changedTile : changedTiles)
-            mJobs.push(Job {agentHalfExtents, navMeshCacheItem, changedTile, makePriority(changedTile, playerTile)});
+        {
+            if (mPushed[agentHalfExtents].insert(changedTile).second)
+                mJobs.push(Job {agentHalfExtents, navMeshCacheItem, changedTile,
+                                makePriority(changedTile, playerTile)});
+        }
 
         mHasJob.notify_all();
     }
@@ -109,13 +115,14 @@ namespace DetourNavigator
         setFirstStart(start);
 
         const auto recastMesh = mRecastMeshManager.get().getMesh(job.mChangedTile);
+        const auto playerTile = getPlayerTile();
 
-        const auto status = updateNavMesh(job.mAgentHalfExtents, recastMesh.get(), job.mChangedTile, mSettings,
-            *job.mNavMeshCacheItem);
+        const auto status = updateNavMesh(job.mAgentHalfExtents, recastMesh.get(), job.mChangedTile, playerTile,
+            mSettings, *job.mNavMeshCacheItem);
 
         const auto finish = std::chrono::steady_clock::now();
 
-        writeDebugFiles(job, *recastMesh);
+        writeDebugFiles(job, recastMesh.get());
 
         using FloatMs = std::chrono::duration<float, std::milli>;
 
@@ -139,10 +146,14 @@ namespace DetourNavigator
         log("got ", mJobs.size(), " jobs");
         const auto job = mJobs.top();
         mJobs.pop();
+        const auto pushed = mPushed.find(job.mAgentHalfExtents);
+        pushed->second.erase(job.mChangedTile);
+        if (pushed->second.empty())
+            mPushed.erase(pushed);
         return job;
     }
 
-    void AsyncNavMeshUpdater::writeDebugFiles(const Job& job, const RecastMesh& recastMesh) const
+    void AsyncNavMeshUpdater::writeDebugFiles(const Job& job, const RecastMesh* recastMesh) const
     {
         std::string revision;
         std::string recastMeshRevision;
@@ -157,8 +168,8 @@ namespace DetourNavigator
             if (mSettings.get().mEnableNavMeshFileNameRevision)
                 navMeshRevision = revision;
         }
-        if (mSettings.get().mEnableWriteRecastMeshToFile)
-            writeToFile(recastMesh, mSettings.get().mRecastMeshPathPrefix, recastMeshRevision);
+        if (recastMesh && mSettings.get().mEnableWriteRecastMeshToFile)
+            writeToFile(*recastMesh, mSettings.get().mRecastMeshPathPrefix, recastMeshRevision);
         if (mSettings.get().mEnableWriteNavMeshToFile)
             writeToFile(*job.mNavMeshCacheItem->mValue.lock(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
     }
@@ -174,5 +185,17 @@ namespace DetourNavigator
         const std::lock_guard<std::mutex> lock(mFirstStartMutex);
         if (!mFirstStart)
             mFirstStart = value;
+    }
+
+    TilePosition AsyncNavMeshUpdater::getPlayerTile()
+    {
+        const std::lock_guard<std::mutex> lock(mPlayerTileMutex);
+        return mPlayerTile;
+    }
+
+    void AsyncNavMeshUpdater::setPlayerTile(const TilePosition& value)
+    {
+        const std::lock_guard<std::mutex> lock(mPlayerTileMutex);
+        mPlayerTile = value;
     }
 }

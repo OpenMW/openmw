@@ -56,17 +56,45 @@ namespace DetourNavigator
 
     void NavMeshManager::update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents)
     {
+        playerPosition *= mSettings.mRecastScaleFactor;
+        std::swap(playerPosition.y(), playerPosition.z());
+        const auto playerTile = getTilePosition(mSettings, playerPosition);
+        if (mLastRecastMeshManagerRevision >= mRecastMeshManager.getRevision() && mPlayerTile
+                && *mPlayerTile == playerTile)
+            return;
+        mLastRecastMeshManagerRevision = mRecastMeshManager.getRevision();
+        mPlayerTile = playerTile;
+        std::set<TilePosition> tilesToPost;
         const auto& cached = getCached(agentHalfExtents);
         const auto changedTiles = mChangedTiles.find(agentHalfExtents);
-        if (changedTiles != mChangedTiles.end())
         {
-            playerPosition *= mSettings.mRecastScaleFactor;
-            std::swap(playerPosition.y(), playerPosition.z());
-            mAsyncNavMeshUpdater.post(agentHalfExtents, cached, getTilePosition(mSettings, playerPosition),
-                                      changedTiles->second);
-            log("cache update posted for agent=", agentHalfExtents, " changedTiles=", changedTiles->second.size());
-            mChangedTiles.erase(changedTiles);
+            const auto locked = cached->mValue.lock();
+            if (changedTiles != mChangedTiles.end())
+            {
+                for (const auto& tile : changedTiles->second)
+                    if (locked->getTileAt(tile.x(), tile.y(), 0))
+                        tilesToPost.insert(tile);
+                for (const auto& tile : tilesToPost)
+                    changedTiles->second.erase(tile);
+                if (changedTiles->second.empty())
+                    mChangedTiles.erase(changedTiles);
+            }
+            const auto maxTiles = locked->getParams()->maxTiles;
+            mRecastMeshManager.forEachTilePosition([&] (const TilePosition& tile)
+            {
+                if (tilesToPost.count(tile))
+                    return;
+                const auto shouldAdd = shouldAddTile(tile, playerTile, maxTiles);
+                const auto presentInNavMesh = bool(locked->getTileAt(tile.x(), tile.y(), 0));
+                if ((shouldAdd && !presentInNavMesh) || (!shouldAdd && presentInNavMesh))
+                    tilesToPost.insert(tile);
+            });
         }
+        mAsyncNavMeshUpdater.post(agentHalfExtents, cached, playerTile, tilesToPost);
+        log("cache update posted for agent=", agentHalfExtents,
+            " playerTile=", *mPlayerTile,
+            " recastMeshManagerRevision=", mLastRecastMeshManagerRevision,
+            " changedTiles=", changedTiles->second.size());
     }
 
     void NavMeshManager::wait()

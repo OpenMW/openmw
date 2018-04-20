@@ -390,6 +390,10 @@ namespace MWWorld
 
     void Scene::playerMoved(const osg::Vec3f &pos)
     {
+        const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
+        const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        navigator->update(player.getRefData().getPosition().asVec3());
+
         if (!mCurrentCell || !mCurrentCell->isExterior())
             return;
 
