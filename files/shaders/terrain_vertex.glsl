@@ -6,9 +6,9 @@ varying float depth;
 #define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
-centroid varying vec4 lighting;
+varying vec4 lighting;
 #else
-centroid varying vec4 passColor;
+varying vec4 passColor;
 #endif
 varying vec3 passViewPos;
 varying vec3 passNormal;
