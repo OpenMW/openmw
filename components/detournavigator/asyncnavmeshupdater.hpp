@@ -10,8 +10,8 @@
 #include <boost/optional.hpp>
 
 #include <atomic>
+#include <chrono>
 #include <condition_variable>
-#include <map>
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -58,6 +58,8 @@ namespace DetourNavigator
         Jobs mJobs;
         std::mutex mRecastMeshMutex;
         std::shared_ptr<RecastMesh> mRecastMesh;
+        std::mutex mFirstStartMutex;
+        boost::optional<std::chrono::steady_clock::time_point> mFirstStart;
         std::thread mThread;
 
         void process() throw();
@@ -73,6 +75,10 @@ namespace DetourNavigator
         std::shared_ptr<RecastMesh> getRecastMesh();
 
         void setRecastMesh(const std::shared_ptr<RecastMesh>& value);
+
+        std::chrono::steady_clock::time_point getFirstStart();
+
+        void setFirstStart(const std::chrono::steady_clock::time_point& value);
     };
 }
 

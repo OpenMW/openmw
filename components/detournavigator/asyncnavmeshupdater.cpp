@@ -105,6 +105,8 @@ namespace DetourNavigator
 
         const auto start = std::chrono::steady_clock::now();
 
+        setFirstStart(start);
+
         const auto recastMesh = getRecastMesh();
 
         const auto status = updateNavMesh(job.mAgentHalfExtents, *recastMesh, job.mChangedTile, mSettings,
@@ -117,7 +119,8 @@ namespace DetourNavigator
         using FloatMs = std::chrono::duration<float, std::milli>;
 
         log("cache updated for agent=", job.mAgentHalfExtents, " status=", status,
-            " time=", std::chrono::duration_cast<FloatMs>(finish - start).count(), "ms");
+            " time=", std::chrono::duration_cast<FloatMs>(finish - start).count(), "ms",
+            " total_time=", std::chrono::duration_cast<FloatMs>(finish - getFirstStart()).count(), "ms");
     }
 
     boost::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getNextJob()
@@ -167,5 +170,18 @@ namespace DetourNavigator
     {
         const std::lock_guard<std::mutex> lock(mRecastMeshMutex);
         mRecastMesh = value;
+    }
+
+    std::chrono::steady_clock::time_point AsyncNavMeshUpdater::getFirstStart()
+    {
+        const std::lock_guard<std::mutex> lock(mFirstStartMutex);
+        return *mFirstStart;
+    }
+
+    void AsyncNavMeshUpdater::setFirstStart(const std::chrono::steady_clock::time_point& value)
+    {
+        const std::lock_guard<std::mutex> lock(mFirstStartMutex);
+        if (!mFirstStart)
+            mFirstStart = value;
     }
 }
