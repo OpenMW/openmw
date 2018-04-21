@@ -36,22 +36,13 @@ namespace CSVRender
             QHBoxLayout *layoutSliderSize;
     };
 
-    class TextureBrushButton : public QPushButton
-    {
-        Q_OBJECT
-
-        public:
-            TextureBrushButton (const QIcon& icon, const QString& tooltip = "",
-                QWidget *parent = 0);
-    };
-
     class TextureBrushWindow : public QFrame
     {
         Q_OBJECT
 
         public:
             TextureBrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent = 0);
-            void configureButtonInitialSettings(TextureBrushButton *button);
+            void configureButtonInitialSettings(QPushButton *button);
 
         private:
             QLabel *selectedBrush;

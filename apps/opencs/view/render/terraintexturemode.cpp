@@ -19,6 +19,7 @@
 #include <QVBoxLayout>
 #include <QDragEnterEvent>
 #include <QDrag>
+#include <QString>
 
 #include "../widget/modebutton.hpp"
 #include "../widget/scenetoolbar.hpp"
@@ -51,11 +52,6 @@ CSVRender::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *p
     setLayout(layoutSliderSize);
 }
 
-CSVRender::TextureBrushButton::TextureBrushButton (const QIcon & icon, const QString & text, QWidget * parent)
-    : QPushButton(icon, text, parent)
-{
-}
-
 CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent)
     : QFrame(parent, Qt::Popup), mWorldspaceWidget (worldspaceWidget)
 {
@@ -67,10 +63,10 @@ CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWi
     const std::string& iconCircle = ":scenetoolbar/brush-circle";
     const std::string& iconCustom = ":scenetoolbar/brush-custom";
 
-    TextureBrushButton *buttonPoint = new TextureBrushButton(QIcon (QPixmap (iconPoint.c_str())), "", this);
-    TextureBrushButton *buttonSquare = new TextureBrushButton(QIcon (QPixmap (iconSquare.c_str())), "", this);
-    TextureBrushButton *buttonCircle = new TextureBrushButton(QIcon (QPixmap (iconCircle.c_str())), "", this);
-    TextureBrushButton *buttonCustom = new TextureBrushButton(QIcon (QPixmap (iconCustom.c_str())), "", this);
+    QPushButton *buttonPoint = new QPushButton(QIcon (QPixmap (QString::fromStdString(iconPoint))), "", this);
+    QPushButton *buttonSquare = new QPushButton(QIcon (QPixmap (QString::fromStdString(iconSquare))), "", this);
+    QPushButton *buttonCircle = new QPushButton(QIcon (QPixmap (QString::fromStdString(iconCircle))), "", this);
+    QPushButton *buttonCustom = new QPushButton(QIcon (QPixmap (QString::fromStdString(iconCustom))), "", this);
 
     QVBoxLayout *layoutMain = new QVBoxLayout;
     layoutMain->setSpacing(0);
@@ -111,7 +107,7 @@ CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWi
     connect(parent, SIGNAL(passBrushTexture(std::string)), this, SLOT(getBrushTexture(std::string)));
 }
 
-void CSVRender::TextureBrushWindow::configureButtonInitialSettings(TextureBrushButton *button)
+void CSVRender::TextureBrushWindow::configureButtonInitialSettings(QPushButton *button)
 {
   button->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
   button->setContentsMargins (QMargins (0, 0, 0, 0));
