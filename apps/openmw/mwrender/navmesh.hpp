@@ -16,7 +16,7 @@ namespace MWRender
     class NavMesh
     {
     public:
-        NavMesh(const osg::ref_ptr<osg::Group>& root);
+        NavMesh(const osg::ref_ptr<osg::Group>& root, bool enabled);
         ~NavMesh();
 
         bool toggle();

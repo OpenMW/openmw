@@ -234,7 +234,7 @@ namespace MWRender
 
         mRootNode->addChild(mSceneRoot);
 
-        mNavMesh.reset(new NavMesh(mRootNode));
+        mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable render", "Navigator")));
         mPathgrid.reset(new Pathgrid(mRootNode));
 
         mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));

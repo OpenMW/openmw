@@ -7,9 +7,9 @@
 
 namespace MWRender
 {
-    NavMesh::NavMesh(const osg::ref_ptr<osg::Group>& root)
+    NavMesh::NavMesh(const osg::ref_ptr<osg::Group>& root, bool enabled)
         : mRootNode(root)
-        , mEnabled(false)
+        , mEnabled(enabled)
         , mRevision(0)
     {
     }
