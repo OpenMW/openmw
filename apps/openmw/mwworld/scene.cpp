@@ -266,7 +266,8 @@ namespace MWWorld
         ListAndResetObjectsVisitor visitor;
 
         (*iter)->forEach<ListAndResetObjectsVisitor>(visitor);
-        const auto playerHalfExtents = mPhysics->getHalfExtents(MWBase::Environment::get().getWorld()->getPlayerPtr());
+        const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const auto playerHalfExtents = mPhysics->getHalfExtents(player);
         for (const auto& ptr : visitor.mObjects)
         {
             if (const auto object = mPhysics->getObject(ptr))
@@ -292,6 +293,8 @@ namespace MWWorld
                 mPhysics->removeHeightField(cellX, cellY);
             }
         }
+
+        navigator->update(player.getRefData().getPosition().asVec3());
 
         MWBase::Environment::get().getMechanicsManager()->drop (*iter);
 
@@ -689,6 +692,9 @@ namespace MWWorld
         {
             addObject(ptr, *mPhysics, mRendering);
             MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
+            const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
+            const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            navigator->update(player.getRefData().getPosition().asVec3());
         }
         catch (std::exception& e)
         {
@@ -702,7 +708,11 @@ namespace MWWorld
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         if (const auto object = mPhysics->getObject(ptr))
+        {
             navigator->removeObject(reinterpret_cast<std::size_t>(object));
+            const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            navigator->update(player.getRefData().getPosition().asVec3());
+        }
         else if (const auto actor = mPhysics->getActor(ptr))
         {
             const auto playerHalfExtents = mPhysics->getHalfExtents(MWBase::Environment::get().getWorld()->getPlayerPtr());
