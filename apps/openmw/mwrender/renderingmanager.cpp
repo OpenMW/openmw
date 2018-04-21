@@ -597,8 +597,8 @@ namespace MWRender
         {
             try
             {
-                mNavMesh->update(navMeshes.begin()->second->mValue, navMeshes.begin()->second->mNavMeshRevision,
-                                 mNavigator.getSettings());
+                mNavMesh->update(navMeshes.begin()->second->mValue, navMeshes.begin()->second->mGeneration,
+                                 navMeshes.begin()->second->mNavMeshRevision, mNavigator.getSettings());
             }
             catch (const std::exception& e)
             {

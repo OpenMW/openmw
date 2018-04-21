@@ -45,7 +45,7 @@ namespace DetourNavigator
         if (cached != mCache.end())
             return;
         mCache.insert(std::make_pair(agentHalfExtents,
-            std::make_shared<NavMeshCacheItem>(makeEmptyNavMesh(mSettings), mRevision))
+            std::make_shared<NavMeshCacheItem>(makeEmptyNavMesh(mSettings), ++mGenerationCounter, mRevision))
         );
         log("cache add for agent=", agentHalfExtents);
     }

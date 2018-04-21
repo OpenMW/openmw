@@ -10,6 +10,7 @@ namespace MWRender
     NavMesh::NavMesh(const osg::ref_ptr<osg::Group>& root, bool enabled)
         : mRootNode(root)
         , mEnabled(enabled)
+        , mGeneration(0)
         , mRevision(0)
     {
     }
@@ -30,12 +31,13 @@ namespace MWRender
         return mEnabled;
     }
 
-    void NavMesh::update(const DetourNavigator::SharedNavMesh& sharedNavMesh, std::size_t revision,
-                         const DetourNavigator::Settings& settings)
+    void NavMesh::update(const DetourNavigator::SharedNavMesh& sharedNavMesh, std::size_t generation,
+                         std::size_t revision, const DetourNavigator::Settings& settings)
     {
-        if (!mEnabled || mRevision >= revision)
+        if (!mEnabled || (mGeneration >= generation && mRevision >= revision))
             return;
 
+        mGeneration = generation;
         mRevision = revision;
         if (mGroup)
             mRootNode->removeChild(mGroup);

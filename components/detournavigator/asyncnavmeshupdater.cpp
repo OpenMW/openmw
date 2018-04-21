@@ -119,6 +119,8 @@ namespace DetourNavigator
         using FloatMs = std::chrono::duration<float, std::milli>;
 
         log("cache updated for agent=", job.mAgentHalfExtents, " status=", status,
+            " generation=", job.mNavMeshCacheItem->mGeneration,
+            " revision=", job.mNavMeshCacheItem->mNavMeshRevision,
             " time=", std::chrono::duration_cast<FloatMs>(finish - start).count(), "ms",
             " total_time=", std::chrono::duration_cast<FloatMs>(finish - getFirstStart()).count(), "ms");
     }
