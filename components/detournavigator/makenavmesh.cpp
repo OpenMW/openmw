@@ -231,6 +231,18 @@ namespace
                 ++mNavMeshRevision;
         }
     };
+
+    UpdateNavMeshStatus makeUpdateNavMeshStatus(bool removed, bool add)
+    {
+        if (removed && add)
+            return UpdateNavMeshStatus::replaced;
+        else if (removed)
+            return UpdateNavMeshStatus::removed;
+        else if (add)
+            return UpdateNavMeshStatus::add;
+        else
+            return UpdateNavMeshStatus::ignore;
+    }
 }
 
 namespace DetourNavigator
@@ -257,7 +269,7 @@ namespace DetourNavigator
         return navMesh;
     }
 
-    void updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
+    UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
         const TilePosition& changedTile, const Settings& settings, NavMeshCacheItem& navMeshCacheItem)
     {
         log("update NavMesh with mutiple tiles:",
@@ -277,12 +289,14 @@ namespace DetourNavigator
         const auto y = changedTile.y();
 
         AutoIncrementRevision incRev(navMeshCacheItem.mNavMeshRevision);
+        bool removed = false;
 
         {
             const auto locked = navMesh.lock();
-            incRev.mNavMeshChanged = dtStatusSucceed(locked->removeTile(locked->getTileRefAt(x, y, 0),
-                                                                        nullptr, nullptr));
+            removed = dtStatusSucceed(locked->removeTile(locked->getTileRefAt(x, y, 0), nullptr, nullptr));
         }
+
+        incRev.mNavMeshChanged = removed;
 
         const auto& boundsMin = recastMesh.getBoundsMin();
         const auto& boundsMax = recastMesh.getBoundsMax();
@@ -290,7 +304,7 @@ namespace DetourNavigator
         if (boundsMin == boundsMax)
         {
             log("ignore add tile: recastMesh is empty");
-            return;
+            return makeUpdateNavMeshStatus(removed, false);
         }
 
         const auto tileBounds = makeTileBounds(settings, changedTile);
@@ -303,7 +317,7 @@ namespace DetourNavigator
         if (!navMeshData.mValue)
         {
             log("ignore add tile: NavMeshData is null");
-            return;
+            return makeUpdateNavMeshStatus(removed, false);
         }
 
         const auto status = navMesh.lock()->addTile(navMeshData.mValue.get(), navMeshData.mSize,
@@ -313,5 +327,7 @@ namespace DetourNavigator
         else
             log("failed to add tile with status=", WriteDtStatus {status});
         navMeshData.mValue.release();
-}
+
+        return makeUpdateNavMeshStatus(removed, dtStatusSucceed(status));
+    }
 }

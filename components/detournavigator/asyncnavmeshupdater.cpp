@@ -24,6 +24,22 @@ namespace
 
 namespace DetourNavigator
 {
+    static std::ostream& operator <<(std::ostream& stream, UpdateNavMeshStatus value)
+    {
+        switch (value)
+        {
+            case UpdateNavMeshStatus::ignore:
+                return stream << "ignore";
+            case UpdateNavMeshStatus::removed:
+                return stream << "removed";
+            case UpdateNavMeshStatus::add:
+                return stream << "add";
+            case UpdateNavMeshStatus::replaced:
+                return stream << "replaced";
+        }
+        return stream << "unknown";
+    }
+
     AsyncNavMeshUpdater::AsyncNavMeshUpdater(const Settings& settings)
         : mSettings(std::cref(settings))
         , mShouldStop()
@@ -91,7 +107,8 @@ namespace DetourNavigator
 
         const auto recastMesh = getRecastMesh();
 
-        updateNavMesh(job.mAgentHalfExtents, *recastMesh, job.mChangedTile, mSettings, *job.mNavMeshCacheItem);
+        const auto status = updateNavMesh(job.mAgentHalfExtents, *recastMesh, job.mChangedTile, mSettings,
+            *job.mNavMeshCacheItem);
 
         const auto finish = std::chrono::steady_clock::now();
 
@@ -99,7 +116,7 @@ namespace DetourNavigator
 
         using FloatMs = std::chrono::duration<float, std::milli>;
 
-        log("cache updated for agent=", job.mAgentHalfExtents,
+        log("cache updated for agent=", job.mAgentHalfExtents, " status=", status,
             " time=", std::chrono::duration_cast<FloatMs>(finish - start).count(), "ms");
     }
 

@@ -20,9 +20,17 @@ namespace DetourNavigator
 
     using NavMeshPtr = std::shared_ptr<dtNavMesh>;
 
+    enum class UpdateNavMeshStatus
+    {
+        ignore,
+        removed,
+        add,
+        replaced
+    };
+
     NavMeshPtr makeEmptyNavMesh(const Settings& settings);
 
-    void updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
+    UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
             const TilePosition& changedTile, const Settings& settings, NavMeshCacheItem& navMeshCacheItem);
 }
 
