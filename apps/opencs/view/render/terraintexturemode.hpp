@@ -113,7 +113,7 @@ namespace CSVRender
 
             void editTerrainTextureGrid (const WorldspaceHitResult& hit);
             void pushEditToCommand (CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,
-                CSMWorld::IdTable& landTable, CSMWorld::IdTable& ltexTable, std::string cellId);
+                CSMWorld::IdTable& landTable, std::string cellId);
 
         private:
             TextureBrushWindow *textureBrushWindow;

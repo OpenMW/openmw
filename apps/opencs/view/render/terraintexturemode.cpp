@@ -196,8 +196,21 @@ void CSVRender::TerrainTextureMode::secondarySelectPressed(const WorldspaceHitRe
 bool CSVRender::TerrainTextureMode::primaryEditStartDrag (const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
+
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
+
+    mCellId = getWorldspaceWidget().getCellId (hit.worldPos);
+
+    QUndoStack& undoStack = document.getUndoStack();
+    undoStack.beginMacro ("Edit texture records");
+    undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, mCellId));
     editTerrainTextureGrid(hit);
-    return false;
+
+    return true;
 }
 
 bool CSVRender::TerrainTextureMode::secondaryEditStartDrag (const QPoint& pos)
@@ -215,10 +228,16 @@ bool CSVRender::TerrainTextureMode::secondarySelectStartDrag (const QPoint& pos)
     return false;
 }
 
-void CSVRender::TerrainTextureMode::drag (const QPoint& pos, int diffX, int diffY, double speedFactor) {
+void CSVRender::TerrainTextureMode::drag (const QPoint& pos, int diffX, int diffY, double speedFactor)
+{
+    WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
+    editTerrainTextureGrid(hit);
 }
 
 void CSVRender::TerrainTextureMode::dragCompleted(const QPoint& pos) {
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    QUndoStack& undoStack = document.getUndoStack();
+    undoStack.endMacro();
 }
 
 void CSVRender::TerrainTextureMode::dragAborted() {
@@ -266,8 +285,6 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
-    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
-        *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
 
     int textureColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandTexturesIndex);
 
@@ -284,7 +301,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
         CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(mCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
         CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
         mNew[yHitInCell*landTextureSize+xHitInCell] = brushInt;
-        pushEditToCommand(mNew, document, landTable, ltexTable, mCellId);
+        pushEditToCommand(mNew, document, landTable, mCellId);
     }
 
     if (mBrushShape == 1)
@@ -329,7 +346,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                         }
                     }
                 }
-                pushEditToCommand(mNew, document, landTable, ltexTable, iteratedCellId);
+                pushEditToCommand(mNew, document, landTable, iteratedCellId);
             }
         }
     }
@@ -386,7 +403,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                         }
                     }
                 }
-                pushEditToCommand(mNew, document, landTable, ltexTable, iteratedCellId);
+                pushEditToCommand(mNew, document, landTable, iteratedCellId);
             }
         }
     }
@@ -398,16 +415,15 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
 }
 
 void CSVRender::TerrainTextureMode::pushEditToCommand(CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,
-    CSMWorld::IdTable& landTable, CSMWorld::IdTable& ltexTable, std::string cellId)
+    CSMWorld::IdTable& landTable, std::string cellId)
 {
     QVariant changedLand;
     changedLand.setValue(newLandGrid);
 
-    CSMWorld::CommandMacro macro (document.getUndoStack(), "Edit texture records");
     QModelIndex index(landTable.getModelIndex (cellId, landTable.findColumnIndex (CSMWorld::Columns::ColumnId_LandTexturesIndex)));
 
-    macro.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, cellId));
-    macro.push (new CSMWorld::ModifyCommand(landTable, index, changedLand));
+    QUndoStack& undoStack = document.getUndoStack();
+    undoStack.push (new CSMWorld::ModifyCommand(landTable, index, changedLand));
 }
 
 void CSVRender::TerrainTextureMode::dragMoveEvent (QDragMoveEvent *event) {
