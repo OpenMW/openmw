@@ -286,7 +286,7 @@ void CharacterController::refreshHitRecoilAnims()
         }
         else if (recovery)
         {
-            std::string anim = isSwimming ? chooseRandomGroup("swimhit") : chooseRandomGroup("hit");
+            std::string anim = chooseRandomGroup("swimhit");
             if (isSwimming && mAnimation->hasAnimation(anim))
             {
                 mHitState = CharState_SwimHit;
