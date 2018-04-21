@@ -44,27 +44,18 @@ namespace CSVRender
             QHBoxLayout *layoutSliderSize;
     };
 
-    class TextureBrushButton : public QPushButton
-    {
-        Q_OBJECT
-
-        public:
-            TextureBrushButton (const QIcon& icon, const QString& tooltip = "",
-                QWidget *parent = 0);
-    };
-
     class TextureBrushWindow : public QFrame
     {
         Q_OBJECT
 
         public:
             TextureBrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent = 0);
-            void configureButtonInitialSettings(TextureBrushButton *button);
+            void configureButtonInitialSettings(QPushButton *button);
 
-            TextureBrushButton *buttonPoint = new TextureBrushButton(QIcon (QPixmap (":scenetoolbar/brush-point")), "", this);
-            TextureBrushButton *buttonSquare = new TextureBrushButton(QIcon (QPixmap (":scenetoolbar/brush-square")), "", this);
-            TextureBrushButton *buttonCircle = new TextureBrushButton(QIcon (QPixmap (":scenetoolbar/brush-circle")), "", this);
-            TextureBrushButton *buttonCustom = new TextureBrushButton(QIcon (QPixmap (":scenetoolbar/brush-custom")), "", this);
+            QPushButton *buttonPoint = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-point")), "", this);
+            QPushButton *buttonSquare = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-square")), "", this);
+            QPushButton *buttonCircle = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-circle")), "", this);
+            QPushButton *buttonCustom = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-custom")), "", this);
 
         private:
             QLabel *selectedBrush;

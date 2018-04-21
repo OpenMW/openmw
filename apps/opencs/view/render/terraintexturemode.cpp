@@ -62,11 +62,6 @@ CSVRender::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *p
     setLayout(layoutSliderSize);
 }
 
-CSVRender::TextureBrushButton::TextureBrushButton (const QIcon & icon, const QString & text, QWidget * parent)
-    : QPushButton(icon, text, parent)
-{
-}
-
 CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent)
     : QFrame(parent, Qt::Popup),
     mWorldspaceWidget (worldspaceWidget),
@@ -74,7 +69,7 @@ CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWi
     mBrushShape(0)
 {
     mBrushTextureLabel = "Brush: " + mBrushTexture;
-    selectedBrush = new QLabel(QString::fromUtf8(mBrushTextureLabel.c_str()), this);
+    selectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel), this);
 
     QVBoxLayout *layoutMain = new QVBoxLayout;
     layoutMain->setSpacing(0);
@@ -122,7 +117,7 @@ CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWi
     connect(parent, SIGNAL(passBrushTexture(std::string)), this, SLOT(setBrushTexture(std::string)));
 }
 
-void CSVRender::TextureBrushWindow::configureButtonInitialSettings(TextureBrushButton *button)
+void CSVRender::TextureBrushWindow::configureButtonInitialSettings(QPushButton *button)
 {
   button->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
   button->setContentsMargins (QMargins (0, 0, 0, 0));
@@ -136,7 +131,7 @@ void CSVRender::TextureBrushWindow::setBrushTexture(std::string brushTexture)
 {
     mBrushTexture = brushTexture;
     mBrushTextureLabel = "Brush:" + mBrushTexture;
-    selectedBrush->setText(QString::fromUtf8(mBrushTextureLabel.c_str()));
+    selectedBrush->setText(QString::fromStdString(mBrushTextureLabel));
 }
 
 void CSVRender::TextureBrushWindow::setBrushSize(int brushSize)
