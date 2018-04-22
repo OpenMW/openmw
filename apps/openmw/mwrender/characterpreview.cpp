@@ -13,6 +13,7 @@
 #include <osgUtil/IntersectionVisitor>
 #include <osgUtil/LineSegmentIntersector>
 
+#include <components/fallback/fallback.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -161,11 +162,18 @@ namespace MWRender
         lightmodel->setAmbientIntensity(osg::Vec4(0.25, 0.25, 0.25, 1.0));
         stateset->setAttributeAndModes(lightmodel, osg::StateAttribute::ON);
 
-        /// \todo Read the fallback values from INIImporter (Inventory:Directional*) ?
         osg::ref_ptr<osg::Light> light = new osg::Light;
+        const Fallback::Map* fallback = MWBase::Environment::get().getWorld()->getFallback();
+        float diffuseR = fallback->getFallbackFloat("Inventory_DirectionalDiffuseR");
+        float diffuseG = fallback->getFallbackFloat("Inventory_DirectionalDiffuseG");
+        float diffuseB = fallback->getFallbackFloat("Inventory_DirectionalDiffuseB");
+        float ambientR = fallback->getFallbackFloat("Inventory_DirectionalAmbientR");
+        float ambientG = fallback->getFallbackFloat("Inventory_DirectionalAmbientG");
+        float ambientB = fallback->getFallbackFloat("Inventory_DirectionalAmbientB");
+        /// \todo Read DirectionalRotationX/DirectionalRotationY
         light->setPosition(osg::Vec4(-0.3,0.3,0.7, 0.0));
-        light->setDiffuse(osg::Vec4(1,1,1,1));
-        light->setAmbient(osg::Vec4(0,0,0,1));
+        light->setDiffuse(osg::Vec4(diffuseR,diffuseG,diffuseB,1));
+        light->setAmbient(osg::Vec4(ambientR,ambientG,ambientB,1));
         light->setSpecular(osg::Vec4(0,0,0,0));
         light->setLightNum(0);
         light->setConstantAttenuation(1.f);
