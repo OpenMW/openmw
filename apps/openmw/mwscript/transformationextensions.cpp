@@ -530,7 +530,8 @@ namespace MWScript
                         // create item
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, 1);
 
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), actor, actor.getCell(), direction, distance);
+                        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(), actor, actor.getCell(), direction, distance);
+                        MWBase::Environment::get().getWorld()->scaleObject(ptr, actor.getCellRef().getScale());
                     }
                 }
         };
