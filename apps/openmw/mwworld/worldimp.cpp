@@ -2313,6 +2313,7 @@ namespace MWWorld
         {
             // Remove the old CharacterController
             MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
+            mNavigator->removeAgent(mPhysics->getHalfExtents(getPlayerPtr()));
             mPhysics->remove(getPlayerPtr());
             mRendering->removePlayer(getPlayerPtr());
 
@@ -2347,6 +2348,8 @@ namespace MWWorld
         mPhysics->addActor(getPlayerPtr(), model);
 
         applyLoopingParticles(player);
+
+        mNavigator->addAgent(mPhysics->getHalfExtents(getPlayerPtr()));
     }
 
     World::RestPermitted World::canRest () const

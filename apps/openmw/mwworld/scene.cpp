@@ -93,7 +93,8 @@ namespace
         else if (const auto actor = physics.getActor(ptr))
         {
             const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
-            navigator->addAgent(actor->getHalfExtents());
+            const auto playerHalfExtents = physics.getHalfExtents(MWBase::Environment::get().getWorld()->getPlayerPtr());
+            navigator->addAgent(playerHalfExtents);
         }
 
         if (useAnim)
@@ -260,12 +261,13 @@ namespace MWWorld
         ListAndResetObjectsVisitor visitor;
 
         (*iter)->forEach<ListAndResetObjectsVisitor>(visitor);
+        const auto playerHalfExtents = mPhysics->getHalfExtents(MWBase::Environment::get().getWorld()->getPlayerPtr());
         for (const auto& ptr : visitor.mObjects)
         {
             if (const auto object = mPhysics->getObject(ptr))
                 navigator->removeObject(reinterpret_cast<std::size_t>(object));
             else if (const auto actor = mPhysics->getActor(ptr))
-                navigator->removeAgent(actor->getHalfExtents());
+                navigator->removeAgent(playerHalfExtents);
             mPhysics->remove(ptr);
         }
 
@@ -676,7 +678,10 @@ namespace MWWorld
         if (const auto object = mPhysics->getObject(ptr))
             navigator->removeObject(reinterpret_cast<std::size_t>(object));
         else if (const auto actor = mPhysics->getActor(ptr))
-            navigator->removeAgent(actor->getHalfExtents());
+        {
+            const auto playerHalfExtents = mPhysics->getHalfExtents(MWBase::Environment::get().getWorld()->getPlayerPtr());
+            navigator->removeAgent(playerHalfExtents);
+        }
         mPhysics->remove(ptr);
         mRendering.removeObject (ptr);
         if (ptr.getClass().isActor())
