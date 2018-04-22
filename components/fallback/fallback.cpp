@@ -1,7 +1,5 @@
 #include "fallback.hpp"
 
-#include <iostream>
-
 #include <boost/lexical_cast.hpp>
 
 
@@ -19,7 +17,6 @@ namespace Fallback
         std::map<std::string,std::string>::const_iterator it;
         if((it = mFallbackMap.find(fall)) == mFallbackMap.end())
         {
-            std::cerr << "Warning: fallback value " << fall << " not found." << std::endl;
             return "";
         }
         return it->second;
