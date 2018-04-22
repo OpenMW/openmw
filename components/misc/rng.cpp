@@ -25,7 +25,7 @@ namespace Misc
 
     int Rng::rollDice(int max)
     {
-        return std::uniform_int_distribution<int>(0, max - 1)(generator);
+        return max > 0 ? std::uniform_int_distribution<int>(0, max - 1)(generator) : 0;
     }
 
 }
