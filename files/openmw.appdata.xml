@@ -3,10 +3,10 @@
 Copyright 2015 Alexandre Moine <nobrakal@gmail.com>
 Copyright 2017 Bret Curtis <psi29a@gmail.com>
 -->
-<component>
+<component type="desktop">
  <id>org.openmw.desktop</id>
  <metadata_license>CC0-1.0</metadata_license>
- <project_license> GPL-3.0 and MIT</project_license>
+ <project_license>GPL-3.0 and MIT</project_license>
  <name>OpenMW</name>
  <summary>Unofficial open source engine re-implementation of the game Morrowind</summary>
  <description>
@@ -20,7 +20,6 @@ Copyright 2017 Bret Curtis <psi29a@gmail.com>
   You will still need the original game data to play OpenMW.
   </p>
  </description>
-
  <screenshots>
   <screenshot type="default">
    <image>https://wiki.openmw.org/images/b/b2/Openmw_0.11.1_launcher_1.png</image>
@@ -34,7 +33,18 @@ Copyright 2017 Bret Curtis <psi29a@gmail.com>
    <image>https://wiki.openmw.org/images/5/5b/Screenshot_Vivec_seen_from_Ebonheart_0.35.png</image>
    <caption>Vivec seen from Ebonheart on OpenMW</caption>
   </screenshot>
+  <screenshot>
+   <image>http://wiki.openmw.org/images/a/a3/0.40_Screenshot-Balmora_3.png</image>
+   <caption>Balmora at morning on OpenMW</caption>
+  </screenshot>
  </screenshots>
+ <categories>
+  <category>Game</category>
+  <category>RolePlaying</category>
+ </categories>
+ <releases>
+  <release version="0.43.0" date="2017-12-05"/>
+ </releases>
  <url type="homepage">https://openmw.org</url>
  <url type="bugtracker">https://bugs.openmw.org/</url>
  <url type="faq">https://openmw.org/faq/</url>
