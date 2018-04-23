@@ -1,5 +1,6 @@
 #include "characterpreview.hpp"
 
+#include <cmath>
 #include <iostream>
 
 #include <osg/Material>
@@ -170,8 +171,12 @@ namespace MWRender
         float ambientR = fallback->getFallbackFloat("Inventory_DirectionalAmbientR");
         float ambientG = fallback->getFallbackFloat("Inventory_DirectionalAmbientG");
         float ambientB = fallback->getFallbackFloat("Inventory_DirectionalAmbientB");
-        /// \todo Read DirectionalRotationX/DirectionalRotationY
-        light->setPosition(osg::Vec4(-0.3,0.3,0.7, 0.0));
+        float azimuth = osg::DegreesToRadians(180.f - fallback->getFallbackFloat("Inventory_DirectionalRotationX"));
+        float altitude = osg::DegreesToRadians(fallback->getFallbackFloat("Inventory_DirectionalRotationY"));
+        float positionX = std::cos(azimuth) * std::sin(altitude);
+        float positionY = std::sin(azimuth) * std::sin(altitude);
+        float positionZ = std::cos(altitude);
+        light->setPosition(osg::Vec4(positionX,positionY,positionZ, 0.0));
         light->setDiffuse(osg::Vec4(diffuseR,diffuseG,diffuseB,1));
         light->setAmbient(osg::Vec4(ambientR,ambientG,ambientB,1));
         light->setSpecular(osg::Vec4(0,0,0,0));
