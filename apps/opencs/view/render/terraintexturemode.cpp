@@ -174,7 +174,19 @@ void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
 
 void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult& hit) // Apply changes here
 {
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
+
+    mCellId = getWorldspaceWidget().getCellId (hit.worldPos);
+
+    QUndoStack& undoStack = document.getUndoStack();
+    undoStack.beginMacro ("Edit texture records");
+    undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, mCellId));
     editTerrainTextureGrid(hit);
+    undoStack.endMacro();
 }
 
 void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResult& hit)
@@ -331,10 +343,10 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                         {
                             int distanceX(0);
                             int distanceY(0);
-                            if (i_cell < cellX) distanceX = xHitInCell + landTextureSize - i;
-                            if (j_cell < cellY) distanceY = yHitInCell + landTextureSize - j;
-                            if (i_cell > cellX) distanceX = -xHitInCell + landTextureSize + i - 1;
-                            if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize + j - 1;
+                            if (i_cell < cellX) distanceX = xHitInCell + landTextureSize * abs(i_cell-cellX) - i;
+                            if (j_cell < cellY) distanceY = yHitInCell + landTextureSize * abs(j_cell-cellY) - j;
+                            if (i_cell > cellX) distanceX = -xHitInCell + landTextureSize * abs(i_cell-cellX) + i;
+                            if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
                             if (i_cell == cellX) distanceX = abs(i-xHitInCell);
                             if (j_cell == cellY) distanceY = abs(j-yHitInCell);
                             if (distanceX < r && distanceY < r) mNew[j*landTextureSize+i] = brushInt;
@@ -374,10 +386,10 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                         {
                             int distanceX(0);
                             int distanceY(0);
-                            if (i_cell < cellX) distanceX = xHitInCell + landTextureSize - i;
-                            if (j_cell < cellY) distanceY = yHitInCell + landTextureSize - j;
-                            if (i_cell > cellX) distanceX = -xHitInCell + landTextureSize + i - 1;
-                            if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize + j - 1;
+                            if (i_cell < cellX) distanceX = xHitInCell + landTextureSize * abs(i_cell-cellX) - i;
+                            if (j_cell < cellY) distanceY = yHitInCell + landTextureSize * abs(j_cell-cellY) - j;
+                            if (i_cell > cellX) distanceX = -xHitInCell + landTextureSize* abs(i_cell-cellX) + i;
+                            if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
                             if (i_cell == cellX) distanceX = abs(i-xHitInCell);
                             if (j_cell == cellY) distanceY = abs(j-yHitInCell);
                             distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
@@ -387,10 +399,10 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                         {
                             int distanceX(0);
                             int distanceY(0);
-                            if (i_cell < cellX) distanceX = xHitInCell + landTextureSize - i;
-                            if (j_cell < cellY) distanceY = yHitInCell + landTextureSize - j;
-                            if (i_cell > cellX) distanceX = -xHitInCell + landTextureSize + i - 1;
-                            if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize + j - 1;
+                            if (i_cell < cellX) distanceX = xHitInCell + landTextureSize * abs(i_cell-cellX) - i;
+                            if (j_cell < cellY) distanceY = yHitInCell + landTextureSize * abs(j_cell-cellY) - j;
+                            if (i_cell > cellX) distanceX = -xHitInCell + landTextureSize * abs(i_cell-cellX) + i;
+                            if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
                             if (i_cell == cellX) distanceX = abs(i-xHitInCell);
                             if (j_cell == cellY) distanceY = abs(j-yHitInCell);
                             distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
