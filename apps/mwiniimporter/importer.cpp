@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <components/misc/stringops.hpp>
+#include <components/esm/esmreader.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -824,33 +825,73 @@ void MwIniImporter::importArchives(multistrmap &cfg, const multistrmap &ini) con
     }
 }
 
-void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, const boost::filesystem::path& iniFilename) const {
-    std::vector<std::pair<std::time_t, std::string> > contentFiles;
+void MwIniImporter::dependencySortStep(std::string& el, MwIniImporter::deplist& src, std::vector<std::string>& ret)
+{
+    auto it = std::find_if(src.begin(), src.end(), [&el](std::pair< std::string, std::vector<std::string> >& o)
+    {
+        return o.first == el;
+    });
+    if (it != src.end())
+    {
+        auto o = std::move(*it);
+        src.erase(it);
+        for (auto name : o.second)
+        {
+            MwIniImporter::dependencySortStep(name, src, ret);
+        }
+        ret.push_back(std::move(o.first));
+    }
+}
+
+std::vector<std::string> MwIniImporter::dependencySort(MwIniImporter::deplist src)
+{
+    std::vector<std::string> ret;
+    while (!src.empty())
+    {
+        MwIniImporter::dependencySortStep(src.begin()->first, src, ret);
+    }
+    return ret;
+}
+
+std::vector<std::string>::iterator MwIniImporter::findString(std::vector<std::string>& v, const std::string& s)
+{
+    return std::find_if(v.begin(), v.end(), [&s](const std::string& str)
+    {
+        return Misc::StringUtils::ciEqual(str, s);
+    });
+}
+
+void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, const boost::filesystem::path& iniFilename) const
+{
+    std::vector<std::pair<std::time_t, boost::filesystem::path>> contentFiles;
     std::string baseGameFile("Game Files:GameFile");
     std::string gameFile("");
     std::time_t defaultTime = 0;
+    ToUTF8::Utf8Encoder encoder(mEncoding);
 
     // assume the Game Files are all in a "Data Files" directory under the directory holding Morrowind.ini
     const boost::filesystem::path gameFilesDir(iniFilename.parent_path() /= "Data Files");
 
     multistrmap::const_iterator it = ini.begin();
-    for(int i=0; it != ini.end(); i++) {
+    for (int i=0; it != ini.end(); i++)
+    {
         gameFile = baseGameFile;
         gameFile.append(this->numberToString(i));
 
         it = ini.find(gameFile);
-        if(it == ini.end()) {
+        if(it == ini.end())
             break;
-        }
 
-        for(std::vector<std::string>::const_iterator entry = it->second.begin(); entry!=it->second.end(); ++entry) {
+        for(std::vector<std::string>::const_iterator entry = it->second.begin(); entry!=it->second.end(); ++entry)
+        {
             std::string filetype(entry->substr(entry->length()-3));
             Misc::StringUtils::lowerCaseInPlace(filetype);
 
-            if(filetype.compare("esm") == 0 || filetype.compare("esp") == 0) {
+            if(filetype.compare("esm") == 0 || filetype.compare("esp") == 0)
+            {
                 boost::filesystem::path filepath(gameFilesDir);
                 filepath /= *entry;
-                contentFiles.push_back(std::make_pair(lastWriteTime(filepath, defaultTime), *entry));
+                contentFiles.push_back({lastWriteTime(filepath, defaultTime), filepath});
             }
         }
     }
@@ -858,11 +899,46 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
     cfg.erase("content");
     cfg.insert( std::make_pair("content", std::vector<std::string>() ) );
 
-    // this will sort files by time order first, then alphabetical (maybe), I suspect non ASCII filenames will be stuffed.
+    // sort by timestamp
     sort(contentFiles.begin(), contentFiles.end());
-    for(std::vector<std::pair<std::time_t, std::string> >::const_iterator iter=contentFiles.begin(); iter!=contentFiles.end(); ++iter) {
-        cfg["content"].push_back(iter->second);
+
+    MwIniImporter::deplist unsortedFiles;
+
+    ESM::ESMReader reader;
+    reader.setEncoder(&encoder);
+    for (auto& file : contentFiles)
+    {
+        reader.open(file.second.string());
+        std::vector<std::string> deps;
+        for (auto& depFile : reader.getGameFiles())
+        {
+            deps.push_back(depFile.name);
+        }
+        unsortedFiles.emplace_back(boost::filesystem::path(reader.getName()).filename().string(), deps);
+        reader.close();
     }
+
+    auto sortedFiles = dependencySort(unsortedFiles);
+
+    // hard-coded dependency Morrowind - Tribunal - Bloodmoon
+    if(findString(sortedFiles, "Morrowind.esm") != sortedFiles.end())
+    {
+        auto foundTribunal  = findString(sortedFiles, "Tribunal.esm");
+        auto foundBloodmoon = findString(sortedFiles, "Bloodmoon.esm");
+
+        if (foundBloodmoon != sortedFiles.end() && foundTribunal != sortedFiles.end())
+        {
+            size_t dstBloodmoon = std::distance(sortedFiles.begin(), foundBloodmoon);
+            size_t dstTribunal  = std::distance(sortedFiles.begin(), foundTribunal);
+            if (dstBloodmoon < dstTribunal)
+                dstTribunal++;
+            sortedFiles.insert(foundBloodmoon, *foundTribunal);
+            sortedFiles.erase(sortedFiles.begin() + dstTribunal);
+        }
+    }
+
+    for (auto& file : sortedFiles)
+        cfg["content"].push_back(file);
 }
 
 void MwIniImporter::writeToFile(std::ostream &out, const multistrmap &cfg) {
