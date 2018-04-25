@@ -103,6 +103,10 @@ To be able to merge PRs, commit priviledges are required. If you do not have the
 
 The person to merge the PR may either use github's Merge button or if using the command line, use the ```--no-ff``` flag (so a merge commit is created, just like with Github's merge button) and include the pull request number in the commit description.
 
+Dealing with regressions
+========================
+
+The master branch should always be in a working state that is not worse than the previous release in any way. If a regression is found, the first and foremost priority should be to get the regression fixed quickly, either by reverting the change that caused it or finding a better solution. Please avoid leaving the project in the 'broken' state for an extensive period of time while proper solutions are found. If the solution takes more than a day or so then it is usually better to revert the offending change first and reapply it later when fixed.
 
 Other resources
 ===============
