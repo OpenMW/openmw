@@ -144,6 +144,15 @@ bool CSVWidget::SceneToolMode::event(QEvent* event)
     return SceneTool::event(event);
 }
 
+void CSVWidget::SceneToolMode::dragEnterEvent (QDragEnterEvent *event)
+{
+    emit passEvent(event);
+}
+void CSVWidget::SceneToolMode::dropEvent (QDropEvent *event)
+{
+    emit passEvent(event);
+}
+
 void CSVWidget::SceneToolMode::selected()
 {
     std::map<ModeButton *, std::string>::iterator iter =

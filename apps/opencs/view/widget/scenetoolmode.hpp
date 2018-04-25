@@ -47,6 +47,8 @@ namespace CSVWidget
         protected:
 
             bool event(QEvent* event);
+            void dragEnterEvent (QDragEnterEvent *event);
+            void dropEvent (QDropEvent *event);
 
         public:
 
@@ -72,6 +74,8 @@ namespace CSVWidget
         signals:
 
             void modeChanged (const std::string& id);
+            void passEvent (QDragEnterEvent *event);
+            void passEvent (QDropEvent *event);
 
         private slots:
 
