@@ -46,10 +46,11 @@ CSVRender::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *p
     brushSizeSlider = new QSlider(Qt::Horizontal);
     brushSizeSlider->setTickPosition(QSlider::TicksBothSides);
     brushSizeSlider->setTickInterval(10);
+    brushSizeSlider->setRange(1, 50);
     brushSizeSlider->setSingleStep(1);
 
     brushSizeSpinBox = new QSpinBox;
-    brushSizeSpinBox->setRange(1, 100);
+    brushSizeSpinBox->setRange(1, 50);
     brushSizeSpinBox->setSingleStep(1);
 
     layoutSliderSize = new QHBoxLayout;
@@ -158,6 +159,7 @@ CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceW
 {
     connect(parent, SIGNAL(passEvent(QDragEnterEvent*)), this, SLOT(handleDragEnterEvent(QDragEnterEvent*)));
     connect(parent, SIGNAL(passEvent(QDropEvent*)), this, SLOT(handleDropEvent(QDropEvent*)));
+    connect(parent, SIGNAL(passEvent(QMouseEvent*)), this, SLOT(handleMouseEvent(QMouseEvent*)));
     connect(textureBrushWindow, SIGNAL(passBrushSize(int)), this, SLOT(setBrushSize(int)));
     connect(textureBrushWindow, SIGNAL(passBrushShape(int)), this, SLOT(setBrushShape(int)));
 }
@@ -191,9 +193,6 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
 
 void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResult& hit)
 {
-      QPoint position = QCursor::pos();
-      textureBrushWindow->move (position);
-      textureBrushWindow->show();
 }
 
 void CSVRender::TerrainTextureMode::secondarySelectPressed(const WorldspaceHitResult& hit)
@@ -272,6 +271,20 @@ void CSVRender::TerrainTextureMode::handleDropEvent (QDropEvent *event) {
           emit passBrushTexture(mBrushTexture);
       }
   }
+}
+
+void CSVRender::TerrainTextureMode::handleMouseEvent (QMouseEvent *event)
+{
+    if (event->button()==Qt::MidButton)
+    {
+        QPoint position = QCursor::pos();
+        textureBrushWindow->move (position);
+        textureBrushWindow->show();
+    }
+    if (event->button()==Qt::LeftButton) PushButton::mouseReleaseEvent (event);
+}
+
+void CSVRender::TerrainTextureMode::handlePrimarySelectOnModeButton () {
 }
 
 void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitResult& hit)

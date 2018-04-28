@@ -31,6 +31,8 @@ namespace CSVWidget
 
 namespace CSVRender
 {
+
+    /// \brief Layout-box for some brush button settings
     class BrushSizeControls : public QGroupBox
     {
         Q_OBJECT
@@ -44,6 +46,7 @@ namespace CSVRender
             QHBoxLayout *layoutSliderSize;
     };
 
+    /// \brief Brush settings window
     class TextureBrushWindow : public QFrame
     {
         Q_OBJECT
@@ -82,27 +85,41 @@ namespace CSVRender
 
         public:
 
+            /// \brief Editmode for terrain texture grid
             TerrainTextureMode(WorldspaceWidget*, QWidget* parent = nullptr);
 
+            /// \brief Create single command for one-click texture editing
             void primaryEditPressed (const WorldspaceHitResult& hit);
 
+            /// \brief Open brush settings window
             void primarySelectPressed(const WorldspaceHitResult&);
+
             void secondarySelectPressed(const WorldspaceHitResult&);
 
             void activate(CSVWidget::SceneToolbar*);
             void deactivate(CSVWidget::SceneToolbar*);
 
+            /// \brief Start texture editing command macro
             virtual bool primaryEditStartDrag (const QPoint& pos);
+
             virtual bool secondaryEditStartDrag (const QPoint& pos);
             virtual bool primarySelectStartDrag (const QPoint& pos);
             virtual bool secondarySelectStartDrag (const QPoint& pos);
+
+            /// \brief Handle texture edit behavior during dragging
             virtual void drag (const QPoint& pos, int diffX, int diffY, double speedFactor);
+
+            /// \brief End texture editing command macro
             virtual void dragCompleted(const QPoint& pos);
+
             virtual void dragAborted();
             virtual void dragWheel (int diff, double speedFactor);
             virtual void dragMoveEvent (QDragMoveEvent *event);
 
+            /// \brief Handle brush mechanics, maths regarding worldspace hit etc.
             void editTerrainTextureGrid (const WorldspaceHitResult& hit);
+
+            /// \brief Push texture edits to command macro
             void pushEditToCommand (CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,
                 CSMWorld::IdTable& landTable, std::string cellId);
 
@@ -123,6 +140,8 @@ namespace CSVRender
         public slots:
             void handleDragEnterEvent (QDragEnterEvent *event);
             void handleDropEvent(QDropEvent *event);
+            void handleMouseEvent (QMouseEvent *event);
+            void handlePrimarySelectOnModeButton();
             void setBrushSize(int brushSize);
             void setBrushShape(int brushShape);
 
