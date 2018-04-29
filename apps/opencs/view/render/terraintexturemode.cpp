@@ -271,6 +271,16 @@ void CSVRender::TerrainTextureMode::handleDropEvent (QDropEvent *event) {
           emit passBrushTexture(mBrushTexture);
       }
   }
+  if (mime->holdsType (CSMWorld::UniversalId::Type_Texture))
+  {
+      const std::vector<CSMWorld::UniversalId> ids = mime->getData();
+
+      for (const CSMWorld::UniversalId& uid : ids)
+      {
+          std::string textureFileName = uid.toString();
+          createTexture(textureFileName);
+      }
+  }
 }
 
 void CSVRender::TerrainTextureMode::handleMouseEvent (QMouseEvent *event)
@@ -444,6 +454,48 @@ void CSVRender::TerrainTextureMode::pushEditToCommand(CSMWorld::LandTexturesColu
 
     QUndoStack& undoStack = document.getUndoStack();
     undoStack.push (new CSMWorld::ModifyCommand(landTable, index, changedLand));
+}
+
+void CSVRender::TerrainTextureMode::createTexture(std::string textureFileName)
+{
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+
+    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
+
+    QUndoStack& undoStack = document.getUndoStack();
+
+    std::string newId;
+
+    int counter=0;
+    bool freeIndexFound = false;
+    do {
+        const size_t maxCounter = std::numeric_limits<uint16_t>::max() - 1;
+        try
+        {
+            newId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
+            if (ltexTable.getRecord(newId).isDeleted() == 0) counter = (counter + 1) % maxCounter;
+        } catch (const std::exception& e)
+        {
+            newId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
+            freeIndexFound = true;
+        }
+    } while (freeIndexFound == false);
+
+    std::size_t idlocation = textureFileName.find("Texture: ");
+    textureFileName = textureFileName.substr (idlocation + 9);
+
+    QVariant textureNameVariant;
+
+    QVariant textureFileNameVariant;
+    textureFileNameVariant.setValue(QString::fromStdString(textureFileName));
+
+    undoStack.beginMacro ("Add land texture record");
+
+    undoStack.push (new CSMWorld::CreateCommand (ltexTable, newId));
+    QModelIndex index(ltexTable.getModelIndex (newId, ltexTable.findColumnIndex (CSMWorld::Columns::ColumnId_Texture)));
+    undoStack.push (new CSMWorld::ModifyCommand(ltexTable, index, textureFileNameVariant));
+    undoStack.endMacro();
 }
 
 void CSVRender::TerrainTextureMode::dragMoveEvent (QDragMoveEvent *event) {

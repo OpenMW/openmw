@@ -123,6 +123,9 @@ namespace CSVRender
             void pushEditToCommand (CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,
                 CSMWorld::IdTable& landTable, std::string cellId);
 
+            /// \brief Create new land texture record from texture asset
+            void createTexture(std::string textureFileName);
+
         private:
             TextureBrushWindow *textureBrushWindow;
             std::string mCellId;
