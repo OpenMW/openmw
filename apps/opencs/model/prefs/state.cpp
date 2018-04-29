@@ -222,6 +222,14 @@ void CSMPrefs::State::declare()
     EnumValues insertOutsideVisibleCell;
     insertOutsideVisibleCell.add (showAndInsert).add (dontInsert).add (insertAnyway);
 
+    EnumValue createAndLandEdit ("Create cell and land, then edit");
+    EnumValue showAndLandEdit ("Show cell and edit");
+    EnumValue dontLandEdit ("Discard");
+    EnumValues landeditOutsideCell;
+    landeditOutsideCell.add (createAndLandEdit).add (dontLandEdit);
+    EnumValues landeditOutsideVisibleCell;
+    landeditOutsideVisibleCell.add (showAndLandEdit).add (dontLandEdit);
+
     declareCategory ("Scene Drops");
     declareInt ("distance", "Drop Distance", 50).
         setTooltip ("If an instance drop can not be placed against another object at the "
@@ -230,6 +238,10 @@ void CSMPrefs::State::declare()
         addValues (insertOutsideCell);
     declareEnum ("outside-visible-drop", "Handling drops outside of visible cells", showAndInsert).
         addValues (insertOutsideVisibleCell);
+    declareEnum ("outside-landedit", "Handling land edit outside of cells", createAndLandEdit).
+        addValues (landeditOutsideCell);
+    declareEnum ("outside-visible-landedit", "Handling land edit outside of visible cells", showAndLandEdit).
+        addValues (landeditOutsideVisibleCell);
 
     declareCategory ("Key Bindings");
 

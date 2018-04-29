@@ -22,11 +22,13 @@
 #include "../widget/scenetoolbar.hpp"
 
 #include "../../model/doc/document.hpp"
+#include "../../model/prefs/state.hpp"
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/commandmacro.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/world/idtree.hpp"
 #include "../../model/world/land.hpp"
 #include "../../model/world/landtexture.hpp"
 #include "../../model/world/resourcetable.hpp"
@@ -186,8 +188,11 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
 
     QUndoStack& undoStack = document.getUndoStack();
     undoStack.beginMacro ("Edit texture records");
-    undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, mCellId));
-    editTerrainTextureGrid(hit);
+    if(allowLandTextureEditing(mCellId)==true)
+    {
+        undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, mCellId));
+        editTerrainTextureGrid(hit);
+    }
     undoStack.endMacro();
 }
 
@@ -213,8 +218,11 @@ bool CSVRender::TerrainTextureMode::primaryEditStartDrag (const QPoint& pos)
 
     QUndoStack& undoStack = document.getUndoStack();
     undoStack.beginMacro ("Edit texture records");
-    undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, mCellId));
-    editTerrainTextureGrid(hit);
+    if(allowLandTextureEditing(mCellId)==true)
+    {
+        undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, mCellId));
+        editTerrainTextureGrid(hit);
+    }
 
     return true;
 }
@@ -299,7 +307,12 @@ void CSVRender::TerrainTextureMode::handlePrimarySelectOnModeButton () {
 
 void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitResult& hit)
 {
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+
     mCellId = getWorldspaceWidget().getCellId (hit.worldPos);
+    if(allowLandTextureEditing(mCellId)==true) {}
 
     std::pair<CSMWorld::CellCoordinates, bool> cellCoordinates_pair = CSMWorld::CellCoordinates::fromId (mCellId);
 
@@ -321,12 +334,9 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
     }
 
     mCellId = "#" + std::to_string(cellX) + " " + std::to_string(cellY);
+    if(allowLandTextureEditing(mCellId)==true) {}
 
     std::string iteratedCellId;
-
-    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
-        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
 
     int textureColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandTexturesIndex);
 
@@ -342,8 +352,12 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
     {
         CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(mCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
         CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
-        mNew[yHitInCell*landTextureSize+xHitInCell] = brushInt;
-        pushEditToCommand(mNew, document, landTable, mCellId);
+
+        if(allowLandTextureEditing(mCellId)==true)
+        {
+            mNew[yHitInCell*landTextureSize+xHitInCell] = brushInt;
+            pushEditToCommand(mNew, document, landTable, mCellId);
+        }
     }
 
     if (mBrushShape == 1)
@@ -363,32 +377,35 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
             for(int j_cell = upperLeftCellY; j_cell <= lowerrightCellY; j_cell++)
             {
                 iteratedCellId = "#" + std::to_string(i_cell) + " " + std::to_string(j_cell);
-                CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(iteratedCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
-                CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
-                for(int i = 0; i < landTextureSize; i++)
+                if(allowLandTextureEditing(iteratedCellId)==true)
                 {
-                    for(int j = 0; j < landTextureSize; j++)
+                    CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(iteratedCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+                    CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
+                    for(int i = 0; i < landTextureSize; i++)
                     {
+                        for(int j = 0; j < landTextureSize; j++)
+                        {
 
-                        if (i_cell == cellX && j_cell == cellY && abs(i-xHitInCell) < r && abs(j-yHitInCell) < r)
-                        {
-                            mNew[j*landTextureSize+i] = brushInt;
-                        }
-                        else
-                        {
-                            int distanceX(0);
-                            int distanceY(0);
-                            if (i_cell < cellX) distanceX = xHitInCell + landTextureSize * abs(i_cell-cellX) - i;
-                            if (j_cell < cellY) distanceY = yHitInCell + landTextureSize * abs(j_cell-cellY) - j;
-                            if (i_cell > cellX) distanceX = -xHitInCell + landTextureSize * abs(i_cell-cellX) + i;
-                            if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
-                            if (i_cell == cellX) distanceX = abs(i-xHitInCell);
-                            if (j_cell == cellY) distanceY = abs(j-yHitInCell);
-                            if (distanceX < r && distanceY < r) mNew[j*landTextureSize+i] = brushInt;
+                           if (i_cell == cellX && j_cell == cellY && abs(i-xHitInCell) < r && abs(j-yHitInCell) < r)
+                            {
+                                mNew[j*landTextureSize+i] = brushInt;
+                            }
+                            else
+                            {
+                                int distanceX(0);
+                                int distanceY(0);
+                                if (i_cell < cellX) distanceX = xHitInCell + landTextureSize * abs(i_cell-cellX) - i;
+                                if (j_cell < cellY) distanceY = yHitInCell + landTextureSize * abs(j_cell-cellY) - j;
+                                if (i_cell > cellX) distanceX = -xHitInCell + landTextureSize * abs(i_cell-cellX) + i;
+                                if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
+                                if (i_cell == cellX) distanceX = abs(i-xHitInCell);
+                                if (j_cell == cellY) distanceY = abs(j-yHitInCell);
+                                if (distanceX < r && distanceY < r) mNew[j*landTextureSize+i] = brushInt;
+                            }
                         }
                     }
+                    pushEditToCommand(mNew, document, landTable, iteratedCellId);
                 }
-                pushEditToCommand(mNew, document, landTable, iteratedCellId);
             }
         }
     }
@@ -410,45 +427,49 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
             for(int j_cell = upperLeftCellY; j_cell <= lowerrightCellY; j_cell++)
             {
                 iteratedCellId = "#" + std::to_string(i_cell) + " " + std::to_string(j_cell);
-                CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(iteratedCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
-                CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
-                for(int i = 0; i < landTextureSize; i++)
+                if(allowLandTextureEditing(iteratedCellId)==true)
                 {
-                    for(int j = 0; j < landTextureSize; j++)
+                    CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(iteratedCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+                    CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
+                    for(int i = 0; i < landTextureSize; i++)
                     {
+                        for(int j = 0; j < landTextureSize; j++)
+                        {
 
-                        if (i_cell == cellX && j_cell == cellY && abs(i-xHitInCell) < r && abs(j-yHitInCell) < r)
-                        {
-                            int distanceX(0);
-                            int distanceY(0);
-                            if (i_cell < cellX) distanceX = xHitInCell + landTextureSize * abs(i_cell-cellX) - i;
-                            if (j_cell < cellY) distanceY = yHitInCell + landTextureSize * abs(j_cell-cellY) - j;
-                            if (i_cell > cellX) distanceX = -xHitInCell + landTextureSize* abs(i_cell-cellX) + i;
-                            if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
-                            if (i_cell == cellX) distanceX = abs(i-xHitInCell);
-                            if (j_cell == cellY) distanceY = abs(j-yHitInCell);
-                            distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
-                            if (distance < rf) mNew[j*landTextureSize+i] = brushInt;
-                        }
-                        else
-                        {
-                            int distanceX(0);
-                            int distanceY(0);
-                            if (i_cell < cellX) distanceX = xHitInCell + landTextureSize * abs(i_cell-cellX) - i;
-                            if (j_cell < cellY) distanceY = yHitInCell + landTextureSize * abs(j_cell-cellY) - j;
-                            if (i_cell > cellX) distanceX = -xHitInCell + landTextureSize * abs(i_cell-cellX) + i;
-                            if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
-                            if (i_cell == cellX) distanceX = abs(i-xHitInCell);
-                            if (j_cell == cellY) distanceY = abs(j-yHitInCell);
-                            distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
-                            if (distance < rf) mNew[j*landTextureSize+i] = brushInt;
+                            if (i_cell == cellX && j_cell == cellY && abs(i-xHitInCell) < r && abs(j-yHitInCell) < r)
+                            {
+                                int distanceX(0);
+                                int distanceY(0);
+                                if (i_cell < cellX) distanceX = xHitInCell + landTextureSize * abs(i_cell-cellX) - i;
+                                if (j_cell < cellY) distanceY = yHitInCell + landTextureSize * abs(j_cell-cellY) - j;
+                                if (i_cell > cellX) distanceX = -xHitInCell + landTextureSize* abs(i_cell-cellX) + i;
+                                if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
+                                if (i_cell == cellX) distanceX = abs(i-xHitInCell);
+                                if (j_cell == cellY) distanceY = abs(j-yHitInCell);
+                                distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
+                                if (distance < rf) mNew[j*landTextureSize+i] = brushInt;
+                            }
+                            else
+                            {
+                                int distanceX(0);
+                                int distanceY(0);
+                                if (i_cell < cellX) distanceX = xHitInCell + landTextureSize * abs(i_cell-cellX) - i;
+                                if (j_cell < cellY) distanceY = yHitInCell + landTextureSize * abs(j_cell-cellY) - j;
+                                if (i_cell > cellX) distanceX = -xHitInCell + landTextureSize * abs(i_cell-cellX) + i;
+                                if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
+                                if (i_cell == cellX) distanceX = abs(i-xHitInCell);
+                                if (j_cell == cellY) distanceY = abs(j-yHitInCell);
+                                distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
+                                if (distance < rf) mNew[j*landTextureSize+i] = brushInt;
+                            }
                         }
                     }
+                    pushEditToCommand(mNew, document, landTable, iteratedCellId);
                 }
-                pushEditToCommand(mNew, document, landTable, iteratedCellId);
             }
         }
     }
+
     if (mBrushShape == 3)
     {
       // Not implemented
@@ -508,6 +529,81 @@ void CSVRender::TerrainTextureMode::createTexture(std::string textureFileName)
     QModelIndex index(ltexTable.getModelIndex (newId, ltexTable.findColumnIndex (CSMWorld::Columns::ColumnId_Texture)));
     undoStack.push (new CSMWorld::ModifyCommand(ltexTable, index, textureFileNameVariant));
     undoStack.endMacro();
+}
+
+bool CSVRender::TerrainTextureMode::allowLandTextureEditing(std::string cellId)
+{
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+    CSMWorld::IdTree& cellTable = dynamic_cast<CSMWorld::IdTree&> (
+            *document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
+
+    bool noCell = document.getData().getCells().searchId (cellId)==-1;
+    bool noLand = document.getData().getLand().searchId (cellId)==-1;
+
+    if (noCell)
+    {
+        std::string mode = CSMPrefs::get()["Scene Drops"]["outside-landedit"].toString();
+
+        // target cell does not exist
+        if (mode=="Discard")
+            return false;
+
+        if (mode=="Create cell and land, then edit")
+        {
+            std::unique_ptr<CSMWorld::CreateCommand> createCommand (
+                new CSMWorld::CreateCommand (cellTable, cellId));
+            int parentIndex = cellTable.findColumnIndex (CSMWorld::Columns::ColumnId_Cell);
+            int index = cellTable.findNestedColumnIndex (parentIndex, CSMWorld::Columns::ColumnId_Interior);
+            createCommand->addNestedValue (parentIndex, index, false);
+            document.getUndoStack().push (createCommand.release());
+
+            if (CSVRender::PagedWorldspaceWidget *paged =
+                dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+            {
+                CSMWorld::CellSelection selection = paged->getCellSelection();
+                selection.add (CSMWorld::CellCoordinates::fromId (cellId).first);
+                paged->setCellSelection (selection);
+            }
+        }
+    }
+    else if (CSVRender::PagedWorldspaceWidget *paged =
+        dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+    {
+        CSMWorld::CellSelection selection = paged->getCellSelection();
+        if (!selection.has (CSMWorld::CellCoordinates::fromId (cellId).first))
+        {
+            // target cell exists, but is not shown
+            std::string mode =
+                CSMPrefs::get()["Scene Drops"]["outside-visible-landedit"].toString();
+
+            if (mode=="Discard")
+                return false;
+
+            if (mode=="Show cell and edit")
+            {
+                selection.add (CSMWorld::CellCoordinates::fromId (cellId).first);
+                paged->setCellSelection (selection);
+            }
+        }
+    }
+
+    if (noLand)
+    {
+        std::string mode = CSMPrefs::get()["Scene Drops"]["outside-landedit"].toString();
+
+        // target cell does not exist
+        if (mode=="Discard")
+            return false;
+
+        if (mode=="Create cell and land, then edit")
+        {
+            document.getUndoStack().push (new CSMWorld::CreateCommand (landTable, cellId));
+        }
+    }
+    
+    return true;
 }
 
 void CSVRender::TerrainTextureMode::dragMoveEvent (QDragMoveEvent *event) {

@@ -126,6 +126,9 @@ namespace CSVRender
             /// \brief Create new land texture record from texture asset
             void createTexture(std::string textureFileName);
 
+            /// \brief Create new cell and land if needed
+            bool allowLandTextureEditing(std::string textureFileName);
+
         private:
             TextureBrushWindow *textureBrushWindow;
             std::string mCellId;
