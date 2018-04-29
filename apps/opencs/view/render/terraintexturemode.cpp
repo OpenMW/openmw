@@ -307,8 +307,20 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
     int cellY = cellCoordinates_pair.first.getY();
 
     // The coordinates of hit in mCellId
-    int xHitInCell ((hit.worldPos.x() - (cellX* cellSize)) * landTextureSize / cellSize);
-    int yHitInCell ((hit.worldPos.y() - (cellY* cellSize)) * landTextureSize / cellSize);
+    int xHitInCell (float(((hit.worldPos.x() - (cellX* cellSize)) * landTextureSize / cellSize) - 0.5));
+    int yHitInCell (float(((hit.worldPos.y() - (cellY* cellSize)) * landTextureSize / cellSize) + 0.5));
+    if (xHitInCell < 0)
+    {
+        xHitInCell = xHitInCell + landTextureSize;
+        cellX = cellX - 1;
+    }
+    if (yHitInCell > 15)
+    {
+        yHitInCell = yHitInCell - landTextureSize;
+        cellY = cellY + 1;
+    }
+
+    mCellId = "#" + std::to_string(cellX) + " " + std::to_string(cellY);
 
     std::string iteratedCellId;
 
