@@ -99,6 +99,15 @@ public:
     void post(NIFFile *nif);
 };
 
+class NiLookAtController : public Controller
+{
+public:
+    NiKeyframeDataPtr data;
+
+    void read(NIFStream *nif);
+    void post(NIFFile *nif);
+};
+
 class NiUVController : public Controller
 {
 public:
