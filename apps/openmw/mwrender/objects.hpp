@@ -88,6 +88,8 @@ public:
     bool removeObject (const MWWorld::Ptr& ptr);
     ///< \return found?
 
+    void updateEffects(float duration);
+
     void removeCell(const MWWorld::CellStore* store);
 
     /// Updates containing cell for object rendering data

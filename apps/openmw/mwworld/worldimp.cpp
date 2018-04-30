@@ -1535,6 +1535,11 @@ namespace MWWorld
         }
     }
 
+    osg::ref_ptr<osg::Node> World::getInstance (const std::string& modelName)
+    {
+        return mRendering->getInstance(modelName);
+    }
+
     const ESM::Potion *World::createRecord (const ESM::Potion& record)
     {
         return mStore.insert(record);
@@ -3324,9 +3329,9 @@ namespace MWWorld
         mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
     }
 
-    void World::spawnEffect(const std::string &model, const std::string &textureOverride, const osg::Vec3f &worldPos)
+    void World::spawnEffect(const std::string &model, const std::string &textureOverride, const osg::Vec3f &worldPos, float scale, bool isMagicVFX)
     {
-        mRendering->spawnEffect(model, textureOverride, worldPos);
+        mRendering->spawnEffect(model, textureOverride, worldPos, scale, isMagicVFX);
     }
 
     void World::explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const Ptr& caster, const Ptr& ignore, ESM::RangeType rangeType,

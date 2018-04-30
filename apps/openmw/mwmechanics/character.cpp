@@ -833,6 +833,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         refreshCurrentAnims(mIdleState, mMovementState, mJumpState, true);
 
     mAnimation->runAnimation(0.f);
+    mAnimation->updateEffects(0.f);
 
     unpersistAnimationState();
 }
@@ -1997,6 +1998,13 @@ void CharacterController::update(float duration)
     }
 
     osg::Vec3f moved = mAnimation->runAnimation(mSkipAnim ? 0.f : duration);
+
+    // treat player specifically since he is not in rendering mObjects
+    if (mPtr == getPlayer())
+    {
+        mAnimation->updateEffects(mSkipAnim ? 0.f : duration);
+    }
+
     if(duration > 0.0f)
         moved /= duration;
     else
@@ -2192,6 +2200,7 @@ void CharacterController::forceStateUpdate()
     }
 
     mAnimation->runAnimation(0.f);
+    mAnimation->updateEffects(0.f);
 }
 
 CharacterController::KillResult CharacterController::kill()
