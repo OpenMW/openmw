@@ -577,6 +577,9 @@ namespace MWSound
         Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
         if(!sfx) return nullptr;
 
+        // Only one copy of given sound can be played at time, so stop previous copy
+        stopSound(soundId);
+
         Sound *sound = getSoundRef();
         sound->init(volume * sfx->mVolume, volumeFromType(type), pitch, mode|type|Play_2D);
         if(!mOutput->playSound(sound, sfx->mHandle, offset))
