@@ -749,6 +749,7 @@ void CharacterController::playRandomDeath(float startpoint)
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim)
     : mPtr(ptr)
+    , mWeapon(MWWorld::Ptr())
     , mAnimation(anim)
     , mIdleState(CharState_None)
     , mMovementState(CharState_None)
@@ -1156,17 +1157,26 @@ bool CharacterController::updateWeaponState()
 
     const bool isWerewolf = cls.isNpc() && cls.getNpcStats(mPtr).isWerewolf();
 
-    std::string soundid;
+    std::string upSoundId;
+    std::string downSoundId;
     if (mPtr.getClass().hasInventoryStore(mPtr))
     {
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
-        MWWorld::ConstContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
-        if(weapon != inv.end() && !(weaptype == WeapType_None && mWeaponType == WeapType_Spell))
-        {
-            soundid = (weaptype == WeapType_None) ?
-                                   weapon->getClass().getDownSoundId(*weapon) :
-                                   weapon->getClass().getUpSoundId(*weapon);
-        }
+        MWWorld::ContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
+        if(stats.getDrawState() == DrawState_Spell)
+            weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+
+        if(weapon != inv.end() && mWeaponType != WeapType_HandToHand && weaptype > WeapType_HandToHand && weaptype < WeapType_Spell)
+            upSoundId = weapon->getClass().getUpSoundId(*weapon);
+
+        if(weapon != inv.end() && mWeaponType > WeapType_HandToHand && mWeaponType < WeapType_Spell)
+            downSoundId = weapon->getClass().getDownSoundId(*weapon);
+
+        // weapon->HtH switch: weapon is empty already, so we need to take sound from previous weapon
+        if(weapon == inv.end() && !mWeapon.isEmpty() && weaptype == WeapType_HandToHand && mWeaponType != WeapType_Spell)
+            downSoundId = mWeapon.getClass().getDownSoundId(mWeapon);
+
+        mWeapon = weapon != inv.end() ? *weapon : MWWorld::Ptr();
     }
 
     MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
@@ -1181,34 +1191,51 @@ bool CharacterController::updateWeaponState()
     if(weaptype != mWeaponType && !isKnockedOut() &&
         !isKnockedDown() && !isRecovery())
     {
-        forcestateupdate = true;
-
-        mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaptype));
-
         std::string weapgroup;
-        if(weaptype == WeapType_None)
+        if ((!isWerewolf || mWeaponType != WeapType_Spell)
+            && mUpperBodyState != UpperCharState_UnEquipingWeap
+            && !isStillWeapon)
         {
-            if (!isWerewolf || mWeaponType != WeapType_Spell)
+            // Note: we do not disable unequipping animation automatically to avoid body desync
+            getWeaponGroup(mWeaponType, weapgroup);
+            mAnimation->play(weapgroup, priorityWeapon,
+                              MWRender::Animation::BlendMask_All, false,
+                              1.0f, "unequip start", "unequip stop", 0.0f, 0);
+            mUpperBodyState = UpperCharState_UnEquipingWeap;
+
+            if(!downSoundId.empty())
             {
-                getWeaponGroup(mWeaponType, weapgroup);
-                mAnimation->play(weapgroup, priorityWeapon,
-                                 MWRender::Animation::BlendMask_All, true,
-                                 1.0f, "unequip start", "unequip stop", 0.0f, 0);
-                mUpperBodyState = UpperCharState_UnEquipingWeap;
+                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                sndMgr->playSound3D(mPtr, downSoundId, 1.0f, 1.0f);
             }
         }
-        else
+
+        float complete;
+        bool animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
+        if (!animPlaying || complete >= 1.0f)
         {
+            mUpperBodyState = UpperCharState_Nothing;
+            forcestateupdate = true;
+            mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaptype));
+
             getWeaponGroup(weaptype, weapgroup);
             mAnimation->setWeaponGroup(weapgroup);
 
             if (!isStillWeapon)
             {
-                mAnimation->showWeapons(false);
-                mAnimation->play(weapgroup, priorityWeapon,
-                                 MWRender::Animation::BlendMask_All, true,
-                                 1.0f, "equip start", "equip stop", 0.0f, 0);
-                mUpperBodyState = UpperCharState_EquipingWeap;
+                if (weaptype == WeapType_None)
+                {
+                    // Disable current weapon animation manually
+                    mAnimation->disable(mCurrentWeapon);
+                }
+                else
+                {
+                    mAnimation->showWeapons(false);
+                    mAnimation->play(weapgroup, priorityWeapon,
+                                    MWRender::Animation::BlendMask_All, true,
+                                    1.0f, "equip start", "equip stop", 0.0f, 0);
+                    mUpperBodyState = UpperCharState_EquipingWeap;
+                }
             }
 
             if(isWerewolf)
@@ -1221,16 +1248,16 @@ bool CharacterController::updateWeaponState()
                     sndMgr->playSound3D(mPtr, sound->mId, 1.0f, 1.0f);
                 }
             }
-        }
 
-        if(!soundid.empty() && !isStillWeapon)
-        {
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            sndMgr->playSound3D(mPtr, soundid, 1.0f, 1.0f);
-        }
+            mWeaponType = weaptype;
+            getWeaponGroup(mWeaponType, mCurrentWeapon);
 
-        mWeaponType = weaptype;
-        getWeaponGroup(mWeaponType, mCurrentWeapon);
+            if(!upSoundId.empty() && !isStillWeapon)
+            {
+                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                sndMgr->playSound3D(mPtr, upSoundId, 1.0f, 1.0f);
+            }
+        }
     }
 
     if(isWerewolf)
