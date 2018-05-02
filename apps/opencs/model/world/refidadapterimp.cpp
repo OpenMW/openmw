@@ -1368,13 +1368,15 @@ QVariant CSMWorld::CreatureAttackRefIdAdapter::getNestedData (const RefIdColumn 
 
     const ESM::Creature& creature = record.get();
 
-    if (subRowIndex < 0 || subRowIndex > 2 || subColIndex < 0 || subColIndex > 2)
-        throw std::runtime_error ("index out of range");
-
     if (subColIndex == 0)
         return subRowIndex + 1;
     else if (subColIndex < 3) // 1 or 2
         return creature.mData.mAttack[(subRowIndex * 2) + (subColIndex - 1)];
+
+    if (subRowIndex < 0 || subRowIndex > 2 || subColIndex < 0 || subColIndex > 2)
+        throw std::runtime_error ("index out of range");
+    
+    return 0;
 }
 
 void CSMWorld::CreatureAttackRefIdAdapter::setNestedData (const RefIdColumn *column,
