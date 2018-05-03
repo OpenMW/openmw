@@ -261,7 +261,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mJournals.addColumn (new FixedRecordTypeColumn<ESM::Dialogue> (UniversalId::Type_Journal));
     mJournals.addColumn (new DialogueTypeColumn<ESM::Dialogue> (true));
 
-    mTopicInfos.addColumn (new StringIdColumn<Info> (true));
+    mTopicInfos.addColumn (new StringIdColumn<Info>);
     mTopicInfos.addColumn (new RecordStateColumn<Info>);
     mTopicInfos.addColumn (new FixedRecordTypeColumn<Info> (UniversalId::Type_TopicInfo));
     mTopicInfos.addColumn (new TopicColumn<Info> (false));
@@ -298,7 +298,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mTopicInfos.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_Value, ColumnBase::Display_Var));
 
-    mJournalInfos.addColumn (new StringIdColumn<Info> (true));
+    mJournalInfos.addColumn (new StringIdColumn<Info>);
     mJournalInfos.addColumn (new RecordStateColumn<Info>);
     mJournalInfos.addColumn (new FixedRecordTypeColumn<Info> (UniversalId::Type_JournalInfo));
     mJournalInfos.addColumn (new TopicColumn<Info> (true));
