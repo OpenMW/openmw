@@ -26,13 +26,23 @@ struct Static
     /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
     static std::string getRecordType() { return "Static"; }
 
-  std::string mId, mModel;
+    std::string mId, mModel;
 
-  void load(ESMReader &esm, bool &isDeleted);
-  void save(ESMWriter &esm, bool isDeleted = false) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).
+
+    Static(const std::string id, const std::string &model)
+    : mId(id)
+    , mModel(model)
+    {
+    }
+
+    Static()
+    {
+    }
 };
 }
 #endif

@@ -1053,6 +1053,34 @@ namespace MWWorld
         }
     }
 
+    template<>
+    void Store<ESM::Static>::setUp()
+    {
+        // Load default marker definitions, if game files do not have them for some reason
+        std::pair<std::string, std::string> markers[] = {
+            std::make_pair("divinemarker", "marker_divine.nif"),
+            std::make_pair("doormarker", "marker_arrow.nif"),
+            std::make_pair("northmarker", "marker_north.nif"),
+            std::make_pair("templemarker", "marker_temple.nif"),
+            std::make_pair("travelmarker", "marker_travel.nif")
+        };
+
+        for (const std::pair<std::string, std::string> marker : markers)
+        {
+            if (search(marker.first) == 0)
+            {
+                ESM::Static newMarker = ESM::Static(marker.first, marker.second);
+                mStatic.insert(std::make_pair(marker.first, newMarker));
+
+                std::map<std::string, ESM::Static>::iterator found = mStatic.find(marker.first);
+                if (found != mStatic.end())
+                {
+                    mShared.push_back(&found->second);
+                }
+            }
+        }
+    }
+
     template <>
     inline RecordId Store<ESM::Dialogue>::load(ESM::ESMReader &esm) {
         // The original letter case of a dialogue ID is saved, because it's printed
