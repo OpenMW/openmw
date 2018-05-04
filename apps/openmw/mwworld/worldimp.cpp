@@ -1332,8 +1332,6 @@ namespace MWWorld
         if (pos.z() < terrainHeight)
             pos.z() = terrainHeight;
 
-        pos.z() += 20; // place slightly above. will snap down to ground with code below
-
         if (force || !isFlying(ptr))
         {
             osg::Vec3f traced = mPhysics->traceDown(ptr, pos, 500);
@@ -2200,6 +2198,11 @@ namespace MWWorld
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
     {
         return mPhysics->isOnGround(ptr);
+    }
+
+    bool World::isIdle(const MWWorld::Ptr &ptr) const
+    {
+        return mPhysics->isIdle(ptr);
     }
 
     void World::togglePOV()

@@ -389,6 +389,7 @@ namespace MWBase
             virtual bool isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const = 0;
             virtual bool isWaterWalkingCastableOnTarget(const MWWorld::ConstPtr &target) const = 0;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
+            virtual bool isIdle(const MWWorld::Ptr &ptr) const = 0;
 
             virtual osg::Matrixf getActorHeadTransform(const MWWorld::ConstPtr& actor) const = 0;
 
