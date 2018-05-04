@@ -260,6 +260,8 @@ namespace SceneUtil {
         };
 
         osg::ref_ptr<DebugHUD>                  _debugHud;
+
+        osg::ref_ptr<osg::Geometry>             _frustumGeometry;
     };
 
 }

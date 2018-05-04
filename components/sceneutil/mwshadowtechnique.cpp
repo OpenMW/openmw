@@ -762,11 +762,43 @@ void MWShadowTechnique::disableShadows()
 void SceneUtil::MWShadowTechnique::enableDebugHUD()
 {
     _debugHud = new DebugHUD(getShadowedScene()->getShadowSettings()->getNumShadowMapsPerLight());
+    _frustumGeometry = new osg::Geometry();
+    _frustumGeometry->setCullingActive(false);
+
+    osg::ref_ptr<osg::DrawElementsUByte> frustumDrawElements = new osg::DrawElementsUByte(osg::PrimitiveSet::LINE_STRIP);
+    _frustumGeometry->addPrimitiveSet(frustumDrawElements);
+    frustumDrawElements->push_back(0);
+    frustumDrawElements->push_back(1);
+    frustumDrawElements->push_back(2);
+    frustumDrawElements->push_back(3);
+    frustumDrawElements->push_back(0);
+    frustumDrawElements->push_back(4);
+    frustumDrawElements->push_back(5);
+    frustumDrawElements->push_back(6);
+    frustumDrawElements->push_back(7);
+    frustumDrawElements->push_back(4);
+
+    frustumDrawElements = new osg::DrawElementsUByte(osg::PrimitiveSet::LINES);
+    _frustumGeometry->addPrimitiveSet(frustumDrawElements);
+    frustumDrawElements->push_back(1);
+    frustumDrawElements->push_back(5);
+    frustumDrawElements->push_back(2);
+    frustumDrawElements->push_back(6);
+    frustumDrawElements->push_back(3);
+    frustumDrawElements->push_back(7);
+
+    // Ensure this doesn't contribute to bounds calculation.
+    _frustumGeometry->setComputeBoundingBoxCallback(new osg::Drawable::ComputeBoundingBoxCallback());
+    _frustumGeometry->setComputeBoundingSphereCallback(new osg::Node::ComputeBoundingSphereCallback());
+
+    getShadowedScene()->addChild(_frustumGeometry);
 }
 
 void SceneUtil::MWShadowTechnique::disableDebugHUD()
 {
     _debugHud = nullptr;
+    getShadowedScene()->removeChild(_frustumGeometry);
+    _frustumGeometry = nullptr;
 }
 
 void SceneUtil::MWShadowTechnique::setSplitPointUniformLogarithmicRatio(double ratio)
@@ -887,6 +919,11 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
     //OSG_NOTICE<<"maxZFar "<<maxZFar<<std::endl;
 
     Frustum frustum(&cv, minZNear, maxZFar);
+    if (_frustumGeometry)
+    {
+        osg::ref_ptr<osg::Vec3dArray> frustumCorners = new osg::Vec3dArray(8, &frustum.corners[0]);
+        _frustumGeometry->setVertexArray(frustumCorners);
+    }
 
     double reducedNear, reducedFar;
     if (cv.getComputeNearFarMode() != osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR)
