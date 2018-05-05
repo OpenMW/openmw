@@ -239,9 +239,7 @@ void CSMTools::ReferenceableCheckStage::bookCheck(
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
 
     if (baseRecord.isDeleted())
-    {
         return;
-    }
 
     const ESM::Book& book = (dynamic_cast<const CSMWorld::Record<ESM::Book>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Book, book.mId);
@@ -260,9 +258,7 @@ void CSMTools::ReferenceableCheckStage::activatorCheck(
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
 
     if (baseRecord.isDeleted())
-    {
         return;
-    }
 
     const ESM::Activator& activator = (dynamic_cast<const CSMWorld::Record<ESM::Activator>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Activator, activator.mId);
@@ -283,9 +279,7 @@ void CSMTools::ReferenceableCheckStage::potionCheck(
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
 
     if (baseRecord.isDeleted())
-    {
         return;
-    }
 
     const ESM::Potion& potion = (dynamic_cast<const CSMWorld::Record<ESM::Potion>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Potion, potion.mId);
@@ -306,9 +300,7 @@ void CSMTools::ReferenceableCheckStage::apparatusCheck(
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
 
     if (baseRecord.isDeleted())
-    {
         return;
-    }
 
     const ESM::Apparatus& apparatus = (dynamic_cast<const CSMWorld::Record<ESM::Apparatus>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Apparatus, apparatus.mId);
@@ -329,9 +321,7 @@ void CSMTools::ReferenceableCheckStage::armorCheck(
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
 
     if (baseRecord.isDeleted())
-    {
         return;
-    }
 
     const ESM::Armor& armor = (dynamic_cast<const CSMWorld::Record<ESM::Armor>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Armor, armor.mId);
@@ -358,9 +348,7 @@ void CSMTools::ReferenceableCheckStage::clothingCheck(
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
 
     if (baseRecord.isDeleted())
-    {
         return;
-    }
 
     const ESM::Clothing& clothing = (dynamic_cast<const CSMWorld::Record<ESM::Clothing>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Clothing, clothing.mId);
@@ -378,9 +366,7 @@ void CSMTools::ReferenceableCheckStage::containerCheck(
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
 
     if (baseRecord.isDeleted())
-    {
         return;
-    }
 
     const ESM::Container& container = (dynamic_cast<const CSMWorld::Record<ESM::Container>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Container, container.mId);
@@ -512,9 +498,7 @@ void CSMTools::ReferenceableCheckStage::ingredientCheck(
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
 
     if (baseRecord.isDeleted())
-    {
         return;
-    }
 
     const ESM::Ingredient& ingredient = (dynamic_cast<const CSMWorld::Record<ESM::Ingredient>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Ingredient, ingredient.mId);
@@ -577,12 +561,7 @@ void CSMTools::ReferenceableCheckStage::lightCheck(
         messages.push_back (std::make_pair (id, light.mId + " has negative light radius"));
 
     if (light.mData.mFlags & ESM::Light::Carry)
-    {
         inventoryItemCheck<ESM::Light>(light, messages, id.toString());
-
-        if (light.mData.mTime == 0)
-            messages.push_back (std::make_pair (id, light.mId + " has zero duration"));
-    }
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Light>(light, messages, id.toString());
@@ -596,9 +575,7 @@ void CSMTools::ReferenceableCheckStage::lockpickCheck(
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
 
     if (baseRecord.isDeleted())
-    {
         return;
-    }
 
     const ESM::Lockpick& lockpick = (dynamic_cast<const CSMWorld::Record<ESM::Lockpick>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Lockpick, lockpick.mId);
@@ -619,9 +596,7 @@ void CSMTools::ReferenceableCheckStage::miscCheck(
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
 
     if (baseRecord.isDeleted())
-    {
         return;
-    }
 
     const ESM::Miscellaneous& miscellaneous = (dynamic_cast<const CSMWorld::Record<ESM::Miscellaneous>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Miscellaneous, miscellaneous.mId);
@@ -706,22 +681,14 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
         messages.push_back (std::make_pair (id, npc.mId + " has any empty name"));
 
     if (npc.mClass.empty())
-    {
-        messages.push_back (std::make_pair (id, npc.mId + " has any empty class"));
-    }
+        messages.push_back (std::make_pair (id, npc.mId + " has an empty class"));
     else if (mClasses.searchId (npc.mClass) == -1)
-    {
         messages.push_back (std::make_pair (id, npc.mId + " has invalid class"));
-    }
 
     if (npc.mRace.empty())
-    {
-        messages.push_back (std::make_pair (id, npc.mId + " has any empty race"));
-    }
+        messages.push_back (std::make_pair (id, npc.mId + " has an empty race"));
     else if (mRaces.searchId (npc.mRace) == -1)
-    {
         messages.push_back (std::make_pair (id, npc.mId + " has invalid race"));
-    }
 
     if (disposition < 0)
         messages.push_back (std::make_pair (id, npc.mId + " has negative disposition"));
@@ -823,7 +790,7 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(
         {
             //checking of health
             if (weapon.mData.mHealth <= 0)
-                messages.push_back (std::make_pair (id, weapon.mId + " has non-positivie health"));
+                messages.push_back (std::make_pair (id, weapon.mId + " has non-positive health"));
 
             if (weapon.mData.mReach < 0)
                 messages.push_back (std::make_pair (id, weapon.mId + " has negative reach"));
@@ -842,9 +809,7 @@ void CSMTools::ReferenceableCheckStage::probeCheck(
     const CSMWorld::RecordBase& baseRecord = records.getRecord(stage);
 
     if (baseRecord.isDeleted())
-    {
         return;
-    }
 
     const ESM::Probe& probe = (dynamic_cast<const CSMWorld::Record<ESM::Probe>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Probe, probe.mId);
