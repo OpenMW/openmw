@@ -66,7 +66,7 @@ namespace CSMWorld
             { ColumnId_SleepForbidden, "Sleep Forbidden" },
             { ColumnId_InteriorWater, "Interior Water" },
             { ColumnId_InteriorSky, "Interior Sky" },
-            { ColumnId_Model, "Model" },
+            { ColumnId_Model, "Model/Animation" },
             { ColumnId_Script, "Script" },
             { ColumnId_Icon, "Icon" },
             { ColumnId_Weight, "Weight" },
