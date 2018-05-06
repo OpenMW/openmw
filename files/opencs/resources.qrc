@@ -89,7 +89,7 @@
         <file alias="1st-person">camera-first-person.png</file>
         <file alias="free-camera">camera-free.png</file>
         <file alias="orbiting-camera">camera-orbit.png</file>
-        <file alias="play">scene-play.png</file>
+        <file alias="play">run-game.png</file>
         <file alias="scene-view-1">scene-view-instance.png</file>
         <file alias="scene-view-16">scene-view-terrain.png</file>
         <file alias="scene-view-4">scene-view-water.png</file>
