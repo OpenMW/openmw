@@ -66,10 +66,8 @@ TEST(EsmFixedString, struct_size)
 
 TEST(EsmFixedString, DISABLED_is_pod)
 {
-    /* TODO: enable in C++11
-     * ASSERT_TRUE(std::is_pod<ESM::NAME>::value);
-     * ASSERT_TRUE(std::is_pod<ESM::NAME32>::value);
-     * ASSERT_TRUE(std::is_pod<ESM::NAME64>::value);
-     * ASSERT_TRUE(std::is_pod<ESM::NAME256>::value);
-     */
+     ASSERT_TRUE(std::is_pod<ESM::NAME>::value);
+     ASSERT_TRUE(std::is_pod<ESM::NAME32>::value);
+     ASSERT_TRUE(std::is_pod<ESM::NAME64>::value);
+     ASSERT_TRUE(std::is_pod<ESM::NAME256>::value);
 }
