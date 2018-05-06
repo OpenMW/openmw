@@ -26,58 +26,11 @@
 
 namespace CSVWidget
 {
-    class SceneToolMode;
+    class SceneToolTextureBrush;
 }
 
 namespace CSVRender
 {
-
-    /// \brief Layout-box for some brush button settings
-    class BrushSizeControls : public QGroupBox
-    {
-        Q_OBJECT
-
-        public:
-            BrushSizeControls(const QString &title, QWidget *parent);
-            QSlider *brushSizeSlider;
-
-        private:
-            QSpinBox *brushSizeSpinBox;
-            QHBoxLayout *layoutSliderSize;
-    };
-
-    /// \brief Brush settings window
-    class TextureBrushWindow : public QFrame
-    {
-        Q_OBJECT
-
-        public:
-            TextureBrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent = 0);
-            void configureButtonInitialSettings(QPushButton *button);
-
-            QPushButton *buttonPoint = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-point")), "", this);
-            QPushButton *buttonSquare = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-square")), "", this);
-            QPushButton *buttonCircle = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-circle")), "", this);
-            QPushButton *buttonCustom = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-custom")), "", this);
-
-        private:
-            QLabel *selectedBrush;
-            QGroupBox *horizontalGroupBox;
-            WorldspaceWidget *mWorldspaceWidget;
-            int mBrushSize;
-            int mBrushShape;
-            std::string mBrushTexture;
-            std::string mBrushTextureLabel;
-
-        public slots:
-            void setBrushTexture(std::string brushTexture);
-            void setBrushShape();
-            void setBrushSize(int brushSize);
-
-        signals:
-            void passBrushSize (int brushSize);
-            void passBrushShape(int brushShape);
-    };
 
     class TerrainTextureMode : public EditMode
     {
@@ -130,11 +83,11 @@ namespace CSVRender
             bool allowLandTextureEditing(std::string textureFileName);
 
         private:
-            TextureBrushWindow *textureBrushWindow;
             std::string mCellId;
             std::string mBrushTexture;
             int mBrushSize;
             int mBrushShape;
+            CSVWidget::SceneToolTextureBrush *mTextureBrushScenetool;
 
             const int cellSize {ESM::Land::REAL_SIZE};
             const int landSize {ESM::Land::LAND_SIZE};
@@ -144,10 +97,7 @@ namespace CSVRender
             void passBrushTexture(std::string brushTexture);
 
         public slots:
-            void handleDragEnterEvent (QDragEnterEvent *event);
             void handleDropEvent(QDropEvent *event);
-            void handleMouseEvent (QMouseEvent *event);
-            void handlePrimarySelectOnModeButton();
             void setBrushSize(int brushSize);
             void setBrushShape(int brushShape);
 

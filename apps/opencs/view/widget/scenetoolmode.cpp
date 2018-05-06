@@ -137,7 +137,6 @@ void CSVWidget::SceneToolMode::setButton (const std::string& id)
 
 void CSVWidget::SceneToolMode::mouseReleaseEvent (QMouseEvent *event)
 {
-    if (event->button()==Qt::MidButton && getCurrentId() == "terrain-texture") emit passEvent(event);
     if (getType()==Type_TopAction && event->button()==Qt::RightButton)
         showPanel (parentWidget()->mapToGlobal (pos()));
     else
@@ -152,15 +151,6 @@ bool CSVWidget::SceneToolMode::event(QEvent* event)
     }
 
     return SceneTool::event(event);
-}
-
-void CSVWidget::SceneToolMode::dragEnterEvent (QDragEnterEvent *event)
-{
-    emit passEvent(event);
-}
-void CSVWidget::SceneToolMode::dropEvent (QDropEvent *event)
-{
-    emit passEvent(event);
 }
 
 void CSVWidget::SceneToolMode::selected()

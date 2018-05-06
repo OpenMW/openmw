@@ -20,6 +20,7 @@
 
 #include "../widget/modebutton.hpp"
 #include "../widget/scenetoolbar.hpp"
+#include "../widget/scenetooltexturebrush.hpp"
 
 #include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
@@ -41,138 +42,41 @@
 #include "object.hpp" // Something small needed regarding pointers from here ()
 #include "worldspacewidget.hpp"
 
-
-CSVRender::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *parent)
-    : QGroupBox(title, parent)
-{
-    brushSizeSlider = new QSlider(Qt::Horizontal);
-    brushSizeSlider->setTickPosition(QSlider::TicksBothSides);
-    brushSizeSlider->setTickInterval(10);
-    brushSizeSlider->setRange(1, 50);
-    brushSizeSlider->setSingleStep(1);
-
-    brushSizeSpinBox = new QSpinBox;
-    brushSizeSpinBox->setRange(1, 50);
-    brushSizeSpinBox->setSingleStep(1);
-
-    layoutSliderSize = new QHBoxLayout;
-    layoutSliderSize->addWidget(brushSizeSlider);
-    layoutSliderSize->addWidget(brushSizeSpinBox);
-
-    connect(brushSizeSlider, SIGNAL(valueChanged(int)), brushSizeSpinBox, SLOT(setValue(int)));
-    connect(brushSizeSpinBox, SIGNAL(valueChanged(int)), brushSizeSlider, SLOT(setValue(int)));
-
-    setLayout(layoutSliderSize);
-}
-
-CSVRender::TextureBrushWindow::TextureBrushWindow(WorldspaceWidget *worldspaceWidget, QWidget *parent)
-    : QFrame(parent, Qt::Popup),
-    mWorldspaceWidget (worldspaceWidget),
-    mBrushSize(0),
-    mBrushShape(0)
-{
-    mBrushTextureLabel = "Brush: " + mBrushTexture;
-    selectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel), this);
-
-    QVBoxLayout *layoutMain = new QVBoxLayout;
-    layoutMain->setSpacing(0);
-
-    QHBoxLayout *layoutHorizontal = new QHBoxLayout;
-    layoutHorizontal->setContentsMargins (QMargins (0, 0, 0, 0));
-    layoutHorizontal->setSpacing(0);
-
-    configureButtonInitialSettings(buttonPoint);
-    configureButtonInitialSettings(buttonSquare);
-    configureButtonInitialSettings(buttonCircle);
-    configureButtonInitialSettings(buttonCustom);
-
-    QButtonGroup* brushButtonGroup = new QButtonGroup(this);
-    brushButtonGroup->addButton(buttonPoint);
-    brushButtonGroup->addButton(buttonSquare);
-    brushButtonGroup->addButton(buttonCircle);
-    brushButtonGroup->addButton(buttonCustom);
-
-    brushButtonGroup->setExclusive(true);
-
-    layoutHorizontal->addWidget(buttonPoint);
-    layoutHorizontal->addWidget(buttonSquare);
-    layoutHorizontal->addWidget(buttonCircle);
-    layoutHorizontal->addWidget(buttonCustom);
-
-    horizontalGroupBox = new QGroupBox(tr(""));
-    horizontalGroupBox->setLayout(layoutHorizontal);
-
-    BrushSizeControls* sizeSliders = new BrushSizeControls(tr(""), this);
-
-    layoutMain->addWidget(horizontalGroupBox);
-    layoutMain->addWidget(sizeSliders);
-    layoutMain->addWidget(selectedBrush);
-
-    setLayout(layoutMain);
-
-    connect(buttonPoint, SIGNAL(clicked()), this, SLOT(setBrushShape()));
-    connect(buttonSquare, SIGNAL(clicked()), this, SLOT(setBrushShape()));
-    connect(buttonCircle, SIGNAL(clicked()), this, SLOT(setBrushShape()));
-    connect(buttonCustom, SIGNAL(clicked()), this, SLOT(setBrushShape()));
-
-    connect(sizeSliders->brushSizeSlider, SIGNAL(valueChanged(int)), parent, SLOT(setBrushSize(int)));
-
-    connect(parent, SIGNAL(passBrushTexture(std::string)), this, SLOT(setBrushTexture(std::string)));
-}
-
-void CSVRender::TextureBrushWindow::configureButtonInitialSettings(QPushButton *button)
-{
-  button->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
-  button->setContentsMargins (QMargins (0, 0, 0, 0));
-  button->setIconSize (QSize (48-6, 48-6));
-  button->setFixedSize (48, 48);
-  button->setAcceptDrops(true);
-  button->setCheckable(true);
-}
-
-void CSVRender::TextureBrushWindow::setBrushTexture(std::string brushTexture)
-{
-    mBrushTexture = brushTexture;
-    mBrushTextureLabel = "Brush:" + mBrushTexture;
-    selectedBrush->setText(QString::fromStdString(mBrushTextureLabel));
-}
-
-void CSVRender::TextureBrushWindow::setBrushSize(int brushSize)
-{
-    mBrushSize = brushSize;
-    emit passBrushSize(mBrushSize);
-}
-
-void CSVRender::TextureBrushWindow::setBrushShape()
-{
-    if(buttonPoint->isChecked()) mBrushShape = 0;
-    if(buttonSquare->isChecked()) mBrushShape = 1;
-    if(buttonCircle->isChecked()) mBrushShape = 2;
-    if(buttonCustom->isChecked()) mBrushShape = 3;
-    emit passBrushShape(mBrushShape);
-}
-
 CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-texture"}, Mask_Terrain | Mask_Reference, "Terrain texture editing", parent),
-    textureBrushWindow(new TextureBrushWindow(worldspaceWidget, this)),
     mBrushTexture("#0"),
     mBrushSize(0),
-    mBrushShape(0)
+    mBrushShape(0),
+    mTextureBrushScenetool(0)
 {
-    connect(parent, SIGNAL(passEvent(QDragEnterEvent*)), this, SLOT(handleDragEnterEvent(QDragEnterEvent*)));
-    connect(parent, SIGNAL(passEvent(QDropEvent*)), this, SLOT(handleDropEvent(QDropEvent*)));
-    connect(parent, SIGNAL(passEvent(QMouseEvent*)), this, SLOT(handleMouseEvent(QMouseEvent*)));
-    connect(textureBrushWindow, SIGNAL(passBrushSize(int)), this, SLOT(setBrushSize(int)));
-    connect(textureBrushWindow, SIGNAL(passBrushShape(int)), this, SLOT(setBrushShape(int)));
 }
 
 void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
+    if(!mTextureBrushScenetool)
+    {
+        mTextureBrushScenetool = new CSVWidget::SceneToolTextureBrush (toolbar, "scenetooltexturebrush");
+        connect(mTextureBrushScenetool, SIGNAL (clicked()), mTextureBrushScenetool, SLOT (activate()));
+        connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passBrushSize(int)), this, SLOT(setBrushSize(int)));
+        connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passBrushShape(int)), this, SLOT(setBrushShape(int)));
+        connect(mTextureBrushScenetool->mTextureBrushWindow->mSizeSliders->mBrushSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(setBrushSize(int)));
+
+        connect(mTextureBrushScenetool, SIGNAL(passEvent(QDropEvent*)), this, SLOT(handleDropEvent(QDropEvent*)));
+        connect(this, SIGNAL(passBrushTexture(std::string)), mTextureBrushScenetool->mTextureBrushWindow, SLOT(setBrushTexture(std::string)));
+    }
+
     EditMode::activate(toolbar);
+    toolbar->addTool (mTextureBrushScenetool);
 }
 
 void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
 {
+    if(mTextureBrushScenetool)
+    {
+        toolbar->removeTool (mTextureBrushScenetool);
+        delete mTextureBrushScenetool;
+        mTextureBrushScenetool = 0;
+    }
     EditMode::deactivate(toolbar);
 }
 
@@ -259,10 +163,6 @@ void CSVRender::TerrainTextureMode::dragAborted() {
 
 void CSVRender::TerrainTextureMode::dragWheel (int diff, double speedFactor) {}
 
-void CSVRender::TerrainTextureMode::handleDragEnterEvent (QDragEnterEvent *event) {
-    event->accept();
-}
-
 void CSVRender::TerrainTextureMode::handleDropEvent (QDropEvent *event) {
   const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
 
@@ -287,22 +187,9 @@ void CSVRender::TerrainTextureMode::handleDropEvent (QDropEvent *event) {
       {
           std::string textureFileName = uid.toString();
           createTexture(textureFileName);
+          emit passBrushTexture(mBrushTexture);
       }
   }
-}
-
-void CSVRender::TerrainTextureMode::handleMouseEvent (QMouseEvent *event)
-{
-    if (event->button()==Qt::MidButton)
-    {
-        QPoint position = QCursor::pos();
-        textureBrushWindow->move (position);
-        textureBrushWindow->show();
-    }
-    if (event->button()==Qt::LeftButton) PushButton::mouseReleaseEvent (event);
-}
-
-void CSVRender::TerrainTextureMode::handlePrimarySelectOnModeButton () {
 }
 
 void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitResult& hit)
@@ -529,6 +416,7 @@ void CSVRender::TerrainTextureMode::createTexture(std::string textureFileName)
     QModelIndex index(ltexTable.getModelIndex (newId, ltexTable.findColumnIndex (CSMWorld::Columns::ColumnId_Texture)));
     undoStack.push (new CSMWorld::ModifyCommand(ltexTable, index, textureFileNameVariant));
     undoStack.endMacro();
+    mBrushTexture = newId;
 }
 
 bool CSVRender::TerrainTextureMode::allowLandTextureEditing(std::string cellId)
@@ -602,7 +490,7 @@ bool CSVRender::TerrainTextureMode::allowLandTextureEditing(std::string cellId)
             document.getUndoStack().push (new CSMWorld::CreateCommand (landTable, cellId));
         }
     }
-    
+
     return true;
 }
 
