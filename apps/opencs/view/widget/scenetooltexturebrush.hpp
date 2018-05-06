@@ -76,9 +76,6 @@ namespace CSVWidget
 
             QString mToolTip;
 
-            //CSVRender::TerrainTextureMode *mTerrainTextureMode;
-            //QIcon *mTextureBrushIcon;
-
         private:
 
             void adjustToolTips();
@@ -90,7 +87,6 @@ namespace CSVWidget
             virtual void showPanel (const QPoint& position);
 
             TextureBrushWindow *mTextureBrushWindow;
-            //virtual void activate();
 
             void dropEvent (QDropEvent *event);
             void dragEnterEvent (QDragEnterEvent *event);
@@ -98,7 +94,6 @@ namespace CSVWidget
         public slots:
             void setButtonIcon(int brushShape);
             virtual void activate();
-            //void clicked ();
 
         signals:
             void passEvent(QDropEvent *event);

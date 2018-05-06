@@ -6,15 +6,7 @@
 #include <string>
 
 #include <QWidget>
-#include <QLabel>
-#include <QSpinBox>
-#include <QGroupBox>
-#include <QSlider>
-#include <QIcon>
-#include <QFrame>
 #include <QEvent>
-#include <QHBoxLayout>
-#include <QPushButton>
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/land.hpp"

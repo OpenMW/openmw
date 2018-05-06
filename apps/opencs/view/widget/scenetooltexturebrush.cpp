@@ -1,12 +1,9 @@
 #include "scenetooltexturebrush.hpp"
 
-#include <iostream>
-
 #include <QFrame>
 #include <QIcon>
 #include <QTableWidget>
 #include <QHBoxLayout>
-
 
 #include <QWidget>
 #include <QSpinBox>
@@ -151,7 +148,6 @@ void CSVWidget::SceneToolTextureBrush::setButtonIcon (int brushShape)
 
 void CSVWidget::SceneToolTextureBrush::showPanel (const QPoint& position)
 {
-
 }
 
 void CSVWidget::SceneToolTextureBrush::activate ()

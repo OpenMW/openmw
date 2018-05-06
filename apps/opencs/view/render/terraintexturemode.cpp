@@ -5,14 +5,8 @@
 
 #include <QWidget>
 #include <QIcon>
-#include <QSpinBox>
-#include <QGroupBox>
-#include <QSlider>
 #include <QEvent>
 #include <QDropEvent>
-#include <QButtonGroup>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QDragEnterEvent>
 #include <QDrag>
 
