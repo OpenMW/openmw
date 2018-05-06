@@ -32,9 +32,6 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
     if (class_.mName.empty())
         messages.push_back (std::make_pair (id, class_.mId + " has an empty name"));
 
-    if (class_.mDescription.empty())
-        messages.push_back (std::make_pair (id, class_.mId + " has an empty description"));
-
     // test for invalid attributes
     for (int i=0; i<2; ++i)
         if (class_.mData.mAttribute[i]==-1)
