@@ -1070,12 +1070,10 @@ namespace MWWorld
             if (search(marker.first) == 0)
             {
                 ESM::Static newMarker = ESM::Static(marker.first, marker.second);
-                mStatic.insert(std::make_pair(marker.first, newMarker));
-
-                std::map<std::string, ESM::Static>::iterator found = mStatic.find(marker.first);
-                if (found != mStatic.end())
+                std::pair<typename Static::iterator, bool> ret = mStatic.insert(std::make_pair(marker.first, newMarker));
+                if (ret.first != mStatic.end())
                 {
-                    mShared.push_back(&found->second);
+                    mShared.push_back(&ret.first->second);
                 }
             }
         }
