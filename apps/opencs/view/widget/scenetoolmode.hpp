@@ -44,8 +44,6 @@ namespace CSVWidget
 
             void setButton (std::map<ModeButton *, std::string>::iterator iter);
 
-            void mouseReleaseEvent (QMouseEvent *event);
-
         protected:
 
             bool event(QEvent* event);

@@ -576,6 +576,7 @@ void CSVRender::WorldspaceWidget::debugProfileAboutToBeRemoved (const QModelInde
 
 void CSVRender::WorldspaceWidget::editModeChanged (const std::string& id)
 {
+    dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).setEditLock (mLocked);
     mDragging = false;
     mDragMode = InteractionType_None;
 }
