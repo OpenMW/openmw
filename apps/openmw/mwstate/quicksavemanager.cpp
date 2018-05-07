@@ -3,8 +3,8 @@
 MWState::QuickSaveManager::QuickSaveManager(std::string &saveName, unsigned int maxSaves)
   : mSaveName(saveName)
   , mMaxSaves(maxSaves)
-  , mOldestSlotVisited(NULL)
   , mSlotsVisited(0)
+  , mOldestSlotVisited(nullptr)
 {
 }
 
