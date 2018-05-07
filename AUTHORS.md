@@ -15,6 +15,7 @@ Programmers
     Adam Hogan (aurix)
     Aesylwinn
     aegis
+    AHSauge
     Aleksandar Jovanov
     Alex Haddad (rainChu)
     Alex McKibben
