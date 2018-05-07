@@ -962,6 +962,29 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     return mReader->getRecordCount();
 }
 
+void CSMWorld::Data::loadFallbackEntries()
+{
+    // Load default marker definitions, if game files do not have them for some reason
+    std::pair<std::string, std::string> markers[] = {
+        std::make_pair("divinemarker", "marker_divine.nif"),
+        std::make_pair("doormarker", "marker_arrow.nif"),
+        std::make_pair("northmarker", "marker_north.nif"),
+        std::make_pair("templemarker", "marker_temple.nif"),
+        std::make_pair("travelmarker", "marker_travel.nif")
+    };
+
+    for (const std::pair<std::string, std::string> marker : markers)
+    {
+        if (mReferenceables.searchId (marker.first)==-1)
+        {
+            CSMWorld::Record<ESM::Static> record;
+            record.mBase = ESM::Static(marker.first, marker.second);
+            record.mState = CSMWorld::RecordBase::State_BaseOnly;
+            mReferenceables.appendRecord (record, CSMWorld::UniversalId::Type_Static);
+        }
+    }
+}
+
 bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 {
     if (!mReader)
@@ -983,6 +1006,9 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
         mReader = 0;
 
         mDialogue = 0;
+
+        loadFallbackEntries();
+
         return true;
     }
 
