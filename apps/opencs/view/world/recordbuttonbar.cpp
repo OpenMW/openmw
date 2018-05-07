@@ -57,12 +57,12 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
 
     // left section
     mPrevButton = new QToolButton (this);
-    mPrevButton->setIcon(QIcon(":/go-previous.png"));
+    mPrevButton->setIcon(QIcon(":record-previous"));
     mPrevButton->setToolTip ("Switch to previous record");
     buttonsLayout->addWidget (mPrevButton, 0);
 
     mNextButton = new QToolButton (this);
-    mNextButton->setIcon(QIcon(":/go-next.png"));
+    mNextButton->setIcon(QIcon(":/record-next"));
     mNextButton->setToolTip ("Switch to next record");
     buttonsLayout->addWidget (mNextButton, 1);
 
@@ -72,7 +72,7 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
     if (mTable.getFeatures() & CSMWorld::IdTable::Feature_Preview)
     {
         QToolButton* previewButton = new QToolButton (this);
-        previewButton->setIcon(QIcon(":/edit-preview.png"));
+        previewButton->setIcon(QIcon(":edit-preview"));
         previewButton->setToolTip ("Open a preview of this record");
         buttonsLayout->addWidget(previewButton);
         connect (previewButton, SIGNAL(clicked()), this, SIGNAL (showPreview()));
@@ -89,22 +89,22 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
 
     // right section
     mCloneButton = new QToolButton (this);
-    mCloneButton->setIcon(QIcon(":/edit-clone.png"));
+    mCloneButton->setIcon(QIcon(":edit-clone"));
     mCloneButton->setToolTip ("Clone record");
     buttonsLayout->addWidget(mCloneButton);
 
     mAddButton = new QToolButton (this);
-    mAddButton->setIcon(QIcon(":/add.png"));
+    mAddButton->setIcon(QIcon(":edit-add"));
     mAddButton->setToolTip ("Add new record");
     buttonsLayout->addWidget(mAddButton);
 
     mDeleteButton = new QToolButton (this);
-    mDeleteButton->setIcon(QIcon(":/edit-delete.png"));
+    mDeleteButton->setIcon(QIcon(":edit-delete"));
     mDeleteButton->setToolTip ("Delete record");
     buttonsLayout->addWidget(mDeleteButton);
 
     mRevertButton = new QToolButton (this);
-    mRevertButton->setIcon(QIcon(":/edit-undo.png"));
+    mRevertButton->setIcon(QIcon(":edit-undo"));
     mRevertButton->setToolTip ("Revert record");
     buttonsLayout->addWidget(mRevertButton);
 
