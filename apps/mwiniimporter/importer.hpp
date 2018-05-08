@@ -14,7 +14,7 @@ class MwIniImporter {
   public:
     typedef std::map<std::string, std::string> strmap;
     typedef std::map<std::string, std::vector<std::string> > multistrmap;
-    typedef std::vector< std::pair< std::string, std::vector<std::string> > > deplist;
+    typedef std::vector< std::pair< std::string, std::vector<std::string> > > dependencyList;
 
     MwIniImporter();
     void    setInputEncoding(const ToUTF8::FromType& encoding);
@@ -28,11 +28,11 @@ class MwIniImporter {
     void    importArchives(multistrmap &cfg, const multistrmap &ini) const;
     static void    writeToFile(std::ostream &out, const multistrmap &cfg);
 
-    static std::vector<std::string> dependencySort(MwIniImporter::deplist src);
+    static std::vector<std::string> dependencySort(MwIniImporter::dependencyList source);
 
   private:
-    static void dependencySortStep(std::string& el, MwIniImporter::deplist& src, std::vector<std::string>& ret);
-    static std::vector<std::string>::iterator findString(std::vector<std::string>& v, const std::string& s);
+    static void dependencySortStep(std::string& element, MwIniImporter::dependencyList& source, std::vector<std::string>& result);
+    static std::vector<std::string>::iterator findString(std::vector<std::string>& source, const std::string& string);
 
     static void insertMultistrmap(multistrmap &cfg, const std::string& key, const std::string& value);
     static std::string numberToString(int n);

@@ -825,39 +825,43 @@ void MwIniImporter::importArchives(multistrmap &cfg, const multistrmap &ini) con
     }
 }
 
-void MwIniImporter::dependencySortStep(std::string& el, MwIniImporter::deplist& src, std::vector<std::string>& ret)
+void MwIniImporter::dependencySortStep(std::string& element, MwIniImporter::dependencyList& source, std::vector<std::string>& result)
 {
-    auto it = std::find_if(src.begin(), src.end(), [&el](std::pair< std::string, std::vector<std::string> >& o)
-    {
-        return o.first == el;
-    });
-    if (it != src.end())
-    {
-        auto o = std::move(*it);
-        src.erase(it);
-        for (auto name : o.second)
+    auto iter = std::find_if(
+        source.begin(),
+        source.end(),
+        [&element](std::pair< std::string, std::vector<std::string> >& sourceElement)
         {
-            MwIniImporter::dependencySortStep(name, src, ret);
+            return sourceElement.first == element;
         }
-        ret.push_back(std::move(o.first));
+    );
+    if (iter != source.end())
+    {
+        auto foundElement = std::move(*iter);
+        source.erase(iter);
+        for (auto name : foundElement.second)
+        {
+            MwIniImporter::dependencySortStep(name, source, result);
+        }
+        result.push_back(std::move(foundElement.first));
     }
 }
 
-std::vector<std::string> MwIniImporter::dependencySort(MwIniImporter::deplist src)
+std::vector<std::string> MwIniImporter::dependencySort(MwIniImporter::dependencyList source)
 {
-    std::vector<std::string> ret;
-    while (!src.empty())
+    std::vector<std::string> result;
+    while (!source.empty())
     {
-        MwIniImporter::dependencySortStep(src.begin()->first, src, ret);
+        MwIniImporter::dependencySortStep(source.begin()->first, source, result);
     }
-    return ret;
+    return result;
 }
 
-std::vector<std::string>::iterator MwIniImporter::findString(std::vector<std::string>& v, const std::string& s)
+std::vector<std::string>::iterator MwIniImporter::findString(std::vector<std::string>& source, const std::string& string)
 {
-    return std::find_if(v.begin(), v.end(), [&s](const std::string& str)
+    return std::find_if(source.begin(), source.end(), [&string](const std::string& sourceString)
     {
-        return Misc::StringUtils::ciEqual(str, s);
+        return Misc::StringUtils::ciEqual(sourceString, string);
     });
 }
 
@@ -902,19 +906,19 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
     // sort by timestamp
     sort(contentFiles.begin(), contentFiles.end());
 
-    MwIniImporter::deplist unsortedFiles;
+    MwIniImporter::dependencyList unsortedFiles;
 
     ESM::ESMReader reader;
     reader.setEncoder(&encoder);
     for (auto& file : contentFiles)
     {
         reader.open(file.second.string());
-        std::vector<std::string> deps;
-        for (auto& depFile : reader.getGameFiles())
+        std::vector<std::string> dependencies;
+        for (auto& gameFile : reader.getGameFiles())
         {
-            deps.push_back(depFile.name);
+            dependencies.push_back(gameFile.name);
         }
-        unsortedFiles.emplace_back(boost::filesystem::path(reader.getName()).filename().string(), deps);
+        unsortedFiles.emplace_back(boost::filesystem::path(reader.getName()).filename().string(), dependencies);
         reader.close();
     }
 
@@ -923,17 +927,17 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
     // hard-coded dependency Morrowind - Tribunal - Bloodmoon
     if(findString(sortedFiles, "Morrowind.esm") != sortedFiles.end())
     {
-        auto foundTribunal  = findString(sortedFiles, "Tribunal.esm");
-        auto foundBloodmoon = findString(sortedFiles, "Bloodmoon.esm");
+        auto tribunalIter  = findString(sortedFiles, "Tribunal.esm");
+        auto bloodmoonIter = findString(sortedFiles, "Bloodmoon.esm");
 
-        if (foundBloodmoon != sortedFiles.end() && foundTribunal != sortedFiles.end())
+        if (bloodmoonIter != sortedFiles.end() && tribunalIter != sortedFiles.end())
         {
-            size_t dstBloodmoon = std::distance(sortedFiles.begin(), foundBloodmoon);
-            size_t dstTribunal  = std::distance(sortedFiles.begin(), foundTribunal);
-            if (dstBloodmoon < dstTribunal)
-                dstTribunal++;
-            sortedFiles.insert(foundBloodmoon, *foundTribunal);
-            sortedFiles.erase(sortedFiles.begin() + dstTribunal);
+            size_t bloodmoonIndex = std::distance(sortedFiles.begin(), bloodmoonIter);
+            size_t tribunalIndex  = std::distance(sortedFiles.begin(), tribunalIter);
+            if (bloodmoonIndex < tribunalIndex)
+                tribunalIndex++;
+            sortedFiles.insert(bloodmoonIter, *tribunalIter);
+            sortedFiles.erase(sortedFiles.begin() + tribunalIndex);
         }
     }
 
