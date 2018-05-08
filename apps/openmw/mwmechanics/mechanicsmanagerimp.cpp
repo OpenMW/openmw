@@ -79,21 +79,21 @@ namespace MWMechanics
         const ESM::NPC *player = ptr.get<ESM::NPC>()->mBase;
 
         // reset
-        creatureStats.setLevel(player->mNpdt52.mLevel);
+        creatureStats.setLevel(player->mNpdt.mLevel);
         creatureStats.getSpells().clear();
         creatureStats.modifyMagicEffects(MagicEffects());
 
         for (int i=0; i<27; ++i)
-            npcStats.getSkill (i).setBase (player->mNpdt52.mSkills[i]);
+            npcStats.getSkill (i).setBase (player->mNpdt.mSkills[i]);
 
-        creatureStats.setAttribute(ESM::Attribute::Strength, player->mNpdt52.mStrength);
-        creatureStats.setAttribute(ESM::Attribute::Intelligence, player->mNpdt52.mIntelligence);
-        creatureStats.setAttribute(ESM::Attribute::Willpower, player->mNpdt52.mWillpower);
-        creatureStats.setAttribute(ESM::Attribute::Agility, player->mNpdt52.mAgility);
-        creatureStats.setAttribute(ESM::Attribute::Speed, player->mNpdt52.mSpeed);
-        creatureStats.setAttribute(ESM::Attribute::Endurance, player->mNpdt52.mEndurance);
-        creatureStats.setAttribute(ESM::Attribute::Personality, player->mNpdt52.mPersonality);
-        creatureStats.setAttribute(ESM::Attribute::Luck, player->mNpdt52.mLuck);
+        creatureStats.setAttribute(ESM::Attribute::Strength, player->mNpdt.mStrength);
+        creatureStats.setAttribute(ESM::Attribute::Intelligence, player->mNpdt.mIntelligence);
+        creatureStats.setAttribute(ESM::Attribute::Willpower, player->mNpdt.mWillpower);
+        creatureStats.setAttribute(ESM::Attribute::Agility, player->mNpdt.mAgility);
+        creatureStats.setAttribute(ESM::Attribute::Speed, player->mNpdt.mSpeed);
+        creatureStats.setAttribute(ESM::Attribute::Endurance, player->mNpdt.mEndurance);
+        creatureStats.setAttribute(ESM::Attribute::Personality, player->mNpdt.mPersonality);
+        creatureStats.setAttribute(ESM::Attribute::Luck, player->mNpdt.mLuck);
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
 

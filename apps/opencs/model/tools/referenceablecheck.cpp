@@ -619,12 +619,12 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
     const ESM::NPC& npc = (dynamic_cast<const CSMWorld::Record<ESM::NPC>& >(baseRecord)).get();
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Npc, npc.mId);
 
-    short level(npc.mNpdt52.mLevel);
-    char disposition(npc.mNpdt52.mDisposition);
-    char reputation(npc.mNpdt52.mReputation);
-    char rank(npc.mNpdt52.mRank);
+    short level(npc.mNpdt.mLevel);
+    char disposition(npc.mNpdt.mDisposition);
+    char reputation(npc.mNpdt.mReputation);
+    char rank(npc.mNpdt.mRank);
     //Don't know what unknown is for
-    int gold(npc.mNpdt52.mGold);
+    int gold(npc.mNpdt.mGold);
 
     //Detect if player is present
     if (Misc::StringUtils::ciEqual(npc.mId, "player")) //Happy now, scrawl?
@@ -638,36 +638,36 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
             return;
         }
 
-        level = npc.mNpdt12.mLevel;
-        disposition = npc.mNpdt12.mDisposition;
-        reputation = npc.mNpdt12.mReputation;
-        rank = npc.mNpdt12.mRank;
-        gold = npc.mNpdt12.mGold;
+        level = npc.mNpdt.mLevel;
+        disposition = npc.mNpdt.mDisposition;
+        reputation = npc.mNpdt.mReputation;
+        rank = npc.mNpdt.mRank;
+        gold = npc.mNpdt.mGold;
     }
     else
     {
-        if (npc.mNpdt52.mAgility == 0)
+        if (npc.mNpdt.mAgility == 0)
             messages.push_back (std::make_pair (id, npc.mId + " agility has zero value"));
 
-        if (npc.mNpdt52.mEndurance == 0)
+        if (npc.mNpdt.mEndurance == 0)
             messages.push_back (std::make_pair (id, npc.mId + " endurance has zero value"));
 
-        if (npc.mNpdt52.mIntelligence == 0)
+        if (npc.mNpdt.mIntelligence == 0)
             messages.push_back (std::make_pair (id, npc.mId + " intelligence has zero value"));
 
-        if (npc.mNpdt52.mLuck == 0)
+        if (npc.mNpdt.mLuck == 0)
             messages.push_back (std::make_pair (id, npc.mId + " luck has zero value"));
 
-        if (npc.mNpdt52.mPersonality == 0)
+        if (npc.mNpdt.mPersonality == 0)
             messages.push_back (std::make_pair (id, npc.mId + " personality has zero value"));
 
-        if (npc.mNpdt52.mStrength == 0)
+        if (npc.mNpdt.mStrength == 0)
             messages.push_back (std::make_pair (id, npc.mId + " strength has zero value"));
 
-        if (npc.mNpdt52.mSpeed == 0)
+        if (npc.mNpdt.mSpeed == 0)
             messages.push_back (std::make_pair (id, npc.mId + " speed has zero value"));
 
-        if (npc.mNpdt52.mWillpower == 0)
+        if (npc.mNpdt.mWillpower == 0)
             messages.push_back (std::make_pair (id, npc.mId + " willpower has zero value"));
     }
 
