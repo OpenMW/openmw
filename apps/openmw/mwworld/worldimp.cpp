@@ -1083,7 +1083,7 @@ namespace MWWorld
             // general case, compatible with all types of different creatures
             // note: we intentionally do *not* use the collision box offset here, this is required to make
             // some flying creatures work that have their collision box offset in the air
-            pos.z() += halfExtents.z() * 2 * 0.75;
+            pos.z() += halfExtents.z();
         }
 
         // the origin of hitbox is an actor's front, not center
@@ -3468,7 +3468,7 @@ namespace MWWorld
     osg::Vec3f World::aimToTarget(const ConstPtr &actor, const MWWorld::ConstPtr& target)
     {
         osg::Vec3f weaponPos = actor.getRefData().getPosition().asVec3();
-        weaponPos.z() += mPhysics->getHalfExtents(actor).z() * 2 * 0.75;
+        weaponPos.z() += mPhysics->getHalfExtents(actor).z();
         osg::Vec3f targetPos = mPhysics->getCollisionObjectPosition(target);
         return (targetPos - weaponPos);
     }
@@ -3477,7 +3477,7 @@ namespace MWWorld
     {
         osg::Vec3f weaponPos = actor.getRefData().getPosition().asVec3();
         osg::Vec3f halfExtents = mPhysics->getHalfExtents(actor);
-        weaponPos.z() += halfExtents.z() * 2 * 0.75;
+        weaponPos.z() += halfExtents.z();
 
         return mPhysics->getHitDistance(weaponPos, target) - halfExtents.y();
     }
