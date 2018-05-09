@@ -1073,21 +1073,28 @@ namespace MWWorld
 
         osg::Quat rot = osg::Quat(posdata.rot[0], osg::Vec3f(-1,0,0)) * osg::Quat(posdata.rot[2], osg::Vec3f(0,0,-1));
 
-        osg::Vec3f pos = ptr.getRefData().getPosition().asVec3();
         osg::Vec3f halfExtents = mPhysics->getHalfExtents(ptr);
-
-        if (ptr == getPlayerPtr())
-            pos = getActorHeadTransform(ptr).getTrans(); // special cased for better aiming with the camera
-        else
-        {
-            // general case, compatible with all types of different creatures
-            // note: we intentionally do *not* use the collision box offset here, this is required to make
-            // some flying creatures work that have their collision box offset in the air
-            pos.z() += halfExtents.z();
-        }
 
         // the origin of hitbox is an actor's front, not center
         distance += halfExtents.y();
+
+        // special cased for better aiming with the camera
+        // if we do not hit anything, will use the default approach as fallback
+        if (ptr == getPlayerPtr())
+        {
+            osg::Vec3f pos = getActorHeadTransform(ptr).getTrans();
+
+            std::pair<MWWorld::Ptr,osg::Vec3f> result = mPhysics->getHitContact(ptr, pos, rot, distance, targets);
+            if(!result.first.isEmpty())
+                return std::make_pair(result.first, result.second);
+        }
+
+        osg::Vec3f pos = ptr.getRefData().getPosition().asVec3();
+
+        // general case, compatible with all types of different creatures
+        // note: we intentionally do *not* use the collision box offset here, this is required to make
+        // some flying creatures work that have their collision box offset in the air
+        pos.z() += halfExtents.z();
 
         std::pair<MWWorld::Ptr,osg::Vec3f> result = mPhysics->getHitContact(ptr, pos, rot, distance, targets);
         if(result.first.isEmpty())
