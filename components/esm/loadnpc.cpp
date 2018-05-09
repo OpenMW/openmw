@@ -66,8 +66,8 @@ namespace ESM
                     }
                     else if (esm.getSubSize() == 12)
                     {
-                    	//Reading into temporary NPDTstruct12 object
-                    	NPDTstruct12 npdt12;
+                        //Reading into temporary NPDTstruct12 object
+                        NPDTstruct12 npdt12;
                         mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
                         esm.getExact(&npdt12, 12);
 
@@ -147,17 +147,17 @@ namespace ESM
 
         if (mNpdtType == NPC_DEFAULT)
         {
-        	esm.writeHNT("NPDT", mNpdt, 52);
+            esm.writeHNT("NPDT", mNpdt, 52);
         }
         else if (mNpdtType == NPC_WITH_AUTOCALCULATED_STATS)
         {
-        	NPDTstruct12 npdt12;
-        	npdt12.mLevel = mNpdt.mLevel;
-        	npdt12.mDisposition = mNpdt.mDisposition;
-        	npdt12.mReputation = mNpdt.mReputation;
-        	npdt12.mRank = mNpdt.mRank;
+            NPDTstruct12 npdt12;
+            npdt12.mLevel = mNpdt.mLevel;
+            npdt12.mDisposition = mNpdt.mDisposition;
+            npdt12.mReputation = mNpdt.mReputation;
+            npdt12.mRank = mNpdt.mRank;
             npdt12.mGold = mNpdt.mGold;
-        	esm.writeHNT("NPDT", npdt12, 12);
+            esm.writeHNT("NPDT", npdt12, 12);
         }
 
         esm.writeHNT("FLAG", mFlags);
