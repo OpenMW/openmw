@@ -44,23 +44,29 @@ CSVWidget::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *p
 CSVWidget::TextureBrushWindow::TextureBrushWindow(QWidget *parent)
     : QFrame(parent, Qt::Popup),
     mBrushShape(0),
-    mBrushSize(0)
-
+    mBrushSize(0),
+    mBrushTexture("L0#0")
 {
-    mBrushTextureLabel = "Brush: " + mBrushTexture;
+    mBrushTextureLabel = "Selected texture (id): " + mBrushTexture;
     mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel), this);
 
     QVBoxLayout *layoutMain = new QVBoxLayout;
     layoutMain->setSpacing(0);
+    layoutMain->setContentsMargins(4,0,4,4);
 
     QHBoxLayout *layoutHorizontal = new QHBoxLayout;
-    layoutHorizontal->setContentsMargins (QMargins (0, 0, 0, 0));
     layoutHorizontal->setSpacing(0);
+    layoutHorizontal->setContentsMargins (QMargins (0, 0, 0, 0));
 
     configureButtonInitialSettings(mButtonPoint);
     configureButtonInitialSettings(mButtonSquare);
     configureButtonInitialSettings(mButtonCircle);
     configureButtonInitialSettings(mButtonCustom);
+
+    mButtonPoint->setToolTip (toolTipPoint);
+    mButtonSquare->setToolTip (toolTipSquare);
+    mButtonCircle->setToolTip (toolTipCircle);
+    mButtonCustom->setToolTip (toolTipCustom);
 
     QButtonGroup* brushButtonGroup = new QButtonGroup(this);
     brushButtonGroup->addButton(mButtonPoint);
@@ -70,10 +76,10 @@ CSVWidget::TextureBrushWindow::TextureBrushWindow(QWidget *parent)
 
     brushButtonGroup->setExclusive(true);
 
-    layoutHorizontal->addWidget(mButtonPoint);
-    layoutHorizontal->addWidget(mButtonSquare);
-    layoutHorizontal->addWidget(mButtonCircle);
-    layoutHorizontal->addWidget(mButtonCustom);
+    layoutHorizontal->addWidget(mButtonPoint, 0, Qt::AlignTop);
+    layoutHorizontal->addWidget(mButtonSquare, 0, Qt::AlignTop);
+    layoutHorizontal->addWidget(mButtonCircle, 0, Qt::AlignTop);
+    layoutHorizontal->addWidget(mButtonCustom, 0, Qt::AlignTop);
 
     mHorizontalGroupBox = new QGroupBox(tr(""));
     mHorizontalGroupBox->setLayout(layoutHorizontal);
@@ -102,8 +108,9 @@ void CSVWidget::TextureBrushWindow::configureButtonInitialSettings(QPushButton *
 void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
 {
     mBrushTexture = brushTexture;
-    mBrushTextureLabel = "Brush:" + mBrushTexture;
+    mBrushTextureLabel = "Selected texture (id): " + mBrushTexture;
     mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel));
+    emit passBrushShape(mBrushShape); // update icon
 }
 
 void CSVWidget::TextureBrushWindow::setBrushSize(int brushSize)
@@ -131,19 +138,36 @@ CSVWidget::SceneToolTextureBrush::SceneToolTextureBrush (SceneToolbar *parent, c
     mTextureBrushWindow(new TextureBrushWindow(this))
 {
     setAcceptDrops(true);
-    if(mTextureBrushWindow->mBrushShape == 0) setIcon (QIcon (QPixmap (":scenetoolbar/brush-point")));
-    if(mTextureBrushWindow->mBrushShape == 1) setIcon (QIcon (QPixmap (":scenetoolbar/brush-square")));
-    if(mTextureBrushWindow->mBrushShape == 2) setIcon (QIcon (QPixmap (":scenetoolbar/brush-circle")));
-    if(mTextureBrushWindow->mBrushShape == 3) setIcon (QIcon (QPixmap (":scenetoolbar/brush-custom")));
     connect(mTextureBrushWindow, SIGNAL(passBrushShape(int)), this, SLOT(setButtonIcon(int)));
+    setButtonIcon(mTextureBrushWindow->mBrushShape);
 }
 
 void CSVWidget::SceneToolTextureBrush::setButtonIcon (int brushShape)
 {
-    if(brushShape == 0) setIcon (QIcon (QPixmap (":scenetoolbar/brush-point")));
-    if(brushShape == 1) setIcon (QIcon (QPixmap (":scenetoolbar/brush-square")));
-    if(brushShape == 2) setIcon (QIcon (QPixmap (":scenetoolbar/brush-circle")));
-    if(brushShape == 3) setIcon (QIcon (QPixmap (":scenetoolbar/brush-custom")));
+    QString tooltip = "Brush settings <p>Currently selected: ";
+    if(brushShape == 0)
+    {
+        setIcon (QIcon (QPixmap (":scenetoolbar/brush-point")));
+        tooltip += dynamic_cast<QString&> (mTextureBrushWindow->toolTipPoint);
+    }
+    if(brushShape == 1)
+    {
+        setIcon (QIcon (QPixmap (":scenetoolbar/brush-square")));
+        tooltip += dynamic_cast<QString&> (mTextureBrushWindow->toolTipSquare);
+    }
+    if(brushShape == 2)
+    {
+        setIcon (QIcon (QPixmap (":scenetoolbar/brush-circle")));
+        tooltip += dynamic_cast<QString&> (mTextureBrushWindow->toolTipCircle);
+    }
+    if(brushShape == 3)
+    {
+        setIcon (QIcon (QPixmap (":scenetoolbar/brush-custom")));
+        tooltip += dynamic_cast<QString&> (mTextureBrushWindow->toolTipCustom);
+    }
+    tooltip += "<p>Selected texture: " + QString::fromStdString(mTextureBrushWindow->mBrushTexture);
+    tooltip += "<br>(drop texture here to change)";
+    setToolTip (tooltip);
 }
 
 void CSVWidget::SceneToolTextureBrush::showPanel (const QPoint& position)

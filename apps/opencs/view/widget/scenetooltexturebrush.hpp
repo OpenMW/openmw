@@ -50,14 +50,18 @@ namespace CSVWidget
             QPushButton *mButtonSquare = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-square")), "", this);
             QPushButton *mButtonCircle = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-circle")), "", this);
             QPushButton *mButtonCustom = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-custom")), "", this);
-            BrushSizeControls* mSizeSliders = new BrushSizeControls(tr(""), this);
+            QString toolTipPoint = "Paint single point";
+            QString toolTipSquare = "Paint with square brush";
+            QString toolTipCircle = "Paint with circle brush";
+            QString toolTipCustom = "Paint custom selection (not implemented yet)";
+            BrushSizeControls* mSizeSliders = new BrushSizeControls("Brush size", this);
             int mBrushShape;
+            int mBrushSize;
+            std::string mBrushTexture;
 
         private:
             QLabel *mSelectedBrush;
             QGroupBox *mHorizontalGroupBox;
-            int mBrushSize;
-            std::string mBrushTexture;
             std::string mBrushTextureLabel;
 
         public slots:
