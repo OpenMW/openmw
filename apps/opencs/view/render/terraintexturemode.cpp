@@ -54,9 +54,11 @@ void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
         connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passBrushSize(int)), this, SLOT(setBrushSize(int)));
         connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passBrushShape(int)), this, SLOT(setBrushShape(int)));
         connect(mTextureBrushScenetool->mTextureBrushWindow->mSizeSliders->mBrushSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(setBrushSize(int)));
+        connect(mTextureBrushScenetool, SIGNAL(passTextureId(std::string)), this, SLOT(setBrushTexture(std::string)));
 
         connect(mTextureBrushScenetool, SIGNAL(passEvent(QDropEvent*)), this, SLOT(handleDropEvent(QDropEvent*)));
         connect(this, SIGNAL(passBrushTexture(std::string)), mTextureBrushScenetool->mTextureBrushWindow, SLOT(setBrushTexture(std::string)));
+        connect(this, SIGNAL(passBrushTexture(std::string)), mTextureBrushScenetool, SLOT(updateBrushHistory(std::string)));
     }
 
     EditMode::activate(toolbar);
@@ -499,4 +501,9 @@ void CSVRender::TerrainTextureMode::setBrushSize(int brushSize)
 void CSVRender::TerrainTextureMode::setBrushShape(int brushShape)
 {
     mBrushShape = brushShape;
+}
+
+void CSVRender::TerrainTextureMode::setBrushTexture(std::string brushTexture)
+{
+    mBrushTexture = brushTexture;
 }

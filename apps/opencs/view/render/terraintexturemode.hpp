@@ -92,7 +92,7 @@ namespace CSVRender
             void handleDropEvent(QDropEvent *event);
             void setBrushSize(int brushSize);
             void setBrushShape(int brushShape);
-
+            void setBrushTexture(std::string brushShape);
     };
 }
 

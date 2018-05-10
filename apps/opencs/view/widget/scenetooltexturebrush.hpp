@@ -16,10 +16,7 @@
 
 #include "scenetool.hpp"
 
-/*namespace CSVRender
-{
-    class TerrainTextureMode;
-}*/
+class QTableWidget;
 
 namespace CSVWidget
 {
@@ -79,6 +76,9 @@ namespace CSVWidget
             Q_OBJECT
 
             QString mToolTip;
+            QFrame *mPanel;
+            QTableWidget *mTable;
+            std::vector<std::string> mBrushHistory;
 
         private:
 
@@ -89,6 +89,7 @@ namespace CSVWidget
             SceneToolTextureBrush (SceneToolbar *parent, const QString& toolTip);
 
             virtual void showPanel (const QPoint& position);
+            void updatePanel ();
 
             TextureBrushWindow *mTextureBrushWindow;
 
@@ -97,11 +98,14 @@ namespace CSVWidget
 
         public slots:
             void setButtonIcon(int brushShape);
+            void updateBrushHistory (const std::string& mBrushTexture);
+            void clicked (const QModelIndex& index);
             virtual void activate();
 
         signals:
             void passEvent(QDropEvent *event);
             void passEvent(QDragEnterEvent *event);
+            void passTextureId(std::string brushTexture);
     };
 }
 

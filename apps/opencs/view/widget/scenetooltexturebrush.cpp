@@ -15,6 +15,10 @@
 #include <QVBoxLayout>
 #include <QDragEnterEvent>
 #include <QDrag>
+#include <QTableWidget>
+#include <QHeaderView>
+#include <QApplication>
+#include <QSizePolicy>
 
 #include "scenetool.hpp"
 
@@ -133,13 +137,40 @@ void CSVWidget::SceneToolTextureBrush::adjustToolTips()
 }
 
 CSVWidget::SceneToolTextureBrush::SceneToolTextureBrush (SceneToolbar *parent, const QString& toolTip)
-: SceneTool (parent),
+: SceneTool (parent, Type_TopAction),
     mToolTip (toolTip),
+    mBrushHistory{"L0#0"},
     mTextureBrushWindow(new TextureBrushWindow(this))
 {
     setAcceptDrops(true);
     connect(mTextureBrushWindow, SIGNAL(passBrushShape(int)), this, SLOT(setButtonIcon(int)));
     setButtonIcon(mTextureBrushWindow->mBrushShape);
+
+    mPanel = new QFrame (this, Qt::Popup);
+
+    QHBoxLayout *layout = new QHBoxLayout (mPanel);
+
+    layout->setContentsMargins (QMargins (0, 0, 0, 0));
+
+    mTable = new QTableWidget (0, 2, this);
+
+    mTable->setShowGrid (true);
+    mTable->verticalHeader()->hide();
+    mTable->horizontalHeader()->hide();
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    mTable->horizontalHeader()->setSectionResizeMode (0, QHeaderView::Stretch);
+    mTable->horizontalHeader()->setSectionResizeMode (1, QHeaderView::ResizeToContents);
+#else
+    mTable->horizontalHeader()->setResizeMode (0, QHeaderView::Stretch);
+    mTable->horizontalHeader()->setResizeMode (1, QHeaderView::ResizeToContents);
+#endif
+    mTable->setSelectionMode (QAbstractItemView::NoSelection);
+
+    layout->addWidget (mTable);
+
+    connect (mTable, SIGNAL (clicked (const QModelIndex&)),
+        this, SLOT (clicked (const QModelIndex&)));
+
 }
 
 void CSVWidget::SceneToolTextureBrush::setButtonIcon (int brushShape)
@@ -172,6 +203,45 @@ void CSVWidget::SceneToolTextureBrush::setButtonIcon (int brushShape)
 
 void CSVWidget::SceneToolTextureBrush::showPanel (const QPoint& position)
 {
+    updatePanel();
+    mPanel->move (position);
+    mPanel->show();
+}
+
+void CSVWidget::SceneToolTextureBrush::updatePanel()
+{
+    mTable->setRowCount (mBrushHistory.size());
+
+    mTable->setItem (0, 1, new QTableWidgetItem (
+            QApplication::style()->standardIcon (QStyle::SP_TitleBarCloseButton), ""));
+
+    for (int i = mBrushHistory.size()-1; i >= 0; --i)
+    {
+        mTable->setItem (i, 0, new QTableWidgetItem (QString::fromStdString(mBrushHistory[i])));
+    }
+}
+
+void CSVWidget::SceneToolTextureBrush::updateBrushHistory (const std::string& brushTexture)
+{
+    mBrushHistory.insert(mBrushHistory.begin(), brushTexture);
+    if(mBrushHistory.size() > 5) mBrushHistory.pop_back();
+}
+
+void CSVWidget::SceneToolTextureBrush::clicked (const QModelIndex& index)
+{
+    if (index.column()==0)
+    {
+        std::string brushTexture = mBrushHistory[index.row()];
+        std::swap(mBrushHistory[index.row()], mBrushHistory[0]);
+        mTextureBrushWindow->setBrushTexture(brushTexture);
+        emit passTextureId(brushTexture);
+        updatePanel();
+        mPanel->hide();
+    }
+    else if (index.column()==1)
+    {
+        mPanel->hide();
+    }
 }
 
 void CSVWidget::SceneToolTextureBrush::activate ()
