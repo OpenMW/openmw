@@ -139,9 +139,11 @@ void CSVWidget::SceneToolTextureBrush::adjustToolTips()
 CSVWidget::SceneToolTextureBrush::SceneToolTextureBrush (SceneToolbar *parent, const QString& toolTip)
 : SceneTool (parent, Type_TopAction),
     mToolTip (toolTip),
-    mBrushHistory{"L0#0"},
     mTextureBrushWindow(new TextureBrushWindow(this))
 {
+    mBrushHistory.resize(1);
+    mBrushHistory[0] = "L0#0";
+
     setAcceptDrops(true);
     connect(mTextureBrushWindow, SIGNAL(passBrushShape(int)), this, SLOT(setButtonIcon(int)));
     setButtonIcon(mTextureBrushWindow->mBrushShape);
