@@ -873,8 +873,20 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
     std::time_t defaultTime = 0;
     ToUTF8::Utf8Encoder encoder(mEncoding);
 
-    // assume the Game Files are all in a "Data Files" directory under the directory holding Morrowind.ini
-    const boost::filesystem::path gameFilesDir(iniFilename.parent_path() /= "Data Files");
+    std::vector<boost::filesystem::path> dataPaths;
+    if (cfg.count("data"))
+    {
+        for (std::string filePathString : cfg["data"])
+        {
+            if (filePathString.front() == '"')
+            {
+                filePathString.erase(filePathString.begin());
+                filePathString.erase(filePathString.end() - 1);
+            }
+            dataPaths.emplace_back(filePathString);
+        }
+    }
+    dataPaths.push_back(iniFilename.parent_path() /= "Data Files");
 
     multistrmap::const_iterator it = ini.begin();
     for (int i=0; it != ini.end(); i++)
@@ -893,9 +905,20 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
 
             if(filetype.compare("esm") == 0 || filetype.compare("esp") == 0)
             {
-                boost::filesystem::path filepath(gameFilesDir);
-                filepath /= *entry;
-                contentFiles.push_back({lastWriteTime(filepath, defaultTime), filepath});
+                bool found = false;
+                for (auto & dataPath : dataPaths)
+                {
+                    boost::filesystem::path path = dataPath / *entry;
+                    std::time_t time = lastWriteTime(path, defaultTime);
+                    if (time != defaultTime)
+                    {
+                        contentFiles.push_back({time, path});
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                    std::cout << "Warning: " << *entry << " not found, ignoring" << std::endl;
             }
         }
     }
@@ -980,10 +1003,6 @@ std::time_t MwIniImporter::lastWriteTime(const boost::filesystem::path& filename
         if (std::strftime(timeStrBuffer, size, "%x %X", localtime(&writeTime)) > 0)
             std::cout << "content file: " << resolved << " timestamp = (" << writeTime <<
                 ") " << timeStrBuffer << std::endl;
-    }
-    else
-    {
-        std::cout << "content file: " << filename << " not found" << std::endl;
     }
     return writeTime;
 }
