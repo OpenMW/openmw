@@ -95,6 +95,8 @@ struct NPC
         int mGold;
     }; // 52 bytes
 
+    //Structure for autocalculated characters.
+    // This is only used for load and save operations.
     struct NPDTstruct12
     {
         short mLevel;
@@ -106,8 +108,9 @@ struct NPC
     #pragma pack(pop)
 
     unsigned char mNpdtType;
-    NPDTstruct52 mNpdt52;
-    NPDTstruct12 mNpdt12; //for autocalculated characters
+    //Worth noting when saving the struct:
+    // Although we might read a NPDTstruct12 in, we use NPDTstruct52 internally
+    NPDTstruct52 mNpdt;
 
     int getFactionRank() const; /// wrapper for mNpdt*, -1 = no rank
 
@@ -141,6 +144,9 @@ struct NPC
 
     void blank();
     ///< Set record to default state (does not touch the ID).
+
+    /// Resets the mNpdt object
+    void blankNpdt();
 };
 }
 #endif
