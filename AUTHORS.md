@@ -157,6 +157,7 @@ Programmers
     terrorfisch
     thegriglat
     Thomas Luppi (Digmaster)
+    tri4ng1e
     unelsson
     Will Herrmann (Thunderforge)
     Tom Mason (wheybags)
