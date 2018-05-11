@@ -246,9 +246,11 @@ namespace SceneUtil {
 
             void draw();
 
-            virtual void draw(osg::ref_ptr<osg::Texture2D> texture, unsigned int shadowMapNumber, osgUtil::CullVisitor& cv);
+            virtual void draw(osg::ref_ptr<osg::Texture2D> texture, unsigned int shadowMapNumber, const osg::Matrixd &matrix, osgUtil::CullVisitor& cv);
 
             virtual void releaseGLObjects(osg::State* state = 0) const;
+
+            virtual void setFrustumVertices(osg::ref_ptr<osg::Vec3dArray> vertices);
         protected:
             virtual void addAnotherShadowMap();
 
@@ -257,11 +259,12 @@ namespace SceneUtil {
             std::vector<osg::ref_ptr<osg::Camera>> mDebugCameras;
             osg::ref_ptr<osg::Program> mDebugProgram;
             std::vector<osg::ref_ptr<osg::Node>> mDebugGeometry;
+            std::vector<osg::ref_ptr<osg::Group>> mFrustumTransforms;
+            std::vector<osg::ref_ptr<osg::Uniform>> mFrustumUniforms;
+            osg::ref_ptr<osg::Geometry> mFrustumGeometry;
         };
 
         osg::ref_ptr<DebugHUD>                  _debugHud;
-
-        osg::ref_ptr<osg::Geometry>             _frustumGeometry;
     };
 
 }

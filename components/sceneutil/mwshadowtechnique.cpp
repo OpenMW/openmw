@@ -115,6 +115,44 @@ std::string debugFragmentShaderSource =
 #endif
         "}                                                                       \n";
 
+std::string debugFrustumVertexShaderSource = "varying float depth; uniform mat4 transform; void main(void){gl_Position = transform * gl_Vertex; depth = gl_Position.z;}";
+std::string debugFrustumFragmentShaderSource =
+        "varying float depth;                                                    \n"
+        "                                                                        \n"
+        "void main(void)                                                         \n"
+        "{                                                                       \n"
+#if 1
+        "    float f = depth;                                                    \n"
+        "                                                                        \n"
+        "    f = 256.0 * f;                                                      \n"
+        "    float fC = floor( f ) / 256.0;                                      \n"
+        "                                                                        \n"
+        "    f = 256.0 * fract( f );                                             \n"
+        "    float fS = floor( f ) / 256.0;                                      \n"
+        "                                                                        \n"
+        "    f = 256.0 * fract( f );                                             \n"
+        "    float fH = floor( f ) / 256.0;                                      \n"
+        "                                                                        \n"
+        "    fS *= 0.5;                                                          \n"
+        "    fH = ( fH  * 0.34 + 0.66 ) * ( 1.0 - fS );                          \n"
+        "                                                                        \n"
+        "    vec3 rgb = vec3( ( fC > 0.5 ? ( 1.0 - fC ) : fC ),                  \n"
+        "                     abs( fC - 0.333333 ),                              \n"
+        "                     abs( fC - 0.666667 ) );                            \n"
+        "                                                                        \n"
+        "    rgb = min( vec3( 1.0, 1.0, 1.0 ), 3.0 * rgb );                      \n"
+        "                                                                        \n"
+        "    float fMax = max( max( rgb.r, rgb.g ), rgb.b );                     \n"
+        "    fMax = 1.0 / fMax;                                                  \n"
+        "                                                                        \n"
+        "    vec3 color = fMax * rgb;                                            \n"
+        "                                                                        \n"
+        "    gl_FragColor =  vec4( fS + fH * color, 1 );                         \n"
+#else
+        "    gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);               \n"
+#endif
+        "}                                                                       \n";
+
 
 template<class T>
 class RenderLeafTraverser : public T
@@ -762,43 +800,14 @@ void MWShadowTechnique::disableShadows()
 void SceneUtil::MWShadowTechnique::enableDebugHUD()
 {
     _debugHud = new DebugHUD(getShadowedScene()->getShadowSettings()->getNumShadowMapsPerLight());
-    _frustumGeometry = new osg::Geometry();
-    _frustumGeometry->setCullingActive(false);
+    
 
-    osg::ref_ptr<osg::DrawElementsUByte> frustumDrawElements = new osg::DrawElementsUByte(osg::PrimitiveSet::LINE_STRIP);
-    _frustumGeometry->addPrimitiveSet(frustumDrawElements);
-    frustumDrawElements->push_back(0);
-    frustumDrawElements->push_back(1);
-    frustumDrawElements->push_back(2);
-    frustumDrawElements->push_back(3);
-    frustumDrawElements->push_back(0);
-    frustumDrawElements->push_back(4);
-    frustumDrawElements->push_back(5);
-    frustumDrawElements->push_back(6);
-    frustumDrawElements->push_back(7);
-    frustumDrawElements->push_back(4);
-
-    frustumDrawElements = new osg::DrawElementsUByte(osg::PrimitiveSet::LINES);
-    _frustumGeometry->addPrimitiveSet(frustumDrawElements);
-    frustumDrawElements->push_back(1);
-    frustumDrawElements->push_back(5);
-    frustumDrawElements->push_back(2);
-    frustumDrawElements->push_back(6);
-    frustumDrawElements->push_back(3);
-    frustumDrawElements->push_back(7);
-
-    // Ensure this doesn't contribute to bounds calculation.
-    _frustumGeometry->setComputeBoundingBoxCallback(new osg::Drawable::ComputeBoundingBoxCallback());
-    _frustumGeometry->setComputeBoundingSphereCallback(new osg::Node::ComputeBoundingSphereCallback());
-
-    getShadowedScene()->addChild(_frustumGeometry);
+    
 }
 
 void SceneUtil::MWShadowTechnique::disableDebugHUD()
 {
     _debugHud = nullptr;
-    getShadowedScene()->removeChild(_frustumGeometry);
-    _frustumGeometry = nullptr;
 }
 
 void SceneUtil::MWShadowTechnique::setSplitPointUniformLogarithmicRatio(double ratio)
@@ -919,11 +928,8 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
     //OSG_NOTICE<<"maxZFar "<<maxZFar<<std::endl;
 
     Frustum frustum(&cv, minZNear, maxZFar);
-    if (_frustumGeometry)
-    {
-        osg::ref_ptr<osg::Vec3dArray> frustumCorners = new osg::Vec3dArray(8, &frustum.corners[0]);
-        _frustumGeometry->setVertexArray(frustumCorners);
-    }
+    if (_debugHud)
+        _debugHud->setFrustumVertices(new osg::Vec3dArray(8, &frustum.corners[0]));
 
     double reducedNear, reducedFar;
     if (cv.getComputeNearFarMode() != osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR)
@@ -1106,9 +1112,6 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 previous_sdl.erase(previous_sdl.begin());
             }
 
-            if (_debugHud)
-                _debugHud->draw(sd->_texture, sm_i, cv);
-
             osg::ref_ptr<osg::Camera> camera = sd->_camera;
 
             camera->setProjectionMatrix(projectionMatrix);
@@ -1273,6 +1276,9 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
             // increment counters.
             ++textureUnit;
             ++numValidShadows ;
+
+            if (_debugHud)
+                _debugHud->draw(sd->_texture, sm_i, camera->getViewMatrix() * camera->getProjectionMatrix(), cv);
         }
     }
 
@@ -2625,15 +2631,51 @@ SceneUtil::MWShadowTechnique::DebugHUD::DebugHUD(int numberOfShadowMapsPerLight)
     osg::ref_ptr<osg::Shader> fragmentShader = new osg::Shader(osg::Shader::FRAGMENT, debugFragmentShaderSource);
     mDebugProgram->addShader(fragmentShader);
 
+    mFrustumGeometry = new osg::Geometry();
+    mFrustumGeometry->setCullingActive(false);
+
+    osg::ref_ptr<osg::Program> frustumProgram = new osg::Program;
+    vertexShader = new osg::Shader(osg::Shader::VERTEX, debugFrustumVertexShaderSource);
+    frustumProgram->addShader(vertexShader);
+    fragmentShader = new osg::Shader(osg::Shader::FRAGMENT, debugFrustumFragmentShaderSource);
+    frustumProgram->addShader(fragmentShader);
+
+    mFrustumGeometry->getOrCreateStateSet()->setAttributeAndModes(frustumProgram, osg::StateAttribute::ON);
+    //mFrustumGeometry->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+    osg::ref_ptr<osg::DrawElementsUByte> frustumDrawElements = new osg::DrawElementsUByte(osg::PrimitiveSet::LINE_STRIP);
+    mFrustumGeometry->addPrimitiveSet(frustumDrawElements);
+    frustumDrawElements->push_back(0);
+    frustumDrawElements->push_back(1);
+    frustumDrawElements->push_back(2);
+    frustumDrawElements->push_back(3);
+    frustumDrawElements->push_back(0);
+    frustumDrawElements->push_back(4);
+    frustumDrawElements->push_back(5);
+    frustumDrawElements->push_back(6);
+    frustumDrawElements->push_back(7);
+    frustumDrawElements->push_back(4);
+
+    frustumDrawElements = new osg::DrawElementsUByte(osg::PrimitiveSet::LINES);
+    mFrustumGeometry->addPrimitiveSet(frustumDrawElements);
+    frustumDrawElements->push_back(1);
+    frustumDrawElements->push_back(5);
+    frustumDrawElements->push_back(2);
+    frustumDrawElements->push_back(6);
+    frustumDrawElements->push_back(3);
+    frustumDrawElements->push_back(7);
+
     for (int i = 0; i < numberOfShadowMapsPerLight; ++i)
         addAnotherShadowMap();
 }
 
-void SceneUtil::MWShadowTechnique::DebugHUD::draw(osg::ref_ptr<osg::Texture2D> texture, unsigned int shadowMapNumber, osgUtil::CullVisitor& cv)
+void SceneUtil::MWShadowTechnique::DebugHUD::draw(osg::ref_ptr<osg::Texture2D> texture, unsigned int shadowMapNumber, const osg::Matrixd &matrix, osgUtil::CullVisitor& cv)
 {
     // It might be possible to change shadow settings at runtime
     if (shadowMapNumber > mDebugCameras.size())
         addAnotherShadowMap();
+
+    mFrustumUniforms[shadowMapNumber]->set(matrix);
     
     osg::ref_ptr<osg::StateSet> stateSet = mDebugGeometry[shadowMapNumber]->getOrCreateStateSet();
     stateSet->setTextureAttributeAndModes(sDebugTextureUnit, texture, osg::StateAttribute::ON);
@@ -2656,6 +2698,14 @@ void SceneUtil::MWShadowTechnique::DebugHUD::releaseGLObjects(osg::State* state)
     mDebugProgram->releaseGLObjects(state);
     for (auto const& node : mDebugGeometry)
         node->releaseGLObjects(state);
+    for (auto const& node : mFrustumTransforms)
+        node->releaseGLObjects(state);
+    mFrustumGeometry->releaseGLObjects(state);
+}
+
+void SceneUtil::MWShadowTechnique::DebugHUD::setFrustumVertices(osg::ref_ptr<osg::Vec3dArray> vertices)
+{
+    mFrustumGeometry->setVertexArray(vertices);
 }
 
 void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
@@ -2666,6 +2716,7 @@ void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
     mDebugCameras[shadowMapNumber]->setViewport(200 * shadowMapNumber, 0, 200, 200);
     mDebugCameras[shadowMapNumber]->setRenderOrder(osg::Camera::POST_RENDER);
     mDebugCameras[shadowMapNumber]->setClearColor(osg::Vec4(1.0, 1.0, 0.0, 1.0));
+    mDebugCameras[shadowMapNumber]->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
 
     mDebugGeometry.push_back(osg::createTexturedQuadGeometry(osg::Vec3(-1, -1, 0), osg::Vec3(2, 0, 0), osg::Vec3(0, 2, 0)));
     mDebugGeometry[shadowMapNumber]->setCullingActive(false);
@@ -2675,4 +2726,12 @@ void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
     osg::ref_ptr<osg::Uniform> textureUniform = new osg::Uniform("texture", sDebugTextureUnit);
     //textureUniform->setType(osg::Uniform::SAMPLER_2D);
     stateSet->addUniform(textureUniform.get());
+
+    mFrustumTransforms.push_back(new osg::Group);
+    mFrustumTransforms[shadowMapNumber]->addChild(mFrustumGeometry);
+    mFrustumTransforms[shadowMapNumber]->setCullingActive(false);
+    mDebugCameras[shadowMapNumber]->addChild(mFrustumTransforms[shadowMapNumber]);
+
+    mFrustumUniforms.push_back(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "transform"));
+    mFrustumTransforms[shadowMapNumber]->getOrCreateStateSet()->addUniform(mFrustumUniforms[shadowMapNumber]);
 }
