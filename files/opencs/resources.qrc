@@ -2,11 +2,11 @@
     <qresource prefix="/">
         <file>openmw-cs.png</file>
         <file>activator.png</file>
-        <file>added.png</file>
+        <file alias="list-added">list-added.png</file>
         <file>apparatus.png</file>
         <file>armor.png</file>
         <file>attribute.png</file>
-        <file>base.png</file>
+        <file>list-base.png</file>
         <file>birthsign.png</file>
         <file>body-part.png</file>
         <file>book.png</file>
@@ -15,55 +15,65 @@
         <file>clothing.png</file>
         <file>container.png</file>
         <file>creature.png</file>
-        <file>dialogoue-info.png</file>
-        <file>dialogoue-journal.png</file>
-        <file>dialogoue-regular.png</file>
+        <file>dialogue-info.png</file>
+        <file>dialogue-journal.png</file>
+        <file>dialogue-regular.png</file>
         <file>dialogue-greeting.png</file>
         <file>dialogue-persuasion.png</file>
-        <file>dialogue-speech.png</file>
+        <file>dialogue-voice.png</file>
+        <file>dialogue-topics.png</file>
+        <file>dialogue-topic-infos.png</file>
+        <file>journal-topic-infos.png</file>
+        <file>journal-topics.png</file>
         <file>door.png</file>
         <file>enchantment.png</file>
         <file>faction.png</file>
         <file>filter.png</file>
-        <file>globvar.png</file>
-        <file>GMST.png</file>
+        <file>global-variable.png</file>
+        <file>gmst.png</file>
         <file>Info.png</file>
         <file>ingredient.png</file>
-        <file>landpaint.png</file>
-        <file>land.png</file>
-        <file>LandTexture.png</file>
+        <file>land-heightmap.png</file>
+        <file>land-texture.png</file>
         <file>leveled-creature.png</file>
+        <file>leveled-item.png</file>
         <file>light.png</file>
         <file>lockpick.png</file>
         <file>magic-effect.png</file>
         <file>magicrabbit.png</file>
         <file>map.png</file>
         <file>miscellaneous.png</file>
-        <file>modified.png</file>
+        <file alias="list-modified">list-modified.png</file>
         <file>npc.png</file>
-        <file>PathGrid.png</file>
+        <file>pathgrid.png</file>
         <file>potion.png</file>
         <file>probe.png</file>
         <file>race.png</file>
         <file>random-item.png</file>
         <file>random.png</file>
-        <file>removed.png</file>
+        <file alias="list-removed">list-removed.png</file>
         <file>repair.png</file>
         <file>script.png</file>
         <file>skill.png</file>
-        <file>soundgen.png</file>
+        <file>sound-generator.png</file>
         <file>sound.png</file>
         <file>spell.png</file>
         <file>static.png</file>
         <file>weapon.png</file>
         <file>multitype.png</file>
-        <file>go-next.png</file>
-        <file>go-previous.png</file>
-        <file>edit-delete.png</file>
-        <file>edit-undo.png</file>
-        <file>edit-preview.png</file>
-        <file>edit-clone.png</file>
-        <file>add.png</file>
+        <file alias="record-next">record-next.png</file>
+        <file alias="record-previous">record-previous.png</file>
+        <file alias="edit-delete">record-delete.png</file>
+        <file alias="edit-undo">record-revert.png</file>
+        <file alias="edit-preview">record-preview.png</file>
+        <file alias="edit-clone">record-clone.png</file>
+        <file alias="edit-add">record-add.png</file>
+        <file alias="resources-icon">resources-icon.png</file>        
+        <file alias="resources-mesh">resources-mesh.png</file>
+        <file alias="resources-music">resources-music.png</file>
+        <file alias="resources-sound">resources-sound.png</file>
+        <file alias="resources-texture">resources-texture.png</file>
+        <file alias="resources-video">resources-video.png</file>
         <file alias="placeholder">placeholder.png</file>
     </qresource>
     <qresource prefix="/startup">
@@ -73,14 +83,14 @@
         <file alias="configure">raster/startup/small/configure.png</file>
     </qresource>
     <qresource prefix="/scenetoolbar">
-        <file alias="night">Moon-48.png</file>
-        <file alias="day">Sun-48.png</file>
-        <file alias="bright">Lightbulb-48.png</file>
-        <file alias="1st-person">eyeballdude.png</file>
-        <file alias="free-camera">flying-eye.png</file>
-        <file alias="orbiting-camera">orbit2.png</file>
-        <file alias="play">scene-play.png</file>
-        <file alias="scene-view-1">scene-view-references.png</file>
+        <file alias="night">lighting-moon.png</file>
+        <file alias="day">lighting-sun.png</file>
+        <file alias="bright">lighting-lamp.png</file>
+        <file alias="1st-person">camera-first-person.png</file>
+        <file alias="free-camera">camera-free.png</file>
+        <file alias="orbiting-camera">camera-orbit.png</file>
+        <file alias="play">run-game.png</file>
+        <file alias="scene-view-1">scene-view-instance.png</file>
         <file alias="scene-view-16">scene-view-terrain.png</file>
         <file alias="scene-view-4">scene-view-water.png</file>
         <file alias="scene-view-2">scene-view-pathgrid.png</file>
@@ -119,7 +129,7 @@
         <file alias="scene-view-c31">scene-view-status-31.png</file>
         <file alias="scene-view-marker-2">scene-exterior-arrows.png</file>
         <file alias="scene-view-marker-4">scene-exterior-borders.png</file>
-        <file alias="scene-view-marker-1">scene-exterior-marker.png</file>
+        <file alias="scene-view-marker-1">scene-exterior-markers.png</file>
         <file alias="scene-view-marker-c0">scene-exterior-status-0.png</file>
         <file alias="scene-view-marker-c1">scene-exterior-status-1.png</file>
         <file alias="scene-view-marker-c2">scene-exterior-status-2.png</file>
@@ -128,5 +138,17 @@
         <file alias="scene-view-marker-c5">scene-exterior-status-5.png</file>
         <file alias="scene-view-marker-c6">scene-exterior-status-6.png</file>
         <file alias="scene-view-marker-c7">scene-exterior-status-7.png</file>
+        <file alias="editing-instance">editing-instance.png</file>
+        <file alias="editing-pathgrid">editing-pathgrid.png</file>
+        <file alias="editing-terrain-movement">editing-terrain-movement.png</file>
+        <file alias="editing-terrain-shape">editing-terrain-shape.png</file>
+        <file alias="editing-terrain-texture">editing-terrain-texture.png</file>
+        <file alias="editing-terrain-vertex-paint">editing-terrain-vertex-paint.png</file>
+        <file alias="transform-move">transform-move.png</file>
+        <file alias="transform-rotate">transform-rotate.png</file>
+        <file alias="transform-scale">transform-scale.png</file>
+        <file alias="selection-mode-cube">selection-mode-cube.png</file>
+        <file alias="selection-mode-cube-corner">selection-mode-cube-corner.png</file>
+        <file alias="selection-mode-cube-sphere">selection-mode-cube-sphere.png</file>        
     </qresource>
 </RCC>

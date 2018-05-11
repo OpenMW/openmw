@@ -73,6 +73,8 @@ namespace MWWorld
                 const Fallback::Map& fallback,
                 float stormWindSpeed,
                 float rainSpeed,
+                float dlFactor,
+                float dlOffset,
                 const std::string& particleEffect);
 
         std::string mCloudTexture;
@@ -101,6 +103,12 @@ namespace MWWorld
         // Value between 0 and 1, defines the strength of the sun glare effect.
         // Also appears to modify how visible the sun, moons, and stars are for various weather effects.
         float mGlareView;
+
+        // Fog factor and offset used with distant land rendering.
+        struct {
+            float FogFactor;
+            float FogOffset;
+        } mDL;
 
         // Sound effect
         // This is used for Blight, Ashstorm and Blizzard (Bloodmoon)
@@ -218,14 +226,14 @@ namespace MWWorld
          */
         void changeWeather(const std::string& regionID, const unsigned int weatherID);
         void modRegion(const std::string& regionID, const std::vector<char>& chances);
-        void playerTeleported();
+        void playerTeleported(const std::string& playerRegion, bool isExterior);
 
         /**
          * Per-frame update
          * @param duration
          * @param paused
          */
-        void update(float duration, bool paused = false);
+        void update(float duration, bool paused, const TimeStamp& time, bool isExterior);
 
         void stopSounds();
 
@@ -240,8 +248,7 @@ namespace MWWorld
 
         unsigned int getWeatherID() const;
 
-        /// @see World::isDark
-        bool isDark() const;
+        bool useTorches(float hour) const;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress);
 
@@ -275,6 +282,7 @@ namespace MWWorld
 
         float mWindSpeed;
         bool mIsStorm;
+        bool mPrecipitation;
         osg::Vec3f mStormDirection;
 
         std::string mCurrentRegion;
@@ -293,6 +301,7 @@ namespace MWWorld
 
         void addWeather(const std::string& name,
                         const Fallback::Map& fallback,
+                        float dlFactor, float dlOffset,
                         const std::string& particleEffect = "");
 
         void importRegions();

@@ -208,7 +208,7 @@ namespace MWGui
         if ((mFilter & Filter_OnlyEnchanted) && !(item.mFlags & ItemStack::Flag_Enchanted))
             return false;
         if ((mFilter & Filter_OnlyChargedSoulstones) && (base.getTypeName() != typeid(ESM::Miscellaneous).name()
-                                                     || base.getCellRef().getSoul() == ""))
+                                                     || base.getCellRef().getSoul() == "" || !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(base.getCellRef().getSoul())))
             return false;
         if ((mFilter & Filter_OnlyRepairTools) && (base.getTypeName() != typeid(ESM::Repair).name()))
             return false;

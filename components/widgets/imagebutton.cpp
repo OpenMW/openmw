@@ -5,13 +5,20 @@
 namespace Gui
 {
 
+    bool ImageButton::sDefaultNeedKeyFocus = true;
+
     ImageButton::ImageButton()
         : Base()
         , mMouseFocus(false)
         , mMousePress(false)
         , mKeyFocus(false)
     {
-        setNeedKeyFocus(true);
+        setNeedKeyFocus(sDefaultNeedKeyFocus);
+    }
+
+    void ImageButton::setDefaultNeedKeyFocus(bool enabled)
+    {
+        sDefaultNeedKeyFocus = enabled;
     }
 
     void ImageButton::setPropertyOverride(const std::string &_key, const std::string &_value)

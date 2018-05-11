@@ -49,7 +49,7 @@ namespace CSMPrefs
         ShortcutMap::iterator shortcutListIt = mWidgetShortcuts.find(widget);
         if (shortcutListIt != mWidgetShortcuts.end())
         {
-            std::remove(shortcutListIt->second.begin(), shortcutListIt->second.end(), shortcut);
+            shortcutListIt->second.erase(std::remove(shortcutListIt->second.begin(), shortcutListIt->second.end(), shortcut), shortcutListIt->second.end());
         }
     }
 

@@ -232,9 +232,9 @@ namespace ESMTerrain
                 // Skip the first row / column unless we're at a chunk edge,
                 // since this row / column is already contained in a previous cell
                 // This is only relevant if we're creating a chunk spanning multiple cells
-                if (colStart == 0 && vertY_ != 0)
+                if (vertY_ != 0)
                     colStart += increment;
-                if (rowStart == 0 && vertX_ != 0)
+                if (vertX_ != 0)
                     rowStart += increment;
 
                 // Only relevant for chunks smaller than (contained in) one cell

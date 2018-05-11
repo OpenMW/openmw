@@ -275,7 +275,6 @@ namespace NifOsg
                     for (unsigned int i=0; i<root->getNumChildren(); ++i)
                         skel->addChild(root->getChild(i));
                     root->removeChildren(0, root->getNumChildren());
-                    created = skel;
                 }
                 else
                     skel->addChild(created);

@@ -512,7 +512,9 @@ void ContentSelectorModel::ContentModel::sortFiles()
             //dependencies appear.
             for (int j = i + 1; j < fileCount; j++)
             {
-                if (gamefiles.contains(mFiles.at(j)->fileName(), Qt::CaseInsensitive))
+                if (gamefiles.contains(mFiles.at(j)->fileName(), Qt::CaseInsensitive)
+                 || (!mFiles.at(i)->isGameFile() && gamefiles.isEmpty()
+                 && mFiles.at(j)->fileName().compare("Morrowind.esm", Qt::CaseInsensitive) == 0)) // Hack: implicit dependency on Morrowind.esm for dependency-less files
                 {
                         mFiles.move(j, i);
 

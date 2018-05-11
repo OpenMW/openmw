@@ -892,7 +892,7 @@ protected:
 public:
 
     typedef TypesetBookImpl::StyleImpl Style;
-    typedef std::map <TextFormat::Id, TextFormat*> ActiveTextFormats;
+    typedef std::map <TextFormat::Id, std::unique_ptr<TextFormat>> ActiveTextFormats;
 
     int mViewTop;
     int mViewBottom;
@@ -1048,7 +1048,7 @@ public:
             {
                 if (mNode != NULL)
                     i->second->destroyDrawItem (mNode);
-                delete i->second;
+                i->second.reset();
             }
 
             mActiveTextFormats.clear ();
@@ -1115,11 +1115,11 @@ public:
 
             if (j == this_->mActiveTextFormats.end ())
             {
-                TextFormat * textFormat = new TextFormat (Font, this_);
+                std::unique_ptr<TextFormat> textFormat(new TextFormat (Font, this_));
 
                 textFormat->mTexture = Font->getTextureFont ();
 
-                j = this_->mActiveTextFormats.insert (std::make_pair (Font, textFormat)).first;
+                j = this_->mActiveTextFormats.insert (std::make_pair (Font, std::move(textFormat))).first;
             }
 
             j->second->mCountVertex += run.mPrintableChars * 6;

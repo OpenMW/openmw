@@ -393,32 +393,8 @@ namespace MWSound
 
     void SoundManager::startRandomTitle()
     {
-        std::vector<std::string> filelist;
+        const std::vector<std::string> &filelist = mMusicFiles[mCurrentPlaylist];
         auto &tracklist = mMusicToPlay[mCurrentPlaylist];
-        if (mMusicFiles.find(mCurrentPlaylist) == mMusicFiles.end())
-        {
-            const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
-
-            std::string pattern = "Music/" + mCurrentPlaylist;
-            mVFS->normalizeFilename(pattern);
-
-            std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(pattern);
-            while (found != index.end())
-            {
-                if (found->first.size() >= pattern.size() && found->first.substr(0, pattern.size()) == pattern)
-                    filelist.push_back(found->first);
-                else
-                    break;
-                ++found;
-            }
-
-            mMusicFiles[mCurrentPlaylist] = filelist;
-        }
-        else
-            filelist = mMusicFiles[mCurrentPlaylist];
-
-        if(filelist.empty())
-            return;
 
         // Do a Fisher-Yates shuffle
 
@@ -454,6 +430,33 @@ namespace MWSound
 
     void SoundManager::playPlaylist(const std::string &playlist)
     {
+        if (mCurrentPlaylist == playlist)
+            return;
+
+        if (mMusicFiles.find(playlist) == mMusicFiles.end())
+        {
+            std::vector<std::string> filelist;
+            const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
+
+            std::string pattern = "Music/" + playlist;
+            mVFS->normalizeFilename(pattern);
+
+            std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(pattern);
+            while (found != index.end())
+            {
+                if (found->first.size() >= pattern.size() && found->first.substr(0, pattern.size()) == pattern)
+                    filelist.push_back(found->first);
+                else
+                    break;
+                ++found;
+            }
+
+            mMusicFiles[playlist] = filelist;
+        }
+
+        if (mMusicFiles[playlist].empty())
+            return;
+
         mCurrentPlaylist = playlist;
         startRandomTitle();
     }

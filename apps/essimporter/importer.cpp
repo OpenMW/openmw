@@ -377,7 +377,7 @@ namespace ESSImport
             profile.mPlayerClassName = context.mCustomPlayerClassName;
         else
             profile.mPlayerClassId = context.mPlayerBase.mClass;
-        profile.mPlayerLevel = context.mPlayerBase.mNpdt52.mLevel;
+        profile.mPlayerLevel = context.mPlayerBase.mNpdt.mLevel;
         profile.mPlayerName = header.mGameData.mPlayerName.toString();
 
         writeScreenshot(header, profile);

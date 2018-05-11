@@ -2,7 +2,7 @@
   OpenMW - The completely unofficial reimplementation of Morrowind
   Copyright (C) 2008-2010  Nicolay Korslund
   Email: < korslund@gmail.com >
-  WWW: http://openmw.sourceforge.net/
+  WWW: https://openmw.org/
 
   This file (bsa_file.h) is part of the OpenMW package.
 
@@ -17,7 +17,7 @@
 
   You should have received a copy of the GNU General Public License
   version 3 along with this program. If not, see
-  http://www.gnu.org/licenses/ .
+  https://www.gnu.org/licenses/ .
 
  */
 

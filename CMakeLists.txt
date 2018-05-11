@@ -135,6 +135,8 @@ if (WIN32)
 endif()
 
 # Dependencies
+find_package(OpenGL REQUIRED)
+
 if (USE_QT)
     message(STATUS "Using Qt${DESIRED_QT_VERSION}")
 
@@ -181,12 +183,6 @@ if (NOT WIN32 AND BUILD_WIZARD) # windows users can just run the morrowind insta
     find_package(LIBUNSHIELD REQUIRED) # required only for non win32 when building openmw-wizard
     set(OPENMW_USE_UNSHIELD TRUE)
 endif()
-
-option(OPENGL_ES "enable opengl es support" FALSE )
-
-if (OPENGL_ES)
-    add_definitions(-DOPENGL_ES)
-endif(OPENGL_ES)
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
@@ -505,8 +501,8 @@ if(WIN32)
     SET(CPACK_PACKAGE_DESCRIPTION_FILE "${OpenMW_SOURCE_DIR}/README.md")
     SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
     SET(CPACK_NSIS_DISPLAY_NAME "OpenMW ${OPENMW_VERSION}")
-    SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.openmw.org")
-    SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.openmw.org")
+    SET(CPACK_NSIS_HELP_LINK "https:\\\\\\\\www.openmw.org")
+    SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "openmw-launcher.exe")
     SET(CPACK_NSIS_MUI_FINISHPAGE_RUN "openmw-launcher.exe")
     SET(CPACK_NSIS_MUI_ICON "${OpenMW_SOURCE_DIR}/files/windows/openmw.ico")
@@ -548,11 +544,6 @@ endif()
 
 # Components
 add_subdirectory (components)
-
-# Plugins
-#if (BUILD_MYGUI_PLUGIN)
-#    add_subdirectory(plugins/mygui_resource_plugin)
-#endif()
 
 # Apps and tools
 if (BUILD_OPENMW)

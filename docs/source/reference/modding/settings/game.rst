@@ -90,11 +90,25 @@ difficulty
 This setting adjusts the difficulty of the game and is intended to be in the range -100 to 100 inclusive.
 Given the default game setting for fDifficultyMult of 5.0,
 a value of -100 results in the player taking 80% of the usual damage, doing 6 times the normal damage.
-A value of 100 results in the player taking 6 times as much damage, but inflicting only 80% of the usual damage.
-Values less than -500 will result in the player receiving no damage,
-and values greater than 500 will result in the player inflicting no damage.
+A value of 100 results in the player taking 6 times as much damage, while inflicting only 80% of the usual damage.
+Values below -500 will result in the player receiving no damage,
+and values above 500 will result in the player inflicting no damage.
 
 This setting can be controlled in game with the Difficulty slider in the Prefs panel of the Options menu.
+
+classic reflect absorb attribute behavior
+-----------------------------------------
+
+:Type:		boolean
+:Range: 	True/False
+:Default:	True
+
+If this setting is true, "Absorb Attribute" spells which were reflected by the target are not "mirrored",
+and the caster will absorb their own attribute resulting in no effect on both the caster and the target.
+This makes the gameplay as a mage easier, but these spells become imbalanced.
+This is how the original Morrowind behaves.
+
+This setting can only be configured by editing the settings configuration file.
 
 show effect duration
 --------------------
@@ -105,6 +119,18 @@ show effect duration
 
 Show the remaining duration of magic effects and lights if this setting is true.
 The remaining duration is displayed in the tooltip by hovering over the magical effect.
+
+This setting can only be configured by editing the settings configuration file.
+
+enchanted weapons are magical
+-----------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Makes enchanted weapons without Magical flag bypass normal weapons resistance (and weakness) certain creatures have.
+This is how original Morrowind behaves.
 
 This setting can only be configured by editing the settings configuration file.
 

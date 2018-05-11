@@ -472,8 +472,8 @@ bool Wizard::UnshieldWorker::setupComponent(Component component)
 
                 if (morrowindFound) {
                     // Check if we have correct archive, other archives have Morrowind.bsa too
-                    if ((tribunalFound && bloodmoonFound)
-                            || (!tribunalFound && !bloodmoonFound)) {
+                    if (tribunalFound == bloodmoonFound)
+                    {
                         cabFile = file;
                         found = true; // We have a GoTY disk or a Morrowind-only disk
                     }

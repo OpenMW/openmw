@@ -533,10 +533,10 @@ namespace MWGui
         }
 
         MWScrollBar::MWScrollBar()
-            : mEnableRepeat(true)
-            , mRepeatTriggerTime(0.5f)
-            , mRepeatStepTime(0.1f)
-            , mIsIncreasing(true)
+          : mEnableRepeat(true)
+          , mRepeatTriggerTime(0.5f)
+          , mRepeatStepTime(0.1f)
+          , mIsIncreasing(true)
         {
 #if MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3,2,2)
             ScrollBar::setRepeatEnabled(false);

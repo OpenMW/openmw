@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * version 3 along with this program. If not, see
- * http://www.gnu.org/licenses/ .
+ * https://www.gnu.org/licenses/ .
  */
 
 #include "character.hpp"
@@ -286,7 +286,7 @@ void CharacterController::refreshHitRecoilAnims()
         }
         else if (recovery)
         {
-            std::string anim = isSwimming ? chooseRandomGroup("swimhit") : chooseRandomGroup("hit");
+            std::string anim = chooseRandomGroup("swimhit");
             if (isSwimming && mAnimation->hasAnimation(anim))
             {
                 mHitState = CharState_SwimHit;
@@ -517,8 +517,7 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
 
 void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterState idle, bool force)
 {
-    if(force || idle != mIdleState ||
-        ((idle == mIdleState) && !mAnimation->isPlaying(mCurrentIdle) && mAnimQueue.empty()))
+    if(force || idle != mIdleState || (!mAnimation->isPlaying(mCurrentIdle) && mAnimQueue.empty()))
     {
         mIdleState = idle;
         size_t numLoops = ~0ul;
@@ -1189,7 +1188,7 @@ bool CharacterController::updateWeaponState()
         std::string weapgroup;
         if(weaptype == WeapType_None)
         {
-            if ((!isWerewolf || mWeaponType != WeapType_Spell))
+            if (!isWerewolf || mWeaponType != WeapType_Spell)
             {
                 getWeaponGroup(mWeaponType, weapgroup);
                 mAnimation->play(weapgroup, priorityWeapon,
@@ -2152,7 +2151,7 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
                             MWRender::Animation::BlendMask_All, false, 1.0f,
                             ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1, loopfallback);
     }
-    else if(mode == 0)
+    else
     {
         mAnimQueue.resize(1);
         mAnimQueue.push_back(entry);

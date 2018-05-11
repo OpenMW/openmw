@@ -1,6 +1,7 @@
 #include "combat.hpp"
 
 #include <components/misc/rng.hpp>
+#include <components/settings/settings.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -155,7 +156,11 @@ namespace MWMechanics
 
         if (!(weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver
               || weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Magical))
-            damage *= multiplier;
+        {
+            if (weapon.getClass().getEnchantment(weapon).empty()
+              || !Settings::Manager::getBool("enchanted weapons are magical", "Game"))
+                damage *= multiplier;
+        }
 
         if ((weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver)
                 && actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())

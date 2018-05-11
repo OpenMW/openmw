@@ -242,8 +242,11 @@ namespace MWMechanics
             return 0;
         if(mSoulGemPtr.getCellRef().getSoul()=="")
             return 0;
-        const ESM::Creature* soul = store.get<ESM::Creature>().find(mSoulGemPtr.getCellRef().getSoul());
-        return soul->mData.mSoul;
+        const ESM::Creature* soul = store.get<ESM::Creature>().search(mSoulGemPtr.getCellRef().getSoul());
+        if(soul)
+            return soul->mData.mSoul;
+        else
+            return 0;
     }
 
     int Enchanting::getMaxEnchantValue() const

@@ -13,7 +13,6 @@
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
-#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 
 #include <LinearMath/btQuickprof.h>

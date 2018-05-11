@@ -391,7 +391,7 @@ namespace MWMechanics
             {
                 // Player followers and escorters with high fight should not initiate combat with the player or with
                 // other player followers or escorters
-                if (std::find(playerAllies.begin(), playerAllies.end(), actor1) == playerAllies.end())
+                if (!isPlayerFollowerOrEscorter)
                     aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
             }
         }
@@ -900,7 +900,7 @@ namespace MWMechanics
             stats.setTimeToStartDrowning(fHoldBreathTime);
     }
 
-    void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
+    void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration, bool mayEquip)
     {
         bool isPlayer = (ptr == getPlayer());
 
@@ -922,7 +922,7 @@ namespace MWMechanics
                 }
             }
 
-            if (MWBase::Environment::get().getWorld()->isDark())
+            if (mayEquip)
             {
                 if (torch != inventoryStore.end())
                 {
@@ -931,16 +931,11 @@ namespace MWMechanics
                         // For non-hostile NPCs, unequip whatever is in the left slot in favor of a light.
                         if (heldIter != inventoryStore.end() && heldIter->getTypeName() != typeid(ESM::Light).name())
                             inventoryStore.unequipItem(*heldIter, ptr);
-
-                        // Also unequip twohanded weapons which conflict with anything in CarriedLeft
-                        if (torch->getClass().canBeEquipped(*torch, ptr).first == 3)
-                            inventoryStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, ptr);
                     }
 
                     heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
-                    // If we have a torch and can equip it (left slot free, no
-                    // twohanded weapon in right slot), then equip it now.
+                    // If we have a torch and can equip it, then equip it now.
                     if (heldIter == inventoryStore.end()
                             && torch->getClass().canBeEquipped(*torch, ptr).first == 1)
                     {
@@ -997,7 +992,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::updateCrimePersuit(const MWWorld::Ptr& ptr, float duration)
+    void Actors::updateCrimePursuit(const MWWorld::Ptr& ptr, float duration)
     {
         MWWorld::Ptr player = getPlayer();
         if (ptr != player && ptr.getClass().isNpc())
@@ -1204,6 +1199,9 @@ namespace MWMechanics
             if (mTimerDisposeSummonsCorpses >= 0.2f) mTimerDisposeSummonsCorpses = 0;
             if (timerUpdateEquippedLight >= updateEquippedLightInterval) timerUpdateEquippedLight = 0;
 
+            // show torches only when there are darkness and no precipitations
+            bool showTorches = MWBase::Environment::get().getWorld()->useTorches();
+
             MWWorld::Ptr player = getPlayer();
 
             /// \todo move update logic to Actor class where appropriate
@@ -1287,7 +1285,7 @@ namespace MWMechanics
                         }
 
                         if (iter->first.getClass().isNpc() && iter->first != player)
-                            updateCrimePersuit(iter->first, duration);
+                            updateCrimePursuit(iter->first, duration);
 
                         if (iter->first != player)
                         {
@@ -1302,7 +1300,7 @@ namespace MWMechanics
                         updateNpc(iter->first, duration);
 
                         if (timerUpdateEquippedLight == 0)
-                            updateEquippedLight(iter->first, updateEquippedLightInterval);
+                            updateEquippedLight(iter->first, updateEquippedLightInterval, showTorches);
                     }
                 }
             }
@@ -1424,7 +1422,7 @@ namespace MWMechanics
                                 MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
                                 break;
                             }
-                            else if (!detected)
+                            else
                                 avoidedNotice = true;
                         }
                     }

@@ -79,21 +79,21 @@ namespace MWMechanics
         const ESM::NPC *player = ptr.get<ESM::NPC>()->mBase;
 
         // reset
-        creatureStats.setLevel(player->mNpdt52.mLevel);
+        creatureStats.setLevel(player->mNpdt.mLevel);
         creatureStats.getSpells().clear();
         creatureStats.modifyMagicEffects(MagicEffects());
 
         for (int i=0; i<27; ++i)
-            npcStats.getSkill (i).setBase (player->mNpdt52.mSkills[i]);
+            npcStats.getSkill (i).setBase (player->mNpdt.mSkills[i]);
 
-        creatureStats.setAttribute(ESM::Attribute::Strength, player->mNpdt52.mStrength);
-        creatureStats.setAttribute(ESM::Attribute::Intelligence, player->mNpdt52.mIntelligence);
-        creatureStats.setAttribute(ESM::Attribute::Willpower, player->mNpdt52.mWillpower);
-        creatureStats.setAttribute(ESM::Attribute::Agility, player->mNpdt52.mAgility);
-        creatureStats.setAttribute(ESM::Attribute::Speed, player->mNpdt52.mSpeed);
-        creatureStats.setAttribute(ESM::Attribute::Endurance, player->mNpdt52.mEndurance);
-        creatureStats.setAttribute(ESM::Attribute::Personality, player->mNpdt52.mPersonality);
-        creatureStats.setAttribute(ESM::Attribute::Luck, player->mNpdt52.mLuck);
+        creatureStats.setAttribute(ESM::Attribute::Strength, player->mNpdt.mStrength);
+        creatureStats.setAttribute(ESM::Attribute::Intelligence, player->mNpdt.mIntelligence);
+        creatureStats.setAttribute(ESM::Attribute::Willpower, player->mNpdt.mWillpower);
+        creatureStats.setAttribute(ESM::Attribute::Agility, player->mNpdt.mAgility);
+        creatureStats.setAttribute(ESM::Attribute::Speed, player->mNpdt.mSpeed);
+        creatureStats.setAttribute(ESM::Attribute::Endurance, player->mNpdt.mEndurance);
+        creatureStats.setAttribute(ESM::Attribute::Personality, player->mNpdt.mPersonality);
+        creatureStats.setAttribute(ESM::Attribute::Luck, player->mNpdt.mLuck);
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
 
@@ -1118,8 +1118,11 @@ namespace MWMechanics
         Misc::StringUtils::lowerCaseInPlace(owner.first);
 
         if (!Misc::StringUtils::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
-            mStolenItems[Misc::StringUtils::lowerCase(item.getCellRef().getRefId())][owner] += count;
-
+        {
+            const MWWorld::Ptr victimRef = MWBase::Environment::get().getWorld()->searchPtr(ownerCellRef->getOwner(), true);
+            if (victimRef.isEmpty() || !victimRef.getClass().getCreatureStats(victimRef).isDead())
+                mStolenItems[Misc::StringUtils::lowerCase(item.getCellRef().getRefId())][owner] += count;
+        }
         if (alarm)
             commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
@@ -1442,7 +1445,20 @@ namespace MWMechanics
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
             // Note: accidental or collateral damage attacks are ignored.
             if (!target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
-                startCombat(target, attacker);
+            {
+                // If an actor has OnPCHitMe declared in his script, his Fight = 0 and the attacker is player,
+                // he will attack the player only if we will force him (e.g. via StartCombat console command)
+                bool peaceful = false;
+                std::string script = target.getClass().getScript(target);
+                if (!script.empty() && target.getRefData().getLocals().hasVar(script, "onpchitme") && attacker == getPlayer())
+                {
+                    int fight = std::max(0, target.getClass().getCreatureStats(target).getAiSetting(CreatureStats::AI_Fight).getModified());
+                    peaceful = (fight == 0);
+                }
+
+                if (!peaceful)
+                    startCombat(target, attacker);
+            }
         }
 
         return true;
@@ -1719,11 +1735,11 @@ namespace MWMechanics
         {
             if (werewolf)
             {
-                player->saveSkillsAttributes();
-                player->setWerewolfSkillsAttributes();
+                player->saveStats();
+                player->setWerewolfStats();
             }
             else
-                player->restoreSkillsAttributes();
+                player->restoreStats();
         }
 
         // Werewolfs can not cast spells, so we need to unset the prepared spell if there is one.

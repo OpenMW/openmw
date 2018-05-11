@@ -312,40 +312,40 @@ namespace MWClass
             int gold=0;
             if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
             {
-                gold = ref->mBase->mNpdt52.mGold;
+                gold = ref->mBase->mNpdt.mGold;
 
                 for (unsigned int i=0; i< ESM::Skill::Length; ++i)
-                    data->mNpcStats.getSkill (i).setBase (ref->mBase->mNpdt52.mSkills[i]);
+                    data->mNpcStats.getSkill (i).setBase (ref->mBase->mNpdt.mSkills[i]);
 
-                data->mNpcStats.setAttribute(ESM::Attribute::Strength, ref->mBase->mNpdt52.mStrength);
-                data->mNpcStats.setAttribute(ESM::Attribute::Intelligence, ref->mBase->mNpdt52.mIntelligence);
-                data->mNpcStats.setAttribute(ESM::Attribute::Willpower, ref->mBase->mNpdt52.mWillpower);
-                data->mNpcStats.setAttribute(ESM::Attribute::Agility, ref->mBase->mNpdt52.mAgility);
-                data->mNpcStats.setAttribute(ESM::Attribute::Speed, ref->mBase->mNpdt52.mSpeed);
-                data->mNpcStats.setAttribute(ESM::Attribute::Endurance, ref->mBase->mNpdt52.mEndurance);
-                data->mNpcStats.setAttribute(ESM::Attribute::Personality, ref->mBase->mNpdt52.mPersonality);
-                data->mNpcStats.setAttribute(ESM::Attribute::Luck, ref->mBase->mNpdt52.mLuck);
+                data->mNpcStats.setAttribute(ESM::Attribute::Strength, ref->mBase->mNpdt.mStrength);
+                data->mNpcStats.setAttribute(ESM::Attribute::Intelligence, ref->mBase->mNpdt.mIntelligence);
+                data->mNpcStats.setAttribute(ESM::Attribute::Willpower, ref->mBase->mNpdt.mWillpower);
+                data->mNpcStats.setAttribute(ESM::Attribute::Agility, ref->mBase->mNpdt.mAgility);
+                data->mNpcStats.setAttribute(ESM::Attribute::Speed, ref->mBase->mNpdt.mSpeed);
+                data->mNpcStats.setAttribute(ESM::Attribute::Endurance, ref->mBase->mNpdt.mEndurance);
+                data->mNpcStats.setAttribute(ESM::Attribute::Personality, ref->mBase->mNpdt.mPersonality);
+                data->mNpcStats.setAttribute(ESM::Attribute::Luck, ref->mBase->mNpdt.mLuck);
 
-                data->mNpcStats.setHealth (ref->mBase->mNpdt52.mHealth);
-                data->mNpcStats.setMagicka (ref->mBase->mNpdt52.mMana);
-                data->mNpcStats.setFatigue (ref->mBase->mNpdt52.mFatigue);
+                data->mNpcStats.setHealth (ref->mBase->mNpdt.mHealth);
+                data->mNpcStats.setMagicka (ref->mBase->mNpdt.mMana);
+                data->mNpcStats.setFatigue (ref->mBase->mNpdt.mFatigue);
 
-                data->mNpcStats.setLevel(ref->mBase->mNpdt52.mLevel);
-                data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt52.mDisposition);
-                data->mNpcStats.setReputation(ref->mBase->mNpdt52.mReputation);
+                data->mNpcStats.setLevel(ref->mBase->mNpdt.mLevel);
+                data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt.mDisposition);
+                data->mNpcStats.setReputation(ref->mBase->mNpdt.mReputation);
 
                 data->mNpcStats.setNeedRecalcDynamicStats(false);
             }
             else
             {
-                gold = ref->mBase->mNpdt12.mGold;
+                gold = ref->mBase->mNpdt.mGold;
 
                 for (int i=0; i<3; ++i)
                     data->mNpcStats.setDynamic (i, 10);
 
-                data->mNpcStats.setLevel(ref->mBase->mNpdt12.mLevel);
-                data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt12.mDisposition);
-                data->mNpcStats.setReputation(ref->mBase->mNpdt12.mReputation);
+                data->mNpcStats.setLevel(ref->mBase->mNpdt.mLevel);
+                data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt.mDisposition);
+                data->mNpcStats.setReputation(ref->mBase->mNpdt.mReputation);
 
                 autoCalculateAttributes(ref->mBase, data->mNpcStats);
                 autoCalculateSkills(ref->mBase, data->mNpcStats, ptr);
@@ -406,7 +406,7 @@ namespace MWClass
             // store
             ptr.getRefData().setCustomData (data.release());
 
-            getInventoryStore(ptr).autoEquip(ptr); 
+            getInventoryStore(ptr).autoEquip(ptr);
         }
     }
 
@@ -1327,10 +1327,7 @@ namespace MWClass
     int Npc::getBaseGold(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
-        if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
-            return ref->mBase->mNpdt52.mGold;
-        else
-            return ref->mBase->mNpdt12.mGold;
+        return ref->mBase->mNpdt.mGold;
     }
 
     bool Npc::isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const

@@ -65,6 +65,9 @@ namespace MWRender
 
         float mFogDepth;
 
+        float mDLFogFactor;
+        float mDLFogOffset;
+
         float mWindSpeed;
 
         float mCloudSpeed;

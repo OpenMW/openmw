@@ -52,7 +52,7 @@ namespace MWWorld
                     playerRef->mBase->mClass
                 );
 
-            npcStats.increaseSkill (ref->mBase->mData.mSkillId, *class_, true);
+            npcStats.increaseSkill (ref->mBase->mData.mSkillId, *class_, true, true);
 
             npcStats.flagAsUsed (ref->mBase->mId);
         }

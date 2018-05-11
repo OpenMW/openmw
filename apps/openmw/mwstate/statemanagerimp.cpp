@@ -37,6 +37,8 @@
 
 #include "../mwscript/globalscripts.hpp"
 
+#include "quicksavemanager.hpp"
+
 void MWState::StateManager::cleanup (bool force)
 {
     if (mState!=State_NoGame || force)
@@ -324,20 +326,25 @@ void MWState::StateManager::quickSave (std::string name)
         return;
     }
 
-    const Slot* slot = NULL;
-    Character* currentCharacter = getCurrentCharacter(); //Get current character
+    int maxSaves = Settings::Manager::getInt("max quicksaves", "Saves");
+    if(maxSaves < 1)
+        maxSaves = 1;
 
-    //Find quicksave slot
+    Character* currentCharacter = getCurrentCharacter(); //Get current character
+    QuickSaveManager saveFinder = QuickSaveManager(name, maxSaves);
+
     if (currentCharacter)
     {
         for (Character::SlotIterator it = currentCharacter->begin(); it != currentCharacter->end(); ++it)
         {
-            if (it->mProfile.mDescription == name)
-                slot = &*it;
+            //Visiting slots allows the quicksave finder to find the oldest quicksave
+            saveFinder.visitSave(&*it);
         }
     }
 
-    saveGame(name, slot);
+    //Once all the saves have been visited, the save finder can tell us which
+    //one to replace (or create)
+    saveGame(name, saveFinder.getNextQuickSaveSlot());
 }
 
 void MWState::StateManager::loadGame(const std::string& filepath)

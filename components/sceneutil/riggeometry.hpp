@@ -23,8 +23,8 @@ namespace SceneUtil
 
         META_Object(SceneUtil, RigGeometry)
 
-        // At this point compileGLObjects() remains unimplemented, hard to avoid race conditions
-        // and there is limited value in compiling anyway since the data will change again for the next frame
+        // Currently empty as this is difficult to implement. Technically we would need to compile both internal geometries in separate frames but this method is only called once. Alternatively we could compile just the static parts of the model.
+        virtual void compileGLObjects(osg::RenderInfo& renderInfo) const {}
 
         struct BoneInfluence
         {
