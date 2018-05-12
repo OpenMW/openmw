@@ -462,10 +462,15 @@ namespace MWWorld
     float Class::getNormalizedEncumbrance(const Ptr &ptr) const
     {
         float capacity = getCapacity(ptr);
+        float encumbrance = getEncumbrance(ptr);
+
+        if (encumbrance == 0)
+            return 0.f;
+
         if (capacity == 0)
             return 1.f;
 
-        return getEncumbrance(ptr) / capacity;
+        return encumbrance / capacity;
     }
 
     std::string Class::getSound(const MWWorld::ConstPtr&) const
