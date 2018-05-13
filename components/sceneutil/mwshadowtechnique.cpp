@@ -149,7 +149,7 @@ std::string debugFrustumFragmentShaderSource =
         "                                                                        \n"
         "    gl_FragColor =  vec4( fS + fH * color, 1 );                         \n"
 #else
-        "    gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);               \n"
+        "    gl_FragColor = vec4(0.0, 0.0, 1.0, 0.0);                            \n"
 #endif
         "}                                                                       \n";
 
@@ -1130,7 +1130,8 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
             osg::Polytope local_polytope(polytope);
             local_polytope.transformProvidingInverse(invertModelView);
 
-
+            double cascaseNear = reducedNear;
+            double cascadeFar = reducedFar;
             if (numShadowMapsPerLight>1)
             {
                 // compute the start and end range in non-dimensional coords
@@ -1158,6 +1159,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                     double ciLog = n * pow(f / n, i / m);
                     double ciUniform = n + (f - n) * i / m;
                     double ci = _splitPointUniformLogRatio * ciLog + (1.0 - _splitPointUniformLogRatio) * ciUniform + _splitPointDeltaBias;
+                    cascaseNear = ci;
 
                     // work out where this is in light space
                     osg::Vec3d worldSpacePos = frustum.eye + frustum.frustumCenterLine * ci;
@@ -1173,7 +1175,8 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                     double ciLog = n * pow(f / n, (i + 1) / m);
                     double ciUniform = n + (f - n) * (i + 1) / m;
                     double ci = _splitPointUniformLogRatio * ciLog + (1.0 - _splitPointUniformLogRatio) * ciUniform + _splitPointDeltaBias;
-
+                    cascadeFar = ci;
+                    
                     // work out where this is in light space
                     osg::Vec3d worldSpacePos = frustum.eye + frustum.frustumCenterLine * ci;
                     osg::Vec3d lightSpacePos = worldSpacePos * viewMatrix * projectionMatrix;
@@ -1185,7 +1188,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 if (sm_i+1<numShadowMapsPerLight) r_end+=0.01;
 
 
-                if (sm_i>0)
+                if (false)//(sm_i>0)
                 {
                     // not the first shadowmap so insert a polytope to clip the scene from before r_start
 
@@ -1200,7 +1203,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
                 }
 
-                if (sm_i+1<numShadowMapsPerLight)
+                if (false)//(sm_i+1<numShadowMapsPerLight)
                 {
                     // not the last shadowmap so insert a polytope to clip the scene from beyond r_end
 
@@ -1225,11 +1228,11 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
                 // OSG_NOTICE<<"  mid_r = "<<mid_r<<", range_r = "<<range_r<<std::endl;
 
-                camera->setProjectionMatrix(
+                /*camera->setProjectionMatrix(
                     camera->getProjectionMatrix() *
                     osg::Matrixd::translate(osg::Vec3d(0.0,-mid_r,0.0)) *
                     osg::Matrixd::scale(osg::Vec3d(1.0,2.0/range_r,1.0)));
-
+                */
             }
 
 
@@ -1247,7 +1250,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
             if (!orthographicViewFrustum && settings->getShadowMapProjectionHint()==ShadowSettings::PERSPECTIVE_SHADOW_MAP)
             {
-                adjustPerspectiveShadowMapCameraSettings(vdsmCallback->getRenderStage(), frustum, pl, camera.get());
+                adjustPerspectiveShadowMapCameraSettings(vdsmCallback->getRenderStage(), frustum, pl, camera.get(), cascaseNear, cascadeFar);
                 if (vdsmCallback->getProjectionMatrix())
                 {
                     vdsmCallback->getProjectionMatrix()->set(camera->getProjectionMatrix());
@@ -2149,7 +2152,7 @@ struct RenderLeafBounds
     double min_z, max_z;
 };
 
-bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::RenderStage* renderStage, Frustum& frustum, LightData& /*positionedLight*/, osg::Camera* camera)
+bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::RenderStage* renderStage, Frustum& frustum, LightData& /*positionedLight*/, osg::Camera* camera, double viewNear, double viewFar)
 {
     const ShadowSettings* settings = getShadowedScene()->getShadowSettings();
 
@@ -2176,6 +2179,14 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
 
     ConvexHull convexHull;
     convexHull.setToFrustum(frustum);
+
+    osg::Vec3d nearPoint = frustum.eye + frustum.frustumCenterLine * viewNear;
+    osg::Vec3d farPoint = frustum.eye + frustum.frustumCenterLine * viewFar;
+    double nearDist = frustum.frustumCenterLine.x() * nearPoint.x() + frustum.frustumCenterLine.y() * nearPoint.y() + frustum.frustumCenterLine.z() * nearPoint.z();
+    double farDist = -frustum.frustumCenterLine.x() * farPoint.x() - frustum.frustumCenterLine.y() * farPoint.y() - frustum.frustumCenterLine.z() * farPoint.z();
+
+    convexHull.clip(osg::Plane(frustum.frustumCenterLine, -nearDist));
+    convexHull.clip(osg::Plane(-frustum.frustumCenterLine, -farDist));
 
 #if 0
     OSG_NOTICE<<"ws ConvexHull xMin="<<convexHull.min(0)<<", xMax="<<convexHull.max(0)<<std::endl;
