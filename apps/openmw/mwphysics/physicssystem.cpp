@@ -249,7 +249,7 @@ namespace MWPhysics
                 // Check if we actually found a valid spawn point (use an infinitely thin ray this time).
                 // Required for some broken door destinations in Morrowind.esm, where the spawn point
                 // intersects with other geometry if the actor's base is taken into account
-                btVector3 from = toBullet(position);
+                btVector3 from = toBullet(position + offset);
                 btVector3 to = from - btVector3(0,0,maxHeight);
 
                 btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
