@@ -200,7 +200,7 @@ namespace MWGui
     {
         if ((mCurrentPage+1)*2 < mPages.size())
         {
-            MWBase::Environment::get().getWindowManager()->playSound("book page2", true);
+            MWBase::Environment::get().getWindowManager()->playSound("book page2");
 
             ++mCurrentPage;
 
@@ -211,7 +211,7 @@ namespace MWGui
     {
         if (mCurrentPage > 0)
         {
-            MWBase::Environment::get().getWindowManager()->playSound("book page", true);
+            MWBase::Environment::get().getWindowManager()->playSound("book page");
 
             --mCurrentPage;
 
