@@ -124,8 +124,19 @@ void main()
 
 	float shadowing = 1.0;
 #if SHADOWS
+	bool doneShadows = false;
 	@foreach shadow_texture_unit_index @shadow_texture_unit_list
-		shadowing *= shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r;
+		if (!doneShadows)
+		{
+			vec2 shadowXY = shadowSpaceCoords@shadow_texture_unit_index.xy / shadowSpaceCoords@shadow_texture_unit_index.w;
+			if (all(lessThan(shadowXY, vec2(1.0, 1.0))) && all(greaterThan(shadowXY, vec2(0.0, 0.0))))
+			{
+				shadowing *= shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r;
+
+				if (all(lessThan(shadowXY, vec2(0.95, 0.95))) && all(greaterThan(shadowXY, vec2(0.05, 0.05))))
+					doneShadows = true;
+			}
+		}
 	@endforeach
 #endif // SHADOWS
 
