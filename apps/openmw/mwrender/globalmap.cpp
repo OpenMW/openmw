@@ -125,7 +125,7 @@ namespace MWRender
                     {
                         for (int cellX=0; cellX<mCellSize; ++cellX)
                         {
-                            int vertexX = static_cast<int>(float(cellX)/float(mCellSize) * 9);
+                            int vertexX = static_cast<int>(float(cellX) / float(mCellSize) * 9);
                             int vertexY = static_cast<int>(float(cellY) / float(mCellSize) * 9);
 
                             int texelX = (x-mMinX) * mCellSize + cellX;
@@ -135,9 +135,9 @@ namespace MWRender
 
                             float y2 = 0;
                             if (land && (land->mDataTypes & ESM::Land::DATA_WNAM))
-                                y2 = (land->mWnam[vertexY * 9 + vertexX] << 4) / 2048.f;
+                                y2 = land->mWnam[vertexY * 9 + vertexX] / 128.f;
                             else
-                                y2 = (SCHAR_MIN << 4) / 2048.f;
+                                y2 = SCHAR_MIN / 128.f;
                             if (y2 < 0)
                             {
                                 r = static_cast<unsigned char>(14 * y2 + 38);
