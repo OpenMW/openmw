@@ -49,7 +49,7 @@ void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
     if(!mTextureBrushScenetool)
     {
-        mTextureBrushScenetool = new CSVWidget::SceneToolTextureBrush (toolbar, "scenetooltexturebrush");
+        mTextureBrushScenetool = new CSVWidget::SceneToolTextureBrush (toolbar, "scenetooltexturebrush", getWorldspaceWidget().getDocument());
         connect(mTextureBrushScenetool, SIGNAL (clicked()), mTextureBrushScenetool, SLOT (activate()));
         connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passBrushSize(int)), this, SLOT(setBrushSize(int)));
         connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passBrushShape(int)), this, SLOT(setBrushShape(int)));

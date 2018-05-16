@@ -21,6 +21,11 @@
 #include <QSizePolicy>
 
 #include "scenetool.hpp"
+#include "../../model/doc/document.hpp"
+#include "../../model/world/data.hpp"
+#include "../../model/world/idtable.hpp"
+#include "../../model/world/landtexture.hpp"
+
 
 CSVWidget::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *parent)
     : QGroupBox(title, parent)
@@ -45,14 +50,21 @@ CSVWidget::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *p
     setLayout(mLayoutSliderSize);
 }
 
-CSVWidget::TextureBrushWindow::TextureBrushWindow(QWidget *parent)
+CSVWidget::TextureBrushWindow::TextureBrushWindow(CSMDoc::Document& document, QWidget *parent)
     : QFrame(parent, Qt::Popup),
     mBrushShape(0),
     mBrushSize(0),
-    mBrushTexture("L0#0")
+    mBrushTexture("L0#0"),
+    mDocument(document)
 {
-    mBrushTextureLabel = "Selected texture (id): " + mBrushTexture;
-    mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel), this);
+    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+        *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
+
+    int landTextureFilename = ltexTable.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
+
+    QModelIndex index = ltexTable.getModelIndex (mBrushTexture, landTextureFilename);
+    mBrushTextureLabel = "Selected texture: " + mBrushTexture + " ";
+    mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel) + ltexTable.data(index).value<QString>());
 
     QVBoxLayout *layoutMain = new QVBoxLayout;
     layoutMain->setSpacing(0);
@@ -111,10 +123,16 @@ void CSVWidget::TextureBrushWindow::configureButtonInitialSettings(QPushButton *
 
 void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
 {
+    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+        *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
+    int landTextureFilename = ltexTable.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
+
     mBrushTexture = brushTexture;
-    mBrushTextureLabel = "Selected texture (id): " + mBrushTexture;
-    mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel));
+    mBrushTextureLabel = "Selected texture: " + mBrushTexture + " ";
+    QModelIndex index = ltexTable.getModelIndex (mBrushTexture, landTextureFilename);
+    mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel) + ltexTable.data(index).value<QString>());
     emit passBrushShape(mBrushShape); // update icon
+
 }
 
 void CSVWidget::TextureBrushWindow::setBrushSize(int brushSize)
@@ -136,10 +154,11 @@ void CSVWidget::SceneToolTextureBrush::adjustToolTips()
 {
 }
 
-CSVWidget::SceneToolTextureBrush::SceneToolTextureBrush (SceneToolbar *parent, const QString& toolTip)
+CSVWidget::SceneToolTextureBrush::SceneToolTextureBrush (SceneToolbar *parent, const QString& toolTip, CSMDoc::Document& document)
 : SceneTool (parent, Type_TopAction),
     mToolTip (toolTip),
-    mTextureBrushWindow(new TextureBrushWindow(this))
+    mDocument (document),
+    mTextureBrushWindow(new TextureBrushWindow(document, this))
 {
     mBrushHistory.resize(1);
     mBrushHistory[0] = "L0#0";
@@ -161,10 +180,10 @@ CSVWidget::SceneToolTextureBrush::SceneToolTextureBrush (SceneToolbar *parent, c
     mTable->horizontalHeader()->hide();
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     mTable->horizontalHeader()->setSectionResizeMode (0, QHeaderView::Stretch);
-    mTable->horizontalHeader()->setSectionResizeMode (1, QHeaderView::ResizeToContents);
+    mTable->horizontalHeader()->setSectionResizeMode (1, QHeaderView::Stretch);
 #else
     mTable->horizontalHeader()->setResizeMode (0, QHeaderView::Stretch);
-    mTable->horizontalHeader()->setResizeMode (1, QHeaderView::ResizeToContents);
+    mTable->horizontalHeader()->setResizeMode (1, QHeaderView::Stretch);
 #endif
     mTable->setSelectionMode (QAbstractItemView::NoSelection);
 
@@ -198,7 +217,14 @@ void CSVWidget::SceneToolTextureBrush::setButtonIcon (int brushShape)
         setIcon (QIcon (QPixmap (":scenetoolbar/brush-custom")));
         tooltip += dynamic_cast<QString&> (mTextureBrushWindow->toolTipCustom);
     }
-    tooltip += "<p>Selected texture: " + QString::fromStdString(mTextureBrushWindow->mBrushTexture);
+    tooltip += "<p>Selected texture: " + QString::fromStdString(mTextureBrushWindow->mBrushTexture) + " ";
+
+    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+        *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
+    int landTextureFilename = ltexTable.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
+    QModelIndex index = ltexTable.getModelIndex (mTextureBrushWindow->mBrushTexture, landTextureFilename);
+    tooltip += ltexTable.data(index).value<QString>();
+
     tooltip += "<br>(drop texture here to change)";
     setToolTip (tooltip);
 }
@@ -214,11 +240,13 @@ void CSVWidget::SceneToolTextureBrush::updatePanel()
 {
     mTable->setRowCount (mBrushHistory.size());
 
-    mTable->setItem (0, 1, new QTableWidgetItem (
-            QApplication::style()->standardIcon (QStyle::SP_TitleBarCloseButton), ""));
-
     for (int i = mBrushHistory.size()-1; i >= 0; --i)
     {
+        CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+            *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
+        int landTextureFilename = ltexTable.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
+        QModelIndex index = ltexTable.getModelIndex (mBrushHistory[i], landTextureFilename);
+        mTable->setItem (i, 1, new QTableWidgetItem (ltexTable.data(index).value<QString>()));
         mTable->setItem (i, 0, new QTableWidgetItem (QString::fromStdString(mBrushHistory[i])));
     }
 }
@@ -231,17 +259,13 @@ void CSVWidget::SceneToolTextureBrush::updateBrushHistory (const std::string& br
 
 void CSVWidget::SceneToolTextureBrush::clicked (const QModelIndex& index)
 {
-    if (index.column()==0)
+    if (index.column()==0 || index.column()==1)
     {
         std::string brushTexture = mBrushHistory[index.row()];
         std::swap(mBrushHistory[index.row()], mBrushHistory[0]);
         mTextureBrushWindow->setBrushTexture(brushTexture);
         emit passTextureId(brushTexture);
         updatePanel();
-        mPanel->hide();
-    }
-    else if (index.column()==1)
-    {
         mPanel->hide();
     }
 }

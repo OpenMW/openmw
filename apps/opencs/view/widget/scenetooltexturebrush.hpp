@@ -16,6 +16,8 @@
 
 #include "scenetool.hpp"
 
+#include "../../model/doc/document.hpp"
+
 class QTableWidget;
 
 namespace CSVWidget
@@ -40,7 +42,7 @@ namespace CSVWidget
         Q_OBJECT
 
         public:
-            TextureBrushWindow(QWidget *parent = 0);
+            TextureBrushWindow(CSMDoc::Document& document, QWidget *parent = 0);
             void configureButtonInitialSettings(QPushButton *button);
 
             QPushButton *mButtonPoint = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-point")), "", this);
@@ -57,6 +59,7 @@ namespace CSVWidget
             std::string mBrushTexture;
 
         private:
+            CSMDoc::Document& mDocument;
             QLabel *mSelectedBrush;
             QGroupBox *mHorizontalGroupBox;
             std::string mBrushTextureLabel;
@@ -76,6 +79,7 @@ namespace CSVWidget
             Q_OBJECT
 
             QString mToolTip;
+            CSMDoc::Document& mDocument;
             QFrame *mPanel;
             QTableWidget *mTable;
             std::vector<std::string> mBrushHistory;
@@ -86,7 +90,7 @@ namespace CSVWidget
 
         public:
 
-            SceneToolTextureBrush (SceneToolbar *parent, const QString& toolTip);
+            SceneToolTextureBrush (SceneToolbar *parent, const QString& toolTip, CSMDoc::Document& document);
 
             virtual void showPanel (const QPoint& position);
             void updatePanel ();
