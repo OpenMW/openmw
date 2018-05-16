@@ -244,8 +244,6 @@ namespace SceneUtil {
         public:
             DebugHUD(int numberOfShadowMapsPerLight);
 
-            void draw();
-
             virtual void draw(osg::ref_ptr<osg::Texture2D> texture, unsigned int shadowMapNumber, const osg::Matrixd &matrix, osgUtil::CullVisitor& cv);
 
             virtual void releaseGLObjects(osg::State* state = 0) const;
