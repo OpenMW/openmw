@@ -952,7 +952,7 @@ std::pair<Sound_Handle,size_t> OpenAL_Output::loadSound(const std::string &fname
 
     std::vector<char> data;
     ALenum format = AL_NONE;
-    int srate;
+    int srate = 0;
 
     try
     {
