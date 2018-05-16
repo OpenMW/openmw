@@ -445,7 +445,7 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick (const QPo
 
     // Default placement
     direction.normalize();
-    direction *= CSMPrefs::get()["Scene Drops"]["distance"].toInt();
+    direction *= CSMPrefs::get()["3D Scene Editing"]["distance"].toInt();
 
     WorldspaceHitResult hit = { false, 0, 0, 0, 0, start + direction };
     return hit;

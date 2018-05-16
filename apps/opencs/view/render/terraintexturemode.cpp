@@ -428,7 +428,7 @@ bool CSVRender::TerrainTextureMode::allowLandTextureEditing(std::string cellId)
 
     if (noCell)
     {
-        std::string mode = CSMPrefs::get()["Scene Drops"]["outside-landedit"].toString();
+        std::string mode = CSMPrefs::get()["3D Scene Editing"]["outside-landedit"].toString();
 
         // target cell does not exist
         if (mode=="Discard")
@@ -460,7 +460,7 @@ bool CSVRender::TerrainTextureMode::allowLandTextureEditing(std::string cellId)
         {
             // target cell exists, but is not shown
             std::string mode =
-                CSMPrefs::get()["Scene Drops"]["outside-visible-landedit"].toString();
+                CSMPrefs::get()["3D Scene Editing"]["outside-visible-landedit"].toString();
 
             if (mode=="Discard")
                 return false;
@@ -475,7 +475,7 @@ bool CSVRender::TerrainTextureMode::allowLandTextureEditing(std::string cellId)
 
     if (noLand)
     {
-        std::string mode = CSMPrefs::get()["Scene Drops"]["outside-landedit"].toString();
+        std::string mode = CSMPrefs::get()["3D Scene Editing"]["outside-landedit"].toString();
 
         // target cell does not exist
         if (mode=="Discard")

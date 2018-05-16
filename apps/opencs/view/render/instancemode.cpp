@@ -551,7 +551,7 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
 
         if (noCell)
         {
-            std::string mode = CSMPrefs::get()["Scene Drops"]["outside-drop"].toString();
+            std::string mode = CSMPrefs::get()["3D Scene Editing"]["outside-drop"].toString();
 
             // target cell does not exist
             if (mode=="Discard")
@@ -585,7 +585,7 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
             {
                 // target cell exists, but is not shown
                 std::string mode =
-                    CSMPrefs::get()["Scene Drops"]["outside-visible-drop"].toString();
+                    CSMPrefs::get()["3D Scene Editing"]["outside-visible-drop"].toString();
 
                 if (mode=="Discard")
                     return;

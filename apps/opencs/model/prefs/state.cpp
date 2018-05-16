@@ -230,7 +230,7 @@ void CSMPrefs::State::declare()
     EnumValues landeditOutsideVisibleCell;
     landeditOutsideVisibleCell.add (showAndLandEdit).add (dontLandEdit);
 
-    declareCategory ("Scene Drops");
+    declareCategory ("3D Scene Editing");
     declareInt ("distance", "Drop Distance", 50).
         setTooltip ("If an instance drop can not be placed against another object at the "
             "insert point, it will be placed by this distance from the insert point instead");
