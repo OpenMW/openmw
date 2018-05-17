@@ -859,6 +859,17 @@ std::vector<std::string>::iterator MwIniImporter::findString(std::vector<std::st
     });
 }
 
+void MwIniImporter::addPaths(std::vector<boost::filesystem::path>& output, std::vector<std::string> input) {
+    for (auto& path : input) {
+        if (path.front() == '"')
+        {
+            path.erase(path.begin());
+            path.erase(path.end() - 1);
+        }
+        output.emplace_back(path);
+    }
+}
+
 void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, const boost::filesystem::path& iniFilename) const
 {
     std::vector<std::pair<std::time_t, boost::filesystem::path>> contentFiles;
@@ -869,17 +880,11 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
 
     std::vector<boost::filesystem::path> dataPaths;
     if (cfg.count("data"))
-    {
-        for (std::string filePathString : cfg["data"])
-        {
-            if (filePathString.front() == '"')
-            {
-                filePathString.erase(filePathString.begin());
-                filePathString.erase(filePathString.end() - 1);
-            }
-            dataPaths.emplace_back(filePathString);
-        }
-    }
+        addPaths(dataPaths, cfg["data"]);
+
+    if (cfg.count("data-local"))
+        addPaths(dataPaths, cfg["data-local"]);
+
     dataPaths.push_back(iniFilename.parent_path() /= "Data Files");
 
     multistrmap::const_iterator it = ini.begin();
