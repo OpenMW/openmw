@@ -36,6 +36,7 @@ namespace MWSound
         void setVolume(float volume) { mVolume = volume; }
         void setBaseVolume(float volume) { mBaseVolume = volume; }
         void setFadeout(float duration) { mFadeOutTime = duration; }
+        void setPitch(float pitch) { mPitch = pitch; }
         void updateFade(float duration)
         {
             if(mFadeOutTime > 0.0f)

@@ -731,19 +731,23 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
 
     mRendering.getSkyManager()->setWeather(mResult);
 
+    float mRainCoverage = mRendering.getSkyManager()->getRainCoverage();
+
     // Play sounds
     if (mPlayingSoundID != mResult.mAmbientLoopSoundID)
     {
         stopSounds();
         if (!mResult.mAmbientLoopSoundID.empty())
             mAmbientSound = MWBase::Environment::get().getSoundManager()->playSound(
-                mResult.mAmbientLoopSoundID, mResult.mAmbientSoundVolume, 1.0,
+                mResult.mAmbientLoopSoundID, mResult.mAmbientSoundVolume, mRainCoverage,
                 MWSound::Type::Sfx, MWSound::PlayMode::Loop
             );
         mPlayingSoundID = mResult.mAmbientLoopSoundID;
     }
-    else if (mAmbientSound)
+    else if (mAmbientSound) {
         mAmbientSound->setVolume(mResult.mAmbientSoundVolume);
+        mAmbientSound->setPitch(mRainCoverage);
+    }
 }
 
 void WeatherManager::stopSounds()

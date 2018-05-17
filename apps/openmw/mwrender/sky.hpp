@@ -180,6 +180,8 @@ namespace MWRender
 
         void setRainIntensityUniform(osg::Uniform *uniform);
 
+        float getRainCoverage() const;
+
     private:
         void create();
         ///< no need to call this, automatically done on first enable()
@@ -263,6 +265,8 @@ namespace MWRender
         bool mSunEnabled;
 
         float mWeatherAlpha;
+
+        float mRainCoverage;
 
         osg::Vec4f mMoonScriptColor;
     };

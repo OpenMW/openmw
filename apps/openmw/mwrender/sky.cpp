@@ -1119,6 +1119,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mWindSpeed(0.f)
     , mEnabled(true)
     , mSunEnabled(true)
+    , mRainCoverage(1.0f)
 {
     osg::ref_ptr<CameraRelativeTransform> skyroot (new CameraRelativeTransform);
     skyroot->setName("Sky Root");
@@ -1450,10 +1451,11 @@ protected:
 class WorldCollisionOperator : public osgParticle::Operator
 {
 public:
-    WorldCollisionOperator(osg::Camera *camera, MWPhysics::PhysicsSystem* physicsSystem): osgParticle::Operator()
+    WorldCollisionOperator(osg::Camera *camera, MWPhysics::PhysicsSystem* physicsSystem, float* rainCoverage): osgParticle::Operator()
     {
         mCamera = camera;
         mPhysicsSystem = physicsSystem;
+        mRainCoverage = rainCoverage;
     }
 
     virtual osg::Object *cloneType() const override
@@ -1473,18 +1475,31 @@ public:
     virtual void operateParticles(osgParticle::ParticleSystem *ps, double dt) override
     {
         if(mPhysicsSystem->getRainCollisionEnabled()) {
+            int r = 0;
             osg::Vec3 cameraPosition = getCameraPosition();
 
-            for (int i = 0; i < ps->numParticles(); ++i) {
+            int numParticles = ps->numParticles();
+
+            for (int i = 0; i < numParticles; ++i) {
                 osgParticle::Particle *p = ps->getParticle(i);
 
                 osg::Vec3f pos = cameraPosition + p->getPosition();
                 osg::Vec3f extrapolatedOrigin = pos - (p->getVelocity() * 100);
 
-                MWPhysics::PhysicsSystem::RayResult result = mPhysicsSystem->castRay(extrapolatedOrigin, pos);
+                MWPhysics::PhysicsSystem::RayResult result = mPhysicsSystem->castRay(extrapolatedOrigin, pos, MWWorld::ConstPtr(), std::vector<MWWorld::Ptr>(), MWPhysics::CollisionType_World);
                 if (result.mHit)
+                {
                     p->kill();
+                    r++;
+                }
             }
+
+            if(numParticles > 0)
+                *mRainCoverage = 1.0f - ((r / (float)numParticles) / 2);
+            else
+                *mRainCoverage = 1.0f;
+        }else{
+            *mRainCoverage = 1.0f;
         }
     }
 
@@ -1495,6 +1510,7 @@ protected:
     {
         return mCamera->getInverseViewMatrix().getTrans();
     }
+    float* mRainCoverage;
 };
 
 
@@ -1550,8 +1566,8 @@ void SkyManager::createRain()
     updater->addParticleSystem(mRainParticleSystem);
 
     osg::ref_ptr<osgParticle::ModularProgram> program (new osgParticle::ModularProgram);
+    program->addOperator(new WorldCollisionOperator(mCamera, mPhysicsSystem, &mRainCoverage));
     program->addOperator(new WrapAroundOperator(mCamera,rainRange));
-    program->addOperator(new WorldCollisionOperator(mCamera, mPhysicsSystem));
     program->setParticleSystem(mRainParticleSystem);
     mRainNode->addChild(program);
 
@@ -1952,6 +1968,11 @@ void SkyManager::listAssetsToPreload(std::vector<std::string>& models, std::vect
 void SkyManager::setWaterEnabled(bool enabled)
 {
     mUnderwaterSwitch->setEnabled(enabled);
+}
+
+float SkyManager::getRainCoverage() const
+{
+    return mRainCoverage;
 }
 
 }
