@@ -231,28 +231,12 @@ void Wizard::MainWizard::setupInstallations()
 
 void Wizard::MainWizard::runSettingsImporter()
 {
+    writeSettings();
+
     QString path(field(QLatin1String("installation.path")).toString());
 
-    // Create the file if it doesn't already exist, else the importer will fail
     QString userPath(toQString(mCfgMgr.getUserConfigPath()));
     QFile file(userPath + QLatin1String("openmw.cfg"));
-
-    if (!file.exists()) {
-        if (!file.open(QIODevice::ReadWrite)) {
-            // File cannot be created
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<html><head/><body><p><b>Could not open or create %1 for writing</b></p> \
-                              <p>Please make sure you have the right permissions \
-                              and try again.</p></body></html>").arg(file.fileName()));
-            msgBox.exec();
-            return qApp->quit();
-        }
-
-        file.close();
-    }
 
     // Construct the arguments to run the importer
     QStringList arguments;
