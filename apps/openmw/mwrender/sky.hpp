@@ -9,6 +9,7 @@
 #include <osg/ref_ptr>
 #include <osg/Vec4f>
 #include <osg/Uniform>
+#include <apps/openmw/mwphysics/physicssystem.hpp>
 
 namespace osg
 {
@@ -31,6 +32,11 @@ namespace osgParticle
 namespace Resource
 {
     class SceneManager;
+}
+
+namespace MWPhysics
+{
+    class PhysicsSystem;
 }
 
 namespace MWRender
@@ -117,7 +123,7 @@ namespace MWRender
     class SkyManager
     {
     public:
-        SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager);
+        SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager, MWPhysics::PhysicsSystem* physicsSystem);
         ~SkyManager();
 
         void update(float duration);
@@ -183,6 +189,7 @@ namespace MWRender
         void updateRainParameters();
 
         Resource::SceneManager* mSceneManager;
+        MWPhysics::PhysicsSystem* mPhysicsSystem;
 
         osg::Camera *mCamera;
         osg::Uniform *mRainIntensityUniform;

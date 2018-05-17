@@ -156,7 +156,7 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0), mSpellPreloadTimer(0.f)
     {
         mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
-        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath));
+        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath, mPhysics.get()));
         mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));
 
         mRendering->preloadCommonAssets();
@@ -2058,6 +2058,7 @@ namespace MWWorld
     void World::processChangedSettings(const Settings::CategorySettingVector& settings)
     {
         mRendering->processChangedSettings(settings);
+        mPhysics->processChangedSettings();
     }
 
     bool World::isFlying(const MWWorld::Ptr &ptr) const

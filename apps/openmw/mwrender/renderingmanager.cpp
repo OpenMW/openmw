@@ -177,7 +177,7 @@ namespace MWRender
     };
 
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                                       const Fallback::Map* fallback, const std::string& resourcePath)
+                                       const Fallback::Map* fallback, const std::string& resourcePath, MWPhysics::PhysicsSystem* physicsSystem)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
@@ -195,6 +195,7 @@ namespace MWRender
         , mDistantTerrain(false)
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
+        , mPhysicsSystem(physicsSystem)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
@@ -277,7 +278,7 @@ namespace MWRender
         sceneRoot->setNodeMask(Mask_Scene);
         sceneRoot->setName("Scene Root");
 
-        mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
+        mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager(), mPhysicsSystem));
 
         mSky->setCamera(mViewer->getCamera());
         mSky->setRainIntensityUniform(mWater->getRainIntensityUniform());

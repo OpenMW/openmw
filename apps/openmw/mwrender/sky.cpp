@@ -42,6 +42,7 @@
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <apps/openmw/mwphysics/physicssystem.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -1093,8 +1094,9 @@ private:
     }
 };
 
-SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager)
+SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager, MWPhysics::PhysicsSystem* physicsSystem)
     : mSceneManager(sceneManager)
+    , mPhysicsSystem(physicsSystem)
     , mCamera(NULL)
     , mRainIntensityUniform(NULL)
     , mAtmosphereNightRoll(0.f)
@@ -1445,6 +1447,57 @@ protected:
     }
 };
 
+class WorldCollisionOperator : public osgParticle::Operator
+{
+public:
+    WorldCollisionOperator(osg::Camera *camera, MWPhysics::PhysicsSystem* physicsSystem): osgParticle::Operator()
+    {
+        mCamera = camera;
+        mPhysicsSystem = physicsSystem;
+    }
+
+    virtual osg::Object *cloneType() const override
+    {
+        return NULL;
+    }
+
+    virtual osg::Object *clone(const osg::CopyOp &op) const override
+    {
+        return NULL;
+    }
+
+    virtual void operate(osgParticle::Particle *P, double dt) override
+    {
+    }
+
+    virtual void operateParticles(osgParticle::ParticleSystem *ps, double dt) override
+    {
+        if(mPhysicsSystem->getRainCollisionEnabled()) {
+            osg::Vec3 cameraPosition = getCameraPosition();
+
+            for (int i = 0; i < ps->numParticles(); ++i) {
+                osgParticle::Particle *p = ps->getParticle(i);
+
+                osg::Vec3f pos = cameraPosition + p->getPosition();
+                osg::Vec3f extrapolatedOrigin = pos - (p->getVelocity() * 100);
+
+                MWPhysics::PhysicsSystem::RayResult result = mPhysicsSystem->castRay(extrapolatedOrigin, pos);
+                if (result.mHit)
+                    p->kill();
+            }
+        }
+    }
+
+protected:
+    osg::Camera *mCamera;
+    MWPhysics::PhysicsSystem* mPhysicsSystem;
+    osg::Vec3 getCameraPosition()
+    {
+        return mCamera->getInverseViewMatrix().getTrans();
+    }
+};
+
+
 void SkyManager::createRain()
 {
     if (mRainNode)
@@ -1498,6 +1551,7 @@ void SkyManager::createRain()
 
     osg::ref_ptr<osgParticle::ModularProgram> program (new osgParticle::ModularProgram);
     program->addOperator(new WrapAroundOperator(mCamera,rainRange));
+    program->addOperator(new WorldCollisionOperator(mCamera, mPhysicsSystem));
     program->setParticleSystem(mRainParticleSystem);
     mRainNode->addChild(program);
 

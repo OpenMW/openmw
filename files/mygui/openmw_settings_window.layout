@@ -395,6 +395,16 @@
                                 </Widget>
                             </Widget>
                         </Widget>
+                        <Widget type="HBox" skin="" position="4 128 350 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
+                                <UserString key="SettingCategory" value="Water"/>
+                                <UserString key="SettingName" value="rain collision"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 75 16" align="Left Top">
+                                <Property key="Caption" value="Rain collision"/>
+                            </Widget>
+                        </Widget>
 
                     </Widget>
                     <!--

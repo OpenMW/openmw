@@ -70,6 +70,18 @@ Setting this to true will enable actors in reflections and increase realism with
 
 This setting can be toggled with the 'Reflect actors' button in the Water tab of the Video panel of the Options menu.
 
+rain collision
+--------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+This setting controls whether or not rain collides with the world.
+Setting this to true will enable collisions between rain particles and the world with a likely decrease in performance.
+
+This setting can be toggled with the 'Rain collision' button in the Water tab of the Video panel of the Options menu.
+
 small feature culling pixel size
 --------------------------------
 

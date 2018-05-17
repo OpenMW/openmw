@@ -170,6 +170,10 @@ namespace MWPhysics
 
             bool isOnSolidGround (const MWWorld::Ptr& actor) const;
 
+            void processChangedSettings();
+
+            bool getRainCollisionEnabled() const;
+
         private:
 
             void updateWater();
@@ -212,6 +216,8 @@ namespace MWPhysics
 
             float mWaterHeight;
             bool mWaterEnabled;
+
+            bool mRainCollision;
 
             std::unique_ptr<btCollisionObject> mWaterCollisionObject;
             std::unique_ptr<btCollisionShape> mWaterCollisionShape;

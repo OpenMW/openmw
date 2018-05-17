@@ -26,6 +26,7 @@
 #include <components/sceneutil/unrefqueue.hpp>
 
 #include <components/nifosg/particle.hpp> // FindRecIndexVisitor
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -707,6 +708,8 @@ namespace MWPhysics
                 std::cerr << "Warning: physics framerate was overridden (a new value is " << physFramerate << ")."  << std::endl;
             }
         }
+
+        mRainCollision = Settings::Manager::getBool("rain collision", "Water");
     }
 
     PhysicsSystem::~PhysicsSystem()
@@ -791,6 +794,16 @@ namespace MWPhysics
             return false;
 
         return true;
+    }
+
+    void PhysicsSystem::processChangedSettings()
+    {
+        mRainCollision = Settings::Manager::getBool("rain collision", "Water");
+    }
+
+    bool PhysicsSystem::getRainCollisionEnabled() const
+    {
+        return mRainCollision;
     }
 
     class DeepestNotMeContactTestResultCallback : public btCollisionWorld::ContactResultCallback
