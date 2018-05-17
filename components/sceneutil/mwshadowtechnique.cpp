@@ -1254,7 +1254,10 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
             if (!orthographicViewFrustum && settings->getShadowMapProjectionHint()==ShadowSettings::PERSPECTIVE_SHADOW_MAP)
             {
-                adjustPerspectiveShadowMapCameraSettings(vdsmCallback->getRenderStage(), frustum, pl, camera.get(), cascaseNear, cascadeFar);
+                if (settings->getMultipleShadowMapHint() == ShadowSettings::CASCADED)
+                    adjustPerspectiveShadowMapCameraSettings(vdsmCallback->getRenderStage(), frustum, pl, camera.get(), cascaseNear, cascadeFar);
+                else
+                    adjustPerspectiveShadowMapCameraSettings(vdsmCallback->getRenderStage(), frustum, pl, camera.get(), reducedNear, reducedFar);
                 if (vdsmCallback->getProjectionMatrix())
                 {
                     vdsmCallback->getProjectionMatrix()->set(camera->getProjectionMatrix());
