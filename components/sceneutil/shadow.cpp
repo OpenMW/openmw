@@ -42,6 +42,11 @@ namespace SceneUtil
         mShadowTechnique->setSplitPointUniformLogarithmicRatio(Settings::Manager::getFloat("split point uniform logarithmic ratio", "Shadows"));
         mShadowTechnique->setSplitPointDeltaBias(Settings::Manager::getFloat("split point bias", "Shadows"));
 
+        if (Settings::Manager::getBool("allow shadow map overlap", "Shadows"))
+            mShadowSettings->setMultipleShadowMapHint(osgShadow::ShadowSettings::CASCADED);
+        else
+            mShadowSettings->setMultipleShadowMapHint(osgShadow::ShadowSettings::PARALLEL_SPLIT);
+
         if (Settings::Manager::getBool("enable debug hud", "Shadows"))
             mShadowTechnique->enableDebugHUD();
         else

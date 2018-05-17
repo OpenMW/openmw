@@ -1188,7 +1188,9 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 if (sm_i+1<numShadowMapsPerLight) r_end+=0.01;
 
 
-                if (false)//(sm_i>0)
+                // We can't add these clipping planes with cascaded shadow maps as they wouldn't be parallel to the light direction.
+
+                if (settings->getMultipleShadowMapHint() == ShadowSettings::PARALLEL_SPLIT && sm_i>0)
                 {
                     // not the first shadowmap so insert a polytope to clip the scene from before r_start
 
@@ -1203,7 +1205,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
                 }
 
-                if (false)//(sm_i+1<numShadowMapsPerLight)
+                if (settings->getMultipleShadowMapHint() == ShadowSettings::PARALLEL_SPLIT && sm_i+1<numShadowMapsPerLight)
                 {
                     // not the last shadowmap so insert a polytope to clip the scene from beyond r_end
 
@@ -1219,20 +1221,22 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
                 local_polytope.setupMask();
 
+                if (settings->getMultipleShadowMapHint() == ShadowSettings::PARALLEL_SPLIT)
+                {
+                    // OSG_NOTICE<<"Need to adjust RTT camera projection and view matrix here, r_start="<<r_start<<", r_end="<<r_end<<std::endl;
+                    // OSG_NOTICE<<"  textureUnit = "<<textureUnit<<std::endl;
 
-                // OSG_NOTICE<<"Need to adjust RTT camera projection and view matrix here, r_start="<<r_start<<", r_end="<<r_end<<std::endl;
-                // OSG_NOTICE<<"  textureUnit = "<<textureUnit<<std::endl;
+                    double mid_r = (r_start + r_end)*0.5;
+                    double range_r = (r_end - r_start);
 
-                double mid_r = (r_start+r_end)*0.5;
-                double range_r = (r_end-r_start);
+                    // OSG_NOTICE<<"  mid_r = "<<mid_r<<", range_r = "<<range_r<<std::endl;
 
-                // OSG_NOTICE<<"  mid_r = "<<mid_r<<", range_r = "<<range_r<<std::endl;
-
-                /*camera->setProjectionMatrix(
-                    camera->getProjectionMatrix() *
-                    osg::Matrixd::translate(osg::Vec3d(0.0,-mid_r,0.0)) *
-                    osg::Matrixd::scale(osg::Vec3d(1.0,2.0/range_r,1.0)));
-                */
+                    camera->setProjectionMatrix(
+                        camera->getProjectionMatrix() *
+                        osg::Matrixd::translate(osg::Vec3d(0.0,-mid_r,0.0)) *
+                        osg::Matrixd::scale(osg::Vec3d(1.0,2.0/range_r,1.0)));
+                    
+                }
             }
 
 
@@ -2182,8 +2186,10 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
 
     osg::Vec3d nearPoint = frustum.eye + frustum.frustumCenterLine * viewNear;
     osg::Vec3d farPoint = frustum.eye + frustum.frustumCenterLine * viewFar;
+    // TODO: Aren't these just dot products? Also the double negation of farDist is silly.
     double nearDist = frustum.frustumCenterLine.x() * nearPoint.x() + frustum.frustumCenterLine.y() * nearPoint.y() + frustum.frustumCenterLine.z() * nearPoint.z();
     double farDist = -frustum.frustumCenterLine.x() * farPoint.x() - frustum.frustumCenterLine.y() * farPoint.y() - frustum.frustumCenterLine.z() * farPoint.z();
+
 
     convexHull.clip(osg::Plane(frustum.frustumCenterLine, -nearDist));
     convexHull.clip(osg::Plane(-frustum.frustumCenterLine, -farDist));
