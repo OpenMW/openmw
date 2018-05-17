@@ -654,12 +654,6 @@ void MwIniImporter::setVerbose(bool verbose) {
     mVerbose = verbose;
 }
 
-std::string MwIniImporter::numberToString(int n) {
-    std::stringstream str;
-    str << n;
-    return str.str();
-}
-
 MwIniImporter::multistrmap MwIniImporter::loadIniFile(const boost::filesystem::path&  filename) const {
     std::cout << "load ini file: " << filename << std::endl;
 
@@ -801,7 +795,7 @@ void MwIniImporter::importArchives(multistrmap &cfg, const multistrmap &ini) con
     multistrmap::const_iterator it = ini.begin();
     for(int i=0; it != ini.end(); i++) {
         archive = baseArchive;
-        archive.append(this->numberToString(i));
+        archive.append(std::to_string(i));
 
         it = ini.find(archive);
         if(it == ini.end()) {
@@ -892,7 +886,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
     for (int i=0; it != ini.end(); i++)
     {
         gameFile = baseGameFile;
-        gameFile.append(this->numberToString(i));
+        gameFile.append(std::to_string(i));
 
         it = ini.find(gameFile);
         if(it == ini.end())

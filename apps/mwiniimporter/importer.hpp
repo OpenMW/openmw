@@ -35,7 +35,6 @@ class MwIniImporter {
     static std::vector<std::string>::iterator findString(std::vector<std::string>& source, const std::string& string);
 
     static void insertMultistrmap(multistrmap &cfg, const std::string& key, const std::string& value);
-    static std::string numberToString(int n);
 
     /// \return file's "last modified time", used in original MW to determine plug-in load order
     static std::time_t lastWriteTime(const boost::filesystem::path& filename, std::time_t defaultTime);
