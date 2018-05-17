@@ -96,6 +96,11 @@ namespace SceneUtil
         // remove extra comma
         definesWithShadows["shadow_texture_unit_list"] = definesWithShadows["shadow_texture_unit_list"].substr(0, definesWithShadows["shadow_texture_unit_list"].length() - 1);
 
+        if (Settings::Manager::getBool("allow shadow map overlap", "Shadows"))
+            definesWithShadows["shadowMapsOverlap"] = "1";
+        else
+            definesWithShadows["shadowMapsOverlap"] = "0";
+
         return definesWithShadows;
     }
 
@@ -104,6 +109,8 @@ namespace SceneUtil
         Shader::ShaderManager::DefineMap definesWithShadows;
         definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("0")));
         definesWithShadows["shadow_texture_unit_list"] = "";
+
+        definesWithShadows["shadowMapsOverlap"] = "0";
 
         return definesWithShadows;
     }
