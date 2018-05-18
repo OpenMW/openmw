@@ -242,6 +242,8 @@ void CSMPrefs::State::declare()
         addValues (landeditOutsideCell);
     declareEnum ("outside-visible-landedit", "Handling land edit outside of visible cells", showAndLandEdit).
         addValues (landeditOutsideVisibleCell);
+    declareInt ("texturebrush-maximumsize", "Maximum texture brush size", 50).
+        setMin (1);
 
     declareCategory ("Key Bindings");
 

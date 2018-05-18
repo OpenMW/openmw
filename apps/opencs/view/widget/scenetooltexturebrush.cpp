@@ -21,7 +21,9 @@
 #include <QSizePolicy>
 
 #include "scenetool.hpp"
+
 #include "../../model/doc/document.hpp"
+#include "../../model/prefs/state.hpp"
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/landtexture.hpp"
@@ -33,11 +35,11 @@ CSVWidget::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *p
     mBrushSizeSlider = new QSlider(Qt::Horizontal);
     mBrushSizeSlider->setTickPosition(QSlider::TicksBothSides);
     mBrushSizeSlider->setTickInterval(10);
-    mBrushSizeSlider->setRange(1, 50);
+    mBrushSizeSlider->setRange(1, CSMPrefs::get()["3D Scene Editing"]["texturebrush-maximumsize"].toInt());
     mBrushSizeSlider->setSingleStep(1);
 
     mBrushSizeSpinBox = new QSpinBox;
-    mBrushSizeSpinBox->setRange(1, 50);
+    mBrushSizeSpinBox->setRange(1, CSMPrefs::get()["3D Scene Editing"]["texturebrush-maximumsize"].toInt());
     mBrushSizeSpinBox->setSingleStep(1);
 
     mLayoutSliderSize = new QHBoxLayout;
@@ -273,6 +275,8 @@ void CSVWidget::SceneToolTextureBrush::clicked (const QModelIndex& index)
 void CSVWidget::SceneToolTextureBrush::activate ()
 {
     QPoint position = QCursor::pos();
+    mTextureBrushWindow->mSizeSliders->mBrushSizeSlider->setRange(1, CSMPrefs::get()["3D Scene Editing"]["texturebrush-maximumsize"].toInt());
+    mTextureBrushWindow->mSizeSliders->mBrushSizeSpinBox->setRange(1, CSMPrefs::get()["3D Scene Editing"]["texturebrush-maximumsize"].toInt());
     mTextureBrushWindow->move (position);
     mTextureBrushWindow->show();
 }

@@ -30,9 +30,9 @@ namespace CSVWidget
         public:
             BrushSizeControls(const QString &title, QWidget *parent);
             QSlider *mBrushSizeSlider;
+            QSpinBox *mBrushSizeSpinBox;
 
         private:
-            QSpinBox *mBrushSizeSpinBox;
             QHBoxLayout *mLayoutSliderSize;
     };
 
