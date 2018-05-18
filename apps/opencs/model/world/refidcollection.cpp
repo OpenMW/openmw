@@ -331,7 +331,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     creatureColumns.mType = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Scale, ColumnBase::Display_Float));
     creatureColumns.mScale = &mColumns.back();
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_OriginalCreature, ColumnBase::Display_Creature));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_ParentCreature, ColumnBase::Display_Creature));
     creatureColumns.mOriginal = &mColumns.back();
 
     static const struct

@@ -105,7 +105,7 @@ namespace CSMWorld
             { ColumnId_Respawn, "Respawn" },
             { ColumnId_CreatureType, "Creature Type" },
             { ColumnId_SoulPoints, "Soul Points" },
-            { ColumnId_OriginalCreature, "Original Creature" },
+            { ColumnId_ParentCreature, "Parent Creature" },
             { ColumnId_Biped, "Biped" },
             { ColumnId_HasWeapon, "Has Weapon" },
             { ColumnId_Swims, "Swims" },
