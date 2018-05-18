@@ -51,13 +51,18 @@ std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLev
         correctedPath.compare(0, prefix2.size(), prefix2.data()) != 0)
         correctedPath = prefix1 + correctedPath;
 
-    if (vfs->exists(correctedPath))
-        return correctedPath;
+    // Find the highest priority file with the same base name (no extension)
+    std::string filePath = vfs->findFirstOf(correctedPath);
+
+    if (!filePath.empty())
+        return filePath;
 
     // Fall back to a resource in the top level directory if it exists
-    std::string fallback = prefix1 + getBasename(correctedPath);
-    if (vfs->exists(fallback))
-        return fallback;
+    filePath = prefix1 + getBasename(correctedPath);
+    filePath = vfs->findFirstOf(filePath);
+
+    if (!filePath.empty())
+        return filePath;
 
     return correctedPath;
 }
