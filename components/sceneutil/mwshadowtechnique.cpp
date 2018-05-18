@@ -1239,6 +1239,10 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 }
             }
 
+            if (settings->getMultipleShadowMapHint() == ShadowSettings::CASCADED)
+                cropShadowCameraToMainFrustum(frustum, camera, cascaseNear, cascadeFar);
+            else
+                cropShadowCameraToMainFrustum(frustum, camera, reducedNear, reducedFar);
 
             osg::ref_ptr<VDSMCameraCullCallback> vdsmCallback = new VDSMCameraCullCallback(this, local_polytope);
             camera->setCullCallback(vdsmCallback.get());
@@ -2158,6 +2162,61 @@ struct RenderLeafBounds
     double min_y, max_y;
     double min_z, max_z;
 };
+
+bool MWShadowTechnique::cropShadowCameraToMainFrustum(Frustum& frustum, osg::Camera* camera, double viewNear, double viewFar)
+{
+    osg::Matrixd light_p = camera->getProjectionMatrix();
+    osg::Matrixd light_v = camera->getViewMatrix();
+    osg::Matrixd light_vp = light_v * light_p;
+    
+    ConvexHull convexHull;
+    convexHull.setToFrustum(frustum);
+
+    osg::Vec3d nearPoint = frustum.eye + frustum.frustumCenterLine * viewNear;
+    osg::Vec3d farPoint = frustum.eye + frustum.frustumCenterLine * viewFar;
+
+    double nearDist = -frustum.frustumCenterLine * nearPoint;
+    double farDist = frustum.frustumCenterLine * farPoint;
+
+    convexHull.clip(osg::Plane(frustum.frustumCenterLine, nearDist));
+    convexHull.clip(osg::Plane(-frustum.frustumCenterLine, farDist));
+
+    convexHull.transform(light_vp);
+
+    double xMin = -1.0, xMax = 1.0;
+    double yMin = -1.0, yMax = 1.0;
+    double zMin = -1.0, zMax = 1.0;
+
+    if (convexHull.valid())
+    {
+        xMin = osg::maximum(-1.0, convexHull.min(0));
+        xMax = osg::minimum(1.0, convexHull.max(0));
+        yMin = osg::maximum(-1.0, convexHull.min(1));
+        yMax = osg::minimum(1.0, convexHull.max(1));
+    }
+    else
+        return false;
+
+    // we always want the lightspace to include the computed near plane.
+    zMin = -1.0;
+    if (xMin != -1.0 || yMin != -1.0 || zMin != -1.0 ||
+        xMax != 1.0 || yMax != 1.0 || zMax != 1.0)
+    {
+        osg::Matrix m;
+        m.makeTranslate(osg::Vec3d(-0.5*(xMax + xMin),
+                                   -0.5*(yMax + yMin),
+                                   -0.5*(zMax + zMin)));
+
+        m.postMultScale(osg::Vec3d(2.0 / (xMax - xMin),
+                                   2.0 / (yMax - yMin),
+                                   2.0 / (zMax - zMin)));
+
+        light_p.postMult(m);
+        camera->setProjectionMatrix(light_p);
+    }
+
+    return true;
+}
 
 bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::RenderStage* renderStage, Frustum& frustum, LightData& /*positionedLight*/, osg::Camera* camera, double viewNear, double viewFar)
 {
