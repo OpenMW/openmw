@@ -45,7 +45,8 @@ namespace VFS
     void Manager::reset()
     {
         mIndex.clear();
-        for (std::vector<Archive*>::iterator it = mArchives.begin(); it != mArchives.end(); ++it)
+        mArchiveIndexes.clear();
+        for (auto it = mArchives.begin(); it != mArchives.end(); ++it)
             delete *it;
         mArchives.clear();
     }
@@ -58,9 +59,18 @@ namespace VFS
     void Manager::buildIndex()
     {
         mIndex.clear();
+        mArchiveIndexes.clear();
+        mArchiveIndexes.reserve(mArchives.size());
 
-        for (std::vector<Archive*>::const_iterator it = mArchives.begin(); it != mArchives.end(); ++it)
+        std::back_insert_iterator<std::vector<NameFileMap>> archiveInserter(mArchiveIndexes);
+        for (auto it = mArchives.begin(); it != mArchives.end(); ++it)
+        {
+            NameFileMap index;
             (*it)->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
+            for (NameFileMap::const_iterator nf = index.begin(); nf != index.end(); ++nf)
+                mIndex[nf->first] = nf->second;
+            *archiveInserter = index;
+        }
     }
 
     Files::IStreamPtr Manager::get(const std::string &name) const
@@ -73,7 +83,7 @@ namespace VFS
 
     Files::IStreamPtr Manager::getNormalized(const std::string &normalizedName) const
     {
-        std::map<std::string, File*>::const_iterator found = mIndex.find(normalizedName);
+        NameFileMap::const_iterator found = mIndex.find(normalizedName);
         if (found == mIndex.end())
             throw std::runtime_error("Resource '" + normalizedName + "' not found");
         return found->second->open();

@@ -63,7 +63,11 @@ namespace VFS
 
         std::vector<Archive*> mArchives;
 
-        std::map<std::string, File*> mIndex;
+        typedef std::map<std::string,File*> NameFileMap;
+
+        std::vector<NameFileMap> mArchiveIndexes;
+
+        NameFileMap mIndex;
     };
 
 }
