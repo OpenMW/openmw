@@ -1,7 +1,5 @@
 #include "magiceffectcheck.hpp"
 
-#include <components/misc/resourcehelpers.hpp>
-
 #include "../world/resources.hpp"
 #include "../world/data.hpp"
 
@@ -19,22 +17,8 @@ namespace
 bool CSMTools::MagicEffectCheckStage::isTextureExists(const std::string &texture, bool isIcon) const
 {
     const CSMWorld::Resources &textures = isIcon ? mIcons : mTextures;
-    bool exists = false;
 
-    if (textures.searchId(texture) != -1)
-    {
-        exists = true;
-    }
-    else
-    {
-        std::string ddsTexture = texture;
-        if (Misc::ResourceHelpers::changeExtensionToDds(ddsTexture) && textures.searchId(ddsTexture) != -1)
-        {
-            exists = true;
-        }
-    }
-
-    return exists;
+    return (textures.searchId(texture) != -1);
 }
 
 std::string CSMTools::MagicEffectCheckStage::checkReferenceable(const std::string &id, 
