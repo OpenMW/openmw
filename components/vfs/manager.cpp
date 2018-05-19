@@ -108,9 +108,8 @@ namespace VFS
         normalize_path(name, mStrict);
     }
 
-    std::string Manager::findFirstOf(const std::string &name) const
+    const std::string& Manager::findFirstOf(std::string normalized) const
     {
-        std::string normalized = name;
         normalize_path(normalized, mStrict);
         size_t extensionPos = normalized.rfind('.');
         if (extensionPos == std::string::npos || normalized.find('/', extensionPos+1) != std::string::npos)
@@ -131,8 +130,9 @@ namespace VFS
                     return entry->first;
             }
         }
-        
-        return {};
+
+        static const std::string empty;
+        return empty;
     }
 
 }

@@ -61,7 +61,7 @@ namespace VFS
         /// Find the highest priority resource of given resource name, ignoring the extension.
         /// @return the path to the resource
         /// @return empty string if no such resources were found
-        std::string findFirstOf(const std::string& name) const;
+        const std::string& findFirstOf(std::string normalized) const;
 
     private:
         bool mStrict;
