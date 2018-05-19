@@ -66,7 +66,7 @@ namespace VFS
         for (auto it = mArchives.begin(); it != mArchives.end(); ++it)
         {
             NameFileMap index;
-            (*it)->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
+            (*it)->listResources(index, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
             for (NameFileMap::const_iterator nf = index.begin(); nf != index.end(); ++nf)
                 mIndex[nf->first] = nf->second;
             *archiveInserter = index;
@@ -108,7 +108,7 @@ namespace VFS
         normalize_path(name, mStrict);
     }
 
-    const std::string& Manager::findFirstOf(const std::string &name) const
+    std::string Manager::findFirstOf(const std::string &name) const
     {
         std::string normalized = name;
         normalize_path(normalized, mStrict);
