@@ -477,6 +477,8 @@ namespace Resource
 
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string &name)
     {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+
         std::string normalized = name;
         mVFS->normalizeFilename(normalized);
 
