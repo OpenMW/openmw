@@ -332,8 +332,8 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# OSG
 	download "OpenSceneGraph 3.6.0-scrawl" \
-		"https://www.lysator.liu.se/~ace/OpenMW/deps/OSG-3.6.0-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z" \
-		"OSG-3.4.1-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z"
+		"https://www.lysator.liu.se/~ace/OpenMW/deps/OSG-3.6.0-scrawl-msvc${MSVC_DISPLAY_YEAR}-win${BITS}.7z" \
+		"OSG-3.4.1-scrawl-msvc${MSVC_DISPLAY_YEAR}-win${BITS}.7z"
 
 	# Qt
 	if [ -z $APPVEYOR ]; then
@@ -546,8 +546,8 @@ printf "OSG 3.6.0-scrawl... "
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf OSG
-		eval 7z x -y "${DEPS}/OSG-3.6.0-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z" $STRIP
-		mv "OSG-3.6.0-scrawl-msvc${MSVC_YEAR}-win${BITS}" OSG
+		eval 7z x -y "${DEPS}/OSG-3.6.0-scrawl-msvc${MSVC_DISPLAY_YEAR}-win${BITS}.7z" $STRIP
+		mv "OSG-3.6.0-scrawl-msvc${MSVC_DISPLAY_YEAR}-win${BITS}" OSG
 	fi
 
 	OSG_SDK="$(real_pwd)/OSG"
