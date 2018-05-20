@@ -216,6 +216,7 @@ case $VS_VERSION in
 	15|15.0|2017 )
 		GENERATOR="Visual Studio 15 2017"
 		TOOLSET="vc140"
+		MSVC_REAL_VER="15"
 		MSVC_VER="14"
 		MSVC_YEAR="2015"
 		MSVC_DISPLAY_YEAR="2017"
@@ -224,6 +225,7 @@ case $VS_VERSION in
 	14|14.0|2015 )
 		GENERATOR="Visual Studio 14 2015"
 		TOOLSET="vc140"
+		MSVC_REAL_VER="14"
 		MSVC_VER="14"
 		MSVC_YEAR="2015"
 		MSVC_DISPLAY_YEAR="2015"
@@ -232,6 +234,7 @@ case $VS_VERSION in
 	12|12.0|2013 )
 		GENERATOR="Visual Studio 12 2013"
 		TOOLSET="vc120"
+		MSVC_REAL_VER="12"
 		MSVC_VER="12"
 		MSVC_YEAR="2013"
 		MSVC_DISPLAY_YEAR="2013"
@@ -408,13 +411,19 @@ fi
 		echo Done.
 	else
 		# Appveyor unstable has all the boost we need already
-		if [ $MSVC_VER -eq 12 ]; then
+		if [ $MSVC_REAL_VER -eq 12 ]; then
 			BOOST_SDK="c:/Libraries/boost_1_58_0"
 		else
 			BOOST_SDK="c:/Libraries/boost_1_67_0"
 		fi
+		if [ $MSVC_REAL_VER -eq 15 ]; then
+			LIB_SUFFIX="1"
+		else
+			LIB_SUFFIX="0"
+		fi
+		
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
-			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.0"
+			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.${LIB_SUFFIX}"
 		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
 
 		echo Done.
