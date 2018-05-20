@@ -248,7 +248,7 @@ void CSVWidget::SceneToolTextureBrush::setButtonIcon (int brushShape)
         tooltip += landtexturesCollection.getData(index, landTextureFilename).value<QString>();
     } else
     {
-        tooltip += "No selected texture or invalid texture";
+        tooltip += "<p>No selected texture or invalid texture";
     }
 
     tooltip += "<br>(drop texture here to change)";
