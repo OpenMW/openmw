@@ -1621,7 +1621,7 @@ namespace MWWorld
         if (!paused)
             doPhysics (duration);
 
-        updatePlayer(paused);
+        updatePlayer();
 
         mPhysics->debugDraw();
 
@@ -1637,7 +1637,7 @@ namespace MWWorld
         }
     }
 
-    void World::updatePlayer(bool paused)
+    void World::updatePlayer()
     {
         MWWorld::Ptr player = getPlayerPtr();
 
@@ -1670,7 +1670,7 @@ namespace MWWorld
         bool swimming = isSwimming(player);
 
         static const float i1stPersonSneakDelta = getStore().get<ESM::GameSetting>().find("i1stPersonSneakDelta")->getFloat();
-        if(!paused && sneaking && !(swimming || inair))
+        if (sneaking && !(swimming || inair))
             mRendering->getCamera()->setSneakOffset(i1stPersonSneakDelta);
         else
             mRendering->getCamera()->setSneakOffset(0.f);
