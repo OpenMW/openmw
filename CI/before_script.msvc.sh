@@ -216,6 +216,7 @@ case $VS_VERSION in
 	15|15.0|2017 )
 		GENERATOR="Visual Studio 15 2017"
 		TOOLSET="vc140"
+		TOOLSET_REAL="vc141"
 		MSVC_REAL_VER="15"
 		MSVC_VER="14"
 		MSVC_YEAR="2015"
@@ -225,6 +226,7 @@ case $VS_VERSION in
 	14|14.0|2015 )
 		GENERATOR="Visual Studio 14 2015"
 		TOOLSET="vc140"
+		TOOLSET_REAL="vc140"
 		MSVC_REAL_VER="14"
 		MSVC_VER="14"
 		MSVC_YEAR="2015"
@@ -234,6 +236,7 @@ case $VS_VERSION in
 	12|12.0|2013 )
 		GENERATOR="Visual Studio 12 2013"
 		TOOLSET="vc120"
+		TOOLSET_REAL="vc120"
 		MSVC_REAL_VER="12"
 		MSVC_VER="12"
 		MSVC_YEAR="2013"
@@ -424,7 +427,7 @@ fi
 		
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
 			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.${LIB_SUFFIX}"
-		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
+		add_cmake_opts -DBoost_COMPILER="-${TOOLSET_REAL}"
 
 		echo Done.
 	fi
