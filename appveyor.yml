@@ -8,7 +8,7 @@ branches:
 
 environment:
     matrix:
-        - msvc: 2015
+#       - msvc: 2015
         - msvc: 2017
 
 platform:
@@ -20,7 +20,7 @@ configuration:
 #   - Release
 
 # For the Qt, Boost, CMake, etc installs
-os: Visual Studio 2015
+os: Visual Studio 2017
 
 # We want the git revision for versioning,
 # so shallow clones don't work.
