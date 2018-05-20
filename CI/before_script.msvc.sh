@@ -385,7 +385,7 @@ else
 	if [ $MSVC_VER -eq 12 ]; then
 		printf "Boost 1.58.0 AppVeyor... "
 	else
-		printf "Boost 1.60.0 AppVeyor... "
+		printf "Boost 1.67.0 AppVeyor... "
 	fi
 fi
 {
@@ -411,7 +411,7 @@ fi
 		if [ $MSVC_VER -eq 12 ]; then
 			BOOST_SDK="c:/Libraries/boost_1_58_0"
 		else
-			BOOST_SDK="c:/Libraries/boost_1_60_0"
+			BOOST_SDK="c:/Libraries/boost_1_67_0"
 		fi
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
 			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.0"
@@ -618,7 +618,7 @@ fi
 
 		echo Done.
 	else
-		QT_SDK="C:/Qt/5.10/msvc${MSVC_YEAR}${SUFFIX}"
+		QT_SDK="C:/Qt/5.10/msvc${MSVC_DISPLAY_YEAR}${SUFFIX}"
 
 		add_cmake_opts -DDESIRED_QT_VERSION=5 \
 			-DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
