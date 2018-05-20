@@ -52,7 +52,7 @@ install:
     - set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
 
 before_build:
-    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -u -p %PLATFORM% -v %msvc%
+    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -u -p %PLATFORM% -v %msvc% -V
 
 build_script:
     - cmd: if %PLATFORM%==Win32 set build=MSVC%msvc%_32
