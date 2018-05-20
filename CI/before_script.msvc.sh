@@ -209,7 +209,7 @@ if [ -z $CONFIGURATION ]; then
 fi
 
 if [ -z $VS_VERSION ]; then
-	VS_VERSION="2013"
+	VS_VERSION="2015"
 fi
 
 case $VS_VERSION in
@@ -232,16 +232,11 @@ case $VS_VERSION in
 		MSVC_YEAR="2015"
 		MSVC_DISPLAY_YEAR="2015"
 		;;
-
+		
 	12|12.0|2013 )
-		GENERATOR="Visual Studio 12 2013"
-		TOOLSET="vc120"
-		TOOLSET_REAL="vc120"
-		MSVC_REAL_VER="12"
-		MSVC_VER="12"
-		MSVC_YEAR="2013"
-		MSVC_DISPLAY_YEAR="2013"
-		;;
+	        echo "Visual Studio 2013 is no longer supported, sorry."
+		exit 1
+	        ;;
 esac
 
 case $PLATFORM in
@@ -336,8 +331,8 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"OpenAL-Soft-1.17.2.zip"
 
 	# OSG
-	download "OpenSceneGraph 3.4.1-scrawl" \
-		"https://www.lysator.liu.se/~ace/OpenMW/deps/OSG-3.4.1-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z" \
+	download "OpenSceneGraph 3.6.0-scrawl" \
+		"https://www.lysator.liu.se/~ace/OpenMW/deps/OSG-3.6.0-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z" \
 		"OSG-3.4.1-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z"
 
 	# Qt
@@ -539,20 +534,20 @@ cd $DEPS
 echo
 
 # OSG
-printf "OSG 3.4.1-scrawl... "
+printf "OSG 3.6.0-scrawl... "
 {
 	cd $DEPS_INSTALL
 
 	if [ -d OSG ] && \
 		grep "OPENSCENEGRAPH_MAJOR_VERSION    3" OSG/include/osg/Version > /dev/null && \
-		grep "OPENSCENEGRAPH_MINOR_VERSION    4" OSG/include/osg/Version > /dev/null && \
-		grep "OPENSCENEGRAPH_PATCH_VERSION    1" OSG/include/osg/Version > /dev/null
+		grep "OPENSCENEGRAPH_MINOR_VERSION    6" OSG/include/osg/Version > /dev/null && \
+		grep "OPENSCENEGRAPH_PATCH_VERSION    0" OSG/include/osg/Version > /dev/null
 	then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf OSG
-		eval 7z x -y "${DEPS}/OSG-3.4.1-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z" $STRIP
-		mv "OSG-3.4.1-scrawl-msvc${MSVC_YEAR}-win${BITS}" OSG
+		eval 7z x -y "${DEPS}/OSG-3.6.0-scrawl-msvc${MSVC_YEAR}-win${BITS}.7z" $STRIP
+		mv "OSG-3.6.0-scrawl-msvc${MSVC_YEAR}-win${BITS}" OSG
 	fi
 
 	OSG_SDK="$(real_pwd)/OSG"
@@ -568,8 +563,8 @@ printf "OSG 3.4.1-scrawl... "
 	add_runtime_dlls "$(pwd)/OSG/bin/"{OpenThreads,zlib,libpng*}${SUFFIX}.dll \
 		"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer}${SUFFIX}.dll
 
-	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.1/osgdb_"{bmp,dds,jpeg,osg,png,tga}${SUFFIX}.dll
-	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.1/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer}${SUFFIX}.dll
+	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.6.0/osgdb_"{bmp,dds,jpeg,osg,png,tga}${SUFFIX}.dll
+	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.6.0/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer}${SUFFIX}.dll
 
 	echo Done.
 }
@@ -728,10 +723,10 @@ if [ -z $CI ]; then
 	echo
 
 	echo "- OSG Plugin DLLs..."
-	mkdir -p $BUILD_CONFIG/osgPlugins-3.4.1
+	mkdir -p $BUILD_CONFIG/osgPlugins-3.6.0
 	for DLL in $OSG_PLUGINS; do
 		echo "    $(basename $DLL)."
-		cp "$DLL" $BUILD_CONFIG/osgPlugins-3.4.1
+		cp "$DLL" $BUILD_CONFIG/osgPlugins-3.6.0
 	done
 	echo
 
