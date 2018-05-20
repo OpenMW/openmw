@@ -333,7 +333,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	# OSG
 	download "OpenSceneGraph 3.6.0-scrawl" \
 		"https://www.lysator.liu.se/~ace/OpenMW/deps/OSG-3.6.0-scrawl-msvc${MSVC_DISPLAY_YEAR}-win${BITS}.7z" \
-		"OSG-3.4.1-scrawl-msvc${MSVC_DISPLAY_YEAR}-win${BITS}.7z"
+		"OSG-3.6.0-scrawl-msvc${MSVC_DISPLAY_YEAR}-win${BITS}.7z"
 
 	# Qt
 	if [ -z $APPVEYOR ]; then
