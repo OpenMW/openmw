@@ -25,8 +25,10 @@
 #include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
 #include "../../model/world/data.hpp"
+#include "../../model/world/idcollection.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/landtexture.hpp"
+#include "../../model/world/universalid.hpp"
 
 
 CSVWidget::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *parent)
@@ -59,14 +61,21 @@ CSVWidget::TextureBrushWindow::TextureBrushWindow(CSMDoc::Document& document, QW
     mBrushTexture("L0#0"),
     mDocument(document)
 {
-    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
-        *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
-
-    int landTextureFilename = ltexTable.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
-
-    QModelIndex index = ltexTable.getModelIndex (mBrushTexture, landTextureFilename);
     mBrushTextureLabel = "Selected texture: " + mBrushTexture + " ";
-    mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel) + ltexTable.data(index).value<QString>());
+
+    CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = mDocument.getData().getLandTextures();
+
+    int landTextureFilename = landtexturesCollection.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
+    int index = landtexturesCollection.searchId(mBrushTexture);
+
+    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
+    {
+        mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel) + landtexturesCollection.getData(index, landTextureFilename).value<QString>());
+    } else
+    {
+        mBrushTextureLabel = "No selected texture or invalid texture";
+        mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel));
+    }
 
     QVBoxLayout *layoutMain = new QVBoxLayout;
     layoutMain->setSpacing(0);
@@ -125,16 +134,22 @@ void CSVWidget::TextureBrushWindow::configureButtonInitialSettings(QPushButton *
 
 void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
 {
-    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
-        *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
-    int landTextureFilename = ltexTable.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
+    CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = mDocument.getData().getLandTextures();
 
+    int landTextureFilename = landtexturesCollection.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
+    int index = landtexturesCollection.searchId(mBrushTexture);
     mBrushTexture = brushTexture;
-    mBrushTextureLabel = "Selected texture: " + mBrushTexture + " ";
-    QModelIndex index = ltexTable.getModelIndex (mBrushTexture, landTextureFilename);
-    mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel) + ltexTable.data(index).value<QString>());
-    emit passBrushShape(mBrushShape); // update icon
 
+    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
+    {
+        mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel) + landtexturesCollection.getData(index, landTextureFilename).value<QString>());
+    } else
+    {
+        mBrushTextureLabel = "No selected texture or invalid texture";
+        mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel));
+    }
+
+    emit passBrushShape(mBrushShape); // update icon
 }
 
 void CSVWidget::TextureBrushWindow::setBrushSize(int brushSize)
@@ -219,13 +234,22 @@ void CSVWidget::SceneToolTextureBrush::setButtonIcon (int brushShape)
         setIcon (QIcon (QPixmap (":scenetoolbar/brush-custom")));
         tooltip += dynamic_cast<QString&> (mTextureBrushWindow->toolTipCustom);
     }
-    tooltip += "<p>Selected texture: " + QString::fromStdString(mTextureBrushWindow->mBrushTexture) + " ";
 
-    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
-        *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
-    int landTextureFilename = ltexTable.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
-    QModelIndex index = ltexTable.getModelIndex (mTextureBrushWindow->mBrushTexture, landTextureFilename);
-    tooltip += ltexTable.data(index).value<QString>();
+    CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = mDocument.getData().getLandTextures();
+
+    int landTextureFilename = landtexturesCollection.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
+    int index = landtexturesCollection.searchId(mTextureBrushWindow->mBrushTexture);
+
+    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
+    {
+        //QModelIndex qIndex = landtexturesCollection.getModelIndex (mBrushTexture, landTextureFilename);
+        tooltip += "<p>Selected texture: " + QString::fromStdString(mTextureBrushWindow->mBrushTexture) + " ";
+
+        tooltip += landtexturesCollection.getData(index, landTextureFilename).value<QString>();
+    } else
+    {
+        tooltip += "No selected texture or invalid texture";
+    }
 
     tooltip += "<br>(drop texture here to change)";
     setToolTip (tooltip);
@@ -244,12 +268,19 @@ void CSVWidget::SceneToolTextureBrush::updatePanel()
 
     for (int i = mBrushHistory.size()-1; i >= 0; --i)
     {
-        CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
-            *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
-        int landTextureFilename = ltexTable.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
-        QModelIndex index = ltexTable.getModelIndex (mBrushHistory[i], landTextureFilename);
-        mTable->setItem (i, 1, new QTableWidgetItem (ltexTable.data(index).value<QString>()));
-        mTable->setItem (i, 0, new QTableWidgetItem (QString::fromStdString(mBrushHistory[i])));
+        CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = mDocument.getData().getLandTextures();
+        int landTextureFilename = landtexturesCollection.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
+        int index = landtexturesCollection.searchId(mBrushHistory[i]);
+
+        if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
+        {
+            mTable->setItem (i, 1, new QTableWidgetItem (landtexturesCollection.getData(index, landTextureFilename).value<QString>()));
+            mTable->setItem (i, 0, new QTableWidgetItem (QString::fromStdString(mBrushHistory[i])));
+        } else
+        {
+            mTable->setItem (i, 1, new QTableWidgetItem ("Invalid/deleted texture"));
+            mTable->setItem (i, 0, new QTableWidgetItem (QString::fromStdString(mBrushHistory[i])));
+        }
     }
 }
 
