@@ -216,6 +216,8 @@ case $VS_VERSION in
 	15|15.0|2017 )
 		GENERATOR="Visual Studio 15 2017"
 		TOOLSET="vc140"
+		TOOLSET_REAL="vc141"
+		MSVC_REAL_VER="15"
 		MSVC_VER="14"
 		MSVC_YEAR="2015"
 		MSVC_DISPLAY_YEAR="2017"
@@ -224,6 +226,8 @@ case $VS_VERSION in
 	14|14.0|2015 )
 		GENERATOR="Visual Studio 14 2015"
 		TOOLSET="vc140"
+		TOOLSET_REAL="vc140"
+		MSVC_REAL_VER="14"
 		MSVC_VER="14"
 		MSVC_YEAR="2015"
 		MSVC_DISPLAY_YEAR="2015"
@@ -232,6 +236,8 @@ case $VS_VERSION in
 	12|12.0|2013 )
 		GENERATOR="Visual Studio 12 2013"
 		TOOLSET="vc120"
+		TOOLSET_REAL="vc120"
+		MSVC_REAL_VER="12"
 		MSVC_VER="12"
 		MSVC_YEAR="2013"
 		MSVC_DISPLAY_YEAR="2013"
@@ -385,7 +391,7 @@ else
 	if [ $MSVC_VER -eq 12 ]; then
 		printf "Boost 1.58.0 AppVeyor... "
 	else
-		printf "Boost 1.60.0 AppVeyor... "
+		printf "Boost 1.67.0 AppVeyor... "
 	fi
 fi
 {
@@ -408,14 +414,20 @@ fi
 		echo Done.
 	else
 		# Appveyor unstable has all the boost we need already
-		if [ $MSVC_VER -eq 12 ]; then
+		if [ $MSVC_REAL_VER -eq 12 ]; then
 			BOOST_SDK="c:/Libraries/boost_1_58_0"
 		else
-			BOOST_SDK="c:/Libraries/boost_1_60_0"
+			BOOST_SDK="c:/Libraries/boost_1_67_0"
 		fi
+		if [ $MSVC_REAL_VER -eq 15 ]; then
+			LIB_SUFFIX="1"
+		else
+			LIB_SUFFIX="0"
+		fi
+		
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
-			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.0"
-		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
+			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.${LIB_SUFFIX}"
+		add_cmake_opts -DBoost_COMPILER="-${TOOLSET_REAL}"
 
 		echo Done.
 	fi
@@ -568,7 +580,7 @@ echo
 if [ -z $APPVEYOR ]; then
 	printf "Qt 5.7.0... "
 else
-	printf "Qt 5.7 AppVeyor... "
+	printf "Qt 5.10 AppVeyor... "
 fi
 {
 	if [ $BITS -eq 64 ]; then
@@ -618,7 +630,7 @@ fi
 
 		echo Done.
 	else
-		QT_SDK="C:/Qt/5.7/msvc${MSVC_YEAR}${SUFFIX}"
+		QT_SDK="C:/Qt/5.10/msvc${MSVC_DISPLAY_YEAR}${SUFFIX}"
 
 		add_cmake_opts -DDESIRED_QT_VERSION=5 \
 			-DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
