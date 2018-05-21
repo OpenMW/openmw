@@ -20,9 +20,9 @@
 
 #include "../mwmechanics/actorutil.hpp"
 
-#include "sound_output.hpp"
 #include "sound_buffer.hpp"
 #include "sound_decoder.hpp"
+#include "sound_output.hpp"
 #include "sound.hpp"
 
 #include "openal_output.hpp"
@@ -577,6 +577,9 @@ namespace MWSound
         Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
         if(!sfx) return nullptr;
 
+        // Only one copy of given sound can be played at time, so stop previous copy
+        stopSound(sfx, MWWorld::ConstPtr());
+
         Sound *sound = getSoundRef();
         sound->init(volume * sfx->mVolume, volumeFromType(type), pitch, mode|type|Play_2D);
         if(!mOutput->playSound(sound, sfx->mHandle, offset))
@@ -611,7 +614,7 @@ namespace MWSound
             return nullptr;
 
         // Only one copy of given sound can be played at time on ptr, so stop previous copy
-        stopSound3D(ptr, soundId);
+        stopSound(sfx, ptr);
 
         bool played;
         Sound *sound = getSoundRef();
@@ -678,18 +681,33 @@ namespace MWSound
             mOutput->finishSound(sound);
     }
 
-    void SoundManager::stopSound3D(const MWWorld::ConstPtr &ptr, const std::string& soundId)
+    void SoundManager::stopSound(Sound_Buffer *sfx, const MWWorld::ConstPtr &ptr)
     {
         SoundMap::iterator snditer = mActiveSounds.find(ptr);
         if(snditer != mActiveSounds.end())
         {
-            Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
             for(SoundBufferRefPair &snd : snditer->second)
             {
                 if(snd.second == sfx)
                     mOutput->finishSound(snd.first);
             }
         }
+    }
+
+    void SoundManager::stopSound(const std::string& soundId)
+    {
+        Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
+        if (!sfx) return;
+
+        stopSound(sfx, MWWorld::ConstPtr());
+    }
+
+    void SoundManager::stopSound3D(const MWWorld::ConstPtr &ptr, const std::string& soundId)
+    {
+        Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
+        if (!sfx) return;
+
+        stopSound(sfx, ptr);
     }
 
     void SoundManager::stopSound3D(const MWWorld::ConstPtr &ptr)
@@ -715,24 +733,11 @@ namespace MWSound
                     mOutput->finishSound(sndbuf.first);
             }
         }
+
         for(SaySoundMap::value_type &snd : mActiveSaySounds)
         {
             if(!snd.first.isEmpty() && snd.first != MWMechanics::getPlayer() && snd.first.getCell() == cell)
                 mOutput->finishStream(snd.second);
-        }
-    }
-
-    void SoundManager::stopSound(const std::string& soundId)
-    {
-        SoundMap::iterator snditer = mActiveSounds.find(MWWorld::ConstPtr());
-        if(snditer != mActiveSounds.end())
-        {
-            Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
-            for(SoundBufferRefPair &sndbuf : snditer->second)
-            {
-                if(sndbuf.second == sfx)
-                    mOutput->finishSound(sndbuf.first);
-            }
         }
     }
 

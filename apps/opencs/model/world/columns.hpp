@@ -99,7 +99,7 @@ namespace CSMWorld
             ColumnId_Respawn = 84,
             ColumnId_CreatureType = 85,
             ColumnId_SoulPoints = 86,
-            ColumnId_OriginalCreature = 87,
+            ColumnId_ParentCreature = 87,
             ColumnId_Biped = 88,
             ColumnId_HasWeapon = 89,
             // unused

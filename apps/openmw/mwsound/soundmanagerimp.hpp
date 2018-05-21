@@ -145,6 +145,9 @@ namespace MWSound
         DecoderPtr getDecoder();
         friend class OpenAL_Output;
 
+        void stopSound(Sound_Buffer *sfx, const MWWorld::ConstPtr &ptr);
+        ///< Stop the given object from playing given sound buffer.
+
     public:
         SoundManager(const VFS::Manager* vfs, const std::map<std::string, std::string>& fallbackMap, bool useSound);
         virtual ~SoundManager();
