@@ -87,10 +87,10 @@ namespace MWClass
             const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ref->mRef.getSoul());
             if (creature)
             {
+                int soul = creature->mData.mSoul;
                 if (Settings::Manager::getBool("rebalance soulgem values", "Game"))
                 {
                     // use soulgem value rebalance formula from morrowind code patch 
-                    int soul = creature->mData.mSoul;
                     float soulValue = 0.0001 * pow(soul, 3) + 2 * soul;
                     
                     // for Azura's star add the unfilled value
@@ -100,7 +100,7 @@ namespace MWClass
                         value = soulValue;
                 }
                 else
-                    value *= creature->mData.mSoul;
+                    value *= soul;
             }
         }
 
