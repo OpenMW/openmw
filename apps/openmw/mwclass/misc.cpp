@@ -88,7 +88,7 @@ namespace MWClass
             if (creature)
             {
                 int soul = creature->mData.mSoul;
-                if (Settings::Manager::getBool("rebalance soulgem values", "Game"))
+                if (Settings::Manager::getBool("rebalance soul gem values", "Game"))
                 {
                     // use soulgem value rebalance formula from morrowind code patch 
                     float soulValue = 0.0001 * pow(soul, 3) + 2 * soul;
