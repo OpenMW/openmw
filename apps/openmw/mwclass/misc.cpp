@@ -90,7 +90,7 @@ namespace MWClass
                 int soul = creature->mData.mSoul;
                 if (Settings::Manager::getBool("rebalance soul gem values", "Game"))
                 {
-                    // use soulgem value rebalance formula from morrowind code patch 
+                    // use the 'Soul gem value rebalance' formula from morrowind code patch 
                     float soulValue = 0.0001 * pow(soul, 3) + 2 * soul;
                     
                     // for Azura's star add the unfilled value
