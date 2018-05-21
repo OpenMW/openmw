@@ -44,6 +44,7 @@ Programmers
     crussell187
     DanielVukelich
     darkf
+    David Cernat (davidcernat)
     devnexen
     Dieho
     Dmitry Shkurskiy (endorph)

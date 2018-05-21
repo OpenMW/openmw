@@ -325,7 +325,10 @@ namespace MWClass
         // add reach and attack speed for melee weapon
         if (ref->mBase->mData.mType < 9 && Settings::Manager::getBool("show melee info", "Game"))
         {
-            text += MWGui::ToolTips::getPercentString(ref->mBase->mData.mReach, "#{sRange}");
+            // 64 game units = 1 yard = 3 ft, display value in feet
+            const float combatDistance = store.get<ESM::GameSetting>().find("fCombatDistance")->getFloat() * ref->mBase->mData.mReach;
+            text += MWGui::ToolTips::getWeightString(combatDistance*3/64, "#{sRange}");
+            text += " #{sFeet}";
 
             text += MWGui::ToolTips::getPercentString(ref->mBase->mData.mSpeed, "#{sAttributeSpeed}");
         }
