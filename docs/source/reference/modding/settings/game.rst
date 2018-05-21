@@ -157,3 +157,16 @@ Otherwise they wait for the enemies or the player to do an attack first.
 Please note this setting has not been extensively tested and could have side effects with certain quests.
 
 This setting can only be configured by editing the settings configuration file.
+
+restore projectiles
+-------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If enabled, spawns projectile in the hit position, if the target is not actor.
+The player can not restore projectile, if the hit object is a water or lava.
+Can alter game balance and decrease performance.
+
+This setting can only be configured by editing the settings configuration file.

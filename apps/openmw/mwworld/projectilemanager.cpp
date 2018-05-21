@@ -15,6 +15,7 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
@@ -152,7 +153,7 @@ namespace MWWorld
         , mPhysics(physics)
         , mCleanupTimer(0.0f)
     {
-
+        mRestoreProjectiles = Settings::Manager::getBool("restore projectiles", "Game");
     }
 
     /// Rotates an osg::PositionAttitudeTransform over time.
@@ -253,6 +254,66 @@ namespace MWWorld
         state.mNode->accept(assignVisitor);
 
         MWRender::overrideFirstRootTexture(texture, mResourceSystem, projectile);
+    }
+
+    void ProjectileManager::updateProjectileRotation(ProjectileState& state, float duration)
+    {
+        osg::Quat orient;
+
+        if (state.mThrown)
+            orient.set(
+                osg::Matrixd::rotate(state.mEffectAnimationTime->getTime() * -10.0,osg::Vec3f(0,0,1)) *
+                osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
+                osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
+                osg::Matrixd::inverse(
+                    osg::Matrixd::lookAt(
+                        osg::Vec3f(0,0,0),
+                        state.mVelocity,
+                        osg::Vec3f(0,0,1))
+                    )
+                );
+        else
+            orient.makeRotate(osg::Vec3f(0,1,0), state.mVelocity);
+
+        state.mNode->setAttitude(orient);
+
+        update(state, duration);
+    }
+
+    void ProjectileManager::restoreProjectile(ProjectileState& state, osg::Vec3f& hitPos)
+    {
+        // dive projectile to target a bit
+        state.mVelocity.normalize();
+        hitPos += state.mVelocity * 2.5f;
+        ESM::Position position = ESM::Position();
+        position.pos[0] = hitPos.x();
+        position.pos[1] = hitPos.y();
+        position.pos[2] = hitPos.z();
+
+        MWBase::Environment::get().getSoundManager()->playSound3D(hitPos, "Missile Hit", 1.f, 1.f);
+        MWWorld::Ptr caster = state.getCaster();
+        MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), state.mIdArrow);
+        MWWorld::Ptr arrow = MWBase::Environment::get().getWorld()->placeObject(projectileRef.getPtr(), caster.getCell(), position);
+
+        // We should orient throwing weapon manually because of its rotation
+        if (state.mIdArrow == state.mBowId)
+        {
+            osg::Quat throwOrient;
+            throwOrient.set(
+                osg::Matrixd::rotate(osg::PI, osg::Vec3f(0,0,1)) *
+                osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
+                osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
+                osg::Matrixd::inverse(
+                    osg::Matrixd::lookAt(
+                        osg::Vec3f(0,0,0),
+                        state.mVelocity,
+                        osg::Vec3f(0,0,1))
+                    )
+                );
+            arrow.getRefData().getBaseNode()->setAttitude(throwOrient);
+        }
+        else
+            arrow.getRefData().getBaseNode()->setAttitude(state.mNode->getAttitude());
     }
 
     void ProjectileManager::update(State& state, float duration)
@@ -401,42 +462,34 @@ namespace MWWorld
             update(*it, duration);
 
             MWWorld::Ptr caster = it->getCaster();
+            MWWorld::Ptr hitObject = MWWorld::Ptr();
+            osg::Vec3f hitPos = newPos;
+            bool hasHit = checkImpact(caster, pos, newPos, hitPos, hitObject);
 
-            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
-            std::vector<MWWorld::Ptr> targetActors;
-            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
-                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
-
-            // Check for impact
-            // TODO: use a proper btRigidBody / btGhostObject?
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
-
-            bool hit = false;
-            if (result.mHit)
+            if (hasHit)
             {
-                hit = true;
-                if (result.mHitObject.isEmpty())
+                if (hitObject.isEmpty())
                 {
                     // terrain
                 }
                 else
                 {
-                    MWMechanics::CastSpell cast(caster, result.mHitObject);
+                    MWMechanics::CastSpell cast(caster, hitObject);
                     cast.mHitPosition = pos;
                     cast.mId = it->mSpellId;
                     cast.mSourceName = it->mSourceName;
                     cast.mStack = false;
-                    cast.inflict(result.mHitObject, caster, it->mEffects, ESM::RT_Target, false, true);
+                    cast.inflict(hitObject, caster, it->mEffects, ESM::RT_Target, false, true);
                 }
             }
 
             // Explodes when hitting water
             if (MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos))
-                hit = true;
+                hasHit = true;
 
-            if (hit)
+            if (hasHit)
             {
-                MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, result.mHitObject,
+                MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, hitObject,
                                                                     ESM::RT_Target, it->mSpellId, it->mSourceName);
 
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -464,47 +517,41 @@ namespace MWWorld
             osg::Vec3f pos(it->mNode->getPosition());
             osg::Vec3f newPos = pos + it->mVelocity * duration;
 
-            osg::Quat orient;
-
-            if (it->mThrown)            
-                orient.set(
-                    osg::Matrixd::rotate(it->mEffectAnimationTime->getTime() * -10.0,osg::Vec3f(0,0,1)) *
-                    osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
-                    osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
-                    osg::Matrixd::inverse(
-                        osg::Matrixd::lookAt(
-                            osg::Vec3f(0,0,0),
-                            it->mVelocity,
-                            osg::Vec3f(0,0,1))
-                        )
-                    );
-            else
-                orient.makeRotate(osg::Vec3f(0,1,0), it->mVelocity);
-
-            it->mNode->setAttitude(orient);
+            updateProjectileRotation(*it, duration);
             it->mNode->setPosition(newPos);
 
-            update(*it, duration);
-
             MWWorld::Ptr caster = it->getCaster();
-
-            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
-            std::vector<MWWorld::Ptr> targetActors;
-            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
-                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
-
-            // Check for impact
-            // TODO: use a proper btRigidBody / btGhostObject?
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+            MWWorld::Ptr hitObject = MWWorld::Ptr();
+            osg::Vec3f hitPos = newPos;
+            bool hasHit = checkImpact(caster, pos, newPos, hitPos, hitObject, mRestoreProjectiles);
 
             bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos);
 
-            if (result.mHit || underwater)
+            if (hasHit || underwater)
             {
+                if (caster.isEmpty())
+                    caster = hitObject;
+
+                if (mRestoreProjectiles)
+                {
+                    // We should prevent an engine from spawning projectile at the end of other projectile to prevent long lines of arrows (->->->->)
+                    bool targetIsProjectile = isProjectile(hitObject);
+                    if (targetIsProjectile) continue;
+
+                    // If we did not hit an actor or lava, we can restore the projectile
+                    bool restore = hitObject.isEmpty() || (!hitObject.getClass().isActor() && hitObject.getClass().getScript(hitObject) != "lava");
+
+                    if (!underwater && restore)
+                    {
+                        restoreProjectile(*it, hitPos);
+                    }
+                }
+
                 MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
 
                 // Try to get a Ptr to the bow that was used. It might no longer exist.
-                MWWorld::Ptr bow = projectileRef.getPtr();
+                MWWorld::Ptr projectile = projectileRef.getPtr();
+                MWWorld::Ptr bow = projectile;
                 if (!caster.isEmpty() && it->mIdArrow != it->mBowId)
                 {
                     MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
@@ -513,10 +560,7 @@ namespace MWWorld
                         bow = *invIt;
                 }
 
-                if (caster.isEmpty())
-                    caster = result.mHitObject;
-
-                MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHit ? result.mHitPos : newPos, it->mAttackStrength);
+                MWMechanics::projectileHit(caster, hitObject, bow, projectile, hitPos, it->mAttackStrength);
 
                 if (underwater)
                     mRendering->emitWaterRipple(newPos);
@@ -528,6 +572,58 @@ namespace MWWorld
 
             ++it;
         }
+    }
+
+    bool ProjectileManager::isProjectile(const MWWorld::Ptr& ptr) const
+    {
+        bool isProjectile = false;
+        if (!ptr.isEmpty() && ptr.getClass().getTypeName() == typeid(ESM::Weapon).name())
+        {
+            int type = ptr.get<ESM::Weapon>()->mBase->mData.mType;
+            isProjectile = (type == ESM::Weapon::MarksmanThrown ||
+                                    type == ESM::Weapon::Arrow ||
+                                    type == ESM::Weapon::Bolt);
+        }
+
+        return isProjectile;
+    }
+
+    bool ProjectileManager::checkImpact(const MWWorld::Ptr& caster, const osg::Vec3f& pos, const osg::Vec3f& newPos, osg::Vec3f& hitPos, MWWorld::Ptr& hitObject, bool checkMeshDimensions)
+    {
+        // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+        std::vector<MWWorld::Ptr> targetActors;
+        if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
+            caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
+
+        // Check for impact
+        // TODO: use a proper btRigidBody / btGhostObject?
+        MWPhysics::PhysicsSystem::RayResult result1;
+        if (checkMeshDimensions)
+            result1 = mPhysics->castRay(pos, newPos, caster, targetActors, MWPhysics::CollisionType_Actor);
+        else
+            result1 = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+
+        if (result1.mHit)
+        {
+            hitObject = result1.mHitObject;
+            hitPos = result1.mHitPos;
+
+            return true;
+        }
+
+        if (!checkMeshDimensions)
+            return false;
+
+        MWRender::RenderingManager::RayResult result2 = mRendering->castRay(pos, newPos, true, true);
+        if (result2.mHit)
+        {
+            hitObject = result2.mHitObject;
+            hitPos = result2.mHitPointWorld;
+
+            return true;
+        }
+
+        return false;
     }
 
     void ProjectileManager::cleanupProjectile(ProjectileManager::ProjectileState& state)

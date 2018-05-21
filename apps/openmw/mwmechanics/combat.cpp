@@ -5,6 +5,8 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -218,13 +220,15 @@ namespace MWMechanics
 
         // Apply "On hit" effect of the weapon & projectile
         bool appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, weapon, hitPosition, true);
-        if (weapon != projectile)
+        if (weapon != projectile && !appliedEnchantment)
             appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, projectile, hitPosition, true);
 
+        static const bool restoreProjectiles = Settings::Manager::getBool("restore projectiles", "Game");
         if (validVictim)
         {
-            // Non-enchanted arrows shot at enemies have a chance to turn up in their inventory
-            if (victim != getPlayer() && !appliedEnchantment)
+            // Non-enchanted projectiles shot at enemies have a chance to turn up in their inventory
+            // If allow to retrieve all projectiles from game world, we allow to restore enchanted projectiles too
+            if (victim != getPlayer() && (restoreProjectiles || !appliedEnchantment))
             {
                 float fProjectileThrownStoreChance = gmst.find("fProjectileThrownStoreChance")->getFloat();
                 if (Misc::Rng::rollProbability() < fProjectileThrownStoreChance / 100.f)
