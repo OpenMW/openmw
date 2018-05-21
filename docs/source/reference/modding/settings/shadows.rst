@@ -22,11 +22,22 @@ number of shadow maps
 
 :Type:		integer
 :Range:		1 to 8, but higher values may conflict with other texture effects
-:Default:	1
+:Default:	3
 
 Control how many shadow maps to use - more of these means each shadow map texel covers less area, producing better-looking shadows, but may decrease performance.
 Using too many shadow maps will lead to them overriding texture slots used for other effects, producing unpleasant artefacts.
 A value of three is recommended in most cases, but other values may produce better results or performance.
+
+allow shadow map overlap
+------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+If true, allow shadow maps to overlap.
+Counter-intuitively, will produce much better results when the light is behind the camera.
+When enabled, OpenMW uses Cascaded Shadow Maps and when disabled, it uses Parallel Split Shadow Maps.
 
 enable debug hud
 ----------------
@@ -97,8 +108,9 @@ Note: Right now, there is no setting allowing toggling of shadows for statics
 Expert settings
 ***************
 
-You probably shouldn't be changing these if you haven't read `this paper on Parallel Split Shadow Maps <https://pdfs.semanticscholar.org/15a9/f2a7cf6b1494f45799617c017bd42659d753.pdf>`_ and understood how they interact with the transformation used with Light Space Perspective Shadow Maps.
+You probably shouldn't be changing these yourself if you haven't read `this paper on Parallel Split Shadow Maps <https://pdfs.semanticscholar.org/15a9/f2a7cf6b1494f45799617c017bd42659d753.pdf>`_ and understood how they interact with the transformation used with Light Space Perspective Shadow Maps.
 If you have, then you may get better results tuning these for your specific view distance.
+Copying values from another user who's done careful tuning is the recommended way of arriving at an optimal value for these settings.
 
 split point uniform logarithmic ratio
 -------------------------------------
@@ -108,6 +120,8 @@ split point uniform logarithmic ratio
 :Default:	0.5
 
 Controls the ratio of :math:`C_i^{log}` versus :math:`C_i^{uniform}` used to form the Practical Split Scheme as described in the linked paper.
+When using a larger-than-default viewing distance and distant terrain, and you have `allow shadow map overlap`_ enabled, larger values will prevent nearby shadows losing quality.
+It is therefore recommended that this isn't left at the default when the viewing distance is changed.
 
 split point bias
 ----------------
