@@ -72,6 +72,7 @@ namespace CSVWidget
         signals:
             void passBrushSize (int brushSize);
             void passBrushShape(int brushShape);
+            void passTextureId(std::string brushTexture);
     };
 
     class SceneToolTextureBrush : public SceneTool

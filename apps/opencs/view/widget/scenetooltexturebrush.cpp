@@ -24,6 +24,7 @@
 
 #include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
+#include "../../model/world/commands.hpp"
 #include "../../model/world/data.hpp"
 #include "../../model/world/idcollection.hpp"
 #include "../../model/world/idtable.hpp"
@@ -134,19 +135,57 @@ void CSVWidget::TextureBrushWindow::configureButtonInitialSettings(QPushButton *
 
 void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
 {
+    mBrushTexture = brushTexture;
+
     CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = mDocument.getData().getLandTextures();
 
     int landTextureFilename = landtexturesCollection.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
+    int columnModification = landtexturesCollection.findColumnIndex(CSMWorld::Columns::ColumnId_Modification);
     int index = landtexturesCollection.searchId(mBrushTexture);
-    mBrushTexture = brushTexture;
+
+    // Check if texture exists in current plugin
+    if(landtexturesCollection.getData(index, columnModification).value<int>() == 0)
+    {
+        CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+            *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
+
+        QUndoStack& undoStack = mDocument.getUndoStack();
+
+        QVariant textureFileNameVariant;
+        textureFileNameVariant.setValue(landtexturesCollection.getData(index, landTextureFilename).value<QString>());
+
+        std::size_t hashlocation = mBrushTexture.find("#");
+        std::string mBrushTexturePlugin = "L0#" + mBrushTexture.substr (hashlocation+1);
+        int indexPlugin = landtexturesCollection.searchId(mBrushTexturePlugin);
+
+        // Reindex texture if needed
+        if (indexPlugin != -1 && !landtexturesCollection.getRecord(indexPlugin).isDeleted())
+        {
+            int counter=0;
+            bool freeIndexFound = false;
+            do {
+                const size_t maxCounter = std::numeric_limits<uint16_t>::max() - 1;
+                mBrushTexturePlugin = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
+                if (landtexturesCollection.searchId(mBrushTexturePlugin) != -1 && landtexturesCollection.getRecord(mBrushTexturePlugin).isDeleted() == 0) counter = (counter + 1) % maxCounter;
+                else freeIndexFound = true;
+            } while (freeIndexFound == false);
+        }
+
+        undoStack.beginMacro ("Add land texture record");
+        undoStack.push (new CSMWorld::CloneCommand (ltexTable, mBrushTexture, mBrushTexturePlugin, CSMWorld::UniversalId::Type_LandTexture));
+        undoStack.endMacro();
+        mBrushTexture = mBrushTexturePlugin;
+        emit passTextureId(mBrushTexture);
+    }
 
     if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
     {
-        mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel) + landtexturesCollection.getData(index, landTextureFilename).value<QString>());
+        mBrushTextureLabel = "Selected texture: " + mBrushTexture + " ";
+        mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel) + landtexturesCollection.getData(index, landTextureFilename).value<QString>());
     } else
     {
         mBrushTextureLabel = "No selected texture or invalid texture";
-        mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel));
+        mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel));
     }
 
     emit passBrushShape(mBrushShape); // update icon
@@ -242,7 +281,6 @@ void CSVWidget::SceneToolTextureBrush::setButtonIcon (int brushShape)
 
     if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
     {
-        //QModelIndex qIndex = landtexturesCollection.getModelIndex (mBrushTexture, landTextureFilename);
         tooltip += "<p>Selected texture: " + QString::fromStdString(mTextureBrushWindow->mBrushTexture) + " ";
 
         tooltip += landtexturesCollection.getData(index, landTextureFilename).value<QString>();

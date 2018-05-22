@@ -55,6 +55,7 @@ void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
         connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passBrushShape(int)), this, SLOT(setBrushShape(int)));
         connect(mTextureBrushScenetool->mTextureBrushWindow->mSizeSliders->mBrushSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(setBrushSize(int)));
         connect(mTextureBrushScenetool, SIGNAL(passTextureId(std::string)), this, SLOT(setBrushTexture(std::string)));
+        connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passTextureId(std::string)), this, SLOT(setBrushTexture(std::string)));
 
         connect(mTextureBrushScenetool, SIGNAL(passEvent(QDropEvent*)), this, SLOT(handleDropEvent(QDropEvent*)));
         connect(this, SIGNAL(passBrushTexture(std::string)), mTextureBrushScenetool->mTextureBrushWindow, SLOT(setBrushTexture(std::string)));
@@ -391,12 +392,16 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
 void CSVRender::TerrainTextureMode::pushEditToCommand(CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,
     CSMWorld::IdTable& landTable, std::string cellId)
 {
+    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
+
     QVariant changedLand;
     changedLand.setValue(newLandGrid);
 
     QModelIndex index(landTable.getModelIndex (cellId, landTable.findColumnIndex (CSMWorld::Columns::ColumnId_LandTexturesIndex)));
 
     QUndoStack& undoStack = document.getUndoStack();
+    undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, cellId));
     undoStack.push (new CSMWorld::ModifyCommand(landTable, index, changedLand));
 }
 
