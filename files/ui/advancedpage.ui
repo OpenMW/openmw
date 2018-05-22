@@ -109,6 +109,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="rebalanceSoulGemValuesCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, the value of filled soul gems is dependent only on soul magnitude.&lt;/p&gt;&lt;p&gt;The default value is true.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Rebalance soul gem values</string>
+            </property>
+           </widget>
+          </item>
           <item alignment="Qt::AlignLeft">
            <widget class="QWidget" name="showOwnedGroup" native="true">
             <property name="toolTip">

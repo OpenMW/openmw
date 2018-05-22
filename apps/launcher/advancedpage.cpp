@@ -23,6 +23,7 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
     loadSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
     loadSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
+    loadSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
 
     // Expected values are (0, 1, 2, 3)
     int showOwnedIndex = mEngineSettings.getInt("show owned", "Game");
@@ -61,6 +62,7 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
     saveSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
     saveSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
+    saveSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
 
     int showOwnedCurrentIndex = showOwnedComboBox->currentIndex();
     if (showOwnedCurrentIndex != mEngineSettings.getInt("show owned", "Game"))
