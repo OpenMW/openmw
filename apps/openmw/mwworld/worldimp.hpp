@@ -640,7 +640,7 @@ namespace MWWorld
             /// Spawn a blood effect for \a ptr at \a worldPosition
             void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;
 
-            void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos) override;
+            void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true) override;
 
             void explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster, const MWWorld::Ptr& ignore,
                                       ESM::RangeType rangeType, const std::string& id, const std::string& sourceName,
@@ -680,6 +680,8 @@ namespace MWWorld
 
             /// Preload VFX associated with this effect list
             void preloadEffects(const ESM::EffectList* effectList) override;
+
+            osg::ref_ptr<osg::Node> getInstance (const std::string& modelName);
     };
 }
 

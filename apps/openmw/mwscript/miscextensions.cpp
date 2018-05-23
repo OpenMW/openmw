@@ -14,6 +14,7 @@
 #include <components/esm/loadcrea.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -1051,6 +1052,7 @@ namespace MWScript
                 MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr (targetId, false);
 
                 MWMechanics::CastSpell cast(ptr, target);
+                cast.playSpellCastingEffects(spell);
                 cast.mHitPosition = target.getRefData().getPosition().asVec3();
                 cast.mAlwaysSucceed = true;
                 cast.cast(spell);

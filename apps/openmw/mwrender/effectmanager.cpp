@@ -27,6 +27,13 @@ EffectManager::~EffectManager()
 
 void EffectManager::addEffect(const std::string &model, const std::string& textureOverride, const osg::Vec3f &worldPosition, float scale, bool isMagicVFX)
 {
+    osg::Vec3f scale3f (scale, scale, scale);
+
+    addEffect(model, textureOverride, worldPosition, scale3f, isMagicVFX);
+}
+
+void EffectManager::addEffect(const std::string &model, const std::string& textureOverride, const osg::Vec3f &worldPosition, const osg::Vec3f &scale, bool isMagicVFX)
+{
     osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model);
 
     node->setNodeMask(Mask_Effect);
@@ -40,7 +47,7 @@ void EffectManager::addEffect(const std::string &model, const std::string& textu
 
     osg::ref_ptr<osg::PositionAttitudeTransform> trans = new osg::PositionAttitudeTransform;
     trans->setPosition(worldPosition);
-    trans->setScale(osg::Vec3f(scale, scale, scale));
+    trans->setScale(scale);
     trans->addChild(node);
 
     SceneUtil::AssignControllerSourcesVisitor assignVisitor(effect.mAnimTime);

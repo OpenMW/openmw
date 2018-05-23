@@ -557,6 +557,7 @@ namespace MWRender
             mEffectManager->update(dt);
             mSky->update(dt);
             mWater->update(dt);
+            mObjects->updateEffects(dt);
         }
 
         mCamera->update(dt, paused);
@@ -841,9 +842,11 @@ namespace MWRender
         mObjects->updatePtr(old, updated);
     }
 
-    void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale, bool isMagicVFX)
+    void RenderingManager::spawnEffect(const std::string &model, const std::string& texture, const osg::Vec3f &worldPosition, float scale, bool isMagicVFX)
     {
-        mEffectManager->addEffect(model, texture, worldPosition, scale, isMagicVFX);
+        osg::Vec3f scale3f (scale, scale, scale);
+
+        mEffectManager->addEffect(model, texture, worldPosition, scale3f, isMagicVFX);
     }
 
     void RenderingManager::notifyWorldSpaceChanged()
@@ -1122,6 +1125,12 @@ namespace MWRender
             updateProjectionMatrix();
         }
     }
+
+    osg::ref_ptr<osg::Node> RenderingManager::getInstance(const std::string& modelName)
+    {
+        return mResourceSystem->getSceneManager()->getInstance(modelName);
+    }
+
     void RenderingManager::exportSceneGraph(const MWWorld::Ptr &ptr, const std::string &filename, const std::string &format)
     {
         osg::Node* node = mViewer->getSceneData();

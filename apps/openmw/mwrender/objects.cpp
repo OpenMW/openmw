@@ -138,6 +138,14 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
     return false;
 }
 
+void Objects::updateEffects(float duration)
+{
+    for(PtrAnimationMap::iterator iter = mObjects.begin();iter != mObjects.end();)
+    {
+        iter->second->updateEffects(duration);
+        ++iter;
+    }
+}
 
 void Objects::removeCell(const MWWorld::CellStore* store)
 {

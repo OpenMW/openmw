@@ -8,6 +8,8 @@
 #include <osg/MatrixTransform>
 #include <osg/BlendFunc>
 #include <osg/Material>
+#include <osg/ComputeBoundsVisitor>
+#include <osg/PositionAttitudeTransform>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>
@@ -1115,8 +1117,6 @@ namespace MWRender
                 ++stateiter;
         }
 
-        updateEffects(duration);
-
         if (mHeadController)
         {
             const float epsilon = 0.001f;
@@ -1366,7 +1366,7 @@ namespace MWRender
                             useQuadratic, quadraticValue, quadraticRadiusMult, useLinear, linearRadiusMult, linearValue);
     }
 
-    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture)
+    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture, float scale)
     {
         if (!mObjectRoot.get())
             return;
@@ -1417,7 +1417,13 @@ namespace MWRender
 
         overrideFirstRootTexture(texture, mResourceSystem, node);
 
-        // TODO: in vanilla morrowind the effect is scaled based on the host object's bounding box.
+        osg::Vec3f scale3f (scale, scale, scale);
+
+        osg::ref_ptr<osg::PositionAttitudeTransform> trans = new osg::PositionAttitudeTransform;
+        trans->setScale(scale3f);
+        trans->addChild(node);
+        parentNode->removeChild(node);
+        parentNode->addChild(trans);
 
         mEffects.push_back(params);
     }
