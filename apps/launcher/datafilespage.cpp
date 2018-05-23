@@ -37,6 +37,8 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
 
     connect(mProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
             this, SLOT(updateOkButton(QString)));
+    connect(mSelector, SIGNAL(signalSelectedFilesChanged(QStringList)),
+            this, SLOT(slotSelectedFilesChanged(QStringList)));
 
     buildView();
     loadSettings();
@@ -318,4 +320,9 @@ bool Launcher::DataFilesPage::showDeleteMessageBox (const QString &text)
     msgBox.exec();
 
     return (msgBox.clickedButton() == deleteButton);
+}
+
+void Launcher::DataFilesPage::slotSelectedFilesChanged(QStringList selectedFilesChanged)
+{
+    emit signalSelectedFilesChanged(selectedFilesChanged);
 }

@@ -56,11 +56,13 @@ namespace ContentSelectorView
         void buildContextMenu();
         void setGameFileSelected(int index, bool selected);
         void setCheckStateForMultiSelectedItems(bool checked);
+        void emitSelectedFilesChanged();
 
     signals:
         void signalCurrentGamefileIndexChanged (int);
 
         void signalAddonDataChanged (const QModelIndex& topleft, const QModelIndex& bottomright);
+        void signalSelectedFilesChanged(QStringList selectedFiles);
 
     private slots:
 

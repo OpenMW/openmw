@@ -163,3 +163,8 @@ void Launcher::AdvancedPage::saveSettingBool(QCheckBox *checkbox, const std::str
     if (cValue != mEngineSettings.getBool(setting, group))
         mEngineSettings.setBool(setting, group, cValue);
 }
+
+void Launcher::AdvancedPage::slotSelectedDataFilesChanged(QStringList selectedFiles)
+{
+    loadCellsForAutocomplete(selectedFiles);
+}

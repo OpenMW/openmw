@@ -29,6 +29,9 @@ namespace Launcher
          */
         void loadCellsForAutocomplete(QStringList filePaths);
 
+    public slots:
+        void slotSelectedDataFilesChanged(QStringList selectedFiles);
+
     private slots:
         void on_skipMenuCheckBox_stateChanged(int state);
         void on_runScriptAfterStartupBrowseButton_clicked();
