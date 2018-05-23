@@ -233,7 +233,6 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
 
 QuadTreeWorld::~QuadTreeWorld()
 {
-    ensureQuadTreeBuilt();
     mViewDataMap->clear();
 }
 
