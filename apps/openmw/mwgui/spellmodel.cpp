@@ -108,7 +108,7 @@ namespace MWGui
             Spell newSpell;
             newSpell.mItem = item;
             newSpell.mId = item.getCellRef().getRefId();
-            newSpell.mName = name;
+            newSpell.mName = item.getClass().getName(item);
             newSpell.mType = Spell::Type_EnchantedItem;
             newSpell.mSelected = invStore.getSelectedEnchantItem() == it;
 
