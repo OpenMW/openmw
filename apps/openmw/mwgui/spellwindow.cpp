@@ -217,7 +217,7 @@ namespace MWGui
         if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead() || stats.getHitRecovery())
             return;
 
-        mSpellView->setModel(new SpellModel(MWMechanics::getPlayer(), mFilterEdit->getCaption()));
+        mSpellView->setModel(new SpellModel(MWMechanics::getPlayer(), ""));
 
         SpellModel::ModelIndex selected = 0;
         for (SpellModel::ModelIndex i = 0; i<int(mSpellView->getModel()->getItemCount()); ++i)

@@ -52,19 +52,21 @@ namespace MWGui
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
 
+        std::string filter = Misc::StringUtils::lowerCaseUtf8(mFilter);
+
         for (MWMechanics::Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
             const ESM::Spell* spell = it->first;
             if (spell->mData.mType != ESM::Spell::ST_Power && spell->mData.mType != ESM::Spell::ST_Spell)
                 continue;
 
-            std::string name = spell->mName;
+            std::string name = Misc::StringUtils::lowerCaseUtf8(spell->mName);
 
-            if (name.find(mFilter) == std::string::npos)
+            if (name.find(filter) == std::string::npos)
                 continue;
 
             Spell newSpell;
-            newSpell.mName = name;
+            newSpell.mName = spell->mName;
             if (spell->mData.mType == ESM::Spell::ST_Spell)
             {
                 newSpell.mType = Spell::Type_Spell;
@@ -98,9 +100,9 @@ namespace MWGui
             if (enchant->mData.mType != ESM::Enchantment::WhenUsed && enchant->mData.mType != ESM::Enchantment::CastOnce)
                 continue;
 
-            std::string name = item.getClass().getName(item);
+            std::string name = Misc::StringUtils::lowerCaseUtf8(item.getClass().getName(item));
 
-            if (name.find(mFilter) == std::string::npos)
+            if (name.find(filter) == std::string::npos)
                 continue;
 
             Spell newSpell;
