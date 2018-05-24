@@ -21,4 +21,6 @@ few chapters to familiarise yourself with the new interface.
     tour
     files-and-directories
     starting-dialog
-
+    tables
+    record-types
+    record-filters
