@@ -32,10 +32,14 @@ namespace
 namespace MWGui
 {
 
+    SpellModel::SpellModel(const MWWorld::Ptr &actor, const std::string& filter)
+        : mActor(actor), mFilter(filter)
+    {
+    }
+
     SpellModel::SpellModel(const MWWorld::Ptr &actor)
         : mActor(actor)
     {
-
     }
 
     void SpellModel::update()
@@ -54,8 +58,13 @@ namespace MWGui
             if (spell->mData.mType != ESM::Spell::ST_Power && spell->mData.mType != ESM::Spell::ST_Spell)
                 continue;
 
+            std::string name = spell->mName;
+
+            if (name.find(mFilter) == std::string::npos)
+                continue;
+
             Spell newSpell;
-            newSpell.mName = spell->mName;
+            newSpell.mName = name;
             if (spell->mData.mType == ESM::Spell::ST_Spell)
             {
                 newSpell.mType = Spell::Type_Spell;
@@ -89,10 +98,15 @@ namespace MWGui
             if (enchant->mData.mType != ESM::Enchantment::WhenUsed && enchant->mData.mType != ESM::Enchantment::CastOnce)
                 continue;
 
+            std::string name = item.getClass().getName(item);
+
+            if (name.find(mFilter) == std::string::npos)
+                continue;
+
             Spell newSpell;
             newSpell.mItem = item;
             newSpell.mId = item.getCellRef().getRefId();
-            newSpell.mName = item.getClass().getName(item);
+            newSpell.mName = name;
             newSpell.mType = Spell::Type_EnchantedItem;
             newSpell.mSelected = invStore.getSelectedEnchantItem() == it;
 
