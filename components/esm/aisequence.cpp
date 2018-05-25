@@ -35,11 +35,13 @@ namespace AiSequence
     void AiTravel::load(ESMReader &esm)
     {
         esm.getHNT (mData, "DATA");
+        esm.getHNOT (mHidden, "HIDD");
     }
 
     void AiTravel::save(ESMWriter &esm) const
     {
         esm.writeHNT ("DATA", mData);
+        esm.writeHNT ("HIDD", mHidden);
     }
 
     void AiEscort::load(ESMReader &esm)

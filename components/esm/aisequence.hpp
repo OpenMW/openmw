@@ -80,6 +80,7 @@ namespace ESM
     struct AiTravel : AiPackage
     {
         AiTravelData mData;
+        bool mHidden;
 
         void load(ESMReader &esm);
         void save(ESMWriter &esm) const;
