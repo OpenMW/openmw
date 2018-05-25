@@ -393,6 +393,8 @@ void AiSequence::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
         (*iter)->writeState(sequence);
     }
+
+    sequence.mLastAiPackage = mLastAiPackage;
 }
 
 void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
@@ -404,7 +406,7 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
     int count = 0;
     for (std::vector<ESM::AiSequence::AiPackageContainer>::const_iterator it = sequence.mPackages.begin();
          it != sequence.mPackages.end(); ++it)
-    {    
+    {
         if (isActualAiPackage(it->mType))
             count++;
     }
@@ -463,6 +465,8 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
 
         mPackages.push_back(package.release());
     }
+
+    mLastAiPackage = sequence.mLastAiPackage;
 }
 
 void AiSequence::fastForward(const MWWorld::Ptr& actor, AiState& state)

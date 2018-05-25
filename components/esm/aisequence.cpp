@@ -156,6 +156,8 @@ namespace AiSequence
                 break;
             }
         }
+
+        esm.writeHNT ("LAST", mLastAiPackage);
     }
 
     void AiSequence::load(ESMReader &esm)
@@ -223,6 +225,8 @@ namespace AiSequence
                 return;
             }
         }
+
+        esm.getHNOT (mLastAiPackage, "LAST");
     }
 }
 }
