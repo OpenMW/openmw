@@ -18,8 +18,8 @@ platform:
     - x64
 
 configuration:
-    - Debug
-#   - Release
+#    - Debug
+   - Release
 
 # For the Qt, Boost, CMake, etc installs
 #os: Visual Studio 2017
@@ -55,6 +55,10 @@ build_script:
     - cmd: if %PLATFORM%==x64 set build=MSVC%msvc%_64
     - cmd: msbuild %build%\OpenMW.sln /t:Build /p:Configuration=%configuration% /m:2 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
+after_build:
+    - cmd: if %PLATFORM%==x64 7z a OpenMW_MSVC%msvc%_x64.zip %APPVEYOR_BUILD_FOLDER%\MSVC%msvc%_64\Release\ -xr"!*.pdb"
+    - cmd: if %PLATFORM%==x64 7z a OpenMW_MSVC%msvc%_x64_pdb.zip %APPVEYOR_BUILD_FOLDER%\MSVC%msvc%_64\Release\*.pdb
+
 test: off
 
 #notifications:
@@ -63,3 +67,9 @@ test: off
 #        -  
 #    on_build_failure: true
 #    on_build_status_changed: true
+
+artifacts:
+  - path: OpenMW_MSVC%msvc%_x64.zip
+    name: OpenMW_MSVC%msvc%_x64
+  - path: OpenMW_MSVC%msvc%_x64_pdb.zip
+    name: OpenMW_MSVC%msvc%_x64_pdb
