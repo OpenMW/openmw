@@ -10,7 +10,11 @@
         </Widget>
 
         <!-- Spell list -->
-        <Widget type="SpellView" skin="MW_SpellView" position="8 38 268 518" align="Left Top Stretch" name="SpellView">
+        <Widget type="SpellView" skin="MW_SpellView" position="8 38 268 490" align="Left Top Stretch" name="SpellView">
+        </Widget>
+
+        <!-- Search box-->
+        <Widget type="EditBox" skin="MW_TextBoxEditWithBorder" position="8 535 268 23" align="Left Bottom HStretch" name="FilterEdit">
         </Widget>
 
     </Widget>
