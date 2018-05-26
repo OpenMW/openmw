@@ -20,8 +20,15 @@
 
 class QTableWidget;
 
+namespace CSVRender
+{
+    class TerrainTextureMode;
+}
+
 namespace CSVWidget
 {
+    class SceneToolTextureBrush;
+
     /// \brief Layout-box for some brush button settings
     class BrushSizeControls : public QGroupBox
     {
@@ -29,12 +36,17 @@ namespace CSVWidget
 
         public:
             BrushSizeControls(const QString &title, QWidget *parent);
-            QSlider *mBrushSizeSlider;
-            QSpinBox *mBrushSizeSpinBox;
 
         private:
             QHBoxLayout *mLayoutSliderSize;
+            QSlider *mBrushSizeSlider;
+            QSpinBox *mBrushSizeSpinBox;
+
+        friend class SceneToolTextureBrush;
+        friend class CSVRender::TerrainTextureMode;
     };
+
+    class SceneToolTextureBrush;
 
     /// \brief Brush settings window
     class TextureBrushWindow : public QFrame
@@ -45,24 +57,27 @@ namespace CSVWidget
             TextureBrushWindow(CSMDoc::Document& document, QWidget *parent = 0);
             void configureButtonInitialSettings(QPushButton *button);
 
-            QPushButton *mButtonPoint = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-point")), "", this);
-            QPushButton *mButtonSquare = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-square")), "", this);
-            QPushButton *mButtonCircle = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-circle")), "", this);
-            QPushButton *mButtonCustom = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-custom")), "", this);
-            QString toolTipPoint = "Paint single point";
-            QString toolTipSquare = "Paint with square brush";
-            QString toolTipCircle = "Paint with circle brush";
-            QString toolTipCustom = "Paint custom selection (not implemented yet)";
-            BrushSizeControls* mSizeSliders = new BrushSizeControls("Brush size", this);
+            const QString toolTipPoint = "Paint single point";
+            const QString toolTipSquare = "Paint with square brush";
+            const QString toolTipCircle = "Paint with circle brush";
+            const QString toolTipCustom = "Paint custom selection (not implemented yet)";
+
+        private:
             int mBrushShape;
             int mBrushSize;
             std::string mBrushTexture;
-
-        private:
             CSMDoc::Document& mDocument;
             QLabel *mSelectedBrush;
             QGroupBox *mHorizontalGroupBox;
             std::string mBrushTextureLabel;
+            QPushButton *mButtonPoint;
+            QPushButton *mButtonSquare;
+            QPushButton *mButtonCircle;
+            QPushButton *mButtonCustom;
+            BrushSizeControls* mSizeSliders;
+
+        friend class SceneToolTextureBrush;
+        friend class CSVRender::TerrainTextureMode;
 
         public slots:
             void setBrushTexture(std::string brushTexture);
@@ -84,6 +99,7 @@ namespace CSVWidget
             QFrame *mPanel;
             QTableWidget *mTable;
             std::vector<std::string> mBrushHistory;
+            TextureBrushWindow *mTextureBrushWindow;
 
         private:
 
@@ -96,10 +112,10 @@ namespace CSVWidget
             virtual void showPanel (const QPoint& position);
             void updatePanel ();
 
-            TextureBrushWindow *mTextureBrushWindow;
-
             void dropEvent (QDropEvent *event);
             void dragEnterEvent (QDragEnterEvent *event);
+
+        friend class CSVRender::TerrainTextureMode;
 
         public slots:
             void setButtonIcon(int brushShape);

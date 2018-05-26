@@ -78,6 +78,13 @@ CSVWidget::TextureBrushWindow::TextureBrushWindow(CSMDoc::Document& document, QW
         mSelectedBrush = new QLabel(QString::fromStdString(mBrushTextureLabel));
     }
 
+    mButtonPoint = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-point")), "", this);
+    mButtonSquare = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-square")), "", this);
+    mButtonCircle = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-circle")), "", this);
+    mButtonCustom = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-custom")), "", this);
+
+    mSizeSliders = new BrushSizeControls("Brush size", this);
+
     QVBoxLayout *layoutMain = new QVBoxLayout;
     layoutMain->setSpacing(0);
     layoutMain->setContentsMargins(4,0,4,4);
