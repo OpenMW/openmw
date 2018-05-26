@@ -701,8 +701,6 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWWorld::Ptr ptr = R()(runtime);
-                    MWBase::Environment::get().getWorld()->queueMovement(ptr, osg::Vec3f(0, 0, -0.1f));
                 }
         };
 

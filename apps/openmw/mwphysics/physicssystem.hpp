@@ -124,7 +124,6 @@ namespace MWPhysics
             bool getLineOfSight(const MWWorld::ConstPtr& actor1, const MWWorld::ConstPtr& actor2) const;
 
             bool isOnGround (const MWWorld::Ptr& actor);
-            bool isIdle (const MWWorld::Ptr& actor);
 
             bool canMoveToWaterSurface (const MWWorld::ConstPtr &actor, const float waterlevel);
 
@@ -174,7 +173,6 @@ namespace MWPhysics
         private:
 
             void updateWater();
-            void updateIdle();
 
             osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
@@ -223,7 +221,6 @@ namespace MWPhysics
             osg::ref_ptr<osg::Group> mParentNode;
 
             float mPhysicsDt;
-            float mIdleUpdateTimer;
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);

@@ -866,7 +866,8 @@ namespace MWMechanics
         }
 
         // place above to prevent moving inside objects, e.g. stairs, because a vector between pathgrids can be underground.
-        dest.mZ += 80;
+        // Adding 20 in adjustPosition() is not enough.
+        dest.mZ += 60;
 
         ToWorldCoordinates(dest, actor.getCell()->getCell());
 

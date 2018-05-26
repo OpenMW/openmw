@@ -2036,8 +2036,7 @@ void CharacterController::update(float duration)
         moved.z() = 1.0;
 
     // Update movement
-    // We should not apply movement for standing actors
-    if(mMovementAnimationControlled && mPtr.getClass().isActor() && (movement.length2() > 0.f || !world->isIdle(mPtr)))
+    if(mMovementAnimationControlled && mPtr.getClass().isActor())
         world->queueMovement(mPtr, moved);
 
     mSkipAnim = false;
