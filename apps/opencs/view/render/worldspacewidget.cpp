@@ -445,7 +445,7 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick (const QPo
 
     // Default placement
     direction.normalize();
-    direction *= CSMPrefs::get()["Scene Drops"]["distance"].toInt();
+    direction *= CSMPrefs::get()["3D Scene Editing"]["distance"].toInt();
 
     WorldspaceHitResult hit = { false, 0, 0, 0, 0, start + direction };
     return hit;
@@ -648,6 +648,12 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
             mDragX = event->posF().x();
             mDragY = height() - event->posF().y();
 #endif
+
+            if (mDragMode == InteractionType_PrimaryEdit)
+            {
+                EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+                editMode.drag (event->pos(), mDragX, mDragY, mDragFactor); // note: terraintexturemode only uses pos
+            }
         }
     }
     else
