@@ -252,27 +252,37 @@ CSVWidget::SceneToolTextureBrush::SceneToolTextureBrush (SceneToolbar *parent, c
 
 void CSVWidget::SceneToolTextureBrush::setButtonIcon (int brushShape)
 {
-    QString tooltip = "Brush settings <p>Currently selected: ";
-    if(brushShape == 0)
+    QString tooltip = "Change brush settings <p>Currently selected: ";
+
+    switch (brushShape)
     {
-        setIcon (QIcon (QPixmap (":scenetoolbar/brush-point")));
-        tooltip += dynamic_cast<QString&> (mTextureBrushWindow->toolTipPoint);
+        case 0:
+
+            setIcon (QIcon (QPixmap (":scenetoolbar/brush-point")));
+            tooltip += mTextureBrushWindow->toolTipPoint;
+            break;
+
+        case 1:
+
+            setIcon (QIcon (QPixmap (":scenetoolbar/brush-square")));
+            tooltip += mTextureBrushWindow->toolTipSquare;
+            break;
+
+        case 2:
+
+            setIcon (QIcon (QPixmap (":scenetoolbar/brush-circle")));
+            tooltip += mTextureBrushWindow->toolTipCircle;
+            break;
+
+        case 3:
+
+            setIcon (QIcon (QPixmap (":scenetoolbar/brush-custom")));
+            tooltip += mTextureBrushWindow->toolTipCustom;
+            break;
     }
-    if(brushShape == 1)
-    {
-        setIcon (QIcon (QPixmap (":scenetoolbar/brush-square")));
-        tooltip += dynamic_cast<QString&> (mTextureBrushWindow->toolTipSquare);
-    }
-    if(brushShape == 2)
-    {
-        setIcon (QIcon (QPixmap (":scenetoolbar/brush-circle")));
-        tooltip += dynamic_cast<QString&> (mTextureBrushWindow->toolTipCircle);
-    }
-    if(brushShape == 3)
-    {
-        setIcon (QIcon (QPixmap (":scenetoolbar/brush-custom")));
-        tooltip += dynamic_cast<QString&> (mTextureBrushWindow->toolTipCustom);
-    }
+
+    tooltip += "<p>(right click to access of previously used brush settings)";
+
 
     CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = mDocument.getData().getLandTextures();
 
