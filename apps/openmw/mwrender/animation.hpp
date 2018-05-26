@@ -364,7 +364,7 @@ public:
      * @param texture override the texture specified in the model's materials - if empty, do not override
      * @note Will not add an effect twice.
      */
-    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", const std::string& texture = "", float scale = 1.0f);
+    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", const std::string& texture = "");
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out) const;
 
@@ -446,6 +446,7 @@ public:
 
     void setLoopingEnabled(const std::string &groupname, bool enabled);
 
+    /// This is typically called as part of runAnimation, but may be called manually if needed.
     void updateEffects(float duration);
 
     /// Return a node with the specified name, or NULL if not existing.

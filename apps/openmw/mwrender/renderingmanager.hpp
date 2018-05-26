@@ -205,8 +205,6 @@ namespace MWRender
 
         LandManager* getLandManager() const;
 
-        osg::ref_ptr<osg::Node> getInstance(const std::string& modelName);
-
     private:
         void updateProjectionMatrix();
         void updateTextureFiltering();

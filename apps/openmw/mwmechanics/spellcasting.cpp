@@ -6,12 +6,8 @@
 
 #include <boost/format.hpp>
 
-#include <osg/BoundingBox>
-#include <osg/ComputeBoundsVisitor>
-
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
-#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -28,7 +24,6 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwrender/animation.hpp"
-#include "../mwrender/vismask.hpp"
 
 #include "npcstats.hpp"
 #include "actorutil.hpp"
@@ -997,12 +992,10 @@ namespace MWMechanics
         return true;
     }
 
-    void CastSpell::playSpellCastingEffects(const std::string &spellid)
-    {
+    void CastSpell::playSpellCastingEffects(const std::string &spellid){
+       
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
-
-        std::vector<std::string> addedEffects;
 
         for (std::vector<ESM::ENAMstruct>::const_iterator iter = spell->mEffects.mList.begin();
             iter != spell->mEffects.mList.end(); ++iter)
@@ -1012,72 +1005,18 @@ namespace MWMechanics
 
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
 
-            const ESM::Static* castStatic;
-
-            if (!effect->mCasting.empty())
-                castStatic = store.get<ESM::Static>().find (effect->mCasting);
-            else
-                castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
-
-            // check if the effect was already added
-            if (std::find(addedEffects.begin(), addedEffects.end(), "meshes\\" + castStatic->mModel) != addedEffects.end())
-                continue;
-
-            std::string texture = effect->mParticle;
-
-            float scale = 1.0f;
-            osg::Vec3f pos (mCaster.getRefData().getPosition().asVec3());
-
-            if (animation && mCaster.getClass().isNpc())
+            if (animation && mCaster.getClass().isActor()) // TODO: Non-actors should also create a spell cast vfx even if they are disabled (animation == NULL)
             {
-                // For NOC we should take race height as scaling factor
-                const ESM::NPC *npc = mCaster.get<ESM::NPC>()->mBase;
-                const MWWorld::ESMStore &esmStore =
-                    MWBase::Environment::get().getWorld()->getStore();
+                const ESM::Static* castStatic;
 
-                const ESM::Race *race =
-                    esmStore.get<ESM::Race>().find(npc->mRace);
+                if (!effect->mCasting.empty())
+                    castStatic = store.get<ESM::Static>().find (effect->mCasting);
+                else
+                    castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
 
-                scale = npc->isMale() ? race->mData.mHeight.mMale : race->mData.mHeight.mFemale;
-            }
-            else
-            {
-                std::string casterModel = mCaster.getClass().getModel(mCaster);
-                osg::ref_ptr<osg::Node> model = MWBase::Environment::get().getWorld()->getInstance(casterModel);
+                std::string texture = effect->mParticle;
 
-                osg::ComputeBoundsVisitor computeBoundsVisitor;
-                computeBoundsVisitor.setTraversalMask(~(MWRender::Mask_ParticleSystem|MWRender::Mask_Effect));
-                model->accept(computeBoundsVisitor);
-                osg::BoundingBox bounds = computeBoundsVisitor.getBoundingBox();
-
-                if (bounds.valid())
-                {
-                    float meshSizeX = std::abs(bounds.xMax() - bounds.xMin());
-                    float meshSizeY = std::abs(bounds.yMax() - bounds.yMin());
-                    float meshSizeZ = std::abs(bounds.zMax() - bounds.zMin());
-
-                    // TODO: take a size of particle or NPC with height and weight = 1.0 as scale = 1.0
-                    float scaleX = meshSizeX/60.f;
-                    float scaleY = meshSizeY/60.f;
-                    float scaleZ = meshSizeZ/120.f;
-
-                    scale = std::max({ scaleX, scaleY, scaleZ });
-
-                    //pos = bounds.center();
-                    //pos[2] = bounds.zMin();
-                }
-            }
-
-            // If the caster has no animation, add the effect directly to the effectManager
-            if (animation)
-            {
-                animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex, false, "", texture, scale);
-            }
-            else
-            {
-                // We should set scale for effect manager manually
-                float meshScale = !mCaster.getClass().isActor() ? mCaster.getCellRef().getScale() : 1.0f;
-                MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + castStatic->mModel, effect->mParticle, pos, scale * meshScale);
+                animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex, false, "", texture);
             }
 
             if (animation && !mCaster.getClass().isActor())
@@ -1086,8 +1025,6 @@ namespace MWMechanics
             static const std::string schools[] = {
                 "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
             };
-
-            addedEffects.push_back("meshes\\" + castStatic->mModel);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             if(!effect->mCastSound.empty())

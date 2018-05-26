@@ -33,7 +33,6 @@ namespace MWRender
 
         /// Add an effect. When it's finished playing, it will be removed automatically.
         void addEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPosition, float scale, bool isMagicVFX = true);
-        void addEffect (const std::string &model, const std::string& textureOverride, const osg::Vec3f &worldPosition, const osg::Vec3f &scale3f, bool isMagicVFX);
 
         void update(float dt);
 
