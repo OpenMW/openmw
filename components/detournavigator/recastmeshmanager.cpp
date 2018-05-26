@@ -1,5 +1,6 @@
 #include "recastmeshmanager.hpp"
 
+#include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 namespace DetourNavigator
@@ -12,18 +13,29 @@ namespace DetourNavigator
 
     bool RecastMeshManager::addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
     {
-        if (!mObjects.insert(std::make_pair(id, Object {&shape, transform})).second)
+        if (!mObjects.emplace(id, RecastMeshObject(shape, transform)).second)
             return false;
         mShouldRebuild = true;
-        return true;
+        return mShouldRebuild;
     }
 
-    boost::optional<RecastMeshManager::Object> RecastMeshManager::removeObject(std::size_t id)
+    bool RecastMeshManager::updateObject(std::size_t id, const btTransform& transform)
+    {
+        const auto object = mObjects.find(id);
+        if (object == mObjects.end())
+            return false;
+        if (!object->second.update(transform))
+            return false;
+        mShouldRebuild = true;
+        return mShouldRebuild;
+    }
+
+    boost::optional<RemovedRecastMeshObject> RecastMeshManager::removeObject(std::size_t id)
     {
         const auto object = mObjects.find(id);
         if (object == mObjects.end())
             return boost::none;
-        const auto result = object->second;
+        const RemovedRecastMeshObject result {object->second.getShape(), object->second.getTransform()};
         mObjects.erase(object);
         mShouldRebuild = true;
         return result;
@@ -46,7 +58,7 @@ namespace DetourNavigator
             return;
         mMeshBuilder.reset();
         for (const auto& v : mObjects)
-            mMeshBuilder.addObject(*v.second.mShape, v.second.mTransform);
+            mMeshBuilder.addObject(v.second.getShape(), v.second.getTransform());
         mShouldRebuild = false;
     }
 }

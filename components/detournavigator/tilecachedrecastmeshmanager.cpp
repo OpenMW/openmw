@@ -40,12 +40,31 @@ namespace DetourNavigator
         return result;
     }
 
-    boost::optional<RecastMeshManager::Object> TileCachedRecastMeshManager::removeObject(std::size_t id)
+    bool TileCachedRecastMeshManager::updateObject(std::size_t id, const btTransform& transform)
+    {
+        const auto object = mObjectsTilesPositions.find(id);
+        if (object == mObjectsTilesPositions.end())
+            return false;
+        bool result = false;
+        std::unique_lock<std::mutex> lock(mTilesMutex);
+        for (const auto& tilePosition : object->second)
+        {
+            const auto tile = mTiles.find(tilePosition);
+            if (tile != mTiles.end())
+                result = tile->second.updateObject(id, transform) || result;
+        }
+        lock.unlock();
+        if (result)
+            ++mRevision;
+        return result;
+    }
+
+    boost::optional<RemovedRecastMeshObject> TileCachedRecastMeshManager::removeObject(std::size_t id)
     {
         const auto object = mObjectsTilesPositions.find(id);
         if (object == mObjectsTilesPositions.end())
             return boost::none;
-        boost::optional<RecastMeshManager::Object> result;
+        boost::optional<RemovedRecastMeshObject> result;
         for (const auto& tilePosition : object->second)
         {
             std::unique_lock<std::mutex> lock(mTilesMutex);

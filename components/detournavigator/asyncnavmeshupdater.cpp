@@ -78,6 +78,8 @@ namespace DetourNavigator
                                 makePriority(changedTile, playerTile)});
         }
 
+        log("posted ", mJobs.size(), " jobs");
+
         mHasJob.notify_all();
     }
 
@@ -169,7 +171,8 @@ namespace DetourNavigator
                 navMeshRevision = revision;
         }
         if (recastMesh && mSettings.get().mEnableWriteRecastMeshToFile)
-            writeToFile(*recastMesh, mSettings.get().mRecastMeshPathPrefix, recastMeshRevision);
+            writeToFile(*recastMesh, mSettings.get().mRecastMeshPathPrefix + std::to_string(job.mChangedTile.x())
+                        + "_" + std::to_string(job.mChangedTile.y()) + "_", recastMeshRevision);
         if (mSettings.get().mEnableWriteNavMeshToFile)
             writeToFile(*job.mNavMeshCacheItem->mValue.lock(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
     }

@@ -19,6 +19,8 @@ namespace DetourNavigator
 
         bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
 
+        bool updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
+
         bool removeObject(std::size_t id);
 
         void update(const osg::Vec3f& playerPosition);

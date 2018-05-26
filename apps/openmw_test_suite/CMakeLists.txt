@@ -22,6 +22,7 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         detournavigator/settingsutils.cpp
         detournavigator/recastmeshbuilder.cpp
         detournavigator/gettilespositions.cpp
+        detournavigator/recastmeshobject.cpp
     )
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})

@@ -30,6 +30,11 @@ namespace DetourNavigator
         return mNavMeshManager.addObject(id, shape, transform);
     }
 
+    bool Navigator::updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
+    {
+        return mNavMeshManager.updateObject(id, shape, transform);
+    }
+
     bool Navigator::removeObject(std::size_t id)
     {
         return mNavMeshManager.removeObject(id);

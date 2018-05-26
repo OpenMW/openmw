@@ -30,12 +30,20 @@ namespace DetourNavigator
         return true;
     }
 
+    bool NavMeshManager::updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
+    {
+        if (!mRecastMeshManager.updateObject(id, transform))
+            return false;
+        addChangedTiles(shape, transform);
+        return true;
+    }
+
     bool NavMeshManager::removeObject(std::size_t id)
     {
         const auto object = mRecastMeshManager.removeObject(id);
         if (!object)
             return false;
-        addChangedTiles(*object->mShape, object->mTransform);
+        addChangedTiles(object->mShape, object->mTransform);
         return true;
     }
 

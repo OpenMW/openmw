@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTMESHMANAGER_H
 
 #include "recastmeshbuilder.hpp"
+#include "recastmeshobject.hpp"
 
 #include <LinearMath/btTransform.h>
 
@@ -13,20 +14,22 @@ class btCollisionShape;
 
 namespace DetourNavigator
 {
+    struct RemovedRecastMeshObject
+    {
+        std::reference_wrapper<const btCollisionShape> mShape;
+        btTransform mTransform;
+    };
+
     class RecastMeshManager
     {
     public:
-        struct Object
-        {
-            const btCollisionShape* mShape;
-            btTransform mTransform;
-        };
-
         RecastMeshManager(const Settings& settings, const TileBounds& bounds);
 
         bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
 
-        boost::optional<Object> removeObject(std::size_t id);
+        bool updateObject(std::size_t id, const btTransform& transform);
+
+        boost::optional<RemovedRecastMeshObject> removeObject(std::size_t id);
 
         std::shared_ptr<RecastMesh> getMesh();
 
@@ -35,7 +38,7 @@ namespace DetourNavigator
     private:
         bool mShouldRebuild;
         RecastMeshBuilder mMeshBuilder;
-        std::unordered_map<std::size_t, Object> mObjects;
+        std::unordered_map<std::size_t, RecastMeshObject> mObjects;
 
         void rebuild();
     };

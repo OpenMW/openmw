@@ -3,6 +3,8 @@
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
 
+#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/esmreader.hpp>
@@ -51,6 +53,7 @@
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwphysics/actor.hpp"
 #include "../mwphysics/collisiontype.hpp"
+#include "../mwphysics/object.hpp"
 
 #include "player.hpp"
 #include "manualref.hpp"
@@ -1535,6 +1538,16 @@ namespace MWWorld
         }
         if(player != results.end())
             moveObjectImp(player->first, player->second.x(), player->second.y(), player->second.z(), false);
+
+        bool navigatorObjectsUpdated = false;
+        mPhysics->forEachAnimatedObject([&] (const MWPhysics::Object* object)
+        {
+            navigatorObjectsUpdated = mNavigator->updateObject(std::size_t(object),
+                    *object->getCollisionObject()->getCollisionShape(),
+                    object->getCollisionObject()->getWorldTransform()) || navigatorObjectsUpdated;
+        });
+        if (navigatorObjectsUpdated)
+            mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3());
     }
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreDoors)
@@ -2254,7 +2267,7 @@ namespace MWWorld
 
         float waterlevel = cell->getWaterLevel();
 
-        // SwimHeightScale affects the upper z position an actor can swim to 
+        // SwimHeightScale affects the upper z position an actor can swim to
         // while in water. Based on observation from the original engine,
         // the upper z position you get with a +1 SwimHeightScale is the depth
         // limit for being able to cast water walking on an underwater target.
@@ -2400,7 +2413,7 @@ namespace MWWorld
     {
         mRendering->screenshot(image, w, h);
     }
-    
+
     bool World::screenshot360(osg::Image* image, std::string settingStr)
     {
         return mRendering->screenshot360(image,settingStr);
@@ -3573,7 +3586,7 @@ namespace MWWorld
                 continue;
             }
             else
-                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, static_cast<float>(effectIt->mArea * 2));              
+                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, static_cast<float>(effectIt->mArea * 2));
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             static const std::string schools[] = {

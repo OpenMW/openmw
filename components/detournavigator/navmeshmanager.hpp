@@ -25,6 +25,8 @@ namespace DetourNavigator
 
         bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
 
+        bool updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
+
         bool removeObject(std::size_t id);
 
         void addAgent(const osg::Vec3f& agentHalfExtents);
