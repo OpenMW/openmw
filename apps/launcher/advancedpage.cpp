@@ -5,6 +5,7 @@
 #include <apps/launcher/utils/cellnameloader.hpp>
 #include <QFileDialog>
 #include <QCompleter>
+#include <thread>
 #include <components/contentselector/view/contentselector.hpp>
 #include <components/contentselector/model/esmfile.hpp>
 
@@ -166,5 +167,8 @@ void Launcher::AdvancedPage::saveSettingBool(QCheckBox *checkbox, const std::str
 
 void Launcher::AdvancedPage::slotSelectedDataFilesChanged(QStringList selectedFiles)
 {
-    loadCellsForAutocomplete(selectedFiles);
+    // Loading cells for core Morrowind + Expansions takes about 0.2 seconds, which is enough to cause a
+    // barely perceptible UI lag. Splitting into its own thread to alleviate that.
+    std::thread loadCellsThread(&AdvancedPage::loadCellsForAutocomplete, this, selectedFiles);
+    loadCellsThread.join();
 }
