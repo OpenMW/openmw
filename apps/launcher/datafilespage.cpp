@@ -37,11 +37,14 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
 
     connect(mProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
             this, SLOT(updateOkButton(QString)));
-    connect(mSelector, SIGNAL(signalSelectedFilesChanged(QStringList)),
-            this, SLOT(slotSelectedFilesChanged(QStringList)));
 
     buildView();
     loadSettings();
+
+    // Connect signal and slot after the settings have been loaded. We only care about the user changing
+    // the addons and don't want to get signals of the system doing it during startup.
+    connect(mSelector, SIGNAL(signalAddonDataChanged(QModelIndex,QModelIndex)),
+            this, SLOT(slotAddonDataChanged()));
 }
 
 void Launcher::DataFilesPage::buildView()
@@ -322,7 +325,11 @@ bool Launcher::DataFilesPage::showDeleteMessageBox (const QString &text)
     return (msgBox.clickedButton() == deleteButton);
 }
 
-void Launcher::DataFilesPage::slotSelectedFilesChanged(QStringList selectedFilesChanged)
+void Launcher::DataFilesPage::slotAddonDataChanged()
 {
-    emit signalSelectedFilesChanged(selectedFilesChanged);
+    QStringList selectedFiles = selectedFilePaths();
+    if (previousSelectedFiles != selectedFiles) {
+        previousSelectedFiles = selectedFiles;
+        emit signalSelectedFilesChanged(selectedFiles);
+    }
 }

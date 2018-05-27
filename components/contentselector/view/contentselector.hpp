@@ -15,7 +15,6 @@ namespace ContentSelectorView
         Q_OBJECT
 
         QMenu *mContextMenu;
-        QStringList mFilePaths;
 
     protected:
 
@@ -56,7 +55,6 @@ namespace ContentSelectorView
         void buildContextMenu();
         void setGameFileSelected(int index, bool selected);
         void setCheckStateForMultiSelectedItems(bool checked);
-        void emitSelectedFilesChanged();
 
     signals:
         void signalCurrentGamefileIndexChanged (int);

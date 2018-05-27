@@ -60,7 +60,7 @@ namespace Launcher
         void slotProfileChangedByUser(const QString &previous, const QString &current);
         void slotProfileRenamed(const QString &previous, const QString &current);
         void slotProfileDeleted(const QString &item);
-        void slotSelectedFilesChanged (QStringList selectedFiles);
+        void slotAddonDataChanged ();
 
         void updateOkButton(const QString &text);
 
@@ -81,7 +81,7 @@ namespace Launcher
         Config::LauncherSettings &mLauncherSettings;
 
         QString mPreviousProfile;
-
+        QStringList previousSelectedFiles;
         QString mDataLocal;
 
         void setPluginsCheckstates(Qt::CheckState state);

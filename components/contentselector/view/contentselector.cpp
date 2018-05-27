@@ -216,8 +216,6 @@ void ContentSelectorView::ContentSelector::slotShowContextMenu(const QPoint& pos
 {
     QPoint globalPos = ui.addonView->viewport()->mapToGlobal(pos);
     mContextMenu->exec(globalPos);
-    // TODO This is a temporary workaround to demonstrate that the selected files signal can be sent
-    emitSelectedFilesChanged();
 }
 
 void ContentSelectorView::ContentSelector::setCheckStateForMultiSelectedItems(bool checked)
@@ -241,15 +239,4 @@ void ContentSelectorView::ContentSelector::slotUncheckMultiSelectedItems()
 void ContentSelectorView::ContentSelector::slotCheckMultiSelectedItems()
 {
     setCheckStateForMultiSelectedItems(true);
-}
-
-void ContentSelectorView::ContentSelector::emitSelectedFilesChanged()
-{
-    //retrieve the files selected for the profile
-    ContentSelectorModel::ContentFileList items = selectedFiles();
-    QStringList filePaths;
-            foreach(const ContentSelectorModel::EsmFile *item, items) {
-            filePaths.append(item->filePath());
-        }
-    emit signalSelectedFilesChanged(filePaths);
 }
