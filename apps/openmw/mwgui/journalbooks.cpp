@@ -244,7 +244,7 @@ BookTypesetter::Ptr JournalBooks::createLatinJournalIndex ()
         const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
         BookTypesetter::Style* style = typesetter->createHotStyle (body, textColours.journalTopic,
                                                                    textColours.journalTopicOver,
-                                                                   textColours.journalTopicPressed, (uint32_t) ch);
+                                                                   textColours.journalTopicPressed, (Utf8Stream::UnicodeChar) ch);
 
         if (i == 13)
             typesetter->sectionBreak ();
@@ -274,7 +274,7 @@ BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex ()
         sprintf(buffer, "( %c%c )", ch[0], ch[1]);
 
         Utf8Stream stream ((char*) ch);
-        uint32_t first = stream.peek();
+        Utf8Stream::UnicodeChar first = stream.peek();
 
         const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
         BookTypesetter::Style* style = typesetter->createHotStyle (body, textColours.journalTopic,

@@ -1,6 +1,7 @@
 #include "misc.hpp"
 
 #include <components/esm/loadmisc.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -85,7 +86,22 @@ namespace MWClass
         {
             const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ref->mRef.getSoul());
             if (creature)
-                value *= creature->mData.mSoul;
+            {
+                int soul = creature->mData.mSoul;
+                if (Settings::Manager::getBool("rebalance soul gem values", "Game"))
+                {
+                    // use the 'soul gem value rebalance' formula from the Morrowind Code Patch 
+                    float soulValue = 0.0001 * pow(soul, 3) + 2 * soul;
+                    
+                    // for Azura's star add the unfilled value
+                    if (Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "Misc_SoulGem_Azura"))
+                        value += soulValue;
+                    else
+                        value = soulValue;
+                }
+                else
+                    value *= soul;
+            }
         }
 
         return value;

@@ -7,7 +7,6 @@
 
 #include <components/translation/translation.hpp>
 #include <components/misc/stringops.hpp>
-#include <components/misc/utf8stream.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
@@ -307,37 +306,20 @@ struct JournalViewModelImpl : JournalViewModel
         visitor (toUtf8Span (topic.getName()));
     }
 
-    void visitTopicNamesStartingWith (uint32_t character, std::function < void (const std::string&) > visitor) const
+    void visitTopicNamesStartingWith (Utf8Stream::UnicodeChar character, std::function < void (const std::string&) > visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
         for (MWBase::Journal::TTopicIter i = journal->topicBegin (); i != journal->topicEnd (); ++i)
         {
             Utf8Stream stream (i->first.c_str());
-            uint32_t first = toUpper(stream.peek());
+            Utf8Stream::UnicodeChar first = Misc::StringUtils::toLowerUtf8(stream.peek());
 
-            if (first != character)
+            if (first != Misc::StringUtils::toLowerUtf8(character))
                 continue;
 
             visitor (i->second.getName());
         }
-    }
-
-    static uint32_t toUpper(uint32_t ch)
-    {
-        // Russian alphabet
-        if (ch >= 0x0430 && ch < 0x0450)
-            ch -= 0x20;
-
-        // Cyrillic IO character
-        if (ch == 0x0451)
-            ch -= 0x50;
-
-        // Latin alphabet
-        if (ch >= 0x61 && ch < 0x80)
-            ch -= 0x20;
-
-        return ch;
     }
 
     struct TopicEntryImpl : BaseEntry <MWDialogue::Topic::TEntryIter, TopicEntry>

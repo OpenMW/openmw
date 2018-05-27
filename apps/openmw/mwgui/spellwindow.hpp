@@ -32,6 +32,7 @@ namespace MWGui
         void onEnchantedItemSelected(MWWorld::Ptr item, bool alreadyEquipped);
         void onSpellSelected(const std::string& spellId);
         void onModelIndexSelected(SpellModel::ModelIndex index);
+        void onFilterChanged(MyGUI::EditBox *sender);
         void onDeleteSpellAccept();
         void askDeleteSpell(const std::string& spellId);
 
@@ -41,6 +42,7 @@ namespace MWGui
 
         SpellView* mSpellView;
         SpellIcons* mSpellIcons;
+        MyGUI::EditBox* mFilterEdit;
 
     private:
         float mUpdateTimer;

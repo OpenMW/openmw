@@ -28,9 +28,13 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Class, class_.mId);
 
-    // test for empty name and description
+    // A class should have a name
     if (class_.mName.empty())
-        messages.push_back (std::make_pair (id, class_.mId + " has an empty name"));
+        messages.push_back (std::make_pair (id, class_.mId + " doesn't have a name"));
+
+    // A playable class should have a description
+    if (class_.mData.mIsPlayable != 0 && class_.mDescription.empty())
+        messages.push_back (std::make_pair (id, class_.mId + " doesn't have a description and it's playable"));
 
     // test for invalid attributes
     for (int i=0; i<2; ++i)

@@ -1751,8 +1751,7 @@ void CharacterController::update(float duration)
 
         if (cls.getEncumbrance(mPtr) <= cls.getCapacity(mPtr))
         {
-            const float encumbrance = cls.getEncumbrance(mPtr) / cls.getCapacity(mPtr);
-
+            const float encumbrance = cls.getNormalizedEncumbrance(mPtr);
             if (sneak)
                 fatigueLoss = fFatigueSneakBase + encumbrance * fFatigueSneakMult;
             else
