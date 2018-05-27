@@ -30,7 +30,7 @@ namespace Launcher
         void loadCellsForAutocomplete(QStringList filePaths);
 
     public slots:
-        void slotSelectedDataFilesChanged(QStringList selectedFiles);
+        void slotLoadedCellsChanged(QStringList cellNames);
 
     private slots:
         void on_skipMenuCheckBox_stateChanged(int state);

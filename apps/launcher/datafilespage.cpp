@@ -7,7 +7,9 @@
 #include <QCheckBox>
 #include <QMenu>
 #include <QSortFilterProxyModel>
+#include <thread>
 
+#include <apps/launcher/utils/cellnameloader.hpp>
 #include <components/files/configurationmanager.hpp>
 
 #include <components/contentselector/model/esmfile.hpp>
@@ -330,6 +332,17 @@ void Launcher::DataFilesPage::slotAddonDataChanged()
     QStringList selectedFiles = selectedFilePaths();
     if (previousSelectedFiles != selectedFiles) {
         previousSelectedFiles = selectedFiles;
-        emit signalSelectedFilesChanged(selectedFiles);
+        // Loading cells for core Morrowind + Expansions takes about 0.2 seconds, which is enough to cause a
+        // barely perceptible UI lag. Splitting into its own thread to alleviate that.
+        std::thread loadCellsThread(&DataFilesPage::reloadCells, this, selectedFiles);
+        loadCellsThread.join();
     }
+}
+
+void Launcher::DataFilesPage::reloadCells(QStringList selectedFiles)
+{
+    CellNameLoader cellNameLoader;
+    QStringList cellNamesList = QStringList::fromSet(cellNameLoader.getCellNames(selectedFiles));
+    std::sort(cellNamesList.begin(), cellNamesList.end());
+    emit signalSelectedFilesChanged(cellNamesList);
 }

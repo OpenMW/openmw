@@ -96,6 +96,7 @@ namespace Launcher
         void addProfile (const QString &profile, bool setAsCurrent);
         void checkForDefaultProfile();
         void populateFileViews(const QString& contentModelName);
+        void reloadCells(QStringList selectedFiles);
 
         class PathIterator
         {

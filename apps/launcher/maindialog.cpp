@@ -142,7 +142,7 @@ void Launcher::MainDialog::createPages()
 
     connect(mPlayPage, SIGNAL(signalProfileChanged(int)), mDataFilesPage, SLOT(slotProfileChanged(int)));
     connect(mDataFilesPage, SIGNAL(signalProfileChanged(int)), mPlayPage, SLOT(setProfilesIndex(int)));
-    connect(mDataFilesPage, SIGNAL(signalSelectedFilesChanged(QStringList)), mAdvancedPage, SLOT(slotSelectedDataFilesChanged(QStringList)));
+    connect(mDataFilesPage, SIGNAL(signalSelectedFilesChanged(QStringList)), mAdvancedPage, SLOT(slotLoadedCellsChanged(QStringList)));
 
 }
 
