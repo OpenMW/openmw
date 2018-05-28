@@ -33,7 +33,7 @@ namespace MWScript
             if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
             {
                 GlobalScriptDesc desc;
-                desc.mRunning = true;
+                desc.mWillBeRunning = true;
                 desc.mLocals.configure (*script);
                 desc.mId = targetId;
 
@@ -42,7 +42,7 @@ namespace MWScript
         }
         else if (!iter->second.mRunning)
         {
-            iter->second.mRunning = true;
+            iter->second.mWillBeRunning = true;
             iter->second.mId = targetId;
         }
     }
@@ -53,7 +53,19 @@ namespace MWScript
             mScripts.find (::Misc::StringUtils::lowerCase (name));
 
         if (iter!=mScripts.end())
+        {
             iter->second.mRunning = false;
+            iter->second.mWillBeRunning = false;
+        }
+    }
+
+    void GlobalScripts::updateState ()
+    {
+        for (std::map<std::string, GlobalScriptDesc>::iterator iter (mScripts.begin());
+            iter!=mScripts.end(); ++iter)
+        {
+            iter->second.mRunning = iter->second.mWillBeRunning;
+        }
     }
 
     bool GlobalScripts::isRunning (const std::string& name) const
@@ -64,7 +76,7 @@ namespace MWScript
         if (iter==mScripts.end())
             return false;
 
-        return iter->second.mRunning;
+        return iter->second.mWillBeRunning;
     }
 
     void GlobalScripts::run()
@@ -182,6 +194,7 @@ namespace MWScript
             }
 
             iter->second.mRunning = script.mRunning!=0;
+            iter->second.mWillBeRunning = iter->second.mRunning;
             iter->second.mLocals.read (script.mLocals, script.mId);
             iter->second.mId = script.mTargetId;
 
