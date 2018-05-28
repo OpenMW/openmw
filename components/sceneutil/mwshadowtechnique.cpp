@@ -927,6 +927,9 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
     //OSG_NOTICE<<"maxZFar "<<maxZFar<<std::endl;
 
+    // Workaround for absurdly huge viewing distances where OSG would otherwise push the near plane out.
+    cv.setNearFarRatio(minZNear / maxZFar);
+
     Frustum frustum(&cv, minZNear, maxZFar);
     if (_debugHud)
         _debugHud->setFrustumVertices(new osg::Vec3dArray(8, &frustum.corners[0]));
@@ -2252,7 +2255,7 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
     double nearDist = frustum.frustumCenterLine.x() * nearPoint.x() + frustum.frustumCenterLine.y() * nearPoint.y() + frustum.frustumCenterLine.z() * nearPoint.z();
     double farDist = -frustum.frustumCenterLine.x() * farPoint.x() - frustum.frustumCenterLine.y() * farPoint.y() - frustum.frustumCenterLine.z() * farPoint.z();
 
-
+   
     convexHull.clip(osg::Plane(frustum.frustumCenterLine, -nearDist));
     convexHull.clip(osg::Plane(-frustum.frustumCenterLine, -farDist));
 
