@@ -360,8 +360,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-parameter")
     endif()
 elseif (MSVC)
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} /Zi /bigobj")
-    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF /INCREMENTAL:NO")
     # Enable link-time code generation globally for all linking
     if (OPENMW_LTO_BUILD)
         set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
@@ -707,8 +705,7 @@ if (WIN32)
     endif()
 
     if (BUILD_OPENMW)
-        # Very specific issue this, only needed on 32-bit VS2015 during unity builds.
-        if (MSVC_VERSION GREATER 1800 AND CMAKE_SIZEOF_VOID_P EQUAL 4 AND OPENMW_UNITY_BUILD)
+        if (OPENMW_UNITY_BUILD)
             set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD} /bigobj")
         else()
             set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")

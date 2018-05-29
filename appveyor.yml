@@ -19,7 +19,8 @@ platform:
 
 configuration:
 #    - Debug
-   - Release
+    - Release
+#    - RelWithDebInfo
 
 # For the Qt, Boost, CMake, etc installs
 #os: Visual Studio 2017
@@ -48,7 +49,7 @@ install:
     - set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
 
 before_build:
-    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -u -p %PLATFORM% -v %msvc% -V
+    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -c %configuration% -p %PLATFORM% -v %msvc% -V
 
 build_script:
     - cmd: if %PLATFORM%==Win32 set build=MSVC%msvc%_32
@@ -56,8 +57,8 @@ build_script:
     - cmd: msbuild %build%\OpenMW.sln /t:Build /p:Configuration=%configuration% /m:2 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 after_build:
-    - cmd: if %PLATFORM%==x64 7z a OpenMW_MSVC%msvc%_x64.zip %APPVEYOR_BUILD_FOLDER%\MSVC%msvc%_64\Release\ -xr"!*.pdb"
-    - cmd: if %PLATFORM%==x64 7z a OpenMW_MSVC%msvc%_x64_pdb.zip %APPVEYOR_BUILD_FOLDER%\MSVC%msvc%_64\Release\*.pdb
+    - cmd: if %PLATFORM%==x64 7z a OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%.zip %APPVEYOR_BUILD_FOLDER%\MSVC%msvc%_64\%configuration%\ -xr"!*.pdb"
+    #- cmd: if %PLATFORM%==x64 7z a OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%_pdb.zip %APPVEYOR_BUILD_FOLDER%\MSVC%msvc%_64\%configuration%\*.pdb
 
 test: off
 
@@ -69,7 +70,7 @@ test: off
 #    on_build_status_changed: true
 
 artifacts:
-  - path: OpenMW_MSVC%msvc%_x64.zip
-    name: OpenMW_MSVC%msvc%_x64
-  - path: OpenMW_MSVC%msvc%_x64_pdb.zip
-    name: OpenMW_MSVC%msvc%_x64_pdb
+  - path: OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%.zip
+    name: OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%
+  #- path: OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%_pdb.zip
+  #  name: OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%_pdb
