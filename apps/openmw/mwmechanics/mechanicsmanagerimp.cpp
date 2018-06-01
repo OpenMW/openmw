@@ -1194,16 +1194,41 @@ namespace MWMechanics
             reportCrime(player, victim, type, arg);
         else if (type == OT_Assault && !victim.isEmpty())
         {
+            bool reported = false;
             if (victim.getClass().isClass(victim, "guard")
                 && !victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
-                reportCrime(player, victim, type, arg);
-            else
+                reported = reportCrime(player, victim, type, arg);
+
+            if (!reported)
                 startCombat(victim, player); // TODO: combat should be started with an "unaware" flag, which makes the victim flee?
         }
         return crimeSeen;
     }
 
-    void MechanicsManager::reportCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg)
+    bool MechanicsManager::canReportCrime(const MWWorld::Ptr &actor, const MWWorld::Ptr &victim, std::set<MWWorld::Ptr> &playerFollowers)
+    {
+        if (actor == getPlayer()
+            || !actor.getClass().isNpc() || actor.getClass().getCreatureStats(actor).isDead())
+            return false;
+
+        if (actor.getClass().getCreatureStats(actor).getAiSequence().isInCombat(victim))
+            return false;
+
+        // Unconsious actor can not report about crime and should not become hostile
+        if (actor.getClass().getCreatureStats(actor).getKnockedDown())
+            return false;
+
+        // Player's followers should not attack player, or try to arrest him
+        if (actor.getClass().getCreatureStats(actor).getAiSequence().hasPackage(AiPackage::TypeIdFollow))
+        {
+            if (playerFollowers.find(actor) != playerFollowers.end())
+                return false;
+        }
+
+        return true;
+    }
+
+    bool MechanicsManager::reportCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
         const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
@@ -1278,28 +1303,14 @@ namespace MWMechanics
 
         bool reported = false;
 
+        std::set<MWWorld::Ptr> playerFollowers;
+        getActorsSidingWith(player, playerFollowers);
+
         // Tell everyone (including the original reporter) in alarm range
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
-            if (*it == player
-                || !it->getClass().isNpc() || it->getClass().getCreatureStats(*it).isDead()) continue;
-
-            if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
+            if (!canReportCrime(*it, victim, playerFollowers))
                 continue;
-
-            // Unconsious actor can not report about crime and should not become hostile
-            if (it->getClass().getCreatureStats(*it).getKnockedDown())
-                continue;
-
-            // Player's followers should not attack player, or try to arrest him
-            if (it->getClass().getCreatureStats(*it).getAiSequence().hasPackage(AiPackage::TypeIdFollow))
-            {
-                std::set<MWWorld::Ptr> playerFollowers;
-                getActorsSidingWith(player, playerFollowers);
-
-                if (playerFollowers.find(*it) != playerFollowers.end())
-                    continue;
-            }
 
             // Will the witness report the crime?
             if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= 100)
@@ -1309,8 +1320,14 @@ namespace MWMechanics
                 if (type == OT_Trespassing)
                     MWBase::Environment::get().getDialogueManager()->say(*it, "intruder");
             }
+        }
 
-            if (it->getClass().isClass(*it, "guard"))
+        for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+        {
+            if (!canReportCrime(*it, victim, playerFollowers))
+                continue;
+
+            if (it->getClass().isClass(*it, "guard") && reported)
             {
                 // Mark as Alarmed for dialogue
                 it->getClass().getCreatureStats(*it).setAlarmed(true);
@@ -1398,6 +1415,8 @@ namespace MWMechanics
                 victim.getClass().getNpcStats(victim).setCrimeId(id);
             }
         }
+
+        return reported;
     }
 
     bool MechanicsManager::actorAttacked(const MWWorld::Ptr &target, const MWWorld::Ptr &attacker)

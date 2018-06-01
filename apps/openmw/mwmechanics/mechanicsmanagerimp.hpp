@@ -224,7 +224,9 @@ namespace MWMechanics
             virtual bool isSneaking(const MWWorld::Ptr& ptr);
 
         private:
-            void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
+            bool canReportCrime(const MWWorld::Ptr &actor, const MWWorld::Ptr &victim, std::set<MWWorld::Ptr> &playerFollowers);
+
+            bool reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0);
 
 
