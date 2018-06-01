@@ -308,6 +308,29 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor, boo
     if (isActualAiPackage(package.getTypeId()))
         stopCombat();
 
+    // we should return a wandering actor back after combat or pursuit
+    // the same thing for actors without AI packages
+    int currentTypeId = getTypeId();
+    int newTypeId = package.getTypeId();
+    if (currentTypeId <= MWMechanics::AiPackage::TypeIdWander
+        && (newTypeId <= MWMechanics::AiPackage::TypeIdCombat
+        || newTypeId == MWMechanics::AiPackage::TypeIdPursue))
+    {
+        osg::Vec3f dest;
+        if (currentTypeId == MWMechanics::AiPackage::TypeIdWander)
+        {
+            AiPackage* activePackage = getActivePackage();
+            dest = activePackage->getDestination(actor);
+        }
+        else
+        {
+            dest = actor.getRefData().getPosition().asVec3();
+        }
+
+        MWMechanics::AiTravel travelPackage(dest.x(), dest.y(), dest.z(), true);
+        stack(travelPackage, actor, false);
+    }
+
     // remove previous packages if required
     if (cancelOther && package.shouldCancelPreviousAi())
     {
