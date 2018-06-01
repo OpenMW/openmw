@@ -308,11 +308,13 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor, boo
     if (isActualAiPackage(package.getTypeId()))
         stopCombat();
 
-    // we should return a wandering actor back after combat or pursuit
-    // the same thing for actors without AI packages
+    // We should return a wandering actor back after combat or pursuit.
+    // The same thing for actors without AI packages.
+    // Also there is no point to stack return packages.
     int currentTypeId = getTypeId();
     int newTypeId = package.getTypeId();
     if (currentTypeId <= MWMechanics::AiPackage::TypeIdWander
+        && !hasPackage(MWMechanics::AiPackage::TypeIdInternalTravel)
         && (newTypeId <= MWMechanics::AiPackage::TypeIdCombat
         || newTypeId == MWMechanics::AiPackage::TypeIdPursue))
     {
