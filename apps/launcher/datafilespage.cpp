@@ -335,7 +335,7 @@ void Launcher::DataFilesPage::slotAddonDataChanged()
         // Loading cells for core Morrowind + Expansions takes about 0.2 seconds, which is enough to cause a
         // barely perceptible UI lag. Splitting into its own thread to alleviate that.
         std::thread loadCellsThread(&DataFilesPage::reloadCells, this, selectedFiles);
-        loadCellsThread.join();
+        loadCellsThread.detach();
     }
 }
 
