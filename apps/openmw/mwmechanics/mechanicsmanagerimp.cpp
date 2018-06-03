@@ -1029,6 +1029,13 @@ namespace MWMechanics
         owner.first = victim.getCellRef().getRefId();
         owner.second = false;
 
+        const std::string victimFaction = victim.getClass().getPrimaryFaction(victim);
+        if (!victimFaction.empty() && Misc::StringUtils::ciEqual(item.getCellRef().getFaction(), victimFaction)) // Is the item faction-owned?
+        {
+            owner.first = victimFaction;
+            owner.second = true;
+        }
+
         Misc::StringUtils::lowerCaseInPlace(owner.first);
 
         // decrease count of stolen items
