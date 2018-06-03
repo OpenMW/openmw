@@ -15,7 +15,6 @@ namespace Misc
     // so we have the opportunity to use proper resource handling for content created in OpenMW-CS.
     namespace ResourceHelpers
     {
-        bool changeExtensionToDds(std::string &path);
         std::string correctResourcePath(const std::string &topLevelDirectory, const std::string &resPath, const VFS::Manager* vfs);
         std::string correctTexturePath(const std::string &resPath, const VFS::Manager* vfs);
         std::string correctIconPath(const std::string &resPath, const VFS::Manager* vfs);

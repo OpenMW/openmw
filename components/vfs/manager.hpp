@@ -58,12 +58,21 @@ namespace VFS
         /// @note May be called from any thread once the index has been built.
         Files::IStreamPtr getNormalized(const std::string& normalizedName) const;
 
+        /// Find the highest priority resource of given resource name, ignoring the extension.
+        /// @return the path to the resource
+        /// @return empty string if no such resources were found
+        const std::string& findFirstOf(std::string normalized) const;
+
     private:
         bool mStrict;
 
         std::vector<Archive*> mArchives;
 
-        std::map<std::string, File*> mIndex;
+        typedef std::map<std::string,File*> NameFileMap;
+
+        std::vector<NameFileMap> mArchiveIndexes;
+
+        NameFileMap mIndex;
     };
 
 }

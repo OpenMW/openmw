@@ -29,20 +29,10 @@ namespace
 
 }
 
-bool Misc::ResourceHelpers::changeExtensionToDds(std::string &path)
-{
-    std::string::size_type pos = path.rfind('.');
-    if(pos != std::string::npos && path.compare(pos, path.length() - pos, ".dds") != 0)
-    {
-        path.replace(pos, path.length(), ".dds");
-        return true;
-    }
-    return false;
-}
-
 std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLevelDirectory, const std::string &resPath, const VFS::Manager* vfs)
 {
-    /* Bethesda at some point converted all their BSA
+    /* 
+     * Bethesda at some point converted all their BSA
      * textures from tga to dds for increased load speed, but all
      * texture file name references were kept as .tga.
      */
@@ -53,25 +43,26 @@ std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLev
     std::string correctedPath = resPath;
     Misc::StringUtils::lowerCaseInPlace(correctedPath);
 
-    // Apparently, leading separators are allowed
+    // Apparently leading separators are allowed
     while (correctedPath.size() && (correctedPath[0] == '/' || correctedPath[0] == '\\'))
         correctedPath.erase(0, 1);
 
-    if(correctedPath.compare(0, prefix1.size(), prefix1.data()) != 0 &&
-       correctedPath.compare(0, prefix2.size(), prefix2.data()) != 0)
+    if (correctedPath.compare(0, prefix1.size(), prefix1.data()) != 0 &&
+        correctedPath.compare(0, prefix2.size(), prefix2.data()) != 0)
         correctedPath = prefix1 + correctedPath;
 
-    std::string origExt = correctedPath;
+    // Find the highest priority file with the same base name (no extension)
+    std::string filePath = vfs->findFirstOf(correctedPath);
 
-    if (vfs->exists(origExt)
-     || (changeExtensionToDds(correctedPath) && vfs->exists(correctedPath)))
-        return correctedPath;
+    if (!filePath.empty())
+        return filePath;
 
-    // fall back to a resource in the top level directory if it exists
-    std::string fallback = topLevelDirectory + "\\" + getBasename(origExt);
-    if (vfs->exists(fallback)
-     || (changeExtensionToDds(fallback) && vfs->exists(fallback)))
-        return fallback;
+    // Fall back to a resource in the top level directory if it exists
+    filePath = prefix1 + getBasename(correctedPath);
+    filePath = vfs->findFirstOf(filePath);
+
+    if (!filePath.empty())
+        return filePath;
 
     return correctedPath;
 }

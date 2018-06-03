@@ -1,6 +1,7 @@
 #include "manager.hpp"
 
 #include <cctype>
+#include <iterator>
 #include <stdexcept>
 
 #include <components/misc/stringops.hpp>
@@ -45,7 +46,8 @@ namespace VFS
     void Manager::reset()
     {
         mIndex.clear();
-        for (std::vector<Archive*>::iterator it = mArchives.begin(); it != mArchives.end(); ++it)
+        mArchiveIndexes.clear();
+        for (auto it = mArchives.begin(); it != mArchives.end(); ++it)
             delete *it;
         mArchives.clear();
     }
@@ -58,9 +60,18 @@ namespace VFS
     void Manager::buildIndex()
     {
         mIndex.clear();
+        mArchiveIndexes.clear();
+        mArchiveIndexes.reserve(mArchives.size());
 
-        for (std::vector<Archive*>::const_iterator it = mArchives.begin(); it != mArchives.end(); ++it)
-            (*it)->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
+        std::back_insert_iterator<std::vector<NameFileMap>> archiveInserter(mArchiveIndexes);
+        for (auto it = mArchives.begin(); it != mArchives.end(); ++it)
+        {
+            NameFileMap index;
+            (*it)->listResources(index, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
+            for (NameFileMap::const_iterator nf = index.begin(); nf != index.end(); ++nf)
+                mIndex[nf->first] = nf->second;
+            *archiveInserter = index;
+        }
     }
 
     Files::IStreamPtr Manager::get(const std::string &name) const
@@ -73,12 +84,13 @@ namespace VFS
 
     Files::IStreamPtr Manager::getNormalized(const std::string &normalizedName) const
     {
-        std::map<std::string, File*>::const_iterator found = mIndex.find(normalizedName);
+        NameFileMap::const_iterator found = mIndex.find(normalizedName);
         if (found == mIndex.end())
             throw std::runtime_error("Resource '" + normalizedName + "' not found");
         return found->second->open();
     }
 
+    
     bool Manager::exists(const std::string &name) const
     {
         std::string normalized = name;
@@ -95,6 +107,33 @@ namespace VFS
     void Manager::normalizeFilename(std::string &name) const
     {
         normalize_path(name, mStrict);
+    }
+
+    const std::string& Manager::findFirstOf(std::string normalized) const
+    {
+        normalize_path(normalized, mStrict);
+        size_t extensionPos = normalized.rfind('.');
+        if (extensionPos == std::string::npos || normalized.find('/', extensionPos+1) != std::string::npos)
+            extensionPos = normalized.length();
+        const std::string basename = normalized.substr(0, extensionPos);
+
+        // Search starting from archives with higher priority
+        for (auto iter = mArchiveIndexes.rbegin(); iter != mArchiveIndexes.rend(); ++iter)
+        {
+            NameFileMap::const_iterator entry = iter->lower_bound(basename);
+            if (entry != iter->end() && entry->first.length() >= basename.length())
+            {
+                extensionPos = entry->first.rfind('.');
+
+                if (extensionPos == std::string::npos || entry->first.find('/', extensionPos+1) != std::string::npos)
+                    extensionPos = entry->first.length();
+                if (entry->first.compare(0, extensionPos, basename) == 0)
+                    return entry->first;
+            }
+        }
+
+        static const std::string empty;
+        return empty;
     }
 
 }
