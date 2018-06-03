@@ -8,6 +8,7 @@
 #include <QMenu>
 #include <QSortFilterProxyModel>
 #include <thread>
+#include <mutex>
 
 #include <apps/launcher/utils/cellnameloader.hpp>
 #include <components/files/configurationmanager.hpp>
