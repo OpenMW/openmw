@@ -18,6 +18,7 @@
 
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
+#include <iostream>
 
 #include "utils/textinputdialog.hpp"
 #include "utils/profilescombobox.hpp"
@@ -47,6 +48,8 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
     // the addons and don't want to get signals of the system doing it during startup.
     connect(mSelector, SIGNAL(signalAddonDataChanged(QModelIndex,QModelIndex)),
             this, SLOT(slotAddonDataChanged()));
+    // Call manually to indicate all changes to addon data during startup.
+    slotAddonDataChanged();
 }
 
 void Launcher::DataFilesPage::buildView()

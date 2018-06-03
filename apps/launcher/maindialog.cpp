@@ -125,9 +125,6 @@ void Launcher::MainDialog::createPages()
     mPlayPage->setProfilesModel(mDataFilesPage->profilesModel());
     mPlayPage->setProfilesIndex(mDataFilesPage->profilesIndex());
 
-    // Load cells for the "Start default character at" field
-    mAdvancedPage->loadCellsForAutocomplete(mDataFilesPage->selectedFilePaths());
-
     // Add the pages to the stacked widget
     pagesWidget->addWidget(mPlayPage);
     pagesWidget->addWidget(mDataFilesPage);
