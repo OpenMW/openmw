@@ -1000,11 +1000,18 @@ namespace MWMechanics
 
         const OwnerMap& owners = it->second;
         const std::string ownerid = ptr.getCellRef().getRefId();
-        const std::string factionid = ptr.getClass().getPrimaryFaction(ptr);
         OwnerMap::const_iterator ownerFound = owners.find(std::make_pair(Misc::StringUtils::lowerCase(ownerid), false));
-        OwnerMap::const_iterator factionOwnerFound = owners.find(std::make_pair(Misc::StringUtils::lowerCase(factionid), true));
+        if (ownerFound != owners.end())
+            return true;
 
-        return ownerFound != owners.end() || factionOwnerFound != owners.end();
+        const std::string factionid = ptr.getClass().getPrimaryFaction(ptr);
+        if (!factionid.empty())
+        {
+            OwnerMap::const_iterator factionOwnerFound = owners.find(std::make_pair(Misc::StringUtils::lowerCase(factionid), true));
+            return factionOwnerFound != owners.end();
+        }
+
+        return false;
     }
 
     void MechanicsManager::confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count)
