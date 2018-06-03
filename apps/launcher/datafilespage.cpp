@@ -339,8 +339,16 @@ void Launcher::DataFilesPage::slotAddonDataChanged()
     }
 }
 
+// Mutex lock to run reloadCells synchronously.
+std::mutex _reloadCellsMutex;
+
 void Launcher::DataFilesPage::reloadCells(QStringList selectedFiles)
 {
+    // Use a mutex lock so that we can prevent two threads from executing the rest of this code at the same time
+    // Based on https://stackoverflow.com/a/5429695/531762
+    std::unique_lock<std::mutex> lock(_reloadCellsMutex);
+
+    // The following code will run only if there is not another thread currently running it
     CellNameLoader cellNameLoader;
     QStringList cellNamesList = QStringList::fromSet(cellNameLoader.getCellNames(selectedFiles));
     std::sort(cellNamesList.begin(), cellNamesList.end());
