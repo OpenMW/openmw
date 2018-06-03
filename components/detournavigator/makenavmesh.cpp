@@ -216,23 +216,6 @@ namespace
         return NavMeshData(navMeshData, navMeshDataSize);
     }
 
-    struct AutoIncrementRevision
-    {
-        std::atomic_size_t& mNavMeshRevision;
-        bool mNavMeshChanged;
-
-        AutoIncrementRevision(std::atomic_size_t& navMeshRevision)
-            : mNavMeshRevision(navMeshRevision)
-            , mNavMeshChanged(false)
-        {}
-
-        ~AutoIncrementRevision()
-        {
-            if (mNavMeshChanged)
-                ++mNavMeshRevision;
-        }
-    };
-
     UpdateNavMeshStatus makeUpdateNavMeshStatus(bool removed, bool add)
     {
         if (removed && add)
@@ -292,20 +275,17 @@ namespace DetourNavigator
         const auto x = changedTile.x();
         const auto y = changedTile.y();
 
-        AutoIncrementRevision incRev(navMeshCacheItem.mNavMeshRevision);
-        bool removed = false;
-
-        {
+        const auto removeTile = [&] {
             const auto locked = navMesh.lock();
-            removed = dtStatusSucceed(locked->removeTile(locked->getTileRefAt(x, y, 0), nullptr, nullptr));
-        }
-
-        incRev.mNavMeshChanged = removed;
+            const auto removed = dtStatusSucceed(locked->removeTile(locked->getTileRefAt(x, y, 0), nullptr, nullptr));
+            navMeshCacheItem.mNavMeshRevision += removed;
+            return makeUpdateNavMeshStatus(removed, false);
+        };
 
         if (!recastMesh)
         {
             log("ignore add tile: recastMesh is null");
-            return makeUpdateNavMeshStatus(removed, false);
+            return removeTile();
         }
 
         const auto& boundsMin = recastMesh->getBoundsMin();
@@ -314,14 +294,14 @@ namespace DetourNavigator
         if (boundsMin == boundsMax)
         {
             log("ignore add tile: recastMesh is empty");
-            return makeUpdateNavMeshStatus(removed, false);
+            return removeTile();
         }
 
         const auto maxTiles = navMesh.lock()->getParams()->maxTiles;
         if (!shouldAddTile(changedTile, playerTile, maxTiles))
         {
             log("ignore add tile: too far from player");
-            return makeUpdateNavMeshStatus(removed, false);
+            return removeTile();
         }
 
         const auto tileBounds = makeTileBounds(settings, changedTile);
@@ -334,17 +314,27 @@ namespace DetourNavigator
         if (!navMeshData.mValue)
         {
             log("ignore add tile: NavMeshData is null");
-            return makeUpdateNavMeshStatus(removed, false);
+            return removeTile();
         }
 
-        const auto status = navMesh.lock()->addTile(navMeshData.mValue.get(), navMeshData.mSize,
-                                                    DT_TILE_FREE_DATA, 0, 0);
-        if (dtStatusSucceed(status))
-            incRev.mNavMeshChanged = true;
-        else
-            log("failed to add tile with status=", WriteDtStatus {status});
-        navMeshData.mValue.release();
+        dtStatus addStatus;
+        bool removed;
+        {
+            const auto locked = navMesh.lock();
+            removed = dtStatusSucceed(locked->removeTile(locked->getTileRefAt(x, y, 0), nullptr, nullptr));
+            addStatus = locked->addTile(navMeshData.mValue.get(), navMeshData.mSize, DT_TILE_FREE_DATA, 0, 0);
+        }
 
-        return makeUpdateNavMeshStatus(removed, dtStatusSucceed(status));
+        if (dtStatusSucceed(addStatus))
+        {
+            ++navMeshCacheItem.mNavMeshRevision;
+            navMeshData.mValue.release();
+            return makeUpdateNavMeshStatus(removed, true);
+        }
+        else
+        {
+            log("failed to add tile with status=", WriteDtStatus {addStatus});
+            return makeUpdateNavMeshStatus(removed, false);
+        }
     }
 }
