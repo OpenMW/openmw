@@ -87,6 +87,7 @@
     Bug #4413: Moving with 0 strength uses all of your fatigue
     Bug #4420: Camera flickering when I open up and close menus while sneaking
     Bug #4435: Item health is considered a signed integer
+    Bug #4441: Adding items to currently disabled weapon-wielding creatures crashes the game
     Feature #1786: Round up encumbrance value in the encumbrance bar
     Feature #2694: Editor: rename "model" column to make its purpose clear
     Feature #3870: Editor: Terrain Texture Brush Button
