@@ -22,7 +22,7 @@ General introduction to normal map conversion
 
 This page has general information and tutorials on how normal mapping works in OpenMW and how you can make mods using the old fake normal mapping technique (such as `Netch Bump mapped`_ and `Hlaalu Bump mapped`_, and maybe the most (in)famous one to give shiny rocks in OpenMW, the mod `On the Rocks`_!, featured in MGSO and Morrowind Rebirth) work in OpenMW.
 
-*Note:* The conversion made in the `Converting Apel's Various Things - Sacks`_-part of this tutorial require the use of the application NifSkope. There are binaries available for Windows, but not for Mac or Linux. Reports say that NifSkope versions 1.X will compile on Linux as long as you have Qt packages installed, while the later 2.X versions will not compile.
+*Note:* The conversion made in the `Converting Apel's Various Things - Sacks`_-part of this tutorial require the use of the application NifSkope_.
 
 *Another note:* I will use the terms bump mapping and normal mapping simultaneously. Normal mapping is one form of bump mapping. In other words, normal mapping is bump mapping, but bump mapping isn't necessarily normal mapping. There are several techniques for bump mapping, and normal mapping is the most common one today.
 
@@ -160,8 +160,6 @@ Converting Apel's Various Things - Sacks
 
 In part one of this tutorial, we converted a mod that only included modified Morrowind model (``.nif``) files so that the normal maps could be loaded in Morrowind with MCP. We ignored those model files since they are not needed with OpenMW. In this tutorial however, we will convert a mod that includes new, custom made models. In other words, we cannot just ignore those files this time.
 
-Before we begin, you need to know that unless you want to build the NifSkope application from source yourself, you will be needing a Windows OS to do this part, since the application only has binaries available for Windows.
-
 Tutorial - MCP, Part 2
 **********************
 
@@ -196,7 +194,7 @@ Since these models have one or two textures applied to them, the fix was not tha
 .. _`Multiple data folders`: https://wiki.openmw.org/index.php?title=Mod_installation
 .. _`Various Things - Sacks`: https://www.nexusmods.com/morrowind/mods/42558/?
 .. _Lead: https://imgur.com/bwpcYlc
-.. _NifSkope: http://niftools.sourceforge.net/wiki/NifSkope
+.. _NifSkope: https://wiki.openmw.org/index.php?title=Tools#NifSkope
 .. _Blocks: https://imgur.com/VmQC0WG
 .. _`no longer have shiny models`: https://imgur.com/vu1k7n1
 .. _`we are done`: https://imgur.com/yyZxlTw
