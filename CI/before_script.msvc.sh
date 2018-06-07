@@ -17,7 +17,6 @@ case "$WORKINGDIR" in
 		;;
 esac
 
-
 set -euo pipefail
 
 APPVEYOR=${APPVEYOR:-}
