@@ -1342,6 +1342,15 @@ namespace MWWorld
         rotateObjectImp(ptr, osg::Vec3f(x, y, z), adjust);
     }
 
+    void World::rotateWorldObject (const Ptr& ptr, osg::Quat rotate)
+    {
+        if(ptr.getRefData().getBaseNode() != 0)
+        {
+            mRendering->rotateObject(ptr, rotate);
+            mPhysics->updateRotation(ptr);
+        }
+    }
+
     MWWorld::Ptr World::placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos)
     {
         return copyObjectToCell(ptr,cell,pos,ptr.getRefData().getCount(),false);

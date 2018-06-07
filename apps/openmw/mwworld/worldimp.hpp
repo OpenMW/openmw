@@ -214,6 +214,8 @@ namespace MWWorld
 
             void setWaterHeight(const float height) override;
 
+            void rotateWorldObject (const MWWorld::Ptr& ptr, osg::Quat rotate) override;
+
             bool toggleWater() override;
             bool toggleWorld() override;
 

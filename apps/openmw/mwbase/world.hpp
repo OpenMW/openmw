@@ -564,6 +564,8 @@ namespace MWBase
 
             virtual bool isPlayerInJail() const = 0;
 
+            virtual void rotateWorldObject (const MWWorld::Ptr& ptr, osg::Quat rotate) = 0;
+
             /// Return terrain height at \a worldPos position.
             virtual float getTerrainHeightAt(const osg::Vec3f& worldPos) const = 0;
 
