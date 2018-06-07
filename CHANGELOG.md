@@ -1,6 +1,7 @@
 0.45.0
 ------
 
+    Bug #1990: Sunrise/sunset not set correct
     Bug #2835: Player able to slowly move when overencumbered
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3591: Angled hit distance too low
