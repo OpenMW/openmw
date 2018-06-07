@@ -992,14 +992,26 @@ namespace MWMechanics
         }
     }
 
-    bool MechanicsManager::isItemStolenFrom(const std::string &itemid, const std::string &ownerid)
+    bool MechanicsManager::isItemStolenFrom(const std::string &itemid, const MWWorld::Ptr& ptr)
     {
         StolenItemsMap::const_iterator it = mStolenItems.find(Misc::StringUtils::lowerCase(itemid));
         if (it == mStolenItems.end())
             return false;
+
         const OwnerMap& owners = it->second;
+        const std::string ownerid = ptr.getCellRef().getRefId();
         OwnerMap::const_iterator ownerFound = owners.find(std::make_pair(Misc::StringUtils::lowerCase(ownerid), false));
-        return ownerFound != owners.end();
+        if (ownerFound != owners.end())
+            return true;
+
+        const std::string factionid = ptr.getClass().getPrimaryFaction(ptr);
+        if (!factionid.empty())
+        {
+            OwnerMap::const_iterator factionOwnerFound = owners.find(std::make_pair(Misc::StringUtils::lowerCase(factionid), true));
+            return factionOwnerFound != owners.end();
+        }
+
+        return false;
     }
 
     void MechanicsManager::confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count)
@@ -1016,6 +1028,13 @@ namespace MWMechanics
         Owner owner;
         owner.first = victim.getCellRef().getRefId();
         owner.second = false;
+
+        const std::string victimFaction = victim.getClass().getPrimaryFaction(victim);
+        if (!victimFaction.empty() && Misc::StringUtils::ciEqual(item.getCellRef().getFaction(), victimFaction)) // Is the item faction-owned?
+        {
+            owner.first = victimFaction;
+            owner.second = true;
+        }
 
         Misc::StringUtils::lowerCaseInPlace(owner.first);
 
