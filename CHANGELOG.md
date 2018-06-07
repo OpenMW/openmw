@@ -1,5 +1,7 @@
 0.45.0
 ------
+    Bug #3374: Touch spells not hitting kwama foragers
+    Bug #3591: Angled hit distance too low
     Bug #4293: Faction members are not aware of faction ownerships in barter
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4433: Guard behaviour is incorrect with Alarm = 0
