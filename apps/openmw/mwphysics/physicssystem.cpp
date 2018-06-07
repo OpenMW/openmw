@@ -167,7 +167,8 @@ namespace MWPhysics
             mTracer.doTrace(mColObj, tracerPos, tracerPos + toMove, mColWorld);
             if(mTracer.mFraction < std::numeric_limits<float>::epsilon())
                 return false; // didn't even move the smallest representable amount
-
+            
+            // FIXME: non-levitating aerial actors should not step down to a lower location than their initial location
             /*
              * Try moving back down sStepSizeDown using stepper.
              * NOTE: if there is an obstacle below (e.g. stairs), we'll be "stepping up".
@@ -402,7 +403,10 @@ namespace MWPhysics
                 float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + halfExtents.z();
                 osg::Vec3f oldPosition = newPosition;
                 bool result = false;
-                if (hitHeight < sStepSizeUp && !isActor(tracer.mHitObject))
+                // FIXME: this might be the wrong set of checks for whether the actor should be able to stairstep
+                // FIXME: right now the movement solver depends on stepping to correctly place the actor back "on the ground" when they land
+                // this is the cause of bug http://bugs.openmw.org/issues/2256
+                if (hitHeight < sStepSizeUp && !isActor(tracer.mHitObject) && (physicActor->getOnGround() || velocity.z() <= 0.0f))
                 {
                     // Try to step up onto it.
                     // NOTE: stepMove does not allow stepping over, modifies newPosition if successful
@@ -422,7 +426,8 @@ namespace MWPhysics
 
                     // Do not allow sliding upward if there is gravity.
                     // Stepping will have taken care of that.
-                    if(!(newPosition.z() < swimlevel || isFlying))
+                    // FIXME: Cancelling out upwards motion here, if in the air, breaks jumping while hugging walls
+                    if(physicActor->getOnGround() && !(newPosition.z() < swimlevel || isFlying))
                         newVelocity.z() = std::min(newVelocity.z(), 0.0f);
 
                     if ((newVelocity-velocity).length2() < 0.01)
