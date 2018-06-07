@@ -1,6 +1,8 @@
 0.45.0
 ------
+    Bug #2835: Player able to slowly move when overencumbered
     Bug #4293: Faction members are not aware of faction ownerships in barter
+    Bug #4327: Missing animations during spell/weapon stance switching
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4433: Guard behaviour is incorrect with Alarm = 0
 
