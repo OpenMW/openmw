@@ -430,15 +430,23 @@ namespace ESMTerrain
 
         // Second iteration - create and fill in the blend maps
         const int blendmapSize = (realTextureSize-1) * chunkSize + 1;
+        // We need to upscale the blendmap 2x with nearest neighbor sampling to look like Vanilla
+        const int imageScaleFactor = 2;
+        const int blendmapImageSize = blendmapSize * imageScaleFactor;
+        
+        
+        const bool largeImage = true;
 
         for (int i=0; i<numBlendmaps; ++i)
         {
             GLenum format = pack ? GL_RGBA : GL_ALPHA;
 
             osg::ref_ptr<osg::Image> image (new osg::Image);
-            image->allocateImage(blendmapSize, blendmapSize, 1, format, GL_UNSIGNED_BYTE);
+            if(!largeImage)
+                image->allocateImage(blendmapSize, blendmapSize, 1, format, GL_UNSIGNED_BYTE);
+            else
+                image->allocateImage(blendmapImageSize, blendmapImageSize, 1, format, GL_UNSIGNED_BYTE);
             unsigned char* pData = image->data();
-
             for (int y=0; y<blendmapSize; ++y)
             {
                 for (int x=0; x<blendmapSize; ++x)
@@ -448,14 +456,26 @@ namespace ESMTerrain
                     int layerIndex = textureIndicesMap.find(id)->second;
                     int blendIndex = (pack ? static_cast<int>(std::floor((layerIndex - 1) / 4.f)) : layerIndex - 1);
                     int channel = pack ? std::max(0, (layerIndex-1) % 4) : 0;
-
-                    if (blendIndex == i)
-                        pData[(blendmapSize - y - 1)*blendmapSize*channels + x*channels + channel] = 255;
+                    
+                    int alpha = (blendIndex == i) ? 255 : 0;
+                    
+                    if(!largeImage)
+                        pData[((blendmapSize - y - 1)*blendmapSize + x)*channels + channel] = alpha;
                     else
-                        pData[(blendmapSize - y - 1)*blendmapSize*channels + x*channels + channel] = 0;
+                    {
+                        int realY = (blendmapSize - y - 1)*imageScaleFactor;
+                        int realX = x*imageScaleFactor;
+                        if(true)
+                            pData[((realY+0)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
+                        if(realY+1 < blendmapImageSize)
+                            pData[((realY+1)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
+                        if(realX+1 < blendmapImageSize)
+                            pData[((realY+0)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
+                        if(realY+1 < blendmapImageSize && realX+1 < blendmapImageSize)
+                            pData[((realY+1)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
+                    }
                 }
             }
-
             blendmaps.push_back(image);
         }
     }
