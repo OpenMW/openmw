@@ -1,5 +1,6 @@
 0.45.0
 ------
+    Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4293: Faction members are not aware of faction ownerships in barter
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4433: Guard behaviour is incorrect with Alarm = 0

@@ -1,5 +1,22 @@
 #!/bin/bash
 
+MISSINGTOOLS=0
+
+command -v 7z >/dev/null 2>&1 || { echo "Error: 7z (7zip) is not on the path."; MISSINGTOOLS=1; }
+command -v cmake >/dev/null 2>&1 || { echo "Error: cmake (CMake) is not on the path."; MISSINGTOOLS=1; }
+
+if [ $MISSINGTOOLS -ne 0 ]; then
+	exit 1
+fi
+
+WORKINGDIR="$(pwd)"
+case "$WORKINGDIR" in
+	*[[:space:]]*)
+		echo "Error: Working directory contains spaces."
+		exit 1
+		;;
+esac
+
 set -euo pipefail
 
 APPVEYOR=${APPVEYOR:-}
