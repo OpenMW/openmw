@@ -1,5 +1,6 @@
 0.45.0
 ------
+    Bug #2222: Fatigue's effect on selling price is backwards
     Bug #2835: Player able to slowly move when overencumbered
     Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4293: Faction members are not aware of faction ownerships in barter
