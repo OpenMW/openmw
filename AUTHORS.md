@@ -37,6 +37,7 @@ Programmers
     Britt Mathis (galdor557)
     Capostrophic
     cc9cii
+    Cédric Mocquillon
     Chris Boyce (slothlife)
     Chris Robinson (KittyCat)
     Cory F. Cohen (cfcohen)
