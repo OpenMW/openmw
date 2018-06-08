@@ -2,9 +2,14 @@
 ------
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3591: Angled hit distance too low
+    Bug #2835: Player able to slowly move when overencumbered
+    Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4293: Faction members are not aware of faction ownerships in barter
+    Bug #4327: Missing animations during spell/weapon stance switching
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4433: Guard behaviour is incorrect with Alarm = 0
+    Bug #4443: Goodbye option and dialogue choices are not mutually exclusive 
+    Feature #4444: Per-group KF-animation files support
 
 0.44.0
 ------

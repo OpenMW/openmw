@@ -152,6 +152,7 @@ struct WeaponInfo;
 class CharacterController : public MWRender::Animation::TextKeyListener
 {
     MWWorld::Ptr mPtr;
+    MWWorld::Ptr mWeapon;
     MWRender::Animation *mAnimation;
     
     struct AnimationQueueEntry
