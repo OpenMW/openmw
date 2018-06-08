@@ -1,6 +1,6 @@
 0.45.0
 ------
-    Feature #3897: Have Goodbye give all choices the effects of Goodbye
+    Bug #3897: Have Goodbye give all choices the effects of Goodbye
     Bug #4293: Faction members are not aware of faction ownerships in barter
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4433: Guard behaviour is incorrect with Alarm = 0
