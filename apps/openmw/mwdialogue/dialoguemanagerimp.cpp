@@ -431,9 +431,11 @@ namespace MWDialogue
 
     void DialogueManager::addChoice (const std::string& text, int choice)
     {
-        mIsInChoice = true;
-
-        mChoices.push_back(std::make_pair(text, choice));
+        if (!mGoodbye)
+        {
+            mIsInChoice = true;
+            mChoices.push_back(std::make_pair(text, choice));
+        }
     }
 
     const std::vector<std::pair<std::string, int> >& DialogueManager::getChoices()
@@ -448,8 +450,8 @@ namespace MWDialogue
 
     void DialogueManager::goodbye()
     {
-        mIsInChoice = false;
-        mGoodbye = true;
+        if (!mIsInChoice)
+            mGoodbye = true;
     }
 
     void DialogueManager::persuade(int type, ResponseCallback* callback)
