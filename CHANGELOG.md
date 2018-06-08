@@ -4,6 +4,7 @@
     Bug #4293: Faction members are not aware of faction ownerships in barter
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4433: Guard behaviour is incorrect with Alarm = 0
+    Bug #4443: Goodbye option and dialogue choices are not mutually exclusive 
 
 0.44.0
 ------
