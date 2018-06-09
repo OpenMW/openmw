@@ -139,7 +139,8 @@ void Launcher::MainDialog::createPages()
 
     connect(mPlayPage, SIGNAL(signalProfileChanged(int)), mDataFilesPage, SLOT(slotProfileChanged(int)));
     connect(mDataFilesPage, SIGNAL(signalProfileChanged(int)), mPlayPage, SLOT(setProfilesIndex(int)));
-    connect(mDataFilesPage, SIGNAL(signalSelectedFilesChanged(QStringList)), mAdvancedPage, SLOT(slotLoadedCellsChanged(QStringList)));
+    // Using Qt::QueuedConnection because signal is emitted in a subthread and slot is in the main thread
+    connect(mDataFilesPage, SIGNAL(signalSelectedFilesChanged(QStringList)), mAdvancedPage, SLOT(slotLoadedCellsChanged(QStringList)), Qt::QueuedConnection);
 
 }
 
