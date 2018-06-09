@@ -9,6 +9,7 @@
     Bug #4433: Guard behaviour is incorrect with Alarm = 0
     Bug #4443: Goodbye option and dialogue choices are not mutually exclusive 
     Feature #4444: Per-group KF-animation files support
+    Bug #4424: [macOS] Cursor is either empty or garbage when compiled against macOS 10.13 SDK
 
 0.44.0
 ------

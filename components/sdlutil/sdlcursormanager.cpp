@@ -7,11 +7,14 @@
 
 #include <SDL_mouse.h>
 #include <SDL_endian.h>
+#include <SDL_render.h>
+#include <SDL_hints.h>
 
 #include <osg/GraphicsContext>
 #include <osg/Geometry>
 #include <osg/Texture2D>
 #include <osg/TexMat>
+#include <osg/Version>
 #include <osgViewer/GraphicsWindow>
 
 #include "imagetosurface.hpp"
@@ -22,6 +25,13 @@
 USE_GRAPHICSWINDOW()
 #endif
 
+#if OSG_VERSION_GREATER_OR_EQUAL(3, 5, 8) || defined(__APPLE__)
+#define OPENMW_USE_SOFTWARE_CURSOR_DECOMPRESSION 1
+#else
+#define OPENMW_USE_SOFTWARE_CURSOR_DECOMPRESSION 0
+#endif
+
+#if !OPENMW_USE_SOFTWARE_CURSOR_DECOMPRESSION
 namespace
 {
 
@@ -132,17 +142,6 @@ namespace
 
         osg::ref_ptr<osg::Geometry> geom;
 
-#if defined(__APPLE__)
-        // Extra flip needed on OS X systems due to a driver bug
-        const char* envval = getenv("OPENMW_CURSOR_WORKAROUND");
-        bool workaround = !envval || envval == std::string("1");
-        std::string vendorString = (const char*)glGetString(GL_VENDOR);
-        if (!envval)
-            workaround = vendorString.find("Intel") != std::string::npos || vendorString.find("ATI") != std::string::npos || vendorString.find("AMD") != std::string::npos;
-        if (workaround)
-            geom = osg::createTexturedQuadGeometry(osg::Vec3(-1,1,0), osg::Vec3(2,0,0), osg::Vec3(0,-2,0));
-        else
-#endif
         geom = osg::createTexturedQuadGeometry(osg::Vec3(-1,-1,0), osg::Vec3(2,0,0), osg::Vec3(0,2,0));
 
         geom->drawImplementation(renderInfo);
@@ -157,6 +156,7 @@ namespace
     }
 
 }
+#endif
 
 namespace SDLUtil
 {
@@ -220,12 +220,62 @@ namespace SDLUtil
 #endif
     }
 
+#if OPENMW_USE_SOFTWARE_CURSOR_DECOMPRESSION
+    typedef std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> SDLSurfacePtr;
+
+    SDLSurfacePtr decompress(osg::Image* source, int rotDegrees)
+    {
+        int width = source->s();
+        int height = source->t();
+        bool useAlpha = source->isImageTranslucent();
+
+        osg::ref_ptr<osg::Image> decompressedImage = new osg::Image;
+        decompressedImage->setFileName(source->getFileName());
+        decompressedImage->allocateImage(width, height, 1, useAlpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE);
+        for (int s=0; s<width; ++s)
+            for (int t=0; t<height; ++t)
+                decompressedImage->setColor(source->getColor(s,t,0), s,t,0);
+
+        Uint32 redMask = 0x000000ff;
+        Uint32 greenMask = 0x0000ff00;
+        Uint32 blueMask = 0x00ff0000;
+        Uint32 alphaMask = useAlpha ? 0xff000000 : 0;
+
+        SDL_Surface *cursorSurface = SDL_CreateRGBSurfaceFrom(decompressedImage->data(),
+            width,
+            height,
+            decompressedImage->getPixelSizeInBits(),
+            decompressedImage->getRowSizeInBytes(),
+            redMask,
+            greenMask,
+            blueMask,
+            alphaMask);
+
+        SDL_Surface *targetSurface = SDL_CreateRGBSurface(0, width, height, 32, redMask, greenMask, blueMask, alphaMask);
+        SDL_Renderer *renderer = SDL_CreateSoftwareRenderer(targetSurface);
+
+        SDL_RenderClear(renderer);
+
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+        SDL_Texture *cursorTexture = SDL_CreateTextureFromSurface(renderer, cursorSurface);
+
+        SDL_RenderCopyEx(renderer, cursorTexture, NULL, NULL, -rotDegrees, NULL, SDL_FLIP_VERTICAL);
+
+        SDL_DestroyTexture(cursorTexture);
+        SDL_FreeSurface(cursorSurface);
+        SDL_DestroyRenderer(renderer);
+
+        return SDLSurfacePtr(targetSurface, SDL_FreeSurface);
+    }
+#endif
+
     void SDLCursorManager::_createCursorFromResource(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x, Uint8 hotspot_y)
     {
-        osg::ref_ptr<osg::Image> decompressed;
-
         if (mCursorMap.find(name) != mCursorMap.end())
             return;
+
+#if !OPENMW_USE_SOFTWARE_CURSOR_DECOMPRESSION
+        osg::ref_ptr<osg::Image> decompressed;
 
         try {
             decompressed = decompress(image, static_cast<float>(rotDegrees));
@@ -239,10 +289,15 @@ namespace SDLUtil
 
         //set the cursor and store it for later
         SDL_Cursor* curs = SDL_CreateColorCursor(surf, hotspot_x, hotspot_y);
-        mCursorMap.insert(CursorMap::value_type(std::string(name), curs));
 
         //clean up
         SDL_FreeSurface(surf);
+#else
+        auto surf = decompress(image, rotDegrees);
+        //set the cursor and store it for later
+        SDL_Cursor* curs = SDL_CreateColorCursor(surf.get(), hotspot_x, hotspot_y);
+#endif
+        mCursorMap.insert(CursorMap::value_type(std::string(name), curs));
     }
 
 }
