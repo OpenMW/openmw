@@ -57,6 +57,7 @@ namespace MWPhysics
     static const float sStepSizeDown = 62.0f;
     static const float sMinStep = 10.f;
     static const float sGroundOffset = 1.0f;
+    static const float fudgeFactor = 0.01f;
 
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
@@ -443,13 +444,14 @@ namespace MWPhysics
 
             bool isOnGround = false;
             bool isOnSlope = false;
-            if (!(inertia.z() > 0.f) && !(newPosition.z() < swimlevel))
+            if (inertia.z() <= 0.f && newPosition.z() >= swimlevel)
             {
                 osg::Vec3f from = newPosition;
                 osg::Vec3f to = newPosition - (physicActor->getOnGround() ?
                              osg::Vec3f(0,0,sStepSizeDown + 2*sGroundOffset) : osg::Vec3f(0,0,2*sGroundOffset));
                 tracer.doTrace(colobj, from, to, collisionWorld);
-                if(tracer.mFraction < 1.0f
+                
+                if(tracer.mHitObject != NULL
                         && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != CollisionType_Actor)
                 {
                     const btCollisionObject* standingOn = tracer.mHitObject;
@@ -459,12 +461,27 @@ namespace MWPhysics
 
                     if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
                         physicActor->setWalkingOnWater(true);
-                    if (!isFlying)
-                        newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
 
                     isOnGround = true;
 
                     isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
+                    
+                    // reject from ground
+                    if (!isFlying && !isOnSlope)
+                    {
+                        float distance = (newPosition.z() - tracer.mEndPos.z()) - fudgeFactor;
+                        if(distance > 0)
+                            newPosition.z() -= distance;
+                        
+                        from = newPosition;
+                        to = newPosition + osg::Vec3f(0,0,sGroundOffset+fudgeFactor);
+                        tracer.doTrace(colobj, from, to, collisionWorld);
+                        
+                        if(tracer.mHitObject == NULL)
+                            newPosition.z() += sGroundOffset;
+                        else if (tracer.mEndPos.z() - newPosition.z() > fudgeFactor)
+                            newPosition.z() += (tracer.mEndPos.z() - newPosition.z()) - fudgeFactor;
+                    }
                 }
                 else
                 {
