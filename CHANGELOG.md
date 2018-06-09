@@ -4,6 +4,7 @@
     Bug #1990: Sunrise/sunset not set correct
     Bug #2222: Fatigue's effect on selling price is backwards
     Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
+    Bug #2772: Non-existing class or faction freezes the game
     Bug #2835: Player able to slowly move when overencumbered
     Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
     Bug #3374: Touch spells not hitting kwama foragers
