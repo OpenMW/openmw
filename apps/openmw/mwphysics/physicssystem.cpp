@@ -168,7 +168,7 @@ namespace MWPhysics
             mTracer.doTrace(mColObj, tracerPos, tracerPos + toMove, mColWorld);
             if(mTracer.mFraction < std::numeric_limits<float>::epsilon())
                 return false; // didn't even move the smallest representable amount
-            
+
             // FIXME: non-levitating aerial actors should not step down to a lower location than their initial location
             /*
              * Try moving back down sStepSizeDown using stepper.
@@ -448,7 +448,7 @@ namespace MWPhysics
                 osg::Vec3f to = newPosition - (physicActor->getOnGround() ?
                              osg::Vec3f(0,0,sStepSizeDown + 2*sGroundOffset) : osg::Vec3f(0,0,2*sGroundOffset));
                 tracer.doTrace(colobj, from, to, collisionWorld);
-                
+
                 if(tracer.mHitObject != NULL
                         && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != CollisionType_Actor)
                 {
@@ -463,18 +463,18 @@ namespace MWPhysics
                     isOnGround = true;
 
                     isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
-                    
+
                     // reject from ground
                     if (!isFlying && !isOnSlope)
                     {
                         float distance = (newPosition.z() - tracer.mEndPos.z()) - fudgeFactor;
                         if(distance > 0)
                             newPosition.z() -= distance;
-                        
+
                         from = newPosition;
                         to = newPosition + osg::Vec3f(0,0,sGroundOffset+fudgeFactor);
                         tracer.doTrace(colobj, from, to, collisionWorld);
-                        
+
                         if(tracer.mHitObject == NULL)
                             newPosition.z() += sGroundOffset;
                         else if (tracer.mEndPos.z() - newPosition.z() > fudgeFactor)
