@@ -1,16 +1,20 @@
 0.45.0
 ------
+
     Bug #2835: Player able to slowly move when overencumbered
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3591: Angled hit distance too low
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
+    Bug #3997: Almalexia doesn't pace
     Bug #4036: Weird behaviour of AI packages if package target has non-unique ID
     Bug #4221: Characters get stuck in V-shaped terrain
+    Bug #4251: Stationary NPCs do not return to their position after combat
     Bug #4293: Faction members are not aware of faction ownerships in barter
     Bug #4327: Missing animations during spell/weapon stance switching
     Bug #4419: MRK NiStringExtraData is handled incorrectly
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4429: [Windows] Error on build INSTALL.vcxproj project (debug) with cmake 3.7.2
+    Bug #4432: Guards behaviour is incorrect if they do not have AI packages
     Bug #4433: Guard behaviour is incorrect with Alarm = 0
     Feature #4444: Per-group KF-animation files support
 

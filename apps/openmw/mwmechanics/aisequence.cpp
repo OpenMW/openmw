@@ -184,7 +184,8 @@ bool isActualAiPackage(int packageTypeId)
                    && packageTypeId != AiPackage::TypeIdPursue
                    && packageTypeId != AiPackage::TypeIdAvoidDoor
                    && packageTypeId != AiPackage::TypeIdFace
-                   && packageTypeId != AiPackage::TypeIdBreathe);
+                   && packageTypeId != AiPackage::TypeIdBreathe
+                   && packageTypeId != AiPackage::TypeIdInternalTravel);
 }
 
 void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
@@ -298,7 +299,7 @@ void AiSequence::clear()
     mPackages.clear();
 }
 
-void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
+void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor, bool cancelOther)
 {
     if (actor == getPlayer())
         throw std::runtime_error("Can't add AI packages to player");
@@ -307,8 +308,33 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
     if (isActualAiPackage(package.getTypeId()))
         stopCombat();
 
+    // We should return a wandering actor back after combat or pursuit.
+    // The same thing for actors without AI packages.
+    // Also there is no point to stack return packages.
+    int currentTypeId = getTypeId();
+    int newTypeId = package.getTypeId();
+    if (currentTypeId <= MWMechanics::AiPackage::TypeIdWander
+        && !hasPackage(MWMechanics::AiPackage::TypeIdInternalTravel)
+        && (newTypeId <= MWMechanics::AiPackage::TypeIdCombat
+        || newTypeId == MWMechanics::AiPackage::TypeIdPursue))
+    {
+        osg::Vec3f dest;
+        if (currentTypeId == MWMechanics::AiPackage::TypeIdWander)
+        {
+            AiPackage* activePackage = getActivePackage();
+            dest = activePackage->getDestination(actor);
+        }
+        else
+        {
+            dest = actor.getRefData().getPosition().asVec3();
+        }
+
+        MWMechanics::AiTravel travelPackage(dest.x(), dest.y(), dest.z(), true);
+        stack(travelPackage, actor, false);
+    }
+
     // remove previous packages if required
-    if (package.shouldCancelPreviousAi())
+    if (cancelOther && package.shouldCancelPreviousAi())
     {
         for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end();)
         {
@@ -392,6 +418,8 @@ void AiSequence::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
         (*iter)->writeState(sequence);
     }
+
+    sequence.mLastAiPackage = mLastAiPackage;
 }
 
 void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
@@ -403,7 +431,7 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
     int count = 0;
     for (std::vector<ESM::AiSequence::AiPackageContainer>::const_iterator it = sequence.mPackages.begin();
          it != sequence.mPackages.end(); ++it)
-    {    
+    {
         if (isActualAiPackage(it->mType))
             count++;
     }
@@ -462,6 +490,8 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
 
         mPackages.push_back(package.release());
     }
+
+    mLastAiPackage = sequence.mLastAiPackage;
 }
 
 void AiSequence::fastForward(const MWWorld::Ptr& actor, AiState& state)

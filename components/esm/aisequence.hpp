@@ -80,6 +80,7 @@ namespace ESM
     struct AiTravel : AiPackage
     {
         AiTravelData mData;
+        bool mHidden;
 
         void load(ESMReader &esm);
         void save(ESMWriter &esm) const;
@@ -149,10 +150,14 @@ namespace ESM
 
     struct AiSequence
     {
-        AiSequence() {}
+        AiSequence()
+        {
+            mLastAiPackage = -1;
+        }
         ~AiSequence();
 
         std::vector<AiPackageContainer> mPackages;
+        int mLastAiPackage;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;
