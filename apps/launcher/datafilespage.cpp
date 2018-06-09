@@ -356,5 +356,5 @@ void Launcher::DataFilesPage::reloadCells(QStringList selectedFiles)
     CellNameLoader cellNameLoader;
     QStringList cellNamesList = QStringList::fromSet(cellNameLoader.getCellNames(selectedFiles));
     std::sort(cellNamesList.begin(), cellNamesList.end());
-    emit signalSelectedFilesChanged(cellNamesList);
+    emit signalLoadedCellsChanged(cellNamesList);
 }

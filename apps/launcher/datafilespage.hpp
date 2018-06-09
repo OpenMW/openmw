@@ -50,7 +50,7 @@ namespace Launcher
 
     signals:
         void signalProfileChanged (int index);
-        void signalSelectedFilesChanged(QStringList selectedFiles);
+        void signalLoadedCellsChanged(QStringList selectedFiles);
 
     public slots:
         void slotProfileChanged (int index);
