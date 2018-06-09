@@ -1,9 +1,10 @@
 0.45.0
 ------
+    Bug #2835: Player able to slowly move when overencumbered
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3591: Angled hit distance too low
-    Bug #2835: Player able to slowly move when overencumbered
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
+    Bug #4036: Weird behaviour of AI packages if package target has non-unique ID
     Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4293: Faction members are not aware of faction ownerships in barter
     Bug #4327: Missing animations during spell/weapon stance switching

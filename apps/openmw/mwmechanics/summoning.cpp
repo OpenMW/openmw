@@ -59,7 +59,7 @@ namespace MWMechanics
                         MWMechanics::CreatureStats& summonedCreatureStats = ref.getPtr().getClass().getCreatureStats(ref.getPtr());
 
                         // Make the summoned creature follow its master and help in fights
-                        AiFollow package(mActor.getCellRef().getRefId());
+                        AiFollow package(mActor);
                         summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
                         creatureActorId = summonedCreatureStats.getActorId();
 

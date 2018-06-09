@@ -46,6 +46,7 @@ namespace AiSequence
     {
         esm.getHNT (mData, "DATA");
         mTargetId = esm.getHNString("TARG");
+        esm.getHNOT (mTargetActorId, "TAID");
         esm.getHNT (mRemainingDuration, "DURA");
         mCellId = esm.getHNOString ("CELL");
     }
@@ -54,6 +55,7 @@ namespace AiSequence
     {
         esm.writeHNT ("DATA", mData);
         esm.writeHNString ("TARG", mTargetId);
+        esm.writeHNT ("TAID", mTargetActorId);
         esm.writeHNT ("DURA", mRemainingDuration);
         if (!mCellId.empty())
             esm.writeHNString ("CELL", mCellId);
@@ -63,6 +65,7 @@ namespace AiSequence
     {
         esm.getHNT (mData, "DATA");
         mTargetId = esm.getHNString("TARG");
+        esm.getHNOT (mTargetActorId, "TAID");
         esm.getHNT (mRemainingDuration, "DURA");
         mCellId = esm.getHNOString ("CELL");
         esm.getHNT (mAlwaysFollow, "ALWY");
@@ -76,6 +79,7 @@ namespace AiSequence
     {
         esm.writeHNT ("DATA", mData);
         esm.writeHNString("TARG", mTargetId);
+        esm.writeHNT ("TAID", mTargetActorId);
         esm.writeHNT ("DURA", mRemainingDuration);
         if (!mCellId.empty())
             esm.writeHNString ("CELL", mCellId);
