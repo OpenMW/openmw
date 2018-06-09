@@ -1,5 +1,7 @@
 0.45.0
 ------
+    Bug #3374: Touch spells not hitting kwama foragers
+    Bug #3591: Angled hit distance too low
     Bug #2835: Player able to slowly move when overencumbered
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
     Bug #4221: Characters get stuck in V-shaped terrain

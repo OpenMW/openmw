@@ -1073,19 +1073,28 @@ namespace MWWorld
 
         osg::Quat rot = osg::Quat(posdata.rot[0], osg::Vec3f(-1,0,0)) * osg::Quat(posdata.rot[2], osg::Vec3f(0,0,-1));
 
+        osg::Vec3f halfExtents = mPhysics->getHalfExtents(ptr);
+
+        // the origin of hitbox is an actor's front, not center
+        distance += halfExtents.y();
+
+        // special cased for better aiming with the camera
+        // if we do not hit anything, will use the default approach as fallback
+        if (ptr == getPlayerPtr())
+        {
+            osg::Vec3f pos = getActorHeadTransform(ptr).getTrans();
+
+            std::pair<MWWorld::Ptr,osg::Vec3f> result = mPhysics->getHitContact(ptr, pos, rot, distance, targets);
+            if(!result.first.isEmpty())
+                return std::make_pair(result.first, result.second);
+        }
+
         osg::Vec3f pos = ptr.getRefData().getPosition().asVec3();
 
-        if (ptr == getPlayerPtr())
-            pos = getActorHeadTransform(ptr).getTrans(); // special cased for better aiming with the camera
-        else
-        {
-            // general case, compatible with all types of different creatures
-            // note: we intentionally do *not* use the collision box offset here, this is required to make
-            // some flying creatures work that have their collision box offset in the air
-            osg::Vec3f halfExtents = mPhysics->getHalfExtents(ptr);
-            pos.z() += halfExtents.z() * 2 * 0.75;
-            distance += halfExtents.y();
-        }
+        // general case, compatible with all types of different creatures
+        // note: we intentionally do *not* use the collision box offset here, this is required to make
+        // some flying creatures work that have their collision box offset in the air
+        pos.z() += halfExtents.z();
 
         std::pair<MWWorld::Ptr,osg::Vec3f> result = mPhysics->getHitContact(ptr, pos, rot, distance, targets);
         if(result.first.isEmpty())
@@ -2752,64 +2761,66 @@ namespace MWWorld
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        // Get the target to use for "on touch" effects, using the facing direction from Head node
-        MWWorld::Ptr target;
-        float distance = getActivationDistancePlusTelekinesis();
-
-        osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
-        osg::Vec3f origin = getActorHeadTransform(actor).getTrans();
-
-        osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
-                * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
-
-        osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
-        osg::Vec3f dest = origin + direction * distance;
-
         // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
         std::vector<MWWorld::Ptr> targetActors;
         if (!actor.isEmpty() && actor != MWMechanics::getPlayer())
             actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targetActors);
 
-        // For actor targets, we want to use bounding boxes (physics raycast).
-        // This is to give a slight tolerance for errors, especially with creatures like the Skeleton that would be very hard to aim at otherwise.
-        // For object targets, we want the detailed shapes (rendering raycast).
-        // If we used the bounding boxes for static objects, then we would not be able to target e.g. objects lying on a shelf.
+        const float fCombatDistance = getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
 
-        MWPhysics::PhysicsSystem::RayResult result1 = mPhysics->castRay(origin, dest, actor, targetActors, MWPhysics::CollisionType_Actor);
+        osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
 
-        MWRender::RenderingManager::RayResult result2 = mRendering->castRay(origin, dest, true, true);
+        // for player we can take faced object first
+        MWWorld::Ptr target;
+        if (actor == MWMechanics::getPlayer())
+            target = getFacedObject();
 
-        float dist1 = std::numeric_limits<float>::max();
-        float dist2 = std::numeric_limits<float>::max();
+        // if the faced object can not be activated, do not use it
+        if (!target.isEmpty() && !target.getClass().canBeActivated(target))
+            target = NULL;
 
-        if (result1.mHit)
-            dist1 = (origin - result1.mHitPos).length();
-        if (result2.mHit)
-            dist2 = (origin - result2.mHitPointWorld).length();
-
-        if (result1.mHit)
+        if (target.isEmpty())
         {
-            target = result1.mHitObject;
-            hitPosition = result1.mHitPos;
-            if (dist1 > getMaxActivationDistance() && !target.isEmpty() && (target.getClass().isActor() || !target.getClass().canBeActivated(target)))
-                target = NULL;
-        }
-        else if (result2.mHit)
-        {
-            target = result2.mHitObject;
-            hitPosition = result2.mHitPointWorld;
-            if (dist2 > getMaxActivationDistance() && !target.isEmpty() && !target.getClass().canBeActivated(target))
-                target = NULL;
-        }
+            // For actor targets, we want to use hit contact with bounding boxes.
+            // This is to give a slight tolerance for errors, especially with creatures like the Skeleton that would be very hard to aim at otherwise.
+            // For object targets, we want the detailed shapes (rendering raycast).
+            // If we used the bounding boxes for static objects, then we would not be able to target e.g. objects lying on a shelf.
+            std::pair<MWWorld::Ptr,osg::Vec3f> result1 = getHitContact(actor, fCombatDistance, targetActors);
 
-        // When targeting an actor that is in combat with an "on touch" spell, 
-        // compare against the minimum of activation distance and combat distance.
+            // Get the target to use for "on touch" effects, using the facing direction from Head node
+            osg::Vec3f origin = getActorHeadTransform(actor).getTrans();
 
-        if (!target.isEmpty() && target.getClass().isActor() && target.getClass().getCreatureStats (target).getAiSequence().isInCombat()) 
-        {
-            distance = std::min (distance, getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat());
-            if (distance < dist1)
-                target = NULL;
+            osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
+                    * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
+
+            osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
+            float distance = getMaxActivationDistance();
+            osg::Vec3f dest = origin + direction * distance;
+
+            MWRender::RenderingManager::RayResult result2 = mRendering->castRay(origin, dest, true, true);
+
+            float dist1 = std::numeric_limits<float>::max();
+            float dist2 = std::numeric_limits<float>::max();
+
+            if (!result1.first.isEmpty() && result1.first.getClass().isActor())
+                dist1 = (origin - result1.second).length();
+            if (result2.mHit)
+                dist2 = (origin - result2.mHitPointWorld).length();
+
+            if (!result1.first.isEmpty() && result1.first.getClass().isActor())
+            {
+                target = result1.first;
+                hitPosition = result1.second;
+                if (dist1 > getMaxActivationDistance())
+                    target = NULL;
+            }
+            else if (result2.mHit)
+            {
+                target = result2.mHitObject;
+                hitPosition = result2.mHitPointWorld;
+                if (dist2 > getMaxActivationDistance() && !target.isEmpty() && !target.getClass().canBeActivated(target))
+                    target = NULL;
+            }
         }
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
@@ -3466,7 +3477,7 @@ namespace MWWorld
     osg::Vec3f World::aimToTarget(const ConstPtr &actor, const MWWorld::ConstPtr& target)
     {
         osg::Vec3f weaponPos = actor.getRefData().getPosition().asVec3();
-        weaponPos.z() += mPhysics->getHalfExtents(actor).z() * 2 * 0.75;
+        weaponPos.z() += mPhysics->getHalfExtents(actor).z();
         osg::Vec3f targetPos = mPhysics->getCollisionObjectPosition(target);
         return (targetPos - weaponPos);
     }
@@ -3475,7 +3486,7 @@ namespace MWWorld
     {
         osg::Vec3f weaponPos = actor.getRefData().getPosition().asVec3();
         osg::Vec3f halfExtents = mPhysics->getHalfExtents(actor);
-        weaponPos.z() += halfExtents.z() * 2 * 0.75;
+        weaponPos.z() += halfExtents.z();
 
         return mPhysics->getHitDistance(weaponPos, target) - halfExtents.y();
     }
