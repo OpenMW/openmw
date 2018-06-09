@@ -433,7 +433,7 @@ namespace ESMTerrain
         // We need to upscale the blendmap 2x with nearest neighbor sampling to look like Vanilla
         const int imageScaleFactor = 2;
         const int blendmapImageSize = blendmapSize * imageScaleFactor;
-        
+
         for (int i=0; i<numBlendmaps; ++i)
         {
             GLenum format = pack ? GL_RGBA : GL_ALPHA;
@@ -441,7 +441,7 @@ namespace ESMTerrain
             osg::ref_ptr<osg::Image> image (new osg::Image);
             image->allocateImage(blendmapImageSize, blendmapImageSize, 1, format, GL_UNSIGNED_BYTE);
             unsigned char* pData = image->data();
-            
+
             for (int y=0; y<blendmapSize; ++y)
             {
                 for (int x=0; x<blendmapSize; ++x)
@@ -451,12 +451,12 @@ namespace ESMTerrain
                     int layerIndex = textureIndicesMap.find(id)->second;
                     int blendIndex = (pack ? static_cast<int>(std::floor((layerIndex - 1) / 4.f)) : layerIndex - 1);
                     int channel = pack ? std::max(0, (layerIndex-1) % 4) : 0;
-                    
+
                     int alpha = (blendIndex == i) ? 255 : 0;
-                    
+
                     int realY = (blendmapSize - y - 1)*imageScaleFactor;
                     int realX = x*imageScaleFactor;
-                    
+
                     pData[((realY+0)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
                     pData[((realY+1)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
                     pData[((realY+0)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
