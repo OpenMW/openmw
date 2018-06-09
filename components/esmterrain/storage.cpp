@@ -434,19 +434,14 @@ namespace ESMTerrain
         const int imageScaleFactor = 2;
         const int blendmapImageSize = blendmapSize * imageScaleFactor;
         
-        
-        const bool largeImage = true;
-
         for (int i=0; i<numBlendmaps; ++i)
         {
             GLenum format = pack ? GL_RGBA : GL_ALPHA;
 
             osg::ref_ptr<osg::Image> image (new osg::Image);
-            if(!largeImage)
-                image->allocateImage(blendmapSize, blendmapSize, 1, format, GL_UNSIGNED_BYTE);
-            else
-                image->allocateImage(blendmapImageSize, blendmapImageSize, 1, format, GL_UNSIGNED_BYTE);
+            image->allocateImage(blendmapImageSize, blendmapImageSize, 1, format, GL_UNSIGNED_BYTE);
             unsigned char* pData = image->data();
+            
             for (int y=0; y<blendmapSize; ++y)
             {
                 for (int x=0; x<blendmapSize; ++x)
@@ -459,21 +454,13 @@ namespace ESMTerrain
                     
                     int alpha = (blendIndex == i) ? 255 : 0;
                     
-                    if(!largeImage)
-                        pData[((blendmapSize - y - 1)*blendmapSize + x)*channels + channel] = alpha;
-                    else
-                    {
-                        int realY = (blendmapSize - y - 1)*imageScaleFactor;
-                        int realX = x*imageScaleFactor;
-                        if(true)
-                            pData[((realY+0)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
-                        if(realY+1 < blendmapImageSize)
-                            pData[((realY+1)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
-                        if(realX+1 < blendmapImageSize)
-                            pData[((realY+0)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
-                        if(realY+1 < blendmapImageSize && realX+1 < blendmapImageSize)
-                            pData[((realY+1)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
-                    }
+                    int realY = (blendmapSize - y - 1)*imageScaleFactor;
+                    int realX = x*imageScaleFactor;
+                    
+                    pData[((realY+0)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
+                    pData[((realY+1)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
+                    pData[((realY+0)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
+                    pData[((realY+1)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
                 }
             }
             blendmaps.push_back(image);
