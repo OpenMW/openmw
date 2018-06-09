@@ -427,11 +427,9 @@ namespace MWPhysics
                     // Can't move this way, try to find another spot along the plane
                     osg::Vec3f newVelocity = slide(velocity, tracer.mPlaneNormal);
 
-                    // Do not allow sliding upward if there is gravity.
-                    // Stepping will have taken care of that.
-                    // FIXME: Cancelling out upwards motion here, if in the air, breaks jumping while hugging walls
+                    // Do not allow sliding to accelerate us upwards. Stepping will take care of walkable slopes.
                     if(physicActor->getOnGround() && !(newPosition.z() < swimlevel || isFlying))
-                        newVelocity.z() = std::min(newVelocity.z(), 0.0f);
+                        newVelocity.z() = std::min(newVelocity.z(), std::max(0.0f, velocity.z()));
 
                     if ((newVelocity-velocity).length2() < 0.01)
                         break;
