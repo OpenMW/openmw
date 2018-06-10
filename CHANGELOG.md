@@ -4,6 +4,7 @@
     Bug #2835: Player able to slowly move when overencumbered
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3591: Angled hit distance too low
+    Bug #3629: DB assassin attack never triggers creature spawning
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
     Bug #3997: Almalexia doesn't pace
     Bug #4036: Weird behaviour of AI packages if package target has non-unique ID
