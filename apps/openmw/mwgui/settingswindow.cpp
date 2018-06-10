@@ -181,6 +181,7 @@ namespace MWGui
         getWidget(mKeyboardSwitch, "KeyboardButton");
         getWidget(mControllerSwitch, "ControllerButton");
         getWidget(mWaterTextureSize, "WaterTextureSize");
+        getWidget(mWaterReflectionDetail, "WaterReflectionDetail");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -204,6 +205,7 @@ namespace MWGui
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
 
         mWaterTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
+        mWaterReflectionDetail->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterReflectionDetailChanged);
 
         mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
         mControllerSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onControllerSwitchClicked);
@@ -237,13 +239,17 @@ namespace MWGui
         std::string tmip = Settings::Manager::getString("texture mipmap", "General");
         mTextureFilteringButton->setCaption(textureMipmappingToStr(tmip));
 
-        int waterTextureSize = Settings::Manager::getInt ("rtt size", "Water");
+        int waterTextureSize = Settings::Manager::getInt("rtt size", "Water");
         if (waterTextureSize >= 512)
             mWaterTextureSize->setIndexSelected(0);
         if (waterTextureSize >= 1024)
             mWaterTextureSize->setIndexSelected(1);
         if (waterTextureSize >= 2048)
             mWaterTextureSize->setIndexSelected(2);
+
+        int waterReflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
+        waterReflectionDetail = std::min(3, std::max(0, waterReflectionDetail));
+        mWaterReflectionDetail->setIndexSelected(waterReflectionDetail);
 
         mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
 
@@ -321,6 +327,13 @@ namespace MWGui
         else if (pos == 2)
             size = 2048;
         Settings::Manager::setInt("rtt size", "Water", size);
+        apply();
+    }
+
+    void SettingsWindow::onWaterReflectionDetailChanged(MyGUI::ComboBox* _sender, size_t pos)
+    {
+        unsigned int level = std::min((unsigned int)3, (unsigned int)pos);
+        Settings::Manager::setInt("reflection detail", "Water", level);
         apply();
     }
 

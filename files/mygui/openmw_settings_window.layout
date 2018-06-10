@@ -385,13 +385,14 @@
                                 </Widget>
                             </Widget>
                             <Widget type="HBox" skin="" position="4 56 350 24">
-                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
-                                    <UserString key="SettingCategory" value="Water"/>
-                                    <UserString key="SettingName" value="reflect actors"/>
-                                    <UserString key="SettingType" value="CheckButton"/>
+                                <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 115 24" align="Left Top" name="WaterReflectionDetail">
+                                    <Property key="AddItem" value="Terrain"/>
+                                    <Property key="AddItem" value="Statics"/>
+                                    <Property key="AddItem" value="Nonactors"/>
+                                    <Property key="AddItem" value="Everything"/>
                                 </Widget>
-                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 79 16" align="Left Top">
-                                    <Property key="Caption" value="Reflect actors"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" position="64 4 90 16" align="Left Top">
+                                    <Property key="Caption" value="Reflection shader detail"/>
                                 </Widget>
                             </Widget>
                         </Widget>

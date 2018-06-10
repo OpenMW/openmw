@@ -73,6 +73,10 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
 void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool animated, bool allowLight)
 {
     insertBegin(ptr);
+    if(animated)
+        ptr.getRefData().getBaseNode()->setNodeMask(Mask_Model);
+    else
+        ptr.getRefData().getBaseNode()->setNodeMask(Mask_Static);
 
     osg::ref_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
 
