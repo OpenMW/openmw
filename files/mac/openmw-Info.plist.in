@@ -18,6 +18,8 @@
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+    <key>CFBundleShortVersionString</key>
+    <string>${OPENMW_VERSION}</string>
 	<key>CFBundleVersion</key>
 	<string>${OPENMW_VERSION}</string>
 	<key>CSResourcesFileMapped</key>
