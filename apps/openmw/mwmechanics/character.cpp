@@ -728,6 +728,14 @@ void CharacterController::playRandomDeath(float startpoint)
         MWBase::Environment::get().getWorld()->useDeathCamera();
     }
 
+    // Do not interrupt scripted animation by death
+    if (!mAnimQueue.empty())
+    {
+        AnimationQueueEntry& first = mAnimQueue.front();
+        if (first.mPersist && isAnimPlaying(first.mGroup))
+            return;
+    }
+
     if(mHitState == CharState_SwimKnockDown && mAnimation->hasAnimation("swimdeathknockdown"))
     {
         mDeathState = CharState_SwimDeathKnockDown;
