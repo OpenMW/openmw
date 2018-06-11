@@ -9,6 +9,7 @@
     Bug #3997: Almalexia doesn't pace
     Bug #4036: Weird behaviour of AI packages if package target has non-unique ID
     Bug #4047: OpenMW not reporting its version number in MacOS; OpenMW-CS not doing it fully
+    Bug #4215: OpenMW shows book text after last <BR> tag
     Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4251: Stationary NPCs do not return to their position after combat
     Bug #4293: Faction members are not aware of faction ownerships in barter
