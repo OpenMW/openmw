@@ -561,6 +561,14 @@ void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterStat
 
 void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force)
 {
+    // If the current animation is persistent, do not touch it
+    if (!mAnimQueue.empty())
+    {
+        AnimationQueueEntry& first = mAnimQueue.front();
+        if (first.mPersist)
+            return;
+    }
+
     if (mPtr.getClass().isActor())
         refreshHitRecoilAnims();
 
@@ -2135,6 +2143,14 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
     if(!mAnimation || !mAnimation->hasAnimation(groupname))
         return false;
 
+    // We should not interrupt persistent animations by non-persistent ones
+    if (!mAnimQueue.empty())
+    {
+        AnimationQueueEntry& first = mAnimQueue.front();
+        if (first.mPersist && !persist)
+            return false;
+    }
+
     // If this animation is a looped animation (has a "loop start" key) that is already playing
     // and has not yet reached the end of the loop, allow it to continue animating with its existing loop count
     // and remove any other animations that were queued.
@@ -2199,9 +2215,21 @@ bool CharacterController::isAnimPlaying(const std::string &groupName)
 
 void CharacterController::clearAnimQueue()
 {
-    if(!mAnimQueue.empty())
-        mAnimation->disable(mAnimQueue.front().mGroup);
-    mAnimQueue.clear();
+    // Do not interrupt scripted animations
+    if (!mAnimQueue.empty())
+    {
+        AnimationQueueEntry& first = mAnimQueue.front();
+        if (!first.mPersist)
+            mAnimation->disable(mAnimQueue.front().mGroup);
+    }
+
+    for (AnimationQueue::iterator it = mAnimQueue.begin(); it != mAnimQueue.end();)
+    {
+        if (!it->mPersist)
+            it = mAnimQueue.erase(it);
+        else
+            ++it;
+    }
 }
 
 void CharacterController::forceStateUpdate()
