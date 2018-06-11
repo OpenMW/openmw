@@ -565,7 +565,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     if (!mAnimQueue.empty())
     {
         AnimationQueueEntry& first = mAnimQueue.front();
-        if (first.mPersist)
+        if (first.mPersist && isAnimPlaying(first.mGroup))
             return;
     }
 
