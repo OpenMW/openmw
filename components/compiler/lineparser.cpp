@@ -512,7 +512,7 @@ namespace Compiler
             return true;
         }
 
-        if (code==Scanner::S_member && mState==PotentialExplicitState)
+        if (code==Scanner::S_member && mState==PotentialExplicitState && mAllowExpression)
         {
             mState = MemberState;
             parseExpression (scanner, loc);
