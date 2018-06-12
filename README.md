@@ -3,7 +3,7 @@ OpenMW
 
 [![Build Status](https://api.travis-ci.org/OpenMW/openmw.svg)](https://travis-ci.org/OpenMW/openmw) [![Build status](https://ci.appveyor.com/api/projects/status/github/openmw/openmw?svg=true)](https://ci.appveyor.com/project/psi29a/openmw)  [![Coverity Scan Build Status](https://scan.coverity.com/projects/3740/badge.svg)](https://scan.coverity.com/projects/3740)
 
-OpenMW is a recreation of the engine for the popular role-playing game Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
+OpenMW is a open-source game engine that supports playing Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
 OpenMW also comes with OpenMW-CS, a replacement for Morrowind's TES Construction Set.
 
