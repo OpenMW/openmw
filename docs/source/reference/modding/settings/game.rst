@@ -77,6 +77,7 @@ This is how original Morrowind behaves.
 
 If this setting is false, player has to wait until end of death animation in all cases.
 This case is more safe, but makes using of summoned creatures exploit (looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder.
+Conflicts with mannequin mods, which use SkipAnim to prevent end of death animation.
 
 This setting can only be configured by editing the settings configuration file.
 
