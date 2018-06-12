@@ -63,6 +63,7 @@ Programmers
     Evgeniy Mineev (sandstranger)
     Federico Guerra (FedeWar)
     Fil Krynicki (filkry)
+    Florian Weber (Florianjw)
     Gašper Sedej
     gugus/gus
     Hallfaer Tuilinn
