@@ -352,6 +352,8 @@ namespace MWClass
 
                 data->mNpcStats.setNeedRecalcDynamicStats(true);
             }
+
+            // Persistent actors with 0 health do not play death animation
             if (data->mNpcStats.isDead())
                 data->mNpcStats.setDeathAnimationFinished(ptr.getClass().isPersistent(ptr));
 
