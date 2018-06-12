@@ -257,15 +257,14 @@ namespace MWMechanics
         if (newItem.isEmpty() || boundPtr != newItem)
             return;
 
+        MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
+
         // change draw state only if the item is in player's right hand
         if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
-            MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
+            player.setDrawState(MWMechanics::DrawState_Weapon);
 
         if (prevItem != store.end())
-        {
-            MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
-            player->setPreviousItem(itemId, prevItem->getCellRef().getRefId());
-        }
+            player.setPreviousItem(itemId, prevItem->getCellRef().getRefId());
     }
 
     void Actors::removeBoundItem (const std::string& itemId, const MWWorld::Ptr& actor)
@@ -282,9 +281,9 @@ namespace MWMechanics
         if (actor != MWMechanics::getPlayer())
             return;
 
-        MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
-        std::string prevItemId = player->getPreviousItem(itemId);
-        player->erasePreviousItem(itemId);
+        MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
+        std::string prevItemId = player.getPreviousItem(itemId);
+        player.erasePreviousItem(itemId);
 
         if (prevItemId.empty())
             return;
