@@ -2182,23 +2182,28 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
 
     if(mode != 0 || mAnimQueue.empty() || !isAnimPlaying(mAnimQueue.front().mGroup))
     {
-        clearAnimQueue();
-        mAnimQueue.push_back(entry);
+        clearAnimQueue(persist);
 
         mAnimation->disable(mCurrentIdle);
         mCurrentIdle.clear();
 
         mIdleState = CharState_SpecialIdle;
         bool loopfallback = (entry.mGroup.compare(0,4,"idle") == 0);
-        mAnimation->play(groupname, persist ? Priority_Persistent : Priority_Default,
+        mAnimation->play(groupname, persist && groupname != "idle" ? Priority_Persistent : Priority_Default,
                             MWRender::Animation::BlendMask_All, false, 1.0f,
                             ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1, loopfallback);
     }
     else
     {
         mAnimQueue.resize(1);
-        mAnimQueue.push_back(entry);
     }
+
+    // "PlayGroup idle" is a special case, used to remove to stop scripted animations playing
+    if (groupname == "idle")
+        entry.mPersist = false;
+
+    mAnimQueue.push_back(entry);
+
     return true;
 }
 
@@ -2225,15 +2230,15 @@ bool CharacterController::isAnimPlaying(const std::string &groupName)
     return mAnimation->isPlaying(groupName);
 }
 
-void CharacterController::clearAnimQueue()
+void CharacterController::clearAnimQueue(bool clearPersistAnims)
 {
-    // Do not interrupt scripted animations
-    if (!isPersistentAnimPlaying() && !mAnimQueue.empty())
+    // Do not interrupt scripted animations, if we want to keep them
+    if ((!isPersistentAnimPlaying() || clearPersistAnims) && !mAnimQueue.empty())
         mAnimation->disable(mAnimQueue.front().mGroup);
 
     for (AnimationQueue::iterator it = mAnimQueue.begin(); it != mAnimQueue.end();)
     {
-        if (!it->mPersist)
+        if (clearPersistAnims || !it->mPersist)
             it = mAnimQueue.erase(it);
         else
             ++it;
