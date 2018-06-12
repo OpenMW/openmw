@@ -10,7 +10,13 @@ build:
   # before_script: 
   #   - apt update && apt -y install make autoconf 
   script: 
+    - ls ./
     - ls /etc
+    - ls /bin
+    - ls /usr/bin
+    - cat /etc/lsb-release
+    - apt-get install -y cmake
+    - mkdir build; cd build; cmake ../openmw
 #  artifacts:
 #    paths:
 #      - mybinary
