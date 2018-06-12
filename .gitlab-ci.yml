@@ -14,9 +14,8 @@ build:
     - ls /etc
     - ls /bin
     - ls /usr/bin
-    - cat /etc/lsb-release
     - apt-get install -y cmake
-    - mkdir build; cd build; cmake ../openmw
+    - mkdir build; cd build; cmake ../
 #  artifacts:
 #    paths:
 #      - mybinary
