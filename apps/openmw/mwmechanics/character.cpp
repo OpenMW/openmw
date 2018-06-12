@@ -562,12 +562,8 @@ void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterStat
 void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force)
 {
     // If the current animation is persistent, do not touch it
-    if (!mAnimQueue.empty())
-    {
-        AnimationQueueEntry& first = mAnimQueue.front();
-        if (first.mPersist && isAnimPlaying(first.mGroup))
-            return;
-    }
+    if (isPersistentAnimPlaying())
+        return;
 
     if (mPtr.getClass().isActor())
         refreshHitRecoilAnims();
@@ -754,12 +750,8 @@ void CharacterController::playRandomDeath(float startpoint)
     }
 
     // Do not interrupt scripted animation by death
-    if (!mAnimQueue.empty())
-    {
-        AnimationQueueEntry& first = mAnimQueue.front();
-        if (first.mPersist && isAnimPlaying(first.mGroup))
-            return;
-    }
+    if (isPersistentAnimPlaying())
+        return;
 
     playDeath(startpoint, mDeathState);
 }
@@ -2154,12 +2146,8 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
         return false;
 
     // We should not interrupt persistent animations by non-persistent ones
-    if (!mAnimQueue.empty())
-    {
-        AnimationQueueEntry& first = mAnimQueue.front();
-        if (first.mPersist && !persist)
-            return false;
-    }
+    if (isPersistentAnimPlaying() && !persist)
+        return false;
 
     // If this animation is a looped animation (has a "loop start" key) that is already playing
     // and has not yet reached the end of the loop, allow it to continue animating with its existing loop count
@@ -2215,6 +2203,17 @@ void CharacterController::skipAnim()
     mSkipAnim = true;
 }
 
+bool CharacterController::isPersistentAnimPlaying()
+{
+    if (!mAnimQueue.empty())
+    {
+        AnimationQueueEntry& first = mAnimQueue.front();
+        return first.mPersist && isAnimPlaying(first.mGroup);
+    }
+
+    return false;
+}
+
 bool CharacterController::isAnimPlaying(const std::string &groupName)
 {
     if(mAnimation == NULL)
@@ -2222,16 +2221,11 @@ bool CharacterController::isAnimPlaying(const std::string &groupName)
     return mAnimation->isPlaying(groupName);
 }
 
-
 void CharacterController::clearAnimQueue()
 {
     // Do not interrupt scripted animations
-    if (!mAnimQueue.empty())
-    {
-        AnimationQueueEntry& first = mAnimQueue.front();
-        if (!first.mPersist)
-            mAnimation->disable(mAnimQueue.front().mGroup);
-    }
+    if (!isPersistentAnimPlaying() && !mAnimQueue.empty())
+        mAnimation->disable(mAnimQueue.front().mGroup);
 
     for (AnimationQueue::iterator it = mAnimQueue.begin(); it != mAnimQueue.end();)
     {
