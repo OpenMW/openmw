@@ -33,4 +33,4 @@ build:
 test:
   stage: test
   script:
-    - true
+    - ls
