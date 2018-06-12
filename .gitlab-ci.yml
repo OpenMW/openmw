@@ -5,10 +5,6 @@ image: gcc
 
 build:
   stage: build
-  # instead of calling g++ directly you can also use some build toolkit like make
-  # install the necessary build tools when needed
-  # before_script: 
-  #   - apt update && apt -y install make autoconf 
   script: 
     - apt-get update
     - apt-get install -y cmake libboost-filesystem-dev libboost-program-options-dev libboost-system-dev
@@ -17,23 +13,23 @@ build:
     - apt-get install -y libmygui-dev libbullet-dev  # to be updated to latest below because stretch is too old
     - curl http://ftp.us.debian.org/debian/pool/main/b/bullet/libbullet-dev_2.87+dfsg-2_amd64.deb -o libbullet-dev_2.87+dfsg-2_amd64.deb
     - curl http://ftp.us.debian.org/debian/pool/main/b/bullet/libbullet2.87_2.87+dfsg-2_amd64.deb -o libbullet2.87_2.87+dfsg-2_amd64.deb
-#    - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmygui.ogreplatform0debian1v5_3.2.2+dfsg-1_amd64.deb -o libmygui.ogreplatform0debian1v5_3.2.2+dfsg-1_amd64.deb
     - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb -o libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb
     - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb -o libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb
     - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmygui-dev_3.2.2+dfsg-1_amd64.deb -o libmygui-dev_3.2.2+dfsg-1_amd64.deb
     - dpkg --ignore-depends=libmygui.ogreplatform0debian1v5 -i *.deb 
     - mkdir build; cd build; cmake ../
     - make -j4
+    - DESTDIR=artifacts make install
   artifacts:
     paths:
-      - build
+      - build/artifacts/
   # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
-  # cache:
-  #   paths:
-  #     - "*.o"
+  cache:
+    paths:
+      - "*.o"
 
 # run tests using the binary built before
-test:
-  stage: test
-  script:
-    - ls
+#test:
+#  stage: test
+#  script:
+#    - ls
