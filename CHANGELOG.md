@@ -3,13 +3,17 @@
 
     Bug #2835: Player able to slowly move when overencumbered
     Bug #3374: Touch spells not hitting kwama foragers
+    Bug #3486: [Mod] NPC Commands does not work
     Bug #3591: Angled hit distance too low
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
     Bug #3997: Almalexia doesn't pace
     Bug #4036: Weird behaviour of AI packages if package target has non-unique ID
     Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4251: Stationary NPCs do not return to their position after combat
+    Bug #4286: Scripted animations can be interrupted
+    Bug #4291: Non-persistent actors that started the game as dead do not play death animations
     Bug #4293: Faction members are not aware of faction ownerships in barter
+    Bug #4307: World cleanup should remove dead bodies only if death animation is finished
     Bug #4327: Missing animations during spell/weapon stance switching
     Bug #4419: MRK NiStringExtraData is handled incorrectly
     Bug #4426: RotateWorld behavior is incorrect
