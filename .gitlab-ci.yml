@@ -6,6 +6,7 @@ image: gcc
 build:
   stage: build
   script: 
+    - nproc
     - apt-get update
     - apt-get install -y cmake libboost-filesystem-dev libboost-program-options-dev libboost-system-dev
     - apt-get install -y libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev
@@ -18,7 +19,7 @@ build:
     - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmygui-dev_3.2.2+dfsg-1_amd64.deb -o libmygui-dev_3.2.2+dfsg-1_amd64.deb
     - dpkg --ignore-depends=libmygui.ogreplatform0debian1v5 -i *.deb 
     - mkdir build; cd build; cmake ../
-    - make -j4
+    - make -j3
     - DESTDIR=artifacts make install
   artifacts:
     paths:
@@ -29,7 +30,7 @@ build:
       - "*.o"
 
 # run tests using the binary built before
-#test:
-#  stage: test
-#  script:
-#    - ls
+test:
+  stage: test
+  script:
+    - true
