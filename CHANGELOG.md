@@ -5,7 +5,9 @@
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3591: Angled hit distance too low
     Bug #3629: DB assassin attack never triggers creature spawning
+    Bug #3876: Landscape texture painting is misaligned
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
+    Bug #3993: Terrain texture blending map is not upscaled
     Bug #3997: Almalexia doesn't pace
     Bug #4036: Weird behaviour of AI packages if package target has non-unique ID
     Bug #4047: OpenMW not reporting its version number in MacOS; OpenMW-CS not doing it fully
