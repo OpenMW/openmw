@@ -10,7 +10,7 @@ build:
   # before_script: 
   #   - apt update && apt -y install make autoconf 
   script: 
-    - whois
+    - ls /etc
 #  artifacts:
 #    paths:
 #      - mybinary
@@ -23,4 +23,4 @@ build:
 test:
   stage: test
   script:
-    - whois
+    - ls
