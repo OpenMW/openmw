@@ -847,7 +847,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     }
 
     // Do not update animation status for dead actors
-    if(mDeathState == CharState_None && !cls.getCreatureStats(mPtr).isDead())
+    if(mDeathState == CharState_None && (!cls.isActor() || !cls.getCreatureStats(mPtr).isDead()))
         refreshCurrentAnims(mIdleState, mMovementState, mJumpState, true);
 
     mAnimation->runAnimation(0.f);
