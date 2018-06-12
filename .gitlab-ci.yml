@@ -16,8 +16,14 @@ build:
     - ls /usr/bin
     - apt-get update
     - apt-cache search cmake
-    - apt-get install -y cmake
+    - apt-get install -y cmake 
+    - apt-get install -y libunshield-dev libtinyxml-dev
+    - apt-get install -y libboost-filesystem-dev libboost-program-options-dev libboost-system-dev
+    - apt-get install -y libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev
+    - apt-get install -y libsdl2-dev libqt4-dev libopenal-dev
+    - apt-get install -y libbullet-dev libopenscenegraph-3.4-dev libmygui-dev
     - mkdir build; cd build; cmake ../
+    - make -j4
 #  artifacts:
 #    paths:
 #      - mybinary
