@@ -2035,7 +2035,8 @@ void CharacterController::update(float duration)
         world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
     }
 
-    osg::Vec3f moved = mAnimation->runAnimation(mSkipAnim ? 0.f : duration);
+    bool isPersist = isPersistentAnimPlaying();
+    osg::Vec3f moved = mAnimation->runAnimation(mSkipAnim && !isPersist ? 0.f : duration);
     if(duration > 0.0f)
         moved /= duration;
     else
