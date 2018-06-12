@@ -1371,7 +1371,7 @@ namespace CSMWorld
         RotColumn (ESM::Position ESXRecordT::* position, int index, bool door)
         : Column<ESXRecordT> (
           (door ? Columns::ColumnId_DoorPositionXRot : Columns::ColumnId_PositionXRot)+index,
-          ColumnBase::Display_Float), mPosition (position), mIndex (index) {}
+          ColumnBase::Display_Double), mPosition (position), mIndex (index) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
