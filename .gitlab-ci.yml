@@ -21,7 +21,7 @@ build:
     - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb -o libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb
     - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb -o libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb
     - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmygui-dev_3.2.2+dfsg-1_amd64.deb -o libmygui-dev_3.2.2+dfsg-1_amd64.deb
-    - dpkg -i *.deb --ignore-depends
+    - dpkg --ignore-depends=libmygui.ogreplatform0debian1v5 -i *.deb 
     - mkdir build; cd build; cmake ../
     - make -j4
   artifacts:
