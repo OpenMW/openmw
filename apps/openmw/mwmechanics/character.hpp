@@ -39,8 +39,8 @@ enum Priority {
     Priority_Knockdown,
     Priority_Torch,
     Priority_Storm,
-
     Priority_Death,
+    Priority_Persistent,
 
     Num_Priorities
 };

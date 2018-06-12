@@ -1308,6 +1308,10 @@ bool CharacterController::updateWeaponState()
         }
     }
 
+    // Combat for actors with persistent animations obviously will be buggy
+    if (isPersistentAnimPlaying())
+        return forcestateupdate;
+
     float complete;
     bool animPlaying;
     if(mAttackingOrSpell)
@@ -2186,7 +2190,7 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
 
         mIdleState = CharState_SpecialIdle;
         bool loopfallback = (entry.mGroup.compare(0,4,"idle") == 0);
-        mAnimation->play(groupname, Priority_Default,
+        mAnimation->play(groupname, persist ? Priority_Persistent : Priority_Default,
                             MWRender::Animation::BlendMask_All, false, 1.0f,
                             ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1, loopfallback);
     }
