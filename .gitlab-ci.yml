@@ -8,12 +8,12 @@ build:
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
   # before_script: 
-    - apt update && apt -y install build-essential cmake git
+  #   - apt update && apt -y install make autoconf 
   script: 
     - whois
-  # artifacts:
-    # paths:
-      # - mybinary
+#  artifacts:
+#    paths:
+#      - mybinary
   # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
   # cache:
   #   paths:
