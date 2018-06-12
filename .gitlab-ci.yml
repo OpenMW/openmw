@@ -17,10 +17,11 @@ build:
     - apt-get install -y libmygui-dev libbullet-dev  # to be updated to latest below because stretch is too old
     - curl http://ftp.us.debian.org/debian/pool/main/b/bullet/libbullet-dev_2.87+dfsg-2_amd64.deb -o libbullet-dev_2.87+dfsg-2_amd64.deb
     - curl http://ftp.us.debian.org/debian/pool/main/b/bullet/libbullet2.87_2.87+dfsg-2_amd64.deb -o libbullet2.87_2.87+dfsg-2_amd64.deb
-    - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmygui.ogreplatform0debian1v5_3.2.2+dfsg-1_amd64.deb -o libmygui.ogreplatform0debian1v5_3.2.2+dfsg-1_amd64.deb
+#    - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmygui.ogreplatform0debian1v5_3.2.2+dfsg-1_amd64.deb -o libmygui.ogreplatform0debian1v5_3.2.2+dfsg-1_amd64.deb
     - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb -o libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb
+    - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb -o libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb
     - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmygui-dev_3.2.2+dfsg-1_amd64.deb -o libmygui-dev_3.2.2+dfsg-1_amd64.deb
-    - dpkg -i *.deb
+    - dpkg -i *.deb --ignore-depends
     - mkdir build; cd build; cmake ../
     - make -j4
   artifacts:
