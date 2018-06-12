@@ -1787,6 +1787,168 @@ struct ConvexHull
         _edges.push_back( Edge(frustum.corners[3],frustum.corners[7]) );
     }
 
+    struct ConvexHull2D
+    {
+        // Implementation based on https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain#C++
+        typedef osg::Vec3d Point;
+
+        static double cross(const Point &O, const Point &A, const Point &B)
+        {
+            return (A.x() - O.x())*(B.y() - O.y()) - (A.y() - O.y())*(B.x() - O.x());
+        }
+
+        // Calculates the 2D convex hull and returns it as a vector containing the points in CCW order with the first and last point being the same.
+        static std::vector<Point> convexHull(std::set<Point> &P)
+        {
+            size_t n = P.size(), k = 0;
+            if (n <= 3)
+                return std::vector<Point>(P.cbegin(), P.cend());
+
+            std::vector<Point> H(2 * n);
+
+            // Points are already sorted in a std::set
+
+            // Build lower hull
+            for (auto pItr = P.cbegin(); pItr != P.cend(); ++pItr)
+            {
+                while (k >= 2 && cross(H[k - 2], H[k - 1], *pItr) <= 0)
+                    k--;
+                H[k++] = *pItr;
+            }
+
+            // Build upper hull
+            size_t t = k + 1;
+            for (auto pItr = std::next(P.crbegin()); pItr != P.crend(); ++pItr)
+            {
+                while (k >= t && cross(H[k - 2], H[k - 1], *pItr) <= 0)
+                    k--;
+                H[k++] = *pItr;
+            }
+
+            H.resize(k - 1);
+            return H;
+        }
+    };
+
+    bool shouldBeDeleted(osg::Vec3d vertex, std::set<osg::Vec3d> &extremeVertices)
+    {
+        // A vertex should be deleted if there is no route -Z-wards to an extreme vertex
+        // equivalent to all -Z-wards vertices being deletable.
+        if (extremeVertices.find(vertex) != extremeVertices.end())
+            return false;
+        for (Edge edge : _edges)
+        {
+            osg::Vec3d otherEnd;
+            if (edge.first == vertex)
+                otherEnd = edge.second;
+            else if (edge.second == vertex)
+                otherEnd = edge.first;
+            else
+                continue;
+
+            if (otherEnd.z() >= vertex.z())
+                continue;
+
+            if (!shouldBeDeleted(otherEnd, extremeVertices))
+                return false;
+        }
+
+        return true;
+    }
+
+    void extendTowardsNegativeZ()
+    {
+        typedef std::set<osg::Vec3d> VertexSet;
+
+        // Collect the set of vertices
+        VertexSet vertices;
+        for (Edge edge : _edges)
+        {
+            vertices.insert(edge.first);
+            vertices.insert(edge.second);
+        }
+
+        if (vertices.size() == 0)
+            return;
+
+        // Get the vertices contributing to the 2D convex hull
+        Vertices extremeVertices = ConvexHull2D::convexHull(vertices);
+        VertexSet extremeVerticesSet(extremeVertices.cbegin(), extremeVertices.cend());
+
+        // Add their extrusions to the final edge collection
+        Edges finalEdges;
+        // Add edges towards -Z
+        for (auto vertex : extremeVertices)
+            finalEdges.push_back(Edge(vertex, osg::Vec3d(vertex.x(), vertex.y(), -DBL_MAX)));
+        // Add edge loop to 'seal' the hull
+        for (auto itr = extremeVertices.cbegin(); itr != extremeVertices.cend() - 1; ++itr)
+            finalEdges.push_back(Edge(osg::Vec3d(itr->x(), itr->y(), -DBL_MAX), osg::Vec3d((itr + 1)->x(), (itr + 1)->y(), -DBL_MAX)));
+        // The convex hull algorithm we are using places a point at both ends of the vector, so we don't need to add the last edge separately.
+        // finalEdges.push_back(Edge(osg::Vec3d(extremeVertices.front().x(), extremeVertices.front().y(), -DBL_MAX), osg::Vec3d(extremeVertices.back().x(), extremeVertices.back().y(), -DBL_MAX)));
+
+        // Collect the first layer of unneeded vertices and remove the edges connecting them to the rest of the mesh
+        VertexSet deletedVertices;
+        for (auto edgeItr = _edges.begin(); edgeItr != _edges.end(); /* nothing */ )
+        {
+            if (extremeVerticesSet.find(edgeItr->first) != extremeVerticesSet.end())
+            {
+                if (extremeVerticesSet.find(edgeItr->second) == extremeVerticesSet.end())
+                {
+                    if (edgeItr->first.z() >= edgeItr->second.z())
+                    {
+                        // If we can travel along edges towards -Z and reach an extreme vertex, the current edge must be kept
+                        if (shouldBeDeleted(edgeItr->second, extremeVerticesSet))
+                        {
+                            deletedVertices.insert(edgeItr->second);
+                            edgeItr = _edges.erase(edgeItr);
+                            continue;
+                        }
+                    }
+                }
+            }
+            else if (extremeVerticesSet.find(edgeItr->second) != extremeVerticesSet.end())
+            {
+                if (edgeItr->second.z() >= edgeItr->first.z())
+                {
+                    if (shouldBeDeleted(edgeItr->first, extremeVerticesSet))
+                    {
+                        deletedVertices.insert(edgeItr->first);
+                        edgeItr = _edges.erase(edgeItr);
+                        continue;
+                    }
+                }
+            }
+            ++edgeItr;
+        }
+
+        // Remove all edges connected to removed vertices
+        bool modifiedSomething = true;
+        while (modifiedSomething)
+        {
+            modifiedSomething = false;
+            for (auto edgeItr = _edges.begin(); edgeItr != _edges.end(); /* nothing */)
+            {
+                if (deletedVertices.find(edgeItr->first) != deletedVertices.end())
+                {
+                    deletedVertices.insert(edgeItr->second);
+                    edgeItr = _edges.erase(edgeItr);
+                    modifiedSomething = true;
+                    continue;
+                }
+                else if (deletedVertices.find(edgeItr->second) != deletedVertices.end())
+                {
+                    deletedVertices.insert(edgeItr->first);
+                    edgeItr = _edges.erase(edgeItr);
+                    modifiedSomething = true;
+                    continue;
+                }
+                ++edgeItr;
+            }
+        }
+
+        _edges.splice(_edges.end(), finalEdges);
+    }
+
     void transform(const osg::Matrixd& m)
     {
         for(Edges::iterator itr = _edges.begin();
@@ -2186,6 +2348,8 @@ bool MWShadowTechnique::cropShadowCameraToMainFrustum(Frustum& frustum, osg::Cam
 
     convexHull.transform(light_vp);
 
+    convexHull.extendTowardsNegativeZ();
+
     double xMin = -1.0, xMax = 1.0;
     double yMin = -1.0, yMax = 1.0;
     double zMin = -1.0, zMax = 1.0;
@@ -2268,6 +2432,8 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
 #endif
 
     convexHull.transform(light_vp);
+
+    convexHull.extendTowardsNegativeZ();
 
 #if 0
     convexHull.output(osg::notify(osg::NOTICE));
