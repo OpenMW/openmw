@@ -1,6 +1,8 @@
 0.45.0
 ------
 
+    Bug #1990: Sunrise/sunset not set correct
+    Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
     Bug #2835: Player able to slowly move when overencumbered
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3591: Angled hit distance too low
@@ -23,6 +25,7 @@
     Bug #4432: Guards behaviour is incorrect if they do not have AI packages
     Bug #4433: Guard behaviour is incorrect with Alarm = 0
     Bug #4452: Default terrain texture bleeds through texture transitions
+    Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
     Feature #4345: Add equivalents for the command line commands to Launcher
     Feature #4444: Per-group KF-animation files support
 
