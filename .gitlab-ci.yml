@@ -23,9 +23,9 @@ before_script:
 build:
   stage: build
   script: 
-    - nproc
+    - cores_to_use=$((`nproc`-2)); if (( $cores_to_use < 1 )); then cores_to_use=1; fi
     - mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=MinSizeRel ../
-    - make -j2
+    - make -j$cores_to_use
     - DESTDIR=artifacts make install
   artifacts:
     paths:
@@ -35,8 +35,8 @@ build:
     paths:
       - "*.o"
 
-# run tests using the binary built before
-test:
-  stage: test
-  script:
-    - ls
+# TODO: run tests using the binary built before
+#test:
+#  stage: test
+#  script:
+#    - ls
