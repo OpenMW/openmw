@@ -35,32 +35,53 @@ struct AiFollowStorage : AiTemporaryBase
 
 int AiFollow::mFollowIndexCounter = 0;
 
-AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
+AiFollow::AiFollow(const std::string &actorId, float duration, float x, float y, float z)
 : mAlwaysFollow(false), mCommanded(false), mDuration(duration), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
-, mActorRefId(actorId), mActorId(-1), mCellId(""), mActive(false), mFollowIndex(mFollowIndexCounter++)
+, mCellId(""), mActive(false), mFollowIndex(mFollowIndexCounter++)
 {
+    mTargetActorRefId = actorId;
 }
 
-AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
+AiFollow::AiFollow(const std::string &actorId, const std::string &cellId, float duration, float x, float y, float z)
 : mAlwaysFollow(false), mCommanded(false), mDuration(duration), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
-, mActorRefId(actorId), mActorId(-1), mCellId(cellId), mActive(false), mFollowIndex(mFollowIndexCounter++)
+, mCellId(cellId), mActive(false), mFollowIndex(mFollowIndexCounter++)
 {
+    mTargetActorRefId = actorId;
 }
 
-AiFollow::AiFollow(const std::string &actorId, bool commanded)
+AiFollow::AiFollow(const MWWorld::Ptr& actor, float duration, float x, float y, float z)
+: mAlwaysFollow(false), mCommanded(false), mDuration(duration), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
+, mCellId(""), mActive(false), mFollowIndex(mFollowIndexCounter++)
+{
+    mTargetActorRefId = actor.getCellRef().getRefId();
+    mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
+}
+
+AiFollow::AiFollow(const MWWorld::Ptr& actor, const std::string &cellId, float duration, float x, float y, float z)
+: mAlwaysFollow(false), mCommanded(false), mDuration(duration), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
+, mCellId(cellId), mActive(false), mFollowIndex(mFollowIndexCounter++)
+{
+    mTargetActorRefId = actor.getCellRef().getRefId();
+    mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
+}
+
+AiFollow::AiFollow(const MWWorld::Ptr& actor, bool commanded)
 : mAlwaysFollow(true), mCommanded(commanded), mDuration(0), mRemainingDuration(0), mX(0), mY(0), mZ(0)
-, mActorRefId(actorId), mActorId(-1), mCellId(""), mActive(false), mFollowIndex(mFollowIndexCounter++)
+, mCellId(""), mActive(false), mFollowIndex(mFollowIndexCounter++)
 {
+    mTargetActorRefId = actor.getCellRef().getRefId();
+    mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
 }
 
 AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
     : mAlwaysFollow(follow->mAlwaysFollow), mCommanded(follow->mCommanded), mRemainingDuration(follow->mRemainingDuration)
     , mX(follow->mData.mX), mY(follow->mData.mY), mZ(follow->mData.mZ)
-    , mActorRefId(follow->mTargetId), mActorId(-1)
     , mCellId(follow->mCellId), mActive(follow->mActive), mFollowIndex(mFollowIndexCounter++)
 {
-// mDuration isn't saved in the save file, so just giving it "1" for now if the package had a duration.
-// The exact value of mDuration only matters for repeating packages.
+    mTargetActorRefId = follow->mTargetId;
+    mTargetActorId = follow->mTargetActorId;
+    // mDuration isn't saved in the save file, so just giving it "1" for now if the package had a duration.
+    // The exact value of mDuration only matters for repeating packages.
     if (mRemainingDuration > 0) // Previously mRemainingDuration could be negative even when mDuration was 0. Checking for > 0 should fix old saves.
        mDuration = 1;
     else
@@ -204,7 +225,7 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
 
 std::string AiFollow::getFollowedActor()
 {
-    return mActorRefId;
+    return mTargetActorRefId;
 }
 
 AiFollow *MWMechanics::AiFollow::clone() const
@@ -228,7 +249,8 @@ void AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) const
     follow->mData.mX = mX;
     follow->mData.mY = mY;
     follow->mData.mZ = mZ;
-    follow->mTargetId = mActorRefId;
+    follow->mTargetId = mTargetActorRefId;
+    follow->mTargetActorId = mTargetActorId;
     follow->mRemainingDuration = mRemainingDuration;
     follow->mCellId = mCellId;
     follow->mAlwaysFollow = mAlwaysFollow;
@@ -239,29 +261,6 @@ void AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) const
     package.mType = ESM::AiSequence::Ai_Follow;
     package.mPackage = follow.release();
     sequence.mPackages.push_back(package);
-}
-
-MWWorld::Ptr AiFollow::getTarget() const
-{
-    if (mActorId == -2)
-        return MWWorld::Ptr();
-
-    if (mActorId == -1)
-    {
-        MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mActorRefId, false);
-        if (target.isEmpty())
-        {
-            mActorId = -2;
-            return target;
-        }
-        else
-            mActorId = target.getClass().getCreatureStats(target).getActorId();
-    }
-
-    if (mActorId != -1)
-        return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mActorId);
-    else
-        return MWWorld::Ptr();
 }
 
 int AiFollow::getFollowIndex() const

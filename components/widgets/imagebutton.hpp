@@ -18,11 +18,15 @@ namespace Gui
 
         ImageButton();
 
+        static void setDefaultNeedKeyFocus(bool enabled);
+
         /// Set mImageNormal, mImageHighlighted and mImagePushed based on file convention (image_idle.ext, image_over.ext and image_pressed.ext)
         void setImage(const std::string& image);
 
     private:
         void updateImage();
+
+        static bool sDefaultNeedKeyFocus;
 
     protected:
         virtual void setPropertyOverride(const std::string& _key, const std::string& _value);

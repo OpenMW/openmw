@@ -635,6 +635,11 @@ namespace MWGui
 
     void DialogueWindow::onChoiceActivated(int id)
     {
+        if (mGoodbye)
+        {
+            onGoodbyeActivated();
+            return;
+        }
         MWBase::Environment::get().getDialogueManager()->questionAnswered(id, mCallback.get());
         updateTopics();
     }

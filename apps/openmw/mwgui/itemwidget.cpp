@@ -16,8 +16,13 @@ namespace
     {
         if (count == 1)
             return "";
-        if (count > 9999)
-            return MyGUI::utility::toString(int(count/1000.f)) + "k";
+
+        if (count > 999999999)
+            return MyGUI::utility::toString(count/1000000000) + "b";
+        else if (count > 999999)
+            return MyGUI::utility::toString(count/1000000) + "m";
+        else if (count > 9999)
+            return MyGUI::utility::toString(count/1000) + "k";
         else
             return MyGUI::utility::toString(count);
     }

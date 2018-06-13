@@ -562,8 +562,9 @@ namespace MWGui
 
     void SettingsWindow::onOpen()
     {
-        updateControlsBox ();
+        updateControlsBox();
         resetScrollbars();
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mOkButton);
     }
 
     void SettingsWindow::onWindowResize(MyGUI::Window *_sender)

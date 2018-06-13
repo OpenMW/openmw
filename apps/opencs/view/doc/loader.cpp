@@ -167,7 +167,7 @@ void CSVDoc::Loader::loadingStopped (CSMDoc::Document *document, bool completed,
         delete iter->second;
         mDocuments.erase (iter);
     }
-    else if (!completed && !error.empty())
+    else
     {
         iter->second->abort (error);
         // Leave the window open for now (wait for the user to close it)

@@ -13,7 +13,7 @@ namespace CSVRender
         , mWorldspaceWidget(worldspaceWidget)
         , mInteractionMask(interactionMask)
     {
-        addButton(":placeholder", "cube-centre",
+        addButton(":scenetoolbar/selection-mode-cube", "cube-centre",
             "Centred cube"
             "<ul><li>Drag with {scene-select-primary} (make instances the selection) or {scene-select-secondary} "
                 "(invert selection state) from the centre of the selection cube outwards</li>"
@@ -22,7 +22,7 @@ namespace CSVRender
                 "starting on an instance will have the same effect</li>"
             "</ul>"
             "<font color=Red>Not implemented yet</font color>");
-        addButton(":placeholder", "cube-corner",
+        addButton(":scenetoolbar/selection-mode-cube-corner", "cube-corner",
             "Cube corner to corner"
             "<ul><li>Drag with {scene-select-primary} (make instances the selection) or {scene-select-secondary} "
                 "(invert selection state) from one corner of the selection cube to the opposite corner</li>"
@@ -31,7 +31,7 @@ namespace CSVRender
                 "starting on an instance will have the same effect</li>"
             "</ul>"
             "<font color=Red>Not implemented yet</font color>");
-        addButton(":placeholder", "sphere",
+        addButton(":scenetoolbar/selection-mode-cube-sphere", "sphere",
             "Centred sphere"
             "<ul><li>Drag with {scene-select-primary} (make instances the selection) or {scene-select-secondary} "
                 "(invert selection state) from the centre of the selection sphere outwards</li>"

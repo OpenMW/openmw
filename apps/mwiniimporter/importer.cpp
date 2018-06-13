@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <components/misc/stringops.hpp>
+#include <components/esm/esmreader.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -653,12 +654,6 @@ void MwIniImporter::setVerbose(bool verbose) {
     mVerbose = verbose;
 }
 
-std::string MwIniImporter::numberToString(int n) {
-    std::stringstream str;
-    str << n;
-    return str.str();
-}
-
 MwIniImporter::multistrmap MwIniImporter::loadIniFile(const boost::filesystem::path&  filename) const {
     std::cout << "load ini file: " << filename << std::endl;
 
@@ -800,7 +795,7 @@ void MwIniImporter::importArchives(multistrmap &cfg, const multistrmap &ini) con
     multistrmap::const_iterator it = ini.begin();
     for(int i=0; it != ini.end(); i++) {
         archive = baseArchive;
-        archive.append(this->numberToString(i));
+        archive.append(std::to_string(i));
 
         it = ini.find(archive);
         if(it == ini.end()) {
@@ -824,33 +819,105 @@ void MwIniImporter::importArchives(multistrmap &cfg, const multistrmap &ini) con
     }
 }
 
-void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, const boost::filesystem::path& iniFilename) const {
-    std::vector<std::pair<std::time_t, std::string> > contentFiles;
+void MwIniImporter::dependencySortStep(std::string& element, MwIniImporter::dependencyList& source, std::vector<std::string>& result)
+{
+    auto iter = std::find_if(
+        source.begin(),
+        source.end(),
+        [&element](std::pair< std::string, std::vector<std::string> >& sourceElement)
+        {
+            return sourceElement.first == element;
+        }
+    );
+    if (iter != source.end())
+    {
+        auto foundElement = std::move(*iter);
+        source.erase(iter);
+        for (auto name : foundElement.second)
+        {
+            MwIniImporter::dependencySortStep(name, source, result);
+        }
+        result.push_back(std::move(foundElement.first));
+    }
+}
+
+std::vector<std::string> MwIniImporter::dependencySort(MwIniImporter::dependencyList source)
+{
+    std::vector<std::string> result;
+    while (!source.empty())
+    {
+        MwIniImporter::dependencySortStep(source.begin()->first, source, result);
+    }
+    return result;
+}
+
+std::vector<std::string>::iterator MwIniImporter::findString(std::vector<std::string>& source, const std::string& string)
+{
+    return std::find_if(source.begin(), source.end(), [&string](const std::string& sourceString)
+    {
+        return Misc::StringUtils::ciEqual(sourceString, string);
+    });
+}
+
+void MwIniImporter::addPaths(std::vector<boost::filesystem::path>& output, std::vector<std::string> input) {
+    for (auto& path : input) {
+        if (path.front() == '"')
+        {
+            path.erase(path.begin());
+            path.erase(path.end() - 1);
+        }
+        output.emplace_back(path);
+    }
+}
+
+void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, const boost::filesystem::path& iniFilename) const
+{
+    std::vector<std::pair<std::time_t, boost::filesystem::path>> contentFiles;
     std::string baseGameFile("Game Files:GameFile");
     std::string gameFile("");
     std::time_t defaultTime = 0;
+    ToUTF8::Utf8Encoder encoder(mEncoding);
 
-    // assume the Game Files are all in a "Data Files" directory under the directory holding Morrowind.ini
-    const boost::filesystem::path gameFilesDir(iniFilename.parent_path() /= "Data Files");
+    std::vector<boost::filesystem::path> dataPaths;
+    if (cfg.count("data"))
+        addPaths(dataPaths, cfg["data"]);
+
+    if (cfg.count("data-local"))
+        addPaths(dataPaths, cfg["data-local"]);
+
+    dataPaths.push_back(iniFilename.parent_path() /= "Data Files");
 
     multistrmap::const_iterator it = ini.begin();
-    for(int i=0; it != ini.end(); i++) {
+    for (int i=0; it != ini.end(); i++)
+    {
         gameFile = baseGameFile;
-        gameFile.append(this->numberToString(i));
+        gameFile.append(std::to_string(i));
 
         it = ini.find(gameFile);
-        if(it == ini.end()) {
+        if(it == ini.end())
             break;
-        }
 
-        for(std::vector<std::string>::const_iterator entry = it->second.begin(); entry!=it->second.end(); ++entry) {
+        for(std::vector<std::string>::const_iterator entry = it->second.begin(); entry!=it->second.end(); ++entry)
+        {
             std::string filetype(entry->substr(entry->length()-3));
             Misc::StringUtils::lowerCaseInPlace(filetype);
 
-            if(filetype.compare("esm") == 0 || filetype.compare("esp") == 0) {
-                boost::filesystem::path filepath(gameFilesDir);
-                filepath /= *entry;
-                contentFiles.push_back(std::make_pair(lastWriteTime(filepath, defaultTime), *entry));
+            if(filetype.compare("esm") == 0 || filetype.compare("esp") == 0)
+            {
+                bool found = false;
+                for (auto & dataPath : dataPaths)
+                {
+                    boost::filesystem::path path = dataPath / *entry;
+                    std::time_t time = lastWriteTime(path, defaultTime);
+                    if (time != defaultTime)
+                    {
+                        contentFiles.push_back({time, path});
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                    std::cout << "Warning: " << *entry << " not found, ignoring" << std::endl;
             }
         }
     }
@@ -858,11 +925,46 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
     cfg.erase("content");
     cfg.insert( std::make_pair("content", std::vector<std::string>() ) );
 
-    // this will sort files by time order first, then alphabetical (maybe), I suspect non ASCII filenames will be stuffed.
+    // sort by timestamp
     sort(contentFiles.begin(), contentFiles.end());
-    for(std::vector<std::pair<std::time_t, std::string> >::const_iterator iter=contentFiles.begin(); iter!=contentFiles.end(); ++iter) {
-        cfg["content"].push_back(iter->second);
+
+    MwIniImporter::dependencyList unsortedFiles;
+
+    ESM::ESMReader reader;
+    reader.setEncoder(&encoder);
+    for (auto& file : contentFiles)
+    {
+        reader.open(file.second.string());
+        std::vector<std::string> dependencies;
+        for (auto& gameFile : reader.getGameFiles())
+        {
+            dependencies.push_back(gameFile.name);
+        }
+        unsortedFiles.emplace_back(boost::filesystem::path(reader.getName()).filename().string(), dependencies);
+        reader.close();
     }
+
+    auto sortedFiles = dependencySort(unsortedFiles);
+
+    // hard-coded dependency Morrowind - Tribunal - Bloodmoon
+    if(findString(sortedFiles, "Morrowind.esm") != sortedFiles.end())
+    {
+        auto tribunalIter  = findString(sortedFiles, "Tribunal.esm");
+        auto bloodmoonIter = findString(sortedFiles, "Bloodmoon.esm");
+
+        if (bloodmoonIter != sortedFiles.end() && tribunalIter != sortedFiles.end())
+        {
+            size_t bloodmoonIndex = std::distance(sortedFiles.begin(), bloodmoonIter);
+            size_t tribunalIndex  = std::distance(sortedFiles.begin(), tribunalIter);
+            if (bloodmoonIndex < tribunalIndex)
+                tribunalIndex++;
+            sortedFiles.insert(bloodmoonIter, *tribunalIter);
+            sortedFiles.erase(sortedFiles.begin() + tribunalIndex);
+        }
+    }
+
+    for (auto& file : sortedFiles)
+        cfg["content"].push_back(file);
 }
 
 void MwIniImporter::writeToFile(std::ostream &out, const multistrmap &cfg) {
@@ -900,10 +1002,6 @@ std::time_t MwIniImporter::lastWriteTime(const boost::filesystem::path& filename
         if (std::strftime(timeStrBuffer, size, "%x %X", localtime(&writeTime)) > 0)
             std::cout << "content file: " << resolved << " timestamp = (" << writeTime <<
                 ") " << timeStrBuffer << std::endl;
-    }
-    else
-    {
-        std::cout << "content file: " << filename << " not found" << std::endl;
     }
     return writeTime;
 }

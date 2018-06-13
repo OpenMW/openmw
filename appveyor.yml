@@ -8,35 +8,32 @@ branches:
 
 environment:
     matrix:
-        - msvc: 2013
         - msvc: 2015
+          APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+        - msvc: 2017
+          APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 
 platform:
-    - Win32
-#   - x64
+#   - Win32
+    - x64
 
 configuration:
-    - Debug
-#   - Release
+#    - Debug
+    - Release
+#    - RelWithDebInfo
 
 # For the Qt, Boost, CMake, etc installs
-os: Visual Studio 2015
+#os: Visual Studio 2017
 
 # We want the git revision for versioning,
 # so shallow clones don't work.
 clone_depth: 1
 
 cache:
-    - C:\projects\openmw\deps\Bullet-2.83.7-msvc2013-win32.7z
-    - C:\projects\openmw\deps\Bullet-2.83.7-msvc2013-win64.7z
     - C:\projects\openmw\deps\Bullet-2.83.7-msvc2015-win32.7z
     - C:\projects\openmw\deps\Bullet-2.83.7-msvc2015-win64.7z
-    - C:\projects\openmw\deps\MyGUI-3.2.3-git-msvc2013-win32.7z
-    - C:\projects\openmw\deps\MyGUI-3.2.3-git-msvc2013-win32.7z
     - C:\projects\openmw\deps\MyGUI-3.2.3-git-msvc2015-win64.7z
     - C:\projects\openmw\deps\MyGUI-3.2.3-git-msvc2015-win64.7z
-    - C:\projects\openmw\deps\OSG-3.4.0-scrawl-msvc2013-win32.7z
-    - C:\projects\openmw\deps\OSG-3.4.0-scrawl-msvc2013-win32.7z
     - C:\projects\openmw\deps\OSG-3.4.0-scrawl-msvc2015-win64.7z
     - C:\projects\openmw\deps\OSG-3.4.0-scrawl-msvc2015-win64.7z
     - C:\projects\openmw\deps\ffmpeg-3.0.1-dev-win32.7z
@@ -52,12 +49,16 @@ install:
     - set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
 
 before_build:
-    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -u -p %PLATFORM% -v %msvc%
+    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -c %configuration% -p %PLATFORM% -v %msvc% -V
 
 build_script:
     - cmd: if %PLATFORM%==Win32 set build=MSVC%msvc%_32
     - cmd: if %PLATFORM%==x64 set build=MSVC%msvc%_64
     - cmd: msbuild %build%\OpenMW.sln /t:Build /p:Configuration=%configuration% /m:2 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+
+after_build:
+    - cmd: if %PLATFORM%==x64 7z a OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%.zip %APPVEYOR_BUILD_FOLDER%\MSVC%msvc%_64\%configuration%\ -xr"!*.pdb"
+    #- cmd: if %PLATFORM%==x64 7z a OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%_pdb.zip %APPVEYOR_BUILD_FOLDER%\MSVC%msvc%_64\%configuration%\*.pdb
 
 test: off
 
@@ -67,3 +68,9 @@ test: off
 #        -  
 #    on_build_failure: true
 #    on_build_status_changed: true
+
+artifacts:
+  - path: OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%.zip
+    name: OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%
+  #- path: OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%_pdb.zip
+  #  name: OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%_pdb

@@ -20,9 +20,9 @@ General introduction to normal map conversion
 :Authors: Joakim (Lysol) Berg
 :Updated: 2016-11-11
 
-This page has general information and tutorials on how normal mapping works in OpenMW and how you can make mods using the old fake normal mapping technique (such as `Netch Bump mapped`_ and `Hlaalu Bump mapped`_, and maybe the most (in)famous one to give shiny rocks in OpenMW, the mod `On the Rocks`_!, featured in MGSO and Morrowind Rebirth) work in OpenMW. 
+This page has general information and tutorials on how normal mapping works in OpenMW and how you can make mods using the old fake normal mapping technique (such as `Netch Bump mapped`_ and `Hlaalu Bump mapped`_, and maybe the most (in)famous one to give shiny rocks in OpenMW, the mod `On the Rocks`_!, featured in MGSO and Morrowind Rebirth) work in OpenMW.
 
-*Note:* The conversion made in the `Converting Apel's Various Things - Sacks`_-part of this tutorial require the use of the application NifSkope. There are binaries available for Windows, but not for Mac or Linux. Reports say that NifSkope versions 1.X will compile on Linux as long as you have Qt packages installed, while the later 2.X versions will not compile.
+*Note:* The conversion made in the `Converting Apel's Various Things - Sacks`_-part of this tutorial require the use of the application NifSkope_.
 
 *Another note:* I will use the terms bump mapping and normal mapping simultaneously. Normal mapping is one form of bump mapping. In other words, normal mapping is bump mapping, but bump mapping isn't necessarily normal mapping. There are several techniques for bump mapping, and normal mapping is the most common one today.
 
@@ -160,8 +160,6 @@ Converting Apel's Various Things - Sacks
 
 In part one of this tutorial, we converted a mod that only included modified Morrowind model (``.nif``) files so that the normal maps could be loaded in Morrowind with MCP. We ignored those model files since they are not needed with OpenMW. In this tutorial however, we will convert a mod that includes new, custom made models. In other words, we cannot just ignore those files this time.
 
-Before we begin, you need to know that unless you want to build the NifSkope application from source yourself, you will be needing a Windows OS to do this part, since the application only has binaries available for Windows.
-
 Tutorial - MCP, Part 2
 **********************
 
@@ -179,24 +177,24 @@ The sacks included in Apel's `Various Things - Sacks`_ come in two versions – 
 #. Remove all these tags by selecting them one at a time and press right click>Block>Remove Branch. (Ctrl-Del)
 #. Repeat this on all the affected models.
 #. If you launch OpenMW now, you'll `no longer have shiny models`_. But one thing is missing. Can you see it? It's actually hard to spot on still pictures, but we have no normal maps here.
-#. Now, go back to the root of where you installed the mod. Now go to ``./Textures/`` and you'll find the texture files in question. 
+#. Now, go back to the root of where you installed the mod. Now go to ``./Textures/`` and you'll find the texture files in question.
 #. OpenMW detects normal maps if they have the same name as the base diffuse texture, but with a *_n.dds* suffix. In this mod, the normal maps has a suffix of *_nm.dds*. Change all the files that ends with *_nm.dds* to instead end with *_n.dds*.
 #. Finally, `we are done`_!
 
 Since these models have one or two textures applied to them, the fix was not that time-consuming. It gets worse when you have to fix a model that uses loads of textures. The principle is the same, it just requires more manual work which is annoying and takes time.
 
-.. _`Netch Bump mapped`: http://www.nexusmods.com/morrowind/mods/42851/?
-.. _`Hlaalu Bump mapped`: http://www.nexusmods.com/morrowind/mods/42396/?
+.. _`Netch Bump mapped`: https://www.nexusmods.com/morrowind/mods/42851/?
+.. _`Hlaalu Bump mapped`: https://www.nexusmods.com/morrowind/mods/42396/?
 .. _`On the Rocks`: http://mw.modhistory.com/download-44-14107
 .. _`texture modding`: https://wiki.openmw.org/index.php?title=TextureModding
-.. _`MGE XE`: http://www.nexusmods.com/morrowind/mods/26348/?
-.. _PeterBitt: http://www.nexusmods.com/morrowind/users/4381248/?
-.. _`PBR Scamp Replacer`: http://www.nexusmods.com/morrowind/mods/44314/?
+.. _`MGE XE`: https://www.nexusmods.com/morrowind/mods/26348/?
+.. _PeterBitt: https://www.nexusmods.com/morrowind/users/4381248/?
+.. _`PBR Scamp Replacer`: https://www.nexusmods.com/morrowind/mods/44314/?
 .. _settings.cfg: https://wiki.openmw.org/index.php?title=Settings
 .. _`Multiple data folders`: https://wiki.openmw.org/index.php?title=Mod_installation
-.. _`Various Things - Sacks`: http://www.nexusmods.com/morrowind/mods/42558/?
-.. _Lead: http://imgur.com/bwpcYlc
-.. _NifSkope: http://niftools.sourceforge.net/wiki/NifSkope
-.. _Blocks: http://imgur.com/VmQC0WG
-.. _`no longer have shiny models`: http://imgur.com/vu1k7n1
-.. _`we are done`: http://imgur.com/yyZxlTw
+.. _`Various Things - Sacks`: https://www.nexusmods.com/morrowind/mods/42558/?
+.. _Lead: https://imgur.com/bwpcYlc
+.. _NifSkope: https://wiki.openmw.org/index.php?title=Tools#NifSkope
+.. _Blocks: https://imgur.com/VmQC0WG
+.. _`no longer have shiny models`: https://imgur.com/vu1k7n1
+.. _`we are done`: https://imgur.com/yyZxlTw

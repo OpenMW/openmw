@@ -316,7 +316,7 @@ namespace MWMechanics
             buildPath(startPoint, endPoint, cell, pathgridGraph);
             if (mPath.size() >= 2)
             {
-                // if 2nd waypoint of new path == 1st waypoint of old, 
+                // if 2nd waypoint of new path == 1st waypoint of old,
                 // delete 1st waypoint of new path.
                 std::list<ESM::Pathgrid::Point>::iterator iter = ++mPath.begin();
                 if (iter->mX == oldStart.mX

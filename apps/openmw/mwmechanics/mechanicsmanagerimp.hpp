@@ -205,7 +205,7 @@ namespace MWMechanics
             virtual std::vector<std::pair<std::string, int> > getStolenItemOwners(const std::string& itemid);
 
             /// Has the player stolen this item from the given owner?
-            virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid);
+            virtual bool isItemStolenFrom(const std::string& itemid, const MWWorld::Ptr& ptr);
 
             virtual bool isBoundItem(const MWWorld::Ptr& item);
 
@@ -224,7 +224,9 @@ namespace MWMechanics
             virtual bool isSneaking(const MWWorld::Ptr& ptr);
 
         private:
-            void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
+            bool canReportCrime(const MWWorld::Ptr &actor, const MWWorld::Ptr &victim, std::set<MWWorld::Ptr> &playerFollowers);
+
+            bool reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0);
 
 

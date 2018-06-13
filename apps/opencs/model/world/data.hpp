@@ -144,6 +144,8 @@ namespace CSMWorld
 
             static int count (RecordBase::State state, const CollectionBase& collection);
 
+            void loadFallbackEntries();
+
         public:
 
             Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,

@@ -1,6 +1,8 @@
 #ifndef GAME_MWWORLD_PLAYER_H
 #define GAME_MWWORLD_PLAYER_H
 
+#include <map>
+
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/livecellref.hpp"
 
@@ -46,7 +48,10 @@ namespace MWWorld
         int                     mCurrentCrimeId;    // the id assigned witnesses
         int                     mPaidCrimeId;      // the last id paid off (0 bounty)
 
-        // Saved skills and attributes prior to becoming a werewolf
+        typedef std::map<std::string, std::string> PreviousItems; // previous equipped items, needed for bound spells
+        PreviousItems mPreviousItems;
+
+        // Saved stats prior to becoming a werewolf
         MWMechanics::SkillValue mSaveSkills[ESM::Skill::Length];
         MWMechanics::AttributeValue mSaveAttributes[ESM::Attribute::Length];
 
@@ -56,9 +61,9 @@ namespace MWWorld
 
         Player(const ESM::NPC *player);
 
-        void saveSkillsAttributes();
-        void restoreSkillsAttributes();
-        void setWerewolfSkillsAttributes();
+        void saveStats();
+        void restoreStats();
+        void setWerewolfStats();
 
         // For mark/recall magic effects
         void markPosition (CellStore* markedCell, const ESM::Position& markedPosition);
@@ -120,6 +125,10 @@ namespace MWWorld
         int getNewCrimeId();  // get new id for witnesses
         void recordCrimeId(); // record the paid crime id when bounty is 0
         int getCrimeId() const;     // get the last paid crime id
+
+        void setPreviousItem(const std::string& boundItemId, const std::string& previousItemId);
+        std::string getPreviousItem(const std::string& boundItemId);
+        void erasePreviousItem(const std::string& boundItemId);
     };
 }
 #endif

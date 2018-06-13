@@ -29,7 +29,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Pathgrid, pathgrid.mId);
 
     // check the number of pathgrid points
-    if (pathgrid.mData.mS2 > static_cast<int>(pathgrid.mPoints.size()))
+    if (pathgrid.mData.mS2 < static_cast<int>(pathgrid.mPoints.size()))
         messages.add (id, pathgrid.mId + " has less points than expected", "", CSMDoc::Message::Severity_Error);
     else if (pathgrid.mData.mS2 > static_cast<int>(pathgrid.mPoints.size()))
         messages.add (id, pathgrid.mId + " has more points than expected", "", CSMDoc::Message::Severity_Error);

@@ -31,6 +31,14 @@ namespace MWGui
 
             boost::algorithm::replace_all(mText, "\r", "");
 
+            // vanilla game does not show any text after last <BR> tag.
+            const std::string lowerText = Misc::StringUtils::lowerCase(mText);
+            int index = lowerText.rfind("<br>");
+            if (index == -1)
+                mText = "";
+            else
+                mText = mText.substr(0, index+4);
+
             registerTag("br", Event_BrTag);
             registerTag("p", Event_PTag);
             registerTag("img", Event_ImgTag);

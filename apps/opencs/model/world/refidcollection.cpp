@@ -184,11 +184,11 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_PosZ, CSMWorld::ColumnBase::Display_Float));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_RotX, CSMWorld::ColumnBase::Display_Float));
+            new RefIdColumn (Columns::ColumnId_RotX, CSMWorld::ColumnBase::Display_Double));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_RotY, CSMWorld::ColumnBase::Display_Float));
+            new RefIdColumn (Columns::ColumnId_RotY, CSMWorld::ColumnBase::Display_Double));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_RotZ, CSMWorld::ColumnBase::Display_Float));
+            new RefIdColumn (Columns::ColumnId_RotZ, CSMWorld::ColumnBase::Display_Double));
 
     // Nested table
     mColumns.push_back(RefIdColumn (Columns::ColumnId_AiPackageList,
@@ -331,7 +331,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     creatureColumns.mType = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Scale, ColumnBase::Display_Float));
     creatureColumns.mScale = &mColumns.back();
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_OriginalCreature, ColumnBase::Display_Creature));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_ParentCreature, ColumnBase::Display_Creature));
     creatureColumns.mOriginal = &mColumns.back();
 
     static const struct

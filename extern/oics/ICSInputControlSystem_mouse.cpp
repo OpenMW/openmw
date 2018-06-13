@@ -268,11 +268,11 @@ namespace ICS
 					ctrl->setIgnoreAutoReverse(true);
 					if(mouseBinderItem.direction == Control::INCREASE)
 					{
-						ctrl->setValue( float( (evt.state.Z.abs) / float(evt.state.¿width?) ) );
+						ctrl->setValue( float( (evt.state.Z.abs) / float(evt.state.Â¿width?) ) );
 					}
 					else if(mouseBinderItem.direction == Control::DECREASE)
 					{
-						ctrl->setValue( float( (1 - evt.state.Z.abs) / float(evt.state.¿width?) ) );
+						ctrl->setValue( float( (1 - evt.state.Z.abs) / float(evt.state.Â¿width?) ) );
 					}
 				}*/
 			}

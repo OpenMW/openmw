@@ -26,12 +26,6 @@ else (GIT_CHECKOUT)
     configure_resource_file(${VERSION_IN_FILE} ${VERSION_FILE_PATH_BASE} ${VERSION_FILE_PATH_RELATIVE})
 endif (GIT_CHECKOUT)
 
-if (OPENGL_ES)
-    find_package(OpenGLES REQUIRED)
-else()
-    find_package(OpenGL REQUIRED)
-endif()
-
 # source files
 
 add_component_dir (settings
@@ -191,12 +185,6 @@ include_directories(${Bullet_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
-if (OPENGL_ES)
-    set(GL_LIB ${OPENGLES_gl_LIBRARY})
-else()
-    set(GL_LIB ${OPENGL_gl_LIBRARY})
-endif()
-
 target_link_libraries(components
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
@@ -213,8 +201,7 @@ target_link_libraries(components
     ${OSGANIMATION_LIBRARIES}
     ${Bullet_LIBRARIES}
     ${SDL2_LIBRARIES}
-    # For MyGUI platform
-    ${GL_LIB}
+    ${OPENGL_gl_LIBRARY}
     ${MyGUI_LIBRARIES}
     )
 
@@ -229,7 +216,7 @@ if (USE_QT)
         ${QT_QTCORE_LIBRARY}
         ${QT_QTGUI_LIBRARY})
     else()
-        qt5_use_modules(components Widgets Core)
+        target_link_libraries(components Qt5::Widgets Qt5::Core)
     endif()
 endif()
 

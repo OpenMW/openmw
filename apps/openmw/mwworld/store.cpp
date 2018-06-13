@@ -592,7 +592,7 @@ namespace MWWorld
         const ESM::Cell *ptr = search(id);
         if (ptr == 0) {
             std::ostringstream msg;
-            msg << "Interior cell '" << id << "' not found";
+            msg << "Cell '" << id << "' not found";
             throw std::runtime_error(msg.str());
         }
         return ptr;
@@ -1050,6 +1050,32 @@ namespace MWWorld
         std::map<std::string, ESM::Dialogue>::iterator it = mStatic.begin();
         for (; it != mStatic.end(); ++it) {
             mShared.push_back(&(it->second));
+        }
+    }
+
+    template<>
+    void Store<ESM::Static>::setUp()
+    {
+        // Load default marker definitions, if game files do not have them for some reason
+        std::pair<std::string, std::string> markers[] = {
+            std::make_pair("divinemarker", "marker_divine.nif"),
+            std::make_pair("doormarker", "marker_arrow.nif"),
+            std::make_pair("northmarker", "marker_north.nif"),
+            std::make_pair("templemarker", "marker_temple.nif"),
+            std::make_pair("travelmarker", "marker_travel.nif")
+        };
+
+        for (const std::pair<std::string, std::string> marker : markers)
+        {
+            if (search(marker.first) == 0)
+            {
+                ESM::Static newMarker = ESM::Static(marker.first, marker.second);
+                std::pair<typename Static::iterator, bool> ret = mStatic.insert(std::make_pair(marker.first, newMarker));
+                if (ret.first != mStatic.end())
+                {
+                    mShared.push_back(&ret.first->second);
+                }
+            }
         }
     }
 

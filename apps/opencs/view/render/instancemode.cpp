@@ -92,7 +92,7 @@ osg::Vec3f CSVRender::InstanceMode::getScreenCoords(const osg::Vec3f& pos)
 }
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
-: EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference | Mask_Terrain, "Instance editing",
+: EditMode (worldspaceWidget, QIcon (":scenetoolbar/editing-instance"), Mask_Reference | Mask_Terrain, "Instance editing",
   parent), mSubMode (0), mSubModeId ("move"), mSelectionMode (0), mDragMode (DragMode_None),
   mDragAxis (-1), mLocked (false), mUnitScaleDist(1)
 {
@@ -104,14 +104,14 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
     {
         mSubMode = new CSVWidget::SceneToolMode (toolbar, "Edit Sub-Mode");
         mSubMode->addButton (new InstanceMoveMode (this), "move");
-        mSubMode->addButton (":placeholder", "rotate",
+        mSubMode->addButton (":scenetoolbar/transform-rotate", "rotate",
             "Rotate selected instances"
             "<ul><li>Use {scene-edit-primary} to rotate instances freely</li>"
             "<li>Use {scene-edit-secondary} to rotate instances within the grid</li>"
             "<li>The center of the view acts as the axis of rotation</li>"
             "</ul>"
             "<font color=Red>Grid rotate not implemented yet</font color>");
-        mSubMode->addButton (":placeholder", "scale",
+        mSubMode->addButton (":scenetoolbar/transform-scale", "scale",
             "Scale selected instances"
             "<ul><li>Use {scene-edit-primary} to scale instances freely</li>"
             "<li>Use {scene-edit-secondary} to scale instances along the grid</li>"
@@ -551,7 +551,7 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
 
         if (noCell)
         {
-            std::string mode = CSMPrefs::get()["Scene Drops"]["outside-drop"].toString();
+            std::string mode = CSMPrefs::get()["3D Scene Editing"]["outside-drop"].toString();
 
             // target cell does not exist
             if (mode=="Discard")
@@ -585,7 +585,7 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
             {
                 // target cell exists, but is not shown
                 std::string mode =
-                    CSMPrefs::get()["Scene Drops"]["outside-visible-drop"].toString();
+                    CSMPrefs::get()["3D Scene Editing"]["outside-visible-drop"].toString();
 
                 if (mode=="Discard")
                     return;

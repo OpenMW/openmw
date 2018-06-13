@@ -7,7 +7,10 @@
 #include <QCheckBox>
 #include <QMenu>
 #include <QSortFilterProxyModel>
+#include <thread>
+#include <mutex>
 
+#include <apps/launcher/utils/cellnameloader.hpp>
 #include <components/files/configurationmanager.hpp>
 
 #include <components/contentselector/model/esmfile.hpp>
@@ -16,6 +19,7 @@
 
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
+#include <iostream>
 
 #include "utils/textinputdialog.hpp"
 #include "utils/profilescombobox.hpp"
@@ -40,6 +44,13 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
 
     buildView();
     loadSettings();
+
+    // Connect signal and slot after the settings have been loaded. We only care about the user changing
+    // the addons and don't want to get signals of the system doing it during startup.
+    connect(mSelector, SIGNAL(signalAddonDataChanged(QModelIndex,QModelIndex)),
+            this, SLOT(slotAddonDataChanged()));
+    // Call manually to indicate all changes to addon data during startup.
+    slotAddonDataChanged();
 }
 
 void Launcher::DataFilesPage::buildView()
@@ -140,6 +151,17 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
     }
     mLauncherSettings.setContentList(profileName, fileNames);
     mGameSettings.setContentList(fileNames);
+}
+
+QStringList Launcher::DataFilesPage::selectedFilePaths()
+{
+    //retrieve the files selected for the profile
+    ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
+    QStringList filePaths;
+    foreach(const ContentSelectorModel::EsmFile *item, items) {
+        filePaths.append(item->filePath());
+    }
+    return filePaths;
 }
 
 void Launcher::DataFilesPage::removeProfile(const QString &profile)
@@ -307,4 +329,32 @@ bool Launcher::DataFilesPage::showDeleteMessageBox (const QString &text)
     msgBox.exec();
 
     return (msgBox.clickedButton() == deleteButton);
+}
+
+void Launcher::DataFilesPage::slotAddonDataChanged()
+{
+    QStringList selectedFiles = selectedFilePaths();
+    if (previousSelectedFiles != selectedFiles) {
+        previousSelectedFiles = selectedFiles;
+        // Loading cells for core Morrowind + Expansions takes about 0.2 seconds, which is enough to cause a
+        // barely perceptible UI lag. Splitting into its own thread to alleviate that.
+        std::thread loadCellsThread(&DataFilesPage::reloadCells, this, selectedFiles);
+        loadCellsThread.detach();
+    }
+}
+
+// Mutex lock to run reloadCells synchronously.
+std::mutex _reloadCellsMutex;
+
+void Launcher::DataFilesPage::reloadCells(QStringList selectedFiles)
+{
+    // Use a mutex lock so that we can prevent two threads from executing the rest of this code at the same time
+    // Based on https://stackoverflow.com/a/5429695/531762
+    std::unique_lock<std::mutex> lock(_reloadCellsMutex);
+
+    // The following code will run only if there is not another thread currently running it
+    CellNameLoader cellNameLoader;
+    QStringList cellNamesList = QStringList::fromSet(cellNameLoader.getCellNames(selectedFiles));
+    std::sort(cellNamesList.begin(), cellNamesList.end());
+    emit signalLoadedCellsChanged(cellNamesList);
 }

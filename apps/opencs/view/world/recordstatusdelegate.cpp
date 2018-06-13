@@ -27,7 +27,7 @@ CSVWorld::RecordStatusDelegateFactory::RecordStatusDelegateFactory()
 
     static const char *sIcons[] =
     {
-        ":./base.png", ":./modified.png", ":./added.png", ":./removed.png", ":./removed.png", 0
+        ":list-base", ":list-modified", ":list-added", ":list-removed", ":list-removed", 0
     };
 
     for (int i=0; sIcons[i]; ++i)

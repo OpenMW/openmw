@@ -8,6 +8,7 @@ set(LAUNCHER
     settingspage.cpp
     advancedpage.cpp
 
+    utils/cellnameloader.cpp
     utils/profilescombobox.cpp
     utils/textinputdialog.cpp
     utils/lineedit.cpp
@@ -24,6 +25,7 @@ set(LAUNCHER_HEADER
     settingspage.hpp
     advancedpage.hpp
 
+    utils/cellnameloader.hpp
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
     utils/lineedit.hpp
@@ -39,6 +41,7 @@ set(LAUNCHER_HEADER_MOC
     settingspage.hpp
     advancedpage.hpp
 
+    utils/cellnameloader.hpp
     utils/textinputdialog.hpp
     utils/profilescombobox.hpp
     utils/lineedit.hpp
@@ -106,7 +109,7 @@ if (DESIRED_QT_VERSION MATCHES 4)
         target_link_libraries(openmw-launcher ${QT_QTMAIN_LIBRARY})
     endif(WIN32)
 else()
-    qt5_use_modules(openmw-launcher Widgets Core)
+    target_link_libraries(openmw-launcher Qt5::Widgets Qt5::Core)
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)

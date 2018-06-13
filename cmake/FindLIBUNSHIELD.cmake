@@ -4,7 +4,7 @@
 # LIBUNSHIELD_FOUND, if false, do not try to link to LibUnshield
 # LIBUNSHIELD_INCLUDE_DIRS, where to find the headers
 #
-# Created by Tom Mason (wheybags) for OpenMW (http://openmw.org), based on FindMPG123.cmake
+# Created by Tom Mason (wheybags) for OpenMW (https://openmw.org), based on FindMPG123.cmake
 #
 # Ripped off from other sources. In fact, this file is so generic (I
 # just did a search and replace on another file) that I wonder why the

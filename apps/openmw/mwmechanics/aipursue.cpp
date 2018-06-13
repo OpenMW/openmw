@@ -15,13 +15,13 @@ namespace MWMechanics
 {
 
 AiPursue::AiPursue(const MWWorld::Ptr& actor)
-    : mTargetActorId(actor.getClass().getCreatureStats(actor).getActorId())
 {
+    mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
 }
 
 AiPursue::AiPursue(const ESM::AiSequence::AiPursue *pursue)
-    : mTargetActorId(pursue->mTargetActorId)
 {
+    mTargetActorId = pursue->mTargetActorId;
 }
 
 AiPursue *MWMechanics::AiPursue::clone() const

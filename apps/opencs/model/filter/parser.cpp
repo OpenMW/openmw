@@ -579,7 +579,7 @@ bool CSMFilter::Parser::parse (const std::string& filter, bool allowPredefined)
     }
     // We do not use isString() here, because there could be a pre-defined filter with an ID that is
     // equal a filter keyword.
-    else if (token.mType==Token::Type_String && allowPredefined)
+    else if (token.mType==Token::Type_String)
     {
         if (getNextToken()!=Token (Token::Type_EOS))
         {

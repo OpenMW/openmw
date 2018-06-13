@@ -79,6 +79,9 @@ namespace
 
         if (ptr.getClass().isActor())
             rendering.addWaterRippleEmitter(ptr);
+
+        // Restore effect particles
+        MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
     }
 
     void updateObjectRotation (const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
@@ -457,8 +460,7 @@ namespace MWWorld
             float z = pos.rot[2];
             world->rotateObject(player, x, y, z);
 
-            if (adjustPlayerPos)
-                player.getClass().adjustPosition(player, true);
+            player.getClass().adjustPosition(player, true);
         }
 
         MWBase::MechanicsManager *mechMgr =

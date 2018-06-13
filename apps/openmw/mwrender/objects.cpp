@@ -123,11 +123,12 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
 
         mObjects.erase(iter);
 
-        if (ptr.getClass().isNpc())
+        if (ptr.getClass().isActor())
         {
-            MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-            store.setInvListener(NULL, ptr);
-            store.setContListener(NULL);
+            if (ptr.getClass().hasInventoryStore(ptr))
+                ptr.getClass().getInventoryStore(ptr).setInvListener(NULL, ptr);
+
+            ptr.getClass().getContainerStore(ptr).setContListener(NULL);
         }
 
         ptr.getRefData().getBaseNode()->getParent(0)->removeChild(ptr.getRefData().getBaseNode());

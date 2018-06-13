@@ -48,7 +48,8 @@ namespace MWMechanics
                 TypeIdPursue = 6,
                 TypeIdAvoidDoor = 7,
                 TypeIdFace = 8,
-                TypeIdBreathe = 9
+                TypeIdBreathe = 9,
+                TypeIdInternalTravel = 10
             };
 
             ///Default constructor
@@ -78,6 +79,9 @@ namespace MWMechanics
 
             /// Get the target actor the AI is targeted at (not applicable to all AI packages, default return empty Ptr)
             virtual MWWorld::Ptr getTarget() const;
+
+            /// Get the destination point of the AI package (not applicable to all AI packages, default return (0, 0, 0))
+            virtual osg::Vec3f getDestination(const MWWorld::Ptr& actor) const { return osg::Vec3f(0, 0, 0); };
 
             /// Return true if having this AiPackage makes the actor side with the target in fights (default false)
             virtual bool sideWithTarget() const;
@@ -119,6 +123,7 @@ namespace MWMechanics
             virtual bool doesPathNeedRecalc(const ESM::Pathgrid::Point& newDest, const MWWorld::CellStore* currentCell);
 
             void evadeObstacles(const MWWorld::Ptr& actor, float duration, const ESM::Position& pos);
+            void openDoors(const MWWorld::Ptr& actor);
 
             const PathgridGraph& getPathGridGraph(const MWWorld::CellStore* cell);
 
@@ -127,6 +132,9 @@ namespace MWMechanics
             ObstacleCheck mObstacleCheck;
 
             float mTimer;
+
+            std::string mTargetActorRefId;
+            mutable int mTargetActorId;
 
             osg::Vec3f mLastActorPos;
 
