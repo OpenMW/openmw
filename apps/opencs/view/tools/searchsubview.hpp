@@ -62,6 +62,8 @@ namespace CSVTools
             void replaceAllRequest();
 
             void tableSizeUpdate();
+
+            void operationDone (int type, bool failed);
     };
 }
 

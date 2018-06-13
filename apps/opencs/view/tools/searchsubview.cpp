@@ -3,6 +3,7 @@
 #include <QVBoxLayout>
 
 #include "../../model/doc/document.hpp"
+#include "../../model/doc/state.hpp"
 #include "../../model/tools/search.hpp"
 #include "../../model/tools/reportmodel.hpp"
 #include "../../model/world/idtablebase.hpp"
@@ -105,6 +106,9 @@ CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     connect (document.getReport (id), SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (tableSizeUpdate()));
+
+    connect (&document, SIGNAL (operationDone (int, bool)),
+        this, SLOT (operationDone (int, bool)));
 }
 
 void CSVTools::SearchSubView::setEditLock (bool locked)
@@ -147,4 +151,13 @@ void CSVTools::SearchSubView::replaceAllRequest()
 void CSVTools::SearchSubView::tableSizeUpdate()
 {
     mBottom->tableSizeChanged (mDocument.getReport (getUniversalId())->rowCount(), 0, 0);
+}
+
+void CSVTools::SearchSubView::operationDone (int type, bool failed)
+{
+    if (type==CSMDoc::State_Searching && !failed &&
+        !mDocument.getReport (getUniversalId())->rowCount())
+    {
+        mBottom->setStatusMessage ("No Results");
+    }
 }

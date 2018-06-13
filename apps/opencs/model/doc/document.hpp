@@ -168,13 +168,15 @@ namespace CSMDoc
             /// document. This signal must be handled to avoid a leak.
             void mergeDone (CSMDoc::Document *document);
 
+            void operationDone (int type, bool failed);
+
         private slots:
 
             void modificationStateChanged (bool clean);
 
             void reportMessage (const CSMDoc::Message& message, int type);
 
-            void operationDone (int type, bool failed);
+            void operationDone2 (int type, bool failed);
 
             void runStateChanged();
 
