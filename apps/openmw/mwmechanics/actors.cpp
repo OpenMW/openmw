@@ -288,23 +288,9 @@ namespace MWMechanics
         if (prevItemId.empty())
             return;
 
-        // Find the item by id
-        MWWorld::Ptr item;
-        for (MWWorld::ContainerStoreIterator iter = store.begin(); iter != store.end(); ++iter)
-        {
-            if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), prevItemId))
-            {
-                if (item.isEmpty() ||
-                    // Prefer the stack with the lowest remaining uses
-                        !item.getClass().hasItemHealth(*iter) ||
-                        iter->getClass().getItemHealth(*iter) < item.getClass().getItemHealth(item))
-                {
-                    item = *iter;
-                }
-            }
-        }
-
+        // Find previous item (or its replacement) by id.
         // we should equip previous item only if expired bound item was equipped.
+        MWWorld::Ptr item = store.findReplacement(prevItemId);
         if (item.isEmpty() || !wasEquipped)
             return;
 
