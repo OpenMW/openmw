@@ -1,6 +1,7 @@
 0.45.0
 ------
 
+    Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
     Bug #2835: Player able to slowly move when overencumbered
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3591: Angled hit distance too low
