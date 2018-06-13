@@ -3,11 +3,6 @@
 # see https://hub.docker.com/_/gcc/
 image: gcc
 
-job:
-  tags:
-    - openmw
-    - debian
-
 cache:
   key: apt-cache
   paths:
