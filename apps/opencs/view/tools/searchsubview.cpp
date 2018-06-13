@@ -8,6 +8,9 @@
 #include "../../model/world/idtablebase.hpp"
 #include "../../model/prefs/state.hpp"
 
+#include "../world/tablebottombox.hpp"
+#include "../world/creator.hpp"
+
 #include "reporttable.hpp"
 #include "searchbox.hpp"
 
@@ -73,6 +76,9 @@ CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     layout->addWidget (mTable = new ReportTable (document, id, true), 2);
 
+    layout->addWidget (mBottom =
+        new CSVWorld::TableBottomBox (CSVWorld::NullCreatorFactory(), document, id, this), 0);
+
     QWidget *widget = new QWidget;
 
     widget->setLayout (layout);
@@ -93,12 +99,23 @@ CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc:
         this, SLOT (startSearch (const CSMTools::Search&)));
 
     connect (&mSearchBox, SIGNAL (replaceAll()), this, SLOT (replaceAllRequest()));
+
+    connect (document.getReport (id), SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
+        this, SLOT (tableSizeUpdate()));
+
+    connect (document.getReport (id), SIGNAL (rowsInserted (const QModelIndex&, int, int)),
+        this, SLOT (tableSizeUpdate()));
 }
 
 void CSVTools::SearchSubView::setEditLock (bool locked)
 {
     mLocked = locked;
     mSearchBox.setEditLock (locked);
+}
+
+void CSVTools::SearchSubView::setStatusBar (bool show)
+{
+    mBottom->setStatusBar(show);
 }
 
 void CSVTools::SearchSubView::stateChanged (int state, CSMDoc::Document *document)
@@ -125,4 +142,9 @@ void CSVTools::SearchSubView::replaceRequest()
 void CSVTools::SearchSubView::replaceAllRequest()
 {
     replace (false);
+}
+
+void CSVTools::SearchSubView::tableSizeUpdate()
+{
+    mBottom->tableSizeChanged (mDocument.getReport (getUniversalId())->rowCount(), 0, 0);
 }
