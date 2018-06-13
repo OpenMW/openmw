@@ -139,24 +139,21 @@ namespace MWClass
         const std::string trapActivationSound = "Disarm Trap Fail";
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        const MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
+        MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
 
         bool isLocked = ptr.getCellRef().getLockLevel() > 0;
         bool isTrapped = !ptr.getCellRef().getTrap().empty();
         bool hasKey = false;
         std::string keyName;
 
-        // make key id lowercase
-        std::string keyId = ptr.getCellRef().getKey();
-        Misc::StringUtils::lowerCaseInPlace(keyId);
-        for (MWWorld::ConstContainerStoreIterator it = invStore.cbegin(); it != invStore.cend(); ++it)
+        const std::string keyId = ptr.getCellRef().getKey();
+        if (!keyId.empty())
         {
-            std::string refId = it->getCellRef().getRefId();
-            Misc::StringUtils::lowerCaseInPlace(refId);
-            if (refId == keyId)
+            MWWorld::Ptr keyPtr = invStore.search(keyId);
+            if (!keyPtr.isEmpty())
             {
                 hasKey = true;
-                keyName = it->getClass().getName(*it);
+                keyName = keyPtr.getClass().getName(keyPtr);
             }
         }
 
