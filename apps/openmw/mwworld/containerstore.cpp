@@ -675,6 +675,30 @@ int MWWorld::ContainerStore::getType (const ConstPtr& ptr)
         "Object '" + ptr.getCellRef().getRefId() + "' of type " + ptr.getTypeName() + " can not be placed into a container");
 }
 
+MWWorld::Ptr MWWorld::ContainerStore::findReplacement(const std::string& id)
+{
+    MWWorld::Ptr item;
+    int itemHealth = 1;
+    for (MWWorld::ContainerStoreIterator iter = begin(); iter != end(); ++iter)
+    {
+        int iterHealth = iter->getClass().hasItemHealth(*iter) ? iter->getClass().getItemHealth(*iter) : 1;
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), id))
+        {
+            // Prefer the stack with the lowest remaining uses
+            // Try to get item with zero durability only if there are no other items found
+            if (item.isEmpty() ||
+                (iterHealth > 0 && iterHealth < itemHealth) ||
+                (itemHealth <= 0 && iterHealth > 0))
+            {
+                item = *iter;
+                itemHealth = iterHealth;
+            }
+        }
+    }
+
+    return item;
+}
+
 MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
 {
     {
