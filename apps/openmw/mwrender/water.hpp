@@ -7,6 +7,7 @@
 #include <osg/ref_ptr>
 #include <osg/Vec3f>
 #include <osg/Uniform>
+#include <osg/Camera>
 
 #include <components/settings/settings.hpp>
 
@@ -111,6 +112,9 @@ namespace MWRender
         void setHeight(const float height);
 
         void update(float dt);
+
+        osg::Camera *getReflectionCamera();
+        osg::Camera *getRefractionCamera();
 
         void processChangedSettings(const Settings::CategorySettingVector& settings);
 

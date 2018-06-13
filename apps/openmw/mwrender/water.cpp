@@ -470,6 +470,16 @@ void Water::updateWaterMaterial()
     updateVisible();
 }
 
+osg::Camera *Water::getReflectionCamera()
+{
+    return mReflection;
+}
+
+osg::Camera *Water::getRefractionCamera()
+{
+    return mRefraction;
+}
+
 void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
 {
     osg::ref_ptr<osg::StateSet> stateset = SceneUtil::createSimpleWaterStateSet(alpha, MWRender::RenderBin_Water);
