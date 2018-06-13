@@ -1057,7 +1057,7 @@ namespace MWInput
             if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get(),settingStr))
             {
                 (*mScreenCaptureOperation) (*(screenshot.get()),0);
-                // mScreenCaptureHandler->getCaptureOperation() causes crash for some reason
+                // FIXME: mScreenCaptureHandler->getCaptureOperation() causes crash for some reason
                 screenshotTaken = true;
             }
         }
