@@ -15,7 +15,6 @@ namespace ContentSelectorView
         Q_OBJECT
 
         QMenu *mContextMenu;
-        QStringList mFilePaths;
 
     protected:
 
@@ -61,6 +60,7 @@ namespace ContentSelectorView
         void signalCurrentGamefileIndexChanged (int);
 
         void signalAddonDataChanged (const QModelIndex& topleft, const QModelIndex& bottomright);
+        void signalSelectedFilesChanged(QStringList selectedFiles);
 
     private slots:
 

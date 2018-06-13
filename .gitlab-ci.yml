@@ -1,0 +1,42 @@
+# use the official gcc image, based on debian
+# can use verions as well, like gcc:5.2
+# see https://hub.docker.com/_/gcc/
+image: gcc
+
+cache:
+  key: apt-cache
+  paths:
+  - apt-cache/
+
+before_script:
+  - export APT_CACHE_DIR=`pwd`/apt-cache && mkdir -pv $APT_CACHE_DIR
+  - apt-get update -yq 
+  - apt-get -o dir::cache::archives="$APT_CACHE_DIR" install -y cmake libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libsdl2-dev libqt4-dev libopenal-dev libopenscenegraph-3.4-dev libunshield-dev libtinyxml-dev
+# - apt-get install -y libmygui-dev libbullet-dev  # to be updated to latest below because stretch is too old
+  - curl http://ftp.us.debian.org/debian/pool/main/b/bullet/libbullet-dev_2.87+dfsg-2_amd64.deb -o libbullet-dev_2.87+dfsg-2_amd64.deb
+  - curl http://ftp.us.debian.org/debian/pool/main/b/bullet/libbullet2.87_2.87+dfsg-2_amd64.deb -o libbullet2.87_2.87+dfsg-2_amd64.deb
+  - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb -o libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb
+  - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb -o libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb
+  - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmygui-dev_3.2.2+dfsg-1_amd64.deb -o libmygui-dev_3.2.2+dfsg-1_amd64.deb
+  - dpkg --ignore-depends=libmygui.ogreplatform0debian1v5 -i *.deb 
+
+build:
+  stage: build
+  script: 
+    - cores_to_use=$((`nproc`-2)); if (( $cores_to_use < 1 )); then cores_to_use=1; fi
+    - mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=MinSizeRel ../
+    - make -j$cores_to_use
+    - DESTDIR=artifacts make install
+  artifacts:
+    paths:
+      - build/artifacts/
+  # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
+  cache:
+    paths:
+      - "*.o"
+
+# TODO: run tests using the binary built before
+#test:
+#  stage: test
+#  script:
+#    - ls

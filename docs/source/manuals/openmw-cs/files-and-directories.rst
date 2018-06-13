@@ -145,7 +145,7 @@ and a place where OpenMW CS looks for already existing files.
 Resource files
 ==============
 
-.. TODO  This paragraph sounds weird 
+.. TODO  This paragraph sounds weird
 
 Unless we are talking about a fully text based game, like Zork or Rogue, one
 would expect that a video game is using some media files: 3D models with
@@ -219,6 +219,6 @@ files for textures.
 
 .. Hyperlink targets for the entire document
 
-.. _FFmpeg: http://ffmpeg.org
+.. _FFmpeg: https://ffmpeg.org
 .. _Vorbis: http://www.vorbis.com
-.. _Theora: http://www.theora.org
+.. _Theora: https://www.theora.org

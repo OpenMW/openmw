@@ -61,12 +61,7 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
         connect (&mVerifier, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
             this, SLOT (verifierMessage (const CSMDoc::Message&, int)));
 
-        std::vector<std::string> mandatoryIds; //  I want C++11, damn it!
-        mandatoryIds.push_back ("Day");
-        mandatoryIds.push_back ("DaysPassed");
-        mandatoryIds.push_back ("GameHour");
-        mandatoryIds.push_back ("Month");
-        mandatoryIds.push_back ("PCRace");
+        std::vector<std::string> mandatoryIds {"Day", "DaysPassed", "GameHour", "Month", "PCRace"};
 
         mVerifierOperation->appendStage (new MandatoryIdStage (mData.getGlobals(),
             CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Globals), mandatoryIds));

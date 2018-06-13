@@ -39,6 +39,7 @@ namespace MWBase
             class ResponseCallback
             {
             public:
+                virtual ~ResponseCallback() = default;
                 virtual void addResponse(const std::string& title, const std::string& text) = 0;
             };
 

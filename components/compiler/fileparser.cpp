@@ -119,6 +119,11 @@ namespace Compiler
                 return false;
             }
         }
+        else if (code==Scanner::S_comma && (mState==NameState || mState==EndNameState))
+        {
+            // ignoring comma (for now)
+            return true;
+        }
 
         return Parser::parseSpecial (code, loc, scanner);
     }

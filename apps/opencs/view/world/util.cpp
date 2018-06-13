@@ -233,6 +233,15 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             return dsb;
         }
 
+        case CSMWorld::ColumnBase::Display_Double:
+        {
+            DialogueDoubleSpinBox *dsb = new DialogueDoubleSpinBox(parent);
+            dsb->setRange(-FLT_MAX, FLT_MAX);
+            dsb->setSingleStep(0.01f);
+            dsb->setDecimals(6);
+            return dsb;
+        }
+
         case CSMWorld::ColumnBase::Display_LongString:
         {
             QPlainTextEdit *edit = new QPlainTextEdit(parent);

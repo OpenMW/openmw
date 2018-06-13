@@ -122,7 +122,7 @@ public:
         }
         else
         {
-            mContext->mPlayer.mObject.mCreatureStats.mLevel = npc.mNpdt52.mLevel;
+            mContext->mPlayer.mObject.mCreatureStats.mLevel = npc.mNpdt.mLevel;
             mContext->mPlayerBase = npc;
             ESM::SpellState::SpellParams empty;
             // FIXME: player start spells and birthsign spells aren't listed here,

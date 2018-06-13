@@ -8,7 +8,7 @@
 
 namespace
 {
-    // See http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
+    // See https://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
     //
     // One of the smallest cost in Seyda Neen is between points 77 & 78:
     // pt      x     y

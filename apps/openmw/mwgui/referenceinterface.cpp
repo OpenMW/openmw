@@ -15,11 +15,8 @@ namespace MWGui
         // check if count of the reference has become 0
         if (!mPtr.isEmpty() && mPtr.getRefData().getCount() == 0)
         {
-            if (!mPtr.isEmpty())
-            {
-                mPtr = MWWorld::Ptr();
-                onReferenceUnavailable();
-            }
+            mPtr = MWWorld::Ptr();
+            onReferenceUnavailable();
         }
     }
 }

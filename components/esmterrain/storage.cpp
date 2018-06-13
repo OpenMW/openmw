@@ -232,9 +232,9 @@ namespace ESMTerrain
                 // Skip the first row / column unless we're at a chunk edge,
                 // since this row / column is already contained in a previous cell
                 // This is only relevant if we're creating a chunk spanning multiple cells
-                if (colStart == 0 && vertY_ != 0)
+                if (vertY_ != 0)
                     colStart += increment;
-                if (rowStart == 0 && vertX_ != 0)
+                if (vertX_ != 0)
                     rowStart += increment;
 
                 // Only relevant for chunks smaller than (contained in) one cell
@@ -430,13 +430,16 @@ namespace ESMTerrain
 
         // Second iteration - create and fill in the blend maps
         const int blendmapSize = (realTextureSize-1) * chunkSize + 1;
+        // We need to upscale the blendmap 2x with nearest neighbor sampling to look like Vanilla
+        const int imageScaleFactor = 2;
+        const int blendmapImageSize = blendmapSize * imageScaleFactor;
 
         for (int i=0; i<numBlendmaps; ++i)
         {
             GLenum format = pack ? GL_RGBA : GL_ALPHA;
 
             osg::ref_ptr<osg::Image> image (new osg::Image);
-            image->allocateImage(blendmapSize, blendmapSize, 1, format, GL_UNSIGNED_BYTE);
+            image->allocateImage(blendmapImageSize, blendmapImageSize, 1, format, GL_UNSIGNED_BYTE);
             unsigned char* pData = image->data();
 
             for (int y=0; y<blendmapSize; ++y)
@@ -449,13 +452,17 @@ namespace ESMTerrain
                     int blendIndex = (pack ? static_cast<int>(std::floor((layerIndex - 1) / 4.f)) : layerIndex - 1);
                     int channel = pack ? std::max(0, (layerIndex-1) % 4) : 0;
 
-                    if (blendIndex == i)
-                        pData[(blendmapSize - y - 1)*blendmapSize*channels + x*channels + channel] = 255;
-                    else
-                        pData[(blendmapSize - y - 1)*blendmapSize*channels + x*channels + channel] = 0;
+                    int alpha = (blendIndex == i) ? 255 : 0;
+
+                    int realY = (blendmapSize - y - 1)*imageScaleFactor;
+                    int realX = x*imageScaleFactor;
+
+                    pData[((realY+0)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
+                    pData[((realY+1)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
+                    pData[((realY+0)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
+                    pData[((realY+1)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
                 }
             }
-
             blendmaps.push_back(image);
         }
     }

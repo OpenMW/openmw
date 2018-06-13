@@ -47,9 +47,11 @@ namespace MWMechanics
             virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
             virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
-            
+
             bool getRepeat() const;
-            
+
+            osg::Vec3f getDestination(const MWWorld::Ptr& actor) const;
+
             enum GreetingState {
                 Greet_None,
                 Greet_InProgress,
@@ -85,7 +87,6 @@ namespace MWMechanics
             bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
             const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos, float duration);
             bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
-            void returnToStartLocation(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
             void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
             bool destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination);
             bool destinationThroughGround(const osg::Vec3f& startPoint, const osg::Vec3f& destination);

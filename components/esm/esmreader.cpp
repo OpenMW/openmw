@@ -57,6 +57,7 @@ void ESMReader::close()
     mCtx.subCached = false;
     mCtx.recName.clear();
     mCtx.subName.clear();
+    mHeader.blank();
 }
 
 void ESMReader::openRaw(Files::IStreamPtr _esm, const std::string& name)

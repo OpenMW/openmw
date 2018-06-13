@@ -47,7 +47,7 @@ namespace
         for (typename MWWorld::CellRefList<T>::List::iterator iter (list.mList.begin());
              iter!=list.mList.end(); ++iter)
         {
-            if (Misc::StringUtils::ciEqual(iter->mBase->mId, id2))
+            if (Misc::StringUtils::ciEqual(iter->mBase->mId, id2) && iter->mData.getCount())
             {
                 MWWorld::Ptr ptr (&*iter, 0);
                 ptr.setContainerStore (store);
@@ -256,11 +256,7 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &id, int count, const Ptr &actorPtr)
 {
     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
-    // a bit pointless to set owner for the player
-    if (actorPtr != MWMechanics::getPlayer())
-        return add(ref.getPtr(), count, actorPtr, true);
-    else
-        return add(ref.getPtr(), count, actorPtr, false);
+    return add(ref.getPtr(), count, actorPtr, true);
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
@@ -677,6 +673,30 @@ int MWWorld::ContainerStore::getType (const ConstPtr& ptr)
 
     throw std::runtime_error (
         "Object '" + ptr.getCellRef().getRefId() + "' of type " + ptr.getTypeName() + " can not be placed into a container");
+}
+
+MWWorld::Ptr MWWorld::ContainerStore::findReplacement(const std::string& id)
+{
+    MWWorld::Ptr item;
+    int itemHealth = 1;
+    for (MWWorld::ContainerStoreIterator iter = begin(); iter != end(); ++iter)
+    {
+        int iterHealth = iter->getClass().hasItemHealth(*iter) ? iter->getClass().getItemHealth(*iter) : 1;
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), id))
+        {
+            // Prefer the stack with the lowest remaining uses
+            // Try to get item with zero durability only if there are no other items found
+            if (item.isEmpty() ||
+                (iterHealth > 0 && iterHealth < itemHealth) ||
+                (itemHealth <= 0 && iterHealth > 0))
+            {
+                item = *iter;
+                itemHealth = iterHealth;
+            }
+        }
+    }
+
+    return item;
 }
 
 MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)

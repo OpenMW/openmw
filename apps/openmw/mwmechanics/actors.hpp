@@ -4,7 +4,6 @@
 #include <set>
 #include <vector>
 #include <string>
-#include <map>
 #include <list>
 
 #include "../mwbase/world.hpp"
@@ -26,6 +25,9 @@ namespace MWMechanics
     {
             std::map<std::string, int> mDeathCount;
 
+            void addBoundItem (const std::string& itemId, const MWWorld::Ptr& actor);
+            void removeBoundItem (const std::string& itemId, const MWWorld::Ptr& actor);
+
             void updateNpc(const MWWorld::Ptr &ptr, float duration);
 
             void adjustMagicEffects (const MWWorld::Ptr& creature);
@@ -39,9 +41,9 @@ namespace MWMechanics
 
             void updateDrowning (const MWWorld::Ptr& ptr, float duration);
 
-            void updateEquippedLight (const MWWorld::Ptr& ptr, float duration);
+            void updateEquippedLight (const MWWorld::Ptr& ptr, float duration, bool mayEquip);
 
-            void updateCrimePersuit (const MWWorld::Ptr& ptr, float duration);
+            void updateCrimePursuit (const MWWorld::Ptr& ptr, float duration);
 
             void killDeadActors ();
 

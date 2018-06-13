@@ -951,10 +951,11 @@ std::pair<Sound_Handle,size_t> OpenAL_Output::loadSound(const std::string &fname
     getALError();
 
     std::vector<char> data;
-    ALenum format;
-    int srate;
+    ALenum format = AL_NONE;
+    int srate = 0;
 
-    try {
+    try
+    {
         DecoderPtr decoder = mManager.getDecoder();
         // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
         if(decoder->mResourceMgr->exists(fname))
@@ -974,7 +975,8 @@ std::pair<Sound_Handle,size_t> OpenAL_Output::loadSound(const std::string &fname
         format = getALFormat(chans, type);
         if(format) decoder->readAll(data);
     }
-    catch(std::exception &e) {
+    catch(std::exception &e)
+    {
         std::cerr<< "Failed to load audio from "<<fname<<": "<<e.what() <<std::endl;
     }
 

@@ -129,7 +129,7 @@ namespace MWWorld
             Ptr copyObjectToCell(const ConstPtr &ptr, CellStore* cell, ESM::Position pos, int count, bool adjustPos);
 
             void updateSoundListener();
-            void updatePlayer(bool paused);
+            void updatePlayer();
 
             void preloadSpells();
 
@@ -213,6 +213,8 @@ namespace MWWorld
             void useDeathCamera() override;
 
             void setWaterHeight(const float height) override;
+
+            void rotateWorldObject (const MWWorld::Ptr& ptr, osg::Quat rotate) override;
 
             bool toggleWater() override;
             bool toggleWorld() override;
@@ -605,12 +607,13 @@ namespace MWWorld
             void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength) override;
 
+            void applyLoopingParticles(const MWWorld::Ptr& ptr);
 
             const std::vector<std::string>& getContentFiles() const override;
-
             void breakInvisibility (const MWWorld::Ptr& actor) override;
-            // Are we in an exterior or pseudo-exterior cell and it's night?
-            bool isDark() const override;
+
+            // Allow NPCs to use torches?
+            bool useTorches() const override;
 
             bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result) override;
 

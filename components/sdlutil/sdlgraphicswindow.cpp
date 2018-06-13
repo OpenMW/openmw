@@ -91,7 +91,7 @@ void GraphicsWindowSDL2::init()
     SDL_Window *oldWin = SDL_GL_GetCurrentWindow();
     SDL_GLContext oldCtx = SDL_GL_GetCurrentContext();
    
-#if defined(OPENGL_ES) || defined(ANDROID)
+#if defined(ANDROID)
     int major = 1;
     int minor = 1;
     char *ver = getenv("OPENMW_GLES_VERSION");

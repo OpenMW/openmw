@@ -161,7 +161,7 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
 
     if (path.isEmpty()) {
         logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"> \
-                                    <b>Error: The installation was aborted by the user</b></p>"));
+                                    <b>Error: The installation was aborted by the user</b></span></p>"));
 
         mWizard->addLogText(QLatin1String("Error: The installation was aborted by the user"));
         mWizard->mError = true;

@@ -40,10 +40,6 @@ namespace MWMechanics
 
             virtual bool canCancel() const { return false; }
             virtual bool shouldCancelPreviousAi() const { return false; }
-
-        private:
-
-            int mTargetActorId; // The actor to pursue
     };
 }
 #endif

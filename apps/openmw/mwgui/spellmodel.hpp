@@ -35,6 +35,7 @@ namespace MWGui
     class SpellModel
     {
     public:
+        SpellModel(const MWWorld::Ptr& actor, const std::string& filter);
         SpellModel(const MWWorld::Ptr& actor);
 
         typedef int ModelIndex;
@@ -50,6 +51,8 @@ namespace MWGui
         MWWorld::Ptr mActor;
 
         std::vector<Spell> mSpells;
+
+        std::string mFilter;
     };
 
 }

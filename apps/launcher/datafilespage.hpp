@@ -7,6 +7,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <QStringList>
 
 class QSortFilterProxyModel;
 class QAbstractItemModel;
@@ -41,8 +42,15 @@ namespace Launcher
         void saveSettings(const QString &profile = "");
         bool loadSettings();
 
+        /**
+         * Returns the file paths of all selected content files
+         * @return the file paths of all selected content files
+         */
+        QStringList selectedFilePaths();
+
     signals:
         void signalProfileChanged (int index);
+        void signalLoadedCellsChanged(QStringList selectedFiles);
 
     public slots:
         void slotProfileChanged (int index);
@@ -52,6 +60,7 @@ namespace Launcher
         void slotProfileChangedByUser(const QString &previous, const QString &current);
         void slotProfileRenamed(const QString &previous, const QString &current);
         void slotProfileDeleted(const QString &item);
+        void slotAddonDataChanged ();
 
         void updateOkButton(const QString &text);
 
@@ -72,7 +81,7 @@ namespace Launcher
         Config::LauncherSettings &mLauncherSettings;
 
         QString mPreviousProfile;
-
+        QStringList previousSelectedFiles;
         QString mDataLocal;
 
         void setPluginsCheckstates(Qt::CheckState state);
@@ -87,6 +96,7 @@ namespace Launcher
         void addProfile (const QString &profile, bool setAsCurrent);
         void checkForDefaultProfile();
         void populateFileViews(const QString& contentModelName);
+        void reloadCells(QStringList selectedFiles);
 
         class PathIterator
         {

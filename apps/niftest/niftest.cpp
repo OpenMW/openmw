@@ -33,12 +33,12 @@ bool hasExtension(std::string filename, std::string  extensionToFind)
 }
 
 ///See if the file has the "nif" extension.
-bool isNIF(std::string filename)
+bool isNIF(const std::string & filename)
 {
     return hasExtension(filename,"nif");
 }
 ///See if the file has the "bsa" extension.
-bool isBSA(std::string filename)
+bool isBSA(const std::string & filename)
 {
     return hasExtension(filename,"bsa");
 }

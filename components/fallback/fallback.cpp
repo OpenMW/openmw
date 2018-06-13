@@ -25,7 +25,7 @@ namespace Fallback
     float Map::getFallbackFloat(const std::string& fall) const
     {
         std::string fallback=getFallbackString(fall);
-        if(fallback.empty())
+        if (fallback.empty())
             return 0;
         else
             return boost::lexical_cast<float>(fallback);
@@ -34,7 +34,7 @@ namespace Fallback
     int Map::getFallbackInt(const std::string& fall) const
     {
         std::string fallback=getFallbackString(fall);
-        if(fallback.empty())
+        if (fallback.empty())
             return 0;
         else
             return std::stoi(fallback);
@@ -43,7 +43,7 @@ namespace Fallback
     bool Map::getFallbackBool(const std::string& fall) const
     {
         std::string fallback=getFallbackString(fall);
-        if(fallback.empty())
+        if (fallback.empty())
             return false;
         else
             return stob(fallback);
@@ -52,8 +52,8 @@ namespace Fallback
     osg::Vec4f Map::getFallbackColour(const std::string& fall) const
     {
         std::string sum=getFallbackString(fall);
-        if(sum.empty())
-            return osg::Vec4f(0.f,0.f,0.f,1.f);
+        if (sum.empty())
+            return osg::Vec4f(0.5f,0.5f,0.5f,1.f);
         else
         {
             std::string ret[3];

@@ -63,19 +63,9 @@ std::string CSVWorld::ReferenceCreator::getErrors() const
     std::string cell = mCell->text().toUtf8().constData();
 
     if (cell.empty())
-    {
-        if (!errors.empty())
-            errors += "<br>";
-
         errors += "Missing Cell ID";
-    }
     else if (getData().getCells().searchId (cell)==-1)
-    {
-        if (!errors.empty())
-            errors += "<br>";
-
         errors += "Invalid Cell ID";
-    }
 
     return errors;
 }

@@ -62,12 +62,23 @@ namespace ESM
                     if (esm.getSubSize() == 52)
                     {
                         mNpdtType = NPC_DEFAULT;
-                        esm.getExact(&mNpdt52, 52);
+                        esm.getExact(&mNpdt, 52);
                     }
                     else if (esm.getSubSize() == 12)
                     {
+                        //Reading into temporary NPDTstruct12 object
+                        NPDTstruct12 npdt12;
                         mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
-                        esm.getExact(&mNpdt12, 12);
+                        esm.getExact(&npdt12, 12);
+
+                        //Clearing the mNdpt struct to initialize all values
+                        blankNpdt();
+                        //Swiching to an internal representation
+                        mNpdt.mLevel = npdt12.mLevel;
+                        mNpdt.mDisposition = npdt12.mDisposition;
+                        mNpdt.mReputation = npdt12.mReputation;
+                        mNpdt.mRank = npdt12.mRank;
+                        mNpdt.mGold = npdt12.mGold;
                     }
                     else
                         esm.fail("NPC_NPDT must be 12 or 52 bytes long");
@@ -135,9 +146,19 @@ namespace ESM
         esm.writeHNOCString("SCRI", mScript);
 
         if (mNpdtType == NPC_DEFAULT)
-            esm.writeHNT("NPDT", mNpdt52, 52);
+        {
+            esm.writeHNT("NPDT", mNpdt, 52);
+        }
         else if (mNpdtType == NPC_WITH_AUTOCALCULATED_STATS)
-            esm.writeHNT("NPDT", mNpdt12, 12);
+        {
+            NPDTstruct12 npdt12;
+            npdt12.mLevel = mNpdt.mLevel;
+            npdt12.mDisposition = mNpdt.mDisposition;
+            npdt12.mReputation = mNpdt.mReputation;
+            npdt12.mRank = mNpdt.mRank;
+            npdt12.mGold = mNpdt.mGold;
+            esm.writeHNT("NPDT", npdt12, 12);
+        }
 
         esm.writeHNT("FLAG", mFlags);
 
@@ -171,25 +192,7 @@ namespace ESM
     void NPC::blank()
     {
         mNpdtType = NPC_DEFAULT;
-        mNpdt52.mLevel = 0;
-        mNpdt52.mStrength = mNpdt52.mIntelligence = mNpdt52.mWillpower = mNpdt52.mAgility =
-            mNpdt52.mSpeed = mNpdt52.mEndurance = mNpdt52.mPersonality = mNpdt52.mLuck = 0;
-        for (int i=0; i< Skill::Length; ++i) mNpdt52.mSkills[i] = 0;
-        mNpdt52.mReputation = 0;
-        mNpdt52.mHealth = mNpdt52.mMana = mNpdt52.mFatigue = 0;
-        mNpdt52.mDisposition = 0;
-        mNpdt52.mFactionID = 0;
-        mNpdt52.mRank = 0;
-        mNpdt52.mUnknown = 0;
-        mNpdt52.mGold = 0;
-        mNpdt12.mLevel = 0;
-        mNpdt12.mDisposition = 0;
-        mNpdt12.mReputation = 0;
-        mNpdt12.mRank = 0;
-        mNpdt12.mUnknown1 = 0;
-        mNpdt12.mUnknown2 = 0;
-        mNpdt12.mUnknown3 = 0;
-        mNpdt12.mGold = 0;
+        blankNpdt();
         mFlags = 0;
         mInventory.mList.clear();
         mSpells.mList.clear();
@@ -207,14 +210,27 @@ namespace ESM
         mHead.clear();
     }
 
+    void NPC::blankNpdt()
+    {
+        mNpdt.mLevel = 0;
+        mNpdt.mStrength = mNpdt.mIntelligence = mNpdt.mWillpower = mNpdt.mAgility =
+            mNpdt.mSpeed = mNpdt.mEndurance = mNpdt.mPersonality = mNpdt.mLuck = 0;
+        for (int i=0; i< Skill::Length; ++i) mNpdt.mSkills[i] = 0;
+        mNpdt.mReputation = 0;
+        mNpdt.mHealth = mNpdt.mMana = mNpdt.mFatigue = 0;
+        mNpdt.mDisposition = 0;
+        mNpdt.mFactionID = 0;
+        mNpdt.mRank = 0;
+        mNpdt.mUnknown = 0;
+        mNpdt.mGold = 0;
+    }
+
     int NPC::getFactionRank() const
     {
         if (mFaction.empty())
             return -1;
-        else if (mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
-            return mNpdt12.mRank;
-        else // NPC_DEFAULT
-            return mNpdt52.mRank;
+        else
+            return mNpdt.mRank;
     }
 
     const std::vector<Transport::Dest>& NPC::getTransport() const

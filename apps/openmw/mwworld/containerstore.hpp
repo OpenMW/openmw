@@ -198,6 +198,9 @@ namespace MWWorld
             ///< This function throws an exception, if ptr does not point to an object, that can be
             /// put into a container.
 
+            Ptr findReplacement(const std::string& id);
+            ///< Returns replacement for object with given id. Prefer used items (with low durability left).
+
             Ptr search (const std::string& id);
 
             virtual void writeState (ESM::InventoryState& state) const;

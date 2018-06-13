@@ -694,7 +694,7 @@ void Record<ESM::Dialogue>::print()
     // loads, rather than loading and then dumping. :-( Anyone mind if
     // I change this?
     ESM::Dialogue::InfoContainer::iterator iit;
-    for (iit = mData.mInfo.begin(); iit != mData.mInfo.end(); iit++)
+    for (iit = mData.mInfo.begin(); iit != mData.mInfo.end(); ++iit)
         std::cout << "INFO!" << iit->mId << std::endl;
 }
 
@@ -1040,45 +1040,47 @@ void Record<ESM::NPC>::print()
 
     if (mData.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
     {
-        std::cout << "  Level: " << mData.mNpdt12.mLevel << std::endl;
-        std::cout << "  Reputation: " << (int)mData.mNpdt12.mReputation << std::endl;
-        std::cout << "  Disposition: " << (int)mData.mNpdt12.mDisposition << std::endl;
-        std::cout << "  Rank: " << (int)mData.mNpdt12.mRank << std::endl;
-        std::cout << "  Unknown1: "
-                  << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown1) << std::endl;
-        std::cout << "  Unknown2: "
-                  << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown2) << std::endl;
-        std::cout << "  Unknown3: "
-                  << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown3) << std::endl;
-        std::cout << "  Gold: " << mData.mNpdt12.mGold << std::endl;
+        std::cout << "  Level: " << mData.mNpdt.mLevel << std::endl;
+        std::cout << "  Reputation: " << (int)mData.mNpdt.mReputation << std::endl;
+        std::cout << "  Disposition: " << (int)mData.mNpdt.mDisposition << std::endl;
+        std::cout << "  Rank: " << (int)mData.mNpdt.mRank << std::endl;
+        //Why do we want to print these fields? They are padding in the struct and contain
+        // nothing of real value. Now we don't deal with NPDTstruct12 in runtime either...
+        //std::cout << "  Unknown1: "
+        //          << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown1) << std::endl;
+        //std::cout << "  Unknown2: "
+        //          << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown2) << std::endl;
+        //std::cout << "  Unknown3: "
+        //          << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown3) << std::endl;
+        std::cout << "  Gold: " << mData.mNpdt.mGold << std::endl;
     }
     else {
-        std::cout << "  Level: " << mData.mNpdt52.mLevel << std::endl;
-        std::cout << "  Reputation: " << (int)mData.mNpdt52.mReputation << std::endl;
-        std::cout << "  Disposition: " << (int)mData.mNpdt52.mDisposition << std::endl;
-        std::cout << "  Rank: " << (int)mData.mNpdt52.mRank << std::endl;
-        std::cout << "  FactionID: " << (int)mData.mNpdt52.mFactionID << std::endl;
+        std::cout << "  Level: " << mData.mNpdt.mLevel << std::endl;
+        std::cout << "  Reputation: " << (int)mData.mNpdt.mReputation << std::endl;
+        std::cout << "  Disposition: " << (int)mData.mNpdt.mDisposition << std::endl;
+        std::cout << "  Rank: " << (int)mData.mNpdt.mRank << std::endl;
+        std::cout << "  FactionID: " << (int)mData.mNpdt.mFactionID << std::endl;
 
         std::cout << "  Attributes:" << std::endl;
-        std::cout << "    Strength: " << (int)mData.mNpdt52.mStrength << std::endl;
-        std::cout << "    Intelligence: " << (int)mData.mNpdt52.mIntelligence << std::endl;
-        std::cout << "    Willpower: " << (int)mData.mNpdt52.mWillpower << std::endl;
-        std::cout << "    Agility: " << (int)mData.mNpdt52.mAgility << std::endl;
-        std::cout << "    Speed: " << (int)mData.mNpdt52.mSpeed << std::endl;
-        std::cout << "    Endurance: " << (int)mData.mNpdt52.mEndurance << std::endl;
-        std::cout << "    Personality: " << (int)mData.mNpdt52.mPersonality << std::endl;
-        std::cout << "    Luck: " << (int)mData.mNpdt52.mLuck << std::endl;
+        std::cout << "    Strength: " << (int)mData.mNpdt.mStrength << std::endl;
+        std::cout << "    Intelligence: " << (int)mData.mNpdt.mIntelligence << std::endl;
+        std::cout << "    Willpower: " << (int)mData.mNpdt.mWillpower << std::endl;
+        std::cout << "    Agility: " << (int)mData.mNpdt.mAgility << std::endl;
+        std::cout << "    Speed: " << (int)mData.mNpdt.mSpeed << std::endl;
+        std::cout << "    Endurance: " << (int)mData.mNpdt.mEndurance << std::endl;
+        std::cout << "    Personality: " << (int)mData.mNpdt.mPersonality << std::endl;
+        std::cout << "    Luck: " << (int)mData.mNpdt.mLuck << std::endl;
 
         std::cout << "  Skills:" << std::endl;
         for (int i = 0; i != ESM::Skill::Length; i++)
             std::cout << "    " << skillLabel(i) << ": "
-                      << (int)(mData.mNpdt52.mSkills[i]) << std::endl;
+                      << (int)(mData.mNpdt.mSkills[i]) << std::endl;
 
-        std::cout << "  Health: " << mData.mNpdt52.mHealth << std::endl;
-        std::cout << "  Magicka: " << mData.mNpdt52.mMana << std::endl;
-        std::cout << "  Fatigue: " << mData.mNpdt52.mFatigue << std::endl;
-        std::cout << "  Unknown: " << (int)mData.mNpdt52.mUnknown << std::endl;
-        std::cout << "  Gold: " << mData.mNpdt52.mGold << std::endl;
+        std::cout << "  Health: " << mData.mNpdt.mHealth << std::endl;
+        std::cout << "  Magicka: " << mData.mNpdt.mMana << std::endl;
+        std::cout << "  Fatigue: " << mData.mNpdt.mFatigue << std::endl;
+        std::cout << "  Unknown: " << (int)mData.mNpdt.mUnknown << std::endl;
+        std::cout << "  Gold: " << mData.mNpdt.mGold << std::endl;
     }
 
     std::vector<ESM::ContItem>::iterator cit;
@@ -1123,7 +1125,7 @@ void Record<ESM::Pathgrid>::print()
 
     int i = 0;
     ESM::Pathgrid::PointList::iterator pit;
-    for (pit = mData.mPoints.begin(); pit != mData.mPoints.end(); pit++)
+    for (pit = mData.mPoints.begin(); pit != mData.mPoints.end(); ++pit)
     {
         std::cout << "  Point[" << i << "]:" << std::endl;
         std::cout << "    Coordinates: (" << pit->mX << ","
@@ -1135,7 +1137,7 @@ void Record<ESM::Pathgrid>::print()
     }
     i = 0;
     ESM::Pathgrid::EdgeList::iterator eit;
-    for (eit = mData.mEdges.begin(); eit != mData.mEdges.end(); eit++)
+    for (eit = mData.mEdges.begin(); eit != mData.mEdges.end(); ++eit)
     {
         std::cout << "  Edge[" << i << "]: " << eit->mV0 << " -> " << eit->mV1 << std::endl;
         if (eit->mV0 >= mData.mData.mS2 || eit->mV1 >= mData.mData.mS2)

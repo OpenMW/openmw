@@ -406,7 +406,7 @@ namespace MWScript
         const MWWorld::ESMStore &store = world->getStore();
         const ESM::Faction *faction = store.get<ESM::Faction>().find(factionId);
 
-        if(rank < 0 || rank > 9)
+        if(rank < 0)
             return "";
 
         return faction->mRanks[rank];

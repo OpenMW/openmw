@@ -28,6 +28,8 @@ namespace MWGui
 
         void setModalWindow(MyGUI::Widget* window);
 
+        void setEnabled(bool enabled);
+
     private:
         bool switchFocus(int direction, bool wrap);
 
@@ -40,6 +42,8 @@ namespace MWGui
 
         MyGUI::Widget* mCurrentFocus;
         MyGUI::Widget* mModalWindow;
+
+        bool mEnabled;
     };
 
 }

@@ -764,10 +764,8 @@ std::vector< CSMWorld::UniversalId > CSVWorld::Table::getDraggedRecords() const
     QModelIndexList selectedRows = selectionModel()->selectedRows();
     std::vector<CSMWorld::UniversalId> idToDrag;
 
-    foreach (QModelIndex it, selectedRows) //I had a dream. Dream where you could use C++11 in OpenMW.
-    {
+    for (QModelIndex& it : selectedRows)
         idToDrag.push_back (getUniversalId (it.row()));
-    }
 
     return idToDrag;
 }
