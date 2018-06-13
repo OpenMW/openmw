@@ -3,6 +3,11 @@
 # see https://hub.docker.com/_/gcc/
 image: gcc
 
+job:
+  tags:
+    - openmw
+    - debian
+
 cache:
   key: apt-cache
   paths:
@@ -25,7 +30,7 @@ build:
   script: 
     - nproc
     - mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=MinSizeRel ../
-    - make -j2
+    - make -j4
     - DESTDIR=artifacts make install
   artifacts:
     paths:
