@@ -12,13 +12,6 @@
   </property>
   <layout class="QVBoxLayout" name="pageVerticalLayout">
    <item>
-    <widget class="QLabel" name="pageDescriptionLabel">
-     <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This temporary page contains new settings that will be available in-game in a post-1.0 release of OpenMW.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QScrollArea" name="scrollArea">
      <property name="widgetResizable">
       <bool>true</bool>
@@ -27,9 +20,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-187</y>
+        <y>0</y>
         <width>630</width>
-        <height>510</height>
+        <height>746</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="scrollAreaVerticalLayout">
@@ -272,6 +265,94 @@
              </item>
             </layout>
            </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="testingGroup">
+         <property name="title">
+          <string>Testing</string>
+         </property>
+         <layout class="QVBoxLayout" name="testingGroupVerticalLayout">
+          <item>
+           <widget class="QLabel" name="testingLabel">
+            <property name="text">
+             <string>These settings are intended for testing mods and will cause issues if used for normal gameplay.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="testingLine">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="skipMenuCheckBox">
+            <property name="text">
+             <string>Skip menu and generate default character</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="startDefaultCharacterAtHorizontalLayout">
+            <item>
+             <spacer name="startDefaultCharacterAtHorizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="startDefaultCharacterAtLabel">
+              <property name="text">
+               <string>Start default character at</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="startDefaultCharacterAtField">
+              <property name="placeholderText">
+               <string>default cell</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Run script after startup:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="runScriptAfterStartupHorizontalLayout">
+            <item>
+             <widget class="QLineEdit" name="runScriptAfterStartupField"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="runScriptAfterStartupBrowseButton">
+              <property name="text">
+               <string>Browse…</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>

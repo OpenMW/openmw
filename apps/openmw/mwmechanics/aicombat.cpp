@@ -103,9 +103,10 @@ namespace MWMechanics
         bool isFleeing();
     };
     
-    AiCombat::AiCombat(const MWWorld::Ptr& actor) :
-        mTargetActorId(actor.getClass().getCreatureStats(actor).getActorId())
-    {}
+    AiCombat::AiCombat(const MWWorld::Ptr& actor)
+    {
+        mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
+    }
 
     AiCombat::AiCombat(const ESM::AiSequence::AiCombat *combat)
     {

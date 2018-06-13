@@ -27,15 +27,36 @@ MWMechanics::AiPackage::~AiPackage() {}
 
 MWMechanics::AiPackage::AiPackage() : 
     mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
+    mTargetActorRefId(""),
+    mTargetActorId(-1),
     mRotateOnTheRunChecks(0),
     mIsShortcutting(false),
-    mShortcutProhibited(false), mShortcutFailPos()
+    mShortcutProhibited(false),
+    mShortcutFailPos()
 {
 }
 
 MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
 {
-    return MWWorld::Ptr();
+    if (mTargetActorId == -2)
+        return MWWorld::Ptr();
+
+    if (mTargetActorId == -1)
+    {
+        MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mTargetActorRefId, false);
+        if (target.isEmpty())
+        {
+            mTargetActorId = -2;
+            return target;
+        }
+        else
+            mTargetActorId = target.getClass().getCreatureStats(target).getActorId();
+    }
+
+    if (mTargetActorId != -1)
+        return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+    else
+        return MWWorld::Ptr();
 }
 
 bool MWMechanics::AiPackage::sideWithTarget() const

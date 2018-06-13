@@ -104,13 +104,13 @@ namespace Nif
     void NiLookAtController::read(NIFStream *nif)
     {
         Controller::read(nif);
-        data.read(nif);
+        target.read(nif);
     }
 
     void NiLookAtController::post(NIFFile *nif)
     {
         Controller::post(nif);
-        data.post(nif);
+        target.post(nif);
     }
 
     void NiPathController::read(NIFStream *nif)

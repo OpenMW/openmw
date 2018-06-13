@@ -31,6 +31,18 @@ void ESM::Player::load (ESMReader &esm)
     mPaidCrimeId = -1;
     esm.getHNOT (mPaidCrimeId, "PAYD");
 
+    bool checkPrevItems = true;
+    while (checkPrevItems)
+    {
+        std::string boundItemId = esm.getHNOString("BOUN");
+        std::string prevItemId = esm.getHNOString("PREV");
+
+        if (!boundItemId.empty())
+            mPreviousItems[boundItemId] = prevItemId;
+        else
+            checkPrevItems = false;
+    }
+
     if (esm.hasMoreSubs())
     {
         for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -61,6 +73,12 @@ void ESM::Player::save (ESMWriter &esm) const
 
     esm.writeHNT ("CURD", mCurrentCrimeId);
     esm.writeHNT ("PAYD", mPaidCrimeId);
+
+    for (PreviousItems::const_iterator it=mPreviousItems.begin(); it != mPreviousItems.end(); ++it)
+    {
+        esm.writeHNString ("BOUN", it->first);
+        esm.writeHNString ("PREV", it->second);
+    }
 
     for (int i=0; i<ESM::Attribute::Length; ++i)
         mSaveAttributes[i].save(esm);

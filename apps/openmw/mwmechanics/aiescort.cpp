@@ -22,28 +22,32 @@
 namespace MWMechanics
 {
     AiEscort::AiEscort(const std::string &actorId, int duration, float x, float y, float z)
-    : mActorId(actorId), mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
+    : mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
+        mTargetActorRefId = actorId;
         mMaxDist = 450;
     }
 
-    AiEscort::AiEscort(const std::string &actorId, const std::string &cellId,int duration, float x, float y, float z)
-    : mActorId(actorId), mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
+    AiEscort::AiEscort(const std::string &actorId, const std::string &cellId, int duration, float x, float y, float z)
+    : mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration), mRemainingDuration(static_cast<float>(duration))
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
+        mTargetActorRefId = actorId;
         mMaxDist = 450;
     }
 
     AiEscort::AiEscort(const ESM::AiSequence::AiEscort *escort)
-        : mActorId(escort->mTargetId), mCellId(escort->mCellId), mX(escort->mData.mX), mY(escort->mData.mY), mZ(escort->mData.mZ)
+        : mCellId(escort->mCellId), mX(escort->mData.mX), mY(escort->mData.mY), mZ(escort->mData.mZ)
         , mMaxDist(450)
         , mRemainingDuration(escort->mRemainingDuration)
         , mCellX(std::numeric_limits<int>::max())
         , mCellY(std::numeric_limits<int>::max())
     {
+        mTargetActorRefId = escort->mTargetId;
+        mTargetActorId = escort->mTargetActorId;
         // mDuration isn't saved in the save file, so just giving it "1" for now if the package has a duration.
         // The exact value of mDuration only matters for repeating packages.
         if (mRemainingDuration > 0) // Previously mRemainingDuration could be negative even when mDuration was 0. Checking for > 0 should fix old saves.
@@ -78,7 +82,7 @@ namespace MWMechanics
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
         actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
 
-        const MWWorld::Ptr follower = MWBase::Environment::get().getWorld()->getPtr(mActorId, false);
+        const MWWorld::Ptr follower = MWBase::Environment::get().getWorld()->getPtr(mTargetActorRefId, false);
         const float* const leaderPos = actor.getRefData().getPosition().pos;
         const float* const followerPos = follower.getRefData().getPosition().pos;
         double differenceBetween[3];
@@ -119,18 +123,14 @@ namespace MWMechanics
         return TypeIdEscort;
     }
 
-    MWWorld::Ptr AiEscort::getTarget() const
-    {
-        return MWBase::Environment::get().getWorld()->getPtr(mActorId, false);
-    }
-
     void AiEscort::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
         std::unique_ptr<ESM::AiSequence::AiEscort> escort(new ESM::AiSequence::AiEscort());
         escort->mData.mX = mX;
         escort->mData.mY = mY;
         escort->mData.mZ = mZ;
-        escort->mTargetId = mActorId;
+        escort->mTargetId = mTargetActorRefId;
+        escort->mTargetActorId = mTargetActorId;
         escort->mRemainingDuration = mRemainingDuration;
         escort->mCellId = mCellId;
 

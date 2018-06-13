@@ -310,8 +310,10 @@ namespace MWGui
     void WaitDialog::wakeUp ()
     {
         mSleeping = false;
-        mTimeAdvancer.stop();
-        stopWaiting();
+        if (mInterruptAt != -1)
+            onWaitingInterrupted();
+        else
+            stopWaiting();
     }
 
 }

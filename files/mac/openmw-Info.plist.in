@@ -8,6 +8,8 @@
 	<string>English</string>
 	<key>CFBundleExecutable</key>
 	<string>openmw-launcher</string>
+    <key>CFBundleIdentifier</key>
+    <string>org.openmw.openmw</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleLongVersionString</key>
@@ -18,6 +20,8 @@
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+    <key>CFBundleShortVersionString</key>
+    <string>${OPENMW_VERSION}</string>
 	<key>CFBundleVersion</key>
 	<string>${OPENMW_VERSION}</string>
 	<key>CSResourcesFileMapped</key>

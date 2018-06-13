@@ -37,6 +37,7 @@ Programmers
     Britt Mathis (galdor557)
     Capostrophic
     cc9cii
+    Cédric Mocquillon
     Chris Boyce (slothlife)
     Chris Robinson (KittyCat)
     Cory F. Cohen (cfcohen)
@@ -62,6 +63,7 @@ Programmers
     Evgeniy Mineev (sandstranger)
     Federico Guerra (FedeWar)
     Fil Krynicki (filkry)
+    Florian Weber (Florianjw)
     Gašper Sedej
     gugus/gus
     Hallfaer Tuilinn

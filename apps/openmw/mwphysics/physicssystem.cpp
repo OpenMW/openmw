@@ -848,6 +848,16 @@ namespace MWPhysics
                                                                      const osg::Quat &orient,
                                                                      float queryDistance, std::vector<MWWorld::Ptr> targets)
     {
+        // First of all, try to hit where you aim to
+        int hitmask = CollisionType_World | CollisionType_Door | CollisionType_HeightMap | CollisionType_Actor;
+        RayResult result = castRay(origin, origin + (orient * osg::Vec3f(0.0f, queryDistance, 0.0f)), actor, targets, CollisionType_Actor, hitmask);
+
+        if (result.mHit)
+        {
+            return std::make_pair(result.mHitObject, result.mHitPos);
+        }
+
+        // Use cone shape as fallback
         const MWWorld::Store<ESM::GameSetting> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         btConeShape shape (osg::DegreesToRadians(store.find("fCombatAngleXY")->getFloat()/2.0f), queryDistance);

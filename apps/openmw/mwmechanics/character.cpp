@@ -1214,7 +1214,6 @@ bool CharacterController::updateWeaponState()
         bool animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
         if (!animPlaying || complete >= 1.0f)
         {
-            mUpperBodyState = UpperCharState_Nothing;
             forcestateupdate = true;
             mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaptype));
 

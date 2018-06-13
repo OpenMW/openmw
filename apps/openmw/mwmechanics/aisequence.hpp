@@ -115,7 +115,7 @@ namespace MWMechanics
             ///< Add \a package to the front of the sequence
             /** Suspends current package
                 @param actor The actor that owns this AiSequence **/
-            void stack (const AiPackage& package, const MWWorld::Ptr& actor);
+            void stack (const AiPackage& package, const MWWorld::Ptr& actor, bool cancelOther=true);
 
             /// Return the current active package.
             /** If there is no active package, it will throw an exception **/

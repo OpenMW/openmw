@@ -1,10 +1,18 @@
 #include "advancedpage.hpp"
 
-#include <components/files/configurationmanager.hpp>
+#include <components/config/gamesettings.hpp>
+#include <components/config/launchersettings.hpp>
+#include <QFileDialog>
+#include <QCompleter>
+#include <components/contentselector/view/contentselector.hpp>
+#include <components/contentselector/model/esmfile.hpp>
 
-Launcher::AdvancedPage::AdvancedPage(Files::ConfigurationManager &cfg, Settings::Manager &engineSettings, QWidget *parent)
+Launcher::AdvancedPage::AdvancedPage(Files::ConfigurationManager &cfg,
+                                     Config::GameSettings &gameSettings,
+                                     Settings::Manager &engineSettings, QWidget *parent)
         : QWidget(parent)
         , mCfgMgr(cfg)
+        , mGameSettings(gameSettings)
         , mEngineSettings(engineSettings)
 {
     setObjectName ("AdvancedPage");
@@ -13,8 +21,54 @@ Launcher::AdvancedPage::AdvancedPage(Files::ConfigurationManager &cfg, Settings:
     loadSettings();
 }
 
+void Launcher::AdvancedPage::loadCellsForAutocomplete(QStringList cellNames) {
+    // Set up an auto-completer for the "Start default character at" field
+    auto *completer = new QCompleter(cellNames);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    completer->setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
+    startDefaultCharacterAtField->setCompleter(completer);
+
+}
+
+void Launcher::AdvancedPage::on_skipMenuCheckBox_stateChanged(int state) {
+    startDefaultCharacterAtLabel->setEnabled(state == Qt::Checked);
+    startDefaultCharacterAtField->setEnabled(state == Qt::Checked);
+}
+
+void Launcher::AdvancedPage::on_runScriptAfterStartupBrowseButton_clicked()
+{
+    QString scriptFile = QFileDialog::getOpenFileName(
+            this,
+            QObject::tr("Select script file"),
+            QDir::currentPath(),
+            QString(tr("Text file (*.txt)")));
+
+
+    if (scriptFile.isEmpty())
+        return;
+
+    QFileInfo info(scriptFile);
+
+    if (!info.exists() || !info.isReadable())
+        return;
+
+    const QString path(QDir::toNativeSeparators(info.absoluteFilePath()));
+
+}
+
 bool Launcher::AdvancedPage::loadSettings()
 {
+    // Testing
+    bool skipMenu = mGameSettings.value("skip-menu").toInt() == 1;
+    if (skipMenu) {
+        skipMenuCheckBox->setCheckState(Qt::Checked);
+    }
+    startDefaultCharacterAtLabel->setEnabled(skipMenu);
+    startDefaultCharacterAtField->setEnabled(skipMenu);
+
+    startDefaultCharacterAtField->setText(mGameSettings.value("start"));
+    runScriptAfterStartupField->setText(mGameSettings.value("script-run"));
+
     // Game Settings
     loadSettingBool(canLootDuringDeathAnimationCheckBox, "can loot during death animation", "Game");
     loadSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
@@ -53,6 +107,19 @@ void Launcher::AdvancedPage::saveSettings()
 {
     // Ensure we only set the new settings if they changed. This is to avoid cluttering the
     // user settings file (which by definition should only contain settings the user has touched)
+
+    // Testing
+    int skipMenu = skipMenuCheckBox->checkState() == Qt::Checked;
+    if (skipMenu != mGameSettings.value("skip-menu").toInt())
+        mGameSettings.setValue("skip-menu", QString::number(skipMenu));
+
+    QString startCell = startDefaultCharacterAtField->text();
+    if (startCell != mGameSettings.value("start")) {
+        mGameSettings.setValue("start", startCell);
+    }
+    QString scriptRun = runScriptAfterStartupField->text();
+    if (scriptRun != mGameSettings.value("script-run"))
+        mGameSettings.setValue("script-run", scriptRun);
 
     // Game Settings
     saveSettingBool(canLootDuringDeathAnimationCheckBox, "can loot during death animation", "Game");
@@ -95,4 +162,9 @@ void Launcher::AdvancedPage::saveSettingBool(QCheckBox *checkbox, const std::str
     bool cValue = checkbox->checkState();
     if (cValue != mEngineSettings.getBool(setting, group))
         mEngineSettings.setBool(setting, group, cValue);
+}
+
+void Launcher::AdvancedPage::slotLoadedCellsChanged(QStringList cellNames)
+{
+    loadCellsForAutocomplete(cellNames);
 }
