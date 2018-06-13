@@ -24,6 +24,7 @@
     Bug #4429: [Windows] Error on build INSTALL.vcxproj project (debug) with cmake 3.7.2
     Bug #4432: Guards behaviour is incorrect if they do not have AI packages
     Bug #4433: Guard behaviour is incorrect with Alarm = 0
+    Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
     Feature #4345: Add equivalents for the command line commands to Launcher
     Feature #4444: Per-group KF-animation files support
 
