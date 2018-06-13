@@ -35,8 +35,8 @@ build:
     paths:
       - "*.o"
 
-# run tests using the binary built before
-test:
-  stage: test
-  script:
-    - ls
+# TODO: run tests using the binary built before
+#test:
+#  stage: test
+#  script:
+#    - ls
