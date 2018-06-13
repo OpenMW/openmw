@@ -5,6 +5,7 @@
 #include <osg/Geode>
 
 #include "world.hpp"
+#include "../esm/loadland.hpp"
 
 namespace MWRender
 {
@@ -18,7 +19,7 @@ CellBorder::CellBorder(Terrain::World *world, osg::Group *root):
 
 void CellBorder::createCellBorderGeometry(int x, int y)
 {
-    const int cellSize = 8192;
+    const int cellSize = ESM::Land::REAL_SIZE;
     const int borderSegments = 40;
     const float offset = 10.0;
 
