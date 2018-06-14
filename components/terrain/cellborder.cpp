@@ -10,9 +10,10 @@
 namespace MWRender
 {
 
-CellBorder::CellBorder(Terrain::World *world, osg::Group *root):
+CellBorder::CellBorder(Terrain::World *world, osg::Group *root, int borderMask):
     mWorld(world),
-    mRoot(root)
+    mRoot(root),
+    mBorderMask(borderMask)
 {
 }
 
@@ -67,6 +68,8 @@ void CellBorder::createCellBorderGeometry(int x, int y)
     osg::PolygonMode* polygonmode = new osg::PolygonMode;
     polygonmode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     stateSet->setAttributeAndModes(polygonmode,osg::StateAttribute::ON);
+
+    borderGeode->setNodeMask(mBorderMask);
 
     mRoot->addChild(borderGeode);
 
