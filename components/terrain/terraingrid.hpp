@@ -7,8 +7,6 @@
 
 #include "world.hpp"
 
-#include "cellborder.hpp"
-
 namespace Terrain
 {
 
@@ -37,10 +35,6 @@ namespace Terrain
         unsigned int mNumSplits;
 
         MWRender::CellBorder::CellGrid mGrid;
-
-        std::unique_ptr<MWRender::CellBorder> mCellBorder;
-
-        bool mBorderVisible; 
     };
 }
 

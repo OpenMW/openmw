@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "defs.hpp"
+#include "cellborder.hpp"
 
 namespace osg
 {
@@ -76,15 +77,15 @@ namespace Terrain
 
         /// Load the cell into the scene graph.
         /// @note Not thread safe.
-        virtual void loadCell(int x, int y) {}
+        virtual void loadCell(int x, int y);
 
         /// Remove the cell from the scene graph.
         /// @note Not thread safe.
-        virtual void unloadCell(int x, int y) {}
+        virtual void unloadCell(int x, int y);
 
         virtual void enable(bool enabled) {}
 
-        virtual void setBordersVisible(bool visible) {}
+        virtual void setBordersVisible(bool visible);
 
         /// Create a View to use with preload feature. The caller is responsible for deleting the view.
         /// @note Thread safe.
@@ -113,6 +114,10 @@ namespace Terrain
 
         std::unique_ptr<TextureManager> mTextureManager;
         std::unique_ptr<ChunkManager> mChunkManager;
+
+        std::unique_ptr<MWRender::CellBorder> mCellBorder;
+
+        bool mBorderVisible; 
     };
 }
 

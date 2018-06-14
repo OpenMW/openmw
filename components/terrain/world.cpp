@@ -18,6 +18,7 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
     : mStorage(storage)
     , mParent(parent)
     , mResourceSystem(resourceSystem)
+    , mBorderVisible(false)
 {
     mTerrainRoot = new osg::Group;
     mTerrainRoot->setNodeMask(nodeMask);
@@ -46,6 +47,7 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     mTextureManager.reset(new TextureManager(mResourceSystem->getSceneManager()));
     mChunkManager.reset(new ChunkManager(mStorage, mResourceSystem->getSceneManager(), mTextureManager.get(), mCompositeMapRenderer));
+    mCellBorder.reset(new MWRender::CellBorder(this,mTerrainRoot.get()));
 
     mResourceSystem->addResourceManager(mChunkManager.get());
     mResourceSystem->addResourceManager(mTextureManager.get());
@@ -62,6 +64,26 @@ World::~World()
     mCompositeMapCamera->getParent(0)->removeChild(mCompositeMapCamera);
 
     delete mStorage;
+}
+
+void World::setBordersVisible(bool visible)
+{
+    mBorderVisible = visible;
+
+    if (!visible)
+        mCellBorder->destroyCellBorderGeometry();
+}
+
+void World::loadCell(int x, int y)
+{
+    if (mBorderVisible)
+        mCellBorder->createCellBorderGeometry(x,y);
+}
+
+void World::unloadCell(int x, int y)
+{
+    if (mBorderVisible)
+        mCellBorder->destroyCellBorderGeometry(x,y);
 }
 
 void World::setTargetFrameRate(float rate)

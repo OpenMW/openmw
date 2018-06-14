@@ -19,9 +19,8 @@ public:
 
 TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask)
     : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
-    , mNumSplits(4), mBorderVisible(false)
+    , mNumSplits(4)
 {
-    mCellBorder.reset(new MWRender::CellBorder(this,mTerrainRoot.get()));
 }
 
 TerrainGrid::~TerrainGrid()
@@ -89,8 +88,7 @@ void TerrainGrid::loadCell(int x, int y)
     if (!terrainNode)
         return; // no terrain defined
 
-    if (mBorderVisible)
-        mCellBorder->createCellBorderGeometry(x,y);
+    TerrainGrid::World::loadCell(x,y);
 
     mTerrainRoot->addChild(terrainNode);
 
@@ -103,8 +101,7 @@ void TerrainGrid::unloadCell(int x, int y)
     if (it == mGrid.end())
         return;
 
-    if (mBorderVisible)
-        mCellBorder->destroyCellBorderGeometry(x,y);
+    Terrain::World::unloadCell(x,y);
 
     osg::ref_ptr<osg::Node> terrainNode = it->second;
     mTerrainRoot->removeChild(terrainNode);
