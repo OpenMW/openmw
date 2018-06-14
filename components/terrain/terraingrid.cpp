@@ -65,19 +65,6 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
     }
 }
 
-void TerrainGrid::setBordersVisible(bool visible)
-{
-    mBorderVisible = visible;
-
-    if (visible)
-    {
-        for (MWRender::CellBorder::CellGrid::iterator it = mGrid.begin(); it != mGrid.end(); ++it)
-            mCellBorder->createCellBorderGeometry(it->first.first,it->first.second);
-    }
-    else
-        mCellBorder->destroyCellBorderGeometry();
-}
-
 void TerrainGrid::loadCell(int x, int y)
 {
     if (mGrid.find(std::make_pair(x, y)) != mGrid.end())

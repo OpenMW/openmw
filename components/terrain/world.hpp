@@ -6,6 +6,7 @@
 #include <osg/Vec3f>
 
 #include <memory>
+#include <set>
 
 #include "defs.hpp"
 #include "cellborder.hpp"
@@ -117,7 +118,9 @@ namespace Terrain
 
         std::unique_ptr<MWRender::CellBorder> mCellBorder;
 
-        bool mBorderVisible; 
+        bool mBorderVisible;
+
+        std::set<std::pair<int,int>> mLoadedCells;
     };
 }
 

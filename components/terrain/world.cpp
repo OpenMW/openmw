@@ -70,7 +70,12 @@ void World::setBordersVisible(bool visible)
 {
     mBorderVisible = visible;
 
-    if (!visible)
+    if (visible)
+    {
+        for (std::set<std::pair<int,int>>::iterator it = mLoadedCells.begin(); it != mLoadedCells.end(); ++it)
+            mCellBorder->createCellBorderGeometry(it->first,it->second);
+    }
+    else
         mCellBorder->destroyCellBorderGeometry();
 }
 
@@ -78,12 +83,16 @@ void World::loadCell(int x, int y)
 {
     if (mBorderVisible)
         mCellBorder->createCellBorderGeometry(x,y);
+
+    mLoadedCells.insert(std::pair<int,int>(x,y));
 }
 
 void World::unloadCell(int x, int y)
 {
     if (mBorderVisible)
         mCellBorder->destroyCellBorderGeometry(x,y);
+
+    mLoadedCells.erase(std::pair<int,int>(x,y));
 }
 
 void World::setTargetFrameRate(float rate)
