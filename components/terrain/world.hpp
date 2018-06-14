@@ -4,12 +4,11 @@
 #include <osg/ref_ptr>
 #include <osg/Referenced>
 #include <osg/Vec3f>
-#include <osg/Switch>
 
 #include <memory>
+#include <set>
 
 #include "defs.hpp"
-
 #include "cellborder.hpp"
 
 namespace osg
@@ -87,7 +86,7 @@ namespace Terrain
 
         virtual void enable(bool enabled) {}
 
-        void setBordersVisible(bool visible);
+        virtual void setBordersVisible(bool visible);
 
         /// Create a View to use with preload feature. The caller is responsible for deleting the view.
         /// @note Thread safe.
@@ -104,14 +103,10 @@ namespace Terrain
         Storage* getStorage() { return mStorage; }
 
     protected:
-        void createCellBorderGeometry(int x, int y);
-        void destroyCellBorderGeometry(int x, int y);
-
         Storage* mStorage;
 
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mTerrainRoot;
-        osg::ref_ptr<osg::Switch> mBorderRoot;
 
         osg::ref_ptr<osg::Group> mCompositeMapCamera;
         osg::ref_ptr<CompositeMapRenderer> mCompositeMapRenderer;
@@ -122,6 +117,10 @@ namespace Terrain
         std::unique_ptr<ChunkManager> mChunkManager;
 
         std::unique_ptr<MWRender::CellBorder> mCellBorder;
+
+        bool mBorderVisible;
+
+        std::set<std::pair<int,int>> mLoadedCells;
     };
 }
 

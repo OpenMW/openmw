@@ -19,17 +19,22 @@ namespace MWRender
     public:
         typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > CellGrid; 
 
-        CellBorder(Terrain::World *world, osg::Group *root);
+        CellBorder(Terrain::World *world, osg::Group *root, int borderMask);
 
         void createCellBorderGeometry(int x, int y);
         void destroyCellBorderGeometry(int x, int y);
 
+        /**
+          Destroys the geometry for all borders.
+        */
+        void destroyCellBorderGeometry();
+
     protected:
         Terrain::World *mWorld;
         osg::Group *mRoot;
-        osg::Group *mBorderRoot;
 
         CellGrid mCellBorderNodes;
+        int mBorderMask;
     };
 }
 

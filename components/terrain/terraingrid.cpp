@@ -75,7 +75,7 @@ void TerrainGrid::loadCell(int x, int y)
     if (!terrainNode)
         return; // no terrain defined
 
-    Terrain::World::loadCell(x,y);
+    TerrainGrid::World::loadCell(x,y);
 
     mTerrainRoot->addChild(terrainNode);
 
@@ -84,11 +84,11 @@ void TerrainGrid::loadCell(int x, int y)
 
 void TerrainGrid::unloadCell(int x, int y)
 {
-    World::unloadCell(x,y);
-
     MWRender::CellBorder::CellGrid::iterator it = mGrid.find(std::make_pair(x,y));
     if (it == mGrid.end())
         return;
+
+    Terrain::World::unloadCell(x,y);
 
     osg::ref_ptr<osg::Node> terrainNode = it->second;
     mTerrainRoot->removeChild(terrainNode);

@@ -7,8 +7,6 @@
 
 #include "world.hpp"
 
-#include "cellborder.hpp"
-
 namespace Terrain
 {
 
@@ -37,7 +35,6 @@ namespace Terrain
 
         MWRender::CellBorder::CellGrid mGrid;
     };
-
 }
 
 #endif

@@ -5,20 +5,21 @@
 #include <osg/Geode>
 
 #include "world.hpp"
+#include "../esm/loadland.hpp"
 
 namespace MWRender
 {
 
-CellBorder::CellBorder(Terrain::World *world, osg::Group *root):
+CellBorder::CellBorder(Terrain::World *world, osg::Group *root, int borderMask):
     mWorld(world),
     mRoot(root),
-    mBorderRoot(0)
+    mBorderMask(borderMask)
 {
 }
 
 void CellBorder::createCellBorderGeometry(int x, int y)
 {
-    const int cellSize = 8192;
+    const int cellSize = ESM::Land::REAL_SIZE;
     const int borderSegments = 40;
     const float offset = 10.0;
 
@@ -68,9 +69,9 @@ void CellBorder::createCellBorderGeometry(int x, int y)
     polygonmode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     stateSet->setAttributeAndModes(polygonmode,osg::StateAttribute::ON);
 
-    mRoot->addChild(borderGeode);
+    borderGeode->setNodeMask(mBorderMask);
 
-    mBorderRoot = borderGeode;
+    mRoot->addChild(borderGeode);
 
     mCellBorderNodes[std::make_pair(x,y)] = borderGeode;
 }
@@ -83,9 +84,15 @@ void CellBorder::destroyCellBorderGeometry(int x, int y)
         return;
 
     osg::ref_ptr<osg::Node> borderNode = it->second;
-    mBorderRoot->removeChild(borderNode);
+    mRoot->removeChild(borderNode);
 
     mCellBorderNodes.erase(it);
+}
+
+void CellBorder::destroyCellBorderGeometry()
+{
+    for (CellGrid::iterator it = mCellBorderNodes.begin(); it != mCellBorderNodes.end(); ++it)
+        destroyCellBorderGeometry(it->first.first,it->first.second);
 }
 
 }
