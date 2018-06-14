@@ -251,21 +251,24 @@ void FFmpeg_Decoder::open(const std::string &fname)
         if(mOutputChannelLayout == 0)
             mOutputChannelLayout = av_get_default_channel_layout((*mStream)->codec->channels);
     }
-    catch(...) {
+    catch(...)
+    {
         if(mStream)
             avcodec_close((*mStream)->codec);
         mStream = NULL;
 
-        if (mFormatCtx->pb->buffer != NULL)
+        if (mFormatCtx != NULL)
         {
-            av_free(mFormatCtx->pb->buffer);
-            mFormatCtx->pb->buffer = NULL;
-        }
-        av_free(mFormatCtx->pb);
-        mFormatCtx->pb = NULL;
+            if (mFormatCtx->pb->buffer != NULL)
+            {
+                av_free(mFormatCtx->pb->buffer);
+                mFormatCtx->pb->buffer = NULL;
+            }
+            av_free(mFormatCtx->pb);
+            mFormatCtx->pb = NULL;
 
-        avformat_close_input(&mFormatCtx);
-        throw;
+            avformat_close_input(&mFormatCtx);
+        }
     }
 }
 
