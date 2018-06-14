@@ -6,7 +6,7 @@
 
 namespace Terrain
 {
-  class World;
+    class World;
 }
 
 namespace MWRender
