@@ -29,6 +29,7 @@ namespace Terrain
 
         View* createView();
 
+        virtual void setBordersVisible(bool visible) override;
     private:
         osg::ref_ptr<osg::Node> buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter);
 
@@ -36,8 +37,11 @@ namespace Terrain
         unsigned int mNumSplits;
 
         MWRender::CellBorder::CellGrid mGrid;
-    };
 
+        std::unique_ptr<MWRender::CellBorder> mCellBorder;
+
+        bool mBorderVisible; 
+    };
 }
 
 #endif

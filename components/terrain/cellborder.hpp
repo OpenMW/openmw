@@ -24,10 +24,14 @@ namespace MWRender
         void createCellBorderGeometry(int x, int y);
         void destroyCellBorderGeometry(int x, int y);
 
+        /**
+          Destroys the geometry for all borders.
+        */
+        void destroyCellBorderGeometry();
+
     protected:
         Terrain::World *mWorld;
         osg::Group *mRoot;
-        osg::Group *mBorderRoot;
 
         CellGrid mCellBorderNodes;
     };

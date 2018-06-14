@@ -4,13 +4,10 @@
 #include <osg/ref_ptr>
 #include <osg/Referenced>
 #include <osg/Vec3f>
-#include <osg/Switch>
 
 #include <memory>
 
 #include "defs.hpp"
-
-#include "cellborder.hpp"
 
 namespace osg
 {
@@ -79,15 +76,15 @@ namespace Terrain
 
         /// Load the cell into the scene graph.
         /// @note Not thread safe.
-        virtual void loadCell(int x, int y);
+        virtual void loadCell(int x, int y) {}
 
         /// Remove the cell from the scene graph.
         /// @note Not thread safe.
-        virtual void unloadCell(int x, int y);
+        virtual void unloadCell(int x, int y) {}
 
         virtual void enable(bool enabled) {}
 
-        void setBordersVisible(bool visible);
+        virtual void setBordersVisible(bool visible) {}
 
         /// Create a View to use with preload feature. The caller is responsible for deleting the view.
         /// @note Thread safe.
@@ -104,14 +101,10 @@ namespace Terrain
         Storage* getStorage() { return mStorage; }
 
     protected:
-        void createCellBorderGeometry(int x, int y);
-        void destroyCellBorderGeometry(int x, int y);
-
         Storage* mStorage;
 
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mTerrainRoot;
-        osg::ref_ptr<osg::Switch> mBorderRoot;
 
         osg::ref_ptr<osg::Group> mCompositeMapCamera;
         osg::ref_ptr<CompositeMapRenderer> mCompositeMapRenderer;
@@ -120,8 +113,6 @@ namespace Terrain
 
         std::unique_ptr<TextureManager> mTextureManager;
         std::unique_ptr<ChunkManager> mChunkManager;
-
-        std::unique_ptr<MWRender::CellBorder> mCellBorder;
     };
 }
 

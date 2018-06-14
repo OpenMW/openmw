@@ -28,12 +28,6 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     mTerrainRoot->setName("Terrain Root");
 
-    mBorderRoot = new osg::Switch;
-    mBorderRoot->setName("Border Root");
-    mBorderRoot->setNodeMask(borderMask);
-
-    mTerrainRoot->addChild(mBorderRoot);
-
     osg::ref_ptr<osg::Camera> compositeCam = new osg::Camera;
     compositeCam->setRenderOrder(osg::Camera::PRE_RENDER, -1);
     compositeCam->setProjectionMatrix(osg::Matrix::identity());
@@ -53,30 +47,8 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
     mTextureManager.reset(new TextureManager(mResourceSystem->getSceneManager()));
     mChunkManager.reset(new ChunkManager(mStorage, mResourceSystem->getSceneManager(), mTextureManager.get(), mCompositeMapRenderer));
 
-    mCellBorder.reset(new MWRender::CellBorder(this,mTerrainRoot.get()));
-
     mResourceSystem->addResourceManager(mChunkManager.get());
     mResourceSystem->addResourceManager(mTextureManager.get());
-
-    setBordersVisible(false);
-}
-
-void World::setBordersVisible(bool visible)
-{
-    if (visible)
-        mBorderRoot->setAllChildrenOn();
-    else
-        mBorderRoot->setAllChildrenOff();
-}
-
-void World::loadCell(int x, int y)
-{
-    mCellBorder->createCellBorderGeometry(x,y);
-}
-
-void World::unloadCell(int x, int y)
-{
-    mCellBorder->destroyCellBorderGeometry(x,y);
 }
 
 World::~World()
