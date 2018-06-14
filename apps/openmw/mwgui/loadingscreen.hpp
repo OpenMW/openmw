@@ -35,7 +35,7 @@ namespace MWGui
 
         /// Overridden from Loading::Listener, see the Loading::Listener documentation for usage details
         virtual void setLabel (const std::string& label, bool important);
-        virtual void loadingOn();
+        virtual void loadingOn(bool visible=true);
         virtual void loadingOff();
         virtual void setProgressRange (size_t range);
         virtual void setProgress (size_t value);
@@ -62,6 +62,8 @@ namespace MWGui
         double mLoadingOnTime;
 
         bool mImportantLabel;
+
+        bool mVisible;
 
         size_t mProgress;
 

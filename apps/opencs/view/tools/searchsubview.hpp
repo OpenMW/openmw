@@ -15,6 +15,11 @@ namespace CSMDoc
     class Document;
 }
 
+namespace CSVWorld
+{
+    class TableBottomBox;
+}
+
 namespace CSVTools
 {
     class ReportTable;
@@ -28,6 +33,7 @@ namespace CSVTools
             CSMDoc::Document& mDocument;
             CSMTools::Search mSearch;
             bool mLocked;
+            CSVWorld::TableBottomBox *mBottom;
 
         private:
 
@@ -43,6 +49,8 @@ namespace CSVTools
 
             virtual void setEditLock (bool locked);
 
+            virtual void setStatusBar (bool show);
+
         private slots:
 
             void stateChanged (int state, CSMDoc::Document *document);
@@ -52,6 +60,10 @@ namespace CSVTools
             void replaceRequest();
 
             void replaceAllRequest();
+
+            void tableSizeUpdate();
+
+            void operationDone (int type, bool failed);
     };
 }
 

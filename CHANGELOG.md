@@ -1,7 +1,11 @@
 0.45.0
 ------
 
+    Bug #1990: Sunrise/sunset not set correct
+    Bug #2222: Fatigue's effect on selling price is backwards
+    Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
     Bug #2835: Player able to slowly move when overencumbered
+    Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3591: Angled hit distance too low
     Bug #3629: DB assassin attack never triggers creature spawning
@@ -17,12 +21,19 @@
     Bug #4293: Faction members are not aware of faction ownerships in barter
     Bug #4327: Missing animations during spell/weapon stance switching
     Bug #4368: Settings window ok button doesn't have key focus by default
+    Bug #4393: NPCs walk back to where they were after using ResetActors
     Bug #4419: MRK NiStringExtraData is handled incorrectly
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4429: [Windows] Error on build INSTALL.vcxproj project (debug) with cmake 3.7.2
     Bug #4432: Guards behaviour is incorrect if they do not have AI packages
     Bug #4433: Guard behaviour is incorrect with Alarm = 0
+    Bug #4451: Script fails to compile when using "Begin, [ScriptName]" syntax
+    Bug #4453: Quick keys behaviour is invalid for equipment
+    Bug #4454: AI opens doors too slow
     Feature #4256: Implement ToggleBorders (TB) console command
+    Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
+    Feature #4222: 360° screenshots
+    Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
     Feature #4345: Add equivalents for the command line commands to Launcher
     Feature #4444: Per-group KF-animation files support
 

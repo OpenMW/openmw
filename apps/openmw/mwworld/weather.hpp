@@ -7,6 +7,8 @@
 
 #include <osg/Vec4f>
 
+#include <components/fallback/fallback.hpp>
+
 #include "../mwbase/soundmanager.hpp"
 
 #include "../mwrender/sky.hpp"
@@ -38,6 +40,13 @@ namespace MWWorld
 {
     class TimeStamp;
 
+    struct WeatherSetting
+    {
+        float mPreSunriseTime;
+        float mPostSunriseTime;
+        float mPreSunsetTime;
+        float mPostSunsetTime;
+    };
 
     struct TimeOfDaySettings
     {
@@ -45,7 +54,37 @@ namespace MWWorld
         float mNightEnd;
         float mDayStart;
         float mDayEnd;
-        float mSunriseTime;
+
+        std::map<std::string, WeatherSetting> mSunriseTransitions;
+
+        float mStarsPostSunsetStart;
+        float mStarsPreSunriseFinish;
+        float mStarsFadingDuration;
+
+        WeatherSetting getSetting(const std::string& type) const
+        {
+            std::map<std::string, WeatherSetting>::const_iterator it = mSunriseTransitions.find(type);
+            if (it != mSunriseTransitions.end())
+            {
+                return it->second;
+            }
+            else
+            {
+                return { 1.f, 1.f, 1.f, 1.f };
+            }
+        }
+
+        void addSetting(const Fallback::Map& fallback, const std::string& type)
+        {
+            WeatherSetting setting = {
+                fallback.getFallbackFloat("Weather_" + type + "_Pre-Sunrise_Time"),
+                fallback.getFallbackFloat("Weather_" + type + "_Post-Sunrise_Time"),
+                fallback.getFallbackFloat("Weather_" + type + "_Pre-Sunset_Time"),
+                fallback.getFallbackFloat("Weather_" + type + "_Post-Sunset_Time")
+            };
+
+            mSunriseTransitions[type] = setting;
+        }
     };
 
     /// Interpolates between 4 data points (sunrise, day, sunset, night) based on the time of day.
@@ -59,7 +98,7 @@ namespace MWWorld
         {
         }
 
-        T getValue (const float gameHour, const TimeOfDaySettings& timeSettings) const;
+        T getValue (const float gameHour, const TimeOfDaySettings& timeSettings, const std::string& prefix) const;
 
     private:
         T mSunriseValue, mDayValue, mSunsetValue, mNightValue;

@@ -2305,6 +2305,11 @@ namespace MWWorld
     {
         mRendering->screenshot(image, w, h);
     }
+    
+    bool World::screenshot360(osg::Image* image, std::string settingStr)
+    {
+        return mRendering->screenshot360(image,settingStr);
+    }
 
     void World::activateDoor(const MWWorld::Ptr& door)
     {

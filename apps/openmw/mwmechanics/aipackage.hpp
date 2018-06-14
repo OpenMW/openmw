@@ -123,6 +123,7 @@ namespace MWMechanics
             virtual bool doesPathNeedRecalc(const ESM::Pathgrid::Point& newDest, const MWWorld::CellStore* currentCell);
 
             void evadeObstacles(const MWWorld::Ptr& actor, float duration, const ESM::Position& pos);
+            void openDoors(const MWWorld::Ptr& actor);
 
             const PathgridGraph& getPathGridGraph(const MWWorld::CellStore* cell);
 

@@ -287,6 +287,7 @@ namespace MWWorld
         mAttackingOrSpell = false;
         mCurrentCrimeId = -1;
         mPaidCrimeId = -1;
+        mPreviousItems.clear();
         mLastKnownExteriorPosition = osg::Vec3f(0,0,0);
 
         for (int i=0; i<ESM::Skill::Length; ++i)
@@ -340,6 +341,8 @@ namespace MWWorld
             mSaveAttributes[i].writeState(player.mSaveAttributes[i]);
         for (int i=0; i<ESM::Skill::Length; ++i)
             mSaveSkills[i].writeState(player.mSaveSkills[i]);
+
+        player.mPreviousItems = mPreviousItems;
 
         writer.startRecord (ESM::REC_PLAY);
         player.save (writer);
@@ -441,6 +444,8 @@ namespace MWWorld
             mForwardBackward = 0;
             mTeleported = false;
 
+            mPreviousItems = player.mPreviousItems;
+
             return true;
         }
 
@@ -460,5 +465,20 @@ namespace MWWorld
     int Player::getCrimeId() const
     {
         return mPaidCrimeId;
+    }
+
+    void Player::setPreviousItem(const std::string& boundItemId, const std::string& previousItemId)
+    {
+        mPreviousItems[boundItemId] = previousItemId;
+    }
+
+    std::string Player::getPreviousItem(const std::string& boundItemId)
+    {
+        return mPreviousItems[boundItemId];
+    }
+
+    void Player::erasePreviousItem(const std::string& boundItemId)
+    {
+        mPreviousItems.erase(boundItemId);
     }
 }

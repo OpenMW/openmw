@@ -6,7 +6,6 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/savedgame.hpp>
 #include <components/esm/weatherstate.hpp>
-#include <components/fallback/fallback.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -43,49 +42,67 @@ namespace
 }
 
 template <typename T>
-T TimeOfDayInterpolator<T>::getValue(const float gameHour, const TimeOfDaySettings& timeSettings) const
+T TimeOfDayInterpolator<T>::getValue(const float gameHour, const TimeOfDaySettings& timeSettings, const std::string& prefix) const
 {
-    // TODO: use pre/post sunset/sunrise time values in [Weather] section
+    WeatherSetting setting = timeSettings.getSetting(prefix);
+    float preSunriseTime = setting.mPreSunriseTime;
+    float postSunriseTime = setting.mPostSunriseTime;
+    float preSunsetTime = setting.mPreSunsetTime;
+    float postSunsetTime = setting.mPostSunsetTime;
 
     // night
-    if (gameHour <= timeSettings.mNightEnd || gameHour >= timeSettings.mNightStart + 1)
+    if (gameHour < timeSettings.mNightEnd - preSunriseTime || gameHour > timeSettings.mNightStart + postSunsetTime)
         return mNightValue;
     // sunrise
-    else if (gameHour >= timeSettings.mNightEnd && gameHour <= timeSettings.mDayStart + 1)
+    else if (gameHour >= timeSettings.mNightEnd - preSunriseTime && gameHour <= timeSettings.mDayStart + postSunriseTime)
     {
-        if (gameHour <= timeSettings.mSunriseTime)
+        float duration = timeSettings.mDayStart + postSunriseTime - timeSettings.mNightEnd + preSunriseTime;
+        float middle = timeSettings.mNightEnd - preSunriseTime + duration / 2.f;
+
+        if (gameHour <= middle)
         {
             // fade in
-            float advance = timeSettings.mSunriseTime - gameHour;
-            float factor = advance / 0.5f;
+            float advance = middle - gameHour;
+            float factor = 0.f;
+            if (duration > 0)
+                factor = advance / duration * 2;
             return lerp(mSunriseValue, mNightValue, factor);
         }
         else
         {
             // fade out
-            float advance = gameHour - timeSettings.mSunriseTime;
-            float factor = advance / 3.f;
+            float advance = gameHour - middle;
+            float factor = 1.f;
+            if (duration > 0)
+                factor = advance / duration * 2;
             return lerp(mSunriseValue, mDayValue, factor);
         }
     }
     // day
-    else if (gameHour >= timeSettings.mDayStart + 1 && gameHour <= timeSettings.mDayEnd - 1)
+    else if (gameHour > timeSettings.mDayStart + postSunriseTime && gameHour < timeSettings.mDayEnd - preSunsetTime)
         return mDayValue;
     // sunset
-    else if (gameHour >= timeSettings.mDayEnd - 1 && gameHour <= timeSettings.mNightStart + 1)
+    else if (gameHour >= timeSettings.mDayEnd - preSunsetTime && gameHour <= timeSettings.mNightStart + postSunsetTime)
     {
-        if (gameHour <= timeSettings.mDayEnd + 1)
+        float duration = timeSettings.mNightStart + postSunsetTime - timeSettings.mDayEnd + preSunsetTime;
+        float middle = timeSettings.mDayEnd - preSunsetTime + duration / 2.f;
+
+        if (gameHour <= middle)
         {
             // fade in
-            float advance = (timeSettings.mDayEnd + 1) - gameHour;
-            float factor = (advance / 2);
+            float advance = middle - gameHour;
+            float factor = 0.f;
+            if (duration > 0)
+                factor = advance / duration * 2;
             return lerp(mSunsetValue, mDayValue, factor);
         }
         else
         {
             // fade out
-            float advance = gameHour - (timeSettings.mDayEnd + 1);
-            float factor = advance / 2.f;
+            float advance = gameHour - middle;
+            float factor = 1.f;
+            if (duration > 0)
+                factor = advance / duration * 2;
             return lerp(mSunsetValue, mNightValue, factor);
         }
     }
@@ -539,10 +556,28 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const Fall
     , mPlayingSoundID()
 {
     mTimeSettings.mNightStart = mSunsetTime + mSunsetDuration;
-    mTimeSettings.mNightEnd = mSunriseTime - 0.5f;
+    mTimeSettings.mNightEnd = mSunriseTime;
     mTimeSettings.mDayStart = mSunriseTime + mSunriseDuration;
     mTimeSettings.mDayEnd = mSunsetTime;
-    mTimeSettings.mSunriseTime = mSunriseTime;
+
+    mTimeSettings.addSetting(fallback, "Sky");
+    mTimeSettings.addSetting(fallback, "Ambient");
+    mTimeSettings.addSetting(fallback, "Fog");
+    mTimeSettings.addSetting(fallback, "Sun");
+
+    // Morrowind handles stars settings differently for other ones
+    mTimeSettings.mStarsPostSunsetStart = fallback.getFallbackFloat("Weather_Stars_Post-Sunset_Start");
+    mTimeSettings.mStarsPreSunriseFinish = fallback.getFallbackFloat("Weather_Stars_Pre-Sunrise_Finish");
+    mTimeSettings.mStarsFadingDuration = fallback.getFallbackFloat("Weather_Stars_Fading_Duration");
+
+    WeatherSetting starSetting = {
+        mTimeSettings.mStarsPreSunriseFinish,
+        mTimeSettings.mStarsFadingDuration - mTimeSettings.mStarsPreSunriseFinish,
+        mTimeSettings.mStarsPostSunsetStart,
+        mTimeSettings.mStarsFadingDuration - mTimeSettings.mStarsPostSunsetStart
+    };
+
+    mTimeSettings.mSunriseTransitions["Stars"] = starSetting;
 
     mWeatherSettings.reserve(10);
     // These distant land fog factor and offset values are the defaults MGE XE provides. Should be
@@ -698,10 +733,13 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
         const float nightDuration = 24.f - dayDuration;
 
         double theta;
-        if ( !is_night ) {
+        if ( !is_night )
+        {
             theta = static_cast<float>(osg::PI) * (adjustedHour - mSunriseTime) / dayDuration;
-        } else {
-            theta = static_cast<float>(osg::PI) * (1.f - (adjustedHour - adjustedNightStart) / nightDuration);
+        }
+        else
+        {
+            theta = static_cast<float>(osg::PI) + static_cast<float>(osg::PI) * (adjustedHour - adjustedNightStart) / nightDuration;
         }
 
         osg::Vec3f final(
@@ -711,7 +749,7 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
         mRendering.setSunDirection( final * -1 );
     }
 
-    float underwaterFog = mUnderwaterFog.getValue(time.getHour(), mTimeSettings);
+    float underwaterFog = mUnderwaterFog.getValue(time.getHour(), mTimeSettings, "Fog");
 
     float peakHour = mSunriseTime + (mSunsetTime - mSunriseTime) / 2;
     if (time.getHour() < mSunriseTime || time.getHour() > mSunsetTime)
@@ -784,7 +822,7 @@ unsigned int WeatherManager::getWeatherID() const
 
 bool WeatherManager::useTorches(float hour) const
 {
-    bool isDark = hour < mSunriseTime || hour > mTimeSettings.mNightStart - 1;
+    bool isDark = hour < mSunriseTime || hour > mTimeSettings.mNightStart;
 
     return isDark && !mPrecipitation;
 }
@@ -1060,20 +1098,25 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
     mResult.mParticleEffect = current.mParticleEffect;
     mResult.mRainEffect = current.mRainEffect;
 
-    mResult.mNight = (gameHour < mSunriseTime || gameHour > mTimeSettings.mNightStart - 1);
+    mResult.mNight = (gameHour < mSunriseTime || gameHour > mTimeSettings.mNightStart + mTimeSettings.mStarsPostSunsetStart - mTimeSettings.mStarsFadingDuration);
 
-    mResult.mFogDepth = current.mLandFogDepth.getValue(gameHour, mTimeSettings);
+    mResult.mFogDepth = current.mLandFogDepth.getValue(gameHour, mTimeSettings, "Fog");
+    mResult.mFogColor = current.mFogColor.getValue(gameHour, mTimeSettings, "Fog");
+    mResult.mAmbientColor = current.mAmbientColor.getValue(gameHour, mTimeSettings, "Ambient");
+    mResult.mSunColor = current.mSunColor.getValue(gameHour, mTimeSettings, "Sun");
+    mResult.mSkyColor = current.mSkyColor.getValue(gameHour, mTimeSettings, "Sky");
+    mResult.mNightFade = mNightFade.getValue(gameHour, mTimeSettings, "Stars");
     mResult.mDLFogFactor = current.mDL.FogFactor;
     mResult.mDLFogOffset = current.mDL.FogOffset;
-    mResult.mFogColor = current.mFogColor.getValue(gameHour, mTimeSettings);
-    mResult.mAmbientColor = current.mAmbientColor.getValue(gameHour, mTimeSettings);
-    mResult.mSunColor = current.mSunColor.getValue(gameHour, mTimeSettings);
-    mResult.mSkyColor = current.mSkyColor.getValue(gameHour, mTimeSettings);
-    mResult.mNightFade = mNightFade.getValue(gameHour, mTimeSettings);
 
-    if (gameHour >= mSunsetTime - mSunPreSunsetTime)
+    WeatherSetting setting = mTimeSettings.getSetting("Sun");
+    float preSunsetTime = setting.mPreSunsetTime;
+
+    if (gameHour >= mTimeSettings.mDayEnd - preSunsetTime)
     {
-        float factor = (gameHour - (mSunsetTime - mSunPreSunsetTime)) / mSunPreSunsetTime;
+        float factor = 1.f;
+        if (preSunsetTime > 0)
+            factor = (gameHour - (mTimeSettings.mDayEnd - preSunsetTime)) / preSunsetTime;
         factor = std::min(1.f, factor);
         mResult.mSunDiscColor = lerp(osg::Vec4f(1,1,1,1), current.mSunDiscSunsetColor, factor);
         // The SunDiscSunsetColor in the INI isn't exactly the resulting color on screen, most likely because
@@ -1087,15 +1130,17 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
     else
         mResult.mSunDiscColor = osg::Vec4f(1,1,1,1);
 
-    if (gameHour >= mSunsetTime)
+    if (gameHour >= mTimeSettings.mDayEnd)
     {
-        float fade = std::min(1.f, (gameHour - mSunsetTime) / 2.f);
+        // sunset
+        float fade = std::min(1.f, (gameHour - mTimeSettings.mDayEnd) / (mTimeSettings.mNightStart - mTimeSettings.mDayEnd));
         fade = fade*fade;
         mResult.mSunDiscColor.a() = 1.f - fade;
     }
-    else if (gameHour >= mSunriseTime && gameHour <= mSunriseTime + 1)
+    else if (gameHour >= mTimeSettings.mNightEnd && gameHour <= mTimeSettings.mNightEnd + mSunriseDuration / 2.f)
     {
-        mResult.mSunDiscColor.a() = gameHour - mSunriseTime;
+        // sunrise
+        mResult.mSunDiscColor.a() = gameHour - mTimeSettings.mNightEnd;
     }
     else
         mResult.mSunDiscColor.a() = 1;

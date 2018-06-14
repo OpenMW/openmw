@@ -3,6 +3,7 @@
 
 #include <osg/ref_ptr>
 #include <osg/Light>
+#include <osg/Camera>
 
 #include <components/settings/settings.hpp>
 
@@ -125,7 +126,8 @@ namespace MWRender
         void setWaterHeight(float level);
 
         /// Take a screenshot of w*h onto the given image, not including the GUI.
-        void screenshot(osg::Image* image, int w, int h);
+        void screenshot(osg::Image* image, int w, int h, osg::Matrixd cameraTransform=osg::Matrixd());
+        bool screenshot360(osg::Image* image, std::string settingStr);
 
         struct RayResult
         {
@@ -214,6 +216,8 @@ namespace MWRender
         void setFogColor(const osg::Vec4f& color);
 
         void reportStats() const;
+
+        void renderCameraToImage(osg::Camera *camera, osg::Image *image, int w, int h);
 
         osg::ref_ptr<osgUtil::IntersectionVisitor> getIntersectionVisitor(osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors);
 

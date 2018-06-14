@@ -26,13 +26,13 @@ namespace MWMechanics
 
     bool proximityToDoor(const MWWorld::Ptr& actor, float minDist)
     {
-        if(getNearbyDoor(actor, minDist)!=MWWorld::Ptr())
-            return true;
-        else
+        if(getNearbyDoor(actor, minDist).isEmpty())
             return false;
+        else
+            return true;
     }
 
-    MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minDist)
+    const MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minDist)
     {
         MWWorld::CellStore *cell = actor.getCell();
 
@@ -50,6 +50,16 @@ namespace MWMechanics
             const MWWorld::LiveCellRef<ESM::Door>& ref = *it;
 
             osg::Vec3f doorPos(ref.mData.getPosition().asVec3());
+
+            // FIXME: cast
+            const MWWorld::Ptr doorPtr = MWWorld::Ptr(&const_cast<MWWorld::LiveCellRef<ESM::Door> &>(ref), actor.getCell());
+
+            int doorState = doorPtr.getClass().getDoorState(doorPtr);
+            float doorRot = ref.mData.getPosition().rot[2] - doorPtr.getCellRef().getPosition().rot[2];
+
+            if (doorState != 0 || doorRot != 0)
+                continue; // the door is already opened/opening
+
             doorPos.z() = 0;
 
             float angle = std::acos(actorDir * (doorPos - pos) / (actorDir.length() * (doorPos - pos).length()));
@@ -62,8 +72,7 @@ namespace MWMechanics
             if ((pos - doorPos).length2() > minDist*minDist)
                 continue;
 
-            // FIXME cast
-            return MWWorld::Ptr(&const_cast<MWWorld::LiveCellRef<ESM::Door> &>(ref), actor.getCell()); // found, stop searching
+            return doorPtr; // found, stop searching
         }
 
         return MWWorld::Ptr(); // none found
