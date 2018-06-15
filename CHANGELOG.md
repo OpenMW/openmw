@@ -30,6 +30,7 @@
     Bug #4451: Script fails to compile when using "Begin, [ScriptName]" syntax
     Bug #4453: Quick keys behaviour is invalid for equipment
     Bug #4454: AI opens doors too slow
+    Feature #4256: Implement ToggleBorders (TB) console command
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #4222: 360° screenshots
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
