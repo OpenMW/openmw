@@ -64,3 +64,11 @@ const MWState::Slot *MWState::LatestSlotFinder::getLatestSaveSlot() const
 {
     return mLatestSlotVisited;
 }
+
+const MWState::Slot *MWState::QuickSaveManager::findNextQuickSaveSlot(const MWState::Character &character, const std::string &saveName, unsigned int maxSaves)
+{
+    NextSlotFinder saveFinder(saveName, maxSaves);
+    for (const Slot &save : character)
+        saveFinder.visitSave(&save);
+    return saveFinder.getNextQuickSaveSlot();
+}

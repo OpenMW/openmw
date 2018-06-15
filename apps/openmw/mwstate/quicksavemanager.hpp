@@ -50,6 +50,16 @@ namespace MWState{
         ///
         ///\return Either the latest quicksave slot visited, or NULL if there is no quicksave
     };
+
+    namespace QuickSaveManager {
+        const Slot *findNextQuickSaveSlot(const Character &character, const std::string &saveName, unsigned int maxSaves);
+        ///< Get the slot that the next quicksave should use.
+        ///
+        /// \param character The character owner of the slots
+        /// \param saveName The name of the save ("QuickSave", "AutoSave", etc)
+        /// \param maxSaves The maximum number of save slots to create before recycling old ones
+        ///\return Either the oldest quicksave slot visited, or NULL if a new slot can be made
+    }
 }
 
 #endif
