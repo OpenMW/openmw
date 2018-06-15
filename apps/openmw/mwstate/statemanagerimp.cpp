@@ -334,8 +334,6 @@ void MWState::StateManager::quickSave (std::string name)
     if (Character* currentCharacter = getCurrentCharacter())
         quickSaveSlot = QuickSaveManager::findNextQuickSaveSlot(*currentCharacter, name, maxSaves);
 
-    //Once all the saves have been visited, the save finder can tell us which
-    //one to replace (or create)
     saveGame(name, quickSaveSlot);
 }
 
@@ -552,7 +550,7 @@ void MWState::StateManager::quickLoad()
     if (Character* currentCharacter = getCurrentCharacter ())
     {
         if (const Slot *latestSave = QuickSaveManager::findLatestSaveSlot(*currentCharacter, "Quicksave"))
-            loadGame(currentCharacter, latestSave->mPath.string()); //Get newest quicksave*/
+            loadGame(currentCharacter, latestSave->mPath.string());
     }
 }
 
