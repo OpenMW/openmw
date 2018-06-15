@@ -1,6 +1,6 @@
 #include "quicksavemanager.hpp"
 
-MWState::NextSlotFinder::NextSlotFinder(std::string &saveName, unsigned int maxSaves)
+MWState::NextSlotFinder::NextSlotFinder(const std::string &saveName, unsigned int maxSaves)
   : mSaveName(saveName)
   , mMaxSaves(maxSaves)
   , mSlotsVisited(0)
@@ -18,19 +18,19 @@ void MWState::NextSlotFinder::visitSave(const Slot *saveSlot)
     }
 }
 
-bool MWState::NextSlotFinder::isOldestSave(const Slot *compare)
+bool MWState::NextSlotFinder::isOldestSave(const Slot *compare) const
 {
     if(mOldestSlotVisited == NULL)
         return true;
     return (compare->mTimeStamp <= mOldestSlotVisited->mTimeStamp);
 }
 
-bool MWState::NextSlotFinder::shouldCreateNewSlot()
+bool MWState::NextSlotFinder::shouldCreateNewSlot() const
 {
     return (mSlotsVisited < mMaxSaves);
 }
 
-const MWState::Slot *MWState::NextSlotFinder::getNextQuickSaveSlot()
+const MWState::Slot *MWState::NextSlotFinder::getNextQuickSaveSlot() const
 {
     if(shouldCreateNewSlot())
         return NULL;

@@ -13,10 +13,10 @@ namespace MWState{
         unsigned int mSlotsVisited;
         const Slot *mOldestSlotVisited;
     private:
-        bool shouldCreateNewSlot();
-        bool isOldestSave(const Slot *compare);
+        bool shouldCreateNewSlot() const;
+        bool isOldestSave(const Slot *compare) const;
     public:
-        NextSlotFinder(std::string &saveName, unsigned int maxSaves);
+        NextSlotFinder(const std::string &saveName, unsigned int maxSaves);
         ///< A utility class to find the next usable quicksave slots
         ///
         /// \param saveName The name of the save ("QuickSave", "AutoSave", etc)
@@ -25,7 +25,7 @@ namespace MWState{
         void visitSave(const Slot *saveSlot);
         ///< Visits the given \a slot \a
 
-        const Slot *getNextQuickSaveSlot();
+        const Slot *getNextQuickSaveSlot() const;
         ///< Get the slot that the next quicksave should use.
         ///
         ///\return Either the oldest quicksave slot visited, or NULL if a new slot can be made
