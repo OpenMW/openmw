@@ -332,15 +332,7 @@ void MWState::StateManager::quickSave (std::string name)
 
     const Slot *quickSaveSlot = nullptr;
     if (Character* currentCharacter = getCurrentCharacter())
-    {
-        NextSlotFinder saveFinder = NextSlotFinder(name, maxSaves);
-        for (Character::SlotIterator it = currentCharacter->begin(); it != currentCharacter->end(); ++it)
-        {
-            //Visiting slots allows the quicksave finder to find the oldest quicksave
-            saveFinder.visitSave(&*it);
-        }
-        quickSaveSlot = saveFinder.getNextQuickSaveSlot();
-    }
+        quickSaveSlot = QuickSaveManager::findNextQuickSaveSlot(*currentCharacter, name, maxSaves);
 
     //Once all the saves have been visited, the save finder can tell us which
     //one to replace (or create)
