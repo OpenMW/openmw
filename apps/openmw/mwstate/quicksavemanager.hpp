@@ -7,7 +7,7 @@
 #include "../mwbase/statemanager.hpp"
 
 namespace MWState{
-    class QuickSaveManager{
+    class NextSlotFinder{
         std::string mSaveName;
         unsigned int mMaxSaves;
         unsigned int mSlotsVisited;
@@ -16,8 +16,8 @@ namespace MWState{
         bool shouldCreateNewSlot();
         bool isOldestSave(const Slot *compare);
     public:
-        QuickSaveManager(std::string &saveName, unsigned int maxSaves);
-        ///< A utility class to manage multiple quicksave slots
+        NextSlotFinder(std::string &saveName, unsigned int maxSaves);
+        ///< A utility class to find the next usable quicksave slots
         ///
         /// \param saveName The name of the save ("QuickSave", "AutoSave", etc)
         /// \param maxSaves The maximum number of save slots to create before recycling old ones
