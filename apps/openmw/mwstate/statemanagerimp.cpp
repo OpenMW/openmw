@@ -331,8 +331,7 @@ void MWState::StateManager::quickSave (std::string name)
         maxSaves = 1;
 
     const Slot *quickSaveSlot = nullptr;
-    Character* currentCharacter = getCurrentCharacter(); //Get current character
-    if (currentCharacter)
+    if (Character* currentCharacter = getCurrentCharacter())
     {
         NextSlotFinder saveFinder = NextSlotFinder(name, maxSaves);
         for (Character::SlotIterator it = currentCharacter->begin(); it != currentCharacter->end(); ++it)
