@@ -1,5 +1,4 @@
 #include <iostream>
-#include <csignal>
 
 #include <QApplication>
 #include <QTextCodec>
