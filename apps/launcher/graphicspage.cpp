@@ -11,6 +11,7 @@
 #define MAC_OS_X_VERSION_MIN_REQUIRED __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #endif // MAC_OS_X_VERSION_MIN_REQUIRED
 
+#include <SDL.h>
 #include <SDL_video.h>
 
 #include <components/files/configurationmanager.hpp>
@@ -46,8 +47,28 @@ Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, Settings:
 
 }
 
+bool Launcher::GraphicsPage::connectToSdl() {
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
+    SDL_SetMainReady();
+    // Required for determining screen resolution and such on the Graphics tab
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    {
+        return false;
+    }
+    signal(SIGINT, SIG_DFL); // We don't want to use the SDL event loop in the launcher,
+    // so reset SIGINT which SDL wants to redirect to an SDL_Quit event.
+
+    return true;
+}
+
 bool Launcher::GraphicsPage::setupSDL()
 {
+    bool sdlConnectSuccessful = connectToSdl();
+    if (!sdlConnectSuccessful)
+    {
+        return false;
+    }
+
     int displays = SDL_GetNumVideoDisplays();
 
     if (displays < 0)
@@ -66,6 +87,9 @@ bool Launcher::GraphicsPage::setupSDL()
     {
         screenComboBox->addItem(QString(tr("Screen ")) + QString::number(i + 1));
     }
+
+    // Disconnect from SDL processes
+    SDL_Quit();
 
     return true;
 }
