@@ -30,6 +30,26 @@ namespace MWState{
         ///
         ///\return Either the oldest quicksave slot visited, or NULL if a new slot can be made
     };
+
+    class LatestSlotFinder {
+        std::string mSaveName;
+        const Slot *mLatestSlotVisited;
+    private:
+        bool isLatestSave(const Slot *compare) const;
+    public:
+        LatestSlotFinder(const std::string &saveName);
+        ///< A utility class to find the latest quicksave slots
+        ///
+        /// \param saveName The name of the save ("QuickSave", "AutoSave", etc)
+
+        void visitSave(const Slot *saveSlot);
+        ///< Visits the given \a slot \a
+
+        const Slot *getLatestSaveSlot() const;
+        ///< Get the latest quicksave.
+        ///
+        ///\return Either the latest quicksave slot visited, or NULL if there is no quicksave
+    };
 }
 
 #endif

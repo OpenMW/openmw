@@ -36,3 +36,31 @@ const MWState::Slot *MWState::QuickSaveManager::getNextQuickSaveSlot()
         return NULL;
     return mOldestSlotVisited;
 }
+
+
+MWState::LatestSlotFinder::LatestSlotFinder(const std::string &saveName)
+    : mSaveName(saveName)
+    , mLatestSlotVisited(nullptr)
+{
+}
+
+void MWState::LatestSlotFinder::visitSave(const Slot *saveSlot)
+{
+    if (mSaveName == saveSlot->mProfile.mDescription)
+    {
+        if (isLatestSave(saveSlot))
+            mLatestSlotVisited = saveSlot;
+    }
+}
+
+bool MWState::LatestSlotFinder::isLatestSave(const Slot *compare) const
+{
+    if (mLatestSlotVisited == nullptr)
+        return true;
+    return (compare->mTimeStamp > mLatestSlotVisited->mTimeStamp);
+}
+
+const MWState::Slot *MWState::LatestSlotFinder::getLatestSaveSlot() const
+{
+    return mLatestSlotVisited;
+}
