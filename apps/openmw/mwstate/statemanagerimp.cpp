@@ -559,9 +559,14 @@ void MWState::StateManager::quickLoad()
 {
     if (Character* currentCharacter = getCurrentCharacter ())
     {
-        if (currentCharacter->begin() == currentCharacter->end())
-            return;
-        loadGame (currentCharacter, currentCharacter->begin()->mPath.string()); //Get newest save
+        LatestSlotFinder saveFinder = LatestSlotFinder("Quicksave");
+        for (Character::SlotIterator it = currentCharacter->begin(); it != currentCharacter->end(); ++it)
+        {
+            //Visiting slots allows the quicksave finder to find the latest quicksave
+            saveFinder.visitSave(&*it);
+        }
+        if (const Slot *latestSave = saveFinder.getLatestSaveSlot())
+            loadGame(currentCharacter, latestSave->mPath.string()); //Get newest quicksave*/
     }
 }
 
