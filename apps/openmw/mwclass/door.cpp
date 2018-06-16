@@ -121,14 +121,23 @@ namespace MWClass
         bool hasKey = false;
         std::string keyName;
 
+        // FIXME: If NPC activate teleporting door, it can lead to crash due to iterator invalidation in the Actors update.
+        // Make such activation a no-op for now, how in vanilla game.
+        if (actor != MWMechanics::getPlayer() && ptr.getCellRef().getTeleport())
+        {
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction(std::string(), ptr));
+            action->setSound(lockedSound);
+            return action;
+        }
+
         // make door glow if player activates it with telekinesis
-        if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
-            MWBase::Environment::get().getWorld()->getDistanceToFacedObject() > 
+        if (actor == MWMechanics::getPlayer() &&
+            MWBase::Environment::get().getWorld()->getDistanceToFacedObject() >
             MWBase::Environment::get().getWorld()->getMaxActivationDistance())
         {
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
 
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();            
+            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             int index = ESM::MagicEffect::effectStringToId("sEffectTelekinesis");
             const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(index);
 
