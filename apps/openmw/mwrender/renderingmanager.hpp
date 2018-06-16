@@ -203,6 +203,8 @@ namespace MWRender
         /// reset a previous overrideFieldOfView() call, i.e. revert to field of view specified in the settings file.
         void resetFieldOfView();
 
+        osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& object) const;
+
         void exportSceneGraph(const MWWorld::Ptr& ptr, const std::string& filename, const std::string& format);
 
         LandManager* getLandManager() const;

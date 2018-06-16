@@ -3339,12 +3339,16 @@ namespace MWWorld
         return mRendering->getTerrainHeightAt(worldPos);
     }
 
-    osg::Vec3f World::getHalfExtents(const ConstPtr& actor, bool rendering) const
+    osg::Vec3f World::getHalfExtents(const ConstPtr& object, bool rendering) const
     {
+        if (!object.getClass().isActor())
+            return mRendering->getHalfExtents(object);
+
+        // Handle actors separately because of bodyparts
         if (rendering)
-            return mPhysics->getRenderingHalfExtents(actor);
+            return mPhysics->getRenderingHalfExtents(object);
         else
-            return mPhysics->getHalfExtents(actor);
+            return mPhysics->getHalfExtents(object);
     }
 
     std::string World::exportSceneGraph(const Ptr &ptr)
