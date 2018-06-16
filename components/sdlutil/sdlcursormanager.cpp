@@ -221,9 +221,7 @@ namespace SDLUtil
     }
 
 #if OPENMW_USE_SOFTWARE_CURSOR_DECOMPRESSION
-    typedef std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> SDLSurfacePtr;
-
-    SDLSurfacePtr decompress(osg::Image* source, int rotDegrees)
+    SurfaceUniquePtr decompress(osg::Image* source, int rotDegrees)
     {
         int width = source->s();
         int height = source->t();
@@ -265,7 +263,7 @@ namespace SDLUtil
         SDL_FreeSurface(cursorSurface);
         SDL_DestroyRenderer(renderer);
 
-        return SDLSurfacePtr(targetSurface, SDL_FreeSurface);
+        return SurfaceUniquePtr(targetSurface, SDL_FreeSurface);
     }
 #endif
 
@@ -285,18 +283,13 @@ namespace SDLUtil
             return;
         }
 
-        SDL_Surface* surf = SDLUtil::imageToSurface(decompressed, true);
-
-        //set the cursor and store it for later
-        SDL_Cursor* curs = SDL_CreateColorCursor(surf, hotspot_x, hotspot_y);
-
-        //clean up
-        SDL_FreeSurface(surf);
+        auto surf = SDLUtil::imageToSurface(decompressed, true);
 #else
         auto surf = decompress(image, rotDegrees);
+#endif
         //set the cursor and store it for later
         SDL_Cursor* curs = SDL_CreateColorCursor(surf.get(), hotspot_x, hotspot_y);
-#endif
+
         mCursorMap.insert(CursorMap::value_type(std::string(name), curs));
     }
 

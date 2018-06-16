@@ -428,9 +428,8 @@ void OMW::Engine::setWindowIcon()
     else
     {
         osg::ref_ptr<osg::Image> image = result.getImage();
-        SDL_Surface* surface = SDLUtil::imageToSurface(image, true);
-        SDL_SetWindowIcon(mWindow, surface);
-        SDL_FreeSurface(surface);
+        auto surface = SDLUtil::imageToSurface(image, true);
+        SDL_SetWindowIcon(mWindow, surface.get());
     }
 }
 
