@@ -188,7 +188,7 @@ target framerate
 Affects the time to be set aside each frame for graphics preloading operations. The game will distribute the preloading over several frames so as to not go under the specified framerate. For best results, set this value to the monitor's refresh rate. If you still experience stutters on turning around, you can try a lower value, although the framerate during loading will suffer a bit in that case.
 
 pointers cache size
-------------------
+-------------------
 
 :Type:		integer
 :Range:		>0
