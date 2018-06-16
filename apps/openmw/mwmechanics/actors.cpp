@@ -984,7 +984,8 @@ namespace MWMechanics
             MWWorld::ContainerStoreIterator torch = inventoryStore.end();
             for (MWWorld::ContainerStoreIterator it = inventoryStore.begin(); it != inventoryStore.end(); ++it)
             {
-                if (it->getTypeName() == typeid(ESM::Light).name())
+                if (it->getTypeName() == typeid(ESM::Light).name() &&
+                    it->getClass().canBeEquipped(*it, ptr).first)
                 {
                     torch = it;
                     break;
@@ -1005,8 +1006,7 @@ namespace MWMechanics
                     heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
                     // If we have a torch and can equip it, then equip it now.
-                    if (heldIter == inventoryStore.end()
-                            && torch->getClass().canBeEquipped(*torch, ptr).first == 1)
+                    if (heldIter == inventoryStore.end())
                     {
                         inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, torch, ptr);
                     }
