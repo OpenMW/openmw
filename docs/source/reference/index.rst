@@ -5,3 +5,4 @@ Reference Material
     :maxdepth: 2
 
     modding/index
+    documentationHowTo
