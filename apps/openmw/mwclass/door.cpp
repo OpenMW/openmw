@@ -122,7 +122,7 @@ namespace MWClass
         std::string keyName;
 
         // FIXME: If NPC activate teleporting door, it can lead to crash due to iterator invalidation in the Actors update.
-        // Make such activation a no-op for now, how in vanilla game.
+        // Make such activation a no-op for now, like how it is in the vanilla game.
         if (actor != MWMechanics::getPlayer() && ptr.getCellRef().getTeleport())
         {
             std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction(std::string(), ptr));
