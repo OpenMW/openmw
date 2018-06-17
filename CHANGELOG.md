@@ -5,12 +5,14 @@
     Bug #2222: Fatigue's effect on selling price is backwards
     Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
     Bug #2835: Player able to slowly move when overencumbered
+    Bug #2862: [macOS] Can't quit launcher using Command-Q or OpenMW->Quit
     Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3591: Angled hit distance too low
     Bug #3629: DB assassin attack never triggers creature spawning
     Bug #3876: Landscape texture painting is misaligned
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
+    Bug #3911: [macOS] Typing in the "Content List name" dialog box produces double characters
     Bug #3993: Terrain texture blending map is not upscaled
     Bug #3997: Almalexia doesn't pace
     Bug #4036: Weird behaviour of AI packages if package target has non-unique ID
@@ -30,6 +32,7 @@
     Bug #4451: Script fails to compile when using "Begin, [ScriptName]" syntax
     Bug #4453: Quick keys behaviour is invalid for equipment
     Bug #4454: AI opens doors too slow
+    Bug #4457: Item without CanCarry flag prevents shield autoequipping in dark areas
     Bug #4458: AiWander console command handles idle chances incorrectly
     Feature #4256: Implement ToggleBorders (TB) console command
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
