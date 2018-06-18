@@ -10,7 +10,7 @@ Intro
 
 The premise of this guide is that you would like to help out the OpenMW project beyond play-testing for bugs and such, buuuuut you're like me and don't really know how to code. This has the rather pesky side effect of you not really knowing about all the tools like GitHub and such. While many of these tools are super handy and great to know how to use, not everyone has the actual need and desire to learn the ins and outs of them. Since we would like as much help fleshing out the user documentation as possible, I wrote this guide to lower the barrier of entry into contributing to the project.
 
-HOWEVER, as much as I will try to guide you through all the tedious setup and day-to-day stuff, you will eventually have to learn to write using ReST (reStructuredText) formatting. Since you're probably like me when I started helping and don't know wtf ReST is, it's an incredibly simple language that is easy to read in plain text form that can then be converted automatically into different types of documents like PDFs and html for webpages.
+*However*, as much as I will try to guide you through all the tedious setup and day-to-day stuff, you will eventually have to learn to write using ReST (reStructuredText) formatting. Since you're probably like me when I started helping and don't know wtf ReST is, never fear. It's an incredibly simple language that is easy to read in plain text form that can then be converted automatically into different types of documents like PDFs and html for webpages.
 
 So here's what you're gonna be learning how to set up:
 
@@ -36,7 +36,7 @@ The master OpenMW respository is where all of our work comes together and where 
 
 Now you have an online repository that is the exact copy of the OpenMW master. To set up your local repository, we're going to use PyCharm.
 
-If you want more info I recommend reading this guide: http://readwrite.com/2013/09/30/understanding-github-a-journey-for-beginners-part-1/
+If you want more info I recommend reading this guide: https://readwrite.com/2013/09/30/understanding-github-a-journey-for-beginners-part-1/
 
 PyCharm
 =======
@@ -66,7 +66,7 @@ Sphinx
 
 So far I've mentioned ReST (reStructuredText) a couple times, but what is it, and what is Sphinx? The most basic explanation is that ReST is the markup language (like HTML is the markup language for webpages) and Sphinx is the program that goes through and builds the actual document so you can read it in a more visually pleasing way. For a much more detailed explanation, I recommend: https://coderwall.com/p/vemncg/what-is-the-difference-rest-docutils-sphinx-readthedocs
 
-This will be the most technical section as we have to use the command prompt or terminal to install Python and Sphinx. I had intended to give you a universal explanation on how to install both, but it would drastically increase the length of this guide. The tutorial on the Sphinx website is really just going to be better than anything I write here, so please refer to their guide here: http://www.sphinx-doc.org/en/stable/install.html
+This will be the most technical section as we have to use the command prompt or terminal to install Python and Sphinx. I had intended to give you a universal explanation on how to install both, but it would drastically increase the length of this guide. The tutorial on the Sphinx website is really just going to be better than anything I write here, so please refer to their guide here: https://www.sphinx-doc.org/en/stable/install.html
 
 Hopefully you now have Python and Sphinx installed. ...
 
