@@ -330,21 +330,11 @@ void MWState::StateManager::quickSave (std::string name)
     if(maxSaves < 1)
         maxSaves = 1;
 
-    Character* currentCharacter = getCurrentCharacter(); //Get current character
-    QuickSaveManager saveFinder = QuickSaveManager(name, maxSaves);
+    const Slot *quickSaveSlot = nullptr;
+    if (Character* currentCharacter = getCurrentCharacter())
+        quickSaveSlot = QuickSaveManager::findNextQuickSaveSlot(*currentCharacter, name, maxSaves);
 
-    if (currentCharacter)
-    {
-        for (Character::SlotIterator it = currentCharacter->begin(); it != currentCharacter->end(); ++it)
-        {
-            //Visiting slots allows the quicksave finder to find the oldest quicksave
-            saveFinder.visitSave(&*it);
-        }
-    }
-
-    //Once all the saves have been visited, the save finder can tell us which
-    //one to replace (or create)
-    saveGame(name, saveFinder.getNextQuickSaveSlot());
+    saveGame(name, quickSaveSlot);
 }
 
 void MWState::StateManager::loadGame(const std::string& filepath)
@@ -559,9 +549,8 @@ void MWState::StateManager::quickLoad()
 {
     if (Character* currentCharacter = getCurrentCharacter ())
     {
-        if (currentCharacter->begin() == currentCharacter->end())
-            return;
-        loadGame (currentCharacter, currentCharacter->begin()->mPath.string()); //Get newest save
+        if (const Slot *latestSave = QuickSaveManager::findLatestSaveSlot(*currentCharacter, "Quicksave"))
+            loadGame(currentCharacter, latestSave->mPath.string());
     }
 }
 
