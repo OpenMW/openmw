@@ -135,6 +135,14 @@ namespace CSVRender
             /// Erase all overrides and restore the visual representation to its true state.
             virtual void reset (unsigned int elementMask);
 
+            void selectTerrain(TerrainSelectionType, const WorldspaceHitResult&);
+
+            void toggleSelectTerrain(TerrainSelectionType, const WorldspaceHitResult&);
+
+            void activateTerrainSelection(TerrainSelectionType);
+
+            void deactivateTerrainSelection(TerrainSelectionType);
+            
         protected:
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
