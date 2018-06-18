@@ -76,6 +76,11 @@ LocalMap::LocalMap(osg::Group* root)
     , mAngle(0.f)
     , mInterior(false)
 {
+    // Increase map resolution, if use UI scaling
+    float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
+    if (uiScale > 1.0)
+        mMapResolution *= uiScale;
+
     SceneUtil::FindByNameVisitor find("Scene Root");
     mRoot->accept(find);
     mSceneRoot = find.mFoundNode;

@@ -13,11 +13,9 @@
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_QuestList" size="516 516" align="Left Top">
+            <Property key="ListItemSkin" value="MW_QuestLink"/>
 
-        <Property key="ListItemSkin" value="MW_QuestLink"/>
-
-        <Child type="Widget" skin="" offset="3 3 510 510" align="Top Left Stretch" name="Client"/>
-
+            <Child type="Widget" skin="" offset="3 3 510 510" align="Top Left Stretch" name="Client"/>
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_QuestLink" size="5 5">

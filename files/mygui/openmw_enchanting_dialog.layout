@@ -50,7 +50,7 @@
         </Widget>
 
         <!-- Values -->
-        <Widget type="VBox" position="320 7 222 80">
+        <Widget type="VBox" position="320 7 222 96">
             <Widget type="HBox">
                 <UserString key="HStretch" value="true"/>
                 <Widget type="AutoSizedTextBox" skin="NormalText">

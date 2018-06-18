@@ -127,7 +127,6 @@
     <Resource type="ResourceSkin" name="MW_List" size="516 516" align="Left Top">
         <Property key="NeedKey" value="true"/>
         <Property key="SkinLine" value="MW_ListLine"/>
-        <Property key="HeightLine" value="18"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
 
@@ -140,8 +139,6 @@
     <Resource type="ResourceSkin" name="MW_PopupList" size="516 516" align="Left Top">
         <Property key="NeedKey" value="true"/>
         <Property key="SkinLine" value="MW_ListLine"/>
-        <Property key="HeightLine" value="18"/>
-
         <Child type="Widget" skin="BlackBG" offset="0 0 516 516" align="Stretch"/>
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
 
@@ -153,7 +150,6 @@
     <Resource type="ResourceSkin" name="MW_PopupListNoTransp" size="516 516" align="Left Top">
         <Property key="NeedKey" value="true"/>
         <Property key="SkinLine" value="MW_ListLine"/>
-        <Property key="HeightLine" value="18"/>
 
         <Child type="Widget" skin="FullBlackBG" offset="0 0 516 516" align="Stretch"/>
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>

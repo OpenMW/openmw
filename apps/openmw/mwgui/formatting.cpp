@@ -415,7 +415,7 @@ namespace MWGui
             : GraphicElement(parent, pag, blockStyle),
               mTextStyle(textStyle)
         {
-            MyGUI::EditBox* box = parent->createWidget<MyGUI::EditBox>("NormalText",
+            Gui::EditBox* box = parent->createWidget<Gui::EditBox>("NormalText",
                 MyGUI::IntCoord(0, pag.getCurrentTop(), pag.getPageWidth(), 0), MyGUI::Align::Left | MyGUI::Align::Top,
                 parent->getName() + MyGUI::utility::toString(parent->getChildCount()));
             box->setEditStatic(true);
@@ -432,15 +432,6 @@ namespace MWGui
             mEditBox = box;
         }
 
-        int TextElement::currentFontHeight() const
-        {
-            std::string fontName(mTextStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mTextStyle.mFont);
-            MyGUI::IFont* font = MyGUI::FontManager::getInstance().getByName(fontName);
-            if (!font)
-                return 0;
-            return font->getDefaultHeight();
-        }
-
         int TextElement::getHeight()
         {
             return mEditBox->getTextSize().height;
@@ -449,7 +440,7 @@ namespace MWGui
         int TextElement::pageSplit()
         {
             // split lines
-            const int lineHeight = currentFontHeight();
+            const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
             unsigned int lastLine = (mPaginator.getStartTop() + mPaginator.getPageHeight() - mPaginator.getCurrentTop());
             if (lineHeight > 0)
                 lastLine /= lineHeight;

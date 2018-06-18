@@ -218,20 +218,23 @@ book JournalBooks::createQuestBook (const std::string& questName)
     return typesetter->complete ();
 }
 
-book JournalBooks::createTopicIndexBook ()
+book JournalBooks::createTopicIndexBook (int& columnsCount)
 {
     bool isRussian = (mEncoding == ToUTF8::WINDOWS_1251);
 
-    BookTypesetter::Ptr typesetter = isRussian ? createCyrillicJournalIndex() : createLatinJournalIndex();
+    BookTypesetter::Ptr typesetter = isRussian ? createCyrillicJournalIndex(columnsCount) : createLatinJournalIndex(columnsCount);
 
     return typesetter->complete ();
 }
 
-BookTypesetter::Ptr JournalBooks::createLatinJournalIndex ()
+BookTypesetter::Ptr JournalBooks::createLatinJournalIndex (int& columnsCount)
 {
-    BookTypesetter::Ptr typesetter = BookTypesetter::create (92, 250);
+    BookTypesetter::Ptr typesetter = BookTypesetter::create (92, 260);
 
     typesetter->setSectionAlignment (BookTypesetter::AlignCenter);
+
+    // Latin journal index always has two columns for now.
+    columnsCount = 2;
 
     char ch = 'A';
 
@@ -258,13 +261,24 @@ BookTypesetter::Ptr JournalBooks::createLatinJournalIndex ()
     return typesetter;
 }
 
-BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex ()
+BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex (int& columnsCount)
 {
-    BookTypesetter::Ptr typesetter = BookTypesetter::create (92, 250);
+    BookTypesetter::Ptr typesetter = BookTypesetter::create (92, 260);
 
     typesetter->setSectionAlignment (BookTypesetter::AlignCenter);
 
     BookTypesetter::Style* body = typesetter->createStyle ("", MyGUI::Colour::Black);
+
+    int fontHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
+
+    // for small font size split alphabet to two columns (2x15 characers), for big font size split it to three colums (3x10 characters).
+    int sectionBreak = 10;
+    columnsCount = 3;
+    if (fontHeight < 18)
+    {
+        sectionBreak = 15;
+        columnsCount = 2;
+    }
 
     unsigned char ch[2] = {0xd0, 0x90}; // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
 
@@ -287,7 +301,7 @@ BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex ()
         if (i == 26 || i == 28)
             continue;
 
-        if (i == 15)
+        if (i % sectionBreak == 0)
             typesetter->sectionBreak ();
 
         typesetter->write (style, to_utf8_span (buffer));

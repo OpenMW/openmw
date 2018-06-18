@@ -22,14 +22,14 @@ namespace MWGui
         Book createTopicBook (uintptr_t topicId);
         Book createTopicBook (const std::string& topicId);
         Book createQuestBook (const std::string& questName);
-        Book createTopicIndexBook ();
+        Book createTopicIndexBook (int& columnsCount);
 
         ToUTF8::FromType mEncoding;
 
     private:
         BookTypesetter::Ptr createTypesetter ();
-        BookTypesetter::Ptr createLatinJournalIndex ();
-        BookTypesetter::Ptr createCyrillicJournalIndex ();
+        BookTypesetter::Ptr createLatinJournalIndex (int& columnsCount);
+        BookTypesetter::Ptr createCyrillicJournalIndex (int& columnsCount);
     };
 }
 

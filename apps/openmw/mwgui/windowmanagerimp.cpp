@@ -44,7 +44,6 @@
 
 #include <components/vfs/manager.hpp>
 
-#include <components/widgets/widgets.hpp>
 #include <components/widgets/tags.hpp>
 
 #include <components/sdlutil/sdlcursormanager.hpp>
@@ -196,6 +195,7 @@ namespace MWGui
       , mFallbackMap(fallbackMap)
       , mShowOwned(0)
       , mEncoding(encoding)
+      , mFontHeight(16)
       , mVersionDescription(versionDescription)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
@@ -232,6 +232,13 @@ namespace MWGui
         ItemWidget::registerComponents();
         SpellView::registerComponents();
         Gui::registerAllWidgets();
+
+        int fontSize = Settings::Manager::getInt("font size", "GUI");
+        fontSize = std::min(std::max(12, fontSize), 20);
+        mFontHeight = fontSize;
+
+        MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
+        MyGUI::ResourceManager::getInstance().registerLoadXmlDelegate("Resource") = newDelegate(this, &WindowManager::loadFontDelegate);
 
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatEvent>("Controller");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerFollowMouse>("Controller");
@@ -282,6 +289,51 @@ namespace MWGui
         MyGUI::ClipboardManager::getInstance().eventClipboardRequested += MyGUI::newDelegate(this, &WindowManager::onClipboardRequested);
 
         mShowOwned = Settings::Manager::getInt("show owned", "Game");
+    }
+
+    void WindowManager::loadFontDelegate(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version)
+    {
+        MyGUI::xml::ElementEnumerator root = _node->getElementEnumerator();
+        while (root.next("Resource"))
+        {
+            std::string type, name;
+            root->findAttribute("type", type);
+            root->findAttribute("name", name);
+
+            if (name.empty())
+                continue;
+
+            if (Misc::StringUtils::ciEqual(type, "ResourceTrueTypeFont"))
+            {
+                // For TrueType fonts we should override Size and Resolution properties
+                // to allow to configure font size via config file, without need to edit XML file.
+                // Also we should take UI scaling factor in account
+                int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
+                resolution = std::max(0, resolution);
+
+                float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
+
+                if (uiScale > 1.0f)
+                    resolution *= uiScale;
+
+                MyGUI::xml::ElementPtr resolutionNode = root->createChild("Property");
+                resolutionNode->addAttribute("key", "Resolution");
+                resolutionNode->addAttribute("value", std::to_string(resolution));
+
+                MyGUI::xml::ElementPtr sizeNode = root->createChild("Property");
+                sizeNode->addAttribute("key", "Size");
+                sizeNode->addAttribute("value", std::to_string(mFontHeight));
+            }
+            else if (Misc::StringUtils::ciEqual(type, "ResourceSkin"))
+            {
+                // We should adjust line height for MyGUI widgets depending on font size
+                MyGUI::xml::ElementPtr heightNode = root->createChild("Property");
+                heightNode->addAttribute("key", "HeightLine");
+                heightNode->addAttribute("value", std::to_string(mFontHeight+2));
+            }
+        }
+
+        MyGUI::ResourceManager::getInstance().loadFromXmlNode(_node, _file, _version);
     }
 
     void WindowManager::initUI()
@@ -504,6 +556,11 @@ namespace MWGui
         updateVisible();
     }
 
+    int WindowManager::getFontHeight() const
+    {
+        return mFontHeight;
+    }
+
     void WindowManager::setNewGame(bool newgame)
     {
         if (newgame)
@@ -522,6 +579,7 @@ namespace MWGui
         {
             mKeyboardNavigation.reset();
 
+            MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
             MyGUI::LanguageManager::getInstance().eventRequestTag.clear();
             MyGUI::PointerManager::getInstance().eventChangeMousePointer.clear();
             MyGUI::InputManager::getInstance().eventChangeKeyFocus.clear();

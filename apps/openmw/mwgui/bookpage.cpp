@@ -1,12 +1,14 @@
 #include "bookpage.hpp"
 
-#include "MyGUI_FontManager.h"
 #include "MyGUI_RenderItem.h"
 #include "MyGUI_RenderManager.h"
 #include "MyGUI_TextureUtility.h"
 #include "MyGUI_FactoryManager.h"
 
 #include <components/misc/utf8stream.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 namespace MWGui
 {
@@ -497,9 +499,9 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
             while (!stream.eof () && !ucsLineBreak (stream.peek ()) && ucsBreakingSpace (stream.peek ()))
             {
-                MyGUI::GlyphInfo* gi = style->mFont->getGlyphInfo (stream.peek ());
-                if (gi)
-                    space_width += static_cast<int>(gi->advance + gi->bearingX);
+                MWGui::GlyphInfo info = GlyphInfo(style->mFont, stream.peek());
+                if (info.codePoint >= 0)
+                    space_width += static_cast<int>(info.advance + info.bearingX);
                 stream.consume ();
             }
 
@@ -507,9 +509,9 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
             while (!stream.eof () && !ucsLineBreak (stream.peek ()) && !ucsBreakingSpace (stream.peek ()))
             {
-                MyGUI::GlyphInfo* gi = style->mFont->getGlyphInfo (stream.peek ());
-                if (gi)
-                    word_width += static_cast<int>(gi->advance + gi->bearingX);
+                MWGui::GlyphInfo info = GlyphInfo(style->mFont, stream.peek());
+                if (info.codePoint >= 0)
+                    word_width += static_cast<int>(info.advance + info.bearingX);
                 stream.consume ();
             }
 
@@ -530,6 +532,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         if (mPartialWhitespace.empty() && mPartialWord.empty())
             return;
 
+        int fontHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
         int space_width = 0;
         int word_width  = 0;
 
@@ -549,9 +552,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             for (PartialTextConstIterator i = mPartialWhitespace.begin (); i != mPartialWhitespace.end (); ++i)
             {
                 int top = mLine ? mLine->mRect.top : mBook->mRect.bottom;
-                int line_height = i->mStyle->mFont->getDefaultHeight ();
 
-                append_run ( i->mStyle, i->mBegin, i->mEnd, 0, left + i->mWidth, top + line_height);
+                append_run ( i->mStyle, i->mBegin, i->mEnd, 0, left + i->mWidth, top + fontHeight);
 
                 left = mLine->mRect.right;
             }
@@ -560,9 +562,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         for (PartialTextConstIterator i = mPartialWord.begin (); i != mPartialWord.end (); ++i)
         {
             int top = mLine ? mLine->mRect.top : mBook->mRect.bottom;
-            int line_height = i->mStyle->mFont->getDefaultHeight ();
 
-            append_run (i->mStyle, i->mBegin, i->mEnd, i->mEnd - i->mBegin, left + i->mWidth, top + line_height);
+            append_run (i->mStyle, i->mBegin, i->mEnd, i->mEnd - i->mBegin, left + i->mWidth, top + fontHeight);
 
             left = mLine->mRect.right;
         }
@@ -756,32 +757,32 @@ namespace
 
         void emitGlyph (wchar_t ch)
         {
-            MyGUI::GlyphInfo* gi = mFont->getGlyphInfo (ch);
+            MWGui::GlyphInfo info = GlyphInfo(mFont, ch);
 
-            if (!gi)
+            if (info.codePoint < 0)
                 return;
 
             MyGUI::FloatRect vr;
 
-            vr.left = mCursor.left + gi->bearingX;
-            vr.top = mCursor.top + gi->bearingY;
-            vr.right = vr.left + gi->width;
-            vr.bottom = vr.top + gi->height;
+            vr.left = mCursor.left + info.bearingX;
+            vr.top = mCursor.top + info.bearingY;
+            vr.right = vr.left + info.width;
+            vr.bottom = vr.top + info.height;
 
-            MyGUI::FloatRect tr = gi->uvRect;
+            MyGUI::FloatRect tr = info.uvRect;
 
             if (mRenderXform.clip (vr, tr))
                 quad (vr, tr);
 
-            mCursor.left += gi->bearingX + gi->advance;
+            mCursor.left += static_cast<int>(info.bearingX + info.advance);
         }
 
         void emitSpace (wchar_t ch)
         {
-            MyGUI::GlyphInfo* gi = mFont->getGlyphInfo (ch);
+            MWGui::GlyphInfo info = GlyphInfo(mFont, ch);
 
-            if (gi)
-                mCursor.left += gi->bearingX + gi->advance;
+            if (info.codePoint >= 0)
+                mCursor.left += static_cast<int>(info.bearingX + info.advance);
         }
 
     private:
