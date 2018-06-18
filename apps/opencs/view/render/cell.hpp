@@ -10,6 +10,8 @@
 
 #include "../../model/world/cellcoordinates.hpp"
 
+#include "terrainselection.hpp"
+
 class QModelIndex;
 
 namespace osg
@@ -49,6 +51,7 @@ namespace CSVRender
             std::map<std::string, Object *> mObjects;
             std::unique_ptr<Terrain::TerrainGrid> mTerrain;
             CSMWorld::CellCoordinates mCoordinates;
+            std::unique_ptr<TerrainSelection> mTerrainTextureSelection;
             std::unique_ptr<CellArrow> mCellArrows[4];
             std::unique_ptr<CellMarker> mCellMarker;
             std::unique_ptr<CellBorder> mCellBorder;
@@ -161,6 +164,8 @@ namespace CSVRender
             /// Erase all overrides and restore the visual representation of the cell to its
             /// true state.
             void reset (unsigned int elementMask);
+
+            TerrainSelection* getTerrainSelection(TerrainSelectionType) const;
 
             friend class CellNodeCallback;
     };

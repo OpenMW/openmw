@@ -89,7 +89,11 @@ opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
     previewwidget editmode instancemode instanceselectionmode instancemovemode
     orbitcameramode pathgridmode selectionmode pathgridselectionmode cameracontroller
+<<<<<<< HEAD
     cellwater terraintexturemode actor
+=======
+    cellwater terraintexturemode terrainselection terraintextureselection
+>>>>>>> Terrain texture selection
     )
 
 opencs_units_noqt (view/render

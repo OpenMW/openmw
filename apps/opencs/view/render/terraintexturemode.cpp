@@ -47,6 +47,8 @@ CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceW
 
 void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
+    getPagedWorldspaceWidget().activateTerrainSelection(TerrainSelectionType::Texture);
+
     if(!mTextureBrushScenetool)
     {
         mTextureBrushScenetool = new CSVWidget::SceneToolTextureBrush (toolbar, "scenetooltexturebrush", getWorldspaceWidget().getDocument());
@@ -68,6 +70,8 @@ void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
 
 void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
 {
+    getPagedWorldspaceWidget().deactivateTerrainSelection(TerrainSelectionType::Texture);
+
     if(mTextureBrushScenetool)
     {
         toolbar->removeTool (mTextureBrushScenetool);
@@ -109,10 +113,12 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
 
 void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResult& hit)
 {
+    getPagedWorldspaceWidget().selectTerrain(TerrainSelectionType::Texture, hit);
 }
 
 void CSVRender::TerrainTextureMode::secondarySelectPressed(const WorldspaceHitResult& hit)
 {
+    getPagedWorldspaceWidget().toggleSelectTerrain(TerrainSelectionType::Texture, hit);
 }
 
 bool CSVRender::TerrainTextureMode::primaryEditStartDrag (const QPoint& pos)
@@ -543,4 +549,9 @@ void CSVRender::TerrainTextureMode::setBrushShape(int brushShape)
 void CSVRender::TerrainTextureMode::setBrushTexture(std::string brushTexture)
 {
     mBrushTexture = brushTexture;
+}
+
+CSVRender::PagedWorldspaceWidget& CSVRender::TerrainTextureMode::getPagedWorldspaceWidget()
+{
+    return dynamic_cast<PagedWorldspaceWidget&>(getWorldspaceWidget());
 }

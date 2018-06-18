@@ -26,6 +26,8 @@ namespace CSVWidget
 namespace CSVRender
 {
 
+    class PagedWorldspaceWidget;
+    
     class TerrainTextureMode : public EditMode
     {
         Q_OBJECT
@@ -88,6 +90,8 @@ namespace CSVRender
             const int cellSize {ESM::Land::REAL_SIZE};
             const int landSize {ESM::Land::LAND_SIZE};
             const int landTextureSize {ESM::Land::LAND_TEXTURE_SIZE};
+
+            PagedWorldspaceWidget& getPagedWorldspaceWidget();
 
         signals:
             void passBrushTexture(std::string brushTexture);
