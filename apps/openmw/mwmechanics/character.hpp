@@ -39,8 +39,8 @@ enum Priority {
     Priority_Knockdown,
     Priority_Torch,
     Priority_Storm,
-
     Priority_Death,
+    Priority_Persistent,
 
     Num_Priorities
 };
@@ -152,6 +152,7 @@ struct WeaponInfo;
 class CharacterController : public MWRender::Animation::TextKeyListener
 {
     MWWorld::Ptr mPtr;
+    MWWorld::Ptr mWeapon;
     MWRender::Animation *mAnimation;
     
     struct AnimationQueueEntry
@@ -214,11 +215,13 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     void refreshMovementAnims(const WeaponInfo* weap, CharacterState movement, bool force=false);
     void refreshIdleAnims(const WeaponInfo* weap, CharacterState idle, bool force=false);
 
-    void clearAnimQueue();
+    void clearAnimQueue(bool clearPersistAnims = false);
 
     bool updateWeaponState();
     bool updateCreatureState();
     void updateIdleStormState(bool inwater);
+
+    bool isPersistentAnimPlaying();
 
     void updateAnimQueue();
 

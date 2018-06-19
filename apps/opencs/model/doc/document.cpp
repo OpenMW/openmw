@@ -320,12 +320,13 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     connect (&mUndoStack, SIGNAL (cleanChanged (bool)), this, SLOT (modificationStateChanged (bool)));
 
     connect (&mTools, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
-    connect (&mTools, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
+    connect (&mTools, SIGNAL (done (int, bool)), this, SIGNAL (operationDone (int, bool)));
+    connect (&mTools, SIGNAL (done (int, bool)), this, SLOT (operationDone2 (int, bool)));
     connect (&mTools, SIGNAL (mergeDone (CSMDoc::Document*)),
             this, SIGNAL (mergeDone (CSMDoc::Document*)));
 
     connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
-    connect (&mSaving, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
+    connect (&mSaving, SIGNAL (done (int, bool)), this, SLOT (operationDone2 (int, bool)));
 
     connect (
         &mSaving, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
@@ -437,7 +438,7 @@ void CSMDoc::Document::reportMessage (const CSMDoc::Message& message, int type)
     std::cout << message.mMessage << std::endl;
 }
 
-void CSMDoc::Document::operationDone (int type, bool failed)
+void CSMDoc::Document::operationDone2 (int type, bool failed)
 {
     if (type==CSMDoc::State_Saving && !failed)
         mDirty = false;

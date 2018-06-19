@@ -24,11 +24,11 @@ namespace MWMechanics
             /// Implementation of AiEscort
             /** The Actor will escort the specified actor to the world position x, y, z until they reach their position, or they run out of time
                 \implement AiEscort **/
-            AiEscort(const std::string &actorId,int duration, float x, float y, float z);
+            AiEscort(const std::string &actorId, int duration, float x, float y, float z);
             /// Implementation of AiEscortCell
             /** The Actor will escort the specified actor to the cell position x, y, z until they reach their position, or they run out of time
                 \implement AiEscortCell **/
-            AiEscort(const std::string &actorId,const std::string &cellId,int duration, float x, float y, float z);
+            AiEscort(const std::string &actorId, const std::string &cellId, int duration, float x, float y, float z);
 
             AiEscort(const ESM::AiSequence::AiEscort* escort);
 
@@ -38,7 +38,6 @@ namespace MWMechanics
 
             virtual int getTypeId() const;
 
-            MWWorld::Ptr getTarget() const;
             virtual bool sideWithTarget() const { return true; }
 
             void writeState(ESM::AiSequence::AiSequence &sequence) const;
@@ -46,7 +45,6 @@ namespace MWMechanics
             void fastForward(const MWWorld::Ptr& actor, AiState& state);
 
         private:
-            std::string mActorId;
             std::string mCellId;
             float mX;
             float mY;

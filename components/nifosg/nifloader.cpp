@@ -261,7 +261,7 @@ namespace NifOsg
 
             osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
 
-            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, imageManager, std::vector<int>(), 0, false, false, &textkeys->mTextKeys);
+            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, imageManager, std::vector<int>(), 0, false, false, false, &textkeys->mTextKeys);
 
             if (nif->getUseSkinning())
             {
@@ -463,7 +463,7 @@ namespace NifOsg
         }
 
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
-                                std::vector<int> boundTextures, int animflags, bool skipMeshes, bool isAnimated, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
+                                std::vector<int> boundTextures, int animflags, bool skipMeshes, bool hasMarkers, bool isAnimated, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
             if (rootNode != NULL && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
                 return NULL;
@@ -510,7 +510,7 @@ namespace NifOsg
                     if(sd->string == "MRK" && !Loader::getShowMarkers())
                     {
                         // Marker objects. These meshes are only visible in the editor.
-                        skipMeshes = true;
+                        hasMarkers = true;
                     }
                 }
             }
@@ -542,7 +542,7 @@ namespace NifOsg
                 node->setNodeMask(0x1);
             }
 
-            if (skipMeshes && isAnimated) // make sure the empty node is not optimized away so the physicssystem can find it.
+            if ((skipMeshes || hasMarkers) && isAnimated) // make sure the empty node is not optimized away so the physicssystem can find it.
             {
                 node->setDataVariance(osg::Object::DYNAMIC);
             }
@@ -554,13 +554,18 @@ namespace NifOsg
             if (nifNode->recType == Nif::RC_NiTriShape && !skipMeshes)
             {
                 const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
-                if (triShape->skin.empty())
-                    handleTriShape(triShape, node, composite, boundTextures, animflags);
-                else
-                    handleSkinnedTriShape(triShape, node, composite, boundTextures, animflags);
+                const std::string nodeName = Misc::StringUtils::lowerCase(triShape->name);
+                static const std::string pattern = "tri editormarker";
+                if (!hasMarkers || nodeName.compare(0, pattern.size(), pattern) != 0)
+                {
+                    if (triShape->skin.empty())
+                        handleTriShape(triShape, node, composite, boundTextures, animflags);
+                    else
+                        handleSkinnedTriShape(triShape, node, composite, boundTextures, animflags);
 
-                if (!nifNode->controller.empty())
-                    handleMeshControllers(nifNode, node, composite, boundTextures, animflags);
+                    if (!nifNode->controller.empty())
+                        handleMeshControllers(nifNode, node, composite, boundTextures, animflags);
+                }
             }
 
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles || nifNode->recType == Nif::RC_NiRotatingParticles)
@@ -598,7 +603,7 @@ namespace NifOsg
                 for(size_t i = 0;i < children.length();++i)
                 {
                     if(!children[i].empty())
-                        handleNode(children[i].getPtr(), node, imageManager, boundTextures, animflags, skipMeshes, isAnimated, textKeys, rootNode);
+                        handleNode(children[i].getPtr(), node, imageManager, boundTextures, animflags, skipMeshes, hasMarkers, isAnimated, textKeys, rootNode);
                 }
             }
 

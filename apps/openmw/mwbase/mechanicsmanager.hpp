@@ -239,7 +239,7 @@ namespace MWBase
             virtual std::vector<std::pair<std::string, int> > getStolenItemOwners(const std::string& itemid) = 0;
 
             /// Has the player stolen this item from the given owner?
-            virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid) = 0;
+            virtual bool isItemStolenFrom(const std::string& itemid, const MWWorld::Ptr& ptr) = 0;
 
             virtual bool isBoundItem(const MWWorld::Ptr& item) = 0;
             virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, MWWorld::Ptr& victim) = 0;

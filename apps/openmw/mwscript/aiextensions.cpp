@@ -193,10 +193,18 @@ namespace MWScript
                     Interpreter::Type_Integer time = static_cast<Interpreter::Type_Integer>(runtime[0].mFloat);
                     runtime.pop();
 
+                    // Chance for Idle is unused
+                    if (arg0)
+                    {
+                        --arg0;
+                        runtime.pop();
+                    }
+
                     std::vector<unsigned char> idleList;
                     bool repeat = false;
 
-                    for(int i=1; i < 10 && arg0; ++i)
+                    // Chances for Idle2-Idle9
+                    for(int i=2; i<=9 && arg0; ++i)
                     {
                         if(!repeat)
                             repeat = true;

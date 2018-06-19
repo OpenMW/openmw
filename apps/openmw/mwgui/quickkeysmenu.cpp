@@ -81,6 +81,47 @@ namespace MWGui
         delete mMagicSelectionDialog;
     }
 
+    void QuickKeysMenu::onOpen()
+    {
+        WindowBase::onOpen();
+
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
+
+        // Check if quick keys are still valid
+        for (int i=0; i<10; ++i)
+        {
+            ItemWidget* button = mQuickKeyButtons[i];
+            int type = mAssigned[i];
+
+            switch (type)
+            {
+                case Type_Unassigned:
+                case Type_HandToHand:
+                case Type_Magic:
+                    break;
+                case Type_Item:
+                case Type_MagicItem:
+                {
+                    MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
+                    // Make sure the item is available and is not broken
+                    if (item.getRefData().getCount() < 1 ||
+                        (item.getClass().hasItemHealth(item) &&
+                        item.getClass().getItemHealth(item) <= 0))
+                    {
+                        // Try searching for a compatible replacement
+                        std::string id = item.getCellRef().getRefId();
+
+                        item = store.findReplacement(id);
+                        button->setUserData(MWWorld::Ptr(item));
+                        break;
+                    }
+                }
+            }
+        }
+
+    }
+
     void QuickKeysMenu::unassign(ItemWidget* key, int index)
     {
         key->clearUserStrings();
@@ -122,12 +163,10 @@ namespace MWGui
         assert(index != -1);
         mSelectedIndex = index;
 
-        {
-            // open assign dialog
-            if (!mAssignDialog)
-                mAssignDialog = new QuickKeysMenuAssign(this);
-            mAssignDialog->setVisible (true);
-        }
+        // open assign dialog
+        if (!mAssignDialog)
+            mAssignDialog = new QuickKeysMenuAssign(this);
+        mAssignDialog->setVisible (true);
     }
 
     void QuickKeysMenu::onOkButtonClicked (MyGUI::Widget *sender)
@@ -296,21 +335,16 @@ namespace MWGui
         if (type == Type_Item || type == Type_MagicItem)
         {
             MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
-            // make sure the item is available
-            if (item.getRefData ().getCount() < 1)
+            // Make sure the item is available and is not broken
+            if (item.getRefData().getCount() < 1 ||
+                (item.getClass().hasItemHealth(item) &&
+                item.getClass().getItemHealth(item) <= 0))
             {
                 // Try searching for a compatible replacement
                 std::string id = item.getCellRef().getRefId();
 
-                for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
-                {
-                    if (Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), id))
-                    {
-                        item = *it;
-                        button->setUserData(MWWorld::Ptr(item));
-                        break;
-                    }
-                }
+                item = store.findReplacement(id);
+                button->setUserData(MWWorld::Ptr(item));
 
                 if (item.getRefData().getCount() < 1)
                 {
@@ -498,6 +532,9 @@ namespace MWGui
         ESM::QuickKeys keys;
         keys.load(reader);
 
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
+
         int i=0;
         for (std::vector<ESM::QuickKeys::QuickKey>::const_iterator it = keys.mKeys.begin(); it != keys.mKeys.end(); ++it)
         {
@@ -519,22 +556,7 @@ namespace MWGui
             case Type_MagicItem:
             {
                 // Find the item by id
-                MWWorld::Ptr player = MWMechanics::getPlayer();
-                MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
-                MWWorld::Ptr item;
-                for (MWWorld::ContainerStoreIterator iter = store.begin(); iter != store.end(); ++iter)
-                {
-                    if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), id))
-                    {
-                        if (item.isEmpty() ||
-                            // Prefer the stack with the lowest remaining uses
-                                !item.getClass().hasItemHealth(*iter) ||
-                                iter->getClass().getItemHealth(*iter) < item.getClass().getItemHealth(item))
-                        {
-                            item = *iter;
-                        }
-                    }
-                }
+                MWWorld::Ptr item = store.findReplacement(id);
 
                 if (item.isEmpty())
                     unassign(button, i);

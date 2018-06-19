@@ -22,6 +22,7 @@
 
 #include "aicombat.hpp"
 #include "aipursue.hpp"
+#include "aitravel.hpp"
 #include "spellcasting.hpp"
 #include "autocalcspell.hpp"
 #include "npcstats.hpp"
@@ -629,22 +630,12 @@ namespace MWMechanics
         float d = static_cast<float>(std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100));
         float e = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-
         float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
         float npcTerm = (d + e + f) * sellerStats.getFatigueTerm();
-        float buyTerm = 0.01f * (100 - 0.5f * (pcTerm - npcTerm));
-        float sellTerm = 0.01f * (50 - 0.5f * (npcTerm - pcTerm));
-
-        float x;
-        if(buying) x = buyTerm;
-        else x = std::min(buyTerm, sellTerm);
-        int offerPrice;
-        if (x < 1)
-            offerPrice = int(x * basePrice);
-        else
-            offerPrice = basePrice + int((x - 1) * basePrice);
-        offerPrice = std::max(1, offerPrice);
-        return offerPrice;
+        float buyTerm = 0.01f * std::max(75.f, (100 - 0.5f * (pcTerm - npcTerm)));
+        float sellTerm = 0.01f * std::min(75.f, (50 - 0.5f * (npcTerm - pcTerm)));
+        int offerPrice = int(basePrice * (buying ? buyTerm : sellTerm));
+        return std::max(1, offerPrice);
     }
 
     int MechanicsManager::countDeaths (const std::string& id) const
@@ -893,8 +884,13 @@ namespace MWMechanics
 
         const MWWorld::CellRef& cellref = target.getCellRef();
         // there is no harm to use unlocked doors
-        if (target.getClass().isDoor() && cellref.getLockLevel() <= 0 && ptr.getCellRef().getTrap().empty())
+        int lockLevel = cellref.getLockLevel();
+        if (target.getClass().isDoor() &&
+            (lockLevel <= 0 || lockLevel == ESM::UnbreakableLock) &&
+            ptr.getCellRef().getTrap().empty())
+        {
             return true;
+        }
 
         // TODO: implement a better check to check if target is owned bed
         if (target.getClass().isActivator() && target.getClass().getScript(target).compare(0, 3, "Bed") != 0)
@@ -992,14 +988,26 @@ namespace MWMechanics
         }
     }
 
-    bool MechanicsManager::isItemStolenFrom(const std::string &itemid, const std::string &ownerid)
+    bool MechanicsManager::isItemStolenFrom(const std::string &itemid, const MWWorld::Ptr& ptr)
     {
         StolenItemsMap::const_iterator it = mStolenItems.find(Misc::StringUtils::lowerCase(itemid));
         if (it == mStolenItems.end())
             return false;
+
         const OwnerMap& owners = it->second;
+        const std::string ownerid = ptr.getCellRef().getRefId();
         OwnerMap::const_iterator ownerFound = owners.find(std::make_pair(Misc::StringUtils::lowerCase(ownerid), false));
-        return ownerFound != owners.end();
+        if (ownerFound != owners.end())
+            return true;
+
+        const std::string factionid = ptr.getClass().getPrimaryFaction(ptr);
+        if (!factionid.empty())
+        {
+            OwnerMap::const_iterator factionOwnerFound = owners.find(std::make_pair(Misc::StringUtils::lowerCase(factionid), true));
+            return factionOwnerFound != owners.end();
+        }
+
+        return false;
     }
 
     void MechanicsManager::confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count)
@@ -1016,6 +1024,13 @@ namespace MWMechanics
         Owner owner;
         owner.first = victim.getCellRef().getRefId();
         owner.second = false;
+
+        const std::string victimFaction = victim.getClass().getPrimaryFaction(victim);
+        if (!victimFaction.empty() && Misc::StringUtils::ciEqual(item.getCellRef().getFaction(), victimFaction)) // Is the item faction-owned?
+        {
+            owner.first = victimFaction;
+            owner.second = true;
+        }
 
         Misc::StringUtils::lowerCaseInPlace(owner.first);
 
@@ -1194,16 +1209,41 @@ namespace MWMechanics
             reportCrime(player, victim, type, arg);
         else if (type == OT_Assault && !victim.isEmpty())
         {
+            bool reported = false;
             if (victim.getClass().isClass(victim, "guard")
                 && !victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
-                reportCrime(player, victim, type, arg);
-            else
+                reported = reportCrime(player, victim, type, arg);
+
+            if (!reported)
                 startCombat(victim, player); // TODO: combat should be started with an "unaware" flag, which makes the victim flee?
         }
         return crimeSeen;
     }
 
-    void MechanicsManager::reportCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg)
+    bool MechanicsManager::canReportCrime(const MWWorld::Ptr &actor, const MWWorld::Ptr &victim, std::set<MWWorld::Ptr> &playerFollowers)
+    {
+        if (actor == getPlayer()
+            || !actor.getClass().isNpc() || actor.getClass().getCreatureStats(actor).isDead())
+            return false;
+
+        if (actor.getClass().getCreatureStats(actor).getAiSequence().isInCombat(victim))
+            return false;
+
+        // Unconsious actor can not report about crime and should not become hostile
+        if (actor.getClass().getCreatureStats(actor).getKnockedDown())
+            return false;
+
+        // Player's followers should not attack player, or try to arrest him
+        if (actor.getClass().getCreatureStats(actor).getAiSequence().hasPackage(AiPackage::TypeIdFollow))
+        {
+            if (playerFollowers.find(actor) != playerFollowers.end())
+                return false;
+        }
+
+        return true;
+    }
+
+    bool MechanicsManager::reportCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg)
     {
         const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
@@ -1278,28 +1318,14 @@ namespace MWMechanics
 
         bool reported = false;
 
+        std::set<MWWorld::Ptr> playerFollowers;
+        getActorsSidingWith(player, playerFollowers);
+
         // Tell everyone (including the original reporter) in alarm range
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
-            if (*it == player
-                || !it->getClass().isNpc() || it->getClass().getCreatureStats(*it).isDead()) continue;
-
-            if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
+            if (!canReportCrime(*it, victim, playerFollowers))
                 continue;
-
-            // Unconsious actor can not report about crime and should not become hostile
-            if (it->getClass().getCreatureStats(*it).getKnockedDown())
-                continue;
-
-            // Player's followers should not attack player, or try to arrest him
-            if (it->getClass().getCreatureStats(*it).getAiSequence().hasPackage(AiPackage::TypeIdFollow))
-            {
-                std::set<MWWorld::Ptr> playerFollowers;
-                getActorsSidingWith(player, playerFollowers);
-
-                if (playerFollowers.find(*it) != playerFollowers.end())
-                    continue;
-            }
 
             // Will the witness report the crime?
             if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= 100)
@@ -1309,8 +1335,14 @@ namespace MWMechanics
                 if (type == OT_Trespassing)
                     MWBase::Environment::get().getDialogueManager()->say(*it, "intruder");
             }
+        }
 
-            if (it->getClass().isClass(*it, "guard"))
+        for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+        {
+            if (!canReportCrime(*it, victim, playerFollowers))
+                continue;
+
+            if (it->getClass().isClass(*it, "guard") && reported)
             {
                 // Mark as Alarmed for dialogue
                 it->getClass().getCreatureStats(*it).setAlarmed(true);
@@ -1398,6 +1430,8 @@ namespace MWMechanics
                 victim.getClass().getNpcStats(victim).setCrimeId(id);
             }
         }
+
+        return reported;
     }
 
     bool MechanicsManager::actorAttacked(const MWWorld::Ptr &target, const MWWorld::Ptr &attacker)
@@ -1466,7 +1500,7 @@ namespace MWMechanics
 
     void MechanicsManager::actorKilled(const MWWorld::Ptr &victim, const MWWorld::Ptr &attacker)
     {
-        if (attacker.isEmpty() || attacker != getPlayer())
+        if (attacker.isEmpty() || victim.isEmpty())
             return;
 
         if (victim == attacker)
@@ -1476,13 +1510,23 @@ namespace MWMechanics
             return; // TODO: implement animal rights
 
         const MWMechanics::NpcStats& victimStats = victim.getClass().getNpcStats(victim);
+        if (victimStats.getCrimeId() == -1)
+            return;
+
+        // For now we report only about crimes of player and player's followers
+        const MWWorld::Ptr &player = getPlayer();
+        if (attacker != player)
+        {
+            std::set<MWWorld::Ptr> playerFollowers;
+            getActorsSidingWith(player, playerFollowers);
+            if (playerFollowers.find(attacker) == playerFollowers.end())
+                return;
+        }
 
         // Simple check for who attacked first: if the player attacked first, a crimeId should be set
         // Doesn't handle possible edge case where no one reported the assault, but in such a case,
         // for bystanders it is not possible to tell who attacked first, anyway.
-        if (victimStats.getCrimeId() != -1)
-            commitCrime(attacker, victim, MWBase::MechanicsManager::OT_Murder);
-
+        commitCrime(player, victim, MWBase::MechanicsManager::OT_Murder);
     }
 
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)
@@ -1560,9 +1604,12 @@ namespace MWMechanics
 
     void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
     {
-        if (ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(target))
+        MWMechanics::AiSequence& aiSequence = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+
+        if (aiSequence.isInCombat(target))
             return;
-        ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
+
+        aiSequence.stack(MWMechanics::AiCombat(target), ptr);
         if (target == getPlayer())
         {
             // if guard starts combat with player, guards pursuing player should do the same

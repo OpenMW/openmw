@@ -1,5 +1,22 @@
 #!/bin/bash
 
+MISSINGTOOLS=0
+
+command -v 7z >/dev/null 2>&1 || { echo "Error: 7z (7zip) is not on the path."; MISSINGTOOLS=1; }
+command -v cmake >/dev/null 2>&1 || { echo "Error: cmake (CMake) is not on the path."; MISSINGTOOLS=1; }
+
+if [ $MISSINGTOOLS -ne 0 ]; then
+	exit 1
+fi
+
+WORKINGDIR="$(pwd)"
+case "$WORKINGDIR" in
+	*[[:space:]]*)
+		echo "Error: Working directory contains spaces."
+		exit 1
+		;;
+esac
+
 set -euo pipefail
 
 APPVEYOR=${APPVEYOR:-}
@@ -636,6 +653,17 @@ fi
 			-DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
 
+		if [ $CONFIGURATION == "Debug" ]; then
+			SUFFIX="d"
+		else
+			SUFFIX=""
+		fi
+
+		DIR=$(echo "${QT_SDK}" | sed "s,\\\\,/,g" | sed "s,\(.\):,/\\1,")
+
+		add_runtime_dlls "${DIR}/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${SUFFIX}.dll
+		add_qt_platform_dlls "${DIR}/plugins/platforms/qwindows${SUFFIX}.dll"
+
 		echo Done.
 	fi
 }
@@ -710,7 +738,7 @@ if [ ! -z $CI ]; then
 fi
 
 # NOTE: Disable this when/if we want to run test cases
-if [ -z $CI ]; then
+#if [ -z $CI ]; then
 	echo "- Copying Runtime DLLs..."
 	mkdir -p $BUILD_CONFIG
 	for DLL in $RUNTIME_DLLS; do
@@ -742,7 +770,7 @@ if [ -z $CI ]; then
 		cp "$DLL" "${BUILD_CONFIG}/platforms"
 	done
 	echo
-fi
+#fi
 
 if [ -z $VERBOSE ]; then
 	printf -- "- Configuring... "

@@ -74,6 +74,9 @@ namespace MWWorld
 
         unsigned int mDynamicCount;
 
+        /// Validate entries in store after setup
+        void validate();
+
     public:
         /// \todo replace with SharedIterator<StoreBase>
         typedef std::map<int, StoreBase *>::const_iterator iterator;
@@ -228,7 +231,7 @@ namespace MWWorld
 
         // This method must be called once, after loading all master/plugin files. This can only be done
         //  from the outside, so it must be public.
-        void setUp();
+        void setUp(bool validateRecords = false);
 
         int countSavedGameRecords() const;
 

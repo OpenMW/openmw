@@ -221,7 +221,6 @@ namespace MWMechanics
         if (effects)
             magicEffects = effects;
 
-        float resisted = 0;
         // Effects with no resistance attribute belonging to them can not be resisted
         if (ESM::MagicEffect::getResistanceEffect(effectId) == -1)
             return 0.f;
@@ -256,10 +255,7 @@ namespace MWMechanics
         }
 
         x = std::min(x + resistance, 100.f);
-
-        resisted = x;
-
-        return resisted;
+        return x;
     }
 
     float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
@@ -456,10 +452,11 @@ namespace MWMechanics
 
             float magnitudeMult = 1;
 
-            if (!absorbed)
+            if (!absorbed && target.getClass().isActor())
             {
+                bool isHarmful = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful;
                 // Reflect harmful effects
-                if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && !reflected && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
+                if (isHarmful && !reflected && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
                 {
                     float reflect = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Reflect).getMagnitude();
                     bool isReflected = (Misc::Rng::roll0to99() < reflect);
@@ -483,17 +480,17 @@ namespace MWMechanics
                     else if (castByPlayer)
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
                 }
-                else if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && castByPlayer && target != caster)
+                else if (isHarmful && castByPlayer && target != caster)
                 {
                     // If player is attempting to cast a harmful spell and it wasn't fully resisted, show the target's HP bar
                     MWBase::Environment::get().getWindowManager()->setEnemy(target);
                 }
 
-                if (target == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState())
+                if (target == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState() && isHarmful)
                     magnitudeMult = 0;
 
                 // Notify the target actor they've been hit
-                if (target != caster && !caster.isEmpty() && magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
+                if (target != caster && !caster.isEmpty() && isHarmful)
                     target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
             }
 
@@ -550,7 +547,7 @@ namespace MWMechanics
                         || (effectIt->mEffectID == ESM::MagicEffect::CommandCreature && target.getTypeName() == typeid(ESM::Creature).name()))
                         && !caster.isEmpty() && caster.getClass().isActor() && target != getPlayer() && magnitude >= target.getClass().getCreatureStats(target).getLevel())
                         {
-                            MWMechanics::AiFollow package(caster.getCellRef().getRefId(), true);
+                            MWMechanics::AiFollow package(caster, true);
                             target.getClass().getCreatureStats(target).getAiSequence().stack(package, target);
                         }
 

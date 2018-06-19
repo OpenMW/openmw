@@ -102,7 +102,7 @@ public:
 class NiLookAtController : public Controller
 {
 public:
-    NiKeyframeDataPtr data;
+    NodePtr target;
 
     void read(NIFStream *nif);
     void post(NIFFile *nif);

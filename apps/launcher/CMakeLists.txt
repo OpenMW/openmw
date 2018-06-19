@@ -8,6 +8,7 @@ set(LAUNCHER
     settingspage.cpp
     advancedpage.cpp
 
+    utils/cellnameloader.cpp
     utils/profilescombobox.cpp
     utils/textinputdialog.cpp
     utils/lineedit.cpp
@@ -24,6 +25,7 @@ set(LAUNCHER_HEADER
     settingspage.hpp
     advancedpage.hpp
 
+    utils/cellnameloader.hpp
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
     utils/lineedit.hpp
@@ -39,6 +41,7 @@ set(LAUNCHER_HEADER_MOC
     settingspage.hpp
     advancedpage.hpp
 
+    utils/cellnameloader.hpp
     utils/textinputdialog.hpp
     utils/profilescombobox.hpp
     utils/lineedit.hpp

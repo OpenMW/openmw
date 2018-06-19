@@ -352,8 +352,10 @@ namespace MWClass
 
                 data->mNpcStats.setNeedRecalcDynamicStats(true);
             }
+
+            // Persistent actors with 0 health do not play death animation
             if (data->mNpcStats.isDead())
-                data->mNpcStats.setDeathAnimationFinished(true);
+                data->mNpcStats.setDeathAnimationFinished(ptr.getClass().isPersistent(ptr));
 
             // race powers
             const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
@@ -1349,6 +1351,9 @@ namespace MWClass
     {
         const MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
         if (ptr.getRefData().getCount() > 0 && !creatureStats.isDead())
+            return;
+
+        if (!creatureStats.isDeathAnimationFinished())
             return;
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();

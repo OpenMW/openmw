@@ -4,7 +4,6 @@
 #include <set>
 #include <vector>
 #include <string>
-#include <map>
 #include <list>
 
 #include "../mwbase/world.hpp"
@@ -25,6 +24,9 @@ namespace MWMechanics
     class Actors
     {
             std::map<std::string, int> mDeathCount;
+
+            void addBoundItem (const std::string& itemId, const MWWorld::Ptr& actor);
+            void removeBoundItem (const std::string& itemId, const MWWorld::Ptr& actor);
 
             void updateNpc(const MWWorld::Ptr &ptr, float duration);
 

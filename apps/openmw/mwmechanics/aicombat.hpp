@@ -54,9 +54,6 @@ namespace MWMechanics
             virtual bool shouldCancelPreviousAi() const { return false; }
 
         private:
-
-            int mTargetActorId;
-
             /// Returns true if combat should end
             bool attack(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, AiCombatStorage& storage, CharacterController& characterController);
 

@@ -311,8 +311,7 @@ namespace MWGui
         // check if the player is attempting to sell back an item stolen from this actor
         for (std::vector<ItemStack>::iterator it = merchantBought.begin(); it != merchantBought.end(); ++it)
         {
-            if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(it->mBase.getCellRef().getRefId(),
-                                                                                   mPtr.getCellRef().getRefId()))
+            if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(it->mBase.getCellRef().getRefId(), mPtr))
             {
                 std::string msg = gmst.find("sNotifyMessage49")->getString();
                 if (msg.find("%s") != std::string::npos)

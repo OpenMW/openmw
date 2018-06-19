@@ -499,7 +499,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     else
         gameControllerdb = ""; //if it doesn't exist, pass in an empty string
 
-    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, mScreenCaptureHandler, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
+    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
     mEnvironment.setInputManager (input);
 
     std::string myguiResources = (mResDir / "mygui").string();
@@ -656,8 +656,11 @@ void OMW::Engine::go()
 
     settingspath = loadSettings (settings);
 
-    mScreenCaptureHandler = new osgViewer::ScreenCaptureHandler(new WriteScreenshotToFileOperation(mCfgMgr.getUserDataPath().string(),
-        Settings::Manager::getString("screenshot format", "General")));
+    mScreenCaptureOperation = new WriteScreenshotToFileOperation(mCfgMgr.getUserDataPath().string(),
+        Settings::Manager::getString("screenshot format", "General"));
+
+    mScreenCaptureHandler = new osgViewer::ScreenCaptureHandler(mScreenCaptureOperation);
+
     mViewer->addEventHandler(mScreenCaptureHandler);
 
     mEnvironment.setFrameRateLimit(Settings::Manager::getFloat("framerate limit", "Video"));

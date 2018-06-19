@@ -1,13 +1,13 @@
 OpenMW
 ======
 
-[![Build Status](https://api.travis-ci.org/OpenMW/openmw.svg)](https://travis-ci.org/OpenMW/openmw) [![Build status](https://ci.appveyor.com/api/projects/status/e6bqw8oouy8ufd46?svg=true)](https://ci.appveyor.com/project/scrawl/openmw)  [![Coverity Scan Build Status](https://scan.coverity.com/projects/3740/badge.svg)](https://scan.coverity.com/projects/3740)
+[![Build Status](https://api.travis-ci.org/OpenMW/openmw.svg)](https://travis-ci.org/OpenMW/openmw) [![Build status](https://ci.appveyor.com/api/projects/status/github/openmw/openmw?svg=true)](https://ci.appveyor.com/project/psi29a/openmw)  [![Coverity Scan Build Status](https://scan.coverity.com/projects/3740/badge.svg)](https://scan.coverity.com/projects/3740) [![pipeline status](https://gitlab.com/OpenMW/openmw/badges/master/pipeline.svg)](https://gitlab.com/OpenMW/openmw/commits/master)
 
-OpenMW is a recreation of the engine for the popular role-playing game Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
+OpenMW is an open-source game engine that supports playing Morrowind by Bethesda Softworks. You need to own the game for OpenMW to play Morrowind.
 
-OpenMW also comes with OpenMW-CS, a replacement for Morrowind's TES Construction Set.
+OpenMW also comes with OpenMW-CS, a replacement for Bethesda's Construction Set.
 
-* Version: 0.43.0
+* Version: 0.44.0
 * License: GPLv3 (see [LICENSE](https://github.com/OpenMW/openmw/blob/master/LICENSE) for more information)
 * Website: https://www.openmw.org
 * IRC: #openmw on irc.freenode.net

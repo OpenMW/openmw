@@ -308,6 +308,7 @@ namespace MWPhysics
             float swimlevel = waterlevel + halfExtents.z() - (physicActor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
 
             ActorTracer tracer;
+
             osg::Vec3f inertia = physicActor->getInertialForce();
             osg::Vec3f velocity;
 
@@ -320,10 +321,11 @@ namespace MWPhysics
             {
                 velocity = (osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))) * movement;
 
-                if (velocity.z() > 0.f && physicActor->getOnGround() && !physicActor->getOnSlope())
+                if ((velocity.z() > 0.f && physicActor->getOnGround() && !physicActor->getOnSlope())
+                 || (velocity.z() > 0.f && velocity.z() + inertia.z() <= -velocity.z() && physicActor->getOnSlope()))
                     inertia = velocity;
-                else if(!physicActor->getOnGround() || physicActor->getOnSlope())
-                    velocity = velocity + physicActor->getInertialForce();
+                else if (!physicActor->getOnGround() || physicActor->getOnSlope())
+                    velocity = velocity + inertia;
             }
 
             // dead actors underwater will float to the surface, if the CharacterController tells us to do so
@@ -846,6 +848,16 @@ namespace MWPhysics
                                                                      const osg::Quat &orient,
                                                                      float queryDistance, std::vector<MWWorld::Ptr> targets)
     {
+        // First of all, try to hit where you aim to
+        int hitmask = CollisionType_World | CollisionType_Door | CollisionType_HeightMap | CollisionType_Actor;
+        RayResult result = castRay(origin, origin + (orient * osg::Vec3f(0.0f, queryDistance, 0.0f)), actor, targets, CollisionType_Actor, hitmask);
+
+        if (result.mHit)
+        {
+            return std::make_pair(result.mHitObject, result.mHitPos);
+        }
+
+        // Use cone shape as fallback
         const MWWorld::Store<ESM::GameSetting> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         btConeShape shape (osg::DegreesToRadians(store.find("fCombatAngleXY")->getFloat()/2.0f), queryDistance);

@@ -126,6 +126,9 @@ void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
                 break;
         }
     }
+
+    if (mLockLevel == 0 && !mKey.empty())
+        mLockLevel = UnbreakableLock;
 }
 
 void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool isDeleted) const

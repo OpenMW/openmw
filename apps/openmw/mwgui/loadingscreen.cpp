@@ -153,7 +153,7 @@ namespace MWGui
         virtual osg::BoundingSphere computeBound(const osg::Node&) const { return osg::BoundingSphere(); }
     };
 
-    void LoadingScreen::loadingOn()
+    void LoadingScreen::loadingOn(bool visible)
     {
         mLoadingOnTime = mTimer.time_m();
         // Early-out if already on
@@ -169,7 +169,10 @@ namespace MWGui
         // We are already using node masks to avoid the scene from being updated/rendered, but node masks don't work for computeBound()
         mViewer->getSceneData()->setComputeBoundingSphereCallback(new DontComputeBoundCallback);
 
-        mShowWallpaper = (MWBase::Environment::get().getStateManager()->getState()
+        mVisible = visible;
+        mLoadingBox->setVisible(mVisible);
+
+        mShowWallpaper = mVisible && (MWBase::Environment::get().getStateManager()->getState()
                 == MWBase::StateManager::State_NoGame);
 
         setVisible(true);
@@ -180,10 +183,15 @@ namespace MWGui
         }
 
         MWBase::Environment::get().getWindowManager()->pushGuiMode(mShowWallpaper ? GM_LoadingWallpaper : GM_Loading);
+
+        if (!mVisible)
+            draw();
     }
 
     void LoadingScreen::loadingOff()
     {
+        mLoadingBox->setVisible(true);   // restore
+
         if (mLastRenderTime < mLoadingOnTime)
         {
             // the loading was so fast that we didn't show loading screen at all
@@ -306,7 +314,7 @@ namespace MWGui
 
     void LoadingScreen::draw()
     {
-        if (!needToDrawLoadingScreen())
+        if (mVisible && !needToDrawLoadingScreen())
             return;
 
         if (mShowWallpaper && mTimer.time_m() > mLastWallpaperChangeTime + 5000*1)

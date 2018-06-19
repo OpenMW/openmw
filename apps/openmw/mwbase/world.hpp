@@ -120,6 +120,7 @@ namespace MWBase
 
             virtual bool toggleWater() = 0;
             virtual bool toggleWorld() = 0;
+            virtual bool toggleBorders() = 0;
 
             virtual void adjustSky() = 0;
 
@@ -450,6 +451,7 @@ namespace MWBase
 
             /// \todo this does not belong here
             virtual void screenshot (osg::Image* image, int w, int h) = 0;
+            virtual bool screenshot360 (osg::Image* image, std::string settingStr) = 0;
 
             /// Find default position inside exterior cell specified by name
             /// \return false if exterior with given name not exists, true otherwise
@@ -563,6 +565,8 @@ namespace MWBase
             virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;
 
             virtual bool isPlayerInJail() const = 0;
+
+            virtual void rotateWorldObject (const MWWorld::Ptr& ptr, osg::Quat rotate) = 0;
 
             /// Return terrain height at \a worldPos position.
             virtual float getTerrainHeightAt(const osg::Vec3f& worldPos) const = 0;
