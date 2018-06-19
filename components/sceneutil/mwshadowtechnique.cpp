@@ -1039,6 +1039,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 osg::Matrixd cornerConverter = osg::Matrixd::inverse(projectionMatrix) * osg::Matrixd::inverse(viewMatrix) * *cv.getModelViewMatrix();
                 double minZ = DBL_MAX;
                 double maxZ = -DBL_MAX;
+                clsb._bb._max[2] = 1.0;
                 for (unsigned int i = 0; i < 8; i++)
                 {
                     osg::Vec3 corner = clsb._bb.corner(i);
