@@ -27,6 +27,8 @@ namespace CSMWorld
         virtual void assign (const RecordBase& record) = 0;
         ///< Will throw an exception if the types don't match.
 
+        bool isBaseOnly() const; 
+
         bool isDeleted() const;
 
         bool isErased() const;

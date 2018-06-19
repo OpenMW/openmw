@@ -2,6 +2,11 @@
 
 CSMWorld::RecordBase::~RecordBase() {}
 
+bool CSMWorld::RecordBase::isBaseOnly() const
+{
+    return mState == State_BaseOnly;
+}
+
 bool CSMWorld::RecordBase::isDeleted() const
 {
     return mState==State_Deleted || mState==State_Erased;

@@ -123,6 +123,7 @@ void CSMPrefs::State::declare()
     declareEnum ("double-s", "Shift Double Click", actionRemove).addValues (reportValues);
     declareEnum ("double-c", "Control Double Click", actionEditAndRemove).addValues (reportValues);
     declareEnum ("double-sc", "Shift Control Double Click", actionNone).addValues (reportValues);
+    declareBool("ignore-base-records", "Ignore base records in verifier", false);
 
     declareCategory ("Search & Replace");
     declareInt ("char-before", "Characters before search string", 10).

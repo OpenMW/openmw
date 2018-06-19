@@ -13,6 +13,7 @@ namespace CSMTools
     class SpellCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::Spell>& mSpells;
+            bool mIgnoreBaseRecords;
 
         public:
 

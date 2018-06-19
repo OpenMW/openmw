@@ -14,6 +14,7 @@ namespace CSMTools
     {
             const CSMWorld::IdCollection<ESM::StartScript>& mStartScripts;
             const CSMWorld::IdCollection<ESM::Script>& mScripts;
+            bool mIgnoreBaseRecords;
 
         public:
 

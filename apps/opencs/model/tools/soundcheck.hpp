@@ -13,6 +13,7 @@ namespace CSMTools
     class SoundCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::Sound>& mSounds;
+            bool mIgnoreBaseRecords;
 
         public:
 

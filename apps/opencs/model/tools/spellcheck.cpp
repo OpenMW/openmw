@@ -5,14 +5,20 @@
 
 #include <components/esm/loadspel.hpp>
 
+#include "../prefs/state.hpp"
+
 #include "../world/universalid.hpp"
 
 CSMTools::SpellCheckStage::SpellCheckStage (const CSMWorld::IdCollection<ESM::Spell>& spells)
 : mSpells (spells)
-{}
+{
+    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+}
 
 int CSMTools::SpellCheckStage::setup()
 {
+    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+
     return mSpells.getSize();
 }
 
@@ -20,7 +26,8 @@ void CSMTools::SpellCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     const CSMWorld::Record<ESM::Spell>& record = mSpells.getRecord (stage);
 
-    if (record.isDeleted())
+    // Skip "Base" records (setting!) and "Deleted" records
+    if ((mIgnoreBaseRecords && record.isBaseOnly()) || record.isDeleted())
         return;
 
     const ESM::Spell& spell = record.get();
