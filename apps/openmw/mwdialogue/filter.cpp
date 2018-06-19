@@ -491,10 +491,11 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
             return !Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mRace, select.getName());
 
         case SelectWrapper::Function_NotCell:
-
-            return !Misc::StringUtils::ciEqual(MWBase::Environment::get().getWorld()->getCellName(mActor.getCell())
-                                               , select.getName());
-
+            {
+                const std::string& actorCell = MWBase::Environment::get().getWorld()->getCellName(mActor.getCell());
+                return !(actorCell.length() >= select.getName().length()
+                      && Misc::StringUtils::ciEqual(actorCell.substr(0, select.getName().length()), select.getName()));
+            }
         case SelectWrapper::Function_SameGender:
 
             return (player.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Female)==

@@ -43,6 +43,7 @@
     Bug #4454: AI opens doors too slow
     Bug #4457: Item without CanCarry flag prevents shield autoequipping in dark areas
     Bug #4458: AiWander console command handles idle chances incorrectly
+    Bug #4459: NotCell dialogue condition doesn't support partial matches
     Feature #4256: Implement ToggleBorders (TB) console command
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #4222: 360° screenshots
