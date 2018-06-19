@@ -383,18 +383,17 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
     SDL_GetWindowPosition(mWindow, &traits->x, &traits->y);
     SDL_GetWindowSize(mWindow, &traits->width, &traits->height);
+    SDL_GL_GetAttribute(SDL_GL_RED_SIZE, reinterpret_cast<int*>(&traits->red));
+    SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, reinterpret_cast<int*>(&traits->green));
+    SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, reinterpret_cast<int*>(&traits->blue));
+    SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, reinterpret_cast<int*>(&traits->depth));
+    SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, reinterpret_cast<int*>(&traits->stencil));
+    SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, reinterpret_cast<int*>(&traits->doubleBuffer));
     traits->windowName = SDL_GetWindowTitle(mWindow);
     traits->windowDecoration = !(SDL_GetWindowFlags(mWindow)&SDL_WINDOW_BORDERLESS);
     traits->screenNum = SDL_GetWindowDisplayIndex(mWindow);
-    // FIXME: Some way to get these settings back from the SDL window?
-    traits->red = 8;
-    traits->green = 8;
-    traits->blue = 8;
-    traits->alpha = 0; // set to 0 to stop ScreenCaptureHandler reading the alpha channel
-    traits->depth = 24;
-    traits->stencil = 8;
     traits->vsync = vsync;
-    traits->doubleBuffer = true;
+    traits->alpha = 0; // set to 0 to stop ScreenCaptureHandler reading the alpha channel
     traits->inheritedWindowData = new SDLUtil::GraphicsWindowSDL2::WindowData(mWindow);
 
     osg::ref_ptr<SDLUtil::GraphicsWindowSDL2> graphicsWindow = new SDLUtil::GraphicsWindowSDL2(traits);
