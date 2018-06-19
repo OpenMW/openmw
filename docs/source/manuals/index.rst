@@ -5,3 +5,4 @@ User Manuals
     :maxdepth: 2
 
     openmw-cs/index
+    installation/index

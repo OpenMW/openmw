@@ -34,7 +34,7 @@ for each saved game in the Load menu. Currently, the counter includes time spent
 This setting can only be configured by editing the settings configuration file.
 
 max quicksaves
-----------
+--------------
 
 :Type:		integer
 :Range:		>0
