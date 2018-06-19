@@ -665,8 +665,9 @@ namespace MWMechanics
                     if (target.getCellRef().getLockLevel() > 0)
                     {
                         MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock", 1.f, 1.f);
-                        if (!caster.isEmpty() && caster.getClass().isActor())
-                            MWBase::Environment::get().getMechanicsManager()->objectOpened(caster, target);
+                        if (!caster.isEmpty())
+                            MWBase::Environment::get().getMechanicsManager()->objectOpened(getPlayer(), target); 
+                            // Use the player instead of the caster for vanilla crime compatibility
 
                         if (caster == getPlayer())
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicOpenSuccess}");
