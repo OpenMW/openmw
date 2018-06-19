@@ -144,7 +144,7 @@ Writing expressions
 
 The syntax for expressions is as follows:
 
-.. code-block::
+.. code::
 
    <name>
    <name>(<arg1>)

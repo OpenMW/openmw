@@ -294,7 +294,7 @@ Increase the Count to 1.
 Save the addon, then test to ensure it works - e.g. start a new game and lockpick the chest.
 
 Placing in plain sight
-=====================
+======================
 
 Let's hide the Ring of Night vision in the cabin of the [Ancient Shipwreck]
 (https://en.uesp.net/wiki/Morrowind:Ancient_Shipwreck), a derelict vessel
