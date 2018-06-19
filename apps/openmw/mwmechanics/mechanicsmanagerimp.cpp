@@ -884,8 +884,13 @@ namespace MWMechanics
 
         const MWWorld::CellRef& cellref = target.getCellRef();
         // there is no harm to use unlocked doors
-        if (target.getClass().isDoor() && cellref.getLockLevel() <= 0 && ptr.getCellRef().getTrap().empty())
+        int lockLevel = cellref.getLockLevel();
+        if (target.getClass().isDoor() &&
+            (lockLevel <= 0 || lockLevel == ESM::UnbreakableLock) &&
+            ptr.getCellRef().getTrap().empty())
+        {
             return true;
+        }
 
         // TODO: implement a better check to check if target is owned bed
         if (target.getClass().isActivator() && target.getClass().getScript(target).compare(0, 3, "Bed") != 0)

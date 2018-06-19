@@ -239,7 +239,8 @@ namespace MWClass
         info.caption = ref->mBase->mName;
 
         std::string text;
-        if (ptr.getCellRef().getLockLevel() > 0)
+        int lockLevel = ptr.getCellRef().getLockLevel();
+        if (lockLevel > 0 && lockLevel != ESM::UnbreakableLock)
             text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ptr.getCellRef().getLockLevel());
         else if (ptr.getCellRef().getLockLevel() < 0)
             text += "\n#{sUnlocked}";
@@ -271,15 +272,16 @@ namespace MWClass
 
     void Container::lock (const MWWorld::Ptr& ptr, int lockLevel) const
     {
-        if(lockLevel!=0)
-            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, in positive
+        if(lockLevel != 0)
+            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, if positive
         else
-            ptr.getCellRef().setLockLevel(abs(ptr.getCellRef().getLockLevel())); //No locklevel given, just flip the original one
+            ptr.getCellRef().setLockLevel(ESM::UnbreakableLock); // If zero, set to max lock level
     }
 
     void Container::unlock (const MWWorld::Ptr& ptr) const
     {
-        ptr.getCellRef().setLockLevel(-abs(ptr.getCellRef().getLockLevel())); //Makes lockLevel negative
+        int lockLevel = ptr.getCellRef().getLockLevel();
+        ptr.getCellRef().setLockLevel(-abs(lockLevel)); //Makes lockLevel negative
     }
 
     bool Container::canLock(const MWWorld::ConstPtr &ptr) const

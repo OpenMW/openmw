@@ -34,6 +34,7 @@
     Bug #4419: MRK NiStringExtraData is handled incorrectly
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4429: [Windows] Error on build INSTALL.vcxproj project (debug) with cmake 3.7.2
+    Bug #4431: "Lock 0" console command is a no-op
     Bug #4432: Guards behaviour is incorrect if they do not have AI packages
     Bug #4433: Guard behaviour is incorrect with Alarm = 0
     Bug #4451: Script fails to compile when using "Begin, [ScriptName]" syntax
