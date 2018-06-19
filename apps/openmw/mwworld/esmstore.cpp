@@ -120,7 +120,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     }
 }
 
-void ESMStore::setUp()
+void ESMStore::setUp(bool validateRecords)
 {
     mIds.clear();
 
@@ -142,6 +142,62 @@ void ESMStore::setUp()
     mAttributes.setUp();
     mDialogs.setUp();
     mStatics.setUp();
+
+    if (validateRecords)
+        validate();
+}
+
+void ESMStore::validate()
+{
+    // Cache first class from store - we will use it if current class is not found
+    std::string defaultCls = "";
+    Store<ESM::Class>::iterator it = mClasses.begin();
+    if (it != mClasses.end())
+        defaultCls = it->mId;
+    else
+        throw std::runtime_error("List of NPC classes is empty!");
+
+    // Validate NPCs for non-existing class and faction.
+    // We will replace invalid entries by fixed ones
+    std::vector<ESM::NPC> entitiesToReplace;
+    for (ESM::NPC npc : mNpcs)
+    {
+        bool changed = false;
+
+        const std::string npcFaction = npc.mFaction;
+        if (!npcFaction.empty())
+        {
+            const ESM::Faction *fact = mFactions.search(npcFaction);
+            if (!fact)
+            {
+                std::cerr << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent faction '" << npc.mFaction << "', ignoring it." << std::endl;
+                npc.mFaction = "";
+                npc.mNpdt.mRank = -1;
+                changed = true;
+            }
+        }
+
+        std::string npcClass = npc.mClass;
+        if (!npcClass.empty())
+        {
+            const ESM::Class *cls = mClasses.search(npcClass);
+            if (!cls)
+            {
+                std::cerr << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent class '" << npc.mClass << "', using '" << defaultCls << "' class as replacement." << std::endl;
+                npc.mClass = defaultCls;
+                changed = true;
+            }
+        }
+
+        if (changed)
+            entitiesToReplace.push_back(npc);
+    }
+
+    for (const ESM::NPC &npc : entitiesToReplace)
+    {
+        mNpcs.eraseStatic(npc.mId);
+        mNpcs.insertStatic(npc);
+    }
 }
 
     int ESMStore::countSavedGameRecords() const

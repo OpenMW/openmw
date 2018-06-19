@@ -184,7 +184,7 @@ namespace MWWorld
 
         fillGlobalVariables();
 
-        mStore.setUp();
+        mStore.setUp(true);
         mStore.movePlayerRecord();
 
         mSwimHeightScale = mStore.get<ESM::GameSetting>().find("fSwimHeightScale")->getFloat();
