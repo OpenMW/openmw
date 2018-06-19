@@ -760,11 +760,14 @@ namespace MWMechanics
         {
             // The actor was killed by a magic effect. Figure out if the player was responsible for it.
             const ActiveSpells& spells = creatureStats.getActiveSpells();
-            bool killedByPlayer = false;
             MWWorld::Ptr player = getPlayer();
+            std::set<MWWorld::Ptr> playerFollowers;
+            getActorsSidingWith(player, playerFollowers);
+
             for (ActiveSpells::TIterator it = spells.begin(); it != spells.end(); ++it)
             {
                 const ActiveSpells::ActiveSpellParams& spell = it->second;
+                MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.mCasterActorId);
                 for (std::vector<ActiveSpells::ActiveEffect>::const_iterator effectIt = spell.mEffects.begin();
                      effectIt != spell.mEffects.end(); ++effectIt)
                 {
@@ -782,16 +785,18 @@ namespace MWMechanics
                             isDamageEffect = true;
                     }
 
-                    MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.mCasterActorId);
-                    if (isDamageEffect && caster == player)
-                        killedByPlayer = true;
+                    if (isDamageEffect)
+                    {
+                        if (caster == player || playerFollowers.find(caster) != playerFollowers.end())
+                        {
+                            if (caster.getClass().getNpcStats(caster).isWerewolf())
+                                caster.getClass().getNpcStats(caster).addWerewolfKill();
+
+                            MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, player);
+                            break;
+                        }
+                    }
                 }
-            }
-            if (killedByPlayer)
-            {
-                MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, player);
-                if (player.getClass().getNpcStats(player).isWerewolf())
-                    player.getClass().getNpcStats(player).addWerewolfKill();
             }
         }
 
