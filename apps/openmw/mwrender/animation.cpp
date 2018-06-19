@@ -1089,11 +1089,28 @@ namespace MWRender
 
     osg::Vec3f Animation::runAnimation(float duration)
     {
+        // If we have scripted animations, play only them
+        bool hasScriptedAnims = false;
+        for (AnimStateMap::iterator stateiter = mStates.begin(); stateiter != mStates.end(); stateiter++)
+        {
+            if (stateiter->second.mPriority.contains(int(MWMechanics::Priority_Persistent)) && stateiter->second.mPlaying)
+            {
+                hasScriptedAnims = true;
+                break;
+            }
+        }
+
         osg::Vec3f movement(0.f, 0.f, 0.f);
         AnimStateMap::iterator stateiter = mStates.begin();
         while(stateiter != mStates.end())
         {
             AnimState &state = stateiter->second;
+            if (hasScriptedAnims && !state.mPriority.contains(int(MWMechanics::Priority_Persistent)))
+            {
+                ++stateiter;
+                continue;
+            }
+
             const NifOsg::TextKeyMap &textkeys = state.mSource->getTextKeys();
             NifOsg::TextKeyMap::const_iterator textkey(textkeys.upper_bound(state.getTime()));
 
