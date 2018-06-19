@@ -37,6 +37,11 @@ namespace Launcher
         QStringList getAvailableResolutions(int screen);
         QRect getMaximumResolution();
 
+        /**
+         * Connect to the SDL so that we can use it to determine graphics
+         * @return whether or not connecting to SDL is successful
+         */
+        bool connectToSdl();
         bool setupSDL();
     };
 }

@@ -6,8 +6,10 @@
 #include <osg/Vec3f>
 
 #include <memory>
+#include <set>
 
 #include "defs.hpp"
+#include "cellborder.hpp"
 
 namespace osg
 {
@@ -54,7 +56,7 @@ namespace Terrain
         /// @param storage Storage instance to get terrain data from (heights, normals, colors, textures..)
         /// @param nodeMask mask for the terrain root
         /// @param preCompileMask mask for pre compiling textures
-        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask);
+        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask);
         virtual ~World();
 
         /// See CompositeMapRenderer::setTargetFrameRate
@@ -76,15 +78,15 @@ namespace Terrain
 
         /// Load the cell into the scene graph.
         /// @note Not thread safe.
-        /// @note May be ignored by derived implementations that don't organize the terrain into cells.
-        virtual void loadCell(int x, int y) {}
+        virtual void loadCell(int x, int y);
 
         /// Remove the cell from the scene graph.
         /// @note Not thread safe.
-        /// @note May be ignored by derived implementations that don't organize the terrain into cells.
-        virtual void unloadCell(int x, int y) {}
+        virtual void unloadCell(int x, int y);
 
         virtual void enable(bool enabled) {}
+
+        virtual void setBordersVisible(bool visible);
 
         /// Create a View to use with preload feature. The caller is responsible for deleting the view.
         /// @note Thread safe.
@@ -113,8 +115,13 @@ namespace Terrain
 
         std::unique_ptr<TextureManager> mTextureManager;
         std::unique_ptr<ChunkManager> mChunkManager;
-    };
 
+        std::unique_ptr<MWRender::CellBorder> mCellBorder;
+
+        bool mBorderVisible;
+
+        std::set<std::pair<int,int>> mLoadedCells;
+    };
 }
 
 #endif

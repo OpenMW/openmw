@@ -135,8 +135,9 @@ namespace MWClass
             data->mCreatureStats.setAiSetting (MWMechanics::CreatureStats::AI_Flee, ref->mBase->mAiData.mFlee);
             data->mCreatureStats.setAiSetting (MWMechanics::CreatureStats::AI_Alarm, ref->mBase->mAiData.mAlarm);
 
+            // Persistent actors with 0 health do not play death animation
             if (data->mCreatureStats.isDead())
-                data->mCreatureStats.setDeathAnimationFinished(true);
+                data->mCreatureStats.setDeathAnimationFinished(ptr.getClass().isPersistent(ptr));
 
             // spells
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
@@ -812,6 +813,9 @@ namespace MWClass
     {
         const MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
         if (ptr.getRefData().getCount() > 0 && !creatureStats.isDead())
+            return;
+
+        if (!creatureStats.isDeathAnimationFinished())
             return;
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();

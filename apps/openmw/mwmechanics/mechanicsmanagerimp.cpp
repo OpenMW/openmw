@@ -1495,7 +1495,7 @@ namespace MWMechanics
 
     void MechanicsManager::actorKilled(const MWWorld::Ptr &victim, const MWWorld::Ptr &attacker)
     {
-        if (attacker.isEmpty() || attacker != getPlayer())
+        if (attacker.isEmpty() || victim.isEmpty())
             return;
 
         if (victim == attacker)
@@ -1505,13 +1505,23 @@ namespace MWMechanics
             return; // TODO: implement animal rights
 
         const MWMechanics::NpcStats& victimStats = victim.getClass().getNpcStats(victim);
+        if (victimStats.getCrimeId() == -1)
+            return;
+
+        // For now we report only about crimes of player and player's followers
+        const MWWorld::Ptr &player = getPlayer();
+        if (attacker != player)
+        {
+            std::set<MWWorld::Ptr> playerFollowers;
+            getActorsSidingWith(player, playerFollowers);
+            if (playerFollowers.find(attacker) == playerFollowers.end())
+                return;
+        }
 
         // Simple check for who attacked first: if the player attacked first, a crimeId should be set
         // Doesn't handle possible edge case where no one reported the assault, but in such a case,
         // for bystanders it is not possible to tell who attacked first, anyway.
-        if (victimStats.getCrimeId() != -1)
-            commitCrime(attacker, victim, MWBase::MechanicsManager::OT_Murder);
-
+        commitCrime(player, victim, MWBase::MechanicsManager::OT_Murder);
     }
 
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)

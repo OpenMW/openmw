@@ -4,22 +4,31 @@
     Bug #1990: Sunrise/sunset not set correct
     Bug #2222: Fatigue's effect on selling price is backwards
     Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
+    Bug #2562: Forcing AI to activate a teleport door sometimes causes a crash
     Bug #2772: Non-existing class or faction freezes the game
     Bug #2835: Player able to slowly move when overencumbered
+    Bug #2852: No murder bounty when a player follower commits murder
+    Bug #2862: [macOS] Can't quit launcher using Command-Q or OpenMW->Quit
     Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
     Bug #3374: Touch spells not hitting kwama foragers
+    Bug #3486: [Mod] NPC Commands does not work
     Bug #3591: Angled hit distance too low
     Bug #3629: DB assassin attack never triggers creature spawning
     Bug #3876: Landscape texture painting is misaligned
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
+    Bug #3911: [macOS] Typing in the "Content List name" dialog box produces double characters
     Bug #3993: Terrain texture blending map is not upscaled
     Bug #3997: Almalexia doesn't pace
     Bug #4036: Weird behaviour of AI packages if package target has non-unique ID
     Bug #4047: OpenMW not reporting its version number in MacOS; OpenMW-CS not doing it fully
+    Bug #4125: OpenMW logo cropped on bugtracker
     Bug #4215: OpenMW shows book text after last <BR> tag
     Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4251: Stationary NPCs do not return to their position after combat
+    Bug #4286: Scripted animations can be interrupted
+    Bug #4291: Non-persistent actors that started the game as dead do not play death animations
     Bug #4293: Faction members are not aware of faction ownerships in barter
+    Bug #4307: World cleanup should remove dead bodies only if death animation is finished
     Bug #4327: Missing animations during spell/weapon stance switching
     Bug #4368: Settings window ok button doesn't have key focus by default
     Bug #4393: NPCs walk back to where they were after using ResetActors
@@ -31,6 +40,9 @@
     Bug #4451: Script fails to compile when using "Begin, [ScriptName]" syntax
     Bug #4453: Quick keys behaviour is invalid for equipment
     Bug #4454: AI opens doors too slow
+    Bug #4457: Item without CanCarry flag prevents shield autoequipping in dark areas
+    Bug #4458: AiWander console command handles idle chances incorrectly
+    Feature #4256: Implement ToggleBorders (TB) console command
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #4222: 360° screenshots
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts

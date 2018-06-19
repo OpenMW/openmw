@@ -120,6 +120,7 @@ namespace MWBase
 
             virtual bool toggleWater() = 0;
             virtual bool toggleWorld() = 0;
+            virtual bool toggleBorders() = 0;
 
             virtual void adjustSky() = 0;
 

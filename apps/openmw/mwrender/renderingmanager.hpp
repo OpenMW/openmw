@@ -207,6 +207,8 @@ namespace MWRender
 
         LandManager* getLandManager() const;
 
+        bool toggleBorders();
+
     private:
         void updateProjectionMatrix();
         void updateTextureFiltering();
@@ -265,6 +267,7 @@ namespace MWRender
         float mFieldOfViewOverride;
         float mFieldOfView;
         float mFirstPersonFieldOfView;
+        bool mBorders;
 
         void operator = (const RenderingManager&);
         RenderingManager(const RenderingManager&);

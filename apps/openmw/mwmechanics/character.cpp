@@ -561,6 +561,10 @@ void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterStat
 
 void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force)
 {
+    // If the current animation is persistent, do not touch it
+    if (isPersistentAnimPlaying())
+        return;
+
     if (mPtr.getClass().isActor())
         refreshHitRecoilAnims();
 
@@ -744,6 +748,11 @@ void CharacterController::playRandomDeath(float startpoint)
     {
         mDeathState = chooseRandomDeathState();
     }
+
+    // Do not interrupt scripted animation by death
+    if (isPersistentAnimPlaying())
+        return;
+
     playDeath(startpoint, mDeathState);
 }
 
@@ -829,8 +838,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         mIdleState = CharState_Idle;
     }
 
-
-    if(mDeathState == CharState_None)
+    // Do not update animation status for dead actors
+    if(mDeathState == CharState_None && (!cls.isActor() || !cls.getCreatureStats(mPtr).isDead()))
         refreshCurrentAnims(mIdleState, mMovementState, mJumpState, true);
 
     mAnimation->runAnimation(0.f);
@@ -1298,6 +1307,10 @@ bool CharacterController::updateWeaponState()
             mUpperBodyState = UpperCharState_WeapEquiped;
         }
     }
+
+    // Combat for actors with persistent animations obviously will be buggy
+    if (isPersistentAnimPlaying())
+        return forcestateupdate;
 
     float complete;
     bool animPlaying;
@@ -2013,15 +2026,17 @@ void CharacterController::update(float duration)
     {
         // initial start of death animation for actors that started the game as dead
         // not done in constructor since we need to give scripts a chance to set the mSkipAnim flag
-        if (!mSkipAnim && mDeathState != CharState_None && mCurrentDeath.empty())
+        if (!mSkipAnim && mDeathState != CharState_None && mCurrentDeath.empty() && cls.isPersistent(mPtr))
         {
+            // Fast-forward death animation to end for persisting corpses
             playDeath(1.f, mDeathState);
         }
         // We must always queue movement, even if there is none, to apply gravity.
         world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
     }
 
-    osg::Vec3f moved = mAnimation->runAnimation(mSkipAnim ? 0.f : duration);
+    bool isPersist = isPersistentAnimPlaying();
+    osg::Vec3f moved = mAnimation->runAnimation(mSkipAnim && !isPersist ? 0.f : duration);
     if(duration > 0.0f)
         moved /= duration;
     else
@@ -2135,6 +2150,10 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
     if(!mAnimation || !mAnimation->hasAnimation(groupname))
         return false;
 
+    // We should not interrupt persistent animations by non-persistent ones
+    if (isPersistentAnimPlaying() && !persist)
+        return false;
+
     // If this animation is a looped animation (has a "loop start" key) that is already playing
     // and has not yet reached the end of the loop, allow it to continue animating with its existing loop count
     // and remove any other animations that were queued.
@@ -2164,29 +2183,45 @@ bool CharacterController::playGroup(const std::string &groupname, int mode, int 
 
     if(mode != 0 || mAnimQueue.empty() || !isAnimPlaying(mAnimQueue.front().mGroup))
     {
-        clearAnimQueue();
-        mAnimQueue.push_back(entry);
+        clearAnimQueue(persist);
 
         mAnimation->disable(mCurrentIdle);
         mCurrentIdle.clear();
 
         mIdleState = CharState_SpecialIdle;
         bool loopfallback = (entry.mGroup.compare(0,4,"idle") == 0);
-        mAnimation->play(groupname, Priority_Default,
+        mAnimation->play(groupname, persist && groupname != "idle" ? Priority_Persistent : Priority_Default,
                             MWRender::Animation::BlendMask_All, false, 1.0f,
                             ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1, loopfallback);
     }
     else
     {
         mAnimQueue.resize(1);
-        mAnimQueue.push_back(entry);
     }
+
+    // "PlayGroup idle" is a special case, used to remove to stop scripted animations playing
+    if (groupname == "idle")
+        entry.mPersist = false;
+
+    mAnimQueue.push_back(entry);
+
     return true;
 }
 
 void CharacterController::skipAnim()
 {
     mSkipAnim = true;
+}
+
+bool CharacterController::isPersistentAnimPlaying()
+{
+    if (!mAnimQueue.empty())
+    {
+        AnimationQueueEntry& first = mAnimQueue.front();
+        return first.mPersist && isAnimPlaying(first.mGroup);
+    }
+
+    return false;
 }
 
 bool CharacterController::isAnimPlaying(const std::string &groupName)
@@ -2196,12 +2231,19 @@ bool CharacterController::isAnimPlaying(const std::string &groupName)
     return mAnimation->isPlaying(groupName);
 }
 
-
-void CharacterController::clearAnimQueue()
+void CharacterController::clearAnimQueue(bool clearPersistAnims)
 {
-    if(!mAnimQueue.empty())
+    // Do not interrupt scripted animations, if we want to keep them
+    if ((!isPersistentAnimPlaying() || clearPersistAnims) && !mAnimQueue.empty())
         mAnimation->disable(mAnimQueue.front().mGroup);
-    mAnimQueue.clear();
+
+    for (AnimationQueue::iterator it = mAnimQueue.begin(); it != mAnimQueue.end();)
+    {
+        if (clearPersistAnims || !it->mPersist)
+            it = mAnimQueue.erase(it);
+        else
+            ++it;
+    }
 }
 
 void CharacterController::forceStateUpdate()
@@ -2211,6 +2253,7 @@ void CharacterController::forceStateUpdate()
     clearAnimQueue();
 
     refreshCurrentAnims(mIdleState, mMovementState, mJumpState, true);
+
     if(mDeathState != CharState_None)
     {
         playRandomDeath();

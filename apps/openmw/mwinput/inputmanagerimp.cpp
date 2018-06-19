@@ -1036,7 +1036,6 @@ namespace MWInput
     void InputManager::screenshot()
     {
         bool regularScreenshot = true;
-        bool screenshotTaken = false;
 
         std::string settingStr;
 
@@ -1047,7 +1046,6 @@ namespace MWInput
         {
             mScreenCaptureHandler->setFramesToCapture(1);
             mScreenCaptureHandler->captureNextFrame(*mViewer);
-            screenshotTaken = true;
         }
         else
         {
@@ -1057,12 +1055,8 @@ namespace MWInput
             {
                 (*mScreenCaptureOperation) (*(screenshot.get()),0);
                 // FIXME: mScreenCaptureHandler->getCaptureOperation() causes crash for some reason
-                screenshotTaken = true;
             }
         }
-
-        if (screenshotTaken)
-            MWBase::Environment::get().getWindowManager()->messageBox("Screenshot saved");
     }
 
     void InputManager::toggleInventory()

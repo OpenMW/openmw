@@ -222,8 +222,8 @@ private:
     osg::ref_ptr<RootNode> mRootNode;
 };
 
-QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask)
-    : World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask)
+QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask, int borderMask)
+    : World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
 {
