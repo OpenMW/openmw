@@ -12,9 +12,13 @@
 #include <osg/Group>
 #include <osg/UserDataContainer>
 #include <osg/ComputeBoundsVisitor>
+#include <osg/ShapeDrawable>
+#include <osg/TextureCubeMap>
 
 #include <osgUtil/LineSegmentIntersector>
 #include <osgUtil/IncrementalCompileOperation>
+
+#include <osg/ImageUtils>
 
 #include <osgViewer/Viewer>
 
@@ -22,6 +26,7 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
+#include <components/shader/shadermanager.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -39,7 +44,12 @@
 #include <components/esm/loadcell.hpp>
 #include <components/fallback/fallback.hpp>
 
+#include <boost/algorithm/string.hpp>
+
 #include "../mwworld/cellstore.hpp"
+#include "../mwgui/loadingscreen.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "sky.hpp"
 #include "effectmanager.hpp"
@@ -193,8 +203,8 @@ namespace MWRender
         , mNightEyeFactor(0.f)
         , mDistantFog(false)
         , mDistantTerrain(false)
-        , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
+        , mBorders(false)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
@@ -212,7 +222,7 @@ namespace MWRender
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
 
-        mRootNode->addChild(sceneRoot);
+        mRootNode->addChild(mSceneRoot);
 
         mPathgrid.reset(new Pathgrid(mRootNode));
 
@@ -244,9 +254,10 @@ namespace MWRender
                                              Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
 
         if (mDistantTerrain)
-            mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
+            mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
         else
-            mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile));
+            mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
+
         mTerrain->setDefaultViewer(mViewer->getCamera());
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
 
@@ -467,6 +478,13 @@ namespace MWRender
     {
         mSky->setEnabled(enabled);
     }
+    
+    bool RenderingManager::toggleBorders()
+    {
+        mBorders = !mBorders;
+        mTerrain->setBordersVisible(mBorders);
+        return mBorders;
+    }
 
     bool RenderingManager::toggleRenderMode(RenderMode mode)
     {
@@ -668,7 +686,203 @@ namespace MWRender
         mutable bool mDone;
     };
 
-    void RenderingManager::screenshot(osg::Image *image, int w, int h)
+    bool RenderingManager::screenshot360(osg::Image* image, std::string settingStr)
+    {
+        int screenshotW = mViewer->getCamera()->getViewport()->width();
+        int screenshotH = mViewer->getCamera()->getViewport()->height();
+        int screenshotMapping = 0;
+        int cubeSize = screenshotMapping == 2 ?
+            screenshotW:         // planet mapping needs higher resolution
+            screenshotW / 2;    
+
+        std::vector<std::string> settingArgs;
+        boost::algorithm::split(settingArgs,settingStr,boost::is_any_of(" "));
+
+        if (settingArgs.size() > 0)
+        {
+            std::string typeStrings[4] = {"spherical","cylindrical","planet","cubemap"};
+            bool found = false;
+
+            for (int i = 0; i < 4; ++i)
+                if (settingArgs[0].compare(typeStrings[i]) == 0)
+                {
+                    screenshotMapping = i;
+                    found = true;
+                    break;
+                }
+
+            if (!found)
+            {
+                std::cerr << "Wrong screenshot type: " << settingArgs[0] << "." << std::endl;
+                return false;
+            }
+        }
+    
+        if (settingArgs.size() > 1)
+            screenshotW = std::min(10000,std::atoi(settingArgs[1].c_str()));
+
+        if (settingArgs.size() > 2)
+            screenshotH = std::min(10000,std::atoi(settingArgs[2].c_str()));
+
+        if (settingArgs.size() > 3)
+            cubeSize = std::min(5000,std::atoi(settingArgs[3].c_str()));
+
+        if (mCamera->isVanityOrPreviewModeEnabled())
+        {
+            std::cerr << "Spherical screenshots are not allowed in preview mode." << std::endl;
+            return false;
+        }
+
+        bool rawCubemap = screenshotMapping == 3;
+
+        if (rawCubemap)
+            screenshotW = cubeSize * 6;  // the image will consist of 6 cube sides in a row
+        else if (screenshotMapping == 2)
+            screenshotH = screenshotW;   // use square resolution for planet mapping
+
+        std::vector<osg::ref_ptr<osg::Image>> images;
+
+        for (int i = 0; i < 6; ++i)
+            images.push_back(new osg::Image);
+
+        osg::Vec3 directions[6] = {
+            rawCubemap ? osg::Vec3(1,0,0) : osg::Vec3(0,0,1),
+            osg::Vec3(0,0,-1),  
+            osg::Vec3(-1,0,0),   
+            rawCubemap ? osg::Vec3(0,0,1) : osg::Vec3(1,0,0),
+            osg::Vec3(0,1,0),
+            osg::Vec3(0,-1,0)};
+
+        double rotations[] = {
+            -osg::PI / 2.0,
+            osg::PI / 2.0,
+            osg::PI,
+            0,
+            osg::PI / 2.0,
+            osg::PI / 2.0};
+
+        double fovBackup = mFieldOfView;
+        mFieldOfView = 90.0;             // each cubemap side sees 90 degrees
+
+        int maskBackup = mPlayerAnimation->getObjectRoot()->getNodeMask();
+
+        if (mCamera->isFirstPerson())
+            mPlayerAnimation->getObjectRoot()->setNodeMask(0);
+
+        for (int i = 0; i < 6; ++i)      // for each cubemap side
+        {
+            osg::Matrixd transform = osg::Matrixd::rotate(osg::Vec3(0,0,-1),directions[i]);
+
+            if (!rawCubemap)
+                transform *= osg::Matrixd::rotate(rotations[i],osg::Vec3(0,0,-1));
+
+            osg::Image *sideImage = images[i].get();
+            screenshot(sideImage,cubeSize,cubeSize,transform);
+
+            if (!rawCubemap)
+                sideImage->flipHorizontal();
+        }
+
+        mPlayerAnimation->getObjectRoot()->setNodeMask(maskBackup);
+        mFieldOfView = fovBackup;
+
+        if (rawCubemap)    // for raw cubemap don't run on GPU, just merge the images
+        {    
+            image->allocateImage(cubeSize * 6,cubeSize,images[0]->r(),images[0]->getPixelFormat(),images[0]->getDataType());
+
+            for (int i = 0; i < 6; ++i)
+                osg::copyImage(images[i].get(),0,0,0,images[i]->s(),images[i]->t(),images[i]->r(),image,i * cubeSize,0,0);
+
+            return true;
+        }
+        
+        // run on GPU now:
+
+        osg::ref_ptr<osg::TextureCubeMap> cubeTexture (new osg::TextureCubeMap);
+        cubeTexture->setResizeNonPowerOfTwoHint(false);
+
+        cubeTexture->setFilter(osg::Texture::MIN_FILTER,osg::Texture::NEAREST);
+        cubeTexture->setFilter(osg::Texture::MAG_FILTER,osg::Texture::NEAREST);
+        
+        cubeTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        cubeTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+
+        for (int i = 0; i < 6; ++i)
+            cubeTexture->setImage(i,images[i].get());
+
+        osg::ref_ptr<osg::Camera> screenshotCamera (new osg::Camera);
+        osg::ref_ptr<osg::ShapeDrawable> quad (new osg::ShapeDrawable(new osg::Box(osg::Vec3(0,0,0),2.0)));
+
+        std::map<std::string, std::string> defineMap;
+
+        Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
+        osg::ref_ptr<osg::Shader> fragmentShader (shaderMgr.getShader("s360_fragment.glsl",defineMap,osg::Shader::FRAGMENT));
+        osg::ref_ptr<osg::Shader> vertexShader (shaderMgr.getShader("s360_vertex.glsl", defineMap, osg::Shader::VERTEX));
+        osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+
+        osg::ref_ptr<osg::Program> program (new osg::Program);
+        program->addShader(fragmentShader);
+        program->addShader(vertexShader);
+        stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
+
+        stateset->addUniform(new osg::Uniform("cubeMap",0));
+        stateset->addUniform(new osg::Uniform("mapping",screenshotMapping));
+        stateset->setTextureAttributeAndModes(0,cubeTexture,osg::StateAttribute::ON);
+            
+        quad->setStateSet(stateset);
+        quad->setUpdateCallback(NULL);
+
+        screenshotCamera->addChild(quad);
+
+        mRootNode->addChild(screenshotCamera);
+
+        renderCameraToImage(screenshotCamera,image,screenshotW,screenshotH);
+
+        screenshotCamera->removeChildren(0,screenshotCamera->getNumChildren());
+        mRootNode->removeChild(screenshotCamera);
+
+        return true;
+    }
+
+    void RenderingManager::renderCameraToImage(osg::Camera *camera, osg::Image *image, int w, int h)
+    {
+        camera->setNodeMask(Mask_RenderToTexture);
+        camera->attach(osg::Camera::COLOR_BUFFER, image);
+        camera->setRenderOrder(osg::Camera::PRE_RENDER);
+        camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
+        camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT,osg::Camera::PIXEL_BUFFER_RTT);
+
+        camera->setViewport(0, 0, w, h);
+
+        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
+        texture->setInternalFormat(GL_RGB);
+        texture->setTextureSize(w,h);
+        texture->setResizeNonPowerOfTwoHint(false);
+        texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+        texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        camera->attach(osg::Camera::COLOR_BUFFER,texture);
+
+        image->setDataType(GL_UNSIGNED_BYTE);
+        image->setPixelFormat(texture->getInternalFormat());
+
+        // The draw needs to complete before we can copy back our image.
+        osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
+        camera->setFinalDrawCallback(callback);
+
+        MWBase::Environment::get().getWindowManager()->getLoadingScreen()->loadingOn(false);
+
+        mViewer->eventTraversal();
+        mViewer->updateTraversal();
+        mViewer->renderingTraversals();
+        callback->waitTillDone();
+
+        MWBase::Environment::get().getWindowManager()->getLoadingScreen()->loadingOff();
+
+        // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the screenshot is completed
+        mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
+    }
+
+    void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Matrixd cameraTransform)
     {
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
         rttCamera->setNodeMask(Mask_RenderToTexture);
@@ -677,7 +891,8 @@ namespace MWRender
         rttCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         rttCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
         rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
-        rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix());
+        rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * cameraTransform);
+
         rttCamera->setViewport(0, 0, w, h);
 
         osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
@@ -693,25 +908,17 @@ namespace MWRender
 
         rttCamera->setUpdateCallback(new NoTraverseCallback);
         rttCamera->addChild(mSceneRoot);
+
+        rttCamera->addChild(mWater->getReflectionCamera());
+        rttCamera->addChild(mWater->getRefractionCamera());
+
         rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~Mask_GUI));
 
         mRootNode->addChild(rttCamera);
 
-        // The draw needs to complete before we can copy back our image.
-        osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
-        rttCamera->setFinalDrawCallback(callback);
+        rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // at the time this function is called we are in the middle of a frame,
-        // so out of order calls are necessary to get a correct frameNumber for the next frame.
-        // refer to the advance() and frame() order in Engine::go()
-        mViewer->eventTraversal();
-        mViewer->updateTraversal();
-        mViewer->renderingTraversals();
-
-        callback->waitTillDone();
-
-        // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the screenshot is completed
-        mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
+        renderCameraToImage(rttCamera.get(),image,w,h);
 
         rttCamera->removeChildren(0, rttCamera->getNumChildren());
         mRootNode->removeChild(rttCamera);

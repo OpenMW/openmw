@@ -630,22 +630,12 @@ namespace MWMechanics
         float d = static_cast<float>(std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100));
         float e = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-
         float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
         float npcTerm = (d + e + f) * sellerStats.getFatigueTerm();
-        float buyTerm = 0.01f * (100 - 0.5f * (pcTerm - npcTerm));
-        float sellTerm = 0.01f * (50 - 0.5f * (npcTerm - pcTerm));
-
-        float x;
-        if(buying) x = buyTerm;
-        else x = std::min(buyTerm, sellTerm);
-        int offerPrice;
-        if (x < 1)
-            offerPrice = int(x * basePrice);
-        else
-            offerPrice = basePrice + int((x - 1) * basePrice);
-        offerPrice = std::max(1, offerPrice);
-        return offerPrice;
+        float buyTerm = 0.01f * std::max(75.f, (100 - 0.5f * (pcTerm - npcTerm)));
+        float sellTerm = 0.01f * std::min(75.f, (50 - 0.5f * (npcTerm - pcTerm)));
+        int offerPrice = int(basePrice * (buying ? buyTerm : sellTerm));
+        return std::max(1, offerPrice);
     }
 
     int MechanicsManager::countDeaths (const std::string& id) const
@@ -1505,7 +1495,7 @@ namespace MWMechanics
 
     void MechanicsManager::actorKilled(const MWWorld::Ptr &victim, const MWWorld::Ptr &attacker)
     {
-        if (attacker.isEmpty() || attacker != getPlayer())
+        if (attacker.isEmpty() || victim.isEmpty())
             return;
 
         if (victim == attacker)
@@ -1515,13 +1505,23 @@ namespace MWMechanics
             return; // TODO: implement animal rights
 
         const MWMechanics::NpcStats& victimStats = victim.getClass().getNpcStats(victim);
+        if (victimStats.getCrimeId() == -1)
+            return;
+
+        // For now we report only about crimes of player and player's followers
+        const MWWorld::Ptr &player = getPlayer();
+        if (attacker != player)
+        {
+            std::set<MWWorld::Ptr> playerFollowers;
+            getActorsSidingWith(player, playerFollowers);
+            if (playerFollowers.find(attacker) == playerFollowers.end())
+                return;
+        }
 
         // Simple check for who attacked first: if the player attacked first, a crimeId should be set
         // Doesn't handle possible edge case where no one reported the assault, but in such a case,
         // for bystanders it is not possible to tell who attacked first, anyway.
-        if (victimStats.getCrimeId() != -1)
-            commitCrime(attacker, victim, MWBase::MechanicsManager::OT_Murder);
-
+        commitCrime(player, victim, MWBase::MechanicsManager::OT_Murder);
     }
 
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)

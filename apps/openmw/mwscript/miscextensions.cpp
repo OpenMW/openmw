@@ -254,6 +254,20 @@ namespace MWScript
                 }
         };
 
+        class OpToggleBorders : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    bool enabled =
+                        MWBase::Environment::get().getWorld()->toggleBorders();
+
+                    runtime.getContext().report (enabled ?
+                        "Border Rendering -> On" : "Border Rendering -> Off");
+                }
+        };
+
         class OpTogglePathgrid : public Interpreter::Opcode0
         {
         public:
@@ -1380,6 +1394,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeRemoveFromLevItem, new OpRemoveFromLevItem);
             interpreter.installSegment3 (Compiler::Misc::opcodeShowSceneGraph, new OpShowSceneGraph<ImplicitRef>);
             interpreter.installSegment3 (Compiler::Misc::opcodeShowSceneGraphExplicit, new OpShowSceneGraph<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeToggleBorders, new OpToggleBorders);
         }
     }
 }

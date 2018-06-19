@@ -1,5 +1,4 @@
 #include <iostream>
-#include <csignal>
 
 #include <QApplication>
 #include <QTextCodec>
@@ -12,24 +11,12 @@
 #define MAC_OS_X_VERSION_MIN_REQUIRED __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #endif // MAC_OS_X_VERSION_MIN_REQUIRED
 
-#include <SDL.h>
-
 #include "maindialog.hpp"
 
 int main(int argc, char *argv[])
 {
     try
     {
-        SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
-        SDL_SetMainReady();
-        if (SDL_Init(SDL_INIT_VIDEO) != 0)
-        {
-            qDebug() << "SDL_Init failed: " << QString::fromUtf8(SDL_GetError());
-            return 0;
-        }
-        signal(SIGINT, SIG_DFL); // We don't want to use the SDL event loop in the launcher,
-                                 // so reset SIGINT which SDL wants to redirect to an SDL_Quit event.
-
         QApplication app(argc, argv);
 
         // Now we make sure the current dir is set to application path
@@ -46,9 +33,7 @@ int main(int argc, char *argv[])
         if (result == Launcher::FirstRunDialogResultContinue)
             mainWin.show();
 
-        int returnValue = app.exec();
-        SDL_Quit();
-        return returnValue;
+        return app.exec();
     }
     catch (std::exception& e)
     {

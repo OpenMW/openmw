@@ -14,10 +14,11 @@
 namespace Terrain
 {
 
-World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask)
+World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask)
     : mStorage(storage)
     , mParent(parent)
     , mResourceSystem(resourceSystem)
+    , mBorderVisible(false)
 {
     mTerrainRoot = new osg::Group;
     mTerrainRoot->setNodeMask(nodeMask);
@@ -39,7 +40,6 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     compileRoot->addChild(compositeCam);
 
-
     mCompositeMapRenderer = new CompositeMapRenderer;
     compositeCam->addChild(mCompositeMapRenderer);
 
@@ -47,6 +47,7 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     mTextureManager.reset(new TextureManager(mResourceSystem->getSceneManager()));
     mChunkManager.reset(new ChunkManager(mStorage, mResourceSystem->getSceneManager(), mTextureManager.get(), mCompositeMapRenderer));
+    mCellBorder.reset(new MWRender::CellBorder(this,mTerrainRoot.get(),borderMask));
 
     mResourceSystem->addResourceManager(mChunkManager.get());
     mResourceSystem->addResourceManager(mTextureManager.get());
@@ -63,6 +64,35 @@ World::~World()
     mCompositeMapCamera->getParent(0)->removeChild(mCompositeMapCamera);
 
     delete mStorage;
+}
+
+void World::setBordersVisible(bool visible)
+{
+    mBorderVisible = visible;
+
+    if (visible)
+    {
+        for (std::set<std::pair<int,int>>::iterator it = mLoadedCells.begin(); it != mLoadedCells.end(); ++it)
+            mCellBorder->createCellBorderGeometry(it->first,it->second);
+    }
+    else
+        mCellBorder->destroyCellBorderGeometry();
+}
+
+void World::loadCell(int x, int y)
+{
+    if (mBorderVisible)
+        mCellBorder->createCellBorderGeometry(x,y);
+
+    mLoadedCells.insert(std::pair<int,int>(x,y));
+}
+
+void World::unloadCell(int x, int y)
+{
+    if (mBorderVisible)
+        mCellBorder->destroyCellBorderGeometry(x,y);
+
+    mLoadedCells.erase(std::pair<int,int>(x,y));
 }
 
 void World::setTargetFrameRate(float rate)

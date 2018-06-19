@@ -288,23 +288,9 @@ namespace MWMechanics
         if (prevItemId.empty())
             return;
 
-        // Find the item by id
-        MWWorld::Ptr item;
-        for (MWWorld::ContainerStoreIterator iter = store.begin(); iter != store.end(); ++iter)
-        {
-            if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), prevItemId))
-            {
-                if (item.isEmpty() ||
-                    // Prefer the stack with the lowest remaining uses
-                        !item.getClass().hasItemHealth(*iter) ||
-                        iter->getClass().getItemHealth(*iter) < item.getClass().getItemHealth(item))
-                {
-                    item = *iter;
-                }
-            }
-        }
-
+        // Find previous item (or its replacement) by id.
         // we should equip previous item only if expired bound item was equipped.
+        MWWorld::Ptr item = store.findReplacement(prevItemId);
         if (item.isEmpty() || !wasEquipped)
             return;
 
@@ -774,11 +760,14 @@ namespace MWMechanics
         {
             // The actor was killed by a magic effect. Figure out if the player was responsible for it.
             const ActiveSpells& spells = creatureStats.getActiveSpells();
-            bool killedByPlayer = false;
             MWWorld::Ptr player = getPlayer();
+            std::set<MWWorld::Ptr> playerFollowers;
+            getActorsSidingWith(player, playerFollowers);
+
             for (ActiveSpells::TIterator it = spells.begin(); it != spells.end(); ++it)
             {
                 const ActiveSpells::ActiveSpellParams& spell = it->second;
+                MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.mCasterActorId);
                 for (std::vector<ActiveSpells::ActiveEffect>::const_iterator effectIt = spell.mEffects.begin();
                      effectIt != spell.mEffects.end(); ++effectIt)
                 {
@@ -796,16 +785,18 @@ namespace MWMechanics
                             isDamageEffect = true;
                     }
 
-                    MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.mCasterActorId);
-                    if (isDamageEffect && caster == player)
-                        killedByPlayer = true;
+                    if (isDamageEffect)
+                    {
+                        if (caster == player || playerFollowers.find(caster) != playerFollowers.end())
+                        {
+                            if (caster.getClass().getNpcStats(caster).isWerewolf())
+                                caster.getClass().getNpcStats(caster).addWerewolfKill();
+
+                            MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, player);
+                            break;
+                        }
+                    }
                 }
-            }
-            if (killedByPlayer)
-            {
-                MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, player);
-                if (player.getClass().getNpcStats(player).isWerewolf())
-                    player.getClass().getNpcStats(player).addWerewolfKill();
             }
         }
 
@@ -998,7 +989,8 @@ namespace MWMechanics
             MWWorld::ContainerStoreIterator torch = inventoryStore.end();
             for (MWWorld::ContainerStoreIterator it = inventoryStore.begin(); it != inventoryStore.end(); ++it)
             {
-                if (it->getTypeName() == typeid(ESM::Light).name())
+                if (it->getTypeName() == typeid(ESM::Light).name() &&
+                    it->getClass().canBeEquipped(*it, ptr).first)
                 {
                     torch = it;
                     break;
@@ -1019,8 +1011,7 @@ namespace MWMechanics
                     heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
                     // If we have a torch and can equip it, then equip it now.
-                    if (heldIter == inventoryStore.end()
-                            && torch->getClass().canBeEquipped(*torch, ptr).first == 1)
+                    if (heldIter == inventoryStore.end())
                     {
                         inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, torch, ptr);
                     }

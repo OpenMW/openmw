@@ -114,42 +114,44 @@ namespace MWClass
         const std::string lockedSound = "LockedDoor";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
-        const MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
+        MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
 
         bool isLocked = ptr.getCellRef().getLockLevel() > 0;
         bool isTrapped = !ptr.getCellRef().getTrap().empty();
         bool hasKey = false;
         std::string keyName;
 
+        // FIXME: If NPC activate teleporting door, it can lead to crash due to iterator invalidation in the Actors update.
+        // Make such activation a no-op for now, like how it is in the vanilla game.
+        if (actor != MWMechanics::getPlayer() && ptr.getCellRef().getTeleport())
+        {
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction(std::string(), ptr));
+            action->setSound(lockedSound);
+            return action;
+        }
+
         // make door glow if player activates it with telekinesis
-        if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
-            MWBase::Environment::get().getWorld()->getDistanceToFacedObject() > 
+        if (actor == MWMechanics::getPlayer() &&
+            MWBase::Environment::get().getWorld()->getDistanceToFacedObject() >
             MWBase::Environment::get().getWorld()->getMaxActivationDistance())
         {
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
 
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();            
+            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             int index = ESM::MagicEffect::effectStringToId("sEffectTelekinesis");
             const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(index);
 
             animation->addSpellCastGlow(effect, 1); // 1 second glow to match the time taken for a door opening or closing
         }
 
-        // make key id lowercase
-        std::string keyId = ptr.getCellRef().getKey();
+        const std::string keyId = ptr.getCellRef().getKey();
         if (!keyId.empty())
         {
-            Misc::StringUtils::lowerCaseInPlace(keyId);
-            for (MWWorld::ConstContainerStoreIterator it = invStore.cbegin(); it != invStore.cend(); ++it)
+            MWWorld::Ptr keyPtr = invStore.search(keyId);
+            if (!keyPtr.isEmpty())
             {
-                std::string refId = it->getCellRef().getRefId();
-                Misc::StringUtils::lowerCaseInPlace(refId);
-                if (refId == keyId)
-                {
-                    hasKey = true;
-                    keyName = it->getClass().getName(*it);
-                    break;
-                }
+                hasKey = true;
+                keyName = keyPtr.getClass().getName(keyPtr);
             }
         }
 

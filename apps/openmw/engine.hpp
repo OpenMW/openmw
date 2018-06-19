@@ -7,7 +7,7 @@
 #include <components/settings/settings.hpp>
 
 #include <osgViewer/Viewer>
-
+#include <osgViewer/ViewerEventHandlers>
 
 #include "mwbase/environment.hpp"
 
@@ -82,6 +82,7 @@ namespace OMW
             boost::filesystem::path mResDir;
             osg::ref_ptr<osgViewer::Viewer> mViewer;
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
+            osgViewer::ScreenCaptureHandler::CaptureOperation *mScreenCaptureOperation;
             std::string mCellName;
             std::vector<std::string> mContentFiles;
             bool mSkipMenu;

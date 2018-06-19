@@ -295,6 +295,7 @@ namespace Compiler
         const int opcodeRemoveFromLevItem = 0x20002fe;
         const int opcodeShowSceneGraph = 0x2002f;
         const int opcodeShowSceneGraphExplicit = 0x20030;
+        const int opcodeToggleBorders = 0x2000307;
     }
 
     namespace Sky

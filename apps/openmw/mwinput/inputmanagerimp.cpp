@@ -36,12 +36,14 @@ namespace MWInput
             SDL_Window* window,
             osg::ref_ptr<osgViewer::Viewer> viewer,
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
+            osgViewer::ScreenCaptureHandler::CaptureOperation *screenCaptureOperation,
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab)
         : mWindow(window)
         , mWindowVisible(true)
         , mViewer(viewer)
         , mScreenCaptureHandler(screenCaptureHandler)
+        , mScreenCaptureOperation(screenCaptureOperation)
         , mJoystickLastUsed(false)
         , mPlayer(NULL)
         , mInputManager(NULL)
@@ -1033,8 +1035,28 @@ namespace MWInput
 
     void InputManager::screenshot()
     {
-        mScreenCaptureHandler->setFramesToCapture(1);
-        mScreenCaptureHandler->captureNextFrame(*mViewer);
+        bool regularScreenshot = true;
+
+        std::string settingStr;
+
+        settingStr = Settings::Manager::getString("screenshot type","Video");
+        regularScreenshot = settingStr.size() == 0 || settingStr.compare("regular") == 0;
+
+        if (regularScreenshot)
+        {
+            mScreenCaptureHandler->setFramesToCapture(1);
+            mScreenCaptureHandler->captureNextFrame(*mViewer);
+        }
+        else
+        {
+            osg::ref_ptr<osg::Image> screenshot (new osg::Image);
+
+            if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get(),settingStr))
+            {
+                (*mScreenCaptureOperation) (*(screenshot.get()),0);
+                // FIXME: mScreenCaptureHandler->getCaptureOperation() causes crash for some reason
+            }
+        }
     }
 
     void InputManager::toggleInventory()

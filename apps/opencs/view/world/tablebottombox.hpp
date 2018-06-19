@@ -39,6 +39,7 @@ namespace CSVWorld
             bool mHasPosition;
             int mRow;
             int mColumn;
+            QString mStatusMessage;
 
         private:
 
@@ -72,6 +73,8 @@ namespace CSVWorld
             ///< Is record creation and deletion supported?
             ///
             /// \note The BotomBox does not partake in the deletion of records.
+
+            void setStatusMessage (const QString& message);
 
         signals:
 
