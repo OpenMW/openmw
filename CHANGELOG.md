@@ -94,6 +94,7 @@
     Bug #4412: openmw-iniimporter ignores data paths from config
     Bug #4413: Moving with 0 strength uses all of your fatigue
     Bug #4420: Camera flickering when I open up and close menus while sneaking
+    Bug #4424: [macOS] Cursor is either empty or garbage when compiled against macOS 10.13 SDK
     Bug #4435: Item health is considered a signed integer
     Bug #4441: Adding items to currently disabled weapon-wielding creatures crashes the game
     Feature #1786: Round up encumbrance value in the encumbrance bar
@@ -108,7 +109,6 @@
     Feature #4423: Rebalance soul gem values
     Task #4015: Use AppVeyor build artifact features to make continuous builds available
     Editor: New (and more complete) icon set
-    Bug #4424: [macOS] Cursor is either empty or garbage when compiled against macOS 10.13 SDK
 
 0.43.0
 ------
