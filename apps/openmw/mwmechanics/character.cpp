@@ -2026,10 +2026,11 @@ void CharacterController::update(float duration)
     {
         // initial start of death animation for actors that started the game as dead
         // not done in constructor since we need to give scripts a chance to set the mSkipAnim flag
-        if (!mSkipAnim && mDeathState != CharState_None && mCurrentDeath.empty() && cls.isPersistent(mPtr))
+        if (!mSkipAnim && mDeathState != CharState_None && mCurrentDeath.empty())
         {
-            // Fast-forward death animation to end for persisting corpses
-            playDeath(1.f, mDeathState);
+            // Fast-forward death animation to end for persisting corpses or corpses after end of death animation
+            if (cls.isPersistent(mPtr) || cls.getCreatureStats(mPtr).isDeathAnimationFinished())
+                playDeath(1.f, mDeathState);
         }
         // We must always queue movement, even if there is none, to apply gravity.
         world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
