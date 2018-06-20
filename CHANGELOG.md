@@ -39,6 +39,7 @@
     Bug #4432: Guards behaviour is incorrect if they do not have AI packages
     Bug #4433: Guard behaviour is incorrect with Alarm = 0
     Bug #4451: Script fails to compile when using "Begin, [ScriptName]" syntax
+    Bug #4452: Default terrain texture bleeds through texture transitions
     Bug #4453: Quick keys behaviour is invalid for equipment
     Bug #4454: AI opens doors too slow
     Bug #4457: Item without CanCarry flag prevents shield autoequipping in dark areas
