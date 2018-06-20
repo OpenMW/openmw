@@ -100,7 +100,13 @@ namespace
 
         void apply(osg::MatrixTransform& trans)
         {
-            mMap[Misc::StringUtils::lowerCase(trans.getName())] = &trans;
+            // Take transformation for first found node in file
+            const std::string nodeName = Misc::StringUtils::lowerCase(trans.getName());
+            if (mMap.find(nodeName) == mMap.end())
+            {
+                mMap[nodeName] = &trans;
+            }
+
             traverse(trans);
         }
 
