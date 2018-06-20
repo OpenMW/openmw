@@ -13,7 +13,7 @@
 CSMTools::PathgridCheckStage::PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids)
 : mPathgrids (pathgrids)
 {
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::PathgridCheckStage::setup()
@@ -28,7 +28,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
     const CSMWorld::Record<CSMWorld::Pathgrid>& record = mPathgrids.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && record.isBaseOnly()) || record.isDeleted())
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const CSMWorld::Pathgrid& pathgrid = record.get();

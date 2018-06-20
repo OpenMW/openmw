@@ -9,7 +9,7 @@ CSMTools::JournalCheckStage::JournalCheckStage(const CSMWorld::IdCollection<ESM:
     const CSMWorld::InfoCollection& journalInfos)
     : mJournals(journals), mJournalInfos(journalInfos)
 {
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::JournalCheckStage::setup()
@@ -24,7 +24,7 @@ void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
     const CSMWorld::Record<ESM::Dialogue> &journalRecord = mJournals.getRecord(stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && journalRecord.isBaseOnly()) || journalRecord.isDeleted())
+    if ((mIgnoreBaseRecords && journalRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || journalRecord.isDeleted())
         return;
 
     const ESM::Dialogue &journal = journalRecord.get();
@@ -51,7 +51,7 @@ void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
         }
 
         // Skip "Base" records (setting!)
-        if (mIgnoreBaseRecords && infoRecord.isBaseOnly())
+        if (mIgnoreBaseRecords && infoRecord.mState == CSMWorld::RecordBase::State_BaseOnly)
             continue;
 
         if (journalInfo.mResponse.empty())

@@ -11,7 +11,7 @@
 CSMTools::SoundCheckStage::SoundCheckStage (const CSMWorld::IdCollection<ESM::Sound>& sounds)
 : mSounds (sounds)
 {
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::SoundCheckStage::setup()
@@ -26,7 +26,7 @@ void CSMTools::SoundCheckStage::perform (int stage, CSMDoc::Messages& messages)
     const CSMWorld::Record<ESM::Sound>& record = mSounds.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && record.isBaseOnly()) || record.isDeleted())
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const ESM::Sound& sound = record.get();

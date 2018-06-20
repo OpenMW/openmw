@@ -12,7 +12,7 @@
 CSMTools::RegionCheckStage::RegionCheckStage (const CSMWorld::IdCollection<ESM::Region>& regions)
 : mRegions (regions)
 {
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::RegionCheckStage::setup()
@@ -27,7 +27,7 @@ void CSMTools::RegionCheckStage::perform (int stage, CSMDoc::Messages& messages)
     const CSMWorld::Record<ESM::Region>& record = mRegions.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && record.isBaseOnly()) || record.isDeleted())
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const ESM::Region& region = record.get();

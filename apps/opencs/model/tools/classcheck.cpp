@@ -13,7 +13,7 @@
 CSMTools::ClassCheckStage::ClassCheckStage (const CSMWorld::IdCollection<ESM::Class>& classes)
 : mClasses (classes)
 {
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::ClassCheckStage::setup()
@@ -28,7 +28,7 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
     const CSMWorld::Record<ESM::Class>& record = mClasses.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && record.isBaseOnly()) || record.isDeleted())
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const ESM::Class& class_ = record.get();

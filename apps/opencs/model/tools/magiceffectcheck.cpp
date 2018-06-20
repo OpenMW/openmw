@@ -80,7 +80,7 @@ CSMTools::MagicEffectCheckStage::MagicEffectCheckStage(const CSMWorld::IdCollect
       mIcons(icons),
       mTextures(textures)
 {
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::MagicEffectCheckStage::setup()
@@ -95,7 +95,7 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages &messa
     const CSMWorld::Record<ESM::MagicEffect> &record = mMagicEffects.getRecord(stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && record.isBaseOnly()) || record.isDeleted())
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     ESM::MagicEffect effect = record.get();

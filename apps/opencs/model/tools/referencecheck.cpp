@@ -14,7 +14,7 @@ CSMTools::ReferenceCheckStage::ReferenceCheckStage(
     mCells(cells),
     mFactions(factions)
 {
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &messages)
@@ -22,7 +22,7 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
     const CSMWorld::Record<CSMWorld::CellRef>& record = mReferences.getRecord(stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && record.isBaseOnly()) || record.isDeleted())
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const CSMWorld::CellRef& cellRef = record.get();

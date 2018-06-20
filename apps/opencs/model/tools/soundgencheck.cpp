@@ -14,7 +14,7 @@ CSMTools::SoundGenCheckStage::SoundGenCheckStage(const CSMWorld::IdCollection<ES
       mSounds(sounds),
       mReferenceables(referenceables)
 {
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::SoundGenCheckStage::setup()
@@ -29,7 +29,7 @@ void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages &messages
     const CSMWorld::Record<ESM::SoundGenerator> &record = mSoundGens.getRecord(stage);
     
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && record.isBaseOnly()) || record.isDeleted())
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const ESM::SoundGenerator& soundGen = record.get();

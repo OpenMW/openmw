@@ -22,7 +22,7 @@ void CSMTools::RaceCheckStage::performPerRecord (int stage, CSMDoc::Messages& me
         mPlayable = true;
 
     // Skip "Base" records (setting!)
-    if (mIgnoreBaseRecords && record.isBaseOnly())
+    if (mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly)
         return;
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Race, race.mId);
@@ -62,7 +62,7 @@ void CSMTools::RaceCheckStage::performFinal (CSMDoc::Messages& messages)
 CSMTools::RaceCheckStage::RaceCheckStage (const CSMWorld::IdCollection<ESM::Race>& races)
 : mRaces (races), mPlayable (false)
 {
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::RaceCheckStage::setup()

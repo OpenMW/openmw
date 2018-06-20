@@ -61,7 +61,7 @@ CSMTools::ScriptCheckStage::ScriptCheckStage (const CSMDoc::Document& document)
     Compiler::registerExtensions (mExtensions);
     mContext.setExtensions (&mExtensions);
 
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::ScriptCheckStage::setup()
@@ -96,7 +96,7 @@ void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
         return;
 
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && record.isBaseOnly()) || record.isDeleted())
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     mMessages = &messages;

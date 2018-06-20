@@ -32,7 +32,7 @@ CSMTools::TopicInfoCheckStage::TopicInfoCheckStage(
       mReferencables(referencables),
       mSoundFiles(soundFiles)
 {
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::TopicInfoCheckStage::setup()
@@ -81,7 +81,7 @@ void CSMTools::TopicInfoCheckStage::perform(int stage, CSMDoc::Messages& message
     const CSMWorld::Record<CSMWorld::Info>& infoRecord = mTopicInfos.getRecord(stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && infoRecord.isBaseOnly()) || infoRecord.isDeleted())
+    if ((mIgnoreBaseRecords && infoRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || infoRecord.isDeleted())
         return;
 
     const CSMWorld::Info& topicInfo = infoRecord.get();

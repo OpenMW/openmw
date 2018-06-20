@@ -11,7 +11,7 @@
 CSMTools::SkillCheckStage::SkillCheckStage (const CSMWorld::IdCollection<ESM::Skill>& skills)
 : mSkills (skills)
 {
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::SkillCheckStage::setup()
@@ -26,7 +26,7 @@ void CSMTools::SkillCheckStage::perform (int stage, CSMDoc::Messages& messages)
     const CSMWorld::Record<ESM::Skill>& record = mSkills.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && record.isBaseOnly()) || record.isDeleted())
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const ESM::Skill& skill = record.get();

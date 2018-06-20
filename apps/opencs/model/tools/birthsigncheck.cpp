@@ -12,7 +12,7 @@
 CSMTools::BirthsignCheckStage::BirthsignCheckStage (const CSMWorld::IdCollection<ESM::BirthSign>& birthsigns)
 : mBirthsigns (birthsigns)
 {
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::BirthsignCheckStage::setup()
@@ -27,7 +27,7 @@ void CSMTools::BirthsignCheckStage::perform (int stage, CSMDoc::Messages& messag
     const CSMWorld::Record<ESM::BirthSign>& record = mBirthsigns.getRecord (stage);
 
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && record.isBaseOnly()) || record.isDeleted())
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const ESM::BirthSign& birthsign = record.get();

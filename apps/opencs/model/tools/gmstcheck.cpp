@@ -9,7 +9,7 @@
 CSMTools::GmstCheckStage::GmstCheckStage(const CSMWorld::IdCollection<ESM::GameSetting>& gameSettings)
     : mGameSettings(gameSettings)
 {
-    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::GmstCheckStage::setup()
@@ -24,7 +24,7 @@ void CSMTools::GmstCheckStage::perform(int stage, CSMDoc::Messages& messages)
     const CSMWorld::Record<ESM::GameSetting>& record = mGameSettings.getRecord (stage);
     
     // Skip "Base" records (setting!) and "Deleted" records
-    if ((mIgnoreBaseRecords && record.isBaseOnly()) || record.isDeleted())
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
     
     const ESM::GameSetting& gmst = record.get();
