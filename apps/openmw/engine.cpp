@@ -379,7 +379,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     }
 
     setWindowIcon();
-    
+
     osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
     int redSize;
     int greenSize;
