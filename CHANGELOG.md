@@ -32,6 +32,7 @@
     Bug #4327: Missing animations during spell/weapon stance switching
     Bug #4368: Settings window ok button doesn't have key focus by default
     Bug #4393: NPCs walk back to where they were after using ResetActors
+    Bug #4416: Handle exception if we try to play non-music file
     Bug #4419: MRK NiStringExtraData is handled incorrectly
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4429: [Windows] Error on build INSTALL.vcxproj project (debug) with cmake 3.7.2
