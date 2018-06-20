@@ -25,6 +25,7 @@ namespace CSMTools
     {
         const CSMWorld::SubCellCollection<CSMWorld::Pathgrid,
               CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& mPathgrids;
+        bool mIgnoreBaseRecords;
 
     public:
 

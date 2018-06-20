@@ -13,6 +13,7 @@ namespace CSMTools
     class BirthsignCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::BirthSign>& mBirthsigns;
+            bool mIgnoreBaseRecords;
 
         public:
 

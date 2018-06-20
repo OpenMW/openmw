@@ -65,6 +65,8 @@ namespace CSMTools
 
         std::set<std::string> mCellNames;
 
+        bool mIgnoreBaseRecords;
+
         // These return false when not successful and write an error
         bool verifyActor(const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         bool verifyCell(const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);

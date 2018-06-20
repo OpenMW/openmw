@@ -4,14 +4,20 @@
 
 #include <components/esm/loadskil.hpp>
 
+#include "../prefs/state.hpp"
+
 #include "../world/universalid.hpp"
 
 CSMTools::SkillCheckStage::SkillCheckStage (const CSMWorld::IdCollection<ESM::Skill>& skills)
 : mSkills (skills)
-{}
+{
+    mIgnoreBaseRecords = false;
+}
 
 int CSMTools::SkillCheckStage::setup()
 {
+    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+
     return mSkills.getSize();
 }
 
@@ -19,7 +25,8 @@ void CSMTools::SkillCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     const CSMWorld::Record<ESM::Skill>& record = mSkills.getRecord (stage);
 
-    if (record.isDeleted())
+    // Skip "Base" records (setting!) and "Deleted" records
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const ESM::Skill& skill = record.get();

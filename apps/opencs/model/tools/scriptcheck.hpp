@@ -32,6 +32,7 @@ namespace CSMTools
             std::string mFile;
             CSMDoc::Messages *mMessages;
             WarningMode mWarningMode;
+            bool mIgnoreBaseRecords;
 
             CSMDoc::Message::Severity getSeverity (Type type);
 

@@ -13,6 +13,7 @@ namespace CSMTools
             const CSMWorld::IdCollection<ESM::SoundGenerator> &mSoundGens;
             const CSMWorld::IdCollection<ESM::Sound> &mSounds;
             const CSMWorld::RefIdCollection &mReferenceables;
+            bool mIgnoreBaseRecords;
 
         public:
             SoundGenCheckStage(const CSMWorld::IdCollection<ESM::SoundGenerator> &soundGens,

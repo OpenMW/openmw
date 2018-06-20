@@ -25,6 +25,7 @@ namespace CSMTools
     private:
         
         const CSMWorld::IdCollection<ESM::GameSetting>& mGameSettings;
+        bool mIgnoreBaseRecords;
         
         std::string varTypeToString(ESM::VarType);
         

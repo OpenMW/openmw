@@ -5,14 +5,20 @@
 
 #include <components/esm/loadregn.hpp>
 
+#include "../prefs/state.hpp"
+
 #include "../world/universalid.hpp"
 
 CSMTools::RegionCheckStage::RegionCheckStage (const CSMWorld::IdCollection<ESM::Region>& regions)
 : mRegions (regions)
-{}
+{
+    mIgnoreBaseRecords = false;
+}
 
 int CSMTools::RegionCheckStage::setup()
 {
+    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+
     return mRegions.getSize();
 }
 
@@ -20,7 +26,8 @@ void CSMTools::RegionCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     const CSMWorld::Record<ESM::Region>& record = mRegions.getRecord (stage);
 
-    if (record.isDeleted())
+    // Skip "Base" records (setting!) and "Deleted" records
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const ESM::Region& region = record.get();

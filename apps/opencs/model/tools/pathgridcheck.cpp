@@ -3,6 +3,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include "../prefs/state.hpp"
+
 #include "../world/universalid.hpp"
 #include "../world/idcollection.hpp"
 #include "../world/subcellcollection.hpp"
@@ -10,10 +12,14 @@
 
 CSMTools::PathgridCheckStage::PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids)
 : mPathgrids (pathgrids)
-{}
+{
+    mIgnoreBaseRecords = false;
+}
 
 int CSMTools::PathgridCheckStage::setup()
 {
+    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+
     return mPathgrids.getSize();
 }
 
@@ -21,7 +27,8 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
 {
     const CSMWorld::Record<CSMWorld::Pathgrid>& record = mPathgrids.getRecord (stage);
 
-    if (record.isDeleted())
+    // Skip "Base" records (setting!) and "Deleted" records
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const CSMWorld::Pathgrid& pathgrid = record.get();

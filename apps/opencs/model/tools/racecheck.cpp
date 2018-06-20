@@ -4,6 +4,8 @@
 
 #include <components/esm/loadrace.hpp>
 
+#include "../prefs/state.hpp"
+
 #include "../world/universalid.hpp"
 
 void CSMTools::RaceCheckStage::performPerRecord (int stage, CSMDoc::Messages& messages)
@@ -14,6 +16,14 @@ void CSMTools::RaceCheckStage::performPerRecord (int stage, CSMDoc::Messages& me
         return;
 
     const ESM::Race& race = record.get();
+
+    // Consider mPlayable flag even when "Base" records are ignored
+    if (race.mData.mFlags & 0x1)
+        mPlayable = true;
+
+    // Skip "Base" records (setting!)
+    if (mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly)
+        return;
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Race, race.mId);
 
@@ -38,10 +48,6 @@ void CSMTools::RaceCheckStage::performPerRecord (int stage, CSMDoc::Messages& me
     if (race.mData.mWeight.mFemale<0)
         messages.push_back (std::make_pair (id, "female " + race.mId + " has negative weight"));
 
-    // remember playable flag
-    if (race.mData.mFlags & 0x1)
-        mPlayable = true;
-
     /// \todo check data members that can't be edited in the table view
 }
 
@@ -55,11 +61,15 @@ void CSMTools::RaceCheckStage::performFinal (CSMDoc::Messages& messages)
 
 CSMTools::RaceCheckStage::RaceCheckStage (const CSMWorld::IdCollection<ESM::Race>& races)
 : mRaces (races), mPlayable (false)
-{}
+{
+    mIgnoreBaseRecords = false;
+}
 
 int CSMTools::RaceCheckStage::setup()
 {
     mPlayable = false;
+    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+
     return mRaces.getSize()+1;
 }
 
