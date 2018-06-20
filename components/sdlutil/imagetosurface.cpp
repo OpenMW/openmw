@@ -6,7 +6,7 @@
 namespace SDLUtil
 {
 
-SDL_Surface* imageToSurface(osg::Image *image, bool flip)
+SurfaceUniquePtr imageToSurface(osg::Image *image, bool flip)
 {
     int width = image->s();
     int height = image->t();
@@ -22,7 +22,7 @@ SDL_Surface* imageToSurface(osg::Image *image, bool flip)
                 static_cast<Uint8>(clr.g() * 255), static_cast<Uint8>(clr.b() * 255), static_cast<Uint8>(clr.a() * 255));
         }
 
-    return surface;
+    return SurfaceUniquePtr(surface, SDL_FreeSurface);
 }
 
 }
