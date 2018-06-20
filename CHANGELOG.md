@@ -45,6 +45,7 @@
     Bug #4458: AiWander console command handles idle chances incorrectly
     Bug #4459: NotCell dialogue condition doesn't support partial matches
     Bug #4461: "Open" spell from non-player caster isn't a crime
+    Bug #4469: Abot Silt Striders – Model turn 90 degrees on horizontal
     Feature #4256: Implement ToggleBorders (TB) console command
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #4222: 360° screenshots
