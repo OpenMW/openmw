@@ -379,16 +379,30 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     }
 
     setWindowIcon();
-
+    
     osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
+    int redSize;
+    int greenSize;
+    int blueSize;
+    int depthSize;
+    int stencilSize;
+    int doubleBuffer;
+    
+    SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &redSize);
+    SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &greenSize);
+    SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &blueSize);
+    SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &depthSize);
+    SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &stencilSize);
+    SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &doubleBuffer);
+    
     SDL_GetWindowPosition(mWindow, &traits->x, &traits->y);
     SDL_GetWindowSize(mWindow, &traits->width, &traits->height);
-    SDL_GL_GetAttribute(SDL_GL_RED_SIZE, reinterpret_cast<int*>(&traits->red));
-    SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, reinterpret_cast<int*>(&traits->green));
-    SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, reinterpret_cast<int*>(&traits->blue));
-    SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, reinterpret_cast<int*>(&traits->depth));
-    SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, reinterpret_cast<int*>(&traits->stencil));
-    SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, reinterpret_cast<int*>(&traits->doubleBuffer));
+    traits->red = redSize;
+    traits->green = greenSize;
+    traits->blue = blueSize;
+    traits->depth = depthSize;
+    traits->stencil = stencilSize;
+    traits->doubleBuffer = doubleBuffer;
     traits->windowName = SDL_GetWindowTitle(mWindow);
     traits->windowDecoration = !(SDL_GetWindowFlags(mWindow)&SDL_WINDOW_BORDERLESS);
     traits->screenNum = SDL_GetWindowDisplayIndex(mWindow);
