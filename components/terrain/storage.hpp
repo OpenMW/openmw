@@ -72,8 +72,6 @@ namespace Terrain
 
         virtual float getHeightAt (const osg::Vec3f& worldPos) = 0;
 
-        virtual LayerInfo getDefaultLayer() = 0;
-
         /// Get the transformation factor for mapping cell units to world units.
         virtual float getCellWorldSize() = 0;
 

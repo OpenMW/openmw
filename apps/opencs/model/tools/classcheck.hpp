@@ -13,6 +13,7 @@ namespace CSMTools
     class ClassCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::Class>& mClasses;
+            bool mIgnoreBaseRecords;
 
         public:
 

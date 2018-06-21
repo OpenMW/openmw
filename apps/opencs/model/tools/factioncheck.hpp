@@ -13,6 +13,7 @@ namespace CSMTools
     class FactionCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::Faction>& mFactions;
+            bool mIgnoreBaseRecords;
 
         public:
 

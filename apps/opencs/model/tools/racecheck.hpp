@@ -14,6 +14,7 @@ namespace CSMTools
     {
             const CSMWorld::IdCollection<ESM::Race>& mRaces;
             bool mPlayable;
+            bool mIgnoreBaseRecords;
 
             void performPerRecord (int stage, CSMDoc::Messages& messages);
 

@@ -24,6 +24,7 @@ namespace CSMTools
             const CSMWorld::RefIdCollection &mReferenceables;
             const CSMWorld::Resources &mIcons;
             const CSMWorld::Resources &mTextures;
+            bool mIgnoreBaseRecords;
 
         private:
             bool isTextureExists(const std::string &texture, bool isIcon) const;

@@ -13,6 +13,7 @@ namespace CSMTools
     class RegionCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::Region>& mRegions;
+            bool mIgnoreBaseRecords;
 
         public:
 

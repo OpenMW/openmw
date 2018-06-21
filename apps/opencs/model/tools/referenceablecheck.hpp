@@ -82,6 +82,7 @@ namespace CSMTools
             const CSMWorld::IdCollection<ESM::Faction>& mFactions;
             const CSMWorld::IdCollection<ESM::Script>& mScripts;
             bool mPlayerPresent;
+            bool mIgnoreBaseRecords;
     };
 }
 #endif // REFERENCEABLECHECKSTAGE_H

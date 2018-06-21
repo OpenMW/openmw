@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include "../prefs/state.hpp"
+
 #include "../world/refiddata.hpp"
 #include "../world/universalid.hpp"
 
@@ -11,20 +13,24 @@ CSMTools::SoundGenCheckStage::SoundGenCheckStage(const CSMWorld::IdCollection<ES
     : mSoundGens(soundGens),
       mSounds(sounds),
       mReferenceables(referenceables)
-{}
+{
+    mIgnoreBaseRecords = false;
+}
 
 int CSMTools::SoundGenCheckStage::setup()
 {
+    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+
     return mSoundGens.getSize();
 }
 
 void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages &messages)
 {
     const CSMWorld::Record<ESM::SoundGenerator> &record = mSoundGens.getRecord(stage);
-    if (record.isDeleted())
-    {
+    
+    // Skip "Base" records (setting!) and "Deleted" records
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
-    }
 
     const ESM::SoundGenerator& soundGen = record.get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_SoundGen, soundGen.mId);

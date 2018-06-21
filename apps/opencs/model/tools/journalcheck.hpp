@@ -28,6 +28,7 @@ namespace CSMTools
 
         const CSMWorld::IdCollection<ESM::Dialogue>& mJournals;
         const CSMWorld::InfoCollection& mJournalInfos;
+        bool mIgnoreBaseRecords;
 
     };
 }

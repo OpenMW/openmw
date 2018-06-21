@@ -2,6 +2,8 @@
 
 #include <components/misc/resourcehelpers.hpp>
 
+#include "../prefs/state.hpp"
+
 #include "../world/resources.hpp"
 #include "../world/data.hpp"
 
@@ -77,16 +79,26 @@ CSMTools::MagicEffectCheckStage::MagicEffectCheckStage(const CSMWorld::IdCollect
       mReferenceables(referenceables),
       mIcons(icons),
       mTextures(textures)
-{}
+{
+    mIgnoreBaseRecords = false;
+}
 
 int CSMTools::MagicEffectCheckStage::setup()
 {
+    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+
     return mMagicEffects.getSize();
 }
 
 void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages &messages)
 {
-    ESM::MagicEffect effect = mMagicEffects.getRecord(stage).get();
+    const CSMWorld::Record<ESM::MagicEffect> &record = mMagicEffects.getRecord(stage);
+
+    // Skip "Base" records (setting!) and "Deleted" records
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
+        return;
+
+    ESM::MagicEffect effect = record.get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_MagicEffect, effect.mId);
     
     if (effect.mData.mBaseCost < 0.0f)

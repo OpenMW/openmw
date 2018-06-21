@@ -5,14 +5,20 @@
 
 #include <components/esm/loadbsgn.hpp>
 
+#include "../prefs/state.hpp"
+
 #include "../world/universalid.hpp"
 
 CSMTools::BirthsignCheckStage::BirthsignCheckStage (const CSMWorld::IdCollection<ESM::BirthSign>& birthsigns)
 : mBirthsigns (birthsigns)
-{}
+{
+    mIgnoreBaseRecords = false;
+}
 
 int CSMTools::BirthsignCheckStage::setup()
 {
+    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+
     return mBirthsigns.getSize();
 }
 
@@ -20,7 +26,8 @@ void CSMTools::BirthsignCheckStage::perform (int stage, CSMDoc::Messages& messag
 {
     const CSMWorld::Record<ESM::BirthSign>& record = mBirthsigns.getRecord (stage);
 
-    if (record.isDeleted())
+    // Skip "Base" records (setting!) and "Deleted" records
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const ESM::BirthSign& birthsign = record.get();
