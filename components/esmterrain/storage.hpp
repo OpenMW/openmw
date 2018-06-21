@@ -94,8 +94,6 @@ namespace ESMTerrain
 
         virtual float getHeightAt (const osg::Vec3f& worldPos);
 
-        virtual Terrain::LayerInfo getDefaultLayer();
-
         /// Get the transformation factor for mapping cell units to world units.
         virtual float getCellWorldSize();
 

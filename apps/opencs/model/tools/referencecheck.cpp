@@ -1,5 +1,7 @@
 #include "referencecheck.hpp"
 
+#include "../prefs/state.hpp"
+
 CSMTools::ReferenceCheckStage::ReferenceCheckStage(
     const CSMWorld::RefCollection& references,
     const CSMWorld::RefIdCollection& referencables,
@@ -12,13 +14,15 @@ CSMTools::ReferenceCheckStage::ReferenceCheckStage(
     mCells(cells),
     mFactions(factions)
 {
+    mIgnoreBaseRecords = false;
 }
 
 void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &messages)
 {
     const CSMWorld::Record<CSMWorld::CellRef>& record = mReferences.getRecord(stage);
 
-    if (record.isDeleted())
+    // Skip "Base" records (setting!) and "Deleted" records
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const CSMWorld::CellRef& cellRef = record.get();
@@ -100,5 +104,7 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
 
 int CSMTools::ReferenceCheckStage::setup()
 {
+    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+
     return mReferences.getSize();
 }

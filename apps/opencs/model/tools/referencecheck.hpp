@@ -23,6 +23,7 @@ namespace CSMTools
             const CSMWorld::RefIdData& mDataSet;
             const CSMWorld::IdCollection<CSMWorld::Cell>& mCells;
             const CSMWorld::IdCollection<ESM::Faction>& mFactions;
+            bool mIgnoreBaseRecords;
     };
 }
 

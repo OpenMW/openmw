@@ -173,6 +173,7 @@ Programmers
 Documentation
 -------------
 
+    Adam Bowen (adamnbowen)
     Alejandro Sanchez (HiPhish)
     Bodillium
     Bret Curtis (psi29a)

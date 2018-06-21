@@ -32,6 +32,7 @@
     Bug #4327: Missing animations during spell/weapon stance switching
     Bug #4368: Settings window ok button doesn't have key focus by default
     Bug #4393: NPCs walk back to where they were after using ResetActors
+    Bug #4416: Handle exception if we try to play non-music file
     Bug #4419: MRK NiStringExtraData is handled incorrectly
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4429: [Windows] Error on build INSTALL.vcxproj project (debug) with cmake 3.7.2
@@ -39,17 +40,22 @@
     Bug #4432: Guards behaviour is incorrect if they do not have AI packages
     Bug #4433: Guard behaviour is incorrect with Alarm = 0
     Bug #4451: Script fails to compile when using "Begin, [ScriptName]" syntax
+    Bug #4452: Default terrain texture bleeds through texture transitions
     Bug #4453: Quick keys behaviour is invalid for equipment
     Bug #4454: AI opens doors too slow
     Bug #4457: Item without CanCarry flag prevents shield autoequipping in dark areas
     Bug #4458: AiWander console command handles idle chances incorrectly
     Bug #4459: NotCell dialogue condition doesn't support partial matches
-    Feature #4256: Implement ToggleBorders (TB) console command
+    Bug #4461: "Open" spell from non-player caster isn't a crime
+    Bug #4469: Abot Silt Striders – Model turn 90 degrees on horizontal
+    Bug #4471: Retrieve SDL window settings instead of using magic numbers
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #4222: 360° screenshots
+    Feature #4256: Implement ToggleBorders (TB) console command
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
     Feature #4345: Add equivalents for the command line commands to Launcher
     Feature #4444: Per-group KF-animation files support
+    Feature #4466: Editor: Add option to ignore "Base" records when running verifier
 
 0.44.0
 ------
@@ -135,6 +141,7 @@
     Bug #4412: openmw-iniimporter ignores data paths from config
     Bug #4413: Moving with 0 strength uses all of your fatigue
     Bug #4420: Camera flickering when I open up and close menus while sneaking
+    Bug #4424: [macOS] Cursor is either empty or garbage when compiled against macOS 10.13 SDK
     Bug #4435: Item health is considered a signed integer
     Bug #4441: Adding items to currently disabled weapon-wielding creatures crashes the game
     Feature #1786: Round up encumbrance value in the encumbrance bar

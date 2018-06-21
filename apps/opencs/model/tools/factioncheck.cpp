@@ -6,14 +6,20 @@
 #include <components/esm/loadfact.hpp>
 #include <components/esm/loadskil.hpp>
 
+#include "../prefs/state.hpp"
+
 #include "../world/universalid.hpp"
 
 CSMTools::FactionCheckStage::FactionCheckStage (const CSMWorld::IdCollection<ESM::Faction>& factions)
 : mFactions (factions)
-{}
+{
+    mIgnoreBaseRecords = false;
+}
 
 int CSMTools::FactionCheckStage::setup()
 {
+    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+
     return mFactions.getSize();
 }
 
@@ -21,7 +27,8 @@ void CSMTools::FactionCheckStage::perform (int stage, CSMDoc::Messages& messages
 {
     const CSMWorld::Record<ESM::Faction>& record = mFactions.getRecord (stage);
 
-    if (record.isDeleted())
+    // Skip "Base" records (setting!) and "Deleted" records
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const ESM::Faction& faction = record.get();

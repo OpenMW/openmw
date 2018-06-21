@@ -361,6 +361,11 @@ namespace ESMTerrain
 
     std::string Storage::getTextureName(UniqueTextureId id)
     {
+        // Goes under used terrain blend transitions
+        static const std::string baseTexture = "textures\\tx_black_01.dds";
+        if (id.first == -1)
+            return baseTexture;
+
         static const std::string defaultTexture = "textures\\_land_default.dds";
         if (id.first == 0)
             return defaultTexture; // Not sure if the default texture really is hardcoded?
@@ -396,11 +401,9 @@ namespace ESMTerrain
         // Save the used texture indices so we know the total number of textures
         // and number of required blend maps
         std::set<UniqueTextureId> textureIndices;
-        // Due to the way the blending works, the base layer will always shine through in between
-        // blend transitions (eg halfway between two texels, both blend values will be 0.5, so 25% of base layer visible).
-        // To get a consistent look, we need to make sure to use the same base layer in all cells.
-        // So we're always adding _land_default.dds as the base layer here, even if it's not referenced in this cell.
-        textureIndices.insert(std::make_pair(0,0));
+        // Due to the way the blending works, the base layer will bleed between texture transitions so we want it to be a black texture
+        // The subsequent passes are added instead of blended, so this gives the correct result
+        textureIndices.insert(std::make_pair(-1,0)); // -1 goes to tx_black_01
 
         LandCache cache;
 
@@ -615,15 +618,6 @@ namespace ESMTerrain
 
         mLayerInfoMap[texture] = info;
 
-        return info;
-    }
-
-    Terrain::LayerInfo Storage::getDefaultLayer()
-    {
-        Terrain::LayerInfo info;
-        info.mDiffuseMap = "textures\\_land_default.dds";
-        info.mParallax = false;
-        info.mSpecular = false;
         return info;
     }
 

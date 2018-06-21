@@ -1,5 +1,7 @@
 #include "bodypartcheck.hpp"
 
+#include "../prefs/state.hpp"
+
 CSMTools::BodyPartCheckStage::BodyPartCheckStage(
         const CSMWorld::IdCollection<ESM::BodyPart> &bodyParts,
         const CSMWorld::Resources                   &meshes,
@@ -7,10 +9,14 @@ CSMTools::BodyPartCheckStage::BodyPartCheckStage(
     mBodyParts(bodyParts),
     mMeshes(meshes),
     mRaces(races)
-{ }
+{
+    mIgnoreBaseRecords = false;
+}
 
 int CSMTools::BodyPartCheckStage::setup()
 {
+    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+
     return mBodyParts.getSize();
 }
 
@@ -18,7 +24,8 @@ void CSMTools::BodyPartCheckStage::perform (int stage, CSMDoc::Messages &message
 {
     const CSMWorld::Record<ESM::BodyPart> &record = mBodyParts.getRecord(stage);
 
-    if ( record.isDeleted() )
+    // Skip "Base" records (setting!) and "Deleted" records
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     const ESM::BodyPart &bodyPart = record.get();

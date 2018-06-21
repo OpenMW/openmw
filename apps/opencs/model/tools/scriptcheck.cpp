@@ -60,6 +60,8 @@ CSMTools::ScriptCheckStage::ScriptCheckStage (const CSMDoc::Document& document)
 
     Compiler::registerExtensions (mExtensions);
     mContext.setExtensions (&mExtensions);
+
+    mIgnoreBaseRecords = false;
 }
 
 int CSMTools::ScriptCheckStage::setup()
@@ -78,15 +80,23 @@ int CSMTools::ScriptCheckStage::setup()
     mId.clear();
     Compiler::ErrorHandler::reset();
 
+    mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
+
     return mDocument.getData().getScripts().getSize();
 }
 
 void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
+    const CSMWorld::Record<ESM::Script> &record = mDocument.getData().getScripts().getRecord(stage);
+
     mId = mDocument.getData().getScripts().getId (stage);
 
     if (mDocument.isBlacklisted (
         CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Script, mId)))
+        return;
+
+    // Skip "Base" records (setting!) and "Deleted" records
+    if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
     mMessages = &messages;
@@ -100,10 +110,8 @@ void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
     try
     {
-        const CSMWorld::Data& data = mDocument.getData();
-
-        mFile = data.getScripts().getRecord (stage).get().mId;
-        std::istringstream input (data.getScripts().getRecord (stage).get().mScriptText);
+        mFile = record.get().mId;
+        std::istringstream input (record.get().mScriptText);
 
         Compiler::Scanner scanner (*this, input, mContext.getExtensions());
 

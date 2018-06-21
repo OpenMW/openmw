@@ -17,6 +17,7 @@ namespace CSMTools
         const CSMWorld::IdCollection<ESM::BodyPart> &mBodyParts;
         const CSMWorld::Resources                   &mMeshes;
         const CSMWorld::IdCollection<ESM::Race>     &mRaces;
+        bool                                        mIgnoreBaseRecords;
 
     public:
         BodyPartCheckStage(

@@ -9,3 +9,8 @@ insert_final_newline = true
 indent_style = space
 indent_size = 4
 insert_final_newline = true
+
+[*.glsl]
+indent_style = space
+indent_size = 4
+insert_final_newline = false
