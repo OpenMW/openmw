@@ -11,6 +11,7 @@
     Bug #2852: No murder bounty when a player follower commits murder
     Bug #2862: [macOS] Can't quit launcher using Command-Q or OpenMW->Quit
     Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
+    Bug #3249: Fixed revert function not updating views properly
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3486: [Mod] NPC Commands does not work
     Bug #3591: Angled hit distance too low
@@ -59,7 +60,7 @@
     Bug #4480: Segfault in QuickKeysMenu when item no longer in inventory
     Bug #4489: Goodbye doesn't block dialogue hyperlinks
     Bug #4490: PositionCell on player gives "Error: tried to add local script twice"
-    Bug #3249: Fixed revert function not updating views properly
+    Bug #4495: Crossbow animations blending is buggy
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #3641: Editor: Limit FPS in 3d preview window

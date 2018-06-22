@@ -370,6 +370,10 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
                 {
                     jumpmask = MWRender::Animation::BlendMask_LowerBody;
                     jumpAnimName = "jump";
+
+                    // For crossbow animations use 1h ones as fallback
+                    if (mWeaponType == WeapType_Crossbow)
+                        jumpAnimName += "1h";
                 }
             }
         }
@@ -423,6 +427,10 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
                 {
                     movemask = MWRender::Animation::BlendMask_LowerBody;
                     movementAnimName = movestate->groupname;
+
+                    // For crossbow animations use 1h ones as fallback
+                    if (mWeaponType == WeapType_Crossbow)
+                        movementAnimName += "1h";
                 }
             }
 
