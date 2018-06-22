@@ -1,3 +1,6 @@
+stages:
+  - build
+  
 linux-stable:
   image: gcc
     
