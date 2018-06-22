@@ -257,6 +257,7 @@ protected:
     Resource::ResourceSystem* mResourceSystem;
 
     osg::Vec3f mAccumulate;
+    float mDiscardThresholdSquare;
 
     TextKeyListener* mTextKeyListener;
 
