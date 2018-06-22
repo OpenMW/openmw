@@ -3,12 +3,12 @@
 void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 viewPos, vec3 viewNormal, vec4 diffuse, vec3 ambient)
 {
     vec3 lightDir;
-	float lightDistance;
+    float lightDistance;
 
     lightDir = gl_LightSource[lightIndex].position.xyz - (viewPos.xyz * gl_LightSource[lightIndex].position.w);
     lightDistance = length(lightDir);
     lightDir = normalize(lightDir);
-	float illumination = clamp(1.0 / (gl_LightSource[lightIndex].constantAttenuation + gl_LightSource[lightIndex].linearAttenuation * lightDistance + gl_LightSource[lightIndex].quadraticAttenuation * lightDistance * lightDistance), 0.0, 1.0);
+    float illumination = clamp(1.0 / (gl_LightSource[lightIndex].constantAttenuation + gl_LightSource[lightIndex].linearAttenuation * lightDistance + gl_LightSource[lightIndex].quadraticAttenuation * lightDistance * lightDistance), 0.0, 1.0);
 
     ambientOut = ambient * gl_LightSource[lightIndex].ambient.xyz * illumination;
     diffuseOut = diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0) * illumination;
@@ -38,7 +38,7 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadow
     lightResult.xyz += ambientLight + diffuseLight * shadowing;
 #else
     shadowDiffuse = diffuseLight;
-	lightResult.xyz += ambientLight;
+    lightResult.xyz += ambientLight;
 #endif
     for (int i=1; i<MAX_LIGHTS; ++i)
     {

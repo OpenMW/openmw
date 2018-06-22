@@ -144,10 +144,10 @@ uniform vec3 nodePosition;
 uniform float rainIntensity;
 
 #if SHADOWS
-	@foreach shadow_texture_unit_index @shadow_texture_unit_list
-		uniform sampler2DShadow shadowTexture@shadow_texture_unit_index;
-		varying vec4 shadowSpaceCoords@shadow_texture_unit_index;
-	@endforeach
+    @foreach shadow_texture_unit_index @shadow_texture_unit_list
+        uniform sampler2DShadow shadowTexture@shadow_texture_unit_index;
+        varying vec4 shadowSpaceCoords@shadow_texture_unit_index;
+    @endforeach
 #endif // SHADOWS
 
 float frustumDepth;
@@ -167,31 +167,31 @@ void main(void)
     UV.y *= -1.0;
 
 #if SHADOWS
-	float shadowing = 1.0;
-	#if @shadowMapsOverlap
-		bool doneShadows = false;
-		@foreach shadow_texture_unit_index @shadow_texture_unit_list
-			if (!doneShadows)
-			{
-				vec2 shadowXY = shadowSpaceCoords@shadow_texture_unit_index.xy / shadowSpaceCoords@shadow_texture_unit_index.w;
-				if (all(lessThan(shadowXY, vec2(1.0, 1.0))) && all(greaterThan(shadowXY, vec2(0.0, 0.0))))
-				{
-					shadowing *= shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r;
+    float shadowing = 1.0;
+    #if @shadowMapsOverlap
+        bool doneShadows = false;
+        @foreach shadow_texture_unit_index @shadow_texture_unit_list
+            if (!doneShadows)
+            {
+                vec2 shadowXY = shadowSpaceCoords@shadow_texture_unit_index.xy / shadowSpaceCoords@shadow_texture_unit_index.w;
+                if (all(lessThan(shadowXY, vec2(1.0, 1.0))) && all(greaterThan(shadowXY, vec2(0.0, 0.0))))
+                {
+                    shadowing *= shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r;
 
-					if (all(lessThan(shadowXY, vec2(0.95, 0.95))) && all(greaterThan(shadowXY, vec2(0.05, 0.05))))
-						doneShadows = true;
-				}
-			}
-		@endforeach
-	#else
-		@foreach shadow_texture_unit_index @shadow_texture_unit_list
-			shadowing *= shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r;
-		@endforeach
-	#endif
+                    if (all(lessThan(shadowXY, vec2(0.95, 0.95))) && all(greaterThan(shadowXY, vec2(0.05, 0.05))))
+                        doneShadows = true;
+                }
+            }
+        @endforeach
+    #else
+        @foreach shadow_texture_unit_index @shadow_texture_unit_list
+            shadowing *= shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r;
+        @endforeach
+    #endif
 
-	float shadow = shadowing;
+    float shadow = shadowing;
 #else // NOT SHADOWS
-	float shadow = 1.0;
+    float shadow = 1.0;
 #endif // SHADOWS
 
     vec2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
@@ -218,8 +218,8 @@ void main(void)
     vec3 rippleAdd = rainRipple.xyz * rainRipple.w * 10.0;
 
     vec3 normal = (normal0 * BIG_WAVES_X + normal1 * BIG_WAVES_Y +
-			normal2 * MID_WAVES_X + normal3 * MID_WAVES_Y +
-			normal4 * SMALL_WAVES_X + normal5 * SMALL_WAVES_Y +
+            normal2 * MID_WAVES_X + normal3 * MID_WAVES_Y +
+            normal4 * SMALL_WAVES_X + normal5 * SMALL_WAVES_Y +
                         rippleAdd);
 
     normal = normalize(vec3(normal.x * BUMP, normal.y * BUMP, normal.z));
@@ -228,8 +228,8 @@ void main(void)
 
     // normal for sunlight scattering
     vec3 lNormal = (normal0 * BIG_WAVES_X*0.5 + normal1 * BIG_WAVES_Y*0.5 +
-		normal2 * MID_WAVES_X*0.2 + normal3 * MID_WAVES_Y*0.2 +
-		normal4 * SMALL_WAVES_X*0.1 + normal5 * SMALL_WAVES_Y*0.1 +
+        normal2 * MID_WAVES_X*0.2 + normal3 * MID_WAVES_Y*0.2 +
+        normal4 * SMALL_WAVES_X*0.1 + normal5 * SMALL_WAVES_Y*0.1 +
                 rippleAdd).xyz;
 
     lNormal = normalize(vec3(lNormal.x * BUMP, lNormal.y * BUMP, lNormal.z));
