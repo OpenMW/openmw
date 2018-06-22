@@ -218,9 +218,9 @@ void main(void)
     vec3 rippleAdd = rainRipple.xyz * rainRipple.w * 10.0;
 
     vec3 normal = (normal0 * BIG_WAVES_X + normal1 * BIG_WAVES_Y +
-            normal2 * MID_WAVES_X + normal3 * MID_WAVES_Y +
-            normal4 * SMALL_WAVES_X + normal5 * SMALL_WAVES_Y +
-                        rippleAdd);
+                   normal2 * MID_WAVES_X + normal3 * MID_WAVES_Y +
+                   normal4 * SMALL_WAVES_X + normal5 * SMALL_WAVES_Y +
+                   rippleAdd);
 
     normal = normalize(vec3(normal.x * BUMP, normal.y * BUMP, normal.z));
 
@@ -228,9 +228,9 @@ void main(void)
 
     // normal for sunlight scattering
     vec3 lNormal = (normal0 * BIG_WAVES_X*0.5 + normal1 * BIG_WAVES_Y*0.5 +
-        normal2 * MID_WAVES_X*0.2 + normal3 * MID_WAVES_Y*0.2 +
-        normal4 * SMALL_WAVES_X*0.1 + normal5 * SMALL_WAVES_Y*0.1 +
-                rippleAdd).xyz;
+                    normal2 * MID_WAVES_X*0.2 + normal3 * MID_WAVES_Y*0.2 +
+                    normal4 * SMALL_WAVES_X*0.1 + normal5 * SMALL_WAVES_Y*0.1 +
+                    rippleAdd).xyz;
 
     lNormal = normalize(vec3(lNormal.x * BUMP, lNormal.y * BUMP, lNormal.z));
     lNormal = vec3(-lNormal.x, -lNormal.y, lNormal.z);
