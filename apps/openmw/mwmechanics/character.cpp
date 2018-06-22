@@ -1627,16 +1627,18 @@ bool CharacterController::updateWeaponState()
                 break;
         }
 
+        // Note: apply reload animations only for upper body since blending with movement animations can give weird result.
+        // Especially noticable with crossbow reload animation.
         if(!start.empty())
         {
             mAnimation->disable(mCurrentWeapon);
             if (mUpperBodyState == UpperCharState_FollowStartToFollowStop)
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_All, true,
+                                 MWRender::Animation::BlendMask_UpperBody, true,
                                  weapSpeed, start, stop, 0.0f, 0);
             else
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_All, false,
+                                 MWRender::Animation::BlendMask_UpperBody, false,
                                  weapSpeed, start, stop, 0.0f, 0);
         }
     }
