@@ -2,6 +2,7 @@
 #define MWGUI_QUICKKEYS_H
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "windowbase.hpp"
 
@@ -57,6 +58,8 @@ namespace MWGui
     private:
         MyGUI::EditBox* mInstructionLabel;
         MyGUI::Button* mOkButton;
+
+        MWWorld::ContainerStore mRefItemContainer;
 
         std::vector<ItemWidget*> mQuickKeyButtons;
         std::vector<QuickKeyType> mAssigned;

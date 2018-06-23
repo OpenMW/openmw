@@ -124,6 +124,13 @@ namespace MWGui
 
     void QuickKeysMenu::unassign(ItemWidget* key, int index)
     {
+        // cleanup refrance ItemContainer
+        if( mAssigned[index] == Type_Item || mAssigned[index] == Type_MagicItem)
+        {
+            MWWorld::Ptr refItem = *key->getUserData<MWWorld::Ptr>();
+            mRefItemContainer.remove(refItem.getCellRef().getRefId(), 1, MWMechanics::getPlayer());
+        }
+
         key->clearUserStrings();
         key->setItem(MWWorld::Ptr());
         while (key->getChildCount()) // Destroy number label
@@ -221,9 +228,11 @@ namespace MWGui
 
         mAssigned[mSelectedIndex] = Type_Item;
 
-        button->setItem(item, ItemWidget::Barter);
+        MWWorld::Ptr itemCopy = *mRefItemContainer.add(item, 1, MWMechanics::getPlayer());
+
+        button->setItem(itemCopy, ItemWidget::Barter);
         button->setUserString ("ToolTipType", "ItemPtr");
-        button->setUserData(MWWorld::Ptr(item));
+        button->setUserData(itemCopy);
 
         if (mItemSelectionDialog)
             mItemSelectionDialog->setVisible(false);
@@ -334,29 +343,78 @@ namespace MWGui
 
         if (type == Type_Item || type == Type_MagicItem)
         {
-            MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
-            // Make sure the item is available and is not broken
-            if (item.getRefData().getCount() < 1 ||
-                (item.getClass().hasItemHealth(item) &&
-                item.getClass().getItemHealth(item) <= 0))
+            MWWorld::Ptr refItem = *button->getUserData<MWWorld::Ptr>();
+            MWWorld::Ptr item = store.findReplacement(refItem.getCellRef().getRefId());
+
+            // check the item is available and not broken
+            if (!item || item.getRefData().getCount() < 1 ||
+                (item.getClass().hasItemHealth(item) && item.getClass().getItemHealth(item) <= 0))
             {
-                // Try searching for a compatible replacement
-                std::string id = item.getCellRef().getRefId();
-
-                item = store.findReplacement(id);
-                button->setUserData(MWWorld::Ptr(item));
-
-                if (item.getRefData().getCount() < 1)
+                if (!item || item.getRefData().getCount() < 1)
                 {
-                    // No replacement was found
-                    MWBase::Environment::get().getWindowManager ()->messageBox (
-                                "#{sQuickMenu5} " + item.getClass().getName(item));
+                    // item not in plater inventory found
+                    MWBase::Environment::get().getWindowManager()->messageBox(
+                        "#{sQuickMenu5} " + refItem.getClass().getName(refItem));
+
                     return;
                 }
             }
-        }
 
-        if (type == Type_Magic)
+            if (type == Type_Item)
+            {
+                bool isWeapon = item.getTypeName() == typeid(ESM::Weapon).name();
+                bool isTool = item.getTypeName() == typeid(ESM::Probe).name() ||
+                    item.getTypeName() == typeid(ESM::Lockpick).name();
+
+                // delay weapon switching if player is busy
+                if (isDelayNeeded && (isWeapon || isTool))
+                {
+                    mActivatedIndex = index;
+                    return;
+                }
+
+                // disable weapon switching if player is dead or paralyzed
+                if (isReturnNeeded && (isWeapon || isTool))
+                {
+                    return;
+                }
+
+                MWBase::Environment::get().getWindowManager()->useItem(item);
+                MWWorld::ConstContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                // change draw state only if the item is in player's right hand
+                if (rightHand != store.end() && item == *rightHand)
+                {
+                    MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
+                }
+            }
+            else if (type == Type_MagicItem)
+            {
+                // retrieve ContainerStoreIterator to the item
+                MWWorld::ContainerStoreIterator it = store.begin();
+                for (; it != store.end(); ++it)
+                {
+                    if (*it == item)
+                    {
+                        break;
+                    }
+                }
+                assert(it != store.end());
+
+                // equip, if it can be equipped
+                if (!item.getClass().getEquipmentSlots(item).first.empty())
+                {
+                    MWBase::Environment::get().getWindowManager()->useItem(item);
+
+                    // make sure that item was successfully equipped
+                    if (!store.isEquipped(item))
+                        return;
+                }
+
+                store.setSelectedEnchantItem(it);
+                MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Spell);
+            }
+        }
+        else if (type == Type_Magic)
         {
             std::string spellId = button->getUserString("Spell");
 
@@ -372,61 +430,6 @@ namespace MWGui
             }
             store.setSelectedEnchantItem(store.end());
             MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
-            MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Spell);
-        }
-        else if (type == Type_Item)
-        {
-            MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
-            bool isWeapon = item.getTypeName() == typeid(ESM::Weapon).name();
-            bool isTool = item.getTypeName() == typeid(ESM::Probe).name() || item.getTypeName() == typeid(ESM::Lockpick).name();
-
-            // delay weapon switching if player is busy
-            if (isDelayNeeded && (isWeapon || isTool))
-            {
-                mActivatedIndex = index;
-                return;
-            }
-
-            // disable weapon switching if player is dead or paralyzed
-            if (isReturnNeeded && (isWeapon || isTool))
-            {
-                return;
-            }
-
-            MWBase::Environment::get().getWindowManager()->useItem(item);
-            MWWorld::ConstContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-            // change draw state only if the item is in player's right hand
-            if (rightHand != store.end() && item == *rightHand)
-            {
-                MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
-            }
-        }
-        else if (type == Type_MagicItem)
-        {
-            MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
-
-            // retrieve ContainerStoreIterator to the item
-            MWWorld::ContainerStoreIterator it = store.begin();
-            for (; it != store.end(); ++it)
-            {
-                if (*it == item)
-                {
-                    break;
-                }
-            }
-            assert(it != store.end());
-
-            // equip, if it can be equipped
-            if (!item.getClass().getEquipmentSlots(item).first.empty())
-            {
-                MWBase::Environment::get().getWindowManager()->useItem(item);
-
-                // make sure that item was successfully equipped
-                if (!store.isEquipped(item))
-                    return;
-            }
-
-            store.setSelectedEnchantItem(it);
             MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Spell);
         }
         else if (type == Type_HandToHand)
