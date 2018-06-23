@@ -41,10 +41,10 @@ MacOS:
     - xcode
   stage: build
   allow_failure: true
-  script: 
-    - cores_to_use=$((`nproc`-2)); if (( $cores_to_use < 1 )); then cores_to_use=1; fi
-    - mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=MinSizeRel ../
-    - make -j$cores_to_use
+  script:
+    - CI/before_install.osx.sh
+    - CI/before_script.osx.sh
+    - make -j2
     - DESTDIR=artifacts make install
   artifacts:
     paths:
