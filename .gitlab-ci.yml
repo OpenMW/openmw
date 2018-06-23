@@ -38,7 +38,7 @@ linux-stable:
 darwin:
   tags:
     - macos
-    - macos_10_12
+    - xcode
   stage: build
   script: 
     - cores_to_use=$((`nproc`-2)); if (( $cores_to_use < 1 )); then cores_to_use=1; fi
