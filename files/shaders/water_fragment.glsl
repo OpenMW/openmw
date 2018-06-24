@@ -1,7 +1,6 @@
 #version 120
 
 #define REFRACTION @refraction_enabled
-#define SHADOWS @shadows_enabled
 
 // Inspired by Blender GLSL Water by martinsh ( https://devlog-martinsh.blogspot.de/2012/07/waterundewater-shader-wip.html )
 
@@ -143,12 +142,7 @@ uniform vec3 nodePosition;
 
 uniform float rainIntensity;
 
-#if SHADOWS
-    @foreach shadow_texture_unit_index @shadow_texture_unit_list
-        uniform sampler2DShadow shadowTexture@shadow_texture_unit_index;
-        varying vec4 shadowSpaceCoords@shadow_texture_unit_index;
-    @endforeach
-#endif // SHADOWS
+#include "shadows_fragment.glsl"
 
 float frustumDepth;
 
@@ -166,33 +160,7 @@ void main(void)
     vec2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
     UV.y *= -1.0;
 
-#if SHADOWS
-    float shadowing = 1.0;
-    #if @shadowMapsOverlap
-        bool doneShadows = false;
-        @foreach shadow_texture_unit_index @shadow_texture_unit_list
-            if (!doneShadows)
-            {
-                vec2 shadowXY = shadowSpaceCoords@shadow_texture_unit_index.xy / shadowSpaceCoords@shadow_texture_unit_index.w;
-                if (all(lessThan(shadowXY, vec2(1.0, 1.0))) && all(greaterThan(shadowXY, vec2(0.0, 0.0))))
-                {
-                    shadowing *= shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r;
-
-                    if (all(lessThan(shadowXY, vec2(0.95, 0.95))) && all(greaterThan(shadowXY, vec2(0.05, 0.05))))
-                        doneShadows = true;
-                }
-            }
-        @endforeach
-    #else
-        @foreach shadow_texture_unit_index @shadow_texture_unit_list
-            shadowing *= shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r;
-        @endforeach
-    #endif
-
-    float shadow = shadowing;
-#else // NOT SHADOWS
-    float shadow = 1.0;
-#endif // SHADOWS
+    float shadow = unshadowedLightRatio();
 
     vec2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
     screenCoords.y = (1.0-screenCoords.y);

@@ -1,7 +1,5 @@
 #version 120
 
-#define SHADOWS @shadows_enabled
-
 varying vec2 uv;
 
 uniform sampler2D diffuseMap;
@@ -27,13 +25,7 @@ centroid varying vec4 passColor;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
-#if SHADOWS
-    @foreach shadow_texture_unit_index @shadow_texture_unit_list
-        uniform sampler2DShadow shadowTexture@shadow_texture_unit_index;
-        varying vec4 shadowSpaceCoords@shadow_texture_unit_index;
-    @endforeach
-#endif // SHADOWS
-
+#include "shadows_fragment.glsl"
 #include "lighting.glsl"
 #include "parallax.glsl"
 
@@ -74,29 +66,7 @@ void main()
     gl_FragData[0].a *= texture2D(blendMap, blendMapUV).a;
 #endif
 
-    float shadowing = 1.0;
-#if SHADOWS
-    #if @shadowMapsOverlap
-        bool doneShadows = false;
-        @foreach shadow_texture_unit_index @shadow_texture_unit_list
-            if (!doneShadows)
-            {
-                vec2 shadowXY = shadowSpaceCoords@shadow_texture_unit_index.xy / shadowSpaceCoords@shadow_texture_unit_index.w;
-                if (all(lessThan(shadowXY, vec2(1.0, 1.0))) && all(greaterThan(shadowXY, vec2(0.0, 0.0))))
-                {
-                    shadowing *= shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r;
-
-                    if (all(lessThan(shadowXY, vec2(0.95, 0.95))) && all(greaterThan(shadowXY, vec2(0.05, 0.05))))
-                        doneShadows = true;
-                }
-            }
-        @endforeach
-    #else
-        @foreach shadow_texture_unit_index @shadow_texture_unit_list
-            shadowing *= shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r;
-        @endforeach
-    #endif
-#endif // SHADOWS
+    float shadowing = unshadowedLightRatio();
 
 #if !PER_PIXEL_LIGHTING
     gl_FragData[0] *= lighting + vec4(shadowDiffuseLighting * shadowing, 0);
