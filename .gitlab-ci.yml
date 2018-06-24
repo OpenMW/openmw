@@ -5,14 +5,11 @@ Debian:
   tags:
     - docker
     - linux
-    
   image: gcc
-    
   cache:
     key: apt-cache
     paths:
     - apt-cache/
-    
   before_script:
     - export APT_CACHE_DIR=`pwd`/apt-cache && mkdir -pv $APT_CACHE_DIR
     - apt-get update -yq 
@@ -24,8 +21,6 @@ Debian:
     - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb -o libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb
     - curl http://ftp.us.debian.org/debian/pool/main/m/mygui/libmygui-dev_3.2.2+dfsg-1_amd64.deb -o libmygui-dev_3.2.2+dfsg-1_amd64.deb
     - dpkg --ignore-depends=libmygui.ogreplatform0debian1v5 -i *.deb 
-    
-
   stage: build
   script: 
     - cores_to_use=$((`nproc`-2)); if (( $cores_to_use < 1 )); then cores_to_use=1; fi
@@ -42,6 +37,7 @@ MacOS:
   stage: build
   allow_failure: true
   script:
+    - macos_qt_formula=qt
     - CI/before_install.osx.sh
     - CI/before_script.osx.sh
     - make -j2
