@@ -34,7 +34,9 @@ namespace ESM
 
         ESM::AnimationState mAnimationState;
 
-        ObjectState() : mHasCustomState(true), mVersion(0)
+        ObjectState()
+        : mHasLocals(0), mEnabled(0), mCount(0)
+        , mFlags(0), mHasCustomState(true), mVersion(0)
         {}
 
         /// @note Does not load the CellRef ID, it should already be loaded before calling this method
