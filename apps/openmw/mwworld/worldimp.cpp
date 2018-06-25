@@ -1179,8 +1179,8 @@ namespace MWWorld
             }
             else
             {
-                bool currCellActive = mWorldScene->isCellActive(*currCell);
-                bool newCellActive = mWorldScene->isCellActive(*newCell);
+                bool currCellActive = currCell && mWorldScene->isCellActive(*currCell);
+                bool newCellActive = newCell && mWorldScene->isCellActive(*newCell);
                 if (!currCellActive && newCellActive)
                 {
                     newPtr = currCell->moveTo(ptr, newCell);

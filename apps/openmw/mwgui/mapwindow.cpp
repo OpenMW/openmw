@@ -679,7 +679,9 @@ namespace MWGui
         mEventBoxLocal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
         mEventBoxLocal->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &MapWindow::onMapDoubleClicked);
 
-        LocalMapBase::init(mLocalMap, mPlayerArrowLocal, Settings::Manager::getInt("local map widget size", "Map"), Settings::Manager::getInt("local map cell distance", "Map"));
+        int mapSize = std::max(1, Settings::Manager::getInt("local map widget size", "Map"));
+        int cellDistance = std::max(1, Settings::Manager::getInt("local map cell distance", "Map"));
+        LocalMapBase::init(mLocalMap, mPlayerArrowLocal, mapSize, cellDistance);
 
         mGlobalMap->setVisible(mGlobal);
         mLocalMap->setVisible(!mGlobal);
