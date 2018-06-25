@@ -60,6 +60,8 @@ namespace MWGui
         MyGUI::Button* mOkButton;
 
         MWWorld::ContainerStore mRefItemContainer;
+        std::vector<std::string> mAssignedId;
+        std::vector<std::string> mAssignedName;
 
         std::vector<ItemWidget*> mQuickKeyButtons;
         std::vector<QuickKeyType> mAssigned;

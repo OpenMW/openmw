@@ -60,6 +60,9 @@ namespace MWGui
 
             mAssigned.push_back(Type_Unassigned);
 
+            mAssignedId.push_back(std::string(""));
+            mAssignedName.push_back(std::string(""));
+
             unassign(button, i);
         }
     }
@@ -130,6 +133,9 @@ namespace MWGui
             MWWorld::Ptr refItem = *key->getUserData<MWWorld::Ptr>();
             mRefItemContainer.remove(refItem.getCellRef().getRefId(), 1, MWMechanics::getPlayer());
         }
+
+        mAssignedName[index] = "";
+        mAssignedId[index] = "";
 
         key->clearUserStrings();
         key->setItem(MWWorld::Ptr());
@@ -227,12 +233,14 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(button->getChildAt(0));
 
         mAssigned[mSelectedIndex] = Type_Item;
+        mAssignedId[mSelectedIndex] = item.getCellRef().getRefId();
+        mAssignedName[mSelectedIndex] = item.getClass().getName(item);
 
-        MWWorld::Ptr itemCopy = *mRefItemContainer.add(item, 1, MWMechanics::getPlayer());
+        MWWorld::Ptr refItem = *mRefItemContainer.add(item, 1, MWMechanics::getPlayer());
 
-        button->setItem(itemCopy, ItemWidget::Barter);
+        button->setItem(refItem, ItemWidget::Barter);
         button->setUserString ("ToolTipType", "ItemPtr");
-        button->setUserData(itemCopy);
+        button->setUserData(item);
 
         if (mItemSelectionDialog)
             mItemSelectionDialog->setVisible(false);
@@ -343,18 +351,26 @@ namespace MWGui
 
         if (type == Type_Item || type == Type_MagicItem)
         {
-            MWWorld::Ptr refItem = *button->getUserData<MWWorld::Ptr>();
-            MWWorld::Ptr item = store.findReplacement(refItem.getCellRef().getRefId());
+            MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
+
+            MWWorld::ContainerStoreIterator it = store.begin();
+            for (; it != store.end(); ++it)
+            {
+                if (*it == item)
+                    break;
+            }
+            if (it == store.end())
+                item = NULL;
 
             // check the item is available and not broken
             if (!item || item.getRefData().getCount() < 1 ||
                 (item.getClass().hasItemHealth(item) && item.getClass().getItemHealth(item) <= 0))
             {
+                item = store.findReplacement(mAssignedId[index-1]);
                 if (!item || item.getRefData().getCount() < 1)
                 {
-                    // item not in plater inventory found
                     MWBase::Environment::get().getWindowManager()->messageBox(
-                        "#{sQuickMenu5} " + refItem.getClass().getName(refItem));
+                        "#{sQuickMenu5} " + mAssignedName[index-1]);
 
                     return;
                 }
@@ -389,17 +405,6 @@ namespace MWGui
             }
             else if (type == Type_MagicItem)
             {
-                // retrieve ContainerStoreIterator to the item
-                MWWorld::ContainerStoreIterator it = store.begin();
-                for (; it != store.end(); ++it)
-                {
-                    if (*it == item)
-                    {
-                        break;
-                    }
-                }
-                assert(it != store.end());
-
                 // equip, if it can be equipped
                 if (!item.getClass().getEquipmentSlots(item).first.empty())
                 {
