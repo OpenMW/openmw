@@ -4,7 +4,7 @@ export CXX=clang++
 export CC=clang
 
 DEPENDENCIES_ROOT="/private/tmp/openmw-deps/openmw-deps"
-QT_PATH=`brew --prefix $macos_qt_formula`
+QT_PATH=`brew --prefix qt`
 mkdir build
 cd build
 
