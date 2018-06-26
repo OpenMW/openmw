@@ -38,7 +38,7 @@ MacOS:
   allow_failure: true
   script:
     #- macos_qt_formula=qt
-    #- CI/before_install.osx.sh
+    - CI/before_install.osx.sh
     - CI/before_script.osx.sh
     - make -j2
     - DESTDIR=artifacts make install
