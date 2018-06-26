@@ -127,13 +127,6 @@ namespace MWGui
 
     void QuickKeysMenu::unassign(ItemWidget* key, int index)
     {
-        // cleanup refrance ItemContainer
-        if( mAssigned[index] == Type_Item || mAssigned[index] == Type_MagicItem)
-        {
-            MWWorld::Ptr refItem = *key->getUserData<MWWorld::Ptr>();
-            mRefItemContainer.remove(refItem.getCellRef().getRefId(), 1, MWMechanics::getPlayer());
-        }
-
         mAssignedName[index] = "";
         mAssignedId[index] = "";
 
@@ -236,9 +229,7 @@ namespace MWGui
         mAssignedId[mSelectedIndex] = item.getCellRef().getRefId();
         mAssignedName[mSelectedIndex] = item.getClass().getName(item);
 
-        MWWorld::Ptr refItem = *mRefItemContainer.add(item, 1, MWMechanics::getPlayer());
-
-        button->setItem(refItem, ItemWidget::Barter);
+        button->setItem(item, ItemWidget::Barter);
         button->setUserString ("ToolTipType", "ItemPtr");
         button->setUserData(item);
 

@@ -59,12 +59,10 @@ namespace MWGui
         MyGUI::EditBox* mInstructionLabel;
         MyGUI::Button* mOkButton;
 
-        MWWorld::ContainerStore mRefItemContainer;
-        std::vector<std::string> mAssignedId;
-        std::vector<std::string> mAssignedName;
-
         std::vector<ItemWidget*> mQuickKeyButtons;
         std::vector<QuickKeyType> mAssigned;
+        std::vector<std::string> mAssignedId;
+        std::vector<std::string> mAssignedName;
 
         QuickKeysMenuAssign* mAssignDialog;
         ItemSelectionDialog* mItemSelectionDialog;
