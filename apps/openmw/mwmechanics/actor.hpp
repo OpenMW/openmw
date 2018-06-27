@@ -3,8 +3,6 @@
 
 #include <memory>
 
-#include "aistate.hpp"
-
 namespace MWRender
 {
     class Animation;
@@ -29,12 +27,8 @@ namespace MWMechanics
 
         CharacterController* getCharacterController();
 
-        AiState& getAiState();
-
     private:
         std::unique_ptr<CharacterController> mCharacterController;
-
-        AiState mAiState;
     };
 
 }
