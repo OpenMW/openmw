@@ -61,4 +61,3 @@ Win10:
   artifacts:
     paths:
     - deps\boost_install.log
-    - "*\OpenMW*.exe"
