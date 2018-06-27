@@ -66,9 +66,9 @@ However this approach means additional work and would be of limited usefulness i
 
 ## Roadmap
 
-We will continue with the revised roadmap scheme. This means we add a new milestone (openmw-stage1). After we are finished discussing this design document and have made necessary adjustments we will cut it up into individual tasks and add them to openmw-stage1. This milestone will then take the role of the current openmw-1.0 and openmw-cs-1.0 milestones.
-Confirmed bug reports also go into openmw-stage1. Other issues (feature requests and tasks) only after we have approved them for near future development.
-We will most like not have a separate openmw-stage1 for the editor, since for the bulk of the changes (The Grand De-hardcoding) most tasks we will require changes to both OpenMW and the editor.
+We will continue with the revised roadmap scheme. This means we add a new label (stage1). After we are finished discussing this design document and have made necessary adjustments we will cut it up into individual tasks and add them to the tracker with the stage1 label. This label will then take the role of the current 1.0 label.
+Confirmed bug reports also get tagged with stage1. Other issues (feature requests and tasks) only after we have approved them for near future development.
+We will most likely not have a separate stage1 label for the editor, since for the bulk of the changes (The Grand De-hardcoding) most tasks we will require changes to both OpenMW and the editor.
 
 # Content File Format & Namespaces
 
