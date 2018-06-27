@@ -53,6 +53,7 @@ Win10:
   allow_failure: true
   script:
     - rm -fr build/*  #  remove anything in the build directory
+    - cd $CI_PROJECT_DIR/openmw
     - CI/before_script.msvc.sh -c Release -p x64 -v 2017 -V
     - msbuild MSVC2017_64\OpenMW.sln /t:Build /p:Configuration=Release /m:2
   cache:
