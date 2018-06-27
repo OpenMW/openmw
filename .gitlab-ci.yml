@@ -60,4 +60,4 @@ Win10:
     - C:\projects\openmw\deps\*
   artifacts:
     paths:
-      - */OpenMW*.exe
+    - "*/OpenMW*.exe"
