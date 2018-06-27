@@ -381,33 +381,20 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     setWindowIcon();
 
     osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
-    int redSize;
-    int greenSize;
-    int blueSize;
-    int depthSize;
-    int stencilSize;
-    int doubleBuffer;
-    
-    SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &redSize);
-    SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &greenSize);
-    SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &blueSize);
-    SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &depthSize);
-    SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &stencilSize);
-    SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &doubleBuffer);
-    
     SDL_GetWindowPosition(mWindow, &traits->x, &traits->y);
     SDL_GetWindowSize(mWindow, &traits->width, &traits->height);
-    traits->red = redSize;
-    traits->green = greenSize;
-    traits->blue = blueSize;
-    traits->depth = depthSize;
-    traits->stencil = stencilSize;
-    traits->doubleBuffer = doubleBuffer;
     traits->windowName = SDL_GetWindowTitle(mWindow);
     traits->windowDecoration = !(SDL_GetWindowFlags(mWindow)&SDL_WINDOW_BORDERLESS);
     traits->screenNum = SDL_GetWindowDisplayIndex(mWindow);
-    traits->vsync = vsync;
+    // FIXME: Some way to get these settings back from the SDL window?
+    traits->red = 8;
+    traits->green = 8;
+    traits->blue = 8;
     traits->alpha = 0; // set to 0 to stop ScreenCaptureHandler reading the alpha channel
+    traits->depth = 24;
+    traits->stencil = 8;
+    traits->vsync = vsync;
+    traits->doubleBuffer = true;
     traits->inheritedWindowData = new SDLUtil::GraphicsWindowSDL2::WindowData(mWindow);
 
     osg::ref_ptr<SDLUtil::GraphicsWindowSDL2> graphicsWindow = new SDLUtil::GraphicsWindowSDL2(traits);
