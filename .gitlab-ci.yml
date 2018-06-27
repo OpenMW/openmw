@@ -44,3 +44,20 @@ MacOS:
   artifacts:
     paths:
       - build/OpenMW-*.dmg
+
+Win10:
+  tags:
+    - win10
+    - msvc2017
+  stage: build
+  allow_failure: true
+  script:
+    - rm -fr build/*  #  remove anything in the build directory
+    - CI/before_script.msvc.sh -c Release -p x64 -v 2017 -V
+    - msbuild MSVC2017_64\OpenMW.sln /t:Build /p:Configuration=Release /m:2
+  cache:
+    paths:
+    - C:\projects\openmw\deps\*
+  artifacts:
+    paths:
+      - */OpenMW*.exe
