@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 MISSINGTOOLS=0
 
@@ -421,7 +422,8 @@ fi
 			printf "Exists. "
 		elif [ -z $SKIP_EXTRACT ]; then
 			rm -rf Boost
-			"${DEPS}/boost-1.61.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="$(echo $BOOST_SDK | sed s,/,\\\\,g)" //VERYSILENT //NORESTART //SUPPRESSMSGBOXES //LOG="boost_install.log" 
+			"${DEPS}/boost-1.61.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="C:\boost" //VERYSILENT //NORESTART //SUPPRESSMSGBOXES //LOG="boost_install.log"			
+			mv /c/boost $BOOST_SDK
 		fi
 
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
