@@ -225,7 +225,7 @@ A resources pack consist of an omwres content file and the associated resources 
 
 The editor will be enhanced with a packaging tool that can take a content file and its associated resources files and package them into a form suitable for distribution.
 
-The question now is what is a suitable form. For Linux the first option that comes to mind are the respective software package management systems. This of course does not help Windows and Mac users. While there is the obvious and very reasonable answer ("Get a real operating system!") this seems unnecessarily harsh to Mac users and is overall not helpful.
+The question now is what is a suitable form. For Linux the first option that comes to mind are the respective software package management systems. This of course does not help Windows and Mac users, which given the desire to make OpenMW the default choice when playing Morrowind content is overall not helpful.
 
 Therefore we will develop our own cross-platform package format for OpenMW content. The exact scope still needs to be determined, but it could be as simple as an archive that holds the content file and the associated resources files. Giving this archive type a unique file extension (e.g. omwpack) would then allow the launcher to pick up opening requests (i.e. double click on the file) and install the content (optionally including a check for dependencies).
 
