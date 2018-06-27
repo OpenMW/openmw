@@ -231,6 +231,8 @@ Therefore we will develop our own cross-platform package format for OpenMW conte
 
 # Scripting
 
+*Important: The following is a draft for a scripting language titles oldscript+ in the forum discussions. We will not go down this implementation route. But this section is still relevant because newscript has to cover all functionality listed here.*
+
 Note: Extensions to the scripting language in form of new instructions and functions are distributed over this entire document. In some cases features may require additional functions that return the value of certain fields of certain records. These functions are usually not listed explicitly and are left as an exercise to the reader.
 
 ## Language Version
@@ -1159,11 +1161,11 @@ All effects described in these sub-records affect active cells only.
 
 ### Sky
 
-TODO all existing sky effects and possibly new ones; bugger scrawl to fill in the details
+TODO all existing sky effects and possibly new ones
 
 ### Particles
 
-TODO all existing particle effects and possibly new ones; bugger scrawl to fill in the details
+TODO all existing particle effects and possibly new ones
 
 ### Event
 
@@ -1210,7 +1212,7 @@ A liquid record consists of the following fields:
 
 We need to support at least one liquid type (ID 0: Water) from the start. Other types can be added.
 
-TODO check with scrawl about other ways to handle visuals for liquid types that requires less hard-coding. Shaders?
+TODO check about other ways to handle visuals for liquid types that requires less hard-coding. Shaders?
 
 ## Magic Effects
 
@@ -2112,7 +2114,7 @@ If the GMST is not 0 we show skill progression in two places:
 
 # Graphics
 
-TODO bugger scrawl until he agrees to fill in this section
+TODO
 
 Random collection of ideas that may be feasible or not:
 
