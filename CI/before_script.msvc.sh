@@ -366,8 +366,8 @@ if [ -z $SKIP_DOWNLOAD ]; then
 			QT_SUFFIX=""
 		fi
 
-		download "Qt 5.7.2" \
-			"https://download.qt.io/official_releases/qt/5.7/5.7.0/qt-opensource-windows-x86-msvc${MSVC_YEAR}${QT_SUFFIX}-5.7.0.exe" \
+		download "Qt 5.7.0" \
+			"https://download.qt.io/archive/qt/5.7/5.7.0/qt-opensource-windows-x86-msvc${MSVC_YEAR}${QT_SUFFIX}-5.7.0.exe" \
 			"qt-5.7.0-msvc${MSVC_YEAR}-win${BITS}.exe" \
 			"https://www.lysator.liu.se/~ace/OpenMW/deps/qt-5-install.qs" \
 			"qt-5-install.qs"
