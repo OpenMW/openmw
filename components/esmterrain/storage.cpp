@@ -24,6 +24,8 @@ namespace ESMTerrain
     };
 
     LandObject::LandObject()
+        : mLand(nullptr)
+        , mLoadFlags(0)
     {
     }
 

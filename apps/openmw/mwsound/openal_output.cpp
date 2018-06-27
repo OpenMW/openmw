@@ -387,7 +387,7 @@ private:
 OpenAL_SoundStream::OpenAL_SoundStream(ALuint src, DecoderPtr decoder)
   : mSource(src), mCurrentBufIdx(0), mFormat(AL_NONE), mSampleRate(0)
   , mBufferSize(0), mFrameSize(0), mSilence(0), mDecoder(std::move(decoder))
-  , mLoudnessAnalyzer(nullptr)
+  , mLoudnessAnalyzer(nullptr), mIsFinished(true)
 {
     mBuffers.fill(0);
 }

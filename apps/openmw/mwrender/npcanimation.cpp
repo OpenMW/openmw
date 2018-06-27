@@ -416,6 +416,7 @@ void NpcAnimation::updateNpcBase()
     const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
     bool isWerewolf = (mNpcType == Type_Werewolf);
     bool isVampire = (mNpcType == Type_Vampire);
+    bool isFemale = !mNpc->isMale();
 
     if (isWerewolf)
     {
@@ -425,8 +426,9 @@ void NpcAnimation::updateNpcBase()
     else
     {
         mHeadModel = "";
-        if (isVampire) // FIXME: fall back to regular head when getVampireHead fails?
-            mHeadModel = getVampireHead(mNpc->mRace, mNpc->mFlags & ESM::NPC::Female);
+        const std::string& vampireHead = getVampireHead(mNpc->mRace, isFemale);
+        if (isVampire && !vampireHead.empty())
+            mHeadModel = vampireHead;
         else if (!mNpc->mHead.empty())
         {
             const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(mNpc->mHead);
@@ -448,7 +450,6 @@ void NpcAnimation::updateNpcBase()
     }
 
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
-    bool isFemale = !mNpc->isMale();
 
     std::string smodel;
     if (mViewMode != VM_FirstPerson)

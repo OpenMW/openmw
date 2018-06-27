@@ -4,7 +4,7 @@ brew update
 
 brew outdated cmake || brew upgrade cmake
 brew outdated pkgconfig || brew upgrade pkgconfig
-brew install $macos_qt_formula
+brew install qt
 
-curl https://downloads.openmw.org/osx/dependencies/openmw-deps-100d2e0.zip -o ~/openmw-deps.zip
-unzip ~/openmw-deps.zip -d /private/tmp/openmw-deps > /dev/null
+curl -fSL -R -J https://downloads.openmw.org/osx/dependencies/openmw-deps-100d2e0.zip -o ~/openmw-deps.zip
+unzip -o ~/openmw-deps.zip -d /private/tmp/openmw-deps > /dev/null

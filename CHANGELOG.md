@@ -22,7 +22,7 @@
     Bug #4036: Weird behaviour of AI packages if package target has non-unique ID
     Bug #4047: OpenMW not reporting its version number in MacOS; OpenMW-CS not doing it fully
     Bug #4125: OpenMW logo cropped on bugtracker
-    Bug #4215: OpenMW shows book text after last <BR> tag
+    Bug #4215: OpenMW shows book text after last EOL tag
     Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4251: Stationary NPCs do not return to their position after combat
     Bug #4286: Scripted animations can be interrupted
@@ -49,6 +49,7 @@
     Bug #4461: "Open" spell from non-player caster isn't a crime
     Bug #4469: Abot Silt Striders – Model turn 90 degrees on horizontal
     Bug #4471: Retrieve SDL window settings instead of using magic numbers
+    Bug #4474: No fallback when getVampireHead fails
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #4222: 360° screenshots
     Feature #4256: Implement ToggleBorders (TB) console command
