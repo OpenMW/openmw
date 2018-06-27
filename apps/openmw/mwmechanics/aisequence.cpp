@@ -360,6 +360,14 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor, boo
     }
 
     mPackages.push_back (package.clone());
+
+    // Make sure that temporary storage is empty
+    if (cancelOther)
+    {
+        mAiState.moveIn(new AiCombatStorage());
+        mAiState.moveIn(new AiFollowStorage());
+        mAiState.moveIn(new AiWanderStorage());
+    }
 }
 
 AiPackage* MWMechanics::AiSequence::getActivePackage()
