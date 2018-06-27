@@ -54,7 +54,7 @@ Win10:
   script:
     - env
     - sh %CI_PROJECT_DIR%/CI/before_script.msvc.sh -c Release -p x64 -v 2017 -V
-    - msbuild MSVC2017_64\OpenMW.sln /t:Build /p:Configuration=Release /m:2
+    - C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\msbuild.exe MSVC2017_64\OpenMW.sln /t:Build /p:Configuration=Release /m:2
   cache:
     paths:
     - deps
