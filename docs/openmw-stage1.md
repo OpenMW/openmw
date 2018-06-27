@@ -10,7 +10,7 @@ At the same time we want to stay true to our origins. While we want to broaden t
 
 Our goal here is to make OpenMW into a general purpose engine, but a general purpose 1st/3rd person real-time RPG engine. We do not attempt to support other genres or other flavours of RPG.
 
-The development of OpenMW will hopefully continue for a long time and we can not reasonable hope to sketch out its entire future development in a single design document. Therefore this document should be seen as stage 1 of the post 1.0 development only. It may last us 6 months or a year or several years, depending on how much development activity we can achieve. But eventually there will be a stage 2 design document.
+The development of OpenMW will hopefully continue for a long time and we can not reasonably hope to sketch out its entire future development in a single design document. Therefore this document should be seen as stage 1 of the post 1.0 development only. It may last us 6 months or a year or several years, depending on how much development activity we can achieve. But eventually there will be a stage 2 design document.
 
 # Definitions
 
@@ -66,9 +66,9 @@ However this approach means additional work and would be of limited usefulness i
 
 ## Roadmap
 
-We will continue with the revised roadmap scheme. This means we add a new milestone (openmw-stage1). After we are finished discussing this design document and have made necessary adjustments we will cut it up into individual tasks and add them to openmw-stage1. This milestone will then take the role of the current openmw-1.0 and openmw-cs-1.0 milestones.
-Confirmed bug reports also go into openmw-stage1. Other issues (feature requests and tasks) only after we have approved them for near future development.
-We will most like not have a separate openmw-stage1 for the editor, since for the bulk of the changes (The Grand Dehardcoding) most tasks we will require changes to both OpenMW and the editor.
+We will continue with the revised roadmap scheme. This means we add a new label (stage1). After we are finished discussing this design document and have made necessary adjustments we will cut it up into individual tasks and add them to the tracker with the stage1 label. This label will then take the role of the current 1.0 label.
+Confirmed bug reports also get tagged with stage1. Other issues (feature requests and tasks) only after we have approved them for near future development.
+We will most likely not have a separate stage1 label for the editor, since for the bulk of the changes (The Grand De-hardcoding) most tasks we will require changes to both OpenMW and the editor.
 
 # Content File Format & Namespaces
 
@@ -92,7 +92,7 @@ The following cases of changes to the record format have been identified:
 * Existing record that is switched over from integer-based to ID-based indexing (this is a special case of the case above)
 * Existing records is split into two records: Split needs to be performed on load.
 
-There have been some concerns regarding the efficiency of string based IDs (vs integer). While there hasn't been an evidence indicating that this is actually a problem in OpenMW, it is important to point out that the move from integer to string does not mean that such a problem could not be addressed.
+There have been some concerns regarding the efficiency of string based IDs (vs. integer). While there hasn't been an evidence indicating that this is actually a problem in OpenMW, it is important to point out that the move from integer to string does not mean that such a problem could not be addressed.
 
 We already have plans to introduce a new string type for IDs, which deals with the case-issue (current std::string based implementation is error-prone and results in some very verbose code).
 
@@ -202,13 +202,13 @@ Most of the current content exists in a form that is not compatible with the new
 
 In most cases this can easily be resolved by adding an importer tool to the launcher, that takes the content and copies it into the desired organisation scheme (archive or directory).
 
-For other content (preexisting data directories and Morrowind, since Morrowind and its add-ons are installed into the same directory) we need to maintain a level of compatibility with the old approach, that can be switched on and off as needed.
+For other content (pre-existing data directories and Morrowind, since Morrowind and its add-ons are installed into the same directory) we need to maintain a level of compatibility with the old approach, that can be switched on and off as needed.
 
 ### Resources Packages
 
-During the discussion about the new content file organisation scheme (omwgame, omwaddon) there was some criticism about the scheme not allowing plugins with no dependencies.
+During the discussion about the new content file organisation scheme (omwgame, omwaddon) there was some criticism about the scheme not allowing plug-ins with no dependencies.
 
-This is not a problem, because such plugins are generally useless. A plugin without any dependency can not modify or reference any record. That was not such a large issue with vanilla Morrowind, because in this case the plugin could have still have depended on things like attributes or dynamic stats. However in OpenMW these will all turn into records and therefore can not be accessed from within an omwaddon file without dependencies. This will only get more extreme as the de-hardcoding progresses further. An omwaddon file without dependencies can do literally nothing, which makes it useless by definition.
+This is not a problem, because such plug-ins are generally useless. A plug-in without any dependency can not modify or reference any record. That was not such a large issue with vanilla Morrowind, because in this case the plug-in could have still have depended on things like attributes or dynamic stats. However in OpenMW these will all turn into records and therefore can not be accessed from within an omwaddon file without dependencies. This will only get more extreme as the de-hardcoding progresses further. An omwaddon file without dependencies can do literally nothing, which makes it useless by definition.
 
 But there is one exception. Some members of the mod community have provided resources packages (meshes and similar) that can be used by other content developers. Under our new resources scheme these would have to be accompanied by an omwaddon file. This is not a good solution because of two reasons:
 
@@ -231,38 +231,38 @@ Therefore we will develop our own cross-platform package format for OpenMW conte
 
 # Scripting
 
-Note: Extensions to the scripting language in form of new instructions and functions are distributed over this entire document. In some cases features may require additional functions that return the value of certain fields of certain records. These functions are usually not listed explicitly and are left as an exercise to the reader.
+**Note**: Extensions to the scripting language in form of new instructions and functions are distributed over this entire document. In some cases, features may require additional functions that return the value of certain fields of certain records. These functions are usually not listed explicitly and are left as an exercise to the reader.
 
 ## Language Version
 
-The version of the language used in a script is determined by a single integer number which is stored in a new sub-record within the script record. Note that this is different from earlier concepts which used a more complicated version identifier and stored it within the actual script.
+The version of the language used in a script is determined by a single integer number which is stored in a new subrecord within the script record. Note that this is different from earlier concepts, which used a more complicated version identifier and stored it within the actual script.
 
-Scripts that are missing this sub-record are considered version 0 (legacy). New scripts (when created in OpenMW-CS) default to the most up-to-date version. The version can be selected from a combo box in the script sub-view. We may add a user setting that hides the combo box UI if the version is the most up to date one.
+Scripts that are missing this subrecord are considered version 0 (legacy). New scripts (when created in OpenMW-CS) default to the most up-to-date version. The version can be selected from a combo box in the script subview. We may add a user setting that hides the combo box UI if the version is the most up to date one.
 
 The version number is incremented whenever an addition to the scripting language is made (at most once per feature release). A new feature release is not required to increment the version number, if no feature changes have been made to the language in this release.
 
-From version 1 on all workarounds for bad scripts will be disabled. This should not break anything for well written scripts. In general moving to a new language version should usually at most require minor fixes.
+From version 1 on, all workarounds for bad scripts will be disabled. This should not break anything for well-written scripts. In general, moving to a new language version should usually at most require minor fixes.
 
 Since old scripts will remain with the old language version (unless there is a need to modify them and use newer features), this scheme will not break compatibility for existing content.
 
 ## Error Handling
 
-We will continue with the existing runtime error handling scheme (meaning stopping the script execution on a runtime error). Introducing exception handling instead would be overkill.
+We will continue with the existing runtime error handling scheme (i.e., stopping the script execution on a runtime error). Introducing exception handling instead would be overkill.
 
-We will do our best to avoid crashes as result of broken script. That means (among others) that we need to put an artificial (configurable) limit on function call depth to avoid crashes and lockups from endless script recursion. We may also decide to put a similar limit on loops.
+We will do our best to avoid crashes as a result of broken scripts. That means (among others) that we need to put an artificial (configurable) limit on function call depth to avoid crashes and lock-ups from endless script recursion. We may also decide to put a similar limit on loops.
 
 ## Variable Types
 
-The types *long* and *float* remain unchanged.
+The types `long` and `float` remain unchanged.
 
-We will flag *short* as deprecated. Currently *short* has no advantage over *long* (it uses the same amount of memory in OpenMW). For anything but a very specific kind of bit cutting the *short* type has no use at all.
-If we ever decide that we do want a shorter integer type we can always de-deprecate *short*.
+We will flag `short` as deprecated. Currently `short` has no advantage over `long` (it uses the same amount of memory in OpenMW). For anything but a very specific kind of bit-cutting the `short` type has no use at all.
+If we ever decide that we do want a shorter integer type we can always de-deprecate `short`.
 
 We will introduce several new types:
 
 ### Strings
 
-The name of the new string type is **String** and string literals are marked by placing them in quotation marks. Example:
+The name of the new string type is `String`, and string literals are marked by placing them in quotation marks. Example:
 
 ````
 String a
@@ -271,7 +271,7 @@ Set a to "Some Text"
 
 Comparison operators for strings are provided in the usual way.
 
-Since we discontinue bad script workarounds most ambiguousness regarding string literals should have been removed already (we will not accept local variable names and instructions within quotation marks anymore). Only a single problem case remains:
+Because we are discontinuing bad script workarounds, most ambiguity regarding string literals should have been removed already (we will not accept local variable names and instructions within quotation marks any more). Only a single problem case remains:
 
 If a function requires an ID, is it a literal ID or is it the name of a string variable that contains an ID? Example:
 
@@ -281,13 +281,13 @@ Set Fargoth to "player"
 Fargoth -> AddItem "Gold_001", 100
 ````
 
-We can not make a rule that forbids the use of local variable names that are also IDs, because that would allow random content files to break scripts in other, unrelated content files.
+We cannot make a rule that forbids the use of local variable names that are also IDs, because that would allow random content files to break scripts in other, unrelated content files.
 
-Therefore the solution here is to simply give the local variable precedence over IDs. If the script author wanted to give money to Fargoth he should not have created a local variable with this name.
+Therefore, the solution here is to simply give the local variable precedence over the ID. If the script author intended to give money to `Fargoth`, he should not have created a local variable with the same name.
 
 Note that global variables are not an issue here, because global variables are IDs and IDs need to be unique (with certain exceptions that are not relevant here).
 
-To remove even the last remaining potential problems with ambiguity we will also introduce a new string literal that can only be a literal and never a string variable name. These literals are marked by a L prefix. Utilising this feature the code block above could be rewritten to the following if the script author absolutely insists on having a local variable named Fargoth:
+To remove even the last remaining potential problems with ambiguity, we will also introduce a new string literal that can only be a literal and never a string variable name. These literals are preceded by an `L` character. Utilising this feature, the aforementioned code block could be rewritten as is shown below, if the script author absolutely insists on having a local variable named `Fargoth`:
 
 ````
 String Fargoth
@@ -295,93 +295,93 @@ Set Fargoth to "player"
 L"Fargoth" -> AddItem "Gold_001", 100
 ````
 
-### Instance-References
+### Instance References
 
-The name of the new reference type is **Ref**. It can reference an instance in the world or in a container or be a null reference.
+The name of the new reference type is `Ref`. It can reference an instance in the world or in a container or be a null reference.
 
-Since we currently have no way to reference an instance persistently the use of the ref type is limited for the time being (see section about variable scope for further details).
+Since we currently have no way to reference an instance persistently, the use of the `Ref` type is limited for the time being (see section *Variable Scope* for further details).
 
-References can be used in any place that would otherwise allow an ID that stand for an existing reference. The rules for strings regarding ambiguousness apply to references in the same way.
+References can be used in any place that would otherwise allow an ID that stand for an existing reference. The rules for strings regarding ambiguity apply to references in the same way.
 
 A reference will implicitly cast to 0 (a null reference) or 1 (not a null reference) when used in a numeric expression.
 
-Note: A reference pointing into the contents of a container points to a stack of items and not a single item.
+**Note**: A reference pointing to the contents of a container points to a stack of items and not a single item.
 
 We introduce the following keywords:
 
-* Self: a value of type Ref (the instance the script is currently running on, only available in local scripts and dialogue scripts)
-* NullRef: a literal of type Ref (null reference)
-* GetId (r): return ID of reference as a string value
-* GetContainer (r): returns the reference of the container r is in (or a null-reference if r is not in a container)
-* GetCell (r): returns the ID string of the cell r is in (either directly or via a container)
-* SearchActive (id, container=0): return a reference with the given ID within the active cells. If container!=0, also check in containers; return a null-reference if no reference is found
-* SearchIn (id, id2): return a reference with the given ID within something (id2) that can contain references; this can be a cell, a worldspace, a container, a creature or a NPC. If id2 represents an instance, a ref variable can be given instead; return a null-reference if no reference is found
+* `Self`: A value of type `Ref` (the instance the script is currently running on, only available in local scripts and dialogue scripts)
+* `NullRef`: A literal of type `Ref` (null reference)
+* `GetId(r)`: Returns the ID of the reference `r` as a string value
+* ``GetContainer(r)`: Returns the reference of the container `r` is in (or a null reference if `r` is not in a container)
+* `GetCell(r)`: Returns the ID string of the cell `r` is in (either directly or via a container)
+* `SearchActive(id, container = 0)`: Returns a reference with the given ID within the active cells. If `container != 0`, also check in containers; returns a null reference if no reference is found
+* `SearchIn(id, id2)`: Returns a reference with the given ID within something (`id2`) that can contain references; this can be a cell, a worldspace, a container, a creature or an NPC. If `id2` represents an instance, a `Ref` variable can be given instead; returns a null reference if no reference is found
 
 ### Lists
 
-A single type list available for the following types:
+A single-type list will be available for the following types:
 
-* Long
-* Float
-* String
-* Ref
+* `long`
+* `float`
+* `String`
+* `Ref`
 
-We will not support mixed type list because that would require a major change to the type system. Internally and functionally a list will work like an array. The type names for lists are:
+We will not support mixed-type lists because that would require a major change to the type system. Internally and functionally, a list will work like an array. The type names for lists are:
 
-* LongList
-* FloatList
-* StringList
-* RefList
+* `LongList`
+* `FloatList`
+* `StringList`
+* `RefList`
 
-List literals are given as a comma separated list of values in square brackets. Empty list literals are allowed. In the context of lists we generally allow implicit promotion of integer to float types.
+List literals are given as a comma-separated list of values in square brackets. Empty list literals are allowed. In the context of lists, we generally allow implicit promotion of integer to float types.
 
 We support the following list operations:
 
-* l1[i]: Return member i (indexing begins at 0)
-* GetSize(l1): Returns the number of elements in l1 as an *Integer*
-* l1 + l2: Returns a concatenated list consisting of the members of l1 followed by the members of l2
-* GetSubset (l1, l2): Return the common subset of the elements of l1 and the elements of l2
-* HasElement (l1, e): Return 0 (if e is not element of l1) or 1 (otherwise)
-* GetIndex (l1, e): Return index of first occurrence of element e in l1 (or -1 if none)
-* Minimum (l1): Return the minimum of the elements in l1 (only works with numerical types)
-* Maximum (l1): Return the minimum of the elements in l1 (only works with numerical types)
+* `l1[i]`: Returns member `i` (indexing begins at 0)
+* `GetSize(l1)`: Returns the number of elements in `l1` as an integer
+* `l1 + l2`: Returns a concatenated list consisting of the members of `l1` followed by the members of `l2`
+* `GetSubset(l1, l2)`: Returns the common subset of the elements of `l1` and `l2`
+* `HasElement(l1, e)`: Returns 0 (if `e` is not element of `l1`) or 1 (otherwise)
+* `GetIndex(l1, e)`: Returns the index of the first occurrence of `e` in `l1` (or -1 if none)
+* `Minimum(l1)`: Returns the minimum of the elements in `l1` (only works with numerical types)
+* `Maximum(l1)`: Returns the maximum of the elements in `l1` (only works with numerical types)
 
 and the following list instructions:
 
-* Set l1[i] To e: Set list element i of list l1 to value e (indexing begins at 0)
-* Sort (l1, cf=""): Sort list elements into ascending order (if cf is an empty string) or via comparison function script cf
-* Filter (l1, ff): Filter list l1 by filter function ff (only keep elements that do not return 0)
-* Reverse (l1): Reverse order of list elements
-* Append (l1, e): Append element e to list l1
-* Append (l1, l2): Append elements of list l2 to list l1
-* Remove (l1, e): Remove all elements equal to e from list l1
-* Remove (l1, l2): Remove from list l1 all elements which are also in list l2
-* InsertAt (l1, e, i): Insert element at position i into list l1 (replacing element i on position upwards and extending the size of the list by one)
-* RemoveAt (l1, i): Remove element at position i from list l1 (moving elements with an index higher than i down by one and reducing the size of the list by one)
-* Resize (l1, n): Set size of l1 to n. If list is extended additional elements are default initialised.
+* `Set l1[i] To e`: Sets list element `i` of list `l1` to value `e` (indexing begins at 0)
+* `Sort(l1, cf="")`: Sorts list elements into ascending order (if `cf` is an empty string) or via comparison function script `cf`
+* `Filter(l1, ff)`: Filters list `l1` by filter function `ff` (only keeps elements that do not return 0)
+* `Reverse(l1)`: Reverses order of list elements of list `l1`
+* `Append(l1, e)`: Appends element `e` to list `l1`
+* `Append(l1, l2)`: Appends elements of list `l2` to list `l1`
+* `Remove(l1, e)`: Removes all elements equal to `e` from list `l1`
+* `Remove(l1, l2)`: Removes all elements from list `l1` which are also in list `l2`
+* `InsertAt(l1, e, i)`: Inserts element `e` into list `l1` at position `i` (moving the element at index `i` one position upwards and extending the size of the list by one)
+* `RemoveAt(l1, i)`: Removes the element at position `i` from list `l1` (moving elements with an index higher than `i` down by one and reducing the size of the list by one)
+* `Resize(l1, n)`: Set size of list `l1` to `n`; if the list is extended, additional elements are initialised with default values
 
 Variable names used in the lists above:
 
-* l1 and l2 are lists/list literals of the same element type
-* i is an integer value that functions as list index
-* n is an integer value
-* e is a variable/literal of the element type of l1 and l2
-* cf: ID of a comparison function script that takes two element type arguments and returns an integer (-1, 0, 1)
-* ff: Id of filter function script that takes one element type arguments and returns an integer (0, 1)
+* `l1` and `l2` are lists / list literals of the same element type
+* `i` is an integer value and is used as list index
+* `n` is an integer value
+* `e` is a variable/literal of the element type of `l1` and `l2`
+* `cf` is the ID of a comparison function script that takes two element-type arguments and returns an integer (-1, 0, 1)
+* `ff` is the ID of a filter function script that takes one element-type argument and returns an integer (0, 1)
 
 ### List Aliases
 
 We define three more type aliases:
 
-* Vector3: A float list of 3 members, used for location or rotation
-* Vector4: A float list of 4 members (location and zrot)
-* Vector6: A float list of 6 members (location and rotation)
+* `Vector3`: A `FloatList` of 3 members, used for location or rotation
+* `Vector4`: A `FloatList` of 4 members (location and rotation around z-axis)
+* `Vector6`: A `FloatList` of 6 members (location and rotation)
 
 These aliases are not separate types.
 
-In the specification of additional functions and instructions values of these types are specified as v3, v4 and v6 respectively. Passing in shorter lists is allowed and will set the missing elements to 0.
+In the specification of additional functions and instructions, values of these types are specified as `v3`, `v4`, and `v6` respectively. Passing shorter lists is allowed and will set the missing elements to 0.
 
-Note that all rotations are specified in degrees.
+**Note**: All rotations are specified in degrees.
 
 ## Variable Scope
 
@@ -391,32 +391,32 @@ The global and the local scope remain unchanged. We will add two more scopes:
 
 ### True Local Variables
 
-What the Morrowind scripting language describes as local variables dose not match the concept of local variables in other languages. In case of local scripts Morrowind local variables function as member variables. In case of global scripts Morrowind local variables function as static variables.
+What the Morrowind scripting language describes as local variables does not match the concept of local variables in other languages. In case of local scripts, Morrowind local variables function as member variables. In case of global scripts, Morrowind local variables function as static variables.
 
-There is a need for true local variables:
+There are several reasons for the introduction of true local variables:
 
 * Less pollution of local dialogue variable names
 * Less state that needs to be saved
-* Avoidance of potential scripting errors when the state of a local variable is maintained across multiple script executions and the script does not re-initialise the variable at the beginning of a new run
+* Prevention of potential scripting errors when the state of a local variable is maintained across multiple script executions and the script does not re-initialise the variable at the beginning of a new run
 
 We will call this scope **true local variable** to distinguish it from old local variables.
 
 Declaration of true local variables will look like this:
 
 ````
-Local Long a = 1
-Local Long b
+Local long a = 1
+Local long b
 ````
 
-If no default value is given the variable is default initialised (value 0, empty string, empty list, null reference).
+If no default value is given, the variable is default-initialised (value 0, empty string, empty list, null reference).
 
 ### Record Variables
 
-A problem (especially relevant for large projects with complex functionality) is that there is no place other then global variables to store additional state that is not specific to an instance. A global function with multiple variables can be used instead but that is just a workaround.
+A common problem (especially relevant for large projects with complex functionality) is that there is no place other than global variables to store additional state that is not specific to an instance. A global function with multiple variables can be used instead, but that is just a workaround.
 
-Furthermore there is currently no way to add new state to other objects (object in the OOP sense, not in the Morrowind sense) other then instances.
+Furthermore, there is currently no way to add new state to other objects (object in the OOP sense, not in the Morrowind sense) other than instances.
 
-Therefore we introduce record variables which are a generalisation of old local variables in local scripts.
+Therefore, we introduce record variables, which are a generalisation of old local variables in local scripts.
 
 The respective records will be enhanced by an optional list of subrecords that can declare record variables and their default values.
 
@@ -428,33 +428,33 @@ Obvious candidates for this feature are:
 * Worldspaces
 * Factions
 
-Note: Object record variables are essentially the same as old local variables declared in a local script, but declared in the object record instead of the script.
+**Note**: Object record variables are essentially the same as old local variables declared in a local script - only that they are declared in an object record instead.
 
 We will introduce the following record variable functions:
 
-* Has{Type} (vn): Return 1 if record/reference has a long/float/string/list record variable of name vn, 0 otherwise.
-* Get{Type} (vn): Return value of record/reference variable vn. Note that we don't use the x.y syntax here, because we need to explicitly specify the type to allow for proper compile time error checking for reference variables.
+* `Has{Type}(vn)`: Returns 1 if record/reference has a long/float/string/list record variable of name `vn`, 0 otherwise
+* `Get{Type}(vn)`: Returns the value of record/reference variable `vn`. Note that we don't use the x.y syntax here, because we need to explicitly specify the type to allow proper compile-time error checking for reference variables.
 
-and the following record variable instruction:
+and the following record variable instructions:
 
-* Set{Type} (vn, val): Set variable vn to value val. It is an error, if this variable does not exist.
+* `Set{Type}(vn, val)`: Sets variable `vn` to value `val`. It is considered an error if this variable does not exist.
 
-With all functions and instructions the record/reference is specified via the -> operator in the usual way. When using object records (via ID) the first instance found is used instead of the object record.
+Within all functions and instructions, the record/reference is specified via the `->` operator in the usual way. When using object records (via ID), the first instance found is used instead of the object record.
 
 Variable names used in the lists above:
 
-* id: string
-* vn: string
-* ref: reference
-* val: value according to {Type}
+* `id` is a `String`
+* `vn` is a `String`
+* `ref`is a reference of type `Ref`
+* `val` is a value according to `{Type}`
 
-and finally {Type} standing for Long, Float, String, LongList, FloatList or StringList
+Finally, `{Type}` stands for `long`, `float`, `String`, `LongList`, `FloatList`, or `StringList`.
 
-We can fold the access of local variables in global scripts into the new record variable system, even though global scripts do not have explicit record variables. The new functions for record variable access make the old x.y syntax obsolete and therefore we declare it as deprecated.
+We can fold the access of local variables in global scripts into the new record variable system, even though global scripts do not have explicit record variables. The new functions for record variable access make the old x.y syntax obsolete and, therefore, we declare it as deprecated.
 
 ## Control Structures
 
-We will add a for loop that works on lists. To avoid unnecessary complexity in the language and to encourage the use of lists we will not have an index based for loop (these can easily be simulated via while).
+We will add a `For` loop that works on lists. To avoid unnecessary complexity in the language and to encourage the use of lists, we will not have an index-based `For` loop (these can easily be simulated via `While`).
 
 Example:
 
@@ -464,104 +464,104 @@ For x In l
 EndFor
 ````
 
-We will add the break and continue keywords both for for and while loops.
+We will add the `break` and `continue` keywords both for `For` and `While` loops.
 
-We may add a switch-case construct, but this is most likely a stage 2 task since there are many different ways to do switch-case and no obviously superior solution. This will most likely require extended discussion and design work.
+We may add a `switch-case` construct, but this is most likely a stage-2 task since there are many different ways to do `switch-case` and no obviously superior solution. This will most likely require extended discussion and design work.
 
 ## General Additions
 
-The vanilla scripting language is missing a few pieces of basic functionality. Therefore we need to add the following kinds of instructions:
+The vanilla scripting language is missing a few pieces of basic functionality. Therefore, we need to add the following kinds of instructions:
 
-* Trigonometric functions (Cos, Sin, Tan, Acos, Asin, Atan, Atan2, DegToRad, RadToDeg)
-* Logical boolean function (And, Or, Not, Xor)
-* Other mathematical functions (Abs, Floor, Ceil, Clamp, Lerp, Sign)
+* Trigonometric functions (`Cos`, `Sin`, `Tan`, `Acos`, `Asin`, `Atan`, `Atan2`, `DegToRad`, `RadToDeg`)
+* Logical boolean function (`And`, `Or`, `Not`, `Xor`)
+* Other mathematical functions (`Abs`, `Floor`, `Ceil`, `Clamp`, `Lerp`, `Sign`)
 
 ## Object Management
 
-We will add a function that moves an instance into the world. This feature (especially the move function) preludes a concept of persistent instance identity, which is most likely a stage 2 or OpenMW 2.0 feature. For now these functions are required to deal with state attached to the instance in the form of record variables/old local variables.
+We will add a function that moves an instance into the world. This feature (especially the `move` function) preludes a concept of persistent instance identity, which is most likely a stage-2 or OpenMW-2.0 feature. For now, these functions are required to deal with state attached to the instance in the form of record variables or old local variables respectively.
 
-* MoveObjectToWorld (target, v6): Move instance from current location to world location.
-* CloneObjectToWorld (target, v6): Add a copy of instance to world location.
+* `MoveObjectToWorld(target, v6)`: Moves the instance from current location to world location `target` at coordinates `v6`
+* `CloneObjectToWorld(target, v6)`: Adds a copy of the instance `target` to world location `target` at coordinates `v6`
 
-(in all cases reference specification for objects to be moved/cloned via -> operator in the usual way)
+**Note**: In all cases, reference specification for objects to be moved/cloned can be done via the `->` operator in the usual way.
 
-Moving or cloning out of a container will only move or clone a single item, not the whole stack.
+**Note**: Moving or cloning out of a container will only move or clone a single item, not the whole stack.
 
-The target value represents the target cell or worldspace (see section "References to cells in data structures" for details)
+The `target` value represents the target cell or worldspace (see section *References to Cells in Data Structures* for details)
 
-We will add replacement functions for object placement related functions without declaring the original functions deprecated.
+We will add replacement functions for object-placement-related functions without declaring the original functions deprecated.
 
 Instructions:
 
-* SetRotation (v3): Set instance's rotation; characters and NPCs ignore first two elements (replaces SetAngle)
-* SetPosition (v3): Set instance's position (replaces SetPos)
-* Teleport (target, v6, strict=0): Teleport instance to location specified by target and v6 (if the instance is a character or NPC the xrot and yrot values are ignored). If strict!=0, no corrections are made to the specified location. Otherwise the location may be adjusted for safety. (replaces Position and PositionCell)
-* Spawn (objectId, target, v6, strict=0): Same as teleport, but spawns a new object (replaces PlaceItem and PlaceItemCell)
+* `SetRotation(v3)`: Sets the instance's rotation; actors ignore the first two elements (replaces `SetAngle`)
+* `SetPosition(v3)`: Sets the instance's position (replaces `SetPos`)
+* `Teleport(target, v6, strict = 0)`: Teleports the instance to location specified by `target` and `v6`; actors ignore the first two elements; if `strict != 0`, no corrections are made to the specified location, otherwise the location may be adjusted for safety (replaces `Position` and `PositionCell`)
+* `Spawn(objectId, target, v6, strict = 0)`: Same as `Teleport`, but spawns a new object `objectId` (replaces `PlaceItem` and `PlaceItemCell`)
 
 Functions:
 
-* GetRotation: Returns instance's rotation as a Vector3 (replaces GetAngle)
-* GetPosition: Returns instance's position as a Vector3 (replaces GetPos)
+* `GetRotation`: Returns the instance's rotation as a `Vector3` (replaces `GetAngle`)
+* `GetPosition`: Returns the instance's position as a `Vector3` (replaces `GetPos`)
 
-## Object-Type Specific Additions
+## Object-Type-Specific Additions
 
 We will add functions to modify and query other non-item-specific state that is already present in the cellref class and therefore already written to saved game files.
 
 Instructions:
 
-* SetTrap (trapId): Set trap ID
-* SetKey (trapId): Set key ID
-* SetTeleport (target, v4): Set teleport location (does not affect teleport flag)
+* `SetTrap(trapId)`: Sets the instance's trap ID to `trapId`
+* `SetKey(trapId)`: Sets the instance's key ID to `keyId`
+* `SetTeleport(target, v4)`: Sets the instance's teleport location to the location specified by `target` and `v4` (does not affect teleport flag)
 
 Functions:
 
-* GetTrap: Return trap ID
-* GetKey: Return key ID
-* GetTeleportTarget: Return teleport target
-* GetTeleportPosition: Returns teleport location and zrot as Vector4
+* `GetTrap`: Return the instance's trap ID
+* `GetKey`: Return the instance's key ID
+* `GetTeleportTarget`: Return the instance's teleport target
+* `GetTeleportPosition`: Returns the instance's teleport location and zrot as `Vector4`
 
 ## Object-Types
 
-We introduce compile time constants for object types (Weapons, Activators and so on). These have integer values. The constants must be named consistently in such a way that name collisions are unlikely (e.g. TypeWeapon, TypeActivator).
+We introduce compile-time constants for object types (Weapons, Activators and so on). These have integer values. The constants must be named consistently in such a way that name collisions are unlikely (e.g. `TypeWeapon`, `TypeActivator`).
 
 We add a function that returns the type of an object or instance:
 
-* GetObjectType
+* `GetObjectType`
 
 ## Queries
 
-A query returns a list of instances within a certain area. Along with the description of the area the query takes a list of object types (t) as an additional argument.
+A query returns a list of instances within a certain area. Along with the description of the area, the query takes a list of object types (`t`) as an additional argument.
 
-* QuerySphere t, v3, r
-* QueryBox t, v3_tl, v3_br (this is an axis-aligned box)
-* QueryCylinder t, v3, r, height (the cylinder is aligned along the Z-axis, v3 specifies the middle point of the bottom circle)
+* `QuerySphere t, v3, r`
+* `QueryBox t, v3_tl, v3_br` (this is an axis-aligned box)
+* `QueryCylinder t, v3, r, height` (the cylinder is aligned along the z-axis, `v3` specifies the middle point of the bottom circle)
 
 ## Text Formatting
 
-The vanilla scripting language provides text formatting in a single place (MessageBox instruction). This is insufficient, because:
+The vanilla scripting language provides text formatting in a single place (`MessageBox` instruction). This is insufficient:
 
-1. We will need text formatting in many places, independently of message boxes
-2. The MessageBox text formatting sucks
+1. We will need text formatting in many places, independently of message boxes.
+2. The `MessageBox` text formatting sucks.
 
-We will deprecate MessageBox. As a replacement we will introduce new instructions for creating message boxes (see following sub-section and GUI section) without a formatting features and also separate text formatting functions.
+We will deprecate `MessageBox`. As a replacement, we will introduce new instructions for creating message boxes (see following subsection and *GUI* section) without a formatting feature and separate text formatting functions.
 
-* Str(v, p = -1): Returns a string containing the string representation of the numeric value v.  p specifies the number of digits after the decimal point. If p==-1 a suitable value depending on the type of v will be chosen.
-* LFormat (s, a): Returns a string equal to the string s with all occurrences of %x replaced with the respective element indexed x from the string list a.
-* Join (l, s): Return a string consisting of the members of the string list l separated by the string s
+* `Str(v, p = -1)`: Returns a `String` containing the string representation of the numeric value `v`. `p` specifies the number of digits after the decimal point. If `p == -1`, a suitable value depending on the type of `v` will be chosen
+* `LFormat(s, a)`: Returns a `String` equal to the `String` `s` with all occurrences of %x replaced with the respective element indexed x from the string list `a`
+* `Join(l, s)`: Returns a `String` consisting of the members of the `StringList` `l` separated by the `String` `s`
 
-## Multiple Choice Message Boxes
+## Multiple-Choice Message Boxes
 
-We add two new functions for showing multiple choice message boxes:
+We add two new functions for showing multiple-choice message boxes:
 
-* MakeChoice t, sl, f
-* MakeBranchChoice t, sl, fl
+* `MakeChoice t, sl, f`
+* `MakeBranchChoice t, sl, fl`
 
 Arguments are as follows:
 
-* t: The message box text
-* sl: A list of strings, defining the available options
-* f: The ID of a script function that is called when an option is selected. The function takes one long argument (the option index, starting at 0).
-* fl: A list of script function names, same length as sl. Functions do not take any arguments. Empty strings in the list are allowed, which makes OpenMW ignore the respective choice.
+* `t` is the message box's text
+* `sl` is a list of strings, defining the available options
+* `f` is the ID of a script function that is called when an option is selected; the function takes one `long` argument (the option index, starting at 0)
+* `fl` is a list of script function names with the same length as `sl`; the functions do not take any arguments; empty strings in the list are allowed, which makes OpenMW ignore the respective choice
 
 ## Functions
 
@@ -575,35 +575,35 @@ The syntax of the begin statement is extended in the following way:
 Begin <function-name> { ( <list-of-arguments> { -> return-type } ) }
 ````
 
-( {} denoting optional parts ) 
+**Note**: `{}` denotes optional parts.
 
-Argument lists are allowed to be empty. Argument lists are comma-separated. Elements in argument list are type name pairs. Elements can be given default values in a C++ typical fashion.
+Argument lists are allowed to be empty and are comma-separated. Elements in argument lists are type-name pairs. Elements can be given default values in a C++ fashion.
 
-Arguments and return values are for all intents and purposes true local variable. Therefore the ref type is available.
+Arguments and return values are for all intents and purposes true local variables. Therefore, the `Ref` type is available.
 
 ### Calling
 
-A function can be called by its name followed by parenthesis. Arguments are listed inside the parenthesis separated by comma.
+A function can be called by its name followed by parentheses. Arguments are listed inside the parentheses separated by commas.
 
-We may at some point add the use of named arguments for function calling (comparable to Python), but this is most likely a stage 2 feature.
+We may at some point add the use of named arguments for function calling (comparable to Python), but this is most likely a stage-2 feature.
 
-If the function has a return type the function is evaluated as an expressions with a type corresponding to the return type.
+If the function has a return type, the function is evaluated as an expression with a type corresponding to the return type.
 
-Calling a function pauses the execution of the calling script, executes the called script and then resumes the execution of the calling script. This is different from the StartScript/StopScript instructions. The StartScript instruction is not modified (i.e. no argument passing).
+Calling a function pauses the execution of the calling script, executes the called script and then resumes the execution of the calling script. This is different from the `StartScript` and `StopScript` instructions. The `StartScript` instruction is not modified (i.e., no argument passing).
 
-A function call must be performed via a function name literal. The function name can not be given as a string variable, since this would make it impossible to check for the correctness of the function signature at compile time.
+A function call must be performed via a function name literal. The function name cannot be given as a string variable, since this would make it impossible to check for the correctness of the function signature at compile time.
 
 Local and global scripts must not have any arguments without default values.
 
 ## Script Hooks
 
-We introduce two new record type (hook, hooked script). The hooked script is a generalisation of the concept of a startup script. We may decide to fold the startup script record type into the hook record type.
+We introduce two new record types (hook, hooked script). The hooked script is a generalisation of the concept of a start-up script. We may decide to fold the start-up script record type into the hook record type.
 
 ### Hooked Scripts
 
 A hooked script record binds a script to a hook record. More than one hooked script record per hook record is allowed.
 
-The ID of a hook record is build from the hook record ID followed by a $ followed by the script name.
+The ID of a hook record is built from the hook record ID followed by a `$` followed by the script name.
 
 Example:
 
@@ -611,9 +611,9 @@ Example:
 Startup$KillFargoth
 ````
 
-By building hook IDs in this way we allow content files to delete hooked script records in dependencies without the need for an additional ID that identifies individual hook records.
+By building hook IDs in this way, we allow content files to delete hooked script records in dependencies without the need for an additional ID that identifies individual hook records.
 
-If more than one script is attached to a hook the order in which the scripts are executed is implementation defined at this point and scripts must not depend on a specific order.
+**Note**: If more than one script is attached to a hook, the order in which the scripts are executed is, at this point, implementation-defined and, thus, scripts must not depend on a specific order.
 
 ### Hooks
 
@@ -621,34 +621,34 @@ A hook record declares a new hook. Each hook record contains a list of argument 
 
 There will be no return values (problematic since there can be multiple scripts per hook).
 
-We provide system hooks within the namespace sys that are called in specific situations (see the section about de-hardcoding for some examples). Content developers may also provide their own hooks (user hooks).
-System hooks are not added to content files, since they can not be modified by content developers anyway. We will instead inject the system hook records on content file load.
+We provide system hooks within the namespace `sys` that are called in specific situations (see the section about de-hardcoding for some examples). Content developers may also provide their own hooks (user hooks).
+System hooks are not added to content files, since they cannot be modified by content developers anyway. We will instead inject the system hook records on content-file load.
 
 System hooks are triggered by the engine. System hooks and user hooks can be triggered explicitly with a new script instruction.
 
 ## Script Slots
 
-We define the term script slot as an optional sub-record in an object record that contains the name of a script. The default script slot for most object types is the "Run-Once-Per-Frame" slot, a.k.a. local script.
+We define the term script slot as an optional subrecord in an object record that contains the name of a script. The default script slot for most object types is the "Run-Once-Per-Frame" slot, a.k.a. local script.
 
-The default slot does not take any function arguments, but other slots can. The function arguments of a script attached to a slot need to match the hard-coded argument list of the slot.
+The default slot does not take any function arguments, but other slots can. The function arguments of a script attached to a slot need to match the hardcoded argument list of the slot.
 
-Note that if to scripts attached to the same object both define a (non-true) local variable with the same name, there will be only one variable. It is an error if the type of these variables don't match.
+**Note**: If two scripts attached to the same object both define a (non-true) local variable with the same name, there will be only one variable. It is an error if the type of these variables don't match.
 
 ### Additional Slots
 
-We add slots for OnX type keywords to object types where applicable The relevant keywords are:
+We add slots for `OnX`-type keywords to object types where applicable. The relevant keywords are:
 
-* OnActivate
-* OnDeath
-* OnKnockout
-* OnMurder
-* OnPCAdd
-* OnPCDrop
-* OnPcEquip
-* OnHitMe
-* OnPCRepair
-* OnPCSoulGemUse
-* OnRepair
+* `OnActivate`
+* `OnDeath`
+* `OnKnockout`
+* `OnMurder`
+* `OnPCAdd`
+* `OnPCDrop`
+* `OnPcEquip`
+* `OnHitMe`
+* `OnPCRepair`
+* `OnPCSoulGemUse`
+* `OnRepair`
 
 ### Custom Slots
 
@@ -656,221 +656,221 @@ We may allow the addition of custom slots (defined by the content developer), th
 
 ## Namespaces
 
-The namespace of a script is determined by its ID. For example a script with the ID foo::Bar would be placed in the namespace foo.
+The namespace of a script is determined by its ID. For example a script with the ID `foo::Bar` would be placed in the namespace `foo`.
 
-IDs in a script refer to the local namespace by default, meaning the ID a in the script b::c would refer to b::a if such an ID exists or to ::a otherwise.
+IDs in a script refer to the local namespace by default, meaning the ID `a` in the script `b::c` would refer to `b::a` if such an ID exists, or to `::a` otherwise.
 
 ## Other Script Instructions
 
 This is a collection of script instructions that fit nowhere else:
 
-* GetPcTarget: Return the reference of the instance the player is currently looking at (crosshair). Can be a NullRef.
-* GetMultiplayer: Always returns 0
-* GetPlayers: Returns a list of reference to all player controlled instances. This list contains a single reference to the instance of object Player.
+* `GetPcTarget`: Returns the reference of the instance the player is currently looking at (crosshair); can be a null reference
+* `GetMultiplayer`: Always returns 0
+* `GetPlayers`: Returns a list of references to all player-controlled instances; this list contains a single reference to the instance of object `Player`
 
 ## Other Script Hooks
 
 This is a collection of script hooks that fit nowhere else:
 
-* sys::NewGameStarted: Executed when a new game is started.
+* `sys::NewGameStarted`: Executed when a new game is started
 
 # Cells, Worldspaces & Areas
 
-## Interior vs Exterior
+## Interior vs. Exterior
 
-The distinction between Interior and Exterior cells stopped making sense with the release of the Tribunal add-on. Therefore we should drop this terminology and replace it with Unpaged Cells (Interior) and Paged Cells (Exterior).
-
-## Paged Cells
-
-Paged cells remain essentially unchanged from old exterior cells, the only major difference being the ID and the worldspace.
-
-Currently there is no uniform ID scheme for cells. Interior cells are named via an ID, exterior cells are named via a cell index (x, y). This needs to be changed, since we need a more consistent way to address cells.
-
-The editor already gives exterior cells an ID (currently in the form of #x,y). The new scheme (relevant at least for the editor and scripting) will be "worldspace::x,y" (the cell will have the ID "x,y" in the namespace "worldspace"). We may also consider to replace the two integer coordinates in the cell record with the string ID. The performance impact of this change should be insignificant.
-
-The default exterior worldspace will be called default (previously called sys::default). Therefore the old exterior cell 0, 0 will be called "default:0,0". We are moving default out of sys to avoid creating an exception to the rule that content files are not allowed to create records in sys.
+The distinction between interior and exterior cells stopped making sense with the release of the Tribunal add-on. Therefore, we should drop this terminology and replace it with **Unpaged Cells** (interior) and **Paged Cells** (exterior).
 
 ## Unpaged Cells
 
 Unpaged cells take the place of old interior cells. The only difference between old interior cells and unpaged cells is the worldspace.
 
-By default each unpaged cell has an associated worldspace record with the same ID. Furthermore the unpaged cell record is enhanced by an optional sub-record that specifies an alternative worldspace (if present).
+By default, each unpaged cell has an associated worldspace record with the same ID. Furthermore, the unpaged-cell record is enhanced by an optional subrecord that specifies an alternative worldspace (if present).
 
 Most of the cell configuration data is moved out of the cell record and into the worldspace record.
 
-By moving out the worldspace into a separate record we can unify worldspace data between interior and exterior cells. We can also associate multiple interior cells with the same worldspace or interior cells with an exterior worldspace. This should reduce duplicated data significantly.
+By moving out the worldspace into a separate record, we can unify worldspace data between interior and exterior cells. We can also associate multiple interior cells with the same worldspace or interior cells with an exterior worldspace. This should reduce duplicated data significantly.
+
+## Paged Cells
+
+Paged cells remain essentially unchanged from old exterior cells, the only major difference being the ID and the worldspace.
+
+Currently, there is no uniform ID scheme for cells. Interior cells are named via an ID, exterior cells are named via a cell index (x, y). This needs to be changed, since we need a more consistent way to address cells.
+
+The editor already gives exterior cells an ID (currently in the form of `#x,y`). The new scheme (relevant at least for the editor and scripting) will be `worldspace::x,y` (the cell will have the ID `x,y` in the namespace `worldspace`). We may also consider to replace the two integer coordinates in the cell record with the string ID. The performance impact of this change should be insignificant.
+
+The default exterior worldspace will be called `default` (previously called `sys::default`). Therefore, the old exterior cell 0, 0 will be called `default:0,0`. We are moving `default` out of `sys` to avoid creating an exception to the rule that content files are not allowed to create records in `sys`.
 
 ## Worldspace Records
 
-Worldspace records are shared by paged and unpaged cells (i.e. there are no interior and exterior worldspaces).
+Worldspace records are shared by paged and unpaged cells (i.e., there are no interior and exterior worldspaces).
 
 Worldspace records contain the following fields:
 
-* Water: Default Water level, Water ID (see de-hardcoding). Note: Script instructions that modify the water level will now modify the water level for a worldspace instead of a cell.
+* Water: Default Water Level, Water ID (see de-hardcoding). **Note**: Script instructions that modify the water level will now modify the water level of a worldspace instead the one of a cell.
 * Ambient Light: 4 values
-* Sky: Sky ID (analogous to Water ID, most likely not part of stage 1). Note: A worldspace can not have both an ambient light and a sky sub-record.
-* Terrain: No data (might be better implemented as a flag). Presence indicate that worldspace has terrain. Ignored by unpaged cells.
+* Sky: Sky ID (analogous to Water ID, most likely not part of stage 1). **Note**: A worldspace cannot have both an ambient-light and a sky subrecord.
+* Terrain: No data (might be better implemented as a flag); presence indicates that worldspace has terrain; ignored by unpaged cells
 
-All fields are optional. If a field is missing the respective cell/worldspace element is not present.
+All fields are optional. If a field is missing, the respective cell/worldspace element is not present.
 
-## References to cells in data structures
+## References to Cells in Data Structures
 
-Vanilla references to cells are generally based on the ID of the cell. There are no fields in vanilla Morrowind data structures that reference individual exterior cells.
+Vanilla references to cells are generally based on the ID of the cell. There are no fields in vanilla Morrowind's data structures that reference individual exterior cells.
 
 We keep these reference fields, but change their meaning:
 
-1. Check if it is the ID of an unpaged cell. If yes, use this cell
-2. Check if it is a worldspace. If yes, use paged cells in this worldspace.
+1. Check whether it is the ID of an unpaged cell. If yes, use this cell.
+2. Check whether it is a worldspace. If yes, use the paged cells in this worldspace.
 3. Otherwise, error.
 
 ## Scripts
 
 ### Water Level
 
-The existing script instructions that deal with water level can be safely extended to the new system. We will add an optional argument at the end of the argument list of each instruction (GetWaterLevel, ModWaterLevel and SetWaterLevel) that specifies the worldspace the instruction is action on. If the argument is missing the instruction effects the current worldspace instead.
+The existing script instructions that deal with water level can be safely extended to the new system. We will add an optional argument at the end of the argument list of each instruction (`GetWaterLevel`, `ModWaterLevel`, and `SetWaterLevel`) which specifies the worldspace the instruction is acting on. If the argument is missing, the instruction affects the current worldspace instead.
 
-Note that this is different from vanilla Morrowind in regards to use in exterior cells.
+**Note**: This behaviour is different from vanilla Morrowind in regards to exterior cells.
 
 ### New Instructions
 
 We add the following script instructions:
 
-* EnumerateActiveCells: Returns a list of strings, containing the IDs of all cells currently active. Paged cells are listed individually.
-* GetWorldspace (c): Returns the ID of the worldspace the cell with ID c is in
-* GetWater (w): Returns the ID of the water used in the worldspace with ID w
-* GetSky (w): Returns the ID of the sky used in the worldspace with ID w
+* `EnumerateActiveCells`: Returns a `StringList` containing the IDs of all cells currently active; paged cells are listed individually
+* `GetWorldspace(c)`: Returns the ID of the worldspace the cell with the ID `c` is in
+* `GetWater(w)`: Returns the ID of the water used in the worldspace with the ID `w`
+* `GetSky(w)`: Returns the ID of the sky used in the worldspace with the ID `w`
 
 ### Script hooks
 
 We add four new script hooks:
 
-* RegionEntered
-* RegionExited
-* WorldspaceEntered
-* WorldspaceExited
+* `RegionEntered`
+* `RegionExited`
+* `WorldspaceEntered`
+* `WorldspaceExited`
 
-All four hooks take the ID of the region or worldspace as arguments and are executed when the player enters or exists a region or worldspace.
+All four hooks take the ID of the region or worldspace as arguments and are executed when the player enters or exits a region or a worldspace.
 
 ## Areas
 
 The ability to designate a section of a worldspace with a specific ID that can be checked or referenced has many uses. A few examples:
 
-* Give a NPC certain dialogue topics only in specific places
+* Give an NPC certain dialogue topics only in specific places
 * Limit wandering NPCs to an area
 * Add special/magical effects to a location
 
-Currently our ability to do that is largely limited to cells. This is a problem because of two reasons:
+Currently, our ability to do that is largely limited to cells. This is a problem because of two reasons:
 
-* The fixed-size square nature of nature of cells makes areas unreasonably inflexible.
+* The fixed-size, square nature of cells makes areas unreasonably inflexible.
 * We can't have overlapping areas.
 
 ### Record
 
-We introduce a new record (Area) that consists of the following fields:
+We introduce a new record ("Area") that consists of the following fields:
 
 * Worldspace ID
-* Polygon (list of 2D coordinates), defining a surface on the x-y-plane
-* Min-Height: Z-coordinate at which the area starts
-* Max-Height: Z-coordinate at which the area ends
+* Polygon: A list of 2D coordinates defining a surface on the xy-plane
+* Min-Height: z-coordinate at which the area starts
+* Max-Height: z-coordinate at which the area ends
 * Enter script ID (string, optional): Script function that is called when the player enters the area
 * Exit script ID (string, optional): Script function that is called when the player exits the area (must also be called in case of teleportation)
 * Inside script ID (string, optional): Script function that is called while the player is in the area.
-* Inside script delta (float, optional): Minimum time between two executions of the inside script function.
-* Composite (integer, optional): If this flag is set the area will be ignored by OpenMW except as a part of a joined area. Composite areas are not accessible by script instructions and do not run any scripts of their own.
+* Inside script delta (float, optional): Minimum time between two executions of the inside-script function.
+* Composite (integer, optional): If this flag is set, the area will be ignored by OpenMW except as a part of a joined area. **Note**: Composite areas are not accessible by script instructions and do not run any scripts of their own.
 
 All script functions take the ID of the area as a parameter.
 
-Whenever a cell or a worldspace is referenced for checking or defining locations the ID of an area can be used instead.
+Whenever a cell or a worldspace is referenced to check or define locations, the ID of an area can be used instead.
 
 ### Script Functions
 
 We add the following script functions:
 
-* GetAreas (v3): Returns a string list containing the IDs of all areas v3 is inside of
-* InArea (id): Returns 1 or 0 depending on if the instance is in area id or not
+* `GetAreas(v3)`: Returns a `StringList` containing the IDs of all areas `v3` is in
+* `InArea(id)`: Returns 1 (instance is in area `id`) or 0 (otherwise)
 
 ## Joined Areas
 
-A joined area is an area that consists of multiple un-joined areas. Joined areas can contain both composite and non-composite areas. A joined area can stretch across multiple worldspaces. Scripts do not distinguish between areas and joined areas.
+A joined area is an area that consists of multiple unjoined areas. Joined areas can contain both composite and non-composite areas. A joined area can stretch across multiple worldspaces. Scripts do not distinguish between areas and joined areas.
 
 ### Record
 
-We introduce a new record (JoinedArea) that consists of the following fields:
+We introduce a new record ("Joined Area") that consists of the following fields:
 
 * Enter script ID (string, optional): Script function that is called when the player enters the area
 * Exit script ID (string, optional): Script function that is called when the player exits the area (must also be called in case of teleportation)
 * Inside script ID (string, optional): Script function that is called while the player is in the area.
-* Inside script delta (float, optional): Minimum time between two executions of the inside script function.
+* Inside script delta (float, optional): Minimum time between two executions of the inside-script function.
 
-# Item-Interactions & -Management
+# Item Interaction & Item Management
 
 ## Deletion
 
-We will add an instruction to delete instances via a reference variable. Current solutions are insufficient because they can not target specific items (when in a container) and require different approaches depending on if an instance is in a container or in the world. Self-deletion must be safe. For the sake of consistency We extend this instruction to work on non-item objects too.
+We will add an instruction to delete instances via a reference variable. Current solutions are insufficient because they can not target specific items (when in a container) and require different approaches depending on whether an instance is in a container or in the world. Self-deletion must be safe. For the sake of consistency, we extend this instruction to work on non-item objects too.
 
-* Delete (reference specification for instance to be deleted via -> operator in the usual way)
+* `Delete` (reference specification for instance to be deleted via the `->` operator in the usual way)
 
 ## Container
 
-We will add a function that returns the contents of a container as a list of references (the term container includes here creatures and NPCs).
+We will add a function that returns the contents of a container as a list of references. **Note**: In this case, the term "container" also includes creatures and NPCs.
 
-* GetContents (reference specification for container via -> operator in the usual way)
+* `GetContents` (reference specification for container via the `->` operator in the usual way)
 
-We will add a function that moves/clones an item instance into a container (actual container or NPC). This feature (especially the move function) preludes a concept of persistent instance identity, which is most likely a stage 2 or OpenMW 2.0 feature. For now these functions are required to deal with state attached to the instance in the form of record variables/old local variables.
+We will add a function that moves/clones an item instance into a container (actual container or actor). This feature (especially the `move` function) preludes a concept of persistent instance identity, which is most likely a stage-2 or OpenMW-2.0 feature. For now, these functions are required to deal with state attached to the instance in the form of record variables / old local variables. (In all cases, the reference specification for the item to be moved/cloned works via the `->` operator in the usual way.)
 
-* MoveItemToContainer (ref/id, count=1): Move item from current location to container specified by ref/id
-* CloneItemToContainer (ref/id, count=1): Add a copy of item to container specified by ref/id
+* `MoveItemToContainer(ref/id, count = 1)`: Move item from current location to container specified by `ref/id`
+* `CloneItemToContainer(ref/id, count = 1)`: Add a copy of item to container specified by `ref/id`
 
-(in all cases reference specification for item to be moved/cloned work via -> operator in the usual way)
-
-The count argument is ignored when the original item is not in a container.
+The `count` argument is ignored when the original item is not in a container.
 
 ## Other Item-Related Instructions
 
-* SetItemHealth (health): Set item current health
-* SetItemCharge (charge): Set item current charge
-* SetItemOwner (owner): Set item owner ID
-* SetItemSoul (soul): Set soul ID (soul gems only)
-* SetItemFaction (faction): Set item faction ID
-* SetItemFactionRank (rank): Set item faction rank
+Instructions:
+
+* `SetItemHealth(health)`: Sets item's current health
+* `SetItemCharge(charge)`: Sets item's current charge
+* `SetItemOwner(owner)`: Sets item's owner ID
+* `SetItemSoul(soul)`: Sets item's soul ID (soul gems only)
+* `SetItemFaction(faction)`: Sets item's faction ID
+* `SetItemFactionRank(rank)`: Sets item's faction rank
 
 Functions:
 
-* IsItem: Return 1 if reference is an item, 0 otherwise
-* GetItemHealth: Return item current health
-* GetItemMaxHealth: Return item max health
-* GetItemCharge: Return item current charge
-* GetItemMaxCharge: Return item max charge
-* GetItemOwner: Return item owner ID
-* GetSoulItem: Return soul ID (soul gems only)
-* GetItemFaction: Return item faction ID
-* GetItemFactionRank: Return item faction rank
+* `IsItem`: Returns 1 if reference is an item, 0 otherwise
+* `GetItemHealth`: Returns item's current health
+* `GetItemMaxHealth`: Returns item's maximum health
+* `GetItemCharge`: Returns item's current charge
+* `GetItemMaxCharge`: Returns item's maximum charge
+* `GetItemOwner`: Returns item's owner ID
+* `GetSoulItem`: Returns item's soul ID (soul gems only)
+* `GetItemFaction`: Returns item's faction ID
+* `GetItemFactionRank`: Returns item's faction rank
 
 ## Item Tags
 
-Currently there is no customisable way of categorising items. To compensate for this shortcoming we introduce items tags.
+Currently, there is no customisable way of categorising items. To compensate for this shortcoming, we introduce item tags.
 
 An item tag is a string that is attached to an object record. An object record can have multiple tags.
 
-Objects also have implicit item tags that are determined by their type (e.g. every weapon object has a tag weapon even without the object record explicit containing this tag. We may introduce other kinds of implicit tags (e.g. weapon types, enchanted items).
+Objects also have implicit item tags that are determined by their type (e.g., every weapon object has a tag "Weapon" even without the object record explicitly containing this tag). We may introduce other kinds of implicit tags (e.g. weapon types, enchanted items).
 
 The de-hardcoding introduces additional item tags.
 
 Item tags are immutable at runtime and can be queried via script instructions:
 
-* GetItemTags (Id): Returns a string list of tags for the object Id. As usual instead of an ID a reference variable can be used.
-* HasitemTag (Id, Tag): Return 1 or 0 depending on Id has the tag Tag.
+* `GetItemTags(id)`: Returns a `StringList` of tags for the object `id`; as usual, instead of an ID a reference variable can be used
+* `HasitemTag(id, tag)`: Returns 1 or 0 depending on `id` having the tag `tag`
 
-Using these instructions on non-item objects return an empty list and 0 respectively.
+Using these instructions on non-item objects returns an empty list or 0 respectively.
 
-Item tags can be used to organise container windows (see GUI section).
+Item tags can be used to organise container windows (see *GUI* section).
 
 A few examples of tags that content developers may come up with:
 
-* quest: A quest item
-* vendor: An item that has no other use than to sell it to a vendor
+* "Quest": A quest item
+* "Vendor": An item that has no other use than to sell it to a vendor
 
-We may suggest some default tags in the documentation (or even the editor) to encourage more consistent tag use by content developers.
+We may suggest some default tags in the documentation (or even the editor itself) to encourage more consistent tag use by content developers.
 
 ## Interactions
 
@@ -880,435 +880,467 @@ We enhance the way how the player interacts with the world, especially via items
 
 There are three methods of interaction:
 
-* The player presses the attack button while holding an interaction-item in his hand and targeting an object in the world. This feature exists in vanilla MW only within the security skill. We generalise these kinds of interactions (see Held Items in the De-Hardcoding section). We also allow this feature for weapons held in the main hand. If an interaction is possible the interaction takes the place of the attack. If the interaction is ignored or refused the attack proceeds.
-* The player drags an item from a container onto on instance in the world. This kind of interaction does not exist in vanilla MW.
-* The player drags an item from a container onto another item in another (or the same) container. This kind of interaction does not exist in vanilla MW.
+* The player presses the attack button while holding an interaction item in his hand and targeting an object in the world. This feature exists in vanilla Morrowind only within the Security skill. We generalise this kind of interaction (see *Held Items* in the *De-Hardcoding* section). We also allow this feature for weapons held in the main hand: If an interaction is possible, the interaction takes the place of the attack. If the interaction is ignored or refused, the attack proceeds.
+* The player drags an item from a container onto an instance in the world. This kind of interaction does not exist in vanilla Morrowind.
+* The player drags an item from a container onto another item in another (or the same) container. This kind of interaction does not exist in vanilla Morrowind.
 
 ### Interaction Subrecords
 
-All item object record types are enhanced by a new optional sub-record that holds the name of the ItemItemInteraction script.
+All item-object record types are enhanced by a new optional subrecord that holds the name of the ItemItemInteraction script.
 
-All object record types (including items) are enhanced by a new optional sub-record that holds the name of the ItemObjectInteraction script.
+All object record types (including items) are enhanced by a new optional subrecord that holds the name of the ItemObjectInteraction script.
 
-### Interaction-Chain
+### Interaction Chain
 
-Custom interactions are handled by running through a sequence of scripts. Each script can either ignore the interactions or accept it or refuse it.
+Custom interactions are handled by running through a sequence of scripts. Each script can either ignore the interaction, accept it, or refuse it.
 
-If the action is accepted or refused the chain stops. If the action is refused or the chain runs to its end without any script accepting it the player will be notified via a sound-effect. We may either re-purpose an existing sound-effect or acquire a new one.
+If the action is accepted or refused, the chain stops. If the action is refused or the chain runs to its end without any script accepting it, the player will be notified via a sound effect. We may either re-purpose an existing sound effect or acquire a new one.
 
 We add two new script instructions:
 
-* AcceptInteraction
-* RefuseInteraction
+* `AcceptInteraction`
+* `RefuseInteraction`
 
-Using any of these instructions outside of an interaction chain is an error. We use these instructions instead of return values, because a part of the interaction chain works via hooks which do no provide return values.
+Using any of these instructions outside of an interaction chain is an error. We use these instructions instead of return values, because a part of the interaction chain works via hooks which do not provide return values.
 
 All interaction chain functions share the following signature:
 
-* ref to Item A/Item
-* ref to Item B/Object
-* ref to actor performing the interaction (player for now, we may extend that later)
-* integer: 0 interaction was initiated via drag & drop, 1 interaction was initiated via attack button
+* reference to item A
+* reference to item/object B
+* reference to actor performing the interaction (player for now, we may extend that later)
+* integer: 0 if interaction was initiated via drag & drop, 1 if interaction was initiated via attack button
 
-### Item-Item-Chain:
+### Item-Item Chain:
 
-* Hook sys::PreItemItemInteraction
-* ItemItemInteraction Script of object A
-* ItemItemInteraction Script of object B
-* Hook sys::ItemItemInteraction
+* Hook `sys::PreItemItemInteraction`
+* `ItemItemInteraction script of item A
+* `ItemItemInteraction script of item B
+* Hook `sys::ItemItemInteraction`
 
-### Item-Object-Chain:
+### Item-Object Chain:
 
 If the object is also an item the Item-Item-Chain is used instead.
 
-* Hook sys::PreItemObjectInteraction
-* ItemObjectInteraction Script of item
-* ItemObjectInteraction Script of object
-* Hook sys::ItemObjectInteraction
+* Hook `sys::PreItemObjectInteraction`
+* `ItemObjectInteraction` script of item A
+* `ItemObjectInteraction` script of object B
+* Hook `sys::ItemObjectInteraction`
 
 # De-Hardcoding
 
-This section describes the first batch of de-hardcoding tasks. This is the core part of stage 1 (*The Grand De-Hardcoding*). We are aiming mostly for low hanging but highly profitable fruits here. More complex de-hardcoding (especially tasks that require more extensive script support) will follow in stage 2.
+This section describes the first batch of de-hardcoding tasks. This is the core part of stage 1 (*The Grand De-Hardcoding*). We are aiming mostly for low-hanging, but highly profitable fruits here. More complex de-hardcoding (especially tasks that require more extensive script support) will follow in stage 2.
 
 ## GMSTs
 
 Many GMSTs will be integrated into other records, which will effectively remove the GMST. We may consider actually removing the GMST record during the load process.
 
-We add three new types of GMSTs:
+We will add three new types of GMSTs:
 
-* IntegerList
-* FloatList
-* StringList
+* `IntegerList`
+* `FloatList`
+* `StringList`
 
-We may consider allowing content files to create new GMSTs outside of the sys namespace. This would make the GMST record type more consistent with other record types. To make this addition useful we need to add script functions to read GMSTs:
+We may consider allowing content files to create new GMSTs outside of the `sys` namespace. This would make the GMST record type more consistent with other record types. To make this addition useful, we need to add script functions to read GMSTs:
 
-* Keyword: Get{Type}Gmst()
+* `Get{Type}Gmst()`
 
-{Type} can be Integer, Float, String, Integerlist, FloatList or StringList.
+`{Type}` can be of type `long`, `float`, `String`, `Longlist`, `FloatList`, or `StringList`.
 
 ## Fallback Values
 
-The openmw.cfg file contains a set of fallback values. These were extracted from the Morrowind.ini file. As the name indicates we consider these values as a fallback for legacy format content files only. Our goal is to move all these values to content file format. In some cases we also may decide to declare a fallback value obsolete and not use it at all.
+The *openmw.cfg* file contains a set of fallback values. These were extracted from the *Morrowind.ini* file. As the name indicates, we consider these values as a fallback for legacy-format content files only. Our goal is to move all these values to content file format. In some cases, we may also decide to declare a fallback value obsolete and not use it at all.
 
 All usable values should be migrated to new GMST records, unless they are already covered by other parts of the de-hardcoding.
 
 ## General Scripting Enhancements
 
-We introduce new script functions:
+We will introduce new script functions:
 
-* Enumerate{x}: {x} is either Skills, Races, Classes, DynamicStats, Attributes, WeaponTypes, ArmorTypes, Specialisations, MagicSchools, Factions or Birthsigns. Returns a string list of the IDs of all records of the respective type.
+* `Enumerate{x}`: Returns a `StringList` of the IDs of all records of the respective type; `{x}` is either "Skills", "Races", "Classes", "DynamicStats", "Attributes", "WeaponTypes", "ArmorTypes", "Specialisations", "MagicSchools", "Factions" or "Birthsigns"
 
 ## Dynamic Stats
 
-We will unify dynamic stats and make them configurable. For stage 1 we will not allow the deletion of existing dynamic stats (they are used in too many parts of the engine). But we will allow new dynamic stats.
+We will unify dynamic stats and make them configurable. For stage 1, we will not allow the deletion of existing dynamic stats (they are used in too many parts of the engine). But we will allow new dynamic stats.
 
-We add a new record type for dynamic stats. Records for Health (sys::Health), Fatigue (sys::Fatigue) and Magicka (sys::Magicka) will be created by the engine when loading older omwgame files (these records are mandatory for newer omwgame files).
+We add a new record type for dynamic stats. Records for Health (`sys::Health`), Fatigue (`sys::Fatigue`), and Magicka (`sys::Magicka`) will be created by the engine when loading older omwgame files (these records are mandatory for newer omwgame files).
 
-A dynamic stats record contains the following information:
+A dynamic-stat record contains the following information:
 
 * Name (taken from GMSTs for default stats)
-* Tooltip text (taken from GMSTs for default stats)
+* Tooltip Text (taken from GMSTs for default stats)
 * Colour
-* (optional) PrevID: ID of stat the engine will try to sort in this stats after (similarly to info records)
-* (optional) NextID: ID of stat the engine will try to sort in this stats before (similarly to info records)
-* (optional) Vital-flag (player dies if stat with vital flag drops to 0)
-* (optional) ID of level-up function: Takes the reference of the character as argument and returns an integer value representing the max stat change from the level-up.
-* (optional) ID of time passed function: Takes the reference of the character and the duration as arguments. Returns a float that is used to modify the current stat value. Not used when waiting or sleeping.
-* (optional) ID of wait function: Takes the reference of the character, the duration and a sleep flag (integer) as arguments. Returns a float that is used to modify the current stat value.
-* Default value: If an actor does not have this stat (possible if the stat was defined in an addon and not in the base-game) this value is used for the maximum value of the stat.
+* (optional) PrevID: ID of the stat the engine will try to subsequently sort this stat in (similar to info records)
+* (optional) NextID: ID of the stat the engine will try to antecedently sort this stat in (similar to info records)
+* (optional) Vital: Flag which specifies whether the player dies if the stat drops to 0
+* (optional) Level-Up Function: ID of the stat's level-up function, which takes the reference of the character as argument and returns an `long` value representing the maximum stat change achievable with a level-up
+* (optional) Time-Passed Function: ID of the stat's time-passed functionm, which takes the reference of the character and the duration as arguments and returns a `float` that is used to modify the current stat value (the function is not used when waiting or sleeping)
+* (optional) Wait Function: ID of the stat's wait function, which takes the reference of the character, the duration, and a sleep flag (integer) as arguments and returns a `float` that is used to modify the current stat value
+* Default Value: Value that is used as the maximum value of the stat if an actor does not have this stat (possible if the stat was defined in an add-on and not in the base game)
 
-Scripts for default stats are injected as necessary. Some of these scripts require access to GMST values. We need to figure out how to implement this, either grab the value from the GMST when adding the script or adding a script function to read GMST values. The later is easier but will not allow us to remove the redundant GMST record easily.
+Scripts for default stats are injected as necessary. Some of these scripts require access to GMST values. We need to figure out how to implement this: either grab the value from the GMST when adding the script or adding a script function to read GMST values. The latter is easier but will not allow us to remove the redundant GMST records easily.
 
-The currently existing Get, Set and Mod instructions are flagged as deprecated and replaced by a single instruction for each operation that takes the stat ID as an argument. We need separate instructions to deal with base, modified and current values.
+The currently existing `Get`, `Set`, and `Mod` instructions are flagged as deprecated and replaced by a single instruction for each operation that takes the stat ID as an argument. We need separate instructions to deal with base, modified and current values.
 
 ## Attributes
 
 We will unify attributes and make them configurable. For stage 1 we will not allow the deletion of existing attributes (they are used in too many parts of the engine). But we will allow new attributes.
 
-We add a new record type for attributes. Records for the existing attributes (sys::NameOfAttribute) will be created by the engine when loading older omwgame files (these records are mandatory for newer omwgame files).
+We add a new record type for attributes. Records for the existing attributes (`sys::NameOfAttribute`) will be created by the engine when loading older omwgame files (these records are mandatory for newer omwgame files).
 
-A attribute record contains the following information:
+An attribute record contains the following information:
 
 * Name (taken from GMSTs for default attributes)
-* Tooltip text (taken from GMSTs for default attributes)
-* (optional) PrevID: ID of attribute the engine will try to sort in this attribute after (similarly to info records)
-* (optional) NextID: ID of attribute the engine will try to sort in this attribute before (similarly to info records)
-* Default value: If an actor does not have this attribute (possible if the attribute was defined in an addon and not in the base-game) this value is used for the attribute.
+* Tooltip Text (taken from GMSTs for default attributes)
+* (optional) PrevID: ID of the attribute the engine will try to subsequently sort this attribute in (similar to info records)
+* (optional) NextID: ID of the attribute the engine will try to antecedently sort this attribute in (similar to info records)
+* Default Value: Value that is used as the maximum value of the attribute if an actor does not have this attribute (possible if the attribute was defined in an add-on and not in the base game)
 
-Note that all records that reference attributes need to have the respective fields be changed from integers to strings.
+**Note**: All records that reference attributes need the respective fields to be changed from integers to strings.
 
-The currently existing Get, Set and Mod instructions are flagged as deprecated and replaced by a single instruction for each operation that takes the attribute ID as an argument. We need separate instructions to deal with base, modified and current values.
+The currently existing `Get`, `Set`, and `Mod` instructions are flagged as deprecated and replaced by a single instruction for each operation that takes the attribute ID as an argument. We need separate instructions to deal with base, modified and current values.
 
-Additionally we will add a new GMST sys::ClassAttributes of type integer. This GMST specifies the number of favoured attributes that a class has. The value defaults to 2.
+Additionally, we will add a new GMST `sys::ClassAttributes` of type `long`. This GMST specifies the number of favoured attributes that a class has. The value defaults to 2.
 
 ## Weapon Types
 
 We will unify weapon types and make them configurable.
 
-We add a new record type for weapon types. Records for the existing weapon types (sys::NameOfType) will be created by the engine when loading older omwgame files.
+We add a new record type for weapon types. Records for the existing weapon types (`sys::NameOfType`) will be created by the engine when loading older omwgame files.
 
 A weapon type record contains the following information:
 
 * Name (taken from GMSTs for default types)
-* HandlingType (how the weapon is held and what animations to play when attacking)
-* Name of HitTestScript (see Combat subsection)
+* Handling Type: Defines how the weapon is held and what animations play when attacking
+* Hit Test Script: Name of the hit test script used (see *Combat* subsection)
 
-For stage 1 the weapon type record is still very basic. Its purpose is mostly to allow better de-hardcoding of skills. We may expand on this in the future. However there are already possible uses (for example a type of "ancient blades" that require a separate skill).
+For stage 1, the weapon type record is still very basic. Its purpose is mostly to allow better de-hardcoding of skills. We may expand on this in the future. However, there are already possible uses, e.g., a weapon type "Ancient Blades" which requires a separate skill.
 
-We add another script function that returns the weapon type ID of an instance or an object ID: GetWeapopnTypeId. Note that GetWeaponType is already taken by Tribunal and we can not repurpose this name without breaking compatibility. 
+We add a new script function:
+
+* `GetWeaponTypeId id`: Returns the weapon type ID of an instance or an object with the ID `id`
+
+**Note**: `GetWeaponType` is already taken by Tribunal and we can not repurpose this name without breaking compatibility. 
 
 ## Armour Types
 
-In vanilla Morrowind armour types exist only implicitly. There is no record and no option to select armour types. Armour types are determined by weight only.
+In vanilla Morrowind, armour types exist only implicitly. There is no record and no option to select armour types. Armour types are determined by weight only.
 
-We will keep implicit armour types as an option, but also add armour types explicitly as a new type of record.
+We will keep implicit armour types as an option, but we'll also add armour types explicitly as a new type of record.
 
-Records for the existing types (sys::LightArmorType, sys::MediumArmorType, sys::HeavyArmorType) will be created by the engine when loading older omwgame files (these records are mandatory for newer omwgame files).
+Records for the existing types (`sys::LightArmorType`, `sys::MediumArmorType`, `sys::HeavyArmorType`) will be created by the engine when loading older omwgame files (these records are mandatory for newer omwgame files).
 
-A armour type record contains the following information:
+An armour type record contains the following information:
 
 * Name (taken from GMSTs for default types)
 * (optional) Minimum weight
 
-Additional armour object records are extended by the optional field "armor type".
+Additionally, armour object records are extended by the optional field "Armour type".
 
-If an armour object does not have this field its type is determined by the weight by the following algorithm:
+If an armour object has no armour type specified, its type is determined by its weight according to the following algorithm:
 
-* Consider all armour types with a minimum weight field
-* Exclude types that have a minimum weight larger than the weight of the object
-* Pick the type with the largest minimum weight
+1. Consider all armour types with a minimum weight field.
+2. Exclude types that have a minimum weight larger than the weight of the object.
+3. Pick the type with the largest minimum weight.
 
-For stage 1 the armour type record is still very basic. Its purpose is mostly to allow better de-hardcoding of skills. We may expand on this in the future. However there are already possible uses (for example going Oblivion by killing medium armour or adding a new type of armour "ancient armor" that requires a separate skill).
+For stage 1, the armour type record is still very basic. Its purpose is mostly to allow better de-hardcoding of skills. We may expand on this in the future. However, there are already possible uses, e.g., imitating TES IV: Oblivion by eliminating medium armour or adding a new armour type such as "Ancient Armour" which requires a separate skill.
 
-We add another script function that returns the armour type ID of an instance or an object ID: GetArmorTypeId.
+We add another script function:
+
+* `GetArmorTypeId id`: Returns the armour type ID of an instance or an object with the ID `id`
+
+**Note**: For the sake of consistency, we've adopted the naming scheme introduced for weapon types.
 
 ## Specialisation
 
 We will unify specialisations and make them configurable.
 
-We add a new record type for specialisations. Records for Combat (sys::CombatSpec), Stealth (sys::StealthSpec) and Magic (sys::MagicSpec) will be created by the engine when loading older omwgame files.
+We add a new record type for specialisations. Records for Combat (`sys::CombatSpec`), Stealth (`sys::StealthSpec`), and Magic (`sys::MagicSpec`) will be created by the engine when loading older omwgame files.
 
 A specialisation record contains the following information:
 
 * Name (taken from GMSTs for default types)
 
-We add a new script instruction GetSpecialization id, that returns the specialisation of a class or a skill with the given ID.
+We add a new script instruction:
+
+* `GetSpecialization id`: Returns the specialisation of a class or a skill with the given ID `id`
 
 ## Magic Schools
 
 We will unify magic schools and make them configurable.
 
-We add a new record type for magic schools. Records for the existing magic schools will be created by the engine when loading older omwgame files.
+We add a new record type for magic schools. Records for the existing magic schools (`sys::AlterationMagicSchool`, `sys::ConjurationMagicSchool`, etc.) will be created by the engine when loading older omwgame files.
 
 A magic school record contains the following information:
 
 * Name (taken from GMSTs for default schools)
-* Specialisation (sys::MagicSpec for default schools)
-* Resource (sys::Magicka for default schools)
+* Specialisation (`sys::MagicSpec` for default schools)
+* Resource (`sys::Magicka` for default schools)
 
-A use for the specialisation field would be (for example) dividing magic up into two categories "divine magic" and "arcane magic" and have characters specialise accordingly.
+A use for the specialisation field would be, e.g., dividing magic into the two categories "Divine Magic" and "Arcane Magic" and having characters specialise accordingly.
 
 ## Skills
 
-Skills are a complex topic and we won't achieve full de-hardcoding in stage 1 and most like there will never be a 100% complete de-hardcoding. But there is still a lot we can do with skills.
+Skills are a complex topic and we won't achieve full de-hardcoding in stage 1 - and most likely there will never be a 100% complete de-hardcoding. But there is still a lot we can do with skills.
 
-Currently skills exist as indexed records. We need to move these over to ID-based records. The exiting indices are translated to IDs of the form sys::NameOfSkill.
+Currently, skills exist as indexed records. We need to move these over to ID-based records. The exiting indices are translated to IDs of the form `sys::NameOfSkill`.
 
-We add a new sub-record type (Function Sub-Record, see below). Each skill can have zero, one or multiple function sub-records.
+We add a new subrecord type (see subsection *Function Subrecords* below). Each skill can have zero, one, or multiple function subrecords.
 
 The following skills are too tightly bound into the engine to allow their easy removal:
 
-* Armorer
-* Enchanting
-* Alchemy
 * Acrobatics
-* Block
-* Sneak
+* Alchemy
+* Armorer
 * Athletics
+* Block
+* Enchant
 * Hand-to-hand
-* Unarmored
 * Mercantile
+* Sneak
 * Speechcraft
+* Unarmored
 
-Therefore we will (for now) forbid the deletion of the respective skill records. All other default skills can be deleted.
+Therefore, we will (for now) forbid the deletion of the respective skill records. All other default skills can be deleted.
 
-### Scripts Instructions
+### Script Instructions
 
-The currently existing Get, Set and Mod instructions are flagged as deprecated and replaced by a single instruction for each operation that takes the skill ID as an argument. We need separate instructions to deal with base and modified values.
+The currently existing `Get`, `Set`, and `Mod` instructions are flagged as deprecated and replaced by a single instruction for each operation that takes the skill ID as an argument. We need separate instructions to deal with base and modified values.
 
 We also introduce new script instructions:
 
-* UseSkill id, v: Progress skill id by a value of v (float).
-* UseValueSkill Id, i: Progress skill id by the value given by use value field with index i (0, 1, 2 or 3)
-* Get{x}SkillLevel s_id: Return the skill level of a function sub-record with TargetId s_id (string). {x} is either Armor, Weapon or Magic. See next sub-section for details.
+* `UseSkill id, v`: Progresses the skill `id` by a value of `v` (`float`).
+* `UseValueSkill Id, i`: Progresses the skill `id` by the value given by the use-value field with index `i` (0, 1, 2 or 3)
+* `Get{x}SkillLevel s_id`: Returns the skill level of a function subrecord with `TargetId` `s_id` (`String`). `{x}` is either "Armor", "Weapon", or "Magic"; see the next subsection for details.
 
-Note that we do not de-hardcode the fixed number of use value fields. The usefulness of these fields is most likely limited for new skills. The UseSkill instruction, which bypasses the use value fields should be sufficient in most cases. We only add the UseValueSkill instructions to better support script interactions with default skills.
+**Note**: We do not de-hardcode the fixed number of use-value fields. The usefulness of these fields for new skills is most likely limited. The `UseSkill` instruction, which bypasses the use-value fields, should be sufficient in most cases. We only add the `UseValueSkill` instructions to better support script interactions with default skills.
 
-### Function Sub-Records
+### Function Subrecords
 
-A function sub-record describes how a skill interacts with hardcoded engine functions. A function record consists of a function ID (we use an index here, because the list of functions will definitely not be extensible by content files) and additional arguments.
+A function subrecord describes how a skill interacts with hardcoded engine functions. A function record consists of a function ID (we use an index here, because the list of functions will definitely not be extensible by content files) and additional arguments.
 
-For stage one we require only one additional argument:
+For stage 1, we require only one additional argument:
 
-* TargetId (single string value)
+* `TargetId` (single `String` value)
 
-For stage 1 we introduce three function IDs: Armour skill, weapon skill, magic skill.
+Stage 1 will introduce three function IDs:
 
-We do not forbid non-unique function sub-records; meaning two skills may have identical function sub-records (e.g. two skills governing light armor). If there is more than one skill with the same function sub-record and the skill level for this function needs to be considered, we use the maximum over all relevant skill levels.
+* Armour Skill
+* Weapon Skill
+* Magic Skill
+
+We do not forbid non-unique function subrecords, i.e., two skills may have identical function subrecords, e.g., two skills governing light armour. If there is more than one skill with the same function subrecord and the skill level for this function needs to be considered, we use the maximum of all relevant skill levels.
 
 ### Armour Skills
 
-We make armour skills fully customisable by introducing a function ID for armour types. Any skill that has a function sub-record with this ID is an armour skill. For default armour skills loaded from older omwgame files we will inject function sub-records during the loading process.
+We make armour skills fully customisable by introducing a function ID for armour types. Any skill that has a function subrecord with this ID is an armour skill. For default armour skills loaded from older omwgame files, we will inject function subrecords during the loading process.
 
-The TargetId of a armour function sub-record indicates the armour type that the skill is governing. 
+The `TargetId` of an armour function subrecord indicates the armour type that the skill is governing. 
 
-The default skills are: Heavy Armor, Medium Armor, Light Armor.
+The default skills are:
+
+* "Heavy Armor"
+* "Light Armor"
+* "Medium Armor"
 
 ### Weapon Skills
 
-We make weapon skills fully customisable by introducing a function ID for weapon types. Any skill that has a function sub-record with this ID is a weapon skill. For default weapon skills loaded from older omwgame files we will inject function sub-records during the loading process.
+We make weapon skills fully customisable by introducing a function ID for weapon types. Any skill that has a function subrecord with this ID is a weapon skill. For default weapon skills loaded from older omwgame files, we will inject function subrecords during the loading process.
 
-The TargetId of a weapon function sub-record indicates the weapon type that the skill is governing. 
+The `TargetId` of a weapon function subrecord indicates the weapon type that the skill is governing. 
 
-The default skills are:  Spear, Axe, Blunt Weapon, Long Blade, Marksman, Short Blade
+The default skills are:
+
+* "Axe"
+* "Blunt Weapon"
+* "Long Blade"
+* "Marksman"
+* "Short Blade"
+* "Spear"
 
 ### Magic Skills
 
-We make magic skills fully customisable by introducing a function ID for magic schools. Any skill that has a function sub-record with this ID is a magic skill. For default magic skills loaded from older omwgame files we will inject function sub-records during the loading process.
+We make magic skills fully customisable by introducing a function ID for magic schools. Any skill that has a function subrecord with this ID is a magic skill. For default magic skills loaded from older omwgame files, we will inject function subrecords during the loading process.
 
-The TargetId of a magic school function sub-record indicates the magic school that the skill is governing. 
+The `TargetId` of a magic school function subrecord indicates the magic school that the skill is governing. 
 
-The default skills are: Illusion, Conjuration, Alteration, Destruction, Mysticism, Restoration
+The default skills are:
+
+* "Alteration"
+* "Conjuration"
+* "Destruction"
+* "Illusion"
+* "Mysticism"
+* "Restoration"
 
 ## Weather
 
-We make weather types customisable by moving from hard-coded index based weather effects to ID based weather types stored in content files. To this end we introduce a new record type (Weather). When loading older omwgame files we will inject weather records for the ten default weather types.
+We make weather types customisable by moving from hardcoded, index-based weather effects to ID-based weather types stored in content files. To achieve this, we introduce a new record type ("Weather"). When loading older omwgame files, we will inject weather records for the ten default weather types (`sys::WeatherAsh`, `sys::WeatherBlight`, etc.).
 
-A weather record is made up from sub-records, each describing a weather effect. A weather record can have any number of weather effect sub-records.
+A weather record is made up of subrecords, each describing a weather effect. A weather record can have any number of weather effect subrecords.
 
-There are three types of effect sub-records:
+There are four types of weather effect subrecords:
 
-* Magic effect: A magic effect that is applied to all actors within active cells while the respective weather type is active.
-* Sky: Modifications to the visuals of the sky (e.g clouds)
-* Particles: Particle effects (e.g. rain)
-* Event: Events that can happen with a certain probability while the weather type is active (e.g. lightning). Events happen at random locations.
+* "Magic Effect": A magic effect that is applied to all actors within active cells while the respective weather type is active
+* "Sky": Modifications to the visuals of the sky (e.g, clouds)
+* "Particles": Particle effects (e.g., rain)
+* "Event": Events that can happen with a certain probability while the weather type is active (e.g., lightning); events happen at random locations
 
-Magic effect sub-records contain the ID of the respective magic effect. All other sub-records contain an integer ID specifying the effect and (if necessary) additional parameters.
+Magic effect subrecords contain the ID of the respective magic effect. All other subrecords contain an integer ID specifying the effect and (if necessary) additional parameters.
 
-All effects described in these sub-records affect active cells only.
+All effects described in these subrecords affect active cells only.
 
 ### Sky
 
-TODO all existing sky effects and possibly new ones; bugger scrawl to fill in the details
+TODO:
+- Should cover all existing sky effects and possibly new ones
 
 ### Particles
 
-TODO all existing particle effects and possibly new ones; bugger scrawl to fill in the details
+TODO:
+- Should cover all existing particle effects and possibly new ones
 
 ### Event
 
 We will add the following event IDs:
 
-* 0: Scripted Event: Additional data consists of the name of the script to be run when the event is triggered. The script takes the following arguments: worldspace (string), location (Vector3), weather ID (string)
-* 1: Lightning
+* "0": Scripted event; additional data consists of the name of the script to be run when the event is triggered; the script takes the following arguments: worldspace (`String`), location (`Vector3`), weather ID (`String`)
+* "1": Lightning
 
-In addition to the event ID and event ID specific data event sub-records have an event trigger block.
+In addition to the event ID and event-ID-specific data, event subrecords have an "Event Trigger" block:
 
-### Event, Trigger
-
-* Chance: The chance of the event happening (floating number in the range between 0 and 1) per unit of time. We may want to make the unit of time globally configurable with a new GMST.
-* Min-Distance (optional): The minimum distance from the player at which the effect can take place (0 by default).
-* Max-Distance (optional): The maximum distance from the player at which the effect can take place (infinite by default):
+* Chance: Floating number in the range between 0 and 1; the chance per unit of time that the event happens (we may want to make the unit of time globally configurable with a new GMST)
+* (optional) Min-Distance: The minimum distance from the player at which the effect can take place (0 by default)
+* (optional) Max-Distance: The maximum distance from the player at which the effect can take place (infinite by default)
 
 ### Scripts
 
-We need to introduce new script instructions regarding to weather, since the existing instructions are based on fixed number weather types or integer indexed weather types. These instructions can not be salvaged and we therefore declare them deprecated.
+We need to introduce new script instructions regarding the weather, since the existing instructions are based on a fixed number of weather types or integer-indexed weather types. These instructions can not be salvaged and we therefore declare them deprecated.
 
 New script instructions:
 
-* SetWeather (region ID, weather ID): Replaces change weather. Set current weather for a region.
-* GetWeather (region ID): Replaces GetCurrentWeather. Returns current weather for a region.
-* SetRegionWeather (region ID, weather ID, chance): Replaces ModRegion. Modify a single entry in the weather table of a region. Chance is of type long. We relax the requirement that the sum of the chance values need to be 100.
-* UpdateRegionWeather (region ID): Forces a new roll on the weather table of a region.
+* `SetWeather(regionId, weatherId)`: Sets the current weather for the region with the ID `regionId` to `weatherId` (replaces `ChangeWeather`)
+* `GetWeather(regionId)`: Returns the current weather ID for the region with the ID `regionId` (replaces `GetCurrentWeather`)
+* `SetRegionWeather(regionId, weatherId, chance)`: Modifies the entry `weatherId` in the weather table of the region with the ID `regionId`; `chance` is of type `long`; we relax the requirement that the sum of the chance values needs to be 100 (replaces `ModRegion`)
+* `UpdateRegionWeather(regionId)`: Forces a new roll on the weather table of the region with the ID `regionId`
 
 ## Water
 
-We currently have only a single water type that is hard-coded. We name this water type sys::Water and inject a suitable record of the new type (see below) during loading of older omwgame files.
+We currently have but a single water type that is hardcoded. We name this water type `sys::Water` and inject a suitable record of the new type (see below) during loading of older omwgame files.
 
-We generalise the concept of water to liquid by introducing a new record type (Liquid). Liquid records can be used both for different looking water type (more swampy water, water with different colouration) but also for completely different liquid types (e.g. Lava).
+We generalise the concept of water to the concept of liquid by introducing a new record type ("Liquid"). Liquid records can be used both for different-looking water types (e.g., more swampy water, water with different colouration) but also for completely different liquid types (e.g. lava).
 
-To support the water type sys::water we also need to add a new magic effect (sys::SuffocationEffect).
+**Note**: Morrowind only uses one liquid type, which we refer to as "water". (While lava does exist in the game, it is handled with activators, rather than as a liquid type)
 
-Liquid records are referenced both in worldspace records (see Cells & Worldspaces section) and in body of liquid records (see Misc section).
+To support the water type `sys::Water`, we also need to add a new magic effect (`sys::SuffocationEffect`).
+
+Liquid records are referenced both in worldspace records (see *Cells, Worldspaces & Areas* section) and in the body of liquid records (see *Misc* section).
 
 A liquid record consists of the following fields:
 
-* Effects: IDs of zero or more magic effects that applied to actors while in the liquid.
-* Submerged Effects: IDs of zero or more magic effects that are applied to actors while completely submerged in the liquid.
-* Liquid type ID: Integer, hard-coded
-* Additional parameter, specific to liquid type
+* Effects: IDs of zero or more magic effects which are applied to actors while in the liquid
+* Submerged Effects: IDs of zero or more magic effects that are applied to actors while completely submerged in the liquid
+* Liquid Type ID: `long`, hardcoded
+* Additional parameters, specific to liquid type
 
 We need to support at least one liquid type (ID 0: Water) from the start. Other types can be added.
 
-TODO check with scrawl about other ways to handle visuals for liquid types that requires less hard-coding. Shaders?
+TODO:
+- Are there other ways to handle visuals for liquid types that require less hardcoding?
+- Use of shaders?
 
 ## Magic Effects
 
-Currently we have a fixed number of magic effects that are referenced by an integer index.
+Currently, we have a fixed number of magic effects that are referenced by an integer index.
 
-We move over the magic effect records to a string ID based scheme.
+We move over to effect records with a string-ID-based scheme.
 
-We also introduce a new effect (sys::SuffocationEffect) by injecting a record when loading from older omwgame files. This effect triggers the normal procedure for running out of air. Note that this will require creating a new effect icon.
+We also introduce a new effect (`sys::SuffocationEffect`) by injecting a record when loading from older omwgame files. This effect triggers the normal procedure for running out of air.
 
-Effect records can be deleted without restrictions. A content developer can add new effect records, again without restrictions.
+**Note**: This will require creating a new effect icon, which will be stored internally along with other resources that are part of the game engine.
 
-We add a field to the effect record that contains the effect's name, currently stored in a GMST.
+Effect records can be deleted without restrictions. A content developer can add new effect records - again without restrictions.
 
-We also add an optional field that contains the ID of a script function that is called when the magic effect takes effect. The function takes two arguments:
+An effect record consists of the following fields:
 
-* The reference of the effects source. This would be a spellcaster in case of a spell or an item in case of an enchantment.
-* A list of target references.
+* Name (currently stored in a GMST)
+* (optional) Effect Function: Contains the ID of a script function that is called when the magic effect takes effect; the function takes two arguments: the reference of the effects source (this would be a spellcaster in case of a spell or an item in case of an enchantment) and a list of target references
+* (optional) Wear-Off Function: Contains the ID of a script function that is called when the magic effect ends (only relevant for non-instant effects); the function takes the same two arguments as the "Effect Function" field
 
-Furthermore we add a second optional field that contains the ID of a script function that is called when the magic effect ends (only relevant for non-instant effects). The function signature is the same.
+For the existing effects, we will inject scripts that match the previously hardcoded effects when loading from an older omwgame file. This will require the addition of a significant number of new script instructions that are all trivial, since they will just call existing engine functions.
 
-For the existing effects we will inject scripts that match the previously hard-coded effects when loading from an older omwgame file. This will require the addition of a significant number of new script instructions that are all trivial, since they will just call existing engine functions.
-
-It is important to generalise as much as possible when creating these new script functions. For example we won't have a DivineIntervention script instruction. Instead we add a GetClosestMarker function and use existing functions for querying position and cell and then use the new Teleport instruction.
+It is important to generalise as much as possible when creating these new script functions, e.g., we won't have a `DivineIntervention` script instruction. Instead we add a `GetClosestMarker` function, use existing functions for querying position and cell and, then, use the new `Teleport` instruction.
 
 ## Input
 
 We allow the addition of customisable input functions that can be bound to keyboard buttons in the usual way and can trigger the execution of scripts. Existing input bindings are not affected by this.
 
-To this end we introduce a new record type (Input):
+To this end, we introduce a new record type ("Input"):
 
 * Label
-* Tooltip (string, optional)
-* Default key (integer)
-* Key down event script (string, optional): A script that is executed when the key is pressed.
-* Key up event script (string, optional): A script that is executed when the key is released.
-* Key pressed event script (string, optional): A script that is executed periodically while the key is down.
-* Key pressed delta (float): Minimum time between two executions of the key pressed event script. Defaults to a reasonable value in the absence of this field.
+* (optional) Tooltip: `String` value
+* Default Key: `long` value
+* (optional) Key-Press Event Script: Contains the ID of a script that is executed when the key is pressed
+* (optional) Key-Release Event Script: Contains the ID of a script that is executed when the key is released
+* (optional) Key-Hold Event Script: Contains the ID of a script that is executed when the key is pressed and held
+* Key-Hold Delta: `float` value describing the minimum time between two executions of the "Key-Hold Event Script"; defaults to a reasonable value
 
 ## Held Items
 
-We merge the probe and lockpick object types into a new object type: Held Item. The security skill related functions are handled via the ItemObjectInteraction script subrecord. When loading older omwgame files a suitable script in the sys namespace is injected for probing and lockpicking each. When transforming probe and lockpick records into Held Item records a ItemObjectInteraction subrecord referencing the respective script is injected.
+We merge the probe and lockpick object types into a new object type: "Held Item". The Security-skill-related functions are handled via the `ItemObjectInteraction` script subrecord. When loading older omwgame files, a suitable script in the `sys` namespace is injected for probing and lock picking each. When transforming probe and lockpick records into held-item records, an `ItemObjectInteraction` subrecord referencing the respective script is injected.
 
-If we enhance the animation system we may need to add additional subrecords that specify the pose for holding the item or the animation for using it.
+**Note**: If we enhance the animation system, we may need to add additional subrecords that specify the pose for holding the item or the animation for using it.
 
 ## Pickpocketing
 
-We add a new GMST (sys::ReversePickpocketing) of type integer that indicates if reverse pickpocketing is allowed (value other than 0) or not (value 0).
+We add a new GMST (`sys::ReversePickpocketing`) of type `long` that indicates if reverse pickpocketing is allowed (value other than 0) or not (value 0).
 
-We move the function for checking if pickpocketing succeeded from the C++ code to a new script function (sys::PickpocketTest). We inject this function when loading older omwgame files.
+We move the function for checking if pickpocketing succeeded from the C++ code to a new script function (`sys::PickpocketTest`). We inject this function when loading older omwgame files.
 
 The function takes the following arguments:
 
-* ref to thief actor
-* ref to victim actor
-* ref to item to be stolen
-* reverse flag: integer, 0 for regular pickpocketing, 1 for reverse
+* thiefId: Reference to the thief (actor)
+* victimId: Reference to the victim (actor)
+* stolenItemId: Reference to the item to be stolen
+* reversePickpocket: `long` flag; set to 0 for regular pickpocketing, set to 1 for reverse pickpocketing
 
 The function returns 1 if the pickpocket attempt succeeded and 0 if it failed.
 
-Items with the nopick tag are excluded from pickpocketing.
+Items with the `noPick` tag are excluded from pickpocketing.
 
 ## Combat
 
-De-hardcoding combat is a monumental task that we can not hope to complete within the time frame of stage 1. We will de-hardcode some parts that do not depend on large scale improvements to animation and can be handled with the scripting improvements in stage 1. Any further enhancements are left for stage 2 or more likely OpenMW 2.0.
+De-hardcoding combat is a monumental task that we can not hope to complete within the time frame of stage 1. We will de-hardcode some parts that do not depend on large-scale improvements to animation and can be handled with the scripting improvements in stage 1. Any further enhancements are left for stage 2 or, more likely, OpenMW 2.0.
 
 ### Hits
 
-We move the hit test check for C++ code to script functions. The following functions will be used:
+We move the hit test check from C++ code to script functions. The following functions will be used:
 
-* For melee weapons the HitTest script function defined in the respective WeaponType record; arguments: ref to weapon, ref to target
-* For ranged weapons the HitTest script function defined in the respective WeaponType record; arguments: ref to weapon, ref to target, ref to ammunition
-* For unarmed attacks the function sys::UnarmedHitTest; arguments: ref to weapon, ref to target
+* `<NameOfMeleeHitTest>(weaponId, targetId)`: Function for melee weapons defined in the corresponding WeaponType record; `weaponId` refers to the weapon used, `targetId` refers to the ID of the target
+* `<NameOfRangedHitTest>(weaponId, targetId, ammunitionId)`: Function for ramged weapons defined in the corresponding WeaponType record; `weaponId` refers to the weapon used and `targetId` refers to the ID of the target, and `ammunitionId` refers to the ammunition used by the ranged weapon
+* `sys::UnarmedHitTest(weaponId, targetId)`: Default function for unarmed attacks; `weaponId` refers to the weapon used and `targetId` refers to the ID of the target
 
-All functions return an integer: 0 (no hit), a value other than 0 (hit)
+All functions return 0 if the attack misses and a value other than 0 on a successful hit.
 
-sys::UnarmedHitTest and default functions for armed hit tests (sys::MeleeHitTest, sys::RangedHitTest) are injected when loading older omwgame files.
+`sys::UnarmedHitTest` and default functions for armed-hit tests (`sys::MeleeHitTest` and `sys::RangedHitTest`) are injected when loading older omwgame files.
 
 ### Script Enhancements
 
 We add a new script function:
 
-* GetTargetRef: Returns the current target of an actor. Returns a NullRef if the actor is not in combat. Also returns a NullRef when used on an instance that is not an actor.
+* `GetTargetRef`: Returns the current target of an actor; returns a null reference if the actor is not in combat or if it is used on an instance that is not an actor
 
 We add two new script instructions:
 
-* DeclareWar l: Similar to StartCombat, but specifies a whole group of enemies. l is a list of references.
-* DeclarePeace l: Ends the hostilities resulting from previous combat towards the actors listed in the reference list l. We may need to add a grace period after this instruction during attacks do not cause hostility again, so we can handle non-instant attacks.
+* `DeclareWar l`: Similar to `StartCombat`, but specifies a whole group of enemies; `l` is a list of references
+* `DeclarePeace l`: Ends the hostilities resulting from previous combat towards the actors listed in the reference list `l`. **Note**: We may need to add a grace period after this instruction during which attacks do not cause hostility again, so we can handle non-instant attacks.
 
 ### Script Hooks
 
-We add three new script hooks.
+We add three new script hooks:
 
-sys::Kill is executed whenever an actor is killed. Scripts for this hook take the following arguments:
-
-* Ref to target
-* Ref to actor who killed the target (may be a null ref)
-
-sys::CombatStarted and sys::CombatEnded are executed when the player enters or exits combat, respectively.
+* `sys::Kill`: Executed whenever an actor is killed; scripts for this hook take the following two arguments: reference to the target and reference to the actor who killed the target (may be a null reference)
+* `sys::CombatStarted`: Executed when the player enters combat
+* `sys::CombatEnded`: Executed when the player exits combat
 
 ## Music
 
@@ -1324,12 +1356,12 @@ The playlist record has the following fields:
 
 The titles on the playlist are all the titles in the music directory and the titles listed explicitly.
 
-When playing a playlist first the probability is considered to randomly decide if a track is played or not. Then a track from the list is chosen.
+When playing a playlist, first the probability is considered to randomly decide if a track is played or not. Then a track from the list is chosen.
 
 If a playlist is played in loop mode the process above is repeated whenever:
 
 * The current track ends
-* If no track is playing at reasonably chosen time intervals
+* No track is playing at reasonably chosen time intervals
 
 ### Background and Event Music
 
@@ -1374,11 +1406,11 @@ We add two playlists (sys::ExplorePlaylist and sys::CombatPlaylist) which are po
 
 We add a GMST (sys::DefaultBackgroundMusic) with a default value of "sys::ExplorePlaylist". Whenever starting a new game or loading a game with no background music running the playlist specified in this GMST is played as background music. If the GMST holds an empty string no background music is played by default.
 
-We add a script to the sys::CombatStarted and sys::CombatEnded hook each. The former plays sys::CombatPlaylist looped and forced. The later stops event music.
+We add a script to the sys::CombatStarted and sys::CombatEnded hook each. The former plays sys::CombatPlaylist looped and forced. The latter stops event music.
 
 ### Location-Based Background Music
 
-We add an optional string sub-record to the records listed below. This field contains a single track or a playlist, that determine the background music for the respective location.
+We add an optional string sub-record to the records listed below. This field contains a single track or a playlist that determine the background music for the respective location.
 
 * Worldspace
 * Region
@@ -1397,8 +1429,8 @@ The process of character creation currently allows for very little customisation
 
 Currently the character creation process runs through these steps:
 
-1. Choose Name
-2. Choose Race and appearance
+1. Choose name
+2. Choose race and appearance
 3. Choose a method for class selection and perform class selection (3 methods)
 4. Choose birthsign
 5. Review
@@ -1427,7 +1459,7 @@ We add several new script instructions.
 * CharacterCreationBack: Go back to previous step
 * CharacterCreationNext: Go to next step (ignored if the next step had not been accessed before)
 
-n is an integer argument with one of several hard-coded integer values:
+n is an integer argument with one of several hardcoded integer values:
 
 * 0: Name GUI
 * 1: Race GUI
@@ -1458,11 +1490,11 @@ Likewise the character selection method of answering a set of quests can be impl
 
 The vanilla (character-)level-up system allows almost no modification. We keep the existing hard-coded system, but make it more configurable, and we also allow content developers to completely replace the existing system.
 
-### State Un-Hiding
+### State Unveiling
 
 Checks for a level up are based on the skill progression since the last level up. In vanilla this state is not accessible to content developers or players.
 
-We address this issue by turning these hidden variables into record variables attached to the player character. The variables have the type long, a name matching the ID of the skill and are created on the fly whenever the engine detects a skill level up. Note that regular script instructions that change skill level do not count towards level ups.
+We address this issue by turning these hidden variables into record variables attached to the player character. The variables have the type long and a name matching the ID of the skill, and are created on the fly whenever the engine detects a skill level up. Note that regular script instructions that change skill level do not count towards level ups.
 
 We also add another record variable (LevelUpCount) that counts the number of major and minor skill level-ups.
 
@@ -1476,7 +1508,7 @@ Some NPCs are flagged as skill trainers. These trainers can train the player in 
 * New script (sys::SkillTrainingTest): Tests if NPC can train player in a skill (returns 0 or 1). This test is performed after the faction standing test and after the skill list is trimmed down via sys::SkillTrainCount. The function takes the following arguments: ref to player, ref to NPC, ID of skill
 * New script (sys::SkillTrainingApplied): Executed after training has been completed. Arguments are the same as with sys::SkillTrainingTest.
 
-When loading from an old omwgame file GMST and scripts are injected. sys::SkillTrainCount defaults to 3, sys::SkillTrainingTest performing the usual tests on skill level and attributes and sys::SkillTrainingApplied defaults to an empty script.
+When loading from an old omwgame file, GMST and scripts are injected. sys::SkillTrainCount defaults to 3, sys::SkillTrainingTest performs the usual tests on skill level and attributes and sys::SkillTrainingApplied defaults to an empty script.
 
 ### Level-Up Test
 
@@ -1511,7 +1543,7 @@ The default implementation (injected when loading from an older omwgame file) re
 
 ### Level-Up Image
 
-The level up dialogue contains an image that depends on how the skill increase is distributed among specialisations. The function that decides about this image is very simple. However since specialisations won't be hard-coded anymore we can not simply pass these values into the function without first establishing more involved script support than planned for stage 1.
+The level up dialogue contains an image that depends on how the skill increase is distributed among specialisations. The function that decides about this image is very simple. However, since specialisations won't be hardcoded any more, we can not simply pass these values into the function without first establishing more involved script support than planned for stage 1.
 
 This is actually not a problem since we can simply track the increase values in record variables, which may also prove useful for other purposes.
 
@@ -1545,13 +1577,13 @@ This process is complicated by the existence of levelled item lists, which makes
 
 We will make several changes to increase the flexibility of item restocking.
 
-First we move the re-fill operation from after a trade is completed to before a trade is completed. This should not affect existing content.
+First we move the refill operation from after a trade is completed to before a trade is completed. This should not affect existing content.
 
-We add three more scripts (optional, specified via new string fields in the actor's record) that hook into the re-fill process.
+We add three more scripts (optional, specified via new string fields in the actor's record) that hook into the refill process.
 
-1. Check if a re-fill should be performed; called at the beginning of every trade cycle. Arguments: ref to actor, integer (1 if first trade since talking to the merchant, 0 otherwise). Returns an integer (0 no re-fill required, otherwise re-fill is required). If script is not present a re-fill is performed).
-2. Called for every item that the re-fill algorithm flags for removal. Arguments: ref to actor, ref to item. Returns an integer (0 if item should be kept, otherwise item is removed). If script is not present the removal takes place.
-3. Called at the end of re-fill procedure. This gives content authors the opportunity to make other modifications. Arguments: ref to actor. No return value.
+1. Check if a refill should be performed; called at the beginning of every trade cycle. Arguments: ref to actor, integer (1 if first trade since talking to the merchant, 0 otherwise). Returns an integer (0 no refill required, otherwise refill is required). If this script is not present, a refill is performed).
+2. Called for every item that the refill algorithm flags for removal. Arguments: ref to actor, ref to item. Returns an integer (0 if item should be kept, otherwise item is removed). If this script is not present, the removal takes place.
+3. Called at the end of refill procedure. This gives content authors the opportunity to make other modifications. Arguments: ref to actor. No return value.
 
 ## Fast-Travel
 
@@ -1664,23 +1696,23 @@ NPC schedules are an advanced topic and as such would be a better fit for stage 
 
 We run schedules only in active cells. But we also need to consider passive cells.
 
-Here are a few examples. For simplicity lets consider a one-dimensional cell grid with the usual pattern of one cell around of the player cell being active.
+Here are a few examples. For simplicity let's consider a one-dimensional cell grid with the usual pattern of one cell around of the player cell being active.
 
 For this example let the player be in cell 0. Now consider NPC A, who is in cell 2 (not active). He has a schedule that takes him to cell 1 sometimes. As a player we would expect to see him from the distance then.
 
 Another example with the same setup as above: While A is moving within cell 2 towards cell 1, the player relocates to cell 2. He would to see A make his way towards cell 1. Moreover if the player moves back to cell 0 and then returns to cell 2, he would expect to see A having made some progress.
 
-Conclusion: We must track all actors who's schedule can take them into active cells.
+Conclusion: We must track all actors whose schedules can take them into active cells.
 
-It is not clear yet how to achieve this goal best. In the most simple implementation we could just estimate the time it takes to perform a task in a schedule and spawn the actor into a active cells accordingly. This would however not cover the second example.
+It is not clear yet how to achieve this goal best. In the most simple implementation we could just estimate the time it takes to perform a task in a schedule and spawn the actor into active cells accordingly. This would however not cover the second example.
 
-Alternatively we could invent a semi-active cell state and apply it to all cells that contain NPCs who's schedule can touch the active cells. This semi-active state would not run any scripts, nor would it render or run animations. And it may use a simplified/limited form of physics. This approach would cover all cases. However it has the potential for a severe performance impact.
+Alternatively we could invent a semi-active cell state and apply it to all cells that contain NPCs whose schedules can touch the active cells. This semi-active state would not run any scripts, nor would it render or run animations, and it may use a simplified/limited form of physics. This approach would cover all cases. However, it has the potential for a severe performance impact.
 
-Again alternatively, we may offer both implementation and switch between them base on settings/available processing power.
+Again alternatively, we may offer both implementations and switch between them base on settings/available processing power.
 
 ### Actor Tracking
 
-Independently from the chosen implementation we need to track all actors who's schedules are relevant to the active cells. This is a problem because with the default data structures we would at least need to scan every single cell on startup for relevant actors. The performance impact of such an approach is most likely not acceptable.
+Independently from the chosen implementation, we need to track all actors whose schedules are relevant to the active cells. This is a problem because with the default data structures we would at least need to scan every single cell on start-up for relevant actors. The performance impact of such an approach is most likely not acceptable.
 
 Therefore information about which actor's schedule is relevant to which cell needs to be stored in a separate data structure that exists outside of the cell records.
 
@@ -1696,9 +1728,9 @@ Each task sub-record consists of:
 
 The time table of a schedule is allowed to have holes (e.g schedule 1 ending at 10:00 and schedule 2 beginning at 10:15).
 
-Task may also overlap partially, but no two task may start at the same time.
+Tasks may also overlap partially, but no two tasks may start at the same time.
 
-When picking a task from the schedule all task which contain the current time are considered. Of these the task with the earliest start time is chosen.
+When picking a task from the schedule, all tasks which contain the current time are considered. Of these the task with the earliest start time is chosen.
 
 A new task is picked only when the current one has expired.
 
@@ -1706,7 +1738,7 @@ A new task is picked only when the current one has expired.
 
 Schedules can be assigned to actors either in the actor record or with a new script instruction.
 
-When explicit switching from one schedule to another, tasks with the ignore flag are ignored. This feature is intended for transitory tasks, that are pointless if the previous task hasn't been performed.
+When explicitly switching from one schedule to another, tasks with the ignore flag are ignored. This feature is intended for transitory tasks, that are pointless if the previous task hasn't been performed.
 
 We add script instructions that allow for querying the current schedule of an actor. We also add a script instruction to prematurely end a task.
 
@@ -1720,14 +1752,14 @@ This is an early draft of the new system and will almost certainly require more 
 
 Idle activities are currently bound to the Wander package. This is suboptimal, both because other packages could benefit from it and because storing the idle function in a package instead of the NPC makes it hard to give the NPC a characteristic idle pattern.
 
-We add a list of idle chances for each available idle animation to the NPC record. Ideally this list should be extensible, but first we need to improve the animation system so that the number of idle animations isn't hard-coded anymore. This may be a stage 2 task.
+We add a list of idle chances for each available idle animation to the NPC record. Ideally this list should be extensible, but first we need to improve the animation system so that the number of idle animations isn't hard-coded any more. This may be a stage 2 task.
 
 Each package contains two fields related to idling behaviour:
 
 * Chance: A value between 0 and 1 that specifies the chance (per reasonable unit of time) of an idle animation to be executed.
 * Dialogue Chance: A value between 0 and 1 that specifies the chance of an idle dialogue if an idle animation is executed.
 
-We may decide to use a scale of 0 to 100 instead of 0 to 1 to increase usability for less mathematical minded content developers.
+We may decide to use a scale of 0 to 100 instead of 0 to 1 to increase usability for less mathematically minded content developers.
 
 The old wander package keeps its old idle list. When active it disables the new idle system.
 
@@ -1737,7 +1769,7 @@ If a NPC does not have any active packages the idle function is still active. In
 
 We categorise package into four roles:
 
-* Legacy: Old packages, generated either via script instructions or via AI package list in actor record. Removed once it runs out (if not flagged for repeat). Deprecated.
+* Legacy: Old packages, generated either via script instructions or via AI package list in the actor record. Removed once they run out (if not flagged for repeat). Deprecated.
 * Schedule: Inserted by the schedule system. Can not be directly manipulated via script instructions.
 * Manual: New packages, generated via new script instructions.
 * Situation: Inserted via other game mechanics (e.g. combat, breath). Can not be directly manipulated via script instructions.
@@ -1750,7 +1782,7 @@ We add new script instructions to query the package state of an actor and to ins
 
 Each package has two fields that describe its duration:
 
-* Duration itself: Package will self-delete once the current time is larger than the start time plus the duration)
+* Duration itself: Package will self-delete once the current time is larger than the start time plus the duration
 * Repeat flag: Package adds itself again at the end of the end of the duration
 
 Packages lacking these fields persist indefinitely unless explicitly removed.
@@ -1761,7 +1793,7 @@ Some legacy packages already have these fields. Schedule packages will not have 
 
 We translate the packages AiFollow, AiActivate and AiTravel into the new format.
 
-AiFollow and AiTravel specify a location by given a set of coordinates and an optional cell ID. We will replace part of the package with a different format.
+AiFollow and AiTravel specify a location by being given a set of coordinates and an optional cell ID. We will replace part of the package with a different format.
 
 There are two possible locations sub-records of which each package may only contain one:
 
@@ -1790,7 +1822,7 @@ This is a new package with no direct equivalent in the old system. The package c
 * A list of locations (in the new format)
 * A loop flag
 
-The actor will walk from one location to the next. Once he reached the last location he will either continue with the first location (if the loop flag is set) or walk down the list of locations in opposite direction and then start over (if the loop flag is not set).
+The actor will walk from one location to the next. Once he has reached the last location he will either continue with the first location (if the loop flag is set) or walk down the list of locations in opposite direction and then start over (if the loop flag is not set).
 
 The obvious use case for this package is a guard patrolling a perimeter or a place.
 
@@ -1819,7 +1851,7 @@ This results in multiple issues:
 
 * When localising the developer must hunt down all references to the localised strings and change them manually (cell names and topics).
 * When updating a localisation to a new version of the content file the translator has to manually pierce together his old translation and the new content file.
-* Changing a string that is used as an internal reference breaks the connection to the referenced records in relation to the unlocalised file, which in turn makes it impossible to utilise automated tools that help for the localisation process.
+* Changing a string that is used as an internal reference breaks the connection to the referenced records in relation to the non-localised file, which in turn makes it impossible to utilise automated tools that help for the localisation process.
 * Content files of mismatching languages generally can't be combined in a content file list. Mixing languages is generally not desirable for playing, but may sometimes be unavoidable. The ability to mix languages is highly desirable for developers (e.g. debugging).
 
 ## Encoding
@@ -1832,7 +1864,7 @@ Localisation will be contained in separate content files (omwlang) that are to b
 
 The launcher will treat a content file and its localisation file as a single entity (see section about Identifying Meta-Data).
 
-We may add a launcher language setting the determines the default language chosen by the launcher. This needs to be a separate option from the legacy encoding setting, which is currently also called language setting.
+We may add a launcher language setting that determines the default language chosen by the launcher. This needs to be a separate option from the legacy encoding setting, which is currently also called language setting.
 
 ## Localisation Records
 
@@ -1866,7 +1898,7 @@ fallback-lp-somekey=Some Text
 
 When looking up fallback strings the preferred language is chosen by the default language setting in the launcher (we may decide to provide a separate setting for fallback strings if this doesn't result in an overly complicated settings UI).
 
-If a fallback string with this language-code is available it will be used. If no such fallback string is available, the default fallback string (without language-code prefix) will be used exist. The default fallback string must exist for all fallback strings with language codes. Otherwise the cfg file must be considered defective.
+If a fallback string with this language-code is available it will be used. If no such fallback string is available, the default fallback string (without language-code prefix) will be used. The default fallback string must exist for all fallback strings with language codes. Otherwise the cfg file must be considered defective.
 
 We add an option to the importer tool to import strings only, which then will be merged (with a user-specified language-code prefix) into an existing cfg file.
 
@@ -1878,7 +1910,7 @@ The handling of cell names in vanilla MW is one of the major localisation proble
 
 We turn the name field (the ID) into an ID-only field. The actual user visible name is moved into an optional localisation record.
 
-We allow referencing of cells by both ID and name. If the name is used we emit an unobtrusive warning message.
+We allow referencing of cells by both ID and name. If the name is used, we emit an unobtrusive warning message.
 
 This change does not fix the problem of already existing localisations that have modified the names of cells. See the section about localisation mapping below for a workaround.
 
@@ -1907,7 +1939,7 @@ Issues #2 and #3 can be enforced at least partially. We declare the use of user 
 
 ## Localisation Mapping
 
-The new localisation scheme leaves existing localisations un-addressed. Localisations of Morrowind.esm break the connection of cell names and topics in relation to the un-localised Morrowind.esm (English).
+The new localisation scheme leaves existing localisations unaddressed. Localisations of Morrowind.esm break the connection of cell names and topics in relation to the un-localised Morrowind.esm (English).
 
 We provide a workaround for this problem by introducing localisation mapping. Localisation mapping is a language-specific list of ID/user visible text pairs, provided as a text file. A similar scheme exists for the Russian localisation. We may decide to simple extend the existing implementation of this feature in OpenMW to provide localisation mapping.
 
@@ -1937,7 +1969,7 @@ Note that by going down this route we do not block the addition of a full-scale 
 
 ## Skinning
 
-Under the term skinning we understand changes to the look of a GUI without affecting the functionality. Vanilla Morrowind already provides a certain level of skinning-capacity though textures and Morrowind.ini settings. We are going to expand on these and clean up the skinning process. After 1.0 all skinning should be done exclusively through content files and associated resources files. Skinning does not belong into ini/cfg files.
+Under the term skinning we understand changes to the look of a GUI without affecting the functionality. Vanilla Morrowind already provides a certain level of skinning-capacity though textures and Morrowind.ini settings. We are going to expand on these and clean up the skinning process. After 1.0 all skinning should be done exclusively through content files and associated resources files. Skinning does not belong in ini/cfg files.
 
 ### Windows
 
@@ -1979,7 +2011,7 @@ Dynamic stats are more complicated since they merge three elements:
 
 The first two go together well enough, but we should provide an option to decouple the enemy health bar and turn it into its own HUD elements.
 
-We also need to consider that after 1.0 we won't always have three dynamic stats. There could be more or (in stage 2) less. The HUD element must be build in a way that can adjust its layout accordingly without manual layouting.
+We also need to consider that after 1.0 we won't always have three dynamic stats. There could be more or (in stage 2) less. The HUD element must be built in a way that it can adjust its layout accordingly without manual layouting.
 
 ### Notifications
 
@@ -2020,7 +2052,7 @@ We add a couple of new input elements that are each represented as a separate wi
 * Numerical input: Takes a range, a precision value and a default value and returns a float.
 * Text input: Takes a default value and returns a string.
 
-Additionally each window has a titlebar, an okay button and and optional cancel button.
+Additionally each window has a title bar, an okay button and and optional cancel button.
 
 For each element we add a new script instruction that brings up the respective element. These instructions take the following arguments:
 
@@ -2075,10 +2107,10 @@ We may explore an alternative GUI layout consisting of a vertical bar (maybe on 
 
 The current horizontal text-based category selector is problematic for two reasons:
 
-* Since we hand over the creation of categories to mod developers we can expect a large number of them and therefore scaling becomes an issue. Horizontally arranged text items scale terribly because text items also primarily extend horizontally. There are workarounds for this problem but these are either bad or add alternative interface (e.g. a pulldown menu listing all tabs) which isn't a great solution either. Under no circumstances will we use the workaround that adds two arrow buttons left and right of the tab bar to change the visible section of the tab bar. This is an anti-pattern and everyone who has ever committed the horrendous crime of implementing this GUI-atrocity deserves to end up in usability hell.
+* Since we hand over the creation of categories to mod developers we can expect a large number of them and therefore scaling becomes an issue. Horizontally arranged text items scale terribly because text items also primarily extend horizontally. There are workarounds for this problem but these are either bad or add alternative interface (e.g. a pull-down menu listing all tabs) which isn't a great solution either. Under no circumstances will we use the workaround that adds two arrow buttons left and right of the tab bar to change the visible section of the tab bar. This is an anti-pattern and everyone who has ever committed the horrendous crime of implementing this GUI-atrocity deserves to end up in usability hell.
 * In table mode we already have a bar at the top of the window. Two bars on the same window border give a cluttered, unclean appearance. 
 
-If we do use an alternative layout we need to add an icon field to the ItemCategory record and we also need to consider, if we drop the vanilla one completely or let the user choose. Unless there is strong opposition (this is a significant change from Vanilla after all) we should choose the former option. If we opt for a less radical change we still should switch from text to icons to counter the scaling problem, even if we stick with the horizontal layout.
+If we do use an alternative layout, we need to add an icon field to the ItemCategory record and we also need to consider whether we drop the vanilla one completely or let the user choose. Unless there is strong opposition (this is a significant change from Vanilla after all) we should choose the former option. If we opt for a less radical change we still should switch from text to icons to counter the scaling problem, even if we stick with the horizontal layout.
 
 ## Character State
 
@@ -2112,7 +2144,7 @@ If the GMST is not 0 we show skill progression in two places:
 
 # Graphics
 
-TODO bugger scrawl until he agrees to fill in this section
+TODO
 
 Random collection of ideas that may be feasible or not:
 
@@ -2149,7 +2181,7 @@ We let scripts to run as operations (exclusively for now). In the context of Ope
 
 * An operation runs in a separate thread and has read only access to the content data
 * Multiple operations can run concurrently, but only one operation of each type (e.g. saving, verifier, python script) at a time
-* While at least one operation is running the content data can not be modified
+* While at least one operation is running, the content data can not be modified
 * The operation can be terminated by the user at any time
 * The operation reports back to the main thread via messages (shown in a table like with the verifier) and progress state (represented as progress bar)
 
@@ -2169,7 +2201,7 @@ Note that all debugging tools will require that OpenMW is started from OpenMW-CS
 
 ### Marking
 
-We add a new keyboard-shortcut to OpenMW (only available when started from OpenMW-CS). When used OpenMW will look at the instance under the mouse pointer (or the crosshair if the mouse pointer is hidden). If this instance is part of a content file (i.e. not created during play) OpenMW will send the cell and RefID of the instance to OpenMW-CS. OpenMW-CS inserts the instance info into a table.
+We add a new keyboard shortcut to OpenMW (only available when started from OpenMW-CS). When used OpenMW will look at the instance under the mouse pointer (or the crosshair if the mouse pointer is hidden). If this instance is part of a content file (i.e. not created during play) OpenMW will send the cell and RefID of the instance to OpenMW-CS. OpenMW-CS inserts the instance info into a table.
 
 This table functions in a similar way to the verifier table; allowing the content developer to jump directly to records that have been identified as being in need of attention.
 
@@ -2189,15 +2221,15 @@ We also add function that produces a warning if the user tries to create an ID o
 
 OpenMW-CS currently has very little in-application help. Improving this will be an ongoing process. For stage 1 we will focus on scripting.
 
-We will add a keyboard-shortcut and a context menu item to the script editor. When activated while the cursor is on a keyword we show a help text that explains the syntax and the function.
+We will add a keyboard shortcut and a context menu item to the script editor. When activated while the cursor is on a keyword we show a help text that explains the syntax and the function.
 
 Ideally we would want to use the same help text within the application and in our documentation. A way to handle this needs to be determined.
 
-The location where we show the help text needs to be determined. For script editor views we could re-use the widget that displays errors. Or we could add a separate subview type for help text. We may decide to add a help main menu item from which the help system can be navigated.
+The location where we show the help text needs to be determined. For script editor views we could reuse the widget that displays errors. Or we could add a separate subview type for help text. We may decide to add a help main menu item from which the help system can be navigated.
 
-## Spellchecker
+## Spell Checker
 
-We will add a spellchecker by utilising an existing spellcheck solution. All names (e.g. items, cells, races) will be implicitly added to the list of known words.
+We will add a spell checker by utilising an existing spell check solution. All names (e.g. items, cells, races) will be implicitly added to the list of known words.
 
 ## Porting Tools
 
@@ -2237,19 +2269,19 @@ A user settings record consists of the following fields:
 
 The following user setting types are available:
 
-* bool (type 0): GMST is an integer; GUI is a checkbox; additional data: default value
-* numeric, integer (type 1): GMST is an integer; GUI is a spinbox; additional data: upper bound, lower bound, default value
-* numeric, float (type 2): GMST is a float; GUI is a spinbox; additional data; upper bound, lower bound, precision, default value
-* list (type 3) GMST is an integer; GUI is a combobox; additional data; list of strings for combobox text, default value
+* bool (type 0): GMST is an integer; GUI is a check box; additional data: default value
+* numeric, integer (type 1): GMST is an integer; GUI is a spin box; additional data: upper bound, lower bound, default value
+* numeric, float (type 2): GMST is a float; GUI is a spin box; additional data; upper bound, lower bound, precision, default value
+* list (type 3) GMST is an integer; GUI is a combo box; additional data; list of strings for combo box text, default value
 * slider (type 4): GMST is a float; GUI is a slider; additional data; upper bound, lower bound, default value
 
 ### Categories
 
 User settings categories are represented as separate pages/tabs in the GUI. We specify categories via category IDs (strings). Currently there does not appear to be a need for a separate user settings category record, since this record would have no data.
 
-Content files can create new categories (simply by referencing them in a user settings record) or add to existing categories (including the vanilla ones). We should consider to add a couple of additional default categories (including localised labels, but empty and invisible until populated by content files) to help content developers organise their settings in a coherent way.
+Content files can create new categories (simply by referencing them in a user settings record) or add to existing categories (including the vanilla ones). We should consider adding a couple of additional default categories (including localised labels, but empty and invisible until populated by content files) to help content developers organise their settings in a coherent way.
 
-The categories in vanilla MW are General, Audio, Controls and Graphics. Content files can add settings to these too. But we should consider reorganisation. General is not a good category. We should consider splitting it up. We should also consider moving the keybindings into their own category. A separate keybindings category would have to be the only exception to the rule that content files are allowed to add settings to pre-existing categories.
+The categories in vanilla MW are General, Audio, Controls and Graphics. Content files can add settings to these too, but we should consider reorganisation. General is not a good category. We should consider splitting it up. We should also consider moving the key bindings into their own category. A separate key bindings category would have to be the only exception to the rule that content files are allowed to add settings to pre-existing categories.
 
 ### Hook
 
@@ -2283,13 +2315,13 @@ A LiquidBody object record has the following fields:
 * Height (float)
 * Shape
 
-Shape is a closed bezier-curve that can be edited in the editor. This shape defines a surface (the liquid surface). The depths of liquid body is defined by the height value.
+Shape is a closed Bézier curve that can be edited in the editor. This shape defines a surface (the liquid surface). The depths of liquid body is defined by the height value.
 
 We can imply that only the surface of the LiquidShape instance is exposed. The other sides do not require rendering.
 
-## Dagoth'Ur Un-Fix
+## Dagoth Ur Fix Un-Fix
 
-We introduced a fix for a defect in Morrowind.esm by blocking remote access to instances of the object dagoth_ur_1 via mod instructions for dynamic stats. We will now bind this fix to a new integer GMST in the sys namespace. This will allow content developers to disable this fix in their mods (hopefully after given poor old Dagoth'Ur a bit more health).
+We introduced a fix for a defect in Morrowind.esm by blocking remote access to instances of the object dagoth_ur_1 via mod instructions for dynamic stats. We will now bind this fix to a new integer GMST in the sys namespace. This will allow content developers to disable this fix in their mods (hopefully after giving poor old Dagoth Ur a bit more health).
 
 ## Comment Subrecords
 
@@ -2312,7 +2344,7 @@ We add four new GMSTs of type integer (default value 1):
 
 These decide if the game is paused when in status mode (right-click), dialogue mode, journal mode or any of the crafting modes (e.g. alchemy). To handle sys::DialogPause==0 properly we ignore  dialogues initiated by NPCs or via script, if the player is already in a dialogue.
 
-## Instance Persistency
+## Instance Persistence
 
 We add a new optional field to all object records and instance subrecords, a single enum-like integer.
 
