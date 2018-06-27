@@ -76,6 +76,9 @@
         <!-- Dialog buttons -->
         <Widget type="HBox" position="0 158 482 24">
             <Widget type="Spacer"/>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="RandomButton">
+                <Property key="Caption" value="Random"/>
+            </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="DescriptionButton">
                 <Property key="Caption" value="#{sCreateClassMenu1}"/>
             </Widget>
