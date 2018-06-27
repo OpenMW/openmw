@@ -52,12 +52,12 @@ Win10:
   stage: build
   allow_failure: true
   script:
-    - rm -fr build/*  #  remove anything in the build directory
-    - echo pwd
-    - echo $CI_PROJECT_DIR
-    - ls -al $CI_PROJECT_DIR
-    - cd $CI_PROJECT_DIR
-    - CI/before_script.msvc.sh -c Release -p x64 -v 2017 -V
+    - sh rm -fr build/*  #  remove anything in the build directory
+    - sh env
+    - sh pwd
+    - sh echo $CI_PROJECT_DIR
+    - sh echo %CI_PROJECT_DIR%
+    - sh %CI_PROJECT_DIR%/CI/before_script.msvc.sh -c Release -p x64 -v 2017 -V
     - msbuild MSVC2017_64\OpenMW.sln /t:Build /p:Configuration=Release /m:2
   cache:
     paths:
