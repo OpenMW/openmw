@@ -16,6 +16,9 @@
 
 #include "tooltips.hpp"
 
+// for std::sort
+#include <algorithm>
+
 namespace
 {
 
@@ -685,6 +688,7 @@ namespace MWGui
                 if(skill >= offset) skill++;
             slot->setSkillId(ESM::Skill::sSkillIds[skill]);
             selected.push_back(skill);
+            std::sort(selected.begin(), selected.end());
         }
 
         for(auto & slot : mMinorSkill)
@@ -694,6 +698,7 @@ namespace MWGui
                 if(skill >= offset) skill++;
             slot->setSkillId(ESM::Skill::sSkillIds[skill]);
             selected.push_back(skill);
+            std::sort(selected.begin(), selected.end());
         }
 
         update();
