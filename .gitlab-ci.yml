@@ -52,7 +52,7 @@ Win10:
   stage: build
   allow_failure: true
   script:
-    - sh rm -fr build/*  #  remove anything in the build directory
+    # - sh rm -fr build/*  #  remove anything in the build directory
     - sh env
     - sh pwd
     - sh echo $CI_PROJECT_DIR
