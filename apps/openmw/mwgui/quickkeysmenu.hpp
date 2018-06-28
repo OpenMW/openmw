@@ -66,6 +66,8 @@ namespace MWGui
         };
 
         std::vector<struct keyData> mKey;
+        struct keyData* mSelected;
+        struct keyData* mActivated;
 
         MyGUI::EditBox* mInstructionLabel;
         MyGUI::Button* mOkButton;
@@ -73,9 +75,6 @@ namespace MWGui
         QuickKeysMenuAssign* mAssignDialog;
         ItemSelectionDialog* mItemSelectionDialog;
         MagicSelectionDialog* mMagicSelectionDialog;
-
-        int mSelectedIndex;
-        int mActivatedIndex;
 
         void onQuickKeyButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);
