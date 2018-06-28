@@ -422,8 +422,8 @@ fi
 			printf "Exists. "
 		elif [ -z $SKIP_EXTRACT ]; then
 			rm -rf Boost
-			"${DEPS}/boost-1.61.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="${TEMP}\boost" //VERYSILENT //NORESTART //SUPPRESSMSGBOXES //LOG="boost_install.log"			
-			mv ${TEMP}/boost ${BOOST_SDK}
+			"${DEPS}/boost-1.61.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="${SYSTEMDRIVE}\boost" //VERYSILENT //NORESTART //SUPPRESSMSGBOXES //LOG="boost_install.log"			
+			mv "${SYSTEMDRIVE}\boost" ${BOOST_SDK}
 		fi
 
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
