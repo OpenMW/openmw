@@ -53,7 +53,7 @@ namespace MWGui
 
         for (int i = 0; i < 10; ++i)
         {
-            mKey[i].index = i;
+            mKey[i].index = i+1;
             getWidget(mKey[i].button, "QuickKey" + MyGUI::utility::toString(i+1));
             mKey[i].button->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onQuickKeyButtonClicked);
 
@@ -143,7 +143,7 @@ namespace MWGui
                 MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Default);
 
             textBox->setTextAlign(MyGUI::Align::Center);
-            textBox->setCaption(MyGUI::utility::toString(key->index + 1));
+            textBox->setCaption(MyGUI::utility::toString(key->index));
             textBox->setNeedMouseFocus(false);
         }
     }
