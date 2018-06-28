@@ -12,7 +12,7 @@
 
 #include "../mwworld/esmstore.hpp"
 
-#include "../../../components/misc/rng.hpp"
+#include <components/misc/rng.hpp>
 
 #include "tooltips.hpp"
 
