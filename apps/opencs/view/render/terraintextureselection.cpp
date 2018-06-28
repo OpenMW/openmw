@@ -7,7 +7,7 @@
 #include <algorithm>
 
 CSVRender::TerrainTextureSelection::TerrainTextureSelection(osg::Group* parentNode, const CSMWorld::CellCoordinates& coords, const ESM::Land& esmLand)
-    :TerrainSelection {coords, esmLand, parentNode}
+    :TerrainSelection (coords, esmLand, parentNode)
 {
     osg::ref_ptr<osg::Geometry> geometry {new osg::Geometry{}};
 
