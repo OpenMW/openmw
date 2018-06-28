@@ -14,7 +14,7 @@ namespace
 }
 
 CSVRender::TerrainSelection::TerrainSelection(const CSMWorld::CellCoordinates& coords, const ESM::Land& esmLand, osg::Group* parentNode)
-    :mCoords {coords}, mEsmLand {esmLand}, mParentNode {parentNode}
+    :mCoords (coords), mEsmLand (esmLand), mParentNode (parentNode)
 {
     mBaseNode = new osg::PositionAttitudeTransform{};
     mBaseNode->setPosition(osg::Vec3d(coords.getX() * cellSize, coords.getY() * cellSize, 10.0));
