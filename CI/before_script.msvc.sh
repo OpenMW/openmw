@@ -233,8 +233,7 @@ fi
 case $VS_VERSION in
 	15|15.0|2017 )
 		GENERATOR="Visual Studio 15 2017"
-		TOOLSET="vc140"
-		TOOLSET_REAL="vc141"
+		TOOLSET="vc141"
 		MSVC_REAL_VER="15"
 		MSVC_VER="14.1"
 		MSVC_YEAR="2015"
@@ -244,7 +243,6 @@ case $VS_VERSION in
 	14|14.0|2015 )
 		GENERATOR="Visual Studio 14 2015"
 		TOOLSET="vc140"
-		TOOLSET_REAL="vc140"
 		MSVC_REAL_VER="14"
 		MSVC_VER="14.0"
 		MSVC_YEAR="2015"
@@ -254,7 +252,6 @@ case $VS_VERSION in
 	12|12.0|2013 )
 		GENERATOR="Visual Studio 12 2013"
 		TOOLSET="vc120"
-		TOOLSET_REAL="vc120"
 		MSVC_REAL_VER="12"
 		MSVC_VER="12.0"
 		MSVC_YEAR="2013"
@@ -406,7 +403,7 @@ echo
 if [ -z $APPVEYOR ]; then
 	printf "Boost 1.67.0... "
 else
-	if [ $MSVC_VER -eq 12 ]; then
+	if [ $MSVC_VER -eq 12.0 ]; then
 		printf "Boost 1.58.0 AppVeyor... "
 	else
 		printf "Boost 1.67.0 AppVeyor... "
@@ -446,7 +443,7 @@ fi
 		
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
 			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.${LIB_SUFFIX}"
-		add_cmake_opts -DBoost_COMPILER="-${TOOLSET_REAL}"
+		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
 
 		echo Done.
 	fi
