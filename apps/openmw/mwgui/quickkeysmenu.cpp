@@ -303,7 +303,8 @@ namespace MWGui
 
     void QuickKeysMenu::activateQuickKey(int index)
     {
-        assert(index > 0);
+        assert(index >= 1 && index <= 9);
+
         struct keyData *key = &mKey[index-1];
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -318,15 +319,12 @@ namespace MWGui
 
         bool isReturnNeeded = playerStats.isParalyzed() || playerStats.isDead();
 
-        if (isReturnNeeded && key->type != Type_Item)
-        {
+        if (isReturnNeeded)
             return;
-        }
-        else if(isDelayNeeded && key->type != Type_Item)
-        {
+
+        else if (isDelayNeeded)
             mActivated = key;
-            return;
-        }
+
         else
             mActivated = nullptr;
 
@@ -367,12 +365,6 @@ namespace MWGui
 
                 // delay weapon switching if player is busy
                 if (isDelayNeeded && (isWeapon || isTool))
-                {
-                    mActivated = key;
-                    return;
-                }
-                // disable weapon switching if player is dead or paralyzed
-                else if (isReturnNeeded && (isWeapon || isTool))
                 {
                     return;
                 }
