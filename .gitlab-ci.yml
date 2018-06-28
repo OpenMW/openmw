@@ -62,4 +62,4 @@ Win10:
     - deps
   artifacts:
     paths:
-    - *.zip
+    - "*.zip"
