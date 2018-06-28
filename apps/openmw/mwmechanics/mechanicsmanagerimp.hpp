@@ -190,9 +190,13 @@ namespace MWMechanics
 
             virtual void keepPlayerAlive();
 
+            virtual bool isCastingSpell (const MWWorld::Ptr& ptr) const;
+
             virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const;
             /// Is \a ptr casting spell or using weapon now?
             virtual bool isAttackingOrSpell(const MWWorld::Ptr &ptr) const;
+
+            virtual void castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell=false);
 
             /// Check if the target actor was detected by an observer
             /// If the observer is a non-NPC, check all actors in AI processing distance as observers

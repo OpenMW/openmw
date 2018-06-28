@@ -487,7 +487,7 @@ namespace MWBase
              */
             virtual bool startSpellCast (const MWWorld::Ptr& actor) = 0;
 
-            virtual void castSpell (const MWWorld::Ptr& actor) = 0;
+            virtual void castSpell (const MWWorld::Ptr& actor, bool manualSpell=false) = 0;
 
             virtual void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection) = 0;
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,

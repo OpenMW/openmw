@@ -2771,13 +2771,13 @@ namespace MWWorld
         return !fail;
     }
 
-    void World::castSpell(const Ptr &actor)
+    void World::castSpell(const Ptr &actor, bool manualSpell)
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
         // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
         std::vector<MWWorld::Ptr> targetActors;
-        if (!actor.isEmpty() && actor != MWMechanics::getPlayer())
+        if (!actor.isEmpty() && actor != MWMechanics::getPlayer() && !manualSpell)
             actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targetActors);
 
         const float fCombatDistance = getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
@@ -2795,51 +2795,71 @@ namespace MWWorld
 
         if (target.isEmpty())
         {
-            // For actor targets, we want to use hit contact with bounding boxes.
-            // This is to give a slight tolerance for errors, especially with creatures like the Skeleton that would be very hard to aim at otherwise.
-            // For object targets, we want the detailed shapes (rendering raycast).
-            // If we used the bounding boxes for static objects, then we would not be able to target e.g. objects lying on a shelf.
-            std::pair<MWWorld::Ptr,osg::Vec3f> result1 = getHitContact(actor, fCombatDistance, targetActors);
-
-            // Get the target to use for "on touch" effects, using the facing direction from Head node
-            osg::Vec3f origin = getActorHeadTransform(actor).getTrans();
-
-            osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
-                    * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
-
-            osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
-            float distance = getMaxActivationDistance();
-            osg::Vec3f dest = origin + direction * distance;
-
-            MWRender::RenderingManager::RayResult result2 = mRendering->castRay(origin, dest, true, true);
-
-            float dist1 = std::numeric_limits<float>::max();
-            float dist2 = std::numeric_limits<float>::max();
-
-            if (!result1.first.isEmpty() && result1.first.getClass().isActor())
-                dist1 = (origin - result1.second).length();
-            if (result2.mHit)
-                dist2 = (origin - result2.mHitPointWorld).length();
-
-            if (!result1.first.isEmpty() && result1.first.getClass().isActor())
+            // For scripted spells we should not use hit contact
+            if (manualSpell)
             {
-                target = result1.first;
-                hitPosition = result1.second;
-                if (dist1 > getMaxActivationDistance())
-                    target = NULL;
+                // Actors that are targeted by this actor's Follow or Escort packages also side with them
+                if (actor != MWMechanics::getPlayer())
+                {
+                    const MWMechanics::CreatureStats &stats = actor.getClass().getCreatureStats(actor);
+                    for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
+                    {
+                        if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdCast)
+                        {
+                            target = (*it)->getTarget();
+                            break;
+                        }
+                    }
+                }
             }
-            else if (result2.mHit)
+            else
             {
-                target = result2.mHitObject;
-                hitPosition = result2.mHitPointWorld;
-                if (dist2 > getMaxActivationDistance() && !target.isEmpty() && !target.getClass().canBeActivated(target))
-                    target = NULL;
+                // For actor targets, we want to use hit contact with bounding boxes.
+                // This is to give a slight tolerance for errors, especially with creatures like the Skeleton that would be very hard to aim at otherwise.
+                // For object targets, we want the detailed shapes (rendering raycast).
+                // If we used the bounding boxes for static objects, then we would not be able to target e.g. objects lying on a shelf.
+                std::pair<MWWorld::Ptr,osg::Vec3f> result1 = getHitContact(actor, fCombatDistance, targetActors);
+
+                // Get the target to use for "on touch" effects, using the facing direction from Head node
+                osg::Vec3f origin = getActorHeadTransform(actor).getTrans();
+
+                osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
+                        * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
+
+                osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
+                float distance = getMaxActivationDistance();
+                osg::Vec3f dest = origin + direction * distance;
+
+                MWRender::RenderingManager::RayResult result2 = mRendering->castRay(origin, dest, true, true);
+
+                float dist1 = std::numeric_limits<float>::max();
+                float dist2 = std::numeric_limits<float>::max();
+
+                if (!result1.first.isEmpty() && result1.first.getClass().isActor())
+                    dist1 = (origin - result1.second).length();
+                if (result2.mHit)
+                    dist2 = (origin - result2.mHitPointWorld).length();
+
+                if (!result1.first.isEmpty() && result1.first.getClass().isActor())
+                {
+                    target = result1.first;
+                    hitPosition = result1.second;
+                    if (dist1 > getMaxActivationDistance())
+                        target = NULL;
+                }
+                else if (result2.mHit)
+                {
+                    target = result2.mHitObject;
+                    hitPosition = result2.mHitPointWorld;
+                    if (dist2 > getMaxActivationDistance() && !target.isEmpty() && !target.getClass().canBeActivated(target))
+                        target = NULL;
+                }
             }
         }
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
 
-        MWMechanics::CastSpell cast(actor, target);
+        MWMechanics::CastSpell cast(actor, target, false, manualSpell);
         cast.mHitPosition = hitPosition;
 
         if (!selectedSpell.empty())

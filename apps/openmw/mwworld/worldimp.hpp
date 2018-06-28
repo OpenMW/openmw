@@ -602,7 +602,7 @@ namespace MWWorld
              * @brief Cast the actual spell, should be called mid-animation
              * @param actor
              */
-            void castSpell (const MWWorld::Ptr& actor) override;
+            void castSpell (const MWWorld::Ptr& actor, bool manualSpell=false) override;
 
             void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection) override;
             void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
