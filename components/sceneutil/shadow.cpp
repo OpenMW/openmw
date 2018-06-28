@@ -101,6 +101,11 @@ namespace SceneUtil
         else
             definesWithShadows["shadowMapsOverlap"] = "0";
 
+        if (Settings::Manager::getBool("enable debug overlay", "Shadows"))
+            definesWithShadows["useShadowDebugOverlay"] = "1";
+        else
+            definesWithShadows["useShadowDebugOverlay"] = "0";
+
         return definesWithShadows;
     }
 
@@ -111,6 +116,8 @@ namespace SceneUtil
         definesWithShadows["shadow_texture_unit_list"] = "";
 
         definesWithShadows["shadowMapsOverlap"] = "0";
+
+        definesWithShadows["useShadowDebugOverlay"] = "0";
 
         return definesWithShadows;
     }

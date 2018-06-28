@@ -49,6 +49,16 @@ enable debug hud
 Enable or disable the debug hud to see what the shadow map(s) contain.
 This setting is only recommended for developers, bug reporting and advanced users performing fine-tuning of shadow settings.
 
+enable debug overlay
+----------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Enable or disable the debug overlay to see the area covered by each shadow map.
+This setting is only recommended for developers, bug reporting and advanced users performing fine-tuning of shadow settings.
+
 compute tight scene bounds
 --------------------------
 
