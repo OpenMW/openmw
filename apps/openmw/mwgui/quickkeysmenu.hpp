@@ -2,7 +2,6 @@
 #define MWGUI_QUICKKEYS_H
 
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/containerstore.hpp"
 
 #include "windowbase.hpp"
 
@@ -56,13 +55,20 @@ namespace MWGui
 
 
     private:
+
+        struct keyData {
+            int index;
+            ItemWidget* button;
+            QuickKeysMenu::QuickKeyType type;
+            std::string id;
+            std::string name;
+            keyData(): index(-1), button(nullptr), type(Type_Unassigned), id(""), name("") {}
+        };
+
+        std::vector<struct keyData> mKey;
+
         MyGUI::EditBox* mInstructionLabel;
         MyGUI::Button* mOkButton;
-
-        std::vector<ItemWidget*> mQuickKeyButtons;
-        std::vector<QuickKeyType> mAssigned;
-        std::vector<std::string> mAssignedId;
-        std::vector<std::string> mAssignedName;
 
         QuickKeysMenuAssign* mAssignDialog;
         ItemSelectionDialog* mItemSelectionDialog;
@@ -74,7 +80,7 @@ namespace MWGui
         void onQuickKeyButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);
 
-        void unassign(ItemWidget* key, int index);
+        void unassign(struct keyData* key);
     };
 
     class QuickKeysMenuAssign : public WindowModal
