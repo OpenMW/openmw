@@ -419,7 +419,7 @@ fi
 			printf "Exists. "
 		elif [ -z $SKIP_EXTRACT ]; then
 			rm -rf Boost
-			"${DEPS}/boost-1.67.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="%TMP%\boost" //VERYSILENT //NORESTART //SUPPRESSMSGBOXES //LOG="boost_install.log"			
+			"${DEPS}/boost-1.67.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="${TMP}\boost" //VERYSILENT //NORESTART //SUPPRESSMSGBOXES //LOG="boost_install.log"			
 			mv "%TMP%\boost" ${BOOST_SDK}
 		fi
 
