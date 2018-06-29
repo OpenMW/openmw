@@ -110,7 +110,11 @@ void CSVWorld::EnumDelegate::paint (QPainter *painter, const QStyleOptionViewIte
     int valueIndex = getValueIndex(index);
     if (valueIndex != -1)
     {
+#if QT_VERSION >= QT_VERSION_CHECK(5,7,0)
+        QStyleOptionViewItem itemOption(option);
+#else
         QStyleOptionViewItemV4 itemOption(option);
+#endif
         itemOption.text = mValues.at(valueIndex).second;
         QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &itemOption, painter);
     }

@@ -2141,7 +2141,7 @@ void CharacterController::unpersistAnimationState()
 
         bool loopfallback = (mAnimQueue.front().mGroup.compare(0,4,"idle") == 0);
         mAnimation->play(anim.mGroup,
-                         Priority_Default, MWRender::Animation::BlendMask_All, false, 1.0f,
+                         Priority_Persistent, MWRender::Animation::BlendMask_All, false, 1.0f,
                          "start", "stop", complete, anim.mLoopCount, loopfallback);
     }
 }
