@@ -4,6 +4,7 @@
     Bug #1990: Sunrise/sunset not set correct
     Bug #2222: Fatigue's effect on selling price is backwards
     Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
+    Bug #2455: Creatures attacks degrade armor
     Bug #2562: Forcing AI to activate a teleport door sometimes causes a crash
     Bug #2772: Non-existing class or faction freezes the game
     Bug #2835: Player able to slowly move when overencumbered
