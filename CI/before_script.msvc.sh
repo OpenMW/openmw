@@ -417,7 +417,7 @@ fi
 		# We work around this by installing to root of the current working drive and then move it to our deps
         
 		BOOST_SDK="$(real_pwd)/Boost"
-		CWD_DRIVE_ROOT=$(powershell -command '(get-location).Drive.Root')  # get the current working drive's root
+		CWD_DRIVE_ROOT="$(powershell -command '(get-location).Drive.Root')"  # get the current working drive's root
 
 		if [ -d Boost ] && grep "BOOST_VERSION 106700" Boost/boost/version.hpp > /dev/null; then
 			printf "Exists. "
