@@ -35,7 +35,7 @@ MacOS:
     - macos
     - xcode
   except:
-    - branches
+    - branches # because our CI VMs are not public, MRs can't use them and timeout
   stage: build
   allow_failure: true
   script:
@@ -51,8 +51,8 @@ Windows:
   tags:
     - win10
     - msvc2017
-  only:
-    - branches
+  except:
+    - branches # because our CI VMs are not public, MRs can't use them and timeout
   stage: build
   allow_failure: true
   script:
