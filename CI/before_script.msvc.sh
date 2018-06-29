@@ -423,8 +423,8 @@ fi
 			printf "Exists. "
 		elif [ -z $SKIP_EXTRACT ]; then
 			rm -rf Boost
-            "${DEPS}/boost-1.61.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="${CWD_DRIVE_ROOT}\Boost" //VERYSILENT //NORESTART //SUPPRESSMSGBOXES //LOG="boost_install.log"			
-			mv "${CWD_DRIVE_ROOT}\Boost" ${BOOST_SDK}
+            "${DEPS}/boost-1.61.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="${CWD_DRIVE_ROOT}Boost_temp" //VERYSILENT //NORESTART //SUPPRESSMSGBOXES //LOG="boost_install.log"			
+			mv "${CWD_DRIVE_ROOT}Boost_temp" ${BOOST_SDK}
 
 		fi
 
