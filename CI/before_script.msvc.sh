@@ -412,12 +412,13 @@ fi
 {
 	if [ -z $APPVEYOR ]; then
 		cd $DEPS_INSTALL
-
+		
+		BOOST_SDK="$(real_pwd)/Boost"
+		
 		# Boost's installer is still based on ms-dos API that doesn't support larger than 260 char path names
 		# We work around this by installing to root of the current working drive and then move it to our deps
-        
-		BOOST_SDK="$(real_pwd)/Boost"
-		CWD_DRIVE_ROOT="$(powershell -command '(get-location).Drive.Root')"  # get the current working drive's root
+		# get the current working drive's root, we'll install to that temporarily
+		CWD_DRIVE_ROOT=$(echo "$(powershell -command '(get-location).Drive.Root')" | sed "s,\\\\,/,g" | sed "s,\(.\):,/\\1,") 
 
 		if [ -d Boost ] && grep "BOOST_VERSION 106700" Boost/boost/version.hpp > /dev/null; then
 			printf "Exists. "
