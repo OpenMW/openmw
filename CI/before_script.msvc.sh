@@ -422,7 +422,7 @@ fi
 			printf "Exists. "
 		elif [ -z $SKIP_EXTRACT ]; then
 			rm -rf Boost
-			[ -n "$CI" ] CI_EXTRA_INNO_OPTIONS="//SUPPRESSMSGBOXES //LOG='boost_install.log'"
+			[ -n "$CI" ] && CI_EXTRA_INNO_OPTIONS="//SUPPRESSMSGBOXES //LOG='boost_install.log'"
 			"${DEPS}/boost-1.67.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="${CWD_DRIVE_ROOT}Boost_temp" //VERYSILENT //NORESTART ${CI_EXTRA_INNO_OPTIONS}
 			mv "${CWD_DRIVE_ROOT}Boost_temp" "${BOOST_SDK}"
 		fi
