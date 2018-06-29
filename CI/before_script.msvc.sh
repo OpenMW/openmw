@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+# set -x  # turn-on for debugging
 
 MISSINGTOOLS=0
 
@@ -413,17 +413,18 @@ fi
 	if [ -z $APPVEYOR ]; then
 		cd $DEPS_INSTALL
 
-        # Boost's installer is still based on ms-dos API that doesn't support larger than 260 char path names
-        # We work around this by installing to root of the current working drive and then move it to our deps
+		# Boost's installer is still based on ms-dos API that doesn't support larger than 260 char path names
+		# We work around this by installing to root of the current working drive and then move it to our deps
         
 		BOOST_SDK="$(real_pwd)/Boost"
-		CWD_DRIVE_ROOT=`powershell -command '(get-location).Drive.Root'`  # get the current working drive's root
+		CWD_DRIVE_ROOT=$(powershell -command '(get-location).Drive.Root')  # get the current working drive's root
 
 		if [ -d Boost ] && grep "BOOST_VERSION 106700" Boost/boost/version.hpp > /dev/null; then
 			printf "Exists. "
 		elif [ -z $SKIP_EXTRACT ]; then
 			rm -rf Boost
-			"${DEPS}/boost-1.67.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="${CWD_DRIVE_ROOT}Boost_temp" //VERYSILENT //NORESTART //SUPPRESSMSGBOXES //LOG="boost_install.log"			
+			[ -n "$CI" ] CI_EXTRA_INNO_OPTIONS="//SUPPRESSMSGBOXES //LOG="boost_install.log"
+			"${DEPS}/boost-1.67.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="${CWD_DRIVE_ROOT}Boost_temp" //VERYSILENT //NORESTART ${CI_EXTRA_INNO_OPTIONS}	
 			mv "${CWD_DRIVE_ROOT}Boost_temp" "${BOOST_SDK}"
 
 		fi
