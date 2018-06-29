@@ -781,7 +781,7 @@ namespace MWClass
                 MWWorld::Ptr armor = ((armorslot != inv.end()) ? *armorslot : MWWorld::Ptr());
                 if(!armor.isEmpty() && armor.getTypeName() == typeid(ESM::Armor).name())
                 {
-                    if (!(object.isEmpty() && !attacker.getClass().isNpc())) // Unarmed creature attacks don't affect armor condition
+                    if (attacker.isEmpty() || (!attacker.isEmpty() && !(object.isEmpty() && !attacker.getClass().isNpc()))) // Unarmed creature attacks don't affect armor condition
                     {
                         int armorhealth = armor.getClass().getItemHealth(armor);
                         armorhealth -= std::min(damageDiff, armorhealth);
