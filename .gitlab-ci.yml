@@ -34,6 +34,8 @@ MacOS:
   tags:
     - macos
     - xcode
+  except:
+    - branches
   stage: build
   allow_failure: true
   script:
@@ -45,10 +47,12 @@ MacOS:
     paths:
       - build/OpenMW-*.dmg
 
-Win10:
+Windows:
   tags:
     - win10
     - msvc2017
+  only:
+    - branches
   stage: build
   allow_failure: true
   script:
