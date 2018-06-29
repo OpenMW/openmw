@@ -73,17 +73,7 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(canLootDuringDeathAnimationCheckBox, "can loot during death animation", "Game");
     loadSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
     loadSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
-    loadSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
-    loadSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
-    loadSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
-    loadSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
     loadSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
-
-    // Expected values are (0, 1, 2, 3)
-    int showOwnedIndex = mEngineSettings.getInt("show owned", "Game");
-    // Match the index with the option. Will default to 0 if invalid.
-    if (showOwnedIndex >= 0 && showOwnedIndex <= 3)
-        showOwnedComboBox->setCurrentIndex(showOwnedIndex);
 
     // Input Settings
     loadSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
@@ -93,6 +83,16 @@ bool Launcher::AdvancedPage::loadSettings()
     // Saves Settings
     loadSettingBool(timePlayedCheckbox, "timeplayed", "Saves");
     maximumQuicksavesComboBox->setValue(mEngineSettings.getInt("max quicksaves", "Saves"));
+
+    // User Interface Settings
+    loadSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
+    loadSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
+    loadSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
+    loadSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
+    int showOwnedIndex = mEngineSettings.getInt("show owned", "Game");
+    // Match the index with the option (only 0, 1, 2, or 3 are valid). Will default to 0 if invalid.
+    if (showOwnedIndex >= 0 && showOwnedIndex <= 3)
+        showOwnedComboBox->setCurrentIndex(showOwnedIndex);
 
     // Other Settings
     QString screenshotFormatString = QString::fromStdString(mEngineSettings.getString("screenshot format", "General")).toUpper();
@@ -125,15 +125,7 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(canLootDuringDeathAnimationCheckBox, "can loot during death animation", "Game");
     saveSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
     saveSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
-    saveSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
-    saveSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
-    saveSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
-    saveSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
     saveSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
-
-    int showOwnedCurrentIndex = showOwnedComboBox->currentIndex();
-    if (showOwnedCurrentIndex != mEngineSettings.getInt("show owned", "Game"))
-        mEngineSettings.setInt("show owned", "Game", showOwnedCurrentIndex);
 
     // Input Settings
     saveSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
@@ -146,6 +138,15 @@ void Launcher::AdvancedPage::saveSettings()
     if (maximumQuicksaves != mEngineSettings.getInt("max quicksaves", "Saves")) {
         mEngineSettings.setInt("max quicksaves", "Saves", maximumQuicksaves);
     }
+
+    // User Interface Settings
+    saveSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
+    saveSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
+    saveSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
+    saveSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
+    int showOwnedCurrentIndex = showOwnedComboBox->currentIndex();
+    if (showOwnedCurrentIndex != mEngineSettings.getInt("show owned", "Game"))
+        mEngineSettings.setInt("show owned", "Game", showOwnedCurrentIndex);
 
     // Other Settings
     std::string screenshotFormatString = screenshotFormatComboBox->currentText().toLower().toStdString();
