@@ -99,15 +99,16 @@ namespace MWGui
                 {
                     MWWorld::Ptr item = *mKey[i].button->getUserData<MWWorld::Ptr>();
                     // Make sure the item is available and is not broken
-                    if (item.getRefData().getCount() < 1 ||
+                    if (!item || item.getRefData().getCount() < 1 ||
                         (item.getClass().hasItemHealth(item) &&
                         item.getClass().getItemHealth(item) <= 0))
                     {
                         // Try searching for a compatible replacement
-                        std::string id = item.getCellRef().getRefId();
+                        item = store.findReplacement(mKey[i].id);
 
-                        item = store.findReplacement(id);
-                        mKey[i].button->setUserData(MWWorld::Ptr(item));
+                        if (item)
+                            mKey[i].button->setUserData(MWWorld::Ptr(item));
+
                         break;
                     }
                 }
