@@ -33,7 +33,7 @@ namespace MWGui
 
     QuickKeysMenu::QuickKeysMenu()
         : WindowBase("openmw_quickkeys_menu.layout")
-        , mKey(std::vector<struct keyData>(10))
+        , mKey(std::vector<keyData>(10))
         , mSelected(nullptr)
         , mActivated(nullptr)
         , mAssignDialog(0)
@@ -116,7 +116,7 @@ namespace MWGui
         }
     }
 
-    void QuickKeysMenu::unassign(struct keyData* key)
+    void QuickKeysMenu::unassign(keyData* key)
     {
         key->button->clearUserStrings();
         key->button->setItem(MWWorld::Ptr());
@@ -306,7 +306,7 @@ namespace MWGui
     {
         assert(index >= 1 && index <= 9);
 
-        struct keyData *key = &mKey[index-1];
+        keyData *key = &mKey[index-1];
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);

@@ -65,7 +65,7 @@ namespace MWGui
             keyData(): index(-1), button(nullptr), type(Type_Unassigned), id(""), name("") {}
         };
 
-        std::vector<struct keyData> mKey;
+        std::vector<keyData> mKey;
         struct keyData* mSelected;
         struct keyData* mActivated;
 
