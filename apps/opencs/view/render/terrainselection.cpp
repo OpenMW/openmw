@@ -13,7 +13,7 @@ namespace
     const int landTextureSize {ESM::Land::LAND_TEXTURE_SIZE};
 }
 
-CSVRender::TerrainSelection::TerrainSelection(CSMWorld::CellCoordinates coords, const ESM::Land& esmLand, osg::Group* parentNode)
+CSVRender::TerrainSelection::TerrainSelection(const CSMWorld::CellCoordinates& coords, const ESM::Land& esmLand, osg::Group* parentNode)
     :mCoords (coords), mEsmLand (esmLand), mParentNode (parentNode)
 {
     mBaseNode = new osg::PositionAttitudeTransform{};
