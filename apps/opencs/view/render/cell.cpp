@@ -145,7 +145,10 @@ void CSVRender::Cell::updateLand()
 
             mCellBorder->buildShape(esmLand);
 
-            mTerrainTextureSelection.reset(new TerrainTextureSelection(mCellNode, mCoordinates, esmLand));
+            if (!mTerrainTextureSelection)
+            {
+                mTerrainTextureSelection.reset(new TerrainTextureSelection(mCellNode, mCoordinates, esmLand));
+            }
 
             return;
         }

@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-CSVRender::TerrainTextureSelection::TerrainTextureSelection(osg::Group* parentNode, const CSMWorld::CellCoordinates& coords, const ESM::Land& esmLand)
+CSVRender::TerrainTextureSelection::TerrainTextureSelection(osg::Group* parentNode, CSMWorld::CellCoordinates coords, const ESM::Land& esmLand)
     :TerrainSelection (coords, esmLand, parentNode)
 {
     osg::ref_ptr<osg::Geometry> geometry {new osg::Geometry{}};
@@ -81,23 +81,23 @@ void CSVRender::TerrainTextureSelection::update()
         int textureSizeToLandSizeModifier = 4;
 
         if (north == mSelection.end()) {
-            vertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y + 1), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier)]+1));
-            vertices->push_back(osg::Vec3f(toWorldCoords(x  + 1), toWorldCoords(y + 1), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier)]+1));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y + 1), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier)]+5));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y + 1), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier)]+5));
         }
 
         if (south == mSelection.end()) {
-            vertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier)]+1));
-            vertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier)]+1));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier)]+5));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier)]+5));
         }
 
         if (east == mSelection.end()) {
-            vertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier)]+1));
-            vertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y + 1), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier)]+1));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier)]+5));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x + 1), toWorldCoords(y + 1), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier)]+5));
         }
 
         if (west == mSelection.end()) {
-            vertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier)]+1));
-            vertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y + 1), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier)]+1));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier)]+5));
+            vertices->push_back(osg::Vec3f(toWorldCoords(x), toWorldCoords(y + 1), landData->mHeights[landIndex(x * textureSizeToLandSizeModifier, y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier)]+5));
         }
     }
 
