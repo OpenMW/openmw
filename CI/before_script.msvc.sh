@@ -417,7 +417,7 @@ fi
 		# Boost's installer is still based on ms-dos API that doesn't support larger than 260 char path names
 		# We work around this by installing to root of the current working drive and then move it to our deps
 		# get the current working drive's root, we'll install to that temporarily
-		CWD_DRIVE_ROOT=$(powershell -command '(get-location).Drive.Root' | sed "s,\\\\,/,g")
+		CWD_DRIVE_ROOT=$(powershell -command '(get-location).Drive.Root')
 		
 
 		if [ -d Boost ] && grep "BOOST_VERSION 106700" Boost/boost/version.hpp > /dev/null; then
