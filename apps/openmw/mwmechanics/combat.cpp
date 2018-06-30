@@ -115,14 +115,16 @@ namespace MWMechanics
 
         if (Misc::Rng::roll0to99() < x)
         {
-            // Reduce shield durability by incoming damage
-            int shieldhealth = shield->getClass().getItemHealth(*shield);
+            if (!(weapon.isEmpty() && !attacker.getClass().isNpc())) // Unarmed creature attacks don't affect armor condition
+            {
+                // Reduce shield durability by incoming damage
+                int shieldhealth = shield->getClass().getItemHealth(*shield);
 
-            shieldhealth -= std::min(shieldhealth, int(damage));
-            shield->getCellRef().setCharge(shieldhealth);
-            if (shieldhealth == 0)
-                inv.unequipItem(*shield, blocker);
-
+                shieldhealth -= std::min(shieldhealth, int(damage));
+                shield->getCellRef().setCharge(shieldhealth);
+                if (shieldhealth == 0)
+                    inv.unequipItem(*shield, blocker);
+            }
             // Reduce blocker fatigue
             const float fFatigueBlockBase = gmst.find("fFatigueBlockBase")->getFloat();
             const float fFatigueBlockMult = gmst.find("fFatigueBlockMult")->getFloat();
