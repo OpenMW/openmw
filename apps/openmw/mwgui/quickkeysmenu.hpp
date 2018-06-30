@@ -66,8 +66,8 @@ namespace MWGui
         };
 
         std::vector<keyData> mKey;
-        struct keyData* mSelected;
-        struct keyData* mActivated;
+        keyData* mSelected;
+        keyData* mActivated;
 
         MyGUI::EditBox* mInstructionLabel;
         MyGUI::Button* mOkButton;
@@ -79,7 +79,7 @@ namespace MWGui
         void onQuickKeyButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);
 
-        void unassign(struct keyData* key);
+        void unassign(keyData* key);
     };
 
     class QuickKeysMenuAssign : public WindowModal
