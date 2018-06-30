@@ -9,15 +9,11 @@
 #include <osg/PositionAttitudeTransform>
 
 #include <components/esm/loadland.hpp>
+#include "../../model/world/cellcoordinates.hpp"
 
 namespace osg
 {
     class Group;
-}
-
-namespace CSMWorld
-{
-    class CellCoordinates;
 }
 
 namespace CSVRender
@@ -35,7 +31,7 @@ namespace CSVRender
     {
         public:
 
-            TerrainSelection(const CSMWorld::CellCoordinates&, const ESM::Land&, osg::Group* parentNode);
+            TerrainSelection(const CSMWorld::CellCoordinates, const ESM::Land&, osg::Group* parentNode);
 
             TerrainSelection(const TerrainSelection&) = delete;
             TerrainSelection& operator=(const TerrainSelection&) = delete;
@@ -79,7 +75,7 @@ namespace CSVRender
 
             std::pair<double, double> toCellCoords(osg::Vec3d worldPos) const;
 
-            const CSMWorld::CellCoordinates& mCoords;
+            CSMWorld::CellCoordinates mCoords;
             const ESM::Land& mEsmLand;
             osg::Group* mParentNode;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
