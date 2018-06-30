@@ -31,7 +31,7 @@ namespace CSVRender
     {
         public:
 
-            TerrainSelection(const CSMWorld::CellCoordinates, const ESM::Land&, osg::Group* parentNode);
+            TerrainSelection(const CSMWorld::CellCoordinates&, const ESM::Land&, osg::Group* parentNode);
 
             TerrainSelection(const TerrainSelection&) = delete;
             TerrainSelection& operator=(const TerrainSelection&) = delete;
