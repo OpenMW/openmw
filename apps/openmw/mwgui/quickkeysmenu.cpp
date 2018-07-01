@@ -124,7 +124,7 @@ namespace MWGui
         while (key->button->getChildCount()) // Destroy number label
             MyGUI::Gui::getInstance().destroyWidget(key->button->getChildAt(0));
 
-        if (key->index == 9)
+        if (key->index == 10)
         {
             key->type = Type_HandToHand;
 
@@ -162,6 +162,10 @@ namespace MWGui
         }
         assert(index != -1);
         mSelected = &mKey[index];
+
+        // prevent reallocation of zero key from Type_HandToHand
+        if(mSelected->index == 10)
+            return;
 
         // open assign dialog
         if (!mAssignDialog)
@@ -304,7 +308,7 @@ namespace MWGui
 
     void QuickKeysMenu::activateQuickKey(int index)
     {
-        assert(index >= 1 && index <= 9);
+        assert(index >= 1 && index <= 10);
 
         keyData *key = &mKey[index-1];
 
