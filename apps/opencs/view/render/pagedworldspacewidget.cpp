@@ -849,6 +849,16 @@ void CSVRender::PagedWorldspaceWidget::selectTerrain(TerrainSelectionType type, 
     }
 }
 
+void CSVRender::PagedWorldspaceWidget::onlyAddSelectTerrain(TerrainSelectionType type, const WorldspaceHitResult& hit)
+{
+    for (auto cell : mCells) {
+        auto terrainSelection = cell.second->getTerrainSelection(type);
+        if (terrainSelection) {
+            terrainSelection->onlyAddSelect(hit);
+        }
+    }
+}
+
 void CSVRender::PagedWorldspaceWidget::toggleSelectTerrain(TerrainSelectionType type, const WorldspaceHitResult& hit)
 {
     for (auto cell : mCells) {

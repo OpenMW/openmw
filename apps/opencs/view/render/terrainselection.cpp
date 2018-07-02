@@ -36,6 +36,14 @@ void CSVRender::TerrainSelection::select(const WorldspaceHitResult& hit)
     update();
 }
 
+void CSVRender::TerrainSelection::onlyAddSelect(const WorldspaceHitResult& hit)
+{
+    if (isInCell(hit)) {
+        addToSelection(hit.worldPos);
+    }
+    update();
+}
+
 void CSVRender::TerrainSelection::toggleSelect(const WorldspaceHitResult& hit)
 {
     if (isInCell(hit)) {

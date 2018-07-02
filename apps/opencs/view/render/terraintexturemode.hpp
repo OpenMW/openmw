@@ -34,6 +34,15 @@ namespace CSVRender
 
         public:
 
+            enum InteractionType
+            {
+                InteractionType_PrimaryEdit,
+                InteractionType_PrimarySelect,
+                InteractionType_SecondaryEdit,
+                InteractionType_SecondarySelect,
+                InteractionType_None
+            };
+
             /// \brief Editmode for terrain texture grid
             TerrainTextureMode(WorldspaceWidget*, QWidget* parent = nullptr);
 
@@ -86,6 +95,7 @@ namespace CSVRender
             int mBrushSize;
             int mBrushShape;
             CSVWidget::SceneToolTextureBrush *mTextureBrushScenetool;
+            int mDragMode;
 
             const int cellSize {ESM::Land::REAL_SIZE};
             const int landSize {ESM::Land::LAND_SIZE};

@@ -42,6 +42,7 @@ namespace CSVRender
             virtual ~TerrainSelection();
 
             void select(const WorldspaceHitResult&);
+            void onlyAddSelect(const WorldspaceHitResult&);
             void toggleSelect(const WorldspaceHitResult&);
 
             void activate();

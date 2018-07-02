@@ -41,7 +41,8 @@ CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceW
     mBrushTexture("L0#0"),
     mBrushSize(0),
     mBrushShape(0),
-    mTextureBrushScenetool(0)
+    mTextureBrushScenetool(0),
+    mDragMode(InteractionType_None)
 {
 }
 
@@ -135,6 +136,8 @@ bool CSVRender::TerrainTextureMode::primaryEditStartDrag (const QPoint& pos)
 
     QUndoStack& undoStack = document.getUndoStack();
 
+    mDragMode = InteractionType_PrimaryEdit;
+
     CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
     int index = landtexturesCollection.searchId(mBrushTexture);
 
@@ -158,38 +161,62 @@ bool CSVRender::TerrainTextureMode::secondaryEditStartDrag (const QPoint& pos)
 
 bool CSVRender::TerrainTextureMode::primarySelectStartDrag (const QPoint& pos)
 {
+    WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
+    mDragMode = InteractionType_PrimarySelect;
+    getPagedWorldspaceWidget().selectTerrain(TerrainSelectionType::Texture, hit);
     return false;
 }
 
 bool CSVRender::TerrainTextureMode::secondarySelectStartDrag (const QPoint& pos)
 {
+    WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
+    mDragMode = InteractionType_SecondarySelect;
+    getPagedWorldspaceWidget().onlyAddSelectTerrain(TerrainSelectionType::Texture, hit);
     return false;
 }
 
 void CSVRender::TerrainTextureMode::drag (const QPoint& pos, int diffX, int diffY, double speedFactor)
 {
-    WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-
-    CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
-    int index = landtexturesCollection.searchId(mBrushTexture);
-
-    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit == true)
+    if (mDragMode == InteractionType_PrimaryEdit)
     {
-        editTerrainTextureGrid(hit);
+        WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
+        CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+
+        CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
+        int index = landtexturesCollection.searchId(mBrushTexture);
+
+        if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit == true)
+        {
+            editTerrainTextureGrid(hit);
+        }
+    }
+
+    if (mDragMode == InteractionType_PrimarySelect)
+    {
+        WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
+        getPagedWorldspaceWidget().selectTerrain(TerrainSelectionType::Texture, hit);
+    }
+
+    if (mDragMode == InteractionType_SecondarySelect)
+    {
+        WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
+        getPagedWorldspaceWidget().onlyAddSelectTerrain(TerrainSelectionType::Texture, hit);
     }
 }
 
 void CSVRender::TerrainTextureMode::dragCompleted(const QPoint& pos) {
-    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-    QUndoStack& undoStack = document.getUndoStack();
-
-    CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
-    int index = landtexturesCollection.searchId(mBrushTexture);
-
-    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
+    if (mDragMode == InteractionType_PrimaryEdit)
     {
-         undoStack.endMacro();
+        CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+        QUndoStack& undoStack = document.getUndoStack();
+
+        CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
+        int index = landtexturesCollection.searchId(mBrushTexture);
+
+        if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
+        {
+             undoStack.endMacro();
+        }
     }
 }
 
