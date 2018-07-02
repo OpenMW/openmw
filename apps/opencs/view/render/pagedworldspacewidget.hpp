@@ -137,6 +137,8 @@ namespace CSVRender
 
             void selectTerrain(TerrainSelectionType, const WorldspaceHitResult&);
 
+            void onlyAddSelectTerrain(TerrainSelectionType, const WorldspaceHitResult&);
+
             void toggleSelectTerrain(TerrainSelectionType, const WorldspaceHitResult&);
 
             void activateTerrainSelection(TerrainSelectionType);
