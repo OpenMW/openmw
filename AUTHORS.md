@@ -22,6 +22,7 @@ Programmers
     alexanderkjall
     Alexander Nadeau (wareya)
     Alexander Olofsson (Ace)
+    Alex S (docwest)
     Allofich
     Andrei Kortunov (akortunov)
     AnyOldName3
