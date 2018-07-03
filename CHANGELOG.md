@@ -58,6 +58,7 @@
     Feature #4256: Implement ToggleBorders (TB) console command
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
     Feature #4345: Add equivalents for the command line commands to Launcher
+    Feature #4404: Editor: All EnumDelegate fields should have their items sorted alphabetically
     Feature #4444: Per-group KF-animation files support
     Feature #4466: Editor: Add option to ignore "Base" records when running verifier
 
