@@ -54,6 +54,7 @@
     Bug #4479: "Game" category on Advanced page is getting too long
     Bug #4480: Segfalt in QuickKeysMenu when item no longer in inventory
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
+    Feature #3641: Editor: Limit FPS in 3d preview window
     Feature #4222: 360° screenshots
     Feature #4256: Implement ToggleBorders (TB) console command
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts

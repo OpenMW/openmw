@@ -151,6 +151,9 @@ CompositeViewer::CompositeViewer()
 
     connect( &mTimer, SIGNAL(timeout()), this, SLOT(update()) );
     mTimer.start( 10 );
+
+    int frameRateLimit = CSMPrefs::get()["Rendering"]["framerate-limit"].toInt();
+    setRunMaxFrameRate(frameRateLimit);
 }
 
 CompositeViewer &CompositeViewer::get()
@@ -168,6 +171,12 @@ void CompositeViewer::update()
 
     mSimulationTime += dt;
     frame(mSimulationTime);
+
+    double minFrameTime = _runMaxFrameRate > 0.0 ? 1.0 / _runMaxFrameRate : 0.0;
+    if (dt < minFrameTime)
+    {
+        OpenThreads::Thread::microSleep(1000*1000*(minFrameTime-dt));
+    }
 }
 
 // ---------------------------------------------------
@@ -375,6 +384,10 @@ void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
     else if (*setting=="3D Scene Input/navi-orbit-const-roll")
     {
         mOrbitCamControl->setConstRoll(setting->isTrue());
+    }
+    else if (*setting=="Rendering/framerate-limit")
+    {
+        CompositeViewer::get().setRunMaxFrameRate(setting->toInt());
     }
     else if (*setting=="Rendering/camera-fov" ||
              *setting=="Rendering/camera-ortho" ||
