@@ -419,9 +419,9 @@ fi
 		# get the current working drive's root, we'll install to that temporarily
 		CWD_DRIVE_ROOT="$(powershell -command '(get-location).Drive.Root')Boost_temp"
 		CWD_DRIVE_ROOT_BASH=$(echo "$CWD_DRIVE_ROOT" | sed "s,\\\\,/,g" | sed "s,\(.\):,/\\1,")
-		if [ -d CWD_DRIVE_ROOT_BASH ] then
-			printf "Cannot continue, ${CWD_DRIVE_ROOT_BASH} aka ${CWD_DRIVE_ROOT} already exists. Please remove before re-running. "
-			exit 1
+		if [ -d CWD_DRIVE_ROOT_BASH ]; then
+			printf "Cannot continue, ${CWD_DRIVE_ROOT_BASH} aka ${CWD_DRIVE_ROOT} already exists. Please remove before re-running. ";
+			exit 1;
 		fi
 
 		if [ -d ${BOOST_SDK} ] && grep "BOOST_VERSION 106700" Boost/boost/version.hpp > /dev/null; then
