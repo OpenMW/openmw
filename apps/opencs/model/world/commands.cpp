@@ -294,16 +294,19 @@ void CSMWorld::CreateCommand::undo()
 }
 
 CSMWorld::RevertCommand::RevertCommand (IdTable& model, const std::string& id, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (model), mId (id), mOld (0)
+: QUndoCommand (parent), mModel (model), mId (id), mOld (0), mNew (0)
 {
     setText (("Revert record " + id).c_str());
 
+    mNew = model.getRecord(id).clone();
+    mNew->revert();
     mOld = model.getRecord (id).clone();
 }
 
 CSMWorld::RevertCommand::~RevertCommand()
 {
     delete mOld;
+    delete mNew;
 }
 
 void CSMWorld::RevertCommand::redo()
@@ -319,20 +322,7 @@ void CSMWorld::RevertCommand::redo()
     }
     else
     {
-        // notify view that data has changed, previously only the modified column was
-        // updated in the view unless the user had selected another item or forced a
-        // repaint with other means
-        int count = mModel.columnCount (index.parent ());
-        for (int i=0; i<count; ++i)
-        {
-            if (i != index.column())
-            {
-                auto colIndex = mModel.index (index.row (), i, index.parent ());
-                auto data = mModel.data (colIndex);
-                mModel.setData (colIndex, data);
-            }
-        }
-
+        mModel.setRecord (mId, *mNew);
         mModel.setData (index, static_cast<int> (RecordBase::State_BaseOnly));
     }
 }
