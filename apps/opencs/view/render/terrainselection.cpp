@@ -105,15 +105,15 @@ std::pair<double, double> CSVRender::TerrainSelection::toCellCoords(osg::Vec3d w
     const int cellX {mCoords.getX() * cellSize};
     const int cellY {mCoords.getY() * cellSize};
 
-    const double x {(worldPos.x() - cellX) * landTextureSize / cellSize};
-    const double y {(worldPos.y() - cellY) * landTextureSize / cellSize};
+    const double x {(worldPos.x() - cellX) * landTextureSize / cellSize+(landTextureSize / cellSize)/4};
+    const double y {(worldPos.y() - cellY) * landTextureSize / cellSize+(landTextureSize / cellSize)/4};
 
     return std::make_pair(x, y);
 }
 
 double CSVRender::TerrainSelection::toWorldCoords(int pos)
 {
-    return (cellSize + 128) * static_cast<double>(pos) / landTextureSize;
+    return cellSize * static_cast<double>(pos) / landTextureSize;
 }
 
 size_t CSVRender::TerrainSelection::landIndex(int x, int y)
