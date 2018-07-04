@@ -34,6 +34,8 @@ MacOS:
   tags:
     - macos
     - xcode
+  except:
+    - branches # because our CI VMs are not public, MRs can't use them and timeout
   stage: build
   allow_failure: true
   script:
@@ -44,3 +46,24 @@ MacOS:
   artifacts:
     paths:
       - build/OpenMW-*.dmg
+
+Windows:
+  tags:
+    - win10
+    - msvc2017
+  except:
+    - branches # because our CI VMs are not public, MRs can't use them and timeout
+  stage: build
+  allow_failure: true
+  script:
+    # - env  # turn on for debugging
+    - sh %CI_PROJECT_DIR%/CI/before_script.msvc.sh -c Release -p x64 -v 2017 -V
+    - SET msBuildLocation="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe"
+    - call %msBuildLocation% MSVC2017_64\OpenMW.sln /t:Build /p:Configuration=Release /m:%NUMBER_OF_PROCESSORS%
+    - 7z a OpenMW_MSVC2017_64_%CI_BUILD_REF_NAME%_%CI_BUILD_ID%.zip %CI_PROJECT_DIR%\MSVC2017_64\Release\
+  cache:
+    paths:
+    - deps
+  artifacts:
+    paths:
+    - "*.zip"
