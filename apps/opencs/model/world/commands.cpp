@@ -319,6 +319,15 @@ void CSMWorld::RevertCommand::redo()
     }
     else
     {
+        // notify view that data has changed, previously only the modified column was
+        // updated in the view unless the user had selected another item or forced a
+        // repaint with other means
+        int count = mModel.columnCount (index.parent ());
+        if (count > 0)
+        {
+            emit mModel.dataChanged(mModel.index (index.row(), 0, index.parent ()),
+                                    mModel.index (index.row(), count - 1, index.parent ()));
+        }
         mModel.setData (index, static_cast<int> (RecordBase::State_BaseOnly));
     }
 }
