@@ -1,4 +1,5 @@
 #!/bin/bash
+# set -x  # turn-on for debugging
 
 MISSINGTOOLS=0
 
@@ -232,10 +233,9 @@ fi
 case $VS_VERSION in
 	15|15.0|2017 )
 		GENERATOR="Visual Studio 15 2017"
-		TOOLSET="vc140"
-		TOOLSET_REAL="vc141"
+		TOOLSET="vc141"
 		MSVC_REAL_VER="15"
-		MSVC_VER="14"
+		MSVC_VER="14.1"
 		MSVC_YEAR="2015"
 		MSVC_DISPLAY_YEAR="2017"
 		;;
@@ -243,9 +243,8 @@ case $VS_VERSION in
 	14|14.0|2015 )
 		GENERATOR="Visual Studio 14 2015"
 		TOOLSET="vc140"
-		TOOLSET_REAL="vc140"
 		MSVC_REAL_VER="14"
-		MSVC_VER="14"
+		MSVC_VER="14.0"
 		MSVC_YEAR="2015"
 		MSVC_DISPLAY_YEAR="2015"
 		;;
@@ -253,9 +252,8 @@ case $VS_VERSION in
 	12|12.0|2013 )
 		GENERATOR="Visual Studio 12 2013"
 		TOOLSET="vc120"
-		TOOLSET_REAL="vc120"
 		MSVC_REAL_VER="12"
-		MSVC_VER="12"
+		MSVC_VER="12.0"
 		MSVC_YEAR="2013"
 		MSVC_DISPLAY_YEAR="2013"
 		;;
@@ -325,9 +323,9 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# Boost
 	if [ -z $APPVEYOR ]; then
-		download "Boost 1.61.0" \
-			"https://sourceforge.net/projects/boost/files/boost-binaries/1.61.0/boost_1_61_0-msvc-${MSVC_VER}.0-${BITS}.exe" \
-			"boost-1.61.0-msvc${MSVC_YEAR}-win${BITS}.exe"
+		download "Boost 1.67.0" \
+			"https://sourceforge.net/projects/boost/files/boost-binaries/1.67.0/boost_1_67_0-msvc-${MSVC_VER}-${BITS}.exe" \
+			"boost-1.67.0-msvc${MSVC_YEAR}-win${BITS}.exe"
 	fi
 
 	# Bullet
@@ -365,8 +363,8 @@ if [ -z $SKIP_DOWNLOAD ]; then
 			QT_SUFFIX=""
 		fi
 
-		download "Qt 5.7.2" \
-			"https://download.qt.io/official_releases/qt/5.7/5.7.0/qt-opensource-windows-x86-msvc${MSVC_YEAR}${QT_SUFFIX}-5.7.0.exe" \
+		download "Qt 5.7.0" \
+			"https://download.qt.io/archive/qt/5.7/5.7.0/qt-opensource-windows-x86-msvc${MSVC_YEAR}${QT_SUFFIX}-5.7.0.exe" \
 			"qt-5.7.0-msvc${MSVC_YEAR}-win${BITS}.exe" \
 			"https://www.lysator.liu.se/~ace/OpenMW/deps/qt-5-install.qs" \
 			"qt-5-install.qs"
@@ -403,9 +401,9 @@ echo
 
 # Boost
 if [ -z $APPVEYOR ]; then
-	printf "Boost 1.61.0... "
+	printf "Boost 1.67.0... "
 else
-	if [ $MSVC_VER -eq 12 ]; then
+	if [ $MSVC_VER -eq 12.0 ]; then
 		printf "Boost 1.58.0 AppVeyor... "
 	else
 		printf "Boost 1.67.0 AppVeyor... "
@@ -417,17 +415,27 @@ fi
 
 		BOOST_SDK="$(real_pwd)/Boost"
 
-		if [ -d Boost ] && grep "BOOST_VERSION 106100" Boost/boost/version.hpp > /dev/null; then
+		# Boost's installer is still based on ms-dos API that doesn't support larger than 260 char path names
+		# We work around this by installing to root of the current working drive and then move it to our deps
+		# get the current working drive's root, we'll install to that temporarily
+		CWD_DRIVE_ROOT="$(powershell -command '(get-location).Drive.Root')Boost_temp"
+		CWD_DRIVE_ROOT_BASH=$(echo "$CWD_DRIVE_ROOT" | sed "s,\\\\,/,g" | sed "s,\(.\):,/\\1,")
+		if [ -d CWD_DRIVE_ROOT_BASH ]; then
+			printf "Cannot continue, ${CWD_DRIVE_ROOT_BASH} aka ${CWD_DRIVE_ROOT} already exists. Please remove before re-running. ";
+			exit 1;
+		fi
+
+		if [ -d ${BOOST_SDK} ] && grep "BOOST_VERSION 106700" Boost/boost/version.hpp > /dev/null; then
 			printf "Exists. "
 		elif [ -z $SKIP_EXTRACT ]; then
 			rm -rf Boost
-			"${DEPS}/boost-1.61.0-msvc${MSVC_YEAR}-win${BITS}.exe" //dir="$(echo $BOOST_SDK | sed s,/,\\\\,g)" //verysilent
+			[ -n "$CI" ] && CI_EXTRA_INNO_OPTIONS="//SUPPRESSMSGBOXES //LOG='boost_install.log'"
+			"${DEPS}/boost-1.67.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="${CWD_DRIVE_ROOT}" //VERYSILENT //NORESTART ${CI_EXTRA_INNO_OPTIONS}
+			mv "${CWD_DRIVE_ROOT_BASH}" "${BOOST_SDK}"
 		fi
-
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
-			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.0"
+			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}"
 		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
-
 		echo Done.
 	else
 		# Appveyor unstable has all the boost we need already
@@ -444,7 +452,7 @@ fi
 		
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
 			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.${LIB_SUFFIX}"
-		add_cmake_opts -DBoost_COMPILER="-${TOOLSET_REAL}"
+		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
 
 		echo Done.
 	fi
