@@ -43,6 +43,7 @@ namespace CSMTools
             std::string mText;
             QRegExp mRegExp;
             int mValue;
+            bool mCase;
             std::set<int> mColumns;
             int mIdColumn;
             int mTypeColumn;
@@ -67,11 +68,11 @@ namespace CSMTools
 
             Search();
         
-            Search (Type type, const std::string& value);
+            Search (Type type, bool caseSensitive, const std::string& value);
 
-            Search (Type type, const QRegExp& value);
+            Search (Type type, bool caseSensitive, const QRegExp& value);
 
-            Search (Type type, int value);
+            Search (Type type, bool caseSensitive, int value);
 
             // Configure search for the specified model.
             void configure (const CSMWorld::IdTableBase *model);
