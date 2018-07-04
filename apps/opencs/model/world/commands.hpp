@@ -201,6 +201,7 @@ namespace CSMWorld
             IdTable& mModel;
             std::string mId;
             RecordBase *mOld;
+            RecordBase *mNew;
 
             // not implemented
             RevertCommand (const RevertCommand&);

@@ -136,7 +136,7 @@ namespace CSMWorld
     struct VarTypeColumn : public Column<ESXRecordT>
     {
         VarTypeColumn (ColumnBase::Display display)
-        : Column<ESXRecordT> (Columns::ColumnId_ValueType, display)
+            : Column<ESXRecordT> (Columns::ColumnId_ValueType, display, ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -161,7 +161,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct VarValueColumn : public Column<ESXRecordT>
     {
-        VarValueColumn() : Column<ESXRecordT> (Columns::ColumnId_Value, ColumnBase::Display_Var) {}
+        VarValueColumn() : Column<ESXRecordT> (Columns::ColumnId_Value, ColumnBase::Display_Var, ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
