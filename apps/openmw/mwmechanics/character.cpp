@@ -459,9 +459,11 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
             }
         }
 
-        /* If we're playing the same animation, restart from the loop start instead of the
-         * beginning. */
-        int mode = ((movementAnimName == mCurrentMovement) ? 2 : 1);
+        // If we're playing the same animation, start it from the point it ended
+        bool sameAnim = (movementAnimName == mCurrentMovement);
+        float startPoint = 0.f;
+        if (sameAnim)
+            mAnimation->getInfo(mCurrentMovement, &startPoint);
 
         mMovementAnimationControlled = true;
 
@@ -510,7 +512,7 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
             }
 
             mAnimation->play(mCurrentMovement, Priority_Movement, movemask, false,
-                             1.f, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul, true);
+                             1.f, (!sameAnim ? "start" : "loop start"), "stop", startPoint, ~0ul, true);
         }
     }
 }
