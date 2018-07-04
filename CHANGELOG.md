@@ -31,6 +31,7 @@
     Bug #4293: Faction members are not aware of faction ownerships in barter
     Bug #4307: World cleanup should remove dead bodies only if death animation is finished
     Bug #4327: Missing animations during spell/weapon stance switching
+    Bug #4358: Running animation is interrupted when magic mode is toggled
     Bug #4368: Settings window ok button doesn't have key focus by default
     Bug #4393: NPCs walk back to where they were after using ResetActors
     Bug #4416: Handle exception if we try to play non-music file
