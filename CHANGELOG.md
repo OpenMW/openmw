@@ -4,6 +4,7 @@
     Bug #1990: Sunrise/sunset not set correct
     Bug #2222: Fatigue's effect on selling price is backwards
     Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
+    Bug #2455: Creatures attacks degrade armor
     Bug #2562: Forcing AI to activate a teleport door sometimes causes a crash
     Bug #2772: Non-existing class or faction freezes the game
     Bug #2835: Player able to slowly move when overencumbered
@@ -48,14 +49,17 @@
     Bug #4459: NotCell dialogue condition doesn't support partial matches
     Bug #4461: "Open" spell from non-player caster isn't a crime
     Bug #4469: Abot Silt Striders – Model turn 90 degrees on horizontal
-    Bug #4471: Retrieve SDL window settings instead of using magic numbers
     Bug #4474: No fallback when getVampireHead fails
     Bug #4475: Scripted animations should not cause movement
+    Bug #4479: "Game" category on Advanced page is getting too long
+    Bug #4480: Segfalt in QuickKeysMenu when item no longer in inventory
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
+    Feature #3641: Editor: Limit FPS in 3d preview window
     Feature #4222: 360° screenshots
     Feature #4256: Implement ToggleBorders (TB) console command
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
     Feature #4345: Add equivalents for the command line commands to Launcher
+    Feature #4404: Editor: All EnumDelegate fields should have their items sorted alphabetically
     Feature #4444: Per-group KF-animation files support
     Feature #4466: Editor: Add option to ignore "Base" records when running verifier
 

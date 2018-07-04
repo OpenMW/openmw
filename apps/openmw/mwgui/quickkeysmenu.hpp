@@ -55,23 +55,31 @@ namespace MWGui
 
 
     private:
+
+        struct keyData {
+            int index;
+            ItemWidget* button;
+            QuickKeysMenu::QuickKeyType type;
+            std::string id;
+            std::string name;
+            keyData(): index(-1), button(nullptr), type(Type_Unassigned), id(""), name("") {}
+        };
+
+        std::vector<keyData> mKey;
+        keyData* mSelected;
+        keyData* mActivated;
+
         MyGUI::EditBox* mInstructionLabel;
         MyGUI::Button* mOkButton;
-
-        std::vector<ItemWidget*> mQuickKeyButtons;
-        std::vector<QuickKeyType> mAssigned;
 
         QuickKeysMenuAssign* mAssignDialog;
         ItemSelectionDialog* mItemSelectionDialog;
         MagicSelectionDialog* mMagicSelectionDialog;
 
-        int mSelectedIndex;
-        int mActivatedIndex;
-
         void onQuickKeyButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);
 
-        void unassign(ItemWidget* key, int index);
+        void unassign(keyData* key);
     };
 
     class QuickKeysMenuAssign : public WindowModal

@@ -381,33 +381,24 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     setWindowIcon();
 
     osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
-    int redSize;
-    int greenSize;
-    int blueSize;
-    int depthSize;
-    int stencilSize;
-    int doubleBuffer;
-    
-    SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &redSize);
-    SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &greenSize);
-    SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &blueSize);
-    SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &depthSize);
-    SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &stencilSize);
-    SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &doubleBuffer);
-    
     SDL_GetWindowPosition(mWindow, &traits->x, &traits->y);
     SDL_GetWindowSize(mWindow, &traits->width, &traits->height);
-    traits->red = redSize;
-    traits->green = greenSize;
-    traits->blue = blueSize;
-    traits->depth = depthSize;
-    traits->stencil = stencilSize;
-    traits->doubleBuffer = doubleBuffer;
     traits->windowName = SDL_GetWindowTitle(mWindow);
     traits->windowDecoration = !(SDL_GetWindowFlags(mWindow)&SDL_WINDOW_BORDERLESS);
     traits->screenNum = SDL_GetWindowDisplayIndex(mWindow);
-    traits->vsync = vsync;
+    // We tried to get rid of the hardcoding but failed: https://github.com/OpenMW/openmw/pull/1771
+    // Here goes kcat's quote:
+    // It's ultimately a chicken and egg problem, and the reason why the code is like it was in the first place.
+    // It needs a context to get the current attributes, but it needs the attributes to set up the context.
+    // So it just specifies the same values that were given to SDL in the hopes that it's good enough to what the window eventually gets.
+    traits->red = 8;
+    traits->green = 8;
+    traits->blue = 8;
     traits->alpha = 0; // set to 0 to stop ScreenCaptureHandler reading the alpha channel
+    traits->depth = 24;
+    traits->stencil = 8;
+    traits->vsync = vsync;
+    traits->doubleBuffer = true;
     traits->inheritedWindowData = new SDLUtil::GraphicsWindowSDL2::WindowData(mWindow);
 
     osg::ref_ptr<SDLUtil::GraphicsWindowSDL2> graphicsWindow = new SDLUtil::GraphicsWindowSDL2(traits);

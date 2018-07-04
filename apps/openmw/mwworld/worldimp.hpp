@@ -608,7 +608,7 @@ namespace MWWorld
             void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength) override;
 
-            void applyLoopingParticles(const MWWorld::Ptr& ptr);
+            void applyLoopingParticles(const MWWorld::Ptr& ptr) override;
 
             const std::vector<std::string>& getContentFiles() const override;
             void breakInvisibility (const MWWorld::Ptr& actor) override;
