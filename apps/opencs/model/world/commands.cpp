@@ -323,11 +323,16 @@ void CSMWorld::RevertCommand::redo()
         // updated in the view unless the user had selected another item or forced a
         // repaint with other means
         int count = mModel.columnCount (index.parent ());
-        if (count > 0)
+        for (int i=0; i<count; ++i)
         {
-            emit mModel.dataChanged(mModel.index (index.row(), 0, index.parent ()),
-                                    mModel.index (index.row(), count - 1, index.parent ()));
+            if (i != index.column())
+            {
+                auto colIndex = mModel.index (index.row (), i, index.parent ());
+                auto data = mModel.data (colIndex);
+                mModel.setData (colIndex, data);
+            }
         }
+
         mModel.setData (index, static_cast<int> (RecordBase::State_BaseOnly));
     }
 }
