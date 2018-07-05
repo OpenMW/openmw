@@ -106,7 +106,7 @@ bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value
 
             } else
             {
-                // Modifying a value can also change the Modified status of a record unless .
+                // Modifying a value can also change the Modified status of a record.
                 QModelIndex stateIndex = this->index(index.row(), stateColumn);
                 emit dataChanged(stateIndex, stateIndex);
             }
