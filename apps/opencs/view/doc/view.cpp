@@ -4,7 +4,6 @@
 #include <stdexcept>
 
 #include <QCloseEvent>
-#include <QDebug>
 #include <QMenuBar>
 #include <QMdiArea>
 #include <QDockWidget>
@@ -102,11 +101,16 @@ void CSVDoc::View::setupFileMenu()
     file->addAction(exit);
 }
 
-static void updateUndoRedoAction(QAction *action, const std::string &settingsKey)
+namespace
 {
-    QKeySequence seq;
-    CSMPrefs::State::get().getShortcutManager().getSequence(settingsKey, seq);
-    action->setShortcut(seq);
+
+    void updateUndoRedoAction(QAction *action, const std::string &settingsKey)
+    {
+        QKeySequence seq;
+        CSMPrefs::State::get().getShortcutManager().getSequence(settingsKey, seq);
+        action->setShortcut(seq);
+    }
+
 }
 
 void CSVDoc::View::undoActionChanged()
