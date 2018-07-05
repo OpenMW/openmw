@@ -106,7 +106,7 @@ Now in order to generate the documentation on your computer to preview them, jus
 GitLab integration in PyCharm
 =============================
 
-As most of the hosting of OpenMW is moving to Gitlab, we should encourage the use of GitLab, though GitHub will continue to be supported.
+As most of the hosting of OpenMW has moved to Gitlab, we should encourage the use of GitLab, though GitHub will continue to be supported.
 
 Add a couple of plugins to Pycharm - see general instructions at https://www.jetbrains.com/help/pycharm/installing-updating-and-uninstalling-repository-plugins.html
 
