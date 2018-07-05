@@ -11,12 +11,10 @@ if (ANDROID)
     set(GAME ${GAME} android_main.c)
 endif()
 
-if(NOT WIN32 AND NOT ANDROID)
-    set(GAME ${GAME} crashcatcher.cpp)
-endif()
 set(GAME_HEADER
     engine.hpp
 )
+
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
