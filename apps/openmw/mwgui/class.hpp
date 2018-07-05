@@ -302,6 +302,7 @@ namespace MWGui
         void onAttributeSelected();
         void onSkillClicked(Widgets::MWSkillPtr _sender);
         void onSkillSelected();
+        void onRandomClicked(MyGUI::Widget* _sender);
         void onDescriptionClicked(MyGUI::Widget* _sender);
         void onDescriptionEntered(WindowBase* parWindow);
         void onDialogCancel();

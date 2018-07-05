@@ -63,6 +63,7 @@
     Feature #4404: Editor: All EnumDelegate fields should have their items sorted alphabetically
     Feature #4444: Per-group KF-animation files support
     Feature #4466: Editor: Add option to ignore "Base" records when running verifier
+    Feature #4477: Specialization/attribute/skill randomization in class creation widget
 
 0.44.0
 ------

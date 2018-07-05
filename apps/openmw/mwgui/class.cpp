@@ -12,7 +12,12 @@
 
 #include "../mwworld/esmstore.hpp"
 
+#include <components/misc/rng.hpp>
+
 #include "tooltips.hpp"
+
+// for std::sort
+#include <algorithm>
 
 namespace
 {
@@ -440,6 +445,10 @@ namespace MWGui
         // Make sure the edit box has focus
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mEditName);
 
+        MyGUI::Button* randomButton;
+        getWidget(randomButton, "RandomButton");
+        randomButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onRandomClicked);
+
         MyGUI::Button* descriptionButton;
         getWidget(descriptionButton, "DescriptionButton");
         descriptionButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionClicked);
@@ -655,6 +664,43 @@ namespace MWGui
         mAffectedSkill->setSkillId(mSkillDialog->getSkillId());
         MWBase::Environment::get().getWindowManager()->removeDialog(mSkillDialog);
         mSkillDialog = 0;
+        update();
+    }
+
+    void CreateClassDialog::onRandomClicked(MyGUI::Widget* _sender)
+    {
+        setSpecialization(Misc::Rng::rollDice(3));
+
+        auto attr1 = Misc::Rng::rollDice(ESM::Attribute::Length);
+        auto attr2 = Misc::Rng::rollDice(ESM::Attribute::Length-1);
+        if(attr2 >= attr1)
+            attr2++;
+        mFavoriteAttribute0->setAttributeId(attr1);
+        mFavoriteAttribute1->setAttributeId(attr2);
+
+        std::vector<int> selected;
+        selected.reserve(10);
+
+        for(auto & slot : mMajorSkill)
+        {
+            auto skill = Misc::Rng::rollDice(ESM::Skill::Length - selected.size());
+            for(const auto & offset : selected)
+                if(skill >= offset) skill++;
+            slot->setSkillId(ESM::Skill::sSkillIds[skill]);
+            selected.push_back(skill);
+            std::sort(selected.begin(), selected.end());
+        }
+
+        for(auto & slot : mMinorSkill)
+        {
+            auto skill = Misc::Rng::rollDice(ESM::Skill::Length - selected.size());
+            for(const auto & offset : selected)
+                if(skill >= offset) skill++;
+            slot->setSkillId(ESM::Skill::sSkillIds[skill]);
+            selected.push_back(skill);
+            std::sort(selected.begin(), selected.end());
+        }
+
         update();
     }
 
