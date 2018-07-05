@@ -86,12 +86,30 @@ bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value
         mIdCollection->setData (index.row(), index.column(), value);
         emit dataChanged(index, index);
 
-        // Modifying a value can also change the Modified status of a record unless .
         int stateColumn = searchColumnIndex(Columns::ColumnId_Modification);
-        if (stateColumn != -1 && index.column() != stateColumn)
+        if (stateColumn != -1)
         {
-            QModelIndex stateIndex = this->index(index.row(), stateColumn);
-            emit dataChanged(stateIndex, stateIndex);
+            if (index.column() == stateColumn)
+            {
+                // modifying the state column can modify other values. we need to tell
+                // views that the whole row has changed.
+
+                int count = columnCount(index.parent());
+                for (int i=0; i<count; ++i)
+                {
+                    if (i != stateColumn) // we already notified about the state column itself
+                    {
+                        QModelIndex columnIndex = this->index(index.row(), i);
+                        emit dataChanged(columnIndex, columnIndex);
+                    }
+                }
+
+            } else
+            {
+                // Modifying a value can also change the Modified status of a record unless .
+                QModelIndex stateIndex = this->index(index.row(), stateColumn);
+                emit dataChanged(stateIndex, stateIndex);
+            }
         }
 
         return true;

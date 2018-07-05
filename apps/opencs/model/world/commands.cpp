@@ -294,19 +294,16 @@ void CSMWorld::CreateCommand::undo()
 }
 
 CSMWorld::RevertCommand::RevertCommand (IdTable& model, const std::string& id, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (model), mId (id), mOld (0), mNew (0)
+: QUndoCommand (parent), mModel (model), mId (id), mOld (0)
 {
     setText (("Revert record " + id).c_str());
 
-    mNew = model.getRecord(id).clone();
-    mNew->revert();
     mOld = model.getRecord (id).clone();
 }
 
 CSMWorld::RevertCommand::~RevertCommand()
 {
     delete mOld;
-    delete mNew;
 }
 
 void CSMWorld::RevertCommand::redo()
@@ -322,7 +319,6 @@ void CSMWorld::RevertCommand::redo()
     }
     else
     {
-        mModel.setRecord (mId, *mNew);
         mModel.setData (index, static_cast<int> (RecordBase::State_BaseOnly));
     }
 }
