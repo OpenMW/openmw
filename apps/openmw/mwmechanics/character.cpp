@@ -662,16 +662,19 @@ MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::I
 
 void CharacterController::playDeath(float startpoint, CharacterState death)
 {
+    // Make sure the character was swimming upon death for forward-compatibility
+    const bool wasSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
+
     switch (death)
     {
     case CharState_SwimDeath:
         mCurrentDeath = "swimdeath";
         break;
     case CharState_SwimDeathKnockDown:
-        mCurrentDeath = "swimdeathknockdown";
+        mCurrentDeath = (wasSwimming ? "swimdeathknockdown" : "deathknockdown");
         break;
     case CharState_SwimDeathKnockOut:
-        mCurrentDeath = "swimdeathknockout";
+        mCurrentDeath = (wasSwimming ? "swimdeathknockout" : "deathknockout");
         break;
     case CharState_DeathKnockDown:
         mCurrentDeath = "deathknockdown";
