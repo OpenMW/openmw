@@ -57,6 +57,7 @@ namespace MWPhysics
     static const float sStepSizeDown = 62.0f;
     static const float sMinStep = 10.f;
     static const float sGroundOffset = 1.0f;
+    static const float fudgeFactor = 0.01f;
 
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
@@ -168,6 +169,7 @@ namespace MWPhysics
             if(mTracer.mFraction < std::numeric_limits<float>::epsilon())
                 return false; // didn't even move the smallest representable amount
 
+            // FIXME: non-levitating aerial actors should not step down to a lower location than their initial location
             /*
              * Try moving back down sStepSizeDown using stepper.
              * NOTE: if there is an obstacle below (e.g. stairs), we'll be "stepping up".
@@ -404,7 +406,10 @@ namespace MWPhysics
                 float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + halfExtents.z();
                 osg::Vec3f oldPosition = newPosition;
                 bool result = false;
-                if (hitHeight < sStepSizeUp && !isActor(tracer.mHitObject))
+                // FIXME: this might be the wrong set of checks for whether the actor should be able to stairstep
+                // FIXME: right now the movement solver depends on stepping to correctly place the actor back "on the ground" when they land
+                // this is the cause of bug http://bugs.openmw.org/issues/2256
+                if (hitHeight < sStepSizeUp && !isActor(tracer.mHitObject) && (physicActor->getOnGround() || velocity.z() <= 0.0f))
                 {
                     // Try to step up onto it.
                     // NOTE: stepMove does not allow stepping over, modifies newPosition if successful
@@ -422,10 +427,9 @@ namespace MWPhysics
                     // Can't move this way, try to find another spot along the plane
                     osg::Vec3f newVelocity = slide(velocity, tracer.mPlaneNormal);
 
-                    // Do not allow sliding upward if there is gravity.
-                    // Stepping will have taken care of that.
-                    if(!(newPosition.z() < swimlevel || isFlying))
-                        newVelocity.z() = std::min(newVelocity.z(), 0.0f);
+                    // Do not allow sliding to accelerate us upwards. Stepping will take care of walkable slopes.
+                    if(physicActor->getOnGround() && !(newPosition.z() < swimlevel || isFlying))
+                        newVelocity.z() = std::min(newVelocity.z(), std::max(0.0f, velocity.z()));
 
                     if ((newVelocity-velocity).length2() < 0.01)
                         break;
@@ -438,13 +442,14 @@ namespace MWPhysics
 
             bool isOnGround = false;
             bool isOnSlope = false;
-            if (!(inertia.z() > 0.f) && !(newPosition.z() < swimlevel))
+            if (inertia.z() <= 0.f && newPosition.z() >= swimlevel)
             {
                 osg::Vec3f from = newPosition;
                 osg::Vec3f to = newPosition - (physicActor->getOnGround() ?
                              osg::Vec3f(0,0,sStepSizeDown + 2*sGroundOffset) : osg::Vec3f(0,0,2*sGroundOffset));
                 tracer.doTrace(colobj, from, to, collisionWorld);
-                if(tracer.mFraction < 1.0f
+
+                if(tracer.mHitObject != NULL
                         && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != CollisionType_Actor)
                 {
                     const btCollisionObject* standingOn = tracer.mHitObject;
@@ -454,12 +459,27 @@ namespace MWPhysics
 
                     if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
                         physicActor->setWalkingOnWater(true);
-                    if (!isFlying)
-                        newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
 
                     isOnGround = true;
 
                     isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
+
+                    // reject from ground
+                    if (!isFlying && !isOnSlope)
+                    {
+                        float distance = (newPosition.z() - tracer.mEndPos.z()) - fudgeFactor;
+                        if(distance > 0)
+                            newPosition.z() -= distance;
+
+                        from = newPosition;
+                        to = newPosition + osg::Vec3f(0,0,sGroundOffset+fudgeFactor);
+                        tracer.doTrace(colobj, from, to, collisionWorld);
+
+                        if(tracer.mHitObject == NULL)
+                            newPosition.z() += sGroundOffset;
+                        else if (tracer.mEndPos.z() - newPosition.z() > fudgeFactor)
+                            newPosition.z() += (tracer.mEndPos.z() - newPosition.z()) - fudgeFactor;
+                    }
                 }
                 else
                 {
