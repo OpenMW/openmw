@@ -64,7 +64,6 @@ CSVTools::SearchBox::SearchBox (QWidget *parent)
     mLayout->addWidget (&mInput, 0, 1);
 
     mCaseSensitive.setText (tr ("Case"));
-    connect (&mCaseSensitive, SIGNAL (toggled (bool)), this, SLOT (caseSensitiveChanged (bool)));
     mLayout->addWidget (&mCaseSensitive, 0, 2);
 
     connect (&mSearch, SIGNAL (clicked (bool)), this, SLOT (startSearch (bool)));
