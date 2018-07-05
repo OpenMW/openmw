@@ -24,8 +24,6 @@ namespace CSMWorld
 
         virtual RecordBase *modifiedCopy() const = 0;
 
-        virtual void revert() = 0;
-
         virtual void assign (const RecordBase& record) = 0;
         ///< Will throw an exception if the types don't match.
 
@@ -50,8 +48,6 @@ namespace CSMWorld
         virtual RecordBase *clone() const;
 
         virtual RecordBase *modifiedCopy() const;
-
-        void revert() override;
 
         virtual void assign (const RecordBase& record);
 
@@ -98,12 +94,6 @@ namespace CSMWorld
     RecordBase *Record<ESXRecordT>::clone() const
     {
         return new Record<ESXRecordT> (*this);
-    }
-
-    template<typename ESXRecordT>
-    void Record<ESXRecordT>::revert()
-    {
-        mModified = mBase;
     }
 
     template <typename ESXRecordT>
