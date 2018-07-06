@@ -369,6 +369,13 @@ namespace MWPhysics
 
             for(int iterations = 0; iterations < sMaxIterations && remainingTime > 0.01f; ++iterations)
             {
+                // sometimes velocity ends up as NAN, even on the first iteration, e.g. after silt striding into aldruhn for the first time
+                // but also happens on other iterations because of numerical instability
+                // break the loop if this is the case
+                float NANcheck = velocity.length2();
+                if (NANcheck != NANcheck)
+                    break;
+
                 osg::Vec3f nextpos = newPosition + velocity * remainingTime;
 
                 // Don't swim up out of water if not flying
@@ -441,7 +448,10 @@ namespace MWPhysics
                     {
                         // hack: if it is the case that we are on the ground and it's a steep unwalkable slope, stay even further away from it than normal
                         // this hides some of the movement solver's shortcomings
-                        if(physicActor->getOnGround() && !physicActor->getOnSlope() && !isWalkableSlope(tracer.mPlaneNormal) && moveDistance*tracer.mFraction > 0.2f+traceMargin)
+                        if(physicActor->getOnGround() && !physicActor->getOnSlope()
+                            && (tracer.mPlaneNormal.x() != 0.0f || tracer.mPlaneNormal.y() != 0.0f)
+                            && !isWalkableSlope(tracer.mPlaneNormal)
+                            && moveDistance*tracer.mFraction > 0.2f+traceMargin)
                             newPosition = tracer.mEndPos - normVelocity*(0.2f+traceMargin);
                         else
                             newPosition = tracer.mEndPos - normVelocity*traceMargin;
