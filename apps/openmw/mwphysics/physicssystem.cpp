@@ -417,7 +417,7 @@ namespace MWPhysics
                 {
                     // Try to step up onto it.
                     // NOTE: step() is a proper procedure, it performs the stepping motion on its own if successful
-                    result = stepper.step(newPosition, velocity, velocity*remainingTime, remainingTime, physicActor->getOnGround(), noSlidingYet);
+                    result = stepper.step(newPosition, velocity, velocity*remainingTime, remainingTime, physicActor->getOnGround() && !physicActor->getOnSlope(), noSlidingYet);
                 }
                 noSlidingYet = false;
                 if (result)
@@ -541,7 +541,7 @@ namespace MWPhysics
             {
                 // find ground
                 osg::Vec3f from = newPosition;
-                auto groundDistance = physicActor->getOnGround() ? (sStepSizeDown + 2*sGroundOffset) : (2*sGroundOffset);
+                auto groundDistance = (physicActor->getOnGround() && !physicActor->getOnSlope()) ? (sStepSizeDown + 2*sGroundOffset) : (2*sGroundOffset);
                 osg::Vec3f to = newPosition - osg::Vec3f(0,0,groundDistance);
                 tracer.doTrace(colobj, from, to, collisionWorld);
                 if(tracer.mFraction < 1.0f && !isActor(tracer.mHitObject))
