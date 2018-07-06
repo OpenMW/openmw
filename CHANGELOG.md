@@ -63,7 +63,7 @@
     Feature #4404: Editor: All EnumDelegate fields should have their items sorted alphabetically
     Feature #4444: Per-group KF-animation files support
     Feature #4466: Editor: Add option to ignore "Base" records when running verifier
-    Feature #4012: Editor: write a log file if OpenCS crashes
+    Feature #4012: Editor: Write a log file if OpenCS crashes
 
 0.44.0
 ------
