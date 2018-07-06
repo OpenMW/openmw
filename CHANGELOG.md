@@ -26,6 +26,7 @@
     Bug #4215: OpenMW shows book text after last EOL tag
     Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4251: Stationary NPCs do not return to their position after combat
+    Bug #4274: Pre-0.43 death animations are not forward-compatible with 0.43+
     Bug #4286: Scripted animations can be interrupted
     Bug #4291: Non-persistent actors that started the game as dead do not play death animations
     Bug #4293: Faction members are not aware of faction ownerships in barter
