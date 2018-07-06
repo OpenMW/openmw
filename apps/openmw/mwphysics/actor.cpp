@@ -34,8 +34,12 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
     if (std::abs(mHalfExtents.x()-mHalfExtents.y())<mHalfExtents.x()*0.05 && mHalfExtents.z() >= mHalfExtents.x())
     {
-        // cylinders cause problems for actor-actor collisions because bullet gives bad collision normals for them
-        // so use one with round edges instead
+        // There are three shapes here, code given for convenience of testing/debugging.
+        // The first is a cylinder with rounded edges. It's the best, but it seems to be a bit performance intensive.
+        // The second is a cylinder. It would be idea, but Bullet gives bad/bogus normals for collisions of very close pairs of cylinders, causing weird collision glitches like jumping into NPCs making them move.
+        // The third is a capsule. It causes problems with vanilla Morrowind's level design, because Morrowind was made and tested with cylinders. For example, some of the stairs in Ebonheart don't work. Good for full conversions.
+        // Right here the capsule is enabled. This should be looked into before 1.0. If cylinders can be made to give good collision normals (for example, by compiling bullet with 64-bit floats), they should be used.
+        // TODO: Should selection between these three shapes be a hidden option?
         if(false)
         {
             float fuzz = 8.0f;
@@ -47,7 +51,6 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
         }
         else if(false)
             mShape.reset(new btCylinderShapeZ(btVector3(mHalfExtents.x(), mHalfExtents.x(), mHalfExtents.z())));
-        // capsules render various stairs unusable and make it possible to enter holes that can't be entered, should only be used for full conversions
         else
             mShape.reset(new btCapsuleShapeZ(mHalfExtents.x(), 2*mHalfExtents.z() - 2*mHalfExtents.x()));
         mRotationallyInvariant = true;
