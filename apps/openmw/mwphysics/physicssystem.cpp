@@ -326,7 +326,7 @@ namespace MWPhysics
                 velocity = (osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))) * movement;
 
                 if ((velocity.z() > 0.f && physicActor->getOnGround() && !physicActor->getOnSlope())
-                 || (velocity.z() > 0.f && velocity.z() + inertia.z() <= -velocity.z() && physicActor->getOnSlope()))
+                 || (velocity.z() > 0.f && velocity.z() + inertia.z() <= -velocity.z() && physicActor->getOnSlope())) // note: this should be less tolerant now that it's harder to get stuck in acute seams
                     inertia = velocity;
                 else if (!physicActor->getOnGround() || physicActor->getOnSlope())
                     velocity = velocity + inertia;
@@ -357,8 +357,16 @@ namespace MWPhysics
              * The initial velocity was set earlier (see above).
              */
             float remainingTime = time;
+            // to ensure actor state gets updated when climbing a stairstep while jumping
             bool forceGroundTest = false;
+            // to control the "tiny slope" stair stepping hack
             bool noSlidingYet = true;
+            // to handle simple acute crevices
+            int numTimesSlid = 0;
+            int numTimesSlidFallback = 0;
+            osg::Vec3f lastSlideNormal(0,0,1);
+            osg::Vec3f lastSlideFallbackNormal(0,0,1);
+            
             for(int iterations = 0; iterations < sMaxIterations && remainingTime > 0.01f; ++iterations)
             {
                 osg::Vec3f nextpos = newPosition + velocity * remainingTime;
@@ -426,38 +434,102 @@ namespace MWPhysics
                     auto moveDistance = normVelocity.normalize();
                     
                     // Stairstepping failed, need to advance to and slide across whatever we hit
-                    // note: this algorithm fails (runs out of iterations) for falling into acute corners
                     
                     float traceMargin = pickSafetyMargin(tracer.mHitObject);
                     // advance if distance greater than safety margin
                     if(moveDistance*tracer.mFraction > traceMargin)
-                        newPosition = tracer.mEndPos - normVelocity*traceMargin;
+                    {
+                        // hack: if it is the case that we are on the ground and it's a steep unwalkable slope, stay even further away from it than normal
+                        // this hides some of the movement solver's shortcomings
+                        if(physicActor->getOnGround() && !physicActor->getOnSlope() && !isWalkableSlope(tracer.mPlaneNormal) && moveDistance*tracer.mFraction > 0.2f+traceMargin)
+                            newPosition = tracer.mEndPos - normVelocity*(0.2f+traceMargin);
+                        else
+                            newPosition = tracer.mEndPos - normVelocity*traceMargin;
+                    }
                     // reduce remaining time to bounce around by how much we moved (ignoring the safety margin)
                     remainingTime *= 1.0f-tracer.mFraction;
                     // slide across it
-                    osg::Vec3f newVelocity = reject(velocity, tracer.mPlaneNormal);
+                    auto virtualNormal = tracer.mPlaneNormal;
+                    // if we're on the ground and it's too steep to walk, pretend it's a wall
+                    if(physicActor->getOnGround() && !physicActor->getOnSlope() && !isWalkableSlope(virtualNormal))
+                    {
+                        virtualNormal.z() = 0;
+                        virtualNormal.normalize();
+                    }
+                    // okay, actually slide across it - if it's coherent with the direction we're hitting it (i.e. we're hitting it from the front)
+                    osg::Vec3f newVelocity = (virtualNormal * velocity <= 0.0f) ? reject(velocity, virtualNormal) : velocity;
                     // eject from whatever we hit, along the normal of contact
                     // (this makes it so that numerical instability doesn't render the motion-directional safety margin moot when hugging walls)
-                    auto testPosition = newPosition + tracer.mPlaneNormal*traceMargin*2;
+                    auto testPosition = newPosition + virtualNormal*traceMargin*2;
                     ActorTracer tempTracer;
                     tempTracer.doTrace(colobj, newPosition, testPosition, collisionWorld);
                     if(tempTracer.mFraction > 0.5f) // distance to any object is greater than traceMargin (we checked traceMargin*2 distance)
                     {
                         auto effectiveFraction = tempTracer.mFraction*2.0f - 1.0f;
-                        newPosition += tracer.mPlaneNormal*traceMargin*effectiveFraction;
+                        newPosition += virtualNormal*traceMargin*effectiveFraction;
                     }
 
                     // Do not allow sliding upward if we're walking or jumping on land.
                     if(newPosition.z() >= swimlevel && !isFlying)
                         newVelocity.z() = std::min(newVelocity.z(), std::max(velocity.z(), 0.0f));
                     
+                    // check for colliding with acute convex corners; handling of acute crevices
+                    if ((numTimesSlid > 0 && lastSlideNormal * virtualNormal <= 0.001f) || (numTimesSlid > 1 && lastSlideFallbackNormal * virtualNormal <= 0.001f))
+                    {
+                        // if we've already done crevice detection this it's probably stuck
+                        if(numTimesSlidFallback > 1)
+                            break;
+                        
+                        // if we've already slid we should pick the best last normal to use
+                        osg::Vec3f bestNormal = lastSlideNormal;
+                        float product_older = 1;
+                        float product_newer = 1;
+                        float product_cross = 1;
+                        float product_best = 1;
+                        
+                        product_older = lastSlideNormal * virtualNormal;
+                        product_best = product_older;
+                        // if we've done this before and the third-most-recent collision normal isn't too similar to our current collision normal we might need to check for a three-sided pit
+                        if(numTimesSlid > 1 && lastSlideFallbackNormal * virtualNormal < 0.99f)
+                        {
+                            product_newer = lastSlideFallbackNormal * virtualNormal;
+                            product_cross = lastSlideFallbackNormal * lastSlideNormal;
+                            // check for all three being acute or right angled; if they are, it's definitely a three-sided pit, we should bail early
+                            if(product_older <= 0.001f && product_newer <= 0.001f && product_cross <= 0.001f)
+                                break;
+                            // otherwise we don't care about product_cross
+                            if (product_newer <= 0.001f && product_newer <= product_older)
+                            {
+                                bestNormal = lastSlideFallbackNormal;
+                                product_best = product_newer;
+                            }
+                        }
+                        // note: the algorithm above only works in very simple cases, for very complex acute pits the solver will run out of iterations instead
+                        if(product_best <= 0.001f)
+                        {
+                            // otherwise constrain our direction to that of the acute seam
+                            osg::Vec3 constraintVector = bestNormal ^ virtualNormal;
+                            constraintVector.normalize();
+                            
+                            if(constraintVector.length2() > 0) // only if it's not zero length
+                            {
+                                newVelocity = project(velocity, constraintVector);
+                                numTimesSlidFallback += 1;
+                            }
+                        }
+                    }
+                    
                     // Break if our velocity hardly changed (?)
                     //if ((newVelocity-velocity).length2() < 0.01)
                     //    break;
                     
                     // Break if our velocity got fully deflected
-                    if (physicActor->getOnGround() && (newVelocity * origVelocity) <= 0.0f)
+                    if (physicActor->getOnGround() && !physicActor->getOnSlope() && (newVelocity * origVelocity) <= 0.0f)
                         break;
+                    
+                    numTimesSlid += 1;
+                    lastSlideFallbackNormal = lastSlideNormal;
+                    lastSlideNormal = virtualNormal;
 
                     velocity = newVelocity;
                 }
@@ -465,7 +537,7 @@ namespace MWPhysics
 
             bool isOnGround = false;
             bool isOnSlope = false;
-            if (forceGroundTest || (!(inertia.z() > 0.f) && !(newPosition.z() < swimlevel)))
+            if (forceGroundTest || (inertia.z() <= 0.0f && newPosition.z() >= swimlevel))
             {
                 // find ground
                 osg::Vec3f from = newPosition;
