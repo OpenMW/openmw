@@ -1365,7 +1365,7 @@ namespace MWMechanics
                         {
                             CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
                             if (isConscious(iter->first))
-                                stats.getAiSequence().execute(iter->first, *iter->second->getCharacterController(), iter->second->getAiState(), duration);
+                                stats.getAiSequence().execute(iter->first, *iter->second->getCharacterController(), duration);
                         }
                     }
 
@@ -1993,7 +1993,7 @@ namespace MWMechanics
                     || ptr.getClass().getCreatureStats(ptr).isParalyzed())
                 continue;
             MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            seq.fastForward(ptr, it->second->getAiState());
+            seq.fastForward(ptr);
         }
     }
 }

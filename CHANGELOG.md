@@ -50,6 +50,7 @@
     Bug #4458: AiWander console command handles idle chances incorrectly
     Bug #4459: NotCell dialogue condition doesn't support partial matches
     Bug #4461: "Open" spell from non-player caster isn't a crime
+    Bug #4464: OpenMW keeps AiState cached storages even after we cancel AI packages
     Bug #4469: Abot Silt Striders – Model turn 90 degrees on horizontal
     Bug #4474: No fallback when getVampireHead fails
     Bug #4475: Scripted animations should not cause movement

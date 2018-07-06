@@ -188,7 +188,7 @@ bool isActualAiPackage(int packageTypeId)
                    && packageTypeId != AiPackage::TypeIdInternalTravel);
 }
 
-void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
+void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, float duration)
 {
     if(actor != getPlayer())
     {
@@ -262,7 +262,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
 
         try
         {
-            if (package->execute (actor,characterController,state,duration))
+            if (package->execute (actor, characterController, mAiState, duration))
             {
                 // Put repeating noncombat AI packages on the end of the stack so they can be used again
                 if (isActualAiPackage(packageTypeId) && (mRepeat || package->getRepeat()))
@@ -360,6 +360,14 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor, boo
     }
 
     mPackages.push_back (package.clone());
+
+    // Make sure that temporary storage is empty
+    if (cancelOther)
+    {
+        mAiState.moveIn(new AiCombatStorage());
+        mAiState.moveIn(new AiFollowStorage());
+        mAiState.moveIn(new AiWanderStorage());
+    }
 }
 
 AiPackage* MWMechanics::AiSequence::getActivePackage()
@@ -494,12 +502,12 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
     mLastAiPackage = sequence.mLastAiPackage;
 }
 
-void AiSequence::fastForward(const MWWorld::Ptr& actor, AiState& state)
+void AiSequence::fastForward(const MWWorld::Ptr& actor)
 {
     if (!mPackages.empty())
     {
         MWMechanics::AiPackage* package = mPackages.front();
-        package->fastForward(actor, state);
+        package->fastForward(actor, mAiState);
     }
 }
 
