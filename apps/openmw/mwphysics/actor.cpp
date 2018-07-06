@@ -35,8 +35,8 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     if (std::abs(mHalfExtents.x()-mHalfExtents.y())<mHalfExtents.x()*0.05 && mHalfExtents.z() >= mHalfExtents.x())
     {
         // cylinders cause problems for actor-actor collisions because bullet gives bad collision normals for them
-        // so use one with round rdges instead
-        if(true)
+        // so use one with round edges instead
+        if(false)
         {
             float fuzz = 8.0f;
             auto height = mHalfExtents.z()-fuzz;
@@ -45,8 +45,9 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
             auto sphere = new btSphereShape(fuzz);
             mShape.reset(new btMinkowskiSumShape(cylinder, sphere));
         }
-        else if(true)
+        else if(false)
             mShape.reset(new btCylinderShapeZ(btVector3(mHalfExtents.x(), mHalfExtents.x(), mHalfExtents.z())));
+        // capsules render various stairs unusable and make it possible to enter holes that can't be entered, should only be used for full conversions
         else
             mShape.reset(new btCapsuleShapeZ(mHalfExtents.x(), 2*mHalfExtents.z() - 2*mHalfExtents.x()));
         mRotationallyInvariant = true;

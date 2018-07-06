@@ -388,7 +388,6 @@ namespace MWPhysics
                     }
                 }
                 
-                /*
                 // We are touching something.
                 if (tracer.mFraction < 1E-9f)
                 {
@@ -396,7 +395,6 @@ namespace MWPhysics
                     osg::Vec3f backOff = (newPosition - tracer.mHitPoint) * 1E-2f;
                     newPosition += backOff;
                 }
-                */
 
                 // We hit something. Check if we can step up.
                 float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + halfExtents.z();
