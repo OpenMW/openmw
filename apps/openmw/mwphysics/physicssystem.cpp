@@ -75,13 +75,13 @@ namespace MWPhysics
         static const float sMaxSlopeCos = std::cos(osg::DegreesToRadians(sMaxSlope));
         return (normal.z() > sMaxSlopeCos);
     }
-    
+
     static bool canStepDown(const ActorTracer &stepper)
     {
         return stepper.mHitObject && isWalkableSlope(stepper.mPlaneNormal) && !isActor(stepper.mHitObject);
     }
-    
-    
+
+
     // vector projection (assumes normalized v)
     static inline osg::Vec3f project(const osg::Vec3f& u, const osg::Vec3f &v)
     {
@@ -93,7 +93,7 @@ namespace MWPhysics
     {
         return direction - project(direction, planeNormal);
     }
-    
+
     static inline float pickSafetyMargin(const btCollisionObject *obj)
     {
         if(obj && isActor(obj))
@@ -101,7 +101,7 @@ namespace MWPhysics
         else
             return sSafetyMargin;
     }
-    
+
 
     class Stepper
     {
@@ -121,12 +121,12 @@ namespace MWPhysics
         {
             if(toMove.x() == 0.0 && toMove.y() == 0.0)
                 return false;
-            
+
             // Stairstepping algorithms work by moving up to avoid the step, moving forwards, then moving back down onto the ground.
             // This algorithm has a couple of minor problems, but they don't cause problems for sane geometry, and just prevent stepping on insane geometry.
-            
+
             mUpStepper.doTrace(mColObj, position, position+osg::Vec3f(0.0f,0.0f,sStepSizeUp), mColWorld);
-            
+
             float upMargin = pickSafetyMargin(mUpStepper.mHitObject);
             float upDistance = 0;
             if(!mUpStepper.mHitObject)
@@ -138,9 +138,9 @@ namespace MWPhysics
                 //std::cerr << "Warning: breaking steps A"  << std::endl;
                 return false;
             }
-            
+
             osg::Vec3f tracerPos = position + osg::Vec3f(0.0f, 0.0f, upDistance);
-            
+
             osg::Vec3f tracerDest;
             auto normalMove = toMove;
             auto moveDistance = normalMove.normalize();
@@ -160,7 +160,7 @@ namespace MWPhysics
                     tracerDest = tracerPos + normalMove*sMinStep;
                 }
                 attempt++;
-                
+
                 mTracer.doTrace(mColObj, tracerPos, tracerDest, mColWorld);
                 float moveMargin = pickSafetyMargin(mTracer.mHitObject);
                 if(mTracer.mHitObject)
@@ -172,26 +172,26 @@ namespace MWPhysics
                         //std::cerr << "Warning: breaking steps B"  << std::endl;
                         return false;
                     }
-                    
+
                     moveDistance -= moveMargin;
                     tracerDest = tracerPos + normalMove*moveDistance;
-                    
+
                     // safely eject from what we hit by the safety margin
                     auto tempDest = tracerDest + mTracer.mPlaneNormal*moveMargin*2;
-                    
+
                     ActorTracer tempTracer;
                     tempTracer.doTrace(mColObj, tracerDest, tempDest, mColWorld);
-                    
+
                     if(tempTracer.mFraction > 0.5f) // distance to any object is greater than moveMargin (we checked moveMargin*2 distance)
                     {
                         auto effectiveFraction = tempTracer.mFraction*2.0f - 1.0f;
                         tracerDest += mTracer.mPlaneNormal*moveMargin*effectiveFraction;
                     }
                 }
-                
+
                 downStepSize = moveDistance + upDistance + sStepSizeDown;
                 mDownStepper.doTrace(mColObj, tracerDest, tracerDest + osg::Vec3f(0.0f, 0.0f, -downStepSize), mColWorld);
-                
+
                 // can't step down onto air, non-walkable-slopes, or actors
                 // NOTE: using a capsule makes isWalkableSlope fail on certain heights of steps that should be completely valid
                 // (like the bottoms of the staircases in aldruhn's guild of mages)
@@ -202,7 +202,7 @@ namespace MWPhysics
                 {
                     if(firstIteration && attempt-1 == 0)
                         continue;
-                    
+
                     //std::cerr << "Warning: breaking steps C " << std::endl;
                     //std::cerr << normalMove.x() << std::endl;
                     //std::cerr << normalMove.y() << std::endl;
@@ -211,22 +211,22 @@ namespace MWPhysics
                     return false;
                 }
             }
-            
+
             // note: can't downstep onto actors so no need to pick safety margin
             float downDistance = 0;
             if(mDownStepper.mFraction*downStepSize > sSafetyMargin)
                 downDistance = mDownStepper.mFraction*downStepSize - sSafetyMargin;
-            
+
             if(downDistance-sSafetyMargin-sGroundOffset > upDistance && !onGround)
             {
                 //std::cerr << "Warning: breaking steps D " << std::endl;
                 return false;
             }
-            
+
             velocity = reject(velocity, mDownStepper.mPlaneNormal);
-                
+
             position = tracerDest + osg::Vec3f(0.0f, 0.0f, -downDistance);
-            
+
             remainingTime *= (1.0f-mTracer.mFraction); // remaining time is proportional to remaining distance
             return true;
         }
@@ -366,7 +366,7 @@ namespace MWPhysics
             int numTimesSlidFallback = 0;
             osg::Vec3f lastSlideNormal(0,0,1);
             osg::Vec3f lastSlideFallbackNormal(0,0,1);
-            
+
             for(int iterations = 0; iterations < sMaxIterations && remainingTime > 0.01f; ++iterations)
             {
                 osg::Vec3f nextpos = newPosition + velocity * remainingTime;
@@ -395,7 +395,7 @@ namespace MWPhysics
                         break;
                     }
                 }
-                
+
                 // We are touching something.
                 if (tracer.mFraction < 1E-9f)
                 {
@@ -432,9 +432,9 @@ namespace MWPhysics
                 {
                     auto normVelocity = velocity;
                     auto moveDistance = normVelocity.normalize();
-                    
+
                     // Stairstepping failed, need to advance to and slide across whatever we hit
-                    
+
                     float traceMargin = pickSafetyMargin(tracer.mHitObject);
                     // advance if distance greater than safety margin
                     if(moveDistance*tracer.mFraction > traceMargin)
@@ -472,21 +472,21 @@ namespace MWPhysics
                     // Do not allow sliding upward if we're walking or jumping on land.
                     if(newPosition.z() >= swimlevel && !isFlying)
                         newVelocity.z() = std::min(newVelocity.z(), std::max(velocity.z(), 0.0f));
-                    
+
                     // check for colliding with acute convex corners; handling of acute crevices
                     if ((numTimesSlid > 0 && lastSlideNormal * virtualNormal <= 0.001f) || (numTimesSlid > 1 && lastSlideFallbackNormal * virtualNormal <= 0.001f))
                     {
                         // if we've already done crevice detection this it's probably stuck
                         if(numTimesSlidFallback > 1)
                             break;
-                        
+
                         // if we've already slid we should pick the best last normal to use
                         osg::Vec3f bestNormal = lastSlideNormal;
                         float product_older = 1;
                         float product_newer = 1;
                         float product_cross = 1;
                         float product_best = 1;
-                        
+
                         product_older = lastSlideNormal * virtualNormal;
                         product_best = product_older;
                         // if we've done this before and the third-most-recent collision normal isn't too similar to our current collision normal we might need to check for a three-sided pit
@@ -510,7 +510,7 @@ namespace MWPhysics
                             // otherwise constrain our direction to that of the acute seam
                             osg::Vec3 constraintVector = bestNormal ^ virtualNormal;
                             constraintVector.normalize();
-                            
+
                             if(constraintVector.length2() > 0) // only if it's not zero length
                             {
                                 newVelocity = project(velocity, constraintVector);
@@ -518,15 +518,15 @@ namespace MWPhysics
                             }
                         }
                     }
-                    
+
                     // Break if our velocity hardly changed (?)
                     //if ((newVelocity-velocity).length2() < 0.01)
                     //    break;
-                    
+
                     // Break if our velocity got fully deflected
                     if (physicActor->getOnGround() && !physicActor->getOnSlope() && (newVelocity * origVelocity) <= 0.0f)
                         break;
-                    
+
                     numTimesSlid += 1;
                     lastSlideFallbackNormal = lastSlideNormal;
                     lastSlideNormal = virtualNormal;
@@ -556,14 +556,14 @@ namespace MWPhysics
 
                     isOnGround = true;
                     isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
-                    
+
                     // note: ground can't be an actor so no need to pick safety margin
                     if(tracer.mFraction*groundDistance > sSafetyMargin)
                     {
                         newPosition = tracer.mEndPos;
                         newPosition.z() += sSafetyMargin;
                     }
-                    
+
                     // safely eject from ground (only if it's walkable; if it's unwalkable this makes us glide up it for a bit before gravity kicks back in)
                     if (!isFlying && !isOnSlope)
                     {
