@@ -103,6 +103,33 @@ You will probably find it helpful to be able to preview any documentation you've
 
 Now in order to generate the documentation on your computer to preview them, just click the green play button in the top right, next to the drop down menu with the name you chose above selected. Sphinx will run and you can view the resulting documentation wherever you chose Output to be, above. The window that Sphinx runs in will also show any errors that occur during the build in red, which should help you find typos and missing/incorrect syntax.
 
+GitLab integration in PyCharm
+=============================
+
+As most of the hosting of OpenMW has moved to Gitlab, we should encourage the use of GitLab, though GitHub will continue to be supported.
+
+Add a couple of plugins to Pycharm - see general instructions at https://www.jetbrains.com/help/pycharm/installing-updating-and-uninstalling-repository-plugins.html
+
+For Linux/Windows - (Macos is a little different)
+
+1. File/Settings/Plugins 
+2. Browse Repositories
+3. Filter with “GitLab”
+4. Install “GitLab Integration Plugin”, 
+5. Follow the accompanying instructions to register your GitLab account (after restarting PyCharm) - File/Settings/Other Settings/Gitlab Integration
+6. Install “GitLab Projects”
+
+Within your account on GitLab
+
+1. Fork OpenMW if you haven’t already done so
+2. Select Settings from the dropdown box in your Avatar (top right)
+3. Select Access Tokens from the list on the left 
+4. Enter a name for application that will use it – say “PyCharm”
+5. Set an expiry date
+6. Check  the “api” box
+7. Create the token, and use it to complete the setup of the "GitLab Integration Plugin" above.
+
+
 Sample PR
 =========
 
