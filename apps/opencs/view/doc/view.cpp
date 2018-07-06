@@ -101,15 +101,39 @@ void CSVDoc::View::setupFileMenu()
     file->addAction(exit);
 }
 
+namespace
+{
+
+    void updateUndoRedoAction(QAction *action, const std::string &settingsKey)
+    {
+        QKeySequence seq;
+        CSMPrefs::State::get().getShortcutManager().getSequence(settingsKey, seq);
+        action->setShortcut(seq);
+    }
+
+}
+
+void CSVDoc::View::undoActionChanged()
+{
+    updateUndoRedoAction(mUndo, "document-edit-undo");
+}
+
+void CSVDoc::View::redoActionChanged()
+{
+    updateUndoRedoAction(mRedo, "document-edit-redo");
+}
+
 void CSVDoc::View::setupEditMenu()
 {
     QMenu *edit = menuBar()->addMenu (tr ("Edit"));
 
     mUndo = mDocument->getUndoStack().createUndoAction (this, tr("Undo"));
     setupShortcut("document-edit-undo", mUndo);
+    connect(mUndo, SIGNAL (changed ()), this, SLOT (undoActionChanged ()));
     edit->addAction (mUndo);
 
-    mRedo= mDocument->getUndoStack().createRedoAction (this, tr("Redo"));
+    mRedo = mDocument->getUndoStack().createRedoAction (this, tr("Redo"));
+    connect(mRedo, SIGNAL (changed ()), this, SLOT (redoActionChanged ()));
     setupShortcut("document-edit-redo", mRedo);
     edit->addAction (mRedo);
 

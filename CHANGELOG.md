@@ -55,7 +55,8 @@
     Bug #4475: Scripted animations should not cause movement
     Bug #4479: "Game" category on Advanced page is getting too long
     Bug #4480: Segfalt in QuickKeysMenu when item no longer in inventory
-    Feature #2606: Implemented (optional) case sensitive global search
+    Bug #4110: Fixed undo / redo menu text losing the assigned shortcuts
+    Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #3641: Editor: Limit FPS in 3d preview window
     Feature #4222: 360° screenshots

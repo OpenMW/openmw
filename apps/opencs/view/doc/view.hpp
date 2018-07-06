@@ -152,6 +152,10 @@ namespace CSVDoc
 
             void settingChanged (const CSMPrefs::Setting *setting);
 
+            void undoActionChanged();
+
+            void redoActionChanged();
+
             void newView();
 
             void save();
