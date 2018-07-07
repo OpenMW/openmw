@@ -61,8 +61,15 @@ void CSVRender::TerrainTextureSelection::update()
     if (!landData)
         return;
 
-    const auto geometry = static_cast<const osg::Geometry*>(mGeode->getDrawable(0));
     osg::ref_ptr<osg::Geometry> newGeometry = new osg::Geometry();
+
+    // Color
+    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array{};
+    colors->push_back(osg::Vec4f(0.f, 0.5f, 0.f, 1.f));
+
+    newGeometry->setColorArray(colors, osg::Array::Binding::BIND_OVERALL);
+
+    newGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::Values::OFF);
 
     const osg::ref_ptr<osg::Vec3Array> vertices (new osg::Vec3Array);
 
@@ -111,7 +118,6 @@ void CSVRender::TerrainTextureSelection::update()
     const auto drawArrays = new osg::DrawArrays(osg::PrimitiveSet::LINES);
 
     drawArrays->setCount(vertices->size());
-    drawArrays->dirty();
 
     newGeometry->addPrimitiveSet(drawArrays);
 
