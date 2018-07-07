@@ -6,11 +6,11 @@
 #include <components/bullethelpers/operators.hpp>
 #include <components/osghelpers/operators.hpp>
 
-#include <atomic>
 #include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <mutex>
 #include <sstream>
 #include <string>
@@ -33,36 +33,64 @@ namespace DetourNavigator
                       << std::chrono::duration_cast<float_s>(value.time_since_epoch()).count();
     }
 
-    class Log
+    struct Sink
+    {
+        virtual ~Sink() = default;
+        virtual void write(const std::string& text) = 0;
+    };
+
+    class FileSink final : public Sink
     {
     public:
-        Log()
-            : mEnabled()
+        FileSink(std::string path)
+            : mPath(std::move(path))
         {
             mFile.exceptions(std::ios::failbit | std::ios::badbit);
         }
 
-        void setEnabled(bool value)
+        void write(const std::string& text) override
         {
-            mEnabled = value;
+            if (!mFile.is_open())
+            {
+                mFile.open(mPath);
+            }
+            mFile << text << std::flush;
+        }
+
+    private:
+        std::string mPath;
+        std::ofstream mFile;
+    };
+
+    class StdoutSink final : public Sink
+    {
+    public:
+        void write(const std::string& text) override
+        {
+            std::cout << text << std::flush;
+        }
+    };
+
+    class Log
+    {
+    public:
+        void setSink(std::unique_ptr<Sink> sink)
+        {
+            const std::lock_guard<std::mutex> guard(mMutex);
+            mSink = std::move(sink);
         }
 
         bool isEnabled() const
         {
-            return mEnabled;
+            const std::lock_guard<std::mutex> guard(mMutex);
+            return bool(mSink);
         }
 
         void write(const std::string& text)
         {
-            if (mEnabled)
-            {
-                const std::lock_guard<std::mutex> lock(mMutex);
-                if (!mFile.is_open())
-                {
-                    mFile.open("detournavigator.log");
-                }
-                mFile << text << std::flush;
-            }
+            const std::lock_guard<std::mutex> guard(mMutex);
+            if (mSink)
+                mSink->write(text);
         }
 
         static Log& instance()
@@ -72,9 +100,8 @@ namespace DetourNavigator
         }
 
     private:
-        std::mutex mMutex;
-        std::ofstream mFile;
-        std::atomic_bool mEnabled;
+        mutable std::mutex mMutex;
+        std::unique_ptr<Sink> mSink;
     };
 
     inline void write(std::ostream& stream)

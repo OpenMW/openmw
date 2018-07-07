@@ -193,7 +193,9 @@ namespace MWWorld
         navigatorSettings.mNavMeshPathPrefix = Settings::Manager::getString("nav mesh path prefix", "Navigator");
         navigatorSettings.mEnableRecastMeshFileNameRevision = Settings::Manager::getBool("enable recast mesh file name revision", "Navigator");
         navigatorSettings.mEnableNavMeshFileNameRevision = Settings::Manager::getBool("enable nav mesh file name revision", "Navigator");
-        DetourNavigator::Log::instance().setEnabled(Settings::Manager::getBool("enable log", "Navigator"));
+        if (Settings::Manager::getBool("enable log", "Navigator"))
+            DetourNavigator::Log::instance().setSink(std::unique_ptr<DetourNavigator::FileSink>(
+                new DetourNavigator::FileSink(Settings::Manager::getString("log path", "Navigator"))));
         mNavigator.reset(new DetourNavigator::Navigator(navigatorSettings));
 
         mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath, *mNavigator));
