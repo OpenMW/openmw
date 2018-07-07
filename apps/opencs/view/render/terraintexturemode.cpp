@@ -163,6 +163,10 @@ bool CSVRender::TerrainTextureMode::primarySelectStartDrag (const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
     mDragMode = InteractionType_PrimarySelect;
+    if (!hit.hit) {
+        mDragMode = InteractionType_None;
+        return false;
+    }
     getPagedWorldspaceWidget().selectTerrain(TerrainSelectionType::Texture, hit);
     return false;
 }
@@ -171,6 +175,10 @@ bool CSVRender::TerrainTextureMode::secondarySelectStartDrag (const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
     mDragMode = InteractionType_SecondarySelect;
+    if (!hit.hit) {
+        mDragMode = InteractionType_None;
+        return false;
+    }
     getPagedWorldspaceWidget().onlyAddSelectTerrain(TerrainSelectionType::Texture, hit);
     return false;
 }
@@ -194,13 +202,13 @@ void CSVRender::TerrainTextureMode::drag (const QPoint& pos, int diffX, int diff
     if (mDragMode == InteractionType_PrimarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        getPagedWorldspaceWidget().selectTerrain(TerrainSelectionType::Texture, hit);
+        if (!hit.hit) {} else getPagedWorldspaceWidget().selectTerrain(TerrainSelectionType::Texture, hit);
     }
 
     if (mDragMode == InteractionType_SecondarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        getPagedWorldspaceWidget().onlyAddSelectTerrain(TerrainSelectionType::Texture, hit);
+        if (!hit.hit) {} else getPagedWorldspaceWidget().onlyAddSelectTerrain(TerrainSelectionType::Texture, hit);
     }
 }
 
