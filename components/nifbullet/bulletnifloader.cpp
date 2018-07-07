@@ -131,16 +131,14 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
 
 // Find a boundingBox in the node hierarchy.
 // Return: use bounding box for collision?
-bool BulletNifLoader::findBoundingBox(const Nif::Node* node, int flags)
+bool BulletNifLoader::findBoundingBox(const Nif::Node* node)
 {
-    flags |= node->flags;
-
     if (node->hasBounds)
     {
         mShape->mCollisionBoxHalfExtents = node->boundXYZ;
         mShape->mCollisionBoxTranslate = node->boundPos;
 
-        if (flags & Nif::NiNode::Flag_BBoxCollision)
+        if (node->flags & Nif::NiNode::Flag_BBoxCollision)
         {
             return true;
         }
