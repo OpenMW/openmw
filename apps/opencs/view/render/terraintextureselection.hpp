@@ -25,7 +25,7 @@ namespace CSVRender
         private:
 
             osg::ref_ptr<osg::Geode> mGeode;
-            Container mSelection;
+            std::vector<std::pair<int, int>> mSelection;
     };
 }
 

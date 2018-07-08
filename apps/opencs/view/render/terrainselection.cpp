@@ -62,7 +62,7 @@ void CSVRender::TerrainSelection::deactivate()
     mParentNode->removeChild(mBaseNode);
 }
 
-CSVRender::TerrainSelection::TerrainPos CSVRender::TerrainSelection::toTextureCoords(osg::Vec3d worldPos) const
+std::pair<int, int> CSVRender::TerrainSelection::toTextureCoords(osg::Vec3d worldPos) const
 {
     const auto x = static_cast<int>(std::floor(toCellCoords(worldPos).first));
     const auto y = static_cast<int>(std::floor(toCellCoords(worldPos).second));
@@ -70,7 +70,7 @@ CSVRender::TerrainSelection::TerrainPos CSVRender::TerrainSelection::toTextureCo
     return std::make_pair(x, y);
 }
 
-CSVRender::TerrainSelection::TerrainPos CSVRender::TerrainSelection::toVertexCoords(osg::Vec3d worldPos) const
+std::pair<int, int> CSVRender::TerrainSelection::toVertexCoords(osg::Vec3d worldPos) const
 {
     const auto x = static_cast<int>(std::floor(toCellCoords(worldPos).first + 0.5));
     const auto y = static_cast<int>(std::floor(toCellCoords(worldPos).second + 0.5));
