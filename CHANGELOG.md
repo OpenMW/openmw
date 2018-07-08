@@ -22,6 +22,7 @@
     Bug #3997: Almalexia doesn't pace
     Bug #4036: Weird behaviour of AI packages if package target has non-unique ID
     Bug #4047: OpenMW not reporting its version number in MacOS; OpenMW-CS not doing it fully
+    Bug #4110: Fixed undo / redo menu text losing the assigned shortcuts
     Bug #4125: OpenMW logo cropped on bugtracker
     Bug #4215: OpenMW shows book text after last EOL tag
     Bug #4221: Characters get stuck in V-shaped terrain
@@ -55,8 +56,9 @@
     Bug #4474: No fallback when getVampireHead fails
     Bug #4475: Scripted animations should not cause movement
     Bug #4479: "Game" category on Advanced page is getting too long
-    Bug #4480: Segfalt in QuickKeysMenu when item no longer in inventory
-    Bug #4110: Fixed undo / redo menu text losing the assigned shortcuts
+    Bug #4480: Segfault in QuickKeysMenu when item no longer in inventory
+    Bug #4489: Goodbye doesn't block dialogue hyperlinks
+    Bug #4490: PositionCell on player gives "Error: tried to add local script twice"
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #3641: Editor: Limit FPS in 3d preview window

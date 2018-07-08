@@ -1191,7 +1191,9 @@ namespace MWWorld
 
                     std::string script = newPtr.getClass().getScript(newPtr);
                     if (!script.empty())
+                    {
                         mLocalScripts.add(script, newPtr);
+                    }
                     addContainerScripts(newPtr, newCell);
                 }
                 else if (!newCellActive && currCellActive)
