@@ -1,7 +1,9 @@
 find_package(GTest REQUIRED)
+find_package(GMock REQUIRED)
 
-if (GTEST_FOUND)
+if (GTEST_FOUND AND GMOCK_FOUND)
     include_directories(SYSTEM ${GTEST_INCLUDE_DIRS})
+    include_directories(SYSTEM ${GMOCK_INCLUDE_DIRS})
 
     file(GLOB UNITTEST_SRC_FILES
         ../openmw/mwworld/store.cpp
@@ -19,11 +21,9 @@ if (GTEST_FOUND)
 
     openmw_add_executable(openmw_test_suite openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
 
-    target_link_libraries(openmw_test_suite ${GTEST_BOTH_LIBRARIES} components)
+    target_link_libraries(openmw_test_suite ${GMOCK_LIBRARIES} components)
     # Fix for not visible pthreads functions for linker with glibc 2.15
     if (UNIX AND NOT APPLE)
         target_link_libraries(openmw_test_suite ${CMAKE_THREAD_LIBS_INIT})
     endif()
 endif()
-
-
