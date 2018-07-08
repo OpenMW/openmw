@@ -20,6 +20,7 @@ namespace CSVRender
             void deselect() override;
 
             void update() override;
+            int calculateLandHeight(int x, int y);
 
         private:
 
