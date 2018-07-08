@@ -50,9 +50,6 @@ namespace CSVRender
 
         protected:
 
-            using TerrainPos = std::pair<int, int>;
-            using Container = std::vector<TerrainPos>;
-
             // these functions need better names
             virtual void addToSelection(osg::Vec3d worldPos) = 0;
             virtual void toggleSelection(osg::Vec3d worldPos) = 0;
@@ -60,8 +57,8 @@ namespace CSVRender
 
             virtual void update() = 0;
 
-            TerrainPos toTextureCoords(osg::Vec3d worldPos) const;
-            TerrainPos toVertexCoords(osg::Vec3d worldPos) const;
+            std::pair<int, int> toTextureCoords(osg::Vec3d worldPos) const;
+            std::pair<int, int> toVertexCoords(osg::Vec3d worldPos) const;
 
             const ESM::Land::LandData* getLandData() const;
             const osg::ref_ptr<osg::PositionAttitudeTransform>& getBaseNode() const;

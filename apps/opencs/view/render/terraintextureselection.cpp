@@ -30,7 +30,7 @@ CSVRender::TerrainTextureSelection::TerrainTextureSelection(osg::Group* parentNo
 
 void CSVRender::TerrainTextureSelection::addToSelection(osg::Vec3d worldPos)
 {
-    const TerrainPos localPos {toTextureCoords(worldPos)};
+    const std::pair<int, int> localPos {toTextureCoords(worldPos)};
 
     if (std::find(mSelection.begin(), mSelection.end(), localPos) == mSelection.end())
         mSelection.push_back(localPos);
@@ -38,7 +38,7 @@ void CSVRender::TerrainTextureSelection::addToSelection(osg::Vec3d worldPos)
 
 void CSVRender::TerrainTextureSelection::toggleSelection(osg::Vec3d worldPos)
 {
-    const TerrainPos localPos {toTextureCoords(worldPos)};
+    const std::pair<int, int> localPos {toTextureCoords(worldPos)};
     const auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
 
     if (iter != mSelection.end()) {
@@ -71,7 +71,7 @@ void CSVRender::TerrainTextureSelection::update()
     if (!mSelection.empty())
     {
 
-        for (TerrainPos localPos : mSelection) {
+        for (std::pair<int, int> localPos : mSelection) {
             int x {localPos.first};
             int y {localPos.second};
 
