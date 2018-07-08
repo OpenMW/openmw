@@ -1,8 +1,9 @@
+##################
 Reference Material
-==================
+##################
 
 .. toctree::
-    :maxdepth: 2
+	:maxdepth: 2
 
-    modding/index
-    documentationHowTo
+	modding/index
+	documentationHowTo

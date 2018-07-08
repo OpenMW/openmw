@@ -1,11 +1,9 @@
 Welcome to OpenMW's Documentation!
 ==================================
 
-Sections
---------
-
 .. toctree::
-    :maxdepth: 3
+	:caption: Table of Contents
+	:maxdepth: 3
 
-    manuals/index
-    reference/index
+	manuals/index
+	reference/index
