@@ -56,20 +56,20 @@ BulletNifLoader::~BulletNifLoader()
 {
 }
 
-osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::NIFFilePtr& nif)
+osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
 {
     mShape = new Resource::BulletShape;
 
     mCompoundShape = NULL;
     mStaticMesh = NULL;
 
-    if (nif->numRoots() < 1)
+    if (nif.numRoots() < 1)
     {
         warn("Found no root nodes in NIF.");
         return mShape;
     }
 
-    Nif::Record *r = nif->getRoot(0);
+    Nif::Record *r = nif.getRoot(0);
     assert(r != NULL);
 
     Nif::Node *node = dynamic_cast<Nif::Node*>(r);
@@ -96,14 +96,15 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::NIFFilePtr&
     {
         // files with the name convention xmodel.nif usually have keyframes stored in a separate file xmodel.kf (see Animation::addAnimSource).
         // assume all nodes in the file will be animated
-        const bool isAnimated = pathFileNameStartsWithX(nif->getFilename());
+        const auto filename = nif.getFilename();
+        const bool isAnimated = pathFileNameStartsWithX(filename);
 
         // If the mesh has RootCollisionNode, attached to actual root node, use it as collision mesh
         const Nif::Node* rootCollisionNode = getCollisionNode(node);
         if (rootCollisionNode)
-            handleNode(nif->getFilename(), rootCollisionNode, 0, false, isAnimated, false);
+            handleNode(filename, rootCollisionNode, 0, false, isAnimated, false);
         else
-            handleNode(nif->getFilename(), node, 0, true, isAnimated, true);
+            handleNode(filename, node, 0, true, isAnimated, true);
 
         if (mCompoundShape)
         {
