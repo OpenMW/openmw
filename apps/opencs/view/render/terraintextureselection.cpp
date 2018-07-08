@@ -56,11 +56,6 @@ void CSVRender::TerrainTextureSelection::deselect()
 
 void CSVRender::TerrainTextureSelection::update()
 {
-    const ESM::Land::LandData* landData {getLandData()};
-
-    if (!landData)
-        return;
-
     osg::ref_ptr<osg::Geometry> newGeometry = new osg::Geometry();
 
     // Color
@@ -91,24 +86,34 @@ void CSVRender::TerrainTextureSelection::update()
             const int nudgeOffset = (ESM::Land::REAL_SIZE / ESM::Land::LAND_TEXTURE_SIZE)/4;
             const int landHeightsNudge = (ESM::Land::REAL_SIZE / ESM::Land::LAND_SIZE)/64; // Does this work with all land size configurations?
 
+            int x1 = x * textureSizeToLandSizeModifier+landHeightsNudge;
+            int x2 = x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier + landHeightsNudge;
+            int y1 = y * textureSizeToLandSizeModifier - landHeightsNudge;
+            int y2 = y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier - landHeightsNudge;
+
+            int landHeightX1Y1 = calculateLandHeight(x1, y1),
+                landHeightX1Y2 = calculateLandHeight(x1, y2),
+                landHeightX2Y1 = calculateLandHeight(x2, y1),
+                landHeightX2Y2 = calculateLandHeight(x2, y2);
+
             if (north == mSelection.end()) {
-                vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, landData->mHeights[landIndex(x * textureSizeToLandSizeModifier+landHeightsNudge, y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier - landHeightsNudge)]+5));
-                vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier + landHeightsNudge, y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier - landHeightsNudge)]+5));
+                vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, landHeightX1Y2+5));
+                vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, landHeightX2Y2+5));
             }
 
             if (south == mSelection.end()) {
-                vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, toWorldCoords(y) - nudgeOffset, landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + landHeightsNudge, y * textureSizeToLandSizeModifier - landHeightsNudge)]+5));
-                vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, toWorldCoords(y) - nudgeOffset, landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier + landHeightsNudge, y * textureSizeToLandSizeModifier - landHeightsNudge)]+5));
+                vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, toWorldCoords(y) - nudgeOffset, landHeightX1Y1+5));
+                vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, toWorldCoords(y) - nudgeOffset, landHeightX2Y1+5));
             }
 
             if (east == mSelection.end()) {
-                vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, toWorldCoords(y) - nudgeOffset, landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier + landHeightsNudge, y * textureSizeToLandSizeModifier - landHeightsNudge)]+5));
-                vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier + landHeightsNudge, y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier - landHeightsNudge)]+5));
+                vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, toWorldCoords(y) - nudgeOffset, landHeightX2Y1+5));
+                vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, landHeightX2Y2+5));
             }
 
             if (west == mSelection.end()) {
-                vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, toWorldCoords(y) - nudgeOffset, landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + landHeightsNudge, y * textureSizeToLandSizeModifier - landHeightsNudge)]+5));
-                vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, landData->mHeights[landIndex(x * textureSizeToLandSizeModifier + landHeightsNudge, y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier - landHeightsNudge)]+5));
+                vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, toWorldCoords(y) - nudgeOffset, landHeightX1Y1+5));
+                vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, landHeightX1Y2+5));
             }
         }
     }
@@ -122,4 +127,41 @@ void CSVRender::TerrainTextureSelection::update()
     newGeometry->addPrimitiveSet(drawArrays);
 
     mGeode->setDrawable(0, newGeometry);
+}
+
+int CSVRender::TerrainTextureSelection::calculateLandHeight(int x, int y)
+{
+    const ESM::Land::LandData* landData (getLandData());
+
+    if (!landData)
+        return 250;
+
+    enum cellTargetType {thisCell, rightCell, upCell, upRightCell};
+    cellTargetType cellTarget = thisCell;
+
+    if (x > ESM::Land::LAND_SIZE - 1 && y < 0)
+    {
+        cellTarget = upRightCell;
+        x = x - ESM::Land::LAND_SIZE;
+        y = y + ESM::Land::LAND_SIZE;
+    }
+    if (x > ESM::Land::LAND_SIZE - 1)
+    {
+        cellTarget = rightCell;
+        x = x - ESM::Land::LAND_SIZE;
+    }
+    if (y < 0)
+    {
+        cellTarget = upCell;
+        y = y + ESM::Land::LAND_SIZE;
+    }
+
+    switch(cellTarget)
+    {
+        case thisCell : return landData->mHeights[landIndex(x,y)];
+        case rightCell : return landData->mHeights[landIndex(ESM::Land::LAND_SIZE-1,y)]; // TO-DO: Get height from neighbouring cell
+        case upCell: return landData->mHeights[landIndex(x,0)]; // TO-DO: Get height from neighbouring cell
+        case upRightCell: return landData->mHeights[landIndex(ESM::Land::LAND_SIZE-1,0)];; // TO-DO: Get height from neighbouring cell
+    }
+    return 0;
 }
