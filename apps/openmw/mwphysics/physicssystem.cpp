@@ -105,16 +105,14 @@ namespace MWPhysics
     static inline osg::Vec3f wallReject(const osg::Vec3f & velocity, osg::Vec3f & virtualNormal, const bool & onGround)
     {
         // slide across it - if it's coherent with the direction we're hitting it (i.e. we're hitting it from the front)
-        osg::Vec3f newVelocity = (virtualNormal * velocity <= 0.0f) ? reject(velocity, virtualNormal) : velocity;
         // if we're on the ground and it's too steep to walk and we'd be directed upwards from it, pretend it's a wall
-        if(onGround && !isWalkableSlope(virtualNormal) && newVelocity.z() < 0.0f)
+        if(onGround && !isWalkableSlope(virtualNormal))
         {
             std::cerr << "wallifying slope" << std::endl;
             virtualNormal.z() = 0;
             virtualNormal.normalize();
-            newVelocity = (virtualNormal * velocity <= 0.0f) ? reject(velocity, virtualNormal) : velocity;
         }
-        return newVelocity;
+        return (virtualNormal * velocity <= 0.0f) ? reject(velocity, virtualNormal) : velocity;
     }
 
 
