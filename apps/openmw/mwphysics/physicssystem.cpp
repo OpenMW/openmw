@@ -58,7 +58,7 @@ namespace MWPhysics
     static const float sMinStep = 10.0f; // hack to skip over tiny unwalkable slopes
     static const float sGroundOffset = 1.0f;
     static const float sSafetyMargin = 0.01f;
-    static const float sActorSafetyMargin = 0.02f;
+    static const float sActorSafetyMargin = 0.02f; // makes it harder to shove actors by running/jumping into them
 
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
@@ -100,6 +100,21 @@ namespace MWPhysics
             return sActorSafetyMargin;
         else
             return sSafetyMargin;
+    }
+
+    static inline osg::Vec3f wallReject(const osg::Vec3f & velocity, osg::Vec3f & virtualNormal, const bool & onGround)
+    {
+        // slide across it - if it's coherent with the direction we're hitting it (i.e. we're hitting it from the front)
+        osg::Vec3f newVelocity = (virtualNormal * velocity <= 0.0f) ? reject(velocity, virtualNormal) : velocity;
+        // if we're on the ground and it's too steep to walk and we'd be directed upwards from it, pretend it's a wall
+        if(onGround && !isWalkableSlope(virtualNormal) && newVelocity.z() < 0.0f)
+        {
+            std::cerr << "wallifying slope" << std::endl;
+            virtualNormal.z() = 0;
+            virtualNormal.normalize();
+            newVelocity = (virtualNormal * velocity <= 0.0f) ? reject(velocity, virtualNormal) : velocity;
+        }
+        return newVelocity;
     }
 
 
@@ -223,6 +238,11 @@ namespace MWPhysics
                 return false;
             }
 
+            if(mTracer.mHitObject)
+            {
+                auto virtualNormal = mTracer.mPlaneNormal;
+                velocity = wallReject(velocity, virtualNormal, onGround);
+            }
             velocity = reject(velocity, mDownStepper.mPlaneNormal);
 
             position = tracerDest + osg::Vec3f(0.0f, 0.0f, -downDistance);
@@ -441,6 +461,7 @@ namespace MWPhysics
                     auto moveDistance = normVelocity.normalize();
 
                     // Stairstepping failed, need to advance to and slide across whatever we hit
+                    //std::cerr << "stairstepping failed" << std::endl;
 
                     float traceMargin = pickSafetyMargin(tracer.mHitObject);
                     // advance if distance greater than safety margin
@@ -460,35 +481,38 @@ namespace MWPhysics
                     remainingTime *= 1.0f-tracer.mFraction;
                     // slide across it
                     auto virtualNormal = tracer.mPlaneNormal;
-                    // if we're on the ground and it's too steep to walk, pretend it's a wall
-                    if(physicActor->getOnGround() && !physicActor->getOnSlope() && !isWalkableSlope(virtualNormal))
-                    {
-                        virtualNormal.z() = 0;
-                        virtualNormal.normalize();
-                    }
-                    // okay, actually slide across it - if it's coherent with the direction we're hitting it (i.e. we're hitting it from the front)
-                    osg::Vec3f newVelocity = (virtualNormal * velocity <= 0.0f) ? reject(velocity, virtualNormal) : velocity;
+                    // note:modifies virtualNormal if necessary
+                    osg::Vec3f newVelocity = wallReject(velocity, virtualNormal, physicActor->getOnGround() && !physicActor->getOnSlope());
+
                     // eject from whatever we hit, along the normal of contact
                     // (this makes it so that numerical instability doesn't render the motion-directional safety margin moot when hugging walls)
                     auto testPosition = newPosition + virtualNormal*traceMargin*2;
                     ActorTracer tempTracer;
                     tempTracer.doTrace(colobj, newPosition, testPosition, collisionWorld);
-                    if(tempTracer.mFraction > 0.5f) // distance to any object is greater than traceMargin (we checked traceMargin*2 distance)
+                    if(tempTracer.mHitObject)
                     {
-                        auto effectiveFraction = tempTracer.mFraction*2.0f - 1.0f;
-                        newPosition += virtualNormal*traceMargin*effectiveFraction;
+                        float otherMargin = pickSafetyMargin(tempTracer.mHitObject);
+                        float hitDistance = tempTracer.mFraction*traceMargin*2;
+                        hitDistance -= otherMargin;
+                        if(hitDistance > 0.0f)
+                            newPosition += virtualNormal*hitDistance;
                     }
+                    else
+                        newPosition += virtualNormal*traceMargin;
 
                     // Do not allow sliding upward if we're walking or jumping on land.
                     if(newPosition.z() >= swimlevel && !isFlying)
                         newVelocity.z() = std::min(newVelocity.z(), std::max(velocity.z(), 0.0f));
 
                     // check for colliding with acute convex corners; handling of acute crevices
-                    if ((numTimesSlid > 0 && lastSlideNormal * virtualNormal <= 0.001f) || (numTimesSlid > 1 && lastSlideFallbackNormal * virtualNormal <= 0.001f))
+                    if ((numTimesSlid > 0 && lastSlideNormal * virtualNormal <= 0.0f) || (numTimesSlid > 1 && lastSlideFallbackNormal * virtualNormal <= 0.0f))
                     {
                         // if we've already done crevice detection this it's probably stuck
                         if(numTimesSlidFallback > 1)
+                        {
+                            //std::cerr << "fallback failure" << std::endl;
                             break;
+                        }
 
                         // if we've already slid we should pick the best last normal to use
                         osg::Vec3f bestNormal = lastSlideNormal;
@@ -505,17 +529,20 @@ namespace MWPhysics
                             product_newer = lastSlideFallbackNormal * virtualNormal;
                             product_cross = lastSlideFallbackNormal * lastSlideNormal;
                             // check for all three being acute or right angled; if they are, it's definitely a three-sided pit, we should bail early
-                            if(product_older <= 0.001f && product_newer <= 0.001f && product_cross <= 0.001f)
+                            if(product_older <= 0.0f && product_newer <= 0.0f && product_cross <= 0.0f)
+                            {
+                                //std::cerr << "pit" << std::endl;
                                 break;
+                            }
                             // otherwise we don't care about product_cross
-                            if (product_newer <= 0.001f && product_newer <= product_older)
+                            if (product_newer <= 0.0f && product_newer <= product_older)
                             {
                                 bestNormal = lastSlideFallbackNormal;
                                 product_best = product_newer;
                             }
                         }
                         // note: the algorithm above only works in very simple cases, for very complex acute pits the solver will run out of iterations instead
-                        if(product_best <= 0.001f)
+                        if(product_best <= 0.0f)
                         {
                             // otherwise constrain our direction to that of the acute seam
                             osg::Vec3 constraintVector = bestNormal ^ virtualNormal;
@@ -535,7 +562,10 @@ namespace MWPhysics
 
                     // Break if our velocity got fully deflected
                     if (physicActor->getOnGround() && !physicActor->getOnSlope() && (newVelocity * origVelocity) <= 0.0f)
+                    {
+                        //std::cerr << "deflection" << std::endl;
                         break;
+                    }
 
                     numTimesSlid += 1;
                     lastSlideFallbackNormal = lastSlideNormal;
@@ -543,6 +573,8 @@ namespace MWPhysics
 
                     velocity = newVelocity;
                 }
+                //if(iterations == sMaxIterations-1)
+                    //std::cerr << "iterations" << std::endl;
             }
 
             bool isOnGround = false;
