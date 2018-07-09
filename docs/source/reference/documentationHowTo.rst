@@ -12,6 +12,32 @@ The premise of this guide is that you would like to help out the OpenMW project 
 
 *However*, as much as I will try to guide you through all the tedious setup and day-to-day stuff, you will eventually have to learn to write using ReST (reStructuredText) formatting. Since you're probably like me when I started helping and don't know wtf ReST is, never fear. It's an incredibly simple language that is easy to read in plain text form that can then be converted automatically into different types of documents like PDFs and html for webpages.
 
+Baby Steps
+==========
+
+Create an account on GitLab (https://gitlab.com), and sign in.
+(Github probably works too, though some details will differ. More details later – maybe.)
+
+Go to the OpenMW project on GitLab (https://gitlab.com/OpenMW/openmw)
+Navigate to whatever documentation you want to tackle.
+Choose Repository and Files in the menu on the left, then docs and source in the tree in the centre.
+
+Don’t overlook the tutorial-style-guide.txt there for some tips to get you started.
+
+Open whichever file you want to tackle – probably within the manuals or reference directories.
+There’s also a dropdown box to the right of edit, at the top of the left menu, which offers options such as new file or directory, or upload file, with “+” to close that dropdown box.
+
+Click on "Edit" towards top right which will reveal the underlying version, rather than the version displayed to normal reaaders. Use "Write" and "Preview" to switch between the two views.
+
+When you have made the appropriate changes, and checked them in Preview mode, click the Green "Commit changes" button at the bottom.
+This should add a branch, with a default name such as patch-1, to your own repository, and add a Merge Request to the main OpenMW Project.
+
+[More details on the commit and review process]
+
+Changes between submission and acceptance of the Merge Request - just make them in your branch, then press the Commit button there.
+
+Going Deeper
+============
 So here's what you're gonna be learning how to set up:
 
 1.	`GitHub`_
