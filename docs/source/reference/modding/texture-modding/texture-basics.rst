@@ -23,7 +23,7 @@ To plug in a normal map, you name the normal map as the diffuse texture but with
 
 .. note::
 	While the original Morrowind engine does support the loading of a BumpTexture slot in the NIF, it will not display it as a normal map. Morrowind Code Patch (MCP) added a way to hack normal maps into the engine by first enabling the engine to load the BumpTexture slot as an environment map and then turn down the brightness of the environment map. This will imitate how a real normal map shader would display a normal map, but it will not look exactly the same.
-	OpenMW uses standard normal mapping, which achieve much better results.
+	OpenMW uses standard normal mapping, which achieves much better results.
 	Unfortunately, this difference can result in incompatibilities.
 	Some mods
 	(e.g. `Redoran Bump Mapped <http://www.nexusmods.com/morrowind/mods/42406/?>`_)
