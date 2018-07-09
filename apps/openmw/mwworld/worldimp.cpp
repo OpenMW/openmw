@@ -1166,7 +1166,10 @@ namespace MWWorld
             if (isPlayer)
             {
                 if (!newCell->isExterior())
+                {
                     changeToInteriorCell(Misc::StringUtils::lowerCase(newCell->getCell()->mName), pos, false);
+                    removeContainerScripts(getPlayerPtr());
+                }
                 else
                 {
                     if (mWorldScene->isCellActive(*newCell))
@@ -1187,7 +1190,8 @@ namespace MWWorld
                     mWorldScene->addObjectToScene(newPtr);
 
                     std::string script = newPtr.getClass().getScript(newPtr);
-                    if (!script.empty()) {
+                    if (!script.empty())
+                    {
                         mLocalScripts.add(script, newPtr);
                     }
                     addContainerScripts(newPtr, newCell);
