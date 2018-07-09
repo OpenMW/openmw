@@ -29,7 +29,7 @@ CS::Editor::Editor (int argc, char **argv)
 {    
     // install the crash handler as soon as possible. note that the log path
     // does not depend on config being read.
-    cc_install(argc, argv, (mCfgMgr.getLogPath() / "openmw-cs-crash.log").string());
+    crashCatcherInstall(argc, argv, (mCfgMgr.getLogPath() / "openmw-cs-crash.log").string());
 
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 

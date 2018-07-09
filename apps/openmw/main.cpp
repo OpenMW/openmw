@@ -328,7 +328,7 @@ int main(int argc, char**argv)
         std::cerr.rdbuf (&cerrsb);
 #endif
 
-        cc_install(argc, argv, (cfgMgr.getLogPath() / "crash.log").string());
+        crashCatcherInstall(argc, argv, (cfgMgr.getLogPath() / "crash.log").string());
 
 #ifdef __APPLE__
         boost::filesystem::path binary_path = boost::filesystem::system_complete(boost::filesystem::path(argv[0]));

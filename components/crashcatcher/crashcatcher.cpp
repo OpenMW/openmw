@@ -406,7 +406,7 @@ static void crash_handler(const char *logfile)
     exit(0);
 }
 
-int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, const char *logfile, int (*user_info)(char*, char*))
+int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *signals, const char *logfile, int (*user_info)(char*, char*))
 {
     struct sigaction sa;
     stack_t altss;
@@ -474,12 +474,12 @@ static bool is_debugger_present()
     return false;
 }
 
-void cc_install(int argc, char **argv, const std::string &crashLogPath)
+void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath)
 {
     if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_present())
     {
         int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
-        if (cc_install_handlers(argc, argv, 5, s, crashLogPath.c_str(), NULL) == -1)
+        if (crashCatcherInstallHandlers(argc, argv, 5, s, crashLogPath.c_str(), NULL) == -1)
         {
             std::cerr << "Installing crash handler failed" << std::endl;
         } else

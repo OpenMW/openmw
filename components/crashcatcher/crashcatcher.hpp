@@ -10,9 +10,9 @@
 #endif
 
 #if USE_CRASH_CATCHER
-extern void cc_install(int argc, char **argv, const std::string &crashLogPath);
+extern void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath);
 #else
-inline void cc_install(int, char **) { return 0; }
+inline void crashCatcherInstall(int, char **, const std::string &crashLogPath) { return 0; }
 #endif
 
 #endif
