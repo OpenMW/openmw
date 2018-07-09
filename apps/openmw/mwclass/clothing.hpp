@@ -65,8 +65,7 @@ namespace MWClass
             ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that.
             ///  Second item in the pair specifies the error message
 
-            virtual std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
-                const;
+            virtual std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const;
             ///< Generate action for using via inventory menu
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;

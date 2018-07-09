@@ -53,8 +53,7 @@ namespace MWClass
 
             virtual std::pair<int, std::string> canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const;
 
-            virtual std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
-                const;
+            virtual std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const;
             ///< Generate action for using via inventory menu
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;

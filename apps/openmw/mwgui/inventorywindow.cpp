@@ -25,7 +25,7 @@
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/action.hpp"
+#include "../mwworld/actionequip.hpp"
 #include "../mwscript/interpretercontext.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
@@ -474,7 +474,7 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Inventory);
     }
 
-    void InventoryWindow::useItem(const MWWorld::Ptr &ptr)
+    void InventoryWindow::useItem(const MWWorld::Ptr &ptr, bool force)
     {
         const std::string& script = ptr.getClass().getScript(ptr);
 
@@ -483,12 +483,23 @@ namespace MWGui
         // early-out for items that need to be equipped, but can't be equipped: we don't want to set OnPcEquip in that case
         if (!ptr.getClass().getEquipmentSlots(ptr).first.empty())
         {
-            std::pair<int, std::string> canEquip = ptr.getClass().canBeEquipped(ptr, player);
-            if (canEquip.first == 0)
+            if (ptr.getClass().hasItemHealth(ptr) && ptr.getCellRef().getCharge() == 0)
             {
-                MWBase::Environment::get().getWindowManager()->messageBox(canEquip.second);
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage1}");
                 updateItemView();
                 return;
+            }
+
+            if (!force)
+            {
+                std::pair<int, std::string> canEquip = ptr.getClass().canBeEquipped(ptr, player);
+
+                if (canEquip.first == 0)
+                {
+                    MWBase::Environment::get().getWindowManager()->messageBox(canEquip.second);
+                    updateItemView();
+                    return;
+                }
             }
         }
 
@@ -512,9 +523,8 @@ namespace MWGui
         {
             if (script.empty() || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 0)
             {
-                std::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
-
-                action->execute (player);
+                std::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
+                action->execute(player);
             }
             else
                 mSkippedToEquip = ptr;

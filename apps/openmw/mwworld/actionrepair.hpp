@@ -7,10 +7,13 @@ namespace MWWorld
 {
     class ActionRepair : public Action
     {
-            virtual void executeImp (const Ptr& actor);
+        bool mForce;
+
+        virtual void executeImp (const Ptr& actor);
 
     public:
-        ActionRepair(const MWWorld::Ptr& item);
+        /// @param item repair hammer
+        ActionRepair(const Ptr& item, bool force=false);
     };
 }
 

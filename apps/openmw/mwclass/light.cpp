@@ -186,9 +186,9 @@ namespace MWClass
         return Class::showsInInventory(ptr);
     }
 
-    std::shared_ptr<MWWorld::Action> Light::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Light::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
+        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
 
         action->setSound(getUpSoundId(ptr));
 

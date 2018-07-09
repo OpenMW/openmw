@@ -36,8 +36,7 @@ namespace MWClass
             virtual int getValue (const MWWorld::ConstPtr& ptr) const;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
-            virtual std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
-                const;
+            virtual std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const;
             ///< Generate action for using via inventory menu
             
             static void registerSelf();

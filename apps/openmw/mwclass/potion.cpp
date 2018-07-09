@@ -139,7 +139,7 @@ namespace MWClass
         return info;
     }
 
-    std::shared_ptr<MWWorld::Action> Potion::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Potion::use (const MWWorld::Ptr& ptr, bool force) const
     {
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
