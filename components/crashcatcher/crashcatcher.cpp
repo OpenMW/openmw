@@ -14,7 +14,11 @@
 #include <stdbool.h>
 #include <sys/ptrace.h>
 
-#include <string>
+#include <iostream>
+
+#include <boost/filesystem/fstream.hpp>
+
+namespace bfs = boost::filesystem;
 
 #include <SDL_messagebox.h>
 
@@ -402,7 +406,7 @@ static void crash_handler(const char *logfile)
     exit(0);
 }
 
-int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, const char *logfile, int (*user_info)(char*, char*))
+int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *signals, const char *logfile, int (*user_info)(char*, char*))
 {
     struct sigaction sa;
     stack_t altss;
@@ -454,19 +458,31 @@ int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, co
     return retval;
 }
 
-
-// gdb apparently opens FD(s) 3,4,5 (whereas a typical prog uses only stdin=0, stdout=1,stderr=2)
-bool
-is_debugger_attached(void)
+static bool is_debugger_present()
 {
-    bool rc = false;
-    FILE *fd = fopen("/tmp", "r");
-
-    if (fileno(fd) > 5)
+    bfs::ifstream file((bfs::path("/proc/self/status")));
+    while (!file.eof())
     {
-        rc = true;
+        std::string word;
+        file >> word;
+        if (word == "TracerPid:")
+        {
+            file >> word;
+            return word != "0";
+        }
     }
+    return false;
+}
 
-    fclose(fd);
-    return rc;
+void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath)
+{
+    if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_present())
+    {
+        int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
+        if (crashCatcherInstallHandlers(argc, argv, 5, s, crashLogPath.c_str(), NULL) == -1)
+        {
+            std::cerr << "Installing crash handler failed" << std::endl;
+        } else
+            std::cout << "Crash handler installed" << std::endl;
+    }
 }

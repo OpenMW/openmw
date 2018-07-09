@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <components/version/version.hpp>
+#include <components/crashcatcher/crashcatcher.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/escape.hpp>
 #include <components/fallback/validate.hpp>
@@ -22,18 +23,6 @@
 
 #if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
 #include <unistd.h>
-#endif
-
-#if (defined(__APPLE__) || (defined(__linux)  &&  !defined(ANDROID)) || (defined(__unix) &&  !defined(ANDROID)) || defined(__posix))
-    #define USE_CRASH_CATCHER 1
-#else
-    #define USE_CRASH_CATCHER 0
-#endif
-
-#if USE_CRASH_CATCHER
-#include <csignal>
-extern int cc_install_handlers(int argc, char **argv, int num_signals, int *sigs, const char *logfile, int (*user_info)(char*, char*));
-extern int is_debugger_attached(void);
 #endif
 
 /**
@@ -339,18 +328,7 @@ int main(int argc, char**argv)
         std::cerr.rdbuf (&cerrsb);
 #endif
 
-
-#if USE_CRASH_CATCHER
-        // Unix crash catcher
-        if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_attached())
-        {
-            int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
-            cc_install_handlers(argc, argv, 5, s, (cfgMgr.getLogPath() / "crash.log").string().c_str(), NULL);
-            std::cout << "Installing crash catcher" << std::endl;
-        }
-        else
-            std::cout << "Running in a debugger, not installing crash catcher" << std::endl;
-#endif
+        crashCatcherInstall(argc, argv, (cfgMgr.getLogPath() / "crash.log").string());
 
 #ifdef __APPLE__
         boost::filesystem::path binary_path = boost::filesystem::system_complete(boost::filesystem::path(argv[0]));

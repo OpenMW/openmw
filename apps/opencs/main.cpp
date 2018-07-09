@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     #endif
 
     try
-    {
+    {           
         // To allow background thread drawing in OSG
         QApplication::setAttribute(Qt::AA_X11InitThreads, true);
 
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
         application.setWindowIcon (QIcon (":./openmw-cs.png"));
 
-        CS::Editor editor;
+        CS::Editor editor(argc, argv);
 
         if(!editor.makeIPCServer())
         {
