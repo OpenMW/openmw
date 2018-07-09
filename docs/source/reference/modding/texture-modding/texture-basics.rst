@@ -19,13 +19,11 @@ OpenMW automatically uses shaders for objects with these mapping techniques.
 Normal Mapping
 ##############
 
-To plug in a normal map, you can edit the NIF mesh file(s) using NifSkope
-and assign the normal map texture to the BumpTexture slot in the NiTexturingProperty.
+To plug in a normal map, you name the normal map as the diffuse texture but with a specified suffix after. OpenMW will then recognise the file and load it as a normal map, provided you have set up your settings file correctly. See the section `Automatic use`_ further down below for detailed information.
 
 .. note::
-	While the original Morrowind engine does support the BumpTexture slot,
-	it uses a strange form of normal mapping that applies to an environment map.
-	OpenMW uses standard normal mapping, which can achieve much better results.
+	While the original Morrowind engine does support the loading of a BumpTexture slot in the NIF, it will not display it as a normal map. Morrowind Code Patch (MCP) added a way to hack normal maps into the engine by first enabling the engine to load the BumpTexture slot as an environment map and then turn down the brightness of the environment map. This will imitate how a real normal map shader would display a normal map, but it will not look exactly the same.
+	OpenMW uses standard normal mapping, which achieve much better results.
 	Unfortunately, this difference can result in incompatibilities.
 	Some mods
 	(e.g. `Redoran Bump Mapped <http://www.nexusmods.com/morrowind/mods/42406/?>`_)
