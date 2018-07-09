@@ -610,10 +610,10 @@ if (WIN32)
     endif()
 
     if (BUILD_OPENMW)
-        # Release builds use the debug console
-        set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
-        set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
-        set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
+        # Release builds don't use the debug console
+        set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
+        set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_WINDOWS")
+        set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
     endif()
 
     # Play a bit with the warning levels
@@ -642,9 +642,11 @@ if (WIN32)
 
         # caused by boost
         4191 # 'type cast' : unsafe conversion (1.56, thread_primitives.hpp, normally off)
+        5032 # detected #pragma warning(push) with no corresponding #pragma warning(pop)
 
         # caused by MyGUI
         4275 # non dll-interface class 'std::exception' used as base for dll-interface class 'MyGUI::Exception'
+        4297 # function assumed not to throw an exception but does
 
         # OpenMW specific warnings
         4099 # Type mismatch, declared class or struct is defined with other type
