@@ -370,6 +370,10 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
                 {
                     jumpmask = MWRender::Animation::BlendMask_LowerBody;
                     jumpAnimName = "jump";
+
+                    // For crossbow animations use 1h ones as fallback
+                    if (mWeaponType == WeapType_Crossbow)
+                        jumpAnimName += "1h";
                 }
             }
         }
@@ -423,6 +427,10 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
                 {
                     movemask = MWRender::Animation::BlendMask_LowerBody;
                     movementAnimName = movestate->groupname;
+
+                    // For crossbow animations use 1h ones as fallback
+                    if (mWeaponType == WeapType_Crossbow)
+                        movementAnimName += "1h";
                 }
             }
 
@@ -1627,16 +1635,18 @@ bool CharacterController::updateWeaponState()
                 break;
         }
 
+        // Note: apply reload animations only for upper body since blending with movement animations can give weird result.
+        // Especially noticable with crossbow reload animation.
         if(!start.empty())
         {
             mAnimation->disable(mCurrentWeapon);
             if (mUpperBodyState == UpperCharState_FollowStartToFollowStop)
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_All, true,
+                                 MWRender::Animation::BlendMask_UpperBody, true,
                                  weapSpeed, start, stop, 0.0f, 0);
             else
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_All, false,
+                                 MWRender::Animation::BlendMask_UpperBody, false,
                                  weapSpeed, start, stop, 0.0f, 0);
         }
     }
