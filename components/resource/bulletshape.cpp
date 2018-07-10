@@ -13,12 +13,14 @@ namespace Resource
 
 BulletShape::BulletShape()
     : mCollisionShape(nullptr)
+    , mAvoidCollisionShape(nullptr)
 {
 
 }
 
 BulletShape::BulletShape(const BulletShape &copy, const osg::CopyOp &copyop)
     : mCollisionShape(duplicateCollisionShape(copy.mCollisionShape))
+    , mAvoidCollisionShape(duplicateCollisionShape(copy.mAvoidCollisionShape))
     , mCollisionBoxHalfExtents(copy.mCollisionBoxHalfExtents)
     , mCollisionBoxTranslate(copy.mCollisionBoxTranslate)
     , mAnimatedShapes(copy.mAnimatedShapes)
@@ -27,6 +29,7 @@ BulletShape::BulletShape(const BulletShape &copy, const osg::CopyOp &copyop)
 
 BulletShape::~BulletShape()
 {
+    deleteShape(mAvoidCollisionShape);
     deleteShape(mCollisionShape);
 }
 
@@ -82,6 +85,11 @@ btCollisionShape *BulletShape::getCollisionShape()
     return mCollisionShape;
 }
 
+btCollisionShape *BulletShape::getAvoidCollisionShape()
+{
+    return mAvoidCollisionShape;
+}
+
 osg::ref_ptr<BulletShapeInstance> BulletShape::makeInstance() const
 {
     osg::ref_ptr<BulletShapeInstance> instance (new BulletShapeInstance(this));
@@ -99,6 +107,9 @@ BulletShapeInstance::BulletShapeInstance(osg::ref_ptr<const BulletShape> source)
 
     if (source->mCollisionShape)
         mCollisionShape = duplicateCollisionShape(source->mCollisionShape);
+
+    if (source->mAvoidCollisionShape)
+        mAvoidCollisionShape = duplicateCollisionShape(source->mAvoidCollisionShape);
 }
 
 }

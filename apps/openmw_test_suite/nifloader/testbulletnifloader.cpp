@@ -142,6 +142,7 @@ namespace Resource
     static bool operator ==(const Resource::BulletShape& lhs, const Resource::BulletShape& rhs)
     {
         return compareObjects(lhs.mCollisionShape, rhs.mCollisionShape)
+            && compareObjects(lhs.mAvoidCollisionShape, rhs.mAvoidCollisionShape)
             && lhs.mCollisionBoxHalfExtents == rhs.mCollisionBoxHalfExtents
             && lhs.mCollisionBoxTranslate == rhs.mCollisionBoxTranslate
             && lhs.mAnimatedShapes == rhs.mAnimatedShapes;
@@ -151,6 +152,7 @@ namespace Resource
     {
         return stream << "Resource::BulletShape {"
             << value.mCollisionShape << ", "
+            << value.mAvoidCollisionShape << ", "
             << value.mCollisionBoxHalfExtents << ", "
             << value.mAnimatedShapes
             << "}";
@@ -837,7 +839,10 @@ namespace
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
         const auto result = mLoader.load(mNifFile);
 
+        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
+        triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
+        expected.mAvoidCollisionShape = new Resource::TriangleMeshShape(triangles.release(), false);
 
         EXPECT_EQ(*result, expected);
     }

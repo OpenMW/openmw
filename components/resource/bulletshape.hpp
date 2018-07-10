@@ -25,6 +25,7 @@ namespace Resource
         META_Object(Resource, BulletShape)
 
         btCollisionShape* mCollisionShape;
+        btCollisionShape* mAvoidCollisionShape;
 
         // Used for actors. Note, ideally actors would use a separate loader - as it is
         // we have to keep a redundant copy of the actor model around in mCollisionShape, which isn't used.
@@ -43,6 +44,8 @@ namespace Resource
         btCollisionShape* duplicateCollisionShape(const btCollisionShape* shape) const;
 
         btCollisionShape* getCollisionShape();
+
+        btCollisionShape* getAvoidCollisionShape();
 
     private:
 
