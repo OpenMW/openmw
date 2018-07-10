@@ -80,7 +80,7 @@ namespace MWGui
 
         for (int i=0; i<ESM::Skill::Length; ++i)
         {
-            int value = npcStats.getSkill (i).getBase ();
+            int value = npcStats.getSkill (i).getModified ();
 
             skills.push_back(std::make_pair(i, value));
         }
