@@ -624,7 +624,8 @@ if (WIN32)
         # Warnings that aren't enabled normally and don't need to be enabled
         # They're unneeded and sometimes completely retarded warnings that /Wall enables
         # Not going to bother commenting them as they tend to warn on every standard library file
-        4061 4263 4264 4266 4350 4371 4435 4514 4548 4571 4610 4619 4623 4625 4626 4628 4640 4668 4710 4711 4820 4826 4917 4946
+        4061 4263 4264 4266 4350 4371 4435 4514 4548 4571 4610 4619 4623 4625 
+        4626 4628 4640 4668 4710 4711 4768 4820 4826 4917 4946 5032 5039 5045
 
         # Warnings that are thrown on standard libraries and not OpenMW
         4347 # Non-template function with same name and parameter count as template function
@@ -642,7 +643,6 @@ if (WIN32)
 
         # caused by boost
         4191 # 'type cast' : unsafe conversion (1.56, thread_primitives.hpp, normally off)
-        5032 # detected #pragma warning(push) with no corresponding #pragma warning(pop)
 
         # caused by MyGUI
         4275 # non dll-interface class 'std::exception' used as base for dll-interface class 'MyGUI::Exception'
