@@ -874,7 +874,6 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
 {
     std::vector<std::pair<std::time_t, boost::filesystem::path>> contentFiles;
     std::string baseGameFile("Game Files:GameFile");
-    std::string gameFile("");
     std::time_t defaultTime = 0;
     ToUTF8::Utf8Encoder encoder(mEncoding);
 
@@ -890,7 +889,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
     multistrmap::const_iterator it = ini.begin();
     for (int i=0; it != ini.end(); i++)
     {
-        gameFile = baseGameFile;
+        std::string gameFile = baseGameFile;
         gameFile.append(std::to_string(i));
 
         it = ini.find(gameFile);
