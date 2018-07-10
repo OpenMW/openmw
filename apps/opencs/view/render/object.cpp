@@ -372,10 +372,10 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
                 indices[j] -= VertexCount;
         }
 
-        size_t offset = i * IndicesPerSegment;
+        size_t elementOffset = i * IndicesPerSegment;
         for (size_t j = 0; j < IndicesPerSegment; ++j)
         {
-            primitives->setElement(offset++, indices[IndexPattern[j]]);
+            primitives->setElement(elementOffset++, indices[IndexPattern[j]]);
         }
     }
 

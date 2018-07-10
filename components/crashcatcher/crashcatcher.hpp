@@ -12,7 +12,9 @@
 #if USE_CRASH_CATCHER
 extern void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath);
 #else
-inline void crashCatcherInstall(int, char **, const std::string &crashLogPath) { return 0; }
+inline void crashCatcherInstall(int, char **, const std::string &crashLogPath)
+{
+}
 #endif
 
 #endif

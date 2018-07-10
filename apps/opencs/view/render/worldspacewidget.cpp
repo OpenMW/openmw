@@ -651,7 +651,6 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 
             if (mDragMode == InteractionType_PrimaryEdit)
             {
-                EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
                 editMode.drag (event->pos(), mDragX, mDragY, mDragFactor); // note: terraintexturemode only uses pos
             }
         }
