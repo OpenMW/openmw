@@ -47,8 +47,8 @@ namespace NifBullet
 {
 
 BulletNifLoader::BulletNifLoader()
-    : mCompoundShape(NULL)
-    , mStaticMesh(NULL)
+    : mCompoundShape()
+    , mStaticMesh()
 {
 }
 
@@ -84,10 +84,11 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
     {
         std::unique_ptr<btCompoundShape> compound (new btCompoundShape);
 
-        btBoxShape* boxShape = new btBoxShape(getbtVector(mShape->mCollisionBoxHalfExtents));
+        std::unique_ptr<btBoxShape> boxShape(new btBoxShape(getbtVector(mShape->mCollisionBoxHalfExtents)));
         btTransform transform = btTransform::getIdentity();
         transform.setOrigin(getbtVector(mShape->mCollisionBoxTranslate));
-        compound->addChildShape(transform, boxShape);
+        compound->addChildShape(transform, boxShape.get());
+        boxShape.release();
 
         mShape->mCollisionShape = compound.release();
         return mShape;
@@ -108,16 +109,20 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
 
         if (mCompoundShape)
         {
-            mShape->mCollisionShape = mCompoundShape;
             if (mStaticMesh)
             {
                 btTransform trans;
                 trans.setIdentity();
-                mCompoundShape->addChildShape(trans, new Resource::TriangleMeshShape(mStaticMesh,true));
+                mCompoundShape->addChildShape(trans, new Resource::TriangleMeshShape(mStaticMesh.get(), true));
+                mStaticMesh.release();
             }
+            mShape->mCollisionShape = mCompoundShape.release();
         }
         else if (mStaticMesh)
-            mShape->mCollisionShape = new Resource::TriangleMeshShape(mStaticMesh,true);
+        {
+            mShape->mCollisionShape = new Resource::TriangleMeshShape(mStaticMesh.get(), true);
+            mStaticMesh.release();
+        }
 
         return mShape;
     }
@@ -277,9 +282,9 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
     if (isAnimated)
     {
         if (!mCompoundShape)
-            mCompoundShape = new btCompoundShape();
+            mCompoundShape.reset(new btCompoundShape);
 
-        btTriangleMesh* childMesh = new btTriangleMesh();
+        std::unique_ptr<btTriangleMesh> childMesh(new btTriangleMesh);
 
         const Nif::NiTriShapeData *data = shape->data.getPtr();
 
@@ -297,7 +302,8 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
             childMesh->addTriangle(getbtVector(b1), getbtVector(b2), getbtVector(b3));
         }
 
-        Resource::TriangleMeshShape* childShape = new Resource::TriangleMeshShape(childMesh,true);
+        std::unique_ptr<Resource::TriangleMeshShape> childShape(new Resource::TriangleMeshShape(childMesh.get(), true));
+        childMesh.release();
 
         float scale = shape->trafo.scale;
         const Nif::Node* parent = shape;
@@ -314,12 +320,13 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
 
         mShape->mAnimatedShapes.insert(std::make_pair(shape->recIndex, mCompoundShape->getNumChildShapes()));
 
-        mCompoundShape->addChildShape(trans, childShape);
+        mCompoundShape->addChildShape(trans, childShape.get());
+        childShape.release();
     }
     else
     {
         if (!mStaticMesh)
-            mStaticMesh = new btTriangleMesh(false);
+            mStaticMesh.reset(new btTriangleMesh(false));
 
         // Static shape, just transform all vertices into position
         const Nif::NiTriShapeData *data = shape->data.getPtr();
