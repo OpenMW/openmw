@@ -596,7 +596,7 @@ namespace MWPhysics
 
                     isOnGround = true;
                     isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
-                    
+
                     if(!isFlying)
                     {
                         // note: ground can't be an actor so no need to pick safety margin
