@@ -143,6 +143,7 @@ Programmers
     Rohit Nirmal
     Roman Melnik (Kromgart)
     Roman Proskuryakov (kpp)
+    Roman Siromakha (elsid)
     Sandy Carter (bwrsandman)
     Scott Howard
     scrawl
