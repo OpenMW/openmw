@@ -10,6 +10,8 @@
 #include <osgViewer/Viewer>
 #include <osgViewer/Renderer>
 
+#include <components/myguiplatform/myguidatamanager.hpp>
+
 namespace Resource
 {
 
@@ -19,7 +21,7 @@ StatsHandler::StatsHandler():
     _statsType(false),
     _statsWidth(1280.0f),
     _statsHeight(1024.0f),
-    _font("fonts/arial.ttf"),
+    _font(""),
     _characterSize(20.0f)
 {
     _camera = new osg::Camera;
@@ -28,6 +30,15 @@ StatsHandler::StatsHandler():
     _camera->setProjectionResizePolicy(osg::Camera::FIXED);
 
     _resourceStatsChildNum = 0;
+
+    _font = osgMyGUI::DataManager::getInstance().getDataPath("DejaVuLGCSansMono.ttf");
+}
+
+Profiler::Profiler()
+{
+    _font = osgMyGUI::DataManager::getInstance().getDataPath("DejaVuLGCSansMono.ttf");
+
+    setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
 }
 
 bool StatsHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa)
@@ -77,7 +88,6 @@ void StatsHandler::setWindowSize(int width, int height)
     {
         _camera->setProjectionMatrix(osg::Matrix::ortho2D(0.0,_statsWidth,_statsHeight-height*_statsWidth/width,_statsHeight));
     }
-
 }
 
 void StatsHandler::toggle(osgViewer::ViewerBase *viewer)

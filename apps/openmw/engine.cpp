@@ -637,27 +637,18 @@ void OMW::Engine::go()
 
     std::cout << "OSG version: " << osgGetVersion() << std::endl;
 
-    mViewer = new osgViewer::Viewer;
-    mViewer->setReleaseContextAtEndOfFrameHint(false);
-
-    osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
-    statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
-
-    statshandler->addUserStatsLine("Script", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
-                                   "script_time_taken", 1000.0, true, false, "script_time_begin", "script_time_end", 10000);
-    statshandler->addUserStatsLine("Mechanics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
-                                   "mechanics_time_taken", 1000.0, true, false, "mechanics_time_begin", "mechanics_time_end", 10000);
-    statshandler->addUserStatsLine("Physics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
-                                   "physics_time_taken", 1000.0, true, false, "physics_time_begin", "physics_time_end", 10000);
-
-    mViewer->addEventHandler(statshandler);
-
-    mViewer->addEventHandler(new Resource::StatsHandler);
-
+    // Load settings
     Settings::Manager settings;
     std::string settingspath;
-
     settingspath = loadSettings (settings);
+
+    // Create encoder
+    ToUTF8::Utf8Encoder encoder (mEncoding);
+    mEncoder = &encoder;
+
+    // Setup viewer
+    mViewer = new osgViewer::Viewer;
+    mViewer->setReleaseContextAtEndOfFrameHint(false);
 
     mScreenCaptureOperation = new WriteScreenshotToFileOperation(mCfgMgr.getUserDataPath().string(),
         Settings::Manager::getString("screenshot format", "General"));
@@ -668,12 +659,24 @@ void OMW::Engine::go()
 
     mEnvironment.setFrameRateLimit(Settings::Manager::getFloat("framerate limit", "Video"));
 
-    // Create encoder
-    ToUTF8::Utf8Encoder encoder (mEncoding);
-    mEncoder = &encoder;
-
     prepareEngine (settings);
 
+    // Setup profiler
+    osg::ref_ptr<Resource::Profiler> statshandler = new Resource::Profiler;
+
+    statshandler->addUserStatsLine("Script", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+                                   "script_time_taken", 1000.0, true, false, "script_time_begin", "script_time_end", 10000);
+    statshandler->addUserStatsLine("Mechanics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+                                   "mechanics_time_taken", 1000.0, true, false, "mechanics_time_begin", "mechanics_time_end", 10000);
+    statshandler->addUserStatsLine("Physics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+                                   "physics_time_taken", 1000.0, true, false, "physics_time_begin", "physics_time_end", 10000);
+
+    mViewer->addEventHandler(statshandler);
+
+    osg::ref_ptr<Resource::StatsHandler> resourceshandler = new Resource::StatsHandler;
+    mViewer->addEventHandler(resourceshandler);
+
+    // Start the game
     if (!mSaveGameFile.empty())
     {
         mEnvironment.getStateManager()->loadGame(mSaveGameFile);
