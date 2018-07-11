@@ -65,7 +65,6 @@
     Bug #4495: Crossbow animations blending is buggy
     Bug #4496: SpellTurnLeft and SpellTurnRight animation groups are unused
     Bug #4497: File names starting with x or X are not classified as animation
-    Bug #3249: Fixed revert function not updating views properly
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #3641: Editor: Limit FPS in 3d preview window
