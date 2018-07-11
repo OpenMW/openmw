@@ -50,8 +50,7 @@ namespace MWClass
             virtual std::string getInventoryIcon (const MWWorld::ConstPtr& ptr) const;
             ///< Return name of inventory icon.
 
-            virtual std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
-                const;
+            virtual std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const;
             ///< Generate action for using via inventory menu
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;

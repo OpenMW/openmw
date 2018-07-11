@@ -146,7 +146,7 @@ namespace MWBase
             virtual MWGui::TradeWindow* getTradeWindow() = 0;
 
             /// Make the player use an item, while updating GUI state accordingly
-            virtual void useItem(const MWWorld::Ptr& item) = 0;
+            virtual void useItem(const MWWorld::Ptr& item, bool force=false) = 0;
 
             virtual void updateSpellWindow() = 0;
 

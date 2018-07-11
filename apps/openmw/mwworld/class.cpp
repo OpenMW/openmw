@@ -113,7 +113,7 @@ namespace MWWorld
         return std::shared_ptr<Action> (new NullAction);
     }
 
-    std::shared_ptr<Action> Class::use (const Ptr& ptr) const
+    std::shared_ptr<Action> Class::use (const Ptr& ptr, bool force) const
     {
         return std::shared_ptr<Action> (new NullAction);
     }

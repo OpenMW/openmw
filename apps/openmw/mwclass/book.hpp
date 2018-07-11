@@ -53,7 +53,7 @@ namespace MWClass
             virtual std::string applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
             ///< Creates a new record using \a ptr as template, with the given name and the given enchantment applied to it.
 
-            virtual std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr) const;
+            virtual std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr, bool force=false) const;
             ///< Generate action for using via inventory menu
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;

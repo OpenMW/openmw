@@ -149,9 +149,9 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    std::shared_ptr<MWWorld::Action> Repair::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Repair::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionRepair(ptr));
+        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionRepair(ptr, force));
     }
 
     bool Repair::canSell (const MWWorld::ConstPtr& item, int npcServices) const
