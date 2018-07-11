@@ -61,7 +61,8 @@
     Bug #4489: Goodbye doesn't block dialogue hyperlinks
     Bug #4490: PositionCell on player gives "Error: tried to add local script twice"
     Bug #4491: Training cap based off Base Skill instead of Modified Skill
-    Bug #4495: Crossbow animations blending is buggy    
+    Bug #4495: Crossbow animations blending is buggy
+    Bug #4496: SpellTurnLeft and SpellTurnRight animation groups are unused
     Bug #3249: Fixed revert function not updating views properly
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results

@@ -422,7 +422,10 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
             movementAnimName = movestate->groupname;
             if(weap != sWeaponTypeListEnd && movementAnimName.find("swim") == std::string::npos)
             {
-                movementAnimName += weap->shortgroup;
+                if (mWeaponType == WeapType_Spell && (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)) // Spellcasting stance turning is a special case
+                    movementAnimName = weap->shortgroup + movementAnimName;
+                else
+                    movementAnimName += weap->shortgroup;
                 if(!mAnimation->hasAnimation(movementAnimName))
                 {
                     movemask = MWRender::Animation::BlendMask_LowerBody;
