@@ -442,7 +442,7 @@ namespace MWPhysics
                 {
                     // Try to step up onto it.
                     // NOTE: step() is a proper procedure, it performs the stepping motion on its own if successful
-                    result = stepper.step(newPosition, velocity, velocity*remainingTime, remainingTime, physicActor->getOnGround() && !physicActor->getOnSlope(), noSlidingYet);
+                    result = stepper.step(newPosition, velocity, velocity*remainingTime, remainingTime, physicActor->getOnGround() && !physicActor->getOnSlope() && !isFlying, noSlidingYet);
                 }
                 noSlidingYet = false;
                 if (result)
@@ -450,7 +450,7 @@ namespace MWPhysics
                     // Prevents aquatic creatures from stairstepping onto land
                     if (ptr.getClass().isPureWaterCreature(ptr) && newPosition.z() + halfExtents.z() > waterlevel)
                         newPosition = oldPosition;
-                    else
+                    else if(!isFlying && position.z() >= swimlevel)
                         forceGroundTest = true;
                 }
                 else
@@ -467,7 +467,7 @@ namespace MWPhysics
                     {
                         // hack: if it is the case that we are on the ground and it's a steep unwalkable slope, stay even further away from it than normal
                         // this hides some of the movement solver's shortcomings
-                        if(physicActor->getOnGround() && !physicActor->getOnSlope()
+                        if(physicActor->getOnGround() && !physicActor->getOnSlope() && !isFlying
                             && (tracer.mPlaneNormal.x() != 0.0f || tracer.mPlaneNormal.y() != 0.0f)
                             && !isWalkableSlope(tracer.mPlaneNormal)
                             && moveDistance*tracer.mFraction > 0.2f+traceMargin)
@@ -479,8 +479,8 @@ namespace MWPhysics
                     remainingTime *= 1.0f-tracer.mFraction;
                     // slide across it
                     auto virtualNormal = tracer.mPlaneNormal;
-                    // note:modifies virtualNormal if necessary
-                    osg::Vec3f newVelocity = wallReject(velocity, virtualNormal, physicActor->getOnGround() && !physicActor->getOnSlope());
+                    // note: modifies virtualNormal if necessary
+                    osg::Vec3f newVelocity = wallReject(velocity, virtualNormal, physicActor->getOnGround() && !physicActor->getOnSlope() && !isFlying);
 
                     // eject from whatever we hit, along the normal of contact
                     // (this makes it so that numerical instability doesn't render the motion-directional safety margin moot when hugging walls)
@@ -559,7 +559,7 @@ namespace MWPhysics
                     //    break;
 
                     // Break if our velocity got fully deflected
-                    if (physicActor->getOnGround() && !physicActor->getOnSlope() && (newVelocity * origVelocity) <= 0.0f)
+                    if (physicActor->getOnGround() && !physicActor->getOnSlope() && !isFlying && (newVelocity * origVelocity) <= 0.0f)
                     {
                         //std::cerr << "deflection" << std::endl;
                         break;
@@ -596,24 +596,27 @@ namespace MWPhysics
 
                     isOnGround = true;
                     isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
-
-                    // note: ground can't be an actor so no need to pick safety margin
-                    if(tracer.mFraction*groundDistance > sSafetyMargin)
+                    
+                    if(!isFlying)
                     {
-                        newPosition = tracer.mEndPos;
-                        newPosition.z() += sSafetyMargin;
-                    }
+                        // note: ground can't be an actor so no need to pick safety margin
+                        if(tracer.mFraction*groundDistance > sSafetyMargin)
+                        {
+                            newPosition = tracer.mEndPos;
+                            newPosition.z() += sSafetyMargin;
+                        }
 
-                    // safely eject from ground (only if it's walkable; if it's unwalkable this makes us glide up it for a bit before gravity kicks back in)
-                    if (!isFlying && !isOnSlope)
-                    {
-                        from = tracer.mEndPos;
-                        to = tracer.mEndPos + osg::Vec3f(0, 0, sGroundOffset);
-                        tracer.doTrace(colobj, from, to, collisionWorld);
-                        if(!tracer.mHitObject)
-                            newPosition.z() = tracer.mEndPos.z();
-                        else if(tracer.mFraction*sGroundOffset > sSafetyMargin)
-                            newPosition.z() += tracer.mFraction*sGroundOffset - sSafetyMargin;
+                        // safely eject from ground (only if it's walkable; if it's unwalkable this makes us glide up it for a bit before gravity kicks back in)
+                        if (!isFlying && !isOnSlope)
+                        {
+                            from = tracer.mEndPos;
+                            to = tracer.mEndPos + osg::Vec3f(0, 0, sGroundOffset);
+                            tracer.doTrace(colobj, from, to, collisionWorld);
+                            if(!tracer.mHitObject)
+                                newPosition.z() = tracer.mEndPos.z();
+                            else if(tracer.mFraction*sGroundOffset > sSafetyMargin)
+                                newPosition.z() += tracer.mFraction*sGroundOffset - sSafetyMargin;
+                        }
                     }
                 }
                 else
