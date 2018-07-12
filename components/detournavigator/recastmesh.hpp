@@ -15,7 +15,8 @@ namespace DetourNavigator
     class RecastMesh
     {
     public:
-        RecastMesh(std::vector<int> indices, std::vector<float> vertices, const Settings& settings);
+        RecastMesh(std::vector<int> indices, std::vector<float> vertices,
+                   std::vector<unsigned char> flags, const Settings& settings);
 
         const std::vector<int>& getIndices() const
         {
@@ -25,6 +26,11 @@ namespace DetourNavigator
         const std::vector<float>& getVertices() const
         {
             return mVertices;
+        }
+
+        const std::vector<unsigned char>& getFlags() const
+        {
+            return mFlags;
         }
 
         std::size_t getVerticesCount() const
@@ -55,6 +61,7 @@ namespace DetourNavigator
     private:
         std::vector<int> mIndices;
         std::vector<float> mVertices;
+        std::vector<unsigned char> mFlags;
         ChunkyTriMesh mChunkyTriMesh;
         osg::Vec3f mBoundsMin;
         osg::Vec3f mBoundsMax;

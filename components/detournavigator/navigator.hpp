@@ -8,6 +8,17 @@
 
 namespace DetourNavigator
 {
+    struct ObjectShapes
+    {
+        const btCollisionShape& mShape;
+        const btCollisionShape* mAvoid;
+
+        ObjectShapes(const btCollisionShape& shape, const btCollisionShape* avoid)
+            : mShape(shape), mAvoid(avoid)
+        {
+        }
+    };
+
     class Navigator
     {
     public:
@@ -19,7 +30,11 @@ namespace DetourNavigator
 
         bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
 
+        bool addObject(std::size_t id, const ObjectShapes& shapes, const btTransform& transform);
+
         bool updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
+
+        bool updateObject(std::size_t id, const ObjectShapes& shapes, const btTransform& transform);
 
         bool removeObject(std::size_t id);
 
@@ -44,6 +59,9 @@ namespace DetourNavigator
         Settings mSettings;
         NavMeshManager mNavMeshManager;
         std::map<osg::Vec3f, std::size_t> mAgents;
+        std::unordered_map<std::size_t, std::size_t> mAvoidIds;
+
+        void updateAvoidShapeId(std::size_t id, std::size_t avoidId);
     };
 }
 

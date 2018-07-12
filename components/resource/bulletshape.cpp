@@ -80,14 +80,21 @@ btCollisionShape* BulletShape::duplicateCollisionShape(const btCollisionShape *s
     throw std::logic_error(std::string("Unhandled Bullet shape duplication: ")+shape->getName());
 }
 
-btCollisionShape *BulletShape::getCollisionShape()
+btCollisionShape *BulletShape::getCollisionShape() const
 {
     return mCollisionShape;
 }
 
-btCollisionShape *BulletShape::getAvoidCollisionShape()
+btCollisionShape *BulletShape::getAvoidCollisionShape() const
 {
     return mAvoidCollisionShape;
+}
+
+void BulletShape::setLocalScaling(const btVector3& scale)
+{
+    mCollisionShape->setLocalScaling(scale);
+    if (mAvoidCollisionShape)
+        mAvoidCollisionShape->setLocalScaling(scale);
 }
 
 osg::ref_ptr<BulletShapeInstance> BulletShape::makeInstance() const

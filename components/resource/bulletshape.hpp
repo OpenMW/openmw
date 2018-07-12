@@ -43,9 +43,11 @@ namespace Resource
 
         btCollisionShape* duplicateCollisionShape(const btCollisionShape* shape) const;
 
-        btCollisionShape* getCollisionShape();
+        btCollisionShape* getCollisionShape() const;
 
-        btCollisionShape* getAvoidCollisionShape();
+        btCollisionShape* getAvoidCollisionShape() const;
+
+        void setLocalScaling(const btVector3& scale);
 
     private:
 

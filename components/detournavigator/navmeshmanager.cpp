@@ -29,20 +29,21 @@ namespace DetourNavigator
         : mSettings(settings)
         , mRecastMeshManager(settings)
         , mAsyncNavMeshUpdater(settings, mRecastMeshManager)
-    {
-    }
+    {}
 
-    bool NavMeshManager::addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
+    bool NavMeshManager::addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform,
+                                   const unsigned char flags)
     {
-        if (!mRecastMeshManager.addObject(id, shape, transform))
+        if (!mRecastMeshManager.addObject(id, shape, transform, flags))
             return false;
         addChangedTiles(shape, transform, ChangeType::add);
         return true;
     }
 
-    bool NavMeshManager::updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
+    bool NavMeshManager::updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform,
+                                      const unsigned char flags)
     {
-        if (!mRecastMeshManager.updateObject(id, transform))
+        if (!mRecastMeshManager.updateObject(id, transform, flags))
             return false;
         addChangedTiles(shape, transform, ChangeType::mixed);
         return true;

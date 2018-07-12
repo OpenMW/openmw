@@ -26,41 +26,47 @@ namespace
 
     TEST_F(DetourNavigatorRecastMeshObjectTest, constructed_object_should_have_shape_and_transform)
     {
-        const RecastMeshObject object(mBoxShape, mTransform);
+        const RecastMeshObject object(mBoxShape, mTransform, 1);
         EXPECT_EQ(std::addressof(object.getShape()), std::addressof(mBoxShape));
         EXPECT_EQ(object.getTransform(), mTransform);
     }
 
     TEST_F(DetourNavigatorRecastMeshObjectTest, update_with_same_transform_for_not_compound_shape_should_return_false)
     {
-        RecastMeshObject object(mBoxShape, mTransform);
-        EXPECT_FALSE(object.update(mTransform));
+        RecastMeshObject object(mBoxShape, mTransform, 1);
+        EXPECT_FALSE(object.update(mTransform, 1));
     }
 
     TEST_F(DetourNavigatorRecastMeshObjectTest, update_with_different_transform_should_return_true)
     {
-        RecastMeshObject object(mBoxShape, mTransform);
-        EXPECT_TRUE(object.update(btTransform::getIdentity()));
+        RecastMeshObject object(mBoxShape, mTransform, 1);
+        EXPECT_TRUE(object.update(btTransform::getIdentity(), 1));
+    }
+
+    TEST_F(DetourNavigatorRecastMeshObjectTest, update_with_different_flags_should_return_true)
+    {
+        RecastMeshObject object(mBoxShape, mTransform, 1);
+        EXPECT_TRUE(object.update(mTransform, 2));
     }
 
     TEST_F(DetourNavigatorRecastMeshObjectTest, update_for_compound_shape_with_same_transform_and_not_changed_child_transform_should_return_false)
     {
-        RecastMeshObject object(mCompoundShape, mTransform);
-        EXPECT_FALSE(object.update(mTransform));
+        RecastMeshObject object(mCompoundShape, mTransform, 1);
+        EXPECT_FALSE(object.update(mTransform, 1));
     }
 
     TEST_F(DetourNavigatorRecastMeshObjectTest, update_for_compound_shape_with_same_transform_and_changed_child_transform_should_return_true)
     {
-        RecastMeshObject object(mCompoundShape, mTransform);
+        RecastMeshObject object(mCompoundShape, mTransform, 1);
         mCompoundShape.updateChildTransform(0, btTransform::getIdentity());
-        EXPECT_TRUE(object.update(mTransform));
+        EXPECT_TRUE(object.update(mTransform, 1));
     }
 
     TEST_F(DetourNavigatorRecastMeshObjectTest, repeated_update_for_compound_shape_without_changes_should_return_false)
     {
-        RecastMeshObject object(mCompoundShape, mTransform);
+        RecastMeshObject object(mCompoundShape, mTransform, 1);
         mCompoundShape.updateChildTransform(0, btTransform::getIdentity());
-        object.update(mTransform);
-        EXPECT_FALSE(object.update(mTransform));
+        object.update(mTransform, 1);
+        EXPECT_FALSE(object.update(mTransform, 1));
     }
 }

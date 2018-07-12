@@ -23,9 +23,11 @@ namespace DetourNavigator
     public:
         NavMeshManager(const Settings& settings);
 
-        bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
+        bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform,
+                       const unsigned char flags);
 
-        bool updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
+        bool updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform,
+                          const unsigned char flags);
 
         bool removeObject(std::size_t id);
 

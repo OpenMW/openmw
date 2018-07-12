@@ -3,6 +3,7 @@
 #include <limits>
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+#include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 #include <components/debug/debuglog.hpp>
@@ -86,7 +87,11 @@ namespace
         if (const auto object = physics.getObject(ptr))
         {
             const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
-            navigator->addObject(reinterpret_cast<std::size_t>(object), *object->getCollisionObject()->getCollisionShape(),
+            const DetourNavigator::ObjectShapes shapes {
+                *object->getShapeInstance()->getCollisionShape(),
+                object->getShapeInstance()->getAvoidCollisionShape()
+            };
+            navigator->addObject(reinterpret_cast<std::size_t>(object), shapes,
                 object->getCollisionObject()->getWorldTransform());
         }
         else if (const auto actor = physics.getActor(ptr))

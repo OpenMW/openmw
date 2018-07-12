@@ -4,6 +4,7 @@
 #include <osg/ComputeBoundsVisitor>
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
+#include <BulletCollision/CollisionShapes/btCompoundShape.h>
 
 #include <components/debug/debuglog.hpp>
 
@@ -17,6 +18,7 @@
 
 #include <components/files/collections.hpp>
 
+#include <components/resource/bulletshape.hpp>
 #include <components/resource/resourcesystem.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -1544,8 +1546,11 @@ namespace MWWorld
         bool navigatorObjectsUpdated = false;
         mPhysics->forEachAnimatedObject([&] (const MWPhysics::Object* object)
         {
-            navigatorObjectsUpdated = mNavigator->updateObject(std::size_t(object),
-                    *object->getCollisionObject()->getCollisionShape(),
+            const DetourNavigator::ObjectShapes shapes {
+                *object->getShapeInstance()->getCollisionShape(),
+                object->getShapeInstance()->getAvoidCollisionShape()
+            };
+            navigatorObjectsUpdated = mNavigator->updateObject(std::size_t(object), shapes,
                     object->getCollisionObject()->getWorldTransform()) || navigatorObjectsUpdated;
         });
         if (navigatorObjectsUpdated)

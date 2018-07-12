@@ -14,9 +14,9 @@ namespace DetourNavigator
     class RecastMeshObject
     {
         public:
-            RecastMeshObject(const btCollisionShape& shape, const btTransform& transform);
+            RecastMeshObject(const btCollisionShape& shape, const btTransform& transform, const unsigned char flags);
 
-            bool update(const btTransform& transform);
+            bool update(const btTransform& transform, const unsigned char flags);
 
             const btCollisionShape& getShape() const
             {
@@ -28,17 +28,24 @@ namespace DetourNavigator
                 return mTransform;
             }
 
+            unsigned char getFlags() const
+            {
+                return mFlags;
+            }
+
         private:
             std::reference_wrapper<const btCollisionShape> mShape;
             btTransform mTransform;
+            unsigned char mFlags;
             std::vector<RecastMeshObject> mChildren;
 
-            static bool updateCompoundObject(const btCompoundShape& shape, std::vector<RecastMeshObject>& children);
+            static bool updateCompoundObject(const btCompoundShape& shape, const unsigned char flags,
+                std::vector<RecastMeshObject>& children);
     };
 
-    std::vector<RecastMeshObject> makeChildrenObjects(const btCollisionShape& shape);
+    std::vector<RecastMeshObject> makeChildrenObjects(const btCollisionShape& shape, const unsigned char flags);
 
-    std::vector<RecastMeshObject> makeChildrenObjects(const btCompoundShape& shape);
+    std::vector<RecastMeshObject> makeChildrenObjects(const btCompoundShape& shape, const unsigned char flags);
 }
 
 #endif

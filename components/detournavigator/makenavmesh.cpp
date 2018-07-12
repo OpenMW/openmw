@@ -129,6 +129,19 @@ namespace
                     areas.data()
                 );
 
+                for (std::size_t i = 0; i < chunk.mSize; ++i)
+                    areas[i] &= chunk.mFlags[i];
+
+                rcClearUnwalkableTriangles(
+                    &context,
+                    config.walkableSlopeAngle,
+                    recastMesh.getVertices().data(),
+                    static_cast<int>(recastMesh.getVerticesCount()),
+                    chunk.mIndices,
+                    static_cast<int>(chunk.mSize),
+                    areas.data()
+                );
+
                 OPENMW_CHECK_DT_RESULT(rcRasterizeTriangles(
                     &context,
                     recastMesh.getVertices().data(),

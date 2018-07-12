@@ -40,7 +40,7 @@ namespace MWPhysics
 
     void Object::setScale(float scale)
     {
-        mShapeInstance->getCollisionShape()->setLocalScaling(btVector3(scale,scale,scale));
+        mShapeInstance->setLocalScaling(btVector3(scale, scale, scale));
     }
 
     void Object::setRotation(const btQuaternion& quat)
