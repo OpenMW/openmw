@@ -2,6 +2,7 @@
 ------
 
     Bug #1990: Sunrise/sunset not set correct
+    Bug #2131: Lustidrike's spell misses the player every time
     Bug #2222: Fatigue's effect on selling price is backwards
     Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
     Bug #2455: Creatures attacks degrade armor
@@ -65,7 +66,9 @@
     Bug #4495: Crossbow animations blending is buggy
     Bug #4496: SpellTurnLeft and SpellTurnRight animation groups are unused
     Bug #4497: File names starting with x or X are not classified as animation
+    Bug #4503: Cast and ExplodeSpell commands increase alteration skill
     Feature #2606: Editor: Implemented (optional) case sensitive global search
+    Feature #3083: Play animation when NPC is casting spell via script
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #3641: Editor: Limit FPS in 3d preview window
     Feature #4222: 360° screenshots

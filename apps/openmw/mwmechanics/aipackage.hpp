@@ -49,7 +49,8 @@ namespace MWMechanics
                 TypeIdAvoidDoor = 7,
                 TypeIdFace = 8,
                 TypeIdBreathe = 9,
-                TypeIdInternalTravel = 10
+                TypeIdInternalTravel = 10,
+                TypeIdCast = 11
             };
 
             ///Default constructor

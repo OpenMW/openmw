@@ -77,6 +77,8 @@ namespace MWMechanics
             ///
             /// \note Ignored, if \a ptr is not a registered actor.
 
+            void castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell=false);
+
             void updateActor(const MWWorld::Ptr &old, const MWWorld::Ptr& ptr);
             ///< Updates an actor with a new Ptr
 
@@ -161,6 +163,7 @@ namespace MWMechanics
 
             void clear(); // Clear death counter
 
+            bool isCastingSpell(const MWWorld::Ptr& ptr) const;
             bool isReadyToBlock(const MWWorld::Ptr& ptr) const;
             bool isAttackingOrSpell(const MWWorld::Ptr& ptr) const;
 

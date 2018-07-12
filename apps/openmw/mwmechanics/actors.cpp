@@ -1157,6 +1157,13 @@ namespace MWMechanics
         }
     }
 
+    void Actors::castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell)
+    {
+        PtrActorMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+            iter->second->getCharacterController()->castSpell(spellId, manualSpell);
+    }
+
     bool Actors::isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer)
     {
         if (!actor.getClass().isActor())
@@ -1966,6 +1973,15 @@ namespace MWMechanics
             return false;
 
         return it->second->getCharacterController()->isReadyToBlock();
+    }
+
+    bool Actors::isCastingSpell(const MWWorld::Ptr &ptr) const
+    {
+        PtrActorMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+
+        return it->second->getCharacterController()->isCastingSpell();
     }
 
     bool Actors::isAttackingOrSpell(const MWWorld::Ptr& ptr) const

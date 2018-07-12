@@ -39,6 +39,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
 
+#include "aicombataction.hpp"
 #include "movement.hpp"
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
@@ -794,6 +795,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSecondsOfRunning(0)
     , mTurnAnimationThreshold(0)
     , mAttackingOrSpell(false)
+    , mCastingManualSpell(false)
     , mTimeUntilWake(0.f)
 {
     if(!mAnimation)
@@ -1007,7 +1009,8 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
              // the same animation for all range types, so there are 3 "release" keys on the same time, one for each range type.
              && evt.compare(off, len, mAttackType + " release") == 0)
     {
-        MWBase::Environment::get().getWorld()->castSpell(mPtr);
+        MWBase::Environment::get().getWorld()->castSpell(mPtr, mCastingManualSpell);
+        mCastingManualSpell = false;
     }
 
     else if (groupname == "shield" && evt.compare(off, len, "block hit") == 0)
@@ -1088,13 +1091,18 @@ bool CharacterController::updateCreatureState()
             if (weapType == WeapType_Spell)
             {
                 const std::string spellid = stats.getSpells().getSelectedSpell();
-                if (!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
+                bool canCast = mCastingManualSpell || MWBase::Environment::get().getWorld()->startSpellCast(mPtr);
+
+                if (!spellid.empty() && canCast)
                 {
-                    MWMechanics::CastSpell cast(mPtr, NULL);
+                    MWMechanics::CastSpell cast(mPtr, NULL, false, mCastingManualSpell);
                     cast.playSpellCastingEffects(spellid);
 
                     if (!mAnimation->hasAnimation("spellcast"))
-                        MWBase::Environment::get().getWorld()->castSpell(mPtr); // No "release" text key to use, so cast immediately
+                    {
+                        MWBase::Environment::get().getWorld()->castSpell(mPtr, mCastingManualSpell); // No "release" text key to use, so cast immediately
+                        mCastingManualSpell = false;
+                    }
                     else
                     {
                         const ESM::Spell *spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellid);
@@ -1367,10 +1375,11 @@ bool CharacterController::updateWeaponState()
                     stats.getSpells().setSelectedSpell(selectedSpell);
                 }
                 std::string spellid = stats.getSpells().getSelectedSpell();
+                bool canCast = mCastingManualSpell || MWBase::Environment::get().getWorld()->startSpellCast(mPtr);
 
-                if(!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
+                if(!spellid.empty() && canCast)
                 {
-                    MWMechanics::CastSpell cast(mPtr, NULL);
+                    MWMechanics::CastSpell cast(mPtr, NULL, false, mCastingManualSpell);
                     cast.playSpellCastingEffects(spellid);
 
                     const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
@@ -2377,6 +2386,11 @@ bool CharacterController::isAttackPrepairing() const
             mUpperBodyState == UpperCharState_MinAttackToMaxAttack;
 }
 
+bool CharacterController::isCastingSpell() const
+{
+    return mCastingManualSpell || mUpperBodyState == UpperCharState_CastingSpell;
+}
+
 bool CharacterController::isReadyToBlock() const
 {
     return updateCarriedLeftVisible(mWeaponType);
@@ -2438,6 +2452,14 @@ bool CharacterController::isRunning() const
 void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
 {
     mAttackingOrSpell = attackingOrSpell;
+}
+
+void CharacterController::castSpell(const std::string spellId, bool manualSpell)
+{
+    mAttackingOrSpell = true;
+    mCastingManualSpell = manualSpell;
+    ActionSpell action = ActionSpell(spellId);
+    action.prepare(mPtr);
 }
 
 void CharacterController::setAIAttackType(const std::string& attackType)
