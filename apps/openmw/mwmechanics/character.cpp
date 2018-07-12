@@ -1992,13 +1992,31 @@ void CharacterController::update(float duration)
             }
         }
 
-        mTurnAnimationThreshold -= duration;
-        if (isTurning())
-            mTurnAnimationThreshold = 0.05f;
-        else if (movestate == CharState_None && isTurning()
-                 && mTurnAnimationThreshold > 0)
+        // Player can not use smooth turning as NPCs, so we play turning animation a bit to avoid jittering
+        if (mPtr == getPlayer())
         {
-            movestate = mMovementState;
+            float threshold = mCurrentMovement.find("swim") == std::string::npos ? 0.4f : 0.8f;
+            float complete;
+            bool animPlaying = mAnimation->getInfo(mCurrentMovement, &complete);
+            if (movestate == CharState_None && isTurning())
+            {
+                if ((animPlaying && complete < threshold) || mJumpState != jumpstate)
+                    movestate = mMovementState;
+            }
+        }
+        else
+        {
+            mTurnAnimationThreshold -= duration;
+            if (movestate == CharState_TurnRight || movestate == CharState_TurnLeft ||
+                movestate == CharState_SwimTurnRight || movestate == CharState_SwimTurnLeft)
+            {
+                mTurnAnimationThreshold = 0.05f;
+            }
+            else if (movestate == CharState_None && isTurning()
+                    && mTurnAnimationThreshold > 0)
+            {
+                movestate = mMovementState;
+            }
         }
 
         if(movestate != CharState_None && !isTurning())
@@ -2028,8 +2046,10 @@ void CharacterController::update(float duration)
 
         if (isTurning())
         {
+            // Adjust animation speed from 1.0 to 1.5 multiplier
+            float turnSpeed = std::min(1.5f, std::abs(rot.z()) / duration / static_cast<float>(osg::PI));
             if (duration > 0)
-                mAnimation->adjustSpeedMult(mCurrentMovement, std::min(1.5f, std::abs(rot.z()) / duration / static_cast<float>(osg::PI)));
+                mAnimation->adjustSpeedMult(mCurrentMovement, std::max(turnSpeed, 1.0f));
         }
         else if (mMovementState != CharState_None && mAdjustMovementAnimSpeed)
         {
