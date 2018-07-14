@@ -13,6 +13,16 @@
 
 #include <iostream>
 
+namespace
+{
+    using DetourNavigator::ChangeType;
+
+    ChangeType addChangeType(const ChangeType current, const ChangeType add)
+    {
+        return current == add ? current : ChangeType::mixed;
+    }
+}
+
 namespace DetourNavigator
 {
     NavMeshManager::NavMeshManager(const Settings& settings)
@@ -26,7 +36,7 @@ namespace DetourNavigator
     {
         if (!mRecastMeshManager.addObject(id, shape, transform))
             return false;
-        addChangedTiles(shape, transform);
+        addChangedTiles(shape, transform, ChangeType::add);
         return true;
     }
 
@@ -34,7 +44,7 @@ namespace DetourNavigator
     {
         if (!mRecastMeshManager.updateObject(id, transform))
             return false;
-        addChangedTiles(shape, transform);
+        addChangedTiles(shape, transform, ChangeType::mixed);
         return true;
     }
 
@@ -43,7 +53,7 @@ namespace DetourNavigator
         const auto object = mRecastMeshManager.removeObject(id);
         if (!object)
             return false;
-        addChangedTiles(object->mShape, object->mTransform);
+        addChangedTiles(object->mShape, object->mTransform, ChangeType::remove);
         return true;
     }
 
@@ -72,7 +82,7 @@ namespace DetourNavigator
             return;
         mLastRecastMeshManagerRevision = mRecastMeshManager.getRevision();
         mPlayerTile = playerTile;
-        std::set<TilePosition> tilesToPost;
+        std::map<TilePosition, ChangeType> tilesToPost;
         const auto& cached = getCached(agentHalfExtents);
         const auto changedTiles = mChangedTiles.find(agentHalfExtents);
         {
@@ -80,10 +90,16 @@ namespace DetourNavigator
             if (changedTiles != mChangedTiles.end())
             {
                 for (const auto& tile : changedTiles->second)
-                    if (locked->getTileAt(tile.x(), tile.y(), 0))
-                        tilesToPost.insert(tile);
+                    if (locked->getTileAt(tile.first.x(), tile.first.y(), 0))
+                    {
+                        auto tileToPost = tilesToPost.find(tile.first);
+                        if (tileToPost == tilesToPost.end())
+                            tilesToPost.insert(tile);
+                        else
+                            tileToPost->second = addChangeType(tileToPost->second, tile.second);
+                    }
                 for (const auto& tile : tilesToPost)
-                    changedTiles->second.erase(tile);
+                    changedTiles->second.erase(tile.first);
                 if (changedTiles->second.empty())
                     mChangedTiles.erase(changedTiles);
             }
@@ -94,8 +110,10 @@ namespace DetourNavigator
                     return;
                 const auto shouldAdd = shouldAddTile(tile, playerTile, maxTiles);
                 const auto presentInNavMesh = bool(locked->getTileAt(tile.x(), tile.y(), 0));
-                if ((shouldAdd && !presentInNavMesh) || (!shouldAdd && presentInNavMesh))
-                    tilesToPost.insert(tile);
+                if (shouldAdd && !presentInNavMesh)
+                    tilesToPost.insert(std::make_pair(tile, ChangeType::add));
+                else if (!shouldAdd && presentInNavMesh)
+                    tilesToPost.insert(std::make_pair(tile, ChangeType::mixed));
             });
         }
         mAsyncNavMeshUpdater.post(agentHalfExtents, cached, playerTile, tilesToPost);
@@ -120,12 +138,20 @@ namespace DetourNavigator
         return mCache;
     }
 
-    void NavMeshManager::addChangedTiles(const btCollisionShape& shape, const btTransform& transform)
+    void NavMeshManager::addChangedTiles(const btCollisionShape& shape, const btTransform& transform,
+                                         const ChangeType changeType)
     {
         getTilesPositions(shape, transform, mSettings, [&] (const TilePosition& v) {
             for (const auto& cached : mCache)
                 if (cached.second)
-                    mChangedTiles[cached.first].insert(v);
+                {
+                    auto& tiles = mChangedTiles[cached.first];
+                    auto tile = tiles.find(v);
+                    if (tile == tiles.end())
+                        tiles.insert(std::make_pair(v, changeType));
+                    else
+                        tile->second = addChangeType(tile->second, changeType);
+                }
         });
     }
 

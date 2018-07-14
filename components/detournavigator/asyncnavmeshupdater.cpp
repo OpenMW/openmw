@@ -9,16 +9,22 @@
 
 namespace
 {
+    using DetourNavigator::ChangeType;
     using DetourNavigator::TilePosition;
 
-    int getDistance(const TilePosition& lhs, const TilePosition& rhs)
+    int getManhattanDistance(const TilePosition& lhs, const TilePosition& rhs)
     {
         return std::abs(lhs.x() - rhs.x()) + std::abs(lhs.y() - rhs.y());
     }
 
-    std::pair<int, int> makePriority(const TilePosition& changedTile, const TilePosition& playerTile)
+    std::tuple<ChangeType, int, int> makePriority(const TilePosition& position, const ChangeType changeType,
+                                                    const TilePosition& playerTile)
     {
-        return std::make_pair(getDistance(changedTile, playerTile), getDistance(changedTile, TilePosition {0, 0}));
+        return std::make_tuple(
+            changeType,
+            getManhattanDistance(position, playerTile),
+            getManhattanDistance(position, TilePosition {0, 0})
+        );
     }
 }
 
@@ -60,7 +66,7 @@ namespace DetourNavigator
 
     void AsyncNavMeshUpdater::post(const osg::Vec3f& agentHalfExtents,
         const std::shared_ptr<NavMeshCacheItem>& navMeshCacheItem, const TilePosition& playerTile,
-        const std::set<TilePosition>& changedTiles)
+        const std::map<TilePosition, ChangeType>& changedTiles)
     {
         log("post jobs playerTile=", playerTile);
 
@@ -73,9 +79,9 @@ namespace DetourNavigator
 
         for (const auto& changedTile : changedTiles)
         {
-            if (mPushed[agentHalfExtents].insert(changedTile).second)
-                mJobs.push(Job {agentHalfExtents, navMeshCacheItem, changedTile,
-                                makePriority(changedTile, playerTile)});
+            if (mPushed[agentHalfExtents].insert(changedTile.first).second)
+                mJobs.push(Job {agentHalfExtents, navMeshCacheItem, changedTile.first,
+                                makePriority(changedTile.first, changedTile.second, playerTile)});
         }
 
         log("posted ", mJobs.size(), " jobs");

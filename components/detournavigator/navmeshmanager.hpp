@@ -45,13 +45,13 @@ namespace DetourNavigator
         const Settings& mSettings;
         TileCachedRecastMeshManager mRecastMeshManager;
         std::map<osg::Vec3f, std::shared_ptr<NavMeshCacheItem>> mCache;
-        std::map<osg::Vec3f, std::set<TilePosition>> mChangedTiles;
+        std::map<osg::Vec3f, std::map<TilePosition, ChangeType>> mChangedTiles;
         AsyncNavMeshUpdater mAsyncNavMeshUpdater;
         std::size_t mGenerationCounter = 0;
         boost::optional<TilePosition> mPlayerTile;
         std::size_t mLastRecastMeshManagerRevision = 0;
 
-        void addChangedTiles(const btCollisionShape& shape, const btTransform& transform);
+        void addChangedTiles(const btCollisionShape& shape, const btTransform& transform, const ChangeType changeType);
 
         const std::shared_ptr<NavMeshCacheItem>& getCached(const osg::Vec3f& agentHalfExtents) const;
     };

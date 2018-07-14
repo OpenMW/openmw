@@ -22,6 +22,13 @@ class dtNavMesh;
 
 namespace DetourNavigator
 {
+    enum class ChangeType
+    {
+        remove = 0,
+        mixed = 1,
+        add = 2,
+    };
+
     class AsyncNavMeshUpdater
     {
     public:
@@ -29,7 +36,7 @@ namespace DetourNavigator
         ~AsyncNavMeshUpdater();
 
         void post(const osg::Vec3f& agentHalfExtents, const std::shared_ptr<NavMeshCacheItem>& mNavMeshCacheItem,
-            const TilePosition& playerTile, const std::set<TilePosition>& changedTiles);
+            const TilePosition& playerTile, const std::map<TilePosition, ChangeType>& changedTiles);
 
         void wait();
 
@@ -39,7 +46,7 @@ namespace DetourNavigator
             osg::Vec3f mAgentHalfExtents;
             std::shared_ptr<NavMeshCacheItem> mNavMeshCacheItem;
             TilePosition mChangedTile;
-            std::pair<int, int> mPriority;
+            std::tuple<ChangeType, int, int> mPriority;
 
             friend inline bool operator <(const Job& lhs, const Job& rhs)
             {
