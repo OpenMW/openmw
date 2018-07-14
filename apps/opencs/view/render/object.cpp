@@ -1,6 +1,8 @@
 #include "object.hpp"
 
 #include <stdexcept>
+#include <string>
+#include <iostream>
 
 #include <osg/Depth>
 #include <osg/Group>
@@ -11,6 +13,7 @@
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
+#include <osg/MatrixTransform>
 
 #include <osgFX/Scribe>
 
@@ -28,7 +31,9 @@
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/sceneutil/attach.hpp>
 
+#include "actor.hpp"
 #include "mask.hpp"
 
 
@@ -84,6 +89,7 @@ void CSVRender::Object::update()
     const CSMWorld::RefIdCollection& referenceables = mData.getReferenceables();
 
     int index = referenceables.searchId (mReferenceableId);
+    int recordType = -1;
     const ESM::Light* light = NULL;
 
     if (index==-1)
@@ -96,7 +102,7 @@ void CSVRender::Object::update()
             referenceables.findColumnIndex (CSMWorld::Columns::ColumnId_Model)).
             toString().toUtf8().constData();
 
-        int recordType =
+        recordType =
                 referenceables.getData (index,
                 referenceables.findColumnIndex(CSMWorld::Columns::ColumnId_RecordType)).toInt();
         if (recordType == CSMWorld::UniversalId::Type_Light)
@@ -112,7 +118,7 @@ void CSVRender::Object::update()
                 model = "marker_creature.nif";
         }
 
-        if (model.empty())
+        if (recordType != CSMWorld::UniversalId::Type_Npc && model.empty())
             error = 2;
     }
 
@@ -126,9 +132,18 @@ void CSVRender::Object::update()
     {
         try
         {
-            std::string path = "meshes\\" + model;
-
-            mResourceSystem->getSceneManager()->getInstance(path, mBaseNode);
+            if (recordType == CSMWorld::UniversalId::Type_Npc)
+            {
+                std::cout << "recordType: Npc\n";
+                Actor actor(mReferenceableId, recordType, mData);
+                actor.update();
+                mBaseNode->addChild(actor.getBaseNode());
+            }
+            else
+            {
+                std::string path = "meshes\\" + model;
+                mResourceSystem->getSceneManager()->getInstance(path, mBaseNode);
+            }
         }
         catch (std::exception& e)
         {

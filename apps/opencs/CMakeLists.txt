@@ -93,7 +93,7 @@ opencs_units (view/render
 
 opencs_units_noqt (view/render
     lighting lightingday lightingnight lightingbright object cell terrainstorage tagbase
-    cellarrow cellmarker cellborder pathgrid
+    cellarrow cellmarker cellborder pathgrid actor
     )
 
 opencs_hdrs_noqt (view/render

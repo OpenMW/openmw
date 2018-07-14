@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_VISITOR_H
 #define OPENMW_COMPONENTS_SCENEUTIL_VISITOR_H
 
+#include <osg/MatrixTransform>
 #include <osg/NodeVisitor>
 
 // Commonly used scene graph visitors
@@ -56,6 +57,35 @@ namespace SceneUtil
         virtual void apply(osg::MatrixTransform& node);
 
         virtual void apply(osg::Drawable& drw);
+    };
+
+    /// Maps names to nodes
+    class NodeMapVisitor : public osg::NodeVisitor
+    {
+    public:
+        typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
+
+        NodeMapVisitor(NodeMap& map)
+            : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+            , mMap(map)
+        {}
+
+        void apply(osg::MatrixTransform& trans);
+
+    private:
+        NodeMap& mMap;
+    };
+
+    /// Hides all attached drawables
+    class HideDrawablesVisitor : public osg::NodeVisitor
+    {
+    public:
+        HideDrawablesVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        void apply(osg::Drawable& drawable) override;
     };
 
 }

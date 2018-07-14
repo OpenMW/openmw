@@ -1,5 +1,6 @@
 #include "visitor.hpp"
 
+#include <osg/Drawable>
 #include <osg/MatrixTransform>
 
 #include <osgParticle/ParticleSystem>
@@ -23,7 +24,7 @@ namespace SceneUtil
     {
         if (Misc::StringUtils::ciEqual(node.className(), mNameToFind))
             mFoundNodes.push_back(&node);
-        
+
         traverse(node);
     }
 
@@ -54,4 +55,20 @@ namespace SceneUtil
             partsys->setFreezeOnCull(false);
     }
 
+    void NodeMapVisitor::apply(osg::MatrixTransform& trans)
+    {
+        // Take transformation for first found node in file
+        const std::string nodeName = Misc::StringUtils::lowerCase(trans.getName());
+        if (mMap.find(nodeName) == mMap.end())
+        {
+            mMap[nodeName] = &trans;
+        }
+
+        traverse(trans);
+    }
+
+    void HideDrawablesVisitor::apply(osg::Drawable& drawable)
+    {
+        drawable.setNodeMask(0);
+    }
 }
