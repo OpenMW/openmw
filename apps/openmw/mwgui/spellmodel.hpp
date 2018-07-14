@@ -20,6 +20,7 @@ namespace MWGui
         std::string mCostColumn; // Cost/chance or Cost/charge
         std::string mId; // Item ID or spell ID
         MWWorld::Ptr mItem; // Only for Type_EnchantedItem
+        int mCount; // Only for Type_EnchantedItem
         bool mSelected; // Is this the currently selected spell/item (only one can be selected at a time)
         bool mActive; // (Items only) is the item equipped?
 

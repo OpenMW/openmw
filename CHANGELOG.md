@@ -79,6 +79,7 @@
     Feature #4444: Per-group KF-animation files support
     Feature #4466: Editor: Add option to ignore "Base" records when running verifier
     Feature #4012: Editor: Write a log file if OpenCS crashes
+    Feature #4509: Show count of enchanted items in stack in the spells list
     Feature #4512: Editor: Use markers for lights and creatures levelled lists
     Task #2490: Don't open command prompt window on Release-mode builds automatically
 

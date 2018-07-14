@@ -80,6 +80,7 @@ namespace MWGui
 
             newSpell.mSelected = (MWBase::Environment::get().getWindowManager()->getSelectedSpell() == spell->mId);
             newSpell.mActive = true;
+            newSpell.mCount = 1;
             mSpells.push_back(newSpell);
         }
 
@@ -109,6 +110,7 @@ namespace MWGui
             newSpell.mItem = item;
             newSpell.mId = item.getCellRef().getRefId();
             newSpell.mName = item.getClass().getName(item);
+            newSpell.mCount = item.getRefData().getCount();
             newSpell.mType = Spell::Type_EnchantedItem;
             newSpell.mSelected = invStore.getSelectedEnchantItem() == it;
 
