@@ -14,6 +14,7 @@
 #include <mutex>
 #include <sstream>
 #include <string>
+#include <thread>
 
 class dtNavMesh;
 
@@ -123,7 +124,7 @@ namespace DetourNavigator
         if (!log.isEnabled())
             return;
         std::ostringstream stream;
-        stream << '[' << std::chrono::steady_clock::now() << "] ";
+        stream << '[' << std::chrono::steady_clock::now() << "] [" << std::this_thread::get_id() << "] ";
         write(stream, std::forward<Ts>(values) ...);
         log.write(stream.str());
     }
