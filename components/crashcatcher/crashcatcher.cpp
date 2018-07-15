@@ -32,6 +32,10 @@ namespace bfs = boost::filesystem;
 #include <signal.h>
 #endif
 
+#if defined(__APPLE__)
+#include <sys/sysctl.h>
+#endif
+
 #define UNUSED(x) (void)(x)
 
 static const char crash_switch[] = "--cc-handle-crash";
@@ -460,6 +464,7 @@ int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *sig
 
 static bool is_debugger_present()
 {
+#if !defined (__APPLE__)
     bfs::ifstream file((bfs::path("/proc/self/status")));
     while (!file.eof())
     {
@@ -472,6 +477,35 @@ static bool is_debugger_present()
         }
     }
     return false;
+#else
+    int junk;
+    int mib[4];
+    struct kinfo_proc info;
+    size_t size;
+
+    // Initialize the flags so that, if sysctl fails for some bizarre
+    // reason, we get a predictable result.
+
+    info.kp_proc.p_flag = 0;
+
+    // Initialize mib, which tells sysctl the info we want, in this case
+    // we're looking for information about a specific process ID.
+
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_PID;
+    mib[3] = getpid();
+
+    // Call sysctl.
+
+    size = sizeof(info);
+    junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
+    assert(junk == 0);
+
+    // We're being debugged if the P_TRACED flag is set.
+
+    return (info.kp_proc.p_flag & P_TRACED) != 0;
+#endif
 }
 
 void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath)
