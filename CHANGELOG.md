@@ -95,6 +95,7 @@
     Bug #4574: Player turning animations are twitchy
     Bug #4575: Weird result of attack animation blending with movement animations
     Bug #4576: Reset of idle animations when attack can not be started
+    Feature #1645: Casting effects from objects
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
     Feature #3103: Provide option for disposition to get increased by successful trade
