@@ -67,6 +67,7 @@
     Bug #4496: SpellTurnLeft and SpellTurnRight animation groups are unused
     Bug #4497: File names starting with x or X are not classified as animation
     Bug #4503: Cast and ExplodeSpell commands increase alteration skill
+    Bug #4510: Division by zero in MWMechanics::CreatureStats::setAttribute
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
