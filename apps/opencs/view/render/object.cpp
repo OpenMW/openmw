@@ -102,6 +102,14 @@ void CSVRender::Object::update()
         if (recordType == CSMWorld::UniversalId::Type_Light)
         {
             light = &dynamic_cast<const CSMWorld::Record<ESM::Light>& >(referenceables.getRecord(index)).get();
+            if (model.empty())
+                model = "marker_light.nif";
+        }
+
+        if (recordType == CSMWorld::UniversalId::Type_CreatureLevelledList)
+        {
+            if (model.empty())
+                model = "marker_creature.nif";
         }
 
         if (model.empty())
