@@ -42,7 +42,19 @@ bool MWMechanics::AiCast::execute(const MWWorld::Ptr& actor, MWMechanics::Charac
             return false;
         }
 
-        osg::Vec3f dir = target.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3();
+        osg::Vec3f targetPos = target.getRefData().getPosition().asVec3();
+        if (target.getClass().isActor())
+        {
+            osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(target);
+            targetPos.z() += halfExtents.z() * 2 * 0.75f;
+        }
+
+        osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
+        osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
+        actorPos.z() += halfExtents.z() * 2 * 0.75f;
+
+        osg::Vec3f dir = targetPos - actorPos;
+
         bool turned = smoothTurn(actor, getZAngleToDir(dir), 2, osg::DegreesToRadians(3.f));
         turned &= smoothTurn(actor, getXAngleToDir(dir), 0, osg::DegreesToRadians(3.f));
 
