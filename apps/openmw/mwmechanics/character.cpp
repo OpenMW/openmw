@@ -1215,6 +1215,7 @@ bool CharacterController::updateWeaponState()
     MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
     priorityWeapon[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
 
+
     bool forcestateupdate = false;
 
     // We should not play equipping animation and sound during weapon->weapon transition
@@ -1663,18 +1664,22 @@ bool CharacterController::updateWeaponState()
                 break;
         }
 
-        // Note: apply reload animations only for upper body since blending with movement animations can give weird result.
-        // Especially noticable with crossbow reload animation.
+        // Note: apply crossbow reload animation only for upper body
+        // since blending with movement animations can give weird result.
         if(!start.empty())
         {
+            int mask = MWRender::Animation::BlendMask_All;
+            if (mWeaponType == WeapType_Crossbow)
+                mask = MWRender::Animation::BlendMask_UpperBody;
+
             mAnimation->disable(mCurrentWeapon);
             if (mUpperBodyState == UpperCharState_FollowStartToFollowStop)
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_UpperBody, true,
+                                 mask, true,
                                  weapSpeed, start, stop, 0.0f, 0);
             else
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_UpperBody, false,
+                                 mask, false,
                                  weapSpeed, start, stop, 0.0f, 0);
         }
     }
