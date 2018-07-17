@@ -11,7 +11,7 @@ namespace CSVRender
     {
         public:
 
-            TerrainTextureSelection(osg::Group* parentNode, const CSMWorld::CellCoordinates&, const ESM::Land&);
+            TerrainTextureSelection(osg::Group* parentNode, const CSMWorld::CellCoordinates&, const ESM::Land&, const ESM::Land::LandData*, const ESM::Land::LandData*, const ESM::Land::LandData*);
 
         protected:
 
@@ -24,6 +24,9 @@ namespace CSVRender
 
         private:
 
+            const ESM::Land::LandData* mEsmLandRightCell;
+            const ESM::Land::LandData* mEsmLandUpCell;
+            const ESM::Land::LandData* mEsmLandUpRightCell;
             osg::ref_ptr<osg::Geode> mGeode;
             std::vector<std::pair<int, int>> mSelection;
     };
