@@ -83,6 +83,7 @@
     Bug #4563: Fast travel price logic checks destination cell instead of service actor cell
     Bug #4565: Underwater view distance should be limited
     Bug #4573: Player uses headtracking in the 1st-person mode
+    Bug #4575: Weird result of attack animation blending with movement animations
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
     Feature #3103: Provide option for disposition to get increased by successful trade
