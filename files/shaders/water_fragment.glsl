@@ -13,14 +13,19 @@ const float BIG_WAVES_Y = 0.1;
 
 const float MID_WAVES_X = 0.1; // strength of middle sized waves
 const float MID_WAVES_Y = 0.1;
+const float MID_WAVES_RAIN_X = 0.2;
+const float MID_WAVES_RAIN_Y = 0.2;
 
 const float SMALL_WAVES_X = 0.1; // strength of small waves
 const float SMALL_WAVES_Y = 0.1;
+const float SMALL_WAVES_RAIN_X = 0.3;
+const float SMALL_WAVES_RAIN_Y = 0.3;
 
 const float WAVE_CHOPPYNESS = 0.05;                // wave choppyness
 const float WAVE_SCALE = 75.0;                     // overall wave scale
 
 const float BUMP = 0.5;                            // overall water surface bumpiness
+const float BUMP_RAIN = 2.5;
 const float REFL_BUMP = 0.10;                      // reflection distortion amount
 const float REFR_BUMP = 0.07;                      // refraction distortion amount
 
@@ -183,22 +188,27 @@ void main(void)
 
     vec3 rippleAdd = rainRipple.xyz * rainRipple.w * 10.0;
 
-    vec3 normal = (normal0 * BIG_WAVES_X + normal1 * BIG_WAVES_Y +
-			normal2 * MID_WAVES_X + normal3 * MID_WAVES_Y +
-			normal4 * SMALL_WAVES_X + normal5 * SMALL_WAVES_Y +
+    vec2 bigWaves = vec2(BIG_WAVES_X,BIG_WAVES_Y);
+    vec2 midWaves = mix(vec2(MID_WAVES_X,MID_WAVES_Y),vec2(MID_WAVES_RAIN_X,MID_WAVES_RAIN_Y),rainIntensity);
+    vec2 smallWaves = mix(vec2(SMALL_WAVES_X,SMALL_WAVES_Y),vec2(SMALL_WAVES_RAIN_X,SMALL_WAVES_RAIN_Y),rainIntensity);
+    float bump = mix(BUMP,BUMP_RAIN,rainIntensity);
+
+    vec3 normal = (normal0 * bigWaves.x + normal1 * bigWaves.y +
+			normal2 * midWaves.x + normal3 * midWaves.y +
+			normal4 * smallWaves.x + normal5 * smallWaves.y +
                         rippleAdd);
 
-    normal = normalize(vec3(normal.x * BUMP, normal.y * BUMP, normal.z));
+    normal = normalize(vec3(normal.x * bump, normal.y * bump, normal.z));
 
     normal = vec3(-normal.x, -normal.y, normal.z);
 
     // normal for sunlight scattering
-    vec3 lNormal = (normal0 * BIG_WAVES_X*0.5 + normal1 * BIG_WAVES_Y*0.5 +
-		normal2 * MID_WAVES_X*0.2 + normal3 * MID_WAVES_Y*0.2 +
-		normal4 * SMALL_WAVES_X*0.1 + normal5 * SMALL_WAVES_Y*0.1 +
+    vec3 lNormal = (normal0 * bigWaves.x * 0.5 + normal1 * bigWaves.y * 0.5 +
+		normal2 * midWaves.x * 0.2 + normal3 * midWaves.y * 0.2 +
+		normal4 * smallWaves.x * 0.1 + normal5 * smallWaves.y * 0.1 +
                 rippleAdd).xyz;
 
-    lNormal = normalize(vec3(lNormal.x * BUMP, lNormal.y * BUMP, lNormal.z));
+    lNormal = normalize(vec3(lNormal.x * bump, lNormal.y * bump, lNormal.z));
     lNormal = vec3(-lNormal.x, -lNormal.y, lNormal.z);
 
     vec3 lVec = normalize((gl_ModelViewMatrixInverse * vec4(gl_LightSource[0].position.xyz, 0.0)).xyz);
