@@ -145,9 +145,33 @@ void CSVRender::Cell::updateLand()
 
             mCellBorder->buildShape(esmLand);
 
-            if (!mTerrainTextureSelection)
+            // Load neighbouring cell's heights for TerrainTextureSelection
+            std::pair<CSMWorld::CellCoordinates, bool> cellCoordinates_pair = CSMWorld::CellCoordinates::fromId (mId);
+
+            int cellX = cellCoordinates_pair.first.getX();
+            int cellY = cellCoordinates_pair.first.getY();
+            std::string cellRightId = "#" + std::to_string(cellX + 1) + " " + std::to_string(cellY);
+            std::string cellUpId = "#" + std::to_string(cellX) + " " + std::to_string(cellY - 1);
+            std::string cellUpRightId = "#" + std::to_string(cellX + 1) + " " + std::to_string(cellY - 1);
+
+            landIndex = land.searchId(cellRightId);
+            if (landIndex != -1 && !land.getRecord(cellRightId).isDeleted())
             {
-                mTerrainTextureSelection.reset(new TerrainTextureSelection(mCellNode, mCoordinates, esmLand));
+                const ESM::Land::LandData* esmLandRight = land.getRecord(cellRightId).get().getLandData();
+                landIndex = land.searchId(cellUpId);
+                if (landIndex != -1 && !land.getRecord(cellUpId).isDeleted())
+                {
+                    const ESM::Land::LandData* esmLandUp = land.getRecord(cellUpId).get().getLandData();
+                    landIndex = land.searchId(cellUpRightId);
+                    if (landIndex != -1 && !land.getRecord(cellUpRightId).isDeleted())
+                    {
+                        const ESM::Land::LandData* esmLandUpRight = land.getRecord(cellUpRightId).get().getLandData();
+                        if (!mTerrainTextureSelection)
+                        {
+                            mTerrainTextureSelection.reset(new TerrainTextureSelection(mCellNode, mCoordinates, esmLand, esmLandRight, esmLandUp, esmLandUpRight));
+                        }
+                    }
+                }
             }
 
             return;

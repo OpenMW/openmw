@@ -6,8 +6,13 @@
 
 #include <algorithm>
 
-CSVRender::TerrainTextureSelection::TerrainTextureSelection(osg::Group* parentNode, const CSMWorld::CellCoordinates& coords, const ESM::Land& esmLand)
-    :TerrainSelection (coords, esmLand, parentNode)
+#include <components/esm/loadland.hpp>
+
+CSVRender::TerrainTextureSelection::TerrainTextureSelection(osg::Group* parentNode, const CSMWorld::CellCoordinates& coords, const ESM::Land& esmLand, const ESM::Land::LandData* esmLandRight, const ESM::Land::LandData* esmLandUp, const ESM::Land::LandData* esmLandUpRight)
+    :TerrainSelection (coords, esmLand, parentNode),
+    mEsmLandRightCell(esmLandRight),
+    mEsmLandUpCell(esmLandUp),
+    mEsmLandUpRightCell(esmLandUpRight)
 {
     osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry();
 
@@ -142,26 +147,26 @@ int CSVRender::TerrainTextureSelection::calculateLandHeight(int x, int y)
     if (x > ESM::Land::LAND_SIZE - 1 && y < 0)
     {
         cellTarget = upRightCell;
-        x = x - ESM::Land::LAND_SIZE;
-        y = y + ESM::Land::LAND_SIZE;
+        x = x - ESM::Land::LAND_SIZE + 1;
+        y = y + ESM::Land::LAND_SIZE - 1;
     }
     if (x > ESM::Land::LAND_SIZE - 1)
     {
         cellTarget = rightCell;
-        x = x - ESM::Land::LAND_SIZE;
+        x = x - ESM::Land::LAND_SIZE + 1;
     }
     if (y < 0)
     {
         cellTarget = upCell;
-        y = y + ESM::Land::LAND_SIZE;
+        y = y + ESM::Land::LAND_SIZE - 1;
     }
 
     switch(cellTarget)
     {
         case thisCell : return landData->mHeights[landIndex(x,y)];
-        case rightCell : return landData->mHeights[landIndex(ESM::Land::LAND_SIZE-1,y)]; // TO-DO: Get height from neighbouring cell
-        case upCell: return landData->mHeights[landIndex(x,0)]; // TO-DO: Get height from neighbouring cell
-        case upRightCell: return landData->mHeights[landIndex(ESM::Land::LAND_SIZE-1,0)];; // TO-DO: Get height from neighbouring cell
+        case rightCell : return mEsmLandRightCell->mHeights[landIndex(x,y)]; // TO-DO: Get height from neighbouring cell
+        case upCell: return mEsmLandUpCell->mHeights[landIndex(x,y)]; // TO-DO: Get height from neighbouring cell
+        case upRightCell: return mEsmLandUpRightCell->mHeights[landIndex(x,y)];; // TO-DO: Get height from neighbouring cell
     }
     return 0;
 }
