@@ -32,7 +32,7 @@ void CSVWorld::DataDisplayDelegate::buildPixmaps ()
 
     while (it != mIcons.end())
     {
-        mPixmaps.push_back (std::make_pair (it->first, it->second.pixmap (mIconSize) ) );
+        mPixmaps.push_back (std::make_pair (it->mValue, it->mIcon.pixmap (mIconSize) ) );
         ++it;
     }
 }
@@ -142,9 +142,23 @@ void CSVWorld::DataDisplayDelegate::settingChanged (const CSMPrefs::Setting *set
 
 void CSVWorld::DataDisplayDelegateFactory::add (int enumValue, const QString& enumName, const QString& iconFilename)
 {
-    mIcons.push_back (std::make_pair(enumValue, QIcon(iconFilename)));
     EnumDelegateFactory::add(enumValue, enumName);
 
+    Icon icon;
+    icon.mValue = enumValue;
+    icon.mName = enumName;
+    icon.mIcon = QIcon(iconFilename);
+
+    for (auto it=mIcons.begin(); it!=mIcons.end(); ++it)
+    {
+        if (it->mName > enumName)
+        {
+            mIcons.insert(it, icon);
+            return;
+        }
+    }
+
+    mIcons.push_back(icon);
 }
 
 CSVWorld::CommandDelegate *CSVWorld::DataDisplayDelegateFactory::makeDelegate (
