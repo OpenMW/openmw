@@ -1339,7 +1339,7 @@ namespace MWRender
             {
                 osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
 
-                CleanObjectRootVisitor removeDrawableVisitor;
+                SceneUtil::CleanObjectRootVisitor removeDrawableVisitor;
                 created->accept(removeDrawableVisitor);
                 removeDrawableVisitor.remove();
 
@@ -1408,7 +1408,7 @@ namespace MWRender
 
         if (isCreature)
         {
-            RemoveTriBipVisitor removeTriBipVisitor;
+            SceneUtil::RemoveTriBipVisitor removeTriBipVisitor;
             mObjectRoot->accept(removeTriBipVisitor);
             removeTriBipVisitor.remove();
         }

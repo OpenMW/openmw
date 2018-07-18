@@ -15,6 +15,7 @@
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/actorutil.hpp>
 #include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/skeleton.hpp>
@@ -304,7 +305,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
 void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
 {
     assert(viewMode != VM_HeadOnly);
-    if(mViewMode == viewMode) 
+    if(mViewMode == viewMode)
         return;
 
     mViewMode = viewMode;
@@ -451,37 +452,15 @@ void NpcAnimation::updateNpcBase()
         }
     }
 
+    bool is1stPerson = mViewMode == VM_FirstPerson;
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
 
-    std::string smodel;
-    if (mViewMode != VM_FirstPerson)
-    {
-        if (isWerewolf)
-            smodel = "meshes\\wolf\\skin.nif";
-        else if (isBeast)
-            smodel = "meshes\\base_animkna.nif";
-        else if (isFemale)
-            smodel = "meshes\\base_anim_female.nif";
-        else
-            smodel = "meshes\\base_anim.nif";
-    }
-    else
-    {
-        if (isWerewolf)
-            smodel = "meshes\\wolf\\skin.1st.nif";
-        else if (isBeast)
-            smodel = "meshes\\base_animkna.1st.nif";
-        else if (isFemale)
-            smodel = "meshes\\base_anim_female.1st.nif";
-        else
-            smodel = "meshes\\base_anim.1st.nif";
-    }
-
+    std::string smodel = SceneUtil::getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf);
     smodel = Misc::ResourceHelpers::correctActorModelPath(smodel, mResourceSystem->getVFS());
 
     setObjectRoot(smodel, true, true, false);
 
-    if(mViewMode != VM_FirstPerson)
+    if(!is1stPerson)
     {
         const std::string base = "meshes\\xbase_anim.nif";
         if (smodel != base)
@@ -675,7 +654,7 @@ PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const st
 }
 
 osg::Vec3f NpcAnimation::runAnimation(float timepassed)
-{    
+{
     osg::Vec3f ret = Animation::runAnimation(timepassed);
 
     mHeadAnimationTime->update(timepassed);
