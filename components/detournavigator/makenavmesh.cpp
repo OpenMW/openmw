@@ -8,6 +8,7 @@
 #include "settingsutils.hpp"
 #include "sharednavmesh.hpp"
 #include "settingsutils.hpp"
+#include "flags.hpp"
 
 #include <DetourNavMesh.h>
 #include <DetourNavMeshBuilder.h>
@@ -99,7 +100,7 @@ namespace
 
         {
             const auto& chunkyMesh = recastMesh.getChunkyTriMesh();
-            std::vector<unsigned char> areas(chunkyMesh.getMaxTrisPerChunk(), RC_NULL_AREA);
+            std::vector<unsigned char> areas(chunkyMesh.getMaxTrisPerChunk(), AreaType_null);
             const osg::Vec2f tileBoundsMin(config.bmin[0], config.bmin[2]);
             const osg::Vec2f tileBoundsMax(config.bmax[0], config.bmax[2]);
             std::vector<std::size_t> cids;
@@ -116,7 +117,7 @@ namespace
                     areas.begin(),
                     std::min(areas.begin() + static_cast<std::ptrdiff_t>(chunk.mSize),
                     areas.end()),
-                    RC_NULL_AREA
+                    AreaType_null
                 );
 
                 rcMarkWalkableTriangles(
@@ -130,7 +131,7 @@ namespace
                 );
 
                 for (std::size_t i = 0; i < chunk.mSize; ++i)
-                    areas[i] &= chunk.mFlags[i];
+                    areas[i] = chunk.mAreaTypes[i];
 
                 rcClearUnwalkableTriangles(
                     &context,
@@ -186,8 +187,8 @@ namespace
         }
 
         for (int i = 0; i < polyMesh.npolys; ++i)
-            if (polyMesh.areas[i] == RC_WALKABLE_AREA)
-                polyMesh.flags[i] = 1;
+            if (polyMesh.areas[i] == AreaType_ground)
+                polyMesh.flags[i] = Flag_walk;
 
         dtNavMeshCreateParams params;
         params.verts = polyMesh.verts;

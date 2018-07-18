@@ -8,17 +8,17 @@ namespace DetourNavigator
     {}
 
     bool CachedRecastMeshManager::addObject(std::size_t id, const btCollisionShape& shape,
-                                            const btTransform& transform, const unsigned char flags)
+                                            const btTransform& transform, const AreaType areaType)
     {
-        if (!mImpl.addObject(id, shape, transform, flags))
+        if (!mImpl.addObject(id, shape, transform, areaType))
             return false;
         mCached.reset();
         return true;
     }
 
-    bool CachedRecastMeshManager::updateObject(std::size_t id, const btTransform& transform, const unsigned char flags)
+    bool CachedRecastMeshManager::updateObject(std::size_t id, const btTransform& transform, const AreaType areaType)
     {
-        if (!mImpl.updateObject(id, transform, flags))
+        if (!mImpl.updateObject(id, transform, areaType))
             return false;
         mCached.reset();
         return true;

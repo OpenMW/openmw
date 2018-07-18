@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_CHUNKYTRIMESH_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_CHUNKYTRIMESH_H
 
+#include "areatype.hpp"
+
 #include <osg/Vec2f>
 
 #include <array>
@@ -24,7 +26,7 @@ namespace DetourNavigator
     struct Chunk
     {
         const int* const mIndices;
-        const unsigned char* const mFlags;
+        const AreaType* const mAreaTypes;
         const std::size_t mSize;
     };
 
@@ -42,7 +44,7 @@ namespace DetourNavigator
         /// Creates partitioned triangle mesh (AABB tree),
         /// where each node contains at max trisPerChunk triangles.
         ChunkyTriMesh(const std::vector<float>& verts, const std::vector<int>& tris,
-                      const std::vector<unsigned char>& flags, const std::size_t trisPerChunk);
+                      const std::vector<AreaType>& flags, const std::size_t trisPerChunk);
 
         ChunkyTriMesh(const ChunkyTriMesh&) = delete;
         ChunkyTriMesh& operator=(const ChunkyTriMesh&) = delete;
@@ -76,7 +78,7 @@ namespace DetourNavigator
             const auto& node = mNodes[chunkId];
             return Chunk {
                 mIndices.data() + node.mOffset * 3,
-                mFlags.data() + node.mOffset,
+                mAreaTypes.data() + node.mOffset,
                 node.mSize
             };
         }
@@ -89,7 +91,7 @@ namespace DetourNavigator
     private:
         std::vector<ChunkyTriMeshNode> mNodes;
         std::vector<int> mIndices;
-        std::vector<unsigned char> mFlags;
+        std::vector<AreaType> mAreaTypes;
         std::size_t mMaxTrisPerChunk;
     };
 }

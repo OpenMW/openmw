@@ -15,9 +15,9 @@ namespace DetourNavigator
         TileCachedRecastMeshManager(const Settings& settings);
 
         bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform,
-                       const unsigned char flags);
+                       const AreaType areaType);
 
-        bool updateObject(std::size_t id, const btTransform& transform, const unsigned char flags);
+        bool updateObject(std::size_t id, const btTransform& transform, const AreaType areaType);
 
         boost::optional<RemovedRecastMeshObject> removeObject(std::size_t id);
 

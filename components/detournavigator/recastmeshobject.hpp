@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTMESHOBJECT_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTMESHOBJECT_H
 
+#include "areatype.hpp"
+
 #include <LinearMath/btTransform.h>
 
 #include <functional>
@@ -14,9 +16,9 @@ namespace DetourNavigator
     class RecastMeshObject
     {
         public:
-            RecastMeshObject(const btCollisionShape& shape, const btTransform& transform, const unsigned char flags);
+            RecastMeshObject(const btCollisionShape& shape, const btTransform& transform, const AreaType areaType);
 
-            bool update(const btTransform& transform, const unsigned char flags);
+            bool update(const btTransform& transform, const AreaType areaType);
 
             const btCollisionShape& getShape() const
             {
@@ -28,24 +30,24 @@ namespace DetourNavigator
                 return mTransform;
             }
 
-            unsigned char getFlags() const
+            AreaType getAreaType() const
             {
-                return mFlags;
+                return mAreaType;
             }
 
         private:
             std::reference_wrapper<const btCollisionShape> mShape;
             btTransform mTransform;
-            unsigned char mFlags;
+            AreaType mAreaType;
             std::vector<RecastMeshObject> mChildren;
 
-            static bool updateCompoundObject(const btCompoundShape& shape, const unsigned char flags,
+            static bool updateCompoundObject(const btCompoundShape& shape, const AreaType areaType,
                 std::vector<RecastMeshObject>& children);
     };
 
-    std::vector<RecastMeshObject> makeChildrenObjects(const btCollisionShape& shape, const unsigned char flags);
+    std::vector<RecastMeshObject> makeChildrenObjects(const btCollisionShape& shape, const AreaType areaType);
 
-    std::vector<RecastMeshObject> makeChildrenObjects(const btCompoundShape& shape, const unsigned char flags);
+    std::vector<RecastMeshObject> makeChildrenObjects(const btCompoundShape& shape, const AreaType areaType);
 }
 
 #endif

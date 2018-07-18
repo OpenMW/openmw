@@ -15,8 +15,7 @@ namespace DetourNavigator
 
         ObjectShapes(const btCollisionShape& shape, const btCollisionShape* avoid)
             : mShape(shape), mAvoid(avoid)
-        {
-        }
+        {}
     };
 
     class Navigator

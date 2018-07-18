@@ -7,15 +7,15 @@
 namespace DetourNavigator
 {
     RecastMesh::RecastMesh(std::vector<int> indices, std::vector<float> vertices,
-                           std::vector<unsigned char> flags, const Settings& settings)
+                           std::vector<AreaType> areaTypes, const Settings& settings)
         : mIndices(std::move(indices))
         , mVertices(std::move(vertices))
-        , mFlags(std::move(flags))
-        , mChunkyTriMesh(mVertices, mIndices, mFlags, settings.mTrianglesPerChunk)
+        , mAreaTypes(std::move(areaTypes))
+        , mChunkyTriMesh(mVertices, mIndices, mAreaTypes, settings.mTrianglesPerChunk)
     {
-        if (getTrianglesCount() != mFlags.size())
+        if (getTrianglesCount() != mAreaTypes.size())
             throw InvalidArgument("number of flags doesn't match number of triangles: triangles="
-                + std::to_string(getTrianglesCount()) + ", flags=" + std::to_string(mFlags.size()));
+                + std::to_string(getTrianglesCount()) + ", areaTypes=" + std::to_string(mAreaTypes.size()));
         if (getVerticesCount())
             rcCalcBounds(mVertices.data(), static_cast<int>(getVerticesCount()), mBoundsMin.ptr(), mBoundsMax.ptr());
     }

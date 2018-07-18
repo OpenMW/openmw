@@ -10,7 +10,7 @@ namespace DetourNavigator
     {}
 
     bool TileCachedRecastMeshManager::addObject(std::size_t id, const btCollisionShape& shape,
-                                                const btTransform& transform, const unsigned char flags)
+                                                const btTransform& transform, const AreaType areaType)
     {
         bool result = false;
         auto& tilesPositions = mObjectsTilesPositions[id];
@@ -27,7 +27,7 @@ namespace DetourNavigator
                     tile = mTiles.insert(std::make_pair(tilePosition,
                             CachedRecastMeshManager(mSettings, tileBounds))).first;
                 }
-                if (tile->second.addObject(id, shape, transform, flags))
+                if (tile->second.addObject(id, shape, transform, areaType))
                 {
                     lock.unlock();
                     tilesPositions.push_back(tilePosition);
@@ -40,7 +40,7 @@ namespace DetourNavigator
     }
 
     bool TileCachedRecastMeshManager::updateObject(std::size_t id, const btTransform& transform,
-        const unsigned char flags)
+        const AreaType areaType)
     {
         const auto object = mObjectsTilesPositions.find(id);
         if (object == mObjectsTilesPositions.end())
@@ -51,7 +51,7 @@ namespace DetourNavigator
         {
             const auto tile = mTiles.find(tilePosition);
             if (tile != mTiles.end())
-                result = tile->second.updateObject(id, transform, flags) || result;
+                result = tile->second.updateObject(id, transform, areaType) || result;
         }
         lock.unlock();
         if (result)

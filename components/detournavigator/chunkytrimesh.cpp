@@ -13,7 +13,7 @@ namespace DetourNavigator
         {
             Rect mBounds;
             std::ptrdiff_t mOffset;
-            unsigned char mFlags;
+            unsigned char mAreaTypes;
         };
 
         template <std::size_t axis>
@@ -44,9 +44,9 @@ namespace DetourNavigator
         }
 
         void subdivide(std::vector<BoundsItem>& items, const std::size_t imin, const std::size_t imax,
-            const std::size_t trisPerChunk, const std::vector<int>& inIndices, const std::vector<unsigned char>& inFlags,
+            const std::size_t trisPerChunk, const std::vector<int>& inIndices, const std::vector<AreaType>& inAreaTypes,
             std::size_t& curNode, std::vector<ChunkyTriMeshNode>& nodes, std::size_t& curTri,
-            std::vector<int>& outIndices, std::vector<unsigned char>& outFlags)
+            std::vector<int>& outIndices, std::vector<AreaType>& outAreaTypes)
         {
             const auto inum = imax - imin;
             const auto icur = curNode;
@@ -72,7 +72,7 @@ namespace DetourNavigator
                         inIndices.begin() + items[i].mOffset * 3 + 3,
                         outIndices.begin() + static_cast<std::ptrdiff_t>(curTri) * 3
                     );
-                    outFlags[curTri] = inFlags[static_cast<std::size_t>(items[i].mOffset)];
+                    outAreaTypes[curTri] = inAreaTypes[static_cast<std::size_t>(items[i].mOffset)];
                     curTri++;
                 }
             }
@@ -104,9 +104,9 @@ namespace DetourNavigator
                 const auto isplit = imin + inum / 2;
 
                 // Left
-                subdivide(items, imin, isplit, trisPerChunk, inIndices, inFlags, curNode, nodes, curTri, outIndices, outFlags);
+                subdivide(items, imin, isplit, trisPerChunk, inIndices, inAreaTypes, curNode, nodes, curTri, outIndices, outAreaTypes);
                 // Right
-                subdivide(items, isplit, imax, trisPerChunk, inIndices, inFlags, curNode, nodes, curTri, outIndices, outFlags);
+                subdivide(items, isplit, imax, trisPerChunk, inIndices, inAreaTypes, curNode, nodes, curTri, outIndices, outAreaTypes);
 
                 const auto iescape = static_cast<std::ptrdiff_t>(curNode) - static_cast<std::ptrdiff_t>(icur);
                 // Negative index means escape.
@@ -116,7 +116,7 @@ namespace DetourNavigator
     }
 
     ChunkyTriMesh::ChunkyTriMesh(const std::vector<float>& verts, const std::vector<int>& indices,
-                                 const std::vector<unsigned char>& flags, const std::size_t trisPerChunk)
+                                 const std::vector<AreaType>& flags, const std::size_t trisPerChunk)
         : mMaxTrisPerChunk(0)
     {
         const auto trianglesCount = indices.size() / 3;
@@ -128,7 +128,7 @@ namespace DetourNavigator
 
         mNodes.resize(nchunks * 4);
         mIndices.resize(trianglesCount * 3);
-        mFlags.resize(trianglesCount);
+        mAreaTypes.resize(trianglesCount);
 
         // Build tree
         std::vector<BoundsItem> items(trianglesCount);
@@ -138,7 +138,7 @@ namespace DetourNavigator
             auto& item = items[i];
 
             item.mOffset = static_cast<std::ptrdiff_t>(i);
-            item.mFlags = flags[i];
+            item.mAreaTypes = flags[i];
 
             // Calc triangle XZ bounds.
             const auto baseIndex = static_cast<std::size_t>(indices[i * 3]) * 3;
@@ -160,7 +160,7 @@ namespace DetourNavigator
 
         std::size_t curTri = 0;
         std::size_t curNode = 0;
-        subdivide(items, 0, trianglesCount, trisPerChunk, indices, flags, curNode, mNodes, curTri, mIndices, mFlags);
+        subdivide(items, 0, trianglesCount, trisPerChunk, indices, flags, curNode, mNodes, curTri, mIndices, mAreaTypes);
 
         items.clear();
 

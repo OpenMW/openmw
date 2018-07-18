@@ -12,20 +12,20 @@ namespace DetourNavigator
     }
 
     bool RecastMeshManager::addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform,
-                                      const unsigned char flags)
+                                      const AreaType areaType)
     {
-        if (!mObjects.emplace(id, RecastMeshObject(shape, transform, flags)).second)
+        if (!mObjects.emplace(id, RecastMeshObject(shape, transform, areaType)).second)
             return false;
         mShouldRebuild = true;
         return mShouldRebuild;
     }
 
-    bool RecastMeshManager::updateObject(std::size_t id, const btTransform& transform, const unsigned char flags)
+    bool RecastMeshManager::updateObject(std::size_t id, const btTransform& transform, const AreaType areaType)
     {
         const auto object = mObjects.find(id);
         if (object == mObjects.end())
             return false;
-        if (!object->second.update(transform, flags))
+        if (!object->second.update(transform, areaType))
             return false;
         mShouldRebuild = true;
         return mShouldRebuild;
@@ -59,7 +59,7 @@ namespace DetourNavigator
             return;
         mMeshBuilder.reset();
         for (const auto& v : mObjects)
-            mMeshBuilder.addObject(v.second.getShape(), v.second.getTransform(), v.second.getFlags());
+            mMeshBuilder.addObject(v.second.getShape(), v.second.getTransform(), v.second.getAreaType());
         mShouldRebuild = false;
     }
 }

@@ -29,7 +29,7 @@ namespace DetourNavigator
 
     bool Navigator::addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
     {
-        return mNavMeshManager.addObject(id, shape, transform, RC_WALKABLE_AREA);
+        return mNavMeshManager.addObject(id, shape, transform, AreaType_ground);
     }
 
     bool Navigator::addObject(std::size_t id, const ObjectShapes& shapes, const btTransform& transform)
@@ -38,7 +38,7 @@ namespace DetourNavigator
         if (shapes.mAvoid)
         {
             const auto avoidId = reinterpret_cast<std::size_t>(shapes.mAvoid);
-            if (mNavMeshManager.addObject(avoidId, *shapes.mAvoid, transform, RC_NULL_AREA))
+            if (mNavMeshManager.addObject(avoidId, *shapes.mAvoid, transform, AreaType_null))
             {
                 updateAvoidShapeId(id, avoidId);
                 result = true;
@@ -49,7 +49,7 @@ namespace DetourNavigator
 
     bool Navigator::updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
     {
-        return mNavMeshManager.updateObject(id, shape, transform, RC_WALKABLE_AREA);
+        return mNavMeshManager.updateObject(id, shape, transform, AreaType_ground);
     }
 
     bool Navigator::updateObject(std::size_t id, const ObjectShapes& shapes, const btTransform& transform)
@@ -58,7 +58,7 @@ namespace DetourNavigator
         if (shapes.mAvoid)
         {
             const auto avoidId = reinterpret_cast<std::size_t>(shapes.mAvoid);
-            if (mNavMeshManager.updateObject(avoidId, *shapes.mAvoid, transform, RC_NULL_AREA))
+            if (mNavMeshManager.updateObject(avoidId, *shapes.mAvoid, transform, AreaType_null))
             {
                 updateAvoidShapeId(id, avoidId);
                 result = true;

@@ -20,15 +20,15 @@ namespace DetourNavigator
     public:
         RecastMeshBuilder(const Settings& settings, const TileBounds& bounds);
 
-        void addObject(const btCollisionShape& shape, const btTransform& transform, const unsigned char flags);
+        void addObject(const btCollisionShape& shape, const btTransform& transform, const AreaType areaType);
 
-        void addObject(const btCompoundShape& shape, const btTransform& transform, const unsigned char flags);
+        void addObject(const btCompoundShape& shape, const btTransform& transform, const AreaType areaType);
 
-        void addObject(const btConcaveShape& shape, const btTransform& transform, const unsigned char flags);
+        void addObject(const btConcaveShape& shape, const btTransform& transform, const AreaType areaType);
 
-        void addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform, const unsigned char flags);
+        void addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform, const AreaType areaType);
 
-        void addObject(const btBoxShape& shape, const btTransform& transform, const unsigned char flags);
+        void addObject(const btBoxShape& shape, const btTransform& transform, const AreaType areaType);
 
         std::shared_ptr<RecastMesh> create() const;
 
@@ -39,7 +39,7 @@ namespace DetourNavigator
         TileBounds mBounds;
         std::vector<int> mIndices;
         std::vector<float> mVertices;
-        std::vector<unsigned char> mFlags;
+        std::vector<AreaType> mAreaTypes;
 
         void addObject(const btConcaveShape& shape, const btTransform& transform, btTriangleCallback&& callback);
 
