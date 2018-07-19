@@ -3,8 +3,7 @@ Welcome to OpenMW's Documentation!
 
 .. toctree::
 	:caption: Table of Contents
-	:maxdepth: 2
+	:maxdepth: 3
 
 	manuals/index
 	reference/index
-	source/index
