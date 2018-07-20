@@ -9,6 +9,8 @@
 
 #include <osg/Vec3f>
 
+#include <LinearMath/btTransform.h>
+
 namespace DetourNavigator
 {
     struct Settings;
@@ -16,8 +18,14 @@ namespace DetourNavigator
     class RecastMesh
     {
     public:
+        struct Water
+        {
+            int mCellSize;
+            btTransform mTransform;
+        };
+
         RecastMesh(std::vector<int> indices, std::vector<float> vertices,
-                   std::vector<AreaType> areaTypes, const Settings& settings);
+                   std::vector<AreaType> areaTypes, std::vector<Water> water, const Settings& settings);
 
         const std::vector<int>& getIndices() const
         {
@@ -32,6 +40,11 @@ namespace DetourNavigator
         const std::vector<AreaType>& getAreaTypes() const
         {
             return mAreaTypes;
+        }
+
+        const std::vector<Water>& getWater() const
+        {
+            return mWater;
         }
 
         std::size_t getVerticesCount() const
@@ -63,6 +76,7 @@ namespace DetourNavigator
         std::vector<int> mIndices;
         std::vector<float> mVertices;
         std::vector<AreaType> mAreaTypes;
+        std::vector<Water> mWater;
         ChunkyTriMesh mChunkyTriMesh;
         osg::Vec3f mBoundsMin;
         osg::Vec3f mBoundsMax;

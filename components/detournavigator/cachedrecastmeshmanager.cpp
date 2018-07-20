@@ -32,6 +32,23 @@ namespace DetourNavigator
         return object;
     }
 
+    bool CachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize,
+        const btTransform& transform)
+    {
+        if (!mImpl.addWater(cellPosition, cellSize, transform))
+            return false;
+        mCached.reset();
+        return true;
+    }
+
+    boost::optional<RecastMeshManager::Water> CachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    {
+        const auto water = mImpl.removeWater(cellPosition);
+        if (water)
+            mCached.reset();
+        return water;
+    }
+
     std::shared_ptr<RecastMesh> CachedRecastMeshManager::getMesh()
     {
         if (!mCached)

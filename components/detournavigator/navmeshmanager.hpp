@@ -7,8 +7,6 @@
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-
 #include <osg/Vec3f>
 
 #include <map>
@@ -33,6 +31,10 @@ namespace DetourNavigator
 
         void addAgent(const osg::Vec3f& agentHalfExtents);
 
+        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform);
+
+        bool removeWater(const osg::Vec2i& cellPosition);
+
         void reset(const osg::Vec3f& agentHalfExtents);
 
         void update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents);
@@ -54,6 +56,10 @@ namespace DetourNavigator
         std::size_t mLastRecastMeshManagerRevision = 0;
 
         void addChangedTiles(const btCollisionShape& shape, const btTransform& transform, const ChangeType changeType);
+
+        void addChangedTiles(const int cellSize, const btTransform& transform, const ChangeType changeType);
+
+        void addChangedTile(const TilePosition& tilePosition, const ChangeType changeType);
 
         const std::shared_ptr<NavMeshCacheItem>& getCached(const osg::Vec3f& agentHalfExtents) const;
     };

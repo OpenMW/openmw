@@ -168,42 +168,6 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
       mPlayerTraveling(false), mPlayerInJail(false), mSpellPreloadTimer(0.f)
     {
-        mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
-
-        DetourNavigator::Settings navigatorSettings;
-        navigatorSettings.mBorderSize = Settings::Manager::getInt("border size", "Navigator");
-        navigatorSettings.mCellHeight = Settings::Manager::getFloat("cell height", "Navigator");
-        navigatorSettings.mCellSize = Settings::Manager::getFloat("cell size", "Navigator");
-        navigatorSettings.mDetailSampleDist = Settings::Manager::getFloat("detail sample dist", "Navigator");
-        navigatorSettings.mDetailSampleMaxError = Settings::Manager::getFloat("detail sample max error", "Navigator");
-        navigatorSettings.mMaxClimb = MWPhysics::sStepSizeUp;
-        navigatorSettings.mMaxSimplificationError = Settings::Manager::getFloat("max simplification error", "Navigator");
-        navigatorSettings.mMaxSlope = MWPhysics::sMaxSlope;
-        navigatorSettings.mRecastScaleFactor = Settings::Manager::getFloat("recast scale factor", "Navigator");
-        navigatorSettings.mMaxEdgeLen = Settings::Manager::getInt("max edge len", "Navigator");
-        navigatorSettings.mMaxNavMeshQueryNodes = Settings::Manager::getInt("max nav mesh query nodes", "Navigator");
-        navigatorSettings.mMaxVertsPerPoly = Settings::Manager::getInt("max verts per poly", "Navigator");
-        navigatorSettings.mRegionMergeSize = Settings::Manager::getInt("region merge size", "Navigator");
-        navigatorSettings.mRegionMinSize = Settings::Manager::getInt("region min size", "Navigator");
-        navigatorSettings.mTileSize = Settings::Manager::getInt("tile size", "Navigator");
-        navigatorSettings.mMaxPolygonPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max polygon path size", "Navigator"));
-        navigatorSettings.mMaxSmoothPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max smooth path size", "Navigator"));
-        navigatorSettings.mTrianglesPerChunk = static_cast<std::size_t>(Settings::Manager::getInt("triangles per chunk", "Navigator"));
-        navigatorSettings.mEnableWriteRecastMeshToFile = Settings::Manager::getBool("enable write recast mesh to file", "Navigator");
-        navigatorSettings.mEnableWriteNavMeshToFile = Settings::Manager::getBool("enable write nav mesh to file", "Navigator");
-        navigatorSettings.mRecastMeshPathPrefix = Settings::Manager::getString("recast mesh path prefix", "Navigator");
-        navigatorSettings.mNavMeshPathPrefix = Settings::Manager::getString("nav mesh path prefix", "Navigator");
-        navigatorSettings.mEnableRecastMeshFileNameRevision = Settings::Manager::getBool("enable recast mesh file name revision", "Navigator");
-        navigatorSettings.mEnableNavMeshFileNameRevision = Settings::Manager::getBool("enable nav mesh file name revision", "Navigator");
-        if (Settings::Manager::getBool("enable log", "Navigator"))
-            DetourNavigator::Log::instance().setSink(std::unique_ptr<DetourNavigator::FileSink>(
-                new DetourNavigator::FileSink(Settings::Manager::getString("log path", "Navigator"))));
-        mNavigator.reset(new DetourNavigator::Navigator(navigatorSettings));
-
-        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath, *mNavigator));
-        mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));
-        mRendering->preloadCommonAssets();
-
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
@@ -231,6 +195,43 @@ namespace MWWorld
         mStore.movePlayerRecord();
 
         mSwimHeightScale = mStore.get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
+
+        mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
+
+        DetourNavigator::Settings navigatorSettings;
+        navigatorSettings.mBorderSize = Settings::Manager::getInt("border size", "Navigator");
+        navigatorSettings.mCellHeight = Settings::Manager::getFloat("cell height", "Navigator");
+        navigatorSettings.mCellSize = Settings::Manager::getFloat("cell size", "Navigator");
+        navigatorSettings.mDetailSampleDist = Settings::Manager::getFloat("detail sample dist", "Navigator");
+        navigatorSettings.mDetailSampleMaxError = Settings::Manager::getFloat("detail sample max error", "Navigator");
+        navigatorSettings.mMaxClimb = MWPhysics::sStepSizeUp;
+        navigatorSettings.mMaxSimplificationError = Settings::Manager::getFloat("max simplification error", "Navigator");
+        navigatorSettings.mMaxSlope = MWPhysics::sMaxSlope;
+        navigatorSettings.mRecastScaleFactor = Settings::Manager::getFloat("recast scale factor", "Navigator");
+        navigatorSettings.mSwimHeightScale = mSwimHeightScale;
+        navigatorSettings.mMaxEdgeLen = Settings::Manager::getInt("max edge len", "Navigator");
+        navigatorSettings.mMaxNavMeshQueryNodes = Settings::Manager::getInt("max nav mesh query nodes", "Navigator");
+        navigatorSettings.mMaxVertsPerPoly = Settings::Manager::getInt("max verts per poly", "Navigator");
+        navigatorSettings.mRegionMergeSize = Settings::Manager::getInt("region merge size", "Navigator");
+        navigatorSettings.mRegionMinSize = Settings::Manager::getInt("region min size", "Navigator");
+        navigatorSettings.mTileSize = Settings::Manager::getInt("tile size", "Navigator");
+        navigatorSettings.mMaxPolygonPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max polygon path size", "Navigator"));
+        navigatorSettings.mMaxSmoothPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max smooth path size", "Navigator"));
+        navigatorSettings.mTrianglesPerChunk = static_cast<std::size_t>(Settings::Manager::getInt("triangles per chunk", "Navigator"));
+        navigatorSettings.mEnableWriteRecastMeshToFile = Settings::Manager::getBool("enable write recast mesh to file", "Navigator");
+        navigatorSettings.mEnableWriteNavMeshToFile = Settings::Manager::getBool("enable write nav mesh to file", "Navigator");
+        navigatorSettings.mRecastMeshPathPrefix = Settings::Manager::getString("recast mesh path prefix", "Navigator");
+        navigatorSettings.mNavMeshPathPrefix = Settings::Manager::getString("nav mesh path prefix", "Navigator");
+        navigatorSettings.mEnableRecastMeshFileNameRevision = Settings::Manager::getBool("enable recast mesh file name revision", "Navigator");
+        navigatorSettings.mEnableNavMeshFileNameRevision = Settings::Manager::getBool("enable nav mesh file name revision", "Navigator");
+        if (Settings::Manager::getBool("enable log", "Navigator"))
+            DetourNavigator::Log::instance().setSink(std::unique_ptr<DetourNavigator::FileSink>(
+                new DetourNavigator::FileSink(Settings::Manager::getString("log path", "Navigator"))));
+        mNavigator.reset(new DetourNavigator::Navigator(navigatorSettings));
+
+        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath, *mNavigator));
+        mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));
+        mRendering->preloadCommonAssets();
 
         mWeatherManager.reset(new MWWorld::WeatherManager(*mRendering, mFallback, mStore));
 

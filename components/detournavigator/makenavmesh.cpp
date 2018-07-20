@@ -15,6 +15,7 @@
 #include <Recast.h>
 #include <RecastAlloc.h>
 
+#include <algorithm>
 #include <iomanip>
 #include <limits>
 
@@ -63,6 +64,41 @@ namespace
             , mSize(size)
         {}
     };
+
+    osg::Vec3f makeOsgVec3f(const btVector3& value)
+    {
+        return osg::Vec3f(value.x(), value.y(), value.z());
+    }
+
+    struct WaterBounds
+    {
+        osg::Vec3f mMin;
+        osg::Vec3f mMax;
+    };
+
+    WaterBounds getWaterBounds(const RecastMesh::Water& water, const Settings& settings,
+        const osg::Vec3f& agentHalfExtents)
+    {
+        if (water.mCellSize == std::numeric_limits<int>::max())
+        {
+            const auto transform = getSwimLevelTransform(settings, water.mTransform, agentHalfExtents.z());
+            const auto min = toNavMeshCoordinates(settings, makeOsgVec3f(transform(btVector3(-1, -1, 0))));
+            const auto max = toNavMeshCoordinates(settings, makeOsgVec3f(transform(btVector3(1, 1, 0))));
+            return WaterBounds {
+                osg::Vec3f(-std::numeric_limits<float>::max(), min.y(), -std::numeric_limits<float>::max()),
+                osg::Vec3f(std::numeric_limits<float>::max(), max.y(), std::numeric_limits<float>::max())
+            };
+        }
+        else
+        {
+            const auto transform = getSwimLevelTransform(settings, water.mTransform, agentHalfExtents.z());
+            const auto halfCellSize = water.mCellSize / 2.0f;
+            return WaterBounds {
+                toNavMeshCoordinates(settings, makeOsgVec3f(transform(btVector3(-halfCellSize, -halfCellSize, 0)))),
+                toNavMeshCoordinates(settings, makeOsgVec3f(transform(btVector3(halfCellSize, halfCellSize, 0))))
+            };
+        }
+    }
 
     NavMeshData makeNavMeshTileData(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
         const int tileX, const int tileY, const osg::Vec3f& boundsMin, const osg::Vec3f& boundsMax,
@@ -156,6 +192,56 @@ namespace
             }
         }
 
+        {
+            const std::array<unsigned char, 2> areas {{AreaType_water, AreaType_water}};
+
+            for (const auto& water : recastMesh.getWater())
+            {
+                const auto bounds = getWaterBounds(water, settings, agentHalfExtents);
+
+                const osg::Vec2f tileBoundsMin(
+                    std::min(config.bmax[0], std::max(config.bmin[0], bounds.mMin.x())),
+                    std::min(config.bmax[2], std::max(config.bmin[2], bounds.mMin.z()))
+                );
+                const osg::Vec2f tileBoundsMax(
+                    std::min(config.bmax[0], std::max(config.bmin[0], bounds.mMax.x())),
+                    std::min(config.bmax[2], std::max(config.bmin[2], bounds.mMax.z()))
+                );
+
+                if (tileBoundsMax == tileBoundsMin)
+                    continue;
+
+                const std::array<osg::Vec3f, 4> vertices {{
+                    osg::Vec3f(tileBoundsMin.x(), bounds.mMin.y(), tileBoundsMin.y()),
+                    osg::Vec3f(tileBoundsMin.x(), bounds.mMin.y(), tileBoundsMax.y()),
+                    osg::Vec3f(tileBoundsMax.x(), bounds.mMin.y(), tileBoundsMax.y()),
+                    osg::Vec3f(tileBoundsMax.x(), bounds.mMin.y(), tileBoundsMin.y()),
+                }};
+
+                std::array<float, 4 * 3> convertedVertices;
+                auto convertedVerticesIt = convertedVertices.begin();
+
+                for (const auto& vertex : vertices)
+                    convertedVerticesIt = std::copy(vertex.ptr(), vertex.ptr() + 3, convertedVerticesIt);
+
+                const std::array<int, 6> indices {{
+                    0, 1, 2,
+                    0, 2, 3,
+                }};
+
+                OPENMW_CHECK_DT_RESULT(rcRasterizeTriangles(
+                    &context,
+                    convertedVertices.data(),
+                    static_cast<int>(convertedVertices.size() / 3),
+                    indices.data(),
+                    areas.data(),
+                    static_cast<int>(areas.size()),
+                    solid,
+                    config.walkableClimb
+                ));
+            }
+        }
+
         rcFilterLowHangingWalkableObstacles(&context, config.walkableClimb, solid);
         rcFilterLedgeSpans(&context, config.walkableHeight, config.walkableClimb, solid);
         rcFilterWalkableLowHeightSpans(&context, config.walkableHeight, solid);
@@ -187,8 +273,12 @@ namespace
         }
 
         for (int i = 0; i < polyMesh.npolys; ++i)
+        {
             if (polyMesh.areas[i] == AreaType_ground)
                 polyMesh.flags[i] = Flag_walk;
+            else if (polyMesh.areas[i] == AreaType_water)
+                polyMesh.flags[i] = Flag_swim;
+        }
 
         dtNavMeshCreateParams params;
         params.verts = polyMesh.verts;
@@ -302,8 +392,15 @@ namespace DetourNavigator
             return removeTile();
         }
 
-        const auto& boundsMin = recastMesh->getBoundsMin();
-        const auto& boundsMax = recastMesh->getBoundsMax();
+        auto boundsMin = recastMesh->getBoundsMin();
+        auto boundsMax = recastMesh->getBoundsMax();
+
+        for (const auto& water : recastMesh->getWater())
+        {
+            const auto bounds = getWaterBounds(water, settings, agentHalfExtents);
+            boundsMin.y() = std::min(boundsMin.y(), bounds.mMin.y());
+            boundsMax.y() = std::max(boundsMax.y(), bounds.mMax.y());
+        }
 
         if (boundsMin == boundsMax)
         {

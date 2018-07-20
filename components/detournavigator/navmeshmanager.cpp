@@ -58,6 +58,23 @@ namespace DetourNavigator
         return true;
     }
 
+    bool NavMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform)
+    {
+        if (!mRecastMeshManager.addWater(cellPosition, cellSize, transform))
+            return false;
+        addChangedTiles(cellSize, transform, ChangeType::add);
+        return true;
+    }
+
+    bool NavMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    {
+        const auto water = mRecastMeshManager.removeWater(cellPosition);
+        if (!water)
+            return false;
+        addChangedTiles(water->mCellSize, water->mTransform, ChangeType::remove);
+        return true;
+    }
+
     void NavMeshManager::addAgent(const osg::Vec3f& agentHalfExtents)
     {
         auto cached = mCache.find(agentHalfExtents);
@@ -75,9 +92,7 @@ namespace DetourNavigator
 
     void NavMeshManager::update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents)
     {
-        playerPosition *= mSettings.mRecastScaleFactor;
-        std::swap(playerPosition.y(), playerPosition.z());
-        const auto playerTile = getTilePosition(mSettings, playerPosition);
+        const auto playerTile = getTilePosition(mSettings, toNavMeshCoordinates(mSettings, playerPosition));
         if (mLastRecastMeshManagerRevision >= mRecastMeshManager.getRevision() && mPlayerTile
                 && *mPlayerTile == playerTile)
             return;
@@ -140,20 +155,36 @@ namespace DetourNavigator
     }
 
     void NavMeshManager::addChangedTiles(const btCollisionShape& shape, const btTransform& transform,
-                                         const ChangeType changeType)
+            const ChangeType changeType)
     {
-        getTilesPositions(shape, transform, mSettings, [&] (const TilePosition& v) {
-            for (const auto& cached : mCache)
-                if (cached.second)
-                {
-                    auto& tiles = mChangedTiles[cached.first];
-                    auto tile = tiles.find(v);
-                    if (tile == tiles.end())
-                        tiles.insert(std::make_pair(v, changeType));
-                    else
-                        tile->second = addChangeType(tile->second, changeType);
-                }
-        });
+        getTilesPositions(shape, transform, mSettings,
+            [&] (const TilePosition& v) { addChangedTile(v, changeType); });
+    }
+
+    void NavMeshManager::addChangedTiles(const int cellSize, const btTransform& transform,
+            const ChangeType changeType)
+    {
+        if (cellSize == std::numeric_limits<int>::max())
+            return;
+
+        getTilesPositions(cellSize, transform, mSettings,
+            [&] (const TilePosition& v) { addChangedTile(v, changeType); });
+    }
+
+    void NavMeshManager::addChangedTile(const TilePosition& tilePosition, const ChangeType changeType)
+    {
+        for (const auto& cached : mCache)
+        {
+            if (cached.second)
+            {
+                auto& tiles = mChangedTiles[cached.first];
+                auto tile = tiles.find(tilePosition);
+                if (tile == tiles.end())
+                    tiles.insert(std::make_pair(tilePosition, changeType));
+                else
+                    tile->second = addChangeType(tile->second, changeType);
+            }
+        }
     }
 
     const std::shared_ptr<NavMeshCacheItem>& NavMeshManager::getCached(const osg::Vec3f& agentHalfExtents) const

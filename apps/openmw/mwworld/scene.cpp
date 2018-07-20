@@ -282,6 +282,9 @@ namespace MWWorld
             mPhysics->remove(ptr);
         }
 
+        const auto cellX = (*iter)->getCell()->getGridX();
+        const auto cellY = (*iter)->getCell()->getGridY();
+
         if ((*iter)->getCell()->isExterior())
         {
             const ESM::Land* land =
@@ -291,13 +294,14 @@ namespace MWWorld
                 );
             if (land && land->mDataTypes&ESM::Land::DATA_VHGT)
             {
-                const auto cellX = (*iter)->getCell()->getGridX();
-                const auto cellY = (*iter)->getCell()->getGridY();
                 if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
                     navigator->removeObject(reinterpret_cast<std::size_t>(heightField));
                 mPhysics->removeHeightField(cellX, cellY);
             }
         }
+
+        if ((*iter)->getCell()->hasWater())
+            navigator->removeWater(osg::Vec2i(cellX, cellY));
 
         navigator->update(player.getRefData().getPosition().asVec3());
 
@@ -326,11 +330,12 @@ namespace MWWorld
 
             const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
 
+            const int cellX = cell->getCell()->getGridX();
+            const int cellY = cell->getCell()->getGridY();
+
             // Load terrain physics first...
             if (cell->getCell()->isExterior())
             {
-                int cellX = cell->getCell()->getGridX();
-                int cellY = cell->getCell()->getGridY();
                 osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
                 const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : 0;
                 if (data)
@@ -368,6 +373,18 @@ namespace MWWorld
             {
                 mPhysics->enableWater(waterLevel);
                 mRendering.setWaterHeight(waterLevel);
+
+                if (cell->getCell()->isExterior())
+                {
+                    if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
+                        navigator->addWater(osg::Vec2i(cellX, cellY), ESM::Land::REAL_SIZE,
+                            cell->getWaterLevel(), heightField->getCollisionObject()->getWorldTransform());
+                }
+                else
+                {
+                    navigator->addWater(osg::Vec2i(cellX, cellY), std::numeric_limits<int>::max(),
+                        cell->getWaterLevel(), btTransform::getIdentity());
+                }
             }
             else
                 mPhysics->disableWater();

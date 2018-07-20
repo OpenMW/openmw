@@ -37,6 +37,11 @@ namespace DetourNavigator
 
         bool removeObject(std::size_t id);
 
+        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
+            const btTransform& transform);
+
+        bool removeWater(const osg::Vec2i& cellPosition);
+
         void update(const osg::Vec3f& playerPosition);
 
         void wait();
@@ -59,8 +64,11 @@ namespace DetourNavigator
         NavMeshManager mNavMeshManager;
         std::map<osg::Vec3f, std::size_t> mAgents;
         std::unordered_map<std::size_t, std::size_t> mAvoidIds;
+        std::unordered_map<std::size_t, std::size_t> mWaterIds;
 
-        void updateAvoidShapeId(std::size_t id, std::size_t avoidId);
+        void updateAvoidShapeId(const std::size_t id, const std::size_t avoidId);
+        void updateWaterShapeId(const std::size_t id, const std::size_t waterId);
+        void updateId(const std::size_t id, const std::size_t waterId, std::unordered_map<std::size_t, std::size_t>& ids);
     };
 }
 

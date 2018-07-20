@@ -6,6 +6,7 @@
 
 #include <set>
 #include <memory>
+#include <unordered_map>
 
 namespace osg
 {
@@ -25,6 +26,11 @@ namespace Files
 namespace Loading
 {
     class Listener;
+}
+
+namespace DetourNavigator
+{
+    class Water;
 }
 
 namespace MWRender

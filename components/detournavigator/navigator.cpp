@@ -71,9 +71,24 @@ namespace DetourNavigator
     {
         bool result = mNavMeshManager.removeObject(id);
         const auto avoid = mAvoidIds.find(id);
-        if (avoid == mAvoidIds.end())
-            return result;
-        return mNavMeshManager.removeObject(avoid->second) || result;
+        if (avoid != mAvoidIds.end())
+            result = mNavMeshManager.removeObject(avoid->second) || result;
+        const auto water = mWaterIds.find(id);
+        if (water != mWaterIds.end())
+            result = mNavMeshManager.removeObject(water->second) || result;
+        return result;
+    }
+
+    bool Navigator::addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
+        const btTransform& transform)
+    {
+        return mNavMeshManager.addWater(cellPosition, cellSize,
+            btTransform(transform.getBasis(), btVector3(transform.getOrigin().x(), transform.getOrigin().y(), level)));
+    }
+
+    bool Navigator::removeWater(const osg::Vec2i& cellPosition)
+    {
+        return mNavMeshManager.removeWater(cellPosition);
     }
 
     void Navigator::update(const osg::Vec3f& playerPosition)
@@ -97,13 +112,23 @@ namespace DetourNavigator
         return mSettings;
     }
 
-    void Navigator::updateAvoidShapeId(std::size_t id, std::size_t avoidId)
+    void Navigator::updateAvoidShapeId(const std::size_t id, const std::size_t avoidId)
     {
-        auto inserted = mAvoidIds.insert(std::make_pair(id, avoidId));
+        updateId(id, avoidId, mWaterIds);
+    }
+
+    void Navigator::updateWaterShapeId(const std::size_t id, const std::size_t waterId)
+    {
+        updateId(id, waterId, mWaterIds);
+    }
+
+    void Navigator::updateId(const std::size_t id, const std::size_t updateId, std::unordered_map<std::size_t, std::size_t>& ids)
+    {
+        auto inserted = ids.insert(std::make_pair(id, updateId));
         if (!inserted.second)
         {
             mNavMeshManager.removeObject(inserted.first->second);
-            inserted.second = avoidId;
+            inserted.second = updateId;
         }
     }
 }

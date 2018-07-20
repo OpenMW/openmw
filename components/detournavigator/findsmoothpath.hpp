@@ -3,12 +3,15 @@
 
 #include "dtstatus.hpp"
 #include "exceptions.hpp"
+#include "flags.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"
 
 #include <DetourCommon.h>
 #include <DetourNavMesh.h>
 #include <DetourNavMeshQuery.h>
+
+#include <LinearMath/btVector3.h>
 
 #include <boost/optional.hpp>
 
@@ -25,6 +28,11 @@ namespace DetourNavigator
     inline osg::Vec3f makeOsgVec3f(const float* values)
     {
         return osg::Vec3f(values[0], values[1], values[2]);
+    }
+
+    inline osg::Vec3f makeOsgVec3f(const btVector3& value)
+    {
+        return osg::Vec3f(value.x(), value.y(), value.z());
     }
 
     inline bool inRange(const osg::Vec3f& v1, const osg::Vec3f& v2, const float r, const float h)
@@ -217,6 +225,7 @@ namespace DetourNavigator
         OPENMW_CHECK_DT_STATUS(navMeshQuery.init(&navMesh, settings.mMaxNavMeshQueryNodes));
 
         dtQueryFilter queryFilter;
+        queryFilter.setIncludeFlags(Flag_swim | Flag_walk);
 
         dtPolyRef startRef = 0;
         osg::Vec3f startPolygonPosition;

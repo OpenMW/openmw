@@ -83,6 +83,80 @@ namespace DetourNavigator
         return result;
     }
 
+    bool TileCachedRecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize,
+        const btTransform& transform)
+    {
+        const auto border = getBorderSize(mSettings);
+
+        auto& tilesPositions = mWaterTilesPositions[cellPosition];
+
+        bool result = false;
+
+        if (cellSize == std::numeric_limits<int>::max())
+        {
+            const std::lock_guard<std::mutex> lock(mTilesMutex);
+            for (auto& tile : mTiles)
+            {
+                if (tile.second.addWater(cellPosition, cellSize, transform))
+                {
+                    tilesPositions.push_back(tile.first);
+                    result = true;
+                }
+            }
+        }
+        else
+        {
+            getTilesPositions(cellSize, transform, mSettings, [&] (const TilePosition& tilePosition)
+                {
+                    std::unique_lock<std::mutex> lock(mTilesMutex);
+                    auto tile = mTiles.find(tilePosition);
+                    if (tile == mTiles.end())
+                    {
+                        auto tileBounds = makeTileBounds(mSettings, tilePosition);
+                        tileBounds.mMin -= osg::Vec2f(border, border);
+                        tileBounds.mMax += osg::Vec2f(border, border);
+                        tile = mTiles.insert(std::make_pair(tilePosition,
+                                CachedRecastMeshManager(mSettings, tileBounds))).first;
+                    }
+                    if (tile->second.addWater(cellPosition, cellSize, transform))
+                    {
+                        lock.unlock();
+                        tilesPositions.push_back(tilePosition);
+                        result = true;
+                    }
+                });
+        }
+
+        if (result)
+            ++mRevision;
+
+        return result;
+    }
+
+    boost::optional<RecastMeshManager::Water> TileCachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    {
+        const auto object = mWaterTilesPositions.find(cellPosition);
+        if (object == mWaterTilesPositions.end())
+            return boost::none;
+        boost::optional<RecastMeshManager::Water> result;
+        for (const auto& tilePosition : object->second)
+        {
+            std::unique_lock<std::mutex> lock(mTilesMutex);
+            const auto tile = mTiles.find(tilePosition);
+            if (tile == mTiles.end())
+                continue;
+            const auto tileResult = tile->second.removeWater(cellPosition);
+            if (tile->second.isEmpty())
+                mTiles.erase(tile);
+            lock.unlock();
+            if (tileResult && !result)
+                result = tileResult;
+        }
+        if (result)
+            ++mRevision;
+        return result;
+    }
+
     std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getMesh(const TilePosition& tilePosition)
     {
         const std::lock_guard<std::mutex> lock(mTilesMutex);

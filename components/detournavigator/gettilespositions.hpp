@@ -51,6 +51,23 @@ namespace DetourNavigator
 
         getTilesPositions(makeOsgVec3f(aabbMin), makeOsgVec3f(aabbMax), settings, std::forward<Callback>(callback));
     }
+
+    template <class Callback>
+    void getTilesPositions(const int cellSize, const btTransform& transform,
+        const Settings& settings, Callback&& callback)
+    {
+        const auto halfCellSize = cellSize / 2;
+        auto aabbMin = transform(btVector3(-halfCellSize, -halfCellSize, 0));
+        auto aabbMax = transform(btVector3(halfCellSize, halfCellSize, 0));
+
+        aabbMin.setX(std::min(aabbMin.x(), aabbMax.x()));
+        aabbMin.setY(std::min(aabbMin.y(), aabbMax.y()));
+
+        aabbMax.setX(std::max(aabbMin.x(), aabbMax.x()));
+        aabbMax.setY(std::max(aabbMin.y(), aabbMax.y()));
+
+        getTilesPositions(makeOsgVec3f(aabbMin), makeOsgVec3f(aabbMax), settings, std::forward<Callback>(callback));
+    }
 }
 
 #endif

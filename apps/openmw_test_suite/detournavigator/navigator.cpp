@@ -48,6 +48,7 @@ namespace
             mSettings.mMaxSimplificationError = 1.3f;
             mSettings.mMaxSlope = 49;
             mSettings.mRecastScaleFactor = 0.017647058823529415f;
+            mSettings.mSwimHeightScale = 0.89999997615814208984375f;
             mSettings.mMaxEdgeLen = 12;
             mSettings.mMaxNavMeshQueryNodes = 2048;
             mSettings.mMaxVertsPerPoly = 6;
@@ -413,6 +414,144 @@ namespace
             osg::Vec3f(187.984161376953125, -200.1311798095703125, -0.764044582843780517578125),
             osg::Vec3f(212.8063507080078125, -213.7926788330078125, 1.7198636531829833984375),
             osg::Vec3f(215, -215, 1.93937528133392333984375),
+        })) << mPath;
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_ground_lower_than_water)
+    {
+        std::array<btScalar, 5 * 5> heightfieldData {{
+            -50,  -50,  -50,  -50,    0,
+            -50, -100, -150, -100,  -50,
+            -50, -150, -200, -150, -100,
+            -50, -100, -150, -100, -100,
+              0,  -50, -100, -100, -100,
+        }};
+        btHeightfieldTerrainShape shape(5, 5, heightfieldData.data(), 1, 0, 0, 2, PHY_FLOAT, false);
+        shape.setLocalScaling(btVector3(128, 128, 1));
+
+        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addWater(osg::Vec2i(0, 0), 128 * 4, 300, btTransform::getIdentity());
+        mNavigator->addObject(1, shape, btTransform::getIdentity());
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        mStart.x() = 0;
+        mStart.z() = 300;
+        mEnd.x() = 0;
+        mEnd.z() = 300;
+
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut);
+
+        EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
+            osg::Vec3f(0, 215, 185.33331298828125),
+            osg::Vec3f(0, 186.6666717529296875, 185.33331298828125),
+            osg::Vec3f(0, 158.333343505859375, 185.33331298828125),
+            osg::Vec3f(0, 130.0000152587890625, 185.33331298828125),
+            osg::Vec3f(0, 101.66667938232421875, 185.33331298828125),
+            osg::Vec3f(0, 73.333343505859375, 185.33331298828125),
+            osg::Vec3f(0, 45.0000152587890625, 185.33331298828125),
+            osg::Vec3f(0, 16.6666812896728515625, 185.33331298828125),
+            osg::Vec3f(0, -11.66664981842041015625, 185.33331298828125),
+            osg::Vec3f(0, -39.999980926513671875, 185.33331298828125),
+            osg::Vec3f(0, -68.33331298828125, 185.33331298828125),
+            osg::Vec3f(0, -96.66664886474609375, 185.33331298828125),
+            osg::Vec3f(0, -124.99997711181640625, 185.33331298828125),
+            osg::Vec3f(0, -153.33331298828125, 185.33331298828125),
+            osg::Vec3f(0, -181.6666412353515625, 185.33331298828125),
+            osg::Vec3f(0, -209.999969482421875, 185.33331298828125),
+            osg::Vec3f(0, -215, 185.33331298828125),
+        })) << mPath;
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_when_ground_cross_water)
+    {
+        std::array<btScalar, 7 * 7> heightfieldData {{
+            0,    0,    0,    0,    0,    0, 0,
+            0, -100, -100, -100, -100, -100, 0,
+            0, -100, -150, -150, -150, -100, 0,
+            0, -100, -150, -200, -150, -100, 0,
+            0, -100, -150, -150, -150, -100, 0,
+            0, -100, -100, -100, -100, -100, 0,
+            0,    0,    0,    0,    0,    0, 0,
+        }};
+        btHeightfieldTerrainShape shape(7, 7, heightfieldData.data(), 1, 0, 0, 2, PHY_FLOAT, false);
+        shape.setLocalScaling(btVector3(128, 128, 1));
+
+        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addWater(osg::Vec2i(0, 0), 128 * 4, -25, btTransform::getIdentity());
+        mNavigator->addObject(1, shape, btTransform::getIdentity());
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        mStart.x() = 0;
+        mEnd.x() = 0;
+
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut);
+
+        EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
+            osg::Vec3f(0, 215, -94.75363922119140625),
+            osg::Vec3f(0, 186.6666717529296875, -106.0000152587890625),
+            osg::Vec3f(0, 158.333343505859375, -115.85507965087890625),
+            osg::Vec3f(0, 130.0000152587890625, -125.71016693115234375),
+            osg::Vec3f(0, 101.66667938232421875, -135.5652313232421875),
+            osg::Vec3f(0, 73.333343505859375, -143.3333587646484375),
+            osg::Vec3f(0, 45.0000152587890625, -143.3333587646484375),
+            osg::Vec3f(0, 16.6666812896728515625, -143.3333587646484375),
+            osg::Vec3f(0, -11.66664981842041015625, -143.3333587646484375),
+            osg::Vec3f(0, -39.999980926513671875, -143.3333587646484375),
+            osg::Vec3f(0, -68.33331298828125, -143.3333587646484375),
+            osg::Vec3f(0, -96.66664886474609375, -137.3043670654296875),
+            osg::Vec3f(0, -124.99997711181640625, -127.44930267333984375),
+            osg::Vec3f(0, -153.33331298828125, -117.5942230224609375),
+            osg::Vec3f(0, -181.6666412353515625, -107.7391510009765625),
+            osg::Vec3f(0, -209.999969482421875, -97.79712677001953125),
+            osg::Vec3f(0, -215, -94.753631591796875),
+        })) << mPath;
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_when_ground_cross_water_with_max_int_cells_size)
+    {
+        std::array<btScalar, 7 * 7> heightfieldData {{
+            0,    0,    0,    0,    0,    0, 0,
+            0, -100, -100, -100, -100, -100, 0,
+            0, -100, -150, -150, -150, -100, 0,
+            0, -100, -150, -200, -150, -100, 0,
+            0, -100, -150, -150, -150, -100, 0,
+            0, -100, -100, -100, -100, -100, 0,
+            0,    0,    0,    0,    0,    0, 0,
+        }};
+        btHeightfieldTerrainShape shape(7, 7, heightfieldData.data(), 1, 0, 0, 2, PHY_FLOAT, false);
+        shape.setLocalScaling(btVector3(128, 128, 1));
+
+        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addObject(1, shape, btTransform::getIdentity());
+        mNavigator->addWater(osg::Vec2i(0, 0), std::numeric_limits<int>::max(), -25, btTransform::getIdentity());
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        mStart.x() = 0;
+        mEnd.x() = 0;
+
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut);
+
+        EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
+            osg::Vec3f(0, 215, -94.75363922119140625),
+            osg::Vec3f(0, 186.6666717529296875, -106.0000152587890625),
+            osg::Vec3f(0, 158.333343505859375, -115.85507965087890625),
+            osg::Vec3f(0, 130.0000152587890625, -125.71016693115234375),
+            osg::Vec3f(0, 101.66667938232421875, -135.5652313232421875),
+            osg::Vec3f(0, 73.333343505859375, -143.3333587646484375),
+            osg::Vec3f(0, 45.0000152587890625, -143.3333587646484375),
+            osg::Vec3f(0, 16.6666812896728515625, -143.3333587646484375),
+            osg::Vec3f(0, -11.66664981842041015625, -143.3333587646484375),
+            osg::Vec3f(0, -39.999980926513671875, -143.3333587646484375),
+            osg::Vec3f(0, -68.33331298828125, -143.3333587646484375),
+            osg::Vec3f(0, -96.66664886474609375, -137.3043670654296875),
+            osg::Vec3f(0, -124.99997711181640625, -127.44930267333984375),
+            osg::Vec3f(0, -153.33331298828125, -117.5942230224609375),
+            osg::Vec3f(0, -181.6666412353515625, -107.7391510009765625),
+            osg::Vec3f(0, -209.999969482421875, -97.79712677001953125),
+            osg::Vec3f(0, -215, -94.753631591796875),
         })) << mPath;
     }
 }

@@ -4,14 +4,17 @@
 #include "recastmesh.hpp"
 #include "tilebounds.hpp"
 
+#include <LinearMath/btTransform.h>
+
+#include <osg/Vec2f>
+#include <osg/Vec2i>
+
 class btBoxShape;
 class btCollisionShape;
 class btCompoundShape;
 class btConcaveShape;
 class btHeightfieldTerrainShape;
-class btTransform;
 class btTriangleCallback;
-class btVector3;
 
 namespace DetourNavigator
 {
@@ -30,6 +33,8 @@ namespace DetourNavigator
 
         void addObject(const btBoxShape& shape, const btTransform& transform, const AreaType areaType);
 
+        void addWater(const int mCellSize, const btTransform& transform);
+
         std::shared_ptr<RecastMesh> create() const;
 
         void reset();
@@ -40,6 +45,7 @@ namespace DetourNavigator
         std::vector<int> mIndices;
         std::vector<float> mVertices;
         std::vector<AreaType> mAreaTypes;
+        std::vector<RecastMesh::Water> mWater;
 
         void addObject(const btConcaveShape& shape, const btTransform& transform, btTriangleCallback&& callback);
 

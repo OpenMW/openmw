@@ -9,7 +9,6 @@
 #include <osg/Vec3f>
 
 #include <memory>
-#include <set>
 
 class dtNavMesh;
 

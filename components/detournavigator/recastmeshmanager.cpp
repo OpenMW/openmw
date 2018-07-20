@@ -42,6 +42,26 @@ namespace DetourNavigator
         return result;
     }
 
+    bool RecastMeshManager::addWater(const osg::Vec2i& cellPosition, const int cellSize,
+        const btTransform& transform)
+    {
+        if (!mWater.insert(std::make_pair(cellPosition, Water {cellSize, transform})).second)
+            return false;
+        mShouldRebuild = true;
+        return true;
+    }
+
+    boost::optional<RecastMeshManager::Water> RecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    {
+        const auto water = mWater.find(cellPosition);
+        if (water == mWater.end())
+            return boost::none;
+        mShouldRebuild = true;
+        const auto result = water->second;
+        mWater.erase(water);
+        return result;
+    }
+
     std::shared_ptr<RecastMesh> RecastMeshManager::getMesh()
     {
         rebuild();
@@ -58,6 +78,8 @@ namespace DetourNavigator
         if (!mShouldRebuild)
             return;
         mMeshBuilder.reset();
+        for (const auto& v : mWater)
+            mMeshBuilder.addWater(v.second.mCellSize, v.second.mTransform);
         for (const auto& v : mObjects)
             mMeshBuilder.addObject(v.second.getShape(), v.second.getTransform(), v.second.getAreaType());
         mShouldRebuild = false;

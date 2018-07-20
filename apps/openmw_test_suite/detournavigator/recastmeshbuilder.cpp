@@ -13,6 +13,14 @@
 
 #include <gtest/gtest.h>
 
+namespace DetourNavigator
+{
+    static inline bool operator ==(const RecastMesh::Water& lhs, const RecastMesh::Water& rhs)
+    {
+        return lhs.mCellSize == rhs.mCellSize && lhs.mTransform == rhs.mTransform;
+    }
+}
+
 namespace
 {
     using namespace testing;
@@ -390,5 +398,15 @@ namespace
         }));
         EXPECT_EQ(recastMesh->getIndices(), std::vector<int>({0, 1, 2, 3, 4, 5}));
         EXPECT_EQ(recastMesh->getAreaTypes(), std::vector<AreaType>({AreaType_ground, AreaType_null}));
+    }
+
+    TEST_F(DetourNavigatorRecastMeshBuilderTest, add_water_then_get_water_should_return_it)
+    {
+        RecastMeshBuilder builder(mSettings, mBounds);
+        builder.addWater(1000, btTransform(btMatrix3x3::getIdentity(), btVector3(100, 200, 300)));
+        const auto recastMesh = builder.create();
+        EXPECT_EQ(recastMesh->getWater(), std::vector<RecastMesh::Water>({
+            RecastMesh::Water {1000, btTransform(btMatrix3x3::getIdentity(), btVector3(100, 200, 300))}
+        }));
     }
 }

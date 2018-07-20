@@ -21,6 +21,10 @@ namespace DetourNavigator
 
         boost::optional<RemovedRecastMeshObject> removeObject(std::size_t id);
 
+        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform);
+
+        boost::optional<RecastMeshManager::Water> removeWater(const osg::Vec2i& cellPosition);
+
         std::shared_ptr<RecastMesh> getMesh(const TilePosition& tilePosition);
 
         bool hasTile(const TilePosition& tilePosition);
@@ -40,6 +44,7 @@ namespace DetourNavigator
         std::mutex mTilesMutex;
         std::map<TilePosition, CachedRecastMeshManager> mTiles;
         std::unordered_map<std::size_t, std::vector<TilePosition>> mObjectsTilesPositions;
+        std::map<osg::Vec2i, std::vector<TilePosition>> mWaterTilesPositions;
         std::size_t mRevision = 0;
     };
 }

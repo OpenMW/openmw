@@ -82,19 +82,16 @@ namespace DetourNavigator
 
     void RecastMeshBuilder::addObject(const btBoxShape& shape, const btTransform& transform, const AreaType areaType)
     {
-        const auto indexOffset = int(mVertices.size() / 3);
+        const auto indexOffset = static_cast<int>(mVertices.size() / 3);
 
-        for (int vertex = 0; vertex < shape.getNumVertices(); ++vertex)
+        for (int vertex = 0, count = shape.getNumVertices(); vertex < count; ++vertex)
         {
             btVector3 position;
             shape.getVertex(vertex, position);
             addVertex(transform(position));
         }
 
-        for (int vertex = 0; vertex < 12; ++vertex)
-            mAreaTypes.push_back(areaType);
-
-        static const std::array<int, 36> indices {{
+        const std::array<int, 36> indices {{
             0, 2, 3,
             3, 1, 0,
             0, 4, 6,
@@ -111,11 +108,18 @@ namespace DetourNavigator
 
         std::transform(indices.begin(), indices.end(), std::back_inserter(mIndices),
             [&] (int index) { return index + indexOffset; });
+
+        std::generate_n(std::back_inserter(mAreaTypes), 12, [=] { return areaType; });
+    }
+
+    void RecastMeshBuilder::addWater(const int cellSize, const btTransform& transform)
+    {
+        mWater.push_back(RecastMesh::Water {cellSize, transform});
     }
 
     std::shared_ptr<RecastMesh> RecastMeshBuilder::create() const
     {
-        return std::make_shared<RecastMesh>(mIndices, mVertices, mAreaTypes, mSettings);
+        return std::make_shared<RecastMesh>(mIndices, mVertices, mAreaTypes, mWater, mSettings);
     }
 
     void RecastMeshBuilder::reset()
@@ -123,6 +127,7 @@ namespace DetourNavigator
         mIndices.clear();
         mVertices.clear();
         mAreaTypes.clear();
+        mWater.clear();
     }
 
     void RecastMeshBuilder::addObject(const btConcaveShape& shape, const btTransform& transform,

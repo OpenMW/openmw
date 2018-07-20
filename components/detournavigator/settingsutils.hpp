@@ -6,6 +6,8 @@
 #include "tileposition.hpp"
 #include "tilebounds.hpp"
 
+#include <LinearMath/btTransform.h>
+
 #include <osg/Vec2f>
 #include <osg/Vec2i>
 #include <osg/Vec3f>
@@ -67,6 +69,20 @@ namespace DetourNavigator
     inline float getBorderSize(const Settings& settings)
     {
         return settings.mBorderSize * settings.mCellSize;
+    }
+
+    inline float getSwimLevel(const Settings& settings, const float agentHalfExtentsZ)
+    {
+        return - settings.mSwimHeightScale * agentHalfExtentsZ;
+    }
+
+    inline btTransform getSwimLevelTransform(const Settings& settings, const btTransform& transform,
+        const float agentHalfExtentsZ)
+    {
+        return btTransform(
+            transform.getBasis(),
+            transform.getOrigin() + btVector3(0, 0, getSwimLevel(settings, agentHalfExtentsZ) - agentHalfExtentsZ)
+        );
     }
 }
 
