@@ -925,6 +925,10 @@ namespace MWClass
 
     float Npc::getSpeed(const MWWorld::Ptr& ptr) const
     {
+        const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead())
+            return 0.f;
+
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const GMST& gmst = getGmst();
 
@@ -933,8 +937,8 @@ namespace MWClass
 
         const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
-        bool sneaking = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        bool running = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run);
+        bool sneaking = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
+        bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
 
         float walkSpeed = gmst.fMinWalkSpeed->getFloat() + 0.01f*npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()*
                                                       (gmst.fMaxWalkSpeed->getFloat() - gmst.fMinWalkSpeed->getFloat());

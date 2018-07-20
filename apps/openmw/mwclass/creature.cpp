@@ -519,6 +519,9 @@ namespace MWClass
     float Creature::getSpeed(const MWWorld::Ptr &ptr) const
     {
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead())
+            return 0.f;
+
         const GMST& gmst = getGmst();
 
         float walkSpeed = gmst.fMinWalkSpeedCreature->getFloat() + 0.01f * stats.getAttribute(ESM::Attribute::Speed).getModified()
