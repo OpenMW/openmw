@@ -25,7 +25,6 @@
 #include "cameracontroller.hpp"
 #include "cellarrow.hpp"
 #include "terraintexturemode.hpp"
-#include "terrainselection.hpp"
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
