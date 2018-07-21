@@ -90,10 +90,14 @@ opencs_units (view/render
     previewwidget editmode instancemode instanceselectionmode instancemovemode
     orbitcameramode pathgridmode selectionmode pathgridselectionmode cameracontroller
 <<<<<<< HEAD
+<<<<<<< HEAD
     cellwater terraintexturemode actor
 =======
     cellwater terraintexturemode terrainselection terraintextureselection
 >>>>>>> Terrain texture selection
+=======
+    cellwater terraintexturemode terrainselection
+>>>>>>> First step towards new data structure
     )
 
 opencs_units_noqt (view/render

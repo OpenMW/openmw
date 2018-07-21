@@ -2,6 +2,7 @@
 
 #include <string>
 #include <sstream>
+#include <memory>
 
 #include <QWidget>
 #include <QIcon>
@@ -9,6 +10,8 @@
 #include <QDropEvent>
 #include <QDragEnterEvent>
 #include <QDrag>
+
+#include <osg/Group>
 
 #include <components/esm/loadland.hpp>
 
@@ -34,21 +37,26 @@
 #include "pagedworldspacewidget.hpp"
 #include "mask.hpp"
 #include "object.hpp" // Something small needed regarding pointers from here ()
+#include "terrainselection.hpp"
 #include "worldspacewidget.hpp"
 
-CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
+CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceWidget, osg::Group* parentNode, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-texture"}, Mask_Terrain | Mask_Reference, "Terrain texture editing", parent),
     mBrushTexture("L0#0"),
     mBrushSize(0),
     mBrushShape(0),
     mTextureBrushScenetool(0),
-    mDragMode(InteractionType_None)
+    mDragMode(InteractionType_None),
+    mParentNode(parentNode)
 {
 }
 
 void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
-    getPagedWorldspaceWidget().activateTerrainSelection(TerrainSelectionType::Texture);
+    if (!mTerrainTextureSelection)
+    {
+        mTerrainTextureSelection.reset(new TerrainSelection(mParentNode));
+    }
 
     if(!mTextureBrushScenetool)
     {
@@ -71,8 +79,6 @@ void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
 
 void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
 {
-    getPagedWorldspaceWidget().deactivateTerrainSelection(TerrainSelectionType::Texture);
-
     if(mTextureBrushScenetool)
     {
         toolbar->removeTool (mTextureBrushScenetool);
@@ -114,12 +120,12 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
 
 void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResult& hit)
 {
-    getPagedWorldspaceWidget().selectTerrain(TerrainSelectionType::Texture, hit);
+    mTerrainTextureSelection->selectTerrainTexture(hit);
 }
 
 void CSVRender::TerrainTextureMode::secondarySelectPressed(const WorldspaceHitResult& hit)
 {
-    getPagedWorldspaceWidget().toggleSelectTerrain(TerrainSelectionType::Texture, hit);
+    mTerrainTextureSelection->toggleSelect(hit);
 }
 
 bool CSVRender::TerrainTextureMode::primaryEditStartDrag (const QPoint& pos)
@@ -167,7 +173,7 @@ bool CSVRender::TerrainTextureMode::primarySelectStartDrag (const QPoint& pos)
         mDragMode = InteractionType_None;
         return false;
     }
-    getPagedWorldspaceWidget().selectTerrain(TerrainSelectionType::Texture, hit);
+    mTerrainTextureSelection->selectTerrainTexture(hit);
     return false;
 }
 
@@ -179,7 +185,7 @@ bool CSVRender::TerrainTextureMode::secondarySelectStartDrag (const QPoint& pos)
         mDragMode = InteractionType_None;
         return false;
     }
-    getPagedWorldspaceWidget().onlyAddSelectTerrain(TerrainSelectionType::Texture, hit);
+    mTerrainTextureSelection->onlyAddSelect(hit);
     return false;
 }
 
@@ -202,13 +208,13 @@ void CSVRender::TerrainTextureMode::drag (const QPoint& pos, int diffX, int diff
     if (mDragMode == InteractionType_PrimarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        if (!hit.hit) {} else getPagedWorldspaceWidget().selectTerrain(TerrainSelectionType::Texture, hit);
+        if (!hit.hit) {} else mTerrainTextureSelection->selectTerrainTexture(hit);
     }
 
     if (mDragMode == InteractionType_SecondarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        if (!hit.hit) {} else getPagedWorldspaceWidget().onlyAddSelectTerrain(TerrainSelectionType::Texture, hit);
+        if (!hit.hit) {} else mTerrainTextureSelection->onlyAddSelect(hit);
     }
 }
 

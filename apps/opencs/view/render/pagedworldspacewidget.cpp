@@ -25,6 +25,7 @@
 #include "cameracontroller.hpp"
 #include "cellarrow.hpp"
 #include "terraintexturemode.hpp"
+#include "terrainselection.hpp"
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
@@ -140,7 +141,7 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
         new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain shape editing"),
         "terrain-shape");
     tool->addButton (
-        new TerrainTextureMode (this, tool),
+        new TerrainTextureMode (this, mRootNode, tool),
         "terrain-texture");
     tool->addButton (
         new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain vertex paint editing"),
@@ -837,56 +838,6 @@ void CSVRender::PagedWorldspaceWidget::reset (unsigned int elementMask)
     for (std::map<CSMWorld::CellCoordinates, Cell *>::const_iterator iter = mCells.begin();
         iter!=mCells.end(); ++iter)
         iter->second->reset (elementMask);
-}
-
-void CSVRender::PagedWorldspaceWidget::selectTerrain(TerrainSelectionType type, const WorldspaceHitResult& hit)
-{
-    for (auto cell : mCells) {
-        auto terrainSelection = cell.second->getTerrainSelection(type);
-        if (terrainSelection) {
-            terrainSelection->select(hit);
-        }
-    }
-}
-
-void CSVRender::PagedWorldspaceWidget::onlyAddSelectTerrain(TerrainSelectionType type, const WorldspaceHitResult& hit)
-{
-    for (auto cell : mCells) {
-        auto terrainSelection = cell.second->getTerrainSelection(type);
-        if (terrainSelection) {
-            terrainSelection->onlyAddSelect(hit);
-        }
-    }
-}
-
-void CSVRender::PagedWorldspaceWidget::toggleSelectTerrain(TerrainSelectionType type, const WorldspaceHitResult& hit)
-{
-    for (auto cell : mCells) {
-        auto terrainSelection = cell.second->getTerrainSelection(type);
-        if (terrainSelection) {
-            terrainSelection->toggleSelect(hit);
-        }
-    }
-}
-
-void CSVRender::PagedWorldspaceWidget::activateTerrainSelection(TerrainSelectionType type)
-{
-    for (auto cell : mCells) {
-        auto terrainSelection = cell.second->getTerrainSelection(type);
-        if (terrainSelection) {
-            terrainSelection->activate();
-        }
-    }
-}
-
-void CSVRender::PagedWorldspaceWidget::deactivateTerrainSelection(TerrainSelectionType type)
-{
-    for (auto cell : mCells) {
-        auto terrainSelection = cell.second->getTerrainSelection(type);
-        if (terrainSelection) {
-            terrainSelection->deactivate();
-        }
-    }
 }
 
 CSVWidget::SceneToolToggle2 *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (

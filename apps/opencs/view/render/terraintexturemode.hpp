@@ -4,11 +4,17 @@
 #include "editmode.hpp"
 
 #include <string>
+#include <memory>
 
 #include <QWidget>
 #include <QEvent>
 
+<<<<<<< HEAD
 #ifndef Q_MOC_RUN
+=======
+#include <osg/Group>
+
+>>>>>>> First step towards new data structure
 #include "../../model/world/data.hpp"
 #include "../../model/world/land.hpp"
 
@@ -17,6 +23,8 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/landtexture.hpp"
 #endif
+
+#include "terrainselection.hpp"
 
 namespace CSVWidget
 {
@@ -27,7 +35,7 @@ namespace CSVRender
 {
 
     class PagedWorldspaceWidget;
-    
+
     class TerrainTextureMode : public EditMode
     {
         Q_OBJECT
@@ -44,7 +52,7 @@ namespace CSVRender
             };
 
             /// \brief Editmode for terrain texture grid
-            TerrainTextureMode(WorldspaceWidget*, QWidget* parent = nullptr);
+            TerrainTextureMode(WorldspaceWidget*, osg::Group* parentNode, QWidget* parent = nullptr);
 
             void primaryOpenPressed (const WorldspaceHitResult& hit);
 
@@ -96,6 +104,8 @@ namespace CSVRender
             int mBrushShape;
             CSVWidget::SceneToolTextureBrush *mTextureBrushScenetool;
             int mDragMode;
+            osg::Group* mParentNode;
+            std::unique_ptr<TerrainSelection> mTerrainTextureSelection;
 
             const int cellSize {ESM::Land::REAL_SIZE};
             const int landSize {ESM::Land::LAND_SIZE};
