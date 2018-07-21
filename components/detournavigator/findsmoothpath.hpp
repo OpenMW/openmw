@@ -219,13 +219,14 @@ namespace DetourNavigator
 
     template <class OutputIterator>
     OutputIterator findSmoothPath(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents,
-            const osg::Vec3f& start, const osg::Vec3f& end, const Settings& settings, OutputIterator out)
+            const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags,
+            const Settings& settings, OutputIterator out)
     {
         dtNavMeshQuery navMeshQuery;
         OPENMW_CHECK_DT_STATUS(navMeshQuery.init(&navMesh, settings.mMaxNavMeshQueryNodes));
 
         dtQueryFilter queryFilter;
-        queryFilter.setIncludeFlags(Flag_swim | Flag_walk);
+        queryFilter.setIncludeFlags(includeFlags);
 
         dtPolyRef startRef = 0;
         osg::Vec3f startPolygonPosition;

@@ -290,14 +290,14 @@ namespace MWMechanics
     }
 
     void PathFinder::buildPathByNavigator(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-        const osg::Vec3f& halfExtents)
+        const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags)
     {
         try
         {
             mPath.clear();
 
             const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
-            navigator->findPath(halfExtents, startPoint, endPoint, std::back_inserter(mPath));
+            navigator->findPath(halfExtents, startPoint, endPoint, flags, std::back_inserter(mPath));
 
             mConstructed = true;
         }

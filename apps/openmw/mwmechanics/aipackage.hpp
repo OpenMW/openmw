@@ -132,6 +132,8 @@ namespace MWMechanics
 
             const PathgridGraph& getPathGridGraph(const MWWorld::CellStore* cell);
 
+            DetourNavigator::Flags getNavigatorFlags(const MWWorld::Ptr& actor) const;
+
             // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;
             ObstacleCheck mObstacleCheck;

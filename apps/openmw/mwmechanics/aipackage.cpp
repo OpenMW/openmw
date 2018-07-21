@@ -141,7 +141,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
             || world->isFlying(actor);
 
         // Prohibit shortcuts for AiWander, if the actor can not move in 3 dimensions.
-        if (actorCanMoveByZ || getTypeId() != TypeIdWander)
+        if (actorCanMoveByZ)
             mIsShortcutting = shortcutPath(start, dest, actor, &destInLOS, actorCanMoveByZ); // try to shortcut first
 
         if (!mIsShortcutting)
@@ -399,4 +399,18 @@ bool MWMechanics::AiPackage::isReachableRotatingOnTheRun(const MWWorld::Ptr& act
     // if pathpoint is reachable for the actor rotating on the run:
     // no points of actor's circle should be farther from the center than destination point
     return (radius <= distToDest);
+}
+
+DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::Ptr& actor) const
+{
+    const auto& actorClass = actor.getClass();
+    DetourNavigator::Flags result = DetourNavigator::Flag_none;
+
+    if (actorClass.isPureWaterCreature(actor) || (getTypeId() != TypeIdWander && actorClass.canSwim(actor)))
+        result |= DetourNavigator::Flag_swim;
+
+    if (actorClass.canWalk(actor))
+        result |= DetourNavigator::Flag_walk;
+
+    return result;
 }

@@ -4,6 +4,7 @@
 #include <deque>
 #include <cassert>
 
+#include <components/detournavigator/flags.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/loadpgrd.hpp>
 
@@ -176,7 +177,7 @@ namespace MWMechanics
             }
 
             void buildPathByNavigator(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-                const osg::Vec3f& halfExtents);
+                const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags);
 
         private:
             bool mConstructed;

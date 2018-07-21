@@ -64,20 +64,20 @@ namespace
 
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_empty_should_throw_exception)
     {
-        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut), InvalidArgument);
+        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut), InvalidArgument);
     }
 
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_existing_agent_with_no_navmesh_should_throw_exception)
     {
         mNavigator->addAgent(mAgentHalfExtents);
-        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut), NavigatorException);
+        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut), NavigatorException);
     }
 
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_removed_agent_should_throw_exception)
     {
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->removeAgent(mAgentHalfExtents);
-        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut), InvalidArgument);
+        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut), InvalidArgument);
     }
 
     TEST_F(DetourNavigatorNavigatorTest, add_agent_should_count_each_agent)
@@ -85,7 +85,7 @@ namespace
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->removeAgent(mAgentHalfExtents);
-        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut), NavigatorException);
+        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut), NavigatorException);
     }
 
     TEST_F(DetourNavigatorNavigatorTest, update_then_find_path_should_return_path)
@@ -105,7 +105,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.85963428020477294921875),
@@ -155,7 +155,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, std::back_inserter(mPath));
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, std::back_inserter(mPath));
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.85963428020477294921875),
@@ -188,7 +188,7 @@ namespace
         mNavigator->wait();
 
         mPath.clear();
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, std::back_inserter(mPath));
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, std::back_inserter(mPath));
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.87827122211456298828125),
@@ -239,7 +239,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, std::back_inserter(mPath));
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, std::back_inserter(mPath));
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.87827122211456298828125),
@@ -274,7 +274,7 @@ namespace
         mNavigator->wait();
 
         mPath.clear();
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.85963428020477294921875),
@@ -331,7 +331,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.96328866481781005859375),
@@ -387,7 +387,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.9393787384033203125),
@@ -417,7 +417,7 @@ namespace
         })) << mPath;
     }
 
-    TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_ground_lower_than_water)
+    TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_ground_lower_than_water_with_only_swim_flag)
     {
         std::array<btScalar, 5 * 5> heightfieldData {{
             -50,  -50,  -50,  -50,    0,
@@ -440,7 +440,7 @@ namespace
         mEnd.x() = 0;
         mEnd.z() = 300;
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_swim, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(0, 215, 185.33331298828125),
@@ -463,7 +463,7 @@ namespace
         })) << mPath;
     }
 
-    TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_when_ground_cross_water)
+    TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_when_ground_cross_water_with_swim_and_walk_flags)
     {
         std::array<btScalar, 7 * 7> heightfieldData {{
             0,    0,    0,    0,    0,    0, 0,
@@ -486,7 +486,7 @@ namespace
         mStart.x() = 0;
         mEnd.x() = 0;
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_swim | Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(0, 215, -94.75363922119140625),
@@ -509,7 +509,7 @@ namespace
         })) << mPath;
     }
 
-    TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_when_ground_cross_water_with_max_int_cells_size)
+    TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_water_when_ground_cross_water_with_max_int_cells_size_and_swim_and_walk_flags)
     {
         std::array<btScalar, 7 * 7> heightfieldData {{
             0,    0,    0,    0,    0,    0, 0,
@@ -532,7 +532,7 @@ namespace
         mStart.x() = 0;
         mEnd.x() = 0;
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_swim | Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(0, 215, -94.75363922119140625),
@@ -551,6 +551,53 @@ namespace
             osg::Vec3f(0, -153.33331298828125, -117.5942230224609375),
             osg::Vec3f(0, -181.6666412353515625, -107.7391510009765625),
             osg::Vec3f(0, -209.999969482421875, -97.79712677001953125),
+            osg::Vec3f(0, -215, -94.753631591796875),
+        })) << mPath;
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, path_should_be_over_ground_when_ground_cross_water_with_only_walk_flag)
+    {
+        std::array<btScalar, 7 * 7> heightfieldData {{
+            0,    0,    0,    0,    0,    0, 0,
+            0, -100, -100, -100, -100, -100, 0,
+            0, -100, -150, -150, -150, -100, 0,
+            0, -100, -150, -200, -150, -100, 0,
+            0, -100, -150, -150, -150, -100, 0,
+            0, -100, -100, -100, -100, -100, 0,
+            0,    0,    0,    0,    0,    0, 0,
+        }};
+        btHeightfieldTerrainShape shape(7, 7, heightfieldData.data(), 1, 0, 0, 2, PHY_FLOAT, false);
+        shape.setLocalScaling(btVector3(128, 128, 1));
+
+        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addWater(osg::Vec2i(0, 0), 128 * 4, -25, btTransform::getIdentity());
+        mNavigator->addObject(1, shape, btTransform::getIdentity());
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        mStart.x() = 0;
+        mEnd.x() = 0;
+
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
+
+        EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
+            osg::Vec3f(0, 215, -94.75363922119140625),
+            osg::Vec3f(9.8083515167236328125, 188.4185333251953125, -105.19994354248046875),
+            osg::Vec3f(19.6167049407958984375, 161.837066650390625, -114.25496673583984375),
+            osg::Vec3f(29.42505645751953125, 135.255615234375, -123.309967041015625),
+            osg::Vec3f(39.23340606689453125, 108.674163818359375, -132.3649749755859375),
+            osg::Vec3f(49.04175567626953125, 82.09270477294921875, -137.2874755859375),
+            osg::Vec3f(58.8501129150390625, 55.5112457275390625, -139.2451171875),
+            osg::Vec3f(68.6584625244140625, 28.9297885894775390625, -141.2027740478515625),
+            osg::Vec3f(78.4668121337890625, 2.3483295440673828125, -143.1604156494140625),
+            osg::Vec3f(88.27516937255859375, -24.233127593994140625, -141.3894805908203125),
+            osg::Vec3f(83.73651885986328125, -52.2005767822265625, -142.3761444091796875),
+            osg::Vec3f(79.19786834716796875, -80.16802978515625, -143.114837646484375),
+            osg::Vec3f(64.8477935791015625, -104.598602294921875, -137.840911865234375),
+            osg::Vec3f(50.497714996337890625, -129.0291748046875, -131.45831298828125),
+            osg::Vec3f(36.147632598876953125, -153.459747314453125, -121.42321014404296875),
+            osg::Vec3f(21.7975559234619140625, -177.8903350830078125, -111.38809967041015625),
+            osg::Vec3f(7.44747829437255859375, -202.3209075927734375, -101.1938323974609375),
             osg::Vec3f(0, -215, -94.753631591796875),
         })) << mPath;
     }
