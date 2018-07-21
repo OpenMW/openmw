@@ -10,8 +10,6 @@
 
 #include "../../model/world/cellcoordinates.hpp"
 
-#include "terrainselection.hpp"
-
 class QModelIndex;
 
 namespace osg
@@ -163,8 +161,6 @@ namespace CSVRender
             /// Erase all overrides and restore the visual representation of the cell to its
             /// true state.
             void reset (unsigned int elementMask);
-
-            TerrainSelection* getTerrainSelection(TerrainSelectionType) const;
 
             friend class CellNodeCallback;
     };
