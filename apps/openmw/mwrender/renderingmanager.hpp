@@ -12,6 +12,8 @@
 #include "renderinginterface.hpp"
 #include "rendermode.hpp"
 
+#include <deque>
+
 namespace osg
 {
     class Group;
@@ -58,6 +60,7 @@ namespace SceneUtil
 namespace DetourNavigator
 {
     class Navigator;
+    struct Settings;
 }
 
 namespace MWRender
@@ -74,6 +77,7 @@ namespace MWRender
     class TerrainStorage;
     class LandManager;
     class NavMesh;
+    class ActorsPaths;
 
     class RenderingManager : public MWRender::RenderingInterface
     {
@@ -219,6 +223,11 @@ namespace MWRender
 
         bool toggleBorders();
 
+        void updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
+                const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const;
+
+        void removeActorPath(const MWWorld::ConstPtr& actor) const;
+
     private:
         void updateProjectionMatrix();
         void updateTextureFiltering();
@@ -245,6 +254,7 @@ namespace MWRender
 
         DetourNavigator::Navigator& mNavigator;
         std::unique_ptr<NavMesh> mNavMesh;
+        std::unique_ptr<ActorsPaths> mActorsPaths;
         std::unique_ptr<Pathgrid> mPathgrid;
         std::unique_ptr<Objects> mObjects;
         std::unique_ptr<Water> mWater;

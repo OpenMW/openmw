@@ -1331,6 +1331,20 @@ namespace MWScript
                 }
         };
 
+        class OpToggleActorsPaths : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    bool enabled =
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_ActorsPaths);
+
+                    runtime.getContext().report (enabled ?
+                        "Agents Paths Rendering -> On" : "Agents Paths Rendering -> Off");
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -1432,6 +1446,7 @@ namespace MWScript
             interpreter.installSegment3 (Compiler::Misc::opcodeShowSceneGraphExplicit, new OpShowSceneGraph<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleBorders, new OpToggleBorders);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleNavMesh, new OpToggleNavMesh);
+            interpreter.installSegment5 (Compiler::Misc::opcodeToggleActorsPaths, new OpToggleActorsPaths);
         }
     }
 }

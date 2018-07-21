@@ -278,7 +278,10 @@ namespace MWWorld
             if (const auto object = mPhysics->getObject(ptr))
                 navigator->removeObject(reinterpret_cast<std::size_t>(object));
             else if (const auto actor = mPhysics->getActor(ptr))
+            {
                 navigator->removeAgent(playerHalfExtents);
+                mRendering.removeActorPath(ptr);
+            }
             mPhysics->remove(ptr);
         }
 

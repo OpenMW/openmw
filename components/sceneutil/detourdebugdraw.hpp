@@ -18,6 +18,8 @@ namespace SceneUtil
 
         void texture(bool state) override;
 
+        void begin(osg::PrimitiveSet::Mode mode, float size);
+
         void begin(duDebugDrawPrimitives prim, float size) override;
 
         void vertex(const float* pos, unsigned int color) override;

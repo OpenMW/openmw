@@ -5,6 +5,7 @@
 #include <components/esm/loadcell.hpp>
 #include <components/esm/loadland.hpp>
 #include <components/esm/loadmgef.hpp>
+#include <components/detournavigator/navigator.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -101,6 +102,12 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     mTimer += duration; //Update timer
 
     const ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
+
+    {
+        const auto halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
+        MWBase::Environment::get().getWorld()->updateActorPath(actor, mPathFinder.getPath(), halfExtents,
+            pos.asVec3(), dest);
+    }
 
     /// Stops the actor when it gets too close to a unloaded cell
     //... At current time, this test is unnecessary. AI shuts down when actor is more than 7168

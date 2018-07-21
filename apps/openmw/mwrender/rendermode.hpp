@@ -12,6 +12,7 @@ namespace MWRender
         Render_Water,
         Render_Scene,
         Render_NavMesh,
+        Render_ActorsPaths,
     };
 
 }

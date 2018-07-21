@@ -66,6 +66,7 @@
 #include "terrainstorage.hpp"
 #include "util.hpp"
 #include "navmesh.hpp"
+#include "actorspaths.hpp"
 
 namespace
 {
@@ -234,7 +235,8 @@ namespace MWRender
 
         mRootNode->addChild(mSceneRoot);
 
-        mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable render", "Navigator")));
+        mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
+        mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
         mPathgrid.reset(new Pathgrid(mRootNode));
 
         mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
@@ -472,6 +474,7 @@ namespace MWRender
     void RenderingManager::removeCell(const MWWorld::CellStore *store)
     {
         mPathgrid->removeCell(store);
+        mActorsPaths->removeCell(store);
         mObjects->removeCell(store);
 
         if (store->getCell()->isExterior())
@@ -526,6 +529,10 @@ namespace MWRender
         else if (mode == Render_NavMesh)
         {
             return mNavMesh->toggle();
+        }
+        else if (mode == Render_ActorsPaths)
+        {
+            return mActorsPaths->toggle();
         }
         return false;
     }
@@ -666,6 +673,7 @@ namespace MWRender
 
     void RenderingManager::removeObject(const MWWorld::Ptr &ptr)
     {
+        mActorsPaths->remove(ptr);
         mObjects->removeObject(ptr);
         mWater->removeEmitter(ptr);
     }
@@ -1049,6 +1057,7 @@ namespace MWRender
     void RenderingManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
     {
         mObjects->updatePtr(old, updated);
+        mActorsPaths->updatePtr(old, updated);
     }
 
     void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale, bool isMagicVFX)
@@ -1369,5 +1378,14 @@ namespace MWRender
         return mTerrainStorage->getLandManager();
     }
 
+    void RenderingManager::updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
+            const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const
+    {
+        mActorsPaths->update(actor, path, halfExtents, start, end, mNavigator.getSettings());
+    }
 
+    void RenderingManager::removeActorPath(const MWWorld::ConstPtr& actor) const
+    {
+        mActorsPaths->remove(actor);
+    }
 }

@@ -56,12 +56,17 @@ namespace SceneUtil
             throw std::logic_error("DebugDraw does not support textures (at " __FILE__ ":" OPENMW_LINE_STRING ")");
     }
 
-    void DebugDraw::begin(duDebugDrawPrimitives prim, float size)
+    void DebugDraw::begin(osg::PrimitiveSet::Mode mode, float size)
     {
-        mMode = toOsgPrimitiveSetMode(prim);
+        mMode = mode;
         mVertices = new osg::Vec3Array;
         mColors = new osg::Vec4Array;
         mSize = size * mRecastInvertedScaleFactor;
+    }
+
+    void DebugDraw::begin(duDebugDrawPrimitives prim, float size)
+    {
+        begin(toOsgPrimitiveSetMode(prim), size);
     }
 
     void DebugDraw::vertex(const float* pos, unsigned color)

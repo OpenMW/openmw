@@ -3745,4 +3745,10 @@ namespace MWWorld
         return mNavigator.get();
     }
 
+    void World::updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
+            const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const
+    {
+        mRendering->updateActorPath(actor, path, halfExtents, start, end);
+    }
+
 }
