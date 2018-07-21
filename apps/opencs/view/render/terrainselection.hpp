@@ -31,7 +31,7 @@ namespace CSVRender
     {
         public:
 
-            TerrainSelection(const CSMWorld::CellCoordinates&, const ESM::Land&, osg::Group* parentNode);
+            TerrainSelection(osg::Group* parentNode);
 
             TerrainSelection(const TerrainSelection&) = delete;
             TerrainSelection& operator=(const TerrainSelection&) = delete;
@@ -41,7 +41,7 @@ namespace CSVRender
 
             virtual ~TerrainSelection();
 
-            void select(const WorldspaceHitResult&);
+            void selectTerrainTexture(const WorldspaceHitResult&);
             void onlyAddSelect(const WorldspaceHitResult&);
             void toggleSelect(const WorldspaceHitResult&);
 
@@ -51,21 +51,22 @@ namespace CSVRender
         protected:
 
             // these functions need better names
-            virtual void addToSelection(osg::Vec3d worldPos) = 0;
-            virtual void toggleSelection(osg::Vec3d worldPos) = 0;
-            virtual void deselect() = 0;
+            void addToSelection(osg::Vec3d worldPos);
+            void toggleSelection(osg::Vec3d worldPos);
+            void deselect();
 
-            virtual void update() = 0;
+            void update();
 
             std::pair<int, int> toTextureCoords(osg::Vec3d worldPos) const;
             std::pair<int, int> toVertexCoords(osg::Vec3d worldPos) const;
 
-            const ESM::Land::LandData* getLandData() const;
             const osg::ref_ptr<osg::PositionAttitudeTransform>& getBaseNode() const;
 
             static double toWorldCoords(int);
 
             static size_t landIndex(int x, int y);
+
+            int calculateLandHeight(int x, int y);
 
         private:
 
@@ -74,9 +75,11 @@ namespace CSVRender
             std::pair<double, double> toCellCoords(osg::Vec3d worldPos) const;
 
             CSMWorld::CellCoordinates mCoords;
-            const ESM::Land& mEsmLand;
             osg::Group* mParentNode;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
+
+            osg::ref_ptr<osg::Geode> mGeode;
+            std::vector<std::pair<int, int>> mSelection; // Global cell_selection coordinate in either vertex or texture units
     };
 }
 

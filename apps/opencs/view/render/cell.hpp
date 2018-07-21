@@ -51,7 +51,6 @@ namespace CSVRender
             std::map<std::string, Object *> mObjects;
             std::unique_ptr<Terrain::TerrainGrid> mTerrain;
             CSMWorld::CellCoordinates mCoordinates;
-            std::unique_ptr<TerrainSelection> mTerrainTextureSelection;
             std::unique_ptr<CellArrow> mCellArrows[4];
             std::unique_ptr<CellMarker> mCellMarker;
             std::unique_ptr<CellBorder> mCellBorder;
