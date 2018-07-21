@@ -16,12 +16,31 @@ namespace MWMechanics
 {
     class PathgridGraph;
 
-    float distance(const ESM::Pathgrid::Point& point, float x, float y, float);
-    float distance(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b);
-    float getZAngleToDir(const osg::Vec3f& dir);
-    float getXAngleToDir(const osg::Vec3f& dir);
-    float getZAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest);
-    float getXAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest);
+    inline float distance(const osg::Vec3f& lhs, const osg::Vec3f& rhs)
+    {
+        return (lhs - rhs).length();
+    }
+
+    inline float getZAngleToDir(const osg::Vec3f& dir)
+    {
+        return std::atan2(dir.x(), dir.y());
+    }
+
+    inline float getXAngleToDir(const osg::Vec3f& dir)
+    {
+        float dirLen = dir.length();
+        return (dirLen != 0) ? -std::asin(dir.z() / dirLen) : 0;
+    }
+
+    inline float getZAngleToPoint(const osg::Vec3f& origin, const osg::Vec3f& dest)
+    {
+        return getZAngleToDir(dest - origin);
+    }
+
+    inline float getXAngleToPoint(const osg::Vec3f& origin, const osg::Vec3f& dest)
+    {
+        return getXAngleToDir(dest - origin);
+    }
 
      const float PATHFIND_Z_REACH = 50.0f;
     //static const float sMaxSlope = 49.0f; // duplicate as in physicssystem
@@ -55,7 +74,7 @@ namespace MWMechanics
 
             void clearPath();
 
-            void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
+            void buildPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                            const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
 
             bool checkPathCompleted(float x, float y, float tolerance = PathTolerance);
@@ -76,7 +95,7 @@ namespace MWMechanics
                 return mPath.size();
             }
 
-            const std::list<ESM::Pathgrid::Point>& getPath() const
+            const std::list<osg::Vec3f>& getPath() const
             {
                 return mPath;
             }
@@ -90,10 +109,10 @@ namespace MWMechanics
                 makes the 2nd point of the new path == the 1st point of old path.
                 Which results in NPC "running in a circle" back to the just passed waypoint.
              */
-            void buildSyncedPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
+            void buildSyncedPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                 const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
 
-            void addPointToPath(const ESM::Pathgrid::Point &point)
+            void addPointToPath(const osg::Vec3f& point)
             {
                 mPath.push_back(point);
             }
@@ -114,7 +133,7 @@ namespace MWMechanics
             {
                 return osg::Vec3f(static_cast<float>(p.mX), static_cast<float>(p.mY), static_cast<float>(p.mZ));
             }
-            
+
             // Slightly cheaper version for comparisons.
             // Caller needs to be careful for very short distances (i.e. less than 1)
             // or when accumuating the results i.e. (a + b)^2 != a^2 + b^2
@@ -153,7 +172,7 @@ namespace MWMechanics
             }
 
         private:
-            std::list<ESM::Pathgrid::Point> mPath;
+            std::list<osg::Vec3f> mPath;
 
             const ESM::Pathgrid *mPathgrid;
             const MWWorld::CellStore* mCell;

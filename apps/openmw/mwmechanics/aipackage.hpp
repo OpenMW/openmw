@@ -105,23 +105,24 @@ namespace MWMechanics
             bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
 
             /// Return if actor's rotation speed is sufficient to rotate to the destination pathpoint on the run. Otherwise actor should rotate while standing.
-            static bool isReachableRotatingOnTheRun(const MWWorld::Ptr& actor, const ESM::Pathgrid::Point& dest);
+            static bool isReachableRotatingOnTheRun(const MWWorld::Ptr& actor, const osg::Vec3f& dest);
 
         protected:
             /// Handles path building and shortcutting with obstacles avoiding
             /** \return If the actor has arrived at his destination **/
-            bool pathTo(const MWWorld::Ptr& actor, const ESM::Pathgrid::Point& dest, float duration, float destTolerance = 0.0f);
+            bool pathTo(const MWWorld::Ptr& actor, const osg::Vec3f& dest, float duration, float destTolerance = 0.0f);
 
             /// Check if there aren't any obstacles along the path to make shortcut possible
             /// If a shortcut is possible then path will be cleared and filled with the destination point.
             /// \param destInLOS If not nullptr function will return ray cast check result
             /// \return If can shortcut the path
-            bool shortcutPath(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor, bool *destInLOS, bool isPathClear);
+            bool shortcutPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint, const MWWorld::Ptr& actor,
+                              bool *destInLOS, bool isPathClear);
 
             /// Check if the way to the destination is clear, taking into account actor speed
-            bool checkWayIsClearForActor(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor);
+            bool checkWayIsClearForActor(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint, const MWWorld::Ptr& actor);
 
-            bool doesPathNeedRecalc(const ESM::Pathgrid::Point& newDest, const MWWorld::CellStore* currentCell);
+            bool doesPathNeedRecalc(const osg::Vec3f& newDest, const MWWorld::CellStore* currentCell);
 
             void evadeObstacles(const MWWorld::Ptr& actor, float duration, const ESM::Position& pos);
             void openDoors(const MWWorld::Ptr& actor);
@@ -143,7 +144,7 @@ namespace MWMechanics
 
             bool mIsShortcutting;   // if shortcutting at the moment
             bool mShortcutProhibited; // shortcutting may be prohibited after unsuccessful attempt
-            ESM::Pathgrid::Point mShortcutFailPos; // position of last shortcut fail
+            osg::Vec3f mShortcutFailPos; // position of last shortcut fail
 
         private:
             bool isNearInactiveCell(const ESM::Position& actorPos);

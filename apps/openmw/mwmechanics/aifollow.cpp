@@ -163,7 +163,7 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
     }
 
     //Set the target destination from the actor
-    ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
+    const auto dest = target.getRefData().getPosition().asVec3();
 
     short baseFollowDistance = followDistance;
     short threshold = 30; // to avoid constant switching between moving/stopping
@@ -196,7 +196,7 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
     if (storage.mMoving)
     {
         //Check if you're far away
-        float dist = distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]);
+        float dist = distance(dest, pos.asVec3());
 
         if (dist > 450)
             actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, true); //Make NPC run

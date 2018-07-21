@@ -90,13 +90,13 @@ void MWMechanics::AiPackage::reset()
     mTimer = AI_REACTION_TIME + 1.0f;
     mIsShortcutting = false;
     mShortcutProhibited = false;
-    mShortcutFailPos = ESM::Pathgrid::Point();
+    mShortcutFailPos = osg::Vec3f();
 
     mPathFinder.clearPath();
     mObstacleCheck.clear();
 }
 
-bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgrid::Point& dest, float duration, float destTolerance)
+bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f& dest, float duration, float destTolerance)
 {
     mTimer += duration; //Update timer
 
@@ -113,7 +113,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
     }
 
     // handle path building and shortcutting
-    const ESM::Pathgrid::Point start = pos.pos;
+    const osg::Vec3f start = pos.asVec3();
 
     const float distToTarget = distance(start, dest);
     const bool isDestReached = (distToTarget <= destTolerance);
@@ -148,7 +148,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
                 if (destInLOS && mPathFinder.getPath().size() > 1)
                 {
                     // get point just before dest
-                    std::list<ESM::Pathgrid::Point>::const_iterator pPointBeforeDest = mPathFinder.getPath().end();
+                    auto pPointBeforeDest = mPathFinder.getPath().end();
                     --pPointBeforeDest;
                     --pPointBeforeDest;
 
@@ -163,7 +163,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
 
             if (!mPathFinder.getPath().empty()) //Path has points in it
             {
-                ESM::Pathgrid::Point lastPos = mPathFinder.getPath().back(); //Get the end of the proposed path
+                const auto& lastPos = mPathFinder.getPath().back(); //Get the end of the proposed path
 
                 if(distance(dest, lastPos) > 100) //End of the path is far from the destination
                     mPathFinder.addPointToPath(dest); //Adds the final destination to the path, to try to get to where you want to go
@@ -266,14 +266,15 @@ const MWMechanics::PathgridGraph& MWMechanics::AiPackage::getPathGridGraph(const
     return *cache[id].get();
 }
 
-bool MWMechanics::AiPackage::shortcutPath(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor, bool *destInLOS, bool isPathClear)
+bool MWMechanics::AiPackage::shortcutPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+        const MWWorld::Ptr& actor, bool *destInLOS, bool isPathClear)
 {
-    if (!mShortcutProhibited || (PathFinder::MakeOsgVec3(mShortcutFailPos) - PathFinder::MakeOsgVec3(startPoint)).length() >= PATHFIND_SHORTCUT_RETRY_DIST)
+    if (!mShortcutProhibited || (mShortcutFailPos - startPoint).length() >= PATHFIND_SHORTCUT_RETRY_DIST)
     {
         // check if target is clearly visible
         isPathClear = !MWBase::Environment::get().getWorld()->castRay(
-            static_cast<float>(startPoint.mX), static_cast<float>(startPoint.mY), static_cast<float>(startPoint.mZ),
-            static_cast<float>(endPoint.mX), static_cast<float>(endPoint.mY), static_cast<float>(endPoint.mZ));
+            startPoint.x(), startPoint.y(), startPoint.z(),
+            endPoint.x(), endPoint.y(), endPoint.z());
 
         if (destInLOS != nullptr) *destInLOS = isPathClear;
 
@@ -294,21 +295,21 @@ bool MWMechanics::AiPackage::shortcutPath(const ESM::Pathgrid::Point& startPoint
     return false;
 }
 
-bool MWMechanics::AiPackage::checkWayIsClearForActor(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor)
+bool MWMechanics::AiPackage::checkWayIsClearForActor(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint, const MWWorld::Ptr& actor)
 {
-    bool actorCanMoveByZ = (actor.getClass().canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
+    const bool actorCanMoveByZ = (actor.getClass().canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
         || MWBase::Environment::get().getWorld()->isFlying(actor);
 
     if (actorCanMoveByZ)
         return true;
 
-    float actorSpeed = actor.getClass().getSpeed(actor);
-    float maxAvoidDist = AI_REACTION_TIME * actorSpeed + actorSpeed / MAX_VEL_ANGULAR_RADIANS * 2; // *2 - for reliability
-    osg::Vec3f::value_type distToTarget = osg::Vec3f(static_cast<float>(endPoint.mX), static_cast<float>(endPoint.mY), 0).length();
+    const float actorSpeed = actor.getClass().getSpeed(actor);
+    const float maxAvoidDist = AI_REACTION_TIME * actorSpeed + actorSpeed / MAX_VEL_ANGULAR_RADIANS * 2; // *2 - for reliability
+    const float distToTarget = osg::Vec2f(endPoint.x(), endPoint.y()).length();
 
-    float offsetXY = distToTarget > maxAvoidDist*1.5? maxAvoidDist : maxAvoidDist/2;
+    const float offsetXY = distToTarget > maxAvoidDist*1.5? maxAvoidDist : maxAvoidDist/2;
 
-    bool isClear = checkWayIsClear(PathFinder::MakeOsgVec3(startPoint), PathFinder::MakeOsgVec3(endPoint), offsetXY);
+    const bool isClear = checkWayIsClear(startPoint, endPoint, offsetXY);
 
     // update shortcut prohibit state
     if (isClear)
@@ -316,12 +317,12 @@ bool MWMechanics::AiPackage::checkWayIsClearForActor(const ESM::Pathgrid::Point&
         if (mShortcutProhibited)
         {
             mShortcutProhibited = false;
-            mShortcutFailPos = ESM::Pathgrid::Point();
+            mShortcutFailPos = osg::Vec3f();
         }
     }
     if (!isClear)
     {
-        if (mShortcutFailPos.mX == 0 && mShortcutFailPos.mY == 0 && mShortcutFailPos.mZ == 0)
+        if (mShortcutFailPos == osg::Vec3f())
         {
             mShortcutProhibited = true;
             mShortcutFailPos = startPoint;
@@ -331,9 +332,11 @@ bool MWMechanics::AiPackage::checkWayIsClearForActor(const ESM::Pathgrid::Point&
     return isClear;
 }
 
-bool MWMechanics::AiPackage::doesPathNeedRecalc(const ESM::Pathgrid::Point& newDest, const MWWorld::CellStore* currentCell)
+bool MWMechanics::AiPackage::doesPathNeedRecalc(const osg::Vec3f& newDest, const MWWorld::CellStore* currentCell)
 {
-    return mPathFinder.getPath().empty() || (distance(mPathFinder.getPath().back(), newDest) > 10) || mPathFinder.getPathCell() != currentCell;
+    return mPathFinder.getPath().empty()
+        || (distance(mPathFinder.getPath().back(), newDest) > 10)
+        || mPathFinder.getPathCell() != currentCell;
 }
 
 bool MWMechanics::AiPackage::isTargetMagicallyHidden(const MWWorld::Ptr& target)
@@ -367,7 +370,7 @@ bool MWMechanics::AiPackage::isNearInactiveCell(const ESM::Position& actorPos)
     }
 }
 
-bool MWMechanics::AiPackage::isReachableRotatingOnTheRun(const MWWorld::Ptr& actor, const ESM::Pathgrid::Point& dest)
+bool MWMechanics::AiPackage::isReachableRotatingOnTheRun(const MWWorld::Ptr& actor, const osg::Vec3f& dest)
 {
     // get actor's shortest radius for moving in circle
     float speed = actor.getClass().getSpeed(actor);
@@ -383,13 +386,12 @@ bool MWMechanics::AiPackage::isReachableRotatingOnTheRun(const MWWorld::Ptr& act
     radiusDir *= radius;
 
     // pick up the nearest center candidate
-    osg::Vec3f dest_ = PathFinder::MakeOsgVec3(dest);
     osg::Vec3f pos = actor.getRefData().getPosition().asVec3();
     osg::Vec3f center1 = pos - radiusDir;
     osg::Vec3f center2 = pos + radiusDir;
-    osg::Vec3f center = (center1 - dest_).length2() < (center2 - dest_).length2() ? center1 : center2;
+    osg::Vec3f center = (center1 - dest).length2() < (center2 - dest).length2() ? center1 : center2;
 
-    float distToDest = (center - dest_).length();
+    float distToDest = (center - dest).length();
 
     // if pathpoint is reachable for the actor rotating on the run:
     // no points of actor's circle should be farther from the center than destination point

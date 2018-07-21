@@ -55,56 +55,16 @@ namespace
             (closestReachableIndex, closestReachableIndex == closestIndex);
     }
 
+    float sqrDistanceIgnoreZ(const osg::Vec3f& point, float x, float y)
+    {
+        x -= point.x();
+        y -= point.y();
+        return (x * x + y * y);
+    }
 }
 
 namespace MWMechanics
 {
-    float sqrDistanceIgnoreZ(const ESM::Pathgrid::Point& point, float x, float y)
-    {
-        x -= point.mX;
-        y -= point.mY;
-        return (x * x + y * y);
-    }
-
-    float distance(const ESM::Pathgrid::Point& point, float x, float y, float z)
-    {
-        x -= point.mX;
-        y -= point.mY;
-        z -= point.mZ;
-        return sqrt(x * x + y * y + z * z);
-    }
-
-    float distance(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b)
-    {
-        float x = static_cast<float>(a.mX - b.mX);
-        float y = static_cast<float>(a.mY - b.mY);
-        float z = static_cast<float>(a.mZ - b.mZ);
-        return sqrt(x * x + y * y + z * z);
-    }
-
-    float getZAngleToDir(const osg::Vec3f& dir)
-    {
-        return std::atan2(dir.x(), dir.y());
-    }
-
-    float getXAngleToDir(const osg::Vec3f& dir)
-    {
-        float dirLen = dir.length();
-        return (dirLen != 0) ? -std::asin(dir.z() / dirLen) : 0;
-    }
-
-    float getZAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest)
-    {
-        osg::Vec3f dir = PathFinder::MakeOsgVec3(dest) - PathFinder::MakeOsgVec3(origin);
-        return getZAngleToDir(dir);
-    }
-
-    float getXAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest)
-    {
-        osg::Vec3f dir = PathFinder::MakeOsgVec3(dest) - PathFinder::MakeOsgVec3(origin);
-        return getXAngleToDir(dir);
-    }
-
     bool checkWayIsClear(const osg::Vec3f& from, const osg::Vec3f& to, float offsetXY)
     {
         osg::Vec3f dir = to - from;
@@ -167,8 +127,7 @@ namespace MWMechanics
      *    j = @.x in local coordinates (i.e. within the cell)
      *    k = @.x in world coordinates
      */
-    void PathFinder::buildPath(const ESM::Pathgrid::Point &startPoint,
-                               const ESM::Pathgrid::Point &endPoint,
+    void PathFinder::buildPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                                const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph)
     {
         mPath.clear();
@@ -225,17 +184,17 @@ namespace MWMechanics
         {
             ESM::Pathgrid::Point temp(mPathgrid->mPoints[startNode]);
             converter.toWorld(temp);
-            mPath.push_back(temp);
+            mPath.push_back(MakeOsgVec3(temp));
         }
         else
         {
-            mPath = pathgridGraph.aStarSearch(startNode, endNode.first);
+            auto path = pathgridGraph.aStarSearch(startNode, endNode.first);
 
             // If nearest path node is in opposite direction from second, remove it from path.
             // Especially useful for wandering actors, if the nearest node is blocked for some reason.
-            if (mPath.size() > 1)
+            if (path.size() > 1)
             {
-                ESM::Pathgrid::Point secondNode = *(++mPath.begin());
+                ESM::Pathgrid::Point secondNode = *(++path.begin());
                 osg::Vec3f firstNodeVec3f = MakeOsgVec3(mPathgrid->mPoints[startNode]);
                 osg::Vec3f secondNodeVec3f = MakeOsgVec3(secondNode);
                 osg::Vec3f toSecondNodeVec3f = secondNodeVec3f - firstNodeVec3f;
@@ -247,21 +206,23 @@ namespace MWMechanics
                     // Add Z offset since path node can overlap with other objects.
                     // Also ignore doors in raytesting.
                     bool isPathClear = !MWBase::Environment::get().getWorld()->castRay(
-                        startPoint.mX, startPoint.mY, startPoint.mZ+16, temp.mX, temp.mY, temp.mZ+16, true);
+                        startPoint.x(), startPoint.y(), startPoint.z() + 16, temp.mX, temp.mY, temp.mZ + 16, true);
                     if (isPathClear)
-                        mPath.pop_front();
+                        path.pop_front();
                 }
             }
 
             // convert supplied path to world coordinates
-            for (std::list<ESM::Pathgrid::Point>::iterator iter(mPath.begin()); iter != mPath.end(); ++iter)
-            {
-                converter.toWorld(*iter);
-            }
+            std::transform(path.begin(), path.end(), std::back_inserter(mPath),
+                [&] (ESM::Pathgrid::Point& point)
+                {
+                    converter.toWorld(point);
+                    return MakeOsgVec3(point);
+                });
         }
 
         // If endNode found is NOT the closest PathGrid point to the endPoint,
-        // assume endPoint is not reachable from endNode. In which case, 
+        // assume endPoint is not reachable from endNode. In which case,
         // path ends at endNode.
         //
         // So only add the destination (which may be different to the closest
@@ -283,9 +244,9 @@ namespace MWMechanics
         if(mPath.empty())
             return 0.;
 
-        const ESM::Pathgrid::Point &nextPoint = *mPath.begin();
-        float directionX = nextPoint.mX - x;
-        float directionY = nextPoint.mY - y;
+        const auto& nextPoint = mPath.front();
+        const float directionX = nextPoint.x() - x;
+        const float directionY = nextPoint.y() - y;
 
         return std::atan2(directionX, directionY);
     }
@@ -297,8 +258,7 @@ namespace MWMechanics
         if(mPath.empty())
             return 0.;
 
-        const ESM::Pathgrid::Point &nextPoint = *mPath.begin();
-        osg::Vec3f dir = MakeOsgVec3(nextPoint) - osg::Vec3f(x,y,z);
+        const osg::Vec3f dir = mPath.front() - osg::Vec3f(x, y, z);
 
         return getXAngleToDir(dir);
     }
@@ -308,8 +268,7 @@ namespace MWMechanics
         if(mPath.empty())
             return true;
 
-        const ESM::Pathgrid::Point& nextPoint = *mPath.begin();
-        if (sqrDistanceIgnoreZ(nextPoint, x, y) < tolerance*tolerance)
+        if (sqrDistanceIgnoreZ(mPath.front(), x, y) < tolerance*tolerance)
         {
             mPath.pop_front();
             if(mPath.empty())
@@ -322,8 +281,7 @@ namespace MWMechanics
     }
 
     // see header for the rationale
-    void PathFinder::buildSyncedPath(const ESM::Pathgrid::Point &startPoint,
-        const ESM::Pathgrid::Point &endPoint,
+    void PathFinder::buildSyncedPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
         const MWWorld::CellStore* cell, const MWMechanics::PathgridGraph& pathgridGraph)
     {
         if (mPath.size() < 2)
@@ -334,16 +292,14 @@ namespace MWMechanics
         }
         else
         {
-            const ESM::Pathgrid::Point oldStart(*getPath().begin());
+            const auto oldStart = getPath().front();
             buildPath(startPoint, endPoint, cell, pathgridGraph);
             if (mPath.size() >= 2)
             {
                 // if 2nd waypoint of new path == 1st waypoint of old,
                 // delete 1st waypoint of new path.
-                std::list<ESM::Pathgrid::Point>::iterator iter = ++mPath.begin();
-                if (iter->mX == oldStart.mX
-                    && iter->mY == oldStart.mY
-                    && iter->mZ == oldStart.mZ)
+                const auto iter = ++mPath.begin();
+                if (*iter == oldStart)
                 {
                     mPath.pop_front();
                 }

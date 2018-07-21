@@ -151,10 +151,8 @@ namespace MWMechanics
         // rebuild a path to it
         if (!mPathFinder.isPathConstructed() && mHasDestination)
         {
-            ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(mDestination));
-            ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
-
-            mPathFinder.buildSyncedPath(start, dest, actor.getCell(), getPathGridGraph(actor.getCell()));
+            mPathFinder.buildSyncedPath(pos.asVec3(), mDestination, actor.getCell(),
+                getPathGridGraph(actor.getCell()));
 
             if (mPathFinder.isPathConstructed())
                 storage.setState(AiWanderStorage::Wander_Walking);
@@ -292,11 +290,9 @@ namespace MWMechanics
      * Commands actor to walk to a random location near original spawn location.
      */
     void AiWander::wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance) {
-        const ESM::Pathgrid::Point currentPosition = actor.getRefData().getPosition().pos;
-        const osg::Vec3f currentPositionVec3f = osg::Vec3f(currentPosition.mX, currentPosition.mY, currentPosition.mZ);
+        const auto currentPosition = actor.getRefData().getPosition().asVec3();
 
         std::size_t attempts = 10; // If a unit can't wander out of water, don't want to hang here
-        ESM::Pathgrid::Point destinationPosition;
         bool isWaterCreature = actor.getClass().isPureWaterCreature(actor);
         do {
             // Determine a random location within radius of original position
@@ -305,13 +301,15 @@ namespace MWMechanics
             const float destinationX = mInitialActorPosition.x() + wanderRadius * std::cos(randomDirection);
             const float destinationY = mInitialActorPosition.y() + wanderRadius * std::sin(randomDirection);
             const float destinationZ = mInitialActorPosition.z();
-            destinationPosition = ESM::Pathgrid::Point(destinationX, destinationY, destinationZ);
+            const osg::Vec3f destinationPosition(destinationX, destinationY, destinationZ);
             mDestination = osg::Vec3f(destinationX, destinationY, destinationZ);
 
             // Check if land creature will walk onto water or if water creature will swim onto land
             if ((!isWaterCreature && !destinationIsAtWater(actor, mDestination)) ||
-                (isWaterCreature && !destinationThroughGround(currentPositionVec3f, mDestination))) {
-                mPathFinder.buildSyncedPath(currentPosition, destinationPosition, actor.getCell(), getPathGridGraph(actor.getCell()));
+                (isWaterCreature && !destinationThroughGround(currentPosition, mDestination)))
+            {
+                mPathFinder.buildSyncedPath(currentPosition, destinationPosition, actor.getCell(),
+                    getPathGridGraph(actor.getCell()));
                 mPathFinder.addPointToPath(destinationPosition);
 
                 if (mPathFinder.isPathConstructed())
@@ -417,7 +415,7 @@ namespace MWMechanics
         float duration, AiWanderStorage& storage, ESM::Position& pos)
     {
         // Is there no destination or are we there yet?
-        if ((!mPathFinder.isPathConstructed()) || pathTo(actor, ESM::Pathgrid::Point(mPathFinder.getPath().back()), duration, DESTINATION_TOLERANCE))
+        if ((!mPathFinder.isPathConstructed()) || pathTo(actor, osg::Vec3f(mPathFinder.getPath().back()), duration, DESTINATION_TOLERANCE))
         {
             stopWalking(actor, storage);
             storage.setState(AiWanderStorage::Wander_ChooseAction);
@@ -592,14 +590,15 @@ namespace MWMechanics
         ToWorldCoordinates(dest, storage.mCell->getCell());
 
         // actor position is already in world coordinates
-        ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(actorPos));
+        const auto start = actorPos.asVec3();
 
         // don't take shortcuts for wandering
-        mPathFinder.buildSyncedPath(start, dest, actor.getCell(), getPathGridGraph(actor.getCell()));
+        const auto destVec3f = PathFinder::MakeOsgVec3(dest);
+        mPathFinder.buildSyncedPath(start, destVec3f, actor.getCell(), getPathGridGraph(actor.getCell()));
 
         if (mPathFinder.isPathConstructed())
         {
-            mDestination = osg::Vec3f(dest.mX, dest.mY, dest.mZ);
+            mDestination = destVec3f;
             mHasDestination = true;
             // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
             ESM::Pathgrid::Point temp = storage.mAllowedNodes[randNode];
@@ -631,15 +630,15 @@ namespace MWMechanics
         // Every now and then check whether one of the doors is opened. (maybe
         // at the end of playing idle?) If the door is opened then re-calculate
         // allowed nodes starting from the spawn point.
-        std::list<ESM::Pathgrid::Point> paths = pathfinder.getPath();
+        auto paths = pathfinder.getPath();
         while(paths.size() >= 2)
         {
-            ESM::Pathgrid::Point pt = paths.back();
+            const auto pt = paths.back();
             for(unsigned int j = 0; j < nodes.size(); j++)
             {
                 // FIXME: doesn't handle a door with the same X/Y
                 //        coordinates but with a different Z
-                if(nodes[j].mX == pt.mX && nodes[j].mY == pt.mY)
+                if (std::abs(nodes[j].mX - pt.x()) <= 0.5 && std::abs(nodes[j].mY - pt.y()) <= 0.5)
                 {
                     nodes.erase(nodes.begin() + j);
                     break;

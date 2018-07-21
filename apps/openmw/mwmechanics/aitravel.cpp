@@ -56,8 +56,7 @@ namespace MWMechanics
         // Unfortunately, with vanilla assets destination is sometimes blocked by other actor.
         // If we got close to target, check for actors nearby. If they are, finish AI package.
         int destinationTolerance = 64;
-        ESM::Pathgrid::Point dest(static_cast<int>(mX), static_cast<int>(mY), static_cast<int>(mZ));
-        if (distance(pos.pos, dest) <= destinationTolerance)
+        if (distance(pos.asVec3(), osg::Vec3f(mX, mY, mZ)) <= destinationTolerance)
         {
             std::vector<MWWorld::Ptr> targetActors;
             std::pair<MWWorld::Ptr, osg::Vec3f> result = MWBase::Environment::get().getWorld()->getHitContact(actor, destinationTolerance, targetActors);
@@ -69,7 +68,7 @@ namespace MWMechanics
             }
         }
 
-        if (pathTo(actor, dest, duration))
+        if (pathTo(actor, osg::Vec3f(mX, mY, mZ), duration))
         {
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
             return true;

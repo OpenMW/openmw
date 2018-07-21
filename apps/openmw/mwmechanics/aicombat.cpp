@@ -124,7 +124,7 @@ namespace MWMechanics
                 float targetReachedTolerance = 0.0f;
                 if (storage.mLOS)
                     targetReachedTolerance = storage.mAttackRange;
-                bool is_target_reached = pathTo(actor, target.getRefData().getPosition().pos, duration, targetReachedTolerance);
+                const bool is_target_reached = pathTo(actor, target.getRefData().getPosition().asVec3(), duration, targetReachedTolerance);
                 if (is_target_reached) storage.mReadyToAttack = true;
             }
 
@@ -355,7 +355,7 @@ namespace MWMechanics
 
                     float dist = (actor.getRefData().getPosition().asVec3() - target.getRefData().getPosition().asVec3()).length();
                     if ((dist > fFleeDistance && !storage.mLOS)
-                            || pathTo(actor, storage.mFleeDest, duration))
+                            || pathTo(actor, PathFinder::MakeOsgVec3(storage.mFleeDest), duration))
                     {
                         state = AiCombatStorage::FleeState_Idle;
                     }

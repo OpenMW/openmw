@@ -49,13 +49,13 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
     actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
     //Set the target desition from the actor
-    ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
+    const auto dest = target.getRefData().getPosition().asVec3();
     ESM::Position aPos = actor.getRefData().getPosition();
 
     float pathTolerance = 100.0;
 
     if (pathTo(actor, dest, duration, pathTolerance) &&
-        std::abs(dest.mZ - aPos.pos[2]) < pathTolerance)      // check the true distance in case the target is far away in Z-direction
+        std::abs(dest.z() - aPos.pos[2]) < pathTolerance)      // check the true distance in case the target is far away in Z-direction
     {
         target.getClass().activate(target,actor).get()->execute(actor); //Arrest player when reached
         return true;
