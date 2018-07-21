@@ -646,6 +646,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     }
     assert(view);
     view->setParent(this);
+    view->setEditLock (mDocument->getState() & CSMDoc::State_Locked);
     mSubViews.append(view); // only after assert
 
     int minWidth = windows["minimum-width"].toInt();
