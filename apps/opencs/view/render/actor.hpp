@@ -39,6 +39,14 @@ namespace CSVRender
         void update();
 
     private:
+        void loadSkeleton(const std::string& model);
+        void updateCreature();
+        void updateNpc();
+
+        std::string getBodyPartMesh(const std::string& bodyPartId);
+
+        static const std::string MeshPrefix;
+
         std::string mId;
         int mType;
         CSMWorld::Data& mData;

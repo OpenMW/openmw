@@ -132,9 +132,8 @@ void CSVRender::Object::update()
     {
         try
         {
-            if (recordType == CSMWorld::UniversalId::Type_Npc)
+            if (recordType == CSMWorld::UniversalId::Type_Npc || recordType == CSMWorld::UniversalId::Type_Creature)
             {
-                std::cout << "recordType: Npc\n";
                 Actor actor(mReferenceableId, recordType, mData);
                 actor.update();
                 mBaseNode->addChild(actor.getBaseNode());
@@ -147,8 +146,8 @@ void CSVRender::Object::update()
         }
         catch (std::exception& e)
         {
-            // TODO: use error marker mesh
             Log(Debug::Error) << e.what();
+            mBaseNode->addChild(createErrorCube());
         }
     }
 
