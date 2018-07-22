@@ -10,6 +10,8 @@
 #include <components/esm/loadland.hpp>
 
 #include "../../model/world/cellcoordinates.hpp"
+#include "../../model/world/columnimp.hpp"
+#include "../../model/world/idtable.hpp"
 
 #include "worldspacewidget.hpp"
 
@@ -20,8 +22,8 @@ namespace
     const int landTextureSize {ESM::Land::LAND_TEXTURE_SIZE};
 }
 
-CSVRender::TerrainSelection::TerrainSelection(osg::Group* parentNode):
-mParentNode(parentNode)
+CSVRender::TerrainSelection::TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget):
+mParentNode(parentNode), mWorldspaceWidget (worldspaceWidget)
 {
     activate();
 
@@ -51,9 +53,6 @@ CSVRender::TerrainSelection::~TerrainSelection()
 
 void CSVRender::TerrainSelection::selectTerrainTexture(const WorldspaceHitResult& hit)
 {
-    int cellX = static_cast<int> (std::floor (hit.worldPos.x() / ESM::Land::REAL_SIZE));
-    int cellY = static_cast<int> (std::floor (hit.worldPos.y() / ESM::Land::REAL_SIZE));
-
     mSelection.clear();
 
     const std::pair<int, int> localPos {toTextureCoords(hit.worldPos)};
@@ -111,26 +110,13 @@ std::pair<int, int> CSVRender::TerrainSelection::toTextureCoords(osg::Vec3d worl
 
 std::pair<int, int> CSVRender::TerrainSelection::toVertexCoords(osg::Vec3d worldPos) const
 {
-    // Old code commented here
-    /*
-    const auto x = static_cast<int>(std::floor(toCellCoords(worldPos).first + 0.5));
-    const auto y = static_cast<int>(std::floor(toCellCoords(worldPos).second + 0.5));
+    const double xd {worldPos.x() * landTextureSize / cellSize+(landTextureSize / cellSize)/4};
+    const double yd {worldPos.y() * landSize / cellSize+(landTextureSize / cellSize)/4};
+
+    const auto x = static_cast<int>(std::floor(xd));
+    const auto y = static_cast<int>(std::floor(yd));
 
     return std::make_pair(x, y);
-    */
-    return std::make_pair(0, 0); // Not implemented yet
-}
-
-bool CSVRender::TerrainSelection::isInCell(const WorldspaceHitResult& hit) const // not used!
-{
-    if (!hit.hit)
-        return false;
-
-    const int cellX {mCoords.getX() * cellSize};
-    const int cellY {mCoords.getY() * cellSize};
-
-    return hit.worldPos.x() >= cellX && hit.worldPos.x() < cellX + cellSize
-        && hit.worldPos.y() >= cellY && hit.worldPos.y() < cellY + cellSize;
 }
 
 double CSVRender::TerrainSelection::toWorldCoords(int pos)
@@ -172,14 +158,16 @@ void CSVRender::TerrainSelection::update()
             const int textureSizeToLandSizeModifier = 4;
 
             // Nudge selection by 1/4th of a texture size, similar how blendmaps are nudged
-            const int nudgeOffset = (ESM::Land::REAL_SIZE / ESM::Land::LAND_TEXTURE_SIZE)/4;
-            const int landHeightsNudge = (ESM::Land::REAL_SIZE / ESM::Land::LAND_SIZE)/64; // Does this work with all land size configurations?
+            const int nudgeOffset = (cellSize / landTextureSize)/4;
+            const int landHeightsNudge = (cellSize / landSize)/64; // Does this work with all land size configurations?
 
-            int x1 = x * textureSizeToLandSizeModifier+landHeightsNudge;
+            // calculate global vertex coordinates at selection box corners
+            int x1 = x * textureSizeToLandSizeModifier + landHeightsNudge;
             int x2 = x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier + landHeightsNudge;
             int y1 = y * textureSizeToLandSizeModifier - landHeightsNudge;
             int y2 = y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier - landHeightsNudge;
 
+            // Draw straigth edges
             int landHeightX1Y1 = calculateLandHeight(x1, y1),
                 landHeightX1Y2 = calculateLandHeight(x1, y2),
                 landHeightX2Y1 = calculateLandHeight(x2, y1),
@@ -218,44 +206,43 @@ void CSVRender::TerrainSelection::update()
     mGeode->setDrawable(0, newGeometry);
 }
 
-int CSVRender::TerrainSelection::calculateLandHeight(int x, int y)
+int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global vertex coordinates
 {
-    return 1000; // To-do: calculate actual land height
+    int cellX(0);
+    int cellY(0);
+    int localX(0);
+    int localY(0);
 
-    // Old land fetch code below
-    /*const ESM::Land::LandData* landData (getLandData());
-
-    if (!landData)
-        return 250;
-
-    enum cellTargetType {thisCell, rightCell, upCell, upRightCell};
-    cellTargetType cellTarget = thisCell;
-
-    if (x > ESM::Land::LAND_SIZE - 1 && y < 0)
+    if (x >= 0)
     {
-        cellTarget = upRightCell;
-        x = x - ESM::Land::LAND_SIZE + 1;
-        y = y + ESM::Land::LAND_SIZE - 1;
+        cellX = std::floor(x / landSize);
+        localX = x - cellX * landSize;
     }
-    if (x > ESM::Land::LAND_SIZE - 1)
+    if (y >= 0)
     {
-        cellTarget = rightCell;
-        x = x - ESM::Land::LAND_SIZE + 1;
+        cellY = std::floor(y / landSize);
+        localY = y - cellY * landSize;
+    }
+    if (x < 0)
+    {
+        cellX = std::trunc(x / landSize) - 1;
+        localX = x - cellX * landSize;
     }
     if (y < 0)
     {
-        cellTarget = upCell;
-        y = y + ESM::Land::LAND_SIZE - 1;
+        cellY = std::trunc(y / landSize) - 1;
+        localY = y - cellY * landSize;
     }
 
-    switch(cellTarget)
-    {
-        case thisCell : return landData->mHeights[landIndex(x,y)];
-        //case rightCell : return mEsmLandRightCell->mHeights[landIndex(x,y)]; // TO-DO: Get height from neighbouring cell
-        //case upCell: return mEsmLandUpCell->mHeights[landIndex(x,y)]; // TO-DO: Get height from neighbouring cell
-        //case upRightCell: return mEsmLandUpRightCell->mHeights[landIndex(x,y)];; // TO-DO: Get height from neighbouring cell
-    }*/
-    return 0;
+    std::string cellId = "#" + std::to_string(cellX) + " " + std::to_string(cellY);
+
+    CSMDoc::Document& document = mWorldspaceWidget->getDocument();
+    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+    int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
+    const CSMWorld::LandHeightsColumn::DataType mPointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+
+    return mPointer[localY*landSize + localX];
 }
 
 // To-do: Implement a get function
