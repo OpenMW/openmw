@@ -8,6 +8,11 @@ CSVRender::WorldspaceWidget& CSVRender::EditMode::getWorldspaceWidget()
     return *mWorldspaceWidget;
 }
 
+CSVRender::WorldspaceWidget* CSVRender::EditMode::getWorldspaceWidgetPointer()
+{
+    return mWorldspaceWidget;
+}
+
 CSVRender::EditMode::EditMode (WorldspaceWidget *worldspaceWidget, const QIcon& icon,
     unsigned int mask, const QString& tooltip, QWidget *parent)
 : ModeButton (icon, tooltip, parent), mWorldspaceWidget (worldspaceWidget), mMask (mask)
