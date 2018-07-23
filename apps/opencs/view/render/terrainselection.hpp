@@ -49,6 +49,8 @@ namespace CSVRender
             void activate();
             void deactivate();
 
+            std::vector<std::pair<int, int>> getTerrainSelection() const;
+
         protected:
 
             // these functions need better names
@@ -70,8 +72,6 @@ namespace CSVRender
             int calculateLandHeight(int x, int y);
 
         private:
-
-            bool isInCell(const WorldspaceHitResult&) const;
 
             osg::Group* mParentNode;
             WorldspaceWidget *mWorldspaceWidget;
