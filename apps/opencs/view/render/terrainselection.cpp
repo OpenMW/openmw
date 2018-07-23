@@ -155,10 +155,11 @@ void CSVRender::TerrainSelection::update()
             const auto south = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x, y - 1));
             const auto east = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x + 1, y));
             const auto west = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x - 1, y));
-            const int textureSizeToLandSizeModifier = 4;
+            const int textureSizeToLandSizeModifier = 4; // To-do: Calculate modifier according to landSize and landTextureSize
 
             // Nudge selection by 1/4th of a texture size, similar how blendmaps are nudged
-            const int nudgeOffset = (cellSize / landTextureSize)/4;
+            #define NUDGEPERCENTAGE (0.25)
+            const int nudgeOffset = (cellSize / landTextureSize) * NUDGEPERCENTAGE;
             const int landHeightsNudge = (cellSize / landSize)/64; // Does this work with all land size configurations?
 
             // calculate global vertex coordinates at selection box corners
@@ -215,23 +216,23 @@ int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global ver
 
     if (x >= 0)
     {
-        cellX = std::floor(x / landSize);
-        localX = x - cellX * landSize;
+        cellX = std::floor(x / (landSize - 1));
+        localX = x - cellX * (landSize - 1);
     }
     if (y >= 0)
     {
-        cellY = std::floor(y / landSize);
-        localY = y - cellY * landSize;
+        cellY = std::floor(y / (landSize - 1));
+        localY = y - cellY * (landSize - 1);
     }
     if (x < 0)
     {
-        cellX = std::trunc(x / landSize) - 1;
-        localX = x - cellX * landSize;
+        cellX = std::trunc(x / (landSize - 1)) - 1;
+        localX = x - cellX * (landSize - 1);
     }
     if (y < 0)
     {
-        cellY = std::trunc(y / landSize) - 1;
-        localY = y - cellY * landSize;
+        cellY = std::trunc(y / (landSize - 1)) - 1;
+        localY = y - cellY * (landSize - 1);
     }
 
     std::string cellId = "#" + std::to_string(cellX) + " " + std::to_string(cellY);
