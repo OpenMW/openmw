@@ -577,11 +577,12 @@ namespace MWPhysics
 
             bool isOnGround = false;
             bool isOnSlope = false;
+            // tests true while flying beacuse inertia is 0 when flying. if this stops being the case, add || isFlying
             if (forceGroundTest || (inertia.z() <= 0.0f && newPosition.z() >= swimlevel))
             {
                 // find ground
                 osg::Vec3f from = newPosition;
-                auto groundDistance = (physicActor->getOnGround() && !physicActor->getOnSlope()) ? (sStepSizeDown + 2*sGroundOffset) : (2*sGroundOffset);
+                auto groundDistance = (physicActor->getOnGround() && !physicActor->getOnSlope() && !isFlying) ? (sStepSizeDown + 2*sGroundOffset) : (2*sGroundOffset);
                 osg::Vec3f to = newPosition - osg::Vec3f(0,0,groundDistance);
                 tracer.doTrace(colobj, from, to, collisionWorld);
                 if(tracer.mFraction < 1.0f && !isActor(tracer.mHitObject))
