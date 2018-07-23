@@ -120,12 +120,18 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
 
 void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResult& hit)
 {
-    mTerrainTextureSelection->selectTerrainTexture(hit);
+    if(hit.hit == true)
+    {
+        mTerrainTextureSelection->selectTerrainTexture(hit);
+    }
 }
 
 void CSVRender::TerrainTextureMode::secondarySelectPressed(const WorldspaceHitResult& hit)
 {
-    mTerrainTextureSelection->toggleSelect(hit);
+    if(hit.hit == true)
+    {
+        mTerrainTextureSelection->toggleSelect(hit);
+    }
 }
 
 bool CSVRender::TerrainTextureMode::primaryEditStartDrag (const QPoint& pos)
@@ -208,13 +214,13 @@ void CSVRender::TerrainTextureMode::drag (const QPoint& pos, int diffX, int diff
     if (mDragMode == InteractionType_PrimarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        if (!hit.hit) {} else mTerrainTextureSelection->selectTerrainTexture(hit);
+        if (hit.hit) mTerrainTextureSelection->selectTerrainTexture(hit);
     }
 
     if (mDragMode == InteractionType_SecondarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        if (!hit.hit) {} else mTerrainTextureSelection->onlyAddSelect(hit);
+        if (hit.hit) mTerrainTextureSelection->onlyAddSelect(hit);
     }
 }
 

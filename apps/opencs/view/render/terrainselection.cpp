@@ -25,8 +25,6 @@ namespace
 CSVRender::TerrainSelection::TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget):
 mParentNode(parentNode), mWorldspaceWidget (worldspaceWidget)
 {
-    activate();
-
     osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry();
 
     // Color
@@ -43,12 +41,18 @@ mParentNode(parentNode), mWorldspaceWidget (worldspaceWidget)
 
     mGeode = new osg::Geode();
     mGeode->addDrawable(geometry);
-    mParentNode->addChild(mGeode);
+
+    activate();
 }
 
 CSVRender::TerrainSelection::~TerrainSelection()
 {
     deactivate();
+}
+
+std::vector<std::pair<int, int>> CSVRender::TerrainSelection::getTerrainSelection() const
+{
+    return mSelection;
 }
 
 void CSVRender::TerrainSelection::selectTerrainTexture(const WorldspaceHitResult& hit)
@@ -89,12 +93,12 @@ void CSVRender::TerrainSelection::toggleSelect(const WorldspaceHitResult& hit)
 
 void CSVRender::TerrainSelection::activate()
 {
-    //mParentNode->addChild(mBaseNode);
+    mParentNode->addChild(mGeode);
 }
 
 void CSVRender::TerrainSelection::deactivate()
 {
-    //mParentNode->removeChild(mBaseNode);
+    mParentNode->removeChild(mGeode);
 }
 
 std::pair<int, int> CSVRender::TerrainSelection::toTextureCoords(osg::Vec3d worldPos) const
@@ -245,15 +249,3 @@ int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global ver
 
     return mPointer[localY*landSize + localX];
 }
-
-// To-do: Implement a get function
-/*CSVRender::TerrainSelection CSVRender::Cell::getTerrainSelection(TerrainSelectionType type) const
-{
-    switch (type) {
-        case TerrainSelectionType::Texture:
-            return mTerrainTextureSelection.get();
-        // other types of terrain can go here
-        default:
-            return nullptr;
-    }
-}*/
