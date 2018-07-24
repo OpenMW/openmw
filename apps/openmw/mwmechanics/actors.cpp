@@ -766,6 +766,8 @@ namespace MWMechanics
 
             for (ActiveSpells::TIterator it = spells.begin(); it != spells.end(); ++it)
             {
+                bool actorKilled = false;
+
                 const ActiveSpells::ActiveSpellParams& spell = it->second;
                 MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(spell.mCasterActorId);
                 for (std::vector<ActiveSpells::ActiveEffect>::const_iterator effectIt = spell.mEffects.begin();
@@ -793,10 +795,14 @@ namespace MWMechanics
                                 caster.getClass().getNpcStats(caster).addWerewolfKill();
 
                             MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, player);
+                            actorKilled = true;
                             break;
                         }
                     }
                 }
+
+                if (actorKilled)
+                    break;
             }
         }
 
