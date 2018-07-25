@@ -106,7 +106,7 @@ namespace MWPhysics
     {
         // slide across it - if it's coherent with the direction we're hitting it (i.e. we're hitting it from the front)
         // if we're on the ground and it's too steep to walk and we'd be directed upwards from it, pretend it's a wall
-        if(onGround && !isWalkableSlope(virtualNormal))
+        if(onGround && !isWalkableSlope(virtualNormal) && virtualNormal.z() != 0.0)
         {
             std::cerr << "wallifying slope" << std::endl;
             virtualNormal.z() = 0;
@@ -236,6 +236,11 @@ namespace MWPhysics
                 return false;
             }
 
+            auto newpos = tracerDest + osg::Vec3f(0.0f, 0.0f, -downDistance);
+
+            if((position-newpos).length2() < sSafetyMargin*sSafetyMargin)
+                return false;
+
             if(mTracer.mHitObject)
             {
                 auto virtualNormal = mTracer.mPlaneNormal;
@@ -243,7 +248,7 @@ namespace MWPhysics
             }
             velocity = reject(velocity, mDownStepper.mPlaneNormal);
 
-            position = tracerDest + osg::Vec3f(0.0f, 0.0f, -downDistance);
+            position = newpos;
 
             remainingTime *= (1.0f-mTracer.mFraction); // remaining time is proportional to remaining distance
             return true;
@@ -421,13 +426,15 @@ namespace MWPhysics
                     }
                 }
 
-                // We are touching something.
-                if (tracer.mFraction < 1E-9f)
+                /*
+                // We are touching something other than an actor.
+                if (tracer.mFraction < 1E-9f && !isActor(tracer.mHitObject))
                 {
                     // Try to separate by backing off slighly to unstuck the solver
                     osg::Vec3f backOff = (newPosition - tracer.mHitPoint) * 1E-2f;
                     newPosition += backOff;
                 }
+                */
 
                 // We hit something. Check if we can step up.
                 float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + halfExtents.z();
@@ -577,7 +584,7 @@ namespace MWPhysics
 
             bool isOnGround = false;
             bool isOnSlope = false;
-            // tests true while flying beacuse inertia is 0 when flying. if this stops being the case, add || isFlying
+            // happens to test true when flying because inertia is 0 when flying. if this stops being the case, add || isFlying
             if (forceGroundTest || (inertia.z() <= 0.0f && newPosition.z() >= swimlevel))
             {
                 // find ground
@@ -625,7 +632,9 @@ namespace MWPhysics
                     // standing on actors is not allowed (see above).
                     // in addition to that, apply a sliding effect away from the center of the actor,
                     // so that we do not stay suspended in air indefinitely.
-                    if (tracer.mFraction < 1.0f && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor)
+                    // Morrowind doesn't do this unless the actors are overlapping and the current one is in the air and moving downwards
+                    /*
+                    if (tracer.mFraction < 1.0f && isActor(tracer.mHitObject))
                     {
                         if (osg::Vec3f(velocity.x(), velocity.y(), 0).length2() < 100.f*100.f)
                         {
@@ -637,7 +646,7 @@ namespace MWPhysics
                             inertia *= 100;
                         }
                     }
-
+                    */
                     isOnGround = false;
                 }
             }
