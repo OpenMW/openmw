@@ -1360,14 +1360,7 @@ bool CharacterController::updateWeaponState()
     {
         MWWorld::Ptr player = getPlayer();
 
-        // We should reset player's idle animation in the first-person mode.
-        if (mPtr == player && MWBase::Environment::get().getWorld()->isFirstPerson())
-            mIdleState = CharState_None;
-
-        // In other cases we should not break swim and sneak animations
-        if (mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
-            mIdleState = CharState_None;
-
+        bool resetIdle = ammunition;
         if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
@@ -1432,6 +1425,11 @@ bool CharacterController::updateWeaponState()
                                      0.0f, 0);
                     mUpperBodyState = UpperCharState_CastingSpell;
                 }
+                else
+                {
+                    resetIdle = false;
+                }
+
                 if (mPtr.getClass().hasInventoryStore(mPtr))
                 {
                     MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
@@ -1501,6 +1499,14 @@ bool CharacterController::updateWeaponState()
                 mUpperBodyState = UpperCharState_StartToMinAttack;
             }
         }
+
+        // We should reset player's idle animation in the first-person mode.
+        if (resetIdle && mPtr == player && MWBase::Environment::get().getWorld()->isFirstPerson())
+            mIdleState = CharState_None;
+
+        // In other cases we should not break swim and sneak animations
+        if (resetIdle && mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
+            mIdleState = CharState_None;
 
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
         if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && !isKnockedDown())
