@@ -62,7 +62,7 @@
     Bug #4480: Segfault in QuickKeysMenu when item no longer in inventory
     Bug #4489: Goodbye doesn't block dialogue hyperlinks
     Bug #4490: PositionCell on player gives "Error: tried to add local script twice"
-    Bug #4491: Training cap based off Base Skill instead of Modified Skill
+    Bug #4494: Training cap based off Base Skill instead of Modified Skill
     Bug #4495: Crossbow animations blending is buggy
     Bug #4496: SpellTurnLeft and SpellTurnRight animation groups are unused
     Bug #4497: File names starting with x or X are not classified as animation
