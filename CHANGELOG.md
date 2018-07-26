@@ -20,6 +20,7 @@
     Bug #3876: Landscape texture painting is misaligned
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
     Bug #3911: [macOS] Typing in the "Content List name" dialog box produces double characters
+    Bug #3950: FLATTEN_STATIC_TRANSFORMS optimization breaks animated collision shapes
     Bug #3993: Terrain texture blending map is not upscaled
     Bug #3997: Almalexia doesn't pace
     Bug #4036: Weird behaviour of AI packages if package target has non-unique ID
