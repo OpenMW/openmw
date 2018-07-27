@@ -614,7 +614,7 @@ namespace MWClass
     float Creature::getCapacity (const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-        return static_cast<float>(stats.getAttribute(0).getModified() * 5);
+        return static_cast<float>(stats.getAttribute(ESM::Attribute::Strength).getModified() * 5);
     }
 
     int Creature::getServices(const MWWorld::ConstPtr &actor) const
