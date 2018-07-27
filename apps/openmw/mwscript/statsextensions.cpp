@@ -17,6 +17,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -1139,7 +1140,11 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
 
                     if (ptr == MWMechanics::getPlayer())
+                    {
                         ptr.getClass().getCreatureStats(ptr).resurrect();
+                        if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_Ended)
+                            MWBase::Environment::get().getStateManager()->resumeGame();
+                    }
                     else if (ptr.getClass().getCreatureStats(ptr).isDead())
                     {
                         bool wasEnabled = ptr.getRefData().isEnabled();

@@ -173,6 +173,11 @@ void MWState::StateManager::endGame()
     mState = State_Ended;
 }
 
+void MWState::StateManager::resumeGame()
+{
+    mState = State_Running;
+}
+
 void MWState::StateManager::saveGame (const std::string& description, const Slot *slot)
 {
     MWState::Character* character = getCurrentCharacter();
