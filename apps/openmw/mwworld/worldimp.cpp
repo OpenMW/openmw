@@ -2778,7 +2778,7 @@ namespace MWWorld
         // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
         std::vector<MWWorld::Ptr> targetActors;
         if (!actor.isEmpty() && actor != MWMechanics::getPlayer() && !manualSpell)
-            actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targetActors);
+            stats.getAiSequence().getCombatTargets(targetActors);
 
         const float fCombatDistance = getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
 
@@ -2801,7 +2801,6 @@ namespace MWWorld
                 // Actors that are targeted by this actor's Follow or Escort packages also side with them
                 if (actor != MWMechanics::getPlayer())
                 {
-                    const MWMechanics::CreatureStats &stats = actor.getClass().getCreatureStats(actor);
                     for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
                     {
                         if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdCast)
