@@ -305,6 +305,7 @@ void CSMPrefs::State::declare()
     declareShortcut ("document-assets-videos", "Open Video Asset List", QKeySequence());
     declareShortcut ("document-debug-run", "Run Debug", QKeySequence());
     declareShortcut ("document-debug-shutdown", "Stop Debug", QKeySequence());
+    declareShortcut ("document-debug-profiles", "Debug Profiles", QKeySequence());
     declareShortcut ("document-debug-runlog", "Open Run Log", QKeySequence());
 
     declareSubcategory ("Table");
