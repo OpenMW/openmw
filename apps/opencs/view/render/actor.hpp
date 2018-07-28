@@ -5,6 +5,9 @@
 
 #include <osg/ref_ptr>
 
+#include <components/esm/loadarmo.hpp>
+#include <components/sceneutil/visitor.hpp>
+
 namespace osg
 {
     class Group;
@@ -39,9 +42,12 @@ namespace CSVRender
         void update();
 
     private:
-        void loadSkeleton(const std::string& model);
         void updateCreature();
         void updateNpc();
+
+        void loadSkeleton(const std::string& model);
+        void loadBodyParts(const std::string& actorId);
+        void attachBodyPart(ESM::PartReferenceType, const std::string& mesh);
 
         std::string getBodyPartMesh(const std::string& bodyPartId);
 
@@ -51,8 +57,9 @@ namespace CSVRender
         int mType;
         CSMWorld::Data& mData;
 
-        SceneUtil::Skeleton* mSkeleton;
         osg::ref_ptr<osg::Group> mBaseNode;
+        SceneUtil::Skeleton* mSkeleton;
+        SceneUtil::NodeMapVisitor::NodeMap mNodeMap;
     };
 }
 
