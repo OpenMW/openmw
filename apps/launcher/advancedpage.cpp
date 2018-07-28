@@ -43,7 +43,6 @@ void Launcher::AdvancedPage::on_runScriptAfterStartupBrowseButton_clicked()
             QDir::currentPath(),
             QString(tr("Text file (*.txt)")));
 
-
     if (scriptFile.isEmpty())
         return;
 
@@ -53,7 +52,7 @@ void Launcher::AdvancedPage::on_runScriptAfterStartupBrowseButton_clicked()
         return;
 
     const QString path(QDir::toNativeSeparators(info.absoluteFilePath()));
-
+    runScriptAfterStartupField->setText(path);
 }
 
 bool Launcher::AdvancedPage::loadSettings()
