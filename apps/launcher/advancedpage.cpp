@@ -76,6 +76,7 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(chargeForEveryFollowerCheckBox, "charge for every follower travelling", "Game");
     loadSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
     loadSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
+    loadSettingBool(strengthInfluencesHandToHand, "strength influences hand to hand", "Game");
 
     // Input Settings
     loadSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
@@ -131,6 +132,7 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(chargeForEveryFollowerCheckBox, "charge for every follower travelling", "Game");
     saveSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
     saveSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
+    saveSettingBool(strengthInfluencesHandToHand, "strength influences hand to hand", "Game");
 
     // Input Settings
     saveSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");

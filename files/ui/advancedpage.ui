@@ -99,6 +99,12 @@
             </property>
             <property name="text">
              <string>Barter disposition change is permanent</string>
+           <widget class="QCheckBox" name="strengthInfluencesHandToHand">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Uses the MCP formula (damage * (strength / 40)) to factor the Strength attribute into hand-to-hand combat.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Factor strength into hand-to-hand combat</string>
             </property>
            </widget>
           </item>

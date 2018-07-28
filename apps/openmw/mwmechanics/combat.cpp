@@ -388,14 +388,14 @@ namespace MWMechanics
 
     void getHandToHandDamage(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, float &damage, bool &healthdmg, float attackStrength)
     {
-        // Note: MCP contains an option to include Strength in hand-to-hand damage
-        // calculations. Some mods recommend using it, so we may want to include an
-        // option for it.
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         float minstrike = store.get<ESM::GameSetting>().find("fMinHandToHandMult")->getFloat();
         float maxstrike = store.get<ESM::GameSetting>().find("fMaxHandToHandMult")->getFloat();
         damage  = static_cast<float>(attacker.getClass().getSkill(attacker, ESM::Skill::HandToHand));
         damage *= minstrike + ((maxstrike-minstrike)*attackStrength);
+        if (Settings::Manager::getBool("strength influences hand to hand", "Game")){
+            damage *= attacker.getClass().getCreatureStats(attacker).getAttribute(ESM::Attribute::Strength).getModified() / 40.0f;
+        }
 
         MWMechanics::CreatureStats& otherstats = victim.getClass().getCreatureStats(victim);
         healthdmg = otherstats.isParalyzed()
