@@ -5,7 +5,9 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/refdata.hpp"
@@ -117,6 +119,11 @@ namespace MWRender
         osg::Vec3d up = orient * osg::Vec3d(0,0,1);
 
         cam->setViewMatrixAsLookAt(position, position + forward, up);
+
+        // Sound listener stuff
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        bool underwater = world->isUnderwater(world->getPlayerPtr().getCell(), position);
+        MWBase::Environment::get().getSoundManager()->setListenerPosDir(position, forward, up, underwater);
     }
 
     void Camera::reset()

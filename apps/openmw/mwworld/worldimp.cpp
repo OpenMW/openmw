@@ -1673,8 +1673,6 @@ namespace MWWorld
 
         mWorldScene->update (duration, paused);
 
-        updateSoundListener();
-
         mSpellPreloadTimer -= duration;
         if (mSpellPreloadTimer <= 0.f)
         {
@@ -1770,28 +1768,6 @@ namespace MWWorld
                     preloadEffects(&ench->mEffects);
             }
         }
-    }
-
-    void World::updateSoundListener()
-    {
-        const ESM::Position& refpos = getPlayerPtr().getRefData().getPosition();
-        osg::Vec3f listenerPos;
-
-        if (isFirstPerson())
-            listenerPos = mRendering->getCameraPosition();
-        else
-            listenerPos = refpos.asVec3() + osg::Vec3f(0, 0, 1.85f * mPhysics->getHalfExtents(getPlayerPtr()).z());
-
-        osg::Quat listenerOrient = osg::Quat(refpos.rot[1], osg::Vec3f(0,-1,0)) *
-                osg::Quat(refpos.rot[0], osg::Vec3f(-1,0,0)) *
-                osg::Quat(refpos.rot[2], osg::Vec3f(0,0,-1));
-
-        osg::Vec3f forward = listenerOrient * osg::Vec3f(0,1,0);
-        osg::Vec3f up = listenerOrient * osg::Vec3f(0,0,1);
-
-        bool underwater = isUnderwater(getPlayerPtr().getCell(), listenerPos);
-
-        MWBase::Environment::get().getSoundManager()->setListenerPosDir(listenerPos, forward, up, underwater);
     }
 
     void World::updateWindowManager ()
