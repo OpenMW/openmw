@@ -393,14 +393,16 @@ namespace MWMechanics
         float maxstrike = store.get<ESM::GameSetting>().find("fMaxHandToHandMult")->getFloat();
         damage  = static_cast<float>(attacker.getClass().getSkill(attacker, ESM::Skill::HandToHand));
         damage *= minstrike + ((maxstrike-minstrike)*attackStrength);
-        if (Settings::Manager::getBool("strength influences hand to hand", "Game")){
-            damage *= attacker.getClass().getCreatureStats(attacker).getAttribute(ESM::Attribute::Strength).getModified() / 40.0f;
-        }
 
         MWMechanics::CreatureStats& otherstats = victim.getClass().getCreatureStats(victim);
         healthdmg = otherstats.isParalyzed()
                 || otherstats.getKnockedDown();
         bool isWerewolf = (attacker.getClass().isNpc() && attacker.getClass().getNpcStats(attacker).isWerewolf());
+
+        if (Settings::Manager::getBool("strength influences hand to hand", "Game") && !isWerewolf) {
+            damage *= attacker.getClass().getCreatureStats(attacker).getAttribute(ESM::Attribute::Strength).getModified() / 40.0f;
+        }
+
         if(isWerewolf)
         {
             healthdmg = true;
