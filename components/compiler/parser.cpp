@@ -67,12 +67,12 @@ namespace Compiler
     // Handle an int token.
     // \return fetch another token?
     //
-    // - Default-implementation: Report an error.
+    // - Default implementation: Report a warning.
 
     bool Parser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected numeric value", loc);
+            reportWarning ("Unexpected numeric value", loc);
         else
             scanner.putbackInt (value, loc);
 
@@ -82,12 +82,12 @@ namespace Compiler
     // Handle a float token.
     // \return fetch another token?
     //
-    // - Default-implementation: Report an error.
+    // - Default implementation: Report a warning.
 
     bool Parser::parseFloat (float value, const TokenLoc& loc, Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected floating point value", loc);
+            reportWarning ("Unexpected floating point value", loc);
         else
             scanner.putbackFloat (value, loc);
 
@@ -97,13 +97,13 @@ namespace Compiler
     // Handle a name token.
     // \return fetch another token?
     //
-    // - Default-implementation: Report an error.
+    // - Default implementation: Report a warning.
 
     bool Parser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected name", loc);
+            reportWarning ("Unexpected name", loc);
         else
             scanner.putbackName (name, loc);
 
@@ -113,12 +113,12 @@ namespace Compiler
     // Handle a keyword token.
     // \return fetch another token?
     //
-    // - Default-implementation: Report an error.
+    // - Default implementation: Report a warning.
 
     bool Parser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected keyword", loc);
+            reportWarning ("Unexpected keyword", loc);
         else
             scanner.putbackKeyword (keyword, loc);
 
@@ -128,12 +128,12 @@ namespace Compiler
     // Handle a special character token.
     // \return fetch another token?
     //
-    // - Default-implementation: Report an error.
+    // - Default implementation: Report a warning.
 
     bool Parser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
     {
         if (!(mOptional && mEmpty))
-            reportSeriousError ("Unexpected special token", loc);
+            reportWarning ("Unexpected special token", loc);
         else
             scanner.putbackSpecial (code, loc);
 
@@ -147,7 +147,7 @@ namespace Compiler
 
     // Handle an EOF token.
     //
-    // - Default-implementation: Report an error.
+    // - Default implementation: Report an error.
 
     void Parser::parseEOF (Scanner& scanner)
     {
