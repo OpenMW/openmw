@@ -231,6 +231,23 @@ namespace MWMechanics
         {
             mPath = pathgridGraph.aStarSearch(startNode, endNode.first);
 
+            if (mPath.size() > 1) {
+                ESM::Pathgrid::Point secondNode = *(++mPath.begin());
+                osg::Vec3f firstNodeVec3f = MakeOsgVec3(mPathgrid->mPoints[startNode]);
+                osg::Vec3f secondNodeVec3f = MakeOsgVec3(secondNode);
+                osg::Vec3f toSecondNodeVec3f = secondNodeVec3f - firstNodeVec3f;
+                osg::Vec3f toStartPointVec3f = startPointInLocalCoords - firstNodeVec3f;
+                if (toSecondNodeVec3f * toStartPointVec3f > 0) {
+                    ESM::Pathgrid::Point temp(secondNode);
+                    converter.toWorld(temp);
+                    bool isPathClear = !MWBase::Environment::get().getWorld()->castRay(
+                        static_cast<float>(startPoint.mX), static_cast<float>(startPoint.mY), static_cast<float>(startPoint.mZ),
+                        static_cast<float>(temp.mX), static_cast<float>(temp.mY), static_cast<float>(temp.mZ));
+                    if (isPathClear)
+                        mPath.pop_front();
+                }
+            }
+
             // convert supplied path to world coordinates
             for (std::list<ESM::Pathgrid::Point>::iterator iter(mPath.begin()); iter != mPath.end(); ++iter)
             {
