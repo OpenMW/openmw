@@ -1471,12 +1471,16 @@ namespace MWWorld
             moveObjectImp(player->first, player->second.x(), player->second.y(), player->second.z(), false);
     }
 
-    bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
+    bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreDoors)
     {
         osg::Vec3f a(x1,y1,z1);
         osg::Vec3f b(x2,y2,z2);
 
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), MWPhysics::CollisionType_World|MWPhysics::CollisionType_Door);
+        int mask = MWPhysics::CollisionType_World;
+        if (!ignoreDoors)
+            mask |= MWPhysics::CollisionType_Door;
+
+        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), mask);
         return result.mHit;
     }
 
