@@ -399,7 +399,12 @@ namespace MWMechanics
                 || otherstats.getKnockedDown();
         bool isWerewolf = (attacker.getClass().isNpc() && attacker.getClass().getNpcStats(attacker).isWerewolf());
 
-        if (Settings::Manager::getBool("strength influences hand to hand", "Game") && !isWerewolf) {
+        // Options in the launcher's combo box: unarmedFactorsStrengthComboBox
+        // 0 = Do not factor strength into hand-to-hand combat.
+        // 1 = Factor into werewolf hand-to-hand combat.
+        // 2 = Ignore werewolves.
+        int factorStrength = Settings::Manager::getInt("strength influences hand to hand", "Game");
+        if (factorStrength == 1 || (factorStrength == 2 && !isWerewolf)) {
             damage *= attacker.getClass().getCreatureStats(attacker).getAttribute(ESM::Attribute::Strength).getModified() / 40.0f;
         }
 

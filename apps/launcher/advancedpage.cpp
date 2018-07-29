@@ -77,6 +77,9 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
     loadSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
     loadSettingBool(strengthInfluencesHandToHand, "strength influences hand to hand", "Game");
+    int unarmedFactorsStrengthIndex = mEngineSettings.getInt("strength influences hand to hand", "Game");
+    if (unarmedFactorsStrengthIndex >= 0 && unarmedFactorsStrengthIndex <= 2)
+        unarmedFactorsStrengthComboBox->setCurrentIndex(unarmedFactorsStrengthIndex);
 
     // Input Settings
     loadSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
@@ -133,6 +136,9 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
     saveSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
     saveSettingBool(strengthInfluencesHandToHand, "strength influences hand to hand", "Game");
+    int unarmedFactorsStrengthIndex = unarmedFactorsStrengthComboBox->currentIndex();
+    if (unarmedFactorsStrengthIndex != mEngineSettings.getInt("strength influences hand to hand", "Game"))
+        mEngineSettings.setInt("strength influences hand to hand", "Game", unarmedFactorsStrengthIndex);
 
     // Input Settings
     saveSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
