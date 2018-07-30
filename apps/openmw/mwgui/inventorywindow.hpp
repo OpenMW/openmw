@@ -101,6 +101,7 @@ namespace MWGui
             std::unique_ptr<MWRender::InventoryPreview> mPreview;
 
             bool mTrading;
+            float mScaleFactor;
 
             void onItemSelected(int index);
             void onItemSelectedFromSourceModel(int index);
