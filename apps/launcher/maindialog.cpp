@@ -90,19 +90,19 @@ void Launcher::MainDialog::createIcons()
     dataFilesButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
     QListWidgetItem *graphicsButton = new QListWidgetItem(iconWidget);
-    graphicsButton->setIcon(QIcon::fromTheme("video-display"));
+    graphicsButton->setIcon(QIcon(":/images/preferences-video.png"));
     graphicsButton->setText(tr("Graphics"));
     graphicsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom | Qt::AlignAbsolute);
     graphicsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
     QListWidgetItem *settingsButton = new QListWidgetItem(iconWidget);
-    settingsButton->setIcon(QIcon::fromTheme("preferences-system"));
+    settingsButton->setIcon(QIcon(":/images/preferences.png"));
     settingsButton->setText(tr("Settings"));
     settingsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     settingsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
     QListWidgetItem *advancedButton = new QListWidgetItem(iconWidget);
-    advancedButton->setIcon(QIcon::fromTheme("emblem-system"));
+    advancedButton->setIcon(QIcon(":/images/preferences-advanced.png"));
     advancedButton->setText(tr("Advanced"));
     advancedButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     advancedButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
