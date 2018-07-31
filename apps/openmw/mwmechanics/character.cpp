@@ -20,6 +20,7 @@
 #include "character.hpp"
 
 #include <iostream>
+#include <string>
 
 #include <components/misc/rng.hpp>
 
@@ -538,6 +539,18 @@ void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterStat
 
         std::string idleGroup;
         MWRender::Animation::AnimPriority idlePriority (Priority_Default);
+
+        // NPCs should not play idle sneak animations at the same time as random idles or they'll look weird.
+        bool playsRandomIdle = false;
+        for (int i = 2; i <= 9; i++)
+        {
+            if (isAnimPlaying("idle" + std::to_string(i)))
+            {
+                playsRandomIdle = true;
+                break;
+            }
+        }
+
         // Only play "idleswim" or "idlesneak" if they exist. Otherwise, fallback to
         // "idle"+weapon or "idle".
         if(mIdleState == CharState_IdleSwim && mAnimation->hasAnimation("idleswim"))
@@ -545,16 +558,18 @@ void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterStat
             idleGroup = "idleswim";
             idlePriority = Priority_SwimIdle;
         }
-        else if(mIdleState == CharState_IdleSneak && mAnimation->hasAnimation("idlesneak"))
+        else if(mIdleState == CharState_IdleSneak && mAnimation->hasAnimation("idlesneak") && !playsRandomIdle)
         {
             idleGroup = "idlesneak";
             idlePriority[MWRender::Animation::BoneGroup_LowerBody] = Priority_SneakIdleLowerBody;
         }
         else if(mIdleState != CharState_None)
         {
-            idleGroup = "idle";
+            if (!playsRandomIdle)
+                idleGroup = "idle";
             if(weap != sWeaponTypeListEnd)
             {
+                idleGroup = "idle";
                 idleGroup += weap->shortgroup;
                 if(!mAnimation->hasAnimation(idleGroup))
                     idleGroup = "idle";
@@ -565,11 +580,13 @@ void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterStat
             }  
         }
 
-        mAnimation->disable(mCurrentIdle);
-        mCurrentIdle = idleGroup;
-        if(!mCurrentIdle.empty())
+        if (!idleGroup.empty())
+        {
+            mAnimation->disable(mCurrentIdle);
+            mCurrentIdle = idleGroup;
             mAnimation->play(mCurrentIdle, idlePriority, MWRender::Animation::BlendMask_All, false,
                              1.0f, "start", "stop", 0.0f, numLoops, true);
+        }
     }
 }
 
