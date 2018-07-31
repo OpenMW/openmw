@@ -2416,13 +2416,12 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
 
     osg::Vec3d nearPoint = frustum.eye + frustum.frustumCenterLine * viewNear;
     osg::Vec3d farPoint = frustum.eye + frustum.frustumCenterLine * viewFar;
-    // TODO: Aren't these just dot products? Also the double negation of farDist is silly.
-    double nearDist = frustum.frustumCenterLine.x() * nearPoint.x() + frustum.frustumCenterLine.y() * nearPoint.y() + frustum.frustumCenterLine.z() * nearPoint.z();
-    double farDist = -frustum.frustumCenterLine.x() * farPoint.x() - frustum.frustumCenterLine.y() * farPoint.y() - frustum.frustumCenterLine.z() * farPoint.z();
 
-   
-    convexHull.clip(osg::Plane(frustum.frustumCenterLine, -nearDist));
-    convexHull.clip(osg::Plane(-frustum.frustumCenterLine, -farDist));
+    double nearDist = -frustum.frustumCenterLine * nearPoint;
+    double farDist = frustum.frustumCenterLine * farPoint;
+
+    convexHull.clip(osg::Plane(frustum.frustumCenterLine, nearDist));
+    convexHull.clip(osg::Plane(-frustum.frustumCenterLine, farDist));
 
 #if 0
     OSG_NOTICE<<"ws ConvexHull xMin="<<convexHull.min(0)<<", xMax="<<convexHull.max(0)<<std::endl;
