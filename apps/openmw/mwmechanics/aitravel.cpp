@@ -53,7 +53,23 @@ namespace MWMechanics
         if (!isWithinMaxRange(osg::Vec3f(mX, mY, mZ), pos.asVec3()))
             return false;
 
-        if (pathTo(actor, ESM::Pathgrid::Point(static_cast<int>(mX), static_cast<int>(mY), static_cast<int>(mZ)), duration))
+        // Unfortunately, with vanilla assets destination is sometimes blocked by other actor.
+        // If we got close to target, check for actors nearby. If they are, finish AI package.
+        int destinationTolerance = 64;
+        ESM::Pathgrid::Point dest(static_cast<int>(mX), static_cast<int>(mY), static_cast<int>(mZ));
+        if (distance(pos.pos, dest) <= destinationTolerance)
+        {
+            std::vector<MWWorld::Ptr> targetActors;
+            std::pair<MWWorld::Ptr, osg::Vec3f> result = MWBase::Environment::get().getWorld()->getHitContact(actor, destinationTolerance, targetActors);
+
+            if (!result.first.isEmpty())
+            {
+                actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+                return true;
+            }
+        }
+
+        if (pathTo(actor, dest, duration))
         {
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
             return true;
