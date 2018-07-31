@@ -2496,7 +2496,7 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
 #if 0
         convexHull.clip(osg::Plane(0.0,0.0,1.0,-rli.min_z));
         convexHull.clip(osg::Plane(0.0,0.0,-1.0,rli.max_z));
-#else
+#elif 0
         convexHull.clip(osg::Plane(0.0,0.0,1.0,1.0));
         convexHull.clip(osg::Plane(0.0,0.0,-1.0,1.0));
 #endif
