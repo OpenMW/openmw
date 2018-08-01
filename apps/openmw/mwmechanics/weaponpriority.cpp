@@ -103,7 +103,10 @@ namespace MWMechanics
 
         int skill = item.getClass().getEquipmentSkill(item);
         if (skill != -1)
-            rating *= actor.getClass().getSkill(actor, skill) / 100.f;
+        {
+            MWMechanics::SkillValue& value = actor.getClass().getSkill(actor, skill);
+            rating *= MWMechanics::getHitChance(actor, enemy, value) / 100.f;
+        }
 
         // There is no need to apply bonus if weapon rating == 0
         if (rating == 0.f)
