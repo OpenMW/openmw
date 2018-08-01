@@ -1117,6 +1117,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mWindSpeed(0.f)
     , mEnabled(true)
     , mSunEnabled(true)
+    , mWeatherAlpha(0.f)
 {
     osg::ref_ptr<CameraRelativeTransform> skyroot (new CameraRelativeTransform);
     skyroot->setName("Sky Root");

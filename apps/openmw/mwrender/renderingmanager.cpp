@@ -203,6 +203,7 @@ namespace MWRender
         , mNightEyeFactor(0.f)
         , mDistantFog(false)
         , mDistantTerrain(false)
+        , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
         , mBorders(false)
     {
