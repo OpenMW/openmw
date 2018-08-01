@@ -182,8 +182,10 @@ static void gdb_info(pid_t pid)
         /* Error creating temp file */
         if(fd >= 0)
         {
-            close(fd);
-            remove(respfile);
+            if (close(fd) == 0)
+                remove(respfile);
+            else
+                std::cerr << "Warning: can not close and remove file '" << respfile << "': " << std::strerror(errno) << std::endl;
         }
         printf("!!! Could not create gdb command file\n");
     }
