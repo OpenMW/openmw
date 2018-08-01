@@ -30,7 +30,7 @@ namespace MWMechanics
             return 0.f;
 
         float rating=0.f;
-        float bonus=0.f;
+        float rangedMult=1.f;
 
         if (weapon->mData.mType >= ESM::Weapon::MarksmanBow && weapon->mData.mType <= ESM::Weapon::MarksmanThrown)
         {
@@ -44,7 +44,8 @@ namespace MWMechanics
             if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(enemy), 0.75f))
                 return 0.f;
 
-            bonus+=1.5f;
+            if (getDistanceMinusHalfExtents(actor, enemy) >= getMaxAttackDistance(enemy))
+                rangedMult = 1.5f;
         }
 
         if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
@@ -104,15 +105,11 @@ namespace MWMechanics
         int skill = item.getClass().getEquipmentSkill(item);
         if (skill != -1)
         {
-            MWMechanics::SkillValue& value = actor.getClass().getSkill(actor, skill);
+            int value = actor.getClass().getSkill(actor, skill);
             rating *= MWMechanics::getHitChance(actor, enemy, value) / 100.f;
         }
 
-        // There is no need to apply bonus if weapon rating == 0
-        if (rating == 0.f)
-            return 0.f;
-
-        return rating + bonus;
+        return rating * rangedMult;
     }
 
     float rateAmmo(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy, MWWorld::Ptr &bestAmmo, ESM::Weapon::Type ammoType)
