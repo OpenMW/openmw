@@ -194,9 +194,9 @@ void main(void)
     float bump = mix(BUMP,BUMP_RAIN,rainIntensity);
 
     vec3 normal = (normal0 * bigWaves.x + normal1 * bigWaves.y +
-			normal2 * midWaves.x + normal3 * midWaves.y +
-			normal4 * smallWaves.x + normal5 * smallWaves.y +
-                        rippleAdd);
+                   normal2 * midWaves.x + normal3 * midWaves.y +
+                   normal4 * smallWaves.x + normal5 * smallWaves.y +
+                   rippleAdd);
 
     normal = normalize(vec3(normal.x * bump, normal.y * bump, normal.z));
 
@@ -204,9 +204,9 @@ void main(void)
 
     // normal for sunlight scattering
     vec3 lNormal = (normal0 * bigWaves.x * 0.5 + normal1 * bigWaves.y * 0.5 +
-		normal2 * midWaves.x * 0.2 + normal3 * midWaves.y * 0.2 +
-		normal4 * smallWaves.x * 0.1 + normal5 * smallWaves.y * 0.1 +
-                rippleAdd).xyz;
+                    normal2 * midWaves.x * 0.2 + normal3 * midWaves.y * 0.2 +
+                    normal4 * smallWaves.x * 0.1 + normal5 * smallWaves.y * 0.1 +
+                    rippleAdd).xyz;
 
     lNormal = normalize(vec3(lNormal.x * bump, lNormal.y * bump, lNormal.z));
     lNormal = vec3(-lNormal.x, -lNormal.y, lNormal.z);
