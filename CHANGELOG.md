@@ -78,6 +78,7 @@
     Feature #3083: Play animation when NPC is casting spell via script
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #3641: Editor: Limit FPS in 3d preview window
+    Feature #3703: Ranged sneak attack criticals
     Feature #4222: 360° screenshots
     Feature #4256: Implement ToggleBorders (TB) console command
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts

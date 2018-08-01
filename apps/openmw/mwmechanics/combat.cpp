@@ -209,8 +209,21 @@ namespace MWMechanics
 
             adjustWeaponDamage(damage, weapon, attacker);
 
-            if(attacker == getPlayer())
+            if (attacker == getPlayer())
+            {
                 attacker.getClass().skillUsageSucceeded(attacker, weaponSkill, 0);
+                const MWMechanics::AiSequence& sequence = victim.getClass().getCreatureStats(victim).getAiSequence();
+
+                bool unaware = !sequence.isInCombat()
+                    && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(attacker, victim);
+
+                if (unaware)
+                {
+                    damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
+                    MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+                }
+            }
 
             if (victim.getClass().getCreatureStats(victim).getKnockedDown())
                 damage *= gmst.find("fCombatKODamageMult")->getFloat();
