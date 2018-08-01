@@ -691,9 +691,6 @@ namespace MWRender
         int screenshotW = mViewer->getCamera()->getViewport()->width();
         int screenshotH = mViewer->getCamera()->getViewport()->height();
         int screenshotMapping = 0;
-        int cubeSize = screenshotMapping == 2 ?
-            screenshotW:         // planet mapping needs higher resolution
-            screenshotW / 2;    
 
         std::vector<std::string> settingArgs;
         boost::algorithm::split(settingArgs,settingStr,boost::is_any_of(" "));
@@ -717,7 +714,10 @@ namespace MWRender
                 return false;
             }
         }
-    
+
+        // planet mapping needs higher resolution
+        int cubeSize = screenshotMapping == 2 ? screenshotW : screenshotW / 2;
+
         if (settingArgs.size() > 1)
             screenshotW = std::min(10000,std::atoi(settingArgs[1].c_str()));
 
