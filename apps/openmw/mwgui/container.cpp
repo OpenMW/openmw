@@ -82,7 +82,7 @@ namespace MWGui
             dialog->eventOkClicked.clear();
             dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::dragItem);
         }
-        else
+        else if (mModel)
             dragItem (NULL, count);
     }
 

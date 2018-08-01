@@ -1180,9 +1180,9 @@ namespace MWWorld
                 addContainerScripts (getPlayerPtr(), newCell);
                 newPtr = getPlayerPtr();
             }
-            else
+            else if (currCell)
             {
-                bool currCellActive = currCell && mWorldScene->isCellActive(*currCell);
+                bool currCellActive = mWorldScene->isCellActive(*currCell);
                 bool newCellActive = newCell && mWorldScene->isCellActive(*newCell);
                 if (!currCellActive && newCellActive)
                 {
