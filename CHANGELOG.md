@@ -76,6 +76,7 @@
     Bug #4539: Paper Doll is affected by GUI scaling
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
+    Feature #3103: Provide option for disposition to get increased by successful trade
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #3641: Editor: Limit FPS in 3d preview window
     Feature #3703: Ranged sneak attack criticals
