@@ -102,6 +102,14 @@ void CSVRender::Object::update()
         if (recordType == CSMWorld::UniversalId::Type_Light)
         {
             light = &dynamic_cast<const CSMWorld::Record<ESM::Light>& >(referenceables.getRecord(index)).get();
+            if (model.empty())
+                model = "marker_light.nif";
+        }
+
+        if (recordType == CSMWorld::UniversalId::Type_CreatureLevelledList)
+        {
+            if (model.empty())
+                model = "marker_creature.nif";
         }
 
         if (model.empty())
@@ -372,10 +380,10 @@ osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker (int axis)
                 indices[j] -= VertexCount;
         }
 
-        size_t offset = i * IndicesPerSegment;
+        size_t elementOffset = i * IndicesPerSegment;
         for (size_t j = 0; j < IndicesPerSegment; ++j)
         {
-            primitives->setElement(offset++, indices[IndexPattern[j]]);
+            primitives->setElement(elementOffset++, indices[IndexPattern[j]]);
         }
     }
 

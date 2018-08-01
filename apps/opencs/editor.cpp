@@ -5,6 +5,9 @@
 #include <QLocalSocket>
 #include <QMessageBox>
 
+
+#include <components/crashcatcher/crashcatcher.hpp>
+
 #include <components/fallback/validate.hpp>
 
 #include <components/nifosg/nifloader.hpp>
@@ -18,12 +21,16 @@
 
 using namespace Fallback;
 
-CS::Editor::Editor ()
+CS::Editor::Editor (int argc, char **argv)
 : mSettingsState (mCfgMgr), mDocumentManager (mCfgMgr),
   mViewManager (mDocumentManager), mPid(""),
   mLock(), mMerge (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
-{
+{    
+    // install the crash handler as soon as possible. note that the log path
+    // does not depend on config being read.
+    crashCatcherInstall(argc, argv, (mCfgMgr.getLogPath() / "openmw-cs-crash.log").string());
+
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
     setupDataFiles (config.first);

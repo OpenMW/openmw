@@ -145,6 +145,12 @@ add_component_dir (fallback
     fallback validate
     )
 
+if(NOT WIN32 AND NOT ANDROID)
+    add_component_dir (crashcatcher
+        crashcatcher
+    )
+endif()
+
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 

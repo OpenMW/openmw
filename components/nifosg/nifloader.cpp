@@ -547,6 +547,11 @@ namespace NifOsg
                 node->setDataVariance(osg::Object::DYNAMIC);
             }
 
+            if (nifNode->recType == Nif::RC_NiTriShape && isAnimated) // the same thing for animated NiTriShapes
+            {
+                node->setDataVariance(osg::Object::DYNAMIC);
+            }
+
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
             applyNodeProperties(nifNode, node, composite, imageManager, boundTextures, animflags);

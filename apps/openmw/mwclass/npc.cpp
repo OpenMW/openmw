@@ -773,22 +773,24 @@ namespace MWClass
                 float x = damage / (damage + getArmorRating(ptr));
                 damage *= std::max(gmst.fCombatArmorMinMult->getFloat(), x);
                 int damageDiff = static_cast<int>(unmitigatedDamage - damage);
-                if (damage < 1)
-                    damage = 1;
+                damage = std::max(1.f, damage);
+                damageDiff = std::max(1, damageDiff);
 
                 MWWorld::InventoryStore &inv = getInventoryStore(ptr);
                 MWWorld::ContainerStoreIterator armorslot = inv.getSlot(hitslot);
                 MWWorld::Ptr armor = ((armorslot != inv.end()) ? *armorslot : MWWorld::Ptr());
                 if(!armor.isEmpty() && armor.getTypeName() == typeid(ESM::Armor).name())
                 {
-                    int armorhealth = armor.getClass().getItemHealth(armor);
-                    armorhealth -= std::min(std::max(1, damageDiff),
-                                                 armorhealth);
-                    armor.getCellRef().setCharge(armorhealth);
+                    if (attacker.isEmpty() || (!attacker.isEmpty() && !(object.isEmpty() && !attacker.getClass().isNpc()))) // Unarmed creature attacks don't affect armor condition
+                    {
+                        int armorhealth = armor.getClass().getItemHealth(armor);
+                        armorhealth -= std::min(damageDiff, armorhealth);
+                        armor.getCellRef().setCharge(armorhealth);
 
-                    // Armor broken? unequip it
-                    if (armorhealth == 0)
-                        armor = *inv.unequipItem(armor, ptr);
+                        // Armor broken? unequip it
+                        if (armorhealth == 0)
+                            armor = *inv.unequipItem(armor, ptr);
+                    }
 
                     if (ptr == MWMechanics::getPlayer())
                         skillUsageSucceeded(ptr, armor.getClass().getEquipmentSkill(armor), 0);
@@ -923,6 +925,10 @@ namespace MWClass
 
     float Npc::getSpeed(const MWWorld::Ptr& ptr) const
     {
+        const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead())
+            return 0.f;
+
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const GMST& gmst = getGmst();
 
@@ -931,8 +937,8 @@ namespace MWClass
 
         const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
-        bool sneaking = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        bool running = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run);
+        bool sneaking = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
+        bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
 
         float walkSpeed = gmst.fMinWalkSpeed->getFloat() + 0.01f*npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()*
                                                       (gmst.fMaxWalkSpeed->getFloat() - gmst.fMinWalkSpeed->getFloat());
@@ -1073,7 +1079,7 @@ namespace MWClass
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
         static const float fEncumbranceStrMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fEncumbranceStrMult")->getFloat();
-        return stats.getAttribute(0).getModified()*fEncumbranceStrMult;
+        return stats.getAttribute(ESM::Attribute::Strength).getModified()*fEncumbranceStrMult;
     }
 
     float Npc::getEncumbrance (const MWWorld::Ptr& ptr) const

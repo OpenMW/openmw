@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_STATS_H
 #define OPENMW_COMPONENTS_RESOURCE_STATS_H
 
-#include <osgGA/GUIEventHandler>
+#include <osgViewer/ViewerEventHandlers>
 
 namespace osgViewer
 {
@@ -15,6 +15,11 @@ namespace osg
 
 namespace Resource
 {
+    class Profiler : public osgViewer::StatsHandler
+    {
+    public:
+        Profiler();
+    };
 
     class StatsHandler : public osgGA::GUIEventHandler
     {

@@ -20,6 +20,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/actionequip.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -193,12 +194,11 @@ namespace MWScript
                             "to fulfil requirements of Equip instruction" << std::endl;
                     }
 
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
-                        MWBase::Environment::get().getWindowManager()->useItem(*it);
+                    if (ptr == MWMechanics::getPlayer())
+                        MWBase::Environment::get().getWindowManager()->useItem(*it, true);
                     else
                     {
-                        std::shared_ptr<MWWorld::Action> action = it->getClass().use(*it);
-                        // No equip sound for actors other than the player
+                        std::shared_ptr<MWWorld::Action> action = it->getClass().use(*it, true);
                         action->execute(ptr, true);
                     }
                 }

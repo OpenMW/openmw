@@ -328,7 +328,10 @@ namespace MWMechanics
                 if (race->mData.mFlags & ESM::Race::Beast)
                     return 0.f;
             }
-            // Intended fall-through
+            else
+                return 0.f;
+
+            break;
         // Creatures can not wear armor
         case ESM::MagicEffect::BoundCuirass:
         case ESM::MagicEffect::BoundGloves:

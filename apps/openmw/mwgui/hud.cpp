@@ -158,7 +158,9 @@ namespace MWGui
 
         getWidget(mCrosshair, "Crosshair");
 
-        LocalMapBase::init(mMinimap, mCompass, Settings::Manager::getInt("local map hud widget size", "Map"), Settings::Manager::getInt("local map cell distance", "Map"));
+        int mapSize = std::max(1, Settings::Manager::getInt("local map hud widget size", "Map"));
+        int cellDistance = std::max(1, Settings::Manager::getInt("local map cell distance", "Map"));
+        LocalMapBase::init(mMinimap, mCompass, mapSize, cellDistance);
 
         mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
         mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);

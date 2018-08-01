@@ -226,7 +226,7 @@ namespace MWClass
         return newPtr;
     }
 
-    std::shared_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr, bool force) const
     {
         if (ptr.getCellRef().getSoul().empty() || !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ptr.getCellRef().getSoul()))
             return std::shared_ptr<MWWorld::Action>(new MWWorld::NullAction());

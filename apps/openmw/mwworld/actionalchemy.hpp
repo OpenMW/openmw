@@ -7,7 +7,11 @@ namespace MWWorld
 {
     class ActionAlchemy : public Action
     {
-            virtual void executeImp (const Ptr& actor);
+        bool mForce;
+        virtual void executeImp (const Ptr& actor);
+
+    public:
+        ActionAlchemy(bool force=false);
     };
 }
 

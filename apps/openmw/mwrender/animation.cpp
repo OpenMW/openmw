@@ -1190,6 +1190,10 @@ namespace MWRender
                 mHeadController->setRotate(osg::Quat(mHeadPitchRadians, osg::Vec3f(1,0,0)) * osg::Quat(mHeadYawRadians, osg::Vec3f(0,0,1)));
         }
 
+        // Scripted animations should not cause movement
+        if (hasScriptedAnims)
+            return osg::Vec3f(0, 0, 0);
+
         return movement;
     }
 

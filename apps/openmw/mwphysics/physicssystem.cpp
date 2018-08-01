@@ -626,7 +626,6 @@ namespace MWPhysics
             assert (mShapeInstance->getCollisionShape()->isCompound());
 
             btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->getCollisionShape());
-
             for (std::map<int, int>::const_iterator it = mShapeInstance->mAnimatedShapes.begin(); it != mShapeInstance->mAnimatedShapes.end(); ++it)
             {
                 int recIndex = it->first;
@@ -640,6 +639,9 @@ namespace MWPhysics
                     if (!visitor.mFound)
                     {
                         std::cerr << "Error: animateCollisionShapes can't find node " << recIndex << " for " << mPtr.getCellRef().getRefId() << std::endl;
+
+                        // Remove nonexistent nodes from animated shapes map and early out
+                        mShapeInstance->mAnimatedShapes.erase(recIndex);
                         return;
                     }
                     osg::NodePath nodePath = visitor.mFoundPath;

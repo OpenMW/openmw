@@ -58,7 +58,7 @@ namespace MWGui
 
             void clear();
 
-            void useItem(const MWWorld::Ptr& ptr);
+            void useItem(const MWWorld::Ptr& ptr, bool force=false);
 
             void setGuiMode(GuiMode mode);
 

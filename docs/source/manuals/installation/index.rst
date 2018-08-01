@@ -1,3 +1,4 @@
+##################
 Installation Guide
 ##################
 
@@ -8,4 +9,4 @@ In order to use OpenMW, you must install both the engine and the game files for 
 
 	install-openmw
 	install-game-files
-
+	common-problems

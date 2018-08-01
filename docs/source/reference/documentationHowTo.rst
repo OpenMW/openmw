@@ -12,6 +12,32 @@ The premise of this guide is that you would like to help out the OpenMW project 
 
 *However*, as much as I will try to guide you through all the tedious setup and day-to-day stuff, you will eventually have to learn to write using ReST (reStructuredText) formatting. Since you're probably like me when I started helping and don't know wtf ReST is, never fear. It's an incredibly simple language that is easy to read in plain text form that can then be converted automatically into different types of documents like PDFs and html for webpages.
 
+Baby Steps
+==========
+
+Create an account on GitLab (https://gitlab.com), and sign in.
+(Github probably works too, though some details will differ. More details later – maybe.)
+
+Go to the OpenMW project on GitLab (https://gitlab.com/OpenMW/openmw)
+Navigate to whatever documentation you want to tackle.
+Choose Repository and Files in the menu on the left, then docs and source in the tree in the centre.
+
+Don’t overlook the tutorial-style-guide.txt there for some tips to get you started.
+
+Open whichever file you want to tackle – probably within the manuals or reference directories.
+There’s also a dropdown box to the right of edit, at the top of the left menu, which offers options such as new file or directory, or upload file, with “+” to close that dropdown box.
+
+Click on "Edit" towards top right which will reveal the underlying version, rather than the version displayed to normal reaaders. Use "Write" and "Preview" to switch between the two views.
+
+When you have made the appropriate changes, and checked them in Preview mode, click the Green "Commit changes" button at the bottom.
+This should add a branch, with a default name such as patch-1, to your own repository, and add a Merge Request to the main OpenMW Project.
+
+[More details on the commit and review process]
+
+Changes between submission and acceptance of the Merge Request - just make them in your branch, then press the Commit button there.
+
+Going Deeper
+============
 So here's what you're gonna be learning how to set up:
 
 1.	`GitHub`_
@@ -102,6 +128,33 @@ You will probably find it helpful to be able to preview any documentation you've
 4.	Click `Apply`, then `OK`.
 
 Now in order to generate the documentation on your computer to preview them, just click the green play button in the top right, next to the drop down menu with the name you chose above selected. Sphinx will run and you can view the resulting documentation wherever you chose Output to be, above. The window that Sphinx runs in will also show any errors that occur during the build in red, which should help you find typos and missing/incorrect syntax.
+
+GitLab integration in PyCharm
+=============================
+
+As most of the hosting of OpenMW has moved to Gitlab, we should encourage the use of GitLab, though GitHub will continue to be supported.
+
+Add a couple of plugins to Pycharm - see general instructions at https://www.jetbrains.com/help/pycharm/installing-updating-and-uninstalling-repository-plugins.html
+
+For Linux/Windows - (Macos is a little different)
+
+1. File/Settings/Plugins 
+2. Browse Repositories
+3. Filter with “GitLab”
+4. Install “GitLab Integration Plugin”, 
+5. Follow the accompanying instructions to register your GitLab account (after restarting PyCharm) - File/Settings/Other Settings/Gitlab Integration
+6. Install “GitLab Projects”
+
+Within your account on GitLab
+
+1. Fork OpenMW if you haven’t already done so
+2. Select Settings from the dropdown box in your Avatar (top right)
+3. Select Access Tokens from the list on the left 
+4. Enter a name for application that will use it – say “PyCharm”
+5. Set an expiry date
+6. Check  the “api” box
+7. Create the token, and use it to complete the setup of the "GitLab Integration Plugin" above.
+
 
 Sample PR
 =========

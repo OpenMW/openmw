@@ -14,7 +14,11 @@
 #include <stdbool.h>
 #include <sys/ptrace.h>
 
-#include <string>
+#include <iostream>
+
+#include <boost/filesystem/fstream.hpp>
+
+namespace bfs = boost::filesystem;
 
 #include <SDL_messagebox.h>
 
@@ -26,6 +30,10 @@
 #endif
 #elif defined (__APPLE__) || defined (__FreeBSD__) || defined(__OpenBSD__)
 #include <signal.h>
+#endif
+
+#if defined(__APPLE__)
+#include <sys/sysctl.h>
 #endif
 
 #define UNUSED(x) (void)(x)
@@ -402,7 +410,7 @@ static void crash_handler(const char *logfile)
     exit(0);
 }
 
-int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, const char *logfile, int (*user_info)(char*, char*))
+int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *signals, const char *logfile, int (*user_info)(char*, char*))
 {
     struct sigaction sa;
     stack_t altss;
@@ -454,19 +462,61 @@ int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, co
     return retval;
 }
 
-
-// gdb apparently opens FD(s) 3,4,5 (whereas a typical prog uses only stdin=0, stdout=1,stderr=2)
-bool
-is_debugger_attached(void)
+static bool is_debugger_present()
 {
-    bool rc = false;
-    FILE *fd = fopen("/tmp", "r");
-
-    if (fileno(fd) > 5)
+#if !defined (__APPLE__)
+    bfs::ifstream file((bfs::path("/proc/self/status")));
+    while (!file.eof())
     {
-        rc = true;
+        std::string word;
+        file >> word;
+        if (word == "TracerPid:")
+        {
+            file >> word;
+            return word != "0";
+        }
     }
+    return false;
+#else
+    int junk;
+    int mib[4];
+    struct kinfo_proc info;
+    size_t size;
 
-    fclose(fd);
-    return rc;
+    // Initialize the flags so that, if sysctl fails for some bizarre
+    // reason, we get a predictable result.
+
+    info.kp_proc.p_flag = 0;
+
+    // Initialize mib, which tells sysctl the info we want, in this case
+    // we're looking for information about a specific process ID.
+
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_PID;
+    mib[3] = getpid();
+
+    // Call sysctl.
+
+    size = sizeof(info);
+    junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
+    assert(junk == 0);
+
+    // We're being debugged if the P_TRACED flag is set.
+
+    return (info.kp_proc.p_flag & P_TRACED) != 0;
+#endif
+}
+
+void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath)
+{
+    if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_present())
+    {
+        int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
+        if (crashCatcherInstallHandlers(argc, argv, 5, s, crashLogPath.c_str(), NULL) == -1)
+        {
+            std::cerr << "Installing crash handler failed" << std::endl;
+        } else
+            std::cout << "Crash handler installed" << std::endl;
+    }
 }

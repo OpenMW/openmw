@@ -56,15 +56,15 @@ namespace MWGui
 
 
     /*
-     * "Modal" windows cause the rest of the interface to be unaccessible while they are visible
+     * "Modal" windows cause the rest of the interface to be inaccessible while they are visible
      */
     class WindowModal : public WindowBase
     {
     public:
         WindowModal(const std::string& parLayout);
-        virtual void onOpen();
-        virtual void onClose();
-        virtual bool exit() {return true;}
+        virtual void onOpen() override;
+        virtual void onClose() override;
+        virtual bool exit() override {return true;}
     };
 
     /// A window that cannot be the target of a drag&drop action.

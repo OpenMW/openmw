@@ -400,7 +400,7 @@ namespace MWWorld
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
-            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) override;
+            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreDoors=false) override;
             ///< cast a Ray and return true if there is an object in the ray path.
 
             bool toggleCollisionMode() override;
@@ -602,13 +602,13 @@ namespace MWWorld
              * @brief Cast the actual spell, should be called mid-animation
              * @param actor
              */
-            void castSpell (const MWWorld::Ptr& actor) override;
+            void castSpell (const MWWorld::Ptr& actor, bool manualSpell=false) override;
 
             void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection) override;
             void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength) override;
 
-            void applyLoopingParticles(const MWWorld::Ptr& ptr);
+            void applyLoopingParticles(const MWWorld::Ptr& ptr) override;
 
             const std::vector<std::string>& getContentFiles() const override;
             void breakInvisibility (const MWWorld::Ptr& actor) override;

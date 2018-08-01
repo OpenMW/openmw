@@ -75,7 +75,7 @@ namespace MWClass
     }
 
 
-    std::shared_ptr<MWWorld::Action> Ingredient::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Ingredient::use (const MWWorld::Ptr& ptr, bool force) const
     {
         std::shared_ptr<MWWorld::Action> action (new MWWorld::ActionEat (ptr));
 

@@ -61,6 +61,7 @@ QuadTreeNode::QuadTreeNode(QuadTreeNode* parent, ChildDirection direction, float
     , mValidBounds(false)
     , mSize(size)
     , mCenter(center)
+    , mViewDataMap(nullptr)
 {
     for (unsigned int i=0; i<4; ++i)
         mNeighbours[i] = 0;

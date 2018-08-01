@@ -297,7 +297,7 @@ namespace MWBase
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
-            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
+            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreDoors=false) = 0;
             ///< cast a Ray and return true if there is an object in the ray path.
 
             virtual bool toggleCollisionMode() = 0;
@@ -487,7 +487,7 @@ namespace MWBase
              */
             virtual bool startSpellCast (const MWWorld::Ptr& actor) = 0;
 
-            virtual void castSpell (const MWWorld::Ptr& actor) = 0;
+            virtual void castSpell (const MWWorld::Ptr& actor, bool manualSpell=false) = 0;
 
             virtual void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection) = 0;
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,

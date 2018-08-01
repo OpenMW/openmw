@@ -66,7 +66,7 @@ namespace CS
 
         public:
 
-            Editor ();
+            Editor (int argc, char **argv);
             ~Editor ();
 
             bool makeIPCServer();

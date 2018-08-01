@@ -7,6 +7,8 @@
 
 #include <components/widgets/sharedstatebutton.hpp>
 
+#include "tooltips.hpp"
+
 namespace MWGui
 {
 
@@ -103,11 +105,12 @@ namespace MWGui
             }
 
             const std::string skin = spell.mActive ? "SandTextButton" : "SpellTextUnequipped";
+            const std::string captionSuffix = MWGui::ToolTips::getCountString(spell.mCount);
 
             Gui::SharedStateButton* t = mScrollView->createWidget<Gui::SharedStateButton>(skin,
                 MyGUI::IntCoord(0, 0, 0, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setNeedKeyFocus(true);
-            t->setCaption(spell.mName);
+            t->setCaption(spell.mName + captionSuffix);
             t->setTextAlign(MyGUI::Align::Left);
             adjustSpellWidget(spell, i, t);
 
@@ -163,7 +166,8 @@ namespace MWGui
 
                 // more checking for major change.
                 const Spell& spell = mModel->getItem(spellIndex);
-                if (nameButton->getCaption() != spell.mName)
+                const std::string captionSuffix = MWGui::ToolTips::getCountString(spell.mCount);
+                if (nameButton->getCaption() != (spell.mName + captionSuffix))
                 {
                     fullUpdateRequired = true;
                     break;

@@ -124,10 +124,9 @@ namespace MWClass
         return info;
     }
 
-
-    std::shared_ptr<MWWorld::Action> Apparatus::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Apparatus::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionAlchemy());
+        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionAlchemy(force));
     }
 
     MWWorld::Ptr Apparatus::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const

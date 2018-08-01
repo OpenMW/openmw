@@ -21,8 +21,81 @@ namespace ESM
 }
 
 namespace MWMechanics
-{       
-    struct AiWanderStorage;
+{
+    /// \brief This class holds the variables AiWander needs which are deleted if the package becomes inactive.
+    struct AiWanderStorage : AiTemporaryBase
+    {
+        // the z rotation angle to reach
+        // when mTurnActorGivingGreetingToFacePlayer is true
+        float mTargetAngleRadians;
+        bool mTurnActorGivingGreetingToFacePlayer;
+        float mReaction; // update some actions infrequently
+
+        enum GreetingState
+        {
+            Greet_None,
+            Greet_InProgress,
+            Greet_Done
+        };
+        GreetingState mSaidGreeting;
+        int mGreetingTimer;
+
+        const MWWorld::CellStore* mCell; // for detecting cell change
+
+        // AiWander states
+        enum WanderState
+        {
+            Wander_ChooseAction,
+            Wander_IdleNow,
+            Wander_MoveNow,
+            Wander_Walking
+        };
+        WanderState mState;
+
+        bool mIsWanderingManually;
+        bool mCanWanderAlongPathGrid;
+
+        unsigned short mIdleAnimation;
+        std::vector<unsigned short> mBadIdles; // Idle animations that when called cause errors
+
+        // do we need to calculate allowed nodes based on mDistance
+        bool mPopulateAvailableNodes;
+
+        // allowed pathgrid nodes based on mDistance from the spawn point
+        // in local coordinates of mCell
+        std::vector<ESM::Pathgrid::Point> mAllowedNodes;
+
+        ESM::Pathgrid::Point mCurrentNode;
+        bool mTrimCurrentNode;
+
+        float mDoorCheckDuration;
+        int mStuckCount;
+
+        AiWanderStorage():
+            mTargetAngleRadians(0),
+            mTurnActorGivingGreetingToFacePlayer(false),
+            mReaction(0),
+            mSaidGreeting(Greet_None),
+            mGreetingTimer(0),
+            mCell(NULL),
+            mState(Wander_ChooseAction),
+            mIsWanderingManually(false),
+            mCanWanderAlongPathGrid(true),
+            mIdleAnimation(0),
+            mBadIdles(),
+            mPopulateAvailableNodes(true),
+            mAllowedNodes(),
+            mTrimCurrentNode(false),
+            mDoorCheckDuration(0), // TODO: maybe no longer needed
+            mStuckCount(0)
+            {};
+
+        void setState(const WanderState wanderState, const bool isManualWander = false)
+        {
+            mState = wanderState;
+            mIsWanderingManually = isManualWander;
+        }
+    };
 
     /// \brief Causes the Actor to wander within a specified range
     class AiWander : public AiPackage
@@ -51,19 +124,6 @@ namespace MWMechanics
             bool getRepeat() const;
 
             osg::Vec3f getDestination(const MWWorld::Ptr& actor) const;
-
-            enum GreetingState {
-                Greet_None,
-                Greet_InProgress,
-                Greet_Done
-            };
-
-            enum WanderState {
-                Wander_ChooseAction,
-                Wander_IdleNow,
-                Wander_MoveNow,
-                Wander_Walking
-            };
 
         private:
             // NOTE: mDistance and mDuration must be set already

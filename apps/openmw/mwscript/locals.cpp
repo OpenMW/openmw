@@ -240,6 +240,10 @@ namespace MWScript
                     char type =  declarations.getType (iter->first);
                     int index2 = declarations.getIndex (iter->first);
 
+                    // silently ignore locals that don't exist anymore
+                    if (type == ' ' || index2 == -1)
+                        continue;
+
                     try
                     {
                         switch (type)
@@ -247,8 +251,6 @@ namespace MWScript
                             case 's': mShorts.at (index2) = iter->second.getInteger(); break;
                             case 'l': mLongs.at (index2) = iter->second.getInteger(); break;
                             case 'f': mFloats.at (index2) = iter->second.getFloat(); break;
-
-                            // silently ignore locals that don't exist anymore
                         }
                     }
                     catch (...)

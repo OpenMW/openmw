@@ -81,7 +81,7 @@ namespace MWGui
 
             MyGUI::Widget* getDefaultKeyFocus() override;
 
-            virtual bool exit() { return false; }
+            virtual bool exit() override { return false; }
 
             bool mMarkedToDelete;
 

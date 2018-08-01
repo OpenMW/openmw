@@ -25,6 +25,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 
+#include "../mwmechanics/aicast.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
@@ -1056,15 +1057,31 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string spell = runtime.getStringLiteral (runtime[0].mInteger);
+                std::string spellId = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
 
                 std::string targetId = ::Misc::StringUtils::lowerCase(runtime.getStringLiteral (runtime[0].mInteger));
                 runtime.pop();
 
+                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (spellId);
+                if (spell && spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power)
+                {
+                    runtime.getContext().report("spellcasting failed: you can cast only spells and powers.");
+                    return;
+                }
+
+                // Obviously we can not use casting animation for player here
+                if (ptr.getClass().isActor() && ptr != MWMechanics::getPlayer())
+                {
+                    MWMechanics::AiCast castPackage(targetId, spellId, true);
+                    ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+
+                    return;
+                }
+
                 MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr (targetId, false);
 
-                MWMechanics::CastSpell cast(ptr, target);
+                MWMechanics::CastSpell cast(ptr, target, false, true);
                 cast.mHitPosition = target.getRefData().getPosition().asVec3();
                 cast.mAlwaysSucceed = true;
                 cast.cast(spell);
@@ -1082,7 +1099,7 @@ namespace MWScript
                 std::string spell = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
 
-                MWMechanics::CastSpell cast(ptr, ptr);
+                MWMechanics::CastSpell cast(ptr, ptr, false, true);
                 cast.mHitPosition = ptr.getRefData().getPosition().asVec3();
                 cast.mAlwaysSucceed = true;
                 cast.cast(spell);

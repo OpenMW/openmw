@@ -39,6 +39,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
 
+#include "aicombataction.hpp"
 #include "movement.hpp"
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
@@ -370,6 +371,10 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
                 {
                     jumpmask = MWRender::Animation::BlendMask_LowerBody;
                     jumpAnimName = "jump";
+
+                    // For crossbow animations use 1h ones as fallback
+                    if (mWeaponType == WeapType_Crossbow)
+                        jumpAnimName += "1h";
                 }
             }
         }
@@ -418,11 +423,18 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
             movementAnimName = movestate->groupname;
             if(weap != sWeaponTypeListEnd && movementAnimName.find("swim") == std::string::npos)
             {
-                movementAnimName += weap->shortgroup;
+                if (mWeaponType == WeapType_Spell && (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)) // Spellcasting stance turning is a special case
+                    movementAnimName = weap->shortgroup + movementAnimName;
+                else
+                    movementAnimName += weap->shortgroup;
                 if(!mAnimation->hasAnimation(movementAnimName))
                 {
                     movemask = MWRender::Animation::BlendMask_LowerBody;
                     movementAnimName = movestate->groupname;
+
+                    // For crossbow animations use 1h ones as fallback
+                    if (mWeaponType == WeapType_Crossbow)
+                        movementAnimName += "1h";
                 }
             }
 
@@ -459,9 +471,11 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
             }
         }
 
-        /* If we're playing the same animation, restart from the loop start instead of the
-         * beginning. */
-        int mode = ((movementAnimName == mCurrentMovement) ? 2 : 1);
+        // If we're playing the same animation, start it from the point it ended
+        bool sameAnim = (movementAnimName == mCurrentMovement);
+        float startPoint = 0.f;
+        if (sameAnim)
+            mAnimation->getInfo(mCurrentMovement, &startPoint);
 
         mMovementAnimationControlled = true;
 
@@ -510,7 +524,7 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
             }
 
             mAnimation->play(mCurrentMovement, Priority_Movement, movemask, false,
-                             1.f, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul, true);
+                             1.f, (!sameAnim ? "start" : "loop start"), "stop", startPoint, ~0ul, true);
         }
     }
 }
@@ -660,16 +674,19 @@ MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::I
 
 void CharacterController::playDeath(float startpoint, CharacterState death)
 {
+    // Make sure the character was swimming upon death for forward-compatibility
+    const bool wasSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
+
     switch (death)
     {
     case CharState_SwimDeath:
         mCurrentDeath = "swimdeath";
         break;
     case CharState_SwimDeathKnockDown:
-        mCurrentDeath = "swimdeathknockdown";
+        mCurrentDeath = (wasSwimming ? "swimdeathknockdown" : "deathknockdown");
         break;
     case CharState_SwimDeathKnockOut:
-        mCurrentDeath = "swimdeathknockout";
+        mCurrentDeath = (wasSwimming ? "swimdeathknockout" : "deathknockout");
         break;
     case CharState_DeathKnockDown:
         mCurrentDeath = "deathknockdown";
@@ -778,6 +795,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSecondsOfRunning(0)
     , mTurnAnimationThreshold(0)
     , mAttackingOrSpell(false)
+    , mCastingManualSpell(false)
     , mTimeUntilWake(0.f)
 {
     if(!mAnimation)
@@ -991,7 +1009,8 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
              // the same animation for all range types, so there are 3 "release" keys on the same time, one for each range type.
              && evt.compare(off, len, mAttackType + " release") == 0)
     {
-        MWBase::Environment::get().getWorld()->castSpell(mPtr);
+        MWBase::Environment::get().getWorld()->castSpell(mPtr, mCastingManualSpell);
+        mCastingManualSpell = false;
     }
 
     else if (groupname == "shield" && evt.compare(off, len, "block hit") == 0)
@@ -1072,13 +1091,18 @@ bool CharacterController::updateCreatureState()
             if (weapType == WeapType_Spell)
             {
                 const std::string spellid = stats.getSpells().getSelectedSpell();
-                if (!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
+                bool canCast = mCastingManualSpell || MWBase::Environment::get().getWorld()->startSpellCast(mPtr);
+
+                if (!spellid.empty() && canCast)
                 {
-                    MWMechanics::CastSpell cast(mPtr, NULL);
+                    MWMechanics::CastSpell cast(mPtr, NULL, false, mCastingManualSpell);
                     cast.playSpellCastingEffects(spellid);
 
                     if (!mAnimation->hasAnimation("spellcast"))
-                        MWBase::Environment::get().getWorld()->castSpell(mPtr); // No "release" text key to use, so cast immediately
+                    {
+                        MWBase::Environment::get().getWorld()->castSpell(mPtr, mCastingManualSpell); // No "release" text key to use, so cast immediately
+                        mCastingManualSpell = false;
+                    }
                     else
                     {
                         const ESM::Spell *spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellid);
@@ -1205,12 +1229,17 @@ bool CharacterController::updateWeaponState()
             && mUpperBodyState != UpperCharState_UnEquipingWeap
             && !isStillWeapon)
         {
-            // Note: we do not disable unequipping animation automatically to avoid body desync
-            getWeaponGroup(mWeaponType, weapgroup);
-            mAnimation->play(weapgroup, priorityWeapon,
-                              MWRender::Animation::BlendMask_All, false,
-                              1.0f, "unequip start", "unequip stop", 0.0f, 0);
-            mUpperBodyState = UpperCharState_UnEquipingWeap;
+            // We can not play un-equip animation when we switch to HtH
+            // because we already un-equipped weapon
+            if (weaptype != WeapType_HandToHand || mWeaponType == WeapType_Spell)
+            {
+                // Note: we do not disable unequipping animation automatically to avoid body desync
+                getWeaponGroup(mWeaponType, weapgroup);
+                mAnimation->play(weapgroup, priorityWeapon,
+                                MWRender::Animation::BlendMask_All, false,
+                                1.0f, "unequip start", "unequip stop", 0.0f, 0);
+                mUpperBodyState = UpperCharState_UnEquipingWeap;
+            }
 
             if(!downSoundId.empty())
             {
@@ -1351,10 +1380,11 @@ bool CharacterController::updateWeaponState()
                     stats.getSpells().setSelectedSpell(selectedSpell);
                 }
                 std::string spellid = stats.getSpells().getSelectedSpell();
+                bool canCast = mCastingManualSpell || MWBase::Environment::get().getWorld()->startSpellCast(mPtr);
 
-                if(!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
+                if(!spellid.empty() && canCast)
                 {
-                    MWMechanics::CastSpell cast(mPtr, NULL);
+                    MWMechanics::CastSpell cast(mPtr, NULL, false, mCastingManualSpell);
                     cast.playSpellCastingEffects(spellid);
 
                     const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
@@ -1622,16 +1652,18 @@ bool CharacterController::updateWeaponState()
                 break;
         }
 
+        // Note: apply reload animations only for upper body since blending with movement animations can give weird result.
+        // Especially noticable with crossbow reload animation.
         if(!start.empty())
         {
             mAnimation->disable(mCurrentWeapon);
             if (mUpperBodyState == UpperCharState_FollowStartToFollowStop)
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_All, true,
+                                 MWRender::Animation::BlendMask_UpperBody, true,
                                  weapSpeed, start, stop, 0.0f, 0);
             else
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_All, false,
+                                 MWRender::Animation::BlendMask_UpperBody, false,
                                  weapSpeed, start, stop, 0.0f, 0);
         }
     }
@@ -2141,7 +2173,7 @@ void CharacterController::unpersistAnimationState()
 
         bool loopfallback = (mAnimQueue.front().mGroup.compare(0,4,"idle") == 0);
         mAnimation->play(anim.mGroup,
-                         Priority_Default, MWRender::Animation::BlendMask_All, false, 1.0f,
+                         Priority_Persistent, MWRender::Animation::BlendMask_All, false, 1.0f,
                          "start", "stop", complete, anim.mLoopCount, loopfallback);
     }
 }
@@ -2359,6 +2391,11 @@ bool CharacterController::isAttackPrepairing() const
             mUpperBodyState == UpperCharState_MinAttackToMaxAttack;
 }
 
+bool CharacterController::isCastingSpell() const
+{
+    return mCastingManualSpell || mUpperBodyState == UpperCharState_CastingSpell;
+}
+
 bool CharacterController::isReadyToBlock() const
 {
     return updateCarriedLeftVisible(mWeaponType);
@@ -2420,6 +2457,14 @@ bool CharacterController::isRunning() const
 void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
 {
     mAttackingOrSpell = attackingOrSpell;
+}
+
+void CharacterController::castSpell(const std::string spellId, bool manualSpell)
+{
+    mAttackingOrSpell = true;
+    mCastingManualSpell = manualSpell;
+    ActionSpell action = ActionSpell(spellId);
+    action.prepare(mPtr);
 }
 
 void CharacterController::setAIAttackType(const std::string& attackType)

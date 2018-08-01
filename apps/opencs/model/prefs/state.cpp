@@ -201,6 +201,9 @@ void CSMPrefs::State::declare()
     declareDouble ("rotate-factor", "Free rotation factor", 0.007).setPrecision(4).setRange(0.0001, 0.1);
 
     declareCategory ("Rendering");
+    declareInt ("framerate-limit", "FPS limit", 60).
+        setTooltip("Framerate limit in 3D preview windows. Zero value means \"unlimited\".").
+        setRange(0, 10000);
     declareInt ("camera-fov", "Camera FOV", 90).setRange(10, 170);
     declareBool ("camera-ortho", "Orthographic projection for camera", false);
     declareInt ("camera-ortho-size", "Orthographic projection size parameter", 100).

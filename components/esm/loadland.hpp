@@ -83,7 +83,12 @@ struct Land
     struct LandData
     {
         LandData()
-            : mDataLoaded(0)
+            : mHeightOffset(0)
+            , mMinHeight(0)
+            , mMaxHeight(0)
+            , mUnk1(0)
+            , mUnk2(0)
+            , mDataLoaded(0)
         {
         }
 

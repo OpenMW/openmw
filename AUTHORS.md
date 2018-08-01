@@ -22,6 +22,7 @@ Programmers
     alexanderkjall
     Alexander Nadeau (wareya)
     Alexander Olofsson (Ace)
+    Alex S (docwest)
     Allofich
     Andrei Kortunov (akortunov)
     AnyOldName3
@@ -63,6 +64,7 @@ Programmers
     Evgeniy Mineev (sandstranger)
     Federico Guerra (FedeWar)
     Fil Krynicki (filkry)
+    Finbar Crago (finbar-crago)
     Florian Weber (Florianjw)
     Gašper Sedej
     gugus/gus
@@ -141,6 +143,7 @@ Programmers
     Rohit Nirmal
     Roman Melnik (Kromgart)
     Roman Proskuryakov (kpp)
+    Roman Siromakha (elsid)
     Sandy Carter (bwrsandman)
     Scott Howard
     scrawl

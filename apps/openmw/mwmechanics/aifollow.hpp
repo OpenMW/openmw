@@ -19,6 +19,21 @@ namespace AiSequence
 
 namespace MWMechanics
 {
+    struct AiFollowStorage : AiTemporaryBase
+    {
+        float mTimer;
+        bool mMoving;
+        float mTargetAngleRadians;
+        bool mTurnActorToTarget;
+
+        AiFollowStorage() :
+            mTimer(0.f),
+            mMoving(false),
+            mTargetAngleRadians(0.f),
+            mTurnActorToTarget(false)
+        {}
+    };
+
     /// \brief AiPackage for an actor to follow another actor/the PC
     /** The AI will follow the target until a condition (time, or position) are set. Both can be disabled to cause the actor to follow the other indefinitely
     **/

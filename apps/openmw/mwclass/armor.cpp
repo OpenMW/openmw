@@ -354,9 +354,9 @@ namespace MWClass
         return std::make_pair(1,"");
     }
 
-    std::shared_ptr<MWWorld::Action> Armor::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Armor::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
+        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
 
         action->setSound(getUpSoundId(ptr));
 

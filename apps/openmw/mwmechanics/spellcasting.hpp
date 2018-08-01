@@ -88,9 +88,10 @@ namespace MWMechanics
         osg::Vec3f mHitPosition; // Used for spawning area orb
         bool mAlwaysSucceed; // Always succeed spells casted by NPCs/creatures regardless of their chance (default: false)
         bool mFromProjectile; // True if spell is cast by enchantment of some projectile (arrow, bolt or thrown weapon)
+        bool mIsScripted; // True if spell is casted from script and ignores some checks (mana level, success chance, etc.)
 
     public:
-        CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const bool fromProjectile=false);
+        CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const bool fromProjectile=false, const bool isScripted=false);
 
         bool cast (const ESM::Spell* spell);
 
@@ -107,6 +108,8 @@ namespace MWMechanics
         bool cast (const std::string& id);
 
         void playSpellCastingEffects(const std::string &spellid);
+
+        bool spellIncreasesSkill();
 
         /// Launch a bolt with the given effects.
         void launchMagicBolt ();

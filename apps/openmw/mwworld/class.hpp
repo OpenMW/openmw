@@ -141,7 +141,7 @@ namespace MWWorld
             virtual std::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
             ///< Generate action for activation (default implementation: return a null action).
 
-            virtual std::shared_ptr<Action> use (const Ptr& ptr)
+            virtual std::shared_ptr<Action> use (const Ptr& ptr, bool force=false)
                 const;
             ///< Generate action for using via inventory menu (default implementation: return a
             /// null action).

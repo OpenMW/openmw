@@ -35,74 +35,6 @@ namespace
 
 namespace MWMechanics
 {
-    
-    /// \brief This class holds the variables AiCombat needs which are deleted if the package becomes inactive.
-    struct AiCombatStorage : AiTemporaryBase
-    {
-        float mAttackCooldown;
-        float mTimerReact;
-        float mTimerCombatMove;
-        bool mReadyToAttack;
-        bool mAttack;
-        float mAttackRange;
-        bool mCombatMove;
-        osg::Vec3f mLastTargetPos;
-        const MWWorld::CellStore* mCell;
-        std::shared_ptr<Action> mCurrentAction;
-        float mActionCooldown;
-        float mStrength;
-        bool mForceNoShortcut;
-        ESM::Position mShortcutFailPos;
-        MWMechanics::Movement mMovement;
-
-        enum FleeState
-        {
-            FleeState_None,
-            FleeState_Idle,
-            FleeState_RunBlindly,
-            FleeState_RunToDestination
-        };
-        FleeState mFleeState;
-        bool mLOS;
-        float mUpdateLOSTimer;
-        float mFleeBlindRunTimer;
-        ESM::Pathgrid::Point mFleeDest;
-        
-        AiCombatStorage():
-        mAttackCooldown(0.0f),
-        mTimerReact(AI_REACTION_TIME),
-        mTimerCombatMove(0.0f),
-        mReadyToAttack(false),
-        mAttack(false),
-        mAttackRange(0.0f),
-        mCombatMove(false),
-        mLastTargetPos(0,0,0),
-        mCell(NULL),
-        mCurrentAction(),
-        mActionCooldown(0.0f),
-        mStrength(),
-        mForceNoShortcut(false),
-        mShortcutFailPos(),
-        mMovement(),
-        mFleeState(FleeState_None),
-        mLOS(false),
-        mUpdateLOSTimer(0.0f),
-        mFleeBlindRunTimer(0.0f)
-        {}
-
-        void startCombatMove(bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
-        void updateCombatMove(float duration);
-        void stopCombatMove();
-        void startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController, 
-            const ESM::Weapon* weapon, bool distantCombat);
-        void updateAttack(CharacterController& characterController);
-        void stopAttack();
-
-        void startFleeing();
-        void stopFleeing();
-        bool isFleeing();
-    };
-    
     AiCombat::AiCombat(const MWWorld::Ptr& actor)
     {
         mTargetActorId = actor.getClass().getCreatureStats(actor).getActorId();
@@ -115,7 +47,7 @@ namespace MWMechanics
 
     void AiCombat::init()
     {
-        
+
     }
 
     /*

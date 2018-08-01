@@ -629,6 +629,9 @@ namespace MWGui
 
     void DialogueWindow::onTopicActivated(const std::string &topicId)
     {
+        if (mGoodbye)
+            return;
+
         MWBase::Environment::get().getDialogueManager()->keywordSelected(topicId, mCallback.get());
         updateTopics();
     }

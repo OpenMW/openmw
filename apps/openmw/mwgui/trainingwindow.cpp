@@ -80,7 +80,7 @@ namespace MWGui
 
         for (int i=0; i<ESM::Skill::Length; ++i)
         {
-            int value = npcStats.getSkill (i).getBase ();
+            int value = npcStats.getSkill (i).getModified ();
 
             skills.push_back(std::make_pair(i, value));
         }
@@ -143,7 +143,7 @@ namespace MWGui
             return;
 
         MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats (mPtr);
-        if (npcStats.getSkill (skillId).getBase () <= pcStats.getSkill (skillId).getBase ())
+        if (npcStats.getSkill (skillId).getModified () <= pcStats.getSkill (skillId).getBase ())
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sServiceTrainingWords}");
             return;

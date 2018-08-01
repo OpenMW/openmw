@@ -80,8 +80,8 @@ template<typename type, typename IntegerT> type inline readLittleEndianType(File
     return val;
 }
 
-class NIFStream {
-
+class NIFStream
+{
     /// Input stream
     Files::IStreamPtr inp;
 
@@ -93,71 +93,71 @@ public:
 
     void skip(size_t size) { inp->ignore(size); }
 
-    char getChar() 
+    char getChar()
     {
-        return readLittleEndianType<char,char>(inp); 
+        return readLittleEndianType<char,char>(inp);
     }
-    short getShort() 
-    { 
+
+    short getShort()
+    {
         return readLittleEndianType<short,short>(inp);
     }
-    unsigned short getUShort() 
-    { 
+
+    unsigned short getUShort()
+    {
         return readLittleEndianType<unsigned short,unsigned short>(inp);
     }
-    int getInt() 
+
+    int getInt()
     {
         return readLittleEndianType<int,int>(inp);
     }
-    unsigned int getUInt() 
-    { 
+
+    unsigned int getUInt()
+    {
         return readLittleEndianType<unsigned int,unsigned int>(inp);
     }
-    float getFloat() 
-    { 
+
+    float getFloat()
+    {
         return readLittleEndianType<float,uint32_t>(inp);
     }
 
-    osg::Vec2f getVector2() {
+    osg::Vec2f getVector2()
+    {
         osg::Vec2f vec;
         readLittleEndianBufferOfType<2,float,uint32_t>(inp, (float*)&vec._v[0]);
         return vec;
     }
-    osg::Vec3f getVector3() {
+
+    osg::Vec3f getVector3()
+    {
         osg::Vec3f vec;
         readLittleEndianBufferOfType<3, float,uint32_t>(inp, (float*)&vec._v[0]);
         return vec;
     }
-    osg::Vec4f getVector4() {
+
+    osg::Vec4f getVector4()
+    {
         osg::Vec4f vec;
         readLittleEndianBufferOfType<4, float,uint32_t>(inp, (float*)&vec._v[0]);
         return vec;
     }
-    Matrix3 getMatrix3() {
+
+    Matrix3 getMatrix3()
+    {
         Matrix3 mat;
         readLittleEndianBufferOfType<9, float,uint32_t>(inp, (float*)&mat.mValues);
         return mat;
     }
-    osg::Quat getQuaternion() {
-        float f[4];
-        readLittleEndianBufferOfType<4, float,uint32_t>(inp, (float*)&f);
-        osg::Quat quat;
-        quat.w() = f[0];
-        quat.x() = f[1];
-        quat.y() = f[2];
-        quat.z() = f[3];
-        return quat;
-    }
-    Transformation getTrafo() {
-        Transformation t;
-        t.pos = getVector3();
-        t.rotation = getMatrix3();
-        t.scale = getFloat();
-        return t;
-    }
+
+    osg::Quat getQuaternion();
+
+    Transformation getTrafo();
 
     ///Read in a string of the given length
-    std::string getString(size_t length) {
+    std::string getString(size_t length)
+    {
         std::vector<char> str(length + 1, 0);
 
         inp->read(&str[0], length);
@@ -165,41 +165,54 @@ public:
         return &str[0];
     }
     ///Read in a string of the length specified in the file
-    std::string getString() {
+    std::string getString()
+    {
         size_t size = readLittleEndianType<uint32_t,uint32_t>(inp);
         return getString(size);
     }
     ///This is special since the version string doesn't start with a number, and ends with "\n"
-    std::string getVersionString() {
+    std::string getVersionString()
+    {
         std::string result;
         std::getline(*inp, result);
         return result;
     }
 
-    void getUShorts(std::vector<unsigned short> &vec, size_t size) {
+    void getUShorts(std::vector<unsigned short> &vec, size_t size)
+    {
         vec.resize(size);
         readLittleEndianDynamicBufferOfType<unsigned short,unsigned short>(inp, &vec.front(), size);
     }
-    void getFloats(std::vector<float> &vec, size_t size) {
+
+    void getFloats(std::vector<float> &vec, size_t size)
+    {
         vec.resize(size);
         readLittleEndianDynamicBufferOfType<float,uint32_t>(inp, &vec.front(), size);
     }
-    void getVector2s(std::vector<osg::Vec2f> &vec, size_t size) {
+
+    void getVector2s(std::vector<osg::Vec2f> &vec, size_t size)
+    {
         vec.resize(size);
         /* The packed storage of each Vec2f is 2 floats exactly */
         readLittleEndianDynamicBufferOfType<float,uint32_t>(inp,(float*) &vec.front(), size*2);
     }
-    void getVector3s(std::vector<osg::Vec3f> &vec, size_t size) {
+
+    void getVector3s(std::vector<osg::Vec3f> &vec, size_t size)
+    {
         vec.resize(size);
         /* The packed storage of each Vec3f is 3 floats exactly */
         readLittleEndianDynamicBufferOfType<float,uint32_t>(inp, (float*) &vec.front(), size*3);
     }
-    void getVector4s(std::vector<osg::Vec4f> &vec, size_t size) {
+
+    void getVector4s(std::vector<osg::Vec4f> &vec, size_t size)
+    {
         vec.resize(size);
         /* The packed storage of each Vec4f is 4 floats exactly */
         readLittleEndianDynamicBufferOfType<float,uint32_t>(inp, (float*) &vec.front(), size*4);
     }
-    void getQuaternions(std::vector<osg::Quat> &quat, size_t size) {
+
+    void getQuaternions(std::vector<osg::Quat> &quat, size_t size)
+    {
         quat.resize(size);
         for (size_t i = 0;i < quat.size();i++)
             quat[i] = getQuaternion();

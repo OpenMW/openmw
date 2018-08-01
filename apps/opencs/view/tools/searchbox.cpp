@@ -35,7 +35,7 @@ void CSVTools::SearchBox::updateSearchButton()
 }
 
 CSVTools::SearchBox::SearchBox (QWidget *parent)
-: QWidget (parent), mSearch ("Search"), mSearchEnabled (false), mReplace ("Replace All")
+: QWidget (parent), mSearch (tr("Search")), mSearchEnabled (false), mReplace (tr("Replace All"))
 {
     mLayout = new QGridLayout (this);
 
@@ -48,29 +48,26 @@ CSVTools::SearchBox::SearchBox (QWidget *parent)
         ++iter)
         mRecordState.addItem (QString::fromUtf8 (iter->c_str()));
         
-    mMode.addItem ("Text");
-    mMode.addItem ("Text (RegEx)");
-    mMode.addItem ("ID");
-    mMode.addItem ("ID (RegEx)");
-    mMode.addItem ("Record State");
-
+    mMode.addItem (tr("Text"));
+    mMode.addItem (tr("Text (RegEx)"));
+    mMode.addItem (tr("ID"));
+    mMode.addItem (tr("ID (RegEx)"));
+    mMode.addItem (tr("Record State"));
+    connect (&mMode, SIGNAL (activated (int)), this, SLOT (modeSelected (int)));
     mLayout->addWidget (&mMode, 0, 0);
 
-    mLayout->addWidget (&mSearch, 0, 3);
-
+    connect (&mText, SIGNAL (textChanged (const QString&)), this, SLOT (textChanged (const QString&)));
+    connect (&mText, SIGNAL (returnPressed()), this, SLOT (startSearch()));
     mInput.insertWidget (0, &mText);
+
     mInput.insertWidget (1, &mRecordState);
+    mLayout->addWidget (&mInput, 0, 1);
 
-    mLayout->addWidget (&mInput, 0, 1);   
-
-    connect (&mMode, SIGNAL (activated (int)), this, SLOT (modeSelected (int)));
-
-    connect (&mText, SIGNAL (textChanged (const QString&)),
-        this, SLOT (textChanged (const QString&)));
+    mCaseSensitive.setText (tr ("Case"));
+    mLayout->addWidget (&mCaseSensitive, 0, 2);
 
     connect (&mSearch, SIGNAL (clicked (bool)), this, SLOT (startSearch (bool)));
-
-    connect (&mText, SIGNAL (returnPressed()), this, SLOT (startSearch()));
+    mLayout->addWidget (&mSearch, 0, 3);
 
     // replace panel
     mReplaceInput.insertWidget (0, &mReplaceText);
@@ -102,23 +99,24 @@ void CSVTools::SearchBox::setSearchMode (bool enabled)
 
 CSMTools::Search CSVTools::SearchBox::getSearch() const
 {
-    CSMTools::Search::Type type = static_cast<CSMTools::Search::Type> (mMode.currentIndex());
-    
+    CSMTools::Search::Type type = static_cast<CSMTools::Search::Type> (mMode.currentIndex());    
+    bool caseSensitive = mCaseSensitive.isChecked();
+
     switch (type)
     {
         case CSMTools::Search::Type_Text:
         case CSMTools::Search::Type_Id:
 
-            return CSMTools::Search (type, std::string (mText.text().toUtf8().data()));
+            return CSMTools::Search (type, caseSensitive, std::string (mText.text().toUtf8().data()));
         
         case CSMTools::Search::Type_TextRegEx:
         case CSMTools::Search::Type_IdRegEx:
 
-            return CSMTools::Search (type, QRegExp (mText.text().toUtf8().data(), Qt::CaseInsensitive));
+            return CSMTools::Search (type, caseSensitive, QRegExp (mText.text().toUtf8().data(), Qt::CaseInsensitive));
         
         case CSMTools::Search::Type_RecordState:
 
-            return CSMTools::Search (type, mRecordState.currentIndex());
+            return CSMTools::Search (type, caseSensitive, mRecordState.currentIndex());
 
         case CSMTools::Search::Type_None:
 
