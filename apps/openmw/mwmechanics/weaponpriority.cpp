@@ -50,20 +50,27 @@ namespace MWMechanics
 
         if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
         {
-            rating = (weapon->mData.mChop[0] + weapon->mData.mChop[1]) / 2.f;
+            float rangedDamage = weapon->mData.mChop[0] + weapon->mData.mChop[1];
+            MWMechanics::adjustWeaponDamage(rangedDamage, item, actor);
+
+            rating = rangedDamage / 2.f;
 
             if (weapon->mData.mType >= ESM::Weapon::MarksmanThrown)
                 MWMechanics::resistNormalWeapon(enemy, actor, item, rating);
         }
         else
         {
+            float meleeDamage = 0.f;
+
             for (int i=0; i<2; ++i)
             {
-                rating += weapon->mData.mSlash[i];
-                rating += weapon->mData.mThrust[i];
-                rating += weapon->mData.mChop[i];
+                meleeDamage += weapon->mData.mSlash[i];
+                meleeDamage += weapon->mData.mThrust[i];
+                meleeDamage += weapon->mData.mChop[i];
             }
-            rating /= 6.f;
+
+            MWMechanics::adjustWeaponDamage(meleeDamage, item, actor);
+            rating = meleeDamage / 6.f;
 
             MWMechanics::resistNormalWeapon(enemy, actor, item, rating);
         }
