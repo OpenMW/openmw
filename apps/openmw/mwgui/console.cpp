@@ -303,6 +303,14 @@ namespace MWGui
         bool has_front_quote = false;
 
         /* Does the input string contain things that don't have to be completed? If yes erase them. */
+
+        /* Erase a possible call to an explicit reference. */
+        size_t explicitPos = tmp.find("->");
+        if (explicitPos != std::string::npos)
+        {
+            tmp.erase(0, explicitPos+2);
+        }
+
         /* Are there quotation marks? */
         if( tmp.find('"') != std::string::npos ) {
             int numquotes=0;
@@ -338,13 +346,6 @@ namespace MWGui
                     tmp.erase(0, rpos+1);
                 }
             }
-        }
-
-        // Erase a possible call to an explicit reference
-        size_t explicitPos = tmp.find("->");
-        if (explicitPos != std::string::npos)
-        {
-            tmp.erase(0, explicitPos+2);
         }
 
         /* Erase the input from the output string so we can easily append the completed form later. */
