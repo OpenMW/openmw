@@ -499,7 +499,7 @@ namespace MWMechanics
             if (enemy.getClass().getNpcStats(enemy).isWerewolf() && stats.getLevel() < iWereWolfLevelToAttack)
             {
                 static const int iWereWolfFleeMod = gmst.find("iWereWolfFleeMod")->getInt();
-                rating += iWereWolfFleeMod;
+                rating = iWereWolfFleeMod;
             }
         }
 
