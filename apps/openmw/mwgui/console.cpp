@@ -339,6 +339,14 @@ namespace MWGui
                 }
             }
         }
+
+        // Erase a possible call to an explicit reference
+        size_t explicitPos = tmp.find("->");
+        if (explicitPos != std::string::npos)
+        {
+            tmp.erase(0, explicitPos+2);
+        }
+
         /* Erase the input from the output string so we can easily append the completed form later. */
         output.erase(output.end()-tmp.length(), output.end());
 
