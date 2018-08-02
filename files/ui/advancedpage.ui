@@ -21,8 +21,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>630</width>
-        <height>791</height>
+        <width>641</width>
+        <height>968</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="scrollAreaVerticalLayout">
@@ -69,6 +69,26 @@
             </property>
             <property name="text">
              <string>Rebalance soul gem values</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chargeForEveryFollowerCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Account for the first follower in fast travel cost calculations.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Charge for every follower travelling</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="enchantedWeaponsMagicalCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make enchanted weaponry without Magical flag bypass normal weapons resistance, like in Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enchanted weapons are magical</string>
             </property>
            </widget>
           </item>
@@ -137,7 +157,7 @@
             </property>
             <layout class="QHBoxLayout" name="maximumQuicksavesLayout">
              <property name="spacing">
-              <number>-1</number>
+              <number>6</number>
              </property>
              <property name="leftMargin">
               <number>0</number>
@@ -312,7 +332,7 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout">
              <property name="spacing">
-              <number>-1</number>
+              <number>6</number>
              </property>
              <property name="leftMargin">
               <number>0</number>
@@ -379,7 +399,7 @@
             </property>
             <layout class="QHBoxLayout" name="screenshotFormatLayout">
              <property name="spacing">
-              <number>-1</number>
+              <number>6</number>
              </property>
              <property name="leftMargin">
               <number>0</number>

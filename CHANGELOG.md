@@ -40,6 +40,7 @@
     Bug #4327: Missing animations during spell/weapon stance switching
     Bug #4358: Running animation is interrupted when magic mode is toggled
     Bug #4368: Settings window ok button doesn't have key focus by default
+    Bug #4378: On-self absorb spells restore stats
     Bug #4393: NPCs walk back to where they were after using ResetActors
     Bug #4416: Handle exception if we try to play non-music file
     Bug #4419: MRK NiStringExtraData is handled incorrectly
@@ -72,10 +73,12 @@
     Bug #4503: Cast and ExplodeSpell commands increase alteration skill
     Bug #4510: Division by zero in MWMechanics::CreatureStats::setAttribute
     Bug #4519: Knockdown does not discard movement in the 1st-person mode
+    Bug #4539: Paper Doll is affected by GUI scaling
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #3641: Editor: Limit FPS in 3d preview window
+    Feature #3703: Ranged sneak attack criticals
     Feature #4222: 360° screenshots
     Feature #4256: Implement ToggleBorders (TB) console command
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
