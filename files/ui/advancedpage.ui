@@ -22,7 +22,11 @@
         <x>0</x>
         <y>0</y>
         <width>641</width>
+<<<<<<< HEAD
         <height>998</height>
+=======
+        <height>968</height>
+>>>>>>> Fixed merge conflicts
        </rect>
       </property>
       <layout class="QVBoxLayout" name="scrollAreaVerticalLayout">
@@ -89,6 +93,7 @@
             </property>
             <property name="text">
              <string>Enchanted weapons are magical</string>
+<<<<<<< HEAD
              </property>
            </widget>
           </item>
@@ -100,6 +105,11 @@
             <property name="text">
              <string>Barter disposition change is permanent</string>
            <widget class="QCheckBox" name="strengthInfluencesHandToHand">
+=======
+            </property>
+           </widget>
+          </item>
+>>>>>>> Fixed merge conflicts
           <item alignment="Qt::AlignLeft">
            <widget class="QWidget" name="unarmedFactorsStrengthGroup" native="true">
             <property name="toolTip">
