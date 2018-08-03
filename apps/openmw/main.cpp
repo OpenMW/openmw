@@ -7,7 +7,6 @@
 #include <components/fallback/validate.hpp>
 #include <components/misc/debugging.hpp>
 
-#include <SDL_messagebox.h>
 #include "engine.hpp"
 
 #include <boost/filesystem/fstream.hpp>
@@ -242,86 +241,33 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     return true;
 }
 
+int runApplication(int argc, char *argv[])
+{
+#ifdef __APPLE__
+    boost::filesystem::path binary_path = boost::filesystem::system_complete(boost::filesystem::path(argv[0]));
+    boost::filesystem::current_path(binary_path.parent_path());
+    setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
+#endif
+
+    Files::ConfigurationManager cfgMgr;
+    std::unique_ptr<OMW::Engine> engine;
+    engine.reset(new OMW::Engine(cfgMgr));
+
+    if (parseOptions(argc, argv, *engine, cfgMgr))
+    {
+        engine->go();
+    }
+
+    return 0;
+}
+
 #ifdef ANDROID
 extern "C" int SDL_main(int argc, char**argv)
 #else
 int main(int argc, char**argv)
 #endif
 {
-#if defined(__APPLE__)
-    setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
-#endif
-
-    // Some objects used to redirect cout and cerr
-    // Scope must be here, so this still works inside the catch block for logging exceptions
-    std::streambuf* cout_rdbuf = std::cout.rdbuf ();
-    std::streambuf* cerr_rdbuf = std::cerr.rdbuf ();
-
-#if !(defined(_WIN32) && defined(_DEBUG))
-    boost::iostreams::stream_buffer<Misc::Tee> coutsb;
-    boost::iostreams::stream_buffer<Misc::Tee> cerrsb;
-#endif
-
-    std::ostream oldcout(cout_rdbuf);
-    std::ostream oldcerr(cerr_rdbuf);
-
-    boost::filesystem::ofstream logfile;
-
-    std::unique_ptr<OMW::Engine> engine;
-
-    int ret = 0;
-    try
-    {
-        Files::ConfigurationManager cfgMgr;
-
-#if defined(_WIN32) && defined(_DEBUG)
-        // Redirect cout and cerr to VS debug output when running in debug mode
-        boost::iostreams::stream_buffer<Misc::DebugOutput> sb;
-        sb.open(Misc::DebugOutput());
-        std::cout.rdbuf (&sb);
-        std::cerr.rdbuf (&sb);
-#else
-        // Redirect cout and cerr to openmw.log
-        logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / "/openmw.log"));
-
-        coutsb.open (Misc::Tee(logfile, oldcout));
-        cerrsb.open (Misc::Tee(logfile, oldcerr));
-
-        std::cout.rdbuf (&coutsb);
-        std::cerr.rdbuf (&cerrsb);
-#endif
-
-        crashCatcherInstall(argc, argv, (cfgMgr.getLogPath() / "crash.log").string());
-
-#ifdef __APPLE__
-        boost::filesystem::path binary_path = boost::filesystem::system_complete(boost::filesystem::path(argv[0]));
-        boost::filesystem::current_path(binary_path.parent_path());
-#endif
-
-        engine.reset(new OMW::Engine(cfgMgr));
-
-        if (parseOptions(argc, argv, *engine, cfgMgr))
-        {
-            engine->go();
-        }
-    }
-    catch (std::exception &e)
-    {
-#if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
-        if (!isatty(fileno(stdin)))
-#endif
-            SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);
-
-        std::cerr << "\nERROR: " << e.what() << std::endl;
-
-        ret = 1;
-    }
-
-    // Restore cout and cerr
-    std::cout.rdbuf(cout_rdbuf);
-    std::cerr.rdbuf(cerr_rdbuf);
-
-    return ret;
+    return wrapApplication(&runApplication, argc, argv, "/openmw.log");
 }
 
 // Platform specific for Windows when there is no console built into the executable.
