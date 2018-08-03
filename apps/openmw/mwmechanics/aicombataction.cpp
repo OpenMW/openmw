@@ -494,10 +494,13 @@ namespace MWMechanics
 
         static const int iWereWolfLevelToAttack = gmst.find("iWereWolfLevelToAttack")->getInt();
 
-        if (enemy.getClass().isNpc() && enemy.getClass().getNpcStats(enemy).isWerewolf() && stats.getLevel() < iWereWolfLevelToAttack)
+        if (actor.getClass().isNpc() && enemy.getClass().isNpc())
         {
-            static const int iWereWolfFleeMod = gmst.find("iWereWolfFleeMod")->getInt();
-            rating = iWereWolfFleeMod;
+            if (enemy.getClass().getNpcStats(enemy).isWerewolf() && stats.getLevel() < iWereWolfLevelToAttack)
+            {
+                static const int iWereWolfFleeMod = gmst.find("iWereWolfFleeMod")->getInt();
+                rating = iWereWolfFleeMod;
+            }
         }
 
         if (rating != 0.0f)

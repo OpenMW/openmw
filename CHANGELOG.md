@@ -12,6 +12,7 @@
     Bug #2835: Player able to slowly move when overencumbered
     Bug #2852: No murder bounty when a player follower commits murder
     Bug #2862: [macOS] Can't quit launcher using Command-Q or OpenMW->Quit
+    Bug #2872: Tab completion in console doesn't work with explicit reference
     Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
     Bug #3249: Fixed revert function not updating views properly
     Bug #3374: Touch spells not hitting kwama foragers
@@ -74,11 +75,13 @@
     Bug #4510: Division by zero in MWMechanics::CreatureStats::setAttribute
     Bug #4519: Knockdown does not discard movement in the 1st-person mode
     Bug #4539: Paper Doll is affected by GUI scaling
+    Bug #4545: Creatures flee from werewolves
     Bug #4548: Weapon priority: use the actual chance to hit the target instead of weapon skill
     Bug #4549: Weapon priority: use the actual damage in weapon rating calculations
     Bug #4550: Weapon priority: make ranged weapon bonus more sensible
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
+    Feature #3103: Provide option for disposition to get increased by successful trade
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #3641: Editor: Limit FPS in 3d preview window
     Feature #3703: Ranged sneak attack criticals

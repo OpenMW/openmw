@@ -75,6 +75,7 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
     loadSettingBool(chargeForEveryFollowerCheckBox, "charge for every follower travelling", "Game");
     loadSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
+    loadSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
 
     // Input Settings
     loadSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
@@ -129,6 +130,7 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
     saveSettingBool(chargeForEveryFollowerCheckBox, "charge for every follower travelling", "Game");
     saveSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
+    saveSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
 
     // Input Settings
     saveSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");

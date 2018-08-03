@@ -334,7 +334,7 @@ namespace MWGui
                 ? gmst.find("iBarterSuccessDisposition")->getInt()
                 : gmst.find("iBarterFailDisposition")->getInt();
 
-            MWBase::Environment::get().getDialogueManager()->applyDispositionChange(dispositionDelta);
+            MWBase::Environment::get().getDialogueManager()->applyBarterDispositionChange(dispositionDelta);
         }
 
         // display message on haggle failure
