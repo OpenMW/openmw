@@ -74,6 +74,9 @@
     Bug #4510: Division by zero in MWMechanics::CreatureStats::setAttribute
     Bug #4519: Knockdown does not discard movement in the 1st-person mode
     Bug #4539: Paper Doll is affected by GUI scaling
+    Bug #4548: Weapon priority: use the actual chance to hit the target instead of weapon skill
+    Bug #4549: Weapon priority: use the actual damage in weapon rating calculations
+    Bug #4550: Weapon priority: make ranged weapon bonus more sensible
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
