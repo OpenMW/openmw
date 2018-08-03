@@ -315,14 +315,14 @@ namespace MWMechanics
         return true;
     }
 
-    CastSpell::CastSpell(const MWWorld::Ptr &caster, const MWWorld::Ptr &target, const bool fromProjectile, const bool isScripted)
+    CastSpell::CastSpell(const MWWorld::Ptr &caster, const MWWorld::Ptr &target, const bool fromProjectile, const bool manualSpell)
         : mCaster(caster)
         , mTarget(target)
         , mStack(false)
         , mHitPosition(0,0,0)
         , mAlwaysSucceed(false)
         , mFromProjectile(fromProjectile)
-        , mIsScripted(isScripted)
+        , mManualSpell(manualSpell)
     {
     }
 
@@ -864,7 +864,7 @@ namespace MWMechanics
 
         bool godmode = mCaster == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
 
-        if (mCaster.getClass().isActor() && !mAlwaysSucceed && !mIsScripted)
+        if (mCaster.getClass().isActor() && !mAlwaysSucceed && !mManualSpell)
         {
             school = getSpellSchool(spell, mCaster);
 
@@ -1037,7 +1037,7 @@ namespace MWMechanics
 
     bool CastSpell::spellIncreasesSkill()
     {
-        if (mIsScripted)
+        if (mManualSpell)
             return false;
 
         return MWMechanics::spellIncreasesSkill(mId);
