@@ -8,7 +8,7 @@
 #include <QIcon>
 #include <QMetaType>
 
-#include <components/misc/debugging.hpp>
+#include <components/debug/debugging.hpp>
 
 #include "model/doc/messages.hpp"
 #include "model/world/universalid.hpp"
@@ -80,5 +80,5 @@ int runApplication(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-    return wrapApplication(&runApplication, argc, argv, "/openmw-cs.log");
+    return wrapApplication(&runApplication, argc, argv, "OpenMW-CS");
 }

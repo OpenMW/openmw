@@ -5,7 +5,7 @@
 #include <components/files/configurationmanager.hpp>
 #include <components/files/escape.hpp>
 #include <components/fallback/validate.hpp>
-#include <components/misc/debugging.hpp>
+#include <components/debug/debugging.hpp>
 
 #include "engine.hpp"
 
@@ -265,7 +265,7 @@ extern "C" int SDL_main(int argc, char**argv)
 int main(int argc, char**argv)
 #endif
 {
-    return wrapApplication(&runApplication, argc, argv, "/openmw.log");
+    return wrapApplication(&runApplication, argc, argv, "OpenMW");
 }
 
 // Platform specific for Windows when there is no console built into the executable.
