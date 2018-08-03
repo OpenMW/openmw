@@ -79,7 +79,6 @@ namespace MWMechanics
         {
             if (item.getClass().getItemHealth(item) == 0)
                 return 0.f;
-            rating *= item.getClass().getItemHealth(item) / float(item.getClass().getItemMaxHealth(item));
         }
 
         if (weapon->mData.mType == ESM::Weapon::MarksmanBow)
