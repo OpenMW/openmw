@@ -1,6 +1,7 @@
 #ifndef MISC_DEBUGGING_H
 #define MISC_DEBUGGING_H
 
+#include <boost/filesystem/fstream.hpp>
 #include <boost/iostreams/stream.hpp>
 
 #include <SDL_messagebox.h>

@@ -9,8 +9,6 @@
 
 #include "engine.hpp"
 
-#include <boost/filesystem/fstream.hpp>
-
 #if defined(_WIN32)
 // For OutputDebugString
 #ifndef WIN32_LEAN_AND_MEAN
