@@ -12,6 +12,7 @@
     Bug #2835: Player able to slowly move when overencumbered
     Bug #2852: No murder bounty when a player follower commits murder
     Bug #2862: [macOS] Can't quit launcher using Command-Q or OpenMW->Quit
+    Bug #2872: Tab completion in console doesn't work with explicit reference
     Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
     Bug #3249: Fixed revert function not updating views properly
     Bug #3374: Touch spells not hitting kwama foragers
