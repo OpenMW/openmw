@@ -52,7 +52,7 @@ namespace MWGui
 
     void ContainerWindow::onItemSelected(int index)
     {
-        if (mDragAndDrop->mIsOnDragAndDrop && mModel)
+        if (mDragAndDrop->mIsOnDragAndDrop)
         {
             dropItem();
             return;
@@ -82,12 +82,15 @@ namespace MWGui
             dialog->eventOkClicked.clear();
             dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::dragItem);
         }
-        else if (mModel)
+        else
             dragItem (NULL, count);
     }
 
     void ContainerWindow::dragItem(MyGUI::Widget* sender, int count)
     {
+        if (!mModel)
+            return;
+
         if (!onTakeItem(mModel->getItem(mSelectedItem), count))
             return;
 
@@ -96,6 +99,9 @@ namespace MWGui
 
     void ContainerWindow::dropItem()
     {
+        if (!mModel)
+            return;
+
         bool success = mModel->onDropItem(mDragAndDrop->mItem.mBase, mDragAndDrop->mDraggedCount);
 
         if (success)
@@ -104,7 +110,7 @@ namespace MWGui
 
     void ContainerWindow::onBackgroundSelected()
     {
-        if (mDragAndDrop->mIsOnDragAndDrop && mModel)
+        if (mDragAndDrop->mIsOnDragAndDrop)
             dropItem();
     }
 
