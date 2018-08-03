@@ -130,7 +130,7 @@ enchanted weapons are magical
 :Range:		True/False
 :Default:	True
 
-Makes enchanted weapons without Magical flag bypass normal weapons resistance (and weakness) certain creatures have.
+Make enchanted weapons without Magical flag bypass normal weapons resistance (and weakness) certain creatures have.
 This is how original Morrowind behaves.
 
 This setting can only be configured by editing the settings configuration file.
@@ -142,7 +142,7 @@ prevent merchant equipping
 :Range:		True/False
 :Default:	False
 
-Prevents merchants from equipping items that are sold to them.
+Prevent merchants from equipping items that are sold to them.
 
 This setting can only be configured by editing the settings configuration file.
 
@@ -153,7 +153,7 @@ followers attack on sight
 :Range:		True/False
 :Default:	False
 
-Makes player followers and escorters start combat with enemies who have started combat with them or the player.
+Make player followers and escorters start combat with enemies who have started combat with them or the player.
 Otherwise they wait for the enemies or the player to do an attack first.
 Please note this setting has not been extensively tested and could have side effects with certain quests.
 
@@ -171,3 +171,15 @@ For example, if the main animation mesh has name Meshes/x.nif, an engine will lo
 Can be useful if you want to use several animation replacers without merging them.
 Attention: animations from AnimKit have own format and are not supposed to be directly loaded in-game!
 This setting can only be configured by editing the settings configuration file.
+
+barter disposition change is permanent
+--------------------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true, disposition change of merchants caused by trading will be permanent and won't be discarded upon exiting dialogue with them.
+This imitates the option Morrowind Code Patch offers.
+
+This setting can be toggled with a checkbox in Advanced tab of the launcher.
