@@ -37,6 +37,8 @@ namespace ESMTerrain
     }
 
     LandObject::LandObject(const LandObject &copy, const osg::CopyOp &copyop)
+        : mLand(nullptr)
+        , mLoadFlags(0)
     {
     }
 

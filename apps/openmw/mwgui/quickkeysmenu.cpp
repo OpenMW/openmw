@@ -161,6 +161,12 @@ namespace MWGui
             }
         }
         assert(index != -1);
+        if (index < 0)
+        {
+            mSelected = nullptr;
+            return;
+        }
+
         mSelected = &mKey[index];
 
         // prevent reallocation of zero key from Type_HandToHand
