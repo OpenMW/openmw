@@ -415,17 +415,7 @@ namespace MWMechanics
             damage *= MWBase::Environment::get().getWorld()->getGlobalFloat("werewolfclawmult");
         }
         if(healthdmg)
-            damage *= store.get<ESM::GameSetting>().find("fHandtoHandHealthPer")->mValue.getFloat();
-
-        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        if(isWerewolf)
-        {
-            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfHit");
-            if(sound)
-                sndMgr->playSound3D(victim, sound->mId, 1.0f, 1.0f);
-        }
-        else
-            sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
+            damage *= store.get<ESM::GameSetting>().find("fHandtoHandHealthPer")->getFloat();
     }
 
     void applyFatigueLoss(const MWWorld::Ptr &attacker, const MWWorld::Ptr &weapon, float attackStrength)
