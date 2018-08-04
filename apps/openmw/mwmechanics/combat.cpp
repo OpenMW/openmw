@@ -415,7 +415,7 @@ namespace MWMechanics
             damage *= MWBase::Environment::get().getWorld()->getGlobalFloat("werewolfclawmult");
         }
         if(healthdmg)
-            damage *= store.get<ESM::GameSetting>().find("fHandtoHandHealthPer")->getFloat();
+            damage *= store.get<ESM::GameSetting>().find("fHandtoHandHealthPer")->mValue.getFloat();
     }
 
     void applyFatigueLoss(const MWWorld::Ptr &attacker, const MWWorld::Ptr &weapon, float attackStrength)

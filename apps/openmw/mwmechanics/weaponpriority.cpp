@@ -155,11 +155,21 @@ namespace MWMechanics
     float rateUnarmed(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
     {
         float rating = 0.f;
+
         if (!actor.getClass().isBipedal(actor))
             return rating;
+
         bool healthDamage = false;
-        MWMechanics::getHandToHandDamage(actor, enemy, rating, healthDamage, 0.5f);
-        // if (healthDamage) rating *= 2.f;
+        MWMechanics::getHandToHandDamage(actor, enemy, rating, healthDamage, 1.f); // we don't know attackStrength yet
+
+        if (!healthDamage) // Adjust for the disadvantage of having to reduce fatigue damage first
+        {
+            const CreatureStats& enemyStats = enemy.getClass().getCreatureStats(enemy);
+            const float enemyCurrentFatigue = enemyStats.getFatigue().getCurrent();
+            const float enemyCurrentHealth = enemyStats.getHealth().getCurrent();
+            rating *= (enemyCurrentHealth / (enemyCurrentFatigue + enemyCurrentHealth));
+        }
+
         int skillValue = actor.getClass().getSkill(actor, ESM::Skill::HandToHand);
         rating *= MWMechanics::getHitChance(actor, enemy, skillValue) / 100.f;
         return rating;
