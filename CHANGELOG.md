@@ -83,6 +83,7 @@
     Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
     Feature #3641: Editor: Limit FPS in 3d preview window
     Feature #3703: Ranged sneak attack criticals
+    Feature #4012: Editor: Write a log file if OpenCS crashes
     Feature #4222: 360° screenshots
     Feature #4256: Implement ToggleBorders (TB) console command
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
@@ -91,9 +92,11 @@
     Feature #4444: Per-group KF-animation files support
     Feature #4466: Editor: Add option to ignore "Base" records when running verifier
     Feature #4488: Make water shader rougher during rain
-    Feature #4012: Editor: Write a log file if OpenCS crashes
     Feature #4509: Show count of enchanted items in stack in the spells list
     Feature #4512: Editor: Use markers for lights and creatures levelled lists
+    Feature #4548: Weapon priority: use the actual chance to hit the target instead of weapon skill
+    Feature #4549: Weapon priority: use the actual damage in weapon rating calculations
+    Feature #4550: Weapon priority: make ranged weapon bonus more sensible
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test
 
