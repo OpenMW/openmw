@@ -12,7 +12,7 @@ namespace MWMechanics
 
     float rateAmmo(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy, MWWorld::Ptr &bestAmmo, ESM::Weapon::Type ammoType);
     float rateAmmo(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy, ESM::Weapon::Type ammoType);
-
+    float rateUnarmed (const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
     float vanillaRateWeaponAndAmmo(const MWWorld::Ptr& weapon, const MWWorld::Ptr& ammo, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
 }
 

@@ -152,6 +152,19 @@ namespace MWMechanics
         return rateAmmo(actor, enemy, emptyPtr, ammoType);
     }
 
+    float rateUnarmed(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
+    {
+        float rating = 0.f;
+        if (!actor.getClass().isBipedal(actor))
+            return rating;
+        bool healthDamage = false;
+        MWMechanics::getHandToHandDamage(actor, enemy, rating, healthDamage, 0.5f);
+        // if (healthDamage) rating *= 2.f;
+        int skillValue = actor.getClass().getSkill(actor, ESM::Skill::HandToHand);
+        rating *= MWMechanics::getHitChance(actor, enemy, skillValue) / 100.f;
+        return rating;
+    }
+
     float vanillaRateWeaponAndAmmo(const MWWorld::Ptr& weapon, const MWWorld::Ptr& ammo, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
