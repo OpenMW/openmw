@@ -77,6 +77,7 @@
     Bug #4539: Paper Doll is affected by GUI scaling
     Bug #4545: Creatures flee from werewolves
     Bug #4551: Replace 0 sound range with default range separately
+    Bug #4557: Topics with reserved names are handled differently from vanilla
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
     Feature #3103: Provide option for disposition to get increased by successful trade
