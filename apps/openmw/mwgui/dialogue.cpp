@@ -408,6 +408,12 @@ namespace MWGui
 
     void DialogueWindow::setPtr(const MWWorld::Ptr& actor)
     {
+        if (!actor.getClass().isActor())
+        {
+            std::cerr << "Warning: can not talk with non-actor object." << std::endl;
+            return;
+        }
+
         bool sameActor = (mPtr == actor);
         if (!sameActor)
         {

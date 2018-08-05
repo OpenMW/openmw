@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "dialogueextensions.hpp"
 
 #include <components/compiler/extensions.hpp>
@@ -133,6 +135,14 @@ namespace MWScript
 
                     if (!ptr.getRefData().isEnabled())
                         return;
+
+                    if (!ptr.getClass().isActor())
+                    {
+                        const std::string error = "Warning: \"forcegreeting\" command works only for actors.";
+                        runtime.getContext().report (error);
+                        std::cerr << error << std::endl;
+                        return;
+                    }
 
                     MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue, ptr);
                 }
