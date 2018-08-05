@@ -54,6 +54,7 @@
     Bug #4452: Default terrain texture bleeds through texture transitions
     Bug #4453: Quick keys behaviour is invalid for equipment
     Bug #4454: AI opens doors too slow
+    Bug #4456: AiActivate should not be cancelled after target activation
     Bug #4457: Item without CanCarry flag prevents shield autoequipping in dark areas
     Bug #4458: AiWander console command handles idle chances incorrectly
     Bug #4459: NotCell dialogue condition doesn't support partial matches
