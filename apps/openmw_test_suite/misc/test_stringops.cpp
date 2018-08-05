@@ -7,7 +7,7 @@ struct PartialBinarySearchTest : public ::testing::Test
     std::vector<std::string> mDataVec;
     virtual void SetUp()
     {
-        const char* data[] = { "Head", "Chest", "Tri Head", "Tri Chest", "Bip01" };
+        const char* data[] = { "Head", "Chest", "Tri Head", "Tri Chest", "Bip01", "Tri Bip01" };
         mDataVec = std::vector<std::string>(data, data+sizeof(data)/sizeof(data[0]));
         std::sort(mDataVec.begin(), mDataVec.end(), Misc::StringUtils::ciLess);
     }
@@ -29,7 +29,15 @@ TEST_F(PartialBinarySearchTest, partial_binary_search_test)
     EXPECT_TRUE( matches("Tri Head 01") );
     EXPECT_TRUE( matches("Tri Head") );
     EXPECT_TRUE( matches("tri head") );
+    EXPECT_TRUE( matches("Tri bip01") );
+    EXPECT_TRUE( matches("bip01") );
+    EXPECT_TRUE( matches("bip01 head") );
+    EXPECT_TRUE( matches("Bip01 L Hand") );
+    EXPECT_TRUE( matches("BIp01 r Clavicle") );
+    EXPECT_TRUE( matches("Bip01 SpiNe1") );
 
+    EXPECT_FALSE( matches("") );
+    EXPECT_FALSE( matches("Node Bip01") );
     EXPECT_FALSE( matches("Hea") );
     EXPECT_FALSE( matches(" Head") );
     EXPECT_FALSE( matches("Tri  Head") );
