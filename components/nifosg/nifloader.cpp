@@ -575,7 +575,7 @@ namespace NifOsg
 
             // Make sure we don't render untextured shapes
             if (nifNode->recType == Nif::RC_NiTriShape && boundTextures.empty())
-                node->setNodeMask(0x1);
+                node->setNodeMask(0x0);
 
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles || nifNode->recType == Nif::RC_NiRotatingParticles)
                 handleParticleSystem(nifNode, node, composite, animflags, rootNode);
