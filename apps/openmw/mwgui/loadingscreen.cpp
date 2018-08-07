@@ -170,11 +170,17 @@ namespace MWGui
         // We are already using node masks to avoid the scene from being updated/rendered, but node masks don't work for computeBound()
         mViewer->getSceneData()->setComputeBoundingSphereCallback(new DontComputeBoundCallback);
 
+        mShowWallpaper = visible && (MWBase::Environment::get().getStateManager()->getState()
+                == MWBase::StateManager::State_NoGame);
+
+        if (!visible)
+        {
+            draw();
+            return;
+        }
+
         mVisible = visible;
         mLoadingBox->setVisible(mVisible);
-
-        mShowWallpaper = mVisible && (MWBase::Environment::get().getStateManager()->getState()
-                == MWBase::StateManager::State_NoGame);
 
         setVisible(true);
 
@@ -184,9 +190,6 @@ namespace MWGui
         }
 
         MWBase::Environment::get().getWindowManager()->pushGuiMode(mShowWallpaper ? GM_LoadingWallpaper : GM_Loading);
-
-        if (!mVisible)
-            draw();
     }
 
     void LoadingScreen::loadingOff()
