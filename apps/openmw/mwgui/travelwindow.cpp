@@ -46,7 +46,7 @@ namespace MWGui
                           mSelect->getHeight());
     }
 
-    void TravelWindow::addDestination(const std::string& name,ESM::Position pos,bool interior)
+    void TravelWindow::addDestination(const std::string& name, ESM::Position pos, bool interior)
     {
         int price;
 
@@ -56,7 +56,7 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-        if(interior)
+        if (!mPtr.getCell()->isExterior())
         {
             price = gmst.find("fMagesGuildTravel")->getInt();
         }
