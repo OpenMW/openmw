@@ -121,7 +121,16 @@ object shadows
 Allow static objects to cast shadows.
 Potentially decreases performance.
 
+enable indoor shadows
+---------------------
 
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Allow shadows indoors.
+Due to limitations with Morrowind's data, only actors can cast shadows indoors without the ceiling casting a shadow everywhere.
+Some might feel this is distracting as shadows can be cast through other objects, so indoor shadows can be disabled completely.
 
 Expert settings
 ***************
