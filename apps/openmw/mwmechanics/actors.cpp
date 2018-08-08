@@ -1353,12 +1353,15 @@ namespace MWMechanics
                             MWWorld::Ptr headTrackTarget;
 
                             MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
+                            bool firstPersonPlayer = iter->first == player && MWBase::Environment::get().getWorld()->isFirstPerson();
 
-                            // Unconsious actor can not track target
-                            // Also actors in combat and pursue mode do not bother to headtrack
+                            // 1. Unconsious actor can not track target
+                            // 2. Actors in combat and pursue mode do not bother to headtrack
+                            // 3. Player character does not use headtracking in the 1st-person view
                             if (!stats.getKnockedDown() &&
                                 !stats.getAiSequence().isInCombat() &&
-                                !stats.getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                                !stats.getAiSequence().hasPackage(AiPackage::TypeIdPursue) &&
+                                !firstPersonPlayer)
                             {
                                 for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                                 {

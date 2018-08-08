@@ -81,6 +81,7 @@
     Bug #4553: Forcegreeting on non-actor opens a dialogue window which cannot be closed
     Bug #4557: Topics with reserved names are handled differently from vanilla
     Bug #4558: Mesh optimizer: check for reserved node name is case-sensitive
+    Bug #4573: Player uses headtracking in the 1st-person mode
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
     Feature #3103: Provide option for disposition to get increased by successful trade
