@@ -369,21 +369,6 @@ private:
     float mFov;
 };
 
-// Disable culling for all child nodes
-class DisableCullingVisitor : public osg::NodeVisitor
-{
-public:
-    DisableCullingVisitor() : NodeVisitor(NodeVisitor::TRAVERSE_ACTIVE_CHILDREN) {};
-
-    virtual ~DisableCullingVisitor() {};
-
-    virtual void apply(osg::Node &node) override
-    {
-        node.setCullingActive(false);
-        traverse(node);
-    };
-};
-
 void NpcAnimation::setRenderBin()
 {
     if (mViewMode == VM_FirstPerson)
@@ -672,13 +657,6 @@ void NpcAnimation::updateParts()
 
     if (mAlpha != 1.f)
         mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
-
-    if (mViewMode == VM_FirstPerson)
-    {
-        // Shadows made first-person meshes get erroneously culled. This stops that.
-        DisableCullingVisitor disableCullingVisitor;
-        mObjectRoot->accept(disableCullingVisitor);
-    }
 }
 
 
