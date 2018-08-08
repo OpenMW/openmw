@@ -22,6 +22,8 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/defines.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
@@ -508,9 +510,11 @@ namespace MWDialogue
         return static_cast<int>(mTemporaryDispositionChange);
     }
 
-    void DialogueManager::applyDispositionChange(int delta)
+    void DialogueManager::applyBarterDispositionChange(int delta)
     {
         mTemporaryDispositionChange += delta;
+        if (Settings::Manager::getBool("barter disposition change is permanent", "Game"))
+            mPermanentDispositionChange += delta;
     }
 
     bool DialogueManager::checkServiceRefused(ResponseCallback* callback)

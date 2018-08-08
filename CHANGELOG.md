@@ -12,6 +12,7 @@
     Bug #2835: Player able to slowly move when overencumbered
     Bug #2852: No murder bounty when a player follower commits murder
     Bug #2862: [macOS] Can't quit launcher using Command-Q or OpenMW->Quit
+    Bug #2872: Tab completion in console doesn't work with explicit reference
     Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
     Bug #3249: Fixed revert function not updating views properly
     Bug #3374: Touch spells not hitting kwama foragers
@@ -64,6 +65,7 @@
     Bug #4475: Scripted animations should not cause movement
     Bug #4479: "Game" category on Advanced page is getting too long
     Bug #4480: Segfault in QuickKeysMenu when item no longer in inventory
+    Bug #4483: Shapes without NiTexturingProperty are rendered
     Bug #4489: Goodbye doesn't block dialogue hyperlinks
     Bug #4490: PositionCell on player gives "Error: tried to add local script twice"
     Bug #4494: Training cap based off Base Skill instead of Modified Skill
@@ -74,11 +76,18 @@
     Bug #4510: Division by zero in MWMechanics::CreatureStats::setAttribute
     Bug #4519: Knockdown does not discard movement in the 1st-person mode
     Bug #4539: Paper Doll is affected by GUI scaling
+    Bug #4545: Creatures flee from werewolves
+    Bug #4551: Replace 0 sound range with default range separately
+    Bug #4553: Forcegreeting on non-actor opens a dialogue window which cannot be closed
+    Bug #4557: Topics with reserved names are handled differently from vanilla
+    Bug #4558: Mesh optimizer: check for reserved node name is case-sensitive
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
-    Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
+    Feature #3103: Provide option for disposition to get increased by successful trade
+    Feature #3276: Editor: Search - Show number of (remaining) search results and indicate a search without any results
     Feature #3641: Editor: Limit FPS in 3d preview window
     Feature #3703: Ranged sneak attack criticals
+    Feature #4012: Editor: Write a log file if OpenCS crashes
     Feature #4222: 360° screenshots
     Feature #4256: Implement ToggleBorders (TB) console command
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
@@ -87,9 +96,11 @@
     Feature #4444: Per-group KF-animation files support
     Feature #4466: Editor: Add option to ignore "Base" records when running verifier
     Feature #4488: Make water shader rougher during rain
-    Feature #4012: Editor: Write a log file if OpenCS crashes
     Feature #4509: Show count of enchanted items in stack in the spells list
     Feature #4512: Editor: Use markers for lights and creatures levelled lists
+    Feature #4548: Weapon priority: use the actual chance to hit the target instead of weapon skill
+    Feature #4549: Weapon priority: use the actual damage in weapon rating calculations
+    Feature #4550: Weapon priority: make ranged weapon bonus more sensible
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test
 

@@ -37,6 +37,7 @@ namespace MWGui
         , mLastRenderTime(0.0)
         , mLoadingOnTime(0.0)
         , mImportantLabel(false)
+        , mVisible(false)
         , mProgress(0)
         , mShowWallpaper(true)
     {

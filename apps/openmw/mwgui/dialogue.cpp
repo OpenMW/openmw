@@ -362,52 +362,59 @@ namespace MWGui
         if (mGoodbye ||  MWBase::Environment::get().getDialogueManager()->isInChoice())
             return;
 
-        int separatorPos = 0;
-        for (unsigned int i=0; i<mTopicsList->getItemCount(); ++i)
-        {
-            if (mTopicsList->getItemNameAt(i) == "")
-                separatorPos = i;
-        }
+        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        if (id >= separatorPos)
+        const std::string sPersuasion = gmst.find("sPersuasion")->getString();
+        const std::string sCompanionShare = gmst.find("sCompanionShare")->getString();
+        const std::string sBarter = gmst.find("sBarter")->getString();
+        const std::string sSpells = gmst.find("sSpells")->getString();
+        const std::string sTravel = gmst.find("sTravel")->getString();
+        const std::string sSpellMakingMenuTitle = gmst.find("sSpellMakingMenuTitle")->getString();
+        const std::string sEnchanting = gmst.find("sEnchanting")->getString();
+        const std::string sServiceTrainingTitle = gmst.find("sServiceTrainingTitle")->getString();
+        const std::string sRepair = gmst.find("sRepair")->getString();
+
+        if (topic != sPersuasion && topic != sCompanionShare && topic != sBarter 
+         && topic != sSpells && topic != sTravel && topic != sSpellMakingMenuTitle 
+         && topic != sEnchanting && topic != sServiceTrainingTitle && topic != sRepair)
         {
             onTopicActivated(topic);
             if (mGoodbyeButton->getEnabled())
                 MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
         }
-        else
+        else if (topic == sPersuasion)
+            mPersuasionDialog.setVisible(true);
+        else if (topic == sCompanionShare)
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Companion, mPtr);
+        else if (!MWBase::Environment::get().getDialogueManager()->checkServiceRefused(mCallback.get()))
         {
-            const MWWorld::Store<ESM::GameSetting> &gmst =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
-            if (topic == gmst.find("sPersuasion")->getString())
-                mPersuasionDialog.setVisible(true);
-            else if (topic == gmst.find("sCompanionShare")->getString())
-                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Companion, mPtr);
-            else if (!MWBase::Environment::get().getDialogueManager()->checkServiceRefused(mCallback.get()))
-            {
-                if (topic == gmst.find("sBarter")->getString())
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Barter, mPtr);
-                else if (topic == gmst.find("sSpells")->getString())
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellBuying, mPtr);
-                else if (topic == gmst.find("sTravel")->getString())
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Travel, mPtr);
-                else if (topic == gmst.find("sSpellMakingMenuTitle")->getString())
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellCreation, mPtr);
-                else if (topic == gmst.find("sEnchanting")->getString())
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Enchanting, mPtr);
-                else if (topic == gmst.find("sServiceTrainingTitle")->getString())
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Training, mPtr);
-                else if (topic == gmst.find("sRepair")->getString())
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_MerchantRepair, mPtr);
-            }
-            else
-                updateTopics();
+            if (topic == sBarter)
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Barter, mPtr);
+            else if (topic == sSpells)
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellBuying, mPtr);
+            else if (topic == sTravel)
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Travel, mPtr);
+            else if (topic == sSpellMakingMenuTitle)
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellCreation, mPtr);
+            else if (topic == sEnchanting)
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Enchanting, mPtr);
+            else if (topic == sServiceTrainingTitle)
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Training, mPtr);
+            else if (topic == sRepair)
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_MerchantRepair, mPtr);
         }
+        else
+            updateTopics();
     }
 
     void DialogueWindow::setPtr(const MWWorld::Ptr& actor)
     {
+        if (!actor.getClass().isActor())
+        {
+            std::cerr << "Warning: can not talk with non-actor object." << std::endl;
+            return;
+        }
+
         bool sameActor = (mPtr == actor);
         if (!sameActor)
         {

@@ -8,8 +8,9 @@
 #include <QIcon>
 #include <QMetaType>
 
-#include "model/doc/messages.hpp"
+#include <components/misc/debugging.hpp>
 
+#include "model/doc/messages.hpp"
 #include "model/world/universalid.hpp"
 
 #ifdef Q_OS_MAC
@@ -41,45 +42,43 @@ class Application : public QApplication
         Application (int& argc, char *argv[]) : QApplication (argc, argv) {}
 };
 
-int main(int argc, char *argv[])
+int runApplication(int argc, char *argv[])
 {
-    #ifdef Q_OS_MAC
-        setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
-    #endif
+#ifdef Q_OS_MAC
+    setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
+#endif
 
-    try
-    {           
-        // To allow background thread drawing in OSG
-        QApplication::setAttribute(Qt::AA_X11InitThreads, true);
+    // To allow background thread drawing in OSG
+    QApplication::setAttribute(Qt::AA_X11InitThreads, true);
 
-        Q_INIT_RESOURCE (resources);
+    Q_INIT_RESOURCE (resources);
 
-        qRegisterMetaType<std::string> ("std::string");
-        qRegisterMetaType<CSMWorld::UniversalId> ("CSMWorld::UniversalId");
-        qRegisterMetaType<CSMDoc::Message> ("CSMDoc::Message");
+    qRegisterMetaType<std::string> ("std::string");
+    qRegisterMetaType<CSMWorld::UniversalId> ("CSMWorld::UniversalId");
+    qRegisterMetaType<CSMDoc::Message> ("CSMDoc::Message");
 
-        Application application (argc, argv);
+    Application application (argc, argv);
 
-    #ifdef Q_OS_MAC
-        QDir dir(QCoreApplication::applicationDirPath());
-        QDir::setCurrent(dir.absolutePath());
-    #endif
+#ifdef Q_OS_MAC
+    QDir dir(QCoreApplication::applicationDirPath());
+    QDir::setCurrent(dir.absolutePath());
+#endif
 
-        application.setWindowIcon (QIcon (":./openmw-cs.png"));
+    application.setWindowIcon (QIcon (":./openmw-cs.png"));
 
-        CS::Editor editor(argc, argv);
+    CS::Editor editor(argc, argv);
 
-        if(!editor.makeIPCServer())
-        {
-            editor.connectToIPCServer();
-            return 0;
-        }
-        return editor.run();
-    }
-    catch (std::exception& e)
+    if(!editor.makeIPCServer())
     {
-        std::cerr << "ERROR: " << e.what() << std::endl;
+        editor.connectToIPCServer();
         return 0;
     }
 
+    return editor.run();
+}
+
+
+int main(int argc, char *argv[])
+{
+    return wrapApplication(&runApplication, argc, argv, "/openmw-cs.log");
 }
