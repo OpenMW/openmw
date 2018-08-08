@@ -1980,15 +1980,9 @@ void CharacterController::update(float duration)
             else if(rot.z() != 0.0f && !sneak && !(mPtr == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson()))
             {
                 if(rot.z() > 0.0f)
-                {
                     movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
-                    mAnimation->disable(mCurrentJump);
-                }
                 else if(rot.z() < 0.0f)
-                {
                     movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
-                    mAnimation->disable(mCurrentJump);
-                }
             }
         }
 
@@ -2000,7 +1994,7 @@ void CharacterController::update(float duration)
             bool animPlaying = mAnimation->getInfo(mCurrentMovement, &complete);
             if (movestate == CharState_None && isTurning())
             {
-                if ((animPlaying && complete < threshold) || mJumpState != jumpstate)
+                if (animPlaying && complete < threshold)
                     movestate = mMovementState;
             }
         }
