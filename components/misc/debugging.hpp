@@ -76,11 +76,7 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
         std::cerr.rdbuf (&sb);
 #else
         // Redirect cout and cerr to the log file
-        boost::filesystem::ofstream logfile;
         logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / logName));
-
-        std::ostream oldcout(cout_rdbuf);
-        std::ostream oldcerr(cerr_rdbuf);
 
         coutsb.open (Misc::Tee(logfile, oldcout));
         cerrsb.open (Misc::Tee(logfile, oldcerr));
