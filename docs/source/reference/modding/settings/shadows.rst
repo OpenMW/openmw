@@ -111,9 +111,17 @@ terrain shadows
 Allow terrain to cast shadows.
 Potentially decreases performance.
 
+object shadows
+--------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Allow static objects to cast shadows.
+Potentially decreases performance.
 
 
-Note: Right now, there is no setting allowing toggling of shadows for statics
 
 Expert settings
 ***************
