@@ -1298,6 +1298,8 @@ namespace MWMechanics
              // AI and magic effects update
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
+                bool isPlayer = iter->first == player;
+
                 float distSqr = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2();
                 // AI processing is only done within distance of 7168 units to the player. Note the "AI distance" slider doesn't affect this
                 // (it only does some throttling for targets beyond the "AI distance", so doesn't give any guarantees as to whether AI will be enabled or not)
@@ -1305,7 +1307,7 @@ namespace MWMechanics
                 // using higher values will make a quest in Bloodmoon harder or impossible to complete (bug #1876)
                 bool inProcessingRange = distSqr <= sqrAiProcessingDistance;
 
-                if (iter->first == player)
+                if (isPlayer)
                     iter->second->getCharacterController()->setAttackingOrSpell(MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell());
 
                 // If dead or no longer in combat, no longer store any actors who attempted to hit us. Also remove for the player.
@@ -1337,14 +1339,14 @@ namespace MWMechanics
                     {
                         if (timerUpdateAITargets == 0)
                         {
-                            if (iter->first != player)
+                            if (!isPlayer)
                                 adjustCommandedActor(iter->first);
 
                             for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                             {
-                                if (it->first == iter->first || iter->first == player) // player is not AI-controlled
+                                if (it->first == iter->first || isPlayer) // player is not AI-controlled
                                     continue;
-                                engageCombat(iter->first, it->first, cachedAllies, it->first == player);
+                                engageCombat(iter->first, it->first, cachedAllies, isPlayer);
                             }
                         }
                         if (timerUpdateHeadTrack == 0)
@@ -1353,12 +1355,15 @@ namespace MWMechanics
                             MWWorld::Ptr headTrackTarget;
 
                             MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
+                            bool firstPersonPlayer = isPlayer && MWBase::Environment::get().getWorld()->isFirstPerson();
 
-                            // Unconsious actor can not track target
-                            // Also actors in combat and pursue mode do not bother to headtrack
+                            // 1. Unconsious actor can not track target
+                            // 2. Actors in combat and pursue mode do not bother to headtrack
+                            // 3. Player character does not use headtracking in the 1st-person view
                             if (!stats.getKnockedDown() &&
                                 !stats.getAiSequence().isInCombat() &&
-                                !stats.getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                                !stats.getAiSequence().hasPackage(AiPackage::TypeIdPursue) &&
+                                !firstPersonPlayer)
                             {
                                 for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                                 {
