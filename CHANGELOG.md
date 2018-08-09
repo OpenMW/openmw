@@ -65,7 +65,6 @@
     Bug #4475: Scripted animations should not cause movement
     Bug #4479: "Game" category on Advanced page is getting too long
     Bug #4480: Segfault in QuickKeysMenu when item no longer in inventory
-    Bug #4483: Shapes without NiTexturingProperty are rendered
     Bug #4489: Goodbye doesn't block dialogue hyperlinks
     Bug #4490: PositionCell on player gives "Error: tried to add local script twice"
     Bug #4494: Training cap based off Base Skill instead of Modified Skill
