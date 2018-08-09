@@ -554,8 +554,8 @@ namespace MWRender
                 mLandFogStart = mViewDistance * (1 - fogDepth);
                 mLandFogEnd = mViewDistance;
             }
-            mUnderwaterFogStart = mViewDistance * (1 - underwaterFog);
-            mUnderwaterFogEnd = mViewDistance;
+            mUnderwaterFogStart = std::min(mViewDistance, 6666.f) * (1 - underwaterFog);
+            mUnderwaterFogEnd = std::min(mViewDistance, 6666.f);
         }
         mFogColor = color;
     }
@@ -585,8 +585,6 @@ namespace MWRender
         mCurrentCameraPos = cameraPos;
         if (mWater->isUnderwater(cameraPos))
         {
-            float viewDistance = mViewDistance;
-            viewDistance = std::min(viewDistance, 6666.f);
             setFogColor(mUnderwaterColor * mUnderwaterWeight + mFogColor * (1.f-mUnderwaterWeight));
             mStateUpdater->setFogStart(mUnderwaterFogStart);
             mStateUpdater->setFogEnd(mUnderwaterFogEnd);
