@@ -46,7 +46,7 @@ namespace MWGui
                           mSelect->getHeight());
     }
 
-    void TravelWindow::addDestination(const std::string& name,ESM::Position pos,bool interior)
+    void TravelWindow::addDestination(const std::string& name, ESM::Position pos, bool interior)
     {
         int price;
 
@@ -56,7 +56,7 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-        if(interior)
+        if (!mPtr.getCell()->isExterior())
         {
             price = gmst.find("fMagesGuildTravel")->getInt();
         }
@@ -168,7 +168,7 @@ namespace MWGui
         ESM::Position pos = *_sender->getUserData<ESM::Position>();
         std::string cellname = _sender->getUserString("Destination");
         bool interior = _sender->getUserString("interior") == "y";
-        if (!interior)
+        if (mPtr.getCell()->isExterior())
         {
             ESM::Position playerPos = player.getRefData().getPosition();
             float d = (osg::Vec3f(pos.pos[0], pos.pos[1], 0) - osg::Vec3f(playerPos.pos[0], playerPos.pos[1], 0)).length();
