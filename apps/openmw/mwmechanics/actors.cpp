@@ -1346,7 +1346,7 @@ namespace MWMechanics
                             {
                                 if (it->first == iter->first || isPlayer) // player is not AI-controlled
                                     continue;
-                                engageCombat(iter->first, it->first, cachedAllies, isPlayer);
+                                engageCombat(iter->first, it->first, cachedAllies, it->first == player);
                             }
                         }
                         if (timerUpdateHeadTrack == 0)
