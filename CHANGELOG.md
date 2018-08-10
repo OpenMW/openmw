@@ -38,6 +38,7 @@
     Bug #4291: Non-persistent actors that started the game as dead do not play death animations
     Bug #4293: Faction members are not aware of faction ownerships in barter
     Bug #4307: World cleanup should remove dead bodies only if death animation is finished
+    Bug #4311: OpenMW does not handle RootCollisionNode correctly
     Bug #4327: Missing animations during spell/weapon stance switching
     Bug #4358: Running animation is interrupted when magic mode is toggled
     Bug #4368: Settings window ok button doesn't have key focus by default
