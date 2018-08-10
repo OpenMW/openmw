@@ -1212,8 +1212,10 @@ bool CharacterController::updateWeaponState()
         mWeapon = weapon != inv.end() ? *weapon : MWWorld::Ptr();
     }
 
+    // Apply 1st-person weapon animations only for upper body
     MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
-    priorityWeapon[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
+    if (mPtr != MWMechanics::getPlayer() || !MWBase::Environment::get().getWorld()->isFirstPerson())
+        priorityWeapon[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
 
     bool forcestateupdate = false;
 
@@ -1358,14 +1360,7 @@ bool CharacterController::updateWeaponState()
     {
         MWWorld::Ptr player = getPlayer();
 
-        // We should reset player's idle animation in the first-person mode.
-        if (mPtr == player && MWBase::Environment::get().getWorld()->isFirstPerson())
-            mIdleState = CharState_None;
-
-        // In other cases we should not break swim and sneak animations
-        if (mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
-            mIdleState = CharState_None;
-
+        bool resetIdle = ammunition;
         if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
@@ -1430,6 +1425,11 @@ bool CharacterController::updateWeaponState()
                                      0.0f, 0);
                     mUpperBodyState = UpperCharState_CastingSpell;
                 }
+                else
+                {
+                    resetIdle = false;
+                }
+
                 if (mPtr.getClass().hasInventoryStore(mPtr))
                 {
                     MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
@@ -1499,6 +1499,14 @@ bool CharacterController::updateWeaponState()
                 mUpperBodyState = UpperCharState_StartToMinAttack;
             }
         }
+
+        // We should reset player's idle animation in the first-person mode.
+        if (resetIdle && mPtr == player && MWBase::Environment::get().getWorld()->isFirstPerson())
+            mIdleState = CharState_None;
+
+        // In other cases we should not break swim and sneak animations
+        if (resetIdle && mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
+            mIdleState = CharState_None;
 
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
         if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && !isKnockedDown())
@@ -1663,18 +1671,22 @@ bool CharacterController::updateWeaponState()
                 break;
         }
 
-        // Note: apply reload animations only for upper body since blending with movement animations can give weird result.
-        // Especially noticable with crossbow reload animation.
+        // Note: apply crossbow reload animation only for upper body
+        // since blending with movement animations can give weird result.
         if(!start.empty())
         {
+            int mask = MWRender::Animation::BlendMask_All;
+            if (mWeaponType == WeapType_Crossbow)
+                mask = MWRender::Animation::BlendMask_UpperBody;
+
             mAnimation->disable(mCurrentWeapon);
             if (mUpperBodyState == UpperCharState_FollowStartToFollowStop)
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_UpperBody, true,
+                                 mask, true,
                                  weapSpeed, start, stop, 0.0f, 0);
             else
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_UpperBody, false,
+                                 mask, false,
                                  weapSpeed, start, stop, 0.0f, 0);
         }
     }
