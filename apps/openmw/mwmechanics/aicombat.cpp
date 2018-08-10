@@ -600,27 +600,26 @@ osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& t
     float duration, int weapType, float strength)
 {
     float projSpeed;
+    const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
     // get projectile speed (depending on weapon type)
     if (weapType == ESM::Weapon::MarksmanThrown)
     {
-        static float fThrownWeaponMinSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMinSpeed")->getFloat();
-        static float fThrownWeaponMaxSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMaxSpeed")->getFloat();
+        static float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->getFloat();
+        static float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->getFloat();
 
-        projSpeed = 
-            fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * strength;
+        projSpeed = fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * strength;
     }
-    else
+    else if (weapType != 0)
     {
-        static float fProjectileMinSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMinSpeed")->getFloat();
-        static float fProjectileMaxSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMaxSpeed")->getFloat();
+        static float fProjectileMinSpeed = gmst.find("fProjectileMinSpeed")->getFloat();
+        static float fProjectileMaxSpeed = gmst.find("fProjectileMaxSpeed")->getFloat();
 
-        projSpeed = 
-            fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * strength;
+        projSpeed = fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * strength;
+    }
+    else // weapType is 0 ==> it's a target spell projectile
+    {
+        projSpeed = gmst.find("fTargetSpellMaxSpeed")->getFloat();
     }
 
     // idea: perpendicular to dir to target speed components of target move vector and projectile vector should be the same
