@@ -242,6 +242,11 @@ if (UNIX AND NOT APPLE)
 target_link_libraries(components ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
+if (BUILD_WITH_CODE_COVERAGE)
+    add_definitions(--coverage)
+    target_link_libraries(components gcov)
+endif()
+
 
 # Make the variable accessible for other subdirectories
 set(COMPONENT_FILES ${COMPONENT_FILES} PARENT_SCOPE)

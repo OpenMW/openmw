@@ -23,6 +23,8 @@ class RecordPtrT
 public:
     RecordPtrT() : index(-2) {}
 
+    RecordPtrT(X* ptr) : ptr(ptr) {}
+
     /// Read the index from the nif
     void read(NIFStream *nif)
     {
@@ -87,6 +89,12 @@ class RecordListT
     std::vector<Ptr> list;
 
 public:
+    RecordListT() = default;
+
+    RecordListT(std::vector<Ptr> list)
+        : list(std::move(list))
+    {}
+
     void read(NIFStream *nif)
     {
         int len = nif->getInt();

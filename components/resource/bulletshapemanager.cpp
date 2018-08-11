@@ -127,7 +127,7 @@ osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &
         if (ext == "nif")
         {
             NifBullet::BulletNifLoader loader;
-            shape = loader.load(mNifFileManager->get(normalized));
+            shape = loader.load(*mNifFileManager->get(normalized));
         }
         else
         {

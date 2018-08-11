@@ -50,7 +50,7 @@ public:
         abort();
     }
 
-    osg::ref_ptr<Resource::BulletShape> load(const Nif::NIFFilePtr& file);
+    osg::ref_ptr<Resource::BulletShape> load(const Nif::File& file);
 
 private:
     bool findBoundingBox(const Nif::Node* node, int flags = 0);
@@ -61,9 +61,9 @@ private:
 
     void handleNiTriShape(const Nif::NiTriShape *shape, int flags, const osg::Matrixf& transform, bool isAnimated);
 
-    btCompoundShape* mCompoundShape;
+    std::unique_ptr<btCompoundShape> mCompoundShape;
 
-    btTriangleMesh* mStaticMesh;
+    std::unique_ptr<btTriangleMesh> mStaticMesh;
 
     osg::ref_ptr<Resource::BulletShape> mShape;
 };
