@@ -9,6 +9,7 @@
 #include <osg/ValueObject>
 
 // resource
+#include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
@@ -992,7 +993,7 @@ namespace NifOsg
                 int uvSet = *it;
                 if (uvSet >= (int)data->uvlist.size())
                 {
-                    std::cerr << "Warning: out of bounds UV set " << uvSet << " on TriShape \"" << triShape->name << "\" in " << mFilename << std::endl;
+                    Log(Debug::Verbose) << "Out of bounds UV set " << uvSet << " on TriShape \"" << triShape->name << "\" in " << mFilename;
                     if (!data->uvlist.empty())
                         geometry->setTexCoordArray(textureStage, new osg::Vec2Array(data->uvlist[0].size(), &data->uvlist[0][0]), osg::Array::BIND_PER_VERTEX);
                     continue;
@@ -1279,7 +1280,7 @@ namespace NifOsg
                     const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
                     if(tex.texture.empty() && texprop->controller.empty())
                     {
-                        std::cerr << "Warning: texture layer " << i << " is in use but empty in " << mFilename << std::endl;
+                        Log(Debug::Verbose) << "Texture layer " << i << " is in use but empty in " << mFilename;
                         continue;
                     }
 
