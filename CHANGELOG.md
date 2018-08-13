@@ -14,6 +14,7 @@
     Bug #2862: [macOS] Can't quit launcher using Command-Q or OpenMW->Quit
     Bug #2872: Tab completion in console doesn't work with explicit reference
     Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
+    Bug #3049: Drain and Fortify effects are not properly applied on health, magicka and fatigue
     Bug #3249: Fixed revert function not updating views properly
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3486: [Mod] NPC Commands does not work
@@ -33,6 +34,7 @@
     Bug #4215: OpenMW shows book text after last EOL tag
     Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4230: AiTravel package issues break some Tribunal quests
+    Bug #4231: Infected rats from the "Crimson Plague" quest rendered unconscious by change in Drain Fatigue functionality
     Bug #4251: Stationary NPCs do not return to their position after combat
     Bug #4274: Pre-0.43 death animations are not forward-compatible with 0.43+
     Bug #4286: Scripted animations can be interrupted
