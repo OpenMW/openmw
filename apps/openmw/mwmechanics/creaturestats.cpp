@@ -195,6 +195,7 @@ namespace MWMechanics
             mDead = true;
 
             mDynamic[index].setModifier(0);
+            mDynamic[index].setCurrentModifier(0);
             mDynamic[index].setCurrent(0);
 
             if (MWBase::Environment::get().getWorld()->getGodModeState())

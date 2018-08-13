@@ -261,6 +261,7 @@ namespace MWScript
                         .getDynamic (mIndex));
 
                     stat.setModified (diff + stat.getModified(), 0);
+                    stat.setCurrentModified (diff + stat.getCurrentModified());
 
                     stat.setCurrent (diff + current);
 

@@ -546,7 +546,7 @@ namespace MWMechanics
         float diff = (static_cast<int>(magickaFactor*intelligence)) - magicka.getBase();
         float currentToBaseRatio = (magicka.getCurrent() / magicka.getBase());
         magicka.setModified(magicka.getModified() + diff, 0);
-        magicka.setCurrent(magicka.getBase() * currentToBaseRatio);
+        magicka.setCurrent(magicka.getBase() * currentToBaseRatio, false, true);
         creatureStats.setMagicka(magicka);
     }
 
@@ -577,8 +577,14 @@ namespace MWMechanics
         float normalizedEncumbrance = ptr.getClass().getNormalizedEncumbrance(ptr);
         if (normalizedEncumbrance > 1)
             normalizedEncumbrance = 1;
+ 
+        // Current fatigue can be above base value due to a fortify effect.
+        // In that case stop here and don't try to restore.
+        DynamicStat<float> fatigue = stats.getFatigue();
+        if (fatigue.getCurrent() >= fatigue.getBase())
+            return;
 
-        // restore fatigue
+        // Restore fatigue
         float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat ();
         float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat ();
         float fEndFatigueMult = settings.find("fEndFatigueMult")->getFloat ();
@@ -586,7 +592,6 @@ namespace MWMechanics
         float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
         x *= fEndFatigueMult * endurance;
 
-        DynamicStat<float> fatigue = stats.getFatigue();
         fatigue.setCurrent (fatigue.getCurrent() + 3600 * x);
         stats.setFatigue (fatigue);
     }
@@ -598,16 +603,20 @@ namespace MWMechanics
 
         MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
 
-        int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+        // Current fatigue can be above base value due to a fortify effect.
+        // In that case stop here and don't try to restore.
+        DynamicStat<float> fatigue = stats.getFatigue();
+        if (fatigue.getCurrent() >= fatigue.getBase())
+            return;
 
-        // restore fatigue
+        // Restore fatigue
+        int endurance = stats.getAttribute(ESM::Attribute::Endurance).getModified();
         const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         static const float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat ();
         static const float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat ();
 
         float x = fFatigueReturnBase + fFatigueReturnMult * endurance;
 
-        DynamicStat<float> fatigue = stats.getFatigue();
         fatigue.setCurrent (fatigue.getCurrent() + duration * x);
         stats.setFatigue (fatigue);
     }
@@ -688,6 +697,19 @@ namespace MWMechanics
             }
         }
 
+        // dynamic stats
+        for (int i = 0; i < 3; ++i)
+        {
+            DynamicStat<float> stat = creatureStats.getDynamic(i);
+            stat.setCurrentModifier(effects.get(ESM::MagicEffect::FortifyHealth + i).getMagnitude() -
+                effects.get(ESM::MagicEffect::DrainHealth + i).getMagnitude(),
+                // Magicka can be decreased below zero due to a fortify effect wearing off
+                // Fatigue can be decreased below zero meaning the actor will be knocked out
+                i == 1 || i == 2);
+
+            creatureStats.setDynamic(i, stat);
+        }
+
         // attributes
         for(int i = 0;i < ESM::Attribute::Length;++i)
         {
@@ -717,19 +739,6 @@ namespace MWMechanics
                     }
                 }
             }
-        }
-
-        // dynamic stats
-        for(int i = 0;i < 3;++i)
-        {
-            DynamicStat<float> stat = creatureStats.getDynamic(i);
-            stat.setModifier(effects.get(ESM::MagicEffect::FortifyHealth+i).getMagnitude() -
-                             effects.get(ESM::MagicEffect::DrainHealth+i).getMagnitude(),
-                             // Magicka can be decreased below zero due to a fortify effect wearing off
-                             // Fatigue can be decreased below zero meaning the actor will be knocked out
-                             i == 1 || i == 2);
-
-            creatureStats.setDynamic(i, stat);
         }
 
         // AI setting modifiers
