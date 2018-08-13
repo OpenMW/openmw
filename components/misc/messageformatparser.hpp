@@ -18,7 +18,8 @@ namespace Misc
             enum Notation
             {
                 FixedNotation,
-                ScientificNotation
+                ScientificNotation,
+                ShortestNotation
             };
 
             virtual void visitedPlaceholder(Placeholder placeholder, char padding, int width, int precision, Notation notation) = 0;

@@ -59,11 +59,33 @@ namespace Interpreter
                             mRuntime.pop();
 
                             if (notation == FixedNotation)
+                            {
                                 out << std::fixed << value;
-                            else
+                                mFormattedMessage += out.str();
+                            }
+                            else if (notation == ShortestNotation)
+                            {
+                                std::string scientific;
+                                std::string fixed;
+
                                 out << std::scientific << value;
 
-                            mFormattedMessage += out.str();
+                                scientific = out.str();
+
+                                out.str(std::string());
+                                out.clear();
+
+                                out << std::fixed << value;
+
+                                fixed = out.str();
+
+                                mFormattedMessage += fixed.length() < scientific.length() ? fixed : scientific;
+                            }
+                            else 
+                            {
+                                out << std::scientific << value;
+                                mFormattedMessage += out.str();
+                            }
                         }
                         break;
                     default:

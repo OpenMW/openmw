@@ -56,6 +56,8 @@ namespace Misc
                                     visitedPlaceholder(FloatPlaceholder, pad, width, precision, FixedNotation);
                                 else if (m[i] == 'e' || m[i] == 'E')
                                     visitedPlaceholder(FloatPlaceholder, pad, width, precision, ScientificNotation);
+                                else if (m[i] == 'g' || m[i] == 'G')
+                                    visitedPlaceholder(FloatPlaceholder, pad, width, precision, ShortestNotation);
                             }
                         }
                     }
