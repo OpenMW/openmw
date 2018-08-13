@@ -154,6 +154,10 @@ namespace MWGui
         if (playerGold<price)
             return;
 
+        // Set "traveling" flag, so GetPCTraveling can detect teleportation.
+        // We will reset this flag during next world update.
+        MWBase::Environment::get().getWorld()->setPlayerTraveling(true);
+
         if (!mPtr.getCell()->isExterior())
             // Interior cell -> mages guild transport
             MWBase::Environment::get().getWindowManager()->playSound("mysticism cast");

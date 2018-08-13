@@ -168,6 +168,7 @@ namespace MWWorld
             bool mLevitationEnabled;
             bool mGoToJail;
             int mDaysInPrison;
+            bool mPlayerTraveling;
 
             float mSpellPreloadTimer;
 
@@ -671,6 +672,9 @@ namespace MWWorld
             float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) override;
 
             bool isPlayerInJail() const override;
+
+            void setPlayerTraveling(bool traveling);
+            bool isPlayerTraveling() const;
 
             /// Return terrain height at \a worldPos position.
             float getTerrainHeightAt(const osg::Vec3f& worldPos) const override;
