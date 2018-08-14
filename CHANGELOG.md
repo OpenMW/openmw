@@ -65,6 +65,7 @@
     Bug #4461: "Open" spell from non-player caster isn't a crime
     Bug #4464: OpenMW keeps AiState cached storages even after we cancel AI packages
     Bug #4469: Abot Silt Striders – Model turn 90 degrees on horizontal
+    Bug #4470: Non-bipedal creatures with Weapon & Shield flag have inconsistent behaviour
     Bug #4474: No fallback when getVampireHead fails
     Bug #4475: Scripted animations should not cause movement
     Bug #4479: "Game" category on Advanced page is getting too long
