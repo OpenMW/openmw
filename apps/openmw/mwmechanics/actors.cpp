@@ -2,7 +2,6 @@
 
 #include <typeinfo>
 #include <iostream>
-
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/loadnpc.hpp>
@@ -1927,7 +1926,8 @@ namespace MWMechanics
         osg::Vec3f position (actor.getRefData().getPosition().asVec3());
         getObjectsInRange(position, aiProcessingDistance, neighbors);
 
-        std::list<MWWorld::Ptr> followers = getActorsFollowing(actor);
+        std::set<MWWorld::Ptr> followers;
+        getActorsFollowing(actor, followers);
         for(auto neighbor = neighbors.begin(); neighbor != neighbors.end(); ++neighbor)
         {
             const CreatureStats &stats = neighbor->getClass().getCreatureStats(*neighbor);
