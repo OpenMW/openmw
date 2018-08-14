@@ -2,7 +2,6 @@
 #define DEBUG_LOG_H
 
 #include <mutex>
-#include <sstream>
 #include <iostream>
 
 namespace Debug

@@ -5,8 +5,8 @@
 
 #include <stdexcept>
 #include <vector>
-#include <iostream>
 
+#include <components/debug/debuglog.hpp>
 #include <components/files/constrainedfilestream.hpp>
 
 #include "record.hpp"
@@ -80,8 +80,7 @@ public:
     /// Used when something goes wrong, but not catastrophically so
     void warn(const std::string &msg) const override
     {
-        std::cerr << " NIFFile Warning: " << msg <<std::endl
-                  << "File: " << filename <<std::endl;
+        Log(Debug::Warning) << " NIFFile Warning: " << msg << "\nFile: " << filename;
     }
 
     /// Open a NIF stream. The name is used for error messages.

@@ -1,6 +1,5 @@
 #include "scenemanager.hpp"
 
-#include <iostream>
 #include <cstdlib>
 
 #include <osg/Node>
@@ -12,6 +11,8 @@
 
 #include <osgDB/SharedStateManager>
 #include <osgDB/Registry>
+
+#include <components/debug/debuglog.hpp>
 
 #include <components/nifosg/nifloader.hpp>
 #include <components/nif/niffile.hpp>
@@ -501,7 +502,7 @@ namespace Resource
                     normalized = "meshes/marker_error." + std::string(sMeshTypes[i]);
                     if (mVFS->exists(normalized))
                     {
-                        std::cerr << "Failed to load '" << name << "': " << e.what() << ", using marker_error." << sMeshTypes[i] << " instead" << std::endl;
+                        Log(Debug::Error) << "Failed to load '" << name << "': " << e.what() << ", using marker_error." << sMeshTypes[i] << " instead";
                         Files::IStreamPtr file = mVFS->get(normalized);
                         loaded = load(file, normalized, mImageManager, mNifFileManager);
                         break;
@@ -658,12 +659,12 @@ namespace Resource
         if(magfilter == "nearest")
             mag = osg::Texture::NEAREST;
         else if(magfilter != "linear")
-            std::cerr<< "Warning: Invalid texture mag filter: "<<magfilter <<std::endl;
+            Log(Debug::Warning) << "Warning: Invalid texture mag filter: "<< magfilter;
 
         if(minfilter == "nearest")
             min = osg::Texture::NEAREST;
         else if(minfilter != "linear")
-            std::cerr<< "Warning: Invalid texture min filter: "<<minfilter <<std::endl;
+            Log(Debug::Warning) << "Warning: Invalid texture min filter: "<< minfilter;
 
         if(mipmap == "nearest")
         {
@@ -675,7 +676,7 @@ namespace Resource
         else if(mipmap != "none")
         {
             if(mipmap != "linear")
-                std::cerr<< "Warning: Invalid texture mipmap: "<<mipmap <<std::endl;
+                Log(Debug::Warning) << "Warning: Invalid texture mipmap: " << mipmap;
             if(min == osg::Texture::NEAREST)
                 min = osg::Texture::NEAREST_MIPMAP_LINEAR;
             else if(min == osg::Texture::LINEAR)

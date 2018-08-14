@@ -4,7 +4,6 @@
 #include <cassert>
 #include <string>
 #include <set>
-#include <iostream>
 #include <map>
 
 #include <osg/Matrixf>
@@ -12,6 +11,7 @@
 #include <osg/ref_ptr>
 #include <osg/Referenced>
 
+#include <components/debug/debuglog.hpp>
 #include <components/nif/niffile.hpp>
 #include <components/resource/bulletshape.hpp>
 
@@ -41,12 +41,12 @@ public:
 
     void warn(const std::string &msg)
     {
-        std::cerr << "NIFLoader: Warn:" << msg << "\n";
+        Log(Debug::Warning) << "NIFLoader: Warn:" << msg;
     }
 
     void fail(const std::string &msg)
     {
-        std::cerr << "NIFLoader: Fail: "<< msg << std::endl;
+        Log(Debug::Error) << "NIFLoader: Fail: "<< msg;
         abort();
     }
 
