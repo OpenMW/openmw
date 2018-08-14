@@ -35,12 +35,12 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadow
     vec3 diffuseLight, ambientLight;
     perLight(ambientLight, diffuseLight, 0, viewPos, viewNormal, diffuse, ambient);
 #if PER_PIXEL_LIGHTING
-    lightResult.xyz += ambientLight + diffuseLight * shadowing;
+    lightResult.xyz += diffuseLight * shadowing - diffuseLight; // This light gets added a second time in the loop to fix Mesa users' slowdown, so we need to negate its contribution here.
 #else
     shadowDiffuse = diffuseLight;
-    lightResult.xyz += ambientLight;
+    lightResult.xyz -= shadowDiffuse; // This light gets added a second time in the loop to fix Mesa users' slowdown, so we need to negate its contribution here.
 #endif
-    for (int i=1; i<MAX_LIGHTS; ++i)
+    for (int i=0; i<MAX_LIGHTS; ++i)
     {
         perLight(ambientLight, diffuseLight, i, viewPos, viewNormal, diffuse, ambient);
         lightResult.xyz += ambientLight + diffuseLight;
