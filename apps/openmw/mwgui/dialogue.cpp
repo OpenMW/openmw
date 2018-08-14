@@ -6,6 +6,7 @@
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Button.h>
 
+#include <components/debug/debuglog.hpp>
 #include <components/widgets/list.hpp>
 #include <components/translation/translation.hpp>
 
@@ -411,7 +412,7 @@ namespace MWGui
     {
         if (!actor.getClass().isActor())
         {
-            std::cerr << "Warning: can not talk with non-actor object." << std::endl;
+            Log(Debug::Warning) << "Warning: can not talk with non-actor object.";
             return;
         }
 

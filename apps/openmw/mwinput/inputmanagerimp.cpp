@@ -10,6 +10,7 @@
 
 #include <SDL_version.h>
 
+#include <components/debug/debuglog.hpp>
 #include <components/sdlutil/sdlinputwrapper.hpp>
 #include <components/sdlutil/sdlvideowrapper.hpp>
 #include <components/esm/esmwriter.hpp>
@@ -120,11 +121,11 @@ namespace MWInput
                 SDL_ControllerDeviceEvent evt;
                 evt.which = i;
                 controllerAdded(mFakeDeviceID, evt);
-                std::cout << "Detected game controller: " << SDL_GameControllerNameForIndex(i) << std::endl;
+                Log(Debug::Info) << "Detected game controller: " << SDL_GameControllerNameForIndex(i);
             }
             else
             {
-                std::cout << "Detected unusable controller: " << SDL_JoystickNameForIndex(i) << std::endl;
+                Log(Debug::Info) << "Detected unusable controller: " << SDL_JoystickNameForIndex(i);
             }
         }
 

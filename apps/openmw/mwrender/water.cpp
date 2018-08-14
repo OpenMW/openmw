@@ -19,6 +19,8 @@
 #include <osgUtil/IncrementalCompileOperation>
 #include <osgUtil/CullVisitor>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -28,7 +30,6 @@
 #include <components/nifosg/controller.hpp>
 
 #include <components/shader/shadermanager.hpp>
-
 
 #include <components/esm/loadcell.hpp>
 
@@ -193,16 +194,16 @@ osg::ref_ptr<osg::Image> readPngImage (const std::string& file)
     boost::filesystem::ifstream inStream;
     inStream.open(file, std::ios_base::in | std::ios_base::binary);
     if (inStream.fail())
-        std::cerr << "Error: Failed to open " << file << std::endl;
+        Log(Debug::Error) << "Error: Failed to open " << file;
     osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
     if (!reader)
     {
-        std::cerr << "Error: Failed to read " << file << ", no png readerwriter found" << std::endl;
+        Log(Debug::Error) << "Error: Failed to read " << file << ", no png readerwriter found";
         return osg::ref_ptr<osg::Image>();
     }
     osgDB::ReaderWriter::ReadResult result = reader->readImage(inStream);
     if (!result.success())
-        std::cerr << "Error: Failed to read " << file << ": " << result.message() << " code " << result.status() << std::endl;
+        Log(Debug::Error) << "Error: Failed to read " << file << ": " << result.message() << " code " << result.status();
 
     return result.getImage();
 }

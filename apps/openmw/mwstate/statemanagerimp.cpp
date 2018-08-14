@@ -1,5 +1,7 @@
 #include "statemanagerimp.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/cellid.hpp>
@@ -157,7 +159,7 @@ void MWState::StateManager::newGame (bool bypass)
         std::stringstream error;
         error << "Failed to start new game: " << e.what();
 
-        std::cerr << error.str() << std::endl;
+        Log(Debug::Error) << error.str();
         cleanup (true);
 
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
@@ -283,7 +285,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         // Ensure we have written the number of records that was estimated
         if (writer.getRecordCount() != recordCount+1) // 1 extra for TES3 record
-            std::cerr << "Warning: number of written savegame records does not match. Estimated: " << recordCount+1 << ", written: " << writer.getRecordCount() << std::endl;
+            Log(Debug::Warning) << "Warning: number of written savegame records does not match. Estimated: " << recordCount+1 << ", written: " << writer.getRecordCount();
 
         writer.close();
 
@@ -305,7 +307,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         std::stringstream error;
         error << "Failed to save game: " << e.what();
 
-        std::cerr << error.str() << std::endl;
+        Log(Debug::Error) << error.str();
 
         std::vector<std::string> buttons;
         buttons.push_back("#{sOk}");
@@ -483,7 +485,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 default:
 
                     // ignore invalid records
-                    std::cerr << "Warning: Ignoring unknown record: " << n.toString() << std::endl;
+                    Log(Debug::Warning) << "Warning: Ignoring unknown record: " << n.toString();
                     reader.skipRecord();
             }
             int progressPercent = static_cast<int>(float(reader.getFileOffset())/total*100);
@@ -549,7 +551,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         std::stringstream error;
         error << "Failed to load saved game: " << e.what();
 
-        std::cerr << error.str() << std::endl;
+        Log(Debug::Error) << error.str();
         cleanup (true);
 
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
@@ -625,7 +627,7 @@ bool MWState::StateManager::verifyProfile(const ESM::SavedGame& profile) const
         if (std::find(selectedContentFiles.begin(), selectedContentFiles.end(), *it)
                 == selectedContentFiles.end())
         {
-            std::cerr << "Warning: Savegame dependency " << *it << " is missing." << std::endl;
+            Log(Debug::Warning) << "Warning: Savegame dependency " << *it << " is missing.";
             notFound = true;
         }
     }
@@ -653,7 +655,7 @@ void MWState::StateManager::writeScreenshot(std::vector<char> &imageData) const
     osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
     if (!readerwriter)
     {
-        std::cerr << "Error: Unable to write screenshot, can't find a jpg ReaderWriter" << std::endl;
+        Log(Debug::Error) << "Error: Unable to write screenshot, can't find a jpg ReaderWriter";
         return;
     }
 
@@ -661,7 +663,7 @@ void MWState::StateManager::writeScreenshot(std::vector<char> &imageData) const
     osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*screenshot, ostream);
     if (!result.success())
     {
-        std::cerr << "Error: Unable to write screenshot: " << result.message() << " code " << result.status() << std::endl;
+        Log(Debug::Error) << "Error: Unable to write screenshot: " << result.message() << " code " << result.status();
         return;
     }
 

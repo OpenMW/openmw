@@ -22,6 +22,8 @@
 
 #include <osgViewer/Viewer>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -709,7 +711,7 @@ namespace MWRender
 
             if (!found)
             {
-                std::cerr << "Wrong screenshot type: " << settingArgs[0] << "." << std::endl;
+                Log(Debug::Warning) << "Wrong screenshot type: " << settingArgs[0] << ".";
                 return false;
             }
         }
@@ -728,7 +730,7 @@ namespace MWRender
 
         if (mCamera->isVanityOrPreviewModeEnabled())
         {
-            std::cerr << "Spherical screenshots are not allowed in preview mode." << std::endl;
+            Log(Debug::Warning) << "Spherical screenshots are not allowed in preview mode.";
             return false;
         }
 

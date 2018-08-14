@@ -1,7 +1,6 @@
 #include "cellpreloader.hpp"
 
-#include <iostream>
-
+#include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/bulletshapemanager.hpp>
@@ -229,12 +228,12 @@ namespace MWWorld
     {
         if (!mWorkQueue)
         {
-            std::cerr << "Error: can't preload, no work queue set " << std::endl;
+            Log(Debug::Error) << "Error: can't preload, no work queue set";
             return;
         }
         if (cell->getState() == CellStore::State_Unloaded)
         {
-            std::cerr << "Error: can't preload objects for unloaded cell" << std::endl;
+            Log(Debug::Error) << "Error: can't preload objects for unloaded cell";
             return;
         }
 

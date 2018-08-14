@@ -1,6 +1,6 @@
 #include "spellmodel.hpp"
 
-#include <iostream>
+#include <components/debug/debuglog.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -94,7 +94,7 @@ namespace MWGui
             const ESM::Enchantment* enchant = esmStore.get<ESM::Enchantment>().search(enchantId);
             if (!enchant)
             {
-                std::cerr << "Warning: Can't find enchantment '" << enchantId << "' on item " << item.getCellRef().getRefId() << std::endl;
+                Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantId << "' on item " << item.getCellRef().getRefId();
                 continue;
             }
 

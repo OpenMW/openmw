@@ -1,10 +1,8 @@
-#include <iostream>
-
 #include "dialogueextensions.hpp"
 
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
@@ -139,8 +137,8 @@ namespace MWScript
                     if (!ptr.getClass().isActor())
                     {
                         const std::string error = "Warning: \"forcegreeting\" command works only for actors.";
-                        runtime.getContext().report (error);
-                        std::cerr << error << std::endl;
+                        runtime.getContext().report(error);
+                        Log(Debug::Warning) << error;
                         return;
                     }
 

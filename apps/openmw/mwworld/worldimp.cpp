@@ -3,6 +3,8 @@
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/cellid.hpp>
@@ -1794,7 +1796,7 @@ namespace MWWorld
         }
         catch (std::exception& e)
         {
-            std::cerr << "Error updating window manager: " << e.what() << std::endl;
+            Log(Debug::Error) << "Error updating window manager: " << e.what();
         }
     }
 
@@ -3075,7 +3077,7 @@ namespace MWWorld
 
         if ( closestMarker.isEmpty() )
         {
-            std::cerr << "Failed to teleport: no closest marker found" << std::endl;
+            Log(Debug::Warning) << "Failed to teleport: no closest marker found";
             return;
         }
 
@@ -3250,19 +3252,19 @@ namespace MWWorld
         MWWorld::ConstPtr prisonMarker = getClosestMarker( ptr, "prisonmarker" );
         if ( prisonMarker.isEmpty() )
         {
-            std::cerr << "Failed to confiscate items: no closest prison marker found." << std::endl;
+            Log(Debug::Warning) << "Failed to confiscate items: no closest prison marker found.";
             return;
         }
         std::string prisonName = prisonMarker.getCellRef().getDestCell();
         if ( prisonName.empty() )
         {
-            std::cerr << "Failed to confiscate items: prison marker not linked to prison interior" << std::endl;
+            Log(Debug::Warning) << "Failed to confiscate items: prison marker not linked to prison interior";
             return;
         }
         MWWorld::CellStore *prison = getInterior( prisonName );
         if ( !prison )
         {
-            std::cerr << "Failed to confiscate items: failed to load cell " << prisonName << std::endl;
+            Log(Debug::Warning) << "Failed to confiscate items: failed to load cell " << prisonName;
             return;
         }
 
@@ -3272,7 +3274,7 @@ namespace MWWorld
             MWBase::Environment::get().getMechanicsManager()->confiscateStolenItems(ptr, closestChest);
         }
         else
-            std::cerr << "Failed to confiscate items: no stolen_goods container found" << std::endl;
+           Log(Debug::Warning) << "Failed to confiscate items: no stolen_goods container found";
     }
 
     void World::goToJail()

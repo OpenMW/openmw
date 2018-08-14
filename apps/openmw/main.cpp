@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/escape.hpp>
@@ -202,8 +200,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     StringsVector content = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
     if (content.empty())
     {
-      std::cout << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting..." << std::endl;
-      return false;
+        Log(Debug::Error) << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting...";
+        return false;
     }
 
     StringsVector::const_iterator it(content.begin());
@@ -217,7 +215,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCell(variables["start"].as<Files::EscapeHashString>().toStdString());
     engine.setSkipMenu (variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
     if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
-        std::cerr << "Warning: new-game used without skip-menu -> ignoring it" << std::endl;
+        Log(Debug::Warning) << "Warning: new-game used without skip-menu -> ignoring it";
 
     // scripts
     engine.setCompileAll(variables["script-all"].as<bool>());

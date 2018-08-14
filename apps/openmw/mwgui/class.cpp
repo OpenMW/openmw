@@ -12,6 +12,8 @@
 
 #include "../mwworld/esmstore.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include "tooltips.hpp"
 
 namespace
@@ -924,7 +926,7 @@ namespace MWGui
         std::string classImage = std::string("textures\\levelup\\") + classId + ".dds";
         if (!MWBase::Environment::get().getWindowManager()->textureExists(classImage))
         {
-            std::cout << "No class image for " << classId << ", falling back to default" << std::endl;
+            Log(Debug::Warning) << "No class image for " << classId << ", falling back to default";
             classImage = "textures\\levelup\\warrior.dds";
         }
         imageBox->setImageTexture(classImage);

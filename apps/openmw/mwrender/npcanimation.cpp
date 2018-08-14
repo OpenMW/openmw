@@ -7,6 +7,8 @@
 #include <osgUtil/RenderBin>
 #include <osgUtil/CullVisitor>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/misc/rng.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
@@ -435,7 +437,7 @@ void NpcAnimation::updateNpcBase()
             if (bp)
                 mHeadModel = "meshes\\" + bp->mModel;
             else
-                std::cerr << "Warning: Failed to load body part '" << mNpc->mHead << "'" << std::endl;
+                Log(Debug::Warning) << "Warning: Failed to load body part '" << mNpc->mHead << "'";
         }
 
         mHairModel = "";
@@ -445,7 +447,7 @@ void NpcAnimation::updateNpcBase()
             if (bp)
                 mHairModel = "meshes\\" + bp->mModel;
             else
-                std::cerr << "Warning: Failed to load body part '" << mNpc->mHair << "'" << std::endl;
+                Log(Debug::Warning) << "Warning: Failed to load body part '" << mNpc->mHair << "'";
         }
     }
 
@@ -758,7 +760,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     }
     catch (std::exception& e)
     {
-        std::cerr << "Error adding NPC part: " << e.what() << std::endl;
+        Log(Debug::Error) << "Error adding NPC part: " << e.what();
         return false;
     }
 
@@ -845,7 +847,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                     bodypart = NULL;
             }
             else if (!bodypart)
-                std::cerr << "Warning: Failed to find body part '" << part->mFemale << "'" << std::endl;
+                Log(Debug::Warning) << "Warning: Failed to find body part '" << part->mFemale << "'";
         }
         if(!bodypart && !part->mMale.empty())
         {
@@ -860,7 +862,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                     bodypart = NULL;
             }
             else if (!bodypart)
-                std::cerr << "Warning: Failed to find body part '" << part->mMale << "'" << std::endl;
+                Log(Debug::Warning) << "Warning: Failed to find body part '" << part->mMale << "'";
         }
 
         if(bodypart)

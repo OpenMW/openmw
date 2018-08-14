@@ -1,10 +1,9 @@
 #include "aiwander.hpp"
 
 #include <cfloat>
-#include <iostream>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
-
 #include <components/esm/aisequence.hpp>
 
 #include "../mwbase/world.hpp"
@@ -23,8 +22,6 @@
 #include "movement.hpp"
 #include "coordinateconverter.hpp"
 #include "actorutil.hpp"
-
-
 
 namespace MWMechanics
 {
@@ -677,7 +674,7 @@ namespace MWMechanics
         }
         else
         {
-            std::cerr<< "Error: Attempted to play out of range idle animation \""<<idleSelect<<"\" for " << actor.getCellRef().getRefId() << std::endl;
+            Log(Debug::Verbose) << "Attempted to play out of range idle animation \"" << idleSelect << "\" for " << actor.getCellRef().getRefId();
             return false;
         }
     }
