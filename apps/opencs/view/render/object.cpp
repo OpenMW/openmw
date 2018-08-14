@@ -1,7 +1,6 @@
 #include "object.hpp"
 
 #include <stdexcept>
-#include <iostream>
 
 #include <osg/Depth>
 #include <osg/Group>
@@ -24,6 +23,7 @@
 #include "../../model/world/cellcoordinates.hpp"
 #include "../../model/prefs/state.hpp"
 
+#include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/lightmanager.hpp>
@@ -133,7 +133,7 @@ void CSVRender::Object::update()
         catch (std::exception& e)
         {
             // TODO: use error marker mesh
-            std::cerr << e.what() << std::endl;
+            Log(Debug::Error) << e.what();
         }
     }
 

@@ -133,7 +133,7 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
     if (boost::filesystem::is_regular_file(cfgFile))
     {
         if (!mSilent)
-            Log(Debug::Info) << "Loading config file: " << cfgFile.string() << "... ";
+            Log(Debug::Info) << "Loading config file: " << cfgFile.string();
 
         boost::filesystem::ifstream configFileStreamUnfiltered(cfgFile);
         boost::iostreams::filtering_istream configFileStream;
@@ -144,14 +144,13 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
             boost::program_options::store(boost::program_options::parse_config_file(
                 configFileStream, description, true), variables);
 
-            if (!mSilent)
-                Log(Debug::Info) << "done.";
             return true;
         }
         else
         {
             if (!mSilent)
-                Log(Debug::Info) << "failed.";
+                Log(Debug::Error) << "Loading failed.";
+
             return false;
         }
     }

@@ -1,7 +1,6 @@
 #include "editor.hpp"
 
 #include <exception>
-#include <iostream>
 #include <string>
 
 #include <QApplication>
@@ -31,7 +30,7 @@ class Application : public QApplication
             }
             catch (const std::exception& exception)
             {
-                std::cerr << "An exception has been caught: " << exception.what() << std::endl;
+                Log(Debug::Error) << "An exception has been caught: " << exception.what();
             }
 
             return false;
