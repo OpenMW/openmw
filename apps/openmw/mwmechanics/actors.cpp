@@ -403,7 +403,7 @@ namespace MWMechanics
         std::set<MWWorld::Ptr> playerAllies;
         getActorsSidingWith(MWMechanics::getPlayer(), playerAllies, cachedAllies);
 
-        bool isPlayerFollowerOrEscorter = std::find(playerAllies.begin(), playerAllies.end(), actor1) != playerAllies.end();
+        bool isPlayerFollowerOrEscorter = playerAllies.find(actor1) != playerAllies.end();
 
         // If actor2 and at least one actor2 are in combat with actor1, actor1 and its allies start combat with them
         // Doesn't apply for player followers/escorters        
@@ -457,7 +457,7 @@ namespace MWMechanics
         // Do aggression check if actor2 is the player or a player follower or escorter
         if (!aggressive)
         {
-            if (againstPlayer || std::find(playerAllies.begin(), playerAllies.end(), actor2) != playerAllies.end())
+            if (againstPlayer || playerAllies.find(actor2) != playerAllies.end())
             {
                 // Player followers and escorters with high fight should not initiate combat with the player or with
                 // other player followers or escorters
@@ -1928,13 +1928,13 @@ namespace MWMechanics
 
         std::set<MWWorld::Ptr> followers;
         getActorsFollowing(actor, followers);
-        for(auto neighbor = neighbors.begin(); neighbor != neighbors.end(); ++neighbor)
+        for (auto neighbor = neighbors.begin(); neighbor != neighbors.end(); ++neighbor)
         {
             const CreatureStats &stats = neighbor->getClass().getCreatureStats(*neighbor);
             if (stats.isDead() || *neighbor == actor || neighbor->getClass().isPureWaterCreature(*neighbor))
                 continue;
 
-            const bool isFollower = std::find(followers.begin(), followers.end(), *neighbor) != followers.end();
+            const bool isFollower = followers.find(*neighbor) != followers.end();
 
             if (stats.getAiSequence().isInCombat(actor) || (MWBase::Environment::get().getMechanicsManager()->isAggressive(*neighbor, actor) && !isFollower))
                 list.push_back(*neighbor);
