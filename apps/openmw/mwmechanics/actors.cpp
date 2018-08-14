@@ -1777,38 +1777,35 @@ namespace MWMechanics
     std::list<MWWorld::Ptr> Actors::getActorsSidingWith(const MWWorld::Ptr& actor)
     {
         std::list<MWWorld::Ptr> list;
-        for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+        for(PtrActorMap::iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
         {
-            const MWWorld::Class &cls = iter->first.getClass();
-            const CreatureStats &stats = cls.getCreatureStats(iter->first);
+            const MWWorld::Ptr &iteratedActor = iter->first;
+            if (iteratedActor == getPlayer())
+                continue;
+
+            const CreatureStats &stats = iteratedActor.getClass().getCreatureStats(iteratedActor);
             if (stats.isDead())
                 continue;
 
-            // An actor counts as siding with this actor if Follow or Escort is the current AI package, or there are only Combat packages before the Follow/Escort package
-            for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
-            {
-                if ((*it)->sideWithTarget() && (*it)->getTarget() == actor)
-                {
-                    list.push_back(iter->first);
-                    break;
-                }
-                else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
-                    break;
-            }
+            // An actor counts as siding with this actor if Follow or Escort is the current AI package, or there are only Combat and Wander packages before the Follow/Escort package
             // Actors that are targeted by this actor's Follow or Escort packages also side with them
-            if (actor != getPlayer())
+            for (auto package = stats.getAiSequence().begin(); package != stats.getAiSequence().end(); ++package)
             {
-                const CreatureStats &stats2 = actor.getClass().getCreatureStats(actor);
-                for (std::list<MWMechanics::AiPackage*>::const_iterator it2 = stats2.getAiSequence().begin(); it2 != stats2.getAiSequence().end(); ++it2)
+                const MWWorld::Ptr &target = (*package)->getTarget();
+                if ((*package)->sideWithTarget() && !target.isEmpty())
                 {
-                    if ((*it2)->sideWithTarget() && !(*it2)->getTarget().isEmpty())
+                    if (iteratedActor == actor)
                     {
-                        list.push_back((*it2)->getTarget());
-                        break;
+                        list.push_back(target);
                     }
-                    else if ((*it2)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
-                        break;
+                    else if (target == actor)
+                    {
+                        list.push_back(iteratedActor);
+                    }
+                    break;
                 }
+                else if ((*package)->getTypeId() != AiPackage::TypeIdCombat && (*package)->getTypeId() != AiPackage::TypeIdWander)
+                    break;
             }
         }
         return list;
@@ -1819,17 +1816,21 @@ namespace MWMechanics
         std::list<MWWorld::Ptr> list;
         for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
         {
-            const MWWorld::Class &cls = iter->first.getClass();
-            CreatureStats &stats = cls.getCreatureStats(iter->first);
+            const MWWorld::Ptr &iteratedActor = iter->first;
+            if (iteratedActor == getPlayer())
+                continue;
+
+            const CreatureStats &stats = iteratedActor.getClass().getCreatureStats(iteratedActor);
             if (stats.isDead())
                 continue;
 
-            // An actor counts as following if AiFollow is the current AiPackage, or there are only Combat packages before the AiFollow package
-            for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
+            // An actor counts as following if AiFollow is the current AiPackage, 
+            // or there are only Combat and Wander packages before the AiFollow package
+            for (auto package = stats.getAiSequence().begin(); package != stats.getAiSequence().end(); ++package)
             {
-                if ((*it)->followTargetThroughDoors() && (*it)->getTarget() == actor)
-                    list.push_back(iter->first);
-                else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
+                if ((*package)->followTargetThroughDoors() && (*package)->getTarget() == actor)
+                    list.push_back(iteratedActor);
+                else if ((*package)->getTypeId() != AiPackage::TypeIdCombat && (*package)->getTypeId() != AiPackage::TypeIdWander)
                     break;
             }
         }
@@ -1878,24 +1879,24 @@ namespace MWMechanics
         std::list<int> list;
         for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
         {
-            const MWWorld::Class &cls = iter->first.getClass();
-            CreatureStats &stats = cls.getCreatureStats(iter->first);
+            const MWWorld::Ptr &iteratedActor = iter->first;
+            if (iteratedActor == getPlayer())
+                continue;
+
+            const CreatureStats &stats = iteratedActor.getClass().getCreatureStats(iteratedActor);
             if (stats.isDead())
                 continue;
 
-            // An actor counts as following if AiFollow is the current AiPackage, or there are only Combat packages before the AiFollow package
-            for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
+            // An actor counts as following if AiFollow is the current AiPackage,
+            // or there are only Combat and Wander packages before the AiFollow package
+            for (auto package = stats.getAiSequence().begin(); package != stats.getAiSequence().end(); ++package)
             {
-                if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
+                if ((*package)->followTargetThroughDoors() && (*package)->getTarget() == actor)
                 {
-                    MWWorld::Ptr followTarget = (*it)->getTarget();
-                    if (followTarget.isEmpty())
-                        continue;
-                    if (followTarget == actor)
-                        list.push_back(static_cast<MWMechanics::AiFollow*>(*it)->getFollowIndex());
+                    list.push_back(static_cast<AiFollow*>(*package)->getFollowIndex());
                     break;
                 }
-                else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
+                else if ((*package)->getTypeId() != AiPackage::TypeIdCombat && (*package)->getTypeId() != AiPackage::TypeIdWander)
                     break;
             }
         }
@@ -1907,14 +1908,14 @@ namespace MWMechanics
         std::vector<MWWorld::Ptr> neighbors;
         osg::Vec3f position (actor.getRefData().getPosition().asVec3());
         getObjectsInRange(position, aiProcessingDistance, neighbors);
-        for(std::vector<MWWorld::Ptr>::const_iterator iter(neighbors.begin());iter != neighbors.end();++iter)
+        for(auto neighbor = neighbors.begin(); neighbor != neighbors.end(); ++neighbor)
         {
-            const MWWorld::Class &cls = iter->getClass();
-            const CreatureStats &stats = cls.getCreatureStats(*iter);
-            if (stats.isDead() || *iter == actor)
+            const CreatureStats &stats = neighbor->getClass().getCreatureStats(*neighbor);
+            if (stats.isDead() || *neighbor == actor)
                 continue;
+
             if (stats.getAiSequence().isInCombat(actor))
-                list.push_front(*iter);
+                list.push_front(*neighbor);
         }
         return list;
     }
@@ -1927,14 +1928,16 @@ namespace MWMechanics
         getObjectsInRange(position, aiProcessingDistance, neighbors);
 
         std::list<MWWorld::Ptr> followers = getActorsFollowing(actor);
-        for(std::vector<MWWorld::Ptr>::const_iterator iter(neighbors.begin());iter != neighbors.end();++iter)
+        for(auto neighbor = neighbors.begin(); neighbor != neighbors.end(); ++neighbor)
         {
-            const CreatureStats &stats = iter->getClass().getCreatureStats(*iter);
-            if (stats.isDead() || *iter == actor || iter->getClass().isPureWaterCreature(*iter))
+            const CreatureStats &stats = neighbor->getClass().getCreatureStats(*neighbor);
+            if (stats.isDead() || *neighbor == actor || neighbor->getClass().isPureWaterCreature(*neighbor))
                 continue;
-            const bool isFollower = std::find(followers.begin(), followers.end(), *iter) != followers.end();
-            if (stats.getAiSequence().isInCombat(actor) || (MWBase::Environment::get().getMechanicsManager()->isAggressive(*iter, actor) && !isFollower))
-                list.push_back(*iter);
+
+            const bool isFollower = std::find(followers.begin(), followers.end(), *neighbor) != followers.end();
+
+            if (stats.getAiSequence().isInCombat(actor) || (MWBase::Environment::get().getMechanicsManager()->isAggressive(*neighbor, actor) && !isFollower))
+                list.push_back(*neighbor);
         }
         return list;
     }
