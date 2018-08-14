@@ -55,6 +55,14 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
     std::streambuf* cout_rdbuf = std::cout.rdbuf ();
     std::streambuf* cerr_rdbuf = std::cerr.rdbuf ();
 
+#if !(defined(_WIN32) && defined(_DEBUG))
+    boost::iostreams::stream_buffer<Debug::Tee> coutsb;
+    boost::iostreams::stream_buffer<Debug::Tee> cerrsb;
+#endif
+
+    const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
+    boost::filesystem::ofstream logfile;
+
     int ret = 0;
     try
     {
@@ -67,12 +75,8 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
         std::cerr.rdbuf (&sb);
 #else
         // Redirect cout and cerr to the log file
-        const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
-        boost::filesystem::ofstream logfile;
         logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / logName));
 
-        boost::iostreams::stream_buffer<Debug::Tee> coutsb;
-        boost::iostreams::stream_buffer<Debug::Tee> cerrsb;
         std::ostream oldcout(cout_rdbuf);
         std::ostream oldcerr(cerr_rdbuf);
         coutsb.open (Debug::Tee(logfile, oldcout));
@@ -90,7 +94,7 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
 #endif
             SDL_ShowSimpleMessageBox(0, (appName + ": Fatal error").c_str(), e.what(), NULL);
 
-        Log(Debug::Error) << "ERROR: " << e.what();
+        Log(Debug::Error) << "Error: " << e.what();
 
         ret = 1;
     }
