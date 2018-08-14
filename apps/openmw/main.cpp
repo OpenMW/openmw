@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include <components/version/version.hpp>
-#include <components/crashcatcher/crashcatcher.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/escape.hpp>
 #include <components/fallback/validate.hpp>

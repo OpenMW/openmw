@@ -1,5 +1,7 @@
 #include "debugging.hpp"
 
+#include <components/crashcatcher/crashcatcher.hpp>
+
 namespace Debug
 {
     std::streamsize DebugOutputBase::write(const char *str, std::streamsize size)
@@ -55,10 +57,20 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
     std::streambuf* cout_rdbuf = std::cout.rdbuf ();
     std::streambuf* cerr_rdbuf = std::cerr.rdbuf ();
 
+#if !(defined(_WIN32) && defined(_DEBUG))
+    boost::iostreams::stream_buffer<Debug::Tee> coutsb;
+    boost::iostreams::stream_buffer<Debug::Tee> cerrsb;
+#endif
+
+    const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
+    const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
+    boost::filesystem::ofstream logfile;
+
     int ret = 0;
     try
     {
         Files::ConfigurationManager cfgMgr;
+
 #if defined(_WIN32) && defined(_DEBUG)
         // Redirect cout and cerr to VS debug output when running in debug mode
         boost::iostreams::stream_buffer<Debug::DebugOutput> sb;
@@ -67,12 +79,8 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
         std::cerr.rdbuf (&sb);
 #else
         // Redirect cout and cerr to the log file
-        const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
-        boost::filesystem::ofstream logfile;
         logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / logName));
 
-        boost::iostreams::stream_buffer<Debug::Tee> coutsb;
-        boost::iostreams::stream_buffer<Debug::Tee> cerrsb;
         std::ostream oldcout(cout_rdbuf);
         std::ostream oldcerr(cerr_rdbuf);
         coutsb.open (Debug::Tee(logfile, oldcout));
@@ -81,6 +89,11 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
         std::cout.rdbuf (&coutsb);
         std::cerr.rdbuf (&cerrsb);
 #endif
+
+        // install the crash handler as soon as possible. note that the log path
+        // does not depend on config being read.
+        crashCatcherInstall(argc, argv, (cfgMgr.getLogPath() / crashLogName).string());
+
         ret = innerApplication(argc, argv);
     }
     catch (std::exception& e)
@@ -90,7 +103,7 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
 #endif
             SDL_ShowSimpleMessageBox(0, (appName + ": Fatal error").c_str(), e.what(), NULL);
 
-        Log(Debug::Error) << "ERROR: " << e.what();
+        Log(Debug::Error) << "Error: " << e.what();
 
         ret = 1;
     }
