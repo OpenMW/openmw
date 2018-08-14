@@ -236,7 +236,7 @@ a negative number indicating that he will restock again to maintain that level.
 However, it's an attractive item, so he will probably wear it rather than sell it.
 So set his stock level too high for him to wear them all (3 works, 2 might do).
 
-Another possibilty, again in Seyda Neen making it easy to access, would be for
+Another possibility, again in Seyda Neen making it easy to access, would be for
 Fargoth to give it to the player in exchange for his healing ring.
 
 .. figure:: https://gitlab.com/OpenMW/openmw-docs/raw/master/docs/source/manuals/openmw-cs/_static/images/chapter-1/Ring_to_Fargoth_1.png
@@ -360,7 +360,7 @@ the base game.
 "Modified" status will cover items from the base game which have been modified in this addon.
 
 Click on the top of the column to toggle between ascending and descending order - thus between "Added"
-and "Modified" at the top. Or put your desired modified status into a filter then sort alpabetically
+and "Modified" at the top. Or put your desired modified status into a filter then sort alphabetically
 on a different column.
 
 
