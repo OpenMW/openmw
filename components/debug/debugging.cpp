@@ -1,5 +1,7 @@
 #include "debugging.hpp"
 
+#include <components/crashcatcher/crashcatcher.hpp>
+
 namespace Debug
 {
     std::streamsize DebugOutputBase::write(const char *str, std::streamsize size)
@@ -61,12 +63,14 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
 #endif
 
     const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
+    const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
     boost::filesystem::ofstream logfile;
 
     int ret = 0;
     try
     {
         Files::ConfigurationManager cfgMgr;
+
 #if defined(_WIN32) && defined(_DEBUG)
         // Redirect cout and cerr to VS debug output when running in debug mode
         boost::iostreams::stream_buffer<Debug::DebugOutput> sb;
@@ -85,6 +89,11 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
         std::cout.rdbuf (&coutsb);
         std::cerr.rdbuf (&cerrsb);
 #endif
+
+        // install the crash handler as soon as possible. note that the log path
+        // does not depend on config being read.
+        crashCatcherInstall(argc, argv, (cfgMgr.getLogPath() / crashLogName).string());
+
         ret = innerApplication(argc, argv);
     }
     catch (std::exception& e)
