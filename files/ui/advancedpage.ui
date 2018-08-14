@@ -22,11 +22,7 @@
         <x>0</x>
         <y>0</y>
         <width>641</width>
-<<<<<<< HEAD
         <height>998</height>
-=======
-        <height>968</height>
->>>>>>> Fixed merge conflicts
        </rect>
       </property>
       <layout class="QVBoxLayout" name="scrollAreaVerticalLayout">
@@ -93,7 +89,6 @@
             </property>
             <property name="text">
              <string>Enchanted weapons are magical</string>
-<<<<<<< HEAD
              </property>
            </widget>
           </item>
@@ -104,12 +99,19 @@
             </property>
             <property name="text">
              <string>Barter disposition change is permanent</string>
-           <widget class="QCheckBox" name="strengthInfluencesHandToHand">
-=======
             </property>
            </widget>
           </item>
->>>>>>> Fixed merge conflicts
+          <item>
+           <widget class="QCheckBox" name="strengthInfluencesHandToHand">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Uses the MCP formula (damage * (strength / 40)) to factor the Strength attribute into hand-to-hand combat.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+           <string>Factor strength into hand-to-hand combat</string>
+           </property>
+           </widget>
+          </item>
           <item alignment="Qt::AlignLeft">
            <widget class="QWidget" name="unarmedFactorsStrengthGroup" native="true">
             <property name="toolTip">
