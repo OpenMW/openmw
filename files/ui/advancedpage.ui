@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>AdvancedPage</class>
  <widget class="QWidget" name="AdvancedPage">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>671</width>
-    <height>373</height>
-   </rect>
-  </property>
   <layout class="QVBoxLayout" name="pageVerticalLayout">
    <item>
     <widget class="QScrollArea" name="scrollArea">
@@ -17,14 +9,6 @@
       <bool>true</bool>
      </property>
      <widget class="QWidget" name="scrollAreaWidgetContents">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>641</width>
-        <height>998</height>
-       </rect>
-      </property>
       <layout class="QVBoxLayout" name="scrollAreaVerticalLayout">
        <item>
         <widget class="QGroupBox" name="gameGroup">
@@ -100,16 +84,6 @@
             <property name="text">
              <string>Barter disposition change is permanent</string>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="strengthInfluencesHandToHand">
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Uses the MCP formula (damage * (strength / 40)) to factor the Strength attribute into hand-to-hand combat.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="text">
-           <string>Factor strength into hand-to-hand combat</string>
-           </property>
            </widget>
           </item>
           <item alignment="Qt::AlignLeft">
