@@ -411,8 +411,8 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
     if(force || movement != mMovementState)
     {
         mMovementState = movement;
-
-        if (movement != CharState_None)
+        // Turning animations should not interrupt idle ones
+        if (movement != CharState_None && !isTurning())
             mIdleState = CharState_None;
 
         std::string movementAnimName;
