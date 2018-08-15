@@ -112,6 +112,7 @@
     Feature #4548: Weapon priority: use the actual chance to hit the target instead of weapon skill
     Feature #4549: Weapon priority: use the actual damage in weapon rating calculations
     Feature #4550: Weapon priority: make ranged weapon bonus more sensible
+    Feature #4579: Add option for applying Strength into hand to hand damage
     Feature #4581: Use proper logging system
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test
