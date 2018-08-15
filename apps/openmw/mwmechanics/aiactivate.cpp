@@ -42,7 +42,6 @@ namespace MWMechanics
         {
             // activate when reached
             MWBase::Environment::get().getWorld()->activate(target, actor);
-            return true;
         }
 
         return false;
