@@ -19,6 +19,7 @@
 #include "aicombataction.hpp"
 #include "aipursue.hpp"
 #include "actorutil.hpp"
+#include "../mwworld/class.hpp"
 
 namespace MWMechanics
 {
@@ -120,6 +121,20 @@ bool AiSequence::isInCombat() const
             return true;
     }
     return false;
+}
+
+bool AiSequence::isEngagedWithActor() const
+{
+    bool isFightingNpc = false;
+    for (std::list<AiPackage *>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+    {
+        if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+        {
+            MWWorld::Ptr target2 = (*it)->getTarget();
+            if (!target2.isEmpty() && target2.getClass().isNpc())
+                isFightingNpc = true;
+        }
+    }
 }
 
 bool AiSequence::hasPackage(int typeId) const

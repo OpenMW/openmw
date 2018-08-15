@@ -132,6 +132,8 @@ namespace MWMechanics
             /// @note No-op for non-player attackers
             virtual void actorKilled (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
 
+            virtual bool canCommitCrimeAgainst(const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
+
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             /// @param container The container the item is in; may be empty for an item in the world
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, const MWWorld::Ptr& container,
