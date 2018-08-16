@@ -1831,35 +1831,49 @@ struct ConvexHull
         }
     };
 
-    bool shouldBeDeleted(osg::Vec3d vertex, std::set<osg::Vec3d> &extremeVertices)
+    Vertices findInternalEdges(osg::Vec3d mainVertex, Vertices connectedVertices)
     {
-        // A vertex should be deleted if there is no route -Z-wards to an extreme vertex
-        // equivalent to all -Z-wards vertices being deletable.
-        if (extremeVertices.find(vertex) != extremeVertices.end())
-            return false;
-        for (Edge edge : _edges)
+        Vertices internalEdgeVertices;
+        for (auto vertex : connectedVertices)
         {
-            osg::Vec3d otherEnd;
-            if (edge.first == vertex)
-                otherEnd = edge.second;
-            else if (edge.second == vertex)
-                otherEnd = edge.first;
-            else
-                continue;
-
-            if (otherEnd.z() >= vertex.z())
-                continue;
-
-            if (!shouldBeDeleted(otherEnd, extremeVertices))
-                return false;
+            osg::Matrixd matrix;
+            osg::Vec3d dir = vertex - mainVertex;
+            matrix.makeLookAt(mainVertex, vertex, dir.z() == 0 ? osg::Vec3d(0, 0, 1) : osg::Vec3d(1, 0, 0));
+            Vertices testVertices;
+            for (auto testVertex : connectedVertices)
+            {
+                if (vertex != testVertex)
+                    testVertices.push_back(testVertex);
+            }
+            std::vector<double> bearings;
+            for (auto testVertex : testVertices)
+            {
+                osg::Vec3d transformedVertex = testVertex * matrix;
+                bearings.push_back(atan2(transformedVertex.y(), transformedVertex.x()));
+            }
+            std::sort(bearings.begin(), bearings.end());
+            bool keep = false;
+            for (auto itr = bearings.begin(); itr + 1 != bearings.end(); ++itr)
+            {
+                if (*itr + osg::PI < *(itr + 1))
+                {
+                    keep = true;
+                    break;
+                }
+            }
+            if (!keep && bearings[0] + osg::PI > bearings.back())
+                keep = true;
+            if (!keep)
+                internalEdgeVertices.push_back(vertex);
         }
-
-        return true;
+        return internalEdgeVertices;
     }
 
     void extendTowardsNegativeZ()
     {
         typedef std::set<osg::Vec3d> VertexSet;
+
+        double lowestPoint = DBL_MAX;
 
         // Collect the set of vertices
         VertexSet vertices;
@@ -1867,6 +1881,8 @@ struct ConvexHull
         {
             vertices.insert(edge.first);
             vertices.insert(edge.second);
+            lowestPoint = osg::minimum(lowestPoint, edge.first.z());
+            lowestPoint = osg::minimum(lowestPoint, edge.second.z());
         }
 
         if (vertices.size() == 0)
@@ -1884,70 +1900,76 @@ struct ConvexHull
         // Add edge loop to 'seal' the hull
         for (auto itr = extremeVertices.cbegin(); itr != extremeVertices.cend() - 1; ++itr)
             finalEdges.push_back(Edge(osg::Vec3d(itr->x(), itr->y(), -DBL_MAX), osg::Vec3d((itr + 1)->x(), (itr + 1)->y(), -DBL_MAX)));
-        // The convex hull algorithm we are using places a point at both ends of the vector, so we don't need to add the last edge separately.
-        // finalEdges.push_back(Edge(osg::Vec3d(extremeVertices.front().x(), extremeVertices.front().y(), -DBL_MAX), osg::Vec3d(extremeVertices.back().x(), extremeVertices.back().y(), -DBL_MAX)));
+        // The convex hull algorithm we are using sometimes places a point at both ends of the vector, so we don't always need to add the last edge separately.
+        if (extremeVertices.front() != extremeVertices.back())
+            finalEdges.push_back(Edge(osg::Vec3d(extremeVertices.front().x(), extremeVertices.front().y(), -DBL_MAX), osg::Vec3d(extremeVertices.back().x(), extremeVertices.back().y(), -DBL_MAX)));
 
-        // Collect the first layer of unneeded vertices and remove the edges connecting them to the rest of the mesh
-        VertexSet deletedVertices;
-        for (auto edgeItr = _edges.begin(); edgeItr != _edges.end(); /* nothing */ )
+        // Just in case using -DBL_MAX upsets some of the maths, we pretend we've only extended the volume by a little bit.
+        lowestPoint -= 1.0;
+        // Remove internal edges connected to extreme vertices
+        for (auto vertex : extremeVertices)
         {
-            if (extremeVerticesSet.find(edgeItr->first) != extremeVerticesSet.end())
+            Vertices connectedVertices;
+            for (Edge edge : _edges)
             {
-                if (extremeVerticesSet.find(edgeItr->second) == extremeVerticesSet.end())
+                if (edge.first == vertex)
+                    connectedVertices.push_back(edge.second);
+                else if (edge.second == vertex)
+                    connectedVertices.push_back(edge.first);
+            }
+            connectedVertices.push_back(osg::Vec3d(vertex.x(), vertex.y(), lowestPoint));
+
+            Vertices unwantedEdgeEnds = findInternalEdges(vertex, connectedVertices);
+            for (auto edgeEnd : unwantedEdgeEnds)
+            {
+                for (auto itr = _edges.begin(); itr != _edges.end(); ++itr)
                 {
-                    if (edgeItr->first.z() >= edgeItr->second.z())
+                    if (*itr == Edge(vertex, edgeEnd))
                     {
-                        // If we can travel along edges towards -Z and reach an extreme vertex, the current edge must be kept
-                        if (shouldBeDeleted(edgeItr->second, extremeVerticesSet))
-                        {
-                            deletedVertices.insert(edgeItr->second);
-                            edgeItr = _edges.erase(edgeItr);
-                            continue;
-                        }
+                        _edges.erase(itr);
+                        break;
+                    }
+                    else if (*itr == Edge(edgeEnd, vertex))
+                    {
+                        _edges.erase(itr);
+                        break;
                     }
                 }
             }
-            else if (extremeVerticesSet.find(edgeItr->second) != extremeVerticesSet.end())
-            {
-                if (edgeItr->second.z() >= edgeItr->first.z())
-                {
-                    if (shouldBeDeleted(edgeItr->first, extremeVerticesSet))
-                    {
-                        deletedVertices.insert(edgeItr->first);
-                        edgeItr = _edges.erase(edgeItr);
-                        continue;
-                    }
-                }
-            }
-            ++edgeItr;
         }
 
-        // Remove all edges connected to removed vertices
-        bool modifiedSomething = true;
-        while (modifiedSomething)
+        // Gather connected vertices
+        VertexSet unprocessedConnectedVertices(extremeVertices.begin(), extremeVertices.end());
+        VertexSet connectedVertices;
+        while (unprocessedConnectedVertices.size() > 0)
         {
-            modifiedSomething = false;
-            for (auto edgeItr = _edges.begin(); edgeItr != _edges.end(); /* nothing */)
+            osg::Vec3d vertex = *unprocessedConnectedVertices.begin();
+            unprocessedConnectedVertices.erase(unprocessedConnectedVertices.begin());
+            connectedVertices.insert(vertex);
+            for (Edge edge : _edges)
             {
-                if (deletedVertices.find(edgeItr->first) != deletedVertices.end())
-                {
-                    deletedVertices.insert(edgeItr->second);
-                    edgeItr = _edges.erase(edgeItr);
-                    modifiedSomething = true;
+                osg::Vec3d otherEnd;
+                if (edge.first == vertex)
+                    otherEnd = edge.second;
+                else if (edge.second == vertex)
+                    otherEnd - edge.first;
+                else
                     continue;
-                }
-                else if (deletedVertices.find(edgeItr->second) != deletedVertices.end())
-                {
-                    deletedVertices.insert(edgeItr->first);
-                    edgeItr = _edges.erase(edgeItr);
-                    modifiedSomething = true;
+
+                if (connectedVertices.count(otherEnd))
                     continue;
-                }
-                ++edgeItr;
+
+                unprocessedConnectedVertices.insert(otherEnd);
             }
         }
 
-        _edges.splice(_edges.end(), finalEdges);
+        for (Edge edge : _edges)
+        {
+            if (connectedVertices.count(edge.first) || connectedVertices.count(edge.second))
+                finalEdges.push_back(edge);
+        }
+
+        _edges = finalEdges;
     }
 
     void transform(const osg::Matrixd& m)
