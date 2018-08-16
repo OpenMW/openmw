@@ -1511,11 +1511,10 @@ namespace MWMechanics
             return; // TODO: implement animal rights
 
         const MWMechanics::NpcStats& victimStats = victim.getClass().getNpcStats(victim);
-        if (victimStats.getCrimeId() == -1)
-            return;
+        const MWWorld::Ptr &player = getPlayer();
+        bool canCommit = attacker == player && canCommitCrimeAgainst(attacker, victim);
 
         // For now we report only about crimes of player and player's followers
-        const MWWorld::Ptr &player = getPlayer();
         if (attacker != player)
         {
             std::set<MWWorld::Ptr> playerFollowers;
@@ -1523,6 +1522,9 @@ namespace MWMechanics
             if (playerFollowers.find(attacker) == playerFollowers.end())
                 return;
         }
+
+        if (!canCommit && victimStats.getCrimeId() == -1)
+            return;
 
         // Simple check for who attacked first: if the player attacked first, a crimeId should be set
         // Doesn't handle possible edge case where no one reported the assault, but in such a case,
