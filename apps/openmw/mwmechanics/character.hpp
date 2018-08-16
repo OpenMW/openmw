@@ -281,7 +281,7 @@ public:
 
     void forceStateUpdate();
     
-    bool isAttackPrepairing() const;
+    bool isAttackPreparing() const;
     bool isCastingSpell() const;
     bool isReadyToBlock() const;
     bool isKnockedDown() const;

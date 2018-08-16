@@ -1685,7 +1685,7 @@ bool CharacterController::updateWeaponState()
                 break;
             case UpperCharState_StartToMinAttack:
             {
-                // If actor is already stopped prepairing attack, do not play the "min attack -> max attack" part.
+                // If actor is already stopped preparing attack, do not play the "min attack -> max attack" part.
                 // Happens if the player did not hold the attack button.
                 // Note: if the "min attack"->"max attack" is a stub, "play" it anyway. Attack strength will be 1.
                 float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"min attack");
@@ -2507,7 +2507,7 @@ bool CharacterController::isRandomAttackAnimation(const std::string& group) cons
             group == "attack3" || group == "swimattack3");
 }
 
-bool CharacterController::isAttackPrepairing() const
+bool CharacterController::isAttackPreparing() const
 {
     return mUpperBodyState == UpperCharState_StartToMinAttack ||
             mUpperBodyState == UpperCharState_MinAttackToMaxAttack;
