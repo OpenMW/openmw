@@ -81,6 +81,7 @@
     Bug #4503: Cast and ExplodeSpell commands increase alteration skill
     Bug #4510: Division by zero in MWMechanics::CreatureStats::setAttribute
     Bug #4519: Knockdown does not discard movement in the 1st-person mode
+    Bug #4531: Movement does not reset idle animations
     Bug #4539: Paper Doll is affected by GUI scaling
     Bug #4545: Creatures flee from werewolves
     Bug #4551: Replace 0 sound range with default range separately
