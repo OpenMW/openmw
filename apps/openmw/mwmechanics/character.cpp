@@ -561,13 +561,21 @@ void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterStat
             }
         }
 
+        // There is no need to restart anim if the new and old anims are the same.
+        // Just update a number of loops.
+        float startPoint = 0;
+        if (!mCurrentIdle.empty() && mCurrentIdle == idleGroup)
+        {
+            mAnimation->getInfo(mCurrentIdle, &startPoint);
+        }
+
         if(!mCurrentIdle.empty())
             mAnimation->disable(mCurrentIdle);
 
         mCurrentIdle = idleGroup;
         if(!mCurrentIdle.empty())
             mAnimation->play(mCurrentIdle, idlePriority, MWRender::Animation::BlendMask_All, false,
-                             1.0f, "start", "stop", 0.0f, numLoops, true);
+                             1.0f, "start", "stop", startPoint, numLoops, true);
     }
 }
 
@@ -2091,12 +2099,13 @@ void CharacterController::update(float duration)
 
         if(mAnimQueue.empty() || inwater || sneak)
         {
-            // Note: turning animations should not interrupt idle ones
+            // Note: turning animations should not interrupt idle ones.
+            // Also movement should not stop idle animation for spellcasting stance.
             if (inwater)
                 idlestate = CharState_IdleSwim;
             else if (sneak && !inJump)
                 idlestate = CharState_IdleSneak;
-            else if (movestate != CharState_None && !isTurning())
+            else if (movestate != CharState_None && !isTurning() && mWeaponType != WeapType_Spell)
                 idlestate = CharState_None;
             else
                 idlestate = CharState_Idle;
