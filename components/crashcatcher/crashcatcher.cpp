@@ -14,7 +14,7 @@
 #include <stdbool.h>
 #include <sys/ptrace.h>
 
-#include <iostream>
+#include <components/debug/debuglog.hpp>
 
 #include <boost/filesystem/fstream.hpp>
 
@@ -185,7 +185,7 @@ static void gdb_info(pid_t pid)
             if (close(fd) == 0)
                 remove(respfile);
             else
-                std::cerr << "Warning: can not close and remove file '" << respfile << "': " << std::strerror(errno) << std::endl;
+                Log(Debug::Warning) << "Warning: can not close and remove file '" << respfile << "': " << std::strerror(errno);
         }
         printf("!!! Could not create gdb command file\n");
     }
@@ -517,8 +517,9 @@ void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath)
         int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
         if (crashCatcherInstallHandlers(argc, argv, 5, s, crashLogPath.c_str(), NULL) == -1)
         {
-            std::cerr << "Installing crash handler failed" << std::endl;
-        } else
-            std::cout << "Crash handler installed" << std::endl;
+            Log(Debug::Warning) << "Installing crash handler failed";
+        }
+        else
+            Log(Debug::Info) << "Crash handler installed";
     }
 }

@@ -1,6 +1,6 @@
 #include "loaddial.hpp"
 
-#include <iostream>
+#include <components/debug/debuglog.hpp>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
@@ -128,7 +128,7 @@ namespace ESM
             return;
         }
 
-        std::cerr << "Warning: Failed to insert info " << info.mId << std::endl;
+        Log(Debug::Warning) << "Warning: Failed to insert info " << info.mId;
     }
 
     void Dialogue::clearDeletedInfos()

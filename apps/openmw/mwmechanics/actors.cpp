@@ -8,7 +8,7 @@
 #include <components/esm/loadnpc.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -1729,7 +1729,7 @@ namespace MWMechanics
         }
         else
         {
-            std::cerr<< "Warning: Actors::playAnimationGroup:  Unable to find " << ptr.getCellRef().getRefId() << std::endl;
+            Log(Debug::Warning) << "Warning: Actors::playAnimationGroup: Unable to find " << ptr.getCellRef().getRefId();
             return false;
         }
     }

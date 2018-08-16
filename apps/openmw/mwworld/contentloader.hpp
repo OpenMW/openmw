@@ -2,10 +2,10 @@
 #define CONTENTLOADER_HPP
 
 #include <iosfwd>
-#include <iostream>
 #include <boost/filesystem/path.hpp>
 #include <MyGUI_TextIterator.h>
 
+#include <components/debug/debuglog.hpp>
 #include "components/loadinglistener/loadinglistener.hpp"
 
 namespace MWWorld
@@ -24,8 +24,8 @@ struct ContentLoader
 
     virtual void load(const boost::filesystem::path& filepath, int& index)
     {
-      std::cout << "Loading content file " << filepath.string() << std::endl;
-      mListener.setLabel(MyGUI::TextIterator::toTagsString(filepath.string()));
+        Log(Debug::Info) << "Loading content file " << filepath.string();
+        mListener.setLabel(MyGUI::TextIterator::toTagsString(filepath.string()));
     }
 
     protected:

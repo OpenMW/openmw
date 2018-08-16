@@ -1,8 +1,9 @@
 #include "riggeometry.hpp"
 
 #include <stdexcept>
-#include <iostream>
 #include <cstdlib>
+
+#include <components/debug/debuglog.hpp>
 
 #include "skeleton.hpp"
 #include "util.hpp"
@@ -96,13 +97,13 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
 
     if (!mSkeleton)
     {
-        std::cerr << "Error: A RigGeometry did not find its parent skeleton" << std::endl;
+        Log(Debug::Error) << "Error: A RigGeometry did not find its parent skeleton";
         return false;
     }
 
     if (!mInfluenceMap)
     {
-        std::cerr << "Error: No InfluenceMap set on RigGeometry" << std::endl;
+        Log(Debug::Error) << "Error: No InfluenceMap set on RigGeometry";
         return false;
     }
 
@@ -113,7 +114,7 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
         Bone* bone = mSkeleton->getBone(it->first);
         if (!bone)
         {
-            std::cerr << "Error: RigGeometry did not find bone " << it->first << std::endl;
+            Log(Debug::Error) << "Error: RigGeometry did not find bone " << it->first ;
             continue;
         }
 
@@ -166,7 +167,7 @@ void RigGeometry::cull(osg::NodeVisitor* nv)
 {
     if (!mSkeleton)
     {
-        std::cerr << "Error: RigGeometry rendering with no skeleton, should have been initialized by UpdateVisitor" << std::endl;
+        Log(Debug::Error) << "Error: RigGeometry rendering with no skeleton, should have been initialized by UpdateVisitor";
         // try to recover anyway, though rendering is likely to be incorrect.
         if (!initFromParentSkeleton(nv))
             return;

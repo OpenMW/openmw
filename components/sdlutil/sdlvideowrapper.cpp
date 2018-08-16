@@ -1,6 +1,6 @@
 #include "sdlvideowrapper.hpp"
 
-#include <iostream>
+#include <components/debug/debuglog.hpp>
 
 #include <osgViewer/Viewer>
 
@@ -65,7 +65,7 @@ namespace SDLUtil
             red[i] = green[i] = blue[i] = static_cast<Uint16>(value);
         }
         if (SDL_SetWindowGammaRamp(mWindow, red, green, blue) < 0)
-            std::cout << "Couldn't set gamma: " << SDL_GetError() << std::endl;
+            Log(Debug::Warning) << "Couldn't set gamma: " << SDL_GetError();
     }
 
     void VideoWrapper::setVideoMode(int width, int height, bool fullscreen, bool windowBorder)

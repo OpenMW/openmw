@@ -12,6 +12,8 @@
 #include <osgDB/ReadFile>
 #include <osg/Texture2D>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/myguiplatform/myguitexture.hpp>
 
 #include <components/misc/stringops.hpp>
@@ -438,14 +440,14 @@ namespace MWGui
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
         if (!readerwriter)
         {
-            std::cerr << "Error: Can't open savegame screenshot, no jpg readerwriter found" << std::endl;
+            Log(Debug::Error) << "Error: Can't open savegame screenshot, no jpg readerwriter found";
             return;
         }
 
         osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(instream);
         if (!result.success())
         {
-            std::cerr << "Error: Failed to read savegame screenshot: " << result.message() << " code " << result.status() << std::endl;
+            Log(Debug::Error) << "Error: Failed to read savegame screenshot: " << result.message() << " code " << result.status();
             return;
         }
 

@@ -10,9 +10,8 @@
 #include <MyGUI_TextBox.h>
 
 #include <components/misc/rng.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
-
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
 
@@ -94,7 +93,7 @@ namespace MWGui
             ++found;
         }
         if (mSplashScreens.empty())
-            std::cerr << "No splash screens found!" << std::endl;
+            Log(Debug::Warning) << "Warning: no splash screens found!";
     }
 
     void LoadingScreen::setLabel(const std::string &label, bool important)

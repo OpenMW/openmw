@@ -1,7 +1,6 @@
 #include "cells.hpp"
 
-#include <iostream>
-
+#include <components/debug/debuglog.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/defs.hpp>
@@ -350,7 +349,7 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, uint32_t type,
         catch (...)
         {
             // silently drop cells that don't exist anymore
-            std::cerr << "Warning: Dropping state for cell " << state.mId.mWorldspace << " (cell no longer exists)" << std::endl;
+            Log(Debug::Warning) << "Warning: Dropping state for cell " << state.mId.mWorldspace << " (cell no longer exists)";
             reader.skipRecord();
             return true;
         }

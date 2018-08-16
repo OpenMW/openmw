@@ -243,7 +243,7 @@ namespace NifOsg
                 callback->setFunction(std::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key)));
 
                 if (target.mKeyframeControllers.find(strdata->string) != target.mKeyframeControllers.end())
-                    std::cerr << "Warning: controller " << strdata->string << " present more than once in " << nif->getFilename() << ", ignoring later version" << std::endl;
+                    Log(Debug::Verbose) << "Controller " << strdata->string << " present more than once in " << nif->getFilename() << ", ignoring later version";
                 else
                     target.mKeyframeControllers[strdata->string] = callback;
             }
@@ -357,20 +357,20 @@ namespace NifOsg
         {
             if (nifNode->recType != Nif::RC_NiTextureEffect)
             {
-                std::cerr << "Unhandled effect " << nifNode->recName << " in " << mFilename << std::endl;
+                Log(Debug::Info) << "Unhandled effect " << nifNode->recName << " in " << mFilename;
                 return;
             }
 
             const Nif::NiTextureEffect* textureEffect = static_cast<const Nif::NiTextureEffect*>(nifNode);
             if (textureEffect->textureType != Nif::NiTextureEffect::Environment_Map)
             {
-                std::cerr << "Unhandled NiTextureEffect type " << textureEffect->textureType << " in " << mFilename << std::endl;
+                Log(Debug::Info) << "Unhandled NiTextureEffect type " << textureEffect->textureType << " in " << mFilename;
                 return;
             }
 
             if (textureEffect->texture.empty())
             {
-                std::cerr << "NiTextureEffect missing source texture in " << mFilename << std::endl;
+                Log(Debug::Info) << "NiTextureEffect missing source texture in " << mFilename;
                 return;
             }
 
@@ -387,7 +387,7 @@ namespace NifOsg
                 texGen->setMode(osg::TexGen::SPHERE_MAP);
                 break;
             default:
-                std::cerr << "Unhandled NiTextureEffect coordGenType " << textureEffect->coordGenType << " in " << mFilename << std::endl;
+                Log(Debug::Info) << "Unhandled NiTextureEffect coordGenType " << textureEffect->coordGenType << " in " << mFilename;
                 return;
             }
 
@@ -638,7 +638,7 @@ namespace NifOsg
                 else if(ctrl->recType == Nif::RC_NiGeomMorpherController)
                 {} // handled in handleTriShape
                 else
-                    std::cerr << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename << std::endl;
+                    Log(Debug::Info) << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename;
             }
         }
 
@@ -664,7 +664,7 @@ namespace NifOsg
                     handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), transformNode, animflags);
                 }
                 else
-                    std::cerr << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename << std::endl;
+                    Log(Debug::Info) << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename;
             }
         }
 
@@ -696,7 +696,7 @@ namespace NifOsg
                     composite->addController(osgctrl);
                 }
                 else
-                    std::cerr << "Unexpected material controller " << ctrl->recType << " in " << mFilename << std::endl;
+                    Log(Debug::Info) << "Unexpected material controller " << ctrl->recType << " in " << mFilename;
             }
         }
 
@@ -736,7 +736,7 @@ namespace NifOsg
                     composite->addController(callback);
                 }
                 else
-                    std::cerr << "Unexpected texture controller " << ctrl->recName << " in " << mFilename << std::endl;
+                    Log(Debug::Info) << "Unexpected texture controller " << ctrl->recName << " in " << mFilename;
             }
         }
 
@@ -769,7 +769,7 @@ namespace NifOsg
                     // unused
                 }
                 else
-                    std::cerr << "Unhandled particle modifier " << affectors->recName << " in " << mFilename << std::endl;
+                    Log(Debug::Info) << "Unhandled particle modifier " << affectors->recName << " in " << mFilename;
             }
             for (; !colliders.empty(); colliders = colliders->extra)
             {
@@ -784,7 +784,7 @@ namespace NifOsg
                     program->addOperator(new SphericalCollider(sphericalcollider));
                 }
                 else
-                    std::cerr << "Unhandled particle collider " << colliders->recName << " in " << mFilename << std::endl;
+                    Log(Debug::Info) << "Unhandled particle collider " << colliders->recName << " in " << mFilename;
             }
         }
 
@@ -881,11 +881,11 @@ namespace NifOsg
                 if(ctrl->recType == Nif::RC_NiParticleSystemController || ctrl->recType == Nif::RC_NiBSPArrayController)
                     partctrl = static_cast<Nif::NiParticleSystemController*>(ctrl.getPtr());
                 else
-                    std::cerr << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename << std::endl;
+                    Log(Debug::Info) << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename;
             }
             if (!partctrl)
             {
-                std::cerr << "No particle controller found in " << mFilename << std::endl;
+                Log(Debug::Info) << "No particle controller found in " << mFilename;
                 return;
             }
 
@@ -925,7 +925,7 @@ namespace NifOsg
                 rootNode->accept(find);
                 if (!find.mFound)
                 {
-                    std::cerr << "can't find emitter node, wrong node order? in " << mFilename << std::endl;
+                    Log(Debug::Info) << "can't find emitter node, wrong node order? in " << mFilename;
                     return;
                 }
                 osg::Group* emitterNode = find.mFound;
@@ -1121,7 +1121,7 @@ namespace NifOsg
             case 9: return osg::BlendFunc::ONE_MINUS_DST_ALPHA;
             case 10: return osg::BlendFunc::SRC_ALPHA_SATURATE;
             default:
-                std::cerr<< "Unexpected blend mode: "<< mode << " in " << mFilename << std::endl;
+                Log(Debug::Info) << "Unexpected blend mode: "<< mode << " in " << mFilename;
                 return osg::BlendFunc::SRC_ALPHA;
             }
         }
@@ -1139,7 +1139,7 @@ namespace NifOsg
             case 6: return osg::AlphaFunc::GEQUAL;
             case 7: return osg::AlphaFunc::NEVER;
             default:
-                std::cerr << "Unexpected blend mode: " << mode << " in " << mFilename << std::endl;
+                Log(Debug::Info) << "Unexpected blend mode: " << mode << " in " << mFilename;
                 return osg::AlphaFunc::LEQUAL;
             }
         }
@@ -1157,7 +1157,7 @@ namespace NifOsg
             case 6: return osg::Stencil::GEQUAL;
             case 7: return osg::Stencil::NEVER; // NifSkope says this is GL_ALWAYS, but in MW it's GL_NEVER
             default:
-                std::cerr << "Unexpected stencil function: " << func << " in " << mFilename << std::endl;
+                Log(Debug::Info) << "Unexpected stencil function: " << func << " in " << mFilename;
                 return osg::Stencil::NEVER;
             }
         }
@@ -1173,7 +1173,7 @@ namespace NifOsg
             case 4: return osg::Stencil::DECR;
             case 5: return osg::Stencil::INVERT;
             default:
-                std::cerr << "Unexpected stencil operation: " << op << " in " << mFilename << std::endl;
+                Log(Debug::Info) << "Unexpected stencil operation: " << op << " in " << mFilename;
                 return osg::Stencil::KEEP;
             }
         }
@@ -1192,7 +1192,7 @@ namespace NifOsg
                 pixelformat = GL_RGBA;
                 break;
             default:
-                std::cerr << "Unhandled internal pixel format " << pixelData->fmt << " in " << mFilename << std::endl;
+                Log(Debug::Info) << "Unhandled internal pixel format " << pixelData->fmt << " in " << mFilename;
                 return NULL;
             }
 
@@ -1210,7 +1210,7 @@ namespace NifOsg
                 size_t mipSize = mip.height * mip.width * pixelData->bpp / 8;
                 if (mipSize + mip.dataOffset > pixelData->data.size())
                 {
-                    std::cerr << "Warning: Internal texture's mipmap data out of bounds, ignoring texture" << std::endl;
+                    Log(Debug::Info) << "Internal texture's mipmap data out of bounds, ignoring texture";
                     return NULL;
                 }
 
@@ -1225,7 +1225,7 @@ namespace NifOsg
 
             if (width <= 0 || height <= 0)
             {
-                std::cerr << "Warning: Internal Texture Width and height must be non zero, ignoring texture" << std::endl;
+                Log(Debug::Info) << "Internal Texture Width and height must be non zero, ignoring texture";
                 return NULL;
             }
 
@@ -1267,12 +1267,12 @@ namespace NifOsg
                         {
                             // Not used by the vanilla engine. MCP (Morrowind Code Patch) adds an option to use Gloss maps:
                             // "- Gloss map fix. Morrowind removed gloss map entries from model files after loading them. This stops Morrowind from removing them."
-                            //std::cerr << "NiTexturingProperty::GlossTexture in " << mFilename << " not currently used." << std::endl;
+                            // Log(Debug::Info) << "NiTexturingProperty::GlossTexture in " << mFilename << " not currently used.";
                             continue;
                         }
                         default:
                         {
-                            std::cerr << "Warning: unhandled texture stage " << i << " in " << mFilename << std::endl;
+                            Log(Debug::Info) << "Unhandled texture stage " << i << " in " << mFilename;
                             continue;
                         }
                     }
@@ -1478,7 +1478,7 @@ namespace NifOsg
                 break;
             }
             default:
-                std::cerr << "Unhandled " << property->recName << " in " << mFilename << std::endl;
+                Log(Debug::Info) << "Unhandled " << property->recName << " in " << mFilename;
                 break;
             }
         }

@@ -3,9 +3,8 @@
 #include <osg/Transform>
 #include <osg/MatrixTransform>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
-
-#include <iostream>
 
 namespace SceneUtil
 {
@@ -183,7 +182,7 @@ void Bone::update(const osg::Matrixf* parentMatrixInSkeletonSpace)
 {
     if (!mNode)
     {
-        std::cerr << "Error: Bone without node " << std::endl;
+        Log(Debug::Error) << "Error: Bone without node";
         return;
     }
     if (parentMatrixInSkeletonSpace)

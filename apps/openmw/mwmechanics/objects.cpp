@@ -1,6 +1,6 @@
 #include "objects.hpp"
 
-#include <iostream>
+#include <components/debug/debuglog.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -88,7 +88,7 @@ bool Objects::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& gro
     }
     else
     {
-        std::cerr<< "Warning: Objects::playAnimationGroup:  Unable to find " << ptr.getCellRef().getRefId() << std::endl;
+        Log(Debug::Warning) << "Warning: Objects::playAnimationGroup: Unable to find " << ptr.getCellRef().getRefId();
         return false;
     }
 }

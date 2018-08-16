@@ -4,6 +4,7 @@
 
 #include <components/misc/rng.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/npcstate.hpp>
@@ -365,7 +366,7 @@ namespace MWClass
                 if (const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter))
                     data->mNpcStats.getSpells().add (spell);
                 else
-                    std::cerr << "Warning: ignoring nonexistent race power '" << *iter << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
+                    Log(Debug::Warning) << "Warning: ignoring nonexistent race power '" << *iter << "' on NPC '" << ref->mBase->mId << "'";
             }
 
             if (!ref->mBase->mFaction.empty())
@@ -395,7 +396,7 @@ namespace MWClass
                 else
                 {
                     /// \todo add option to make this a fatal error message pop-up, but default to warning for vanilla compatibility
-                    std::cerr << "Warning: ignoring nonexistent spell '" << *iter << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
+                    Log(Debug::Warning) << "Warning: ignoring nonexistent spell '" << *iter << "' on NPC '" << ref->mBase->mId << "'";
                 }
             }
 

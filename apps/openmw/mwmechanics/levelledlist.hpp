@@ -1,8 +1,7 @@
 #ifndef OPENMW_MECHANICS_LEVELLEDLIST_H
 #define OPENMW_MECHANICS_LEVELLEDLIST_H
 
-#include <iostream>
-
+#include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -63,7 +62,7 @@ namespace MWMechanics
         // Vanilla doesn't fail on nonexistent items in levelled lists
         if (!MWBase::Environment::get().getWorld()->getStore().find(Misc::StringUtils::lowerCase(item)))
         {
-            std::cerr << "Warning: ignoring nonexistent item '" << item << "' in levelled list '" << levItem->mId << "'" << std::endl;
+            Log(Debug::Warning) << "Warning: ignoring nonexistent item '" << item << "' in levelled list '" << levItem->mId << "'";
             return std::string();
         }
 

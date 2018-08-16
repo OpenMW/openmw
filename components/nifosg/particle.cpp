@@ -5,6 +5,7 @@
 #include <osg/MatrixTransform>
 #include <osg/Geometry>
 
+#include <components/debug/debuglog.hpp>
 #include <components/nif/controlled.hpp>
 #include <components/nif/nifkey.hpp>
 #include <components/nif/data.hpp>
@@ -284,7 +285,7 @@ void Emitter::emitParticles(double dt)
 
         if (!visitor.mFound)
         {
-            std::cerr << "Error: Can't find emitter node" << randomRecIndex << std::endl;
+            Log(Debug::Info) << "Can't find emitter node" << randomRecIndex;
             return;
         }
 

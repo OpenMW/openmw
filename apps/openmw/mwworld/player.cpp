@@ -1,7 +1,8 @@
 #include "player.hpp"
 
 #include <stdexcept>
-#include <iostream>
+
+#include <components/debug/debuglog.hpp>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
@@ -364,7 +365,7 @@ namespace MWWorld
 
             if (!player.mObject.mEnabled)
             {
-                std::cerr << "Warning: Savegame attempted to disable the player." << std::endl;
+                Log(Debug::Warning) << "Warning: Savegame attempted to disable the player.";
                 player.mObject.mEnabled = true;
             }
 
@@ -391,7 +392,7 @@ namespace MWWorld
             }
             catch (...)
             {
-                std::cerr << "Warning: Player cell '" << player.mCellId.mWorldspace << "' no longer exists" << std::endl;
+                Log(Debug::Warning) << "Warning: Player cell '" << player.mCellId.mWorldspace << "' no longer exists";
                 // Cell no longer exists. The loader will have to choose a default cell.
                 mCellStore = NULL;
             }

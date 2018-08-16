@@ -1,10 +1,10 @@
 #include "loadscpt.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
-
-#include <iostream>
 
 namespace ESM
 {
@@ -45,12 +45,12 @@ namespace ESM
                 // an exeption, just log an error and continue.
                 std::stringstream ss;
 
-                ss << "ESM Error: " << "String table overflow";
+                ss << "String table overflow";
                 ss << "\n  File: " << esm.getName();
                 ss << "\n  Record: " << esm.getContext().recName.toString();
                 ss << "\n  Subrecord: " << "SCVR";
                 ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
-                std::cerr << ss.str() << std::endl;
+                Log(Debug::Verbose) << ss.str();
                 break;
             }
 
@@ -91,10 +91,10 @@ namespace ESM
                     if (subSize != static_cast<uint32_t>(mData.mScriptDataSize))
                     {
                         std::stringstream ss;
-                        ss << "ESM Warning: Script data size defined in SCHD subrecord does not match size of SCDT subrecord";
+                        ss << "Script data size defined in SCHD subrecord does not match size of SCDT subrecord";
                         ss << "\n  File: " << esm.getName();
                         ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
-                        std::cerr << ss.str() << std::endl;
+                        Log(Debug::Verbose) << ss.str();
                     }
 
                     mScriptData.resize(subSize);

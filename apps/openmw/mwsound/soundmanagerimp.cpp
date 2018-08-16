@@ -1,6 +1,5 @@
 #include "soundmanagerimp.hpp"
 
-#include <iostream>
 #include <algorithm>
 #include <map>
 #include <numeric>
@@ -8,7 +7,7 @@
 #include <osg/Matrixf>
 
 #include <components/misc/rng.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -81,7 +80,7 @@ namespace MWSound
 
         if(!useSound)
         {
-            std::cout<< "Sound disabled." <<std::endl;
+            Log(Debug::Info) << "Sound disabled.";
             return;
         }
 
@@ -93,23 +92,28 @@ namespace MWSound
         std::string devname = Settings::Manager::getString("device", "Sound");
         if(!mOutput->init(devname, hrtfname, hrtfmode))
         {
-            std::cerr<< "Failed to initialize audio output, sound disabled" <<std::endl;
+            Log(Debug::Error) << "Failed to initialize audio output, sound disabled";
             return;
         }
 
         std::vector<std::string> names = mOutput->enumerate();
-        std::cout <<"Enumerated output devices:\n";
+        std::stringstream stream;
+
+        stream << "Enumerated output devices:\n";
         for(const std::string &name : names)
-            std::cout <<"  "<<name<<"\n";
-        std::cout.flush();
+            stream << "  " << name;
+
+        Log(Debug::Info) << stream.str();
+        stream.str("");
 
         names = mOutput->enumerateHrtf();
         if(!names.empty())
         {
-            std::cout<< "Enumerated HRTF names:\n";
+            stream << "Enumerated HRTF names:\n";
             for(const std::string &name : names)
-                std::cout <<"  "<<name<<"\n";
-            std::cout.flush();
+                stream << "  " << name;
+
+            Log(Debug::Info) << stream.str();
         }
     }
 
@@ -221,7 +225,7 @@ namespace MWSound
                 do {
                     if(mUnusedBuffers.empty())
                     {
-                        std::cerr<< "No unused sound buffers to free, using "<<mBufferCacheSize<<" bytes!" <<std::endl;
+                        Log(Debug::Warning) << "No unused sound buffers to free, using " << mBufferCacheSize << " bytes!";
                         break;
                     }
                     Sound_Buffer *unused = mUnusedBuffers.back();
@@ -360,7 +364,7 @@ namespace MWSound
     {
         if(!mOutput->isInitialized())
             return;
-        std::cout <<"Playing "<<filename<< std::endl;
+        Log(Debug::Info) << "Playing " << filename;
         mLastPlayedMusic = filename;
 
         stopMusic();
