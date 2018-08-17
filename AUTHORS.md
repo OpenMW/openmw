@@ -172,6 +172,7 @@ Programmers
     Vincent Heuken
     vocollapse
     zelurker
+    James Carty (MrTopCat)
 
 Documentation
 -------------
