@@ -22,6 +22,8 @@
 
 #include <osgViewer/Viewer>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -580,8 +582,8 @@ namespace MWRender
                 mLandFogStart = mViewDistance * (1 - fogDepth);
                 mLandFogEnd = mViewDistance;
             }
-            mUnderwaterFogStart = mViewDistance * (1 - underwaterFog);
-            mUnderwaterFogEnd = mViewDistance;
+            mUnderwaterFogStart = std::min(mViewDistance, 6666.f) * (1 - underwaterFog);
+            mUnderwaterFogEnd = std::min(mViewDistance, 6666.f);
         }
         mFogColor = color;
     }
@@ -611,8 +613,6 @@ namespace MWRender
         mCurrentCameraPos = cameraPos;
         if (mWater->isUnderwater(cameraPos))
         {
-            float viewDistance = mViewDistance;
-            viewDistance = std::min(viewDistance, 6666.f);
             setFogColor(mUnderwaterColor * mUnderwaterWeight + mFogColor * (1.f-mUnderwaterWeight));
             mStateUpdater->setFogStart(mUnderwaterFogStart);
             mStateUpdater->setFogEnd(mUnderwaterFogEnd);
@@ -737,7 +737,7 @@ namespace MWRender
 
             if (!found)
             {
-                std::cerr << "Wrong screenshot type: " << settingArgs[0] << "." << std::endl;
+                Log(Debug::Warning) << "Wrong screenshot type: " << settingArgs[0] << ".";
                 return false;
             }
         }
@@ -756,7 +756,7 @@ namespace MWRender
 
         if (mCamera->isVanityOrPreviewModeEnabled())
         {
-            std::cerr << "Spherical screenshots are not allowed in preview mode." << std::endl;
+            Log(Debug::Warning) << "Spherical screenshots are not allowed in preview mode.";
             return false;
         }
 

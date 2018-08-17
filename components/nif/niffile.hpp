@@ -5,8 +5,8 @@
 
 #include <stdexcept>
 #include <vector>
-#include <iostream>
 
+#include <components/debug/debuglog.hpp>
 #include <components/files/constrainedfilestream.hpp>
 
 #include "record.hpp"
@@ -14,7 +14,30 @@
 namespace Nif
 {
 
-class NIFFile
+struct File
+{
+    virtual ~File() = default;
+
+    virtual void fail(const std::string &msg) const = 0;
+
+    virtual void warn(const std::string &msg) const = 0;
+
+    virtual Record *getRecord(size_t index) const = 0;
+
+    virtual size_t numRecords() const = 0;
+
+    virtual Record *getRoot(size_t index = 0) const = 0;
+
+    virtual size_t numRoots() const = 0;
+
+    virtual void setUseSkinning(bool skinning) = 0;
+
+    virtual bool getUseSkinning() const = 0;
+
+    virtual std::string getFilename() const = 0;
+};
+
+class NIFFile final : public File
 {
     enum NIFVersion {
         VER_MW    = 0x04000002    // Morrowind NIFs
@@ -48,17 +71,16 @@ class NIFFile
 
 public:
     /// Used if file parsing fails
-    void fail(const std::string &msg) const
+    void fail(const std::string &msg) const override
     {
         std::string err = " NIFFile Error: " + msg;
         err += "\nFile: " + filename;
         throw std::runtime_error(err);
     }
     /// Used when something goes wrong, but not catastrophically so
-    void warn(const std::string &msg) const
+    void warn(const std::string &msg) const override
     {
-        std::cerr << " NIFFile Warning: " << msg <<std::endl
-                  << "File: " << filename <<std::endl;
+        Log(Debug::Warning) << " NIFFile Warning: " << msg << "\nFile: " << filename;
     }
 
     /// Open a NIF stream. The name is used for error messages.
@@ -66,31 +88,31 @@ public:
     ~NIFFile();
 
     /// Get a given record
-    Record *getRecord(size_t index) const
+    Record *getRecord(size_t index) const override
     {
         Record *res = records.at(index);
         return res;
     }
     /// Number of records
-    size_t numRecords() const { return records.size(); }
+    size_t numRecords() const override { return records.size(); }
 
     /// Get a given root
-    Record *getRoot(size_t index=0) const
+    Record *getRoot(size_t index=0) const override
     {
         Record *res = roots.at(index);
         return res;
     }
     /// Number of roots
-    size_t numRoots() const { return roots.size(); }
+    size_t numRoots() const override { return roots.size(); }
 
     /// Set whether there is skinning contained in this NIF file.
     /// @note This is just a hint for users of the NIF file and has no effect on the loading procedure.
-    void setUseSkinning(bool skinning);
+    void setUseSkinning(bool skinning) override;
 
-    bool getUseSkinning() const;
+    bool getUseSkinning() const override;
 
     /// Get the name of the file
-    std::string getFilename() const { return filename; }
+    std::string getFilename() const override { return filename; }
 };
 typedef std::shared_ptr<const Nif::NIFFile> NIFFilePtr;
 

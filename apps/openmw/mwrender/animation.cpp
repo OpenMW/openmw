@@ -12,6 +12,8 @@
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/nifosg/nifloader.hpp>
 
 #include <components/resource/resourcesystem.hpp>
@@ -192,7 +194,7 @@ namespace
             for (RemoveVec::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
             {
                 if (!it->second->removeChild(it->first))
-                    std::cerr << "error removing " << it->first->getName() << std::endl;
+                    Log(Debug::Error) << "Error removing " << it->first->getName();
             }
         }
 
@@ -612,7 +614,7 @@ namespace MWRender
             NodeMap::const_iterator found = nodeMap.find(bonename);
             if (found == nodeMap.end())
             {
-                std::cerr << "Warning: addAnimSource: can't find bone '" + bonename << "' in " << baseModel << " (referenced by " << kfname << ")" << std::endl;
+                Log(Debug::Warning) << "Warning: addAnimSource: can't find bone '" + bonename << "' in " << baseModel << " (referenced by " << kfname << ")";
                 continue;
             }
 
@@ -724,7 +726,7 @@ namespace MWRender
             }
             catch (std::exception& e)
             {
-                std::cerr << "Error handling text key " << evt << ": " << e.what() << std::endl;
+                Log(Debug::Error) << "Error handling text key " << evt << ": " << e.what();
             }
         }
     }
@@ -1767,12 +1769,12 @@ namespace MWRender
     PartHolder::~PartHolder()
     {
         if (mNode.get() && !mNode->getNumParents())
-            std::cerr << "Error: part has no parents " << std::endl;
+            Log(Debug::Verbose) << "Part has no parents" ;
 
         if (mNode.get() && mNode->getNumParents())
         {
             if (mNode->getNumParents() > 1)
-                std::cerr << "Error: part has multiple parents " << mNode->getNumParents() << " " << mNode.get() << std::endl;
+                Log(Debug::Verbose) << "Part has multiple (" << mNode->getNumParents() << ") parents";
             mNode->getParent(0)->removeChild(mNode);
         }
     }

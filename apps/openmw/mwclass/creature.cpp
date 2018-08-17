@@ -1,7 +1,7 @@
 #include "creature.hpp"
 
 #include <components/misc/rng.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/esm/loadcrea.hpp>
 #include <components/esm/creaturestate.hpp>
 #include <components/settings/settings.hpp>
@@ -146,7 +146,7 @@ namespace MWClass
                 if (const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter))
                     data->mCreatureStats.getSpells().add (spell);
                 else /// \todo add option to make this a fatal error message pop-up, but default to warning for vanilla compatibility
-                    std::cerr << "Warning: ignoring nonexistent spell '" << *iter << "' on creature '" << ref->mBase->mId << "'" << std::endl;
+                    Log(Debug::Warning) << "Warning: ignoring nonexistent spell '" << *iter << "' on creature '" << ref->mBase->mId << "'";
             }
 
             // inventory

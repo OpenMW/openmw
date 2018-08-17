@@ -14,14 +14,19 @@
     Bug #2862: [macOS] Can't quit launcher using Command-Q or OpenMW->Quit
     Bug #2872: Tab completion in console doesn't work with explicit reference
     Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
+    Bug #3049: Drain and Fortify effects are not properly applied on health, magicka and fatigue
+    Bug #3072: Fatal error on AddItem <item> that has a script containing Equip <item>
     Bug #3249: Fixed revert function not updating views properly
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3486: [Mod] NPC Commands does not work
+    Bug #3533: GetSpellEffects should detect effects with zero duration
     Bug #3591: Angled hit distance too low
     Bug #3629: DB assassin attack never triggers creature spawning
+    Bug #3788: GetPCInJail and GetPCTraveling do not work as in vanilla
     Bug #3876: Landscape texture painting is misaligned
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
     Bug #3911: [macOS] Typing in the "Content List name" dialog box produces double characters
+    Bug #3948: AiCombat moving target aiming uses incorrect speed for magic projectiles
     Bug #3950: FLATTEN_STATIC_TRANSFORMS optimization breaks animated collision shapes
     Bug #3993: Terrain texture blending map is not upscaled
     Bug #3997: Almalexia doesn't pace
@@ -32,12 +37,15 @@
     Bug #4215: OpenMW shows book text after last EOL tag
     Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4230: AiTravel package issues break some Tribunal quests
+    Bug #4231: Infected rats from the "Crimson Plague" quest rendered unconscious by change in Drain Fatigue functionality
     Bug #4251: Stationary NPCs do not return to their position after combat
     Bug #4274: Pre-0.43 death animations are not forward-compatible with 0.43+
     Bug #4286: Scripted animations can be interrupted
     Bug #4291: Non-persistent actors that started the game as dead do not play death animations
     Bug #4293: Faction members are not aware of faction ownerships in barter
+    Bug #4304: "Follow" not working as a second AI package
     Bug #4307: World cleanup should remove dead bodies only if death animation is finished
+    Bug #4311: OpenMW does not handle RootCollisionNode correctly
     Bug #4327: Missing animations during spell/weapon stance switching
     Bug #4358: Running animation is interrupted when magic mode is toggled
     Bug #4368: Settings window ok button doesn't have key focus by default
@@ -61,11 +69,11 @@
     Bug #4461: "Open" spell from non-player caster isn't a crime
     Bug #4464: OpenMW keeps AiState cached storages even after we cancel AI packages
     Bug #4469: Abot Silt Striders – Model turn 90 degrees on horizontal
+    Bug #4470: Non-bipedal creatures with Weapon & Shield flag have inconsistent behaviour
     Bug #4474: No fallback when getVampireHead fails
     Bug #4475: Scripted animations should not cause movement
     Bug #4479: "Game" category on Advanced page is getting too long
     Bug #4480: Segfault in QuickKeysMenu when item no longer in inventory
-    Bug #4483: Shapes without NiTexturingProperty are rendered
     Bug #4489: Goodbye doesn't block dialogue hyperlinks
     Bug #4490: PositionCell on player gives "Error: tried to add local script twice"
     Bug #4494: Training cap based off Base Skill instead of Modified Skill
@@ -81,6 +89,12 @@
     Bug #4553: Forcegreeting on non-actor opens a dialogue window which cannot be closed
     Bug #4557: Topics with reserved names are handled differently from vanilla
     Bug #4558: Mesh optimizer: check for reserved node name is case-sensitive
+    Bug #4563: Fast travel price logic checks destination cell instead of service actor cell
+    Bug #4565: Underwater view distance should be limited
+    Bug #4573: Player uses headtracking in the 1st-person mode
+    Bug #4574: Player turning animations are twitchy
+    Bug #4575: Weird result of attack animation blending with movement animations
+    Bug #4576: Reset of idle animations when attack can not be started
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
     Feature #3103: Provide option for disposition to get increased by successful trade
@@ -101,6 +115,8 @@
     Feature #4548: Weapon priority: use the actual chance to hit the target instead of weapon skill
     Feature #4549: Weapon priority: use the actual damage in weapon rating calculations
     Feature #4550: Weapon priority: make ranged weapon bonus more sensible
+    Feature #4579: Add option for applying Strength into hand to hand damage
+    Feature #4581: Use proper logging system
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test
 

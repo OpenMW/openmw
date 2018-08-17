@@ -1,6 +1,6 @@
 #include "sdlinputwrapper.hpp"
 
-#include <iostream>
+#include <components/debug/debuglog.hpp>
 
 #include <osgViewer/Viewer>
 
@@ -160,9 +160,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     break;
 
                 default:
-                    std::ios::fmtflags f(std::cerr.flags());
-                    std::cerr << "Unhandled SDL event of type 0x" << std::hex << evt.type << std::endl;
-                    std::cerr.flags(f);
+                    Log(Debug::Info) << "Unhandled SDL event of type 0x" << std::hex << evt.type;
                     break;
             }
         }

@@ -6,6 +6,7 @@
 
 #include <osg/Texture2D>
 
+#include <components/debug/debuglog.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
 
@@ -37,7 +38,7 @@ void VideoWidget::playVideo(const std::string &video)
     }
     catch (std::exception& e)
     {
-        std::cerr << "Failed to open video: " << e.what() << std::endl;
+        Log(Debug::Error) << "Failed to open video: " << e.what();
         return;
     }
 

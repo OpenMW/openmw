@@ -31,8 +31,10 @@ enum Priority {
     Priority_WeaponLowerBody,
     Priority_SneakIdleLowerBody,
     Priority_SwimIdle,
-    Priority_Jump,
     Priority_Movement,
+    // Note: in vanilla movement anims have higher priority than jump ones.
+    // It causes issues with landing animations during movement.
+    Priority_Jump,
     Priority_Hit,
     Priority_Weapon,
     Priority_Block,
@@ -221,6 +223,9 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     bool updateWeaponState();
     bool updateCreatureState();
     void updateIdleStormState(bool inwater);
+
+    std::string chooseRandomAttackAnimation() const;
+    bool isRandomAttackAnimation(const std::string& group) const;
 
     bool isPersistentAnimPlaying();
 

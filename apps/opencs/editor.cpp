@@ -5,11 +5,8 @@
 #include <QLocalSocket>
 #include <QMessageBox>
 
-
-#include <components/crashcatcher/crashcatcher.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/fallback/validate.hpp>
-
 #include <components/nifosg/nifloader.hpp>
 
 #include "model/doc/document.hpp"
@@ -27,10 +24,6 @@ CS::Editor::Editor (int argc, char **argv)
   mLock(), mMerge (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
 {    
-    // install the crash handler as soon as possible. note that the log path
-    // does not depend on config being read.
-    crashCatcherInstall(argc, argv, (mCfgMgr.getLogPath() / "openmw-cs-crash.log").string());
-
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
     setupDataFiles (config.first);
@@ -301,7 +294,7 @@ bool CS::Editor::makeIPCServer()
         mLock = boost::interprocess::file_lock(mPid.string().c_str());
         if(!mLock.try_lock())
         {
-            std::cerr << "OpenCS already running."  << std::endl;
+            Log(Debug::Error) << "Error: OpenMW-CS is already running.";
             return false;
         }
 
@@ -324,17 +317,17 @@ bool CS::Editor::makeIPCServer()
             if(boost::filesystem::exists(fullPath.toUtf8().constData()))
             {
                 // TODO: compare pid of the current process with that in the file
-                std::cout << "Detected unclean shutdown." << std::endl;
+                Log(Debug::Info) << "Detected unclean shutdown.";
                 // delete the stale file
                 if(remove(fullPath.toUtf8().constData()))
-                    std::cerr << "ERROR removing stale connection file" << std::endl;
+                    Log(Debug::Error) << "Error: can not remove stale connection file.";
             }
         }
     }
 
     catch(const std::exception& e)
     {
-        std::cerr << "ERROR " << e.what() << std::endl;
+        Log(Debug::Error) << "Error: " << e.what();
         return false;
     }
 

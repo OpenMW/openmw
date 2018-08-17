@@ -1,6 +1,5 @@
 #include "physicssystem.hpp"
 
-#include <iostream>
 #include <stdexcept>
 
 #include <osg/Group>
@@ -20,7 +19,7 @@
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/bulletshapemanager.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
@@ -638,7 +637,7 @@ namespace MWPhysics
                     mPtr.getRefData().getBaseNode()->accept(visitor);
                     if (!visitor.mFound)
                     {
-                        std::cerr << "Error: animateCollisionShapes can't find node " << recIndex << " for " << mPtr.getCellRef().getRefId() << std::endl;
+                        Log(Debug::Warning) << "Warning: animateCollisionShapes can't find node " << recIndex << " for " << mPtr.getCellRef().getRefId();
 
                         // Remove nonexistent nodes from animated shapes map and early out
                         mShapeInstance->mAnimatedShapes.erase(recIndex);
@@ -708,7 +707,7 @@ namespace MWPhysics
             if (physFramerate > 0)
             {
                 mPhysicsDt = 1.f / physFramerate;
-                std::cerr << "Warning: physics framerate was overridden (a new value is " << physFramerate << ")."  << std::endl;
+                Log(Debug::Warning) << "Warning: using custom physics framerate (" << physFramerate << " FPS).";
             }
         }
     }

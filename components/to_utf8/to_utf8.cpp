@@ -2,9 +2,10 @@
 
 #include <vector>
 #include <cassert>
-#include <iostream>
 #include <iomanip>
 #include <stdexcept>
+
+#include <components/debug/debuglog.hpp>
 
 /* This file contains the code to translate from WINDOWS-1252 (native
    charset used in English version of Morrowind) to UTF-8. The library
@@ -319,9 +320,7 @@ void Utf8Encoder::copyFromArray2(const char*& chp, char* &out)
         }
     }
 
-    std::ios::fmtflags f(std::cout.flags());
-    std::cout << "Could not find glyph " << std::hex << (int)ch << " " << (int)ch2 << " " << (int)ch3 << std::endl;
-    std::cout.flags(f);
+    Log(Debug::Info) << "Could not find glyph " << std::hex << (int)ch << " " << (int)ch2 << " " << (int)ch3;
 
     *(out++) = ch; // Could not find glyph, just put whatever
 }

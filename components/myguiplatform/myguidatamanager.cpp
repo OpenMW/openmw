@@ -5,7 +5,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include <iostream>
+#include <components/debug/debuglog.hpp>
 
 namespace osgMyGUI
 {
@@ -23,7 +23,7 @@ MyGUI::IDataStream *DataManager::getData(const std::string &name)
     stream->open(fullpath, std::ios::binary);
     if (stream->fail())
     {
-        std::cerr << "DataManager::getData: Failed to open '" << name << "'" << std::endl;
+        Log(Debug::Error) << "DataManager::getData: Failed to open '" << name << "'";
         return NULL;
     }
     return new MyGUI::DataFileStream(stream.release());

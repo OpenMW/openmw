@@ -1,8 +1,8 @@
 #include "refcollection.hpp"
 
 #include <sstream>
-#include <iostream>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/esm/loadcell.hpp>
 
@@ -58,10 +58,10 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
                 // message
                 if (index.first != mref.mTarget[0] || index.second != mref.mTarget[1])
                 {
-                    std::cerr << "The Position of moved ref "
-                        << ref.mRefID << " does not match the target cell" << std::endl;
-                    std::cerr << "Position: #" << index.first << " " << index.second
-                        <<", Target #"<< mref.mTarget[0] << " " << mref.mTarget[1] << std::endl;
+                    Log(Debug::Warning) << "Warning: the Position of moved ref "
+                        << ref.mRefID << " does not match the target cell";
+                    Log(Debug::Warning) << "Position: #" << index.first << " " << index.second
+                        <<", Target #"<< mref.mTarget[0] << " " << mref.mTarget[1];
 
                     stream.clear();
                     stream << "#" << mref.mTarget[0] << " " << mref.mTarget[1];

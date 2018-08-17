@@ -3,8 +3,8 @@
 #include <deque>
 
 //#include <osg/Timer>
-//#include <iostream>
 
+//#include <components/debug/debuglog.hpp>
 #include <components/sceneutil/workqueue.hpp>
 
 namespace SceneUtil
@@ -20,7 +20,7 @@ namespace SceneUtil
             //osg::Timer timer;
             //size_t objcount = mObjects.size();
             mObjects.clear();
-            //std::cout << "cleared " << objcount << " objects in " << timer.time_m() << std::endl;
+            //Log(Debug::Verbose) << "cleared " << objcount << " objects in " << timer.time_m();
         }
     };
 

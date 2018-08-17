@@ -388,9 +388,6 @@ namespace MWMechanics
 
     void getHandToHandDamage(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, float &damage, bool &healthdmg, float attackStrength)
     {
-        // Note: MCP contains an option to include Strength in hand-to-hand damage
-        // calculations. Some mods recommend using it, so we may want to include an
-        // option for it.
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         float minstrike = store.get<ESM::GameSetting>().find("fMinHandToHandMult")->getFloat();
         float maxstrike = store.get<ESM::GameSetting>().find("fMaxHandToHandMult")->getFloat();
@@ -401,6 +398,16 @@ namespace MWMechanics
         healthdmg = otherstats.isParalyzed()
                 || otherstats.getKnockedDown();
         bool isWerewolf = (attacker.getClass().isNpc() && attacker.getClass().getNpcStats(attacker).isWerewolf());
+
+        // Options in the launcher's combo box: unarmedFactorsStrengthComboBox
+        // 0 = Do not factor strength into hand-to-hand combat.
+        // 1 = Factor into werewolf hand-to-hand combat.
+        // 2 = Ignore werewolves.
+        int factorStrength = Settings::Manager::getInt("strength influences hand to hand", "Game");
+        if (factorStrength == 1 || (factorStrength == 2 && !isWerewolf)) {
+            damage *= attacker.getClass().getCreatureStats(attacker).getAttribute(ESM::Attribute::Strength).getModified() / 40.0f;
+        }
+
         if(isWerewolf)
         {
             healthdmg = true;

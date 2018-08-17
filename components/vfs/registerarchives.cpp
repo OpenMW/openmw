@@ -1,8 +1,9 @@
 #include "registerarchives.hpp"
 
 #include <set>
-#include <iostream>
 #include <sstream>
+
+#include <components/debug/debuglog.hpp>
 
 #include <components/vfs/manager.hpp>
 #include <components/vfs/bsaarchive.hpp>
@@ -21,7 +22,7 @@ namespace VFS
             {
                 // Last BSA has the highest priority
                 const std::string archivePath = collections.getPath(*archive).string();
-                std::cout << "Adding BSA archive " << archivePath << std::endl;
+                Log(Debug::Info) << "Adding BSA archive " << archivePath;
 
                 vfs->addArchive(new BsaArchive(archivePath));
             }
@@ -40,12 +41,12 @@ namespace VFS
             {
                 if (seen.insert(*iter).second)
                 {
-                    std::cout << "Adding data directory " << iter->string() << std::endl;
+                    Log(Debug::Info) << "Adding data directory " << iter->string();
                     // Last data dir has the highest priority
                     vfs->addArchive(new FileSystemArchive(iter->string()));
                 }
                 else
-                    std::cerr << "Ignoring duplicate data directory " << iter->string() << std::endl;
+                    Log(Debug::Info) << "Ignoring duplicate data directory " << iter->string();
             }
         }
 

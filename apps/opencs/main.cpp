@@ -1,14 +1,13 @@
 #include "editor.hpp"
 
 #include <exception>
-#include <iostream>
 #include <string>
 
 #include <QApplication>
 #include <QIcon>
 #include <QMetaType>
 
-#include <components/misc/debugging.hpp>
+#include <components/debug/debugging.hpp>
 
 #include "model/doc/messages.hpp"
 #include "model/world/universalid.hpp"
@@ -31,7 +30,7 @@ class Application : public QApplication
             }
             catch (const std::exception& exception)
             {
-                std::cerr << "An exception has been caught: " << exception.what() << std::endl;
+                Log(Debug::Error) << "An exception has been caught: " << exception.what();
             }
 
             return false;
@@ -80,5 +79,5 @@ int runApplication(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-    return wrapApplication(&runApplication, argc, argv, "/openmw-cs.log");
+    return wrapApplication(&runApplication, argc, argv, "OpenMW-CS");
 }

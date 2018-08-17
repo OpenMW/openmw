@@ -1,5 +1,6 @@
 #include "charactercreation.hpp"
 
+#include <components/debug/debuglog.hpp>
 #include <components/fallback/fallback.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -284,7 +285,7 @@ namespace MWGui
         }
         catch (std::exception& e)
         {
-            std::cerr << "Error: Failed to create chargen window: " << e.what() << std::endl;
+            Log(Debug::Error) << "Error: Failed to create chargen window: " << e.what();
         }
     }
 
@@ -602,7 +603,7 @@ namespace MWGui
                     mGenerateClass = "Mage";
                 else
                 {
-                    std::cout << "Failed to deduce class from chosen answers in generate class dialog" << std::endl;
+                    Log(Debug::Warning) << "Failed to deduce class from chosen answers in generate class dialog.";
                     mGenerateClass = "Thief";
                 }
             }

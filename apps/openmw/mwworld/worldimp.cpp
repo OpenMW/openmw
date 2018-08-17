@@ -3,6 +3,8 @@
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/cellid.hpp>
@@ -153,7 +155,8 @@ namespace MWWorld
       mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles), mUserDataPath(userDataPath),
       mActivationDistanceOverride (activationDistanceOverride), mStartupScript(startupScript),
       mStartCell (startCell), mDistanceToFacedObject(-1), mTeleportEnabled(true),
-      mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0), mSpellPreloadTimer(0.f)
+      mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
+      mPlayerTraveling(false), mPlayerInJail(false), mSpellPreloadTimer(0.f)
     {
         mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
         mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath));
@@ -311,6 +314,8 @@ namespace MWWorld
         mGoToJail = false;
         mTeleportEnabled = true;
         mLevitationEnabled = true;
+        mPlayerTraveling = false;
+        mPlayerInJail = false;
 
         fillGlobalVariables();
     }
@@ -1642,6 +1647,15 @@ namespace MWWorld
         if (mGoToJail && !paused)
             goToJail();
 
+        // Reset "traveling" flag - there was a frame to detect traveling.
+        mPlayerTraveling = false;
+
+        // The same thing for "in jail" flag: reset it if:
+        // 1. Player was in jail
+        // 2. Jailing window was closed
+        if (mPlayerInJail && !mGoToJail && !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Jail))
+            mPlayerInJail = false;
+
         updateWeather(duration, paused);
 
         if (!paused)
@@ -1794,7 +1808,7 @@ namespace MWWorld
         }
         catch (std::exception& e)
         {
-            std::cerr << "Error updating window manager: " << e.what() << std::endl;
+            Log(Debug::Error) << "Error updating window manager: " << e.what();
         }
     }
 
@@ -3075,7 +3089,7 @@ namespace MWWorld
 
         if ( closestMarker.isEmpty() )
         {
-            std::cerr << "Failed to teleport: no closest marker found" << std::endl;
+            Log(Debug::Warning) << "Failed to teleport: no closest marker found";
             return;
         }
 
@@ -3250,19 +3264,19 @@ namespace MWWorld
         MWWorld::ConstPtr prisonMarker = getClosestMarker( ptr, "prisonmarker" );
         if ( prisonMarker.isEmpty() )
         {
-            std::cerr << "Failed to confiscate items: no closest prison marker found." << std::endl;
+            Log(Debug::Warning) << "Failed to confiscate items: no closest prison marker found.";
             return;
         }
         std::string prisonName = prisonMarker.getCellRef().getDestCell();
         if ( prisonName.empty() )
         {
-            std::cerr << "Failed to confiscate items: prison marker not linked to prison interior" << std::endl;
+            Log(Debug::Warning) << "Failed to confiscate items: prison marker not linked to prison interior";
             return;
         }
         MWWorld::CellStore *prison = getInterior( prisonName );
         if ( !prison )
         {
-            std::cerr << "Failed to confiscate items: failed to load cell " << prisonName << std::endl;
+            Log(Debug::Warning) << "Failed to confiscate items: failed to load cell " << prisonName;
             return;
         }
 
@@ -3272,7 +3286,7 @@ namespace MWWorld
             MWBase::Environment::get().getMechanicsManager()->confiscateStolenItems(ptr, closestChest);
         }
         else
-            std::cerr << "Failed to confiscate items: no stolen_goods container found" << std::endl;
+           Log(Debug::Warning) << "Failed to confiscate items: no stolen_goods container found";
     }
 
     void World::goToJail()
@@ -3281,6 +3295,7 @@ namespace MWWorld
         {
             // Reset bounty and forget the crime now, but don't change cell yet (the player should be able to read the dialog text first)
             mGoToJail = true;
+            mPlayerInJail = true;
 
             MWWorld::Ptr player = getPlayerPtr();
 
@@ -3306,10 +3321,17 @@ namespace MWWorld
 
     bool World::isPlayerInJail() const
     {
-        if (mGoToJail)
-            return true;
+        return mPlayerInJail;
+    }
 
-        return MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Jail);
+    void World::setPlayerTraveling(bool traveling)
+    {
+        mPlayerTraveling = traveling;
+    }
+
+    bool World::isPlayerTraveling() const
+    {
+        return mPlayerTraveling;
     }
 
     float World::getTerrainHeightAt(const osg::Vec3f& worldPos) const

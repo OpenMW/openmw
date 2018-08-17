@@ -85,7 +85,11 @@ add_component_dir (esmterrain
     )
 
 add_component_dir (misc
-    utf8stream stringops resourcehelpers rng debugging messageformatparser
+    utf8stream stringops resourcehelpers rng messageformatparser
+    )
+
+add_component_dir (debug
+    debugging debuglog
     )
 
 IF(NOT WIN32 AND NOT APPLE)
@@ -241,6 +245,11 @@ endif()
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
 target_link_libraries(components ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
+if (BUILD_WITH_CODE_COVERAGE)
+    add_definitions(--coverage)
+    target_link_libraries(components gcov)
 endif()
 
 

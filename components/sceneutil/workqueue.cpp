@@ -1,6 +1,6 @@
 #include "workqueue.hpp"
 
-#include <iostream>
+#include <components/debug/debuglog.hpp>
 
 namespace SceneUtil
 {
@@ -71,7 +71,7 @@ void WorkQueue::addWorkItem(osg::ref_ptr<WorkItem> item, bool front)
 {
     if (item->isDone())
     {
-        std::cerr << "Error: trying to add a work item that is already completed" << std::endl;
+        Log(Debug::Error) << "Error: trying to add a work item that is already completed";
         return;
     }
 

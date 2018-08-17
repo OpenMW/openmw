@@ -583,7 +583,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         refreshHitRecoilAnims();
 
     const WeaponInfo *weap = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(mWeaponType));
-    if (!mPtr.getClass().isBipedal(mPtr))
+    if (!mPtr.getClass().hasInventoryStore(mPtr))
         weap = sWeaponTypeListEnd;
 
     refreshJumpAnims(weap, jump, force);
@@ -592,7 +592,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     // idle handled last as it can depend on the other states
     // FIXME: if one of the below states is close to their last animation frame (i.e. will be disabled in the coming update),
     // the idle animation should be displayed
-    if ((mUpperBodyState != UpperCharState_Nothing
+    if (((mUpperBodyState != UpperCharState_Nothing && mUpperBodyState != UpperCharState_WeapEquiped)
             || (mMovementState != CharState_None && !isTurning())
             || mHitState != CharState_None)
             && !mPtr.getClass().isBipedal(mPtr))
@@ -771,6 +771,20 @@ void CharacterController::playRandomDeath(float startpoint)
         return;
 
     playDeath(startpoint, mDeathState);
+}
+
+std::string CharacterController::chooseRandomAttackAnimation() const
+{
+    std::string result;
+    bool isSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
+
+    if (isSwimming)
+        result = chooseRandomGroup("swimattack");
+
+    if (!isSwimming || !mAnimation->hasAnimation(result))
+        result = chooseRandomGroup("attack");
+
+    return result;
 }
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim)
@@ -1123,16 +1137,10 @@ bool CharacterController::updateCreatureState()
                 else
                     mCurrentWeapon = "";
             }
+
             if (weapType != WeapType_Spell || !mAnimation->hasAnimation("spellcast")) // Not all creatures have a dedicated spellcast animation
             {
-                bool isSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
-                int roll = Misc::Rng::rollDice(3); // [0, 2]
-                if (roll == 0)
-                    mCurrentWeapon = isSwimming && mAnimation->hasAnimation("swimattack1") ? "swimattack1" : "attack1";
-                else if (roll == 1)
-                    mCurrentWeapon = isSwimming && mAnimation->hasAnimation("swimattack2") ? "swimattack2" : "attack2";
-                else
-                    mCurrentWeapon = isSwimming && mAnimation->hasAnimation("swimattack3") ? "swimattack3" : "attack3";
+                mCurrentWeapon = chooseRandomAttackAnimation();
             }
 
             if (!mCurrentWeapon.empty())
@@ -1212,8 +1220,11 @@ bool CharacterController::updateWeaponState()
         mWeapon = weapon != inv.end() ? *weapon : MWWorld::Ptr();
     }
 
+    // Use blending only with 3d-person movement animations for bipedal actors
+    bool firstPersonPlayer = (mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson());
     MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
-    priorityWeapon[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
+    if (!firstPersonPlayer && mPtr.getClass().isBipedal(mPtr))
+        priorityWeapon[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
 
     bool forcestateupdate = false;
 
@@ -1239,6 +1250,10 @@ bool CharacterController::updateWeaponState()
                                 MWRender::Animation::BlendMask_All, false,
                                 1.0f, "unequip start", "unequip stop", 0.0f, 0);
                 mUpperBodyState = UpperCharState_UnEquipingWeap;
+
+                // If we do not have the "unequip detach" key, hide weapon manually.
+                if (mAnimation->getTextKeyTime(weapgroup+": unequip detach") < 0)
+                    mAnimation->showWeapons(false);
             }
 
             if(!downSoundId.empty())
@@ -1250,7 +1265,6 @@ bool CharacterController::updateWeaponState()
 
         float complete;
         bool animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
-
         if (!animPlaying || complete >= 1.0f)
         {
             // Weapon is changed, no current animation (e.g. unequipping or attack).
@@ -1273,6 +1287,13 @@ bool CharacterController::updateWeaponState()
                                         MWRender::Animation::BlendMask_All, true,
                                         1.0f, "equip start", "equip stop", 0.0f, 0);
                         mUpperBodyState = UpperCharState_EquipingWeap;
+
+                        // If we do not have the "equip attach" key, show weapon manually.
+                        if (weaptype != WeapType_Spell)
+                        {
+                            if (mAnimation->getTextKeyTime(weapgroup+": equip attach") < 0)
+                                mAnimation->showWeapons(true);
+                        }
                     }
                 }
 
@@ -1358,18 +1379,20 @@ bool CharacterController::updateWeaponState()
     {
         MWWorld::Ptr player = getPlayer();
 
-        // We should reset player's idle animation in the first-person mode.
-        if (mPtr == player && MWBase::Environment::get().getWorld()->isFirstPerson())
-            mIdleState = CharState_None;
-
-        // In other cases we should not break swim and sneak animations
-        if (mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
-            mIdleState = CharState_None;
-
+        bool resetIdle = ammunition;
         if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
             mAttackStrength = 0;
+
+            // Randomize attacks for non-bipedal creatures with Weapon flag
+            if (mPtr.getClass().getTypeName() == typeid(ESM::Creature).name() &&
+                !mPtr.getClass().isBipedal(mPtr) &&
+                (!mAnimation->hasAnimation(mCurrentWeapon) || isRandomAttackAnimation(mCurrentWeapon)))
+            {
+                mCurrentWeapon = chooseRandomAttackAnimation();
+            }
+
             if(mWeaponType == WeapType_Spell)
             {
                 // Unset casting flag, otherwise pressing the mouse button down would
@@ -1417,19 +1440,39 @@ bool CharacterController::updateWeaponState()
 
                     const ESM::ENAMstruct &firstEffect = spell->mEffects.mList.at(0); // first effect used for casting animation
 
-                    switch(firstEffect.mRange)
+                    std::string startKey;
+                    std::string stopKey;
+                    if (isRandomAttackAnimation(mCurrentWeapon))
                     {
-                        case 0: mAttackType = "self"; break;
-                        case 1: mAttackType = "touch"; break;
-                        case 2: mAttackType = "target"; break;
+                        startKey = "start";
+                        stopKey = "stop";
+                        MWBase::Environment::get().getWorld()->castSpell(mPtr, mCastingManualSpell); // No "release" text key to use, so cast immediately
+                        mCastingManualSpell = false;
+                    }
+                    else
+                    {
+                        switch(firstEffect.mRange)
+                        {
+                            case 0: mAttackType = "self"; break;
+                            case 1: mAttackType = "touch"; break;
+                            case 2: mAttackType = "target"; break;
+                        }
+
+                        startKey = mAttackType+" start";
+                        stopKey = mAttackType+" stop";
                     }
 
                     mAnimation->play(mCurrentWeapon, priorityWeapon,
                                      MWRender::Animation::BlendMask_All, true,
-                                     weapSpeed, mAttackType+" start", mAttackType+" stop",
+                                     1, startKey, stopKey,
                                      0.0f, 0);
                     mUpperBodyState = UpperCharState_CastingSpell;
                 }
+                else
+                {
+                    resetIdle = false;
+                }
+
                 if (mPtr.getClass().hasInventoryStore(mPtr))
                 {
                     MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
@@ -1469,16 +1512,27 @@ bool CharacterController::updateWeaponState()
             }
             else if (ammunition)
             {
-                if(mWeaponType == WeapType_Crossbow || mWeaponType == WeapType_BowAndArrow ||
-                   mWeaponType == WeapType_Thrown)
+                std::string startKey;
+                std::string stopKey;
+                if(mWeaponType == WeapType_Crossbow || mWeaponType == WeapType_BowAndArrow || mWeaponType == WeapType_Thrown)
+                {
                     mAttackType = "shoot";
-                else
+                    startKey = mAttackType+" start";
+                    stopKey = mAttackType+" min attack";
+                }
+
+                if (isRandomAttackAnimation(mCurrentWeapon))
+                {
+                    startKey = "start";
+                    stopKey = "stop";
+                }
+                else if (mAttackType != "shoot")
                 {
                     if(mPtr == getPlayer())
                     {
                         if (isWeapon)
                         {
-                            if (Settings::Manager::getBool("best attack", "Game"))        
+                            if (Settings::Manager::getBool("best attack", "Game"))
                             {
                                 MWWorld::ConstContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                                 mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
@@ -1487,18 +1541,31 @@ bool CharacterController::updateWeaponState()
                                 setAttackTypeBasedOnMovement();
                         }
                         else
-                            setAttackTypeRandomly(mAttackType);                       
+                        {
+                            // There is no "best attack" for Hand-to-Hand
+                            setAttackTypeRandomly(mAttackType);
+                        }
                     }
                     // else if (mPtr != getPlayer()) use mAttackType set by AiCombat
+                    startKey = mAttackType+" start";
+                    stopKey = mAttackType+" min attack";
                 }
 
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
                                  MWRender::Animation::BlendMask_All, false,
-                                 weapSpeed, mAttackType+" start", mAttackType+" min attack",
+                                 weapSpeed, startKey, stopKey,
                                  0.0f, 0);
                 mUpperBodyState = UpperCharState_StartToMinAttack;
             }
         }
+
+        // We should reset player's idle animation in the first-person mode.
+        if (resetIdle && mPtr == player && MWBase::Environment::get().getWorld()->isFirstPerson())
+            mIdleState = CharState_None;
+
+        // In other cases we should not break swim and sneak animations
+        if (resetIdle && mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
+            mIdleState = CharState_None;
 
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
         if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && !isKnockedDown())
@@ -1611,7 +1678,7 @@ bool CharacterController::updateWeaponState()
         else if(mUpperBodyState == UpperCharState_UnEquipingWeap)
             mUpperBodyState = UpperCharState_Nothing;
     }
-    else if(complete >= 1.0f)
+    else if(complete >= 1.0f && !isRandomAttackAnimation(mCurrentWeapon))
     {
         std::string start, stop;
         switch(mUpperBodyState)
@@ -1663,20 +1730,29 @@ bool CharacterController::updateWeaponState()
                 break;
         }
 
-        // Note: apply reload animations only for upper body since blending with movement animations can give weird result.
-        // Especially noticable with crossbow reload animation.
+        // Note: apply crossbow reload animation only for upper body
+        // since blending with movement animations can give weird result.
         if(!start.empty())
         {
+            int mask = MWRender::Animation::BlendMask_All;
+            if (mWeaponType == WeapType_Crossbow)
+                mask = MWRender::Animation::BlendMask_UpperBody;
+
             mAnimation->disable(mCurrentWeapon);
             if (mUpperBodyState == UpperCharState_FollowStartToFollowStop)
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_UpperBody, true,
+                                 mask, true,
                                  weapSpeed, start, stop, 0.0f, 0);
             else
                 mAnimation->play(mCurrentWeapon, priorityWeapon,
-                                 MWRender::Animation::BlendMask_UpperBody, false,
+                                 mask, false,
                                  weapSpeed, start, stop, 0.0f, 0);
         }
+    }
+    else if(complete >= 1.0f && isRandomAttackAnimation(mCurrentWeapon))
+    {
+        mAnimation->disable(mCurrentWeapon);
+        mUpperBodyState = UpperCharState_WeapEquiped;
     }
 
     if (mPtr.getClass().hasInventoryStore(mPtr))
@@ -1980,25 +2056,37 @@ void CharacterController::update(float duration)
             else if(rot.z() != 0.0f && !sneak && !(mPtr == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson()))
             {
                 if(rot.z() > 0.0f)
-                {
                     movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
-                    mAnimation->disable(mCurrentJump);
-                }
                 else if(rot.z() < 0.0f)
-                {
                     movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
-                    mAnimation->disable(mCurrentJump);
-                }
             }
         }
 
-        mTurnAnimationThreshold -= duration;
-        if (isTurning())
-            mTurnAnimationThreshold = 0.05f;
-        else if (movestate == CharState_None && isTurning()
-                 && mTurnAnimationThreshold > 0)
+        // Player can not use smooth turning as NPCs, so we play turning animation a bit to avoid jittering
+        if (mPtr == getPlayer())
         {
-            movestate = mMovementState;
+            float threshold = mCurrentMovement.find("swim") == std::string::npos ? 0.4f : 0.8f;
+            float complete;
+            bool animPlaying = mAnimation->getInfo(mCurrentMovement, &complete);
+            if (movestate == CharState_None && isTurning())
+            {
+                if (animPlaying && complete < threshold)
+                    movestate = mMovementState;
+            }
+        }
+        else
+        {
+            mTurnAnimationThreshold -= duration;
+            if (movestate == CharState_TurnRight || movestate == CharState_TurnLeft ||
+                movestate == CharState_SwimTurnRight || movestate == CharState_SwimTurnLeft)
+            {
+                mTurnAnimationThreshold = 0.05f;
+            }
+            else if (movestate == CharState_None && isTurning()
+                    && mTurnAnimationThreshold > 0)
+            {
+                movestate = mMovementState;
+            }
         }
 
         if(movestate != CharState_None && !isTurning())
@@ -2028,8 +2116,10 @@ void CharacterController::update(float duration)
 
         if (isTurning())
         {
+            // Adjust animation speed from 1.0 to 1.5 multiplier
+            float turnSpeed = std::min(1.5f, std::abs(rot.z()) / duration / static_cast<float>(osg::PI));
             if (duration > 0)
-                mAnimation->adjustSpeedMult(mCurrentMovement, std::min(1.5f, std::abs(rot.z()) / duration / static_cast<float>(osg::PI)));
+                mAnimation->adjustSpeedMult(mCurrentMovement, std::max(turnSpeed, 1.0f));
         }
         else if (mMovementState != CharState_None && mAdjustMovementAnimSpeed)
         {
@@ -2396,6 +2486,13 @@ void CharacterController::setAttackTypeBasedOnMovement()
         mAttackType = "chop";
 }
 
+bool CharacterController::isRandomAttackAnimation(const std::string& group) const
+{
+    return (group == "attack1" || group == "swimattack1" ||
+            group == "attack2" || group == "swimattack2" ||
+            group == "attack3" || group == "swimattack3");
+}
+
 bool CharacterController::isAttackPrepairing() const
 {
     return mUpperBodyState == UpperCharState_StartToMinAttack ||
@@ -2497,7 +2594,7 @@ void CharacterController::setAttackTypeRandomly(std::string& attackType)
 bool CharacterController::readyToPrepareAttack() const
 {
     return (mHitState == CharState_None || mHitState == CharState_Block)
-            && mUpperBodyState  <= UpperCharState_WeapEquiped;
+            && mUpperBodyState <= UpperCharState_WeapEquiped;
 }
 
 bool CharacterController::readyToStartAttack() const

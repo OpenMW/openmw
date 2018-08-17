@@ -3,8 +3,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <iostream>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
 namespace Interpreter{
@@ -191,8 +191,8 @@ namespace Interpreter{
                 }
                 catch (std::exception& e)
                 {
-                    std::cerr << "Error: Failed to replace escape character, with the following error: " << e.what() << std::endl;
-                    std::cerr << "Full text below: " << std::endl << text << std::endl;
+                    Log(Debug::Error) << "Error: Failed to replace escape character, with the following error: " << e.what();
+                    Log(Debug::Error) << "Full text below:\n" << text;
                 }
 
                 // Not found, or error

@@ -1,9 +1,7 @@
 #include "sortfilteritemmodel.hpp"
 
-#include <iostream>
-
 #include <components/misc/stringops.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/esm/loadalch.hpp>
 #include <components/esm/loadappa.hpp>
 #include <components/esm/loadarmo.hpp>
@@ -245,7 +243,7 @@ namespace MWGui
             const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchId);
             if (!ench)
             {
-                std::cerr << "Warning: Can't find enchantment '" << enchId << "' on item " << base.getCellRef().getRefId() << std::endl;
+                Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchId << "' on item " << base.getCellRef().getRefId();
                 return false;
             }
 

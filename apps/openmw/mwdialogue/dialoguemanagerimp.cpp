@@ -5,7 +5,8 @@
 #include <algorithm>
 #include <iterator>
 #include <list>
-#include <iostream>
+
+#include <components/debug/debuglog.hpp>
 
 #include <components/esm/loaddial.hpp>
 #include <components/esm/loadinfo.hpp>
@@ -203,16 +204,14 @@ namespace MWDialogue
         }
         catch (const std::exception& error)
         {
-            std::cerr << std::string ("Dialogue error: An exception has been thrown: ") + error.what() << std::endl;
+            Log(Debug::Error) << std::string ("Dialogue error: An exception has been thrown: ") + error.what();
             success = false;
         }
 
         if (!success)
         {
-            std::cerr
-                << "Warning: compiling failed (dialogue script)" << std::endl
-                << cmd
-                << std::endl << std::endl;
+            Log(Debug::Warning)
+                << "Warning: compiling failed (dialogue script)\n" << cmd << "\n\n";
         }
 
         return success;
@@ -232,7 +231,7 @@ namespace MWDialogue
             }
             catch (const std::exception& error)
             {
-                std::cerr << std::string ("Dialogue error: An exception has been thrown: ") + error.what() << std::endl;
+               Log(Debug::Error) << std::string ("Dialogue error: An exception has been thrown: ") + error.what();
             }
         }
     }

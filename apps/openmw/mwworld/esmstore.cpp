@@ -1,12 +1,11 @@
 #include "esmstore.hpp"
 
 #include <set>
-#include <iostream>
 
 #include <boost/filesystem/operations.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
-
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 
@@ -84,7 +83,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                 }
                 else
                 {
-                    std::cerr << "error: info record without dialog" << std::endl;
+                    Log(Debug::Error) << "Error: info record without dialog";
                     esm.skipRecord();
                 }
             } else if (n.intval == ESM::REC_MGEF) {
@@ -170,7 +169,7 @@ void ESMStore::validate()
             const ESM::Faction *fact = mFactions.search(npcFaction);
             if (!fact)
             {
-                std::cerr << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent faction '" << npc.mFaction << "', ignoring it." << std::endl;
+                Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent faction '" << npc.mFaction << "', ignoring it.";
                 npc.mFaction = "";
                 npc.mNpdt.mRank = -1;
                 changed = true;
@@ -183,7 +182,7 @@ void ESMStore::validate()
             const ESM::Class *cls = mClasses.search(npcClass);
             if (!cls)
             {
-                std::cerr << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent class '" << npc.mClass << "', using '" << defaultCls << "' class as replacement." << std::endl;
+                Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent class '" << npc.mClass << "', using '" << defaultCls << "' class as replacement.";
                 npc.mClass = defaultCls;
                 changed = true;
             }

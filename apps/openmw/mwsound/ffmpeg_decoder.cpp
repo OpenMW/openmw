@@ -3,9 +3,9 @@
 #include <memory>
 
 #include <stdexcept>
-#include <iostream>
 #include <algorithm>
 
+#include <components/debug/debuglog.hpp>
 #include <components/vfs/manager.hpp>
 
 namespace MWSound
@@ -28,7 +28,7 @@ int FFmpeg_Decoder::readPacket(void *user_data, uint8_t *buf, int buf_size)
 
 int FFmpeg_Decoder::writePacket(void *, uint8_t *, int)
 {
-    std::cerr<< "can't write to read-only stream" <<std::endl;
+    Log(Debug::Error) << "can't write to read-only stream";
     return -1;
 }
 
@@ -343,7 +343,7 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
         char str[1024];
         av_get_channel_layout_string(str, sizeof(str), (*mStream)->codec->channels,
                                      (*mStream)->codec->channel_layout);
-        std::cerr<< "Unsupported channel layout: "<<str <<std::endl;
+        Log(Debug::Error) << "Unsupported channel layout: "<< str;
 
         if((*mStream)->codec->channels == 1)
         {
@@ -385,7 +385,7 @@ size_t FFmpeg_Decoder::read(char *buffer, size_t bytes)
 {
     if(!mStream)
     {
-        std::cerr<< "No audio stream" <<std::endl;
+        Log(Debug::Error) << "No audio stream";
         return 0;
     }
     return readAVAudioData(buffer, bytes);
@@ -395,7 +395,7 @@ void FFmpeg_Decoder::readAll(std::vector<char> &output)
 {
     if(!mStream)
     {
-        std::cerr<< "No audio stream" <<std::endl;
+        Log(Debug::Error) << "No audio stream";
         return;
     }
 

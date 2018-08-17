@@ -12,11 +12,18 @@
 #endif // MAC_OS_X_VERSION_MIN_REQUIRED
 
 #include "maindialog.hpp"
+#include "sdlinit.hpp"
 
 int main(int argc, char *argv[])
 {
     try
     {
+// Note: we should init SDL2 before Qt4 to avoid crashes on Linux,
+// but we should init SDL2 after Qt5 to avoid input issues on MacOS X.
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+        initSDL();
+#endif
+
         QApplication app(argc, argv);
 
         // Now we make sure the current dir is set to application path
@@ -33,7 +40,14 @@ int main(int argc, char *argv[])
         if (result == Launcher::FirstRunDialogResultContinue)
             mainWin.show();
 
-        return app.exec();
+        int exitCode = app.exec();
+
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+        // Disconnect from SDL processes
+        quitSDL();
+#endif
+
+        return exitCode;
     }
     catch (std::exception& e)
     {

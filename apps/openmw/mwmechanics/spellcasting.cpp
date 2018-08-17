@@ -509,9 +509,18 @@ namespace MWMechanics
                 }
                 else // target.getClass().isActor() == true
                 {
+                    ActiveSpells::ActiveEffect effect;
+                    effect.mEffectId = effectIt->mEffectID;
+                    effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
+                    effect.mMagnitude = magnitude;
+
                     bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
                     if (hasDuration && effectIt->mDuration == 0)
                     {
+                        // We still should add effect to list to allow GetSpellEffects to detect this spell
+                        effect.mDuration = 0.f;
+                        appliedLastingEffects.push_back(effect);
+
                         // duration 0 means apply full magnitude instantly
                         bool wasDead = target.getClass().getCreatureStats(target).isDead();
                         effectTick(target.getClass().getCreatureStats(target), target, EffectKey(*effectIt), magnitude);
@@ -522,18 +531,15 @@ namespace MWMechanics
                     }
                     else
                     {
-                        // add to list of active effects, to apply in next frame
-                        ActiveSpells::ActiveEffect effect;
-                        effect.mEffectId = effectIt->mEffectID;
-                        effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
+
                         if (!hasDuration)
                             effect.mDuration = 1.0f;
                         else
                             effect.mDuration = static_cast<float>(effectIt->mDuration);
-                        effect.mMagnitude = magnitude;
 
                         targetEffects.add(MWMechanics::EffectKey(*effectIt), MWMechanics::EffectParam(effect.mMagnitude));
 
+                        // add to list of active effects, to apply in next frame
                         appliedLastingEffects.push_back(effect);
 
                         // Unequip all items, if a spell with the ExtraSpell effect was casted

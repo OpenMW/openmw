@@ -1,4 +1,4 @@
-#include <iostream>
+#include <components/debug/debuglog.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -317,7 +317,7 @@ namespace MWScript
                         {
                             std::string error = "Warning: PositionCell: unknown interior cell (" + cellID + "), moving to exterior instead";
                             runtime.getContext().report (error);
-                            std::cerr << error << std::endl;
+                            Log(Debug::Warning) << error;
                         }
                     }
                     if(store)
@@ -429,7 +429,7 @@ namespace MWScript
                         if(!cell)
                         {
                             runtime.getContext().report ("unknown cell (" + cellID + ")");
-                            std::cerr << "unknown cell (" << cellID << ")\n";
+                            Log(Debug::Error) << "Error: unknown cell (" << cellID << ")";
                         }
                     }
                     if(store)

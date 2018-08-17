@@ -1,8 +1,8 @@
 #include "aisequence.hpp"
 
 #include <limits>
-#include <iostream>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -282,7 +282,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
         }
         catch (std::exception& e)
         {
-            std::cerr << "Error during AiSequence::execute: " << e.what() << std::endl;
+            Log(Debug::Error) << "Error during AiSequence::execute: " << e.what();
         }
     }
 }

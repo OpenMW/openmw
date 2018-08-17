@@ -13,6 +13,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/interpreter/defines.hpp>
 #include <components/misc/stringops.hpp>
 
@@ -300,7 +301,7 @@ namespace MWGui
 
                         if (!exists)
                         {
-                            std::cerr << "Warning: Could not find \"" << src << "\" referenced by an <img> tag." << std::endl;
+                            Log(Debug::Warning) << "Warning: Could not find \"" << src << "\" referenced by an <img> tag.";
                             break;
                         }
 

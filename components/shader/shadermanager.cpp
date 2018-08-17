@@ -11,6 +11,8 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include <components/debug/debuglog.hpp>
+
 namespace Shader
 {
 
@@ -69,13 +71,13 @@ namespace Shader
             size_t start = source.find('"', foundPos);
             if (start == std::string::npos || start == source.size()-1)
             {
-                std::cerr << "Invalid #include " << std::endl;
+                Log(Debug::Error) << "Invalid #include";
                 return false;
             }
             size_t end = source.find('"', start+1);
             if (end == std::string::npos)
             {
-                std::cerr << "Invalid #include " << std::endl;
+                Log(Debug::Error) << "Invalid #include";
                 return false;
             }
             std::string includeFilename = source.substr(start+1, end-(start+1));
@@ -84,7 +86,7 @@ namespace Shader
             includeFstream.open(includePath);
             if (includeFstream.fail())
             {
-                std::cerr << "Failed to open " << includePath.string() << std::endl;
+                Log(Debug::Error) << "Failed to open " << includePath.string();
                 return false;
             }
 
@@ -119,7 +121,7 @@ namespace Shader
 
             if (includedFiles.insert(includePath).second == false)
             {
-                std::cerr << "Detected cyclic #includes" << std::endl;
+                Log(Debug::Error) << "Detected cyclic #includes";
                 return false;
             }
         }
@@ -135,13 +137,13 @@ namespace Shader
             size_t endPos = source.find_first_of(" \n\r()[].;,", foundPos);
             if (endPos == std::string::npos)
             {
-                std::cerr << "Unexpected EOF" << std::endl;
+                Log(Debug::Error) << "Unexpected EOF";
                 return false;
             }
             std::string command = source.substr(foundPos + 1, endPos - (foundPos + 1));
             if (command != "foreach")
             {
-                std::cerr << "Unknown shader directive: $" << command << std::endl;
+                Log(Debug::Error) << "Unknown shader directive: $" << command;
                 return false;
             }
 
@@ -149,7 +151,7 @@ namespace Shader
             size_t iterNameEnd = source.find_first_of(" \n\r()[].;,", iterNameStart);
             if (iterNameEnd == std::string::npos)
             {
-                std::cerr << "Unexpected EOF" << std::endl;
+                Log(Debug::Error) << "Unexpected EOF";
                 return false;
             }
             std::string iteratorName = "$" + source.substr(iterNameStart, iterNameEnd - iterNameStart);
@@ -158,7 +160,7 @@ namespace Shader
             size_t listEnd = source.find_first_of("\n\r", listStart);
             if (listEnd == std::string::npos)
             {
-                std::cerr << "Unexpected EOF" << std::endl;
+                Log(Debug::Error) << "Unexpected EOF";
                 return false;
             }
             std::string list = source.substr(listStart, listEnd - listStart);
@@ -170,7 +172,7 @@ namespace Shader
             size_t contentEnd = source.find("$endforeach", contentStart);
             if (contentEnd == std::string::npos)
             {
-                std::cerr << "Unexpected EOF" << std::endl;
+				Log(Debug::Error) << "Unexpected EOF";
                 return false;
             }
             std::string content = source.substr(contentStart, contentEnd - contentStart);
@@ -219,7 +221,7 @@ namespace Shader
             size_t endPos = source.find_first_of(" \n\r()[].;,", foundPos);
             if (endPos == std::string::npos)
             {
-                std::cerr << "Unexpected EOF" << std::endl;
+                Log(Debug::Error) << "Unexpected EOF";
                 return false;
             }
             std::string define = source.substr(foundPos+1, endPos - (foundPos+1));
@@ -232,7 +234,7 @@ namespace Shader
                 size_t iterNameEnd = source.find_first_of(" \n\r()[].;,", iterNameStart);
                 if (iterNameEnd == std::string::npos)
                 {
-                    std::cerr << "Unexpected EOF" << std::endl;
+					Log(Debug::Error)  << "Unexpected EOF";
                     return false;
                 }
                 forIterators.push_back(source.substr(iterNameStart, iterNameEnd - iterNameStart));
@@ -242,7 +244,7 @@ namespace Shader
                 source.replace(foundPos, 1, "$");
                 if (forIterators.empty())
                 {
-                    std::cerr << "endforeach without foreach" << std::endl;
+					Log(Debug::Error) << "endforeach without foreach";
                     return false;
                 }
                 else
@@ -262,7 +264,7 @@ namespace Shader
             }
             else
             {
-                std::cerr << "Undefined " << define << std::endl;
+				Log(Debug::Error) << "Undefined " << define;
                 return false;
             }
         }
@@ -282,7 +284,7 @@ namespace Shader
             stream.open(p);
             if (stream.fail())
             {
-                std::cerr << "Failed to open " << p.string() << std::endl;
+                Log(Debug::Error) << "Failed to open " << p.string();
                 return NULL;
             }
             std::stringstream buffer;

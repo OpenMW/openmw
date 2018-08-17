@@ -10,6 +10,7 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/sceneutil/riggeometry.hpp>
@@ -147,7 +148,7 @@ namespace Shader
                                 specularMap = texture;
                         }
                         else
-                            std::cerr << "ShaderVisitor encountered unknown texture " << texture << std::endl;
+                            Log(Debug::Error) << "ShaderVisitor encountered unknown texture " << texture;
                     }
                 }
             }

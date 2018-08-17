@@ -1,11 +1,8 @@
-#include <iostream>
-
 #include <components/version/version.hpp>
-#include <components/crashcatcher/crashcatcher.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/escape.hpp>
 #include <components/fallback/validate.hpp>
-#include <components/misc/debugging.hpp>
+#include <components/debug/debugging.hpp>
 
 #include "engine.hpp"
 
@@ -203,8 +200,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     StringsVector content = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
     if (content.empty())
     {
-      std::cout << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting..." << std::endl;
-      return false;
+        Log(Debug::Error) << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting...";
+        return false;
     }
 
     StringsVector::const_iterator it(content.begin());
@@ -218,7 +215,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCell(variables["start"].as<Files::EscapeHashString>().toStdString());
     engine.setSkipMenu (variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
     if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
-        std::cerr << "Warning: new-game used without skip-menu -> ignoring it" << std::endl;
+        Log(Debug::Warning) << "Warning: new-game used without skip-menu -> ignoring it";
 
     // scripts
     engine.setCompileAll(variables["script-all"].as<bool>());
@@ -265,7 +262,7 @@ extern "C" int SDL_main(int argc, char**argv)
 int main(int argc, char**argv)
 #endif
 {
-    return wrapApplication(&runApplication, argc, argv, "/openmw.log");
+    return wrapApplication(&runApplication, argc, argv, "OpenMW");
 }
 
 // Platform specific for Windows when there is no console built into the executable.
