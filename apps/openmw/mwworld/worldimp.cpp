@@ -155,7 +155,8 @@ namespace MWWorld
       mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles), mUserDataPath(userDataPath),
       mActivationDistanceOverride (activationDistanceOverride), mStartupScript(startupScript),
       mStartCell (startCell), mDistanceToFacedObject(-1), mTeleportEnabled(true),
-      mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0), mSpellPreloadTimer(0.f)
+      mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
+      mPlayerTraveling(false), mPlayerInJail(false), mSpellPreloadTimer(0.f)
     {
         mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
         mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath));
@@ -313,6 +314,8 @@ namespace MWWorld
         mGoToJail = false;
         mTeleportEnabled = true;
         mLevitationEnabled = true;
+        mPlayerTraveling = false;
+        mPlayerInJail = false;
 
         fillGlobalVariables();
     }
@@ -1643,6 +1646,15 @@ namespace MWWorld
     {
         if (mGoToJail && !paused)
             goToJail();
+
+        // Reset "traveling" flag - there was a frame to detect traveling.
+        mPlayerTraveling = false;
+
+        // The same thing for "in jail" flag: reset it if:
+        // 1. Player was in jail
+        // 2. Jailing window was closed
+        if (mPlayerInJail && !mGoToJail && !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Jail))
+            mPlayerInJail = false;
 
         updateWeather(duration, paused);
 
@@ -3283,6 +3295,7 @@ namespace MWWorld
         {
             // Reset bounty and forget the crime now, but don't change cell yet (the player should be able to read the dialog text first)
             mGoToJail = true;
+            mPlayerInJail = true;
 
             MWWorld::Ptr player = getPlayerPtr();
 
@@ -3308,10 +3321,17 @@ namespace MWWorld
 
     bool World::isPlayerInJail() const
     {
-        if (mGoToJail)
-            return true;
+        return mPlayerInJail;
+    }
 
-        return MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Jail);
+    void World::setPlayerTraveling(bool traveling)
+    {
+        mPlayerTraveling = traveling;
+    }
+
+    bool World::isPlayerTraveling() const
+    {
+        return mPlayerTraveling;
     }
 
     float World::getTerrainHeightAt(const osg::Vec3f& worldPos) const
