@@ -2067,6 +2067,14 @@ struct ConvexHull
             ++itr)
         {
             center += *itr;
+
+            center.x() = osg::maximum(center.x(), -DBL_MAX);
+            center.y() = osg::maximum(center.y(), -DBL_MAX);
+            center.z() = osg::maximum(center.z(), -DBL_MAX);
+
+            center.x() = osg::minimum(center.x(), DBL_MAX);
+            center.y() = osg::minimum(center.y(), DBL_MAX);
+            center.z() = osg::minimum(center.z(), DBL_MAX);
         }
 
         center /= double(intersections.size());
