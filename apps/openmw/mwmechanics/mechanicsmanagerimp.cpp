@@ -1,6 +1,7 @@
 #include "mechanicsmanagerimp.hpp"
 
 #include <limits.h>
+#include <set>
 
 #include <components/misc/rng.hpp>
 
@@ -1445,11 +1446,12 @@ namespace MWMechanics
         if (target == getPlayer() || !attacker.getClass().isActor())
             return false;
 
-        std::list<MWWorld::Ptr> followersAttacker = getActorsSidingWith(attacker);
+        std::set<MWWorld::Ptr> followersAttacker;
+        getActorsSidingWith(attacker, followersAttacker);
 
         MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
 
-        if (std::find(followersAttacker.begin(), followersAttacker.end(), target) != followersAttacker.end())
+        if (followersAttacker.find(target) != followersAttacker.end())
         {
             statsTarget.friendlyHit();
 
