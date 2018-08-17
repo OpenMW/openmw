@@ -172,7 +172,7 @@ namespace Shader
             size_t contentEnd = source.find("$endforeach", contentStart);
             if (contentEnd == std::string::npos)
             {
-				Log(Debug::Error) << "Unexpected EOF";
+                Log(Debug::Error) << "Unexpected EOF";
                 return false;
             }
             std::string content = source.substr(contentStart, contentEnd - contentStart);
@@ -234,7 +234,7 @@ namespace Shader
                 size_t iterNameEnd = source.find_first_of(" \n\r()[].;,", iterNameStart);
                 if (iterNameEnd == std::string::npos)
                 {
-					Log(Debug::Error)  << "Unexpected EOF";
+                    Log(Debug::Error)  << "Unexpected EOF";
                     return false;
                 }
                 forIterators.push_back(source.substr(iterNameStart, iterNameEnd - iterNameStart));
@@ -244,7 +244,7 @@ namespace Shader
                 source.replace(foundPos, 1, "$");
                 if (forIterators.empty())
                 {
-					Log(Debug::Error) << "endforeach without foreach";
+                    Log(Debug::Error) << "endforeach without foreach";
                     return false;
                 }
                 else
@@ -264,7 +264,7 @@ namespace Shader
             }
             else
             {
-				Log(Debug::Error) << "Undefined " << define;
+                Log(Debug::Error) << "Undefined " << define;
                 return false;
             }
         }
