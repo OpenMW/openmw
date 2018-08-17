@@ -183,6 +183,7 @@ Documentation
     Cramal
     Ryan Tucker (Ravenwing)
     sir_herrbatka
+    Diego Crespo
 
 Packagers
 ---------
