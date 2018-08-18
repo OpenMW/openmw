@@ -33,7 +33,7 @@ namespace MWMechanics
             void update(const MWWorld::Ptr& actor, float duration, float scaleMinimumDistance = 1.0f);
 
             // change direction to try to fix "stuck" actor
-            void takeEvasiveAction(MWMechanics::Movement& actorMovement);
+            void takeEvasiveAction(MWMechanics::Movement& actorMovement) const;
 
         private:
 

@@ -186,7 +186,7 @@ namespace MWMechanics
         }
     }
 
-    void ObstacleCheck::takeEvasiveAction(MWMechanics::Movement& actorMovement)
+    void ObstacleCheck::takeEvasiveAction(MWMechanics::Movement& actorMovement) const
     {
         actorMovement.mPosition[0] = evadeDirections[mEvadeDirectionIndex][0];
         actorMovement.mPosition[1] = evadeDirections[mEvadeDirectionIndex][1];
