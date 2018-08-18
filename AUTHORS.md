@@ -181,6 +181,7 @@ Documentation
     Alejandro Sanchez (HiPhish)
     Bodillium
     Bret Curtis (psi29a)
+    David Walley (Loriel)
     Cramal
     Ryan Tucker (Ravenwing)
     sir_herrbatka
