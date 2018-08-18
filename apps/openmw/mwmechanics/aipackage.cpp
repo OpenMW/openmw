@@ -200,8 +200,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
 void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor)
 {
-    MWMechanics::Movement& movement = actor.getClass().getMovementSettings(actor);
-
     // check if stuck due to obstacles
     if (!mObstacleCheck.isEvading()) return;
 
@@ -215,7 +213,7 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor)
     }
     else
     {
-        mObstacleCheck.takeEvasiveAction(movement);
+        mObstacleCheck.takeEvasiveAction(actor.getClass().getMovementSettings(actor));
     }
 }
 
