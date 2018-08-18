@@ -90,7 +90,7 @@ namespace MWMechanics
                 return !mPath.empty();
             }
 
-            int getPathSize() const
+            std::size_t getPathSize() const
             {
                 return mPath.size();
             }
