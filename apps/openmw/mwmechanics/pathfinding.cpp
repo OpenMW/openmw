@@ -27,7 +27,7 @@ namespace
         //       points to a quadtree may help
         for(unsigned int counter = 0; counter < grid->mPoints.size(); counter++)
         {
-            float potentialDistBetween = MWMechanics::PathFinder::DistanceSquared(grid->mPoints[counter], pos);
+            float potentialDistBetween = MWMechanics::PathFinder::distanceSquared(grid->mPoints[counter], pos);
             if (potentialDistBetween < closestDistanceReachable)
             {
                 // found a closer one
@@ -108,7 +108,7 @@ namespace MWMechanics
      * pathgrid point (e.g. wander) then it may be worth while to call
      * pop_back() to remove the redundant entry.
      *
-     * NOTE: coordinates must be converted prior to calling GetClosestPoint()
+     * NOTE: coordinates must be converted prior to calling getClosestPoint()
      *
      *    |
      *    |       cell
@@ -148,16 +148,16 @@ namespace MWMechanics
             return;
         }
 
-        // NOTE: GetClosestPoint expects local coordinates
+        // NOTE: getClosestPoint expects local coordinates
         CoordinateConverter converter(mCell->getCell());
 
-        // NOTE: It is possible that GetClosestPoint returns a pathgrind point index
+        // NOTE: It is possible that getClosestPoint returns a pathgrind point index
         //       that is unreachable in some situations. e.g. actor is standing
         //       outside an area enclosed by walls, but there is a pathgrid
         //       point right behind the wall that is closer than any pathgrid
         //       point outside the wall
         osg::Vec3f startPointInLocalCoords(converter.toLocalVec3(startPoint));
-        int startNode = GetClosestPoint(mPathgrid, startPointInLocalCoords);
+        int startNode = getClosestPoint(mPathgrid, startPointInLocalCoords);
 
         osg::Vec3f endPointInLocalCoords(converter.toLocalVec3(endPoint));
         std::pair<int, bool> endNode = getClosestReachablePoint(mPathgrid, &pathgridGraph,
@@ -167,8 +167,8 @@ namespace MWMechanics
         // if it's shorter for actor to travel from start to end, than to travel from either
         // start or end to nearest pathgrid point, just travel from start to end.
         float startToEndLength2 = (endPointInLocalCoords - startPointInLocalCoords).length2();
-        float endTolastNodeLength2 = DistanceSquared(mPathgrid->mPoints[endNode.first], endPointInLocalCoords);
-        float startTo1stNodeLength2 = DistanceSquared(mPathgrid->mPoints[startNode], startPointInLocalCoords);
+        float endTolastNodeLength2 = distanceSquared(mPathgrid->mPoints[endNode.first], endPointInLocalCoords);
+        float startTo1stNodeLength2 = distanceSquared(mPathgrid->mPoints[startNode], startPointInLocalCoords);
         if ((startToEndLength2 < startTo1stNodeLength2) || (startToEndLength2 < endTolastNodeLength2))
         {
             mPath.push_back(endPoint);
@@ -184,7 +184,7 @@ namespace MWMechanics
         {
             ESM::Pathgrid::Point temp(mPathgrid->mPoints[startNode]);
             converter.toWorld(temp);
-            mPath.push_back(MakeOsgVec3(temp));
+            mPath.push_back(makeOsgVec3(temp));
         }
         else
         {
@@ -195,8 +195,8 @@ namespace MWMechanics
             if (path.size() > 1)
             {
                 ESM::Pathgrid::Point secondNode = *(++path.begin());
-                osg::Vec3f firstNodeVec3f = MakeOsgVec3(mPathgrid->mPoints[startNode]);
-                osg::Vec3f secondNodeVec3f = MakeOsgVec3(secondNode);
+                osg::Vec3f firstNodeVec3f = makeOsgVec3(mPathgrid->mPoints[startNode]);
+                osg::Vec3f secondNodeVec3f = makeOsgVec3(secondNode);
                 osg::Vec3f toSecondNodeVec3f = secondNodeVec3f - firstNodeVec3f;
                 osg::Vec3f toStartPointVec3f = startPointInLocalCoords - firstNodeVec3f;
                 if (toSecondNodeVec3f * toStartPointVec3f > 0)
@@ -217,7 +217,7 @@ namespace MWMechanics
                 [&] (ESM::Pathgrid::Point& point)
                 {
                     converter.toWorld(point);
-                    return MakeOsgVec3(point);
+                    return makeOsgVec3(point);
                 });
         }
 

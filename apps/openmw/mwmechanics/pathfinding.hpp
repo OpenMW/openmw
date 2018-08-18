@@ -118,18 +118,18 @@ namespace MWMechanics
             }
 
             /// utility function to convert a osg::Vec3f to a Pathgrid::Point
-            static ESM::Pathgrid::Point MakePathgridPoint(const osg::Vec3f& v)
+            static ESM::Pathgrid::Point makePathgridPoint(const osg::Vec3f& v)
             {
                 return ESM::Pathgrid::Point(static_cast<int>(v[0]), static_cast<int>(v[1]), static_cast<int>(v[2]));
             }
 
             /// utility function to convert an ESM::Position to a Pathgrid::Point
-            static ESM::Pathgrid::Point MakePathgridPoint(const ESM::Position& p)
+            static ESM::Pathgrid::Point makePathgridPoint(const ESM::Position& p)
             {
                 return ESM::Pathgrid::Point(static_cast<int>(p.pos[0]), static_cast<int>(p.pos[1]), static_cast<int>(p.pos[2]));
             }
 
-            static osg::Vec3f MakeOsgVec3(const ESM::Pathgrid::Point& p)
+            static osg::Vec3f makeOsgVec3(const ESM::Pathgrid::Point& p)
             {
                 return osg::Vec3f(static_cast<float>(p.mX), static_cast<float>(p.mY), static_cast<float>(p.mZ));
             }
@@ -138,9 +138,9 @@ namespace MWMechanics
             // Caller needs to be careful for very short distances (i.e. less than 1)
             // or when accumuating the results i.e. (a + b)^2 != a^2 + b^2
             //
-            static float DistanceSquared(ESM::Pathgrid::Point point, const osg::Vec3f& pos)
+            static float distanceSquared(ESM::Pathgrid::Point point, const osg::Vec3f& pos)
             {
-                return (MWMechanics::PathFinder::MakeOsgVec3(point) - pos).length2();
+                return (MWMechanics::PathFinder::makeOsgVec3(point) - pos).length2();
             }
 
             // Return the closest pathgrid point index from the specified position
@@ -149,18 +149,18 @@ namespace MWMechanics
             //
             // NOTE: pos is expected to be in local coordinates, as is grid->mPoints
             //
-            static int GetClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
+            static int getClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
             {
                 assert(grid && !grid->mPoints.empty());
 
-                float distanceBetween = DistanceSquared(grid->mPoints[0], pos);
+                float distanceBetween = distanceSquared(grid->mPoints[0], pos);
                 int closestIndex = 0;
 
                 // TODO: if this full scan causes performance problems mapping pathgrid
                 //       points to a quadtree may help
                 for(unsigned int counter = 1; counter < grid->mPoints.size(); counter++)
                 {
-                    float potentialDistBetween = DistanceSquared(grid->mPoints[counter], pos);
+                    float potentialDistBetween = distanceSquared(grid->mPoints[counter], pos);
                     if(potentialDistBetween < distanceBetween)
                     {
                         distanceBetween = potentialDistBetween;

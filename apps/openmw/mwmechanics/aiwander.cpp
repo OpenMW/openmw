@@ -593,7 +593,7 @@ namespace MWMechanics
         const auto start = actorPos.asVec3();
 
         // don't take shortcuts for wandering
-        const auto destVec3f = PathFinder::MakeOsgVec3(dest);
+        const auto destVec3f = PathFinder::makeOsgVec3(dest);
         mPathFinder.buildSyncedPath(start, destVec3f, actor.getCell(), getPathGridGraph(actor.getCell()));
 
         if (mPathFinder.isPathConstructed())
@@ -730,7 +730,7 @@ namespace MWMechanics
         ESM::Pathgrid::Point worldDest = dest;
         ToWorldCoordinates(worldDest, actor.getCell()->getCell());
 
-        bool isPathGridOccupied = MWBase::Environment::get().getMechanicsManager()->isAnyActorInRange(PathFinder::MakeOsgVec3(worldDest), 60);
+        bool isPathGridOccupied = MWBase::Environment::get().getMechanicsManager()->isAnyActorInRange(PathFinder::makeOsgVec3(worldDest), 60);
 
         // add offset only if the selected pathgrid is occupied by another actor
         if (isPathGridOccupied)
@@ -751,18 +751,18 @@ namespace MWMechanics
                 ESM::Pathgrid::Point connDest = points[randomIndex];
 
                 // add an offset towards random neighboring node
-                osg::Vec3f dir = PathFinder::MakeOsgVec3(connDest) - PathFinder::MakeOsgVec3(dest);
+                osg::Vec3f dir = PathFinder::makeOsgVec3(connDest) - PathFinder::makeOsgVec3(dest);
                 float length = dir.length();
                 dir.normalize();
 
                 for (int j = 1; j <= 3; j++)
                 {
                     // move for 5-15% towards random neighboring node
-                    dest = PathFinder::MakePathgridPoint(PathFinder::MakeOsgVec3(dest) + dir * (j * 5 * length / 100.f));
+                    dest = PathFinder::makePathgridPoint(PathFinder::makeOsgVec3(dest) + dir * (j * 5 * length / 100.f));
                     worldDest = dest;
                     ToWorldCoordinates(worldDest, actor.getCell()->getCell());
 
-                    isOccupied = MWBase::Environment::get().getMechanicsManager()->isAnyActorInRange(PathFinder::MakeOsgVec3(worldDest), 60);
+                    isOccupied = MWBase::Environment::get().getMechanicsManager()->isAnyActorInRange(PathFinder::makeOsgVec3(worldDest), 60);
 
                     if (!isOccupied)
                         break;
@@ -798,7 +798,7 @@ namespace MWMechanics
         const ESM::Pathgrid *pathgrid =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*currentCell->getCell());
 
-        int index = PathFinder::GetClosestPoint(pathgrid, PathFinder::MakeOsgVec3(dest));
+        int index = PathFinder::getClosestPoint(pathgrid, PathFinder::makeOsgVec3(dest));
 
         getPathGridGraph(currentCell).getNeighbouringPoints(index, points);
     }
@@ -831,7 +831,7 @@ namespace MWMechanics
             CoordinateConverter(cell).toLocal(npcPos);
 
             // Find closest pathgrid point
-            int closestPointIndex = PathFinder::GetClosestPoint(pathgrid, npcPos);
+            int closestPointIndex = PathFinder::getClosestPoint(pathgrid, npcPos);
 
             // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
             // and if the point is connected to the closest current point
@@ -839,7 +839,7 @@ namespace MWMechanics
             int pointIndex = 0;
             for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
             {
-                osg::Vec3f nodePos(PathFinder::MakeOsgVec3(pathgrid->mPoints[counter]));
+                osg::Vec3f nodePos(PathFinder::makeOsgVec3(pathgrid->mPoints[counter]));
                 if((npcPos - nodePos).length2() <= mDistance * mDistance &&
                    getPathGridGraph(cellStore).isPointConnected(closestPointIndex, counter))
                 {
@@ -866,7 +866,7 @@ namespace MWMechanics
     // 2. Partway along the path between the point and its connected points.
     void AiWander::AddNonPathGridAllowedPoints(osg::Vec3f npcPos, const ESM::Pathgrid * pathGrid, int pointIndex, AiWanderStorage& storage)
     {
-        storage.mAllowedNodes.push_back(PathFinder::MakePathgridPoint(npcPos));
+        storage.mAllowedNodes.push_back(PathFinder::makePathgridPoint(npcPos));
         for (std::vector<ESM::Pathgrid::Edge>::const_iterator it = pathGrid->mEdges.begin(); it != pathGrid->mEdges.end(); ++it)
         {
             if (it->mV0 == pointIndex)
@@ -878,8 +878,8 @@ namespace MWMechanics
 
     void AiWander::AddPointBetweenPathGridPoints(const ESM::Pathgrid::Point& start, const ESM::Pathgrid::Point& end, AiWanderStorage& storage)
     {
-        osg::Vec3f vectorStart = PathFinder::MakeOsgVec3(start);
-        osg::Vec3f delta = PathFinder::MakeOsgVec3(end) - vectorStart;
+        osg::Vec3f vectorStart = PathFinder::makeOsgVec3(start);
+        osg::Vec3f delta = PathFinder::makeOsgVec3(end) - vectorStart;
         float length = delta.length();
         delta.normalize();
 
@@ -888,7 +888,7 @@ namespace MWMechanics
         // must not travel longer than distance between waypoints or NPC goes past waypoint
         distance = std::min(distance, static_cast<int>(length));
         delta *= distance;
-        storage.mAllowedNodes.push_back(PathFinder::MakePathgridPoint(vectorStart + delta));
+        storage.mAllowedNodes.push_back(PathFinder::makePathgridPoint(vectorStart + delta));
     }
 
     void AiWander::SetCurrentNodeToClosestAllowedNode(const osg::Vec3f& npcPos, AiWanderStorage& storage)
@@ -897,7 +897,7 @@ namespace MWMechanics
         unsigned int index = 0;
         for (unsigned int counterThree = 0; counterThree < storage.mAllowedNodes.size(); counterThree++)
         {
-            osg::Vec3f nodePos(PathFinder::MakeOsgVec3(storage.mAllowedNodes[counterThree]));
+            osg::Vec3f nodePos(PathFinder::makeOsgVec3(storage.mAllowedNodes[counterThree]));
             float tempDist = (npcPos - nodePos).length2();
             if (tempDist < distanceToClosestNode)
             {

@@ -303,7 +303,7 @@ namespace MWMechanics
                             osg::Vec3f localPos = actor.getRefData().getPosition().asVec3();
                             coords.toLocal(localPos);
 
-                            int closestPointIndex = PathFinder::GetClosestPoint(pathgrid, localPos);
+                            int closestPointIndex = PathFinder::getClosestPoint(pathgrid, localPos);
                             for (int i = 0; i < static_cast<int>(pathgrid->mPoints.size()); i++)
                             {
                                 if (i != closestPointIndex && getPathGridGraph(storage.mCell).isPointConnected(closestPointIndex, i))
@@ -355,7 +355,7 @@ namespace MWMechanics
 
                     float dist = (actor.getRefData().getPosition().asVec3() - target.getRefData().getPosition().asVec3()).length();
                     if ((dist > fFleeDistance && !storage.mLOS)
-                            || pathTo(actor, PathFinder::MakeOsgVec3(storage.mFleeDest), duration))
+                            || pathTo(actor, PathFinder::makeOsgVec3(storage.mFleeDest), duration))
                     {
                         state = AiCombatStorage::FleeState_Idle;
                     }
