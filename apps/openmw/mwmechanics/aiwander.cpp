@@ -425,7 +425,7 @@ namespace MWMechanics
         else
         {
             // have not yet reached the destination
-            evadeObstacles(actor, storage, duration, pos);
+            evadeObstacles(actor, storage);
         }
     }
 
@@ -456,7 +456,7 @@ namespace MWMechanics
         storage.setState(AiWanderStorage::Wander_IdleNow);
     }
 
-    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration, ESM::Position& pos)
+    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage)
     {
         if (mObstacleCheck.isEvading())
         {
