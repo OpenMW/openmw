@@ -47,6 +47,8 @@ namespace MWMechanics
     // distance after which actor (failed previously to shortcut) will try again
     const float PATHFIND_SHORTCUT_RETRY_DIST = 300.0f;
 
+    const float DEFAULT_TOLERANCE = 32.0f;
+
     // cast up-down ray with some offset from actor position to check for pits/obstacles on the way to target;
     // magnitude of pits/obstacles is defined by PATHFIND_Z_REACH
     bool checkWayIsClear(const osg::Vec3f& from, const osg::Vec3f& to, float offsetXY);
@@ -56,14 +58,12 @@ namespace MWMechanics
         public:
             PathFinder();
 
-            static const int PathTolerance = 32;
-
             void clearPath();
 
             void buildPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                            const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
 
-            bool checkPathCompleted(const osg::Vec3f& position, const float tolerance = PathTolerance);
+            bool checkPathCompleted(const osg::Vec3f& position, const float tolerance = DEFAULT_TOLERANCE);
             ///< \Returns true if we are within \a tolerance units of the last path point.
 
             /// In radians
