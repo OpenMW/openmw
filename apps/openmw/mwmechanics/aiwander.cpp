@@ -158,7 +158,7 @@ namespace MWMechanics
                 storage.setState(AiWanderStorage::Wander_Walking);
         }
 
-        doPerFrameActionsForState(actor, duration, storage, pos);
+        doPerFrameActionsForState(actor, duration, storage);
 
         playIdleDialogueRandomly(actor);
 
@@ -348,7 +348,7 @@ namespace MWMechanics
         storage.setState(AiWanderStorage::Wander_IdleNow);
     }
 
-    void AiWander::doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos)
+    void AiWander::doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage)
     {
         switch (storage.mState)
         {
@@ -357,7 +357,7 @@ namespace MWMechanics
                 break;
 
             case AiWanderStorage::Wander_Walking:
-                onWalkingStatePerFrameActions(actor, duration, storage, pos);
+                onWalkingStatePerFrameActions(actor, duration, storage);
                 break;
 
             case AiWanderStorage::Wander_ChooseAction:
@@ -413,8 +413,7 @@ namespace MWMechanics
         }
     }
 
-    void AiWander::onWalkingStatePerFrameActions(const MWWorld::Ptr& actor,
-        float duration, AiWanderStorage& storage, ESM::Position& pos)
+    void AiWander::onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage)
     {
         // Is there no destination or are we there yet?
         if ((!mPathFinder.isPathConstructed()) || pathTo(actor, osg::Vec3f(mPathFinder.getPath().back()), duration, DESTINATION_TOLERANCE))
