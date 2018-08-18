@@ -178,20 +178,18 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         smoothTurn(actor, getXAngleToPoint(start, dest), 0);
         return true;
     }
-    else
+
+    if (mRotateOnTheRunChecks == 0
+        || isReachableRotatingOnTheRun(actor, *mPathFinder.getPath().begin())) // to prevent circling around a path point
     {
-        if (mRotateOnTheRunChecks == 0
-            || isReachableRotatingOnTheRun(actor, *mPathFinder.getPath().begin())) // to prevent circling around a path point
-        {
-            actor.getClass().getMovementSettings(actor).mPosition[1] = 1; // move to the target
-            if (mRotateOnTheRunChecks > 0) mRotateOnTheRunChecks--;
-        }
-
-        mObstacleCheck.update(actor, duration);
-
-        // handle obstacles on the way
-        evadeObstacles(actor, pos);
+        actor.getClass().getMovementSettings(actor).mPosition[1] = 1; // move to the target
+        if (mRotateOnTheRunChecks > 0) mRotateOnTheRunChecks--;
     }
+
+    mObstacleCheck.update(actor, duration);
+
+    // handle obstacles on the way
+    evadeObstacles(actor, pos);
 
     // turn to next path point by X,Z axes
     zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
