@@ -58,20 +58,6 @@ namespace MWMechanics
 
             static const int PathTolerance = 32;
 
-            static float sgn(float val)
-            {
-                if(val > 0)
-                    return 1.0;
-                return -1.0;
-            }
-
-            static int sgn(int a)
-            {
-                if(a > 0)
-                    return 1;
-                return -1;
-            }
-
             void clearPath();
 
             void buildPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
