@@ -121,7 +121,7 @@ existing filters into more complex ones.
 Scopes
 ======
 
-Every default filter has the prefix ``project``. This is a *scpoe*, a mechanism
+Every default filter has the prefix ``project``. This is a *scope*, a mechanism
 that determines the lifetime of the filter. These are the supported scopes:
 
 ``project::``
