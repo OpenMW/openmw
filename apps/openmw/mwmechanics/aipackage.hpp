@@ -124,7 +124,7 @@ namespace MWMechanics
 
             bool doesPathNeedRecalc(const osg::Vec3f& newDest, const MWWorld::CellStore* currentCell);
 
-            void evadeObstacles(const MWWorld::Ptr& actor, const ESM::Position& pos);
+            void evadeObstacles(const MWWorld::Ptr& actor);
 
             void openDoors(const MWWorld::Ptr& actor);
 

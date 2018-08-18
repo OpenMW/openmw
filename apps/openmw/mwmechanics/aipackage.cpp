@@ -189,7 +189,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     mObstacleCheck.update(actor, duration);
 
     // handle obstacles on the way
-    evadeObstacles(actor, pos);
+    evadeObstacles(actor);
 
     // turn to next path point by X,Z axes
     zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
@@ -198,10 +198,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     return false;
 }
 
-void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, const ESM::Position& pos)
+void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor)
 {
-    zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
-
     MWMechanics::Movement& movement = actor.getClass().getMovementSettings(actor);
 
     // check if stuck due to obstacles
