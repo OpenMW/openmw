@@ -1462,23 +1462,10 @@ namespace MWMechanics
             }
         }
 
-        // Attacking an NPC that is already in combat with any other NPC is not a crime
-        AiSequence& seq = statsTarget.getAiSequence();
-        bool isFightingNpc = false;
-        for (std::list<AiPackage*>::const_iterator it = seq.begin(); it != seq.end(); ++it)
-        {
-            if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
-            {
-                MWWorld::Ptr target2 = (*it)->getTarget();
-                if (!target2.isEmpty() && target2.getClass().isNpc())
-                    isFightingNpc = true;
-            }
-        }
-
-        if (target.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
-                && !isAggressive(target, attacker) && !isFightingNpc
-                && !target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+        if (canCommitCrimeAgainst(target, attacker))
             commitCrime(attacker, target, MWBase::MechanicsManager::OT_Assault);
+
+        AiSequence& seq = statsTarget.getAiSequence();
 
         if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(target)
                                     || attacker == getPlayer())
@@ -1506,6 +1493,14 @@ namespace MWMechanics
         return true;
     }
 
+    bool MechanicsManager::canCommitCrimeAgainst(const MWWorld::Ptr &target, const MWWorld::Ptr &attacker)
+    {
+        MWMechanics::AiSequence seq = target.getClass().getCreatureStats(target).getAiSequence();
+        return target.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
+                && !isAggressive(target, attacker) && !seq.isEngagedWithActor()
+                && !target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackage::TypeIdPursue);
+    }
+
     void MechanicsManager::actorKilled(const MWWorld::Ptr &victim, const MWWorld::Ptr &attacker)
     {
         if (attacker.isEmpty() || victim.isEmpty())
@@ -1518,11 +1513,10 @@ namespace MWMechanics
             return; // TODO: implement animal rights
 
         const MWMechanics::NpcStats& victimStats = victim.getClass().getNpcStats(victim);
-        if (victimStats.getCrimeId() == -1)
-            return;
+        const MWWorld::Ptr &player = getPlayer();
+        bool canCommit = attacker == player && canCommitCrimeAgainst(victim, attacker);
 
         // For now we report only about crimes of player and player's followers
-        const MWWorld::Ptr &player = getPlayer();
         if (attacker != player)
         {
             std::set<MWWorld::Ptr> playerFollowers;
@@ -1530,6 +1524,9 @@ namespace MWMechanics
             if (playerFollowers.find(attacker) == playerFollowers.end())
                 return;
         }
+
+        if (!canCommit && victimStats.getCrimeId() == -1)
+            return;
 
         // Simple check for who attacked first: if the player attacked first, a crimeId should be set
         // Doesn't handle possible edge case where no one reported the assault, but in such a case,

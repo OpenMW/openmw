@@ -173,6 +173,7 @@ Programmers
     vocollapse
     Yohaulticetl
     zelurker
+    James Carty (MrTopCat)
 
 Documentation
 -------------
