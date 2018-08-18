@@ -63,7 +63,7 @@ namespace MWMechanics
             void buildPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                            const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
 
-            bool checkPathCompleted(float x, float y, float tolerance = PathTolerance);
+            bool checkPathCompleted(const osg::Vec3f& position, const float tolerance = PathTolerance);
             ///< \Returns true if we are within \a tolerance units of the last path point.
 
             /// In radians

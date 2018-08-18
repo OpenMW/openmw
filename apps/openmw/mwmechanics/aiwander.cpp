@@ -249,7 +249,9 @@ namespace MWMechanics
                     setPathToAnAllowedNode(actor, storage, pos);
                 }
             }
-        } else if (storage.mIsWanderingManually && mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DESTINATION_TOLERANCE)) {
+        }
+        else if (storage.mIsWanderingManually && mPathFinder.checkPathCompleted(pos.asVec3(), DESTINATION_TOLERANCE))
+        {
             completeManualWalking(actor, storage);
         }
 

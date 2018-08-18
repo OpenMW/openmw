@@ -55,11 +55,14 @@ namespace
             (closestReachableIndex, closestReachableIndex == closestIndex);
     }
 
-    float sqrDistanceIgnoreZ(const osg::Vec3f& point, float x, float y)
+    float sqrDistance(const osg::Vec2f& lhs, const osg::Vec2f& rhs)
     {
-        x -= point.x();
-        y -= point.y();
-        return (x * x + y * y);
+        return (lhs - rhs).length2();
+    }
+
+    float sqrDistanceIgnoreZ(const osg::Vec3f& lhs, const osg::Vec3f& rhs)
+    {
+        return sqrDistance(osg::Vec2f(lhs.x(), lhs.y()), osg::Vec2f(rhs.x(), rhs.y()));
     }
 }
 
@@ -263,9 +266,9 @@ namespace MWMechanics
         return getXAngleToDir(dir);
     }
 
-    bool PathFinder::checkPathCompleted(float x, float y, float tolerance)
+    bool PathFinder::checkPathCompleted(const osg::Vec3f& position, const float tolerance)
     {
-        if (!mPath.empty() && sqrDistanceIgnoreZ(mPath.front(), x, y) < tolerance*tolerance)
+        if (!mPath.empty() && sqrDistanceIgnoreZ(mPath.front(), position) < tolerance*tolerance)
             mPath.pop_front();
 
         return mPath.empty();
