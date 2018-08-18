@@ -298,8 +298,7 @@ namespace MWMechanics
             {
                 // if 2nd waypoint of new path == 1st waypoint of old,
                 // delete 1st waypoint of new path.
-                const auto iter = ++mPath.begin();
-                if (*iter == oldStart)
+                if (mPath[1] == oldStart)
                 {
                     mPath.pop_front();
                 }

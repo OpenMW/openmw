@@ -148,8 +148,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
                 if (destInLOS && mPathFinder.getPath().size() > 1)
                 {
                     // get point just before dest
-                    auto pPointBeforeDest = mPathFinder.getPath().rbegin();
-                    ++pPointBeforeDest;
+                    auto pPointBeforeDest = mPathFinder.getPath().rbegin() + 1;
 
                     // if start point is closer to the target then last point of path (excluding target itself) then go straight on the target
                     if (distance(start, dest) <= distance(dest, *pPointBeforeDest))

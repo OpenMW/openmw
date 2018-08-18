@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_PATHFINDING_H
 #define GAME_MWMECHANICS_PATHFINDING_H
 
-#include <list>
+#include <deque>
 #include <cassert>
 
 #include <components/esm/defs.hpp>
@@ -95,7 +95,7 @@ namespace MWMechanics
                 return mPath.size();
             }
 
-            const std::list<osg::Vec3f>& getPath() const
+            const std::deque<osg::Vec3f>& getPath() const
             {
                 return mPath;
             }
@@ -172,7 +172,7 @@ namespace MWMechanics
             }
 
         private:
-            std::list<osg::Vec3f> mPath;
+            std::deque<osg::Vec3f> mPath;
 
             const ESM::Pathgrid *mPathgrid;
             const MWWorld::CellStore* mCell;
