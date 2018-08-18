@@ -186,14 +186,14 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         if (mRotateOnTheRunChecks > 0) mRotateOnTheRunChecks--;
     }
 
+    // turn to next path point by X,Z axes
+    zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
+    smoothTurn(actor, mPathFinder.getXAngleToNext(pos.pos[0], pos.pos[1], pos.pos[2]), 0);
+
     mObstacleCheck.update(actor, duration);
 
     // handle obstacles on the way
     evadeObstacles(actor);
-
-    // turn to next path point by X,Z axes
-    zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
-    smoothTurn(actor, mPathFinder.getXAngleToNext(pos.pos[0], pos.pos[1], pos.pos[2]), 0);
 
     return false;
 }
