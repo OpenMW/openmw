@@ -167,14 +167,14 @@ namespace MWMechanics
         if (AI_REACTION_TIME <= lastReaction)
         {
             lastReaction = 0;
-            return reactionTimeActions(actor, storage, currentCell, cellChange, pos, duration);
+            return reactionTimeActions(actor, storage, currentCell, cellChange, pos);
         }
         else
             return false;
     }
 
     bool AiWander::reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
-        const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos, float duration)
+        const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos)
     {
         if (mDistance <= 0)
             storage.mCanWanderAlongPathGrid = false;
@@ -224,7 +224,7 @@ namespace MWMechanics
         }
 
         // If Wandering manually and hit an obstacle, stop
-        if (storage.mIsWanderingManually && mObstacleCheck.check(actor, duration, 2.0f)) {
+        if (storage.mIsWanderingManually && mObstacleCheck.isEvading()) {
             completeManualWalking(actor, storage);
         }
 
