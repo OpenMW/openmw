@@ -138,8 +138,6 @@ namespace MWMechanics
             std::string mTargetActorRefId;
             mutable int mTargetActorId;
 
-            osg::Vec3f mLastActorPos;
-
             short mRotateOnTheRunChecks; // attempts to check rotation to the pathpoint on the run possibility
 
             bool mIsShortcutting;   // if shortcutting at the moment
