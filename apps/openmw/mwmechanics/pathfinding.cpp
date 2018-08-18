@@ -265,19 +265,10 @@ namespace MWMechanics
 
     bool PathFinder::checkPathCompleted(float x, float y, float tolerance)
     {
-        if(mPath.empty())
-            return true;
-
-        if (sqrDistanceIgnoreZ(mPath.front(), x, y) < tolerance*tolerance)
-        {
+        if (!mPath.empty() && sqrDistanceIgnoreZ(mPath.front(), x, y) < tolerance*tolerance)
             mPath.pop_front();
-            if(mPath.empty())
-            {
-                return true;
-            }
-        }
 
-        return false;
+        return mPath.empty();
     }
 
     // see header for the rationale
