@@ -49,11 +49,15 @@ namespace Misc
                                 width = (widthSet) ? width : -1;
 
                                 if (m[i] == 'S' || m[i] == 's')
-                                    visitedPlaceholder(StringPlaceholder, pad, width, precision);
-                                else if (m[i] == 'g' || m[i] == 'G')
-                                    visitedPlaceholder(IntegerPlaceholder, pad, width, precision);
+                                    visitedPlaceholder(StringPlaceholder, pad, width, precision, FixedNotation);
+                                else if (m[i] == 'd' || m[i] == 'i')
+                                    visitedPlaceholder(IntegerPlaceholder, pad, width, precision, FixedNotation);
                                 else if (m[i] == 'f' || m[i] == 'F')
-                                    visitedPlaceholder(FloatPlaceholder, pad, width, precision);
+                                    visitedPlaceholder(FloatPlaceholder, pad, width, precision, FixedNotation);
+                                else if (m[i] == 'e' || m[i] == 'E')
+                                    visitedPlaceholder(FloatPlaceholder, pad, width, precision, ScientificNotation);
+                                else if (m[i] == 'g' || m[i] == 'G')
+                                    visitedPlaceholder(FloatPlaceholder, pad, width, precision, ShortestNotation);
                             }
                         }
                     }
