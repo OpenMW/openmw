@@ -90,6 +90,7 @@ namespace MWMechanics
     void PathFinder::clearPath()
     {
         mPath.clear();
+        mCell = nullptr;
     }
 
     /*
