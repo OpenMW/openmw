@@ -56,7 +56,10 @@ namespace MWMechanics
     class PathFinder
     {
         public:
-            PathFinder();
+            PathFinder()
+                : mCell(nullptr)
+            {
+            }
 
             void clearPath()
             {
