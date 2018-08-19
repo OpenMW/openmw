@@ -163,7 +163,6 @@ namespace MWMechanics
         private:
             std::deque<osg::Vec3f> mPath;
 
-            const ESM::Pathgrid *mPathgrid;
             const MWWorld::CellStore* mCell;
     };
 }

@@ -83,8 +83,7 @@ namespace MWMechanics
     }
 
     PathFinder::PathFinder()
-        : mPathgrid(nullptr)
-        , mCell(nullptr)
+        : mCell(nullptr)
     {
     }
 
@@ -134,18 +133,14 @@ namespace MWMechanics
                                const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph)
     {
         mPath.clear();
+        mCell = cell;
 
-        // TODO: consider removing mCell / mPathgrid in favor of mPathgridGraph
-        if(mCell != cell || !mPathgrid)
-        {
-            mCell = cell;
-            mPathgrid = pathgridGraph.getPathgrid();
-        }
+        const auto pathgrid = pathgridGraph.getPathgrid();
 
         // Refer to AiWander reseach topic on openmw forums for some background.
         // Maybe there is no pathgrid for this cell.  Just go to destination and let
         // physics take care of any blockages.
-        if(!mPathgrid || mPathgrid->mPoints.empty())
+        if(!pathgrid || pathgrid->mPoints.empty())
         {
             mPath.push_back(endPoint);
             return;
@@ -160,18 +155,18 @@ namespace MWMechanics
         //       point right behind the wall that is closer than any pathgrid
         //       point outside the wall
         osg::Vec3f startPointInLocalCoords(converter.toLocalVec3(startPoint));
-        int startNode = getClosestPoint(mPathgrid, startPointInLocalCoords);
+        int startNode = getClosestPoint(pathgrid, startPointInLocalCoords);
 
         osg::Vec3f endPointInLocalCoords(converter.toLocalVec3(endPoint));
-        std::pair<int, bool> endNode = getClosestReachablePoint(mPathgrid, &pathgridGraph,
+        std::pair<int, bool> endNode = getClosestReachablePoint(pathgrid, &pathgridGraph,
             endPointInLocalCoords,
                 startNode);
 
         // if it's shorter for actor to travel from start to end, than to travel from either
         // start or end to nearest pathgrid point, just travel from start to end.
         float startToEndLength2 = (endPointInLocalCoords - startPointInLocalCoords).length2();
-        float endTolastNodeLength2 = distanceSquared(mPathgrid->mPoints[endNode.first], endPointInLocalCoords);
-        float startTo1stNodeLength2 = distanceSquared(mPathgrid->mPoints[startNode], startPointInLocalCoords);
+        float endTolastNodeLength2 = distanceSquared(pathgrid->mPoints[endNode.first], endPointInLocalCoords);
+        float startTo1stNodeLength2 = distanceSquared(pathgrid->mPoints[startNode], startPointInLocalCoords);
         if ((startToEndLength2 < startTo1stNodeLength2) || (startToEndLength2 < endTolastNodeLength2))
         {
             mPath.push_back(endPoint);
@@ -185,7 +180,7 @@ namespace MWMechanics
         //       nodes are the same
         if(startNode == endNode.first)
         {
-            ESM::Pathgrid::Point temp(mPathgrid->mPoints[startNode]);
+            ESM::Pathgrid::Point temp(pathgrid->mPoints[startNode]);
             converter.toWorld(temp);
             mPath.push_back(makeOsgVec3(temp));
         }
@@ -198,7 +193,7 @@ namespace MWMechanics
             if (path.size() > 1)
             {
                 ESM::Pathgrid::Point secondNode = *(++path.begin());
-                osg::Vec3f firstNodeVec3f = makeOsgVec3(mPathgrid->mPoints[startNode]);
+                osg::Vec3f firstNodeVec3f = makeOsgVec3(pathgrid->mPoints[startNode]);
                 osg::Vec3f secondNodeVec3f = makeOsgVec3(secondNode);
                 osg::Vec3f toSecondNodeVec3f = secondNodeVec3f - firstNodeVec3f;
                 osg::Vec3f toStartPointVec3f = startPointInLocalCoords - firstNodeVec3f;
