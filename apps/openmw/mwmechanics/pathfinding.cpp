@@ -87,12 +87,6 @@ namespace MWMechanics
     {
     }
 
-    void PathFinder::clearPath()
-    {
-        mPath.clear();
-        mCell = nullptr;
-    }
-
     /*
      * NOTE: This method may fail to find a path.  The caller must check the
      * result before using it.  If there is no path the AI routies need to

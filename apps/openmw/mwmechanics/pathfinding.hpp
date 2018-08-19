@@ -58,7 +58,11 @@ namespace MWMechanics
         public:
             PathFinder();
 
-            void clearPath();
+            void clearPath()
+            {
+                mPath.clear();
+                mCell = nullptr;
+            }
 
             void buildPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                            const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
