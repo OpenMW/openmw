@@ -3339,12 +3339,16 @@ namespace MWWorld
         return mRendering->getTerrainHeightAt(worldPos);
     }
 
-    osg::Vec3f World::getHalfExtents(const ConstPtr& actor, bool rendering) const
+    osg::Vec3f World::getHalfExtents(const ConstPtr& object, bool rendering) const
     {
+        if (!object.getClass().isActor())
+            return mRendering->getHalfExtents(object);
+
+        // Handle actors separately because of bodyparts
         if (rendering)
-            return mPhysics->getRenderingHalfExtents(actor);
+            return mPhysics->getRenderingHalfExtents(object);
         else
-            return mPhysics->getHalfExtents(actor);
+            return mPhysics->getHalfExtents(object);
     }
 
     std::string World::exportSceneGraph(const Ptr &ptr)
@@ -3403,9 +3407,9 @@ namespace MWWorld
         mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
     }
 
-    void World::spawnEffect(const std::string &model, const std::string &textureOverride, const osg::Vec3f &worldPos)
+    void World::spawnEffect(const std::string &model, const std::string &textureOverride, const osg::Vec3f &worldPos, float scale, bool isMagicVFX)
     {
-        mRendering->spawnEffect(model, textureOverride, worldPos);
+        mRendering->spawnEffect(model, textureOverride, worldPos, scale, isMagicVFX);
     }
 
     void World::explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const Ptr& caster, const Ptr& ignore, ESM::RangeType rangeType,
