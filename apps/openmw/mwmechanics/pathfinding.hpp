@@ -86,7 +86,10 @@ namespace MWMechanics
                 return mPath;
             }
 
-            const MWWorld::CellStore* getPathCell() const;
+            const MWWorld::CellStore* getPathCell() const
+            {
+                return mCell;
+            }
 
             /** Synchronize new path with old one to avoid visiting 1 waypoint 2 times
             @note

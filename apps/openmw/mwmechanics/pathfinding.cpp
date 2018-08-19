@@ -299,9 +299,4 @@ namespace MWMechanics
             }
         }
     }
-
-    const MWWorld::CellStore* PathFinder::getPathCell() const
-    {
-        return mCell;
-    }
 }
