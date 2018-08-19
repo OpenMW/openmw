@@ -89,8 +89,7 @@ namespace MWMechanics
 
     void PathFinder::clearPath()
     {
-        if(!mPath.empty())
-            mPath.clear();
+        mPath.clear();
     }
 
     /*
