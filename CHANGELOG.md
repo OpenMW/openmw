@@ -98,6 +98,7 @@
     Bug #4575: Weird result of attack animation blending with movement animations
     Bug #4576: Reset of idle animations when attack can not be started
     Bug #4591: Attack strength should be 0 if player did not hold the attack button
+    Bug #4597: <> operator causes a compile error
     Feature #1645: Casting effects from objects
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script

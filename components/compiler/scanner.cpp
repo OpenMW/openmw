@@ -502,6 +502,11 @@ namespace Compiler
                     if (get (c) && c!='=') // <== is a allowed as an alternative to <=  :(
                         putback (c);
                 }
+                else if (c == '<' || c == '>') // Treat <> and << as <
+                {
+                    special = S_cmpLT;
+                    mErrorHandler.warning (std::string("invalid operator <") + c + ", treating it as <", mLoc);
+                }
                 else
                 {
                     putback (c);
@@ -524,6 +529,11 @@ namespace Compiler
 
                     if (get (c) && c!='=') // >== is a allowed as an alternative to >=  :(
                         putback (c);
+                }
+                else if (c == '<' || c == '>') // Treat >< and >> as >
+                {
+                    special = S_cmpGT;
+                    mErrorHandler.warning (std::string("invalid operator >") + c + ", treating it as >", mLoc);
                 }
                 else
                 {
