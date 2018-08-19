@@ -171,7 +171,9 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         mTimer = 0;
     }
 
-    if (isDestReached || mPathFinder.checkPathCompleted(pos.asVec3())) // if path is finished
+    mPathFinder.update(pos.asVec3(), std::max(destTolerance, DEFAULT_TOLERANCE));
+
+    if (isDestReached || mPathFinder.checkPathCompleted()) // if path is finished
     {
         // turn to destination point
         zTurn(actor, getZAngleToPoint(start, dest));

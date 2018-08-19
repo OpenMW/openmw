@@ -121,6 +121,7 @@ namespace MWMechanics
     void PathFinder::buildPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                                const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph)
     {
+        mConstructed = true;
         mPath.clear();
         mCell = cell;
 
@@ -250,12 +251,10 @@ namespace MWMechanics
         return getXAngleToDir(dir);
     }
 
-    bool PathFinder::checkPathCompleted(const osg::Vec3f& position, const float tolerance)
+    void PathFinder::update(const osg::Vec3f& position, const float tolerance)
     {
         if (!mPath.empty() && sqrDistanceIgnoreZ(mPath.front(), position) < tolerance*tolerance)
             mPath.pop_front();
-
-        return mPath.empty();
     }
 
     // see header for the rationale

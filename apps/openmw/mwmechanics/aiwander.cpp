@@ -250,7 +250,7 @@ namespace MWMechanics
                 }
             }
         }
-        else if (storage.mIsWanderingManually && mPathFinder.checkPathCompleted(pos.asVec3(), DESTINATION_TOLERANCE))
+        else if (storage.mIsWanderingManually && mPathFinder.checkPathCompleted())
         {
             completeManualWalking(actor, storage);
         }

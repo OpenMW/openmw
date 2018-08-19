@@ -57,12 +57,14 @@ namespace MWMechanics
     {
         public:
             PathFinder()
-                : mCell(nullptr)
+                : mConstructed(false)
+                , mCell(nullptr)
             {
             }
 
             void clearPath()
             {
+                mConstructed = false;
                 mPath.clear();
                 mCell = nullptr;
             }
@@ -70,8 +72,13 @@ namespace MWMechanics
             void buildPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                            const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
 
-            bool checkPathCompleted(const osg::Vec3f& position, const float tolerance = DEFAULT_TOLERANCE);
-            ///< \Returns true if we are within \a tolerance units of the last path point.
+            /// Remove front point if exist and within tolerance
+            void update(const osg::Vec3f& position, const float tolerance = DEFAULT_TOLERANCE);
+
+            bool checkPathCompleted() const
+            {
+                return mConstructed && mPath.empty();
+            }
 
             /// In radians
             float getZAngleToNext(float x, float y) const;
@@ -80,7 +87,7 @@ namespace MWMechanics
 
             bool isPathConstructed() const
             {
-                return !mPath.empty();
+                return mConstructed && !mPath.empty();
             }
 
             std::size_t getPathSize() const
@@ -110,6 +117,7 @@ namespace MWMechanics
 
             void addPointToPath(const osg::Vec3f& point)
             {
+                mConstructed = true;
                 mPath.push_back(point);
             }
 
@@ -168,6 +176,7 @@ namespace MWMechanics
             }
 
         private:
+            bool mConstructed;
             std::deque<osg::Vec3f> mPath;
 
             const MWWorld::CellStore* mCell;
