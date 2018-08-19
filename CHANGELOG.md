@@ -15,12 +15,14 @@
     Bug #2872: Tab completion in console doesn't work with explicit reference
     Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
     Bug #3049: Drain and Fortify effects are not properly applied on health, magicka and fatigue
+    Bug #3072: Fatal error on AddItem <item> that has a script containing Equip <item>
     Bug #3249: Fixed revert function not updating views properly
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3486: [Mod] NPC Commands does not work
     Bug #3533: GetSpellEffects should detect effects with zero duration
     Bug #3591: Angled hit distance too low
     Bug #3629: DB assassin attack never triggers creature spawning
+    Bug #3788: GetPCInJail and GetPCTraveling do not work as in vanilla
     Bug #3876: Landscape texture painting is misaligned
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
     Bug #3911: [macOS] Typing in the "Content List name" dialog box produces double characters
@@ -42,6 +44,7 @@
     Bug #4286: Scripted animations can be interrupted
     Bug #4291: Non-persistent actors that started the game as dead do not play death animations
     Bug #4293: Faction members are not aware of faction ownerships in barter
+    Bug #4304: "Follow" not working as a second AI package
     Bug #4307: World cleanup should remove dead bodies only if death animation is finished
     Bug #4311: OpenMW does not handle RootCollisionNode correctly
     Bug #4327: Missing animations during spell/weapon stance switching
@@ -95,6 +98,7 @@
     Bug #4575: Weird result of attack animation blending with movement animations
     Bug #4576: Reset of idle animations when attack can not be started
     Bug #4591: Attack strength should be 0 if player did not hold the attack button
+    Feature #1645: Casting effects from objects
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
     Feature #3103: Provide option for disposition to get increased by successful trade

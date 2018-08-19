@@ -1082,6 +1082,7 @@ namespace MWScript
                 MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr (targetId, false);
 
                 MWMechanics::CastSpell cast(ptr, target, false, true);
+                cast.playSpellCastingEffects(spell->mId);
                 cast.mHitPosition = target.getRefData().getPosition().asVec3();
                 cast.mAlwaysSucceed = true;
                 cast.cast(spell);
@@ -1155,8 +1156,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime &runtime)
                 {
-                    /// \todo implement traveling check
-                    runtime.push (0);
+                    runtime.push (MWBase::Environment::get().getWorld()->isPlayerTraveling());
                 }
         };
 

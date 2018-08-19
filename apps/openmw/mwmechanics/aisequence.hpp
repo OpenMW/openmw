@@ -88,6 +88,9 @@ namespace MWMechanics
             /// Is there any combat package?
             bool isInCombat () const;
 
+            /// Are we in combat with any other actor, who's also engaging us?
+            bool isEngagedWithActor () const;
+
             /// Does this AI sequence have the given package type?
             bool hasPackage(int typeId) const;
 

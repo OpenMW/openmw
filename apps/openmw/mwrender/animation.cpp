@@ -8,6 +8,7 @@
 #include <osg/MatrixTransform>
 #include <osg/BlendFunc>
 #include <osg/Material>
+#include <osg/PositionAttitudeTransform>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>
@@ -204,6 +205,110 @@ namespace
         std::vector<std::pair<osg::Node*, osg::Group*> > mToRemove;
     };
 
+    class RemoveFinishedCallbackVisitor : public RemoveVisitor
+    {
+    public:
+        RemoveFinishedCallbackVisitor()
+            : RemoveVisitor()
+            , mEffectId(-1)
+        {
+        }
+
+        RemoveFinishedCallbackVisitor(int effectId)
+            : RemoveVisitor()
+            , mEffectId(effectId)
+        {
+        }
+
+        virtual void apply(osg::Node &node)
+        {
+            traverse(node);
+        }
+
+        virtual void apply(osg::Group &group)
+        {
+            traverse(group);
+
+            osg::Callback* callback = group.getUpdateCallback();
+            if (callback)
+            {
+                // We should remove empty transformation nodes and finished callbacks here
+                MWRender::UpdateVfxCallback* vfxCallback = dynamic_cast<MWRender::UpdateVfxCallback*>(callback);
+                bool finished = vfxCallback && vfxCallback->mFinished;
+                bool toRemove = vfxCallback && mEffectId >= 0 && vfxCallback->mParams.mEffectId == mEffectId;
+                if (finished || toRemove)
+                {
+                    mToRemove.push_back(std::make_pair(group.asNode(), group.getParent(0)));
+                }
+            }
+        }
+
+        virtual void apply(osg::MatrixTransform &node)
+        {
+            traverse(node);
+        }
+
+        virtual void apply(osg::Geometry&)
+        {
+        }
+
+    private:
+        int mEffectId;
+    };
+
+    class FindVfxCallbacksVisitor : public osg::NodeVisitor
+    {
+    public:
+
+        std::vector<MWRender::UpdateVfxCallback*> mCallbacks;
+
+        FindVfxCallbacksVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mEffectId(-1)
+        {
+        }
+
+        FindVfxCallbacksVisitor(int effectId)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mEffectId(effectId)
+        {
+        }
+
+        virtual void apply(osg::Node &node)
+        {
+            traverse(node);
+        }
+
+        virtual void apply(osg::Group &group)
+        {
+            osg::Callback* callback = group.getUpdateCallback();
+            if (callback)
+            {
+                MWRender::UpdateVfxCallback* vfxCallback = dynamic_cast<MWRender::UpdateVfxCallback*>(callback);
+                if (vfxCallback)
+                {
+                    if (mEffectId < 0 || vfxCallback->mParams.mEffectId == mEffectId)
+                    {
+                        mCallbacks.push_back(vfxCallback);
+                    }
+                }
+            }
+            traverse(group);
+        }
+
+        virtual void apply(osg::MatrixTransform &node)
+        {
+            traverse(node);
+        }
+
+        virtual void apply(osg::Geometry&)
+        {
+        }
+
+    private:
+        int mEffectId;
+    };
+
     // Removes all drawables from a graph.
     class CleanObjectRootVisitor : public RemoveVisitor
     {
@@ -287,7 +392,6 @@ namespace
             }
         }
     };
-
 }
 
 namespace MWRender
@@ -431,6 +535,42 @@ namespace MWRender
 
         const std::multimap<float, std::string>& getTextKeys() const;
     };
+
+    void UpdateVfxCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        traverse(node, nv);
+
+        if (mFinished)
+            return;
+
+        double newTime = nv->getFrameStamp()->getSimulationTime();
+        if (mStartingTime == 0)
+        {
+            mStartingTime = newTime;
+            return;
+        }
+
+        double duration = newTime - mStartingTime;
+        mStartingTime = newTime;
+
+        mParams.mAnimTime->addTime(duration);
+        if (mParams.mAnimTime->getTime() >= mParams.mMaxControllerLength)
+        {
+            if (mParams.mLoop)
+            {
+                // Start from the beginning again; carry over the remainder
+                // Not sure if this is actually needed, the controller function might already handle loops
+                float remainder = mParams.mAnimTime->getTime() - mParams.mMaxControllerLength;
+                mParams.mAnimTime->resetTime(remainder);
+            }
+            else
+            {
+                // Remove effect immediately
+                mParams.mObjects.reset();
+                mFinished = true;
+            }
+        }
+    }
 
     class ResetAccumRootCallback : public osg::NodeCallback
     {
@@ -1436,15 +1576,22 @@ namespace MWRender
                             useQuadratic, quadraticValue, quadraticRadiusMult, useLinear, linearRadiusMult, linearValue);
     }
 
-    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture)
+    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture, float scale)
     {
         if (!mObjectRoot.get())
             return;
 
         // Early out if we already have this effect
-        for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
-            if (it->mLoop && loop && it->mEffectId == effectId && it->mBoneName == bonename)
+        FindVfxCallbacksVisitor visitor(effectId);
+        mInsert->accept(visitor);
+
+        for (std::vector<UpdateVfxCallback*>::iterator it = visitor.mCallbacks.begin(); it != visitor.mCallbacks.end(); ++it)
+        {
+            UpdateVfxCallback* callback = *it;
+
+            if (loop && !callback->mFinished && callback->mParams.mLoop && callback->mParams.mBoneName == bonename)
                 return;
+        }
 
         EffectParams params;
         params.mModelName = model;
@@ -1459,11 +1606,13 @@ namespace MWRender
 
             parentNode = found->second;
         }
-        osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model, parentNode);
 
+        osg::ref_ptr<osg::PositionAttitudeTransform> trans = new osg::PositionAttitudeTransform;
+        trans->setScale(osg::Vec3f(scale, scale, scale));
+        parentNode->addChild(trans);
+
+        osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model, trans);
         node->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-
-        params.mObjects = PartHolderPtr(new PartHolder(node));
 
         SceneUtil::FindMaxControllerLengthVisitor findMaxLengthVisitor;
         node->accept(findMaxLengthVisitor);
@@ -1471,71 +1620,50 @@ namespace MWRender
         // FreezeOnCull doesn't work so well with effect particles, that tend to have moving emitters
         SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
         node->accept(disableFreezeOnCullVisitor);
-
-        params.mMaxControllerLength = findMaxLengthVisitor.getMaxLength();
-
         node->setNodeMask(Mask_Effect);
 
+        params.mMaxControllerLength = findMaxLengthVisitor.getMaxLength();
         params.mLoop = loop;
         params.mEffectId = effectId;
         params.mBoneName = bonename;
-
+        params.mObjects = PartHolderPtr(new PartHolder(node));
         params.mAnimTime = std::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
+        trans->addUpdateCallback(new UpdateVfxCallback(params));
 
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
         node->accept(assignVisitor);
 
         overrideFirstRootTexture(texture, mResourceSystem, node);
-
-        // TODO: in vanilla morrowind the effect is scaled based on the host object's bounding box.
-
-        mEffects.push_back(params);
     }
 
     void Animation::removeEffect(int effectId)
     {
-        for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
-        {
-            if (it->mEffectId == effectId)
-            {
-                mEffects.erase(it);
-                return;
-            }
-        }
+        RemoveFinishedCallbackVisitor visitor(effectId);
+        mInsert->accept(visitor);
+        visitor.remove();
     }
 
     void Animation::getLoopingEffects(std::vector<int> &out) const
     {
-        for (std::vector<EffectParams>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+        FindVfxCallbacksVisitor visitor;
+        mInsert->accept(visitor);
+
+        for (std::vector<UpdateVfxCallback*>::iterator it = visitor.mCallbacks.begin(); it != visitor.mCallbacks.end(); ++it)
         {
-            if (it->mLoop)
-                out.push_back(it->mEffectId);
+            UpdateVfxCallback* callback = *it;
+
+            if (callback->mParams.mLoop && !callback->mFinished)
+                out.push_back(callback->mParams.mEffectId);
         }
     }
 
     void Animation::updateEffects(float duration)
     {
-        for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); )
-        {
-            it->mAnimTime->addTime(duration);
-
-            if (it->mAnimTime->getTime() >= it->mMaxControllerLength)
-            {
-                if (it->mLoop)
-                {
-                    // Start from the beginning again; carry over the remainder
-                    // Not sure if this is actually needed, the controller function might already handle loops
-                    float remainder = it->mAnimTime->getTime() - it->mMaxControllerLength;
-                    it->mAnimTime->resetTime(remainder);
-                }
-                else
-                {
-                    it = mEffects.erase(it);
-                    continue;
-                }
-            }
-            ++it;
-        }
+        // TODO: objects without animation still will have
+        // transformation nodes with finished callbacks
+        RemoveFinishedCallbackVisitor visitor;
+        mInsert->accept(visitor);
+        visitor.remove();
     }
 
     bool Animation::upperBodyReady() const
@@ -1778,5 +1906,4 @@ namespace MWRender
             mNode->getParent(0)->removeChild(mNode);
         }
     }
-
 }
