@@ -436,9 +436,9 @@ namespace MWMechanics
         return mActors.isActorDetected(actor, observer);
     }
 
-    bool MechanicsManager::isAttackPrepairing(const MWWorld::Ptr& ptr)
+    bool MechanicsManager::isAttackPreparing(const MWWorld::Ptr& ptr)
     {
-        return mActors.isAttackPrepairing(ptr);
+        return mActors.isAttackPreparing(ptr);
     }
 
     bool MechanicsManager::isRunning(const MWWorld::Ptr& ptr)
