@@ -423,6 +423,7 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
                     movementAnimName = weap->shortgroup + movementAnimName;
                 else
                     movementAnimName += weap->shortgroup;
+
                 if(!mAnimation->hasAnimation(movementAnimName))
                 {
                     movemask = MWRender::Animation::BlendMask_LowerBody;
@@ -451,6 +452,10 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
                 }
                 else
                 {
+                    // For crossbow animations use 1h ones as fallback
+                    if (mWeaponType == WeapType_Crossbow)
+                        movementAnimName += "1h";
+
                     movementAnimName.erase(swimpos, 4);
                     if (weap != sWeaponTypeListEnd)
                     {
