@@ -2079,7 +2079,7 @@ struct ConvexHull
 
         center /= double(intersections.size());
 
-        typedef std::map<double, osg::Vec3d> VertexMap;
+        typedef std::map<double, std::list<std::pair<osg::Vec3d, double>>> VertexMap;
         VertexMap vertexMap;
         for(Vertices::iterator itr = intersections.begin();
             itr != intersections.end();
@@ -2090,16 +2090,38 @@ struct ConvexHull
             double v = dv * up;
             double angle = atan2(h,v);
             // OSG_NOTICE<<"angle = "<<osg::RadiansToDegrees(angle)<<", h="<<h<<" v= "<<v<<std::endl;
-            vertexMap[angle] = *itr;
+
+            // We need to make sure all intersections are added to the list in the right order, even if they're so far away that their angles work out the same.
+            double sortValue;
+            if (angle < osg::DegreesToRadians(-135.0) || angle > osg::DegreesToRadians(135.0))
+                sortValue = -h;
+            else if (angle < osg::DegreesToRadians(-45.0))
+                sortValue = v;
+            else if (angle < osg::DegreesToRadians(45.0))
+                sortValue = h;
+            else
+                sortValue = -v;
+            if (vertexMap.count(angle))
+            {
+                auto listItr = vertexMap[angle].begin();
+                while (listItr != vertexMap[angle].end() && listItr->second < sortValue)
+                    ++listItr;
+                vertexMap[angle].insert(listItr, std::make_pair(*itr, sortValue));
+            }
+            else
+                vertexMap[angle].push_back(std::make_pair(*itr, sortValue));
         }
 
-        osg::Vec3d previous_v = vertexMap.rbegin()->second;
+        osg::Vec3d previous_v = vertexMap.rbegin()->second.back().first;
         for(VertexMap::iterator itr = vertexMap.begin();
             itr != vertexMap.end();
             ++itr)
         {
-            _edges.push_back(Edge(previous_v, itr->second));
-            previous_v = itr->second;
+            for (auto vertex : itr->second)
+            {
+                _edges.push_back(Edge(previous_v, vertex.first));
+                previous_v = vertex.first;
+            }
         }
 
         // OSG_NOTICE<<"  after clip("<<plane<<") edges.size()="<<_edges.size()<<std::endl;
@@ -2523,7 +2545,7 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
 #endif
 #endif
 
-#if 0
+#if 1
         convexHull.clip(osg::Plane(0.0,0.0,1.0,-rli.min_z));
         convexHull.clip(osg::Plane(0.0,0.0,-1.0,rli.max_z));
 #elif 0
