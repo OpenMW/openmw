@@ -6,6 +6,7 @@
 #include <utility>
 
 #include <QObject>
+#include <QModelIndex>
 
 #include <components/esm/loadarmo.hpp>
 #include <components/esm/loadbody.hpp>
