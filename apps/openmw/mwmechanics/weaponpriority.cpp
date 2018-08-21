@@ -108,11 +108,19 @@ namespace MWMechanics
             }
         }
 
-        int skill = item.getClass().getEquipmentSkill(item);
-        if (skill != -1)
+        if (actor.getClass().isNpc())
         {
-            int value = actor.getClass().getSkill(actor, skill);
-            rating *= MWMechanics::getHitChance(actor, enemy, value) / 100.f;
+            int skill = item.getClass().getEquipmentSkill(item);
+            if (skill != -1)
+            {
+               int value = actor.getClass().getSkill(actor, skill);
+               rating *= MWMechanics::getHitChance(actor, enemy, value) / 100.f;
+            }
+        }
+        else
+        {
+            MWWorld::LiveCellRef<ESM::Creature> *ref = actor.get<ESM::Creature>();
+            rating *= MWMechanics::getHitChance(actor, enemy, ref->mBase->mData.mCombat) / 100.f;
         }
 
         return rating * rangedMult;
