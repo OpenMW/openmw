@@ -1,10 +1,9 @@
 #include "actor.hpp"
 
-#include <iostream>
-
 #include <osg/Group>
 #include <osg/Node>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/mappings.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcemanager.hpp>
@@ -46,7 +45,7 @@ namespace CSVRender
         }
         catch (std::exception& e)
         {
-            std::cout << "Caught exception: " << e.what() << std::endl;
+            Log(Debug::Error) << "Exception in Actor::update(): " << e.what();
         }
     }
 

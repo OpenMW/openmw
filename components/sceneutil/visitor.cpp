@@ -1,11 +1,11 @@
 #include "visitor.hpp"
 
-#include <iostream>
-
 #include <osg/Drawable>
 #include <osg/MatrixTransform>
 
 #include <osgParticle/ParticleSystem>
+
+#include <components/debug/debuglog.hpp>
 
 #include <components/misc/stringops.hpp>
 
@@ -74,7 +74,7 @@ namespace SceneUtil
         for (RemoveVec::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
         {
             if (!it->second->removeChild(it->first))
-                std::cerr << "error removing " << it->first->getName() << std::endl;
+                Log(Debug::Error) << "error removing " << it->first->getName();
         }
     }
 
