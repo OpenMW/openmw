@@ -120,7 +120,7 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
 
 void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResult& hit)
 {
-    if(hit.hit == true)
+    if(hit.hit)
     {
         mTerrainTextureSelection->selectTerrainTexture(hit);
     }

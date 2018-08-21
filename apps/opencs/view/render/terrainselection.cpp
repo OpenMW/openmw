@@ -114,8 +114,8 @@ std::pair<int, int> CSVRender::TerrainSelection::toTextureCoords(osg::Vec3d worl
 
 std::pair<int, int> CSVRender::TerrainSelection::toVertexCoords(osg::Vec3d worldPos) const
 {
-    const double xd {worldPos.x() * landTextureSize / cellSize+(landTextureSize / cellSize)/4};
-    const double yd {worldPos.y() * landSize / cellSize+(landTextureSize / cellSize)/4};
+    const double xd (worldPos.x() * landTextureSize / cellSize+(landTextureSize / cellSize)/4);
+    const double yd (worldPos.y() * landSize / cellSize+(landTextureSize / cellSize)/4);
 
     const auto x = static_cast<int>(std::floor(xd));
     const auto y = static_cast<int>(std::floor(yd));
@@ -162,8 +162,8 @@ void CSVRender::TerrainSelection::update()
             const int textureSizeToLandSizeModifier = 4; // To-do: Calculate modifier according to landSize and landTextureSize
 
             // Nudge selection by 1/4th of a texture size, similar how blendmaps are nudged
-            #define NUDGEPERCENTAGE (0.25)
-            const int nudgeOffset = (cellSize / landTextureSize) * NUDGEPERCENTAGE;
+            const float NudgePercentage = 0.25f;
+            const int nudgeOffset = (cellSize / landTextureSize) * NudgePercentage;
             const int landHeightsNudge = (cellSize / landSize)/64; // Does this work with all land size configurations?
 
             // calculate global vertex coordinates at selection box corners
@@ -173,10 +173,10 @@ void CSVRender::TerrainSelection::update()
             int y2 = y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier - landHeightsNudge;
 
             // Draw straigth edges
-            int landHeightX1Y1 = calculateLandHeight(x1, y1),
-                landHeightX1Y2 = calculateLandHeight(x1, y2),
-                landHeightX2Y1 = calculateLandHeight(x2, y1),
-                landHeightX2Y2 = calculateLandHeight(x2, y2);
+            int landHeightX1Y1 = calculateLandHeight(x1, y1);
+            int landHeightX1Y2 = calculateLandHeight(x1, y2);
+            int landHeightX2Y1 = calculateLandHeight(x2, y1);
+            int landHeightX2Y2 = calculateLandHeight(x2, y2);
 
             if (north == mSelection.end()) {
                 vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, landHeightX1Y2+5));
@@ -202,7 +202,7 @@ void CSVRender::TerrainSelection::update()
 
     newGeometry->setVertexArray(vertices);
 
-    const auto drawArrays = new osg::DrawArrays(osg::PrimitiveSet::LINES);
+    osg::ref_ptr<osg::DrawArrays> drawArrays = new osg::DrawArrays(osg::PrimitiveSet::LINES);
 
     drawArrays->setCount(vertices->size());
 
