@@ -557,7 +557,7 @@ namespace Compiler
         mExplicit.clear();
     }
 
-    void GetArgumentsFromMessageFormat::visitedPlaceholder(Placeholder placeholder, char /*padding*/, int /*width*/, int /*precision*/)
+    void GetArgumentsFromMessageFormat::visitedPlaceholder(Placeholder placeholder, char /*padding*/, int /*width*/, int /*precision*/, Notation /*notation*/)
     {
         switch (placeholder)
         {

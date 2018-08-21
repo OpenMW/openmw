@@ -372,21 +372,32 @@ namespace MWMechanics
         actorMovementSettings.mPosition[1] = storage.mMovement.mPosition[1];
         actorMovementSettings.mPosition[2] = storage.mMovement.mPosition[2];
 
-        rotateActorOnAxis(actor, 2, actorMovementSettings, storage.mMovement);
-        rotateActorOnAxis(actor, 0, actorMovementSettings, storage.mMovement);
+        rotateActorOnAxis(actor, 2, actorMovementSettings, storage);
+        rotateActorOnAxis(actor, 0, actorMovementSettings, storage);
     }
 
     void AiCombat::rotateActorOnAxis(const MWWorld::Ptr& actor, int axis, 
-        MWMechanics::Movement& actorMovementSettings, MWMechanics::Movement& desiredMovement)
+        MWMechanics::Movement& actorMovementSettings, AiCombatStorage& storage)
     {
         actorMovementSettings.mRotation[axis] = 0;
-        float& targetAngleRadians = desiredMovement.mRotation[axis];
+        float& targetAngleRadians = storage.mMovement.mRotation[axis];
         if (targetAngleRadians != 0)
         {
-            if (smoothTurn(actor, targetAngleRadians, axis))
+            // Some attack animations contain small amount of movement.
+            // Since we use cone shapes for melee, we can use a threshold to avoid jittering
+            std::shared_ptr<Action>& currentAction = storage.mCurrentAction;
+            bool isRangedCombat = false;
+            currentAction->getCombatRange(isRangedCombat);
+            // Check if the actor now facing desired direction, no need to turn any more
+            if (isRangedCombat)
             {
-                // actor now facing desired direction, no need to turn any more
-                targetAngleRadians = 0;
+                if (smoothTurn(actor, targetAngleRadians, axis))
+                    targetAngleRadians = 0;
+            }
+            else
+            {
+                if (smoothTurn(actor, targetAngleRadians, axis, osg::DegreesToRadians(3.f)))
+                    targetAngleRadians = 0;
             }
         }
     }
@@ -453,7 +464,7 @@ namespace MWMechanics
             if (distToTarget <= rangeAttackOfTarget && Misc::Rng::rollClosedProbability() < 0.25)
             {
                 mMovement.mPosition[0] = Misc::Rng::rollProbability() < 0.5 ? 1.0f : -1.0f; // to the left/right
-                mTimerCombatMove = 0.05f + 0.15f * Misc::Rng::rollClosedProbability();
+                mTimerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
                 mCombatMove = true;
             }
         }

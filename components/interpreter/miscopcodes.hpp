@@ -24,7 +24,7 @@ namespace Interpreter
             Runtime& mRuntime;
 
         protected:
-            virtual void visitedPlaceholder(Placeholder placeholder, char padding, int width, int precision)
+            virtual void visitedPlaceholder(Placeholder placeholder, char padding, int width, int precision, Notation notation)
             {
                 std::ostringstream out;
                 out.fill(padding);
@@ -58,8 +58,34 @@ namespace Interpreter
                             float value = mRuntime[0].mFloat;
                             mRuntime.pop();
 
-                            out << std::fixed << value;
-                            mFormattedMessage += out.str();
+                            if (notation == FixedNotation)
+                            {
+                                out << std::fixed << value;
+                                mFormattedMessage += out.str();
+                            }
+                            else if (notation == ShortestNotation)
+                            {
+                                std::string scientific;
+                                std::string fixed;
+
+                                out << std::scientific << value;
+
+                                scientific = out.str();
+
+                                out.str(std::string());
+                                out.clear();
+
+                                out << std::fixed << value;
+
+                                fixed = out.str();
+
+                                mFormattedMessage += fixed.length() < scientific.length() ? fixed : scientific;
+                            }
+                            else 
+                            {
+                                out << std::scientific << value;
+                                mFormattedMessage += out.str();
+                            }
                         }
                         break;
                     default:

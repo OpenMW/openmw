@@ -50,6 +50,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/class.hpp"
 #include "../mwgui/loadingscreen.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -1345,6 +1346,29 @@ namespace MWRender
             mFieldOfViewOverride = val;
             updateProjectionMatrix();
         }
+    }
+
+    osg::Vec3f RenderingManager::getHalfExtents(const MWWorld::ConstPtr& object) const
+    {
+        osg::Vec3f halfExtents(0, 0, 0);
+        std::string modelName = object.getClass().getModel(object);
+        if (modelName.empty())
+            return halfExtents;
+
+        osg::ref_ptr<const osg::Node> node = mResourceSystem->getSceneManager()->getTemplate(modelName);
+        osg::ComputeBoundsVisitor computeBoundsVisitor;
+        computeBoundsVisitor.setTraversalMask(~(MWRender::Mask_ParticleSystem|MWRender::Mask_Effect));
+        const_cast<osg::Node*>(node.get())->accept(computeBoundsVisitor);
+        osg::BoundingBox bounds = computeBoundsVisitor.getBoundingBox();
+
+        if (bounds.valid())
+        {
+            halfExtents[0] = std::abs(bounds.xMax() - bounds.xMin()) / 2.f;
+            halfExtents[1] = std::abs(bounds.yMax() - bounds.yMin()) / 2.f;
+            halfExtents[2] = std::abs(bounds.zMax() - bounds.zMin()) / 2.f;
+        }
+
+        return halfExtents;
     }
 
     void RenderingManager::resetFieldOfView()
