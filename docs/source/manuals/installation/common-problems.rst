@@ -61,7 +61,7 @@ In-game textures show up as pink
     may not include support for this algorithm.
 
 :Fix:
-    Upgrade your graphics drivers and/or operating system the latest version.
+    Upgrade your graphics drivers and/or operating system to the latest version.
 
 Music plays, but only a black screen is shown
 #############################################
