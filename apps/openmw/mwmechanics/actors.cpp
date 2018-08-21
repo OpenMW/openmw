@@ -1790,14 +1790,13 @@ namespace MWMechanics
             // Actors that are targeted by this actor's Follow or Escort packages also side with them
             for (auto package = stats.getAiSequence().begin(); package != stats.getAiSequence().end(); ++package)
             {
-                const MWWorld::Ptr &target = (*package)->getTarget();
-                if ((*package)->sideWithTarget() && !target.isEmpty())
+                if ((*package)->sideWithTarget() && !(*package)->getTarget().isEmpty())
                 {
                     if (iteratedActor == actor)
                     {
-                        list.push_back(target);
+                        list.push_back((*package)->getTarget());
                     }
-                    else if (target == actor)
+                    else if ((*package)->getTarget() == actor)
                     {
                         list.push_back(iteratedActor);
                     }
