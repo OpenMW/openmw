@@ -1383,9 +1383,9 @@ We add several new script instructions:
 * PlayBackgroundMusic (t)
 * PlaylistBackgroundMusic (pl)
 * StopBackgroundMusic
-* PlayEventMusic (t, loop=0, force=0)
-* PlaylistEventMusic (pl, loop=0, force=0)
-* StopEventMusic
+* PlayEventMusic (t, priority, loop=0, force=0)
+* PlaylistEventMusic (pl, priority, loop=0, force=0)
+* StopEventMusic (priority)
 
 Arguments:
 
@@ -1393,8 +1393,14 @@ Arguments:
 * pl (string): a playlist (specified by its ID)
 * loop (integer): looping or not
 * force (integer): Terminate any other running event music first. If this flag is 0 and there is already event music playing the new event music is ignored. Event music provided by content developers will usually not set this flag.
+* priority (integer): Priority for event music. If there are multiple instances of active event music only the one with the highest priority will play. There can only ever be one instance of event music for any priority level. If event music of higher priority stops and there is event music of lower priority the event music of lower priority starts to play.
 
-Note: An attempt to play a track or playlist that is currently playing is ignored. In this case the track or playlist does not restart.
+Note: An attempt to play a track or playlist that is currently playing is ignored. In this case the track or playlist does not restart. Changes in looping behaviour are considered though.
+
+New games starting with a new format omwgame file can use priorities as the developer sees fit. For old games where automatic injection of scripts and music records take place we define the following priorities:
+
+* 10: Combat music
+* 0: Basic event music
 
 ### Transition of Existing System
 
