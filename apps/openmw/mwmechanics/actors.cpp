@@ -1782,6 +1782,8 @@ namespace MWMechanics
             if (iteratedActor == getPlayer())
                 continue;
 
+            const bool sameActor = (iteratedActor == actor);
+
             const CreatureStats &stats = iteratedActor.getClass().getCreatureStats(iteratedActor);
             if (stats.isDead())
                 continue;
@@ -1790,14 +1792,13 @@ namespace MWMechanics
             // Actors that are targeted by this actor's Follow or Escort packages also side with them
             for (auto package = stats.getAiSequence().begin(); package != stats.getAiSequence().end(); ++package)
             {
-                const MWWorld::Ptr &target = (*package)->getTarget();
-                if ((*package)->sideWithTarget() && !target.isEmpty())
+                if ((*package)->sideWithTarget() && !(*package)->getTarget().isEmpty())
                 {
-                    if (iteratedActor == actor)
+                    if (sameActor)
                     {
-                        list.push_back(target);
+                        list.push_back((*package)->getTarget());
                     }
-                    else if (target == actor)
+                    else if ((*package)->getTarget() == actor)
                     {
                         list.push_back(iteratedActor);
                     }
@@ -1816,7 +1817,7 @@ namespace MWMechanics
         for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
         {
             const MWWorld::Ptr &iteratedActor = iter->first;
-            if (iteratedActor == getPlayer())
+            if (iteratedActor == getPlayer() || iteratedActor == actor)
                 continue;
 
             const CreatureStats &stats = iteratedActor.getClass().getCreatureStats(iteratedActor);
@@ -1879,7 +1880,7 @@ namespace MWMechanics
         for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
         {
             const MWWorld::Ptr &iteratedActor = iter->first;
-            if (iteratedActor == getPlayer())
+            if (iteratedActor == getPlayer() || iteratedActor == actor)
                 continue;
 
             const CreatureStats &stats = iteratedActor.getClass().getCreatureStats(iteratedActor);
@@ -1909,8 +1910,11 @@ namespace MWMechanics
         getObjectsInRange(position, aiProcessingDistance, neighbors);
         for(auto neighbor = neighbors.begin(); neighbor != neighbors.end(); ++neighbor)
         {
+            if (*neighbor == actor)
+                continue;
+
             const CreatureStats &stats = neighbor->getClass().getCreatureStats(*neighbor);
-            if (stats.isDead() || *neighbor == actor)
+            if (stats.isDead())
                 continue;
 
             if (stats.getAiSequence().isInCombat(actor))
