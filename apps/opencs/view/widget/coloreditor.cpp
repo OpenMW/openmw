@@ -1,11 +1,9 @@
 #include "coloreditor.hpp"
 
 #include <QApplication>
-#include <QColor>
 #include <QColorDialog>
 #include <QDesktopWidget>
 #include <QPainter>
-#include <QRect>
 #include <QShowEvent>
 
 #include "colorpickerpopup.hpp"
@@ -27,9 +25,7 @@ CSVWidget::ColorEditor::ColorEditor(QWidget *parent, const bool popupOnStart)
       mColorPicker(new ColorPickerPopup(this)),
       mPopupOnStart(popupOnStart)
 {
-    setCheckable(true);
     connect(this, SIGNAL(clicked()), this, SLOT(showPicker()));
-    connect(mColorPicker, SIGNAL(hid()), this, SLOT(pickerHid()));
     connect(mColorPicker, SIGNAL(colorChanged(const QColor &)), this, SLOT(pickerColorChanged(const QColor &)));
 }
 
@@ -85,20 +81,7 @@ void CSVWidget::ColorEditor::setColor(const int colorInt)
 
 void CSVWidget::ColorEditor::showPicker()
 {
-    if (isChecked())
-    {
-        mColorPicker->showPicker(calculatePopupPosition(), mColor);
-    }
-    else
-    {
-        mColorPicker->hide();
-    }
-}
-
-void CSVWidget::ColorEditor::pickerHid()
-{
-    setChecked(false);
-    emit pickingFinished();
+    mColorPicker->showPicker(calculatePopupPosition(), mColor);
 }
 
 void CSVWidget::ColorEditor::pickerColorChanged(const QColor &color)
