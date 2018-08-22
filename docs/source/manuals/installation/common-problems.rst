@@ -48,3 +48,32 @@ Installing game files via Steam on macOS: DISK WRITE ERROR
 		}
 
 	Restart the Steam client. The download should now proceed.
+
+In-game textures show up as pink
+################################
+
+:Symptoms:
+    Some textures don't show up and are replaced by pink "filler" textures.
+
+:Cause:
+    Textures shipped with Morrowind are compressed with S3TC, a texture compression algorithm that was patented in
+    the United States until October 2017. Software drivers and operating system distributions released before that date
+    may not include support for this algorithm.
+
+:Fix:
+    Upgrade your graphics drivers and/or operating system to the latest version.
+
+Music plays, but only a black screen is shown
+#############################################
+
+:Symptoms:
+    When launching OpenMW, audio is heard but there is only a black screen.
+
+:Cause:
+    This can occur when you did not import the Morrowind.ini file when the launcher asked for it.
+
+:Fix:
+    To fix it, you need to delete the `launcher.cfg` file from your configuration path
+    ([Path description on Wiki](https://wiki.openmw.org/index.php?title=Paths)), then start the launcher, select your
+    Morrowind installation, and when the launcher asks whether the `Morrowind.ini` file should be imported, make sure
+    to select "Yes".
