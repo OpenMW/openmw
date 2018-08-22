@@ -913,8 +913,7 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
         sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
         return;
     }
-    if(evt.compare(0, 10, "soundgen: ") == 0
-     && evt.compare(10, evt.size()-10, "land") != 0) // Morrowind ignores land soundgen for some reason
+    if(evt.compare(0, 10, "soundgen: ") == 0)
     {
         std::string soundgen = evt.substr(10);
 
@@ -939,11 +938,14 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
             }
         }
 
+        if (soundgen == "land") // Morrowind ignores land soundgen for some reason
+            return;
+
         std::string sound = mPtr.getClass().getSoundIdFromSndGen(mPtr, soundgen);
         if(!sound.empty())
         {
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            if(evt.compare(10, evt.size()-10, "left") == 0 || evt.compare(10, evt.size()-10, "right") == 0)
+            if(soundgen == "left" || soundgen == "right")
             {
                 // Don't make foot sounds local for the player, it makes sense to keep them
                 // positioned on the ground.
