@@ -164,6 +164,7 @@ namespace MWMechanics
 
             bool mHasDestination;
             osg::Vec3f mDestination;
+            bool mUsePathgrid;
 
             void getNeighbouringNodes(ESM::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM::Pathgrid::PointList& points);
 

@@ -148,7 +148,9 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         {
             if (wasShortcutting || doesPathNeedRecalc(dest, actor.getCell())) // if need to rebuild path
             {
-                mPathFinder.buildSyncedPath(start, dest, actor.getCell(), getPathGridGraph(actor.getCell()));
+                const auto playerHalfExtents = world->getHalfExtents(world->getPlayerPtr());
+                mPathFinder.buildPath(start, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
+                    playerHalfExtents, getNavigatorFlags(actor));
                 mRotateOnTheRunChecks = 3;
 
                 // give priority to go directly on target if there is minimal opportunity

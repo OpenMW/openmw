@@ -50,7 +50,8 @@ namespace MWMechanics
 
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mRemainingDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle),
-        mRepeat(repeat), mStoredInitialActorPosition(false), mInitialActorPosition(osg::Vec3f(0, 0, 0)), mHasDestination(false), mDestination(osg::Vec3f(0, 0, 0))
+        mRepeat(repeat), mStoredInitialActorPosition(false), mInitialActorPosition(osg::Vec3f(0, 0, 0)),
+        mHasDestination(false), mDestination(osg::Vec3f(0, 0, 0)), mUsePathgrid(false)
     {
         mIdle.resize(8, 0);
         init();
@@ -151,8 +152,18 @@ namespace MWMechanics
         // rebuild a path to it
         if (!mPathFinder.isPathConstructed() && mHasDestination)
         {
-            mPathFinder.buildSyncedPath(pos.asVec3(), mDestination, actor.getCell(),
-                getPathGridGraph(actor.getCell()));
+            if (mUsePathgrid)
+            {
+                mPathFinder.buildPathByPathgrid(pos.asVec3(), mDestination, actor.getCell(),
+                    getPathGridGraph(actor.getCell()));
+            }
+            else
+            {
+                const auto world = MWBase::Environment::get().getWorld();
+                const auto playerHalfExtents = world->getHalfExtents(world->getPlayerPtr());
+                mPathFinder.buildPath(pos.asVec3(), mDestination, actor.getCell(), getPathGridGraph(actor.getCell()),
+                    playerHalfExtents, getNavigatorFlags(actor));
+            }
 
             if (mPathFinder.isPathConstructed())
                 storage.setState(AiWanderStorage::Wander_Walking);
@@ -310,14 +321,17 @@ namespace MWMechanics
             if ((!isWaterCreature && !destinationIsAtWater(actor, mDestination)) ||
                 (isWaterCreature && !destinationThroughGround(currentPosition, mDestination)))
             {
-                mPathFinder.buildSyncedPath(currentPosition, destinationPosition, actor.getCell(),
-                    getPathGridGraph(actor.getCell()));
+                const auto world = MWBase::Environment::get().getWorld();;
+                const auto playerHalfExtents = world->getHalfExtents(world->getPlayerPtr());
+                mPathFinder.buildPath(currentPosition, destinationPosition, actor.getCell(),
+                    getPathGridGraph(actor.getCell()), playerHalfExtents, getNavigatorFlags(actor));
                 mPathFinder.addPointToPath(destinationPosition);
 
                 if (mPathFinder.isPathConstructed())
                 {
                     storage.setState(AiWanderStorage::Wander_Walking, true);
                     mHasDestination = true;
+                    mUsePathgrid = false;
                 }
                 return;
             }
@@ -595,12 +609,13 @@ namespace MWMechanics
 
         // don't take shortcuts for wandering
         const auto destVec3f = PathFinder::makeOsgVec3(dest);
-        mPathFinder.buildSyncedPath(start, destVec3f, actor.getCell(), getPathGridGraph(actor.getCell()));
+        mPathFinder.buildPathByPathgrid(start, destVec3f, actor.getCell(), getPathGridGraph(actor.getCell()));
 
         if (mPathFinder.isPathConstructed())
         {
             mDestination = destVec3f;
             mHasDestination = true;
+            mUsePathgrid = true;
             // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
             ESM::Pathgrid::Point temp = storage.mAllowedNodes[randNode];
             storage.mAllowedNodes.erase(storage.mAllowedNodes.begin() + randNode);

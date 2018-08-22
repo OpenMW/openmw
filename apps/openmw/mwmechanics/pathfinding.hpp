@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <cassert>
+#include <iterator>
 
 #include <components/detournavigator/flags.hpp>
 #include <components/esm/defs.hpp>
@@ -70,8 +71,12 @@ namespace MWMechanics
                 mCell = nullptr;
             }
 
+            void buildPathByPathgrid(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+                const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
+
             void buildPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-                           const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
+                const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
+                const DetourNavigator::Flags flags);
 
             /// Remove front point if exist and within tolerance
             void update(const osg::Vec3f& position, const float tolerance = DEFAULT_TOLERANCE);
@@ -105,16 +110,6 @@ namespace MWMechanics
             {
                 return mCell;
             }
-
-            /** Synchronize new path with old one to avoid visiting 1 waypoint 2 times
-            @note
-                BuildPath() takes closest PathGrid point to NPC as first point of path.
-                This is undesirable if NPC has just passed a Pathgrid point, as this
-                makes the 2nd point of the new path == the 1st point of old path.
-                Which results in NPC "running in a circle" back to the just passed waypoint.
-             */
-            void buildSyncedPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-                const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
 
             void addPointToPath(const osg::Vec3f& point)
             {
@@ -176,14 +171,18 @@ namespace MWMechanics
                 return closestIndex;
             }
 
-            void buildPathByNavigator(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-                const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags);
-
         private:
             bool mConstructed;
             std::deque<osg::Vec3f> mPath;
 
             const MWWorld::CellStore* mCell;
+
+            void buildPathByPathgridImpl(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+                const PathgridGraph& pathgridGraph, std::back_insert_iterator<std::deque<osg::Vec3f>> out);
+
+            void buildPathByNavigatorImpl(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+                const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
+                std::back_insert_iterator<std::deque<osg::Vec3f>> out);
     };
 }
 

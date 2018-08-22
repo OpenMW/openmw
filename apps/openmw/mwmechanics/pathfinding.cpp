@@ -124,13 +124,9 @@ namespace MWMechanics
      *    j = @.x in local coordinates (i.e. within the cell)
      *    k = @.x in world coordinates
      */
-    void PathFinder::buildPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-                               const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph)
+    void PathFinder::buildPathByPathgridImpl(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+        const PathgridGraph& pathgridGraph, std::back_insert_iterator<std::deque<osg::Vec3f>> out)
     {
-        mConstructed = true;
-        mPath.clear();
-        mCell = cell;
-
         const auto pathgrid = pathgridGraph.getPathgrid();
 
         // Refer to AiWander reseach topic on openmw forums for some background.
@@ -138,7 +134,7 @@ namespace MWMechanics
         // physics take care of any blockages.
         if(!pathgrid || pathgrid->mPoints.empty())
         {
-            mPath.push_back(endPoint);
+            *out++ = endPoint;
             return;
         }
 
@@ -165,7 +161,7 @@ namespace MWMechanics
         float startTo1stNodeLength2 = distanceSquared(pathgrid->mPoints[startNode], startPointInLocalCoords);
         if ((startToEndLength2 < startTo1stNodeLength2) || (startToEndLength2 < endTolastNodeLength2))
         {
-            mPath.push_back(endPoint);
+            *out++ = endPoint;
             return;
         }
 
@@ -178,7 +174,7 @@ namespace MWMechanics
         {
             ESM::Pathgrid::Point temp(pathgrid->mPoints[startNode]);
             converter.toWorld(temp);
-            mPath.push_back(makeOsgVec3(temp));
+            *out++ = makeOsgVec3(temp);
         }
         else
         {
@@ -207,7 +203,7 @@ namespace MWMechanics
             }
 
             // convert supplied path to world coordinates
-            std::transform(path.begin(), path.end(), std::back_inserter(mPath),
+            std::transform(path.begin(), path.end(), out,
                 [&] (ESM::Pathgrid::Point& point)
                 {
                     converter.toWorld(point);
@@ -228,7 +224,7 @@ namespace MWMechanics
         //
         // The AI routines will have to deal with such situations.
         if(endNode.second)
-            mPath.push_back(endPoint);
+            *out++ = endPoint;
     }
 
     float PathFinder::getZAngleToNext(float x, float y) const
@@ -263,43 +259,40 @@ namespace MWMechanics
             mPath.pop_front();
     }
 
-    // see header for the rationale
-    void PathFinder::buildSyncedPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-        const MWWorld::CellStore* cell, const MWMechanics::PathgridGraph& pathgridGraph)
+    void PathFinder::buildPathByPathgrid(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+        const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph)
     {
-        if (mPath.size() < 2)
-        {
-            // if path has one point, then it's the destination.
-            // don't need to worry about bad path for this case
-            buildPath(startPoint, endPoint, cell, pathgridGraph);
-        }
-        else
-        {
-            const auto oldStart = getPath().front();
-            buildPath(startPoint, endPoint, cell, pathgridGraph);
-            if (mPath.size() >= 2)
-            {
-                // if 2nd waypoint of new path == 1st waypoint of old,
-                // delete 1st waypoint of new path.
-                if (mPath[1] == oldStart)
-                {
-                    mPath.pop_front();
-                }
-            }
-        }
+        mPath.clear();
+        mCell = cell;
+
+        buildPathByPathgridImpl(startPoint, endPoint, pathgridGraph, std::back_inserter(mPath));
+
+        mConstructed = true;
     }
 
-    void PathFinder::buildPathByNavigator(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-        const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags)
+    void PathFinder::buildPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+        const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
+        const DetourNavigator::Flags flags)
+    {
+        mPath.clear();
+        mCell = cell;
+
+        buildPathByNavigatorImpl(startPoint, endPoint, halfExtents, flags, std::back_inserter(mPath));
+
+        if (mPath.empty())
+            buildPathByPathgridImpl(startPoint, endPoint, pathgridGraph, std::back_inserter(mPath));
+
+        mConstructed = true;
+    }
+
+    void PathFinder::buildPathByNavigatorImpl(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+        const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
+        std::back_insert_iterator<std::deque<osg::Vec3f>> out)
     {
         try
         {
-            mPath.clear();
-
             const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
-            navigator->findPath(halfExtents, startPoint, endPoint, flags, std::back_inserter(mPath));
-
-            mConstructed = true;
+            navigator->findPath(halfExtents, startPoint, endPoint, flags, out);
         }
         catch (const DetourNavigator::NavigatorException& exception)
         {
