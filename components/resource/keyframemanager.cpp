@@ -1,4 +1,5 @@
 #include "keyframemanager.hpp"
+#include <iostream>
 
 #include <components/vfs/manager.hpp>
 
@@ -16,7 +17,7 @@ namespace Resource
     {
     }
 
-    osg::ref_ptr<const NifOsg::KeyframeHolder> KeyframeManager::get(const std::string &name)
+    osg::ref_ptr<const NifOsg::KeyframeHolder> KeyframeManager::get(const std::string &name, bool useKfFile)
     {
         std::string normalized = name;
         mVFS->normalizeFilename(normalized);
@@ -27,7 +28,15 @@ namespace Resource
         else
         {
             osg::ref_ptr<NifOsg::KeyframeHolder> loaded (new NifOsg::KeyframeHolder);
-            NifOsg::Loader::loadKf(Nif::NIFFilePtr(new Nif::NIFFile(mVFS->getNormalized(normalized), normalized)), *loaded.get());
+
+            if (useKfFile)
+                NifOsg::Loader::loadKf(Nif::NIFFilePtr(new Nif::NIFFile(mVFS->getNormalized(normalized), normalized)), *loaded.get());
+            else
+            {
+                std::cout << "use mesh! " << name << " " << normalized << std::endl;
+                NifOsg::Loader::load(Nif::NIFFilePtr(new Nif::NIFFile(mVFS->getNormalized(normalized), normalized)), NULL, *loaded.get());
+                std::cout << loaded.get()->mTextKeys.size() << std::endl;
+            }
 
             mCache->addEntryToObjectCache(normalized, loaded);
             return loaded;

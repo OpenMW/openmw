@@ -199,15 +199,15 @@ namespace NifOsg
                 return;
             }
 
-            const Nif::Record *r = nif->getRoot(0);
+            Nif::Record *r = nif->getRoot(0);
             assert(r != NULL);
 
             if(r->recType != Nif::RC_NiSequenceStreamHelper)
             {
-                nif->warn("First root was not a NiSequenceStreamHelper, but a "+
-                          r->recName+".");
+                nif->warn("First root was not a NiSequenceStreamHelper, but a " + r->recName + ".");
                 return;
             }
+
             const Nif::NiSequenceStreamHelper *seq = static_cast<const Nif::NiSequenceStreamHelper*>(r);
 
             Nif::ExtraPtr extra = seq->extra;
@@ -249,7 +249,7 @@ namespace NifOsg
             }
         }
 
-        osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::ImageManager* imageManager)
+        osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::ImageManager* imageManager, KeyframeHolder& target)
         {
             if (nif->numRoots() < 1)
                 nif->fail("Found no root nodes");
@@ -262,7 +262,7 @@ namespace NifOsg
 
             osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
 
-            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, imageManager, std::vector<int>(), 0, false, false, false, &textkeys->mTextKeys);
+            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, imageManager, std::vector<int>(), 0, false, false, false, &textkeys->mTextKeys, target);
 
             if (nif->getUseSkinning())
             {
@@ -283,7 +283,10 @@ namespace NifOsg
             }
 
             if (!textkeys->mTextKeys.empty())
+            {
+                target.mTextKeys = textkeys->mTextKeys;
                 created->getOrCreateUserDataContainer()->addUserObject(textkeys);
+            }
 
             return created;
         }
@@ -464,7 +467,7 @@ namespace NifOsg
         }
 
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
-                                std::vector<int> boundTextures, int animflags, bool skipMeshes, bool hasMarkers, bool isAnimated, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
+                                std::vector<int> boundTextures, int animflags, bool skipMeshes, bool hasMarkers, bool isAnimated, TextKeyMap* textKeys, KeyframeHolder& target, osg::Node* rootNode=NULL)
         {
             if (rootNode != NULL && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
                 return NULL;
@@ -583,7 +586,7 @@ namespace NifOsg
             // Note: NiTriShapes are not allowed to have KeyframeControllers (the vanilla engine just crashes when there is one).
             // We can take advantage of this constraint for optimizations later.
             if (nifNode->recType != Nif::RC_NiTriShape && !nifNode->controller.empty() && node->getDataVariance() == osg::Object::DYNAMIC)
-                handleNodeControllers(nifNode, static_cast<osg::MatrixTransform*>(node.get()), animflags);
+                handleNodeControllers(nifNode, static_cast<osg::MatrixTransform*>(node.get()), target, animflags);
 
             if (nifNode->recType == Nif::RC_NiLODNode)
             {
@@ -607,7 +610,7 @@ namespace NifOsg
                 for(size_t i = 0;i < children.length();++i)
                 {
                     if(!children[i].empty())
-                        handleNode(children[i].getPtr(), node, imageManager, boundTextures, animflags, skipMeshes, hasMarkers, isAnimated, textKeys, rootNode);
+                        handleNode(children[i].getPtr(), node, imageManager, boundTextures, animflags, skipMeshes, hasMarkers, isAnimated, textKeys, target, rootNode);
                 }
             }
 
@@ -642,7 +645,7 @@ namespace NifOsg
             }
         }
 
-        void handleNodeControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode, int animflags)
+        void handleNodeControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode, KeyframeHolder& target, int animflags)
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -657,6 +660,10 @@ namespace NifOsg
 
                         setupController(key, callback, animflags);
                         transformNode->addUpdateCallback(callback);
+
+                        const std::string nodeName = Misc::StringUtils::lowerCase(nifNode->name);
+                        if (target.mKeyframeControllers.find(nodeName) == target.mKeyframeControllers.end())
+                            target.mKeyframeControllers[nodeName] = callback;
                     }
                 }
                 else if (ctrl->recType == Nif::RC_NiVisController)
@@ -1670,10 +1677,10 @@ namespace NifOsg
 
     };
 
-    osg::ref_ptr<osg::Node> Loader::load(Nif::NIFFilePtr file, Resource::ImageManager* imageManager)
+    osg::ref_ptr<osg::Node> Loader::load(Nif::NIFFilePtr file, Resource::ImageManager* imageManager, KeyframeHolder& target)
     {
         LoaderImpl impl(file->getFilename());
-        return impl.load(file, imageManager);
+        return impl.load(file, imageManager, target);
     }
 
     void Loader::loadKf(Nif::NIFFilePtr kf, KeyframeHolder& target)

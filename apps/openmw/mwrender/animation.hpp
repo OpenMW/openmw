@@ -316,8 +316,8 @@ protected:
      * @param model The file to add the keyframes for. Note that the .nif file extension will be replaced with .kf.
      * @param baseModel The filename of the mObjectRoot, only used for error messages.
     */
-    void addAnimSource(const std::string &model, const std::string& baseModel);
-    void addSingleAnimSource(const std::string &model, const std::string& baseModel);
+    void addAnimSource(const std::string &model, const std::string& baseModel, bool useKfFile=true);
+    void addSingleAnimSource(const std::string &model, const std::string& baseModel, bool useKfFile=true);
 
     /** Adds an additional light to the given node using the specified ESM record. */
     void addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light *light);
