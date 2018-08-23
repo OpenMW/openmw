@@ -1243,10 +1243,16 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 }
             }
 
+            std::vector<osg::Plane> extraPlanes;
             if (settings->getMultipleShadowMapHint() == ShadowSettings::CASCADED)
-                cropShadowCameraToMainFrustum(frustum, camera, cascaseNear, cascadeFar);
+            {
+                cropShadowCameraToMainFrustum(frustum, camera, cascaseNear, cascadeFar, extraPlanes);
+                for (auto plane : extraPlanes)
+                    local_polytope.getPlaneList().push_back(plane);
+                local_polytope.setupMask();
+            }
             else
-                cropShadowCameraToMainFrustum(frustum, camera, reducedNear, reducedFar);
+                cropShadowCameraToMainFrustum(frustum, camera, reducedNear, reducedFar, extraPlanes);
 
             osg::ref_ptr<VDSMCameraCullCallback> vdsmCallback = new VDSMCameraCullCallback(this, local_polytope);
             camera->setCullCallback(vdsmCallback.get());
@@ -1873,16 +1879,12 @@ struct ConvexHull
     {
         typedef std::set<osg::Vec3d> VertexSet;
 
-        double lowestPoint = DBL_MAX;
-
         // Collect the set of vertices
         VertexSet vertices;
         for (Edge edge : _edges)
         {
             vertices.insert(edge.first);
             vertices.insert(edge.second);
-            lowestPoint = osg::minimum(lowestPoint, edge.first.z());
-            lowestPoint = osg::minimum(lowestPoint, edge.second.z());
         }
 
         if (vertices.size() == 0)
@@ -1893,19 +1895,18 @@ struct ConvexHull
         VertexSet extremeVerticesSet(extremeVertices.cbegin(), extremeVertices.cend());
 
         // Add their extrusions to the final edge collection
+        // We extrude as far as -1.5 as the coordinate space shouldn't ever put any shadow casters further than -1.0
         Edges finalEdges;
         // Add edges towards -Z
         for (auto vertex : extremeVertices)
-            finalEdges.push_back(Edge(vertex, osg::Vec3d(vertex.x(), vertex.y(), -DBL_MAX)));
+            finalEdges.push_back(Edge(vertex, osg::Vec3d(vertex.x(), vertex.y(), -1.5)));
         // Add edge loop to 'seal' the hull
         for (auto itr = extremeVertices.cbegin(); itr != extremeVertices.cend() - 1; ++itr)
-            finalEdges.push_back(Edge(osg::Vec3d(itr->x(), itr->y(), -DBL_MAX), osg::Vec3d((itr + 1)->x(), (itr + 1)->y(), -DBL_MAX)));
+            finalEdges.push_back(Edge(osg::Vec3d(itr->x(), itr->y(), -1.5), osg::Vec3d((itr + 1)->x(), (itr + 1)->y(), -1.5)));
         // The convex hull algorithm we are using sometimes places a point at both ends of the vector, so we don't always need to add the last edge separately.
         if (extremeVertices.front() != extremeVertices.back())
-            finalEdges.push_back(Edge(osg::Vec3d(extremeVertices.front().x(), extremeVertices.front().y(), -DBL_MAX), osg::Vec3d(extremeVertices.back().x(), extremeVertices.back().y(), -DBL_MAX)));
+            finalEdges.push_back(Edge(osg::Vec3d(extremeVertices.front().x(), extremeVertices.front().y(), -1.5), osg::Vec3d(extremeVertices.back().x(), extremeVertices.back().y(), -1.5)));
 
-        // Just in case using -DBL_MAX upsets some of the maths, we pretend we've only extended the volume by a little bit.
-        lowestPoint -= 1.0;
         // Remove internal edges connected to extreme vertices
         for (auto vertex : extremeVertices)
         {
@@ -1917,7 +1918,7 @@ struct ConvexHull
                 else if (edge.second == vertex)
                     connectedVertices.push_back(edge.first);
             }
-            connectedVertices.push_back(osg::Vec3d(vertex.x(), vertex.y(), lowestPoint));
+            connectedVertices.push_back(osg::Vec3d(vertex.x(), vertex.y(), -1.5));
 
             Vertices unwantedEdgeEnds = findInternalEdges(vertex, connectedVertices);
             for (auto edgeEnd : unwantedEdgeEnds)
@@ -2381,11 +2382,12 @@ struct RenderLeafBounds
     double min_z, max_z;
 };
 
-bool MWShadowTechnique::cropShadowCameraToMainFrustum(Frustum& frustum, osg::Camera* camera, double viewNear, double viewFar)
+bool MWShadowTechnique::cropShadowCameraToMainFrustum(Frustum& frustum, osg::Camera* camera, double viewNear, double viewFar, std::vector<osg::Plane>& planeList)
 {
     osg::Matrixd light_p = camera->getProjectionMatrix();
     osg::Matrixd light_v = camera->getViewMatrix();
     osg::Matrixd light_vp = light_v * light_p;
+    osg::Matrixd oldLightP = light_p;
     
     ConvexHull convexHull;
     convexHull.setToFrustum(frustum);
@@ -2433,6 +2435,18 @@ bool MWShadowTechnique::cropShadowCameraToMainFrustum(Frustum& frustum, osg::Cam
 
         light_p.postMult(m);
         camera->setProjectionMatrix(light_p);
+
+        convexHull.transform(osg::Matrixd::inverse(oldLightP));
+
+        xMin = convexHull.min(0);
+        xMax = convexHull.max(0);
+        yMin = convexHull.min(1);
+        yMax = convexHull.max(1);
+
+        planeList.push_back(osg::Plane(0.0, -1.0, 0.0, yMax));
+        planeList.push_back(osg::Plane(0.0, 1.0, 0.0, -yMin));
+        planeList.push_back(osg::Plane(-1.0, 0.0, 0.0, xMax));
+        planeList.push_back(osg::Plane(1.0, 0.0, 0.0, -xMin));
     }
 
     return true;
