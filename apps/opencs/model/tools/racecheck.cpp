@@ -29,24 +29,24 @@ void CSMTools::RaceCheckStage::performPerRecord (int stage, CSMDoc::Messages& me
 
     // test for empty name and description
     if (race.mName.empty())
-        messages.push_back (std::make_pair (id, race.mId + " has an empty name"));
+        messages.push_back (std::make_pair (id, "Name is missing"));
 
     if (race.mDescription.empty())
-        messages.push_back (std::make_pair (id, race.mId + " has an empty description"));
+        messages.push_back (std::make_pair (id, "Description is missing"));
 
     // test for positive height
     if (race.mData.mHeight.mMale<=0)
-        messages.push_back (std::make_pair (id, "male " + race.mId + " has non-positive height"));
+        messages.push_back (std::make_pair (id, "Male height is non-positive"));
 
     if (race.mData.mHeight.mFemale<=0)
-        messages.push_back (std::make_pair (id, "female " + race.mId + " has non-positive height"));
+        messages.push_back (std::make_pair (id, "Female height is non-positive"));
 
     // test for non-negative weight
     if (race.mData.mWeight.mMale<0)
-        messages.push_back (std::make_pair (id, "male " + race.mId + " has negative weight"));
+        messages.push_back (std::make_pair (id, "Male weight is negative"));
 
     if (race.mData.mWeight.mFemale<0)
-        messages.push_back (std::make_pair (id, "female " + race.mId + " has negative weight"));
+        messages.push_back (std::make_pair (id, "Female weight is negative"));
 
     /// \todo check data members that can't be edited in the table view
 }

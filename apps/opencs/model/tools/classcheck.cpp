@@ -37,11 +37,11 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
     // A class should have a name
     if (class_.mName.empty())
-        messages.push_back (std::make_pair (id, class_.mId + " doesn't have a name"));
+        messages.push_back (std::make_pair (id, "Name is missing"));
 
     // A playable class should have a description
     if (class_.mData.mIsPlayable != 0 && class_.mDescription.empty())
-        messages.push_back (std::make_pair (id, class_.mId + " doesn't have a description and it's playable"));
+        messages.push_back (std::make_pair (id, "Description of a playable class is missing"));
 
     // test for invalid attributes
     for (int i=0; i<2; ++i)
@@ -49,14 +49,14 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
         {
             std::ostringstream stream;
 
-            stream << "Attribute #" << i << " of " << class_.mId << " is not set";
+            stream << "Attribute #" << i << " is not set";
 
             messages.push_back (std::make_pair (id, stream.str()));
         }
 
     if (class_.mData.mAttribute[0]==class_.mData.mAttribute[1] && class_.mData.mAttribute[0]!=-1)
     {
-        messages.push_back (std::make_pair (id, "Class lists same attribute twice"));
+        messages.push_back (std::make_pair (id, "Same attribute is listed twice"));
     }
 
     // test for non-unique skill
@@ -66,10 +66,9 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
         for (int i2=0; i2<2; ++i2)
             ++skills[class_.mData.mSkills[i][i2]];
 
-    for (std::map<int, int>::const_iterator iter (skills.begin()); iter!=skills.end(); ++iter)
-        if (iter->second>1)
+    for (auto &skill : skills)
+        if (skill.second>1)
         {
-            messages.push_back (std::make_pair (id,
-                ESM::Skill::indexToId (iter->first) + " is listed more than once"));
+            messages.push_back (std::make_pair (id, "Skill " + ESM::Skill::indexToId (skill.first) + " is listed more than once"));
         }
 }
