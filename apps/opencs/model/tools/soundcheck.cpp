@@ -6,10 +6,14 @@
 
 #include "../prefs/state.hpp"
 
+#include "../world/data.hpp"
+#include "../world/resources.hpp"
 #include "../world/universalid.hpp"
 
-CSMTools::SoundCheckStage::SoundCheckStage (const CSMWorld::IdCollection<ESM::Sound>& sounds)
-: mSounds (sounds)
+CSMTools::SoundCheckStage::SoundCheckStage (const CSMWorld::IdCollection<ESM::Sound> &sounds,
+                                            const CSMWorld::Resources &soundfiles)
+    : mSounds (sounds),
+      mSoundFiles (soundfiles)
 {
     mIgnoreBaseRecords = false;
 }
@@ -36,5 +40,12 @@ void CSMTools::SoundCheckStage::perform (int stage, CSMDoc::Messages& messages)
     if (sound.mData.mMinRange>sound.mData.mMaxRange)
         messages.push_back (std::make_pair (id, "Minimum range larger than maximum range"));
 
-    /// \todo check, if the sound file exists ADD CHECK HERE
+    if (sound.mSound.empty())
+    {
+        messages.push_back(std::make_pair(id, "Sound file is missing"));
+    }
+    else if (mSoundFiles.searchId(sound.mSound) == -1)
+    {
+        messages.push_back(std::make_pair(id, "Sound file '" + sound.mSound + "' does not exist"));
+    }
 }

@@ -74,7 +74,7 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
 
         mVerifierOperation->appendStage (new RaceCheckStage (mData.getRaces()));
 
-        mVerifierOperation->appendStage (new SoundCheckStage (mData.getSounds()));
+        mVerifierOperation->appendStage (new SoundCheckStage (mData.getSounds(), mData.getResources (CSMWorld::UniversalId::Type_SoundsRes)));
 
         mVerifierOperation->appendStage (new RegionCheckStage (mData.getRegions()));
 

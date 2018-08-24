@@ -7,17 +7,24 @@
 
 #include "../doc/stage.hpp"
 
+namespace CSMWorld
+{
+    class Resources;
+}
+
 namespace CSMTools
 {
     /// \brief VerifyStage: make sure that sound records are internally consistent
     class SoundCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::Sound>& mSounds;
+            const CSMWorld::Resources &mSoundFiles;
             bool mIgnoreBaseRecords;
 
         public:
 
-            SoundCheckStage (const CSMWorld::IdCollection<ESM::Sound>& sounds);
+            SoundCheckStage (const CSMWorld::IdCollection<ESM::Sound>& sounds,
+                             const CSMWorld::Resources &soundfiles);
 
             virtual int setup();
             ///< \return number of steps
