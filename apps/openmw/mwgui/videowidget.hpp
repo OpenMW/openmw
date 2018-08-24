@@ -1,12 +1,9 @@
 #ifndef OPENMW_MWGUI_VIDEOWIDGET_H
 #define OPENMW_MWGUI_VIDEOWIDGET_H
 
-#include <MyGUI_Widget.h>
+#include <extern/osg-ffmpeg-videoplayer/videoplayer.hpp>
 
-namespace Video
-{
-    class VideoPlayer;
-}
+#include <MyGUI_Widget.h>
 
 namespace VFS
 {
