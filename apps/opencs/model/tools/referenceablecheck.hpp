@@ -18,7 +18,8 @@ namespace CSMTools
                 const CSMWorld::IdCollection<ESM::Class>& classes,
                 const CSMWorld::IdCollection<ESM::Faction>& factions,
                 const CSMWorld::IdCollection<ESM::Script>& scripts,
-                const CSMWorld::Resources& models);
+                const CSMWorld::Resources& models,
+                const CSMWorld::Resources& icons);
 
             virtual void perform(int stage, CSMDoc::Messages& messages);
             virtual int setup();
@@ -84,6 +85,7 @@ namespace CSMTools
             const CSMWorld::IdCollection<ESM::Faction>& mFactions;
             const CSMWorld::IdCollection<ESM::Script>& mScripts;
             const CSMWorld::Resources& mModels;
+            const CSMWorld::Resources& mIcons;
             bool mPlayerPresent;
             bool mIgnoreBaseRecords;
     };

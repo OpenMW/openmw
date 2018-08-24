@@ -1,6 +1,7 @@
 #include "referenceablecheck.hpp"
 
 #include <components/misc/stringops.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../prefs/state.hpp"
 
@@ -12,13 +13,15 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
     const CSMWorld::IdCollection<ESM::Class>& classes,
     const CSMWorld::IdCollection<ESM::Faction>& faction,
     const CSMWorld::IdCollection<ESM::Script>& scripts,
-    const CSMWorld::Resources& models)
+    const CSMWorld::Resources& models,
+    const CSMWorld::Resources& icons)
    :mObjects(referenceable),
     mRaces(races),
     mClasses(classes),
     mFactions(faction),
     mScripts(scripts),
     mModels(models),
+    mIcons(icons),
     mPlayerPresent(false)
 {
     mIgnoreBaseRecords = false;
@@ -953,7 +956,13 @@ template<typename Item> void CSMTools::ReferenceableCheckStage::inventoryItemChe
 
     //checking for icon
     if (someItem.mIcon.empty())
-        messages.push_back (std::make_pair (someID, "Icon is missing")); // ADD CHECK HERE
+        messages.push_back (std::make_pair (someID, "Icon is missing"));
+    else if (mIcons.searchId(someItem.mIcon) == -1)
+    {
+        std::string ddsIcon = someItem.mIcon;
+        if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsIcon) && mIcons.searchId(ddsIcon) != -1))
+            messages.push_back(std::make_pair(someID, "Icon '" + someItem.mIcon + "' does not exist"));
+    }
 
     if (enchantable && someItem.mData.mEnchant < 0)
         messages.push_back (std::make_pair (someID, "Enchantment points number is negative"));
@@ -981,7 +990,13 @@ template<typename Item> void CSMTools::ReferenceableCheckStage::inventoryItemChe
 
     //checking for icon
     if (someItem.mIcon.empty())
-        messages.push_back (std::make_pair (someID, "Icon is missing")); // ADD CHECK HERE
+        messages.push_back (std::make_pair (someID, "Icon is missing"));
+    else if (mIcons.searchId(someItem.mIcon) == -1)
+    {
+        std::string ddsIcon = someItem.mIcon;
+        if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsIcon) && mIcons.searchId(ddsIcon) != -1))
+            messages.push_back(std::make_pair(someID, "Icon '" + someItem.mIcon + "' does not exist"));
+    }
 }
 
 template<typename Tool> void CSMTools::ReferenceableCheckStage::toolCheck (

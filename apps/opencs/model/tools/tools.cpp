@@ -83,7 +83,7 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
         mVerifierOperation->appendStage (new SpellCheckStage (mData.getSpells()));
 
         mVerifierOperation->appendStage (new ReferenceableCheckStage (mData.getReferenceables().getDataSet(), mData.getRaces(), mData.getClasses(), mData.getFactions(), mData.getScripts(), 
-                                                                      mData.getResources (CSMWorld::UniversalId::Type_Meshes)));
+                                                                      mData.getResources (CSMWorld::UniversalId::Type_Meshes), mData.getResources (CSMWorld::UniversalId::Type_Icons)));
 
         mVerifierOperation->appendStage (new ReferenceCheckStage(mData.getReferences(), mData.getReferenceables(), mData.getCells(), mData.getFactions()));
 
