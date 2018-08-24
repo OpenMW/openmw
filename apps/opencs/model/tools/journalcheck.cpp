@@ -33,6 +33,7 @@ void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
     std::set<int> questIndices;
 
     CSMWorld::InfoCollection::Range range = mJournalInfos.getTopicRange(journal.mId);
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Journal, journal.mId);
 
     for (CSMWorld::InfoCollection::RecordConstIterator it = range.first; it != range.second; ++it)
     {
@@ -56,9 +57,7 @@ void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
 
         if (journalInfo.mResponse.empty())
         {
-            CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_JournalInfo, journalInfo.mId);
-
-            messages.add(id, "Journal Info: missing description", "", CSMDoc::Message::Severity_Warning);
+            messages.add(id, "Missing journal entry text", "", CSMDoc::Message::Severity_Warning);
         }
 
         std::pair<std::set<int>::iterator, bool> result = questIndices.insert(journalInfo.mData.mJournalIndex);
@@ -66,25 +65,18 @@ void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
         // Duplicate index
         if (result.second == false)
         {
-            CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_JournalInfo, journalInfo.mId);
-
             std::ostringstream stream;
-            stream << "Journal: duplicated quest index " << journalInfo.mData.mJournalIndex;
-
+            stream << "Duplicated quest index " << journalInfo.mData.mJournalIndex;
             messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         }
     }
 
     if (totalInfoCount == 0)
     {
-        CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Journal, journal.mId);
-
-        messages.add(id, "Journal: no defined Journal Infos", "", CSMDoc::Message::Severity_Warning);
+        messages.add(id, "No related journal entry", "", CSMDoc::Message::Severity_Warning);
     }
     else if (statusNamedCount > 1)
     {
-        CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Journal, journal.mId);
-
-        messages.add(id, "Journal: multiple infos with quest status \"Named\"", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Multiple entries with quest status 'Named'", "", CSMDoc::Message::Severity_Error);
     }
 }

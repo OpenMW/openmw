@@ -25,8 +25,7 @@ void CSMTools::StartScriptCheckStage::perform(int stage, CSMDoc::Messages& messa
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_StartScript, scriptId);
 
     if (mScripts.searchId (Misc::StringUtils::lowerCase (scriptId))==-1)
-        messages.push_back (
-            std::make_pair (id, "Start script " + scriptId + " does not exist"));
+        messages.push_back (std::make_pair (id, "Start script " + scriptId + " does not exist"));
 }
 
 int CSMTools::StartScriptCheckStage::setup()
