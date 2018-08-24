@@ -134,7 +134,7 @@ void CSMTools::TopicInfoCheckStage::perform(int stage, CSMDoc::Messages& message
     if (topicInfo.mData.mGender < -1 || topicInfo.mData.mGender > 1)
     {
         std::ostringstream stream;
-        messages.add(id, "Gender: Value is invalid", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Gender is invalid", "", CSMDoc::Message::Severity_Error);
     }
 
     if (!topicInfo.mRace.empty())
@@ -166,23 +166,28 @@ void CSMTools::TopicInfoCheckStage::perform(int stage, CSMDoc::Messages& message
 bool CSMTools::TopicInfoCheckStage::verifyActor(const std::string& actor, const CSMWorld::UniversalId& id,
     CSMDoc::Messages& messages)
 {
-    const std::string specifier = "Actor";
-
     CSMWorld::RefIdData::LocalIndex index = mReferencables.searchId(actor);
 
     if (index.first == -1)
     {
-        writeMissingIdError(specifier, actor, id, messages);
+        std::ostringstream stream;
+        stream << "Actor '" << actor << "' does not exist";
+        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (mReferencables.getRecord(index).isDeleted())
     {
-        writeDeletedRecordError(specifier, actor, id, messages);
+        std::ostringstream stream;
+        stream << "Deleted actor '" << actor << "' is being referenced";
+        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (index.second != CSMWorld::UniversalId::Type_Npc && index.second != CSMWorld::UniversalId::Type_Creature)
     {
-        writeInvalidTypeError(specifier, actor, index.second, "NPC or Creature", id, messages);
+        CSMWorld::UniversalId tempId(index.second, actor);
+        std::ostringstream stream;
+        stream << "Object '" << actor << "' has invalid type " << tempId.getTypeName() << " (an actor must be an NPC or a creature)"; 
+        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
     }
 
@@ -192,11 +197,11 @@ bool CSMTools::TopicInfoCheckStage::verifyActor(const std::string& actor, const 
 bool CSMTools::TopicInfoCheckStage::verifyCell(const std::string& cell, const CSMWorld::UniversalId& id,
     CSMDoc::Messages& messages)
 {
-    const std::string specifier = "Cell";
-
     if (mCellNames.find(cell) == mCellNames.end())
     {
-        writeMissingIdError(specifier, cell, id, messages);
+        std::ostringstream stream;
+        stream << "Cell '" << cell << "' does not exist";
+        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
     }
 
@@ -209,9 +214,8 @@ bool CSMTools::TopicInfoCheckStage::verifyFactionRank(const std::string& faction
     if (rank < -1)
     {
         std::ostringstream stream;
-        stream << "Rank or PC Rank is set to " << rank << ", but should be set to -1 if no rank is required";
-
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
+        stream << "Faction rank is set to " << rank << ", but it should be set to -1 if there are no rank requirements";
+        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Warning);
         return false;
     }
 
@@ -229,10 +233,10 @@ bool CSMTools::TopicInfoCheckStage::verifyFactionRank(const std::string& faction
     if (rank >= limit)
     {
         std::ostringstream stream;
-        stream << "Rank or PC Rank is set to " << rank << " which is more than the maximum of " << limit - 1
-               << " for the " << factionName << " faction";
+        stream << "Faction rank is set to " << rank << " which is more than the maximum of " << limit - 1
+               << " for the '" << factionName << "' faction";
 
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
+        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Warning);
         return false;
     }
 
@@ -242,18 +246,20 @@ bool CSMTools::TopicInfoCheckStage::verifyFactionRank(const std::string& faction
 bool CSMTools::TopicInfoCheckStage::verifyItem(const std::string& item, const CSMWorld::UniversalId& id,
     CSMDoc::Messages& messages)
 {
-    const std::string specifier = "Item";
-
     CSMWorld::RefIdData::LocalIndex index = mReferencables.searchId(item);
 
     if (index.first == -1)
     {
-        writeMissingIdError(specifier, item, id, messages);
+        std::ostringstream stream;
+        stream << "Item '" << item << "' does not exist";
+        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (mReferencables.getRecord(index).isDeleted())
     {
-        writeDeletedRecordError(specifier, item, id, messages);
+        std::ostringstream stream;
+        stream << "Deleted item '" << item << "' is being referenced";
+        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else
@@ -276,8 +282,13 @@ bool CSMTools::TopicInfoCheckStage::verifyItem(const std::string& item, const CS
                 break;
 
             default:
-                writeInvalidTypeError(specifier, item, index.second, "Potion, Armor, Book, etc.", id, messages);
+            {
+                CSMWorld::UniversalId tempId(index.second, item);
+                std::ostringstream stream;
+                stream << "Object '" << item << "' has invalid type " << tempId.getTypeName() << " (an item can be a potion, an armor piece, a book and so on)"; 
+                messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
                 return false;
+            }
         }
     }
 
@@ -291,13 +302,13 @@ bool CSMTools::TopicInfoCheckStage::verifySelectStruct(const ESM::DialInfo::Sele
 
     if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_None)
     {
-        messages.add(id, "Invalid Info Condition: " + infoCondition.toString(), "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Invalid condition '" + infoCondition.toString() + "'", "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (!infoCondition.variantTypeIsValid())
     {
         std::ostringstream stream;
-        stream << "Info Condition: Value for \"" << infoCondition.toString() << "\" has a type of ";
+        stream << "Value of condition '" << infoCondition.toString() << "' has invalid ";
 
         switch (select.mValue.getType())
         {
@@ -307,8 +318,9 @@ bool CSMTools::TopicInfoCheckStage::verifySelectStruct(const ESM::DialInfo::Sele
             case ESM::VT_Long:   stream << "Long"; break;
             case ESM::VT_Float:  stream << "Float"; break;
             case ESM::VT_String: stream << "String"; break;
-            default:             stream << "Unknown"; break;
+            default:             stream << "unknown"; break;
         }
+        stream << " type";
 
         messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
@@ -316,7 +328,7 @@ bool CSMTools::TopicInfoCheckStage::verifySelectStruct(const ESM::DialInfo::Sele
     else if (infoCondition.conditionIsAlwaysTrue())
     {
         std::ostringstream stream;
-        stream << "Info Condition: " << infoCondition.toString() << " is always true";
+        stream << "Condition '" << infoCondition.toString() << "' is always true";
 
         messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Warning);
         return false;
@@ -324,7 +336,7 @@ bool CSMTools::TopicInfoCheckStage::verifySelectStruct(const ESM::DialInfo::Sele
     else if (infoCondition.conditionIsNeverTrue())
     {
         std::ostringstream stream;
-        stream << "Info Condition: " << infoCondition.toString() << " is never true";
+        stream << "Condition '" << infoCondition.toString() << "' is never true";
 
         messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Warning);
         return false;
@@ -383,11 +395,11 @@ bool CSMTools::TopicInfoCheckStage::verifySelectStruct(const ESM::DialInfo::Sele
 bool CSMTools::TopicInfoCheckStage::verifySound(const std::string& sound, const CSMWorld::UniversalId& id,
     CSMDoc::Messages& messages)
 {
-    const std::string specifier = "Sound File";
-
     if (mSoundFiles.searchId(sound) == -1)
     {
-        writeMissingIdError(specifier, sound, id, messages);
+        std::ostringstream stream;
+        stream << "Sound file '" << sound << "' does not exist";
+        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
     }
 
@@ -402,47 +414,18 @@ bool CSMTools::TopicInfoCheckStage::verifyId(const std::string& name, const CSMW
 
     if (index == -1)
     {
-        writeMissingIdError(T::getRecordType(), name, id, messages);
+        std::ostringstream stream;
+        stream << T::getRecordType() + " '" << name << "' does not exist";
+        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (collection.getRecord(index).isDeleted())
     {
-        writeDeletedRecordError(T::getRecordType(), name, id, messages);
+        std::ostringstream stream;
+        stream << "Deleted " << T::getRecordType() << " record '" << name << "' is being referenced";
+        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
     }
 
     return true;
-}
-
-// Error functions
-
-void CSMTools::TopicInfoCheckStage::writeMissingIdError(const std::string& specifier, const std::string& missingId,
-    const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
-{
-    std::ostringstream stream;
-    stream << specifier << ": ID or name \"" << missingId << "\" could not be found";
-
-    messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
-}
-
-void CSMTools::TopicInfoCheckStage::writeDeletedRecordError(const std::string& specifier, const std::string& recordId,
-    const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
-{
-    std::ostringstream stream;
-    stream << specifier << ": Deleted record with ID \"" << recordId << "\" is being referenced";
-
-    messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
-}
-
-void CSMTools::TopicInfoCheckStage::writeInvalidTypeError(const std::string& specifier, const std::string& invalidId,
-    CSMWorld::UniversalId::Type invalidType, const std::string& expectedType, const CSMWorld::UniversalId& id,
-    CSMDoc::Messages& messages)
-{
-    CSMWorld::UniversalId tempId(invalidType, invalidId);
-
-    std::ostringstream stream;
-    stream << specifier << ": invalid type of " << tempId.getTypeName() << " was found for referencable \""
-           << invalidId << "\" (can be of type " << expectedType << ")";
-
-    messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
 }

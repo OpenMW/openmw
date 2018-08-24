@@ -20,7 +20,7 @@ namespace
 
 std::string CSMTools::MagicEffectCheckStage::checkTexture(const std::string &texture, bool isIcon) const
 {
-    if (texture.empty()) return (isIcon ? "Icon is not specified" : std::string());
+    if (texture.empty()) return (isIcon ? "Icon is missing" : std::string());
 
     const CSMWorld::Resources &textures = isIcon ? mIcons : mTextures;
     if (textures.searchId(texture) != -1) return std::string();
@@ -97,7 +97,7 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages &messa
     {
         addMessage(messages, id, "Description is missing");
     }
-    
+
     if (effect.mData.mBaseCost < 0.0f)
     {
         addMessage(messages, id, "Base cost is negative");
