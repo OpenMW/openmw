@@ -9,10 +9,10 @@
 
 CSMTools::SoundGenCheckStage::SoundGenCheckStage(const CSMWorld::IdCollection<ESM::SoundGenerator> &soundGens,
                                                  const CSMWorld::IdCollection<ESM::Sound> &sounds,
-                                                 const CSMWorld::RefIdCollection &referenceables)
+                                                 const CSMWorld::RefIdCollection &objects)
     : mSoundGens(soundGens),
       mSounds(sounds),
-      mReferenceables(referenceables)
+      mObjects(objects)
 {
     mIgnoreBaseRecords = false;
 }
@@ -37,10 +37,10 @@ void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages &messages
 
     if (!soundGen.mCreature.empty())
     {
-        CSMWorld::RefIdData::LocalIndex creatureIndex = mReferenceables.getDataSet().searchId(soundGen.mCreature);
+        CSMWorld::RefIdData::LocalIndex creatureIndex = mObjects.getDataSet().searchId(soundGen.mCreature);
         if (creatureIndex.first == -1)
         {
-            messages.push_back(std::make_pair(id, "No such creature '" + soundGen.mCreature + "'"));
+            messages.push_back(std::make_pair(id, "Creature '" + soundGen.mCreature + "' doesn't exist"));
         }
         else if (creatureIndex.second != CSMWorld::UniversalId::Type_Creature)
         {
@@ -50,10 +50,10 @@ void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages &messages
 
     if (soundGen.mSound.empty())
     {
-        messages.push_back(std::make_pair(id, "Sound is not specified"));
+        messages.push_back(std::make_pair(id, "Sound is missing"));
     }
     else if (mSounds.searchId(soundGen.mSound) == -1)
     {
-        messages.push_back(std::make_pair(id, "No such sound '" + soundGen.mSound + "'"));
+        messages.push_back(std::make_pair(id, "Sound '" + soundGen.mSound + "' doesn't exist"));
     }
 }
