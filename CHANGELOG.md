@@ -16,6 +16,7 @@
     Bug #2872: Tab completion in console doesn't work with explicit reference
     Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
     Bug #3049: Drain and Fortify effects are not properly applied on health, magicka and fatigue
+    Bug #3059: Unable to hit with marksman weapons when too close to an enemy
     Bug #3072: Fatal error on AddItem <item> that has a script containing Equip <item>
     Bug #3249: Fixed revert function not updating views properly
     Bug #3374: Touch spells not hitting kwama foragers
