@@ -1145,14 +1145,24 @@ bool OpenAL_Output::playSound(Sound *sound, Sound_Handle data, float offset)
 
     initCommon2D(source, sound->getPosition(), sound->getRealVolume(), sound->getPitch(),
                  sound->getIsLooping(), sound->getUseEnv());
+    alSourcei(source, AL_BUFFER, GET_PTRID(data));
     alSourcef(source, AL_SEC_OFFSET, offset);
     if(getALError() != AL_NO_ERROR)
+    {
+        alSourceRewind(source);
+        alSourcei(source, AL_BUFFER, 0);
+        alGetError();
         return false;
+    }
 
-    alSourcei(source, AL_BUFFER, GET_PTRID(data));
     alSourcePlay(source);
     if(getALError() != AL_NO_ERROR)
+    {
+        alSourceRewind(source);
+        alSourcei(source, AL_BUFFER, 0);
+        alGetError();
         return false;
+    }
 
     mFreeSources.pop_front();
     sound->mHandle = MAKE_PTRID(source);
@@ -1175,14 +1185,24 @@ bool OpenAL_Output::playSound3D(Sound *sound, Sound_Handle data, float offset)
     initCommon3D(source, sound->getPosition(), sound->getMinDistance(), sound->getMaxDistance(),
                  sound->getRealVolume(), sound->getPitch(), sound->getIsLooping(),
                  sound->getUseEnv());
+    alSourcei(source, AL_BUFFER, GET_PTRID(data));
     alSourcef(source, AL_SEC_OFFSET, offset);
     if(getALError() != AL_NO_ERROR)
+    {
+        alSourceRewind(source);
+        alSourcei(source, AL_BUFFER, 0);
+        alGetError();
         return false;
+    }
 
-    alSourcei(source, AL_BUFFER, GET_PTRID(data));
     alSourcePlay(source);
     if(getALError() != AL_NO_ERROR)
+    {
+        alSourceRewind(source);
+        alSourcei(source, AL_BUFFER, 0);
+        alGetError();
         return false;
+    }
 
     mFreeSources.pop_front();
     sound->mHandle = MAKE_PTRID(source);
