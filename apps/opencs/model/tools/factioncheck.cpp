@@ -37,12 +37,12 @@ void CSMTools::FactionCheckStage::perform (int stage, CSMDoc::Messages& messages
 
     // test for empty name
     if (faction.mName.empty())
-        messages.push_back (std::make_pair (id, faction.mId + " has an empty name"));
+        messages.push_back (std::make_pair (id, "Name is missing"));
 
     // test for invalid attributes
     if (faction.mData.mAttribute[0]==faction.mData.mAttribute[1] && faction.mData.mAttribute[0]!=-1)
     {
-        messages.push_back (std::make_pair (id , "Faction lists same attribute twice"));
+        messages.push_back (std::make_pair (id, "Same attribute is listed twice"));
     }
 
     // test for non-unique skill
@@ -52,11 +52,10 @@ void CSMTools::FactionCheckStage::perform (int stage, CSMDoc::Messages& messages
         if (faction.mData.mSkills[i]!=-1)
             ++skills[faction.mData.mSkills[i]];
 
-    for (std::map<int, int>::const_iterator iter (skills.begin()); iter!=skills.end(); ++iter)
-        if (iter->second>1)
+    for (auto &skill : skills)
+        if (skill.second>1)
         {
-            messages.push_back (std::make_pair (id,
-                ESM::Skill::indexToId (iter->first) + " is listed more than once"));
+            messages.push_back (std::make_pair (id, "Skill " + ESM::Skill::indexToId (skill.first) + " is listed more than once"));
         }
 
     /// \todo check data members that can't be edited in the table view

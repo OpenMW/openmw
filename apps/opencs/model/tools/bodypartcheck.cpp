@@ -34,25 +34,24 @@ void CSMTools::BodyPartCheckStage::perform (int stage, CSMDoc::Messages &message
 
     // Check BYDT
     if (bodyPart.mData.mPart > 14 )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has out of range part value." ));
+        messages.push_back(std::make_pair(id, "Invalid mesh part"));
 
     if (bodyPart.mData.mFlags > 3 )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has out of range flags value." ));
+        messages.push_back(std::make_pair(id, "Invalid flags"));
 
     if (bodyPart.mData.mType > 2 )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has out of range type value." ));
+        messages.push_back(std::make_pair(id, "Invalid type"));
 
     // Check MODL
 
     if ( bodyPart.mModel.empty() )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has no model." ));
+        messages.push_back(std::make_pair(id, "Model is missing" ));
     else if ( mMeshes.searchId( bodyPart.mModel ) == -1 )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has invalid model." ));
+        messages.push_back(std::make_pair(id, "Model '" + bodyPart.mModel + "' does not exist"));
 
     // Check FNAM
-
     if ( bodyPart.mRace.empty() )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has no race." ));
+        messages.push_back(std::make_pair(id, "Race is missing" ));
     else if ( mRaces.searchId( bodyPart.mRace ) == -1 )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has invalid race." ));
+        messages.push_back(std::make_pair(id, "Race '" + bodyPart.mRace + " does not exist"));
 }
