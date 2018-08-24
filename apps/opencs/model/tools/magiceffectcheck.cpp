@@ -9,7 +9,7 @@
 
 namespace
 {
-    void addMessageIfNotEmpty(CSMDoc::Messages &messages, const CSMWorld::UniversalId &id, const std::string& text)
+    void addMessage(CSMDoc::Messages &messages, const CSMWorld::UniversalId &id, const std::string& text)
     {
         if (!text.empty())
         {
@@ -18,42 +18,34 @@ namespace
     }
 }
 
-bool CSMTools::MagicEffectCheckStage::isTextureExists(const std::string &texture, bool isIcon) const
+std::string CSMTools::MagicEffectCheckStage::checkTexture(const std::string &texture, bool isIcon) const
 {
+    if (texture.empty()) return (isIcon ? "Icon is not specified" : std::string());
+
     const CSMWorld::Resources &textures = isIcon ? mIcons : mTextures;
-    bool exists = false;
+    if (textures.searchId(texture) != -1) return std::string();
 
-    if (textures.searchId(texture) != -1)
-    {
-        exists = true;
-    }
-    else
-    {
-        std::string ddsTexture = texture;
-        if (Misc::ResourceHelpers::changeExtensionToDds(ddsTexture) && textures.searchId(ddsTexture) != -1)
-        {
-            exists = true;
-        }
-    }
+    std::string ddsTexture = texture;
+    if (Misc::ResourceHelpers::changeExtensionToDds(ddsTexture) && textures.searchId(ddsTexture) != -1) return std::string();
 
-    return exists;
+    return (isIcon ? "Icon '" : "Particle '") + texture + "' does not exist";
 }
 
-std::string CSMTools::MagicEffectCheckStage::checkReferenceable(const std::string &id, 
+std::string CSMTools::MagicEffectCheckStage::checkObject(const std::string &id, 
                                                                 const CSMWorld::UniversalId &type, 
                                                                 const std::string &column) const
 {
     std::string error;
     if (!id.empty())
     {
-        CSMWorld::RefIdData::LocalIndex index = mReferenceables.getDataSet().searchId(id);
+        CSMWorld::RefIdData::LocalIndex index = mObjects.getDataSet().searchId(id);
         if (index.first == -1)
         {
-            error = "No such " + column + " '" + id + "'";
+            error = column + " '" + id + "' " + "does not exist";
         }
         else if (index.second != type.getType())
         {
-            error = column + " is not of type " + type.getTypeName();
+            error = column + " '" + id + "' " + "does not have " + type.getTypeName() + " type";
         }
     }
     return error;
@@ -64,19 +56,19 @@ std::string CSMTools::MagicEffectCheckStage::checkSound(const std::string &id, c
     std::string error;
     if (!id.empty() && mSounds.searchId(id) == -1)
     {
-        error = "No such " + column + " '" + id + "'";
+        error = column + " '" + id + "' " + "does not exist";
     }
     return error;
 }
 
 CSMTools::MagicEffectCheckStage::MagicEffectCheckStage(const CSMWorld::IdCollection<ESM::MagicEffect> &effects,
                                                        const CSMWorld::IdCollection<ESM::Sound> &sounds,
-                                                       const CSMWorld::RefIdCollection &referenceables,
+                                                       const CSMWorld::RefIdCollection &objects,
                                                        const CSMWorld::Resources &icons,
                                                        const CSMWorld::Resources &textures)
     : mMagicEffects(effects),
       mSounds(sounds),
-      mReferenceables(referenceables),
+      mObjects(objects),
       mIcons(icons),
       mTextures(textures)
 {
@@ -100,46 +92,25 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages &messa
 
     ESM::MagicEffect effect = record.get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_MagicEffect, effect.mId);
-    
-    if (effect.mData.mBaseCost < 0.0f)
-    {
-        messages.push_back(std::make_pair(id, "Base Cost is negative"));
-    }
-
-    if (effect.mIcon.empty())
-    {
-        messages.push_back(std::make_pair(id, "Icon is not specified"));
-    }
-    else if (!isTextureExists(effect.mIcon, true))
-    {
-        messages.push_back(std::make_pair(id, "No such Icon '" + effect.mIcon + "'"));
-    }
-
-    if (!effect.mParticle.empty() && !isTextureExists(effect.mParticle, false))
-    {
-        messages.push_back(std::make_pair(id, "No such Particle '" + effect.mParticle + "'"));
-    }
-
-    addMessageIfNotEmpty(messages, 
-                         id, 
-                         checkReferenceable(effect.mCasting, CSMWorld::UniversalId::Type_Static, "Casting Object"));
-    addMessageIfNotEmpty(messages, 
-                         id,
-                         checkReferenceable(effect.mHit, CSMWorld::UniversalId::Type_Static, "Hit Object"));
-    addMessageIfNotEmpty(messages,
-                         id,
-                         checkReferenceable(effect.mArea, CSMWorld::UniversalId::Type_Static, "Area Object"));
-    addMessageIfNotEmpty(messages,
-                         id,
-                         checkReferenceable(effect.mBolt, CSMWorld::UniversalId::Type_Weapon, "Bolt Object"));
-
-    addMessageIfNotEmpty(messages, id, checkSound(effect.mCastSound, "Casting Sound"));
-    addMessageIfNotEmpty(messages, id, checkSound(effect.mHitSound, "Hit Sound"));
-    addMessageIfNotEmpty(messages, id, checkSound(effect.mAreaSound, "Area Sound"));
-    addMessageIfNotEmpty(messages, id, checkSound(effect.mBoltSound, "Bolt Sound"));
 
     if (effect.mDescription.empty())
     {
-        messages.push_back(std::make_pair(id, "Description is empty"));
+        addMessage(messages, id, "Description is missing");
     }
+    
+    if (effect.mData.mBaseCost < 0.0f)
+    {
+        addMessage(messages, id, "Base cost is negative");
+    }
+
+    addMessage(messages, id, checkTexture(effect.mIcon, true));
+    addMessage(messages, id, checkTexture(effect.mParticle, false));
+    addMessage(messages, id, checkObject(effect.mCasting, CSMWorld::UniversalId::Type_Static, "Casting object"));
+    addMessage(messages, id, checkObject(effect.mHit, CSMWorld::UniversalId::Type_Static, "Hit object"));
+    addMessage(messages, id, checkObject(effect.mArea, CSMWorld::UniversalId::Type_Static, "Area object"));
+    addMessage(messages, id, checkObject(effect.mBolt, CSMWorld::UniversalId::Type_Weapon, "Bolt object"));
+    addMessage(messages, id, checkSound(effect.mCastSound, "Casting sound"));
+    addMessage(messages, id, checkSound(effect.mHitSound, "Hit sound"));
+    addMessage(messages, id, checkSound(effect.mAreaSound, "Area sound"));
+    addMessage(messages, id, checkSound(effect.mBoltSound, "Bolt sound"));
 }
