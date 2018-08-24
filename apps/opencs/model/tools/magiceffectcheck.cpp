@@ -4,23 +4,8 @@
 
 #include "../prefs/state.hpp"
 
-#include "../world/data.hpp"
-
-namespace
-{
-    void addMessage(CSMDoc::Messages &messages, const CSMWorld::UniversalId &id, const std::string& text)
-    {
-        if (!text.empty())
-        {
-            messages.push_back(std::make_pair(id, text));
-        }
-    }
-}
-
 std::string CSMTools::MagicEffectCheckStage::checkTexture(const std::string &texture, bool isIcon) const
 {
-    if (texture.empty()) return (isIcon ? "Icon is missing" : std::string());
-
     const CSMWorld::Resources &textures = isIcon ? mIcons : mTextures;
     if (textures.searchId(texture) != -1) return std::string();
 
@@ -34,30 +19,16 @@ std::string CSMTools::MagicEffectCheckStage::checkObject(const std::string &id,
                                                                 const CSMWorld::UniversalId &type, 
                                                                 const std::string &column) const
 {
-    std::string error;
-    if (!id.empty())
-    {
-        CSMWorld::RefIdData::LocalIndex index = mObjects.getDataSet().searchId(id);
-        if (index.first == -1)
-        {
-            error = column + " '" + id + "' " + "does not exist";
-        }
-        else if (index.second != type.getType())
-        {
-            error = column + " '" + id + "' " + "does not have " + type.getTypeName() + " type";
-        }
-    }
-    return error;
+    CSMWorld::RefIdData::LocalIndex index = mObjects.getDataSet().searchId(id);
+    if (index.first == -1) return (column + " '" + id + "' " + "does not exist");
+    else if (index.second != type.getType()) return (column + " '" + id + "' " + "does not have " + type.getTypeName() + " type");
+    return std::string();
 }
 
 std::string CSMTools::MagicEffectCheckStage::checkSound(const std::string &id, const std::string &column) const
 {
-    std::string error;
-    if (!id.empty() && mSounds.searchId(id) == -1)
-    {
-        error = column + " '" + id + "' " + "does not exist";
-    }
-    return error;
+    if (!id.empty() && mSounds.searchId(id) == -1) return (column + " '" + id + "' " + "does not exist");
+    return std::string();
 }
 
 CSMTools::MagicEffectCheckStage::MagicEffectCheckStage(const CSMWorld::IdCollection<ESM::MagicEffect> &effects,
@@ -94,22 +65,85 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages &messa
 
     if (effect.mDescription.empty())
     {
-        addMessage(messages, id, "Description is missing");
+        messages.add(id, "Description is missing", "", CSMDoc::Message::Severity_Warning);
     }
 
     if (effect.mData.mBaseCost < 0.0f)
     {
-        addMessage(messages, id, "Base cost is negative");
+        messages.add(id, "Base cost is negative", "", CSMDoc::Message::Severity_Error);
     }
 
-    addMessage(messages, id, checkTexture(effect.mIcon, true));
-    addMessage(messages, id, checkTexture(effect.mParticle, false));
-    addMessage(messages, id, checkObject(effect.mCasting, CSMWorld::UniversalId::Type_Static, "Casting object"));
-    addMessage(messages, id, checkObject(effect.mHit, CSMWorld::UniversalId::Type_Static, "Hit object"));
-    addMessage(messages, id, checkObject(effect.mArea, CSMWorld::UniversalId::Type_Static, "Area object"));
-    addMessage(messages, id, checkObject(effect.mBolt, CSMWorld::UniversalId::Type_Weapon, "Bolt object"));
-    addMessage(messages, id, checkSound(effect.mCastSound, "Casting sound"));
-    addMessage(messages, id, checkSound(effect.mHitSound, "Hit sound"));
-    addMessage(messages, id, checkSound(effect.mAreaSound, "Area sound"));
-    addMessage(messages, id, checkSound(effect.mBoltSound, "Bolt sound"));
+    if (effect.mIcon.empty())
+    {
+        messages.add(id, "Icon is missing", "", CSMDoc::Message::Severity_Error);
+    }
+    else
+    {
+        const std::string error = checkTexture(effect.mIcon, true);
+        if (!error.empty())
+            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+    }
+
+    if (!effect.mParticle.empty())
+    {
+        const std::string error = checkTexture(effect.mParticle, false);
+        if (!error.empty())
+            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+    }
+
+    if (!effect.mCasting.empty())
+    {
+        const std::string error = checkObject(effect.mCasting, CSMWorld::UniversalId::Type_Static, "Casting object");
+        if (!error.empty())
+            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+    }
+
+    if (!effect.mHit.empty())
+    {
+        const std::string error = checkObject(effect.mHit, CSMWorld::UniversalId::Type_Static, "Hit object");
+        if (!error.empty())
+            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+    }
+
+    if (!effect.mArea.empty())
+    {
+        const std::string error = checkObject(effect.mArea, CSMWorld::UniversalId::Type_Static, "Area object");
+        if (!error.empty())
+            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+    }
+
+    if (!effect.mBolt.empty())
+    {
+        const std::string error = checkObject(effect.mBolt, CSMWorld::UniversalId::Type_Static, "Bolt object");
+        if (!error.empty())
+            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+    }
+
+    if (!effect.mCastSound.empty())
+    {
+        const std::string error = checkSound(effect.mCastSound, "Casting sound");
+        if (!error.empty())
+            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+    }
+
+    if (!effect.mHitSound.empty())
+    {
+        const std::string error = checkSound(effect.mHitSound, "Hit sound");
+        if (!error.empty())
+            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+    }
+
+    if (!effect.mAreaSound.empty())
+    {
+        const std::string error = checkSound(effect.mAreaSound, "Area sound");
+        if (!error.empty())
+            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+    }
+
+    if (!effect.mBoltSound.empty())
+    {
+        const std::string error = checkSound(effect.mBoltSound, "Bolt sound");
+        if (!error.empty())
+            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+    }
 }
