@@ -4,13 +4,41 @@
 #include <map>
 
 #include <components/esm/loadbsgn.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../prefs/state.hpp"
 
+#include "../world/data.hpp"
+#include "../world/resources.hpp"
 #include "../world/universalid.hpp"
 
-CSMTools::BirthsignCheckStage::BirthsignCheckStage (const CSMWorld::IdCollection<ESM::BirthSign>& birthsigns)
-: mBirthsigns (birthsigns)
+namespace
+{
+    void addMessage(CSMDoc::Messages &messages, const CSMWorld::UniversalId &id, const std::string& text)
+    {
+        if (!text.empty())
+        {
+            messages.push_back(std::make_pair(id, text));
+        }
+    }
+}
+
+
+std::string CSMTools::BirthsignCheckStage::checkTexture(const std::string &texture) const
+{
+    if (texture.empty()) return "Texture is missing";
+    if (mTextures.searchId(texture) != -1) return std::string();
+
+    std::string ddsTexture = texture;
+    if (Misc::ResourceHelpers::changeExtensionToDds(ddsTexture) && mTextures.searchId(ddsTexture) != -1) return std::string();
+
+    return "Texture '" + texture + "' does not exist";
+}
+
+CSMTools::BirthsignCheckStage::BirthsignCheckStage (const CSMWorld::IdCollection<ESM::BirthSign>& birthsigns,
+                                                    const CSMWorld::Resources &textures)
+: mBirthsigns(birthsigns),
+  mTextures(textures)
 {
     mIgnoreBaseRecords = false;
 }
@@ -34,17 +62,13 @@ void CSMTools::BirthsignCheckStage::perform (int stage, CSMDoc::Messages& messag
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Birthsign, birthsign.mId);
 
-    // test for empty name, description and texture
     if (birthsign.mName.empty())
-        messages.push_back (std::make_pair (id, birthsign.mId + " has an empty name"));
+        addMessage(messages, id, "Name is missing");
 
     if (birthsign.mDescription.empty())
-        messages.push_back (std::make_pair (id, birthsign.mId + " has an empty description"));
+        addMessage(messages, id, "Description is missing");
 
-    if (birthsign.mTexture.empty())
-        messages.push_back (std::make_pair (id, birthsign.mId + " is missing a texture"));
-
-    /// \todo test if the texture exists
+    addMessage(messages, id, checkTexture(birthsign.mTexture));
 
     /// \todo check data members that can't be edited in the table view
 }

@@ -78,7 +78,7 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
 
         mVerifierOperation->appendStage (new RegionCheckStage (mData.getRegions()));
 
-        mVerifierOperation->appendStage (new BirthsignCheckStage (mData.getBirthsigns()));
+        mVerifierOperation->appendStage (new BirthsignCheckStage (mData.getBirthsigns(), mData.getResources (CSMWorld::UniversalId::Type_Textures)));
 
         mVerifierOperation->appendStage (new SpellCheckStage (mData.getSpells()));
 

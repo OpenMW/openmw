@@ -7,17 +7,27 @@
 
 #include "../doc/stage.hpp"
 
+namespace CSMWorld
+{
+    class Resources;
+}
+
 namespace CSMTools
 {
     /// \brief VerifyStage: make sure that birthsign records are internally consistent
     class BirthsignCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::IdCollection<ESM::BirthSign>& mBirthsigns;
+            const CSMWorld::IdCollection<ESM::BirthSign> &mBirthsigns;
+            const CSMWorld::Resources &mTextures;
             bool mIgnoreBaseRecords;
+
+        private:
+            std::string checkTexture(const std::string &texture) const;
 
         public:
 
-            BirthsignCheckStage (const CSMWorld::IdCollection<ESM::BirthSign>& birthsigns);
+            BirthsignCheckStage (const CSMWorld::IdCollection<ESM::BirthSign> &birthsigns,
+                                 const CSMWorld::Resources &textures);
 
             virtual int setup();
             ///< \return number of steps
