@@ -1,37 +1,21 @@
 #include "birthsigncheck.hpp"
 
-#include <sstream>
-#include <map>
-
 #include <components/esm/loadbsgn.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../prefs/state.hpp"
 
-#include "../world/data.hpp"
 #include "../world/universalid.hpp"
-
-namespace
-{
-    void addMessage(CSMDoc::Messages &messages, const CSMWorld::UniversalId &id, const std::string& text)
-    {
-        if (!text.empty())
-        {
-            messages.push_back(std::make_pair(id, text));
-        }
-    }
-}
 
 
 std::string CSMTools::BirthsignCheckStage::checkTexture(const std::string &texture) const
 {
-    if (texture.empty()) return "Texture is missing";
     if (mTextures.searchId(texture) != -1) return std::string();
 
     std::string ddsTexture = texture;
     if (Misc::ResourceHelpers::changeExtensionToDds(ddsTexture) && mTextures.searchId(ddsTexture) != -1) return std::string();
 
-    return "Texture '" + texture + "' does not exist";
+    return "Image '" + texture + "' does not exist";
 }
 
 CSMTools::BirthsignCheckStage::BirthsignCheckStage (const CSMWorld::IdCollection<ESM::BirthSign>& birthsigns,
@@ -62,12 +46,25 @@ void CSMTools::BirthsignCheckStage::perform (int stage, CSMDoc::Messages& messag
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Birthsign, birthsign.mId);
 
     if (birthsign.mName.empty())
-        addMessage(messages, id, "Name is missing");
+    {
+        messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
+    }
 
     if (birthsign.mDescription.empty())
-        addMessage(messages, id, "Description is missing");
+    {
+        messages.add(id, "Description is missing", "", CSMDoc::Message::Severity_Warning);
+    }
 
-    addMessage(messages, id, checkTexture(birthsign.mTexture));
+    if (birthsign.mTexture.empty())
+    {
+        messages.add(id, "Image is missing", "", CSMDoc::Message::Severity_Error);
+    }
+    else
+    {
+        const std::string error = checkTexture(birthsign.mTexture);
+        if (!error.empty())
+            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+    }
 
     /// \todo check data members that can't be edited in the table view
 }
