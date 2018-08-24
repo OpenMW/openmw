@@ -38,11 +38,11 @@ void CSMTools::SkillCheckStage::perform (int stage, CSMDoc::Messages& messages)
         {
             std::ostringstream stream;
 
-            stream << "Use value #" << i << " of " << skill.mId << " is negative";
+            stream << "Usage experience value #" << i << " is negative";
 
             messages.push_back (std::make_pair (id, stream.str()));
         }
 
     if (skill.mDescription.empty())
-        messages.push_back (std::make_pair (id, skill.mId + " has an empty description"));
+        messages.push_back (std::make_pair (id, "Description is missing"));
 }
