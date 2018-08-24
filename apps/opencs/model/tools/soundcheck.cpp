@@ -36,5 +36,5 @@ void CSMTools::SoundCheckStage::perform (int stage, CSMDoc::Messages& messages)
     if (sound.mData.mMinRange>sound.mData.mMaxRange)
         messages.push_back (std::make_pair (id, "Minimum range larger than maximum range"));
 
-    /// \todo check, if the sound file exists
+    /// \todo check, if the sound file exists ADD CHECK HERE
 }
