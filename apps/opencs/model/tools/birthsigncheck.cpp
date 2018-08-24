@@ -9,7 +9,6 @@
 #include "../prefs/state.hpp"
 
 #include "../world/data.hpp"
-#include "../world/resources.hpp"
 #include "../world/universalid.hpp"
 
 namespace

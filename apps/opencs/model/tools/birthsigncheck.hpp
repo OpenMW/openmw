@@ -4,13 +4,9 @@
 #include <components/esm/loadbsgn.hpp>
 
 #include "../world/idcollection.hpp"
+#include "../world/resources.hpp"
 
 #include "../doc/stage.hpp"
-
-namespace CSMWorld
-{
-    class Resources;
-}
 
 namespace CSMTools
 {
