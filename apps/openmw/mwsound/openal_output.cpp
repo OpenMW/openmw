@@ -1217,9 +1217,8 @@ void OpenAL_Output::finishSound(Sound *sound)
     ALuint source = GET_PTRID(sound->mHandle);
     sound->mHandle = 0;
 
-    // Rewind the stream instead of stopping it, this puts the source into an AL_INITIAL state,
-    // which works around a bug in the MacOS OpenAL implementation which would otherwise think
-    // the initial queue already played when it hasn't.
+    // Rewind the stream to put the source back into an AL_INITIAL state, for
+    // the next time it's used.
     alSourceRewind(source);
     alSourcei(source, AL_BUFFER, 0);
     getALError();
@@ -1322,9 +1321,8 @@ void OpenAL_Output::finishStream(Stream *sound)
     sound->mHandle = 0;
     mStreamThread->remove(stream);
 
-    // Rewind the stream instead of stopping it, this puts the source into an AL_INITIAL state,
-    // which works around a bug in the MacOS OpenAL implementation which would otherwise think
-    // the initial queue already played when it hasn't.
+    // Rewind the stream to put the source back into an AL_INITIAL state, for
+    // the next time it's used.
     alSourceRewind(source);
     alSourcei(source, AL_BUFFER, 0);
     getALError();
