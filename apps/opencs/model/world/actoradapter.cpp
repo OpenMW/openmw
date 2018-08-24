@@ -24,22 +24,22 @@ namespace CSMWorld
                 this, SLOT(handleBodyPartChanged(const QModelIndex&, const QModelIndex&)));
     }
 
-    const ActorAdapter::ActorPartMap* ActorAdapter::getActorPartMap(const std::string& refId)
+    const ActorAdapter::ActorPartMap* ActorAdapter::getActorParts(const std::string& refId, bool create)
     {
-        auto it = mActorPartMaps.find(refId);
-        if (it != mActorPartMaps.end())
+        auto it = mCachedActors.find(refId);
+        if (it != mCachedActors.end())
         {
-            return &it->second;
+            return &it->second.parts;
+        }
+        else if (create)
+        {
+            updateActor(refId);
+            return getActorParts(refId, false);
         }
         else
         {
-            updateActor(refId);
-            it = mActorPartMaps.find(refId);
-            if (it != mActorPartMaps.end())
-                return &it->second;
+            return nullptr;
         }
-
-        return nullptr;
     }
 
     void ActorAdapter::handleReferenceableChanged(const QModelIndex& topLeft, const QModelIndex& botRight)
@@ -57,17 +57,13 @@ namespace CSMWorld
             {
                 // Update the cached npc or creature
                 std::string refId = mReferenceables.getId(row);
-                if (mActorPartMaps.find(refId) != mActorPartMaps.end())
+                if (mCachedActors.find(refId) != mCachedActors.end())
                     updateActor(refId);
             }
-            else if (type == CSMWorld::UniversalId::Type_Armor)
+            else if (type == CSMWorld::UniversalId::Type_Armor || type == CSMWorld::UniversalId::Type_Clothing)
             {
-                // TODO update everything?
-                // store all items referenced when creating map and check against that here
-            }
-            else if (type == CSMWorld::UniversalId::Type_Clothing)
-            {
-                // TODO update everything?
+                std::string refId = mReferenceables.getId(row);
+                updateActorsWithDependency(refId);
             }
         }
     }
@@ -79,14 +75,28 @@ namespace CSMWorld
         for (int row = rowStart; row <= rowEnd; ++row)
         {
             std::string raceId = mRaces.getId(row);
-            updateNpcsWithRace(raceId);
+            updateActorsWithDependency(raceId);
         }
     }
 
     void ActorAdapter::handleBodyPartChanged(const QModelIndex& topLeft, const QModelIndex& botRight)
     {
-        // TODO
-        Log(Debug::Info) << "Body Part Changed (" << topLeft.row() << ", " << topLeft.column() << ") (" << botRight.row() << ", " << botRight.column() << ")";
+        int rowStart = getHighestIndex(topLeft).row();
+        int rowEnd = getHighestIndex(botRight).row();
+        for (int row = rowStart; row <= rowEnd; ++row)
+        {
+            // Manually update race specified by part
+            auto& record = mBodyParts.getRecord(row);
+            if (!record.isDeleted())
+            {
+                updateRace(record.get().mRace);
+            }
+
+            // Update entries with a tracked dependency
+            std::string partId = mBodyParts.getId(row);
+            updateRacesWithDependency(partId);
+            updateActorsWithDependency(partId);
+        }
     }
 
     QModelIndex ActorAdapter::getHighestIndex(QModelIndex index) const
@@ -96,47 +106,66 @@ namespace CSMWorld
         return index;
     }
 
-    ActorAdapter::RacePartMap& ActorAdapter::getOrCreateRacePartMap(const std::string& raceId, bool isFemale)
+    bool ActorAdapter::is1stPersonPart(const std::string& name) const
     {
-        auto key = std::make_pair(raceId, isFemale);
-        auto it = mRacePartMaps.find(key);
-        if (it != mRacePartMaps.end())
+        return name.size() >= 4 && name.find(".1st", name.size() - 4) != std::string::npos;
+    }
+
+    ActorAdapter::RaceData& ActorAdapter::getRaceData(const std::string& raceId)
+    {
+        auto it = mCachedRaces.find(raceId);
+        if (it != mCachedRaces.end())
         {
             return it->second;
         }
         else
         {
             // Create and find result
-            updateRaceParts(raceId);
-            return mRacePartMaps.find(key)->second;
+            updateRace(raceId);
+            return mCachedRaces.find(raceId)->second;
         }
     }
 
-    void ActorAdapter::updateRaceParts(const std::string& raceId)
+    void ActorAdapter::updateRace(const std::string& raceId)
     {
-        // Convenience function to determine if part is for 1st person view
-        auto is1stPersonPart = [](std::string name) {
-            return name.size() >= 4 && name.find(".1st", name.size() - 4) != std::string::npos;
-        };
+        // Retrieve or create cache entry
+        auto raceDataIt = mCachedRaces.find(raceId);
+        if (raceDataIt == mCachedRaces.end())
+        {
+            auto result = mCachedRaces.emplace(raceId, RaceData());
+            raceDataIt = result.first;
+        }
 
-        RacePartMap maleMap, femaleMap;
+        auto& raceData = raceDataIt->second;
+        raceData.femaleParts.clear();
+        raceData.maleParts.clear();
+        raceData.dependencies.clear();
+
+        // Construct entry
         for (int i = 0; i < mBodyParts.getSize(); ++i)
         {
             auto& record = mBodyParts.getRecord(i);
-            if (!record.isDeleted() && record.get().mRace == raceId && record.get().mData.mType == ESM::BodyPart::MT_Skin && !is1stPersonPart(record.get().mId))
+            if (!record.isDeleted() && record.get().mRace == raceId)
             {
                 auto& part = record.get();
-                auto type = (ESM::BodyPart::MeshPart) part.mData.mPart;
-                // Note: Prefer the first part encountered for duplicates. emplace() does not overwrite
-                if (part.mData.mFlags & ESM::BodyPart::BPF_Female)
-                    femaleMap.emplace(type, part.mId);
-                else
-                    maleMap.emplace(type, part.mId);
+
+                // Part could affect race data
+                raceData.dependencies.emplace(part.mId, true);
+
+                // Add base types
+                if (part.mData.mType == ESM::BodyPart::MT_Skin && !is1stPersonPart(part.mId))
+                {
+                    auto type = (ESM::BodyPart::MeshPart) part.mData.mPart;
+                    // Note: Prefer the first part encountered for duplicates. emplace() does not overwrite
+                    if (part.mData.mFlags & ESM::BodyPart::BPF_Female)
+                        raceData.femaleParts.emplace(type, part.mId);
+                    else
+                        raceData.maleParts.emplace(type, part.mId);
+                }
             }
         }
 
-        mRacePartMaps[std::make_pair(raceId, true)] = femaleMap;
-        mRacePartMaps[std::make_pair(raceId, false)] = maleMap;
+        updateActorsWithDependency(raceId);
     }
 
     void ActorAdapter::updateActor(const std::string& refId)
@@ -156,17 +185,28 @@ namespace CSMWorld
     void ActorAdapter::updateNpc(const std::string& refId)
     {
         auto& record = mReferenceables.getRecord(refId);
+
+        // Retrieve record if possible
         if (record.isDeleted())
         {
-            mActorPartMaps.erase(refId);
+            mCachedActors.erase(refId);
+            emit actorChanged(refId);
             return;
         }
-
         auto& npc = dynamic_cast<const Record<ESM::NPC>&>(record).get();
-        auto& femaleRacePartMap = getOrCreateRacePartMap(npc.mRace, true);
-        auto& maleRacePartMap = getOrCreateRacePartMap(npc.mRace, false);
 
-        ActorPartMap npcMap;
+        // Create holder for cached data
+        auto actorIt = mCachedActors.find(refId);
+        if (actorIt == mCachedActors.end())
+        {
+            auto result = mCachedActors.emplace(refId, ActorData());
+            actorIt = result.first;
+        }
+        auto& actorData = actorIt->second;
+
+        // Reset old data
+        actorData.parts.clear();
+        actorData.dependencies.clear();
 
         // Look at the npc's inventory first
         for (auto& item : npc.mInventory.mList)
@@ -174,7 +214,7 @@ namespace CSMWorld
             if (item.mCount > 0)
             {
                 std::string itemId = item.mItem.toString();
-                // Handle armor, weapons, and clothing
+                // Handle armor and clothing
                 int index = mReferenceables.searchId(itemId);
                 if (index != -1 && !mReferenceables.getRecord(index).isDeleted())
                 {
@@ -184,6 +224,10 @@ namespace CSMWorld
                     int recordType = mReferenceables.getData(index, typeColumn).toInt();
                     if (recordType == CSMWorld::UniversalId::Type_Armor)
                     {
+                        // Changes here could affect the actor
+                        actorData.dependencies.emplace(itemId, true);
+
+                        // Add any parts if there is room
                         auto& armor = dynamic_cast<const Record<ESM::Armor>&>(itemRecord).get();
                         for (auto& part : armor.mParts.mParts)
                         {
@@ -194,11 +238,18 @@ namespace CSMWorld
                                 bodyPartId = part.mMale;
 
                             if (!bodyPartId.empty())
-                                npcMap.emplace(static_cast<ESM::PartReferenceType>(part.mPart), bodyPartId);
+                            {
+                                actorData.parts.emplace(static_cast<ESM::PartReferenceType>(part.mPart), bodyPartId);
+                                actorData.dependencies.emplace(bodyPartId, true);
+                            }
                         }
                     }
                     else if (recordType == CSMWorld::UniversalId::Type_Clothing)
                     {
+                        // Changes here could affect the actor
+                        actorData.dependencies.emplace(itemId, true);
+
+                        // Add any parts if there is room
                         auto& clothing = dynamic_cast<const Record<ESM::Clothing>&>(itemRecord).get();
                         for (auto& part : clothing.mParts.mParts)
                         {
@@ -209,26 +260,37 @@ namespace CSMWorld
                                 bodyPartId = part.mMale;
 
                             if (!bodyPartId.empty())
-                                npcMap.emplace(static_cast<ESM::PartReferenceType>(part.mPart), bodyPartId);
+                            {
+                                actorData.parts.emplace(static_cast<ESM::PartReferenceType>(part.mPart), bodyPartId);
+                                actorData.dependencies.emplace(bodyPartId, true);
+                            }
                         }
                     }
                 }
             }
         }
 
-        // Fill in the rest with body parts
+        // Lookup cached race parts
+        auto& raceData = getRaceData(npc.mRace);
+
+        // Changes to race could affect the actor
+        actorData.dependencies.emplace(npc.mRace, true);
+
+        // Fill in the rest with race specific body parts
         for (int i = 0; i < ESM::PRT_Count; ++i)
         {
             auto type = static_cast<ESM::PartReferenceType>(i);
-            if (npcMap.find(type) == npcMap.end())
+            if (actorData.parts.find(type) == actorData.parts.end())
             {
                 switch (type)
                 {
                     case ESM::PRT_Head:
-                        npcMap.emplace(type, npc.mHead);
+                        actorData.parts.emplace(type, npc.mHead);
+                        actorData.dependencies.emplace(npc.mHead, true);
                         break;
                     case ESM::PRT_Hair:
-                        npcMap.emplace(type, npc.mHair);
+                        actorData.parts.emplace(type, npc.mHair);
+                        actorData.dependencies.emplace(npc.mHair, true);
                         break;
                     case ESM::PRT_Skirt:
                     case ESM::PRT_Shield:
@@ -243,48 +305,57 @@ namespace CSMWorld
                         // Check female map if applicable
                         if (!npc.isMale())
                         {
-                            auto partIt = femaleRacePartMap.find(ESM::getMeshPart(type));
-                            if (partIt != femaleRacePartMap.end())
+                            auto partIt = raceData.femaleParts.find(ESM::getMeshPart(type));
+                            if (partIt != raceData.femaleParts.end())
                                 bodyPartId = partIt->second;
                         }
 
                         // Check male map next
                         if (bodyPartId.empty() || npc.isMale())
                         {
-                            auto partIt = maleRacePartMap.find(ESM::getMeshPart(type));
-                            if (partIt != maleRacePartMap.end())
+                            auto partIt = raceData.maleParts.find(ESM::getMeshPart(type));
+                            if (partIt != raceData.maleParts.end())
                                 bodyPartId = partIt->second;
                         }
 
                         // Add to map
                         if (!bodyPartId.empty())
                         {
-                            npcMap.emplace(type, bodyPartId);
+                            actorData.parts.emplace(type, bodyPartId);
+                            actorData.dependencies.emplace(bodyPartId, true);
                         }
                     }
                 }
             }
         }
 
-        mActorPartMaps[refId] = npcMap;
+        // Signal change to actor
         emit actorChanged(refId);
     }
 
     void ActorAdapter::updateCreature(const std::string& refId)
     {
+        // Signal change to actor
         emit actorChanged(refId);
     }
 
-    void ActorAdapter::updateNpcsWithRace(const std::string& raceId)
+    void ActorAdapter::updateActorsWithDependency(const std::string& id)
     {
-        for (auto it : mActorPartMaps)
+        for (auto it : mCachedActors)
         {
-            auto& refId = it.first;
-            auto& npc = dynamic_cast<const Record<ESM::NPC>&>(mReferenceables.getRecord(refId)).get();
-            if (npc.mRace == raceId)
-            {
-                updateNpc(refId);
-            }
+            auto& deps = it.second.dependencies;
+            if (deps.find(id) != deps.end())
+                updateActor(it.first);
+        }
+    }
+
+    void ActorAdapter::updateRacesWithDependency(const std::string& id)
+    {
+        for (auto it : mCachedRaces)
+        {
+            auto& deps = it.second.dependencies;
+            if (deps.find(id) != deps.end())
+                updateRace(it.first);
         }
     }
 }

@@ -41,12 +41,10 @@ namespace CSMWorld
 
             // Maps body part type to 'body part' id
             using ActorPartMap = std::unordered_map<ESM::PartReferenceType, std::string>;
-            // Maps mesh part type to 'body part' id
-            using RacePartMap = std::unordered_map<ESM::BodyPart::MeshPart, std::string>;
 
             ActorAdapter(CSMWorld::Data& data);
 
-            const ActorPartMap* getActorPartMap(const std::string& refId);
+            const ActorPartMap* getActorParts(const std::string& refId, bool create=true);
 
         signals:
 
@@ -59,29 +57,48 @@ namespace CSMWorld
             void handleBodyPartChanged(const QModelIndex&, const QModelIndex&);
 
         private:
+            // Maps mesh part type to 'body part' id
+            using RacePartMap = std::unordered_map<ESM::BodyPart::MeshPart, std::string>;
+            // Stores ids that are referenced by the actor. Data part is meaningless.
+            using DependencyMap = std::unordered_map<std::string, bool>;
+
+            struct ActorData
+            {
+                ActorPartMap parts;
+                DependencyMap dependencies;
+            };
+
+            struct RaceData
+            {
+                RacePartMap femaleParts;
+                RacePartMap maleParts;
+                DependencyMap dependencies;
+            };
 
             ActorAdapter(const ActorAdapter&) = delete;
             ActorAdapter& operator=(const ActorAdapter&) = delete;
 
             QModelIndex getHighestIndex(QModelIndex) const;
+            bool is1stPersonPart(const std::string& id) const;
 
-            RacePartMap& getOrCreateRacePartMap(const std::string& raceId, bool isFemale);
+            RaceData& getRaceData(const std::string& raceId);
 
-            void updateRaceParts(const std::string& raceId);
+            void updateRace(const std::string& raceId);
             void updateActor(const std::string& refId);
             void updateNpc(const std::string& refId);
             void updateCreature(const std::string& refId);
 
-            void updateNpcsWithRace(const std::string& raceId);
+            void updateActorsWithDependency(const std::string& id);
+            void updateRacesWithDependency(const std::string& id);
 
             RefIdCollection& mReferenceables;
             IdCollection<ESM::Race>& mRaces;
             IdCollection<ESM::BodyPart>& mBodyParts;
 
             // Key: referenceable id
-            std::unordered_map<std::string, ActorPartMap> mActorPartMaps;
-            // Key: race id, is female
-            std::unordered_map<std::pair<std::string, bool>, RacePartMap, StringBoolPairHash> mRacePartMaps;
+            std::unordered_map<std::string, ActorData> mCachedActors;
+            // Key: race id
+            std::unordered_map<std::string, RaceData> mCachedRaces;
     };
 }
 

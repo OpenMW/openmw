@@ -142,10 +142,10 @@ namespace CSVRender
     void Actor::loadBodyParts(const std::string& actorId)
     {
         auto actorAdapter = mData.getActorAdapter();
-        auto partMap = actorAdapter->getActorPartMap(actorId);
-        if (partMap)
+        auto parts = actorAdapter->getActorParts(actorId);
+        if (parts)
         {
-            for (auto& pair : *partMap)
+            for (auto& pair : *parts)
                 attachBodyPart(pair.first, getBodyPartMesh(pair.second));
         }
     }
