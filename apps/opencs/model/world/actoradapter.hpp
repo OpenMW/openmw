@@ -60,12 +60,19 @@ namespace CSMWorld
 
         private:
 
+            ActorAdapter(const ActorAdapter&) = delete;
+            ActorAdapter& operator=(const ActorAdapter&) = delete;
+
+            QModelIndex getHighestIndex(QModelIndex) const;
+
             RacePartMap& getOrCreateRacePartMap(const std::string& raceId, bool isFemale);
 
             void updateRaceParts(const std::string& raceId);
             void updateActor(const std::string& refId);
             void updateNpc(const std::string& refId);
             void updateCreature(const std::string& refId);
+
+            void updateNpcsWithRace(const std::string& raceId);
 
             RefIdCollection& mReferenceables;
             IdCollection<ESM::Race>& mRaces;

@@ -1,7 +1,6 @@
 #include "actoradapter.hpp"
 
-#include <iostream>
-
+#include <components/debug/debuglog.hpp>
 #include <components/esm/loadarmo.hpp>
 #include <components/esm/loadclot.hpp>
 #include <components/esm/loadnpc.hpp>
@@ -45,17 +44,56 @@ namespace CSMWorld
 
     void ActorAdapter::handleReferenceableChanged(const QModelIndex& topLeft, const QModelIndex& botRight)
     {
-        // TODO
+        // Setup
+        const int TypeColumn = mReferenceables.findColumnIndex(CSMWorld::Columns::ColumnId_RecordType);
+        int rowStart = getHighestIndex(topLeft).row();
+        int rowEnd = getHighestIndex(botRight).row();
+
+        // Handle each record
+        for (int row = rowStart; row <= rowEnd; ++row)
+        {
+            int type = mReferenceables.getData(row, TypeColumn).toInt();
+            if (type == CSMWorld::UniversalId::Type_Creature || type == CSMWorld::UniversalId::Type_Npc)
+            {
+                // Update the cached npc or creature
+                std::string refId = mReferenceables.getId(row);
+                if (mActorPartMaps.find(refId) != mActorPartMaps.end())
+                    updateActor(refId);
+            }
+            else if (type == CSMWorld::UniversalId::Type_Armor)
+            {
+                // TODO update everything?
+                // store all items referenced when creating map and check against that here
+            }
+            else if (type == CSMWorld::UniversalId::Type_Clothing)
+            {
+                // TODO update everything?
+            }
+        }
     }
 
     void ActorAdapter::handleRaceChanged(const QModelIndex& topLeft, const QModelIndex& botRight)
     {
-        // TODO
+        int rowStart = getHighestIndex(topLeft).row();
+        int rowEnd = getHighestIndex(botRight).row();
+        for (int row = rowStart; row <= rowEnd; ++row)
+        {
+            std::string raceId = mRaces.getId(row);
+            updateNpcsWithRace(raceId);
+        }
     }
 
     void ActorAdapter::handleBodyPartChanged(const QModelIndex& topLeft, const QModelIndex& botRight)
     {
         // TODO
+        Log(Debug::Info) << "Body Part Changed (" << topLeft.row() << ", " << topLeft.column() << ") (" << botRight.row() << ", " << botRight.column() << ")";
+    }
+
+    QModelIndex ActorAdapter::getHighestIndex(QModelIndex index) const
+    {
+        while (index.parent().isValid())
+            index = index.parent();
+        return index;
     }
 
     ActorAdapter::RacePartMap& ActorAdapter::getOrCreateRacePartMap(const std::string& raceId, bool isFemale)
@@ -174,10 +212,6 @@ namespace CSMWorld
                                 npcMap.emplace(static_cast<ESM::PartReferenceType>(part.mPart), bodyPartId);
                         }
                     }
-                    else if (recordType == CSMWorld::UniversalId::Type_Weapon)
-                    {
-                        // TODO
-                    }
                 }
             }
         }
@@ -233,10 +267,24 @@ namespace CSMWorld
         }
 
         mActorPartMaps[refId] = npcMap;
+        emit actorChanged(refId);
     }
 
     void ActorAdapter::updateCreature(const std::string& refId)
     {
-        // TODO
+        emit actorChanged(refId);
+    }
+
+    void ActorAdapter::updateNpcsWithRace(const std::string& raceId)
+    {
+        for (auto it : mActorPartMaps)
+        {
+            auto& refId = it.first;
+            auto& npc = dynamic_cast<const Record<ESM::NPC>&>(mReferenceables.getRecord(refId)).get();
+            if (npc.mRace == raceId)
+            {
+                updateNpc(refId);
+            }
+        }
     }
 }

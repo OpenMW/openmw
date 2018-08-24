@@ -134,9 +134,10 @@ void CSVRender::Object::update()
         {
             if (recordType == CSMWorld::UniversalId::Type_Npc || recordType == CSMWorld::UniversalId::Type_Creature)
             {
-                Actor actor(mReferenceableId, recordType, mData);
-                actor.update();
-                mBaseNode->addChild(actor.getBaseNode());
+                if (!mActor)
+                    mActor.reset(new Actor(mReferenceableId, recordType, mData));
+                mActor->update();
+                mBaseNode->addChild(mActor->getBaseNode());
             }
             else
             {

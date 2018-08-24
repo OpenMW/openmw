@@ -20,6 +20,7 @@ namespace CSVRender
 
     Actor::Actor(const std::string& id, int type, CSMWorld::Data& data)
         : mId(id)
+        , mInitialized(false)
         , mType(type)
         , mData(data)
         , mBaseNode(new osg::Group())
@@ -45,7 +46,22 @@ namespace CSVRender
         }
         catch (std::exception& e)
         {
-            Log(Debug::Error) << "Exception in Actor::update(): " << e.what();
+            Log(Debug::Info) << "Exception in Actor::update(): " << e.what();
+        }
+
+        if (!mInitialized)
+        {
+            mInitialized = true;
+            connect(mData.getActorAdapter(), SIGNAL(actorChanged(const std::string&)), this, SLOT(handleActorChanged(const std::string&)));
+        }
+    }
+
+    void Actor::handleActorChanged(const std::string& refId)
+    {
+        if (mId == refId)
+        {
+            Log(Debug::Info) << "Actor::actorChanged " << mId;
+            update();
         }
     }
 

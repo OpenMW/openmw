@@ -89,12 +89,12 @@ opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
     previewwidget editmode instancemode instanceselectionmode instancemovemode
     orbitcameramode pathgridmode selectionmode pathgridselectionmode cameracontroller
-    cellwater terraintexturemode
+    cellwater terraintexturemode actor
     )
 
 opencs_units_noqt (view/render
     lighting lightingday lightingnight lightingbright object cell terrainstorage tagbase
-    cellarrow cellmarker cellborder pathgrid actor
+    cellarrow cellmarker cellborder pathgrid
     )
 
 opencs_hdrs_noqt (view/render

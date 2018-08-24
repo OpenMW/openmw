@@ -5,6 +5,8 @@
 
 #include <osg/ref_ptr>
 
+#include <QObject>
+
 #include <components/esm/loadarmo.hpp>
 #include <components/sceneutil/visitor.hpp>
 
@@ -26,8 +28,9 @@ namespace SceneUtil
 namespace CSVRender
 {
     /// Handles loading an npc or creature
-    class Actor
+    class Actor : public QObject
     {
+        Q_OBJECT
     public:
         /// Creates an actor.
         /// \param id       The referenceable id
@@ -40,6 +43,9 @@ namespace CSVRender
 
         /// (Re)creates the npc or creature renderable
         void update();
+
+    private slots:
+        void handleActorChanged(const std::string& refId);
 
     private:
         void updateCreature();
@@ -54,6 +60,7 @@ namespace CSVRender
         static const std::string MeshPrefix;
 
         std::string mId;
+        bool mInitialized;
         int mType;
         CSMWorld::Data& mData;
 
