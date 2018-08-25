@@ -2377,6 +2377,11 @@ namespace MWWorld
         return !actors.empty();
     }
 
+    void World::getActorsStandingOn (const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr> &actors)
+    {
+        mPhysics->getActorsStandingOn(object, actors);
+    }
+
     bool World::getPlayerCollidingWith (const MWWorld::ConstPtr& object)
     {
         MWWorld::Ptr player = getPlayerPtr();
