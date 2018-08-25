@@ -23,6 +23,7 @@
     Bug #3533: GetSpellEffects should detect effects with zero duration
     Bug #3591: Angled hit distance too low
     Bug #3629: DB assassin attack never triggers creature spawning
+    Bug #3681: OpenMW-CS: Clicking Scripts in Preferences spawns many color pickers
     Bug #3788: GetPCInJail and GetPCTraveling do not work as in vanilla
     Bug #3876: Landscape texture painting is misaligned
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
