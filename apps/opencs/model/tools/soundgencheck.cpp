@@ -40,20 +40,20 @@ void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages &messages
         CSMWorld::RefIdData::LocalIndex creatureIndex = mObjects.getDataSet().searchId(soundGen.mCreature);
         if (creatureIndex.first == -1)
         {
-            messages.push_back(std::make_pair(id, "Creature '" + soundGen.mCreature + "' doesn't exist"));
+            messages.add(id, "Creature '" + soundGen.mCreature + "' doesn't exist", "", CSMDoc::Message::Severity_Error);
         }
         else if (creatureIndex.second != CSMWorld::UniversalId::Type_Creature)
         {
-            messages.push_back(std::make_pair(id, "'" + soundGen.mCreature + "' is not a creature"));
+            messages.add(id, "'" + soundGen.mCreature + "' is not a creature", "", CSMDoc::Message::Severity_Error);
         }
     }
 
     if (soundGen.mSound.empty())
     {
-        messages.push_back(std::make_pair(id, "Sound is missing"));
+        messages.add(id, "Sound is missing", "", CSMDoc::Message::Severity_Error);
     }
     else if (mSounds.searchId(soundGen.mSound) == -1)
     {
-        messages.push_back(std::make_pair(id, "Sound '" + soundGen.mSound + "' doesn't exist"));
+        messages.add(id, "Sound '" + soundGen.mSound + "' doesn't exist", "", CSMDoc::Message::Severity_Error);
     }
 }
