@@ -412,6 +412,7 @@ namespace MWBase
             /// @note throws an exception when invoked on a teleport door
             virtual void activateDoor(const MWWorld::Ptr& door, int state) = 0;
 
+            virtual void getActorsStandingOn (const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr> &actors) = 0; ///< get a list of actors standing on \a object
             virtual bool getPlayerStandingOn (const MWWorld::ConstPtr& object) = 0; ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::ConstPtr& object) = 0; ///< @return true if any actor is standing on \a object
             virtual bool getPlayerCollidingWith(const MWWorld::ConstPtr& object) = 0; ///< @return true if the player is colliding with \a object
