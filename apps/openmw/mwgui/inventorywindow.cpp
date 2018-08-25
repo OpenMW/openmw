@@ -681,6 +681,8 @@ namespace MWGui
             return;
 
         int count = object.getRefData().getCount();
+        if (object.getClass().isGold(object))
+            count *= object.getClass().getValue(object);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWBase::Environment::get().getWorld()->breakInvisibility(player);
