@@ -1,12 +1,9 @@
 #include "soundcheck.hpp"
 
-#include <sstream>
-
 #include <components/esm/loadskil.hpp>
 
 #include "../prefs/state.hpp"
 
-#include "../world/data.hpp"
 #include "../world/resources.hpp"
 #include "../world/universalid.hpp"
 
@@ -38,14 +35,16 @@ void CSMTools::SoundCheckStage::perform (int stage, CSMDoc::Messages& messages)
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Sound, sound.mId);
 
     if (sound.mData.mMinRange>sound.mData.mMaxRange)
-        messages.push_back (std::make_pair (id, "Minimum range larger than maximum range"));
+    {
+        messages.add(id, "Minimum range larger than maximum range", "", CSMDoc::Message::Severity_Warning);
+    }
 
     if (sound.mSound.empty())
     {
-        messages.push_back(std::make_pair(id, "Sound file is missing"));
+        messages.add(id, "Sound file is missing", "", CSMDoc::Message::Severity_Error);
     }
     else if (mSoundFiles.searchId(sound.mSound) == -1)
     {
-        messages.push_back(std::make_pair(id, "Sound file '" + sound.mSound + "' does not exist"));
+        messages.add(id, "Sound file '" + sound.mSound + "' does not exist", "", CSMDoc::Message::Severity_Error);
     }
 }
