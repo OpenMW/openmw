@@ -100,11 +100,8 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
 
         // check duplicate points
         // FIXME: how to do this efficiently?
-        for (unsigned int j = 0; j < pathgrid.mPoints.size(); ++j)
+        for (unsigned int j = 0; j != i; ++j)
         {
-            if (j == i)
-                continue;
-
             if (pathgrid.mPoints[i].mX == pathgrid.mPoints[j].mX &&
                 pathgrid.mPoints[i].mY == pathgrid.mPoints[j].mY &&
                 pathgrid.mPoints[i].mZ == pathgrid.mPoints[j].mZ)
