@@ -114,7 +114,7 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages &messa
 
     if (!effect.mBolt.empty())
     {
-        const std::string error = checkObject(effect.mBolt, CSMWorld::UniversalId::Type_Static, "Bolt object");
+        const std::string error = checkObject(effect.mBolt, CSMWorld::UniversalId::Type_Weapon, "Bolt object");
         if (!error.empty())
             messages.add(id, error, "", CSMDoc::Message::Severity_Error);
     }
