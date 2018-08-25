@@ -61,6 +61,11 @@ namespace ToUTF8
 
 struct ContentLoader;
 
+namespace MWPhysics
+{
+    class Object;
+}
+
 namespace MWWorld
 {
     class WeatherManager;
@@ -147,6 +152,10 @@ namespace MWWorld
 
             void doPhysics(float duration);
             ///< Run physics simulation and modify \a world accordingly.
+
+            void updateNavigator();
+
+            bool updateNavigatorObject(const MWPhysics::Object* object);
 
             void ensureNeededRecords();
 

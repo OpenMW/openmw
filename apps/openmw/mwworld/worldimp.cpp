@@ -1543,19 +1543,32 @@ namespace MWWorld
         }
         if(player != results.end())
             moveObjectImp(player->first, player->second.x(), player->second.y(), player->second.z(), false);
+    }
 
-        bool navigatorObjectsUpdated = false;
+    void World::updateNavigator()
+    {
+        bool updated = false;
+
         mPhysics->forEachAnimatedObject([&] (const MWPhysics::Object* object)
         {
-            const DetourNavigator::ObjectShapes shapes {
-                *object->getShapeInstance()->getCollisionShape(),
-                object->getShapeInstance()->getAvoidCollisionShape()
-            };
-            navigatorObjectsUpdated = mNavigator->updateObject(std::size_t(object), shapes,
-                    object->getCollisionObject()->getWorldTransform()) || navigatorObjectsUpdated;
+            updated = updateNavigatorObject(object) || updated;
         });
-        if (navigatorObjectsUpdated)
+
+        for (const auto& door : mDoorStates)
+            if (const auto object = mPhysics->getObject(door.first))
+                updated = updateNavigatorObject(object) || updated;
+
+        if (updated)
             mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3());
+    }
+
+    bool World::updateNavigatorObject(const MWPhysics::Object* object)
+    {
+        const DetourNavigator::ObjectShapes shapes {
+            *object->getShapeInstance()->getCollisionShape(),
+            object->getShapeInstance()->getAvoidCollisionShape()
+        };
+        return mNavigator->updateObject(std::size_t(object), shapes, object->getCollisionObject()->getWorldTransform());
     }
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreDoors)
@@ -1747,7 +1760,10 @@ namespace MWWorld
         updateWeather(duration, paused);
 
         if (!paused)
+        {
             doPhysics (duration);
+            updateNavigator();
+        }
 
         updatePlayer();
 
