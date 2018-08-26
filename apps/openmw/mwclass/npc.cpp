@@ -1241,11 +1241,10 @@ namespace MWClass
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
-            if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
+            if (world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return "DefaultLandWater";
-            if(world->isOnGround(ptr))
-                return "DefaultLand";
-            return "";
+
+            return "DefaultLand";
         }
         if(name == "swimleft")
             return "Swim Left";

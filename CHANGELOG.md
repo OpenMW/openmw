@@ -4,6 +4,8 @@
     Bug #1990: Sunrise/sunset not set correct
     Bug #2131: Lustidrike's spell misses the player every time
     Bug #2222: Fatigue's effect on selling price is backwards
+    Bug #2256: Landing sound not playing when jumping immediately after landing
+    Bug #2274: Thin platform clips through player character instead of lifting
     Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
     Bug #2455: Creatures attacks degrade armor
     Bug #2562: Forcing AI to activate a teleport door sometimes causes a crash
@@ -15,6 +17,7 @@
     Bug #2872: Tab completion in console doesn't work with explicit reference
     Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
     Bug #3049: Drain and Fortify effects are not properly applied on health, magicka and fatigue
+    Bug #3059: Unable to hit with marksman weapons when too close to an enemy
     Bug #3072: Fatal error on AddItem <item> that has a script containing Equip <item>
     Bug #3249: Fixed revert function not updating views properly
     Bug #3374: Touch spells not hitting kwama foragers
@@ -22,7 +25,9 @@
     Bug #3533: GetSpellEffects should detect effects with zero duration
     Bug #3591: Angled hit distance too low
     Bug #3629: DB assassin attack never triggers creature spawning
+    Bug #3681: OpenMW-CS: Clicking Scripts in Preferences spawns many color pickers
     Bug #3788: GetPCInJail and GetPCTraveling do not work as in vanilla
+    Bug #3836: Script fails to compile when command argument contains "\n"
     Bug #3876: Landscape texture painting is misaligned
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
     Bug #3911: [macOS] Typing in the "Content List name" dialog box produces double characters
@@ -98,6 +103,8 @@
     Bug #4575: Weird result of attack animation blending with movement animations
     Bug #4576: Reset of idle animations when attack can not be started
     Bug #4591: Attack strength should be 0 if player did not hold the attack button
+    Bug #4597: <> operator causes a compile error
+    Bug #4604: Picking up gold from the ground only makes 1 grabbed
     Feature #1645: Casting effects from objects
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
@@ -123,6 +130,8 @@
     Feature #4581: Use proper logging system
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test
+    Task #4605: Optimize skinning
+    Task #4606: Support Rapture3D's OpenAL driver
     Task #4613: Incomplete type errors when compiling with g++ on OSX 10.9
 
 0.44.0
