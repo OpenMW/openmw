@@ -26,6 +26,7 @@ namespace CSVRender
         , mBaseNode(new osg::Group())
         , mSkeleton(nullptr)
     {
+        mActorData = mData.getActorAdapter()->getActorData(mId);
     }
 
     osg::Group* Actor::getBaseNode()
@@ -60,7 +61,6 @@ namespace CSVRender
     {
         if (mId == refId)
         {
-            Log(Debug::Info) << "Actor::actorChanged " << mId;
             update();
         }
     }
@@ -79,9 +79,6 @@ namespace CSVRender
         SceneUtil::RemoveTriBipVisitor removeTriBipVisitor;
         mSkeleton->accept(removeTriBipVisitor);
         removeTriBipVisitor.remove();
-
-        // Attach weapons
-        loadBodyParts(creature.mId);
 
         // Post setup
         mSkeleton->markDirty();
@@ -141,12 +138,11 @@ namespace CSVRender
 
     void Actor::loadBodyParts(const std::string& actorId)
     {
-        auto actorAdapter = mData.getActorAdapter();
-        auto parts = actorAdapter->getActorParts(actorId);
-        if (parts)
+        for (int i = 0; i < ESM::PRT_Count; ++i)
         {
-            for (auto& pair : *parts)
-                attachBodyPart(pair.first, getBodyPartMesh(pair.second));
+            auto type = (ESM::PartReferenceType) i;
+            std::string partId = mActorData->getPart(type);
+            attachBodyPart(type, getBodyPartMesh(partId));
         }
     }
 

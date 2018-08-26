@@ -150,6 +150,10 @@ add_component_dir (fallback
     fallback validate
     )
 
+add_component_dir(cache
+    weakcache
+    )
+
 if(NOT WIN32 AND NOT ANDROID)
     add_component_dir (crashcatcher
         crashcatcher

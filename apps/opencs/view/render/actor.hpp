@@ -10,6 +10,8 @@
 #include <components/esm/loadarmo.hpp>
 #include <components/sceneutil/visitor.hpp>
 
+#include "../../model/world/actoradapter.hpp"
+
 namespace osg
 {
     class Group;
@@ -63,6 +65,7 @@ namespace CSVRender
         bool mInitialized;
         int mType;
         CSMWorld::Data& mData;
+        CSMWorld::ActorAdapter::ActorDataPtr mActorData;
 
         osg::ref_ptr<osg::Group> mBaseNode;
         SceneUtil::Skeleton* mSkeleton;
