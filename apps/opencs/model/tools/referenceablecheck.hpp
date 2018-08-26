@@ -80,7 +80,7 @@ namespace CSMTools
                                                    CSMDoc::Messages& messages,
                                                    const std::string& someID);
 
-            const CSMWorld::RefIdData& mObjects;
+            const CSMWorld::RefIdData& mReferencables;
             const CSMWorld::IdCollection<ESM::Race>& mRaces;
             const CSMWorld::IdCollection<ESM::Class>& mClasses;
             const CSMWorld::IdCollection<ESM::Faction>& mFactions;

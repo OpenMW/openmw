@@ -16,7 +16,7 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
     const CSMWorld::Resources& models,
     const CSMWorld::Resources& icons,
     const CSMWorld::IdCollection<ESM::BodyPart>& bodyparts)
-   :mObjects(referenceable),
+   :mReferencables(referenceable),
     mRaces(races),
     mClasses(classes),
     mFactions(faction),
@@ -32,201 +32,201 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
 void CSMTools::ReferenceableCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     //Checks for books, than, when stage is above mBooksSize goes to other checks, with (stage - PrevSum) as stage.
-    const int bookSize(mObjects.getBooks().getSize());
+    const int bookSize(mReferencables.getBooks().getSize());
 
     if (stage < bookSize)
     {
-        bookCheck(stage, mObjects.getBooks(), messages);
+        bookCheck(stage, mReferencables.getBooks(), messages);
         return;
     }
 
     stage -= bookSize;
 
-    const int activatorSize(mObjects.getActivators().getSize());
+    const int activatorSize(mReferencables.getActivators().getSize());
 
     if (stage < activatorSize)
     {
-        activatorCheck(stage, mObjects.getActivators(), messages);
+        activatorCheck(stage, mReferencables.getActivators(), messages);
         return;
     }
 
     stage -= activatorSize;
 
-    const int potionSize(mObjects.getPotions().getSize());
+    const int potionSize(mReferencables.getPotions().getSize());
 
     if (stage < potionSize)
     {
-        potionCheck(stage, mObjects.getPotions(), messages);
+        potionCheck(stage, mReferencables.getPotions(), messages);
         return;
     }
 
     stage -= potionSize;
 
-    const int apparatusSize(mObjects.getApparati().getSize());
+    const int apparatusSize(mReferencables.getApparati().getSize());
 
     if (stage < apparatusSize)
     {
-        apparatusCheck(stage, mObjects.getApparati(), messages);
+        apparatusCheck(stage, mReferencables.getApparati(), messages);
         return;
     }
 
     stage -= apparatusSize;
 
-    const int armorSize(mObjects.getArmors().getSize());
+    const int armorSize(mReferencables.getArmors().getSize());
 
     if (stage < armorSize)
     {
-        armorCheck(stage, mObjects.getArmors(), messages);
+        armorCheck(stage, mReferencables.getArmors(), messages);
         return;
     }
 
     stage -= armorSize;
 
-    const int clothingSize(mObjects.getClothing().getSize());
+    const int clothingSize(mReferencables.getClothing().getSize());
 
     if (stage < clothingSize)
     {
-        clothingCheck(stage, mObjects.getClothing(), messages);
+        clothingCheck(stage, mReferencables.getClothing(), messages);
         return;
     }
 
     stage -= clothingSize;
 
-    const int containerSize(mObjects.getContainers().getSize());
+    const int containerSize(mReferencables.getContainers().getSize());
 
     if (stage < containerSize)
     {
-        containerCheck(stage, mObjects.getContainers(), messages);
+        containerCheck(stage, mReferencables.getContainers(), messages);
         return;
     }
 
     stage -= containerSize;
 
-    const int doorSize(mObjects.getDoors().getSize());
+    const int doorSize(mReferencables.getDoors().getSize());
 
     if (stage < doorSize)
     {
-        doorCheck(stage, mObjects.getDoors(), messages);
+        doorCheck(stage, mReferencables.getDoors(), messages);
         return;
     }
 
     stage -= doorSize;
 
-    const int ingredientSize(mObjects.getIngredients().getSize());
+    const int ingredientSize(mReferencables.getIngredients().getSize());
 
     if (stage < ingredientSize)
     {
-        ingredientCheck(stage, mObjects.getIngredients(), messages);
+        ingredientCheck(stage, mReferencables.getIngredients(), messages);
         return;
     }
 
     stage -= ingredientSize;
 
-    const int creatureLevListSize(mObjects.getCreatureLevelledLists().getSize());
+    const int creatureLevListSize(mReferencables.getCreatureLevelledLists().getSize());
 
     if (stage < creatureLevListSize)
     {
-        creaturesLevListCheck(stage, mObjects.getCreatureLevelledLists(), messages);
+        creaturesLevListCheck(stage, mReferencables.getCreatureLevelledLists(), messages);
         return;
     }
 
     stage -= creatureLevListSize;
 
-    const int itemLevelledListSize(mObjects.getItemLevelledList().getSize());
+    const int itemLevelledListSize(mReferencables.getItemLevelledList().getSize());
 
     if (stage < itemLevelledListSize)
     {
-        itemLevelledListCheck(stage, mObjects.getItemLevelledList(), messages);
+        itemLevelledListCheck(stage, mReferencables.getItemLevelledList(), messages);
         return;
     }
 
     stage -= itemLevelledListSize;
 
-    const int lightSize(mObjects.getLights().getSize());
+    const int lightSize(mReferencables.getLights().getSize());
 
     if (stage < lightSize)
     {
-        lightCheck(stage, mObjects.getLights(), messages);
+        lightCheck(stage, mReferencables.getLights(), messages);
         return;
     }
 
     stage -= lightSize;
 
-    const int lockpickSize(mObjects.getLocpicks().getSize());
+    const int lockpickSize(mReferencables.getLocpicks().getSize());
 
     if (stage < lockpickSize)
     {
-        lockpickCheck(stage, mObjects.getLocpicks(), messages);
+        lockpickCheck(stage, mReferencables.getLocpicks(), messages);
         return;
     }
 
     stage -= lockpickSize;
 
-    const int miscSize(mObjects.getMiscellaneous().getSize());
+    const int miscSize(mReferencables.getMiscellaneous().getSize());
 
     if (stage < miscSize)
     {
-        miscCheck(stage, mObjects.getMiscellaneous(), messages);
+        miscCheck(stage, mReferencables.getMiscellaneous(), messages);
         return;
     }
 
     stage -= miscSize;
 
-    const int npcSize(mObjects.getNPCs().getSize());
+    const int npcSize(mReferencables.getNPCs().getSize());
 
     if (stage < npcSize)
     {
-        npcCheck(stage, mObjects.getNPCs(), messages);
+        npcCheck(stage, mReferencables.getNPCs(), messages);
         return;
     }
 
     stage -= npcSize;
 
-    const int weaponSize(mObjects.getWeapons().getSize());
+    const int weaponSize(mReferencables.getWeapons().getSize());
 
     if (stage < weaponSize)
     {
-        weaponCheck(stage, mObjects.getWeapons(), messages);
+        weaponCheck(stage, mReferencables.getWeapons(), messages);
         return;
     }
 
     stage -= weaponSize;
 
-    const int probeSize(mObjects.getProbes().getSize());
+    const int probeSize(mReferencables.getProbes().getSize());
 
     if (stage < probeSize)
     {
-        probeCheck(stage, mObjects.getProbes(), messages);
+        probeCheck(stage, mReferencables.getProbes(), messages);
         return;
     }
 
     stage -= probeSize;
 
-    const int repairSize(mObjects.getRepairs().getSize());
+    const int repairSize(mReferencables.getRepairs().getSize());
 
     if (stage < repairSize)
     {
-        repairCheck(stage, mObjects.getRepairs(), messages);
+        repairCheck(stage, mReferencables.getRepairs(), messages);
         return;
     }
 
     stage -= repairSize;
 
-    const int staticSize(mObjects.getStatics().getSize());
+    const int staticSize(mReferencables.getStatics().getSize());
 
     if (stage < staticSize)
     {
-        staticCheck(stage, mObjects.getStatics(), messages);
+        staticCheck(stage, mReferencables.getStatics(), messages);
         return;
     }
 
     stage -= staticSize;
 
-    const int creatureSize(mObjects.getCreatures().getSize());
+    const int creatureSize(mReferencables.getCreatures().getSize());
 
     if (stage < creatureSize)
     {
-        creatureCheck(stage, mObjects.getCreatures(), messages);
+        creatureCheck(stage, mReferencables.getCreatures(), messages);
         return;
     }
 // if we come that far, we are about to perform our last, final check.
@@ -239,7 +239,7 @@ int CSMTools::ReferenceableCheckStage::setup()
     mPlayerPresent = false;
     mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
 
-    return mObjects.getSize() + 1;
+    return mReferencables.getSize() + 1;
 }
 
 void CSMTools::ReferenceableCheckStage::bookCheck(
@@ -300,6 +300,7 @@ void CSMTools::ReferenceableCheckStage::potionCheck(
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Potion, potion.mId);
 
     inventoryItemCheck<ESM::Potion>(potion, messages, id.toString());
+    /// \todo Check magic effects for validity
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Potion>(potion, messages, id.toString());
@@ -485,7 +486,7 @@ void CSMTools::ReferenceableCheckStage::creatureCheck (
 
     if (!creature.mOriginal.empty())
     {
-        CSMWorld::RefIdData::LocalIndex index = mObjects.searchId(creature.mOriginal);
+        CSMWorld::RefIdData::LocalIndex index = mReferencables.searchId(creature.mOriginal);
         if (index.first == -1)
             messages.add(id, "Parent creature '" + creature.mOriginal + "' does not exist", "", CSMDoc::Message::Severity_Error);
         else if (index.second != CSMWorld::UniversalId::Type_Creature)
@@ -892,7 +893,7 @@ void CSMTools::ReferenceableCheckStage::staticCheck (
     if (staticElement.mModel.empty())
         messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
     else if (mModels.searchId(staticElement.mModel) == -1)
-       messages.add(id, "Model '" + staticElement.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Model '" + staticElement.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
 }
 
 //final check
@@ -911,7 +912,7 @@ void CSMTools::ReferenceableCheckStage::inventoryListCheck(
     for (size_t i = 0; i < itemList.size(); ++i)
     {
         std::string itemName = itemList[i].mItem.toString();
-        CSMWorld::RefIdData::LocalIndex localIndex = mObjects.searchId(itemName);
+        CSMWorld::RefIdData::LocalIndex localIndex = mReferencables.searchId(itemName);
 
         if (localIndex.first == -1)
             messages.add(id, "Item '" + itemName + "' does not exist", "", CSMDoc::Message::Severity_Error);
@@ -1020,7 +1021,7 @@ template<typename Tool> void CSMTools::ReferenceableCheckStage::toolCheck (
 
 template<typename Tool> void CSMTools::ReferenceableCheckStage::toolCheck (
     const Tool& someTool, CSMDoc::Messages& messages, const std::string& someID)
-{    
+{
     if (someTool.mData.mQuality <= 0)
         messages.add(someID, "Quality is non-positive", "", CSMDoc::Message::Severity_Error);
 }
@@ -1030,7 +1031,7 @@ template<typename List> void CSMTools::ReferenceableCheckStage::listCheck (
 {
     for (unsigned i = 0; i < someList.mList.size(); ++i)
     {
-        if (mObjects.searchId(someList.mList[i].mId).first == -1)
+        if (mReferencables.searchId(someList.mList[i].mId).first == -1)
             messages.add(someID, "Object '" + someList.mList[i].mId + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
         if (someList.mList[i].mLevel < 1)
