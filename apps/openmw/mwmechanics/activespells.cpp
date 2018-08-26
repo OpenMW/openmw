@@ -197,8 +197,12 @@ namespace MWMechanics
 
     void ActiveSpells::removeEffects(const std::string &id)
     {
-        mSpells.erase(Misc::StringUtils::lowerCase(id));
-        mSpellsChanged = true;
+        TContainer::iterator spell(mSpells.find(id));
+        if (spell != end());
+        {
+            spell->second.mEffects.clear();
+            mSpellsChanged = true;
+        }
     }
 
     void ActiveSpells::visitEffectSources(EffectSourceVisitor &visitor) const

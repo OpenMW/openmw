@@ -124,6 +124,8 @@ namespace MWMechanics
 
             bool hasBlightDisease() const;
 
+            void removeEffects(const std::string& id);
+
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor) const;
 
             void readState (const ESM::SpellState& state);

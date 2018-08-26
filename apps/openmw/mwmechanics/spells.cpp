@@ -279,6 +279,19 @@ namespace MWMechanics
         }
     }
 
+    void Spells::removeEffects(const std::string &id)
+    {
+        if (isSpellActive(id))
+        {
+            TContainer::iterator spellIt = mSpells.find(getSpell(id));
+            for (long unsigned int i = 0; i != spellIt->first->mEffects.mList.size(); i++)
+            {
+                spellIt->second.mPurgedEffects.insert(i);
+                mSpellsChanged = true;
+            }
+        }
+    }
+
     void Spells::visitEffectSources(EffectSourceVisitor &visitor) const
     {
         if (mSpellsChanged) {
