@@ -49,12 +49,10 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
     // test for invalid attributes
     for (int i=0; i<2; ++i)
-    {
         if (class_.mData.mAttribute[i]==-1)
         {
             messages.add(id, "Attribute #" + std::to_string(i) + " is not set", "", CSMDoc::Message::Severity_Error);
         }
-    }
 
     if (class_.mData.mAttribute[0]==class_.mData.mAttribute[1] && class_.mData.mAttribute[0]!=-1)
     {
@@ -69,10 +67,8 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
             ++skills[class_.mData.mSkills[i][i2]];
 
     for (auto &skill : skills)
-    {
         if (skill.second>1)
         {
             messages.add(id, "Skill " + ESM::Skill::indexToId (skill.first) + " is listed more than once", "", CSMDoc::Message::Severity_Warning);
         }
-    }
 }

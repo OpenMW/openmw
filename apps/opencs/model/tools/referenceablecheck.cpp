@@ -723,7 +723,9 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
         messages.add(id, "Disposition is negative", "", CSMDoc::Message::Severity_Warning);
 
     if (reputation < 0)
+    {
         messages.add(id, "Reputation is negative", "", CSMDoc::Message::Severity_Warning);
+    }
 
     if (!npc.mFaction.empty())
     {

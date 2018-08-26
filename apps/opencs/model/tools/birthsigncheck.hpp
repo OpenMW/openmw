@@ -17,9 +17,6 @@ namespace CSMTools
             const CSMWorld::Resources &mTextures;
             bool mIgnoreBaseRecords;
 
-        private:
-            std::string checkTexture(const std::string &texture) const;
-
         public:
 
             BirthsignCheckStage (const CSMWorld::IdCollection<ESM::BirthSign> &birthsigns,

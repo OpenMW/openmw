@@ -7,17 +7,6 @@
 
 #include "../world/universalid.hpp"
 
-
-std::string CSMTools::BirthsignCheckStage::checkTexture(const std::string &texture) const
-{
-    if (mTextures.searchId(texture) != -1) return std::string();
-
-    std::string ddsTexture = texture;
-    if (Misc::ResourceHelpers::changeExtensionToDds(ddsTexture) && mTextures.searchId(ddsTexture) != -1) return std::string();
-
-    return "Image '" + texture + "' does not exist";
-}
-
 CSMTools::BirthsignCheckStage::BirthsignCheckStage (const CSMWorld::IdCollection<ESM::BirthSign>& birthsigns,
                                                     const CSMWorld::Resources &textures)
 : mBirthsigns(birthsigns),
@@ -46,24 +35,21 @@ void CSMTools::BirthsignCheckStage::perform (int stage, CSMDoc::Messages& messag
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Birthsign, birthsign.mId);
 
     if (birthsign.mName.empty())
-    {
         messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
-    }
 
     if (birthsign.mDescription.empty())
-    {
         messages.add(id, "Description is missing", "", CSMDoc::Message::Severity_Warning);
-    }
 
     if (birthsign.mTexture.empty())
-    {
         messages.add(id, "Image is missing", "", CSMDoc::Message::Severity_Error);
-    }
     else
     {
-        const std::string error = checkTexture(birthsign.mTexture);
-        if (!error.empty())
-            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+        if (mTextures.searchId(birthsign.mTexture) != -1)
+            return;
+
+        std::string ddsTexture = birthsign.mTexture;
+        if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsTexture) && mTextures.searchId(ddsTexture) != -1))
+            messages.add(id,  "Image '" + birthsign.mTexture + "' does not exist", "", CSMDoc::Message::Severity_Error);
     }
 
     /// \todo check data members that can't be edited in the table view

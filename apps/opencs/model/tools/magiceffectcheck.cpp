@@ -4,17 +4,6 @@
 
 #include "../prefs/state.hpp"
 
-std::string CSMTools::MagicEffectCheckStage::checkTexture(const std::string &texture, bool isIcon) const
-{
-    const CSMWorld::Resources &textures = isIcon ? mIcons : mTextures;
-    if (textures.searchId(texture) != -1) return std::string();
-
-    std::string ddsTexture = texture;
-    if (Misc::ResourceHelpers::changeExtensionToDds(ddsTexture) && textures.searchId(ddsTexture) != -1) return std::string();
-
-    return (isIcon ? "Icon '" : "Particle '") + texture + "' does not exist";
-}
-
 std::string CSMTools::MagicEffectCheckStage::checkObject(const std::string &id, 
                                                                 const CSMWorld::UniversalId &type, 
                                                                 const std::string &column) const
@@ -22,12 +11,6 @@ std::string CSMTools::MagicEffectCheckStage::checkObject(const std::string &id,
     CSMWorld::RefIdData::LocalIndex index = mObjects.getDataSet().searchId(id);
     if (index.first == -1) return (column + " '" + id + "' " + "does not exist");
     else if (index.second != type.getType()) return (column + " '" + id + "' " + "does not have " + type.getTypeName() + " type");
-    return std::string();
-}
-
-std::string CSMTools::MagicEffectCheckStage::checkSound(const std::string &id, const std::string &column) const
-{
-    if (!id.empty() && mSounds.searchId(id) == -1) return (column + " '" + id + "' " + "does not exist");
     return std::string();
 }
 
@@ -79,16 +62,22 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages &messa
     }
     else
     {
-        const std::string error = checkTexture(effect.mIcon, true);
-        if (!error.empty())
-            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+        if (mIcons.searchId(effect.mIcon) == -1)
+        {
+            std::string ddsIcon = effect.mIcon;
+            if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsIcon) && mIcons.searchId(ddsIcon) != -1))
+                messages.add(id, "Icon '" + effect.mIcon + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        }
     }
 
     if (!effect.mParticle.empty())
     {
-        const std::string error = checkTexture(effect.mParticle, false);
-        if (!error.empty())
-            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
+        if (mTextures.searchId(effect.mParticle) == -1)
+        {
+            std::string ddsParticle = effect.mParticle;
+            if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsParticle) && mTextures.searchId(ddsParticle) != -1))
+                messages.add(id, "Particle texture '" + effect.mParticle + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        }
     }
 
     if (!effect.mCasting.empty())
@@ -119,31 +108,12 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages &messa
             messages.add(id, error, "", CSMDoc::Message::Severity_Error);
     }
 
-    if (!effect.mCastSound.empty())
-    {
-        const std::string error = checkSound(effect.mCastSound, "Casting sound");
-        if (!error.empty())
-            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
-    }
-
-    if (!effect.mHitSound.empty())
-    {
-        const std::string error = checkSound(effect.mHitSound, "Hit sound");
-        if (!error.empty())
-            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
-    }
-
-    if (!effect.mAreaSound.empty())
-    {
-        const std::string error = checkSound(effect.mAreaSound, "Area sound");
-        if (!error.empty())
-            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
-    }
-
-    if (!effect.mBoltSound.empty())
-    {
-        const std::string error = checkSound(effect.mBoltSound, "Bolt sound");
-        if (!error.empty())
-            messages.add(id, error, "", CSMDoc::Message::Severity_Error);
-    }
+    if (!effect.mCastSound.empty() && mSounds.searchId(effect.mCastSound) == -1)
+        messages.add(id, "Casting sound '" + effect.mCastSound + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    if (!effect.mHitSound.empty() && mSounds.searchId(effect.mHitSound) == -1)
+        messages.add(id, "Hit sound '" + effect.mHitSound + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    if (!effect.mAreaSound.empty() && mSounds.searchId(effect.mAreaSound) == -1)
+        messages.add(id, "Area sound '" + effect.mAreaSound + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    if (!effect.mBoltSound.empty() && mSounds.searchId(effect.mBoltSound) == -1)
+        messages.add(id, "Bolt sound '" + effect.mBoltSound + "' does not exist", "", CSMDoc::Message::Severity_Error);
 }
