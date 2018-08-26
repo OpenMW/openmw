@@ -129,6 +129,7 @@
     Feature #4581: Use proper logging system
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test
+    Task #4605: Optimize skinning
     Task #4606: Support Rapture3D's OpenAL driver
 
 0.44.0
