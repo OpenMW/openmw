@@ -8,10 +8,7 @@ namespace SceneUtil
 {
     void UnrefWorkItem::doWork()
     {
-        //osg::Timer timer;
-        //size_t objcount = mObjects.size();
         mObjects.clear();
-        //Log(Debug::Verbose) << "cleared " << objcount << " objects in " << timer.time_m();
     }
 
     UnrefQueue::UnrefQueue()
