@@ -36,7 +36,12 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
     // A class should have a name
     if (class_.mName.empty())
-        messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Warning);
+    {
+        if (class_.mData.mIsPlayable != 0)
+            messages.add(id, "Name of a playable class is missing", "", CSMDoc::Message::Severity_Error);
+        else
+            messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Warning);
+    }
 
     // A playable class should have a description
     if (class_.mData.mIsPlayable != 0 && class_.mDescription.empty())
