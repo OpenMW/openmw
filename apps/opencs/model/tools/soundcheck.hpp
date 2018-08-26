@@ -3,14 +3,10 @@
 
 #include <components/esm/loadsoun.hpp>
 
+#include "../world/resources.hpp"
 #include "../world/idcollection.hpp"
 
 #include "../doc/stage.hpp"
-
-namespace CSMWorld
-{
-    class Resources;
-}
 
 namespace CSMTools
 {

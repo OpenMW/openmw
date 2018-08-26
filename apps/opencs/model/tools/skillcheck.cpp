@@ -35,10 +35,8 @@ void CSMTools::SkillCheckStage::perform (int stage, CSMDoc::Messages& messages)
         messages.add(id, "Description is missing", "", CSMDoc::Message::Severity_Warning);
 
     for (int i=0; i<4; ++i)
-    {
         if (skill.mData.mUseValue[i]<0)
         {
             messages.add(id, "Usage experience value #" + std::to_string(i) + " is negative", "", CSMDoc::Message::Severity_Error);
         }
-    }
 }

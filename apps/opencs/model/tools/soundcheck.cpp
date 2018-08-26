@@ -4,7 +4,6 @@
 
 #include "../prefs/state.hpp"
 
-#include "../world/resources.hpp"
 #include "../world/universalid.hpp"
 
 CSMTools::SoundCheckStage::SoundCheckStage (const CSMWorld::IdCollection<ESM::Sound> &sounds,
