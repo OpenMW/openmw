@@ -263,6 +263,7 @@ protected:
     osg::ref_ptr<RotateController> mHeadController;
     float mHeadYawRadians;
     float mHeadPitchRadians;
+    bool mHasMagicEffects;
 
     osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
     osg::ref_ptr<GlowUpdater> mGlowUpdater;
@@ -450,7 +451,7 @@ public:
     void setLoopingEnabled(const std::string &groupname, bool enabled);
 
     /// This is typically called as part of runAnimation, but may be called manually if needed.
-    void updateEffects(float duration);
+    void updateEffects();
 
     /// Return a node with the specified name, or NULL if not existing.
     /// @note The matching is case-insensitive.
