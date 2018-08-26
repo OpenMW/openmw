@@ -123,6 +123,7 @@
     Feature #4581: Use proper logging system
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test
+    Task #4613: Incomplete type errors when compiling with g++ on OSX 10.9
 
 0.44.0
 ------
