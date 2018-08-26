@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_MAKENAVMESH_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_MAKENAVMESH_H
 
+#include "offmeshconnectionsmanager.hpp"
 #include "settings.hpp"
 #include "navmeshcacheitem.hpp"
 #include "tileposition.hpp"
@@ -47,7 +48,8 @@ namespace DetourNavigator
     NavMeshPtr makeEmptyNavMesh(const Settings& settings);
 
     UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh* recastMesh,
-        const TilePosition& changedTile, const TilePosition& playerTile, const Settings& settings,
+        const TilePosition& changedTile, const TilePosition& playerTile,
+        const std::vector<OffMeshConnection>& offMeshConnections, const Settings& settings,
         NavMeshCacheItem& navMeshCacheItem);
 }
 

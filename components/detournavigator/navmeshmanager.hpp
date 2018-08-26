@@ -3,6 +3,7 @@
 
 #include "asyncnavmeshupdater.hpp"
 #include "cachedrecastmeshmanager.hpp"
+#include "offmeshconnectionsmanager.hpp"
 #include "sharednavmesh.hpp"
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
@@ -37,6 +38,10 @@ namespace DetourNavigator
 
         void reset(const osg::Vec3f& agentHalfExtents);
 
+        void addOffMeshConnection(std::size_t id, const osg::Vec3f& start, const osg::Vec3f& end);
+
+        void removeOffMeshConnection(std::size_t id);
+
         void update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents);
 
         void wait();
@@ -48,6 +53,7 @@ namespace DetourNavigator
     private:
         const Settings& mSettings;
         TileCachedRecastMeshManager mRecastMeshManager;
+        OffMeshConnectionsManager mOffMeshConnectionsManager;
         std::map<osg::Vec3f, std::shared_ptr<NavMeshCacheItem>> mCache;
         std::map<osg::Vec3f, std::map<TilePosition, ChangeType>> mChangedTiles;
         AsyncNavMeshUpdater mAsyncNavMeshUpdater;

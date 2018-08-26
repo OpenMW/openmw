@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_ASYNCNAVMESHUPDATER_H
 
 #include "navmeshcacheitem.hpp"
+#include "offmeshconnectionsmanager.hpp"
 #include "tilecachedrecastmeshmanager.hpp"
 #include "tileposition.hpp"
 
@@ -32,7 +33,8 @@ namespace DetourNavigator
     class AsyncNavMeshUpdater
     {
     public:
-        AsyncNavMeshUpdater(const Settings& settings, TileCachedRecastMeshManager& recastMeshManager);
+        AsyncNavMeshUpdater(const Settings& settings, TileCachedRecastMeshManager& recastMeshManager,
+            OffMeshConnectionsManager& offMeshConnectionsManager);
         ~AsyncNavMeshUpdater();
 
         void post(const osg::Vec3f& agentHalfExtents, const std::shared_ptr<NavMeshCacheItem>& mNavMeshCacheItem,
@@ -58,6 +60,7 @@ namespace DetourNavigator
 
         std::reference_wrapper<const Settings> mSettings;
         std::reference_wrapper<TileCachedRecastMeshManager> mRecastMeshManager;
+        std::reference_wrapper<OffMeshConnectionsManager> mOffMeshConnectionsManager;
         std::atomic_bool mShouldStop;
         std::mutex mMutex;
         std::condition_variable mHasJob;

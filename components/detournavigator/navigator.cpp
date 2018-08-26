@@ -47,6 +47,20 @@ namespace DetourNavigator
         return result;
     }
 
+    bool Navigator::addObject(std::size_t id, const DoorShapes& shapes, const btTransform& transform)
+    {
+        if (addObject(id, static_cast<const ObjectShapes&>(shapes), transform))
+        {
+            mNavMeshManager.addOffMeshConnection(
+                id,
+                toNavMeshCoordinates(mSettings, shapes.mConnectionStart),
+                toNavMeshCoordinates(mSettings, shapes.mConnectionEnd)
+            );
+            return true;
+        }
+        return false;
+    }
+
     bool Navigator::updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
     {
         return mNavMeshManager.updateObject(id, shape, transform, AreaType_ground);
@@ -67,6 +81,11 @@ namespace DetourNavigator
         return result;
     }
 
+    bool Navigator::updateObject(std::size_t id, const DoorShapes& shapes, const btTransform& transform)
+    {
+        return updateObject(id, static_cast<const ObjectShapes&>(shapes), transform);
+    }
+
     bool Navigator::removeObject(std::size_t id)
     {
         bool result = mNavMeshManager.removeObject(id);
@@ -76,6 +95,7 @@ namespace DetourNavigator
         const auto water = mWaterIds.find(id);
         if (water != mWaterIds.end())
             result = mNavMeshManager.removeObject(water->second) || result;
+        mNavMeshManager.removeOffMeshConnection(id);
         return result;
     }
 

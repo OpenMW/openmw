@@ -29,6 +29,7 @@
 #include "../mwphysics/actor.hpp"
 #include "../mwphysics/object.hpp"
 #include "../mwphysics/heightfield.hpp"
+#include "../mwphysics/convert.hpp"
 
 #include "player.hpp"
 #include "localscripts.hpp"
@@ -40,25 +41,45 @@
 
 namespace
 {
+    osg::Quat makeActorOsgQuat(const ESM::Position& position)
+    {
+        return osg::Quat(position.rot[2], osg::Vec3(0, 0, -1));
+    }
 
-    void setNodeRotation(const MWWorld::Ptr& ptr, MWRender::RenderingManager& rendering, bool inverseRotationOrder)
+    osg::Quat makeInversedOrderObjectOsgQuat(const ESM::Position& position)
+    {
+        const float xr = position.rot[0];
+        const float yr = position.rot[1];
+        const float zr = position.rot[2];
+
+        return osg::Quat(xr, osg::Vec3(-1, 0, 0))
+                * osg::Quat(yr, osg::Vec3(0, -1, 0))
+                * osg::Quat(zr, osg::Vec3(0, 0, -1));
+    }
+
+    osg::Quat makeObjectOsgQuat(const ESM::Position& position)
+    {
+        const float xr = position.rot[0];
+        const float yr = position.rot[1];
+        const float zr = position.rot[2];
+
+        return osg::Quat(zr, osg::Vec3(0, 0, -1))
+            * osg::Quat(yr, osg::Vec3(0, -1, 0))
+            * osg::Quat(xr, osg::Vec3(-1, 0, 0));
+    }
+
+    void setNodeRotation(const MWWorld::Ptr& ptr, MWRender::RenderingManager& rendering, const bool inverseRotationOrder)
     {
         if (!ptr.getRefData().getBaseNode())
             return;
 
-        osg::Quat worldRotQuat(ptr.getRefData().getPosition().rot[2], osg::Vec3(0,0,-1));
-        if (!ptr.getClass().isActor())
-        {
-            float xr = ptr.getRefData().getPosition().rot[0];
-            float yr = ptr.getRefData().getPosition().rot[1];
-            if (!inverseRotationOrder)
-                worldRotQuat = worldRotQuat * osg::Quat(yr, osg::Vec3(0,-1,0)) *
-                    osg::Quat(xr, osg::Vec3(-1,0,0));
-            else
-                worldRotQuat = osg::Quat(xr, osg::Vec3(-1,0,0)) * osg::Quat(yr, osg::Vec3(0,-1,0)) * worldRotQuat;
-        }
-
-        rendering.rotateObject(ptr, worldRotQuat);
+        rendering.rotateObject(ptr,
+            ptr.getClass().isActor()
+            ? makeActorOsgQuat(ptr.getRefData().getPosition())
+            : (inverseRotationOrder
+                ? makeInversedOrderObjectOsgQuat(ptr.getRefData().getPosition())
+                : makeObjectOsgQuat(ptr.getRefData().getPosition()))
+        );
     }
 
     void addObject(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
@@ -84,23 +105,6 @@ namespace
 
         ptr.getClass().insertObject (ptr, model, physics);
 
-        if (const auto object = physics.getObject(ptr))
-        {
-            const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
-            const DetourNavigator::ObjectShapes shapes {
-                *object->getShapeInstance()->getCollisionShape(),
-                object->getShapeInstance()->getAvoidCollisionShape()
-            };
-            navigator->addObject(reinterpret_cast<std::size_t>(object), shapes,
-                object->getCollisionObject()->getWorldTransform());
-        }
-        else if (const auto actor = physics.getActor(ptr))
-        {
-            const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
-            const auto playerHalfExtents = physics.getHalfExtents(MWBase::Environment::get().getWorld()->getPlayerPtr());
-            navigator->addAgent(playerHalfExtents);
-        }
-
         if (useAnim)
             MWBase::Environment::get().getMechanicsManager()->add(ptr);
 
@@ -109,6 +113,71 @@ namespace
 
         // Restore effect particles
         MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
+    }
+
+    void addObject(const MWWorld::Ptr& ptr, const MWPhysics::PhysicsSystem& physics, DetourNavigator::Navigator& navigator)
+    {
+        if (const auto object = physics.getObject(ptr))
+        {
+            if (ptr.getClass().isDoor() && !ptr.getCellRef().getTeleport())
+            {
+                const auto shape = object->getShapeInstance()->getCollisionShape();
+
+                btVector3 aabbMin;
+                btVector3 aabbMax;
+                shape->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
+
+                const auto center = (aabbMax + aabbMin) * 0.5f;
+
+                const auto distanceFromDoor = MWBase::Environment::get().getWorld()->getMaxActivationDistance() * 0.5f;
+                const auto toPoint = aabbMax.x() - aabbMin.x() < aabbMax.y() - aabbMin.y()
+                        ? btVector3(distanceFromDoor, 0, 0)
+                        : btVector3(0, distanceFromDoor, 0);
+
+                const auto& transform = object->getCollisionObject()->getWorldTransform();
+                const btTransform closedDoorTransform(
+                    MWPhysics::toBullet(makeObjectOsgQuat(ptr.getCellRef().getPosition())),
+                    transform.getOrigin()
+                );
+
+                const auto start = DetourNavigator::makeOsgVec3f(closedDoorTransform(center + toPoint));
+                const auto startPoint = physics.castRay(start, start - osg::Vec3f(0, 0, 1000), ptr, {},
+                    MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Water);
+                const auto connectionStart = startPoint.mHit ? startPoint.mHitPos : start;
+
+                const auto end = DetourNavigator::makeOsgVec3f(closedDoorTransform(center - toPoint));
+                const auto endPoint = physics.castRay(end, end - osg::Vec3f(0, 0, 1000), ptr, {},
+                    MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Water);
+                const auto connectionEnd = endPoint.mHit ? endPoint.mHitPos : end;
+
+                navigator.addObject(
+                    reinterpret_cast<std::size_t>(object),
+                    DetourNavigator::DoorShapes(
+                        *shape,
+                        object->getShapeInstance()->getAvoidCollisionShape(),
+                        connectionStart,
+                        connectionEnd
+                    ),
+                    transform
+                );
+            }
+            else
+            {
+                navigator.addObject(
+                    reinterpret_cast<std::size_t>(object),
+                    DetourNavigator::ObjectShapes {
+                        *object->getShapeInstance()->getCollisionShape(),
+                        object->getShapeInstance()->getAvoidCollisionShape()
+                    },
+                    object->getCollisionObject()->getWorldTransform()
+                );
+            }
+        }
+        else if (const auto actor = physics.getActor(ptr))
+        {
+            const auto playerHalfExtents = physics.getHalfExtents(MWBase::Environment::get().getWorld()->getPlayerPtr());
+            navigator.addAgent(playerHalfExtents);
+        }
     }
 
     void updateObjectRotation (const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
@@ -137,24 +206,19 @@ namespace
         MWWorld::CellStore& mCell;
         bool mRescale;
         Loading::Listener& mLoadingListener;
-        MWPhysics::PhysicsSystem& mPhysics;
-        MWRender::RenderingManager& mRendering;
 
         std::vector<MWWorld::Ptr> mToInsert;
 
-        InsertVisitor (MWWorld::CellStore& cell, bool rescale, Loading::Listener& loadingListener,
-            MWPhysics::PhysicsSystem& physics, MWRender::RenderingManager& rendering);
+        InsertVisitor (MWWorld::CellStore& cell, bool rescale, Loading::Listener& loadingListener);
 
         bool operator() (const MWWorld::Ptr& ptr);
-        void insert();
+
+        template <class AddObject>
+        void insert(AddObject&& addObject);
     };
 
-    InsertVisitor::InsertVisitor (MWWorld::CellStore& cell, bool rescale,
-        Loading::Listener& loadingListener, MWPhysics::PhysicsSystem& physics,
-        MWRender::RenderingManager& rendering)
-    : mCell (cell), mRescale (rescale), mLoadingListener (loadingListener),
-      mPhysics (physics),
-      mRendering (rendering)
+    InsertVisitor::InsertVisitor (MWWorld::CellStore& cell, bool rescale, Loading::Listener& loadingListener)
+    : mCell (cell), mRescale (rescale), mLoadingListener (loadingListener)
     {}
 
     bool InsertVisitor::operator() (const MWWorld::Ptr& ptr)
@@ -165,7 +229,8 @@ namespace
         return true;
     }
 
-    void InsertVisitor::insert()
+    template <class AddObject>
+    void InsertVisitor::insert(AddObject&& addObject)
     {
         for (std::vector<MWWorld::Ptr>::iterator it = mToInsert.begin(); it != mToInsert.end(); ++it)
         {
@@ -182,7 +247,7 @@ namespace
             {
                 try
                 {
-                    addObject(ptr, mPhysics, mRendering);
+                    addObject(ptr);
                 }
                 catch (const std::exception& e)
                 {
@@ -577,8 +642,9 @@ namespace MWWorld
         mLastPlayerPos = pos.asVec3();
     }
 
-    Scene::Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics)
-    : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering)
+    Scene::Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics,
+                  DetourNavigator::Navigator& navigator)
+    : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering), mNavigator(navigator)
     , mPreloadTimer(0.f)
     , mHalfGridSize(Settings::Manager::getInt("exterior cell load distance", "Cells"))
     , mCellLoadingThreshold(1024.f)
@@ -706,9 +772,10 @@ namespace MWWorld
 
     void Scene::insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener)
     {
-        InsertVisitor insertVisitor (cell, rescale, *loadingListener, *mPhysics, mRendering);
+        InsertVisitor insertVisitor (cell, rescale, *loadingListener);
         cell.forEach (insertVisitor);
-        insertVisitor.insert();
+        insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mRendering); });
+        insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mNavigator); });
 
         // do adjustPosition (snapping actors to ground) after objects are loaded, so we don't depend on the loading order
         AdjustPositionVisitor adjustPosVisitor;
@@ -720,6 +787,7 @@ namespace MWWorld
         try
         {
             addObject(ptr, *mPhysics, mRendering);
+            addObject(ptr, *mPhysics, mNavigator);
             MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
             const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
             const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();

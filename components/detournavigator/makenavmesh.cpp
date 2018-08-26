@@ -100,9 +100,31 @@ namespace
         }
     }
 
+    std::vector<float> getOffMeshVerts(const std::vector<OffMeshConnection>& connections)
+    {
+        std::vector<float> result;
+
+        result.reserve(connections.size() * 6);
+
+        const auto add = [&] (const osg::Vec3f& v)
+        {
+            result.push_back(v.x());
+            result.push_back(v.y());
+            result.push_back(v.z());
+        };
+
+        for (const auto& v : connections)
+        {
+            add(v.mStart);
+            add(v.mEnd);
+        }
+
+        return result;
+    }
+
     NavMeshData makeNavMeshTileData(const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
-        const int tileX, const int tileY, const osg::Vec3f& boundsMin, const osg::Vec3f& boundsMax,
-        const Settings& settings)
+        const std::vector<OffMeshConnection>& offMeshConnections, const int tileX, const int tileY,
+        const osg::Vec3f& boundsMin, const osg::Vec3f& boundsMax, const Settings& settings)
     {
         rcContext context;
         rcConfig config;
@@ -280,6 +302,12 @@ namespace
                 polyMesh.flags[i] = Flag_swim;
         }
 
+        const auto offMeshConVerts = getOffMeshVerts(offMeshConnections);
+        const std::vector<float> offMeshConRad(offMeshConnections.size(), getRadius(settings, agentHalfExtents));
+        const std::vector<unsigned char> offMeshConDir(offMeshConnections.size(), DT_OFFMESH_CON_BIDIR);
+        const std::vector<unsigned char> offMeshConAreas(offMeshConnections.size(), AreaType_ground);
+        const std::vector<unsigned short> offMeshConFlags(offMeshConnections.size(), Flag_openDoor);
+
         dtNavMeshCreateParams params;
         params.verts = polyMesh.verts;
         params.vertCount = polyMesh.nverts;
@@ -293,13 +321,13 @@ namespace
         params.detailVertsCount = polyMeshDetail.nverts;
         params.detailTris = polyMeshDetail.tris;
         params.detailTriCount = polyMeshDetail.ntris;
-        params.offMeshConVerts = nullptr;
-        params.offMeshConRad = nullptr;
-        params.offMeshConDir = nullptr;
-        params.offMeshConAreas = nullptr;
-        params.offMeshConFlags = nullptr;
+        params.offMeshConVerts = offMeshConVerts.data();
+        params.offMeshConRad = offMeshConRad.data();
+        params.offMeshConDir = offMeshConDir.data();
+        params.offMeshConAreas = offMeshConAreas.data();
+        params.offMeshConFlags = offMeshConFlags.data();
         params.offMeshConUserID = nullptr;
-        params.offMeshConCount = 0;
+        params.offMeshConCount = static_cast<int>(offMeshConnections.size());
         params.walkableHeight = getHeight(settings, agentHalfExtents);
         params.walkableRadius = getRadius(settings, agentHalfExtents);
         params.walkableClimb = getMaxClimb(settings);
@@ -358,7 +386,8 @@ namespace DetourNavigator
     }
 
     UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh* recastMesh,
-        const TilePosition& changedTile, const TilePosition& playerTile, const Settings& settings,
+        const TilePosition& changedTile, const TilePosition& playerTile,
+        const std::vector<OffMeshConnection>& offMeshConnections, const Settings& settings,
         NavMeshCacheItem& navMeshCacheItem)
     {
         log("update NavMesh with mutiple tiles:",
@@ -419,7 +448,7 @@ namespace DetourNavigator
         const osg::Vec3f tileBorderMin(tileBounds.mMin.x(), boundsMin.y() - 1, tileBounds.mMin.y());
         const osg::Vec3f tileBorderMax(tileBounds.mMax.x(), boundsMax.y() + 1, tileBounds.mMax.y());
 
-        auto navMeshData = makeNavMeshTileData(agentHalfExtents, *recastMesh, x, y,
+        auto navMeshData = makeNavMeshTileData(agentHalfExtents, *recastMesh, offMeshConnections, x, y,
             tileBorderMin, tileBorderMax, settings);
 
         if (!navMeshData.mValue)

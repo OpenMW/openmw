@@ -46,9 +46,11 @@ namespace DetourNavigator
         return stream << "unknown";
     }
 
-    AsyncNavMeshUpdater::AsyncNavMeshUpdater(const Settings& settings, TileCachedRecastMeshManager& recastMeshManager)
+    AsyncNavMeshUpdater::AsyncNavMeshUpdater(const Settings& settings, TileCachedRecastMeshManager& recastMeshManager,
+            OffMeshConnectionsManager& offMeshConnectionsManager)
         : mSettings(settings)
         , mRecastMeshManager(recastMeshManager)
+        , mOffMeshConnectionsManager(offMeshConnectionsManager)
         , mShouldStop()
         , mThread([&] { process(); })
     {
@@ -124,9 +126,10 @@ namespace DetourNavigator
 
         const auto recastMesh = mRecastMeshManager.get().getMesh(job.mChangedTile);
         const auto playerTile = getPlayerTile();
+        const auto offMeshConnections = mOffMeshConnectionsManager.get().get(job.mChangedTile);
 
         const auto status = updateNavMesh(job.mAgentHalfExtents, recastMesh.get(), job.mChangedTile, playerTile,
-            mSettings, *job.mNavMeshCacheItem);
+            offMeshConnections, mSettings, *job.mNavMeshCacheItem);
 
         const auto finish = std::chrono::steady_clock::now();
 

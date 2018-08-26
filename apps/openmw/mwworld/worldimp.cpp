@@ -235,7 +235,7 @@ namespace MWWorld
 
         mWeatherManager.reset(new MWWorld::WeatherManager(*mRendering, mFallback, mStore));
 
-        mWorldScene.reset(new Scene(*mRendering.get(), mPhysics.get()));
+        mWorldScene.reset(new Scene(*mRendering.get(), mPhysics.get(), *mNavigator));
     }
 
     void World::fillGlobalVariables()

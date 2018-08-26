@@ -10,6 +10,7 @@ namespace DetourNavigator
         Flag_none = 0,
         Flag_walk = 1 << 0,
         Flag_swim = 1 << 1,
+        Flag_openDoor = 1 << 2,
     };
 }
 

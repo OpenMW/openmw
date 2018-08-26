@@ -30,6 +30,7 @@ namespace Loading
 
 namespace DetourNavigator
 {
+    class Navigator;
     class Water;
 }
 
@@ -63,6 +64,7 @@ namespace MWWorld
             bool mCellChanged;
             MWPhysics::PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
+            DetourNavigator::Navigator& mNavigator;
             std::unique_ptr<CellPreloader> mPreloader;
             float mPreloadTimer;
             int mHalfGridSize;
@@ -91,7 +93,8 @@ namespace MWWorld
 
         public:
 
-            Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics);
+            Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics,
+                   DetourNavigator::Navigator& navigator);
 
             ~Scene();
 

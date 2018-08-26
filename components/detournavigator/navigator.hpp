@@ -19,6 +19,19 @@ namespace DetourNavigator
         {}
     };
 
+    struct DoorShapes : ObjectShapes
+    {
+        osg::Vec3f mConnectionStart;
+        osg::Vec3f mConnectionEnd;
+
+        DoorShapes(const btCollisionShape& shape, const btCollisionShape* avoid,
+                   const osg::Vec3f& connectionStart,const osg::Vec3f& connectionEnd)
+            : ObjectShapes(shape, avoid)
+            , mConnectionStart(connectionStart)
+            , mConnectionEnd(connectionEnd)
+        {}
+    };
+
     class Navigator
     {
     public:
@@ -32,9 +45,13 @@ namespace DetourNavigator
 
         bool addObject(std::size_t id, const ObjectShapes& shapes, const btTransform& transform);
 
+        bool addObject(std::size_t id, const DoorShapes& shapes, const btTransform& transform);
+
         bool updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
 
         bool updateObject(std::size_t id, const ObjectShapes& shapes, const btTransform& transform);
+
+        bool updateObject(std::size_t id, const DoorShapes& shapes, const btTransform& transform);
 
         bool removeObject(std::size_t id);
 

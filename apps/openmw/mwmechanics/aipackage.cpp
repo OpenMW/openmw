@@ -414,5 +414,8 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
     if (actorClass.canWalk(actor))
         result |= DetourNavigator::Flag_walk;
 
+    if (actorClass.isBipedal(actor) && getTypeId() != TypeIdWander)
+        result |= DetourNavigator::Flag_openDoor;
+
     return result;
 }
