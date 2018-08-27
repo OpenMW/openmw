@@ -1,28 +1,15 @@
 #include "unrefqueue.hpp"
 
-#include <deque>
-
 //#include <osg/Timer>
 
 //#include <components/debug/debuglog.hpp>
-#include <components/sceneutil/workqueue.hpp>
 
 namespace SceneUtil
 {
-
-    class UnrefWorkItem : public SceneUtil::WorkItem
+    void UnrefWorkItem::doWork()
     {
-    public:
-        std::deque<osg::ref_ptr<const osg::Referenced> > mObjects;
-
-        virtual void doWork()
-        {
-            //osg::Timer timer;
-            //size_t objcount = mObjects.size();
-            mObjects.clear();
-            //Log(Debug::Verbose) << "cleared " << objcount << " objects in " << timer.time_m();
-        }
-    };
+        mObjects.clear();
+    }
 
     UnrefQueue::UnrefQueue()
     {

@@ -1,13 +1,23 @@
 #ifndef OPENMW_COMPONENTS_UNREFQUEUE_H
 #define OPENMW_COMPONENTS_UNREFQUEUE_H
 
+#include <deque>
+
 #include <osg/ref_ptr>
 #include <osg/Referenced>
+
+#include <components/sceneutil/workqueue.hpp>
 
 namespace SceneUtil
 {
     class WorkQueue;
-    class UnrefWorkItem;
+    
+    class UnrefWorkItem : public SceneUtil::WorkItem
+    {
+    public:
+        std::deque<osg::ref_ptr<const osg::Referenced> > mObjects;
+        virtual void doWork();
+    };
 
     /// @brief Handles unreferencing of objects through the WorkQueue. Typical use scenario
     /// would be the main thread pushing objects that are no longer needed, and the background thread deleting them.
