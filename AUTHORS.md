@@ -153,6 +153,7 @@ Programmers
     Siimacore
     sir_herrbatka
     smbas
+    Sophie Kirschner (pineapplemachine)
     spycrab
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)

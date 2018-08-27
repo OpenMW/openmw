@@ -22,6 +22,8 @@ VideoWidget::VideoWidget()
     setNeedKeyFocus(true);
 }
 
+VideoWidget::~VideoWidget() = default;
+
 void VideoWidget::setVFS(const VFS::Manager *vfs)
 {
     mVFS = vfs;
