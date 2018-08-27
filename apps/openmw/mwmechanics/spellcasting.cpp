@@ -52,7 +52,11 @@ namespace MWMechanics
     float calcEffectCost(const ESM::ENAMstruct& effect)
     {
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
+        return calcEffectCost(effect, magicEffect);
+    }
 
+    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect)
+    {
         int minMagn = 1;
         int maxMagn = 1;
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
