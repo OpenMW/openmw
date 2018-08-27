@@ -86,6 +86,10 @@ namespace MWGui
             mUpdateTimer = 0;
             mSpellView->incrementalUpdate();
         }
+
+        // Update effects in-game too if the window is pinned
+        if (mPinned && !MWBase::Environment::get().getWindowManager()->isGuiMode())
+            mSpellIcons->updateWidgets(mEffectBox, false);
     }
 
     void SpellWindow::updateSpells()
