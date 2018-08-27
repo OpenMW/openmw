@@ -138,6 +138,7 @@
     Task #4605: Optimize skinning
     Task #4606: Support Rapture3D's OpenAL driver
     Task #4613: Incomplete type errors when compiling with g++ on OSX 10.9
+    Task #4621: Optimize combat AI
 
 0.44.0
 ------
