@@ -1825,9 +1825,9 @@ void CharacterController::update(float duration)
     {
         bool onground = world->isOnGround(mPtr);
         bool inwater = world->isSwimming(mPtr);
-        bool sneak = cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Sneak);
         bool flying = world->isFlying(mPtr);
-        // Can't run while flying (see speed formula in Npc/Creature::getSpeed)
+        // Can't run and sneak while flying (see speed formula in Npc/Creature::getSpeed)
+        bool sneak = cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Sneak) && !flying;
         bool isrunning = cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run) && !flying;
         CreatureStats &stats = cls.getCreatureStats(mPtr);
 

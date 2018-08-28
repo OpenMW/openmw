@@ -106,6 +106,7 @@
     Bug #4597: <> operator causes a compile error
     Bug #4604: Picking up gold from the ground only makes 1 grabbed
     Bug #4617: First person sneaking offset is not applied while the character is in air
+    Bug #4618: Sneaking is possible while the character is flying
     Feature #1645: Casting effects from objects
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
