@@ -253,7 +253,7 @@ namespace MWClass
 
         // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
         std::vector<MWWorld::Ptr> targetActors;
-        if (!ptr.isEmpty() && ptr.getClass().isActor() && ptr != MWMechanics::getPlayer())
+        if (!ptr.isEmpty() && ptr.getClass().isActor())
             ptr.getClass().getCreatureStats(ptr).getAiSequence().getCombatTargets(targetActors);
 
         std::pair<MWWorld::Ptr, osg::Vec3f> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist, targetActors);
@@ -325,9 +325,6 @@ namespace MWClass
         if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage, attackStrength))
             damage = 0;
 
-        if (victim == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState())
-            damage = 0;
-
         MWMechanics::diseaseContact(victim, ptr);
 
         victim.getClass().onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true);
@@ -376,11 +373,6 @@ namespace MWClass
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
 
-        bool godmode = object == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
-
-        if (godmode)
-            damage = 0;
-
         if (!successful)
         {
             // Missed
@@ -415,7 +407,7 @@ namespace MWClass
 
             if(ishealth)
             {
-                if (!attacker.isEmpty() && !godmode)
+                if (!attacker.isEmpty())
                 {
                     damage = scaleDamage(damage, attacker, ptr);
                     MWBase::Environment::get().getWorld()->spawnBloodEffect(ptr, hitPosition);
