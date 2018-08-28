@@ -26,7 +26,7 @@ namespace
 
         float v = 0.0f;
         for(int i = 0;i < 3;++i)
-            v += std::sin(fb*time*f[i] + o[1])*m[i];
+            v += std::sin(fb*time*f[i] + o[i])*m[i];
         return v * s;
     }
 
