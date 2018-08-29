@@ -107,6 +107,7 @@
     Bug #4597: <> operator causes a compile error
     Bug #4604: Picking up gold from the ground only makes 1 grabbed
     Bug #4607: Scaling for animated collision shapes is applied twice
+    Bug #4608: Falling damage is applied twice
     Bug #4615: Flicker effects for light sources are handled incorrectly
     Bug #4617: First person sneaking offset is not applied while the character is in air
     Bug #4618: Sneaking is possible while the character is flying
