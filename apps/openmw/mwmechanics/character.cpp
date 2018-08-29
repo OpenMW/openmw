@@ -2045,6 +2045,12 @@ void CharacterController::update(float duration)
 
             inJump = false;
 
+            // Do not play turning animation for player if rotation speed is very slow.
+            // Actual threshold should take framerate in account.
+            float rotationThreshold = 0;
+            if (mPtr == getPlayer())
+                rotationThreshold = 0.015 * 60 * duration;
+
             if(std::abs(vec.x()/2.0f) > std::abs(vec.y()))
             {
                 if(vec.x() > 0.0f)
@@ -2069,9 +2075,9 @@ void CharacterController::update(float duration)
             }
             else if(rot.z() != 0.0f && !sneak && !(mPtr == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson()))
             {
-                if(rot.z() > 0.0f)
+                if(rot.z() > rotationThreshold)
                     movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
-                else if(rot.z() < 0.0f)
+                else if(rot.z() < -rotationThreshold)
                     movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
             }
         }
