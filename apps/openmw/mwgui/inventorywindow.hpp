@@ -102,6 +102,7 @@ namespace MWGui
 
             bool mTrading;
             float mScaleFactor;
+            float mUpdateTimer;
 
             void onItemSelected(int index);
             void onItemSelectedFromSourceModel(int index);
