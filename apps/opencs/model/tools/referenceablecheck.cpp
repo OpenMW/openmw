@@ -737,7 +737,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
     }
 
     if (npc.mHead.empty())
-        messages.push_back (std::make_pair (id, "Head is missing"));
+        messages.add(id, "Head is missing", "", CSMDoc::Message::Severity_Error);
     else
     {
         if (mBodyParts.searchId(npc.mHead) == -1)
@@ -746,7 +746,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
     }
 
     if (npc.mHair.empty())
-        messages.push_back (std::make_pair (id, "Hair is missing"));
+        messages.add(id, "Hair is missing", "", CSMDoc::Message::Severity_Error);
     else
     {
         if (mBodyParts.searchId(npc.mHair) == -1)
