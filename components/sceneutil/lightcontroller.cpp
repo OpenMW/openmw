@@ -26,7 +26,7 @@ namespace
 
         float v = 0.0f;
         for(int i = 0;i < 3;++i)
-            v += std::sin(fb*time*f[i] + o[1])*m[i];
+            v += std::sin(fb*time*f[i] + o[i])*m[i];
         return v * s;
     }
 
@@ -73,17 +73,15 @@ namespace SceneUtil
         float cycle_time;
         float time_distortion;
 
-        const float pi = 3.14159265359;
-
         if(mType == LT_Pulse || mType == LT_PulseSlow)
         {
-            cycle_time = 2.0f * pi;
-            time_distortion = mType == LT_Pulse ? 20.0f : 4.f;
+            cycle_time = 2.0f * osg::PI;
+            time_distortion = 3.0f;
         }
         else
         {
-            static const float fa = 0.785398f;
-            static const float phase_wavelength = 120.0f * pi / fa;
+            static const float fa = osg::PI / 4.0f;
+            static const float phase_wavelength = 120.0f * osg::PI / fa;
 
             cycle_time = 500.0f;
             mPhase = std::fmod(mPhase + dt, phase_wavelength);
@@ -94,12 +92,14 @@ namespace SceneUtil
         if(mDirection > 0 && mDeltaCount > +cycle_time)
         {
             mDirection = -1.0f;
-            mDeltaCount = 2.0f*cycle_time - mDeltaCount;
+            float extra = mDeltaCount - cycle_time;
+            mDeltaCount -= 2*extra;
         }
         if(mDirection < 0 && mDeltaCount < -cycle_time)
         {
             mDirection = +1.0f;
-            mDeltaCount = -2.0f*cycle_time - mDeltaCount;
+            float extra = cycle_time - mDeltaCount;
+            mDeltaCount += 2*extra;
         }
 
         static const float fast = 4.0f/1.0f;
