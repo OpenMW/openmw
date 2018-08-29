@@ -208,8 +208,11 @@ namespace
     class RemoveFinishedCallbackVisitor : public RemoveVisitor
     {
     public:
+        bool mHasMagicEffects;
+
         RemoveFinishedCallbackVisitor()
             : RemoveVisitor()
+            , mHasMagicEffects(false)
             , mEffectId(-1)
         {
         }
@@ -234,11 +237,14 @@ namespace
             {
                 // We should remove empty transformation nodes and finished callbacks here
                 MWRender::UpdateVfxCallback* vfxCallback = dynamic_cast<MWRender::UpdateVfxCallback*>(callback);
-                bool finished = vfxCallback && vfxCallback->mFinished;
-                bool toRemove = vfxCallback && mEffectId >= 0 && vfxCallback->mParams.mEffectId == mEffectId;
-                if (finished || toRemove)
+                if (vfxCallback)
                 {
-                    mToRemove.push_back(std::make_pair(group.asNode(), group.getParent(0)));
+                    bool finished = vfxCallback->mFinished;
+                    bool toRemove = mEffectId >= 0 && vfxCallback->mParams.mEffectId == mEffectId;
+                    if (finished || toRemove)
+                        mToRemove.push_back(std::make_pair(group.asNode(), group.getParent(0)));
+                    else
+                        mHasMagicEffects = true;
                 }
             }
         }
@@ -610,6 +616,7 @@ namespace MWRender
         , mTextKeyListener(NULL)
         , mHeadYawRadians(0.f)
         , mHeadPitchRadians(0.f)
+        , mHasMagicEffects(false)
         , mAlpha(1.f)
     {
         for(size_t i = 0;i < sNumBlendMasks;i++)
@@ -1321,7 +1328,7 @@ namespace MWRender
                 ++stateiter;
         }
 
-        updateEffects(duration);
+        updateEffects();
 
         if (mHeadController)
         {
@@ -1633,6 +1640,9 @@ namespace MWRender
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
         node->accept(assignVisitor);
 
+        // Notify that this animation has attached magic effects
+        mHasMagicEffects = true;
+
         overrideFirstRootTexture(texture, mResourceSystem, node);
     }
 
@@ -1641,10 +1651,14 @@ namespace MWRender
         RemoveFinishedCallbackVisitor visitor(effectId);
         mInsert->accept(visitor);
         visitor.remove();
+        mHasMagicEffects = visitor.mHasMagicEffects;
     }
 
     void Animation::getLoopingEffects(std::vector<int> &out) const
     {
+        if (!mHasMagicEffects)
+            return;
+
         FindVfxCallbacksVisitor visitor;
         mInsert->accept(visitor);
 
@@ -1657,13 +1671,19 @@ namespace MWRender
         }
     }
 
-    void Animation::updateEffects(float duration)
+    void Animation::updateEffects()
     {
+        // We do not need to visit scene every frame.
+        // We can use a bool flag to check in spellcasting effect found.
+        if (!mHasMagicEffects)
+            return;
+
         // TODO: objects without animation still will have
         // transformation nodes with finished callbacks
         RemoveFinishedCallbackVisitor visitor;
         mInsert->accept(visitor);
         visitor.remove();
+        mHasMagicEffects = visitor.mHasMagicEffects;
     }
 
     bool Animation::upperBodyReady() const

@@ -1679,7 +1679,7 @@ namespace MWMechanics
 
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(iter->first);
             if (animation)
-                animation->updateEffects(duration);
+                animation->updateEffects();
 
         }
 
