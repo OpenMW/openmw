@@ -9,8 +9,10 @@ std::string CSMTools::MagicEffectCheckStage::checkObject(const std::string &id,
                                                                 const std::string &column) const
 {
     CSMWorld::RefIdData::LocalIndex index = mObjects.getDataSet().searchId(id);
-    if (index.first == -1) return (column + " '" + id + "' " + "does not exist");
-    else if (index.second != type.getType()) return (column + " '" + id + "' " + "does not have " + type.getTypeName() + " type");
+    if (index.first == -1) 
+        return (column + " '" + id + "' does not exist");
+    else if (index.second != type.getType()) 
+        return (column + " '" + id + "' does not have " + type.getTypeName() + " type");
     return std::string();
 }
 

@@ -32,6 +32,7 @@
 #include "gmstcheck.hpp"
 #include "topicinfocheck.hpp"
 #include "journalcheck.hpp"
+#include "enchantmentcheck.hpp"
 
 CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
 {
@@ -127,6 +128,8 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
                                                                   mData.getResources (CSMWorld::UniversalId::Type_SoundsRes)));
 
         mVerifierOperation->appendStage (new JournalCheckStage(mData.getJournals(), mData.getJournalInfos()));
+
+        mVerifierOperation->appendStage (new EnchantmentCheckStage(mData.getEnchantments()));
 
         mVerifier.setOperation (mVerifierOperation);
     }
