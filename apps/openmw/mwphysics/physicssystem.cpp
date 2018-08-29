@@ -650,7 +650,6 @@ namespace MWPhysics
 
                 osg::NodePath& nodePath = nodePathFound->second;
                 osg::Matrixf matrix = osg::computeLocalToWorld(nodePath);
-                osg::Vec3f scale = matrix.getScale();
                 matrix.orthoNormalize(matrix);
 
                 btTransform transform;
@@ -659,8 +658,8 @@ namespace MWPhysics
                     for (int j=0; j<3; ++j)
                         transform.getBasis()[i][j] = matrix(j,i); // NB column/row major difference
 
-                if (compound->getLocalScaling() * toBullet(scale) != compound->getChildShape(shapeIndex)->getLocalScaling())
-                    compound->getChildShape(shapeIndex)->setLocalScaling(compound->getLocalScaling() * toBullet(scale));
+                // Note: we can not apply scaling here for now since we treat scaled shapes
+                // as new shapes (btScaledBvhTriangleMeshShape) with 1.0 scale for now
                 if (!(transform == compound->getChildTransform(shapeIndex)))
                     compound->updateChildTransform(shapeIndex, transform);
             }
