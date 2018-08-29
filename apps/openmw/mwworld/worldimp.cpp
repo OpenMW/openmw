@@ -1706,11 +1706,11 @@ namespace MWWorld
 
         // Sink the camera while sneaking
         bool sneaking = player.getClass().getCreatureStats(getPlayerPtr()).getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        bool inair = !isOnGround(player);
         bool swimming = isSwimming(player);
+        bool flying = isFlying(player);
 
         static const float i1stPersonSneakDelta = getStore().get<ESM::GameSetting>().find("i1stPersonSneakDelta")->getFloat();
-        if (sneaking && !(swimming || inair))
+        if (sneaking && !swimming && !flying)
             mRendering->getCamera()->setSneakOffset(i1stPersonSneakDelta);
         else
             mRendering->getCamera()->setSneakOffset(0.f);
