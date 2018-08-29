@@ -992,6 +992,10 @@ namespace MWClass
         if(getEncumbrance(ptr) > getCapacity(ptr))
             return 0.f;
 
+        const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead())
+            return 0.f;
+
         const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
         const GMST& gmst = getGmst();
         const MWMechanics::MagicEffects &mageffects = npcdata->mNpcStats.getMagicEffects();
@@ -1013,7 +1017,7 @@ namespace MWClass
         x += mageffects.get(ESM::MagicEffect::Jump).getMagnitude() * 64;
         x *= encumbranceTerm;
 
-        if(ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
+        if(stats.getStance(MWMechanics::CreatureStats::Stance_Run))
             x *= gmst.fJumpRunMultiplier->getFloat();
         x *= npcdata->mNpcStats.getFatigueTerm();
         x -= -627.2f;/*gravity constant*/
