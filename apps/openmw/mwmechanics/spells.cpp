@@ -283,12 +283,18 @@ namespace MWMechanics
     {
         if (isSpellActive(id))
         {
-            TContainer::iterator spellIt = mSpells.find(getSpell(id));
-            for (long unsigned int i = 0; i != spellIt->first->mEffects.mList.size(); i++)
+            for (TContainer::iterator spell = mSpells.begin(); spell != mSpells.end(); ++spell)
             {
-                spellIt->second.mPurgedEffects.insert(i);
-                mSpellsChanged = true;
+                if (spell->first == getSpell(id))
+                {
+                    for (long unsigned int i = 0; i != spell->first->mEffects.mList.size(); i++)
+                    {
+                        spell->second.mPurgedEffects.insert(i);
+                    }
+                }
             }
+
+            mSpellsChanged = true;
         }
     }
 
