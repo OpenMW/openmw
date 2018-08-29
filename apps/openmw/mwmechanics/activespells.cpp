@@ -197,11 +197,13 @@ namespace MWMechanics
 
     void ActiveSpells::removeEffects(const std::string &id)
     {
-        TContainer::iterator spell(mSpells.find(id));
-        if (spell != end());
+        for (TContainer::iterator spell = mSpells.begin(); spell != mSpells.end(); ++spell)
         {
-            spell->second.mEffects.clear();
-            mSpellsChanged = true;
+            if (spell->first == id)
+            {
+                spell->second.mEffects.clear();
+                mSpellsChanged = true;
+            }
         }
     }
 
