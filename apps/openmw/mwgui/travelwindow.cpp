@@ -58,13 +58,13 @@ namespace MWGui
 
         if (!mPtr.getCell()->isExterior())
         {
-            price = gmst.find("fMagesGuildTravel")->getInt();
+            price = gmst.find("fMagesGuildTravel")->mValue.getInteger();
         }
         else
         {
             ESM::Position PlayerPos = player.getRefData().getPosition();
             float d = sqrt(pow(pos.pos[0] - PlayerPos.pos[0], 2) + pow(pos.pos[1] - PlayerPos.pos[1], 2) + pow(pos.pos[2] - PlayerPos.pos[2], 2));
-            price = static_cast<int>(d / gmst.find("fTravelMult")->getFloat());
+            price = static_cast<int>(d / gmst.find("fTravelMult")->mValue.getFloat());
         }
 
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
@@ -176,7 +176,7 @@ namespace MWGui
         {
             ESM::Position playerPos = player.getRefData().getPosition();
             float d = (osg::Vec3f(pos.pos[0], pos.pos[1], 0) - osg::Vec3f(playerPos.pos[0], playerPos.pos[1], 0)).length();
-            int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->getFloat());
+            int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->mValue.getFloat());
             for(int i = 0;i < hours;i++)
             {
                 MWBase::Environment::get().getMechanicsManager ()->rest (true);

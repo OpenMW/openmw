@@ -593,8 +593,8 @@ namespace MWMechanics
     {
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        static const float fAIMagicSpellMult = gmst.find("fAIMagicSpellMult")->getFloat();
-        static const float fAIRangeMagicSpellMult = gmst.find("fAIRangeMagicSpellMult")->getFloat();
+        static const float fAIMagicSpellMult = gmst.find("fAIMagicSpellMult")->mValue.getFloat();
+        static const float fAIRangeMagicSpellMult = gmst.find("fAIRangeMagicSpellMult")->mValue.getFloat();
 
         float mult = fAIMagicSpellMult;
 

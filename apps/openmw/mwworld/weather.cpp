@@ -911,7 +911,7 @@ inline void WeatherManager::addWeather(const std::string& name,
                                        float dlFactor, float dlOffset,
                                        const std::string& particleEffect)
 {
-    static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->getFloat();
+    static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->mValue.getFloat();
 
     Weather weather(name, fallback, fStromWindSpeed, mRainSpeed, dlFactor, dlOffset, particleEffect);
 

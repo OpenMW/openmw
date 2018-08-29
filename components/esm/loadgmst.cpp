@@ -22,21 +22,6 @@ namespace ESM
         mValue.write (esm, ESM::Variant::Format_Gmst);
     }
 
-    int GameSetting::getInt() const
-    {
-        return mValue.getInteger();
-    }
-
-    float GameSetting::getFloat() const
-    {
-        return mValue.getFloat();
-    }
-
-    std::string GameSetting::getString() const
-    {
-        return mValue.getString();
-    }
-
     void GameSetting::blank()
     {
         mValue.setType (ESM::VT_None);

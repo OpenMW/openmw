@@ -54,22 +54,22 @@ int getBoundItemSlot (const std::string& itemId)
     static std::map<std::string, int> boundItemsMap;
     if (boundItemsMap.empty())
     {
-        std::string boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundBootsID")->getString();
+        std::string boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundBootsID")->mValue.getString();
         boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_Boots;
 
-        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundCuirassID")->getString();
+        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundCuirassID")->mValue.getString();
         boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_Cuirass;
 
-        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundLeftGauntletID")->getString();
+        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundLeftGauntletID")->mValue.getString();
         boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_LeftGauntlet;
 
-        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundRightGauntletID")->getString();
+        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundRightGauntletID")->mValue.getString();
         boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_RightGauntlet;
 
-        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundHelmID")->getString();
+        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundHelmID")->mValue.getString();
         boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_Helmet;
 
-        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundShieldID")->getString();
+        boundId = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sMagicBoundShieldID")->mValue.getString();
         boundItemsMap[boundId] = MWWorld::InventoryStore::Slot_CarriedLeft;
     }
 
@@ -138,7 +138,7 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
     magicka = 0;
     if (!stunted)
     {
-        float fRestMagicMult = settings.find("fRestMagicMult")->getFloat ();
+        float fRestMagicMult = settings.find("fRestMagicMult")->mValue.getFloat ();
         magicka = fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
     }
 }
@@ -179,7 +179,7 @@ namespace MWMechanics
             if (caster.isEmpty() || !caster.getClass().isActor())
                 return;
 
-            static const float fSoulgemMult = world->getStore().get<ESM::GameSetting>().find("fSoulgemMult")->getFloat();
+            static const float fSoulgemMult = world->getStore().get<ESM::GameSetting>().find("fSoulgemMult")->mValue.getFloat();
 
             int creatureSoulValue = mCreature.get<ESM::Creature>()->mBase->mData.mSoul;
             if (creatureSoulValue == 0)
@@ -313,9 +313,9 @@ namespace MWMechanics
                                     MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance)
     {
         static const float fMaxHeadTrackDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("fMaxHeadTrackDistance")->getFloat();
+                .find("fMaxHeadTrackDistance")->mValue.getFloat();
         static const float fInteriorHeadTrackMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("fInteriorHeadTrackMult")->getFloat();
+                .find("fInteriorHeadTrackMult")->mValue.getFloat();
         float maxDistance = fMaxHeadTrackDistance;
         const ESM::Cell* currentCell = actor.getCell()->getCell();
         if (!currentCell->isExterior() && !(currentCell->mData.mFlags & ESM::Cell::QuasiEx))
@@ -470,7 +470,7 @@ namespace MWMechanics
         if (actor1.getClass().isClass(actor1, "Guard") && !actor2.getClass().isNpc())
         {
             // Check if the creature is too far
-            static const float fAlarmRadius = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
+            static const float fAlarmRadius = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fAlarmRadius")->mValue.getFloat();
             if (sqrDist > fAlarmRadius * fAlarmRadius)
                 return;
 
@@ -534,9 +534,9 @@ namespace MWMechanics
 
         float base = 1.f;
         if (ptr == getPlayer())
-            base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fPCbaseMagickaMult")->getFloat();
+            base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fPCbaseMagickaMult")->mValue.getFloat();
         else
-            base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCbaseMagickaMult")->getFloat();
+            base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCbaseMagickaMult")->mValue.getFloat();
 
         double magickaFactor = base +
             creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).getMagnitude() * 0.1;
@@ -584,9 +584,9 @@ namespace MWMechanics
             return;
 
         // Restore fatigue
-        float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat ();
-        float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat ();
-        float fEndFatigueMult = settings.find("fEndFatigueMult")->getFloat ();
+        float fFatigueReturnBase = settings.find("fFatigueReturnBase")->mValue.getFloat ();
+        float fFatigueReturnMult = settings.find("fFatigueReturnMult")->mValue.getFloat ();
+        float fEndFatigueMult = settings.find("fEndFatigueMult")->mValue.getFloat ();
 
         float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
         x *= fEndFatigueMult * endurance;
@@ -611,8 +611,8 @@ namespace MWMechanics
         // Restore fatigue
         int endurance = stats.getAttribute(ESM::Attribute::Endurance).getModified();
         const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-        static const float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat ();
-        static const float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat ();
+        static const float fFatigueReturnBase = settings.find("fFatigueReturnBase")->mValue.getFloat ();
+        static const float fFatigueReturnMult = settings.find("fFatigueReturnMult")->mValue.getFloat ();
 
         float x = fFatigueReturnBase + fFatigueReturnMult * endurance;
 
@@ -853,14 +853,14 @@ namespace MWMechanics
 
                 std::string itemGmst = it->second;
                 std::string item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                            itemGmst)->getString();
+                            itemGmst)->mValue.getString();
 
                 magnitude > 0 ? addBoundItem(item, ptr) : removeBoundItem(item, ptr);
 
                 if (it->first == ESM::MagicEffect::BoundGloves)
                 {
                     item = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                                "sMagicBoundRightGauntletID")->getString();
+                                "sMagicBoundRightGauntletID")->mValue.getString();
                     magnitude > 0 ? addBoundItem(item, ptr) : removeBoundItem(item, ptr);
                 }
             }
@@ -936,7 +936,7 @@ namespace MWMechanics
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
 
         // When npc stats are just initialized, mTimeToStartDrowning == -1 and we should get value from GMST
-        static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->getFloat();
+        static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->mValue.getFloat();
         if (stats.getTimeToStartDrowning() == -1.f)
             stats.setTimeToStartDrowning(fHoldBreathTime);
 
@@ -970,7 +970,7 @@ namespace MWMechanics
             if(timeLeft == 0.0f && !godmode)
             {
                 // If drowning, apply 3 points of damage per second
-                static const float fSuffocationDamage = world->getStore().get<ESM::GameSetting>().find("fSuffocationDamage")->getFloat();
+                static const float fSuffocationDamage = world->getStore().get<ESM::GameSetting>().find("fSuffocationDamage")->mValue.getFloat();
                 DynamicStat<float> health = stats.getHealth();
                 health.setCurrent(health.getCurrent() - fSuffocationDamage*duration);
                 stats.setHealth(health);
@@ -1096,7 +1096,7 @@ namespace MWMechanics
                 && creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid).getMagnitude() == 0)
             {
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
-                static const int cutoff = esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt();
+                static const int cutoff = esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->mValue.getInteger();
                 // Force dialogue on sight if bounty is greater than the cutoff
                 // In vanilla morrowind, the greeting dialogue is scripted to either arrest the player (< 5000 bounty) or attack (>= 5000 bounty)
                 if (   player.getClass().getNpcStats(player).getBounty() >= cutoff
@@ -1104,7 +1104,7 @@ namespace MWMechanics
                     && MWBase::Environment::get().getWorld()->getLOS(ptr, player)
                     && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr))
                 {
-                    static const int iCrimeThresholdMultiplier = esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->getInt();
+                    static const int iCrimeThresholdMultiplier = esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->mValue.getInteger();
                     if (player.getClass().getNpcStats(player).getBounty() >= cutoff * iCrimeThresholdMultiplier)
                     {
                         MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
@@ -1487,9 +1487,9 @@ namespace MWMechanics
                 static float sneakSkillTimer = 0.f; // times sneak skill progress from "avoid notice"
 
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
-                const int radius = esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt();
+                const int radius = esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->mValue.getInteger();
 
-                static float fSneakUseDelay = esmStore.get<ESM::GameSetting>().find("fSneakUseDelay")->getFloat();
+                static float fSneakUseDelay = esmStore.get<ESM::GameSetting>().find("fSneakUseDelay")->mValue.getFloat();
 
                 if (sneakTimer >= fSneakUseDelay)
                     sneakTimer = 0.f;

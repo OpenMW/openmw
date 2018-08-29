@@ -1192,7 +1192,7 @@ namespace MWInput
     void InputManager::updateIdleTime(float dt)
     {
         static const float vanityDelay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("fVanityDelay")->getFloat();
+                .find("fVanityDelay")->mValue.getFloat();
         if (mTimeIdle >= 0.f)
             mTimeIdle += dt;
         if (mTimeIdle > vanityDelay) {

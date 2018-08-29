@@ -341,7 +341,7 @@ namespace MWGui
                 MWWorld::Ptr item = (i == 0) ? mEnchanting.getOldItem() : mEnchanting.getGem();
                 if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(item.getCellRef().getRefId(), mPtr))
                 {
-                    std::string msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage49")->getString();
+                    std::string msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage49")->mValue.getString();
                     if (msg.find("%s") != std::string::npos)
                         msg.replace(msg.find("%s"), 2, item.getClass().getName(item));
                     MWBase::Environment::get().getWindowManager()->messageBox(msg);

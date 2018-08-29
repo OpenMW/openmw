@@ -61,7 +61,7 @@ namespace MWGui
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         for (int i=0; names[i][0]; ++i)
         {
-            setText (names[i][0], store.get<ESM::GameSetting>().find (names[i][1])->getString());
+            setText (names[i][0], store.get<ESM::GameSetting>().find (names[i][1])->mValue.getString());
         }
 
         getWidget(mSkillView, "SkillView");
@@ -306,7 +306,7 @@ namespace MWGui
         MyGUI::Widget* levelWidget;
         for (int i=0; i<2; ++i)
         {
-            int max = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iLevelUpTotal")->getInt();
+            int max = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iLevelUpTotal")->mValue.getInteger();
             getWidget(levelWidget, i==0 ? "Level_str" : "LevelText");
             levelWidget->setUserString("RangePosition_LevelProgress", MyGUI::utility::toString(PCstats.getLevelProgress()));
             levelWidget->setUserString("Range_LevelProgress", MyGUI::utility::toString(max));

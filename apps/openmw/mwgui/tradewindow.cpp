@@ -313,7 +313,7 @@ namespace MWGui
         {
             if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(it->mBase.getCellRef().getRefId(), mPtr))
             {
-                std::string msg = gmst.find("sNotifyMessage49")->getString();
+                std::string msg = gmst.find("sNotifyMessage49")->mValue.getString();
                 if (msg.find("%s") != std::string::npos)
                     msg.replace(msg.find("%s"), 2, it->mBase.getClass().getName(it->mBase));
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
@@ -331,8 +331,8 @@ namespace MWGui
         // apply disposition change if merchant is NPC
         if ( mPtr.getClass().isNpc() ) {
             int dispositionDelta = offerAccepted
-                ? gmst.find("iBarterSuccessDisposition")->getInt()
-                : gmst.find("iBarterFailDisposition")->getInt();
+                ? gmst.find("iBarterSuccessDisposition")->mValue.getInteger()
+                : gmst.find("iBarterFailDisposition")->mValue.getInteger();
 
             MWBase::Environment::get().getDialogueManager()->applyBarterDispositionChange(dispositionDelta);
         }

@@ -287,8 +287,8 @@ namespace MWClass
             std::string type = mapping[ref->mBase->mData.mType].first;
             std::string oneOrTwoHanded = mapping[ref->mBase->mData.mType].second;
 
-            text += store.get<ESM::GameSetting>().find(type)->getString() +
-                ((oneOrTwoHanded != "") ? ", " + store.get<ESM::GameSetting>().find(oneOrTwoHanded)->getString() : "");
+            text += store.get<ESM::GameSetting>().find(type)->mValue.getString() +
+                ((oneOrTwoHanded != "") ? ", " + store.get<ESM::GameSetting>().find(oneOrTwoHanded)->mValue.getString() : "");
 
             // weapon damage
             if (ref->mBase->mData.mType >= 9)
@@ -326,7 +326,7 @@ namespace MWClass
         if (ref->mBase->mData.mType < 9 && Settings::Manager::getBool("show melee info", "Game"))
         {
             // 64 game units = 1 yard = 3 ft, display value in feet
-            const float combatDistance = store.get<ESM::GameSetting>().find("fCombatDistance")->getFloat() * ref->mBase->mData.mReach;
+            const float combatDistance = store.get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat() * ref->mBase->mData.mReach;
             text += MWGui::ToolTips::getWeightString(combatDistance*3/64, "#{sRange}");
             text += " #{sFeet}";
 

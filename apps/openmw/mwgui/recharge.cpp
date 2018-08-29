@@ -181,7 +181,7 @@ void Recharge::onItemClicked(MyGUI::Widget *sender, const MWWorld::Ptr& item)
 
     if (gem.getRefData().getCount() == 0)
     {
-        std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage51")->getString();
+        std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage51")->mValue.getString();
         message = boost::str(boost::format(message) % gem.getClass().getName(gem));
         MWBase::Environment::get().getWindowManager()->messageBox(message);
 

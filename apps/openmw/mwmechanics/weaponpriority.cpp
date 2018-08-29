@@ -157,9 +157,9 @@ namespace MWMechanics
     {
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        static const float fAIMeleeWeaponMult = gmst.find("fAIMeleeWeaponMult")->getFloat();
-        static const float fAIMeleeArmorMult = gmst.find("fAIMeleeArmorMult")->getFloat();
-        static const float fAIRangeMeleeWeaponMult = gmst.find("fAIRangeMeleeWeaponMult")->getFloat();
+        static const float fAIMeleeWeaponMult = gmst.find("fAIMeleeWeaponMult")->mValue.getFloat();
+        static const float fAIMeleeArmorMult = gmst.find("fAIMeleeArmorMult")->mValue.getFloat();
+        static const float fAIRangeMeleeWeaponMult = gmst.find("fAIRangeMeleeWeaponMult")->mValue.getFloat();
 
         if (weapon.isEmpty())
             return 0.f;

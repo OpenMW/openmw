@@ -57,7 +57,7 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
 
             int basePrice = iter->getClass().getValue(*iter);
             float fRepairMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                    .find("fRepairMult")->getFloat();
+                    .find("fRepairMult")->mValue.getFloat();
 
             float p = static_cast<float>(std::max(1, basePrice));
             float r = static_cast<float>(std::max(1, static_cast<int>(maxDurability / p)));
@@ -71,7 +71,7 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
             std::string name = iter->getClass().getName(*iter)
                     + " - " + MyGUI::utility::toString(price)
                     + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                    .find("sgp")->getString();
+                    .find("sgp")->mValue.getString();
 
 
             MyGUI::Button* button =
