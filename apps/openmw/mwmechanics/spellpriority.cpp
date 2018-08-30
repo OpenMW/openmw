@@ -232,20 +232,59 @@ namespace MWMechanics
         case ESM::MagicEffect::CommandHumanoid:
             return 0.f;
 
+        case ESM::MagicEffect::Blind:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                const CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
+
+                // Enemy can't attack
+                if (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                    return 0.f;
+
+                // Enemy doesn't attack
+                if (stats.getDrawState() != MWMechanics::DrawState_Weapon)
+                    return 0.f;
+
+                break;
+            }
+
         case ESM::MagicEffect::Sound:
             {
                 if (enemy.isEmpty())
                     return 0.f;
 
-                // there is no need to cast sound if enemy is not able to cast spells
-                CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
+                const CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
 
+                // Enemy can't cast spells
                 if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude() > 0)
                     return 0.f;
 
                 if (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
                     return 0.f;
 
+                // Enemy doesn't cast spells
+                if (stats.getDrawState() != MWMechanics::DrawState_Spell)
+                    return 0.f;
+
+                break;
+            }
+
+        case ESM::MagicEffect::Silence:
+            {
+                if (enemy.isEmpty())
+                    return 0.f;
+
+                const CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
+
+                // Enemy can't cast spells
+                if (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                    return 0.f;
+
+                // Enemy doesn't cast spells
+                if (stats.getDrawState() != MWMechanics::DrawState_Spell)
+                    return 0.f;
                 break;
             }
 
@@ -353,9 +392,10 @@ namespace MWMechanics
                 int priority = 1;
                 if (effect.mEffectID == ESM::MagicEffect::RestoreHealth)
                     priority = 10;
-                const DynamicStat<float>& current = actor.getClass().getCreatureStats(actor).
-                        getDynamic(effect.mEffectID - ESM::MagicEffect::RestoreHealth);
-                float toHeal = (effect.mMagnMin + effect.mMagnMax)/2.f * effect.mDuration;
+                const MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+                const DynamicStat<float>& current = stats.getDynamic(effect.mEffectID - ESM::MagicEffect::RestoreHealth);
+                const float magnitude = (effect.mMagnMin + effect.mMagnMax)/2.f;
+                const float toHeal = magnitude * effect.mDuration;
                 // Effect doesn't heal more than we need, *or* we are below 1/2 health
                 if (current.getModified() - current.getCurrent() > toHeal
                         || current.getCurrent() < current.getModified()*0.5)
@@ -363,8 +403,8 @@ namespace MWMechanics
                     return 10000.f * priority
                             - (toHeal - (current.getModified()-current.getCurrent())); // prefer the most fitting potion
                 }
-                else
-                    return -10000.f * priority; // Save for later
+
+                return 0.f;
             }
             break;
 
