@@ -298,6 +298,7 @@ namespace Compiler
         const int opcodeToggleBorders = 0x2000307;
         const int opcodeToggleNavMesh = 0x2000308;
         const int opcodeToggleActorsPaths = 0x2000309;
+        const int opcodeSetNavMeshNumberToRender = 0x200030a;
     }
 
     namespace Sky

@@ -21,8 +21,11 @@ namespace MWRender
 
         bool toggle();
 
-        void update(const DetourNavigator::SharedNavMesh& sharedNavMesh, std::size_t generation, std::size_t revision,
+        void update(const DetourNavigator::SharedNavMesh& sharedNavMesh,
+                    const std::size_t number, const std::size_t generation, const std::size_t revision,
                     const DetourNavigator::Settings& settings);
+
+        void reset();
 
         void enable();
 
@@ -31,6 +34,7 @@ namespace MWRender
     private:
         osg::ref_ptr<osg::Group> mRootNode;
         bool mEnabled;
+        std::size_t mId = std::numeric_limits<std::size_t>::max();
         std::size_t mGeneration;
         std::size_t mRevision;
         osg::ref_ptr<osg::Group> mGroup;

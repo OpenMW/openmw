@@ -58,8 +58,8 @@ namespace DetourNavigator
         std::map<osg::Vec3f, std::map<TilePosition, ChangeType>> mChangedTiles;
         AsyncNavMeshUpdater mAsyncNavMeshUpdater;
         std::size_t mGenerationCounter = 0;
-        boost::optional<TilePosition> mPlayerTile;
-        std::size_t mLastRecastMeshManagerRevision = 0;
+        std::map<osg::Vec3f, TilePosition> mPlayerTile;
+        std::map<osg::Vec3f, std::size_t> mLastRecastMeshManagerRevision;
 
         void addChangedTiles(const btCollisionShape& shape, const btTransform& transform, const ChangeType changeType);
 

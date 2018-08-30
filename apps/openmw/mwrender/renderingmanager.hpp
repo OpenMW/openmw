@@ -228,6 +228,8 @@ namespace MWRender
 
         void removeActorPath(const MWWorld::ConstPtr& actor) const;
 
+        void setNavMeshNumber(const std::size_t value);
+
     private:
         void updateProjectionMatrix();
         void updateTextureFiltering();
@@ -254,6 +256,7 @@ namespace MWRender
 
         DetourNavigator::Navigator& mNavigator;
         std::unique_ptr<NavMesh> mNavMesh;
+        std::size_t mNavMeshNumber = 0;
         std::unique_ptr<ActorsPaths> mActorsPaths;
         std::unique_ptr<Pathgrid> mPathgrid;
         std::unique_ptr<Objects> mObjects;

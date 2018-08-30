@@ -31,12 +31,13 @@ namespace MWRender
         return mEnabled;
     }
 
-    void NavMesh::update(const DetourNavigator::SharedNavMesh& sharedNavMesh, std::size_t generation,
-                         std::size_t revision, const DetourNavigator::Settings& settings)
+    void NavMesh::update(const DetourNavigator::SharedNavMesh& sharedNavMesh, const std::size_t id,
+        const std::size_t generation, const std::size_t revision, const DetourNavigator::Settings& settings)
     {
-        if (!mEnabled || (mGeneration >= generation && mRevision >= revision))
+        if (!mEnabled || (mId == id && mGeneration >= generation && mRevision >= revision))
             return;
 
+        mId = id;
         mGeneration = generation;
         mRevision = revision;
         if (mGroup)
@@ -49,6 +50,12 @@ namespace MWRender
         }
     }
 
+    void NavMesh::reset()
+    {
+        if (mGroup)
+            mRootNode->removeChild(mGroup);
+    }
+
     void NavMesh::enable()
     {
         if (mGroup)
@@ -58,8 +65,7 @@ namespace MWRender
 
     void NavMesh::disable()
     {
-        if (mGroup)
-            mRootNode->removeChild(mGroup);
+        reset();
         mEnabled = false;
     }
 }

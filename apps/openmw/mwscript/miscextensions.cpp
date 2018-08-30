@@ -1345,6 +1345,25 @@ namespace MWScript
                 }
         };
 
+        class OpSetNavMeshNumberToRender : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    const auto navMeshNumber = runtime[0].mInteger;
+                    runtime.pop();
+
+                    if (navMeshNumber < 0)
+                    {
+                        runtime.getContext().report("Invalid navmesh number: use not less than zero values");
+                        return;
+                    }
+
+                    MWBase::Environment::get().getWorld()->setNavMeshNumberToRender(static_cast<std::size_t>(navMeshNumber));
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -1447,6 +1466,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleBorders, new OpToggleBorders);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleNavMesh, new OpToggleNavMesh);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleActorsPaths, new OpToggleActorsPaths);
+            interpreter.installSegment5 (Compiler::Misc::opcodeSetNavMeshNumberToRender, new OpSetNavMeshNumberToRender);
         }
     }
 }

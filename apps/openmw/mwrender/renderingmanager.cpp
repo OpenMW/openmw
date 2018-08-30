@@ -600,12 +600,20 @@ namespace MWRender
         }
 
         const auto navMeshes = mNavigator.getNavMeshes();
-        if (!navMeshes.empty())
+
+        auto it = navMeshes.begin();
+        for (std::size_t i = 0; it != navMeshes.end() && i < mNavMeshNumber; ++i)
+            ++it;
+        if (it == navMeshes.end())
+        {
+            mNavMesh->reset();
+        }
+        else
         {
             try
             {
-                mNavMesh->update(navMeshes.begin()->second->mValue, navMeshes.begin()->second->mGeneration,
-                                 navMeshes.begin()->second->mNavMeshRevision, mNavigator.getSettings());
+                mNavMesh->update(it->second->mValue, mNavMeshNumber, it->second->mGeneration,
+                                 it->second->mNavMeshRevision, mNavigator.getSettings());
             }
             catch (const std::exception& e)
             {
@@ -1387,5 +1395,10 @@ namespace MWRender
     void RenderingManager::removeActorPath(const MWWorld::ConstPtr& actor) const
     {
         mActorsPaths->remove(actor);
+    }
+
+    void RenderingManager::setNavMeshNumber(const std::size_t value)
+    {
+        mNavMeshNumber = value;
     }
 }

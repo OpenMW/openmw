@@ -3767,4 +3767,9 @@ namespace MWWorld
         mRendering->updateActorPath(actor, path, halfExtents, start, end);
     }
 
+    void World::setNavMeshNumberToRender(const std::size_t value)
+    {
+        mRendering->setNavMeshNumber(value);
+    }
+
 }

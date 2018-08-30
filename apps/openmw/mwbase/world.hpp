@@ -601,6 +601,8 @@ namespace MWBase
 
             virtual void updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
                     const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const = 0;
+
+            virtual void setNavMeshNumberToRender(const std::size_t value) = 0;
     };
 }
 
