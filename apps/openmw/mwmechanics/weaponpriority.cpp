@@ -31,7 +31,7 @@ namespace MWMechanics
 
         if (type != -1 && weapon->mData.mType != type)
             return 0.f;
-        
+
         const MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::Store<ESM::GameSetting>& gmst = world->getStore().get<ESM::GameSetting>();
 

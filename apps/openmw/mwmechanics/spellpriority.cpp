@@ -403,8 +403,8 @@ namespace MWMechanics
                     return 10000.f * priority
                             - (toHeal - (current.getModified()-current.getCurrent())); // prefer the most fitting potion
                 }
-
-                return 0.f;
+                else
+                    return -10000.f * priority; // Save for later
             }
             break;
 
