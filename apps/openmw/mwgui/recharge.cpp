@@ -169,14 +169,13 @@ void Recharge::onItemClicked(MyGUI::Widget *sender, const MWWorld::Ptr& item)
         MWBase::Environment::get().getWindowManager()->playSound("Enchant Success");
 
         player.getClass().getContainerStore(player).restack(item);
-
-        player.getClass().skillUsageSucceeded (player, ESM::Skill::Enchant, 0);
     }
     else
     {
         MWBase::Environment::get().getWindowManager()->playSound("Enchant Fail");
     }
 
+    player.getClass().skillUsageSucceeded (player, ESM::Skill::Enchant, 0);
     gem.getContainerStore()->remove(gem, 1, player);
 
     if (gem.getRefData().getCount() == 0)
