@@ -97,8 +97,11 @@ namespace MWMechanics
             }
         }
 
-        if (weapon->mData.mType <= ESM::Weapon::MarksmanThrown)
-            rating *= weapon->mData.mSpeed;
+        if (enemy.getClass().isNpc())
+        {
+            static const float fCombatArmorMinMult = gmst.find("fCombatArmorMinMult")->mValue.getFloat();
+            rating *= std::max(fCombatArmorMinMult, rating / (rating + enemy.getClass().getArmorRating(enemy)));
+        }
 
         int value = 50.f;
         if (actor.getClass().isNpc())
@@ -114,6 +117,9 @@ namespace MWMechanics
         }
 
         rating *= getHitChance(actor, enemy, value) / 100.f;
+
+        if (weapon->mData.mType <= ESM::Weapon::MarksmanThrown)
+            rating *= weapon->mData.mSpeed;
 
         return rating * rangedMult;
     }
