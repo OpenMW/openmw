@@ -100,20 +100,20 @@ namespace MWMechanics
         if (weapon->mData.mType <= ESM::Weapon::MarksmanThrown)
             rating *= weapon->mData.mSpeed;
 
+        int value = 50.f;
         if (actor.getClass().isNpc())
         {
             int skill = item.getClass().getEquipmentSkill(item);
             if (skill != -1)
-            {
-               int value = actor.getClass().getSkill(actor, skill);
-               rating *= getHitChance(actor, enemy, value) / 100.f;
-            }
+               value = actor.getClass().getSkill(actor, skill);
         }
         else
         {
             MWWorld::LiveCellRef<ESM::Creature> *ref = actor.get<ESM::Creature>();
-            rating *= getHitChance(actor, enemy, ref->mBase->mData.mCombat) / 100.f;
+            value = ref->mBase->mData.mCombat;
         }
+
+        rating *= getHitChance(actor, enemy, value) / 100.f;
 
         return rating * rangedMult;
     }
