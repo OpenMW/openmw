@@ -240,7 +240,7 @@ namespace MWMechanics
                 const CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
 
                 // Enemy can't attack
-                if (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                if (stats.isParalyzed() || stats.getKnockedDown())
                     return 0.f;
 
                 // Enemy doesn't attack
@@ -261,7 +261,7 @@ namespace MWMechanics
                 if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude() > 0)
                     return 0.f;
 
-                if (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                if (stats.isParalyzed() || stats.getKnockedDown())
                     return 0.f;
 
                 // Enemy doesn't cast spells
@@ -279,7 +279,7 @@ namespace MWMechanics
                 const CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
 
                 // Enemy can't cast spells
-                if (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                if (stats.isParalyzed() || stats.getKnockedDown())
                     return 0.f;
 
                 // Enemy doesn't cast spells
