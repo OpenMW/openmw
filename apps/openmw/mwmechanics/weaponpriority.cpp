@@ -52,7 +52,10 @@ namespace MWMechanics
             {
                 static const float fAIMeleeWeaponMult = gmst.find("fAIMeleeWeaponMult")->mValue.getFloat();
                 static const float fAIRangeMeleeWeaponMult = gmst.find("fAIRangeMeleeWeaponMult")->mValue.getFloat();
-                rangedMult = fAIRangeMeleeWeaponMult / fAIMeleeWeaponMult;
+                if (fAIMeleeWeaponMult != 0)
+                    rangedMult = fAIRangeMeleeWeaponMult / fAIMeleeWeaponMult;
+                else
+                    rangedMult = fAIRangeMeleeWeaponMult;
             }
         }
 
