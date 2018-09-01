@@ -190,11 +190,6 @@ namespace MWMechanics
 
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {
-                std::vector<int> equipmentSlots = it->getClass().getEquipmentSlots(*it).first;
-                if (std::find(equipmentSlots.begin(), equipmentSlots.end(), (int)MWWorld::InventoryStore::Slot_CarriedRight)
-                        == equipmentSlots.end())
-                    continue;
-
                 float rating = rateWeapon(*it, actor, enemy, -1, bestArrowRating, bestBoltRating);
                 if (rating > bestActionRating)
                 {
@@ -215,14 +210,12 @@ namespace MWMechanics
 
         for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            const ESM::Spell* spell = it->first;
-
-            float rating = rateSpell(spell, actor, enemy);
+            float rating = rateSpell(it->first, actor, enemy);
             if (rating > bestActionRating)
             {
                 bestActionRating = rating;
-                bestAction.reset(new ActionSpell(spell->mId));
-                antiFleeRating = vanillaRateSpell(spell, actor, enemy);
+                bestAction.reset(new ActionSpell(it->first->mId));
+                antiFleeRating = vanillaRateSpell(it->first, actor, enemy);
             }
         }
 
@@ -265,11 +258,6 @@ namespace MWMechanics
 
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {
-                std::vector<int> equipmentSlots = it->getClass().getEquipmentSlots(*it).first;
-                if (std::find(equipmentSlots.begin(), equipmentSlots.end(), (int)MWWorld::InventoryStore::Slot_CarriedRight)
-                        == equipmentSlots.end())
-                    continue;
-
                 float rating = rateWeapon(*it, actor, enemy, -1, bestArrowRating, bestBoltRating);
                 if (rating > bestActionRating)
                 {
@@ -280,9 +268,7 @@ namespace MWMechanics
 
         for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            const ESM::Spell* spell = it->first;
-
-            float rating = rateSpell(spell, actor, enemy);
+            float rating = rateSpell(it->first, actor, enemy);
             if (rating > bestActionRating)
             {
                 bestActionRating = rating;

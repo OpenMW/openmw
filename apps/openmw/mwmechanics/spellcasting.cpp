@@ -34,13 +34,17 @@ namespace MWMechanics
 {
     ESM::Skill::SkillEnum spellSchoolToSkill(int school)
     {
-        std::map<int, ESM::Skill::SkillEnum> schoolSkillMap; // maps spell school to skill id
-        schoolSkillMap[0] = ESM::Skill::Alteration;
-        schoolSkillMap[1] = ESM::Skill::Conjuration;
-        schoolSkillMap[3] = ESM::Skill::Illusion;
-        schoolSkillMap[2] = ESM::Skill::Destruction;
-        schoolSkillMap[4] = ESM::Skill::Mysticism;
-        schoolSkillMap[5] = ESM::Skill::Restoration;
+        static std::map<int, ESM::Skill::SkillEnum> schoolSkillMap; // maps spell school to skill id
+        if (schoolSkillMap.empty())
+        {
+            schoolSkillMap[0] = ESM::Skill::Alteration;
+            schoolSkillMap[1] = ESM::Skill::Conjuration;
+            schoolSkillMap[3] = ESM::Skill::Illusion;
+            schoolSkillMap[2] = ESM::Skill::Destruction;
+            schoolSkillMap[4] = ESM::Skill::Mysticism;
+            schoolSkillMap[5] = ESM::Skill::Restoration;
+        }
+
         assert(schoolSkillMap.find(school) != schoolSkillMap.end());
         return schoolSkillMap[school];
     }
@@ -48,7 +52,11 @@ namespace MWMechanics
     float calcEffectCost(const ESM::ENAMstruct& effect)
     {
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
+        return calcEffectCost(effect, magicEffect);
+    }
 
+    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect)
+    {
         int minMagn = 1;
         int maxMagn = 1;
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))

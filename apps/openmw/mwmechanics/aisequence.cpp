@@ -228,7 +228,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
             {
                 if ((*it)->getTypeId() != AiPackage::TypeIdCombat) break;
 
-                MWWorld::Ptr target = static_cast<const AiCombat *>(*it)->getTarget();
+                MWWorld::Ptr target = (*it)->getTarget();
 
                 // target disappeared (e.g. summoned creatures)
                 if (target.isEmpty())
@@ -242,11 +242,11 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
 
                     const ESM::Position &targetPos = target.getRefData().getPosition();
 
-                    float distTo = (targetPos.asVec3() - vActorPos).length();
+                    float distTo = (targetPos.asVec3() - vActorPos).length2();
 
                     // Small threshold for changing target
                     if (it == mPackages.begin())
-                        distTo = std::max(0.f, distTo - 50.f);
+                        distTo = std::max(0.f, distTo - 2500.f);
 
                     // if a target has higher priority than current target or has same priority but closer
                     if (rating > bestRating || ((distTo < nearestDist) && rating == bestRating))

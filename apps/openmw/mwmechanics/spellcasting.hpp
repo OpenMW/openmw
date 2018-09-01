@@ -3,6 +3,7 @@
 
 #include <components/esm/effectlist.hpp>
 #include <components/esm/loadskil.hpp>
+#include <components/esm/loadmgef.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -25,6 +26,7 @@ namespace MWMechanics
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
 
     float calcEffectCost(const ESM::ENAMstruct& effect);
+    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect);
 
     bool isSummoningEffect(int effectId);
 

@@ -29,6 +29,9 @@ namespace MWMechanics
         if (type != -1 && weapon->mData.mType != type)
             return 0.f;
 
+        if (type == -1 && (weapon->mData.mType == ESM::Weapon::Arrow || weapon->mData.mType == ESM::Weapon::Bolt))
+            return 0.f;
+
         float rating=0.f;
         float rangedMult=1.f;
 

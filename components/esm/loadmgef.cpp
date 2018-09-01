@@ -274,42 +274,45 @@ short MagicEffect::getResistanceEffect(short effect)
     // Source https://wiki.openmw.org/index.php?title=Research:Magic#Effect_attribute
 
     // <Effect, Effect providing resistance against first effect>
-    std::map<short, short> effects;
-    effects[DisintegrateArmor] = Sanctuary;
-    effects[DisintegrateWeapon] = Sanctuary;
-
-    for (int i=0; i<5; ++i)
-        effects[DrainAttribute+i] = ResistMagicka;
-    for (int i=0; i<5; ++i)
-        effects[DamageAttribute+i] = ResistMagicka;
-    for (int i=0; i<5; ++i)
-        effects[AbsorbAttribute+i] = ResistMagicka;
-    for (int i=0; i<10; ++i)
-        effects[WeaknessToFire+i] = ResistMagicka;
-
-    effects[Burden] = ResistMagicka;
-    effects[Charm] = ResistMagicka;
-    effects[Silence] = ResistMagicka;
-    effects[Blind] = ResistMagicka;
-    effects[Sound] = ResistMagicka;
-
-    for (int i=0; i<2; ++i)
+    static std::map<short, short> effects;
+    if (effects.empty())
     {
-        effects[CalmHumanoid+i] = ResistMagicka;
-        effects[FrenzyHumanoid+i] = ResistMagicka;
-        effects[DemoralizeHumanoid+i] = ResistMagicka;
-        effects[RallyHumanoid+i] = ResistMagicka;
+        effects[DisintegrateArmor] = Sanctuary;
+        effects[DisintegrateWeapon] = Sanctuary;
+
+        for (int i=0; i<5; ++i)
+            effects[DrainAttribute+i] = ResistMagicka;
+        for (int i=0; i<5; ++i)
+            effects[DamageAttribute+i] = ResistMagicka;
+        for (int i=0; i<5; ++i)
+            effects[AbsorbAttribute+i] = ResistMagicka;
+        for (int i=0; i<10; ++i)
+            effects[WeaknessToFire+i] = ResistMagicka;
+
+        effects[Burden] = ResistMagicka;
+        effects[Charm] = ResistMagicka;
+        effects[Silence] = ResistMagicka;
+        effects[Blind] = ResistMagicka;
+        effects[Sound] = ResistMagicka;
+
+        for (int i=0; i<2; ++i)
+        {
+            effects[CalmHumanoid+i] = ResistMagicka;
+            effects[FrenzyHumanoid+i] = ResistMagicka;
+            effects[DemoralizeHumanoid+i] = ResistMagicka;
+            effects[RallyHumanoid+i] = ResistMagicka;
+        }
+
+        effects[TurnUndead] = ResistMagicka;
+
+        effects[FireDamage] = ResistFire;
+        effects[FrostDamage] = ResistFrost;
+        effects[ShockDamage] = ResistShock;
+        effects[Vampirism] = ResistCommonDisease;
+        effects[Corprus] = ResistCorprusDisease;
+        effects[Poison] = ResistPoison;
+        effects[Paralyze] = ResistParalysis;
     }
-
-    effects[TurnUndead] = ResistMagicka;
-
-    effects[FireDamage] = ResistFire;
-    effects[FrostDamage] = ResistFrost;
-    effects[ShockDamage] = ResistShock;
-    effects[Vampirism] = ResistCommonDisease;
-    effects[Corprus] = ResistCorprusDisease;
-    effects[Poison] = ResistPoison;
-    effects[Paralyze] = ResistParalysis;
 
     if (effects.find(effect) != effects.end())
         return effects[effect];
@@ -319,41 +322,43 @@ short MagicEffect::getResistanceEffect(short effect)
 
 short MagicEffect::getWeaknessEffect(short effect)
 {
-    std::map<short, short> effects;
-
-    for (int i=0; i<5; ++i)
-        effects[DrainAttribute+i] = WeaknessToMagicka;
-    for (int i=0; i<5; ++i)
-        effects[DamageAttribute+i] = WeaknessToMagicka;
-    for (int i=0; i<5; ++i)
-        effects[AbsorbAttribute+i] = WeaknessToMagicka;
-    for (int i=0; i<10; ++i)
-        effects[WeaknessToFire+i] = WeaknessToMagicka;
-
-    effects[Burden] = WeaknessToMagicka;
-    effects[Charm] = WeaknessToMagicka;
-    effects[Silence] = WeaknessToMagicka;
-    effects[Blind] = WeaknessToMagicka;
-    effects[Sound] = WeaknessToMagicka;
-
-    for (int i=0; i<2; ++i)
+    static std::map<short, short> effects;
+    if (effects.empty())
     {
-        effects[CalmHumanoid+i] = WeaknessToMagicka;
-        effects[FrenzyHumanoid+i] = WeaknessToMagicka;
-        effects[DemoralizeHumanoid+i] = WeaknessToMagicka;
-        effects[RallyHumanoid+i] = WeaknessToMagicka;
+        for (int i=0; i<5; ++i)
+            effects[DrainAttribute+i] = WeaknessToMagicka;
+        for (int i=0; i<5; ++i)
+            effects[DamageAttribute+i] = WeaknessToMagicka;
+        for (int i=0; i<5; ++i)
+            effects[AbsorbAttribute+i] = WeaknessToMagicka;
+        for (int i=0; i<10; ++i)
+            effects[WeaknessToFire+i] = WeaknessToMagicka;
+
+        effects[Burden] = WeaknessToMagicka;
+        effects[Charm] = WeaknessToMagicka;
+        effects[Silence] = WeaknessToMagicka;
+        effects[Blind] = WeaknessToMagicka;
+        effects[Sound] = WeaknessToMagicka;
+
+        for (int i=0; i<2; ++i)
+        {
+            effects[CalmHumanoid+i] = WeaknessToMagicka;
+            effects[FrenzyHumanoid+i] = WeaknessToMagicka;
+            effects[DemoralizeHumanoid+i] = WeaknessToMagicka;
+            effects[RallyHumanoid+i] = WeaknessToMagicka;
+        }
+
+        effects[TurnUndead] = WeaknessToMagicka;
+
+        effects[FireDamage] = WeaknessToFire;
+        effects[FrostDamage] = WeaknessToFrost;
+        effects[ShockDamage] = WeaknessToShock;
+        effects[Vampirism] = WeaknessToCommonDisease;
+        effects[Corprus] = WeaknessToCorprusDisease;
+        effects[Poison] = WeaknessToPoison;
+
+        effects[Paralyze] = -1;
     }
-
-    effects[TurnUndead] = WeaknessToMagicka;
-
-    effects[FireDamage] = WeaknessToFire;
-    effects[FrostDamage] = WeaknessToFrost;
-    effects[ShockDamage] = WeaknessToShock;
-    effects[Vampirism] = WeaknessToCommonDisease;
-    effects[Corprus] = WeaknessToCorprusDisease;
-    effects[Poison] = WeaknessToPoison;
-
-    effects[Paralyze] = -1;
 
     if (effects.find(effect) != effects.end())
         return effects[effect];
