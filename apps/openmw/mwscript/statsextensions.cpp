@@ -501,6 +501,7 @@ namespace MWScript
                     runtime.pop();
 
                     ptr.getClass().getCreatureStats (ptr).getActiveSpells().removeEffects(spellid);
+                    ptr.getClass().getCreatureStats (ptr).getSpells().removeEffects(spellid);
                 }
         };
 

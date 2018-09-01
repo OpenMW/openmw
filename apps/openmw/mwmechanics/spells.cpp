@@ -279,6 +279,25 @@ namespace MWMechanics
         }
     }
 
+    void Spells::removeEffects(const std::string &id)
+    {
+        if (isSpellActive(id))
+        {
+            for (TContainer::iterator spell = mSpells.begin(); spell != mSpells.end(); ++spell)
+            {
+                if (spell->first == getSpell(id))
+                {
+                    for (long unsigned int i = 0; i != spell->first->mEffects.mList.size(); i++)
+                    {
+                        spell->second.mPurgedEffects.insert(i);
+                    }
+                }
+            }
+
+            mSpellsChanged = true;
+        }
+    }
+
     void Spells::visitEffectSources(EffectSourceVisitor &visitor) const
     {
         if (mSpellsChanged) {
