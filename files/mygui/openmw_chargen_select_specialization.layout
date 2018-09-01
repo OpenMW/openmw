@@ -2,7 +2,7 @@
 <MyGUI type="Layout">
     <!-- correct size is 247 144, adjust when skin is changed to a dialog -->
     <Widget type="Window" skin="MW_DialogNoTransp" layer="Windows" position="0 0 247 144" align="Center" name="_Main">
-        <Widget type="Widget" skin="" position="14 14 216 113" align="Stretch">
+        <Widget type="Widget" skin="" position="14 14 216 116" align="Stretch">
 
             <!-- Label -->
             <Widget type="TextBox" skin="HeaderText" position="0 0 216 18" name="LabelT" align="Center Top">
@@ -22,9 +22,12 @@
             </Widget>
 
             <!-- Dialog buttons -->
-            <Widget type="AutoSizedButton" skin="MW_Button" position="150 90 66 21" name="CancelButton">
-                <Property key="ExpandDirection" value="Left"/>
-                <Property key="Caption" value="#{sCancel}"/>
+            <Widget type="HBox" position="0 88 216 28">
+                <Widget type="Spacer" />
+                <Widget type="AutoSizedButton" skin="MW_Button" align="Right Bottom" name="CancelButton">
+                    <Property key="ExpandDirection" value="Left Up"/>
+                    <Property key="Caption" value="#{sCancel}"/>
+                </Widget>
             </Widget>
 
         </Widget>

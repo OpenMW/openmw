@@ -16,7 +16,7 @@
         </Widget>>
 
         <!-- Dialog buttons -->
-        <Widget type="HBox" position="0 338 511 24">
+        <Widget type="HBox" position="0 338 511 28">
             <Widget type="Spacer"/>
             <Widget type="AutoSizedButton" skin="MW_Button" name="BackButton">
                 <Property key="Caption" value="#{sBack}"/>

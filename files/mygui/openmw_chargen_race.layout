@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 588 433" align="Center" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 640 433" align="Center" name="_Main">
 
         <!-- Appearance -->
         <Widget type="TextBox" skin="HeaderText" position="8 16 241 18" name="AppearanceT" align="Left Top">
@@ -54,28 +54,28 @@
 
         <!-- Race -->
 
-        <Widget type="TextBox" skin="HeaderText" position="261 16 132 18" name="RaceT" align="Left Top">
+        <Widget type="TextBox" skin="HeaderText" position="261 16 160 18" name="RaceT" align="Left Top">
             <Property key="TextAlign" value="Left Top"/>
         </Widget>
-        <Widget type="ListBox" skin="MW_List" position="264 39 132 150" name="RaceList">
+        <Widget type="ListBox" skin="MW_List" position="264 39 160 150" name="RaceList">
         </Widget>
 
         <!-- Spell powers -->
-        <Widget type="TextBox" skin="HeaderText" position="261 210 132 18" name="SpellPowerT" align="Left Top">
+        <Widget type="TextBox" skin="HeaderText" position="261 210 160 18" name="SpellPowerT" align="Left Top">
             <Property key="TextAlign" value="Left Top"/>
         </Widget>
         <!-- Spell power sub-widgets will be placed here, no skin to make it invisible -->
-        <Widget type="Widget" skin="" position="261 230 250 140" name="SpellPowerList"/>
+        <Widget type="Widget" skin="" position="261 230 350 140" name="SpellPowerList"/>
 
         <!-- Skill bonus -->
-        <Widget type="TextBox" skin="HeaderText" position="403 39 159 18" name="SkillsT" align="Left Top">
+        <Widget type="TextBox" skin="HeaderText" position="432 39 190 18" name="SkillsT" align="Left Top">
             <Property key="TextAlign" value="Left Top"/>
         </Widget>
         <!-- Skill bonus sub-widgets will be placed here, no skin to make it invisible -->
-        <Widget type="Widget" skin="" position="403 59 159 360" name="SkillList"/>
+        <Widget type="Widget" skin="" position="432 59 190 360" name="SkillList"/>
 
         <!-- Dialog buttons -->
-        <Widget type="HBox" position="0 393 572 24">
+        <Widget type="HBox" position="0 393 626 28">
             <Widget type="Spacer"/>
 
             <Widget type="AutoSizedButton" skin="MW_Button" position="471 397 53 23" name="BackButton">
