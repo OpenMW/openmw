@@ -34,25 +34,28 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
     if (std::abs(mHalfExtents.x()-mHalfExtents.y())<mHalfExtents.x()*0.05 && mHalfExtents.z() >= mHalfExtents.x())
     {
-        // There are three shapes here, code given for convenience of testing/debugging.
-        // The first is a cylinder with rounded edges. It's the best, but it seems to be a bit performance intensive, and it breaks debug collision mesh rendering.
-        // The second is a cylinder. It would be idea, but Bullet gives bad/bogus normals for collisions of very close pairs of cylinders, causing weird collision glitches like jumping into NPCs making them move.
-        // The third is a capsule. It causes problems with vanilla Morrowind's level design, because Morrowind was made and tested with cylinders. For example, some of the stairs in Ebonheart don't work. Good for full conversions.
-        // Right here the capsule is enabled. This should be looked into before 1.0. If cylinders can be made to give good collision normals (for example, by compiling bullet with 64-bit floats), they should be used.
-        // TODO: Should selection between these three shapes be a hidden option?
-        if(false)
-        {
-            float fuzz = 8.0f;
-            auto height = mHalfExtents.z()-fuzz;
-            auto width = mHalfExtents.x()-fuzz;
-            auto cylinder = new btCylinderShapeZ(btVector3(width, width, height));
-            auto sphere = new btSphereShape(fuzz);
-            mShape.reset(new btMinkowskiSumShape(cylinder, sphere));
-        }
-        else if(true)
-            mShape.reset(new btCylinderShapeZ(btVector3(mHalfExtents.x(), mHalfExtents.x(), mHalfExtents.z())));
-        else
-            mShape.reset(new btCapsuleShapeZ(mHalfExtents.x(), 2*mHalfExtents.z() - 2*mHalfExtents.x()));
+        // There are basically four shapes that are sensible to use for actor collisions.
+        // - 1: Axis-Aligned Bounding Boxes, or AABBs. These are what vanilla Morrowind uses.
+        // They make world geometry seem to collide differently at different angles, e.g. it's easier to hit the sides of 45 degree hallways.
+        // - 2: Cylinders. These are like AABBs, flat on the bottom and the sides, but colliding with rotated objects at the same local angle is always basically the same, precision excepted.
+        // Bullet seems to give bad normals for cylinder collisions sometimes. This is mostly avoided or worked around, but for cylinder-cylinder collisions
+        // it can trigger a weird bug that makes it so you can shove actors by jumping against them over and over.
+        // - 3: Rounded cylinders. Bullet can actually do these, but they perform very badly and don't render properly in debug collision wireframe rendering.
+        // These don't have the bad normals problem that cylinders have, at least at a high enough rounding, but again, they perform very badly.
+        // - 4: Capsules. These are touted as some kind of pancea, and they'd be good for total conversions, but they break vanilla Morrowind level design.
+        // It's true that Vanilla uses AABBs, but there's nowhere that would be SIGNIFICANTLY different from vanilla when using cylinders instead. Capsules, on the other hand, break some staircases.
+        // See https://gitlab.com/OpenMW/openmw/issues/4247 for more details.
+
+        // Also, vanilla's movement solver is kind of screwed up in the first place, so a good movement solver is always going to be different anyway, even if it used AABBs.
+        // An example of this is how some meshes you're supposed to step onto easily actually have tiny steep slopes at their starts. Vanilla just goes inside them then steps onto them.
+        // OpenMW can't go into them. That would be bad.
+        // AABBs and cylinders fail to slide onto them, getting stuck on the steep edge.
+        // Capsules would let the player slide onto them, because of the tapered bottom, but capsules also break OTHER, more obvious/important vanilla level design examples, BECAUSE of the tapered bottom.
+
+        // Cylinders are the best compromise for an actor collision hull shape.
+        // It might be nice to allow content files to choose between cylinders and capsules in the future, probably as a part of post-1.0 dehardcoding.
+
+        mShape.reset(new btCylinderShapeZ(btVector3(mHalfExtents.x(), mHalfExtents.x(), mHalfExtents.z())));
         mRotationallyInvariant = true;
     }
     else

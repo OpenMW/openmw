@@ -63,6 +63,9 @@ public:
                 normal.z() = 0;
                 normal.normalize();
                 // only collide if horizontally moving towards the hit actor (note: the motion vector appears to be inverted)
+                // FIXME: This kinda screws with standing on actors that walk up slopes for some reason. Makes you fall through them.
+                // It happens in vanilla Morrowind too, but much less often.
+                // I tried hunting down why but couldn't figure it out. Possibly a stair stepping or ground ejection bug.
                 if(normal * motion > 0.0f)
                 {
                     convexResult.m_hitFraction = 0.0f;
@@ -74,6 +77,9 @@ public:
                     return btScalar(1);
                 }
             }
+            // TODO: It might be a nice idea to not use bullet for normal (non-overlapping) actor-actor collisions anyway, at least as long as they remain cylinders.
+            // Bullet seems to give bad tracing results for cylinder-cylinder collisions in some situations.
+            // The math for cylinder-cylinder collisions is probably very easy. The only issue is that we'd have to roll our own actor-actor broadpass.
         }
 
         btVector3 hitNormalWorld;
@@ -171,5 +177,6 @@ void ActorTracer::findGround(const Actor* actor, const osg::Vec3f& start, const 
         mFraction = 1.0f;
     }
 }
+
 
 }

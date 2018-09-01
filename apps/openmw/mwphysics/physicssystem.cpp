@@ -55,10 +55,15 @@ namespace MWPhysics
     static const float sMaxSlope = 49.0f;
     static const float sStepSizeUp = 34.0f;
     static const float sStepSizeDown = 62.0f;
+    // TODO: It might be nice to replace the sMinStep hack with something that lets the player stand on
+    // slightly-too-steep slopes for a short period of time before losing their walking ability. Only while moving of course.
     static const float sMinStep = 10.0f; // hack to skip over tiny unwalkable slopes
-    static const float sGroundOffset = 1.0f;
-    static const float sSafetyMargin = 0.01f;
-    static const float sActorSafetyMargin = 0.02f; // makes it harder to shove actors by running/jumping into them
+    static const float sMinStepShort = 20.0f; // hack to skip over shorter but longer/wider/further unwalkable slopes - only allowed to go up, and the up step size is shorter
+    static const float sMinStepShortUp = 25.0f; // hack to skip over shorter but longer/wider/further unwalkable slopes
+
+    static const float sGroundOffset = 1.0f; // How far to float above the ground surface
+    static const float sSafetyMargin = 0.5f; // How far to stay away from any geometry we collide with (so that we don't go slightly inside of it and end up with bad collision tracing data)
+    static const float sActorSafetyMargin = 0.5f; // makes it harder to shove actors by running/jumping into them (some kind of bug with bullet's cylinder-cylinder collision normals)
 
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
@@ -108,7 +113,7 @@ namespace MWPhysics
         // if we're on the ground and it's too steep to walk and we'd be directed upwards from it, pretend it's a wall
         if(onGround && !isWalkableSlope(virtualNormal) && virtualNormal.z() != 0.0)
         {
-            std::cerr << "wallifying slope" << std::endl;
+            //std::cerr << "wallifying slope" << std::endl;
             virtualNormal.z() = 0;
             virtualNormal.normalize();
         }
@@ -157,22 +162,40 @@ namespace MWPhysics
             osg::Vec3f tracerDest;
             auto normalMove = toMove;
             auto moveDistance = normalMove.normalize();
-            // attempt 0: normal movement
-            // attempt 1: fixed distance movement, only happens on the first movement solver iteration/bounce each frame to avoid a glitch
+            // attempt 1: normal movement
+            // attempt 2: fixed distance movement, only happens on the first movement solver iteration/bounce each frame to avoid a glitch
+            // attempt 3: further, less tall fixed distance movement, same as above
+            // If you're making a full conversion you should purge the logic for attempts 2 and 3. Attempts 2 and 3 just try to work around problems with vanilla Morrowind assets.
             int attempt = 0;
             float downStepSize;
-            while(attempt < 2)
+            while(attempt < 3)
             {
-                if(attempt == 0)
+                attempt++;
+
+                if(attempt == 1)
                     tracerDest = tracerPos + toMove;
                 else if (!firstIteration) // first attempt failed and not on first movement solver iteration, can't retry
+                {
+                    //std::cerr << "Warning: breaking steps B"  << std::endl;
                     return false;
-                else if(attempt == 1)
+                }
+                else if(attempt == 2)
                 {
                     moveDistance = sMinStep;
                     tracerDest = tracerPos + normalMove*sMinStep;
+                    //std::cerr << "trying fallback A\n";
                 }
-                attempt++;
+                else if(attempt == 3)
+                {
+                    if(upDistance > sMinStepShortUp)
+                    {
+                        upDistance = sMinStepShortUp;
+                        tracerPos = position + osg::Vec3f(0.0f, 0.0f, upDistance);
+                    }
+                    //std::cerr << "trying fallback B\n";
+                    moveDistance = sMinStepShort;
+                    tracerDest = tracerPos + normalMove*sMinStepShort;
+                }
 
                 mTracer.doTrace(mColObj, tracerPos, tracerDest, mColWorld);
                 float moveMargin = pickSafetyMargin(mTracer.mHitObject);
@@ -182,7 +205,7 @@ namespace MWPhysics
                     moveDistance *= mTracer.mFraction;
                     if(moveDistance <= moveMargin) // didn't move enough to accomplish anything
                     {
-                        //std::cerr << "Warning: breaking steps B"  << std::endl;
+                        //std::cerr << "Warning: breaking steps C"  << std::endl;
                         return false;
                     }
 
@@ -202,25 +225,39 @@ namespace MWPhysics
                     }
                 }
 
-                downStepSize = moveDistance + upDistance + sStepSizeDown;
+                if(attempt > 2) // do not allow stepping down below original height for attempt 3
+                    downStepSize = upDistance;
+                else
+                    downStepSize = moveDistance + upDistance + sStepSizeDown;
                 mDownStepper.doTrace(mColObj, tracerDest, tracerDest + osg::Vec3f(0.0f, 0.0f, -downStepSize), mColWorld);
 
                 // can't step down onto air, non-walkable-slopes, or actors
-                // NOTE: using a capsule makes isWalkableSlope fail on certain heights of steps that should be completely valid
+                // NOTE: using a capsule causes isWalkableSlope (used in canStepDown) to fail on certain geometry that were intended to be valid at the bottoms of stairs
                 // (like the bottoms of the staircases in aldruhn's guild of mages)
                 // The old code worked around this by trying to do mTracer again with a fixed distance of sMinStep (10.0) but it caused all sorts of other problems.
+                // Switched back to cylinders to avoid that and similer problems.
                 if(canStepDown(mDownStepper))
+                {
+                    //std::cerr << "stepped down\n";
                     break;
+                }
                 else
                 {
-                    if(firstIteration && attempt-1 == 0)
+                    // do not try attempt 3 if we just tried attempt 2 and the horizontal distance was rather large
+                    // (forces actor to get snug against the defective ledge for attempt 3 to be tried)
+                    if(attempt == 2 && moveDistance > upDistance-(mDownStepper.mFraction*downStepSize))
+                    {
+                        //std::cerr << "giving up on stepping A\n";
+                        return false;
+                    }
+                    // do next attempt if first iteration of movement solver and not out of attempts
+                    if(firstIteration && attempt < 3)
+                    {
+                        //std::cerr << "continuing on\n";
                         continue;
+                    }
 
-                    //std::cerr << "Warning: breaking steps C " << std::endl;
-                    //std::cerr << normalMove.x() << std::endl;
-                    //std::cerr << normalMove.y() << std::endl;
-                    //std::cerr << normalMove.z() << std::endl;
-                    //std::cerr << moveDistance << std::endl;
+                    //std::cerr << "giving up on stepping B\n";
                     return false;
                 }
             }
@@ -231,10 +268,7 @@ namespace MWPhysics
                 downDistance = mDownStepper.mFraction*downStepSize - sSafetyMargin;
 
             if(downDistance-sSafetyMargin-sGroundOffset > upDistance && !onGround)
-            {
-                //std::cerr << "Warning: breaking steps D " << std::endl;
                 return false;
-            }
 
             auto newpos = tracerDest + osg::Vec3f(0.0f, 0.0f, -downDistance);
 
@@ -398,6 +432,8 @@ namespace MWPhysics
                 float NANcheck = velocity.length2();
                 if (NANcheck != NANcheck)
                     break;
+                if (NANcheck == 0.0f)
+                    break;
 
                 osg::Vec3f nextpos = newPosition + velocity * remainingTime;
 
@@ -415,13 +451,18 @@ namespace MWPhysics
                 }
                 else
                 {
+                    // earlier in the code: osg::Vec3f nextpos = newPosition + velocity * remainingTime;
+
+                    auto direction = velocity;
+                    direction.normalize();
+
                     // get tracing information between the current and desired position
-                    tracer.doTrace(colobj, newPosition, nextpos, collisionWorld);
+                    tracer.doTrace(colobj, newPosition, nextpos + direction*sSafetyMargin, collisionWorld);
 
                     // if there is no obstruction, move to the new position and break
                     if(!tracer.mHitObject)
                     {
-                        newPosition = tracer.mEndPos;
+                        newPosition = tracer.mEndPos - direction*sSafetyMargin;
                         break;
                     }
                 }
@@ -434,14 +475,16 @@ namespace MWPhysics
                     osg::Vec3f backOff = (newPosition - tracer.mHitPoint) * 1E-2f;
                     newPosition += backOff;
                 }
+                // This way of doing this can cause the actor to enter other geometry, and then the normals for colliding with that other geometry go in incoherent directions.
+                // This needs to be done differently.
                 */
 
                 // We hit something. Check if we can step up.
                 float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + halfExtents.z();
                 osg::Vec3f oldPosition = newPosition;
-                bool result = false;
+                bool usedStepLogic = false;
                 // We can only step up:
-                // - things that aren't definitely tall (hitHeight can return any point of contact, but will always return a low point of contact for short objects)
+                // - things that aren't definitely tall (hitHeight can be any point of contact, but will always be a low point of contact for short objects)
                 // - non-actors
                 // - things that are flat walls or facing upwards (no downwards-facing walls or ceilings)
                 // note that we want to attempt stepping with too-steep slopes/sloped walls because they might be the side of a short step
@@ -449,10 +492,10 @@ namespace MWPhysics
                 {
                     // Try to step up onto it.
                     // NOTE: step() is a proper procedure, it performs the stepping motion on its own if successful
-                    result = stepper.step(newPosition, velocity, velocity*remainingTime, remainingTime, physicActor->getOnGround() && !physicActor->getOnSlope() && !isFlying, noSlidingYet);
+                    usedStepLogic = stepper.step(newPosition, velocity, velocity*remainingTime, remainingTime, physicActor->getOnGround() && !physicActor->getOnSlope() && !isFlying, noSlidingYet);
                 }
                 noSlidingYet = false;
-                if (result)
+                if (usedStepLogic)
                 {
                     // Prevents aquatic creatures from stairstepping onto land
                     if (ptr.getClass().isPureWaterCreature(ptr) && newPosition.z() + halfExtents.z() > waterlevel)
@@ -478,9 +521,13 @@ namespace MWPhysics
                             && (tracer.mPlaneNormal.x() != 0.0f || tracer.mPlaneNormal.y() != 0.0f)
                             && !isWalkableSlope(tracer.mPlaneNormal)
                             && moveDistance*tracer.mFraction > 0.2f+traceMargin)
+                        {
                             newPosition = tracer.mEndPos - normVelocity*(0.2f+traceMargin);
+                        }
                         else
+                        {
                             newPosition = tracer.mEndPos - normVelocity*traceMargin;
+                        }
                     }
                     // reduce remaining time to bounce around by how much we moved (ignoring the safety margin)
                     remainingTime *= 1.0f-tracer.mFraction;
@@ -500,10 +547,14 @@ namespace MWPhysics
                         float hitDistance = tempTracer.mFraction*traceMargin*2;
                         hitDistance -= otherMargin;
                         if(hitDistance > 0.0f)
+                        {
                             newPosition += virtualNormal*hitDistance;
+                        }
                     }
                     else
+                    {
                         newPosition += virtualNormal*traceMargin;
+                    }
 
                     // Do not allow sliding upward if we're walking or jumping on land.
                     if(newPosition.z() >= swimlevel && !isFlying)
@@ -584,6 +635,7 @@ namespace MWPhysics
 
             bool isOnGround = false;
             bool isOnSlope = false;
+
             // happens to test true when flying because inertia is 0 when flying. if this stops being the case, add || isFlying
             if (forceGroundTest || (inertia.z() <= 0.0f && newPosition.z() >= swimlevel))
             {
@@ -632,7 +684,9 @@ namespace MWPhysics
                     // standing on actors is not allowed (see above).
                     // in addition to that, apply a sliding effect away from the center of the actor,
                     // so that we do not stay suspended in air indefinitely.
+
                     // Morrowind doesn't do this unless the actors are overlapping and the current one is in the air and moving downwards
+                    // So I commented it out for now.
                     /*
                     if (tracer.mFraction < 1.0f && isActor(tracer.mHitObject))
                     {
