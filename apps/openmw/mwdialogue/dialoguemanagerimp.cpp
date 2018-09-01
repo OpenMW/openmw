@@ -261,7 +261,7 @@ namespace MWDialogue
                 const MWWorld::Store<ESM::GameSetting>& gmsts =
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-                title = gmsts.find (modifiedTopic)->getString();
+                title = gmsts.find (modifiedTopic)->mValue.getString();
             }
             else
                 title = topic;
@@ -537,7 +537,7 @@ namespace MWDialogue
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
 
-            callback->addResponse(gmsts.find ("sServiceRefusal")->getString(), Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+            callback->addResponse(gmsts.find ("sServiceRefusal")->mValue.getString(), Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
 
             executeScript (info->mResultScript, mActor);
             return true;

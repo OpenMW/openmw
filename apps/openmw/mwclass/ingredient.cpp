@@ -138,7 +138,7 @@ namespace MWClass
         int alchemySkill = npcStats.getSkill (ESM::Skill::Alchemy).getBase();
 
         static const float fWortChanceValue =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->getFloat();
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->mValue.getFloat();
 
         MWGui::Widgets::SpellEffectList list;
         for (int i=0; i<4; ++i)

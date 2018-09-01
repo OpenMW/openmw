@@ -303,7 +303,7 @@ namespace MWPhysics
             position.z() += halfExtents.z();
 
             static const float fSwimHeightScale = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                    .find("fSwimHeightScale")->getFloat();
+                    .find("fSwimHeightScale")->mValue.getFloat();
             float swimlevel = waterlevel + halfExtents.z() - (physicActor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
 
             ActorTracer tracer;
@@ -339,7 +339,7 @@ namespace MWPhysics
                 osg::Vec3f stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
                 float angleDegrees = osg::RadiansToDegrees(std::acos(stormDirection * velocity / (stormDirection.length() * velocity.length())));
                 static const float fStromWalkMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fStromWalkMult")->getFloat();
+                        .find("fStromWalkMult")->mValue.getFloat();
                 velocity *= 1.f-(fStromWalkMult * (angleDegrees/180.f));
             }
 
@@ -860,8 +860,8 @@ namespace MWPhysics
         // Use cone shape as fallback
         const MWWorld::Store<ESM::GameSetting> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        btConeShape shape (osg::DegreesToRadians(store.find("fCombatAngleXY")->getFloat()/2.0f), queryDistance);
-        shape.setLocalScaling(btVector3(1, 1, osg::DegreesToRadians(store.find("fCombatAngleZ")->getFloat()/2.0f) /
+        btConeShape shape (osg::DegreesToRadians(store.find("fCombatAngleXY")->mValue.getFloat()/2.0f), queryDistance);
+        shape.setLocalScaling(btVector3(1, 1, osg::DegreesToRadians(store.find("fCombatAngleZ")->mValue.getFloat()/2.0f) /
                                               shape.getRadius()));
 
         // The shape origin is its center, so we have to move it forward by half the length. The

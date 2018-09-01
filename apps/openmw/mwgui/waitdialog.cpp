@@ -183,10 +183,10 @@ namespace MWGui
                 {
                     // figure out if player will be woken while sleeping
                     int x = Misc::Rng::rollDice(hoursToWait);
-                    float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->getFloat();
+                    float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->mValue.getFloat();
                     if (x < fSleepRandMod * hoursToWait)
                     {
-                        float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->getFloat();
+                        float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->mValue.getFloat();
                         int interruptAtHoursRemaining = int(fSleepRestMod * hoursToWait);
                         if (interruptAtHoursRemaining != 0)
                         {
@@ -252,7 +252,7 @@ namespace MWGui
         // trigger levelup if possible
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-        if (mSleeping && pcstats.getLevelProgress () >= gmst.find("iLevelUpTotal")->getInt())
+        if (mSleeping && pcstats.getLevelProgress () >= gmst.find("iLevelUpTotal")->mValue.getInteger())
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
         }

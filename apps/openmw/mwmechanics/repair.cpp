@@ -42,7 +42,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     int armorerSkill = npcStats.getSkill(ESM::Skill::Armorer).getModified();
 
     float fRepairAmountMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-            .find("fRepairAmountMult")->getFloat();
+            .find("fRepairAmountMult")->mValue.getFloat();
 
     float toolQuality = ref->mBase->mData.mQuality;
 
@@ -87,7 +87,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
         store.remove(mTool, 1, player);
 
         std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("sNotifyMessage51")->getString();
+                .find("sNotifyMessage51")->mValue.getString();
 
         MWBase::Environment::get().getWindowManager()->messageBox((boost::format(message) % mTool.getClass().getName(mTool)).str());
 

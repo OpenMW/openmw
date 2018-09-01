@@ -358,7 +358,7 @@ namespace MWGui
         mGuiModeStates[GM_Journal].mCloseSound = "book close";
         mGuiModeStates[GM_Journal].mOpenSound = "book open";
 
-        mMessageBoxManager = new MessageBoxManager(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
+        mMessageBoxManager = new MessageBoxManager(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->mValue.getFloat());
 
         SpellBuyingWindow* spellBuyingWindow = new SpellBuyingWindow();
         mWindows.push_back(spellBuyingWindow);

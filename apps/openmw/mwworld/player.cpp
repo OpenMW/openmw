@@ -64,7 +64,7 @@ namespace MWWorld
         MWMechanics::CreatureStats& creatureStats = getPlayer().getClass().getCreatureStats(getPlayer());
         MWMechanics::NpcStats& npcStats = getPlayer().getClass().getNpcStats(getPlayer());
         MWMechanics::DynamicStat<float> health = creatureStats.getDynamic(0);
-        creatureStats.setHealth(int(health.getBase() / gmst.find("fWereWolfHealth")->getFloat()));
+        creatureStats.setHealth(int(health.getBase() / gmst.find("fWereWolfHealth")->mValue.getFloat()));
         for (int i=0; i<ESM::Skill::Length; ++i)
             npcStats.setSkill(i, mSaveSkills[i]);
         for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -77,7 +77,7 @@ namespace MWWorld
         MWMechanics::CreatureStats& creatureStats = getPlayer().getClass().getCreatureStats(getPlayer());
         MWMechanics::NpcStats& npcStats = getPlayer().getClass().getNpcStats(getPlayer());
         MWMechanics::DynamicStat<float> health = creatureStats.getDynamic(0);
-        creatureStats.setHealth(int(health.getBase() * gmst.find("fWereWolfHealth")->getFloat()));
+        creatureStats.setHealth(int(health.getBase() * gmst.find("fWereWolfHealth")->mValue.getFloat()));
         for(size_t i = 0;i < ESM::Attribute::Length;++i)
         {
             // Oh, Bethesda. It's "Intelligence".
@@ -85,7 +85,7 @@ namespace MWWorld
                                             ESM::Attribute::sAttributeNames[i]);
 
             MWMechanics::AttributeValue value = npcStats.getAttribute(i);
-            value.setBase(int(gmst.find(name)->getFloat()));
+            value.setBase(int(gmst.find(name)->mValue.getFloat()));
             npcStats.setAttribute(i, value);
         }
 
@@ -100,7 +100,7 @@ namespace MWWorld
                                             ESM::Skill::sSkillNames[i]);
 
             MWMechanics::SkillValue value = npcStats.getSkill(i);
-            value.setBase(int(gmst.find(name)->getFloat()));
+            value.setBase(int(gmst.find(name)->mValue.getFloat()));
             npcStats.setSkill(i, value);
         }
     }

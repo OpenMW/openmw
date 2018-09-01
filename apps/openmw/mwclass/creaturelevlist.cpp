@@ -56,8 +56,8 @@ namespace MWClass
             else if (creatureStats.isDead())
             {
                 const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-                static const float fCorpseRespawnDelay = gmst.find("fCorpseRespawnDelay")->getFloat();
-                static const float fCorpseClearDelay = gmst.find("fCorpseClearDelay")->getFloat();
+                static const float fCorpseRespawnDelay = gmst.find("fCorpseRespawnDelay")->mValue.getFloat();
+                static const float fCorpseClearDelay = gmst.find("fCorpseClearDelay")->mValue.getFloat();
 
                 float delay = std::min(fCorpseRespawnDelay, fCorpseClearDelay);
                 if (creatureStats.getTimeOfDeath() + delay <= MWBase::Environment::get().getWorld()->getTimeStamp())

@@ -48,8 +48,8 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        static const float fFatigueBase = gmst.find("fFatigueBase")->getFloat();
-        static const float fFatigueMult = gmst.find("fFatigueMult")->getFloat();
+        static const float fFatigueBase = gmst.find("fFatigueBase")->mValue.getFloat();
+        static const float fFatigueMult = gmst.find("fFatigueMult")->mValue.getFloat();
 
         return fFatigueBase - fFatigueMult * (1-normalised);
     }

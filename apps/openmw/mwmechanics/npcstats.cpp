@@ -149,12 +149,12 @@ float MWMechanics::NpcStats::getSkillProgressRequirement (int skillIndex, const 
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-    float typeFactor = gmst.find ("fMiscSkillBonus")->getFloat();
+    float typeFactor = gmst.find ("fMiscSkillBonus")->mValue.getFloat();
 
     for (int i=0; i<5; ++i)
         if (class_.mData.mSkills[i][0]==skillIndex)
         {
-            typeFactor = gmst.find ("fMinorSkillBonus")->getFloat();
+            typeFactor = gmst.find ("fMinorSkillBonus")->mValue.getFloat();
 
             break;
         }
@@ -162,7 +162,7 @@ float MWMechanics::NpcStats::getSkillProgressRequirement (int skillIndex, const 
     for (int i=0; i<5; ++i)
         if (class_.mData.mSkills[i][1]==skillIndex)
         {
-            typeFactor = gmst.find ("fMajorSkillBonus")->getFloat();
+            typeFactor = gmst.find ("fMajorSkillBonus")->mValue.getFloat();
 
             break;
         }
@@ -178,7 +178,7 @@ float MWMechanics::NpcStats::getSkillProgressRequirement (int skillIndex, const 
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find (skillIndex);
     if (skill->mData.mSpecialization==class_.mData.mSpecialization)
     {
-        specialisationFactor = gmst.find ("fSpecialSkillBonus")->getFloat();
+        specialisationFactor = gmst.find ("fSpecialSkillBonus")->mValue.getFloat();
 
         if (specialisationFactor<=0)
             throw std::runtime_error ("invalid skill specialisation factor");
@@ -227,21 +227,21 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
     // is this a minor or major skill?
-    int increase = gmst.find("iLevelupMiscMultAttriubte")->getInt(); // Note: GMST has a typo
+    int increase = gmst.find("iLevelupMiscMultAttriubte")->mValue.getInteger(); // Note: GMST has a typo
     for (int k=0; k<5; ++k)
     {
         if (class_.mData.mSkills[k][0] == skillIndex)
         {
-            mLevelProgress += gmst.find("iLevelUpMinorMult")->getInt();
-            increase = gmst.find("iLevelUpMajorMultAttribute")->getInt();
+            mLevelProgress += gmst.find("iLevelUpMinorMult")->mValue.getInteger();
+            increase = gmst.find("iLevelUpMajorMultAttribute")->mValue.getInteger();
         }
     }
     for (int k=0; k<5; ++k)
     {
         if (class_.mData.mSkills[k][1] == skillIndex)
         {
-            mLevelProgress += gmst.find("iLevelUpMajorMult")->getInt();
-            increase = gmst.find("iLevelUpMinorMultAttribute")->getInt();
+            mLevelProgress += gmst.find("iLevelUpMajorMult")->mValue.getInteger();
+            increase = gmst.find("iLevelUpMinorMultAttribute")->mValue.getInteger();
         }
     }
 
@@ -249,7 +249,7 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
         MWBase::Environment::get().getWorld ()->getStore ().get<ESM::Skill>().find(skillIndex);
     mSkillIncreases[skill->mData.mAttribute] += increase;
 
-    mSpecIncreases[skill->mData.mSpecialization] += gmst.find("iLevelupSpecialization")->getInt();
+    mSpecIncreases[skill->mData.mSpecialization] += gmst.find("iLevelupSpecialization")->mValue.getInteger();
 
     // Play sound & skill progress notification
     /// \todo check if character is the player, if levelling is ever implemented for NPCs
@@ -266,7 +266,7 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     
     MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), MWGui::ShowInDialogueMode_Never);
 
-    if (mLevelProgress >= gmst.find("iLevelUpTotal")->getInt())
+    if (mLevelProgress >= gmst.find("iLevelUpTotal")->mValue.getInteger())
     {
         // levelup is possible now
         MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", MWGui::ShowInDialogueMode_Never);
@@ -287,7 +287,7 @@ void MWMechanics::NpcStats::levelUp()
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-    mLevelProgress -= gmst.find("iLevelUpTotal")->getInt();
+    mLevelProgress -= gmst.find("iLevelUpTotal")->mValue.getInteger();
     mLevelProgress = std::max(0, mLevelProgress); // might be necessary when levelup was invoked via console
 
     for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -298,7 +298,7 @@ void MWMechanics::NpcStats::levelUp()
     // "When you gain a level, in addition to increasing three primary attributes, your Health
     // will automatically increase by 10% of your Endurance attribute. If you increased Endurance this level,
     // the Health increase is calculated from the increased Endurance"
-    setHealth(getHealth().getBase() + endurance * gmst.find("fLevelUpHealthEndMult")->getFloat());
+    setHealth(getHealth().getBase() + endurance * gmst.find("fLevelUpHealthEndMult")->mValue.getFloat());
 
     setLevel(getLevel()+1);
 }
@@ -324,7 +324,7 @@ int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const
     std::stringstream gmst;
     gmst << "iLevelUp" << std::setfill('0') << std::setw(2) << num << "Mult";
 
-    return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(gmst.str())->getInt();
+    return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(gmst.str())->mValue.getInteger();
 }
 
 int MWMechanics::NpcStats::getSkillIncreasesForSpecialization(int spec) const
