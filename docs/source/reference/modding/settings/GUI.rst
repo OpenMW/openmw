@@ -27,7 +27,7 @@ ttf resolution
 --------------
 
 :Type:		integer
-:Range:		> 0
+:Range:		48 to 960
 :Default:	96
 
 Allows to specify resolution for in-game TrueType fonts.

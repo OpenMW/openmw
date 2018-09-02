@@ -309,7 +309,7 @@ namespace MWGui
                 // to allow to configure font size via config file, without need to edit XML file.
                 // Also we should take UI scaling factor in account
                 int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
-                resolution = std::max(0, resolution);
+                resolution = std::min(960, std::max(48, resolution));
 
                 float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
 
