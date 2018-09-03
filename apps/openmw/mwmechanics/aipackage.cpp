@@ -102,11 +102,11 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     mTimer += duration; //Update timer
 
     const auto position = actor.getRefData().getPosition().asVec3(); //position of the actor
+    const auto world = MWBase::Environment::get().getWorld();
 
     {
-        const auto halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
-        MWBase::Environment::get().getWorld()->updateActorPath(actor, mPathFinder.getPath(), halfExtents,
-            position, dest);
+        const auto halfExtents = world->getHalfExtents(actor);
+        world->updateActorPath(actor, mPathFinder.getPath(), halfExtents, position, dest);
     }
 
     /// Stops the actor when it gets too close to a unloaded cell
@@ -131,10 +131,9 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         bool destInLOS = false;
 
         const MWWorld::Class& actorClass = actor.getClass();
-        MWBase::World* world = MWBase::Environment::get().getWorld();
 
         // check if actor can move along z-axis
-        bool actorCanMoveByZ = (actorClass.canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
+        bool actorCanMoveByZ = (actorClass.canSwim(actor) && world->isSwimming(actor))
             || world->isFlying(actor);
 
         // Prohibit shortcuts for AiWander, if the actor can not move in 3 dimensions.
@@ -227,7 +226,8 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor)
 
 void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
 {
-    static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
+    const auto world = MWBase::Environment::get().getWorld();
+    static float distance = world->getMaxActivationDistance();
 
     const MWWorld::Ptr door = getNearbyDoor(actor, distance);
     if (door == MWWorld::Ptr())
@@ -238,7 +238,7 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
     {
         if ((door.getCellRef().getTrap().empty() && door.getCellRef().getLockLevel() <= 0 ))
         {
-            MWBase::Environment::get().getWorld()->activate(door, actor);
+            world->activate(door, actor);
             return;
         }
 
@@ -250,7 +250,7 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
         MWWorld::Ptr keyPtr = invStore.search(keyId);
 
         if (!keyPtr.isEmpty())
-            MWBase::Environment::get().getWorld()->activate(door, actor);
+            world->activate(door, actor);
     }
 }
 
@@ -299,8 +299,9 @@ bool MWMechanics::AiPackage::shortcutPath(const osg::Vec3f& startPoint, const os
 
 bool MWMechanics::AiPackage::checkWayIsClearForActor(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint, const MWWorld::Ptr& actor)
 {
-    const bool actorCanMoveByZ = (actor.getClass().canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
-        || MWBase::Environment::get().getWorld()->isFlying(actor);
+    const auto world = MWBase::Environment::get().getWorld();
+    const bool actorCanMoveByZ = (actor.getClass().canSwim(actor) && world->isSwimming(actor))
+        || world->isFlying(actor);
 
     if (actorCanMoveByZ)
         return true;
