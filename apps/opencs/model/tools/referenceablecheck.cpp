@@ -667,9 +667,6 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
         return;
 
     short level(npc.mNpdt.mLevel);
-    char disposition(npc.mNpdt.mDisposition);
-    char reputation(npc.mNpdt.mReputation);
-    char rank(npc.mNpdt.mRank);
     int gold(npc.mNpdt.mGold);
 
     if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS) //12 = autocalculated
@@ -719,22 +716,8 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
     else if (mRaces.searchId (npc.mRace) == -1)
         messages.add(id, "Race '" + npc.mRace + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
-    if (disposition < 0)
-        messages.add(id, "Disposition is negative", "", CSMDoc::Message::Severity_Warning);
-
-    if (reputation < 0)
-    {
-        messages.add(id, "Reputation is negative", "", CSMDoc::Message::Severity_Warning);
-    }
-
-    if (!npc.mFaction.empty())
-    {
-        if (rank < 0)
-            messages.add(id, "Faction rank is negative", "", CSMDoc::Message::Severity_Warning);
-
-        if (mFactions.searchId(npc.mFaction) == -1)
-            messages.add(id, "Faction '" + npc.mFaction + "' does not exist", "", CSMDoc::Message::Severity_Error);
-    }
+    if (!npc.mFaction.empty() && mFactions.searchId(npc.mFaction) == -1)
+        messages.add(id, "Faction '" + npc.mFaction + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     if (npc.mHead.empty())
         messages.add(id, "Head is missing", "", CSMDoc::Message::Severity_Error);
