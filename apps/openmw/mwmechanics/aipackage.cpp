@@ -101,28 +101,25 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 {
     mTimer += duration; //Update timer
 
-    const ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
+    const auto position = actor.getRefData().getPosition().asVec3(); //position of the actor
 
     {
         const auto halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
         MWBase::Environment::get().getWorld()->updateActorPath(actor, mPathFinder.getPath(), halfExtents,
-            pos.asVec3(), dest);
+            position, dest);
     }
 
     /// Stops the actor when it gets too close to a unloaded cell
     //... At current time, this test is unnecessary. AI shuts down when actor is more than 7168
     //... units from player, and exterior cells are 8192 units long and wide.
     //... But AI processing distance may increase in the future.
-    if (isNearInactiveCell(pos))
+    if (isNearInactiveCell(position))
     {
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
         return false;
     }
 
-    // handle path building and shortcutting
-    const osg::Vec3f start = pos.asVec3();
-
-    const float distToTarget = distance(start, dest);
+    const float distToTarget = distance(position, dest);
     const bool isDestReached = (distToTarget <= destTolerance);
 
     if (!isDestReached && mTimer > AI_REACTION_TIME)
@@ -142,14 +139,14 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
         // Prohibit shortcuts for AiWander, if the actor can not move in 3 dimensions.
         if (actorCanMoveByZ)
-            mIsShortcutting = shortcutPath(start, dest, actor, &destInLOS, actorCanMoveByZ); // try to shortcut first
+            mIsShortcutting = shortcutPath(position, dest, actor, &destInLOS, actorCanMoveByZ); // try to shortcut first
 
         if (!mIsShortcutting)
         {
             if (wasShortcutting || doesPathNeedRecalc(dest, actor.getCell())) // if need to rebuild path
             {
                 const auto playerHalfExtents = world->getHalfExtents(world->getPlayerPtr());
-                mPathFinder.buildPath(start, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
+                mPathFinder.buildPath(position, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
                     playerHalfExtents, getNavigatorFlags(actor));
                 mRotateOnTheRunChecks = 3;
 
@@ -160,7 +157,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
                     auto pPointBeforeDest = mPathFinder.getPath().rbegin() + 1;
 
                     // if start point is closer to the target then last point of path (excluding target itself) then go straight on the target
-                    if (distance(start, dest) <= distance(dest, *pPointBeforeDest))
+                    if (distance(position, dest) <= distance(dest, *pPointBeforeDest))
                     {
                         mPathFinder.clearPath();
                         mPathFinder.addPointToPath(dest);
@@ -180,13 +177,13 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         mTimer = 0;
     }
 
-    mPathFinder.update(pos.asVec3(), std::max(destTolerance, DEFAULT_TOLERANCE));
+    mPathFinder.update(position, std::max(destTolerance, DEFAULT_TOLERANCE));
 
     if (isDestReached || mPathFinder.checkPathCompleted()) // if path is finished
     {
         // turn to destination point
-        zTurn(actor, getZAngleToPoint(start, dest));
-        smoothTurn(actor, getXAngleToPoint(start, dest), 0);
+        zTurn(actor, getZAngleToPoint(position, dest));
+        smoothTurn(actor, getXAngleToPoint(position, dest), 0);
         return true;
     }
 
@@ -198,8 +195,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     }
 
     // turn to next path point by X,Z axes
-    zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
-    smoothTurn(actor, mPathFinder.getXAngleToNext(pos.pos[0], pos.pos[1], pos.pos[2]), 0);
+    zTurn(actor, mPathFinder.getZAngleToNext(position.x(), position.y()));
+    smoothTurn(actor, mPathFinder.getXAngleToNext(position.x(), position.y(), position.z()), 0);
 
     mObstacleCheck.update(actor, duration);
 
@@ -351,14 +348,13 @@ bool MWMechanics::AiPackage::isTargetMagicallyHidden(const MWWorld::Ptr& target)
         || (magicEffects.get(ESM::MagicEffect::Chameleon).getMagnitude() > 75);
 }
 
-bool MWMechanics::AiPackage::isNearInactiveCell(const ESM::Position& actorPos)
+bool MWMechanics::AiPackage::isNearInactiveCell(osg::Vec3f position)
 {
     const ESM::Cell* playerCell(getPlayer().getCell()->getCell());
     if (playerCell->isExterior())
     {
         // get actor's distance from origin of center cell
-        osg::Vec3f actorOffset(actorPos.asVec3());
-        CoordinateConverter(playerCell).toLocal(actorOffset);
+        CoordinateConverter(playerCell).toLocal(position);
 
         // currently assumes 3 x 3 grid for exterior cells, with player at center cell.
         // ToDo: (Maybe) use "exterior cell load distance" setting to get count of actual active cells
@@ -366,8 +362,8 @@ bool MWMechanics::AiPackage::isNearInactiveCell(const ESM::Position& actorPos)
         const float distanceFromEdge = 200.0;
         float minThreshold = (-1.0f * ESM::Land::REAL_SIZE) + distanceFromEdge;
         float maxThreshold = (2.0f * ESM::Land::REAL_SIZE) - distanceFromEdge;
-        return (actorOffset[0] < minThreshold) || (maxThreshold < actorOffset[0])
-            || (actorOffset[1] < minThreshold) || (maxThreshold < actorOffset[1]);
+        return (position.x() < minThreshold) || (maxThreshold < position.x())
+            || (position.y() < minThreshold) || (maxThreshold < position.y());
     }
     else
     {

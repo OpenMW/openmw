@@ -150,7 +150,7 @@ namespace MWMechanics
             osg::Vec3f mShortcutFailPos; // position of last shortcut fail
 
         private:
-            bool isNearInactiveCell(const ESM::Position& actorPos);
+            bool isNearInactiveCell(osg::Vec3f position);
     };
 }
 
