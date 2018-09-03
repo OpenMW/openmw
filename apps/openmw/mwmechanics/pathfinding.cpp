@@ -253,9 +253,14 @@ namespace MWMechanics
         return getXAngleToDir(dir);
     }
 
-    void PathFinder::update(const osg::Vec3f& position, const float tolerance)
+    void PathFinder::update(const osg::Vec3f& position, const float pointTolerance, const float destinationTolerance)
     {
-        if (!mPath.empty() && sqrDistanceIgnoreZ(mPath.front(), position) < tolerance*tolerance)
+        if (mPath.empty())
+            return;
+
+        const auto tolerance = mPath.size() > 1 ? pointTolerance : destinationTolerance;
+
+        if (sqrDistanceIgnoreZ(mPath.front(), position) < tolerance * tolerance)
             mPath.pop_front();
     }
 
