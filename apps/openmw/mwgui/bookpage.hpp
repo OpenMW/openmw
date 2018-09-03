@@ -102,7 +102,7 @@ namespace MWGui
         static Ptr create (int pageWidth, int pageHeight);
 
         /// Create a simple text style consisting of a font and a text color.
-        virtual Style* createStyle (char const * Font, const Colour& Colour) = 0;
+        virtual Style* createStyle (const std::string& fontName, const Colour& colour) = 0;
 
         /// Create a hyper-link style with a user-defined identifier based on an
         /// existing style. The unique flag forces a new instance of this style

@@ -264,18 +264,29 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
     {
     }
 
-    Style * createStyle (char const * fontName, const Colour& fontColour)
+    Style * createStyle (const std::string& fontName, const Colour& fontColour)
     {
-        if (strcmp(fontName, "") == 0)
-            return createStyle(MyGUI::FontManager::getInstance().getDefaultFont().c_str(), fontColour);
+        const std::string templateName = "Journalbook ";
+        std::string bookFont;
+        if (fontName.empty())
+        {
+            bookFont = MyGUI::FontManager::getInstance().getDefaultFont();
+            bookFont = templateName + bookFont;
+            return createStyle(bookFont, fontColour);
+        }
+
+        if (fontName.compare(0, templateName.size(), templateName) == 0)
+            bookFont = fontName;
+        else
+            bookFont = templateName + bookFont;
 
         for (Styles::iterator i = mBook->mStyles.begin (); i != mBook->mStyles.end (); ++i)
-            if (i->match (fontName, fontColour, fontColour, fontColour, 0))
+            if (i->match (bookFont.c_str(), fontColour, fontColour, fontColour, 0))
                 return &*i;
 
-        MyGUI::IFont* font = MyGUI::FontManager::getInstance().getByName(fontName);
+        MyGUI::IFont* font = MyGUI::FontManager::getInstance().getByName(bookFont);
         if (!font)
-            throw std::runtime_error(std::string("can't find font ") + fontName);
+            throw std::runtime_error(std::string("can't find font ") + bookFont);
 
         StyleImpl & style = *mBook->mStyles.insert (mBook->mStyles.end (), StyleImpl ());
         style.mFont = font;

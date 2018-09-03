@@ -293,47 +293,90 @@ namespace MWGui
 
     void WindowManager::loadFontDelegate(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version)
     {
-        MyGUI::xml::ElementEnumerator root = _node->getElementEnumerator();
-        while (root.next("Resource"))
+        const std::string templateName = "Journalbook ";
+        MyGUI::xml::ElementEnumerator font = _node->getElementEnumerator();
+        bool createCopy = false;
+        while (font.next("Resource"))
         {
             std::string type, name;
-            root->findAttribute("type", type);
-            root->findAttribute("name", name);
+            font->findAttribute("type", type);
+            font->findAttribute("name", name);
 
             if (name.empty())
                 continue;
 
             if (Misc::StringUtils::ciEqual(type, "ResourceTrueTypeFont"))
             {
+                createCopy = true;
+
                 // For TrueType fonts we should override Size and Resolution properties
-                // to allow to configure font size via config file, without need to edit XML file.
-                // Also we should take UI scaling factor in account
+                // to allow to configure font size via config file, without need to edit XML files.
+                // Also we should take UI scaling factor in account.
                 int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
                 resolution = std::min(960, std::max(48, resolution));
 
                 float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
+                resolution *= uiScale;
 
-                if (uiScale > 1.0f)
-                    resolution *= uiScale;
-
-                MyGUI::xml::ElementPtr resolutionNode = root->createChild("Property");
+                MyGUI::xml::ElementPtr resolutionNode = font->createChild("Property");
                 resolutionNode->addAttribute("key", "Resolution");
                 resolutionNode->addAttribute("value", std::to_string(resolution));
 
-                MyGUI::xml::ElementPtr sizeNode = root->createChild("Property");
+                MyGUI::xml::ElementPtr sizeNode = font->createChild("Property");
                 sizeNode->addAttribute("key", "Size");
                 sizeNode->addAttribute("value", std::to_string(mFontHeight));
             }
             else if (Misc::StringUtils::ciEqual(type, "ResourceSkin"))
             {
                 // We should adjust line height for MyGUI widgets depending on font size
-                MyGUI::xml::ElementPtr heightNode = root->createChild("Property");
+                MyGUI::xml::ElementPtr heightNode = font->createChild("Property");
                 heightNode->addAttribute("key", "HeightLine");
                 heightNode->addAttribute("value", std::to_string(mFontHeight+2));
             }
         }
 
         MyGUI::ResourceManager::getInstance().loadFromXmlNode(_node, _file, _version);
+
+        if (createCopy)
+        {
+            MyGUI::xml::ElementPtr copy = _node->createCopy();
+
+            MyGUI::xml::ElementEnumerator copyFont = copy->getElementEnumerator();
+            while (copyFont.next("Resource"))
+            {
+                std::string type, name;
+                copyFont->findAttribute("type", type);
+                copyFont->findAttribute("name", name);
+
+                if (name.empty())
+                    continue;
+
+                if (Misc::StringUtils::ciEqual(type, "ResourceTrueTypeFont"))
+                {
+                    // Since the journal and books use the custom scaling factor depending on resolution,
+                    // setup separate fonts with different Resolution to fit these windows.
+                    // These fonts have an internal prefix.
+                    int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
+                    resolution = std::min(960, std::max(48, resolution));
+
+                    float currentX = Settings::Manager::getInt("resolution x", "Video");
+                    float currentY = Settings::Manager::getInt("resolution y", "Video");
+                    // TODO: read size from openmw_layout.xml
+                    float heightScale = (currentY / 520);
+                    float widthScale = (currentX / 600);
+                    float uiScale = std::min(widthScale, heightScale);
+                    resolution *= uiScale;
+
+                    MyGUI::xml::ElementPtr resolutionNode = copyFont->createChild("Property");
+                    resolutionNode->addAttribute("key", "Resolution");
+                    resolutionNode->addAttribute("value", std::to_string(resolution));
+
+                    copyFont->setAttribute("name", "Journalbook " + name);
+                }
+            }
+
+            MyGUI::ResourceManager::getInstance().loadFromXmlNode(copy, _file, _version);
+        }
     }
 
     void WindowManager::initUI()

@@ -480,6 +480,14 @@ namespace Gui
 
         font->deserialization(root, MyGUI::Version(3,2,0));
 
+        // Setup "book" version of font as fallback if we will not use TrueType fonts
+        MyGUI::ResourceManualFont* bookFont = static_cast<MyGUI::ResourceManualFont*>(
+                    MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
+        mFonts.push_back(bookFont);
+        bookFont->deserialization(root, MyGUI::Version(3,2,0));
+        bookFont->setResourceName("Journalbook " + resourceName);
+
+        // Remove automatically registered fonts
         for (std::vector<MyGUI::ResourceManualFont*>::iterator it = mFonts.begin(); it != mFonts.end();)
         {
             if ((*it)->getResourceName() == font->getResourceName())
@@ -487,10 +495,17 @@ namespace Gui
                 MyGUI::ResourceManager::getInstance().removeByName(font->getResourceName());
                 it = mFonts.erase(it);
             }
+            else if ((*it)->getResourceName() == bookFont->getResourceName())
+            {
+                MyGUI::ResourceManager::getInstance().removeByName(bookFont->getResourceName());
+                it = mFonts.erase(it);
+            }
             else
                 ++it;
         }
+
         MyGUI::ResourceManager::getInstance().addResource(font);
+        MyGUI::ResourceManager::getInstance().addResource(bookFont);
     }
 
 }

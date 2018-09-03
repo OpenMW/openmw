@@ -377,7 +377,7 @@ namespace MWGui
             if (attr.find("face") != attr.end())
             {
                 std::string face = attr.at("face");
-                mTextStyle.mFont = face;
+                mTextStyle.mFont = "Journalbook "+face;
             }
             if (attr.find("size") != attr.end())
             {

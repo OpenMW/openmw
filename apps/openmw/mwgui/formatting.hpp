@@ -14,7 +14,7 @@ namespace MWGui
         {
             TextStyle() :
                 mColour(0,0,0)
-                , mFont("Default")
+                , mFont("")
                 , mTextSize(16)
             {
             }

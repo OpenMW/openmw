@@ -31,7 +31,7 @@ ttf resolution
 :Default:	96
 
 Allows to specify resolution for in-game TrueType fonts.
-Note: actual resolution depends on "scaling factor" setting value, this value is for 1.0 or lower scaling factor.
+Note: actual resolution depends on "scaling factor" setting value, this value is for 1.0 scaling factor.
 
 menu transparency
 -----------------
