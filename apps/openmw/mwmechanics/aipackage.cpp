@@ -129,12 +129,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
         const bool wasShortcutting = mIsShortcutting;
         bool destInLOS = false;
-
-        const MWWorld::Class& actorClass = actor.getClass();
-
-        // check if actor can move along z-axis
-        bool actorCanMoveByZ = (actorClass.canSwim(actor) && world->isSwimming(actor))
-            || world->isFlying(actor);
+        const bool actorCanMoveByZ = canActorMoveByZAxis(actor);
 
         // Prohibit shortcuts for AiWander, if the actor can not move in 3 dimensions.
         if (actorCanMoveByZ)
@@ -417,4 +412,11 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
         result |= DetourNavigator::Flag_openDoor;
 
     return result;
+}
+
+bool MWMechanics::AiPackage::canActorMoveByZAxis(const MWWorld::Ptr& actor) const
+{
+    const auto world = MWBase::Environment::get().getWorld();
+    const auto& actorClass = actor.getClass();
+    return (actorClass.canSwim(actor) && world->isSwimming(actor)) || world->isFlying(actor);
 }
