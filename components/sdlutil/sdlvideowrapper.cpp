@@ -2,8 +2,6 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <MyGUI_ResourceManager.h>
-
 #include <osgViewer/Viewer>
 
 #include <SDL_video.h>
@@ -91,9 +89,6 @@ namespace SDLUtil
             SDL_SetWindowSize(mWindow, width, height);
             SDL_SetWindowBordered(mWindow, windowBorder ? SDL_TRUE : SDL_FALSE);
         }
-
-        // We should reload TrueType fonts for new resolution
-        MyGUI::ResourceManager::getInstance().load("openmw_font.xml");
     }
 
 }

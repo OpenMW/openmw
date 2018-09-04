@@ -676,6 +676,9 @@ namespace MWInput
                                         Settings::Manager::getInt("resolution y", "Video"),
                                         Settings::Manager::getBool("fullscreen", "Video"),
                                         Settings::Manager::getBool("window border", "Video"));
+
+            // We should reload TrueType fonts to fit new resolution
+            MWBase::Environment::get().getWindowManager()->loadUserFonts();
         }
     }
 

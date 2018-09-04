@@ -145,8 +145,9 @@ namespace
 namespace Gui
 {
 
-    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs)
+    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, const std::string& userDataPath)
         : mVFS(vfs)
+        , mUserDataPath(userDataPath)
     {
         if (encoding == ToUTF8::WINDOWS_1252)
             mEncoding = ToUTF8::CP437;
@@ -175,7 +176,7 @@ namespace Gui
         mFonts.clear();
     }
 
-    void FontLoader::loadAllFonts(bool exportToFile)
+    void FontLoader::loadBitmapFonts(bool exportToFile)
     {
         const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
 
@@ -196,6 +197,25 @@ namespace Gui
                 break;
             ++found;
         }
+    }
+
+    void FontLoader::loadTrueTypeFonts()
+    {
+        osgMyGUI::DataManager* dataManager = dynamic_cast<osgMyGUI::DataManager*>(&osgMyGUI::DataManager::getInstance());
+        if (!dataManager)
+        {
+            Log(Debug::Error) << "Can not load TrueType fonts: osgMyGUI::DataManager is not available.";
+            return;
+        }
+
+        const std::string cfg = dataManager->getDataPath("");
+        const std::string fontFile = mUserDataPath + "/" + "Fonts" + "/" + "openmw_font.xml";
+        if (!boost::filesystem::exists(fontFile))
+            return;
+
+        dataManager->setResourcePath(mUserDataPath + "/" + "Fonts");
+        MyGUI::ResourceManager::getInstance().load("openmw_font.xml");
+        dataManager->setResourcePath(cfg);
     }
 
 

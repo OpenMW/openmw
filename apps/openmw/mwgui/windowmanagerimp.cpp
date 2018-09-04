@@ -38,6 +38,7 @@
 #include <components/translation/translation.hpp>
 
 #include <components/myguiplatform/myguiplatform.hpp>
+#include <components/myguiplatform/myguidatamanager.hpp>
 #include <components/myguiplatform/myguirendermanager.hpp>
 #include <components/myguiplatform/additivelayer.hpp>
 #include <components/myguiplatform/scalinglayer.hpp>
@@ -131,8 +132,8 @@ namespace MWGui
 
     WindowManager::WindowManager(
             osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-            const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts,
-            Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap, const std::string& versionDescription)
+            const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
+            ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap, const std::string& versionDescription, const std::string& userDataPath)
       : mStore(NULL)
       , mResourceSystem(resourceSystem)
       , mWorkQueue(workQueue)
@@ -210,8 +211,8 @@ namespace MWGui
         MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
         // Load fonts
-        mFontLoader.reset(new Gui::FontLoader(encoding, resourceSystem->getVFS()));
-        mFontLoader->loadAllFonts(exportFonts);
+        mFontLoader.reset(new Gui::FontLoader(encoding, resourceSystem->getVFS(), userDataPath));
+        mFontLoader->loadBitmapFonts(exportFonts);
 
         //Register own widgets with MyGUI
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
@@ -245,6 +246,7 @@ namespace MWGui
 
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::ResourceManager::getInstance().load("core.xml");
+        loadUserFonts();
 
         bool keyboardNav = Settings::Manager::getBool("keyboard navigation", "GUI");
         mKeyboardNavigation.reset(new KeyboardNavigation());
@@ -377,6 +379,11 @@ namespace MWGui
 
             MyGUI::ResourceManager::getInstance().loadFromXmlNode(copy, _file, _version);
         }
+    }
+
+    void WindowManager::loadUserFonts()
+    {
+        mFontLoader->loadTrueTypeFonts();
     }
 
     void WindowManager::initUI()
