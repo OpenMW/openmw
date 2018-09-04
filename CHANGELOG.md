@@ -138,6 +138,9 @@
     Feature #4550: Weapon priority: make ranged weapon bonus more sensible
     Feature #4579: Add option for applying Strength into hand to hand damage
     Feature #4581: Use proper logging system
+    Feature #4624: Spell priority: don't cast hit chance-affecting spells if the enemy is not in respective stance at the moment
+    Feature #4625: Weapon priority: use weighted mean for melee damage rating
+    Feature #4626: Weapon priority: account for weapon speed
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test
     Task #4605: Optimize skinning

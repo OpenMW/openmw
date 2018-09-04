@@ -268,24 +268,27 @@ namespace MWClass
         {
             text += "\n#{sType} ";
 
-            std::map <int, std::pair <std::string, std::string> > mapping;
-            mapping[ESM::Weapon::ShortBladeOneHand] = std::make_pair("sSkillShortblade", "sOneHanded");
-            mapping[ESM::Weapon::LongBladeOneHand] = std::make_pair("sSkillLongblade", "sOneHanded");
-            mapping[ESM::Weapon::LongBladeTwoHand] = std::make_pair("sSkillLongblade", "sTwoHanded");
-            mapping[ESM::Weapon::BluntOneHand] = std::make_pair("sSkillBluntweapon", "sOneHanded");
-            mapping[ESM::Weapon::BluntTwoClose] = std::make_pair("sSkillBluntweapon", "sTwoHanded");
-            mapping[ESM::Weapon::BluntTwoWide] = std::make_pair("sSkillBluntweapon", "sTwoHanded");
-            mapping[ESM::Weapon::SpearTwoWide] = std::make_pair("sSkillSpear", "sTwoHanded");
-            mapping[ESM::Weapon::AxeOneHand] = std::make_pair("sSkillAxe", "sOneHanded");
-            mapping[ESM::Weapon::AxeTwoHand] = std::make_pair("sSkillAxe", "sTwoHanded");
-            mapping[ESM::Weapon::MarksmanBow] = std::make_pair("sSkillMarksman", "");
-            mapping[ESM::Weapon::MarksmanCrossbow] = std::make_pair("sSkillMarksman", "");
-            mapping[ESM::Weapon::MarksmanThrown] = std::make_pair("sSkillMarksman", "");
-            mapping[ESM::Weapon::Arrow] = std::make_pair("sSkillMarksman", "");
-            mapping[ESM::Weapon::Bolt] = std::make_pair("sSkillMarksman", "");
+            static std::map <int, std::pair <std::string, std::string> > mapping;
+            if (mapping.empty())
+            {
+                mapping[ESM::Weapon::ShortBladeOneHand] = std::make_pair("sSkillShortblade", "sOneHanded");
+                mapping[ESM::Weapon::LongBladeOneHand] = std::make_pair("sSkillLongblade", "sOneHanded");
+                mapping[ESM::Weapon::LongBladeTwoHand] = std::make_pair("sSkillLongblade", "sTwoHanded");
+                mapping[ESM::Weapon::BluntOneHand] = std::make_pair("sSkillBluntweapon", "sOneHanded");
+                mapping[ESM::Weapon::BluntTwoClose] = std::make_pair("sSkillBluntweapon", "sTwoHanded");
+                mapping[ESM::Weapon::BluntTwoWide] = std::make_pair("sSkillBluntweapon", "sTwoHanded");
+                mapping[ESM::Weapon::SpearTwoWide] = std::make_pair("sSkillSpear", "sTwoHanded");
+                mapping[ESM::Weapon::AxeOneHand] = std::make_pair("sSkillAxe", "sOneHanded");
+                mapping[ESM::Weapon::AxeTwoHand] = std::make_pair("sSkillAxe", "sTwoHanded");
+                mapping[ESM::Weapon::MarksmanBow] = std::make_pair("sSkillMarksman", "");
+                mapping[ESM::Weapon::MarksmanCrossbow] = std::make_pair("sSkillMarksman", "");
+                mapping[ESM::Weapon::MarksmanThrown] = std::make_pair("sSkillMarksman", "");
+                mapping[ESM::Weapon::Arrow] = std::make_pair("sSkillMarksman", "");
+                mapping[ESM::Weapon::Bolt] = std::make_pair("sSkillMarksman", "");
+            }
 
-            std::string type = mapping[ref->mBase->mData.mType].first;
-            std::string oneOrTwoHanded = mapping[ref->mBase->mData.mType].second;
+            const std::string type = mapping[ref->mBase->mData.mType].first;
+            const std::string oneOrTwoHanded = mapping[ref->mBase->mData.mType].second;
 
             text += store.get<ESM::GameSetting>().find(type)->mValue.getString() +
                 ((oneOrTwoHanded != "") ? ", " + store.get<ESM::GameSetting>().find(oneOrTwoHanded)->mValue.getString() : "");
