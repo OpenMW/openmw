@@ -1064,7 +1064,13 @@ namespace MWScript
                 runtime.pop();
 
                 const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (spellId);
-                if (spell && spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power)
+                if (!spell)
+                {
+                    runtime.getContext().report("spellcasting failed: can not find spell \""+spellId+"\"");
+                    return;
+                }
+
+                if (spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power)
                 {
                     runtime.getContext().report("spellcasting failed: you can cast only spells and powers.");
                     return;
