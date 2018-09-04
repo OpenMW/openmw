@@ -114,6 +114,7 @@
     Bug #4617: First person sneaking offset is not applied while the character is in air
     Bug #4618: Sneaking is possible while the character is flying
     Bug #4622: Recharging enchanted items with Soul Gems does not award experience if it fails
+    Bug #4628: NPC record reputation, disposition and faction rank should have unsigned char type
     Feature #1645: Casting effects from objects
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
