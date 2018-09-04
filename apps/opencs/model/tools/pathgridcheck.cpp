@@ -109,7 +109,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
                 pathgrid.mPoints[i].mY == pathgrid.mPoints[j].mY &&
                 pathgrid.mPoints[i].mZ == pathgrid.mPoints[j].mZ)
             {
-                std::vector<int>::const_iterator it = find(duplList.begin(), duplList.end(), i);
+                std::vector<int>::const_iterator it = find(duplList.begin(), duplList.end(), static_cast<int>(i));
                 if (it == duplList.end())
                 {
                     std::ostringstream ss;
