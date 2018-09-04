@@ -36,12 +36,7 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
     // A class should have a name
     if (class_.mName.empty())
-    {
-        if (class_.mData.mIsPlayable != 0)
-            messages.add(id, "Name of a playable class is missing", "", CSMDoc::Message::Severity_Error);
-        else
-            messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Warning);
-    }
+        messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
 
     // A playable class should have a description
     if (class_.mData.mIsPlayable != 0 && class_.mDescription.empty())
@@ -56,7 +51,7 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
     if (class_.mData.mAttribute[0]==class_.mData.mAttribute[1] && class_.mData.mAttribute[0]!=-1)
     {
-        messages.add(id, "Same attribute is listed twice", "", CSMDoc::Message::Severity_Warning);
+        messages.add(id, "Same attribute is listed twice", "", CSMDoc::Message::Severity_Error);
     }
 
     // test for non-unique skill
@@ -69,6 +64,6 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
     for (auto &skill : skills)
         if (skill.second>1)
         {
-            messages.add(id, "Skill " + ESM::Skill::indexToId (skill.first) + " is listed more than once", "", CSMDoc::Message::Severity_Warning);
+            messages.add(id, "Skill " + ESM::Skill::indexToId (skill.first) + " is listed more than once", "", CSMDoc::Message::Severity_Error);
         }
 }

@@ -475,7 +475,7 @@ void CSMTools::ReferenceableCheckStage::creatureCheck (
         if (creature.mData.mAttack[i] < 0)
             messages.add(id, "Attack " + std::to_string(i/2 + 1) + " has negative" + (i % 2 == 0 ? " minimum " : " maximum ") + "damage", "", CSMDoc::Message::Severity_Error);
         if (i % 2 == 0 && creature.mData.mAttack[i] > creature.mData.mAttack[i+1])
-            messages.add(id, "Attack " + std::to_string(i/2 + 1) + " has minimum damage higher than maximum damage", "", CSMDoc::Message::Severity_Warning);
+            messages.add(id, "Attack " + std::to_string(i/2 + 1) + " has minimum damage higher than maximum damage", "", CSMDoc::Message::Severity_Error);
     }
 
     if (creature.mData.mGold < 0)

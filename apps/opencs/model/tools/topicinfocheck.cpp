@@ -133,7 +133,6 @@ void CSMTools::TopicInfoCheckStage::perform(int stage, CSMDoc::Messages& message
 
     if (topicInfo.mData.mGender < -1 || topicInfo.mData.mGender > 1)
     {
-        std::ostringstream stream;
         messages.add(id, "Gender is invalid", "", CSMDoc::Message::Severity_Error);
     }
 
@@ -170,16 +169,12 @@ bool CSMTools::TopicInfoCheckStage::verifyActor(const std::string& actor, const 
 
     if (index.first == -1)
     {
-        std::ostringstream stream;
-        stream << "Actor '" << actor << "' does not exist";
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Actor '" + actor + "' does not exist", "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (mReferencables.getRecord(index).isDeleted())
     {
-        std::ostringstream stream;
-        stream << "Deleted actor '" << actor << "' is being referenced";
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Deleted actor '" + actor + "' is being referenced", "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (index.second != CSMWorld::UniversalId::Type_Npc && index.second != CSMWorld::UniversalId::Type_Creature)
@@ -199,9 +194,7 @@ bool CSMTools::TopicInfoCheckStage::verifyCell(const std::string& cell, const CS
 {
     if (mCellNames.find(cell) == mCellNames.end())
     {
-        std::ostringstream stream;
-        stream << "Cell '" << cell << "' does not exist";
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Cell '" + cell + "' does not exist", "", CSMDoc::Message::Severity_Error);
         return false;
     }
 
@@ -236,7 +229,7 @@ bool CSMTools::TopicInfoCheckStage::verifyFactionRank(const std::string& faction
         stream << "Faction rank is set to " << rank << " which is more than the maximum of " << limit - 1
                << " for the '" << factionName << "' faction";
 
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Warning);
+        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
         return false;
     }
 
@@ -250,16 +243,12 @@ bool CSMTools::TopicInfoCheckStage::verifyItem(const std::string& item, const CS
 
     if (index.first == -1)
     {
-        std::ostringstream stream;
-        stream << "Item '" << item << "' does not exist";
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
+        messages.add(id, ("Item '" + item + "' does not exist"), "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (mReferencables.getRecord(index).isDeleted())
     {
-        std::ostringstream stream;
-        stream << "Deleted item '" << item << "' is being referenced";
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
+        messages.add(id, ("Deleted item '" + item + "' is being referenced"), "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else
@@ -327,18 +316,12 @@ bool CSMTools::TopicInfoCheckStage::verifySelectStruct(const ESM::DialInfo::Sele
     }
     else if (infoCondition.conditionIsAlwaysTrue())
     {
-        std::ostringstream stream;
-        stream << "Condition '" << infoCondition.toString() << "' is always true";
-
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Warning);
+        messages.add(id, "Condition '" + infoCondition.toString() + "' is always true", "", CSMDoc::Message::Severity_Warning);
         return false;
     }
     else if (infoCondition.conditionIsNeverTrue())
     {
-        std::ostringstream stream;
-        stream << "Condition '" << infoCondition.toString() << "' is never true";
-
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Warning);
+        messages.add(id, "Condition '" + infoCondition.toString() + "' is never true", "", CSMDoc::Message::Severity_Warning);
         return false;
     }
 
@@ -397,9 +380,7 @@ bool CSMTools::TopicInfoCheckStage::verifySound(const std::string& sound, const 
 {
     if (mSoundFiles.searchId(sound) == -1)
     {
-        std::ostringstream stream;
-        stream << "Sound file '" << sound << "' does not exist";
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Sound file '" + sound + "' does not exist", "", CSMDoc::Message::Severity_Error);
         return false;
     }
 
@@ -414,16 +395,12 @@ bool CSMTools::TopicInfoCheckStage::verifyId(const std::string& name, const CSMW
 
     if (index == -1)
     {
-        std::ostringstream stream;
-        stream << T::getRecordType() + " '" << name << "' does not exist";
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
+        messages.add(id, T::getRecordType() + " '" + name + "' does not exist", "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (collection.getRecord(index).isDeleted())
     {
-        std::ostringstream stream;
-        stream << "Deleted " << T::getRecordType() << " record '" << name << "' is being referenced";
-        messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Deleted " + T::getRecordType() + " record '" + name + "' is being referenced", "", CSMDoc::Message::Severity_Error);
         return false;
     }
 
