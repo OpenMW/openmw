@@ -465,11 +465,10 @@ namespace
         {
             setOptionsMode ();
 
-            int pagesCount;
             if (!mTopicIndexBook)
-                mTopicIndexBook = createTopicIndexBook (pagesCount);
+                mTopicIndexBook = createTopicIndexBook ();
 
-            if (pagesCount == 3)
+            if (mIndexPagesCount == 3)
             {
                 getPage (LeftTopicIndex)->showPage (mTopicIndexBook, 0);
                 getPage (CenterTopicIndex)->showPage (mTopicIndexBook, 1);

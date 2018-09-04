@@ -157,7 +157,7 @@ MWGui::BookTypesetter::Utf8Span to_utf8_span (char const * text)
 typedef TypesetBook::Ptr book;
 
 JournalBooks::JournalBooks (JournalViewModel::Ptr model, ToUTF8::FromType encoding) :
-    mModel (model), mEncoding(encoding)
+    mModel (model), mEncoding(encoding), mIndexPagesCount(0)
 {
 }
 
@@ -218,23 +218,23 @@ book JournalBooks::createQuestBook (const std::string& questName)
     return typesetter->complete ();
 }
 
-book JournalBooks::createTopicIndexBook (int& columnsCount)
+book JournalBooks::createTopicIndexBook ()
 {
     bool isRussian = (mEncoding == ToUTF8::WINDOWS_1251);
 
-    BookTypesetter::Ptr typesetter = isRussian ? createCyrillicJournalIndex(columnsCount) : createLatinJournalIndex(columnsCount);
+    BookTypesetter::Ptr typesetter = isRussian ? createCyrillicJournalIndex() : createLatinJournalIndex();
 
     return typesetter->complete ();
 }
 
-BookTypesetter::Ptr JournalBooks::createLatinJournalIndex (int& columnsCount)
+BookTypesetter::Ptr JournalBooks::createLatinJournalIndex ()
 {
     BookTypesetter::Ptr typesetter = BookTypesetter::create (92, 260);
 
     typesetter->setSectionAlignment (BookTypesetter::AlignCenter);
 
     // Latin journal index always has two columns for now.
-    columnsCount = 2;
+    mIndexPagesCount = 2;
 
     char ch = 'A';
 
@@ -261,7 +261,7 @@ BookTypesetter::Ptr JournalBooks::createLatinJournalIndex (int& columnsCount)
     return typesetter;
 }
 
-BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex (int& columnsCount)
+BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex ()
 {
     BookTypesetter::Ptr typesetter = BookTypesetter::create (92, 260);
 
@@ -273,11 +273,11 @@ BookTypesetter::Ptr JournalBooks::createCyrillicJournalIndex (int& columnsCount)
 
     // for small font size split alphabet to two columns (2x15 characers), for big font size split it to three colums (3x10 characters).
     int sectionBreak = 10;
-    columnsCount = 3;
+    mIndexPagesCount = 3;
     if (fontHeight < 18)
     {
         sectionBreak = 15;
-        columnsCount = 2;
+        mIndexPagesCount = 2;
     }
 
     unsigned char ch[2] = {0xd0, 0x90}; // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
