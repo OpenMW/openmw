@@ -49,13 +49,13 @@ namespace MWMechanics
         return schoolSkillMap[school];
     }
 
-    float calcEffectCost(const ESM::ENAMstruct& effect)
+    float calcEffectCost(const ESM::ENAMstruct& effect, const bool customSpellCost)
     {
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
-        return calcEffectCost(effect, magicEffect);
+        return calcEffectCost(effect, magicEffect, customSpellCost);
     }
 
-    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect)
+    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect, const bool customSpellCost)
     {
         int minMagn = 1;
         int maxMagn = 1;
@@ -68,6 +68,9 @@ namespace MWMechanics
         int duration = 0;
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
             duration = effect.mDuration;
+        //The wonders of vanilla spellmaking
+        if (customSpellCost && duration < 1)
+            duration = 1;
 
         static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore()
             .get<ESM::GameSetting>().find("fEffectCostMult")->mValue.getFloat();

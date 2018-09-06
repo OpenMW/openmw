@@ -3,6 +3,7 @@
 
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadspel.hpp>
+#include <components/settings/settings.hpp>
 
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
