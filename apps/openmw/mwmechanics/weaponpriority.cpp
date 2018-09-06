@@ -39,7 +39,8 @@ namespace MWMechanics
             return 0.f;
 
         float rating=0.f;
-        float rangedMult=1.f;
+        static const float fAIMeleeWeaponMult = gmst.find("fAIMeleeWeaponMult")->mValue.getFloat();
+        float ratingMult = fAIMeleeWeaponMult;
 
         if (weapon->mData.mType >= ESM::Weapon::MarksmanBow && weapon->mData.mType <= ESM::Weapon::MarksmanThrown)
         {
@@ -48,14 +49,11 @@ namespace MWMechanics
              || world->isUnderwater(MWWorld::ConstPtr(enemy), 0.75f))
                 return 0.f;
 
+            // Use a higher rating multiplier if the actor is out of enemy's reach, use the normal mult otherwise
             if (getDistanceMinusHalfExtents(actor, enemy) >= getMaxAttackDistance(enemy))
             {
-                static const float fAIMeleeWeaponMult = gmst.find("fAIMeleeWeaponMult")->mValue.getFloat();
                 static const float fAIRangeMeleeWeaponMult = gmst.find("fAIRangeMeleeWeaponMult")->mValue.getFloat();
-                if (fAIMeleeWeaponMult != 0)
-                    rangedMult = fAIRangeMeleeWeaponMult / fAIMeleeWeaponMult;
-                else
-                    rangedMult = fAIRangeMeleeWeaponMult;
+                ratingMult = fAIRangeMeleeWeaponMult;
             }
         }
 
@@ -124,7 +122,7 @@ namespace MWMechanics
         if (weapon->mData.mType < ESM::Weapon::MarksmanBow)
             rating *= weapon->mData.mSpeed;
 
-        return rating * rangedMult;
+        return rating * ratingMult;
     }
 
     float rateAmmo(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy, MWWorld::Ptr &bestAmmo, ESM::Weapon::Type ammoType)
