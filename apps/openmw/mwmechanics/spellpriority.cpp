@@ -617,13 +617,19 @@ namespace MWMechanics
     float rateEffects(const ESM::EffectList &list, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy)
     {
         // NOTE: enemy may be empty
+
         float rating = 0.f;
+        float ratingMult = 1.f; // NB: this multiplier is applied to the effect rating, not the final rating
+
+        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        static const float fAIMagicSpellMult = gmst.find("fAIMagicSpellMult")->mValue.getFloat();
+        static const float fAIRangeMagicSpellMult = gmst.find("fAIRangeMagicSpellMult")->mValue.getFloat();
+
         for (std::vector<ESM::ENAMstruct>::const_iterator it = list.mList.begin(); it != list.mList.end(); ++it)
         {
-            rating += rateEffect(*it, actor, enemy);
+            ratingMult = (it->mRange == ESM::RT_Target) ? fAIRangeMagicSpellMult : fAIMagicSpellMult;
 
-            if (it->mRange == ESM::RT_Target)
-                rating *= 1.5f;
+            rating += rateEffect(*it, actor, enemy) * ratingMult;
         }
         return rating;
     }

@@ -141,6 +141,7 @@
     Feature #4624: Spell priority: don't cast hit chance-affecting spells if the enemy is not in respective stance at the moment
     Feature #4625: Weapon priority: use weighted mean for melee damage rating
     Feature #4626: Weapon priority: account for weapon speed
+    Feature #4632: AI priority: utilize vanilla AI GMSTs for priority rating
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test
     Task #4605: Optimize skinning
