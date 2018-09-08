@@ -555,6 +555,14 @@ namespace CSMWorld
             if (data)
             {
                 setupRace(race, data);
+                // Race was changed. Need to mark actor dependencies as dirty.
+                // Cannot use markDirtyDependency because that would invalidate
+                // the current iterator.
+                for (auto actorIt : mCachedActors)
+                {
+                    if (actorIt->hasDependency(race))
+                        mDirtyActors.emplace(actorIt->getId());
+                }
             }
         }
         mDirtyRaces.clear();
