@@ -67,7 +67,13 @@ namespace MWGui
         , mLastYSize(0)
         , mPreview(new MWRender::InventoryPreview(parent, resourceSystem, MWMechanics::getPlayer()))
         , mTrading(false)
+        , mScaleFactor(1.0f)
+        , mUpdateTimer(0.f)
     {
+        float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
+        if (uiScale > 1.0)
+            mScaleFactor = uiScale;
+
         mPreviewTexture.reset(new osgMyGUI::OSGTexture(mPreview->getTexture()));
         mPreview->rebuild();
 
@@ -431,10 +437,10 @@ namespace MWGui
         MyGUI::IntSize size = mAvatarImage->getSize();
         int width = std::min(mPreview->getTextureWidth(), size.width);
         int height = std::min(mPreview->getTextureHeight(), size.height);
-        mPreview->setViewport(width, height);
+        mPreview->setViewport(int(width*mScaleFactor), int(height*mScaleFactor));
 
         mAvatarImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f,
-                                                                     width/float(mPreview->getTextureWidth()), height/float(mPreview->getTextureHeight())));
+                                                                     width*mScaleFactor/float(mPreview->getTextureWidth()), height*mScaleFactor/float(mPreview->getTextureHeight())));
     }
 
     void InventoryWindow::onFilterChanged(MyGUI::Widget* _sender)
@@ -512,7 +518,7 @@ namespace MWGui
 
         // Give the script a chance to run once before we do anything else
         // this is important when setting pcskipequip as a reaction to onpcequip being set (bk_treasuryreport does this)
-        if (!script.empty() && MWBase::Environment::get().getWorld()->getScriptsEnabled())
+        if (!force && !script.empty() && MWBase::Environment::get().getWorld()->getScriptsEnabled())
         {
             MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
             MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
@@ -591,6 +597,11 @@ namespace MWGui
     {
         // convert to OpenGL lower-left origin
         y = (mAvatarImage->getHeight()-1) - y;
+
+        // Scale coordinates
+        x = int(x*mScaleFactor);
+        y = int(y*mScaleFactor);
+
         int slot = mPreview->getSlotSelected (x, y);
 
         if (slot == -1)
@@ -621,6 +632,22 @@ namespace MWGui
     void InventoryWindow::onFrame(float dt)
     {
         updateEncumbranceBar();
+
+        if (mPinned)
+        {
+            mUpdateTimer += dt;
+            if (0.1f < mUpdateTimer)
+            {
+                mUpdateTimer = 0;
+
+                // Update pinned inventory in-game
+                if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
+                {
+                    mItemView->update();
+                    notifyContentChanged();
+                }
+            }
+        }
     }
 
     void InventoryWindow::setTrading(bool trading)
@@ -671,6 +698,8 @@ namespace MWGui
             return;
 
         int count = object.getRefData().getCount();
+        if (object.getClass().isGold(object))
+            count *= object.getClass().getValue(object);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWBase::Environment::get().getWorld()->breakInvisibility(player);

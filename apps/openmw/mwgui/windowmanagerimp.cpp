@@ -21,6 +21,8 @@
 #include <SDL_keyboard.h>
 #include <SDL_clipboard.h>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/sdlutil/sdlcursormanager.hpp>
 
 #include <components/esm/esmreader.hpp>
@@ -356,7 +358,7 @@ namespace MWGui
         mGuiModeStates[GM_Journal].mCloseSound = "book close";
         mGuiModeStates[GM_Journal].mOpenSound = "book open";
 
-        mMessageBoxManager = new MessageBoxManager(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
+        mMessageBoxManager = new MessageBoxManager(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->mValue.getFloat());
 
         SpellBuyingWindow* spellBuyingWindow = new SpellBuyingWindow();
         mWindows.push_back(spellBuyingWindow);
@@ -898,7 +900,8 @@ namespace MWGui
 
         mKeyboardNavigation->onFrame();
 
-        mMessageBoxManager->onFrame(frameDuration);
+        if (mMessageBoxManager)
+            mMessageBoxManager->onFrame(frameDuration);
 
         mToolTips->onFrame(frameDuration);
 
@@ -1081,7 +1084,7 @@ namespace MWGui
         {
             if (!mStore)
             {
-                std::cerr << "Error: WindowManager::onRetrieveTag: no Store set up yet, can not replace '" << tag << "'" << std::endl;
+                Log(Debug::Error) << "Error: WindowManager::onRetrieveTag: no Store set up yet, can not replace '" << tag << "'";
                 return;
             }
             const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().find(tag);
@@ -1787,7 +1790,7 @@ namespace MWGui
                 if (found != mCurrentModals.end())
                     mCurrentModals.erase(found);
                 else
-                    std::cerr << " warning: can't find modal window " << input << std::endl;
+                    Log(Debug::Warning) << "Warning: can't find modal window " << input;
             }
         }
         if (mCurrentModals.empty())

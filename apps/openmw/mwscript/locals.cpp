@@ -3,7 +3,7 @@
 #include <components/esm/loadscpt.hpp>
 #include <components/esm/variant.hpp>
 #include <components/esm/locals.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/compiler/locals.hpp>
 #include <components/compiler/exception.hpp>
 
@@ -229,10 +229,10 @@ namespace MWScript
                     }
                     catch (std::exception& e)
                     {
-                        std::cerr << "Failed to read local variable state for script '"
-                                  << script << "' (legacy format): " << e.what()
-                                  << "\nNum shorts: " << numshorts << " / " << mShorts.size()
-                                  << " Num longs: " << numlongs << " / " << mLongs.size() << std::endl;
+                        Log(Debug::Error) << "Failed to read local variable state for script '"
+                                          << script << "' (legacy format): " << e.what()
+                                          << "\nNum shorts: " << numshorts << " / " << mShorts.size()
+                                          << " Num longs: " << numlongs << " / " << mLongs.size();
                     }
                 }
                 else

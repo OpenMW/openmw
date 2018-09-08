@@ -6,6 +6,8 @@
 
 #include <MyGUI_LanguageManager.h>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 
@@ -190,8 +192,9 @@ namespace MWScript
                     if (it == invStore.end())
                     {
                         it = ptr.getClass().getContainerStore (ptr).add (item, 1, ptr);
-                        std::cerr << "Implicitly adding one " << item << " to container "
-                            "to fulfil requirements of Equip instruction" << std::endl;
+                        Log(Debug::Warning) << "Implicitly adding one " << item << 
+                            " to the inventory store of " << ptr.getCellRef().getRefId() <<
+                            " to fulfill the requirements of Equip instruction";
                     }
 
                     if (ptr == MWMechanics::getPlayer())

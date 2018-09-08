@@ -40,7 +40,7 @@ namespace MWMechanics
 
         float pickQuality = lockpick.get<ESM::Lockpick>()->mBase->mData.mQuality;
 
-        float fPickLockMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fPickLockMult")->getFloat();
+        float fPickLockMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fPickLockMult")->mValue.getFloat();
 
         float x = 0.2f * mAgility + 0.1f * mLuck + mSecuritySkill;
         x *= pickQuality * mFatigueTerm;
@@ -81,7 +81,7 @@ namespace MWMechanics
         const ESM::Spell* trapSpell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(trap.getCellRef().getTrap());
         int trapSpellPoints = trapSpell->mData.mCost;
 
-        float fTrapCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTrapCostMult")->getFloat();
+        float fTrapCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTrapCostMult")->mValue.getFloat();
 
         float x = 0.2f * mAgility + 0.1f * mLuck + mSecuritySkill;
         x += fTrapCostMult * trapSpellPoints;

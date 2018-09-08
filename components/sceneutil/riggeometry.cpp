@@ -1,11 +1,37 @@
 #include "riggeometry.hpp"
 
 #include <stdexcept>
-#include <iostream>
 #include <cstdlib>
+
+#include <components/debug/debuglog.hpp>
 
 #include "skeleton.hpp"
 #include "util.hpp"
+
+namespace
+{
+    inline void accumulateMatrix(const osg::Matrixf& invBindMatrix, const osg::Matrixf& matrix, const float weight, osg::Matrixf& result)
+    {
+        osg::Matrixf m = invBindMatrix * matrix;
+        float* ptr = m.ptr();
+        float* ptrresult = result.ptr();
+        ptrresult[0] += ptr[0] * weight;
+        ptrresult[1] += ptr[1] * weight;
+        ptrresult[2] += ptr[2] * weight;
+
+        ptrresult[4] += ptr[4] * weight;
+        ptrresult[5] += ptr[5] * weight;
+        ptrresult[6] += ptr[6] * weight;
+
+        ptrresult[8] += ptr[8] * weight;
+        ptrresult[9] += ptr[9] * weight;
+        ptrresult[10] += ptr[10] * weight;
+
+        ptrresult[12] += ptr[12] * weight;
+        ptrresult[13] += ptr[13] * weight;
+        ptrresult[14] += ptr[14] * weight;
+    }
+}
 
 namespace SceneUtil
 {
@@ -96,13 +122,13 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
 
     if (!mSkeleton)
     {
-        std::cerr << "Error: A RigGeometry did not find its parent skeleton" << std::endl;
+        Log(Debug::Error) << "Error: A RigGeometry did not find its parent skeleton";
         return false;
     }
 
     if (!mInfluenceMap)
     {
-        std::cerr << "Error: No InfluenceMap set on RigGeometry" << std::endl;
+        Log(Debug::Error) << "Error: No InfluenceMap set on RigGeometry";
         return false;
     }
 
@@ -113,7 +139,7 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
         Bone* bone = mSkeleton->getBone(it->first);
         if (!bone)
         {
-            std::cerr << "Error: RigGeometry did not find bone " << it->first << std::endl;
+            Log(Debug::Error) << "Error: RigGeometry did not find bone " << it->first ;
             continue;
         }
 
@@ -140,39 +166,18 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
     return true;
 }
 
-void accumulateMatrix(const osg::Matrixf& invBindMatrix, const osg::Matrixf& matrix, float weight, osg::Matrixf& result)
-{
-    osg::Matrixf m = invBindMatrix * matrix;
-    float* ptr = m.ptr();
-    float* ptrresult = result.ptr();
-    ptrresult[0] += ptr[0] * weight;
-    ptrresult[1] += ptr[1] * weight;
-    ptrresult[2] += ptr[2] * weight;
-
-    ptrresult[4] += ptr[4] * weight;
-    ptrresult[5] += ptr[5] * weight;
-    ptrresult[6] += ptr[6] * weight;
-
-    ptrresult[8] += ptr[8] * weight;
-    ptrresult[9] += ptr[9] * weight;
-    ptrresult[10] += ptr[10] * weight;
-
-    ptrresult[12] += ptr[12] * weight;
-    ptrresult[13] += ptr[13] * weight;
-    ptrresult[14] += ptr[14] * weight;
-}
-
 void RigGeometry::cull(osg::NodeVisitor* nv)
 {
     if (!mSkeleton)
     {
-        std::cerr << "Error: RigGeometry rendering with no skeleton, should have been initialized by UpdateVisitor" << std::endl;
+        Log(Debug::Error) << "Error: RigGeometry rendering with no skeleton, should have been initialized by UpdateVisitor";
         // try to recover anyway, though rendering is likely to be incorrect.
         if (!initFromParentSkeleton(nv))
             return;
     }
 
-    if ((!mSkeleton->getActive() && mLastFrameNumber != 0) || mLastFrameNumber == nv->getTraversalNumber())
+    unsigned int traversalNumber = nv->getTraversalNumber();
+    if (mLastFrameNumber == traversalNumber || (mLastFrameNumber != 0 && !mSkeleton->getActive()))
     {
         osg::Geometry& geom = *getGeometry(mLastFrameNumber);
         nv->pushOntoNodePath(&geom);
@@ -180,10 +185,10 @@ void RigGeometry::cull(osg::NodeVisitor* nv)
         nv->popFromNodePath();
         return;
     }
-    mLastFrameNumber = nv->getTraversalNumber();
+    mLastFrameNumber = traversalNumber;
     osg::Geometry& geom = *getGeometry(mLastFrameNumber);
 
-    mSkeleton->updateBoneMatrices(nv->getTraversalNumber());
+    mSkeleton->updateBoneMatrices(traversalNumber);
 
     // skinning
     const osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
@@ -194,34 +199,31 @@ void RigGeometry::cull(osg::NodeVisitor* nv)
     osg::Vec3Array* normalDst = static_cast<osg::Vec3Array*>(geom.getNormalArray());
     osg::Vec4Array* tangentDst = static_cast<osg::Vec4Array*>(geom.getTexCoordArray(7));
 
-    for (Bone2VertexMap::const_iterator it = mBone2VertexMap.begin(); it != mBone2VertexMap.end(); ++it)
+    for (auto &pair : mBone2VertexMap)
     {
-        osg::Matrixf resultMat  (0, 0, 0, 0,
+        osg::Matrixf resultMat (0, 0, 0, 0,
                                 0, 0, 0, 0,
                                 0, 0, 0, 0,
                                 0, 0, 0, 1);
 
-        for (std::vector<BoneWeight>::const_iterator weightIt = it->first.begin(); weightIt != it->first.end(); ++weightIt)
+        for (auto &weight : pair.first)
         {
-            Bone* bone = weightIt->first.first;
-            const osg::Matrix& invBindMatrix = weightIt->first.second;
-            float weight = weightIt->second;
-            const osg::Matrixf& boneMatrix = bone->mMatrixInSkeletonSpace;
-            accumulateMatrix(invBindMatrix, boneMatrix, weight, resultMat);
+            accumulateMatrix(weight.first.second, weight.first.first->mMatrixInSkeletonSpace, weight.second, resultMat);
         }
+
         if (mGeomToSkelMatrix)
             resultMat *= (*mGeomToSkelMatrix);
 
-        for (std::vector<unsigned short>::const_iterator vertexIt = it->second.begin(); vertexIt != it->second.end(); ++vertexIt)
+        for (auto &vertex : pair.second)
         {
-            unsigned short vertex = *vertexIt;
             (*positionDst)[vertex] = resultMat.preMult((*positionSrc)[vertex]);
             if (normalDst)
-                (*normalDst)[vertex] = osg::Matrix::transform3x3((*normalSrc)[vertex], resultMat);
+                (*normalDst)[vertex] = osg::Matrixf::transform3x3((*normalSrc)[vertex], resultMat);
+
             if (tangentDst)
             {
-                osg::Vec4f srcTangent = (*tangentSrc)[vertex];
-                osg::Vec3f transformedTangent = osg::Matrix::transform3x3(osg::Vec3f(srcTangent.x(), srcTangent.y(), srcTangent.z()), resultMat);
+                const osg::Vec4f& srcTangent = (*tangentSrc)[vertex];
+                osg::Vec3f transformedTangent = osg::Matrixf::transform3x3(osg::Vec3f(srcTangent.x(), srcTangent.y(), srcTangent.z()), resultMat);
                 (*tangentDst)[vertex] = osg::Vec4f(transformedTangent, srcTangent.w());
             }
         }

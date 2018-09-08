@@ -88,6 +88,10 @@ add_component_dir (misc
     utf8stream stringops resourcehelpers rng messageformatparser
     )
 
+add_component_dir (debug
+    debugging debuglog
+    )
+
 IF(NOT WIN32 AND NOT APPLE)
     add_definitions(-DGLOBAL_DATA_PATH="${GLOBAL_DATA_PATH}")
     add_definitions(-DGLOBAL_CONFIG_PATH="${GLOBAL_CONFIG_PATH}")
@@ -240,6 +244,11 @@ endif()
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
 target_link_libraries(components ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
+if (BUILD_WITH_CODE_COVERAGE)
+    add_definitions(--coverage)
+    target_link_libraries(components gcov)
 endif()
 
 

@@ -26,6 +26,7 @@ namespace MWGui
 
         Spell()
             : mType(Type_Spell)
+            , mCount(0)
             , mSelected(false)
             , mActive(false)
         {

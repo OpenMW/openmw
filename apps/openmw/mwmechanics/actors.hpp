@@ -118,7 +118,7 @@ namespace MWMechanics
             int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
 
-            bool isAttackPrepairing(const MWWorld::Ptr& ptr);
+            bool isAttackPreparing(const MWWorld::Ptr& ptr);
             bool isRunning(const MWWorld::Ptr& ptr);
             bool isSneaking(const MWWorld::Ptr& ptr);
 

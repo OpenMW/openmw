@@ -10,6 +10,8 @@
 
 #include <SDL.h>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/misc/rng.hpp>
 
 #include <components/vfs/manager.hpp>
@@ -61,7 +63,7 @@ namespace
     void checkSDLError(int ret)
     {
         if (ret != 0)
-            std::cerr << "SDL error: " << SDL_GetError() << std::endl;
+            Log(Debug::Error) << "SDL error: " << SDL_GetError();
     }
 }
 
@@ -189,7 +191,7 @@ bool OMW::Engine::frame(float frametime)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Error in frame: " << e.what() << std::endl;
+        Log(Debug::Error) << "Error in frame: " << e.what();
     }
     return true;
 }
@@ -198,6 +200,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   : mWindow(NULL)
   , mEncoding(ToUTF8::WINDOWS_1252)
   , mEncoder(NULL)
+  , mScreenCaptureOperation(nullptr)
   , mSkipMenu (false)
   , mUseSound (true)
   , mCompileAll (false)
@@ -363,7 +366,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
             // Try with a lower AA
             if (antialiasing > 0)
             {
-                std::cout << "Note: " << antialiasing << "x antialiasing not supported, trying " << antialiasing/2 << std::endl;
+                Log(Debug::Warning) << "Warning: " << antialiasing << "x antialiasing not supported, trying " << antialiasing/2;
                 antialiasing /= 2;
                 Settings::Manager::setInt("antialiasing", "Video", antialiasing);
                 checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
@@ -372,7 +375,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
             else
             {
                 std::stringstream error;
-                error << "Failed to create SDL window: " << SDL_GetError() << std::endl;
+                error << "Failed to create SDL window: " << SDL_GetError();
                 throw std::runtime_error(error.str());
             }
         }
@@ -419,16 +422,16 @@ void OMW::Engine::setWindowIcon()
     std::string windowIcon = (mResDir / "mygui" / "openmw.png").string();
     windowIconStream.open(windowIcon, std::ios_base::in | std::ios_base::binary);
     if (windowIconStream.fail())
-        std::cerr << "Error: Failed to open " << windowIcon << std::endl;
+        Log(Debug::Error) << "Error: Failed to open " << windowIcon;
     osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
     if (!reader)
     {
-        std::cerr << "Error: Failed to read window icon, no png readerwriter found" << std::endl;
+        Log(Debug::Error) << "Error: Failed to read window icon, no png readerwriter found";
         return;
     }
     osgDB::ReaderWriter::ReadResult result = reader->readImage(windowIconStream);
     if (!result.success())
-        std::cerr << "Error: Failed to read " << windowIcon << ": " << result.message() << " code " << result.status() << std::endl;
+        Log(Debug::Error) << "Error: Failed to read " << windowIcon << ": " << result.message() << " code " << result.status();
     else
     {
         osg::ref_ptr<osg::Image> image = result.getImage();
@@ -563,21 +566,19 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     {
         std::pair<int, int> result = mEnvironment.getScriptManager()->compileAll();
         if (result.first)
-            std::cout
+            Log(Debug::Info)
                 << "compiled " << result.second << " of " << result.first << " scripts ("
                 << 100*static_cast<double> (result.second)/result.first
-                << "%)"
-                << std::endl;
+                << "%)";
     }
     if (mCompileAllDialogue)
     {
         std::pair<int, int> result = MWDialogue::ScriptTest::compileAll(&mExtensions, mWarningsMode);
         if (result.first)
-            std::cout
+            Log(Debug::Info)
                 << "compiled " << result.second << " of " << result.first << " dialogue script/actor combinations a("
                 << 100*static_cast<double> (result.second)/result.first
-                << "%)"
-                << std::endl;
+                << "%)";
     }
 }
 
@@ -613,14 +614,14 @@ public:
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension(mScreenshotFormat);
         if (!readerwriter)
         {
-            std::cerr << "Error: Can't write screenshot, no '" << mScreenshotFormat << "' readerwriter found" << std::endl;
+            Log(Debug::Error) << "Error: Can't write screenshot, no '" << mScreenshotFormat << "' readerwriter found";
             return;
         }
 
         osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(image, outStream);
         if (!result.success())
         {
-            std::cerr << "Error: Can't write screenshot: " << result.message() << " code " << result.status() << std::endl;
+            Log(Debug::Error) << "Error: Can't write screenshot: " << result.message() << " code " << result.status();
         }
     }
 
@@ -635,7 +636,7 @@ void OMW::Engine::go()
 {
     assert (!mContentFiles.empty());
 
-    std::cout << "OSG version: " << osgGetVersion() << std::endl;
+    Log(Debug::Info) << "OSG version: " << osgGetVersion();
 
     // Load settings
     Settings::Manager settings;
@@ -737,7 +738,7 @@ void OMW::Engine::go()
     // Save user settings
     settings.saveUser(settingspath);
 
-    std::cout << "Quitting peacefully." << std::endl;
+    Log(Debug::Info) << "Quitting peacefully.";
 }
 
 void OMW::Engine::setCompileAll (bool all)

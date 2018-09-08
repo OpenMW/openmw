@@ -1,6 +1,5 @@
 #include "soundmanagerimp.hpp"
 
-#include <iostream>
 #include <algorithm>
 #include <map>
 #include <numeric>
@@ -8,7 +7,7 @@
 #include <osg/Matrixf>
 
 #include <components/misc/rng.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -81,7 +80,7 @@ namespace MWSound
 
         if(!useSound)
         {
-            std::cout<< "Sound disabled." <<std::endl;
+            Log(Debug::Info) << "Sound disabled.";
             return;
         }
 
@@ -93,23 +92,28 @@ namespace MWSound
         std::string devname = Settings::Manager::getString("device", "Sound");
         if(!mOutput->init(devname, hrtfname, hrtfmode))
         {
-            std::cerr<< "Failed to initialize audio output, sound disabled" <<std::endl;
+            Log(Debug::Error) << "Failed to initialize audio output, sound disabled";
             return;
         }
 
         std::vector<std::string> names = mOutput->enumerate();
-        std::cout <<"Enumerated output devices:\n";
+        std::stringstream stream;
+
+        stream << "Enumerated output devices:\n";
         for(const std::string &name : names)
-            std::cout <<"  "<<name<<"\n";
-        std::cout.flush();
+            stream << "  " << name;
+
+        Log(Debug::Info) << stream.str();
+        stream.str("");
 
         names = mOutput->enumerateHrtf();
         if(!names.empty())
         {
-            std::cout<< "Enumerated HRTF names:\n";
+            stream << "Enumerated HRTF names:\n";
             for(const std::string &name : names)
-                std::cout <<"  "<<name<<"\n";
-            std::cout.flush();
+                stream << "  " << name;
+
+            Log(Debug::Info) << stream.str();
         }
     }
 
@@ -135,23 +139,19 @@ namespace MWSound
     Sound_Buffer *SoundManager::insertSound(const std::string &soundId, const ESM::Sound *sound)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        static const float fAudioDefaultMinDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMinDistance")->getFloat();
-        static const float fAudioDefaultMaxDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMaxDistance")->getFloat();
-        static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->getFloat();
-        static const float fAudioMaxDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMaxDistanceMult")->getFloat();
+        static const float fAudioDefaultMinDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMinDistance")->mValue.getFloat();
+        static const float fAudioDefaultMaxDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMaxDistance")->mValue.getFloat();
+        static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->mValue.getFloat();
+        static const float fAudioMaxDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMaxDistanceMult")->mValue.getFloat();
         float volume, min, max;
 
         volume = static_cast<float>(pow(10.0, (sound->mData.mVolume / 255.0*3348.0 - 3348.0) / 2000.0));
-        if(sound->mData.mMinRange == 0 && sound->mData.mMaxRange == 0)
-        {
+        min = sound->mData.mMinRange;
+        max = sound->mData.mMaxRange;
+        if (min == 0)
             min = fAudioDefaultMinDistance;
+        if (max == 0)
             max = fAudioDefaultMaxDistance;
-        }
-        else
-        {
-            min = sound->mData.mMinRange;
-            max = sound->mData.mMaxRange;
-        }
 
         min *= fAudioMinDistanceMult;
         max *= fAudioMaxDistanceMult;
@@ -225,7 +225,7 @@ namespace MWSound
                 do {
                     if(mUnusedBuffers.empty())
                     {
-                        std::cerr<< "No unused sound buffers to free, using "<<mBufferCacheSize<<" bytes!" <<std::endl;
+                        Log(Debug::Warning) << "No unused sound buffers to free, using " << mBufferCacheSize << " bytes!";
                         break;
                     }
                     Sound_Buffer *unused = mUnusedBuffers.back();
@@ -296,10 +296,10 @@ namespace MWSound
     Stream *SoundManager::playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->getFloat();
-        static const float fAudioMaxDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMaxDistanceMult")->getFloat();
-        static const float fAudioVoiceDefaultMinDistance = world->getStore().get<ESM::GameSetting>().find("fAudioVoiceDefaultMinDistance")->getFloat();
-        static const float fAudioVoiceDefaultMaxDistance = world->getStore().get<ESM::GameSetting>().find("fAudioVoiceDefaultMaxDistance")->getFloat();
+        static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->mValue.getFloat();
+        static const float fAudioMaxDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMaxDistanceMult")->mValue.getFloat();
+        static const float fAudioVoiceDefaultMinDistance = world->getStore().get<ESM::GameSetting>().find("fAudioVoiceDefaultMinDistance")->mValue.getFloat();
+        static const float fAudioVoiceDefaultMaxDistance = world->getStore().get<ESM::GameSetting>().find("fAudioVoiceDefaultMaxDistance")->mValue.getFloat();
         static float minDistance = std::max(fAudioVoiceDefaultMinDistance * fAudioMinDistanceMult, 1.0f);
         static float maxDistance = std::max(fAudioVoiceDefaultMaxDistance * fAudioMaxDistanceMult, minDistance);
 
@@ -364,7 +364,7 @@ namespace MWSound
     {
         if(!mOutput->isInitialized())
             return;
-        std::cout <<"Playing "<<filename<< std::endl;
+        Log(Debug::Info) << "Playing " << filename;
         mLastPlayedMusic = filename;
 
         stopMusic();

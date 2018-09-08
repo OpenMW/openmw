@@ -14,6 +14,8 @@
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_RenderManager.h>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/vfs/manager.hpp>
 
 #include <components/misc/stringops.hpp>
@@ -281,7 +283,7 @@ namespace Gui
             assert (image->isDataContiguous());
             memcpy(image->data(), &textureData[0], textureData.size());
 
-            std::cout << "Writing " << resourceName + ".png" << std::endl;
+            Log(Debug::Info) << "Writing " << resourceName + ".png";
             osgDB::writeImageFile(*image, resourceName + ".png");
         }
 
@@ -461,7 +463,7 @@ namespace Gui
 
         if (exportToFile)
         {
-            std::cout << "Writing " << resourceName + ".xml" << std::endl;
+            Log(Debug::Info) << "Writing " << resourceName + ".xml";
             xmlDocument.createDeclaration();
             xmlDocument.save(resourceName + ".xml");
         }

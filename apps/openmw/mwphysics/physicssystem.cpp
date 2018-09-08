@@ -1,6 +1,5 @@
 #include "physicssystem.hpp"
 
-#include <iostream>
 #include <stdexcept>
 
 #include <osg/Group>
@@ -20,7 +19,7 @@
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/bulletshapemanager.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
@@ -304,7 +303,7 @@ namespace MWPhysics
             position.z() += halfExtents.z();
 
             static const float fSwimHeightScale = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                    .find("fSwimHeightScale")->getFloat();
+                    .find("fSwimHeightScale")->mValue.getFloat();
             float swimlevel = waterlevel + halfExtents.z() - (physicActor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
 
             ActorTracer tracer;
@@ -340,7 +339,7 @@ namespace MWPhysics
                 osg::Vec3f stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
                 float angleDegrees = osg::RadiansToDegrees(std::acos(stormDirection * velocity / (stormDirection.length() * velocity.length())));
                 static const float fStromWalkMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fStromWalkMult")->getFloat();
+                        .find("fStromWalkMult")->mValue.getFloat();
                 velocity *= 1.f-(fStromWalkMult * (angleDegrees/180.f));
             }
 
@@ -638,7 +637,7 @@ namespace MWPhysics
                     mPtr.getRefData().getBaseNode()->accept(visitor);
                     if (!visitor.mFound)
                     {
-                        std::cerr << "Error: animateCollisionShapes can't find node " << recIndex << " for " << mPtr.getCellRef().getRefId() << std::endl;
+                        Log(Debug::Warning) << "Warning: animateCollisionShapes can't find node " << recIndex << " for " << mPtr.getCellRef().getRefId();
 
                         // Remove nonexistent nodes from animated shapes map and early out
                         mShapeInstance->mAnimatedShapes.erase(recIndex);
@@ -651,7 +650,6 @@ namespace MWPhysics
 
                 osg::NodePath& nodePath = nodePathFound->second;
                 osg::Matrixf matrix = osg::computeLocalToWorld(nodePath);
-                osg::Vec3f scale = matrix.getScale();
                 matrix.orthoNormalize(matrix);
 
                 btTransform transform;
@@ -660,8 +658,8 @@ namespace MWPhysics
                     for (int j=0; j<3; ++j)
                         transform.getBasis()[i][j] = matrix(j,i); // NB column/row major difference
 
-                if (compound->getLocalScaling() * toBullet(scale) != compound->getChildShape(shapeIndex)->getLocalScaling())
-                    compound->getChildShape(shapeIndex)->setLocalScaling(compound->getLocalScaling() * toBullet(scale));
+                // Note: we can not apply scaling here for now since we treat scaled shapes
+                // as new shapes (btScaledBvhTriangleMeshShape) with 1.0 scale for now
                 if (!(transform == compound->getChildTransform(shapeIndex)))
                     compound->updateChildTransform(shapeIndex, transform);
             }
@@ -708,7 +706,7 @@ namespace MWPhysics
             if (physFramerate > 0)
             {
                 mPhysicsDt = 1.f / physFramerate;
-                std::cerr << "Warning: physics framerate was overridden (a new value is " << physFramerate << ")."  << std::endl;
+                Log(Debug::Warning) << "Warning: using custom physics framerate (" << physFramerate << " FPS).";
             }
         }
     }
@@ -862,8 +860,8 @@ namespace MWPhysics
         // Use cone shape as fallback
         const MWWorld::Store<ESM::GameSetting> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        btConeShape shape (osg::DegreesToRadians(store.find("fCombatAngleXY")->getFloat()/2.0f), queryDistance);
-        shape.setLocalScaling(btVector3(1, 1, osg::DegreesToRadians(store.find("fCombatAngleZ")->getFloat()/2.0f) /
+        btConeShape shape (osg::DegreesToRadians(store.find("fCombatAngleXY")->mValue.getFloat()/2.0f), queryDistance);
+        shape.setLocalScaling(btVector3(1, 1, osg::DegreesToRadians(store.find("fCombatAngleZ")->mValue.getFloat()/2.0f) /
                                               shape.getRadius()));
 
         // The shape origin is its center, so we have to move it forward by half the length. The

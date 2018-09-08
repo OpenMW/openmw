@@ -3,6 +3,7 @@
 #include <cassert>
 #include <osgDB/Registry>
 
+#include <components/debug/debuglog.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "objectcache.hpp"
@@ -97,7 +98,7 @@ namespace Resource
             }
             catch (std::exception& e)
             {
-                std::cerr << "Failed to open image: " << e.what() << std::endl;
+                Log(Debug::Error) << "Failed to open image: " << e.what();
                 mCache->addEntryToObjectCache(normalized, mWarningImage);
                 return mWarningImage;
             }
@@ -109,7 +110,7 @@ namespace Resource
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
             if (!reader)
             {
-                std::cerr << "Error loading " << filename << ": no readerwriter for '" << ext << "' found" << std::endl;
+                Log(Debug::Error) << "Error loading " << filename << ": no readerwriter for '" << ext << "' found";
                 mCache->addEntryToObjectCache(normalized, mWarningImage);
                 return mWarningImage;
             }
@@ -117,7 +118,7 @@ namespace Resource
             osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, mOptions);
             if (!result.success())
             {
-                std::cerr << "Error loading " << filename << ": " << result.message() << " code " << result.status() << std::endl;
+                Log(Debug::Error) << "Error loading " << filename << ": " << result.message() << " code " << result.status();
                 mCache->addEntryToObjectCache(normalized, mWarningImage);
                 return mWarningImage;
             }
@@ -130,7 +131,7 @@ namespace Resource
                 static bool uncompress = (getenv("OPENMW_DECOMPRESS_TEXTURES") != 0);
                 if (!uncompress)
                 {
-                    std::cerr << "Error loading " << filename << ": no S3TC texture compression support installed" << std::endl;
+                    Log(Debug::Error) << "Error loading " << filename << ": no S3TC texture compression support installed";
                     mCache->addEntryToObjectCache(normalized, mWarningImage);
                     return mWarningImage;
                 }

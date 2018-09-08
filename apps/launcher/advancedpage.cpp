@@ -73,6 +73,12 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
     loadSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
     loadSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
+    loadSettingBool(chargeForEveryFollowerCheckBox, "charge for every follower travelling", "Game");
+    loadSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
+    loadSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
+    int unarmedFactorsStrengthIndex = mEngineSettings.getInt("strength influences hand to hand", "Game");
+    if (unarmedFactorsStrengthIndex >= 0 && unarmedFactorsStrengthIndex <= 2)
+        unarmedFactorsStrengthComboBox->setCurrentIndex(unarmedFactorsStrengthIndex);
 
     // Input Settings
     loadSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
@@ -125,6 +131,12 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
     saveSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
     saveSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
+    saveSettingBool(chargeForEveryFollowerCheckBox, "charge for every follower travelling", "Game");
+    saveSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
+    saveSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
+    int unarmedFactorsStrengthIndex = unarmedFactorsStrengthComboBox->currentIndex();
+    if (unarmedFactorsStrengthIndex != mEngineSettings.getInt("strength influences hand to hand", "Game"))
+        mEngineSettings.setInt("strength influences hand to hand", "Game", unarmedFactorsStrengthIndex);
 
     // Input Settings
     saveSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");

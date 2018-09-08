@@ -1,5 +1,7 @@
 #include "store.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 
@@ -8,7 +10,6 @@
 
 #include <stdexcept>
 #include <sstream>
-#include <iostream>
 
 namespace
 {
@@ -692,7 +693,7 @@ namespace MWWorld
                             if (it_lease != wipecell->mLeasedRefs.end())
                                 wipecell->mLeasedRefs.erase(it_lease);
                             else
-                                std::cerr << "Error: can't find " << it->mRefNum.mIndex << " " << it->mRefNum.mContentFile  << " in leasedRefs " << std::endl;
+                                Log(Debug::Error) << "Error: can't find " << it->mRefNum.mIndex << " " << it->mRefNum.mContentFile  << " in leasedRefs";
                         }
                         *itold = *it;
                     }

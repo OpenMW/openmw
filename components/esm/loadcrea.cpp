@@ -1,6 +1,6 @@
 #include "loadcrea.hpp"
 
-#include <iostream>
+#include <components/debug/debuglog.hpp>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
@@ -89,7 +89,7 @@ namespace ESM {
                     // seems to occur only in .ESS files, unsure of purpose
                     int index;
                     esm.getHT(index);
-                    std::cerr << "Creature::load: Unhandled INDX " << index << std::endl;
+                    Log(Debug::Warning) << "Creature::load: Unhandled INDX " << index;
                     break;
                 default:
                     esm.fail("Unknown subrecord");

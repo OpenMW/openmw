@@ -22,6 +22,8 @@
 
 #include <osgViewer/Viewer>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -47,6 +49,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/class.hpp"
 #include "../mwgui/loadingscreen.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -203,6 +206,7 @@ namespace MWRender
         , mNightEyeFactor(0.f)
         , mDistantFog(false)
         , mDistantTerrain(false)
+        , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
         , mBorders(false)
     {
@@ -553,8 +557,8 @@ namespace MWRender
                 mLandFogStart = mViewDistance * (1 - fogDepth);
                 mLandFogEnd = mViewDistance;
             }
-            mUnderwaterFogStart = mViewDistance * (1 - underwaterFog);
-            mUnderwaterFogEnd = mViewDistance;
+            mUnderwaterFogStart = std::min(mViewDistance, 6666.f) * (1 - underwaterFog);
+            mUnderwaterFogEnd = std::min(mViewDistance, 6666.f);
         }
         mFogColor = color;
     }
@@ -584,8 +588,6 @@ namespace MWRender
         mCurrentCameraPos = cameraPos;
         if (mWater->isUnderwater(cameraPos))
         {
-            float viewDistance = mViewDistance;
-            viewDistance = std::min(viewDistance, 6666.f);
             setFogColor(mUnderwaterColor * mUnderwaterWeight + mFogColor * (1.f-mUnderwaterWeight));
             mStateUpdater->setFogStart(mUnderwaterFogStart);
             mStateUpdater->setFogEnd(mUnderwaterFogEnd);
@@ -691,9 +693,6 @@ namespace MWRender
         int screenshotW = mViewer->getCamera()->getViewport()->width();
         int screenshotH = mViewer->getCamera()->getViewport()->height();
         int screenshotMapping = 0;
-        int cubeSize = screenshotMapping == 2 ?
-            screenshotW:         // planet mapping needs higher resolution
-            screenshotW / 2;    
 
         std::vector<std::string> settingArgs;
         boost::algorithm::split(settingArgs,settingStr,boost::is_any_of(" "));
@@ -713,11 +712,14 @@ namespace MWRender
 
             if (!found)
             {
-                std::cerr << "Wrong screenshot type: " << settingArgs[0] << "." << std::endl;
+                Log(Debug::Warning) << "Wrong screenshot type: " << settingArgs[0] << ".";
                 return false;
             }
         }
-    
+
+        // planet mapping needs higher resolution
+        int cubeSize = screenshotMapping == 2 ? screenshotW : screenshotW / 2;
+
         if (settingArgs.size() > 1)
             screenshotW = std::min(10000,std::atoi(settingArgs[1].c_str()));
 
@@ -729,7 +731,7 @@ namespace MWRender
 
         if (mCamera->isVanityOrPreviewModeEnabled())
         {
-            std::cerr << "Spherical screenshots are not allowed in preview mode." << std::endl;
+            Log(Debug::Warning) << "Spherical screenshots are not allowed in preview mode.";
             return false;
         }
 
@@ -1318,6 +1320,29 @@ namespace MWRender
             mFieldOfViewOverride = val;
             updateProjectionMatrix();
         }
+    }
+
+    osg::Vec3f RenderingManager::getHalfExtents(const MWWorld::ConstPtr& object) const
+    {
+        osg::Vec3f halfExtents(0, 0, 0);
+        std::string modelName = object.getClass().getModel(object);
+        if (modelName.empty())
+            return halfExtents;
+
+        osg::ref_ptr<const osg::Node> node = mResourceSystem->getSceneManager()->getTemplate(modelName);
+        osg::ComputeBoundsVisitor computeBoundsVisitor;
+        computeBoundsVisitor.setTraversalMask(~(MWRender::Mask_ParticleSystem|MWRender::Mask_Effect));
+        const_cast<osg::Node*>(node.get())->accept(computeBoundsVisitor);
+        osg::BoundingBox bounds = computeBoundsVisitor.getBoundingBox();
+
+        if (bounds.valid())
+        {
+            halfExtents[0] = std::abs(bounds.xMax() - bounds.xMin()) / 2.f;
+            halfExtents[1] = std::abs(bounds.yMax() - bounds.yMin()) / 2.f;
+            halfExtents[2] = std::abs(bounds.zMax() - bounds.zMin()) / 2.f;
+        }
+
+        return halfExtents;
     }
 
     void RenderingManager::resetFieldOfView()

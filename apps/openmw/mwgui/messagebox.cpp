@@ -5,6 +5,7 @@
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_Button.h>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -125,7 +126,7 @@ namespace MWGui
     {
         if (mInterMessageBoxe != NULL)
         {
-            std::cerr << "Warning: replacing an interactive message box that was not answered yet" << std::endl;
+            Log(Debug::Warning) << "Warning: replacing an interactive message box that was not answered yet";
             mInterMessageBoxe->setVisible(false);
             delete mInterMessageBoxe;
             mInterMessageBoxe = NULL;

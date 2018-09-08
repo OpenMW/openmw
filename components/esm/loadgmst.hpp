@@ -28,17 +28,6 @@ struct GameSetting
 
     void load(ESMReader &esm, bool &isDeleted);
 
-    /// \todo remove the get* functions (redundant, since mValue has equivalent functions now).
-
-    int getInt() const;
-    ///< Throws an exception if GMST is not of type int or float.
-
-    float getFloat() const;
-    ///< Throws an exception if GMST is not of type int or float.
-
-    std::string getString() const;
-    ///< Throwns an exception if GMST is not of type string.
-
     void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();

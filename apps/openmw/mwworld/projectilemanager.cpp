@@ -1,10 +1,11 @@
 #include "projectilemanager.hpp"
 
 #include <iomanip>
-#include <iostream>
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/ComputeBoundsVisitor>
+
+#include <components/debug/debuglog.hpp>
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/projectilestate.hpp>
@@ -384,7 +385,7 @@ namespace MWWorld
         {
             osg::Quat orient = it->mNode->getAttitude();
             static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fTargetSpellMaxSpeed")->getFloat();
+                        .find("fTargetSpellMaxSpeed")->mValue.getFloat();
             float speed = fTargetSpellMaxSpeed * it->mSpeed;
             osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
             direction.normalize();
@@ -647,7 +648,7 @@ namespace MWWorld
             }
             catch(...)
             {
-                std::cerr << "Warning: Failed to recreate magic projectile from saved data (id \"" << state.mSpellId << "\" no longer exists?)" << std::endl;
+                Log(Debug::Warning) << "Warning: Failed to recreate magic projectile from saved data (id \"" << state.mSpellId << "\" no longer exists?)";
                 return true;
             }
 

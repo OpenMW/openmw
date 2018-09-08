@@ -17,6 +17,7 @@ namespace MWMechanics
     {
             T mBase;
             T mModified;
+            T mCurrentModified;
 
         public:
             typedef T Type;
@@ -28,7 +29,9 @@ namespace MWMechanics
             const T& getBase() const;
 
             T getModified() const;
+            T getCurrentModified() const;
             T getModifier() const;
+            T getCurrentModifier() const;
 
             /// Set base and modified to \a value.
             void set (const T& value);
@@ -36,9 +39,15 @@ namespace MWMechanics
             /// Set base and adjust modified accordingly.
             void setBase (const T& value);
 
-            /// Set modified value an adjust base accordingly.
+            /// Set modified value and adjust base accordingly.
             void setModified (T value, const T& min, const T& max = std::numeric_limits<T>::max());
+
+            /// Set "current modified," used for drain and fortify. Unlike the regular modifier
+            /// this just adds and subtracts from the current value without changing the maximum.
+            void setCurrentModified(T value);
+
             void setModifier (const T& modifier);
+            void setCurrentModifier (const T& modifier);
 
             void writeState (ESM::StatState<T>& state) const;
             void readState (const ESM::StatState<T>& state);
@@ -73,6 +82,7 @@ namespace MWMechanics
 
             const T& getBase() const;
             T getModified() const;
+            T getCurrentModified() const;
             const T& getCurrent() const;
 
             /// Set base, modified and current to \a value.
@@ -81,11 +91,16 @@ namespace MWMechanics
             /// Set base and adjust modified accordingly.
             void setBase (const T& value);
 
-            /// Set modified value an adjust base accordingly.
+            /// Set modified value and adjust base accordingly.
             void setModified (T value, const T& min, const T& max = std::numeric_limits<T>::max());
 
-            void setCurrent (const T& value, bool allowDecreaseBelowZero = false);
-            void setModifier (const T& modifier, bool allowCurrentDecreaseBelowZero=false);
+            /// Set "current modified," used for drain and fortify. Unlike the regular modifier
+            /// this just adds and subtracts from the current value without changing the maximum.
+            void setCurrentModified(T value);
+
+            void setCurrent (const T& value, bool allowDecreaseBelowZero = false, bool allowIncreaseAboveModified = false);
+            void setModifier (const T& modifier, bool allowCurrentToDecreaseBelowZero=false);
+            void setCurrentModifier (const T& modifier, bool allowCurrentToDecreaseBelowZero = false);
 
             void writeState (ESM::StatState<T>& state) const;
             void readState (const ESM::StatState<T>& state);

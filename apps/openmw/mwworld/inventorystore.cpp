@@ -3,6 +3,7 @@
 #include <iterator>
 #include <algorithm>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/loadench.hpp>
 #include <components/esm/inventorystate.hpp>
 #include <components/misc/rng.hpp>
@@ -251,8 +252,8 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
     MWMechanics::NpcStats& stats = actor.getClass().getNpcStats(actor);
 
-    static float fUnarmoredBase1 = store.find("fUnarmoredBase1")->getFloat();
-    static float fUnarmoredBase2 = store.find("fUnarmoredBase2")->getFloat();
+    static float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
+    static float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
     int unarmoredSkill = stats.getSkill(ESM::Skill::Unarmored).getModified();
 
     float unarmoredRating = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
@@ -895,7 +896,7 @@ void MWWorld::InventoryStore::updateRechargingItems()
                         enchantmentId);
             if (!enchantment)
             {
-                std::cerr << "Warning: Can't find enchantment '" << enchantmentId << "' on item " << it->getCellRef().getRefId() << std::endl;
+                Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantmentId << "' on item " << it->getCellRef().getRefId();
                 continue;
             }
 
@@ -920,7 +921,7 @@ void MWWorld::InventoryStore::rechargeItems(float duration)
             continue;
 
         static float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                    "fMagicItemRechargePerSecond")->getFloat();
+                    "fMagicItemRechargePerSecond")->mValue.getFloat();
 
         if (it->first->getCellRef().getEnchantmentCharge() <= it->second)
         {

@@ -146,8 +146,15 @@ public:
         std::string::const_iterator yit = y.begin();
         for(;xit != x.end() && yit != y.end() && len > 0;++xit,++yit,--len)
         {
-            int res = *xit - *yit;
-            if(res != 0 && toLower(*xit) != toLower(*yit))
+            char left = *xit;
+            char right = *yit;
+            if (left == right)
+                continue;
+
+            left = toLower(left);
+            right = toLower(right);
+            int res = left - right;
+            if(res != 0)
                 return (res > 0) ? 1 : -1;
         }
         if(len > 0)

@@ -1,7 +1,5 @@
 #include "scripttest.hpp"
 
-#include <iostream>
-
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -12,6 +10,7 @@
 
 #include "../mwscript/compilercontext.hpp"
 
+#include <components/debug/debuglog.hpp>
 #include <components/compiler/exception.hpp>
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/compiler/scanner.hpp>
@@ -80,16 +79,14 @@ void test(const MWWorld::Ptr& actor, int &compiled, int &total, const Compiler::
                 }
                 catch (const std::exception& error)
                 {
-                    std::cerr << std::string ("Dialogue error: An exception has been thrown: ") + error.what() << std::endl;
+                    Log(Debug::Error) << std::string ("Dialogue error: An exception has been thrown: ") + error.what();
                     success = false;
                 }
 
                 if (!success)
                 {
-                    std::cerr
-                        << "compiling failed (dialogue script)" << std::endl
-                        << info->mResultScript
-                        << std::endl << std::endl;
+                    Log(Debug::Warning)
+                        << "compiling failed (dialogue script)\n" << info->mResultScript << "\n\n";
                 }
             }
         }

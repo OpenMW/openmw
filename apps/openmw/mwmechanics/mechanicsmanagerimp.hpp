@@ -132,6 +132,12 @@ namespace MWMechanics
             /// @note No-op for non-player attackers
             virtual void actorKilled (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
 
+            /// Checks if commiting a crime is currently valid
+            /// @param victim The actor being attacked
+            /// @param attacker The actor commiting the crime
+            /// @return true if the victim is a valid target for crime
+            virtual bool canCommitCrimeAgainst(const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
+
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             /// @param container The container the item is in; may be empty for an item in the world
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, const MWWorld::Ptr& container,
@@ -223,7 +229,7 @@ namespace MWMechanics
 
             virtual void confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count);
 
-            virtual bool isAttackPrepairing(const MWWorld::Ptr& ptr);
+            virtual bool isAttackPreparing(const MWWorld::Ptr& ptr);
             virtual bool isRunning(const MWWorld::Ptr& ptr);
             virtual bool isSneaking(const MWWorld::Ptr& ptr);
 

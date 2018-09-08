@@ -168,6 +168,8 @@ namespace MWWorld
             bool mLevitationEnabled;
             bool mGoToJail;
             int mDaysInPrison;
+            bool mPlayerTraveling;
+            bool mPlayerInJail;
 
             float mSpellPreloadTimer;
 
@@ -523,6 +525,7 @@ namespace MWWorld
             /// @note throws an exception when invoked on a teleport door
             void activateDoor(const MWWorld::Ptr& door, int state) override;
 
+            void getActorsStandingOn (const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr> &actors) override; ///< get a list of actors standing on \a object
             bool getPlayerStandingOn (const MWWorld::ConstPtr& object) override; ///< @return true if the player is standing on \a object
             bool getActorStandingOn (const MWWorld::ConstPtr& object) override; ///< @return true if any actor is standing on \a object
             bool getPlayerCollidingWith(const MWWorld::ConstPtr& object) override; ///< @return true if the player is colliding with \a object
@@ -605,8 +608,8 @@ namespace MWWorld
             void castSpell (const MWWorld::Ptr& actor, bool manualSpell=false) override;
 
             void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection) override;
-            void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
-                                           const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength) override;
+            void launchProjectile (MWWorld::Ptr& actor, MWWorld::Ptr& projectile,
+                                           const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength) override;
 
             void applyLoopingParticles(const MWWorld::Ptr& ptr) override;
 
@@ -644,7 +647,7 @@ namespace MWWorld
             /// Spawn a blood effect for \a ptr at \a worldPosition
             void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;
 
-            void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos) override;
+            void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true) override;
 
             void explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster, const MWWorld::Ptr& ignore,
                                       ESM::RangeType rangeType, const std::string& id, const std::string& sourceName,
@@ -671,6 +674,9 @@ namespace MWWorld
             float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) override;
 
             bool isPlayerInJail() const override;
+
+            void setPlayerTraveling(bool traveling) override;
+            bool isPlayerTraveling() const override;
 
             /// Return terrain height at \a worldPos position.
             float getTerrainHeightAt(const osg::Vec3f& worldPos) const override;

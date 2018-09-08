@@ -153,6 +153,7 @@ Programmers
     Siimacore
     sir_herrbatka
     smbas
+    Sophie Kirschner (pineapplemachine)
     spycrab
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)
@@ -171,7 +172,9 @@ Programmers
     viadanna
     Vincent Heuken
     vocollapse
+    Yohaulticetl
     zelurker
+    James Carty (MrTopCat)
 
 Documentation
 -------------
@@ -180,9 +183,11 @@ Documentation
     Alejandro Sanchez (HiPhish)
     Bodillium
     Bret Curtis (psi29a)
+    David Walley (Loriel)
     Cramal
     Ryan Tucker (Ravenwing)
     sir_herrbatka
+    Diego Crespo
 
 Packagers
 ---------

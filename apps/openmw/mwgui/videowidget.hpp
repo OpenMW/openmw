@@ -25,6 +25,8 @@ namespace MWGui
         MYGUI_RTTI_DERIVED(VideoWidget)
 
         VideoWidget();
+        
+        ~VideoWidget();
 
         /// Set the VFS (virtual file system) to find the videos on.
         void setVFS(const VFS::Manager* vfs);

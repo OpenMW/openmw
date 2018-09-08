@@ -1064,7 +1064,13 @@ namespace MWScript
                 runtime.pop();
 
                 const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (spellId);
-                if (spell && spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power)
+                if (!spell)
+                {
+                    runtime.getContext().report("spellcasting failed: can not find spell \""+spellId+"\"");
+                    return;
+                }
+
+                if (spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power)
                 {
                     runtime.getContext().report("spellcasting failed: you can cast only spells and powers.");
                     return;
@@ -1082,6 +1088,7 @@ namespace MWScript
                 MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr (targetId, false);
 
                 MWMechanics::CastSpell cast(ptr, target, false, true);
+                cast.playSpellCastingEffects(spell->mId);
                 cast.mHitPosition = target.getRefData().getPosition().asVec3();
                 cast.mAlwaysSucceed = true;
                 cast.cast(spell);
@@ -1155,8 +1162,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime &runtime)
                 {
-                    /// \todo implement traveling check
-                    runtime.push (0);
+                    runtime.push (MWBase::Environment::get().getWorld()->isPlayerTraveling());
                 }
         };
 

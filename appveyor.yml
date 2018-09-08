@@ -12,6 +12,9 @@ environment:
           APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
         - msvc: 2017
           APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+matrix:
+    allow_failures:
+        - msvc: 2015     
 
 platform:
 #   - Win32

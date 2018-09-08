@@ -119,11 +119,12 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor, float attackStrength)
             return;
         osg::Vec3f launchPos = osg::computeLocalToWorld(nodepaths[0]).getTrans();
 
-        float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->getFloat();
-        float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->getFloat();
+        float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->mValue.getFloat();
+        float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->mValue.getFloat();
         float speed = fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * attackStrength;
 
-        MWBase::Environment::get().getWorld()->launchProjectile(actor, *weapon, launchPos, orient, *weapon, speed, attackStrength);
+        MWWorld::Ptr weaponPtr = *weapon;
+        MWBase::Environment::get().getWorld()->launchProjectile(actor, weaponPtr, launchPos, orient, weaponPtr, speed, attackStrength);
 
         showWeapon(false);
 
@@ -145,13 +146,15 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor, float attackStrength)
             return;
         osg::Vec3f launchPos = osg::computeLocalToWorld(nodepaths[0]).getTrans();
 
-        float fProjectileMinSpeed = gmst.find("fProjectileMinSpeed")->getFloat();
-        float fProjectileMaxSpeed = gmst.find("fProjectileMaxSpeed")->getFloat();
+        float fProjectileMinSpeed = gmst.find("fProjectileMinSpeed")->mValue.getFloat();
+        float fProjectileMaxSpeed = gmst.find("fProjectileMaxSpeed")->mValue.getFloat();
         float speed = fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * attackStrength;
 
-        MWBase::Environment::get().getWorld()->launchProjectile(actor, *ammo, launchPos, orient, *weapon, speed, attackStrength);
+        MWWorld::Ptr weaponPtr = *weapon;
+        MWWorld::Ptr ammoPtr = *ammo;
+        MWBase::Environment::get().getWorld()->launchProjectile(actor, ammoPtr, launchPos, orient, weaponPtr, speed, attackStrength);
 
-        inv.remove(*ammo, 1, actor);
+        inv.remove(ammoPtr, 1, actor);
         mAmmunition.reset();
     }
 }

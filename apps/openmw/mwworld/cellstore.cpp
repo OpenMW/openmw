@@ -1,7 +1,8 @@
 #include "cellstore.hpp"
 
-#include <iostream>
 #include <algorithm>
+
+#include <components/debug/debuglog.hpp>
 
 #include <components/esm/cellstate.hpp>
 #include <components/esm/cellid.hpp>
@@ -138,7 +139,7 @@ namespace
                     return;
                 }
 
-            std::cerr << "Warning: Dropping reference to " << state.mRef.mRefID << " (invalid content file link)" << std::endl;
+            Log(Debug::Warning) << "Warning: Dropping reference to " << state.mRef.mRefID << " (invalid content file link)";
             return;
         }
 
@@ -196,9 +197,9 @@ namespace MWWorld
         }
         else
         {
-            std::cerr
+            Log(Debug::Warning)
                 << "Warning: could not resolve cell reference '" << ref.mRefID << "'"
-                << " (dropping reference)" << std::endl;
+                << " (dropping reference)";
         }
     }
 
@@ -497,7 +498,7 @@ namespace MWWorld
             }
             catch (std::exception& e)
             {
-                std::cerr << "An error occurred listing references for cell " << getCell()->getDescription() << ": " << e.what() << std::endl;
+                Log(Debug::Error) << "An error occurred listing references for cell " << getCell()->getDescription() << ": " << e.what();
             }
         }
 
@@ -553,7 +554,7 @@ namespace MWWorld
             }
             catch (std::exception& e)
             {
-                std::cerr << "An error occurred loading references for cell " << getCell()->getDescription() << ": " << e.what() << std::endl;
+                Log(Debug::Error) << "An error occurred loading references for cell " << getCell()->getDescription() << ": " << e.what();
             }
         }
 
@@ -659,11 +660,10 @@ namespace MWWorld
             case ESM::REC_WEAP: mWeapons.load(ref, deleted, store); break;
             case ESM::REC_BODY: mBodyParts.load(ref, deleted, store); break;
 
-            case 0: std::cerr << "Cell reference '" + ref.mRefID + "' not found!\n"; return;
+            case 0: Log(Debug::Error) << "Cell reference '" + ref.mRefID + "' not found!"; return;
 
             default:
-                std::cerr
-                    << "Error: Ignoring reference '" << ref.mRefID << "' of unhandled type\n";
+                Log(Debug::Error) << "Error: Ignoring reference '" << ref.mRefID << "' of unhandled type";
                 return;
         }
 
@@ -756,7 +756,7 @@ namespace MWWorld
             int type = MWBase::Environment::get().getWorld()->getStore().find(cref.mRefID);
             if (type == 0)
             {
-                std::cerr << "Dropping reference to '" << cref.mRefID << "' (object no longer exists)" << std::endl;
+                Log(Debug::Warning) << "Dropping reference to '" << cref.mRefID << "' (object no longer exists)";
                 reader.skipHSubUntil("OBJE");
                 continue;
             }
@@ -892,7 +892,7 @@ namespace MWWorld
 
             if (!visitor.mFound)
             {
-                std::cerr << "Warning: Dropping moved ref tag for " << refnum.mIndex << " (moved object no longer exists)" << std::endl;
+                Log(Debug::Warning) << "Warning: Dropping moved ref tag for " << refnum.mIndex << " (moved object no longer exists)";
                 continue;
             }
 
@@ -902,8 +902,8 @@ namespace MWWorld
 
             if (otherCell == NULL)
             {
-                std::cerr << "Warning: Dropping moved ref tag for " << movedRef->mRef.getRefId()
-                          << " (target cell " << movedTo.mWorldspace << " no longer exists). Reference moved back to its original location." << std::endl;
+                Log(Debug::Warning) << "Warning: Dropping moved ref tag for " << movedRef->mRef.getRefId()
+                                    << " (target cell " << movedTo.mWorldspace << " no longer exists). Reference moved back to its original location.";
                 // Note by dropping tag the object will automatically re-appear in its original cell, though potentially at inapproriate coordinates.
                 // Restore original coordinates:
                 movedRef->mData.setPosition(movedRef->mRef.getPosition());
@@ -913,7 +913,7 @@ namespace MWWorld
             if (otherCell == this)
             {
                 // Should never happen unless someone's tampering with files.
-                std::cerr << "Found invalid moved ref, ignoring" << std::endl;
+                Log(Debug::Warning) << "Found invalid moved ref, ignoring";
                 continue;
             }
 
@@ -944,7 +944,7 @@ namespace MWWorld
     void clearCorpse(const MWWorld::Ptr& ptr)
     {
         const MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
-        static const float fCorpseClearDelay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCorpseClearDelay")->getFloat();
+        static const float fCorpseClearDelay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCorpseClearDelay")->mValue.getFloat();
         if (creatureStats.isDead() &&
             creatureStats.isDeathAnimationFinished() &&
             !ptr.getClass().isPersistent(ptr) &&
@@ -958,7 +958,7 @@ namespace MWWorld
     {
         if (mState == State_Loaded)
         {
-            static const int iMonthsToRespawn = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iMonthsToRespawn")->getInt();
+            static const int iMonthsToRespawn = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iMonthsToRespawn")->mValue.getInteger();
             if (MWBase::Environment::get().getWorld()->getTimeStamp() - mLastRespawn > 24*30*iMonthsToRespawn)
             {
                 mLastRespawn = MWBase::Environment::get().getWorld()->getTimeStamp();

@@ -1,8 +1,8 @@
 #include "aisequence.hpp"
 
 #include <limits>
-#include <iostream>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -19,6 +19,7 @@
 #include "aicombataction.hpp"
 #include "aipursue.hpp"
 #include "actorutil.hpp"
+#include "../mwworld/class.hpp"
 
 namespace MWMechanics
 {
@@ -122,6 +123,20 @@ bool AiSequence::isInCombat() const
     return false;
 }
 
+bool AiSequence::isEngagedWithActor() const
+{
+    for (std::list<AiPackage *>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+    {
+        if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+        {
+            MWWorld::Ptr target2 = (*it)->getTarget();
+            if (!target2.isEmpty() && target2.getClass().isNpc())
+                return true;
+        }
+    }
+    return false;
+}
+
 bool AiSequence::hasPackage(int typeId) const
 {
     for (std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
@@ -213,7 +228,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
             {
                 if ((*it)->getTypeId() != AiPackage::TypeIdCombat) break;
 
-                MWWorld::Ptr target = static_cast<const AiCombat *>(*it)->getTarget();
+                MWWorld::Ptr target = (*it)->getTarget();
 
                 // target disappeared (e.g. summoned creatures)
                 if (target.isEmpty())
@@ -227,11 +242,11 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
 
                     const ESM::Position &targetPos = target.getRefData().getPosition();
 
-                    float distTo = (targetPos.asVec3() - vActorPos).length();
+                    float distTo = (targetPos.asVec3() - vActorPos).length2();
 
                     // Small threshold for changing target
                     if (it == mPackages.begin())
-                        distTo = std::max(0.f, distTo - 50.f);
+                        distTo = std::max(0.f, distTo - 2500.f);
 
                     // if a target has higher priority than current target or has same priority but closer
                     if (rating > bestRating || ((distTo < nearestDist) && rating == bestRating))
@@ -282,7 +297,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
         }
         catch (std::exception& e)
         {
-            std::cerr << "Error during AiSequence::execute: " << e.what() << std::endl;
+            Log(Debug::Error) << "Error during AiSequence::execute: " << e.what();
         }
     }
 }

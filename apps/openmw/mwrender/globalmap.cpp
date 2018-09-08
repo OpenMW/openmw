@@ -15,6 +15,8 @@
 #include <components/settings/settings.hpp>
 #include <components/files/memorystream.hpp>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/sceneutil/workqueue.hpp>
 
 #include <components/esm/globalmap.hpp>
@@ -411,14 +413,14 @@ namespace MWRender
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
         if (!readerwriter)
         {
-            std::cerr << "Error: Can't write map overlay: no png readerwriter found" << std::endl;
+            Log(Debug::Error) << "Error: Can't write map overlay: no png readerwriter found";
             return;
         }
 
         osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*mOverlayImage, ostream);
         if (!result.success())
         {
-            std::cerr << "Error: Can't write map overlay: " << result.message() << " code " << result.status() << std::endl;
+            Log(Debug::Warning) << "Error: Can't write map overlay: " << result.message() << " code " << result.status();
             return;
         }
 
@@ -463,14 +465,14 @@ namespace MWRender
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
         if (!readerwriter)
         {
-            std::cerr << "Error: Can't read map overlay: no png readerwriter found" << std::endl;
+            Log(Debug::Error) << "Error: Can't read map overlay: no png readerwriter found";
             return;
         }
 
         osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(istream);
         if (!result.success())
         {
-            std::cerr << "Error: Can't read map overlay: " << result.message() << " code " << result.status() << std::endl;
+            Log(Debug::Error) << "Error: Can't read map overlay: " << result.message() << " code " << result.status();
             return;
         }
 
@@ -572,7 +574,7 @@ namespace MWRender
         CameraVector::iterator found = std::find(mActiveCameras.begin(), mActiveCameras.end(), camera);
         if (found == mActiveCameras.end())
         {
-            std::cerr << "Error: GlobalMap trying to remove an inactive camera" << std::endl;
+            Log(Debug::Error) << "Error: GlobalMap trying to remove an inactive camera";
             return;
         }
         mActiveCameras.erase(found);

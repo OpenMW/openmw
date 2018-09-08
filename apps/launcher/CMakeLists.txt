@@ -1,6 +1,7 @@
 set(LAUNCHER
     datafilespage.cpp
     graphicspage.cpp
+    sdlinit.cpp
     main.cpp
     maindialog.cpp
     playpage.cpp
@@ -19,6 +20,7 @@ set(LAUNCHER
 set(LAUNCHER_HEADER
     datafilespage.hpp
     graphicspage.hpp
+    sdlinit.hpp
     maindialog.hpp
     playpage.hpp
     textslotmsgbox.hpp

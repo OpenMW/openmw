@@ -15,7 +15,14 @@ namespace Misc
                 FloatPlaceholder
             };
 
-            virtual void visitedPlaceholder(Placeholder placeholder, char padding, int width, int precision) = 0;
+            enum Notation
+            {
+                FixedNotation,
+                ScientificNotation,
+                ShortestNotation
+            };
+
+            virtual void visitedPlaceholder(Placeholder placeholder, char padding, int width, int precision, Notation notation) = 0;
             virtual void visitedCharacter(char c) = 0;
 
         public:

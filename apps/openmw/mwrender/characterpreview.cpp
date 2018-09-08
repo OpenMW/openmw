@@ -1,7 +1,6 @@
 #include "characterpreview.hpp"
 
 #include <cmath>
-#include <iostream>
 
 #include <osg/Material>
 #include <osg/Fog>
@@ -14,6 +13,7 @@
 #include <osgUtil/IntersectionVisitor>
 #include <osgUtil/LineSegmentIntersector>
 
+#include <components/debug/debuglog.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 
@@ -474,7 +474,7 @@ namespace MWRender
             mCamera->addUpdateCallback(mUpdateCameraCallback);
         }
         else
-            std::cerr << "Error: Bip01 Head node not found" << std::endl;
+            Log(Debug::Error) << "Error: Bip01 Head node not found";
     }
 
 }

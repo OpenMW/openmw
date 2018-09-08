@@ -10,6 +10,7 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/vfs/manager.hpp>
 
@@ -37,6 +38,8 @@ namespace ESMTerrain
     }
 
     LandObject::LandObject(const LandObject &copy, const osg::CopyOp &copyop)
+        : mLand(nullptr)
+        , mLoadFlags(0)
     {
     }
 
@@ -376,7 +379,7 @@ namespace ESMTerrain
         const ESM::LandTexture* ltex = getLandTexture(id.first-1, id.second);
         if (!ltex)
         {
-            std::cerr << "Warning: Unable to find land texture index " << id.first-1 << " in plugin " << id.second << ", using default texture instead" << std::endl;
+            Log(Debug::Warning) << "Warning: Unable to find land texture index " << id.first-1 << " in plugin " << id.second << ", using default texture instead";
             return defaultTexture;
         }
 

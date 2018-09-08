@@ -351,7 +351,7 @@ namespace MWMechanics
 
             case AiCombatStorage::FleeState_RunToDestination:
                 {
-                    static const float fFleeDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fFleeDistance")->getFloat();
+                    static const float fFleeDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fFleeDistance")->mValue.getFloat();
 
                     float dist = (actor.getRefData().getPosition().asVec3() - target.getRefData().getPosition().asVec3()).length();
                     if ((dist > fFleeDistance && !storage.mLOS)
@@ -372,21 +372,32 @@ namespace MWMechanics
         actorMovementSettings.mPosition[1] = storage.mMovement.mPosition[1];
         actorMovementSettings.mPosition[2] = storage.mMovement.mPosition[2];
 
-        rotateActorOnAxis(actor, 2, actorMovementSettings, storage.mMovement);
-        rotateActorOnAxis(actor, 0, actorMovementSettings, storage.mMovement);
+        rotateActorOnAxis(actor, 2, actorMovementSettings, storage);
+        rotateActorOnAxis(actor, 0, actorMovementSettings, storage);
     }
 
     void AiCombat::rotateActorOnAxis(const MWWorld::Ptr& actor, int axis, 
-        MWMechanics::Movement& actorMovementSettings, MWMechanics::Movement& desiredMovement)
+        MWMechanics::Movement& actorMovementSettings, AiCombatStorage& storage)
     {
         actorMovementSettings.mRotation[axis] = 0;
-        float& targetAngleRadians = desiredMovement.mRotation[axis];
+        float& targetAngleRadians = storage.mMovement.mRotation[axis];
         if (targetAngleRadians != 0)
         {
-            if (smoothTurn(actor, targetAngleRadians, axis))
+            // Some attack animations contain small amount of movement.
+            // Since we use cone shapes for melee, we can use a threshold to avoid jittering
+            std::shared_ptr<Action>& currentAction = storage.mCurrentAction;
+            bool isRangedCombat = false;
+            currentAction->getCombatRange(isRangedCombat);
+            // Check if the actor now facing desired direction, no need to turn any more
+            if (isRangedCombat)
             {
-                // actor now facing desired direction, no need to turn any more
-                targetAngleRadians = 0;
+                if (smoothTurn(actor, targetAngleRadians, axis))
+                    targetAngleRadians = 0;
+            }
+            else
+            {
+                if (smoothTurn(actor, targetAngleRadians, axis, osg::DegreesToRadians(3.f)))
+                    targetAngleRadians = 0;
             }
         }
     }
@@ -453,7 +464,7 @@ namespace MWMechanics
             if (distToTarget <= rangeAttackOfTarget && Misc::Rng::rollClosedProbability() < 0.25)
             {
                 mMovement.mPosition[0] = Misc::Rng::rollProbability() < 0.5 ? 1.0f : -1.0f; // to the left/right
-                mTimerCombatMove = 0.05f + 0.15f * Misc::Rng::rollClosedProbability();
+                mTimerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
                 mCombatMove = true;
             }
         }
@@ -509,13 +520,13 @@ namespace MWMechanics
 
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-                float baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayCreature")->getFloat();
+                float baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayCreature")->mValue.getFloat();
                 if (actor.getClass().isNpc())
                 {
-                    baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayNPC")->getFloat();
+                    baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayNPC")->mValue.getFloat();
 
                     //say a provoking combat phrase
-                    int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->getInt();
+                    int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->mValue.getInteger();
                     if (Misc::Rng::roll0to99() < chance)
                     {
                         MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
@@ -600,27 +611,26 @@ osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& t
     float duration, int weapType, float strength)
 {
     float projSpeed;
+    const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
     // get projectile speed (depending on weapon type)
     if (weapType == ESM::Weapon::MarksmanThrown)
     {
-        static float fThrownWeaponMinSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMinSpeed")->getFloat();
-        static float fThrownWeaponMaxSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMaxSpeed")->getFloat();
+        static float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->mValue.getFloat();
+        static float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->mValue.getFloat();
 
-        projSpeed = 
-            fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * strength;
+        projSpeed = fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * strength;
     }
-    else
+    else if (weapType != 0)
     {
-        static float fProjectileMinSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMinSpeed")->getFloat();
-        static float fProjectileMaxSpeed = 
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMaxSpeed")->getFloat();
+        static float fProjectileMinSpeed = gmst.find("fProjectileMinSpeed")->mValue.getFloat();
+        static float fProjectileMaxSpeed = gmst.find("fProjectileMaxSpeed")->mValue.getFloat();
 
-        projSpeed = 
-            fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * strength;
+        projSpeed = fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * strength;
+    }
+    else // weapType is 0 ==> it's a target spell projectile
+    {
+        projSpeed = gmst.find("fTargetSpellMaxSpeed")->mValue.getFloat();
     }
 
     // idea: perpendicular to dir to target speed components of target move vector and projectile vector should be the same
