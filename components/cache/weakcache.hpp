@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 namespace cache
 {
@@ -19,18 +20,19 @@ namespace cache
         class iterator
         {
         public:
-            iterator(typename Map::iterator current, typename Map::iterator end);
+            iterator(WeakCache* cache, typename Map::iterator current, typename Map::iterator end);
             iterator& operator++();
             bool operator==(const iterator& other);
             bool operator!=(const iterator& other);
             StrongPtr operator*();
         private:
+            WeakCache* mCache;
             typename Map::iterator mCurrent, mEnd;
             StrongPtr mPtr;
         };
 
         /// Stores a weak pointer to the item.
-        void insert(Key key, StrongPtr value);
+        void insert(Key key, StrongPtr value, bool prune=true);
 
         /// Retrieves the item associated with the key.
         /// \return An item or null.
@@ -39,14 +41,19 @@ namespace cache
         iterator begin();
         iterator end();
 
+        /// Removes known invalid entries
+        void prune();
+
     private:
         Map mData;
+        std::vector<Key> mDirty;
     };
 
 
     template <typename Key, typename T>
-    WeakCache<Key, T>::iterator::iterator(typename Map::iterator current, typename Map::iterator end)
-        : mCurrent(current)
+    WeakCache<Key, T>::iterator::iterator(WeakCache* cache, typename Map::iterator current, typename Map::iterator end)
+        : mCache(cache)
+        , mCurrent(current)
         , mEnd(end)
     {
         // Move to 1st available valid item
@@ -54,6 +61,7 @@ namespace cache
         {
             mPtr = mCurrent->second.lock();
             if (mPtr) break;
+            else mCache->mDirty.push_back(mCurrent->first);
         }
     }
 
@@ -62,7 +70,7 @@ namespace cache
     {
         auto next = mCurrent;
         ++next;
-        return *this = iterator(next, mEnd);
+        return *this = iterator(mCache, next, mEnd);
     }
 
     template <typename Key, typename T>
@@ -85,9 +93,10 @@ namespace cache
 
 
     template <typename Key, typename T>
-    void WeakCache<Key, T>::insert(Key key, StrongPtr value)
+    void WeakCache<Key, T>::insert(Key key, StrongPtr value, bool shouldPrune)
     {
         mData[key] = WeakPtr(value);
+        if (shouldPrune) prune();
     }
 
     template <typename Key, typename T>
@@ -103,13 +112,26 @@ namespace cache
     template <typename Key, typename T>
     typename WeakCache<Key, T>::iterator WeakCache<Key, T>::begin()
     {
-        return iterator(mData.begin(), mData.end());
+        return iterator(this, mData.begin(), mData.end());
     }
 
     template <typename Key, typename T>
     typename WeakCache<Key, T>::iterator WeakCache<Key, T>::end()
     {
-        return iterator(mData.end(), mData.end());
+        return iterator(this, mData.end(), mData.end());
+    }
+
+    template <typename Key, typename T>
+    void WeakCache<Key, T>::prune()
+    {
+        // Remove empty entries
+        for (auto& key : mDirty)
+        {
+            auto it = mData.find(key);
+            if (it != mData.end() && it->second.use_count() == 0)
+                mData.erase(it);
+        }
+        mDirty.clear();
     }
 }
 
