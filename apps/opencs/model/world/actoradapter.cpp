@@ -195,6 +195,10 @@ namespace CSMWorld
         int start = getHighestIndex(topLeft).row();
         int end = getHighestIndex(botRight).row();
 
+        // A change to record status (ex. Deleted) returns an invalid botRight
+        if (end == -1)
+            end = start;
+
         // Handle each record
         for (int row = start; row <= end; ++row)
         {
@@ -245,6 +249,11 @@ namespace CSMWorld
     {
         int start = getHighestIndex(topLeft).row();
         int end = getHighestIndex(botRight).row();
+
+        // A change to record status (ex. Deleted) returns an invalid botRight
+        if (end == -1)
+            end = start;
+
         for (int row = start; row <= end; ++row)
         {
             std::string raceId = mRaces.getId(row);
@@ -299,9 +308,14 @@ namespace CSMWorld
 
     void ActorAdapter::handleBodyPartChanged(const QModelIndex& topLeft, const QModelIndex& botRight)
     {
-        int rowStart = getHighestIndex(topLeft).row();
-        int rowEnd = getHighestIndex(botRight).row();
-        for (int row = rowStart; row <= rowEnd; ++row)
+        int start = getHighestIndex(topLeft).row();
+        int end = getHighestIndex(botRight).row();
+
+        // A change to record status (ex. Deleted) returns an invalid botRight
+        if (end == -1)
+            end = start;
+
+        for (int row = start; row <= end; ++row)
         {
             // Race specified by part may need update
             auto& record = mBodyParts.getRecord(row);
