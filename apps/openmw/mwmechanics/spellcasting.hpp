@@ -25,8 +25,8 @@ namespace MWMechanics
 
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
 
-    float calcEffectCost(const ESM::ENAMstruct& effect, const bool customSpellCost = false);
-    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect, const bool customSpellCost = false);
+    float calcEffectCost(const ESM::ENAMstruct& effect);
+    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect);
 
     bool isSummoningEffect(int effectId);
 

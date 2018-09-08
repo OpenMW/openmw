@@ -449,13 +449,11 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        static const bool vanillaCost = Settings::Manager::getBool("expensive spells", "Game");
-
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
             const ESM::ENAMstruct& effect = *it;
 
-            y += std::max(1.f, MWMechanics::calcEffectCost(effect, vanillaCost));
+            y += std::max(1.f, MWMechanics::calcEffectCost(effect));
 
             if (effect.mRange == ESM::RT_Target)
                 y *= 1.5;
