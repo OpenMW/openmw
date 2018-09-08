@@ -132,8 +132,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         const bool actorCanMoveByZ = canActorMoveByZAxis(actor);
 
         // Prohibit shortcuts for AiWander, if the actor can not move in 3 dimensions.
-        if (actorCanMoveByZ)
-            mIsShortcutting = shortcutPath(position, dest, actor, &destInLOS, actorCanMoveByZ); // try to shortcut first
+        mIsShortcutting = actorCanMoveByZ
+            && shortcutPath(position, dest, actor, &destInLOS, actorCanMoveByZ); // try to shortcut first
 
         if (!mIsShortcutting)
         {
