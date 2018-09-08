@@ -74,7 +74,6 @@ namespace ESM
 
 namespace CSMWorld
 {
-    class ActorAdapter;
     class ResourcesManager;
     class Resources;
 

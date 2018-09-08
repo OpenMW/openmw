@@ -13,7 +13,6 @@
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
-#include <osg/MatrixTransform>
 
 #include <osgFX/Scribe>
 
@@ -31,7 +30,6 @@
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/fallback/fallback.hpp>
-#include <components/sceneutil/attach.hpp>
 
 #include "actor.hpp"
 #include "mask.hpp"

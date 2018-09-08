@@ -3,12 +3,10 @@
 #include <osg/Group>
 #include <osg/Node>
 
-#include <components/debug/debuglog.hpp>
 #include <components/esm/mappings.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcemanager.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/actorutil.hpp>
 #include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/skeleton.hpp>
 
