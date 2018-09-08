@@ -124,10 +124,14 @@ void CSVRender::Object::update()
             mActor->update();
             mBaseNode->addChild(mActor->getBaseNode());
         }
-        else
+        else if (!model.empty())
         {
             std::string path = "meshes\\" + model;
             mResourceSystem->getSceneManager()->getInstance(path, mBaseNode);
+        }
+        else
+        {
+            throw std::runtime_error(mReferenceableId + " has no model");
         }
     }
     catch (std::exception& e)
