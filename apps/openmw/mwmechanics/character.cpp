@@ -2145,9 +2145,11 @@ void CharacterController::update(float duration)
         if (isTurning())
         {
             // Adjust animation speed from 1.0 to 1.5 multiplier
-            float turnSpeed = std::min(1.5f, std::abs(rot.z()) / duration / static_cast<float>(osg::PI));
             if (duration > 0)
+            {
+                float turnSpeed = std::min(1.5f, std::abs(rot.z()) / duration / static_cast<float>(osg::PI));
                 mAnimation->adjustSpeedMult(mCurrentMovement, std::max(turnSpeed, 1.0f));
+            }
         }
         else if (mMovementState != CharState_None && mAdjustMovementAnimSpeed)
         {

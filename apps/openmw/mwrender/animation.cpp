@@ -219,6 +219,7 @@ namespace
 
         RemoveFinishedCallbackVisitor(int effectId)
             : RemoveVisitor()
+            , mHasMagicEffects(false)
             , mEffectId(effectId)
         {
         }
