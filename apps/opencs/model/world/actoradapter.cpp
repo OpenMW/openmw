@@ -6,6 +6,7 @@
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/loadrace.hpp>
 #include <components/esm/mappings.hpp>
+#include <components/sceneutil/actorutil.hpp>
 
 #include "data.hpp"
 
@@ -14,6 +15,11 @@ namespace CSMWorld
     const std::string& ActorAdapter::RaceData::getId() const
     {
         return mId;
+    }
+
+    bool ActorAdapter::RaceData::isBeast() const
+    {
+        return mIsBeast;
     }
 
     bool ActorAdapter::RaceData::handlesPart(ESM::PartReferenceType type) const
@@ -63,9 +69,10 @@ namespace CSMWorld
         if (!id.empty()) mDependencies.emplace(id);
     }
 
-    void ActorAdapter::RaceData::reset(const std::string& id)
+    void ActorAdapter::RaceData::reset_data(const std::string& id, bool isBeast)
     {
         mId = id;
+        mIsBeast = isBeast;
         for (auto& str : mFemaleParts)
             str.clear();
         for (auto& str : mMaleParts)
@@ -82,9 +89,26 @@ namespace CSMWorld
         return mId;
     }
 
+    bool ActorAdapter::ActorData::isCreature() const
+    {
+        return mCreature;
+    }
+
     bool ActorAdapter::ActorData::isFemale() const
     {
         return mFemale;
+    }
+
+    std::string ActorAdapter::ActorData::getSkeleton() const
+    {
+        if (mCreature || !mSkeletonOverride.empty())
+            return "meshes\\" + mSkeletonOverride;
+
+        bool firstPerson = false;
+        bool beast = mRaceData ? mRaceData->isBeast() : false;
+        bool werewolf = false;
+
+        return SceneUtil::getActorSkeleton(firstPerson, mFemale, beast, werewolf);
     }
 
     const std::string& ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
@@ -112,10 +136,12 @@ namespace CSMWorld
         if (!id.empty()) mDependencies.emplace(id);
     }
 
-    void ActorAdapter::ActorData::reset(const std::string& id, bool isFemale, RaceDataPtr raceData)
+    void ActorAdapter::ActorData::reset_data(const std::string& id, const std::string& skeleton, bool isCreature, bool isFemale, RaceDataPtr raceData)
     {
         mId = id;
+        mCreature = isCreature;
         mFemale = isFemale;
+        mSkeletonOverride = skeleton;
         mRaceData = raceData;
         for (auto& str : mParts)
             str.clear();
@@ -383,7 +409,7 @@ namespace CSMWorld
         if (index == -1)
         {
             // Record does not exist
-            data->reset(id);
+            data->reset_data(id);
             emit actorChanged(id);
             return;
         }
@@ -392,7 +418,7 @@ namespace CSMWorld
         if (record.isDeleted())
         {
             // Record is deleted and therefore not accessible
-            data->reset(id);
+            data->reset_data(id);
             emit actorChanged(id);
             return;
         }
@@ -414,20 +440,18 @@ namespace CSMWorld
         else
         {
             // Wrong record type
-            data->reset(id);
+            data->reset_data(id);
             emit actorChanged(id);
         }
     }
 
     void ActorAdapter::setupRace(const std::string& id, RaceDataPtr data)
     {
-        // Common setup
-        data->reset(id);
-
         int index = mRaces.searchId(id);
         if (index == -1)
         {
             // Record does not exist
+            data->reset_data(id);
             return;
         }
 
@@ -435,10 +459,12 @@ namespace CSMWorld
         if (raceRecord.isDeleted())
         {
             // Record is deleted, so not accessible
+            data->reset_data(id);
             return;
         }
 
-        // TODO move stuff in actor related to race here
+        auto& race = raceRecord.get();
+        data->reset_data(id, race.mData.mFlags & ESM::Race::Beast);
 
         // Setup body parts
         for (int i = 0; i < mBodyParts.getSize(); ++i)
@@ -470,7 +496,7 @@ namespace CSMWorld
         auto& npc = dynamic_cast<const Record<ESM::NPC>&>(mReferenceables.getRecord(index)).get();
 
         RaceDataPtr raceData = getRaceData(npc.mRace);
-        data->reset(id, !npc.isMale(), raceData);
+        data->reset_data(id, "", false, !npc.isMale(), raceData);
 
         // Add inventory items
         for (auto& item : npc.mInventory.mList)
@@ -541,9 +567,11 @@ namespace CSMWorld
 
     void ActorAdapter::setupCreature(const std::string& id, ActorDataPtr data)
     {
-        data->reset(id);
+        // Record is known to exist and is not deleted
+        int index = mReferenceables.searchId(id);
+        auto& creature = dynamic_cast<const Record<ESM::Creature>&>(mReferenceables.getRecord(index)).get();
 
-        // TODO move stuff from Actor here
+        data->reset_data(id, creature.mModel, true);
     }
 
     void ActorAdapter::markDirtyDependency(const std::string& dep)

@@ -44,6 +44,8 @@ namespace CSMWorld
         public:
             /// Retrieves the id of the race represented
             const std::string& getId() const;
+            /// Checks if it's a beast race
+            bool isBeast() const;
             /// Checks if a part could exist for the given type
             bool handlesPart(ESM::PartReferenceType type) const;
             /// Retrieves the associated body part
@@ -60,11 +62,12 @@ namespace CSMWorld
             /// Marks an additional dependency
             void addOtherDependency(const std::string& id);
             /// Clears parts and dependencies
-            void reset(const std::string& raceId);
+            void reset_data(const std::string& raceId, bool isBeast=false);
 
         private:
             bool handles(ESM::PartReferenceType type) const;
             std::string mId;
+            bool mIsBeast;
             RacePartList mFemaleParts;
             RacePartList mMaleParts;
             StringSet mDependencies;
@@ -78,8 +81,12 @@ namespace CSMWorld
         public:
             /// Retrieves the id of the actor represented
             const std::string& getId() const;
+            /// Checks if the actor is a creature
+            bool isCreature() const;
             /// Checks if the actor is female
             bool isFemale() const;
+            /// Returns the skeleton the actor should use for attaching parts to
+            std::string getSkeleton() const;
             /// Retrieves the associated actor part
             const std::string& getPart(ESM::PartReferenceType index) const;
             /// Checks if the actor has a data dependency
@@ -90,11 +97,13 @@ namespace CSMWorld
             /// Marks an additional dependency for the actor
             void addOtherDependency(const std::string& id);
             /// Clears race, parts, and dependencies
-            void reset(const std::string& actorId, bool female=true, RaceDataPtr raceData=nullptr);
+            void reset_data(const std::string& actorId, const std::string& skeleton="", bool isCreature=false, bool female=true, RaceDataPtr raceData=nullptr);
 
         private:
             std::string mId;
+            bool mCreature;
             bool mFemale;
+            std::string mSkeletonOverride;
             RaceDataPtr mRaceData;
             ActorPartList mParts;
             StringSet mDependencies;

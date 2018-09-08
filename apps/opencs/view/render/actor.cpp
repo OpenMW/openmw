@@ -18,15 +18,15 @@ namespace CSVRender
 {
     const std::string Actor::MeshPrefix = "meshes\\";
 
-    Actor::Actor(const std::string& id, int type, CSMWorld::Data& data)
+    Actor::Actor(const std::string& id, CSMWorld::Data& data)
         : mId(id)
-        , mInitialized(false)
-        , mType(type)
         , mData(data)
         , mBaseNode(new osg::Group())
         , mSkeleton(nullptr)
     {
         mActorData = mData.getActorAdapter()->getActorData(mId);
+        connect(mData.getActorAdapter(), SIGNAL(actorChanged(const std::string&)),
+                this, SLOT(handleActorChanged(const std::string&)));
     }
 
     osg::Group* Actor::getBaseNode()
@@ -36,25 +36,33 @@ namespace CSVRender
 
     void Actor::update()
     {
-        try
-        {
-            mBaseNode->removeChildren(0, mBaseNode->getNumChildren());
+        mBaseNode->removeChildren(0, mBaseNode->getNumChildren());
 
-            if (mType == CSMWorld::UniversalId::Type_Npc)
-                updateNpc();
-            else if (mType == CSMWorld::UniversalId::Type_Creature)
-                updateCreature();
-        }
-        catch (std::exception& e)
+        // Load skeleton
+        std::string skeletonModel = mActorData->getSkeleton();
+        skeletonModel = Misc::ResourceHelpers::correctActorModelPath(skeletonModel, mData.getResourceSystem()->getVFS());
+        loadSkeleton(skeletonModel);
+
+        if (!mActorData->isCreature())
         {
-            Log(Debug::Info) << "Exception in Actor::update(): " << e.what();
+            // Get rid of the extra attachments
+            SceneUtil::CleanObjectRootVisitor cleanVisitor;
+            mSkeleton->accept(cleanVisitor);
+            cleanVisitor.remove();
+
+            // Attach parts to skeleton
+            loadBodyParts();
+        }
+        else
+        {
+            SceneUtil::RemoveTriBipVisitor removeTriBipVisitor;
+            mSkeleton->accept(removeTriBipVisitor);
+            removeTriBipVisitor.remove();
         }
 
-        if (!mInitialized)
-        {
-            mInitialized = true;
-            connect(mData.getActorAdapter(), SIGNAL(actorChanged(const std::string&)), this, SLOT(handleActorChanged(const std::string&)));
-        }
+        // Post setup
+        mSkeleton->markDirty();
+        mSkeleton->setActive(SceneUtil::Skeleton::Active);
     }
 
     void Actor::handleActorChanged(const std::string& refId)
@@ -63,57 +71,6 @@ namespace CSVRender
         {
             update();
         }
-    }
-
-    void Actor::updateCreature()
-    {
-        auto& referenceables = mData.getReferenceables();
-
-        auto& creature = dynamic_cast<const CSMWorld::Record<ESM::Creature>& >(referenceables.getRecord(mId)).get();
-
-        // Load skeleton with meshes
-        std::string skeletonModel = MeshPrefix + creature.mModel;
-        skeletonModel = Misc::ResourceHelpers::correctActorModelPath(skeletonModel, mData.getResourceSystem()->getVFS());
-        loadSkeleton(skeletonModel);
-
-        SceneUtil::RemoveTriBipVisitor removeTriBipVisitor;
-        mSkeleton->accept(removeTriBipVisitor);
-        removeTriBipVisitor.remove();
-
-        // Post setup
-        mSkeleton->markDirty();
-        mSkeleton->setActive(SceneUtil::Skeleton::Active);
-    }
-
-    void Actor::updateNpc()
-    {
-        auto& races = mData.getRaces();
-        auto& referenceables = mData.getReferenceables();
-
-        auto& npc = dynamic_cast<const CSMWorld::Record<ESM::NPC>& >(referenceables.getRecord(mId)).get();
-        auto& race = dynamic_cast<const CSMWorld::Record<ESM::Race>& >(races.getRecord(npc.mRace)).get();
-
-        bool is1stPerson = false;
-        bool isFemale = !npc.isMale();
-        bool isBeast = race.mData.mFlags & ESM::Race::Beast;
-        bool isWerewolf = false;
-
-        // Load skeleton
-        std::string skeletonModel = SceneUtil::getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf);
-        skeletonModel = Misc::ResourceHelpers::correctActorModelPath(skeletonModel, mData.getResourceSystem()->getVFS());
-        loadSkeleton(skeletonModel);
-
-        // Get rid of the extra attachments
-        SceneUtil::CleanObjectRootVisitor cleanVisitor;
-        mSkeleton->accept(cleanVisitor);
-        cleanVisitor.remove();
-
-        // Attach parts to skeleton
-        loadBodyParts(npc.mId);
-
-        // Post setup
-        mSkeleton->markDirty();
-        mSkeleton->setActive(SceneUtil::Skeleton::Active);
     }
 
     void Actor::loadSkeleton(const std::string& model)
@@ -136,7 +93,7 @@ namespace CSVRender
 
     }
 
-    void Actor::loadBodyParts(const std::string& actorId)
+    void Actor::loadBodyParts()
     {
         for (int i = 0; i < ESM::PRT_Count; ++i)
         {
