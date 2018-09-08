@@ -115,6 +115,7 @@
     Bug #4618: Sneaking is possible while the character is flying
     Bug #4622: Recharging enchanted items with Soul Gems does not award experience if it fails
     Bug #4628: NPC record reputation, disposition and faction rank should have unsigned char type
+    Bug #4633: Sneaking stance affects speed even if the actor is not able to crouch
     Feature #1645: Casting effects from objects
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
