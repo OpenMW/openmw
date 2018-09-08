@@ -175,17 +175,18 @@ static void gdb_info(pid_t pid)
         fflush(stdout);
 
         /* Clean up */
-        remove(respfile);
+        if (remove(respfile) != 0)
+            Log(Debug::Warning) << "Warning: can not remove file '" << respfile << "': " << std::strerror(errno);
     }
     else
     {
         /* Error creating temp file */
         if(fd >= 0)
         {
-            if (close(fd) == 0)
-                remove(respfile);
-            else
-                Log(Debug::Warning) << "Warning: can not close and remove file '" << respfile << "': " << std::strerror(errno);
+            if (close(fd) != 0)
+                Log(Debug::Warning) << "Warning: can not close file '" << respfile << "': " << std::strerror(errno);
+            else if (remove(respfile) != 0)
+                Log(Debug::Warning) << "Warning: can not remove file '" << respfile << "': " << std::strerror(errno);
         }
         printf("!!! Could not create gdb command file\n");
     }
