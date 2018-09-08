@@ -109,6 +109,7 @@
     Bug #4604: Picking up gold from the ground only makes 1 grabbed
     Bug #4607: Scaling for animated collision shapes is applied twice
     Bug #4608: Falling damage is applied twice
+    Bug #4611: Instant magic effects have 0 duration in custom spell cost calculations unlike vanilla
     Bug #4614: Crash due to division by zero when FlipController has no textures
     Bug #4615: Flicker effects for light sources are handled incorrectly
     Bug #4617: First person sneaking offset is not applied while the character is in air
