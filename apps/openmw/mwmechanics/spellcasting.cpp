@@ -65,7 +65,7 @@ namespace MWMechanics
             maxMagn = effect.mMagnMax;
         }
 
-        int duration = 0;
+        int duration = 1;
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
             duration = effect.mDuration;
 
