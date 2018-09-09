@@ -2060,9 +2060,9 @@ namespace MWGui
         return mTextColours;
     }
 
-    bool WindowManager::injectKeyPress(MyGUI::KeyCode key, unsigned int text)
+    bool WindowManager::injectKeyPress(MyGUI::KeyCode key, unsigned int text, bool repeat)
     {
-        if (!mKeyboardNavigation->injectKeyPress(key, text))
+        if (!mKeyboardNavigation->injectKeyPress(key, text, repeat))
         {
             MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
             bool widgetActive = MyGUI::InputManager::getInstance().injectKeyPress(key, text);

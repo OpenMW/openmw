@@ -45,6 +45,7 @@
     Bug #4230: AiTravel package issues break some Tribunal quests
     Bug #4231: Infected rats from the "Crimson Plague" quest rendered unconscious by change in Drain Fatigue functionality
     Bug #4251: Stationary NPCs do not return to their position after combat
+    Bug #4260: Keyboard navigation makes persuasion exploitable
     Bug #4271: Scamp flickers when attacking
     Bug #4274: Pre-0.43 death animations are not forward-compatible with 0.43+
     Bug #4286: Scripted animations can be interrupted

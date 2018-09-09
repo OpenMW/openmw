@@ -172,7 +172,7 @@ enum Direction
     D_Prev
 };
 
-bool KeyboardNavigation::injectKeyPress(MyGUI::KeyCode key, unsigned int text)
+bool KeyboardNavigation::injectKeyPress(MyGUI::KeyCode key, unsigned int text, bool repeat)
 {
     if (!mEnabled)
         return false;
@@ -192,7 +192,12 @@ bool KeyboardNavigation::injectKeyPress(MyGUI::KeyCode key, unsigned int text)
     case MyGUI::KeyCode::Return:
     case MyGUI::KeyCode::NumpadEnter:
     case MyGUI::KeyCode::Space:
+    {
+        if (repeat)
+            return false;
+
         return accept();
+    }
     default:
         return false;
     }
