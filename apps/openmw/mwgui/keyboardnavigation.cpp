@@ -6,6 +6,8 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_Window.h>
 
+#include <components/debug/debuglog.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 
@@ -49,7 +51,14 @@ KeyboardNavigation::KeyboardNavigation()
 
 KeyboardNavigation::~KeyboardNavigation()
 {
-    MyGUI::WidgetManager::getInstance().unregisterUnlinker(this);
+    try
+    {
+        MyGUI::WidgetManager::getInstance().unregisterUnlinker(this);
+    }
+    catch(const MyGUI::Exception& e)
+    {
+        Log(Debug::Error) << "Error in the destructor: " << e.what();
+    }
 }
 
 void KeyboardNavigation::saveFocus(int mode)
