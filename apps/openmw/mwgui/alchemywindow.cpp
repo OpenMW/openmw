@@ -65,6 +65,9 @@ namespace MWGui
     void AlchemyWindow::onAccept(MyGUI::EditBox* sender)
     {
         onCreateButtonClicked(sender);
+
+        // To do not spam onAccept() again and again
+        MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);
     }
 
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)

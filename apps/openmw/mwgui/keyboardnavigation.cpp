@@ -193,8 +193,10 @@ bool KeyboardNavigation::injectKeyPress(MyGUI::KeyCode key, unsigned int text, b
     case MyGUI::KeyCode::NumpadEnter:
     case MyGUI::KeyCode::Space:
     {
+        // We should disable repeating for activation keys
+        MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::None);
         if (repeat)
-            return false;
+            return true;
 
         return accept();
     }

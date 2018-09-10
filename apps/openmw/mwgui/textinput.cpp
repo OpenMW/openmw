@@ -65,6 +65,9 @@ namespace MWGui
     void TextInputDialog::onTextAccepted(MyGUI::Edit* _sender)
     {
         onOkClicked(_sender);
+
+        // To do not spam onTextAccepted() again and again
+        MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);
     }
 
     std::string TextInputDialog::getTextInput() const

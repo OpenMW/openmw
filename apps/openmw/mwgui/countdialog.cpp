@@ -73,8 +73,10 @@ namespace MWGui
     void CountDialog::onEnterKeyPressed(MyGUI::EditBox* _sender)
     {
         eventOkClicked(NULL, mSlider->getScrollPosition()+1);
-
         setVisible(false);
+
+        // To do not spam onEnterKeyPressed() again and again
+        MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);
     }
 
     void CountDialog::onEditValueChanged(int value)

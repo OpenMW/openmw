@@ -2091,6 +2091,11 @@ namespace MWGui
             return true;
     }
 
+    bool WindowManager::injectKeyRelease(MyGUI::KeyCode key)
+    {
+        return MyGUI::InputManager::getInstance().injectKeyRelease(key);
+    }
+
     void WindowManager::GuiModeState::update(bool visible)
     {
         for (unsigned int i=0; i<mWindows.size(); ++i)
