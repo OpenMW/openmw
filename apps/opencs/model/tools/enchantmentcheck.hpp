@@ -24,6 +24,7 @@ namespace CSMTools
 
             virtual void perform (int stage, CSMDoc::Messages& messages);
             ///< Messages resulting from this tage will be appended to \a messages.
+
     };
 }
 
