@@ -38,7 +38,7 @@ namespace Compiler
         {
             case 'l':
 
-                Generator::report (mCode, mLiterals, "%g");
+                Generator::report (mCode, mLiterals, "%d");
                 break;
 
             case 'f':
