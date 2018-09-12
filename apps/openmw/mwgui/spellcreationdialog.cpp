@@ -147,7 +147,7 @@ namespace MWGui
 
         mDurationValue->setCaption("1");
         mMagnitudeMinValue->setCaption("1");
-        static const std::string &to = MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "-");
+        const std::string to = MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "-");
 
         mMagnitudeMaxValue->setCaption(to + " 1");
         mAreaValue->setCaption("0");
@@ -314,7 +314,7 @@ namespace MWGui
         }
 
         mEffect.mMagnMax = pos+1;
-        static const std::string &to = MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "-");
+        const std::string to = MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "-");
 
         mMagnitudeMaxValue->setCaption(to + " " + MyGUI::utility::toString(pos+1));
 
