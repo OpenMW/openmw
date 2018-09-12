@@ -174,6 +174,8 @@ namespace MWGui
         if(mDragAndDrop != NULL && mDragAndDrop->mIsOnDragAndDrop)
             return;
 
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
+
         // transfer everything into the player's inventory
         ItemModel* playerModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getModel();
         mModel->update();
@@ -219,6 +221,8 @@ namespace MWGui
     {
         if(mDragAndDrop == NULL || !mDragAndDrop->mIsOnDragAndDrop)
         {
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
+
             onTakeAllButtonClicked(mTakeButton);
 
             if (mPtr.getClass().isPersistent(mPtr))
