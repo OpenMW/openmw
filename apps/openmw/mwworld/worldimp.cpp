@@ -1159,10 +1159,16 @@ namespace MWWorld
 
         osg::Vec3f vec(x, y, z);
 
-        CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL; // currCell == NULL should only happen for player, during initial startup
+        CellStore *currCell = ptr.isInCell() ? ptr.getCell() : nullptr; // currCell == nullptr should only happen for player, during initial startup
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = isPlayer || (currCell && mWorldScene->isCellActive(*currCell));
         MWWorld::Ptr newPtr = ptr;
+
+        if (!isPlayer && !currCell)
+           throw std::runtime_error("Can not move actor \"" + ptr.getCellRef().getRefId() + "\" to another cell: current cell is nullptr");
+
+        if (!newCell)
+           throw std::runtime_error("Can not move actor \"" + ptr.getCellRef().getRefId() + "\" to another cell: new cell is nullptr");
 
         if (currCell != newCell)
         {
@@ -1185,10 +1191,10 @@ namespace MWWorld
                 addContainerScripts (getPlayerPtr(), newCell);
                 newPtr = getPlayerPtr();
             }
-            else if (currCell)
+            else
             {
                 bool currCellActive = mWorldScene->isCellActive(*currCell);
-                bool newCellActive = newCell && mWorldScene->isCellActive(*newCell);
+                bool newCellActive = mWorldScene->isCellActive(*newCell);
                 if (!currCellActive && newCellActive)
                 {
                     newPtr = currCell->moveTo(ptr, newCell);

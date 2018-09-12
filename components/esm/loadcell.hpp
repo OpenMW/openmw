@@ -78,14 +78,14 @@ struct Cell
 
   struct DATAstruct
   {
-    int mFlags;
-    int mX, mY;
+      int mFlags {0};
+      int mX {0}, mY {0};
   };
 
   struct AMBIstruct
   {
-    Color mAmbient, mSunlight, mFog;
-    float mFogDensity;
+      Color mAmbient {0}, mSunlight {0}, mFog {0};
+      float mFogDensity {0.f};
   };
 
   Cell() : mName(""),

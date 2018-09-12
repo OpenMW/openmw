@@ -99,7 +99,14 @@ namespace MWGui
 
     ScreenFader::~ScreenFader()
     {
-        MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate(this, &ScreenFader::onFrameStart);
+        try
+        {
+            MyGUI::Gui::getInstance().eventFrameStart -= MyGUI::newDelegate(this, &ScreenFader::onFrameStart);
+        }
+        catch(const MyGUI::Exception& e)
+        {
+            Log(Debug::Error) << "Error in the destructor: " << e.what();
+        }
     }
 
     void ScreenFader::onFrameStart(float dt)

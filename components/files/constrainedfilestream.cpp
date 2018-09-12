@@ -103,21 +103,16 @@ namespace Files
 
     };
 
-    ConstrainedFileStream::ConstrainedFileStream(const char *filename, size_t start, size_t length)
-        : std::istream(new ConstrainedFileStreamBuf(filename, start, length))
+    ConstrainedFileStream::ConstrainedFileStream(std::unique_ptr<std::streambuf> buf)
+        : std::istream(buf.get())
+        , mBuf(std::move(buf))
     {
-
     }
-
-    ConstrainedFileStream::~ConstrainedFileStream()
-    {
-        delete rdbuf();
-    }
-
 
     IStreamPtr openConstrainedFileStream(const char *filename,
                                                        size_t start, size_t length)
     {
-        return IStreamPtr(new ConstrainedFileStream(filename, start, length));
+        auto buf = std::unique_ptr<std::streambuf>(new ConstrainedFileStreamBuf(filename, start, length));
+        return IStreamPtr(new ConstrainedFileStream(std::move(buf)));
     }
 }

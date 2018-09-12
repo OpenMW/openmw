@@ -41,8 +41,6 @@ namespace Debug
         {
             return size;
         }
-
-        char mDebugLevel;
     };
 
 #if defined(_WIN32) && defined(_DEBUG)

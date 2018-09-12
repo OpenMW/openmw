@@ -161,7 +161,17 @@ namespace Gui
         mTextures.clear();
 
         for (std::vector<MyGUI::ResourceManualFont*>::iterator it = mFonts.begin(); it != mFonts.end(); ++it)
-            MyGUI::ResourceManager::getInstance().removeByName((*it)->getResourceName());
+        {
+            try
+            {
+                MyGUI::ResourceManager::getInstance().removeByName((*it)->getResourceName());
+            }
+            catch(const MyGUI::Exception& e)
+            {
+                Log(Debug::Error) << "Error in the destructor: " << e.what();
+            }
+        }
+
         mFonts.clear();
     }
 
