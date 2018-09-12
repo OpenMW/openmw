@@ -938,8 +938,8 @@ namespace MWClass
 
         const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
-        bool sneaking = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
+        bool sneaking = MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr) && stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
+        bool running = MWBase::Environment::get().getMechanicsManager()->isRunning(ptr) && stats.getStance(MWMechanics::CreatureStats::Stance_Run);
 
         float walkSpeed = gmst.fMinWalkSpeed->mValue.getFloat() + 0.01f*npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()*
                                                       (gmst.fMaxWalkSpeed->mValue.getFloat() - gmst.fMinWalkSpeed->mValue.getFloat());
@@ -964,7 +964,7 @@ namespace MWClass
             flySpeed = std::max(0.0f, flySpeed);
             moveSpeed = flySpeed;
         }
-        else if(world->isSwimming(ptr))
+        else if (world->isSwimming(ptr))
         {
             float swimSpeed = walkSpeed;
             if(running)
@@ -974,7 +974,7 @@ namespace MWClass
                                                     gmst.fSwimRunAthleticsMult->mValue.getFloat();
             moveSpeed = swimSpeed;
         }
-        else if(running && !sneaking)
+        else if (running)
             moveSpeed = runSpeed;
         else
             moveSpeed = walkSpeed;
