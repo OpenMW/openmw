@@ -137,27 +137,10 @@ namespace CSMWorld
                 Type_Search,
                 Type_MetaDatas,
                 Type_MetaData,
-                Type_RunLog,
-                Type_RunGame,
-                Type_StopGame,
-                Type_Undo,
-                Type_Redo,
-                Type_Preferences,
-                Type_NewWindow,
-                Type_StatusBar,
-                Type_NewGame,
-                Type_NewAddon,
-                Type_Open,
-                Type_Save,
-                Type_Verify,
-                Type_Merge,
-                Type_ErrorLog,
-                Type_Close,
-                Type_Exit,
-                Type_Reload
+                Type_RunLog
             };
 
-            enum { NumberOfTypes = Type_Reload+1 };
+            enum { NumberOfTypes = Type_RunLog+1 };
 
         private:
 

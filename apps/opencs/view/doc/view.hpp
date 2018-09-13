@@ -67,6 +67,7 @@ namespace CSVDoc
             void closeEvent (QCloseEvent *event);
 
             QAction* createMenuEntry(CSMWorld::UniversalId::Type type, QMenu* menu, const char* shortcutName);
+            QAction* createMenuEntry(const std::string& title, const std::string& iconName, QMenu* menu, const char* shortcutName);
 
             void setupFileMenu();
 
