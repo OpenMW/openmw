@@ -1,10 +1,5 @@
 #include "regioncheck.hpp"
 
-#include <sstream>
-#include <map>
-
-#include <components/esm/loadregn.hpp>
-
 #include "../prefs/state.hpp"
 
 #include "../world/universalid.hpp"

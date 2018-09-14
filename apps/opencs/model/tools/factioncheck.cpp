@@ -1,9 +1,7 @@
 #include "factioncheck.hpp"
 
-#include <sstream>
 #include <map>
 
-#include <components/esm/loadfact.hpp>
 #include <components/esm/loadskil.hpp>
 
 #include "../prefs/state.hpp"

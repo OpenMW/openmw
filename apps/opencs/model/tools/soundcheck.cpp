@@ -1,7 +1,5 @@
 #include "soundcheck.hpp"
 
-#include <components/esm/loadskil.hpp>
-
 #include "../prefs/state.hpp"
 
 #include "../world/universalid.hpp"
@@ -35,7 +33,7 @@ void CSMTools::SoundCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
     if (sound.mData.mMinRange>sound.mData.mMaxRange)
     {
-        messages.add(id, "Minimum range larger than maximum range", "", CSMDoc::Message::Severity_Warning);
+        messages.add(id, "Minimum range is larger than maximum range", "", CSMDoc::Message::Severity_Warning);
     }
 
     if (sound.mSound.empty())

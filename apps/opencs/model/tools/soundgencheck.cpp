@@ -1,7 +1,5 @@
 #include "soundgencheck.hpp"
 
-#include <sstream>
-
 #include "../prefs/state.hpp"
 
 #include "../world/refiddata.hpp"

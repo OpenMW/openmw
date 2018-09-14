@@ -23,9 +23,7 @@ namespace CSMTools
             bool mIgnoreBaseRecords;
 
         private:
-            std::string checkTexture(const std::string &texture, bool isIcon) const;
             std::string checkObject(const std::string &id, const CSMWorld::UniversalId &type, const std::string &column) const;
-            std::string checkSound(const std::string &id, const std::string &column) const;
 
         public:
             MagicEffectCheckStage(const CSMWorld::IdCollection<ESM::MagicEffect> &effects,

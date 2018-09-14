@@ -1,6 +1,5 @@
 #include "birthsigncheck.hpp"
 
-#include <components/esm/loadbsgn.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../prefs/state.hpp"
@@ -42,11 +41,8 @@ void CSMTools::BirthsignCheckStage::perform (int stage, CSMDoc::Messages& messag
 
     if (birthsign.mTexture.empty())
         messages.add(id, "Image is missing", "", CSMDoc::Message::Severity_Error);
-    else
+    else if (mTextures.searchId(birthsign.mTexture) == -1)
     {
-        if (mTextures.searchId(birthsign.mTexture) != -1)
-            return;
-
         std::string ddsTexture = birthsign.mTexture;
         if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsTexture) && mTextures.searchId(ddsTexture) != -1))
             messages.add(id,  "Image '" + birthsign.mTexture + "' does not exist", "", CSMDoc::Message::Severity_Error);

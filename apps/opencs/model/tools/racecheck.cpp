@@ -1,9 +1,5 @@
 #include "racecheck.hpp"
 
-#include <sstream>
-
-#include <components/esm/loadrace.hpp>
-
 #include "../prefs/state.hpp"
 
 #include "../world/universalid.hpp"
@@ -28,10 +24,8 @@ void CSMTools::RaceCheckStage::performPerRecord (int stage, CSMDoc::Messages& me
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Race, race.mId);
 
     // test for empty name and description
-    if (race.mName.empty() && race.mData.mFlags & 0x1)
-        messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
-    else if (race.mName.empty())
-        messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Warning);
+    if (race.mName.empty())
+        messages.add(id, "Name is missing", "", (race.mData.mFlags & 0x1) ? CSMDoc::Message::Severity_Error : CSMDoc::Message::Severity_Warning);
 
     if (race.mDescription.empty())
         messages.add(id, "Description is missing", "", CSMDoc::Message::Severity_Warning);

@@ -1,7 +1,6 @@
 #include "journalcheck.hpp"
 
 #include <set>
-#include <sstream>
 
 #include "../prefs/state.hpp"
 
@@ -63,12 +62,10 @@ void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
         std::pair<std::set<int>::iterator, bool> result = questIndices.insert(journalInfo.mData.mJournalIndex);
 
         // Duplicate index
-        if (result.second == false)
+        if (!result.second)
         {
             CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_JournalInfo, journalInfo.mId);
-            std::ostringstream stream;
-            stream << "Duplicated quest index " << journalInfo.mData.mJournalIndex;
-            messages.add(id, stream.str(), "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Duplicated quest index " + std::to_string(journalInfo.mData.mJournalIndex), "", CSMDoc::Message::Severity_Error);
         }
     }
 

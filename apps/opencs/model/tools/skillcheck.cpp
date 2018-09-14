@@ -1,7 +1,5 @@
 #include "skillcheck.hpp"
 
-#include <components/esm/loadskil.hpp>
-
 #include "../prefs/state.hpp"
 
 #include "../world/universalid.hpp"
@@ -37,6 +35,6 @@ void CSMTools::SkillCheckStage::perform (int stage, CSMDoc::Messages& messages)
     for (int i=0; i<4; ++i)
         if (skill.mData.mUseValue[i]<0)
         {
-            messages.add(id, "Usage experience value #" + std::to_string(i) + " is negative", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Use value #" + std::to_string(i) + " is negative", "", CSMDoc::Message::Severity_Error);
         }
 }
