@@ -243,7 +243,7 @@ std::string CharacterController::chooseRandomGroup (const std::string& prefix, i
     return prefix + toString(roll);
 }
 
-void CharacterController::refreshHitRecoilAnims()
+void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
 {
     bool recovery = mPtr.getClass().getCreatureStats(mPtr).getHitRecovery();
     bool knockdown = mPtr.getClass().getCreatureStats(mPtr).getKnockedDown();
@@ -348,14 +348,16 @@ void CharacterController::refreshHitRecoilAnims()
         mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "loop stop", "stop", 0.0f, 0);
     }
     if (mHitState != CharState_None)
-        mIdleState = CharState_None;
+        idle = CharState_None;
 }
 
-void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState jump, bool force)
+void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState jump, CharacterState& idle, bool force)
 {
     if(force || jump != mJumpState)
     {
-        mIdleState = CharState_None;
+        if (jump != JumpState_None)
+            idle = CharState_None;
+
         bool startAtLoop = (jump == mJumpState);
         mJumpState = jump;
 
@@ -371,6 +373,11 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
                 {
                     jumpmask = MWRender::Animation::BlendMask_LowerBody;
                     jumpAnimName = "jump";
+
+                    // Since we apply movement only for lower body, do not reset idle animations.
+                    // For upper body there will be idle animation.
+                    if (idle == CharState_None)
+                        idle = CharState_Idle;
 
                     // For crossbow animations use 1h ones as fallback
                     if (mWeaponType == WeapType_Crossbow)
@@ -406,34 +413,48 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
     }
 }
 
-void CharacterController::refreshMovementAnims(const WeaponInfo* weap, CharacterState movement, bool force)
+void CharacterController::refreshMovementAnims(const WeaponInfo* weap, CharacterState movement, CharacterState& idle, bool force)
 {
-    if(force || movement != mMovementState)
+    std::string movementAnimName;
+    MWRender::Animation::BlendMask movemask;
+    const StateInfo *movestate;
+    if(force || movement != mMovementState || idle != mIdleState)
     {
-        mMovementState = movement;
-        std::string movementAnimName;
-        MWRender::Animation::BlendMask movemask = MWRender::Animation::BlendMask_All;
-        const StateInfo *movestate = std::find_if(sMovementList, sMovementListEnd, FindCharState(mMovementState));
+        movemask = MWRender::Animation::BlendMask_All;
+        movestate = std::find_if(sMovementList, sMovementListEnd, FindCharState(movement));
         if(movestate != sMovementListEnd)
         {
             movementAnimName = movestate->groupname;
             if(weap != sWeaponTypeListEnd && movementAnimName.find("swim") == std::string::npos)
             {
-                if (mWeaponType == WeapType_Spell && (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)) // Spellcasting stance turning is a special case
+                if (mWeaponType == WeapType_Spell && (movement == CharState_TurnLeft || movement == CharState_TurnRight)) // Spellcasting stance turning is a special case
                     movementAnimName = weap->shortgroup + movementAnimName;
                 else
                     movementAnimName += weap->shortgroup;
+
                 if(!mAnimation->hasAnimation(movementAnimName))
                 {
                     movemask = MWRender::Animation::BlendMask_LowerBody;
                     movementAnimName = movestate->groupname;
+
+                    // Since we apply movement only for lower body, do not reset idle animations.
+                    // For upper body there will be idle animation.
+                    if (idle == CharState_None)
+                        idle = CharState_Idle;
 
                     // For crossbow animations use 1h ones as fallback
                     if (mWeaponType == WeapType_Crossbow)
                         movementAnimName += "1h";
                 }
             }
+        }
+    }
 
+    if(force || movement != mMovementState)
+    {
+        mMovementState = movement;
+        if(movestate != sMovementListEnd)
+        {
             if(!mAnimation->hasAnimation(movementAnimName))
             {
                 std::string::size_type swimpos = movementAnimName.find("swim");
@@ -451,6 +472,10 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
                 }
                 else
                 {
+                    // For crossbow animations use 1h ones as fallback
+                    if (mWeaponType == WeapType_Crossbow)
+                        movementAnimName += "1h";
+
                     movementAnimName.erase(swimpos, 4);
                     if (weap != sWeaponTypeListEnd)
                     {
@@ -527,7 +552,15 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
 
 void CharacterController::refreshIdleAnims(const WeaponInfo* weap, CharacterState idle, bool force)
 {
-    if(force || idle != mIdleState || mIdleState == CharState_None || (!mAnimation->isPlaying(mCurrentIdle) && mAnimQueue.empty()))
+    // FIXME: if one of the below states is close to their last animation frame (i.e. will be disabled in the coming update),
+    // the idle animation should be displayed
+    if (((mUpperBodyState != UpperCharState_Nothing && mUpperBodyState != UpperCharState_WeapEquiped)
+            || (mMovementState != CharState_None && !isTurning())
+            || mHitState != CharState_None)
+            && !mPtr.getClass().isBipedal(mPtr))
+        idle = CharState_None;
+
+    if(force || idle != mIdleState || (!mAnimation->isPlaying(mCurrentIdle) && mAnimQueue.empty()))
     {
         mIdleState = idle;
         size_t numLoops = ~0ul;
@@ -586,24 +619,16 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         return;
 
     if (mPtr.getClass().isActor())
-        refreshHitRecoilAnims();
+        refreshHitRecoilAnims(idle);
 
     const WeaponInfo *weap = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(mWeaponType));
     if (!mPtr.getClass().hasInventoryStore(mPtr))
         weap = sWeaponTypeListEnd;
 
-    refreshJumpAnims(weap, jump, force);
-    refreshMovementAnims(weap, movement, force);
+    refreshJumpAnims(weap, jump, idle, force);
+    refreshMovementAnims(weap, movement, idle, force);
 
     // idle handled last as it can depend on the other states
-    // FIXME: if one of the below states is close to their last animation frame (i.e. will be disabled in the coming update),
-    // the idle animation should be displayed
-    if (((mUpperBodyState != UpperCharState_Nothing && mUpperBodyState != UpperCharState_WeapEquiped)
-            || (mMovementState != CharState_None && !isTurning())
-            || mHitState != CharState_None)
-            && !mPtr.getClass().isBipedal(mPtr))
-        idle = CharState_None;
-
     refreshIdleAnims(weap, idle, force);
 }
 
@@ -1195,7 +1220,7 @@ bool CharacterController::updateCarriedLeftVisible(WeaponType weaptype) const
     }
 }
 
-bool CharacterController::updateWeaponState()
+bool CharacterController::updateWeaponState(CharacterState& idle)
 {
     const MWWorld::Class &cls = mPtr.getClass();
     CreatureStats &stats = cls.getCreatureStats(mPtr);
@@ -1394,6 +1419,14 @@ bool CharacterController::updateWeaponState()
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
             mAttackStrength = 0;
 
+            // Randomize attacks for non-bipedal creatures with Weapon flag
+            if (mPtr.getClass().getTypeName() == typeid(ESM::Creature).name() &&
+                !mPtr.getClass().isBipedal(mPtr) &&
+                (!mAnimation->hasAnimation(mCurrentWeapon) || isRandomAttackAnimation(mCurrentWeapon)))
+            {
+                mCurrentWeapon = chooseRandomAttackAnimation();
+            }
+
             if(mWeaponType == WeapType_Spell)
             {
                 // Unset casting flag, otherwise pressing the mouse button down would
@@ -1557,11 +1590,11 @@ bool CharacterController::updateWeaponState()
 
         // We should reset player's idle animation in the first-person mode.
         if (resetIdle && mPtr == player && MWBase::Environment::get().getWorld()->isFirstPerson())
-            mIdleState = CharState_None;
+            idle = CharState_None;
 
         // In other cases we should not break swim and sneak animations
         if (resetIdle && mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
-            mIdleState = CharState_None;
+            idle = CharState_None;
 
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
         if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && !isKnockedDown())
@@ -2072,12 +2105,18 @@ void CharacterController::update(float duration)
                                          : (sneak ? CharState_SneakBack
                                                   : (isrunning ? CharState_RunBack : CharState_WalkBack)));
             }
-            else if(rot.z() != 0.0f && !sneak && !(mPtr == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson()))
+            else if(rot.z() != 0.0f)
             {
-                if(rot.z() > rotationThreshold)
-                    movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
-                else if(rot.z() < -rotationThreshold)
-                    movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
+                // It seems only bipedal actors use turning animations.
+                // Also do not use turning animations in the first-person view and when sneaking.
+                bool isFirstPlayer = mPtr == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson();
+                if (!sneak && !isFirstPlayer && mPtr.getClass().isBipedal(mPtr))
+                {
+                    if(rot.z() > rotationThreshold)
+                        movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
+                    else if(rot.z() < -rotationThreshold)
+                        movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
+                }
             }
         }
 
@@ -2095,16 +2134,21 @@ void CharacterController::update(float duration)
         }
         else
         {
-            mTurnAnimationThreshold -= duration;
-            if (movestate == CharState_TurnRight || movestate == CharState_TurnLeft ||
-                movestate == CharState_SwimTurnRight || movestate == CharState_SwimTurnLeft)
+            if (mPtr.getClass().isBipedal(mPtr))
             {
-                mTurnAnimationThreshold = 0.05f;
-            }
-            else if (movestate == CharState_None && isTurning()
-                    && mTurnAnimationThreshold > 0)
-            {
-                movestate = mMovementState;
+                if (mTurnAnimationThreshold > 0)
+                    mTurnAnimationThreshold -= duration;
+
+                if (movestate == CharState_TurnRight || movestate == CharState_TurnLeft ||
+                    movestate == CharState_SwimTurnRight || movestate == CharState_SwimTurnLeft)
+                {
+                    mTurnAnimationThreshold = 0.05f;
+                }
+                else if (movestate == CharState_None && isTurning()
+                        && mTurnAnimationThreshold > 0)
+                {
+                    movestate = mMovementState;
+                }
             }
         }
 
@@ -2113,13 +2157,12 @@ void CharacterController::update(float duration)
 
         if(mAnimQueue.empty() || inwater || sneak)
         {
-            // Note: turning animations should not interrupt idle ones.
-            // Also movement should not stop idle animation for spellcasting stance.
+            // Note: turning animations should not interrupt idle ones
             if (inwater)
                 idlestate = CharState_IdleSwim;
             else if (sneak && !inJump)
                 idlestate = CharState_IdleSneak;
-            else if (movestate != CharState_None && !isTurning() && mWeaponType != WeapType_Spell)
+            else if (movestate != CharState_None && !isTurning())
                 idlestate = CharState_None;
             else
                 idlestate = CharState_Idle;
@@ -2131,7 +2174,7 @@ void CharacterController::update(float duration)
         {
             // bipedal means hand-to-hand could be used (which is handled in updateWeaponState). an existing InventoryStore means an actual weapon could be used.
             if(cls.isBipedal(mPtr) || cls.hasInventoryStore(mPtr))
-                forcestateupdate = updateWeaponState() || forcestateupdate;
+                forcestateupdate = updateWeaponState(idlestate) || forcestateupdate;
             else
                 forcestateupdate = updateCreatureState() || forcestateupdate;
 
