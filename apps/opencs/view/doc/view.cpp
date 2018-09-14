@@ -47,58 +47,40 @@ void CSVDoc::View::setupFileMenu()
 {
     QMenu *file = menuBar()->addMenu (tr ("File"));
 
-    QAction *newGame = new QAction (tr ("New Game"), this);
+    QAction* newGame = createMenuEntry("New Game", ":./menu-new-game.png", file, "document-file-newgame");
     connect (newGame, SIGNAL (triggered()), this, SIGNAL (newGameRequest()));
-    setupShortcut("document-file-newgame", newGame);
-    file->addAction (newGame);
 
-
-    QAction *newAddon = new QAction (tr ("New Addon"), this);
+    QAction* newAddon = createMenuEntry("New Addon", ":./menu-new-addon.png", file, "document-file-newaddon");
     connect (newAddon, SIGNAL (triggered()), this, SIGNAL (newAddonRequest()));
-    setupShortcut("document-file-newaddon", newAddon);
-    file->addAction (newAddon);
 
-    QAction *open = new QAction (tr ("Open"), this);
+    QAction* open = createMenuEntry("Open", ":./menu-open.png", file, "document-file-open");
     connect (open, SIGNAL (triggered()), this, SIGNAL (loadDocumentRequest()));
-    setupShortcut("document-file-open", open);
-    file->addAction (open);
 
-    mSave = new QAction (tr ("Save"), this);
-    connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
-    setupShortcut("document-file-save", mSave);
-    file->addAction (mSave);
+    QAction* save = createMenuEntry("Save", ":./menu-save.png", file, "document-file-save");
+    connect (save, SIGNAL (triggered()), this, SLOT (save()));
+    mSave = save;
 
-    mVerify = new QAction (tr ("Verify"), this);
-    connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
-    setupShortcut("document-file-verify", mVerify);
-    file->addAction (mVerify);
+    QAction* verify = createMenuEntry("Verify", ":./menu-verify.png", file, "document-file-verify");
+    connect (verify, SIGNAL (triggered()), this, SLOT (verify()));
+    mVerify = verify;
 
-    mMerge = new QAction (tr ("Merge"), this);
-    connect (mMerge, SIGNAL (triggered()), this, SLOT (merge()));
-    setupShortcut("document-file-merge", mMerge);
-    file->addAction (mMerge);
+    QAction* merge = createMenuEntry("Merge", ":./menu-merge.png", file, "document-file-merge");
+    connect (merge, SIGNAL (triggered()), this, SLOT (merge()));
+    mMerge = merge;
 
-    QAction *loadErrors = new QAction (tr ("Open Load Error Log"), this);
+    QAction* loadErrors = createMenuEntry("Error Log", ":./error-log.png", file, "document-file-errorlog");
     connect (loadErrors, SIGNAL (triggered()), this, SLOT (loadErrorLog()));
-    setupShortcut("document-file-errorlog", loadErrors);
-    file->addAction (loadErrors);
 
-    QAction *meta = new QAction (tr ("Meta Data"), this);
+    QAction* meta = createMenuEntry(CSMWorld::UniversalId::Type_MetaDatas, file, "document-file-metadata");
     connect (meta, SIGNAL (triggered()), this, SLOT (addMetaDataSubView()));
-    setupShortcut("document-file-metadata", meta);
-    file->addAction (meta);
 
-    QAction *close = new QAction (tr ("Close Document"), this);
+    QAction* close = createMenuEntry("Close", ":./menu-close.png", file, "document-file-close");
     connect (close, SIGNAL (triggered()), this, SLOT (close()));
-    setupShortcut("document-file-close", close);
-    file->addAction(close);
 
-    QAction *exit = new QAction (tr ("Exit Application"), this);
+    QAction* exit = createMenuEntry("Exit", ":./menu-exit.png", file, "document-file-exit");
     connect (exit, SIGNAL (triggered()), this, SLOT (exit()));
-    connect (this, SIGNAL(exitApplicationRequest(CSVDoc::View *)), &mViewManager, SLOT(exitApplication(CSVDoc::View *)));
-    setupShortcut("document-file-exit", exit);
 
-    file->addAction(exit);
+    connect (this, SIGNAL(exitApplicationRequest(CSVDoc::View *)), &mViewManager, SLOT(exitApplication(CSVDoc::View *)));
 }
 
 namespace
@@ -130,251 +112,174 @@ void CSVDoc::View::setupEditMenu()
     mUndo = mDocument->getUndoStack().createUndoAction (this, tr("Undo"));
     setupShortcut("document-edit-undo", mUndo);
     connect(mUndo, SIGNAL (changed ()), this, SLOT (undoActionChanged ()));
+    mUndo->setIcon(QIcon(QString::fromStdString(":./menu-undo.png")));
     edit->addAction (mUndo);
 
     mRedo = mDocument->getUndoStack().createRedoAction (this, tr("Redo"));
     connect(mRedo, SIGNAL (changed ()), this, SLOT (redoActionChanged ()));
     setupShortcut("document-edit-redo", mRedo);
+    mRedo->setIcon(QIcon(QString::fromStdString(":./menu-redo.png")));
     edit->addAction (mRedo);
 
-    QAction *userSettings = new QAction (tr ("Preferences"), this);
+    QAction* userSettings = createMenuEntry("Preferences", ":./menu-preferences.png", edit, "document-edit-preferences");
     connect (userSettings, SIGNAL (triggered()), this, SIGNAL (editSettingsRequest()));
-    setupShortcut("document-edit-preferences", userSettings);
-    edit->addAction (userSettings);
 
-    QAction *search = new QAction (tr ("Search"), this);
+    QAction* search = createMenuEntry(CSMWorld::UniversalId::Type_Search, edit, "document-edit-search");
     connect (search, SIGNAL (triggered()), this, SLOT (addSearchSubView()));
-    setupShortcut("document-edit-search", search);
-    edit->addAction (search);
 }
 
 void CSVDoc::View::setupViewMenu()
 {
     QMenu *view = menuBar()->addMenu (tr ("View"));
 
-    QAction *newWindow = new QAction (tr ("New View"), this);
+    QAction *newWindow = createMenuEntry("New View", ":./menu-new-window.png", view, "document-view-newview");
     connect (newWindow, SIGNAL (triggered()), this, SLOT (newView()));
-    setupShortcut("document-view-newview", newWindow);
-    view->addAction (newWindow);
 
-    mShowStatusBar = new QAction (tr ("Toggle Status Bar"), this);
-    mShowStatusBar->setCheckable (true);
+    mShowStatusBar = createMenuEntry("Toggle Status Bar", ":./menu-status-bar.png", view, "document-view-statusbar");
     connect (mShowStatusBar, SIGNAL (toggled (bool)), this, SLOT (toggleShowStatusBar (bool)));
-    setupShortcut("document-view-statusbar", mShowStatusBar);
-
+    mShowStatusBar->setCheckable (true);
     mShowStatusBar->setChecked (CSMPrefs::get()["Windows"]["show-statusbar"].isTrue());
 
     view->addAction (mShowStatusBar);
 
-    QAction *filters = new QAction (tr ("Filters"), this);
+    QAction *filters = createMenuEntry(CSMWorld::UniversalId::Type_Filters, view, "document-mechanics-filters");
     connect (filters, SIGNAL (triggered()), this, SLOT (addFiltersSubView()));
-    setupShortcut("document-view-filters", filters);
-    view->addAction (filters);
 }
 
 void CSVDoc::View::setupWorldMenu()
 {
     QMenu *world = menuBar()->addMenu (tr ("World"));
 
-    QAction *regions = new QAction (tr ("Regions"), this);
+    QAction* regions = createMenuEntry(CSMWorld::UniversalId::Type_Regions, world, "document-world-regions");
     connect (regions, SIGNAL (triggered()), this, SLOT (addRegionsSubView()));
-    setupShortcut("document-world-regions", regions);
-    world->addAction (regions);
 
-    QAction *cells = new QAction (tr ("Cells"), this);
+    QAction* cells = createMenuEntry(CSMWorld::UniversalId::Type_Cells, world, "document-world-cells");
     connect (cells, SIGNAL (triggered()), this, SLOT (addCellsSubView()));
-    setupShortcut("document-world-cells", cells);
-    world->addAction (cells);
 
-    QAction *referenceables = new QAction (tr ("Objects"), this);
+    QAction* referenceables = createMenuEntry(CSMWorld::UniversalId::Type_Referenceables, world, "document-world-referencables");
     connect (referenceables, SIGNAL (triggered()), this, SLOT (addReferenceablesSubView()));
-    setupShortcut("document-world-referencables", referenceables);
-    world->addAction (referenceables);
 
-    QAction *references = new QAction (tr ("Instances"), this);
+    QAction* references = createMenuEntry(CSMWorld::UniversalId::Type_References, world, "document-world-references");
     connect (references, SIGNAL (triggered()), this, SLOT (addReferencesSubView()));
-    setupShortcut("document-world-references", references);
-    world->addAction (references);
 
-    QAction *lands = new QAction (tr ("Lands"), this);
+    QAction *lands = createMenuEntry(CSMWorld::UniversalId::Type_Lands, world, "document-world-lands");
     connect (lands, SIGNAL (triggered()), this, SLOT (addLandsSubView()));
-    setupShortcut("document-world-lands", lands);
-    world->addAction (lands);
 
-    QAction *landTextures = new QAction (tr ("Land Textures"), this);
+    QAction *landTextures = createMenuEntry(CSMWorld::UniversalId::Type_LandTextures, world, "document-world-landtextures");
     connect (landTextures, SIGNAL (triggered()), this, SLOT (addLandTexturesSubView()));
-    setupShortcut("document-world-landtextures", landTextures);
-    world->addAction (landTextures);
 
-    QAction *grid = new QAction (tr ("Pathgrid"), this);
+    QAction *grid = createMenuEntry(CSMWorld::UniversalId::Type_Pathgrids, world, "document-world-pathgrid");
     connect (grid, SIGNAL (triggered()), this, SLOT (addPathgridSubView()));
-    setupShortcut("document-world-pathgrid", grid);
-    world->addAction (grid);
 
     world->addSeparator(); // items that don't represent single record lists follow here
 
-    QAction *regionMap = new QAction (tr ("Region Map"), this);
+    QAction *regionMap = createMenuEntry(CSMWorld::UniversalId::Type_RegionMap, world, "document-world-regionmap");
     connect (regionMap, SIGNAL (triggered()), this, SLOT (addRegionMapSubView()));
-    setupShortcut("document-world-regionmap", regionMap);
-    world->addAction (regionMap);
 }
 
 void CSVDoc::View::setupMechanicsMenu()
 {
     QMenu *mechanics = menuBar()->addMenu (tr ("Mechanics"));
 
-    QAction *globals = new QAction (tr ("Globals"), this);
+    QAction* globals = createMenuEntry(CSMWorld::UniversalId::Type_Globals, mechanics, "document-mechanics-globals");
     connect (globals, SIGNAL (triggered()), this, SLOT (addGlobalsSubView()));
-    setupShortcut("document-mechanics-globals", globals);
-    mechanics->addAction (globals);
 
-    QAction *gmsts = new QAction (tr ("Game Settings"), this);
+    QAction* gmsts = createMenuEntry(CSMWorld::UniversalId::Type_Gmsts, mechanics, "document-mechanics-gamesettings");
     connect (gmsts, SIGNAL (triggered()), this, SLOT (addGmstsSubView()));
-    setupShortcut("document-mechanics-gamesettings", gmsts);
-    mechanics->addAction (gmsts);
 
-    QAction *scripts = new QAction (tr ("Scripts"), this);
+    QAction* scripts = createMenuEntry(CSMWorld::UniversalId::Type_Scripts, mechanics, "document-mechanics-scripts");
     connect (scripts, SIGNAL (triggered()), this, SLOT (addScriptsSubView()));
-    setupShortcut("document-mechanics-scripts", scripts);
-    mechanics->addAction (scripts);
 
-    QAction *spells = new QAction (tr ("Spells"), this);
+    QAction* spells = createMenuEntry(CSMWorld::UniversalId::Type_Spells, mechanics, "document-mechanics-spells");
     connect (spells, SIGNAL (triggered()), this, SLOT (addSpellsSubView()));
-    setupShortcut("document-mechanics-spells", spells);
-    mechanics->addAction (spells);
 
-    QAction *enchantments = new QAction (tr ("Enchantments"), this);
+    QAction* enchantments = createMenuEntry(CSMWorld::UniversalId::Type_Enchantments, mechanics, "document-mechanics-enchantments");
     connect (enchantments, SIGNAL (triggered()), this, SLOT (addEnchantmentsSubView()));
-    setupShortcut("document-mechanics-enchantments", enchantments);
-    mechanics->addAction (enchantments);
 
-    QAction *effects = new QAction (tr ("Magic Effects"), this);
-    connect (effects, SIGNAL (triggered()), this, SLOT (addMagicEffectsSubView()));
-    setupShortcut("document-mechanics-magiceffects", effects);
-    mechanics->addAction (effects);
+    QAction* magicEffects = createMenuEntry(CSMWorld::UniversalId::Type_MagicEffects, mechanics, "document-mechanics-magiceffects");
+    connect (magicEffects, SIGNAL (triggered()), this, SLOT (addMagicEffectsSubView()));
 
-    QAction *startScripts = new QAction (tr ("Start Scripts"), this);
+    QAction* startScripts = createMenuEntry(CSMWorld::UniversalId::Type_StartScripts, mechanics, "document-mechanics-startscripts");
     connect (startScripts, SIGNAL (triggered()), this, SLOT (addStartScriptsSubView()));
-    setupShortcut("document-mechanics-startscripts", startScripts);
-    mechanics->addAction (startScripts);
 }
 
 void CSVDoc::View::setupCharacterMenu()
 {
     QMenu *characters = menuBar()->addMenu (tr ("Characters"));
 
-    QAction *skills = new QAction (tr ("Skills"), this);
+    QAction* skills = createMenuEntry(CSMWorld::UniversalId::Type_Skills, characters, "document-character-skills");
     connect (skills, SIGNAL (triggered()), this, SLOT (addSkillsSubView()));
-    setupShortcut("document-character-skills", skills);
-    characters->addAction (skills);
 
-    QAction *classes = new QAction (tr ("Classes"), this);
+    QAction* classes = createMenuEntry(CSMWorld::UniversalId::Type_Classes, characters, "document-character-classes");
     connect (classes, SIGNAL (triggered()), this, SLOT (addClassesSubView()));
-    setupShortcut("document-character-classes", classes);
-    characters->addAction (classes);
 
-    QAction *factions = new QAction (tr ("Factions"), this);
+    QAction* factions = createMenuEntry(CSMWorld::UniversalId::Type_Faction, characters, "document-character-factions");
     connect (factions, SIGNAL (triggered()), this, SLOT (addFactionsSubView()));
-    setupShortcut("document-character-factions", factions);
-    characters->addAction (factions);
 
-    QAction *races = new QAction (tr ("Races"), this);
+    QAction* races = createMenuEntry(CSMWorld::UniversalId::Type_Races, characters, "document-character-races");
     connect (races, SIGNAL (triggered()), this, SLOT (addRacesSubView()));
-    setupShortcut("document-character-races", races);
-    characters->addAction (races);
 
-    QAction *birthsigns = new QAction (tr ("Birthsigns"), this);
+    QAction* birthsigns = createMenuEntry(CSMWorld::UniversalId::Type_Birthsigns, characters, "document-character-birthsigns");
     connect (birthsigns, SIGNAL (triggered()), this, SLOT (addBirthsignsSubView()));
-    setupShortcut("document-character-birthsigns", birthsigns);
-    characters->addAction (birthsigns);
 
-    QAction *topics = new QAction (tr ("Topics"), this);
+    QAction* topics = createMenuEntry(CSMWorld::UniversalId::Type_Topics, characters, "document-character-topics");
     connect (topics, SIGNAL (triggered()), this, SLOT (addTopicsSubView()));
-    setupShortcut("document-character-topics", topics);
-    characters->addAction (topics);
 
-    QAction *journals = new QAction (tr ("Journals"), this);
+    QAction* journals = createMenuEntry(CSMWorld::UniversalId::Type_Journals, characters, "document-character-journals");
     connect (journals, SIGNAL (triggered()), this, SLOT (addJournalsSubView()));
-    setupShortcut("document-character-journals", journals);
-    characters->addAction (journals);
 
-    QAction *topicInfos = new QAction (tr ("Topic Infos"), this);
+    QAction* topicInfos = createMenuEntry(CSMWorld::UniversalId::Type_TopicInfos, characters, "document-character-topicinfos");
     connect (topicInfos, SIGNAL (triggered()), this, SLOT (addTopicInfosSubView()));
-    setupShortcut("document-character-topicinfos", topicInfos);
-    characters->addAction (topicInfos);
 
-    QAction *journalInfos = new QAction (tr ("Journal Infos"), this);
+    QAction* journalInfos = createMenuEntry(CSMWorld::UniversalId::Type_JournalInfos, characters, "document-character-journalinfos");
     connect (journalInfos, SIGNAL (triggered()), this, SLOT (addJournalInfosSubView()));
-    setupShortcut("document-character-journalinfos", journalInfos);
-    characters->addAction (journalInfos);
 
-    QAction *bodyParts = new QAction (tr ("Body Parts"), this);
+    QAction* bodyParts = createMenuEntry(CSMWorld::UniversalId::Type_BodyParts, characters, "document-character-bodyparts");
     connect (bodyParts, SIGNAL (triggered()), this, SLOT (addBodyPartsSubView()));
-    setupShortcut("document-character-bodyparts", bodyParts);
-    characters->addAction (bodyParts);
 }
 
 void CSVDoc::View::setupAssetsMenu()
 {
     QMenu *assets = menuBar()->addMenu (tr ("Assets"));
 
-    QAction *reload = new QAction (tr ("Reload"), this);
+    QAction* reload = createMenuEntry("Reload", ":./menu-reload.png", assets, "document-assets-reload");
     connect (reload, SIGNAL (triggered()), &mDocument->getData(), SLOT (assetsChanged()));
-    setupShortcut("document-assets-reload", reload);
-    assets->addAction (reload);
 
     assets->addSeparator();
 
-    QAction *sounds = new QAction (tr ("Sounds"), this);
+    QAction* sounds = createMenuEntry(CSMWorld::UniversalId::Type_Sounds, assets, "document-assets-sounds");
     connect (sounds, SIGNAL (triggered()), this, SLOT (addSoundsSubView()));
-    setupShortcut("document-assets-sounds", sounds);
-    assets->addAction (sounds);
 
-    QAction *soundGens = new QAction (tr ("Sound Generators"), this);
+    QAction* soundGens = createMenuEntry(CSMWorld::UniversalId::Type_SoundGens, assets, "document-assets-soundgens");
     connect (soundGens, SIGNAL (triggered()), this, SLOT (addSoundGensSubView()));
-    setupShortcut("document-assets-soundgens", soundGens);
-    assets->addAction (soundGens);
 
     assets->addSeparator(); // resources follow here
 
-    QAction *meshes = new QAction (tr ("Meshes"), this);
+    QAction* meshes = createMenuEntry(CSMWorld::UniversalId::Type_Meshes, assets, "document-assets-meshes");
     connect (meshes, SIGNAL (triggered()), this, SLOT (addMeshesSubView()));
-    setupShortcut("document-assets-meshes", meshes);
-    assets->addAction (meshes);
 
-    QAction *icons = new QAction (tr ("Icons"), this);
+    QAction* icons = createMenuEntry(CSMWorld::UniversalId::Type_Icons, assets, "document-assets-icons");
     connect (icons, SIGNAL (triggered()), this, SLOT (addIconsSubView()));
-    setupShortcut("document-assets-icons", icons);
-    assets->addAction (icons);
 
-    QAction *musics = new QAction (tr ("Music"), this);
+    QAction* musics = createMenuEntry(CSMWorld::UniversalId::Type_Musics, assets, "document-assets-musics");
     connect (musics, SIGNAL (triggered()), this, SLOT (addMusicsSubView()));
-    setupShortcut("document-assets-music", musics);
-    assets->addAction (musics);
 
-    QAction *soundsRes = new QAction (tr ("Sound Files"), this);
-    connect (soundsRes, SIGNAL (triggered()), this, SLOT (addSoundsResSubView()));
-    setupShortcut("document-assets-soundres", soundsRes);
-    assets->addAction (soundsRes);
+    QAction* soundFiles = createMenuEntry(CSMWorld::UniversalId::Type_SoundsRes, assets, "document-assets-soundres");
+    connect (soundFiles, SIGNAL (triggered()), this, SLOT (addSoundsResSubView()));
 
-    QAction *textures = new QAction (tr ("Textures"), this);
+    QAction* textures = createMenuEntry(CSMWorld::UniversalId::Type_Textures, assets, "document-assets-textures");
     connect (textures, SIGNAL (triggered()), this, SLOT (addTexturesSubView()));
-    setupShortcut("document-assets-textures", textures);
-    assets->addAction (textures);
 
-    QAction *videos = new QAction (tr ("Videos"), this);
+    QAction* videos = createMenuEntry(CSMWorld::UniversalId::Type_Videos, assets, "document-assets-videos");
     connect (videos, SIGNAL (triggered()), this, SLOT (addVideosSubView()));
-    setupShortcut("document-assets-videos", videos);
-    assets->addAction (videos);
 }
 
 void CSVDoc::View::setupDebugMenu()
 {
     QMenu *debug = menuBar()->addMenu (tr ("Debug"));
 
-    QAction *profiles = new QAction (tr ("Debug Profiles"), this);
+    QAction* profiles = createMenuEntry(CSMWorld::UniversalId::Type_DebugProfiles, debug, "document-debug-profiles");
     connect (profiles, SIGNAL (triggered()), this, SLOT (addDebugProfilesSubView()));
-    debug->addAction (profiles);
 
     debug->addSeparator();
 
@@ -387,18 +292,41 @@ void CSVDoc::View::setupDebugMenu()
 
     QAction *runDebug = debug->addMenu (mGlobalDebugProfileMenu);
     runDebug->setText (tr ("Run OpenMW"));
-
     setupShortcut("document-debug-run", runDebug);
+    runDebug->setIcon(QIcon(QString::fromStdString(":./run-openmw.png")));
 
-    mStopDebug = new QAction (tr ("Shutdown OpenMW"), this);
-    connect (mStopDebug, SIGNAL (triggered()), this, SLOT (stop()));
-    setupShortcut("document-debug-shutdown", mStopDebug);
-    debug->addAction (mStopDebug);
+    QAction* stopDebug = createMenuEntry("Stop OpenMW", ":./stop-openmw.png", debug, "document-debug-shutdown");
+    connect (stopDebug, SIGNAL (triggered()), this, SLOT (stop()));
+    mStopDebug = stopDebug;
 
-    QAction *runLog = new QAction (tr ("Open Run Log"), this);
+    QAction* runLog = createMenuEntry(CSMWorld::UniversalId::Type_RunLog, debug, "document-debug-runlog");
     connect (runLog, SIGNAL (triggered()), this, SLOT (addRunLogSubView()));
-    setupShortcut("document-debug-runlog", runLog);
-    debug->addAction (runLog);
+}
+
+QAction* CSVDoc::View::createMenuEntry(CSMWorld::UniversalId::Type type, QMenu* menu, const char* shortcutName)
+{
+    const std::string title = CSMWorld::UniversalId (type).getTypeName();
+    QAction *entry = new QAction(QString::fromStdString(title), this);
+    setupShortcut(shortcutName, entry);
+    const std::string iconName = CSMWorld::UniversalId (type).getIcon();
+    if (!iconName.empty() && iconName != ":placeholder")
+        entry->setIcon(QIcon(QString::fromStdString(iconName)));
+
+    menu->addAction (entry);
+
+    return entry;
+}
+
+QAction* CSVDoc::View::createMenuEntry(const std::string& title, const std::string& iconName, QMenu* menu, const char* shortcutName)
+{
+    QAction *entry = new QAction(QString::fromStdString(title), this);
+    setupShortcut(shortcutName, entry);
+    if (!iconName.empty() && iconName != ":placeholder")
+        entry->setIcon(QIcon(QString::fromStdString(iconName)));
+
+    menu->addAction (entry);
+
+    return entry;
 }
 
 void CSVDoc::View::setupUi()
