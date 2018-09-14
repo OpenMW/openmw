@@ -367,6 +367,9 @@ namespace MWGui
     void TradeWindow::onAccept(MyGUI::EditBox *sender)
     {
         onOfferButtonClicked(sender);
+
+        // To do not spam onAccept() again and again
+        MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);
     }
 
     void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)

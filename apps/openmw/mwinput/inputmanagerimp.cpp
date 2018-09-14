@@ -214,7 +214,7 @@ namespace MWInput
             break;
         }
 
-        MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0);
+        MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0, false);
     }
 
     void InputManager::channelChanged(ICS::Channel* channel, float currentValue, float previousValue)
@@ -720,7 +720,7 @@ namespace MWInput
         bool consumed = false;
         if (kc != OIS::KC_UNASSIGNED && !mInputBinder->detectingBindingState())
         {
-            consumed = MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+            consumed = MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Enum(kc), 0, arg.repeat);
             if (SDL_IsTextInputActive() &&  // Little trick to check if key is printable
                                     ( !(SDLK_SCANCODE_MASK & arg.keysym.sym) && std::isprint(arg.keysym.sym)))
                 consumed = true;
@@ -1153,7 +1153,7 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             if (!SDL_IsTextInputActive() && !isLeftOrRightButton(A_Activate, mInputBinder, mFakeDeviceID, mJoystickLastUsed))
-                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Return, 0);
+                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Return, 0, false);
         }
         else if (mControlSwitch["playercontrols"])
             mPlayer->activate();

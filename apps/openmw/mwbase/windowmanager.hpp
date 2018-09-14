@@ -350,7 +350,8 @@ namespace MWBase
 
             virtual const MWGui::TextColours& getTextColours() = 0;
 
-            virtual bool injectKeyPress(MyGUI::KeyCode key, unsigned int text) = 0;
+            virtual bool injectKeyPress(MyGUI::KeyCode key, unsigned int text, bool repeat) = 0;
+            virtual bool injectKeyRelease(MyGUI::KeyCode key) = 0;
     };
 }
 

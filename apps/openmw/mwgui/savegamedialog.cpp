@@ -127,6 +127,9 @@ namespace MWGui
     void SaveGameDialog::onEditSelectAccept(MyGUI::EditBox *sender)
     {
         accept();
+
+        // To do not spam onEditSelectAccept() again and again
+        MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);
     }
 
     void SaveGameDialog::onOpen()

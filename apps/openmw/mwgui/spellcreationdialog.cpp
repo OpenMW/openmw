@@ -423,6 +423,9 @@ namespace MWGui
     void SpellCreationDialog::onAccept(MyGUI::EditBox *sender)
     {
         onBuyButtonClicked(sender);
+
+        // To do not spam onAccept() again and again
+        MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);
     }
 
     void SpellCreationDialog::onOpen()

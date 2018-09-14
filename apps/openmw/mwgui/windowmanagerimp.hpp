@@ -379,7 +379,8 @@ namespace MWGui
 
     virtual const MWGui::TextColours& getTextColours();
 
-    virtual bool injectKeyPress(MyGUI::KeyCode key, unsigned int text);
+    virtual bool injectKeyPress(MyGUI::KeyCode key, unsigned int text, bool repeat=false);
+    virtual bool injectKeyRelease(MyGUI::KeyCode key);
 
   private:
     const MWWorld::ESMStore* mStore;
