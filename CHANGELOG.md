@@ -93,6 +93,7 @@
     Bug #4510: Division by zero in MWMechanics::CreatureStats::setAttribute
     Bug #4519: Knockdown does not discard movement in the 1st-person mode
     Bug #4531: Movement does not reset idle animations
+    Bug #4532: Underwater sfx isn't tied to 3rd person camera
     Bug #4539: Paper Doll is affected by GUI scaling
     Bug #4543: Picking cursed items through inventory (menumode) makes it disappear
     Bug #4545: Creatures flee from werewolves
