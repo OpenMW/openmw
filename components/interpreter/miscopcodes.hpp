@@ -65,23 +65,18 @@ namespace Interpreter
                             }
                             else if (notation == ShortestNotation)
                             {
-                                std::string scientific;
-                                std::string fixed;
-
-                                out << std::scientific << value;
-
-                                scientific = out.str();
+                                out << value;
+                                std::string standard = out.str();
 
                                 out.str(std::string());
                                 out.clear();
 
-                                out << std::fixed << value;
+                                out << std::scientific << value;
+                                std::string scientific = out.str();
 
-                                fixed = out.str();
-
-                                mFormattedMessage += fixed.length() < scientific.length() ? fixed : scientific;
+                                mFormattedMessage += standard.length() < scientific.length() ? standard : scientific;
                             }
-                            else 
+                            else
                             {
                                 out << std::scientific << value;
                                 mFormattedMessage += out.str();
