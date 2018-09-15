@@ -1394,6 +1394,7 @@ namespace MWPhysics
             mStandingCollisions.clear();
         }
 
+        const MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         PtrVelocityList::iterator iter = mMovementQueue.begin();
         for(;iter != mMovementQueue.end();++iter)
@@ -1451,7 +1452,7 @@ namespace MWPhysics
 
             MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
             if ((wasOnGround && physicActor->getOnGround()) || flying || world->isSwimming(iter->first) || slowFall < 1)
-                stats.land();
+                stats.land(iter->first == player);
             else if (heightDiff < 0)
                 stats.addToFallHeight(-heightDiff);
 
