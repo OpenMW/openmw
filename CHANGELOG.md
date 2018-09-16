@@ -121,6 +121,7 @@
     Bug #4628: NPC record reputation, disposition and faction rank should have unsigned char type
     Bug #4633: Sneaking stance affects speed even if the actor is not able to crouch
     Feature #912: Editor: Add missing icons to UniversalId tables
+    Feature #1617: Editor: Enchantment effect record verifier
     Feature #1645: Casting effects from objects
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #3083: Play animation when NPC is casting spell via script
@@ -155,6 +156,7 @@
     Task #4606: Support Rapture3D's OpenAL driver
     Task #4613: Incomplete type errors when compiling with g++ on OSX 10.9
     Task #4621: Optimize combat AI
+    Task #4643: Revise editor record verifying functionality
 
 0.44.0
 ------
