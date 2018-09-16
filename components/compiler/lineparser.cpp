@@ -88,7 +88,7 @@ namespace Compiler
     {
         if (mState==PotentialEndState)
         {
-            getErrorHandler().warning ("stray string argument (ignoring it)", loc);
+            getErrorHandler().warning ("ignoring stray string argument", loc);
             mState = EndState;
             return true;
         }
@@ -233,7 +233,7 @@ namespace Compiler
 
         if (mState==SetPotentialMemberVarState && keyword==Scanner::K_to)
         {
-            getErrorHandler().warning ("unknown variable (ignoring set instruction)", loc);
+            getErrorHandler().warning ("unknown variable, ignoring set instruction", loc);
             SkipParser skip (getErrorHandler(), getContext());
             scanner.scan (skip);
             return false;
@@ -286,7 +286,7 @@ namespace Compiler
                 {
                     if (!hasExplicit && mState==ExplicitState)
                     {
-                        getErrorHandler().warning ("stray explicit reference (ignoring it)", loc);
+                        getErrorHandler().warning ("ignoring stray explicit reference", loc);
                         mExplicit.clear();
                     }
 
@@ -344,7 +344,7 @@ namespace Compiler
                     {
                         if (!hasExplicit && !mExplicit.empty())
                         {
-                            getErrorHandler().warning ("stray explicit reference (ignoring it)", loc);
+                            getErrorHandler().warning ("ignoring stray explicit reference", loc);
                             mExplicit.clear();
                         }
 
@@ -360,7 +360,7 @@ namespace Compiler
         if (mState==ExplicitState)
         {
             // drop stray explicit reference
-            getErrorHandler().warning ("stray explicit reference (ignoring it)", loc);
+            getErrorHandler().warning ("ignoring stray explicit reference", loc);
             mState = BeginState;
             mExplicit.clear();
         }
@@ -412,19 +412,19 @@ namespace Compiler
 
                 case Scanner::K_else:
 
-                    getErrorHandler().warning ("stray else (ignoring it)", loc);
+                    getErrorHandler().warning ("ignoring stray else", loc);
                     mState = EndState;
                     return true;
 
                 case Scanner::K_endif:
 
-                    getErrorHandler().warning ("stray endif (ignoring it)", loc);
+                    getErrorHandler().warning ("ignoring stray endif", loc);
                     mState = EndState;
                     return true;
 
                 case Scanner::K_begin:
 
-                    getErrorHandler().warning ("stray begin (ignoring it)", loc);
+                    getErrorHandler().warning ("ignoring stray begin", loc);
                     mState = EndState;
                     return true;
             }
@@ -491,7 +491,7 @@ namespace Compiler
     {
         if (mState==EndState && code==Scanner::S_open)
         {
-            getErrorHandler().warning ("stray '[' or '(' at the end of the line (ignoring it)",
+            getErrorHandler().warning ("ignoring stray '[' or '(' at the end of the line",
                 loc);
             return true;
         }

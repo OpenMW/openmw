@@ -56,8 +56,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
                 if (pointList[pathgrid.mEdges[i].mV0].mOtherIndex[j] == pathgrid.mEdges[i].mV1)
                 {
                     std::ostringstream ss;
-                    ss << "Duplicate edge between points" 
-                        << pathgrid.mEdges[i].mV0 << " and " << pathgrid.mEdges[i].mV1;
+                    ss << "Duplicate edge between points #" << pathgrid.mEdges[i].mV0 << " and #" << pathgrid.mEdges[i].mV1;
                     messages.add (id, ss.str(), "", CSMDoc::Message::Severity_Error);
                     break;
                 }
@@ -70,7 +69,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
         else
         {
             std::ostringstream ss;
-            ss << "An edge is connected to a non-existent point " << pathgrid.mEdges[i].mV0;
+            ss << "An edge is connected to a non-existent point #" << pathgrid.mEdges[i].mV0;
             messages.add (id, ss.str(), "", CSMDoc::Message::Severity_Error);
         }
     }
@@ -93,7 +92,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
             if (!foundReverse)
             {
                 std::ostringstream ss;
-                ss << "Missing edge between points " << i << " and " << pointList[i].mOtherIndex[j];
+                ss << "Missing edge between points #" << i << " and #" << pointList[i].mOtherIndex[j];
                 messages.add (id, ss.str(), "", CSMDoc::Message::Severity_Error);
             }
         }
@@ -110,7 +109,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
                 if (it == duplList.end())
                 {
                     std::ostringstream ss;
-                    ss << "Point " << i << " duplicates point " << j
+                    ss << "Point #" << i << " duplicates point #" << j
                     << " (" << pathgrid.mPoints[i].mX << ", " << pathgrid.mPoints[i].mY << ", " << pathgrid.mPoints[i].mZ << ")";
                     messages.add (id, ss.str(), "", CSMDoc::Message::Severity_Warning);
 
@@ -127,11 +126,10 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
         if (pointList[i].mConnectionNum == 0)
         {
             std::ostringstream ss;
-            ss << "Point " << i << " (" 
-            << pathgrid.mPoints[i].mX << ", " 
-            << pathgrid.mPoints[i].mY << ", " 
-            << pathgrid.mPoints[i].mZ << ") "
-            << "is disconnected from other points";
+            ss << "Point #" << i << " ("
+            << pathgrid.mPoints[i].mX << ", "
+            << pathgrid.mPoints[i].mY << ", "
+            << pathgrid.mPoints[i].mZ << ") is disconnected from other points";
             messages.add (id, ss.str(), "", CSMDoc::Message::Severity_Warning);
         }
     }

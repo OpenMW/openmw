@@ -30,7 +30,7 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, const Compi
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Script, mId);
 
-    stream << "Line " << loc.mLine << ", column " << loc.mColumn << " (" << loc.mLiteral << "): " << message;
+    stream << "line " << loc.mLine << ", column " << loc.mColumn << ": " << message << " (" << loc.mLiteral << ")";
 
     std::ostringstream hintStream;
 
