@@ -415,37 +415,38 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
 
 void CharacterController::refreshMovementAnims(const WeaponInfo* weap, CharacterState movement, CharacterState& idle, bool force)
 {
+    if (movement == mMovementState && idle == mIdleState && !force)
+        return;
+
     std::string movementAnimName;
     MWRender::Animation::BlendMask movemask;
     const StateInfo *movestate;
-    if(force || movement != mMovementState || idle != mIdleState)
+
+    movemask = MWRender::Animation::BlendMask_All;
+    movestate = std::find_if(sMovementList, sMovementListEnd, FindCharState(movement));
+    if(movestate != sMovementListEnd)
     {
-        movemask = MWRender::Animation::BlendMask_All;
-        movestate = std::find_if(sMovementList, sMovementListEnd, FindCharState(movement));
-        if(movestate != sMovementListEnd)
+        movementAnimName = movestate->groupname;
+        if(weap != sWeaponTypeListEnd && movementAnimName.find("swim") == std::string::npos)
         {
-            movementAnimName = movestate->groupname;
-            if(weap != sWeaponTypeListEnd && movementAnimName.find("swim") == std::string::npos)
+            if (mWeaponType == WeapType_Spell && (movement == CharState_TurnLeft || movement == CharState_TurnRight)) // Spellcasting stance turning is a special case
+                movementAnimName = weap->shortgroup + movementAnimName;
+            else
+                movementAnimName += weap->shortgroup;
+
+            if(!mAnimation->hasAnimation(movementAnimName))
             {
-                if (mWeaponType == WeapType_Spell && (movement == CharState_TurnLeft || movement == CharState_TurnRight)) // Spellcasting stance turning is a special case
-                    movementAnimName = weap->shortgroup + movementAnimName;
-                else
-                    movementAnimName += weap->shortgroup;
+                movemask = MWRender::Animation::BlendMask_LowerBody;
+                movementAnimName = movestate->groupname;
 
-                if(!mAnimation->hasAnimation(movementAnimName))
-                {
-                    movemask = MWRender::Animation::BlendMask_LowerBody;
-                    movementAnimName = movestate->groupname;
+                // Since we apply movement only for lower body, do not reset idle animations.
+                // For upper body there will be idle animation.
+                if (idle == CharState_None)
+                    idle = CharState_Idle;
 
-                    // Since we apply movement only for lower body, do not reset idle animations.
-                    // For upper body there will be idle animation.
-                    if (idle == CharState_None)
-                        idle = CharState_Idle;
-
-                    // For crossbow animations use 1h ones as fallback
-                    if (mWeaponType == WeapType_Crossbow)
-                        movementAnimName += "1h";
-                }
+                // For crossbow animations use 1h ones as fallback
+                if (mWeaponType == WeapType_Crossbow)
+                    movementAnimName += "1h";
             }
         }
     }
