@@ -20,6 +20,7 @@
     Bug #3059: Unable to hit with marksman weapons when too close to an enemy
     Bug #3072: Fatal error on AddItem <item> that has a script containing Equip <item>
     Bug #3249: Fixed revert function not updating views properly
+    Bug #3288: TrueType fonts are handled incorrectly
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3486: [Mod] NPC Commands does not work
     Bug #3533: GetSpellEffects should detect effects with zero duration

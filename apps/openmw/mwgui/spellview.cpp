@@ -6,6 +6,7 @@
 #include <MyGUI_Gui.h>
 
 #include <components/widgets/sharedstatebutton.hpp>
+#include <components/widgets/box.hpp>
 
 #include "tooltips.hpp"
 
@@ -240,7 +241,7 @@ namespace MWGui
             mLines.push_back(LineInfo(separator, (MyGUI::Widget*)NULL, NoSpellIndex));
         }
 
-        MyGUI::TextBox* groupWidget = mScrollView->createWidget<MyGUI::TextBox>("SandBrightText",
+        MyGUI::TextBox* groupWidget = mScrollView->createWidget<Gui::TextBox>("SandBrightText",
             MyGUI::IntCoord(0, 0, mScrollView->getWidth(), 24),
             MyGUI::Align::Left | MyGUI::Align::Top);
         groupWidget->setCaptionWithReplacing(label);
@@ -249,7 +250,7 @@ namespace MWGui
 
         if (label2 != "")
         {
-            MyGUI::TextBox* groupWidget2 = mScrollView->createWidget<MyGUI::TextBox>("SandBrightText",
+            MyGUI::TextBox* groupWidget2 = mScrollView->createWidget<Gui::TextBox>("SandBrightText",
                 MyGUI::IntCoord(0, 0, mScrollView->getWidth(), 24),
                 MyGUI::Align::Left | MyGUI::Align::Top);
             groupWidget2->setCaptionWithReplacing(label2);

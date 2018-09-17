@@ -152,12 +152,6 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
     }
 
-    void Console::setFont(const std::string &fntName)
-    {
-        mHistory->setFontName(fntName);
-        mCommandLine->setFontName(fntName);
-    }
-
     void Console::print(const std::string &msg, const std::string& color)
     {
         mHistory->addText(color + MyGUI::TextIterator::toTagsString(msg));

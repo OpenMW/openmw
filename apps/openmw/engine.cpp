@@ -516,7 +516,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
                 mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap,
-                Version::getOpenmwVersionDescription(mResDir.string()));
+                Version::getOpenmwVersionDescription(mResDir.string()), mCfgMgr.getUserConfigPath().string());
     mEnvironment.setWindowManager (window);
 
     // Create sound system

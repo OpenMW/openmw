@@ -74,7 +74,7 @@
 
         <!-- Buttons -->
 
-        <Widget type="HBox" skin="" position="110 374 452 24" align="Bottom Right">
+        <Widget type="HBox" skin="" position="110 374 452 28" align="Bottom Right">
 
             <Widget type="Spacer"/>
 

@@ -156,10 +156,10 @@
             <State name="normal" offset="0 0 8 8"/>
         </BasisSkin>
     </Resource>
-    
+
     <!-- Defines a owned background -->
     <Resource type="ResourceSkin" name="DialogBG_NoTransp_Owned" size="8 8" texture="white">
-        <Property key="Colour" value="#{setting=GUI,color background owned}"/> 
+        <Property key="Colour" value="#{setting=GUI,color background owned}"/>
         <BasisSkin type="MainSkin" offset="0 0 8 8">
             <State name="normal" offset="0 0 8 8"/>
         </BasisSkin>
@@ -443,7 +443,6 @@
     <!-- The actual caption. It contains the edges of the blocks on
          its sides as well -->
     <Resource type="ResourceSkin" name="MW_Caption" size="88 20">
-        <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Center"/>
 
         <Child type="Widget" skin="HB_ALL" offset="0 0 30 20" align="Default" name="Left"/>
@@ -458,7 +457,6 @@
 ------------------------------------------------------ -->
 
     <Resource type="ResourceSkin" name="MW_Window" size="256 256">
-        <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Center"/>
         <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
@@ -593,7 +591,6 @@
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_Window_NoCaption" size="256 256">
-        <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Center"/>
         <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
@@ -730,7 +727,6 @@
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_Window_Pinnable" size="256 256">
-        <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Center"/>
         <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>

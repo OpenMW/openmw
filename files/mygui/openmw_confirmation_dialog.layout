@@ -13,7 +13,7 @@
             <Property key="NeedKey" value="false"/>
         </Widget>
 
-        <Widget type="VBox" position="0 89 352 24" align="Center Bottom">
+        <Widget type="VBox" position="0 89 352 28" align="Center Bottom">
             <Widget type="HBox">
                 <Property key="Spacing" value="8"/>
 

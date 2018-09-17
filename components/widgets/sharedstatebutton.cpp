@@ -7,7 +7,6 @@ namespace Gui
         : mIsMousePressed(false)
         , mIsMouseFocus(false)
     {
-
     }
 
     void SharedStateButton::shutdownOverride()
