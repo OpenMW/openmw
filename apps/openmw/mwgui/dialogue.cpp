@@ -137,7 +137,7 @@ namespace MWGui
         if (mTitle != "")
         {
             const MyGUI::Colour& headerColour = MWBase::Environment::get().getWindowManager()->getTextColours().header;
-            BookTypesetter::Style* title = typesetter->createStyle("", headerColour);
+            BookTypesetter::Style* title = typesetter->createStyle("", headerColour, false);
             typesetter->write(title, to_utf8_span(mTitle.c_str()));
             typesetter->sectionBreak();
         }
@@ -182,7 +182,7 @@ namespace MWGui
         {
             const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
 
-            BookTypesetter::Style* style = typesetter->createStyle("", textColours.normal);
+            BookTypesetter::Style* style = typesetter->createStyle("", textColours.normal, false);
             size_t formatted = 0; // points to the first character that is not laid out yet
             for (std::map<Range, intptr_t>::iterator it = hyperLinks.begin(); it != hyperLinks.end(); ++it)
             {
@@ -223,7 +223,7 @@ namespace MWGui
     {
         const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
 
-        BookTypesetter::Style* style = typesetter->createStyle("", textColours.normal);
+        BookTypesetter::Style* style = typesetter->createStyle("", textColours.normal, false);
 
 
         if (topicId)
@@ -239,7 +239,7 @@ namespace MWGui
     void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
         const MyGUI::Colour& textColour = MWBase::Environment::get().getWindowManager()->getTextColours().notify;
-        BookTypesetter::Style* title = typesetter->createStyle("", textColour);
+        BookTypesetter::Style* title = typesetter->createStyle("", textColour, false);
         typesetter->sectionBreak(9);
         typesetter->write(title, to_utf8_span(mText.c_str()));
     }
@@ -567,7 +567,7 @@ namespace MWGui
             (*it)->write(typesetter, &mKeywordSearch, mTopicLinks);
 
 
-        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::White);
+        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::White, false);
 
         typesetter->sectionBreak(9);
         // choices
