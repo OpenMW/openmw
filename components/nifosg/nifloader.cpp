@@ -1082,7 +1082,10 @@ namespace NifOsg
             // Assign bone weights
             osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map (new SceneUtil::RigGeometry::InfluenceMap);
 
+            // We should take in account transformation of NiTriShape and NiSkinData
             const Nif::NiSkinData *data = skin->data.getPtr();
+            osg::Matrixf shapeTransforms = triShape->trafo.toMatrix() * data->trafo.toMatrix();
+
             const Nif::NodeList &bones = skin->bones;
             for(size_t i = 0;i < bones.length();i++)
             {
@@ -1096,11 +1099,12 @@ namespace NifOsg
                     influence.mWeights.insert(indexWeight);
                 }
                 influence.mInvBindMatrix = data->bones[i].trafo.toMatrix();
-                influence.mBoundSphere = osg::BoundingSpheref(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
+                influence.mBoundSphere = osg::BoundingSpheref(shapeTransforms * data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
 
                 map->mMap.insert(std::make_pair(boneName, influence));
             }
             rig->setInfluenceMap(map);
+            rig->setRigTransforms(*&shapeTransforms);
 
             parentNode->addChild(rig);
         }

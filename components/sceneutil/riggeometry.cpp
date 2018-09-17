@@ -49,6 +49,7 @@ RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
     : Drawable(copy, copyop)
     , mSkeleton(NULL)
     , mInfluenceMap(copy.mInfluenceMap)
+    , mRigTransforms(copy.mRigTransforms)
     , mLastFrameNumber(0)
     , mBoundsFirstFrame(true)
 {
@@ -214,6 +215,9 @@ void RigGeometry::cull(osg::NodeVisitor* nv)
         if (mGeomToSkelMatrix)
             resultMat *= (*mGeomToSkelMatrix);
 
+        if (!mRigTransforms.isIdentity())
+            resultMat *= mRigTransforms;
+
         for (auto &vertex : pair.second)
         {
             (*positionDst)[vertex] = resultMat.preMult((*positionSrc)[vertex]);
@@ -307,6 +311,11 @@ void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
 void RigGeometry::setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap)
 {
     mInfluenceMap = influenceMap;
+}
+
+void RigGeometry::setRigTransforms(osg::Matrixf& transform)
+{
+    mRigTransforms = transform;
 }
 
 void RigGeometry::accept(osg::NodeVisitor &nv)
