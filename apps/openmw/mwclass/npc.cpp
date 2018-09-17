@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <components/misc/constants.hpp>
 #include <components/misc/rng.hpp>
 
 #include <components/debug/debuglog.hpp>
@@ -1020,7 +1021,7 @@ namespace MWClass
         if(stats.getStance(MWMechanics::CreatureStats::Stance_Run))
             x *= gmst.fJumpRunMultiplier->mValue.getFloat();
         x *= npcdata->mNpcStats.getFatigueTerm();
-        x -= -627.2f;/*gravity constant*/
+        x -= -Constants::GravityConst * Constants::UnitsPerMeter;
         x /= 3.0f;
 
         return x;

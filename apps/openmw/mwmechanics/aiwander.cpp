@@ -300,9 +300,8 @@ namespace MWMechanics
         bool isWaterCreature = actor.getClass().isPureWaterCreature(actor);
         do {
             // Determine a random location within radius of original position
-            const float pi = 3.14159265359f;
             const float wanderRadius = (0.2f + Misc::Rng::rollClosedProbability() * 0.8f) * wanderDistance;
-            const float randomDirection = Misc::Rng::rollClosedProbability() * 2.0f * pi;
+            const float randomDirection = Misc::Rng::rollClosedProbability() * 2.0f * osg::PI;
             const float destinationX = mInitialActorPosition.x() + wanderRadius * std::cos(randomDirection);
             const float destinationY = mInitialActorPosition.y() + wanderRadius * std::sin(randomDirection);
             const float destinationZ = mInitialActorPosition.z();

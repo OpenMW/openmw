@@ -25,6 +25,8 @@
 #include <components/esm/loadlevlist.hpp>
 #include <components/esm/loadglob.hpp>
 
+#include <components/misc/constants.hpp>
+
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "importercontext.hpp"
@@ -413,9 +415,8 @@ namespace ESSImport
         if (context.mPlayer.mCellId.mPaged)
         {
             // exterior cell -> determine cell coordinates based on position
-            const int cellSize = 8192;
-            int cellX = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[0]/cellSize));
-            int cellY = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[1] / cellSize));
+            int cellX = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[0] / Constants::CellSizeInUnits));
+            int cellY = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[1] / Constants::CellSizeInUnits));
             context.mPlayer.mCellId.mIndex.mX = cellX;
             context.mPlayer.mCellId.mIndex.mY = cellY;
         }

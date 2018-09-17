@@ -21,6 +21,7 @@
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/esm/loadgmst.hpp>
+#include <components/misc/constants.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 
@@ -486,7 +487,7 @@ namespace MWPhysics
                 physicActor->setInertialForce(osg::Vec3f(0.f, 0.f, 0.f));
             else
             {
-                inertia.z() += time * -627.2f;
+                inertia.z() -= time * Constants::GravityConst * Constants::UnitsPerMeter;
                 if (inertia.z() < 0)
                     inertia.z() *= slowFall;
                 if (slowFall < 1.f) {

@@ -33,7 +33,7 @@
 namespace
 {
 
-    const int cellSize = 8192;
+    const int cellSize = Constants::CellSizeInUnits;
 
     enum LocalMapWidgetDepth
     {

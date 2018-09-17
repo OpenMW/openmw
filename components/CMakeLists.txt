@@ -85,7 +85,7 @@ add_component_dir (esmterrain
     )
 
 add_component_dir (misc
-    utf8stream stringops resourcehelpers rng messageformatparser
+    constants utf8stream stringops resourcehelpers rng messageformatparser
     )
 
 add_component_dir (debug
