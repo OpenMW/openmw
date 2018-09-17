@@ -56,9 +56,6 @@ namespace CSMDoc
                 const std::string& hint = "",
                 Message::Severity severity = Message::Severity_Default);
 
-            /// \deprecated Use add instead.
-            void push_back (const std::pair<CSMWorld::UniversalId, std::string>& data);
-
             Iterator begin() const;
 
             Iterator end() const;

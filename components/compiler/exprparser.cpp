@@ -422,7 +422,7 @@ namespace Compiler
                     {
                         if (!hasExplicit)
                         {
-                            getErrorHandler().warning ("stray explicit reference (ignoring it)", loc);
+                            getErrorHandler().warning ("ignoring stray explicit reference", loc);
                             mExplicit.clear();
                         }
 
@@ -791,7 +791,7 @@ namespace Compiler
                         ++optionalCount;
                 }
                 else
-                    getErrorHandler().warning ("Ignoring extra argument",
+                    getErrorHandler().warning ("ignoring extra argument",
                         stringParser.getTokenLoc());
             }
             else if (*iter=='X')
@@ -805,7 +805,7 @@ namespace Compiler
                 if (parser.isEmpty())
                     break;
                 else
-                    getErrorHandler().warning("Ignoring extra argument", parser.getTokenLoc());
+                    getErrorHandler().warning("ignoring extra argument", parser.getTokenLoc());
             }
             else if (*iter=='z')
             {
@@ -817,7 +817,7 @@ namespace Compiler
                 if (discardParser.isEmpty())
                     break;
                 else
-                    getErrorHandler().warning("Ignoring extra argument", discardParser.getTokenLoc());
+                    getErrorHandler().warning("ignoring extra argument", discardParser.getTokenLoc());
             }
             else if (*iter=='j')
             {

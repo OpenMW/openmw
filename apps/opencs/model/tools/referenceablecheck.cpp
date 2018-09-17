@@ -1,6 +1,7 @@
 #include "referenceablecheck.hpp"
 
 #include <components/misc/stringops.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../prefs/state.hpp"
 
@@ -11,13 +12,18 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
     const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races,
     const CSMWorld::IdCollection<ESM::Class>& classes,
     const CSMWorld::IdCollection<ESM::Faction>& faction,
-    const CSMWorld::IdCollection<ESM::Script>& scripts)
-    :
-    mReferencables(referenceable),
+    const CSMWorld::IdCollection<ESM::Script>& scripts,
+    const CSMWorld::Resources& models,
+    const CSMWorld::Resources& icons,
+    const CSMWorld::IdCollection<ESM::BodyPart>& bodyparts)
+   :mReferencables(referenceable),
     mRaces(races),
     mClasses(classes),
     mFactions(faction),
     mScripts(scripts),
+    mModels(models),
+    mIcons(icons),
+    mBodyParts(bodyparts),
     mPlayerPresent(false)
 {
     mIgnoreBaseRecords = false;
@@ -270,9 +276,10 @@ void CSMTools::ReferenceableCheckStage::activatorCheck(
     const ESM::Activator& activator = (dynamic_cast<const CSMWorld::Record<ESM::Activator>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Activator, activator.mId);
 
-    //Checking for model, IIRC all activators should have a model
     if (activator.mModel.empty())
-        messages.push_back (std::make_pair (id, activator.mId + " has no model"));
+        messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(activator.mModel) == -1)
+        messages.add(id, "Model '" + activator.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Activator>(activator, messages, id.toString());
@@ -293,7 +300,7 @@ void CSMTools::ReferenceableCheckStage::potionCheck(
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Potion, potion.mId);
 
     inventoryItemCheck<ESM::Potion>(potion, messages, id.toString());
-    //IIRC potion can have empty effects list just fine.
+    /// \todo Check magic effects for validity
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Potion>(potion, messages, id.toString());
@@ -338,13 +345,13 @@ void CSMTools::ReferenceableCheckStage::armorCheck(
 
     inventoryItemCheck<ESM::Armor>(armor, messages, id.toString(), true);
 
-    //checking for armor class, armor should have poistive armor class, but 0 is considered legal
+    // Armor should have positive armor class, but 0 class is not an error
     if (armor.mData.mArmor < 0)
-        messages.push_back (std::make_pair (id, armor.mId + " has negative armor class"));
+        messages.add(id, "Armor class is negative", "", CSMDoc::Message::Severity_Error);
 
-    //checking for health. Only positive numbers are allowed, or 0 is illegal
+    // Armor durability must be a positive number
     if (armor.mData.mHealth <= 0)
-        messages.push_back (std::make_pair (id, armor.mId + " has non positive health"));
+        messages.add(id, "Durability is non-positive", "", CSMDoc::Message::Severity_Error);
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Armor>(armor, messages, id.toString());
@@ -383,18 +390,19 @@ void CSMTools::ReferenceableCheckStage::containerCheck(
     const ESM::Container& container = (dynamic_cast<const CSMWorld::Record<ESM::Container>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Container, container.mId);
 
-    //Checking for model, IIRC all containers should have a model
+    //checking for name
+    if (container.mName.empty())
+        messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
+
+    //Checking for model
     if (container.mModel.empty())
-        messages.push_back (std::make_pair (id, container.mId + " has no model"));
+        messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(container.mModel) == -1)
+        messages.add(id, "Model '" + container.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     //Checking for capacity (weight)
     if (container.mWeight < 0) //0 is allowed
-        messages.push_back (std::make_pair (id,
-            container.mId + " has negative weight (capacity)"));
-
-    //checking for name
-    if (container.mName.empty())
-        messages.push_back (std::make_pair (id, container.mId + " has an empty name"));
+        messages.add(id, "Capacity is negative", "", CSMDoc::Message::Severity_Error);
     
     //checking contained items
     inventoryListCheck(container.mInventory.mList, messages, id.toString());
@@ -416,68 +424,81 @@ void CSMTools::ReferenceableCheckStage::creatureCheck (
     const ESM::Creature& creature = (dynamic_cast<const CSMWorld::Record<ESM::Creature>&>(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Creature, creature.mId);
 
-    if (creature.mModel.empty())
-        messages.push_back (std::make_pair (id, creature.mId + " has no model"));
-
     if (creature.mName.empty())
-        messages.push_back (std::make_pair (id, creature.mId + " has an empty name"));
+        messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
+
+    if (creature.mModel.empty())
+        messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(creature.mModel) == -1)
+        messages.add(id, "Model '" + creature.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     //stats checks
-    if (creature.mData.mLevel < 1)
-        messages.push_back (std::make_pair (id, creature.mId + " has non-positive level"));
+    if (creature.mData.mLevel <= 0)
+        messages.add(id, "Level is non-positive", "", CSMDoc::Message::Severity_Warning);
 
     if (creature.mData.mStrength < 0)
-        messages.push_back (std::make_pair (id, creature.mId + " has negative strength"));
-
+        messages.add(id, "Strength is negative", "", CSMDoc::Message::Severity_Warning);
     if (creature.mData.mIntelligence < 0)
-        messages.push_back (std::make_pair (id, creature.mId + " has negative intelligence"));
-
+        messages.add(id, "Intelligence is negative", "", CSMDoc::Message::Severity_Warning);
     if (creature.mData.mWillpower < 0)
-        messages.push_back (std::make_pair (id, creature.mId + " has negative willpower"));
-
+        messages.add(id, "Willpower is negative", "", CSMDoc::Message::Severity_Warning);
     if (creature.mData.mAgility < 0)
-        messages.push_back (std::make_pair (id, creature.mId + " has negative agility"));
-
+        messages.add(id, "Agility is negative", "", CSMDoc::Message::Severity_Warning);
     if (creature.mData.mSpeed < 0)
-        messages.push_back (std::make_pair (id, creature.mId + " has negative speed"));
-
+        messages.add(id, "Speed is negative", "", CSMDoc::Message::Severity_Warning);
     if (creature.mData.mEndurance < 0)
-        messages.push_back (std::make_pair (id, creature.mId + " has negative endurance"));
-
+        messages.add(id, "Endurance is negative", "", CSMDoc::Message::Severity_Warning);
     if (creature.mData.mPersonality < 0)
-        messages.push_back (std::make_pair (id, creature.mId + " has negative personality"));
-
+        messages.add(id, "Personality is negative", "", CSMDoc::Message::Severity_Warning);
     if (creature.mData.mLuck < 0)
-        messages.push_back (std::make_pair (id, creature.mId + " has negative luck"));
+        messages.add(id, "Luck is negative", "", CSMDoc::Message::Severity_Warning);
+
+    if (creature.mData.mCombat < 0)
+        messages.add(id, "Combat is negative", "", CSMDoc::Message::Severity_Warning);
+    if (creature.mData.mMagic < 0)
+        messages.add(id, "Magic is negative", "", CSMDoc::Message::Severity_Warning);
+    if (creature.mData.mStealth < 0)
+        messages.add(id, "Stealth is negative", "", CSMDoc::Message::Severity_Warning);
 
     if (creature.mData.mHealth < 0)
-        messages.push_back (std::make_pair (id, creature.mId + " has negative health"));
+        messages.add(id, "Health is negative", "", CSMDoc::Message::Severity_Error);
+    if (creature.mData.mMana < 0)
+        messages.add(id, "Magicka is negative", "", CSMDoc::Message::Severity_Error);
+    if (creature.mData.mFatigue < 0)
+        messages.add(id, "Fatigue is negative", "", CSMDoc::Message::Severity_Error);
 
     if (creature.mData.mSoul < 0)
-        messages.push_back (std::make_pair (id, creature.mId + " has negative soul value"));
+        messages.add(id, "Soul value is negative", "", CSMDoc::Message::Severity_Error);
 
     for (int i = 0; i < 6; ++i)
     {
         if (creature.mData.mAttack[i] < 0)
-        {
-            messages.push_back (std::make_pair (id,
-                creature.mId + " has negative attack strength"));
-            break;
-        }
+            messages.add(id, "Attack " + std::to_string(i/2 + 1) + " has negative" + (i % 2 == 0 ? " minimum " : " maximum ") + "damage", "", CSMDoc::Message::Severity_Error);
+        if (i % 2 == 0 && creature.mData.mAttack[i] > creature.mData.mAttack[i+1])
+            messages.add(id, "Attack " + std::to_string(i/2 + 1) + " has minimum damage higher than maximum damage", "", CSMDoc::Message::Severity_Error);
     }
 
-    //TODO, find meaning of other values
-    if (creature.mData.mGold < 0) //It seems that this is for gold in merchant creatures
-        messages.push_back (std::make_pair (id, creature.mId + " has negative gold "));
+    if (creature.mData.mGold < 0)
+        messages.add(id, "Gold count is negative", "", CSMDoc::Message::Severity_Error);
 
     if (creature.mScale == 0)
-        messages.push_back (std::make_pair (id, creature.mId + " has zero scale value"));
+        messages.add(id, "Scale is equal to zero", "", CSMDoc::Message::Severity_Error);
+
+    if (!creature.mOriginal.empty())
+    {
+        CSMWorld::RefIdData::LocalIndex index = mReferencables.searchId(creature.mOriginal);
+        if (index.first == -1)
+            messages.add(id, "Parent creature '" + creature.mOriginal + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        else if (index.second != CSMWorld::UniversalId::Type_Creature)
+            messages.add(id, "'" + creature.mOriginal + "' is not a creature", "", CSMDoc::Message::Severity_Error);
+    }
 
     // Check inventory
     inventoryListCheck(creature.mInventory.mList, messages, id.toString());
  
     // Check that mentioned scripts exist
     scriptCheck<ESM::Creature>(creature, messages, id.toString());
+    /// \todo Check spells, teleport table, AI data and AI packages for validity
 }
 
 void CSMTools::ReferenceableCheckStage::doorCheck(
@@ -495,10 +516,12 @@ void CSMTools::ReferenceableCheckStage::doorCheck(
 
     //usual, name or model
     if (door.mName.empty())
-        messages.push_back (std::make_pair (id, door.mId + " has an empty name"));
+        messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
 
     if (door.mModel.empty())
-        messages.push_back (std::make_pair (id, door.mId + " has no model"));
+        messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(door.mModel) == -1)
+        messages.add(id, "Model '" + door.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Door>(door, messages, id.toString());
@@ -572,7 +595,7 @@ void CSMTools::ReferenceableCheckStage::lightCheck(
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Light, light.mId);
 
     if (light.mData.mRadius < 0)
-        messages.push_back (std::make_pair (id, light.mId + " has negative light radius"));
+        messages.add(id, "Light radius is negative", "", CSMDoc::Message::Severity_Error);
 
     if (light.mData.mFlags & ESM::Light::Carry)
         inventoryItemCheck<ESM::Light>(light, messages, id.toString());
@@ -644,96 +667,75 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
         return;
 
     short level(npc.mNpdt.mLevel);
-    char disposition(npc.mNpdt.mDisposition);
-    char reputation(npc.mNpdt.mReputation);
-    char rank(npc.mNpdt.mRank);
-    //Don't know what unknown is for
     int gold(npc.mNpdt.mGold);
 
     if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS) //12 = autocalculated
     {
         if ((npc.mFlags & ESM::NPC::Autocalc) == 0) //0x0010 = autocalculated flag
         {
-            messages.push_back (std::make_pair (id, npc.mId + " mNpdtType or flags mismatch!")); //should not happen?
+            messages.add(id, "NPC with autocalculated stats doesn't have autocalc flag turned on", "", CSMDoc::Message::Severity_Error); //should not happen?
             return;
         }
-
-        level = npc.mNpdt.mLevel;
-        disposition = npc.mNpdt.mDisposition;
-        reputation = npc.mNpdt.mReputation;
-        rank = npc.mNpdt.mRank;
-        gold = npc.mNpdt.mGold;
     }
     else
     {
-        if (npc.mNpdt.mAgility == 0)
-            messages.push_back (std::make_pair (id, npc.mId + " agility has zero value"));
-
-        if (npc.mNpdt.mEndurance == 0)
-            messages.push_back (std::make_pair (id, npc.mId + " endurance has zero value"));
-
-        if (npc.mNpdt.mIntelligence == 0)
-            messages.push_back (std::make_pair (id, npc.mId + " intelligence has zero value"));
-
-        if (npc.mNpdt.mLuck == 0)
-            messages.push_back (std::make_pair (id, npc.mId + " luck has zero value"));
-
-        if (npc.mNpdt.mPersonality == 0)
-            messages.push_back (std::make_pair (id, npc.mId + " personality has zero value"));
-
         if (npc.mNpdt.mStrength == 0)
-            messages.push_back (std::make_pair (id, npc.mId + " strength has zero value"));
-
-        if (npc.mNpdt.mSpeed == 0)
-            messages.push_back (std::make_pair (id, npc.mId + " speed has zero value"));
-
+            messages.add(id, "Strength is equal to zero", "", CSMDoc::Message::Severity_Warning);
+        if (npc.mNpdt.mIntelligence == 0)
+            messages.add(id, "Intelligence is equal to zero", "", CSMDoc::Message::Severity_Warning);
         if (npc.mNpdt.mWillpower == 0)
-            messages.push_back (std::make_pair (id, npc.mId + " willpower has zero value"));
+            messages.add(id, "Willpower is equal to zero", "", CSMDoc::Message::Severity_Warning);
+        if (npc.mNpdt.mAgility == 0)
+            messages.add(id, "Agility is equal to zero", "", CSMDoc::Message::Severity_Warning);
+        if (npc.mNpdt.mSpeed == 0)
+            messages.add(id, "Speed is equal to zero", "", CSMDoc::Message::Severity_Warning);
+        if (npc.mNpdt.mEndurance == 0)
+            messages.add(id, "Endurance is equal to zero", "", CSMDoc::Message::Severity_Warning);
+        if (npc.mNpdt.mPersonality == 0)
+            messages.add(id, "Personality is equal to zero", "", CSMDoc::Message::Severity_Warning);
+        if (npc.mNpdt.mLuck == 0)
+            messages.add(id, "Luck is equal to zero", "", CSMDoc::Message::Severity_Warning);
     }
 
-    if (level < 1)
-        messages.push_back (std::make_pair (id, npc.mId + " level is non positive"));
+    if (level <= 0)
+        messages.add(id, "Level is non-positive", "", CSMDoc::Message::Severity_Warning);
 
     if (gold < 0)
-        messages.push_back (std::make_pair (id, npc.mId + " gold has negative value"));
+        messages.add(id, "Gold count is negative", "", CSMDoc::Message::Severity_Error);
 
     if (npc.mName.empty())
-        messages.push_back (std::make_pair (id, npc.mId + " has any empty name"));
+        messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
 
     if (npc.mClass.empty())
-        messages.push_back (std::make_pair (id, npc.mId + " has an empty class"));
+        messages.add(id, "Class is missing", "", CSMDoc::Message::Severity_Error);
     else if (mClasses.searchId (npc.mClass) == -1)
-        messages.push_back (std::make_pair (id, npc.mId + " has invalid class"));
+        messages.add(id, "Class '" + npc.mClass + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     if (npc.mRace.empty())
-        messages.push_back (std::make_pair (id, npc.mId + " has an empty race"));
+        messages.add(id, "Race is missing", "", CSMDoc::Message::Severity_Error);
     else if (mRaces.searchId (npc.mRace) == -1)
-        messages.push_back (std::make_pair (id, npc.mId + " has invalid race"));
+        messages.add(id, "Race '" + npc.mRace + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
-    if (disposition < 0)
-        messages.push_back (std::make_pair (id, npc.mId + " has negative disposition"));
-
-    if (reputation < 0) //It seems that no character in Morrowind.esm have negative reputation. I'm assuming that negative reputation is invalid
-    {
-        messages.push_back (std::make_pair (id, npc.mId + " has negative reputation"));
-    }
-
-    if (!npc.mFaction.empty())
-    {
-        if (rank < 0)
-            messages.push_back (std::make_pair (id, npc.mId + " has negative rank"));
-
-        if (mFactions.searchId(npc.mFaction) == -1)
-            messages.push_back (std::make_pair (id, npc.mId + " has invalid faction"));
-    }
+    if (!npc.mFaction.empty() && mFactions.searchId(npc.mFaction) == -1)
+        messages.add(id, "Faction '" + npc.mFaction + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     if (npc.mHead.empty())
-        messages.push_back (std::make_pair (id, npc.mId + " has no head"));
+        messages.add(id, "Head is missing", "", CSMDoc::Message::Severity_Error);
+    else
+    {
+        if (mBodyParts.searchId(npc.mHead) == -1)
+            messages.add(id, "Head body part '" + npc.mHead + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        /// \todo Check gender, race and other body parts stuff validity for the specific NPC
+    }
 
     if (npc.mHair.empty())
-        messages.push_back (std::make_pair (id, npc.mId + " has no hair"));
-
-    //TODO: reputation, Disposition, rank, everything else
+        messages.add(id, "Hair is missing", "", CSMDoc::Message::Severity_Error);
+    else
+    {
+        if (mBodyParts.searchId(npc.mHair) == -1)
+            messages.add(id, "Hair body part '" + npc.mHair + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        /// \todo Check gender, race and other body part stuff validity for the specific NPC
+    }
 
     // Check inventory
     inventoryListCheck(npc.mInventory.mList, messages, id.toString());
@@ -793,28 +795,25 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(
                 weapon.mData.mType == ESM::Weapon::Bolt))
         {
             if (weapon.mData.mSlash[0] > weapon.mData.mSlash[1])
-                messages.push_back (std::make_pair (id,
-                    weapon.mId + " has minimum slash damage higher than maximum"));
+                messages.add(id, "Minimum slash damage higher than maximum", "", CSMDoc::Message::Severity_Warning);
 
             if (weapon.mData.mThrust[0] > weapon.mData.mThrust[1])
-                messages.push_back (std::make_pair (id,
-                    weapon.mId + " has minimum thrust damage higher than maximum"));
+                messages.add(id, "Minimum thrust damage higher than maximum", "", CSMDoc::Message::Severity_Warning);
         }
 
         if (weapon.mData.mChop[0] > weapon.mData.mChop[1])
-            messages.push_back (std::make_pair (id,
-                weapon.mId + " has minimum chop damage higher than maximum"));
+            messages.add(id, "Minimum chop damage higher than maximum", "", CSMDoc::Message::Severity_Warning);
 
         if (!(weapon.mData.mType == ESM::Weapon::Arrow ||
                 weapon.mData.mType == ESM::Weapon::Bolt ||
                 weapon.mData.mType == ESM::Weapon::MarksmanThrown))
         {
             //checking of health
-            if (weapon.mData.mHealth <= 0)
-                messages.push_back (std::make_pair (id, weapon.mId + " has non-positive health"));
+            if (weapon.mData.mHealth == 0)
+                messages.add(id, "Durability is equal to zero", "", CSMDoc::Message::Severity_Warning);
 
             if (weapon.mData.mReach < 0)
-                messages.push_back (std::make_pair (id, weapon.mId + " has negative reach"));
+                messages.add(id, "Reach is negative", "", CSMDoc::Message::Severity_Error);
         }
     }
 
@@ -877,7 +876,9 @@ void CSMTools::ReferenceableCheckStage::staticCheck (
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Static, staticElement.mId);
 
     if (staticElement.mModel.empty())
-        messages.push_back (std::make_pair (id, staticElement.mId + " has no model"));
+        messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(staticElement.mModel) == -1)
+        messages.add(id, "Model '" + staticElement.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
 }
 
 //final check
@@ -885,8 +886,7 @@ void CSMTools::ReferenceableCheckStage::staticCheck (
 void CSMTools::ReferenceableCheckStage::finalCheck (CSMDoc::Messages& messages)
 {
     if (!mPlayerPresent)
-        messages.push_back (std::make_pair (CSMWorld::UniversalId::Type_Referenceables,
-            "There is no player record"));
+        messages.add(CSMWorld::UniversalId::Type_Referenceables, "Player record is missing", "", CSMDoc::Message::Severity_SeriousError);
 }
 
 void CSMTools::ReferenceableCheckStage::inventoryListCheck(
@@ -900,8 +900,7 @@ void CSMTools::ReferenceableCheckStage::inventoryListCheck(
         CSMWorld::RefIdData::LocalIndex localIndex = mReferencables.searchId(itemName);
 
         if (localIndex.first == -1)
-            messages.push_back (std::make_pair (id,
-                id + " contains non-existing item (" + itemName + ")"));
+            messages.add(id, "Item '" + itemName + "' does not exist", "", CSMDoc::Message::Severity_Error);
         else
         {
             // Needs to accommodate containers, creatures, and NPCs
@@ -922,8 +921,7 @@ void CSMTools::ReferenceableCheckStage::inventoryListCheck(
             case CSMWorld::UniversalId::Type_ItemLevelledList:
                 break;
             default:
-                messages.push_back (std::make_pair(id,
-                    id + " contains item of invalid type (" + itemName + ")"));
+                messages.add(id, "'" + itemName + "' is not an item", "", CSMDoc::Message::Severity_Error);
             }
         }
     }
@@ -935,67 +933,82 @@ template<typename Item> void CSMTools::ReferenceableCheckStage::inventoryItemChe
     const Item& someItem, CSMDoc::Messages& messages, const std::string& someID, bool enchantable)
 {
     if (someItem.mName.empty())
-        messages.push_back (std::make_pair (someID, someItem.mId + " has an empty name"));
+        messages.add(someID, "Name is missing", "", CSMDoc::Message::Severity_Error);
 
     //Checking for weight
     if (someItem.mData.mWeight < 0)
-        messages.push_back (std::make_pair (someID, someItem.mId + " has negative weight"));
+        messages.add(someID, "Weight is negative", "", CSMDoc::Message::Severity_Error);
 
     //Checking for value
     if (someItem.mData.mValue < 0)
-        messages.push_back (std::make_pair (someID, someItem.mId + " has negative value"));
+        messages.add(someID, "Value is negative", "", CSMDoc::Message::Severity_Error);
 
     //checking for model
     if (someItem.mModel.empty())
-        messages.push_back (std::make_pair (someID, someItem.mId + " has no model"));
+        messages.add(someID, "Model is missing", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(someItem.mModel) == -1)
+        messages.add(someID, "Model '" + someItem.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     //checking for icon
     if (someItem.mIcon.empty())
-        messages.push_back (std::make_pair (someID, someItem.mId + " has no icon"));
+        messages.add(someID, "Icon is missing", "", CSMDoc::Message::Severity_Error);
+    else if (mIcons.searchId(someItem.mIcon) == -1)
+    {
+        std::string ddsIcon = someItem.mIcon;
+        if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsIcon) && mIcons.searchId(ddsIcon) != -1))
+            messages.add(someID, "Icon '" + someItem.mIcon + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    }
 
     if (enchantable && someItem.mData.mEnchant < 0)
-        messages.push_back (std::make_pair (someID, someItem.mId + " has negative enchantment"));
+        messages.add(someID, "Enchantment points number is negative", "", CSMDoc::Message::Severity_Error);
 }
 
 template<typename Item> void CSMTools::ReferenceableCheckStage::inventoryItemCheck (
     const Item& someItem, CSMDoc::Messages& messages, const std::string& someID)
 {
     if (someItem.mName.empty())
-        messages.push_back (std::make_pair (someID, someItem.mId + " has an empty name"));
+        messages.add(someID, "Name is missing", "", CSMDoc::Message::Severity_Error);
 
     //Checking for weight
     if (someItem.mData.mWeight < 0)
-        messages.push_back (std::make_pair (someID, someItem.mId + " has negative weight"));
+        messages.add(someID, "Weight is negative", "", CSMDoc::Message::Severity_Error);
 
     //Checking for value
     if (someItem.mData.mValue < 0)
-        messages.push_back (std::make_pair (someID, someItem.mId + " has negative value"));
+        messages.add(someID, "Value is negative", "", CSMDoc::Message::Severity_Error);
 
     //checking for model
     if (someItem.mModel.empty())
-        messages.push_back (std::make_pair (someID, someItem.mId + " has no model"));
+        messages.add(someID, "Model is missing", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(someItem.mModel) == -1)
+        messages.add(someID, "Model '" + someItem.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     //checking for icon
     if (someItem.mIcon.empty())
-        messages.push_back (std::make_pair (someID, someItem.mId + " has no icon"));
+        messages.add(someID, "Icon is missing", "", CSMDoc::Message::Severity_Error);
+    else if (mIcons.searchId(someItem.mIcon) == -1)
+    {
+        std::string ddsIcon = someItem.mIcon;
+        if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsIcon) && mIcons.searchId(ddsIcon) != -1))
+            messages.add(someID, "Icon '" + someItem.mIcon + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    }
 }
 
 template<typename Tool> void CSMTools::ReferenceableCheckStage::toolCheck (
     const Tool& someTool, CSMDoc::Messages& messages, const std::string& someID, bool canBeBroken)
 {
     if (someTool.mData.mQuality <= 0)
-        messages.push_back (std::make_pair (someID, someTool.mId + " has non-positive quality"));
+        messages.add(someID, "Quality is non-positive", "", CSMDoc::Message::Severity_Error);
 
     if (canBeBroken && someTool.mData.mUses<=0)
-        messages.push_back (std::make_pair (someID,
-            someTool.mId + " has non-positive uses count"));
+        messages.add(someID, "Number of uses is non-positive", "", CSMDoc::Message::Severity_Error);
 }
 
 template<typename Tool> void CSMTools::ReferenceableCheckStage::toolCheck (
     const Tool& someTool, CSMDoc::Messages& messages, const std::string& someID)
 {
     if (someTool.mData.mQuality <= 0)
-        messages.push_back (std::make_pair (someID, someTool.mId + " has non-positive quality"));
+        messages.add(someID, "Quality is non-positive", "", CSMDoc::Message::Severity_Error);
 }
 
 template<typename List> void CSMTools::ReferenceableCheckStage::listCheck (
@@ -1004,12 +1017,10 @@ template<typename List> void CSMTools::ReferenceableCheckStage::listCheck (
     for (unsigned i = 0; i < someList.mList.size(); ++i)
     {
         if (mReferencables.searchId(someList.mList[i].mId).first == -1)
-            messages.push_back (std::make_pair (someID,
-                someList.mId + " contains item without referencable"));
+            messages.add(someID, "Object '" + someList.mList[i].mId + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
         if (someList.mList[i].mLevel < 1)
-            messages.push_back (std::make_pair (someID,
-                someList.mId + " contains item with non-positive level"));
+            messages.add(someID, "Level of item '" + someList.mList[i].mId + "' is non-positive", "", CSMDoc::Message::Severity_Error);
     }
 }
 
@@ -1019,6 +1030,6 @@ template<typename Tool> void CSMTools::ReferenceableCheckStage::scriptCheck (
     if (!someTool.mScript.empty())
     {
         if (mScripts.searchId(someTool.mScript) == -1)
-            messages.push_back (std::make_pair (someID, someTool.mId + " refers to an unknown script \""+someTool.mScript+"\""));
+            messages.add(someID, "Script '" + someTool.mScript + "' does not exist", "", CSMDoc::Message::Severity_Error);
     }
 }

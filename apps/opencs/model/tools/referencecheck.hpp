@@ -19,7 +19,7 @@ namespace CSMTools
 
         private:
             const CSMWorld::RefCollection& mReferences;
-            const CSMWorld::RefIdCollection& mReferencables;
+            const CSMWorld::RefIdCollection& mObjects;
             const CSMWorld::RefIdData& mDataSet;
             const CSMWorld::IdCollection<CSMWorld::Cell>& mCells;
             const CSMWorld::IdCollection<ESM::Faction>& mFactions;

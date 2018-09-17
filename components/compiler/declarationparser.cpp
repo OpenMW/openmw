@@ -24,7 +24,7 @@ bool Compiler::DeclarationParser::parseName (const std::string& name, const Toke
         if (type!=' ')
         {
             /// \todo add option to make re-declared local variables an error
-            getErrorHandler().warning ("can't re-declare local variable (ignoring declaration)",
+            getErrorHandler().warning ("ignoring local variable re-declaration",
                 loc);
 
             mState = State_End;
