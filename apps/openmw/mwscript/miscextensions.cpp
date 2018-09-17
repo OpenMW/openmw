@@ -107,8 +107,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 MWBase::World* world = MWBase::Environment::get().getWorld();
-                MWWorld::Ptr player = world->getPlayerPtr();
-                runtime.push (!world->isOnGround(player) && !world->isFlying(player));
+                runtime.push (world->getPlayer().getJumping());
             }
         };
 

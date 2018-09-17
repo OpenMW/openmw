@@ -122,6 +122,7 @@
     Bug #4622: Recharging enchanted items with Soul Gems does not award experience if it fails
     Bug #4628: NPC record reputation, disposition and faction rank should have unsigned char type
     Bug #4633: Sneaking stance affects speed even if the actor is not able to crouch
+    Bug #4641: GetPCJumping is handled incorrectly
     Bug #4644: %Name should be available for all actors, not just for NPCs
     Feature #912: Editor: Add missing icons to UniversalId tables
     Feature #1645: Casting effects from objects

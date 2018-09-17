@@ -36,7 +36,8 @@ namespace MWWorld
         mTeleported(false),
         mCurrentCrimeId(-1),
         mPaidCrimeId(-1),
-        mAttackingOrSpell(false)
+        mAttackingOrSpell(false),
+        mJumping(false)
     {
         ESM::CellRef cellRef;
         cellRef.blank();
@@ -255,6 +256,16 @@ namespace MWWorld
         return mAttackingOrSpell;
     }
 
+    void Player::setJumping(bool jumping)
+    {
+        mJumping = jumping;
+    }
+
+    bool Player::getJumping() const
+    {
+        return mJumping;
+    }
+
     bool Player::isInCombat() {
         return MWBase::Environment::get().getMechanicsManager()->getActorsFighting(getPlayer()).size() != 0;
     }
@@ -286,6 +297,7 @@ namespace MWWorld
         mForwardBackward = 0;
         mTeleported = false;
         mAttackingOrSpell = false;
+        mJumping = false;
         mCurrentCrimeId = -1;
         mPaidCrimeId = -1;
         mPreviousItems.clear();

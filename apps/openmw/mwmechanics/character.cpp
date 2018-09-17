@@ -1850,7 +1850,8 @@ void CharacterController::update(float duration)
     if (isKnockedOut())
         mTimeUntilWake -= duration;
 
-    bool godmode = mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+    bool isPlayer = mPtr == MWMechanics::getPlayer();
+    bool godmode = isPlayer && MWBase::Environment::get().getWorld()->getGodModeState();
 
     if(!cls.isActor())
         updateAnimQueue();
@@ -1915,7 +1916,7 @@ void CharacterController::update(float duration)
         isrunning = isrunning && mHasMovedInXY;
 
         // advance athletics
-        if(mHasMovedInXY && mPtr == getPlayer())
+        if(mHasMovedInXY && isPlayer)
         {
             if(inwater)
             {
@@ -2011,8 +2012,12 @@ void CharacterController::update(float duration)
                 }
 
                 // advance acrobatics
-                if (mPtr == getPlayer())
+                // also set jumping flag to allow GetPCJumping works
+                if (isPlayer)
+                {
                     cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
+                    MWBase::Environment::get().getWorld()->getPlayer().setJumping(true);
+                }
 
                 // decrease fatigue
                 const float fatigueJumpBase = gmst.find("fFatigueJumpBase")->mValue.getFloat();
@@ -2035,7 +2040,7 @@ void CharacterController::update(float duration)
             jumpstate = JumpState_Landing;
             vec.z() = 0.0f;
 
-            float height = cls.getCreatureStats(mPtr).land();
+            float height = cls.getCreatureStats(mPtr).land(isPlayer);
             float healthLost = getFallDamage(mPtr, height);
 
             if (healthLost > 0.0f)
@@ -2058,7 +2063,7 @@ void CharacterController::update(float duration)
                 else
                 {
                     // report acrobatics progression
-                    if (mPtr == getPlayer())
+                    if (isPlayer)
                         cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
                 }
             }
@@ -2080,7 +2085,7 @@ void CharacterController::update(float duration)
             // Do not play turning animation for player if rotation speed is very slow.
             // Actual threshold should take framerate in account.
             float rotationThreshold = 0;
-            if (mPtr == getPlayer())
+            if (isPlayer)
                 rotationThreshold = 0.015 * 60 * duration;
 
             if(std::abs(vec.x()/2.0f) > std::abs(vec.y()))
@@ -2109,7 +2114,7 @@ void CharacterController::update(float duration)
             {
                 // It seems only bipedal actors use turning animations.
                 // Also do not use turning animations in the first-person view and when sneaking.
-                bool isFirstPlayer = mPtr == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson();
+                bool isFirstPlayer = isPlayer && MWBase::Environment::get().getWorld()->isFirstPerson();
                 if (!sneak && !isFirstPlayer && mPtr.getClass().isBipedal(mPtr))
                 {
                     if(rot.z() > rotationThreshold)
@@ -2121,7 +2126,7 @@ void CharacterController::update(float duration)
         }
 
         // Player can not use smooth turning as NPCs, so we play turning animation a bit to avoid jittering
-        if (mPtr == getPlayer())
+        if (isPlayer)
         {
             float threshold = mCurrentMovement.find("swim") == std::string::npos ? 0.4f : 0.8f;
             float complete;

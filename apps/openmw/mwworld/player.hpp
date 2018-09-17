@@ -56,6 +56,7 @@ namespace MWWorld
         MWMechanics::AttributeValue mSaveAttributes[ESM::Attribute::Length];
 
         bool mAttackingOrSpell;
+        bool mJumping;
 
     public:
 
@@ -110,6 +111,9 @@ namespace MWWorld
 
         void setAttackingOrSpell(bool attackingOrSpell);
         bool getAttackingOrSpell() const;
+
+        void setJumping(bool jumping);
+        bool getJumping() const;
 
         ///Checks all nearby actors to see if anyone has an aipackage against you
         bool isInCombat();
