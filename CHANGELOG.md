@@ -155,6 +155,7 @@
     Feature #4626: Weapon priority: account for weapon speed
     Feature #4632: AI priority: utilize vanilla AI GMSTs for priority rating
     Feature #4636: Use sTo GMST in spellmaking menu
+    Feature #4642: Batching potion creation
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test
     Task #4605: Optimize skinning

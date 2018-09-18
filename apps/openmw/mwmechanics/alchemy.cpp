@@ -30,6 +30,7 @@
 
 MWMechanics::Alchemy::Alchemy()
     : mValue(0)
+    , mPotionName("")
 {
 }
 
@@ -336,6 +337,25 @@ int MWMechanics::Alchemy::countIngredients() const
     return ingredients;
 }
 
+int MWMechanics::Alchemy::countPotionsToBrew() const
+{
+    Result readyStatus = getReadyStatus();
+    if (readyStatus != Result_Success)
+        return 0;
+
+    int toBrew = -1;
+
+    for (TIngredientsIterator iter (beginIngredients()); iter!=endIngredients(); ++iter)
+        if (!iter->isEmpty())
+        {
+            int count = iter->getRefData().getCount();
+            if ((count > 0 && count < toBrew) || toBrew < 0)
+                toBrew = count;
+        }
+
+    return toBrew;
+}
+
 void MWMechanics::Alchemy::setAlchemist (const MWWorld::Ptr& npc)
 {
     mAlchemist = npc;
@@ -396,6 +416,12 @@ void MWMechanics::Alchemy::clear()
     mTools.clear();
     mIngredients.clear();
     mEffects.clear();
+    setPotionName("");
+}
+
+void MWMechanics::Alchemy::setPotionName(const std::string& name)
+{
+    mPotionName = name;
 }
 
 int MWMechanics::Alchemy::addIngredient (const MWWorld::Ptr& ingredient)
@@ -456,7 +482,7 @@ bool MWMechanics::Alchemy::knownEffect(unsigned int potionEffectIndex, const MWW
             || (potionEffectIndex <= 7 && alchemySkill >= fWortChanceValue*4);
 }
 
-MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& name)
+MWMechanics::Alchemy::Result MWMechanics::Alchemy::getReadyStatus() const
 {
     if (mTools[ESM::Apparatus::MortarPestle].isEmpty())
         return Result_NoMortarAndPestle;
@@ -464,15 +490,43 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
     if (countIngredients()<2)
         return Result_LessThanTwoIngredients;
 
-    if (name.empty())
+    if (mPotionName.empty())
         return Result_NoName;
 
     if (listEffects().empty())
-    {
-        removeIngredients();
         return Result_NoEffects;
+
+    return Result_Success;
+}
+
+MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& name, int& count)
+{
+    setPotionName(name);
+    Result readyStatus = getReadyStatus();
+
+    if (readyStatus == Result_NoEffects)
+        removeIngredients();
+
+    if (readyStatus != Result_Success)
+        return readyStatus;
+
+    Result result = Result_RandomFailure;
+    int brewedCount = 0;
+    for (int i = 0; i < count; ++i)
+    {
+        if (createSingle() == Result_Success)
+        {
+            result = Result_Success;
+            brewedCount++;
+        }
     }
 
+    count = brewedCount;
+    return result;
+}
+
+MWMechanics::Alchemy::Result MWMechanics::Alchemy::createSingle ()
+{
     if (beginEffects() == endEffects())
     {
         // all effects were nullified due to insufficient skill
@@ -486,7 +540,7 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
         return Result_RandomFailure;
     }
 
-    addPotion (name);
+    addPotion(mPotionName);
 
     removeIngredients();
 

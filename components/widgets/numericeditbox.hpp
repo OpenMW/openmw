@@ -30,6 +30,7 @@ namespace Gui
 
         /// @note Does not trigger eventValueChanged
         void setValue (int value);
+        int getValue();
 
         void setMinValue(int minValue);
         void setMaxValue(int maxValue);
