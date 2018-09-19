@@ -119,7 +119,7 @@ namespace MWMechanics
 
         rating *= getHitChance(actor, enemy, value) / 100.f;
 
-        if (weapon->mData.mType < ESM::Weapon::MarksmanBow)
+        if (weapon->mData.mType < ESM::Weapon::Arrow)
             rating *= weapon->mData.mSpeed;
 
         return rating * ratingMult;
