@@ -1,7 +1,5 @@
 #include "tradewindow.hpp"
 
-#include <climits>
-
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_ControllerManager.h>
@@ -96,7 +94,7 @@ namespace MWGui
 
         mTotalBalance->eventValueChanged += MyGUI::newDelegate(this, &TradeWindow::onBalanceValueChanged);
         mTotalBalance->eventEditSelectAccept += MyGUI::newDelegate(this, &TradeWindow::onAccept);
-        mTotalBalance->setMinValue(INT_MIN+1); // disallow INT_MIN since abs(INT_MIN) is undefined
+        mTotalBalance->setMinValue(std::numeric_limits<int>::min()+1); // disallow INT_MIN since abs(INT_MIN) is undefined
 
         setCoord(400, 0, 400, 300);
     }
@@ -431,7 +429,7 @@ namespace MWGui
     void TradeWindow::onIncreaseButtonTriggered()
     {
         // prevent overflows, and prevent entering INT_MIN since abs(INT_MIN) is undefined
-        if (mCurrentBalance == INT_MAX || mCurrentBalance == INT_MIN+1)
+        if (mCurrentBalance == std::numeric_limits<int>::max() || mCurrentBalance == std::numeric_limits<int>::min()+1)
             return;
         if (mCurrentBalance < 0) mCurrentBalance -= 1;
         else mCurrentBalance += 1;

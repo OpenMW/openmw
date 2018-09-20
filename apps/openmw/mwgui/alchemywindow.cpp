@@ -1,7 +1,5 @@
 #include "alchemywindow.hpp"
 
-#include <climits>
-
 #include <MyGUI_Gui.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
@@ -323,8 +321,8 @@ namespace MWGui
     {
         int currentCount = mBrewCountEdit->getValue();
 
-        // prevent overflows, and prevent entering INT_MIN since abs(INT_MIN) is undefined
-        if (currentCount == INT_MAX || currentCount == INT_MIN+1)
+        // prevent overflows
+        if (currentCount == std::numeric_limits<int>::max())
             return;
 
         mBrewCountEdit->setValue(currentCount+1);
