@@ -66,7 +66,7 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
-        return (ref->mBase->mData.mType < 11); // thrown weapons and arrows/bolts don't have health, only quantity
+        return (ref->mBase->mData.mType < ESM::Weapon::MarksmanThrown); // thrown weapons and arrows/bolts don't have health, only quantity
     }
 
     int Weapon::getItemMaxHealth (const MWWorld::ConstPtr& ptr) const
@@ -319,21 +319,26 @@ namespace MWClass
             }
         }
 
-        if (ref->mBase->mData.mType < 11) // thrown weapons and arrows/bolts don't have health, only quantity
+        if (hasItemHealth(ptr))
         {
             int remainingHealth = getItemHealth(ptr);
             text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
                     + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
         }
 
-        // add reach and attack speed for melee weapon
-        if (ref->mBase->mData.mType < 9 && Settings::Manager::getBool("show melee info", "Game"))
+        const bool verbose = Settings::Manager::getBool("show melee info", "Game");
+        // add reach for melee weapon
+        if (ref->mBase->mData.mType < ESM::Weapon::MarksmanBow && verbose)
         {
             // display value in feet
             const float combatDistance = store.get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat() * ref->mBase->mData.mReach;
             text += MWGui::ToolTips::getWeightString(combatDistance / Constants::UnitsPerFoot, "#{sRange}");
             text += " #{sFeet}";
+        }
 
+        // add attack speed for any weapon excepts arrows and bolts
+        if (ref->mBase->mData.mType < ESM::Weapon::Arrow && verbose)
+        {
             text += MWGui::ToolTips::getPercentString(ref->mBase->mData.mSpeed, "#{sAttributeSpeed}");
         }
 

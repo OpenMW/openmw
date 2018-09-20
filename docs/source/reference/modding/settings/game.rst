@@ -36,7 +36,7 @@ show melee info
 :Range:		True/False
 :Default:	False
 
-If this setting is true, the reach and speed of melee weapons will show on their tooltip.
+If this setting is true, the reach and speed of weapons will show on their tooltip.
 
 This setting can only be configured by editing the settings configuration file.
 
