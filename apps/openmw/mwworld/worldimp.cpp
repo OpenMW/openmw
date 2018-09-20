@@ -9,6 +9,7 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/cellid.hpp>
 
+#include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
 
@@ -260,7 +261,7 @@ namespace MWWorld
             if (!getPlayerPtr().isInCell())
             {
                 ESM::Position pos;
-                const int cellSize = 8192;
+                const int cellSize = Constants::CellSizeInUnits;
                 pos.pos[0] = cellSize/2;
                 pos.pos[1] = cellSize/2;
                 pos.pos[2] = 0;
@@ -1434,7 +1435,7 @@ namespace MWWorld
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
     {
-        const int cellSize = 8192;
+        const int cellSize = Constants::CellSizeInUnits;
 
         x = static_cast<float>(cellSize * cellX);
         y = static_cast<float>(cellSize * cellY);
@@ -1448,10 +1449,8 @@ namespace MWWorld
 
     void World::positionToIndex (float x, float y, int &cellX, int &cellY) const
     {
-        const int cellSize = 8192;
-
-        cellX = static_cast<int>(std::floor(x / cellSize));
-        cellY = static_cast<int>(std::floor(y / cellSize));
+        cellX = static_cast<int>(std::floor(x / Constants::CellSizeInUnits));
+        cellY = static_cast<int>(std::floor(y / Constants::CellSizeInUnits));
     }
 
     void World::queueMovement(const Ptr &ptr, const osg::Vec3f &velocity)
@@ -3245,9 +3244,9 @@ namespace MWWorld
 
     float World::feetToGameUnits(float feet)
     {
-        // Looks like there is no GMST for this. This factor was determined in experiments
-        // with the Telekinesis effect.
-        return feet * 22;
+        // Original engine rounds size upward
+        static const int unitsPerFoot = ceil(Constants::UnitsPerFoot);
+        return feet * unitsPerFoot;
     }
 
     float World::getActivationDistancePlusTelekinesis()

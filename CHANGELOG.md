@@ -162,6 +162,7 @@
     Task #4613: Incomplete type errors when compiling with g++ on OSX 10.9
     Task #4621: Optimize combat AI
     Task #4643: Revise editor record verifying functionality
+    Task #4645: Use constants instead of widely used magic numbers
 
 0.44.0
 ------

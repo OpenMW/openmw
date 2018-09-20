@@ -5,6 +5,8 @@
 #include <ostream>
 #include <sstream>
 
+#include <components/misc/constants.hpp>
+
 CSMWorld::CellCoordinates::CellCoordinates() : mX (0), mY (0) {}
 
 CSMWorld::CellCoordinates::CellCoordinates (int x, int y) : mX (x), mY (y) {}
@@ -61,9 +63,7 @@ std::pair<CSMWorld::CellCoordinates, bool> CSMWorld::CellCoordinates::fromId (
 
 std::pair<int, int> CSMWorld::CellCoordinates::coordinatesToCellIndex (float x, float y)
 {
-    const int cellSize = 8192;
-
-    return std::make_pair (std::floor (x/cellSize), std::floor (y/cellSize));
+    return std::make_pair (std::floor (x / Constants::CellSizeInUnits), std::floor (y / Constants::CellSizeInUnits));
 }
 
 bool CSMWorld::operator== (const CellCoordinates& left, const CellCoordinates& right)

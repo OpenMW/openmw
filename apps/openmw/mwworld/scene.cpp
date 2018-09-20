@@ -345,7 +345,7 @@ namespace MWWorld
         getGridCenter(cellX, cellY);
         float centerX, centerY;
         MWBase::Environment::get().getWorld()->indexToPosition(cellX, cellY, centerX, centerY, true);
-        const float maxDistance = 8192/2 + mCellLoadingThreshold; // 1/2 cell size + threshold
+        const float maxDistance = Constants::CellSizeInUnits / 2 + mCellLoadingThreshold; // 1/2 cell size + threshold
         float distance = std::max(std::abs(centerX-pos.x()), std::abs(centerY-pos.y()));
         if (distance > maxDistance)
         {
@@ -793,7 +793,7 @@ namespace MWWorld
 
                 float dist = std::max(std::abs(thisCellCenterX - playerPos.x()), std::abs(thisCellCenterY - playerPos.y()));
                 dist = std::min(dist,std::max(std::abs(thisCellCenterX - predictedPos.x()), std::abs(thisCellCenterY - predictedPos.y())));
-                float loadDist = 8192/2 + 8192 - mCellLoadingThreshold + mPreloadDistance;
+                float loadDist = Constants::CellSizeInUnits / 2 + Constants::CellSizeInUnits - mCellLoadingThreshold + mPreloadDistance;
 
                 if (dist < loadDist)
                     preloadCell(MWBase::Environment::get().getWorld()->getExterior(cellX+dx, cellY+dy));

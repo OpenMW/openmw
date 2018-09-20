@@ -4,6 +4,8 @@
 
 #include <sstream>
 
+#include <components/misc/constants.hpp>
+
 #include "quadtreenode.hpp"
 #include "storage.hpp"
 #include "viewdata.hpp"
@@ -81,7 +83,7 @@ public:
     {
         float dist = distanceToBox(node->getBoundingBox(), eyePoint);
         int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()/mMinSize));
-        int lodLevel = Log2(static_cast<unsigned int>(dist/(8192*mMinSize)));
+        int lodLevel = Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*mMinSize)));
 
         return nativeLodLevel <= lodLevel;
     }
