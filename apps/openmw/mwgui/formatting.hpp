@@ -14,7 +14,7 @@ namespace MWGui
         {
             TextStyle() :
                 mColour(0,0,0)
-                , mFont("")
+                , mFont("Journalbook Magic Cards")
                 , mTextSize(16)
             {
             }
