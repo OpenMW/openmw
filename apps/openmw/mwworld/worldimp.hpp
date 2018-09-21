@@ -407,6 +407,9 @@ namespace MWWorld
 
             bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) override;
 
+            void setActorCollisionMode(const Ptr& ptr, bool enabled) override;
+            bool isActorCollisionEnabled(const Ptr& ptr) override;
+
             bool toggleCollisionMode() override;
             ///< Toggle collision mode for player. If disabled player object should ignore
             /// collisions and gravity.

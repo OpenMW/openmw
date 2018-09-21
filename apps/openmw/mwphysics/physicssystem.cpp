@@ -1366,6 +1366,33 @@ namespace MWPhysics
         return false;
     }
 
+    void PhysicsSystem::setActorCollisionMode(const MWWorld::Ptr& ptr, bool enabled)
+    {
+        ActorMap::iterator found = mActors.find(ptr);
+        if (found != mActors.end())
+        {
+            bool cmode = found->second->getCollisionMode();
+            if (cmode == enabled)
+                return;
+
+            cmode = enabled;
+            found->second->enableCollisionMode(cmode);
+            found->second->enableCollisionBody(cmode);
+        }
+    }
+
+    bool PhysicsSystem::isActorCollisionEnabled(const MWWorld::Ptr& ptr)
+    {
+        ActorMap::iterator found = mActors.find(ptr);
+        if (found != mActors.end())
+        {
+            bool cmode = found->second->getCollisionMode();
+            return cmode;
+        }
+
+        return false;
+    }
+
     void PhysicsSystem::queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &movement)
     {
         PtrVelocityList::iterator iter = mMovementQueue.begin();

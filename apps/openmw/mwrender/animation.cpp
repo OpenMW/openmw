@@ -1748,21 +1748,31 @@ namespace MWRender
 
         if (alpha != 1.f)
         {
-            osg::StateSet* stateset (new osg::StateSet);
+            // If we have an existing material for alpha transparency, just override alpha level
+            osg::StateSet* stateset = mObjectRoot->getOrCreateStateSet();
+            osg::Material* material = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+            if (material)
+            {
+                material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
+            }
+            else
+            {
+                osg::StateSet* stateset (new osg::StateSet);
 
-            osg::BlendFunc* blendfunc (new osg::BlendFunc);
-            stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                osg::BlendFunc* blendfunc (new osg::BlendFunc);
+                stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
-            // FIXME: overriding diffuse/ambient/emissive colors
-            osg::Material* material (new osg::Material);
-            material->setColorMode(osg::Material::OFF);
-            material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,alpha));
-            material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
-            stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                // FIXME: overriding diffuse/ambient/emissive colors
+                material = new osg::Material;
+                material->setColorMode(osg::Material::OFF);
+                material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,alpha));
+                material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+                stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
-            mObjectRoot->setStateSet(stateset);
+                mObjectRoot->setStateSet(stateset);
 
-            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
+                mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
+            }
         }
         else
         {

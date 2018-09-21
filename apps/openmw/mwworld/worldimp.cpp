@@ -1582,6 +1582,16 @@ namespace MWWorld
         }
     }
 
+    void World::setActorCollisionMode(const MWWorld::Ptr& ptr, bool enabled)
+    {
+        mPhysics->setActorCollisionMode(ptr, enabled);
+    }
+
+    bool World::isActorCollisionEnabled(const MWWorld::Ptr& ptr)
+    {
+        return mPhysics->isActorCollisionEnabled(ptr);
+    }
+
     bool World::toggleCollisionMode()
     {
         if (mPhysics->toggleCollisionMode())
@@ -3559,7 +3569,13 @@ namespace MWWorld
             MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
                         origin, feetToGameUnits(static_cast<float>(effectIt->mArea)), objects);
             for (std::vector<MWWorld::Ptr>::iterator affected = objects.begin(); affected != objects.end(); ++affected)
+            {
+                // Ignore actors without collisions here, otherwise it will be possible to hit actors outside processing range.
+                if (affected->getClass().isActor() && !isActorCollisionEnabled(*affected))
+                    continue;
+
                 toApply[*affected].push_back(*effectIt);
+            }
         }
 
         // Now apply the appropriate effects to each actor in range

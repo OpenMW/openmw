@@ -103,7 +103,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 
     /// Stops the actor when it gets too close to a unloaded cell
-    //... At current time, this test is unnecessary. AI shuts down when actor is more than 7168
+    //... At current time, this test is unnecessary. AI shuts down when actor is more than "actors processing range" setting value
     //... units from player, and exterior cells are 8192 units long and wide.
     //... But AI processing distance may increase in the future.
     if (isNearInactiveCell(pos))
@@ -354,7 +354,7 @@ bool MWMechanics::AiPackage::isNearInactiveCell(const ESM::Position& actorPos)
 
         // currently assumes 3 x 3 grid for exterior cells, with player at center cell.
         // ToDo: (Maybe) use "exterior cell load distance" setting to get count of actual active cells
-        // While AI Process distance is 7168, AI shuts down actors before they reach edges of 3 x 3 grid.
+        // AI shuts down actors before they reach edges of 3 x 3 grid.
         const float distanceFromEdge = 200.0;
         float minThreshold = (-1.0f * ESM::Land::REAL_SIZE) + distanceFromEdge;
         float maxThreshold = (2.0f * ESM::Land::REAL_SIZE) - distanceFromEdge;
