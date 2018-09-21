@@ -614,6 +614,7 @@ namespace MWRender
         , mPtr(ptr)
         , mResourceSystem(resourceSystem)
         , mAccumulate(1.f, 1.f, 0.f)
+        , mDiscardThresholdSquare(0)
         , mTextKeyListener(NULL)
         , mHeadYawRadians(0.f)
         , mHeadPitchRadians(0.f)
@@ -626,6 +627,8 @@ namespace MWRender
         mLightListCallback = new SceneUtil::LightListCallback;
 
         mUseAdditionalSources = Settings::Manager::getBool ("use additional anim sources", "Game");
+        const float thres = Settings::Manager::getFloat ("discard movement threshold", "Game");
+        mDiscardThresholdSquare = thres*thres;
     }
 
     Animation::~Animation()
@@ -1340,8 +1343,9 @@ namespace MWRender
                 mHeadController->setRotate(osg::Quat(mHeadPitchRadians, osg::Vec3f(1,0,0)) * osg::Quat(mHeadYawRadians, osg::Vec3f(0,0,1)));
         }
 
-        // Scripted animations should not cause movement
-        if (hasScriptedAnims)
+        // Scripted animations should not cause movement.
+        // Also we can discard small amount of movement as non-intended.
+        if (hasScriptedAnims || movement.length2() <= mDiscardThresholdSquare)
             return osg::Vec3f(0, 0, 0);
 
         return movement;
