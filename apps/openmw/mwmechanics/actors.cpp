@@ -1242,21 +1242,24 @@ namespace MWMechanics
     void Actors::updateCombatMusic ()
     {
         MWWorld::Ptr player = getPlayer();
-        int hostilesCount = 0; // need to know this to play Battle music
+        const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
+        bool hasHostiles = false; // need to know this to play Battle music
+        bool aiActive = MWBase::Environment::get().getMechanicsManager()->isAIActive();
 
-        for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+        if (aiActive)
         {
-            if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
+            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
-                bool inProcessingRange = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2()
-                        <= sqrAiProcessingDistance;
+                if (iter->first == player) continue;
 
-                if (MWBase::Environment::get().getMechanicsManager()->isAIActive() && inProcessingRange)
+                bool inProcessingRange = (playerPos - iter->first.getRefData().getPosition().asVec3()).length2() <= sqrAiProcessingDistance;
+                if (inProcessingRange)
                 {
-                    if (iter->first != player)
+                    MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
+                    if (!stats.isDead() && stats.getAiSequence().isInCombat())
                     {
-                        MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
-                        if (stats.getAiSequence().isInCombat() && !stats.isDead()) hostilesCount++;
+                        hasHostiles = true;
+                        break;
                     }
                 }
             }
@@ -1265,13 +1268,13 @@ namespace MWMechanics
         // check if we still have any player enemies to switch music
         static int currentMusic = 0;
 
-        if (currentMusic != 1 && hostilesCount == 0 && !(player.getClass().getCreatureStats(player).isDead() &&
+        if (currentMusic != 1 && !hasHostiles && !(player.getClass().getCreatureStats(player).isDead() &&
         MWBase::Environment::get().getSoundManager()->isMusicPlaying()))
         {
             MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
             currentMusic = 1;
         }
-        else if (currentMusic != 2 && hostilesCount > 0)
+        else if (currentMusic != 2 && hasHostiles)
         {
             MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Battle"));
             currentMusic = 2;
