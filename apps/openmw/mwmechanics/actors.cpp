@@ -1301,6 +1301,7 @@ namespace MWMechanics
             bool showTorches = MWBase::Environment::get().getWorld()->useTorches();
 
             MWWorld::Ptr player = getPlayer();
+            const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
 
             /// \todo move update logic to Actor class where appropriate
 
@@ -1321,7 +1322,7 @@ namespace MWMechanics
             {
                 bool isPlayer = iter->first == player;
 
-                float distSqr = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2();
+                float distSqr = (playerPos - iter->first.getRefData().getPosition().asVec3()).length2();
                 // AI processing is only done within distance of 7168 units to the player. Note the "AI distance" slider doesn't affect this
                 // (it only does some throttling for targets beyond the "AI distance", so doesn't give any guarantees as to whether AI will be enabled or not)
                 // This distance could be made configurable later, but the setting must be marked with a big warning:
@@ -1431,7 +1432,7 @@ namespace MWMechanics
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 const float animationDistance = aiProcessingDistance + 400; // Slightly larger than AI distance so there is time to switch back to the idle animation.
-                const float distSqr = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2();
+                const float distSqr = (playerPos - iter->first.getRefData().getPosition().asVec3()).length2();
                 bool isPlayer = iter->first == player;
                 bool inAnimationRange = isPlayer || (animationDistance == 0 || distSqr <= animationDistance*animationDistance);
                 int activeFlag = 1; // Can be changed back to '2' to keep updating bounding boxes off screen (more accurate, but slower)
@@ -1520,7 +1521,7 @@ namespace MWMechanics
                             continue;
 
                         // is the player in range and can they be detected
-                        if ((observer.getRefData().getPosition().asVec3() - player.getRefData().getPosition().asVec3()).length2() <= radius*radius
+                        if ((observer.getRefData().getPosition().asVec3() - playerPos).length2() <= radius*radius
                             && MWBase::Environment::get().getWorld()->getLOS(player, observer))
                         {
                             if (MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, observer))
@@ -1664,7 +1665,8 @@ namespace MWMechanics
     void Actors::rest(bool sleep)
     {
         float duration = 3600.f / MWBase::Environment::get().getWorld()->getTimeScaleFactor();
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
 
         for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
         {
@@ -1674,7 +1676,7 @@ namespace MWMechanics
             restoreDynamicStats(iter->first, sleep);
 
             if ((!iter->first.getRefData().getBaseNode()) ||
-                    (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2() > sqrAiProcessingDistance)
+                    (playerPos - iter->first.getRefData().getPosition().asVec3()).length2() > sqrAiProcessingDistance)
                 continue;
 
             adjustMagicEffects (iter->first);
