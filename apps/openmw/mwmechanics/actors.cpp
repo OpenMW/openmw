@@ -1303,6 +1303,16 @@ namespace MWMechanics
 
             std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> > cachedAllies; // will be filled as engageCombat iterates
 
+            bool aiActive = MWBase::Environment::get().getMechanicsManager()->isAIActive();
+            int attackedByPlayerId = player.getClass().getCreatureStats(player).getHitAttemptActorId();
+            if (attackedByPlayerId != -1)
+            {
+                const MWWorld::Ptr playerHitAttemptActor = MWBase::Environment::get().getWorld()->searchPtrViaActorId(attackedByPlayerId);
+
+                if (!playerHitAttemptActor.isInCell())
+                    player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
+            }
+
              // AI and magic effects update
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
@@ -1328,11 +1338,6 @@ namespace MWMechanics
                         player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
                 }
 
-                const MWWorld::Ptr playerHitAttemptActor = MWBase::Environment::get().getWorld()->searchPtrViaActorId(player.getClass().getCreatureStats(player).getHitAttemptActorId());
-
-                if (!playerHitAttemptActor.isInCell())
-                    player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
-
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {
                     bool cellChanged = MWBase::Environment::get().getWorld()->hasCellChanged();
@@ -1343,7 +1348,7 @@ namespace MWMechanics
                         return; // for now abort update of the old cell when cell changes by teleportation magic effect
                                 // a better solution might be to apply cell changes at the end of the frame
                     }
-                    if (MWBase::Environment::get().getMechanicsManager()->isAIActive() && inProcessingRange)
+                    if (aiActive && inProcessingRange)
                     {
                         if (timerUpdateAITargets == 0)
                         {
