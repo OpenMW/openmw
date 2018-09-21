@@ -1,7 +1,5 @@
 #include "globalmap.hpp"
 
-#include <climits>
-
 #include <osg/Image>
 #include <osg/Texture2D>
 #include <osg/Group>

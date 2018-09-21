@@ -1,8 +1,6 @@
 #include "util.hpp"
 
 #include <stdexcept>
-#include <climits>
-#include <cfloat>
 
 #include <QUndoStack>
 #include <QMetaProperty>
@@ -209,7 +207,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_Integer:
         {
             DialogueSpinBox *sb = new DialogueSpinBox(parent);
-            sb->setRange(INT_MIN, INT_MAX);
+            sb->setRange(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
             return sb;
         }
 
