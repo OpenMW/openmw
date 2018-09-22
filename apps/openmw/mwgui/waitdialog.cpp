@@ -120,14 +120,14 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->popGuiMode ();
         }
 
-	MWBase::World::RestPermitted canRest = MWBase::Environment::get().getWorld ()->canRest ();
+        MWBase::World::RestPermitted canRest = MWBase::Environment::get().getWorld ()->canRest ();
 
-	if (canRest == MWBase::World::Rest_EnemiesAreNearby)
+        if (canRest == MWBase::World::Rest_EnemiesAreNearby)
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
             MWBase::Environment::get().getWindowManager()->popGuiMode ();
-	}
-	else if (canRest == MWBase::World::Rest_PlayerIsUnderwater)
+        }
+        else if (canRest == MWBase::World::Rest_PlayerIsUnderwater)
         {
             // resting underwater or mid-air not allowed
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage1}");

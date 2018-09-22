@@ -2309,8 +2309,8 @@ namespace MWWorld
         if (!actor)
             throw std::runtime_error("can't find player");
 
-	if(mPlayer->enemiesNearby())
-	  return Rest_EnemiesAreNearby;
+        if(mPlayer->enemiesNearby())
+            return Rest_EnemiesAreNearby;
 
         if ((actor->getCollisionMode() && !mPhysics->isOnSolidGround(player)) || isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
             return Rest_PlayerIsUnderwater;
