@@ -55,6 +55,7 @@ namespace
             mSettings.mRegionMergeSize = 20;
             mSettings.mRegionMinSize = 8;
             mSettings.mTileSize = 64;
+            mSettings.mAsyncNavMeshUpdaterThreads = 1;
             mSettings.mMaxPolygonPathSize = 1024;
             mSettings.mMaxSmoothPathSize = 1024;
             mSettings.mTrianglesPerChunk = 256;

@@ -215,6 +215,7 @@ namespace MWWorld
         navigatorSettings.mRegionMergeSize = Settings::Manager::getInt("region merge size", "Navigator");
         navigatorSettings.mRegionMinSize = Settings::Manager::getInt("region min size", "Navigator");
         navigatorSettings.mTileSize = Settings::Manager::getInt("tile size", "Navigator");
+        navigatorSettings.mAsyncNavMeshUpdaterThreads = static_cast<std::size_t>(Settings::Manager::getInt("async nav mesh updater threads", "Navigator"));
         navigatorSettings.mMaxPolygonPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max polygon path size", "Navigator"));
         navigatorSettings.mMaxSmoothPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max smooth path size", "Navigator"));
         navigatorSettings.mTrianglesPerChunk = static_cast<std::size_t>(Settings::Manager::getInt("triangles per chunk", "Navigator"));

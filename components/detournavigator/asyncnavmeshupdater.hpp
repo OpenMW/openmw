@@ -71,7 +71,7 @@ namespace DetourNavigator
         TilePosition mPlayerTile;
         std::mutex mFirstStartMutex;
         boost::optional<std::chrono::steady_clock::time_point> mFirstStart;
-        std::thread mThread;
+        std::vector<std::thread> mThreads;
 
         void process() throw();
 

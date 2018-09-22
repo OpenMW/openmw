@@ -27,6 +27,7 @@ namespace DetourNavigator
         int mRegionMergeSize;
         int mRegionMinSize;
         int mTileSize;
+        std::size_t mAsyncNavMeshUpdaterThreads;
         std::size_t mMaxPolygonPathSize;
         std::size_t mMaxSmoothPathSize;
         std::size_t mTrianglesPerChunk;

@@ -52,8 +52,9 @@ namespace DetourNavigator
         , mRecastMeshManager(recastMeshManager)
         , mOffMeshConnectionsManager(offMeshConnectionsManager)
         , mShouldStop()
-        , mThread([&] { process(); })
     {
+        for (std::size_t i = 0; i < mSettings.get().mAsyncNavMeshUpdaterThreads; ++i)
+            mThreads.emplace_back([&] { process(); });
     }
 
     AsyncNavMeshUpdater::~AsyncNavMeshUpdater()
@@ -63,7 +64,8 @@ namespace DetourNavigator
         mJobs = decltype(mJobs)();
         mHasJob.notify_all();
         lock.unlock();
-        mThread.join();
+        for (auto& thread : mThreads)
+            thread.join();
     }
 
     void AsyncNavMeshUpdater::post(const osg::Vec3f& agentHalfExtents,
