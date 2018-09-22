@@ -419,6 +419,43 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
     }
 }
 
+bool CharacterController::onOpen()
+{
+    if (mPtr.getTypeName() == typeid(ESM::Container).name())
+    {
+        if (!mAnimation->hasAnimation("containeropen"))
+            return true;
+
+        if (mAnimation->isPlaying("containeropen"))
+            return false;
+
+        if (mAnimation->isPlaying("containerclose"))
+            return false;
+
+        mAnimation->play("containeropen", Priority_Persistent, MWRender::Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.f, 0);
+        if (mAnimation->isPlaying("containeropen"))
+            return false;
+    }
+
+    return true;
+}
+
+void CharacterController::onClose()
+{
+    if (mPtr.getTypeName() == typeid(ESM::Container).name())
+    {
+        if (!mAnimation->hasAnimation("containerclose"))
+            return;
+
+        float complete, startPoint = 0.f;
+        bool animPlaying = mAnimation->getInfo("containeropen", &complete);
+        if (animPlaying)
+            startPoint = 1.f - complete;
+
+        mAnimation->play("containerclose", Priority_Persistent, MWRender::Animation::BlendMask_All, false, 1.0f, "start", "stop", startPoint, 0);
+    }
+}
+
 void CharacterController::refreshMovementAnims(const WeaponInfo* weap, CharacterState movement, CharacterState& idle, bool force)
 {
     if (movement == mMovementState && idle == mIdleState && !force)
@@ -1079,6 +1116,8 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
 
     else if (groupname == "shield" && evt.compare(off, len, "block hit") == 0)
         mPtr.getClass().block(mPtr);
+    else if (groupname == "containeropen" && evt.compare(off, len, "loot") == 0)
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Container, mPtr);
 }
 
 void CharacterController::updatePtr(const MWWorld::Ptr &ptr)

@@ -182,6 +182,9 @@ namespace MWMechanics
 
             virtual void playerLoaded() override;
 
+            virtual bool onOpen(const MWWorld::Ptr& ptr) override;
+            virtual void onClose(const MWWorld::Ptr& ptr) override;
+
             virtual int countSavedGameRecords() const override;
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& listener) const override;
