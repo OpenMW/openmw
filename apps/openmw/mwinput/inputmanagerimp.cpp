@@ -1029,10 +1029,6 @@ namespace MWInput
         if (!MWBase::Environment::get().getWindowManager()->getRestEnabled () || MWBase::Environment::get().getWindowManager()->isGuiMode ())
             return;
 
-        if(mPlayer->enemiesNearby()) {//Check if in combat
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}"); //Nope,
-            return;
-        }
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_Rest); //Open rest GUI
 
     }
