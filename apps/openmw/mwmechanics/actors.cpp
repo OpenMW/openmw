@@ -1311,6 +1311,7 @@ namespace MWMechanics
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 bool isPlayer = iter->first == player;
+                CharacterController* ctrl = iter->second->getCharacterController();
 
                 float distSqr = (playerPos - iter->first.getRefData().getPosition().asVec3()).length2();
                 // AI processing is only done within distance of 7168 units to the player. Note the "AI distance" slider doesn't affect this
@@ -1320,7 +1321,7 @@ namespace MWMechanics
                 bool inProcessingRange = distSqr <= sqrAiProcessingDistance;
 
                 if (isPlayer)
-                    iter->second->getCharacterController()->setAttackingOrSpell(MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell());
+                    ctrl->setAttackingOrSpell(MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell());
 
                 // If dead or no longer in combat, no longer store any actors who attempted to hit us. Also remove for the player.
                 if (iter->first != player && (iter->first.getClass().getCreatureStats(iter->first).isDead()
@@ -1380,7 +1381,7 @@ namespace MWMechanics
                                 }
                             }
 
-                            iter->second->getCharacterController()->setHeadTrackTarget(headTrackTarget);
+                            ctrl->setHeadTrackTarget(headTrackTarget);
                         }
 
                         if (iter->first.getClass().isNpc() && iter->first != player)
@@ -1390,13 +1391,13 @@ namespace MWMechanics
                         {
                             CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
                             if (isConscious(iter->first))
-                                stats.getAiSequence().execute(iter->first, *iter->second->getCharacterController(), duration);
+                                stats.getAiSequence().execute(iter->first, *ctrl, duration);
                         }
                     }
 
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())
                     {
-                        updateDrowning(iter->first, duration, iter->second->getCharacterController()->isKnockedOut(), isPlayer);
+                        updateDrowning(iter->first, duration, ctrl->isKnockedOut(), isPlayer);
                         calculateNpcStatModifiers(iter->first, duration);
 
                         if (timerUpdateEquippedLight == 0)
@@ -1437,22 +1438,24 @@ namespace MWMechanics
                     inAnimationRange = true;
                     active = std::max(1, active);
                 }
-                iter->second->getCharacterController()->setActive(active);
+
+                CharacterController* ctrl = iter->second->getCharacterController();
+                ctrl->setActive(active);
 
                 if (!inAnimationRange)
                     continue;
 
                 if (iter->first.getClass().getCreatureStats(iter->first).isParalyzed())
-                    iter->second->getCharacterController()->skipAnim();
+                    ctrl->skipAnim();
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
                 // (would invalidate the iterator)
                 if (iter->first == getPlayer())
                 {
-                    playerCharacter = iter->second->getCharacterController();
+                    playerCharacter = ctrl;
                     continue;
                 }
-                iter->second->getCharacterController()->update(duration);
+                ctrl->update(duration);
             }
 
             if (playerCharacter)
