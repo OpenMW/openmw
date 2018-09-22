@@ -27,17 +27,17 @@ namespace DetourNavigator
         mNavMeshManager.reset(agentHalfExtents);
     }
 
-    bool Navigator::addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
+    bool Navigator::addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform)
     {
         return mNavMeshManager.addObject(id, shape, transform, AreaType_ground);
     }
 
-    bool Navigator::addObject(std::size_t id, const ObjectShapes& shapes, const btTransform& transform)
+    bool Navigator::addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
         bool result = addObject(id, shapes.mShape, transform);
         if (shapes.mAvoid)
         {
-            const auto avoidId = reinterpret_cast<std::size_t>(shapes.mAvoid);
+            const ObjectId avoidId(shapes.mAvoid);
             if (mNavMeshManager.addObject(avoidId, *shapes.mAvoid, transform, AreaType_null))
             {
                 updateAvoidShapeId(id, avoidId);
@@ -47,7 +47,7 @@ namespace DetourNavigator
         return result;
     }
 
-    bool Navigator::addObject(std::size_t id, const DoorShapes& shapes, const btTransform& transform)
+    bool Navigator::addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform)
     {
         if (addObject(id, static_cast<const ObjectShapes&>(shapes), transform))
         {
@@ -61,17 +61,17 @@ namespace DetourNavigator
         return false;
     }
 
-    bool Navigator::updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform)
+    bool Navigator::updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform)
     {
         return mNavMeshManager.updateObject(id, shape, transform, AreaType_ground);
     }
 
-    bool Navigator::updateObject(std::size_t id, const ObjectShapes& shapes, const btTransform& transform)
+    bool Navigator::updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
         bool result = updateObject(id, shapes.mShape, transform);
         if (shapes.mAvoid)
         {
-            const auto avoidId = reinterpret_cast<std::size_t>(shapes.mAvoid);
+            const ObjectId avoidId(shapes.mAvoid);
             if (mNavMeshManager.updateObject(avoidId, *shapes.mAvoid, transform, AreaType_null))
             {
                 updateAvoidShapeId(id, avoidId);
@@ -81,12 +81,12 @@ namespace DetourNavigator
         return result;
     }
 
-    bool Navigator::updateObject(std::size_t id, const DoorShapes& shapes, const btTransform& transform)
+    bool Navigator::updateObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform)
     {
         return updateObject(id, static_cast<const ObjectShapes&>(shapes), transform);
     }
 
-    bool Navigator::removeObject(std::size_t id)
+    bool Navigator::removeObject(const ObjectId id)
     {
         bool result = mNavMeshManager.removeObject(id);
         const auto avoid = mAvoidIds.find(id);
@@ -132,23 +132,23 @@ namespace DetourNavigator
         return mSettings;
     }
 
-    void Navigator::updateAvoidShapeId(const std::size_t id, const std::size_t avoidId)
+    void Navigator::updateAvoidShapeId(const ObjectId id, const ObjectId avoidId)
     {
         updateId(id, avoidId, mWaterIds);
     }
 
-    void Navigator::updateWaterShapeId(const std::size_t id, const std::size_t waterId)
+    void Navigator::updateWaterShapeId(const ObjectId id, const ObjectId waterId)
     {
         updateId(id, waterId, mWaterIds);
     }
 
-    void Navigator::updateId(const std::size_t id, const std::size_t updateId, std::unordered_map<std::size_t, std::size_t>& ids)
+    void Navigator::updateId(const ObjectId id, const ObjectId updateId, std::unordered_map<ObjectId, ObjectId>& ids)
     {
         auto inserted = ids.insert(std::make_pair(id, updateId));
         if (!inserted.second)
         {
             mNavMeshManager.removeObject(inserted.first->second);
-            inserted.second = updateId;
+            inserted.first->second = updateId;
         }
     }
 }

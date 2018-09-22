@@ -22,13 +22,13 @@ namespace DetourNavigator
     public:
         NavMeshManager(const Settings& settings);
 
-        bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform,
+        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
 
-        bool updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform,
+        bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                           const AreaType areaType);
 
-        bool removeObject(std::size_t id);
+        bool removeObject(const ObjectId id);
 
         void addAgent(const osg::Vec3f& agentHalfExtents);
 
@@ -38,9 +38,9 @@ namespace DetourNavigator
 
         void reset(const osg::Vec3f& agentHalfExtents);
 
-        void addOffMeshConnection(std::size_t id, const osg::Vec3f& start, const osg::Vec3f& end);
+        void addOffMeshConnection(const ObjectId id, const osg::Vec3f& start, const osg::Vec3f& end);
 
-        void removeOffMeshConnection(std::size_t id);
+        void removeOffMeshConnection(const ObjectId id);
 
         void update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents);
 

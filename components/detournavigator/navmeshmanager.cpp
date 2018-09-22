@@ -32,7 +32,7 @@ namespace DetourNavigator
         , mAsyncNavMeshUpdater(settings, mRecastMeshManager, mOffMeshConnectionsManager)
     {}
 
-    bool NavMeshManager::addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform,
+    bool NavMeshManager::addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                                    const AreaType areaType)
     {
         if (!mRecastMeshManager.addObject(id, shape, transform, areaType))
@@ -41,7 +41,7 @@ namespace DetourNavigator
         return true;
     }
 
-    bool NavMeshManager::updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform,
+    bool NavMeshManager::updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                                       const AreaType areaType)
     {
         if (!mRecastMeshManager.updateObject(id, transform, areaType))
@@ -50,7 +50,7 @@ namespace DetourNavigator
         return true;
     }
 
-    bool NavMeshManager::removeObject(std::size_t id)
+    bool NavMeshManager::removeObject(const ObjectId id)
     {
         const auto object = mRecastMeshManager.removeObject(id);
         if (!object)
@@ -91,7 +91,7 @@ namespace DetourNavigator
         mCache.erase(agentHalfExtents);
     }
 
-    void NavMeshManager::addOffMeshConnection(std::size_t id, const osg::Vec3f& start, const osg::Vec3f& end)
+    void NavMeshManager::addOffMeshConnection(const ObjectId id, const osg::Vec3f& start, const osg::Vec3f& end)
     {
         if (!mOffMeshConnectionsManager.add(id, OffMeshConnection {start, end}))
             return;
@@ -105,7 +105,7 @@ namespace DetourNavigator
             addChangedTile(endTilePosition, ChangeType::add);
     }
 
-    void NavMeshManager::removeOffMeshConnection(std::size_t id)
+    void NavMeshManager::removeOffMeshConnection(const ObjectId id)
     {
         if (const auto connection = mOffMeshConnectionsManager.remove(id))
         {

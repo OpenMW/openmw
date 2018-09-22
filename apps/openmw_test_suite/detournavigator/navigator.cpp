@@ -102,7 +102,7 @@ namespace
         shape.setLocalScaling(btVector3(128, 128, 1));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addObject(1, shape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
@@ -152,7 +152,7 @@ namespace
         compoundShape.addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(0, 0, 0)), &boxShape);
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addObject(1, heightfieldShape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&heightfieldShape), heightfieldShape, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
@@ -184,7 +184,7 @@ namespace
             osg::Vec3f(215, -215, 1.877177715301513671875),
         })) << mPath;
 
-        mNavigator->addObject(2, compoundShape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&compoundShape), compoundShape, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
@@ -235,8 +235,8 @@ namespace
         compoundShape.addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(0, 0, 0)), &boxShape);
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addObject(1, heightfieldShape, btTransform::getIdentity());
-        mNavigator->addObject(2, compoundShape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&heightfieldShape), heightfieldShape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&compoundShape), compoundShape, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
@@ -270,7 +270,7 @@ namespace
 
         compoundShape.updateChildTransform(0, btTransform(btMatrix3x3::getIdentity(), btVector3(1000, 0, 0)));
 
-        mNavigator->updateObject(2, compoundShape, btTransform::getIdentity());
+        mNavigator->updateObject(ObjectId(&compoundShape), compoundShape, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
@@ -327,8 +327,8 @@ namespace
         shape2.setLocalScaling(btVector3(128, 128, 1));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addObject(1, shape, btTransform::getIdentity());
-        mNavigator->addObject(2, shape2, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&shape2), shape2, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
@@ -384,7 +384,7 @@ namespace
         shapeAvoid.setLocalScaling(btVector3(128, 128, 1));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addObject(1, ObjectShapes {shape, &shapeAvoid}, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&shape), ObjectShapes {shape, &shapeAvoid}, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
@@ -432,7 +432,7 @@ namespace
 
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addWater(osg::Vec2i(0, 0), 128 * 4, 300, btTransform::getIdentity());
-        mNavigator->addObject(1, shape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
@@ -480,7 +480,7 @@ namespace
 
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addWater(osg::Vec2i(0, 0), 128 * 4, -25, btTransform::getIdentity());
-        mNavigator->addObject(1, shape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
@@ -525,7 +525,7 @@ namespace
         shape.setLocalScaling(btVector3(128, 128, 1));
 
         mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->addObject(1, shape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
         mNavigator->addWater(osg::Vec2i(0, 0), std::numeric_limits<int>::max(), -25, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
@@ -572,7 +572,7 @@ namespace
 
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addWater(osg::Vec2i(0, 0), 128 * 4, -25, btTransform::getIdentity());
-        mNavigator->addObject(1, shape, btTransform::getIdentity());
+        mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 

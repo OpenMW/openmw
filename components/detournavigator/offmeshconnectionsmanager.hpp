@@ -4,6 +4,7 @@
 #include "settings.hpp"
 #include "settingsutils.hpp"
 #include "tileposition.hpp"
+#include "objectid.hpp"
 
 #include <osg/Vec3f>
 
@@ -30,7 +31,7 @@ namespace DetourNavigator
             : mSettings(settings)
         {}
 
-        bool add(const std::size_t id, const OffMeshConnection& value)
+        bool add(const ObjectId id, const OffMeshConnection& value)
         {
             const std::lock_guard<std::mutex> lock(mMutex);
 
@@ -48,7 +49,7 @@ namespace DetourNavigator
             return true;
         }
 
-        boost::optional<OffMeshConnection> remove(const std::size_t id)
+        boost::optional<OffMeshConnection> remove(const ObjectId id)
         {
             const std::lock_guard<std::mutex> lock(mMutex);
 
@@ -84,7 +85,7 @@ namespace DetourNavigator
                 return result;
 
             std::for_each(itByTilePosition->second.begin(), itByTilePosition->second.end(),
-                [&] (const std::size_t v)
+                [&] (const ObjectId v)
                 {
                     const auto itById = mValuesById.find(v);
                     if (itById != mValuesById.end())
@@ -97,10 +98,10 @@ namespace DetourNavigator
     private:
         const Settings& mSettings;
         std::mutex mMutex;
-        std::unordered_map<std::size_t, OffMeshConnection> mValuesById;
-        std::map<TilePosition, std::unordered_set<std::size_t>> mValuesByTilePosition;
+        std::unordered_map<ObjectId, OffMeshConnection> mValuesById;
+        std::map<TilePosition, std::unordered_set<ObjectId>> mValuesByTilePosition;
 
-        void removeByTilePosition(const TilePosition& tilePosition, const std::size_t id)
+        void removeByTilePosition(const TilePosition& tilePosition, const ObjectId id)
         {
             const auto it = mValuesByTilePosition.find(tilePosition);
             if (it != mValuesByTilePosition.end())

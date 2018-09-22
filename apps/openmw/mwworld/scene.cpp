@@ -151,7 +151,7 @@ namespace
                 const auto connectionEnd = endPoint.mHit ? endPoint.mHitPos : end;
 
                 navigator.addObject(
-                    reinterpret_cast<std::size_t>(object),
+                    DetourNavigator::ObjectId(object),
                     DetourNavigator::DoorShapes(
                         *shape,
                         object->getShapeInstance()->getAvoidCollisionShape(),
@@ -164,7 +164,7 @@ namespace
             else
             {
                 navigator.addObject(
-                    reinterpret_cast<std::size_t>(object),
+                    DetourNavigator::ObjectId(object),
                     DetourNavigator::ObjectShapes {
                         *object->getShapeInstance()->getCollisionShape(),
                         object->getShapeInstance()->getAvoidCollisionShape()
@@ -343,7 +343,7 @@ namespace MWWorld
         for (const auto& ptr : visitor.mObjects)
         {
             if (const auto object = mPhysics->getObject(ptr))
-                navigator->removeObject(reinterpret_cast<std::size_t>(object));
+                navigator->removeObject(DetourNavigator::ObjectId(object));
             else if (const auto actor = mPhysics->getActor(ptr))
             {
                 navigator->removeAgent(ptr.getCell()->isExterior() ? playerHalfExtents : actor->getHalfExtents());
@@ -365,7 +365,7 @@ namespace MWWorld
             if (land && land->mDataTypes&ESM::Land::DATA_VHGT)
             {
                 if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                    navigator->removeObject(reinterpret_cast<std::size_t>(heightField));
+                    navigator->removeObject(DetourNavigator::ObjectId(heightField));
                 mPhysics->removeHeightField(cellX, cellY);
             }
         }
@@ -420,7 +420,7 @@ namespace MWWorld
                 }
 
                 if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                    navigator->addObject(reinterpret_cast<std::size_t>(heightField), *heightField->getShape(),
+                    navigator->addObject(DetourNavigator::ObjectId(heightField), *heightField->getShape(),
                             heightField->getCollisionObject()->getWorldTransform());
             }
 
@@ -808,7 +808,7 @@ namespace MWWorld
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         if (const auto object = mPhysics->getObject(ptr))
         {
-            navigator->removeObject(reinterpret_cast<std::size_t>(object));
+            navigator->removeObject(DetourNavigator::ObjectId(object));
             const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             navigator->update(player.getRefData().getPosition().asVec3());
         }

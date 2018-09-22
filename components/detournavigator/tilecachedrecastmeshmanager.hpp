@@ -14,12 +14,12 @@ namespace DetourNavigator
     public:
         TileCachedRecastMeshManager(const Settings& settings);
 
-        bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform,
+        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
 
-        bool updateObject(std::size_t id, const btTransform& transform, const AreaType areaType);
+        bool updateObject(const ObjectId id, const btTransform& transform, const AreaType areaType);
 
-        boost::optional<RemovedRecastMeshObject> removeObject(std::size_t id);
+        boost::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
 
         bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform);
 
@@ -43,7 +43,7 @@ namespace DetourNavigator
         const Settings& mSettings;
         std::mutex mTilesMutex;
         std::map<TilePosition, CachedRecastMeshManager> mTiles;
-        std::unordered_map<std::size_t, std::vector<TilePosition>> mObjectsTilesPositions;
+        std::unordered_map<ObjectId, std::vector<TilePosition>> mObjectsTilesPositions;
         std::map<osg::Vec2i, std::vector<TilePosition>> mWaterTilesPositions;
         std::size_t mRevision = 0;
     };

@@ -9,7 +9,7 @@ namespace DetourNavigator
         : mSettings(settings)
     {}
 
-    bool TileCachedRecastMeshManager::addObject(std::size_t id, const btCollisionShape& shape,
+    bool TileCachedRecastMeshManager::addObject(const ObjectId id, const btCollisionShape& shape,
                                                 const btTransform& transform, const AreaType areaType)
     {
         bool result = false;
@@ -39,7 +39,7 @@ namespace DetourNavigator
         return result;
     }
 
-    bool TileCachedRecastMeshManager::updateObject(std::size_t id, const btTransform& transform,
+    bool TileCachedRecastMeshManager::updateObject(const ObjectId id, const btTransform& transform,
         const AreaType areaType)
     {
         const auto object = mObjectsTilesPositions.find(id);
@@ -59,7 +59,7 @@ namespace DetourNavigator
         return result;
     }
 
-    boost::optional<RemovedRecastMeshObject> TileCachedRecastMeshManager::removeObject(std::size_t id)
+    boost::optional<RemovedRecastMeshObject> TileCachedRecastMeshManager::removeObject(const ObjectId id)
     {
         const auto object = mObjectsTilesPositions.find(id);
         if (object == mObjectsTilesPositions.end())

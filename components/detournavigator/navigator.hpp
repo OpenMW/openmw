@@ -41,19 +41,19 @@ namespace DetourNavigator
 
         void removeAgent(const osg::Vec3f& agentHalfExtents);
 
-        bool addObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
+        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform);
 
-        bool addObject(std::size_t id, const ObjectShapes& shapes, const btTransform& transform);
+        bool addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform);
 
-        bool addObject(std::size_t id, const DoorShapes& shapes, const btTransform& transform);
+        bool addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform);
 
-        bool updateObject(std::size_t id, const btCollisionShape& shape, const btTransform& transform);
+        bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform);
 
-        bool updateObject(std::size_t id, const ObjectShapes& shapes, const btTransform& transform);
+        bool updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform);
 
-        bool updateObject(std::size_t id, const DoorShapes& shapes, const btTransform& transform);
+        bool updateObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform);
 
-        bool removeObject(std::size_t id);
+        bool removeObject(const ObjectId id);
 
         bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
             const btTransform& transform);
@@ -82,12 +82,12 @@ namespace DetourNavigator
         Settings mSettings;
         NavMeshManager mNavMeshManager;
         std::map<osg::Vec3f, std::size_t> mAgents;
-        std::unordered_map<std::size_t, std::size_t> mAvoidIds;
-        std::unordered_map<std::size_t, std::size_t> mWaterIds;
+        std::unordered_map<ObjectId, ObjectId> mAvoidIds;
+        std::unordered_map<ObjectId, ObjectId> mWaterIds;
 
-        void updateAvoidShapeId(const std::size_t id, const std::size_t avoidId);
-        void updateWaterShapeId(const std::size_t id, const std::size_t waterId);
-        void updateId(const std::size_t id, const std::size_t waterId, std::unordered_map<std::size_t, std::size_t>& ids);
+        void updateAvoidShapeId(const ObjectId id, const ObjectId avoidId);
+        void updateWaterShapeId(const ObjectId id, const ObjectId waterId);
+        void updateId(const ObjectId id, const ObjectId waterId, std::unordered_map<ObjectId, ObjectId>& ids);
     };
 }
 

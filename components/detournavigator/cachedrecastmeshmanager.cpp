@@ -7,7 +7,7 @@ namespace DetourNavigator
         : mImpl(settings, bounds)
     {}
 
-    bool CachedRecastMeshManager::addObject(std::size_t id, const btCollisionShape& shape,
+    bool CachedRecastMeshManager::addObject(const ObjectId id, const btCollisionShape& shape,
                                             const btTransform& transform, const AreaType areaType)
     {
         if (!mImpl.addObject(id, shape, transform, areaType))
@@ -16,7 +16,7 @@ namespace DetourNavigator
         return true;
     }
 
-    bool CachedRecastMeshManager::updateObject(std::size_t id, const btTransform& transform, const AreaType areaType)
+    bool CachedRecastMeshManager::updateObject(const ObjectId id, const btTransform& transform, const AreaType areaType)
     {
         if (!mImpl.updateObject(id, transform, areaType))
             return false;
@@ -24,7 +24,7 @@ namespace DetourNavigator
         return true;
     }
 
-    boost::optional<RemovedRecastMeshObject> CachedRecastMeshManager::removeObject(std::size_t id)
+    boost::optional<RemovedRecastMeshObject> CachedRecastMeshManager::removeObject(const ObjectId id)
     {
         const auto object = mImpl.removeObject(id);
         if (object)
