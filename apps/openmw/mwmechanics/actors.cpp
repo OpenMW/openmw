@@ -501,12 +501,6 @@ namespace MWMechanics
         }
     }
 
-    void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration)
-    {
-        updateDrowning(ptr, duration);
-        calculateNpcStatModifiers(ptr, duration);
-    }
-
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
     {
         CreatureStats& creatureStats =  creature.getClass().getCreatureStats (creature);
@@ -926,13 +920,8 @@ namespace MWMechanics
         return ctrl->isSneaking();
     }
 
-    void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
+    void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration, bool isKnockedOut, bool isPlayer)
     {
-        PtrActorMap::iterator it = mActors.find(ptr);
-        if (it == mActors.end())
-            return;
-        CharacterController* ctrl = it->second->getCharacterController();
-
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
 
         // When npc stats are just initialized, mTimeToStartDrowning == -1 and we should get value from GMST
@@ -940,9 +929,10 @@ namespace MWMechanics
         if (stats.getTimeToStartDrowning() == -1.f)
             stats.setTimeToStartDrowning(fHoldBreathTime);
 
-        if (ptr.getClass().isNpc() && stats.getTimeToStartDrowning() < fHoldBreathTime / 2)
+        if (stats.getTimeToStartDrowning() < fHoldBreathTime / 2)
         {
-            if(ptr != MWMechanics::getPlayer() ) {
+            if(!isPlayer)
+            {
                 MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
                 if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdBreathe) //Only add it once
                     seq.stack(MWMechanics::AiBreathe(), ptr);
@@ -950,7 +940,7 @@ namespace MWMechanics
         }
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
+        bool knockedOutUnderwater = (isKnockedOut && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
         if((world->isSubmerged(ptr) || knockedOutUnderwater)
            && stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
         {
@@ -965,7 +955,7 @@ namespace MWMechanics
                 stats.setTimeToStartDrowning(timeLeft);
             }
 
-            bool godmode = ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+            bool godmode = isPlayer && MWBase::Environment::get().getWorld()->getGodModeState();
 
             if(timeLeft == 0.0f && !godmode)
             {
@@ -980,7 +970,7 @@ namespace MWMechanics
                 if(!sndmgr->getSoundPlaying(ptr, "drown"))
                     sndmgr->playSound3D(ptr, "drown", 1.0f, 1.0f);
 
-                if(ptr == world->getPlayerPtr())
+                if(isPlayer)
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
             }
         }
@@ -1406,7 +1396,8 @@ namespace MWMechanics
 
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())
                     {
-                        updateNpc(iter->first, duration);
+                        updateDrowning(iter->first, duration, iter->second->getCharacterController()->isKnockedOut(), isPlayer);
+                        calculateNpcStatModifiers(iter->first, duration);
 
                         if (timerUpdateEquippedLight == 0)
                             updateEquippedLight(iter->first, updateEquippedLightInterval, showTorches);
