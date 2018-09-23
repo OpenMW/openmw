@@ -2168,12 +2168,12 @@ void CharacterController::update(float duration)
         if(mAnimQueue.empty() || inwater || sneak)
         {
             // Note: turning animations should not interrupt idle ones
-            if (inwater)
+            if (movestate != CharState_None && !isTurning())
+                idlestate = CharState_None;
+            else if (inwater)
                 idlestate = CharState_IdleSwim;
             else if (sneak && !inJump)
                 idlestate = CharState_IdleSneak;
-            else if (movestate != CharState_None && !isTurning())
-                idlestate = CharState_None;
             else
                 idlestate = CharState_Idle;
         }
