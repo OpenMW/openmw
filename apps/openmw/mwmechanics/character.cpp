@@ -353,7 +353,7 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
 
 void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState jump, CharacterState& idle, CharacterState& movement, bool force)
 {
-    if (!force && jump == mJumpState && movement == CharState_None)
+    if (!force && jump == mJumpState && idle == CharState_None && movement == CharState_None)
         return;
 
     if (jump != JumpState_None)
