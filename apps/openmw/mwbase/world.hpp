@@ -446,7 +446,7 @@ namespace MWBase
                 Rest_EnemiesAreNearby = 3
             };
 
-            virtual RestPermitted canRest() = 0;
+            virtual RestPermitted canRest() const = 0;
             ///< check if the player is allowed to rest
 
             /// \todo Probably shouldn't be here

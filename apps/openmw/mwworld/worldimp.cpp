@@ -2297,7 +2297,7 @@ namespace MWWorld
         applyLoopingParticles(player);
     }
 
-    World::RestPermitted World::canRest ()
+    World::RestPermitted World::canRest () const
     {
         CellStore *currentCell = mWorldScene->getCurrentCell();
 
