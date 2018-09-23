@@ -752,12 +752,15 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
     float underwaterFog = mUnderwaterFog.getValue(time.getHour(), mTimeSettings, "Fog");
 
     float peakHour = mSunriseTime + (mSunsetTime - mSunriseTime) / 2;
+    float glareFade = 1.f;
     if (time.getHour() < mSunriseTime || time.getHour() > mSunsetTime)
-        mRendering.getSkyManager()->setGlareTimeOfDayFade(0);
+        glareFade = 0.f;
     else if (time.getHour() < peakHour)
-        mRendering.getSkyManager()->setGlareTimeOfDayFade(1 - (peakHour - time.getHour()) / (peakHour - mSunriseTime));
+        glareFade -= (peakHour - time.getHour()) / (peakHour - mSunriseTime);
     else
-        mRendering.getSkyManager()->setGlareTimeOfDayFade(1 - (time.getHour() - peakHour) / (mSunsetTime - peakHour));
+        glareFade -= (time.getHour() - peakHour) / (mSunsetTime - peakHour);
+
+    mRendering.getSkyManager()->setGlareTimeOfDayFade(glareFade);
 
     mRendering.getSkyManager()->setMasserState(mMasser.calculateState(time));
     mRendering.getSkyManager()->setSecundaState(mSecunda.calculateState(time));
@@ -765,7 +768,7 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
     mRendering.configureFog(mResult.mFogDepth, underwaterFog, mResult.mDLFogFactor,
                             mResult.mDLFogOffset/100.0f, mResult.mFogColor);
     mRendering.setAmbientColour(mResult.mAmbientColor);
-    mRendering.setSunColour(mResult.mSunColor, mResult.mSunColor * mResult.mGlareView);
+    mRendering.setSunColour(mResult.mSunColor, mResult.mSunColor * mResult.mGlareView * glareFade);
 
     mRendering.getSkyManager()->setWeather(mResult);
 
