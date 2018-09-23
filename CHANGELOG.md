@@ -1,6 +1,7 @@
 0.45.0
 ------
 
+    Bug #1875: Actors in inactive cells don't heal from resting
     Bug #1990: Sunrise/sunset not set correct
     Bug #2131: Lustidrike's spell misses the player every time
     Bug #2222: Fatigue's effect on selling price is backwards

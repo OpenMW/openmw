@@ -3118,6 +3118,10 @@ namespace MWWorld
         return closestMarker;
     }
 
+    void World::rest()
+    {
+        mCells.rest();
+    }
 
     void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
                                           const std::string& id)
