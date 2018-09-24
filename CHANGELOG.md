@@ -164,6 +164,7 @@
     Task #4621: Optimize combat AI
     Task #4643: Revise editor record verifying functionality
     Task #4645: Use constants instead of widely used magic numbers
+    Task #4652: Move call to enemiesNearby() from InputManager::rest() to World::canRest()
 
 0.44.0
 ------
