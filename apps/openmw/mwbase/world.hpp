@@ -446,8 +446,8 @@ namespace MWBase
                 Rest_EnemiesAreNearby = 3
             };
 
+            /// check if the player is allowed to rest
             virtual RestPermitted canRest() const = 0;
-            ///< check if the player is allowed to rest
 
             /// \todo Probably shouldn't be here
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) = 0;
