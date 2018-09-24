@@ -126,6 +126,7 @@
     Bug #4633: Sneaking stance affects speed even if the actor is not able to crouch
     Bug #4641: GetPCJumping is handled incorrectly
     Bug #4644: %Name should be available for all actors, not just for NPCs
+    Bug #4649: Levelup fully restores health
     Feature #912: Editor: Add missing icons to UniversalId tables
     Feature #1617: Editor: Enchantment effect record verifier
     Feature #1645: Casting effects from objects
