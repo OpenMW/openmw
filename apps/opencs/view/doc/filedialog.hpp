@@ -42,6 +42,7 @@ namespace CSVDoc
         void showDialog (ContentAction action);
 
         void addFiles (const QString &path);
+        void setEncoding (const QString &encoding);
         void clearFiles ();
 
         QString filename() const;

@@ -80,6 +80,7 @@
     Bug #4460: Script function "Equip" doesn't bypass beast restrictions
     Bug #4461: "Open" spell from non-player caster isn't a crime
     Bug #4464: OpenMW keeps AiState cached storages even after we cancel AI packages
+    Bug #4467: Content selector: cyrillic characters are decoded incorrectly in plugin descriptions
     Bug #4469: Abot Silt Striders – Model turn 90 degrees on horizontal
     Bug #4470: Non-bipedal creatures with Weapon & Shield flag have inconsistent behaviour
     Bug #4474: No fallback when getVampireHead fails
