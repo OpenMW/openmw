@@ -33,8 +33,8 @@ public:
   int getVer() const { return mHeader.mData.version; }
   int getRecordCount() const { return mHeader.mData.records; }
   float getFVer() const { return (mHeader.mData.version == VER_12) ? 1.2f : 1.3f; }
-  const std::string getAuthor() const { return mHeader.mData.author.toString(); }
-  const std::string getDesc() const { return mHeader.mData.desc.toString(); }
+  const std::string getAuthor() const { return mHeader.mData.author; }
+  const std::string getDesc() const { return mHeader.mData.desc; }
   const std::vector<Header::MasterData> &getGameFiles() const { return mHeader.mMaster; }
   const Header& getHeader() const { return mHeader; }
   int getFormat() const;
