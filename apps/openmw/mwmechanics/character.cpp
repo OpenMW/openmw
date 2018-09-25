@@ -356,7 +356,7 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
     if (!force && jump == mJumpState && idle == CharState_None && movement == CharState_None)
         return;
 
-    if (jump != JumpState_None)
+    if (jump != JumpState_None && !(mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson())) // FIXME
     {
         idle = CharState_None;
         movement = CharState_None;
