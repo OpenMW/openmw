@@ -1,6 +1,7 @@
 0.45.0
 ------
 
+    Bug #1933: Actors can have few stocks of the same item
     Bug #1990: Sunrise/sunset not set correct
     Bug #2131: Lustidrike's spell misses the player every time
     Bug #2222: Fatigue's effect on selling price is backwards

@@ -241,7 +241,6 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
     }
 
     return ptr1 != ptr2 // an item never stacks onto itself
-        && ptr1.getCellRef().getOwner() == ptr2.getCellRef().getOwner()
         && ptr1.getCellRef().getSoul() == ptr2.getCellRef().getSoul()
 
         && ptr1.getClass().getRemainingUsageTime(ptr1) == ptr2.getClass().getRemainingUsageTime(ptr2)
