@@ -2297,7 +2297,7 @@ namespace MWWorld
         applyLoopingParticles(player);
     }
 
-    int World::canRest ()
+    World::RestPermitted World::canRest () const
     {
         CellStore *currentCell = mWorldScene->getCurrentCell();
 
@@ -2309,13 +2309,16 @@ namespace MWWorld
         if (!actor)
             throw std::runtime_error("can't find player");
 
+        if(mPlayer->enemiesNearby())
+            return Rest_EnemiesAreNearby;
+
         if ((actor->getCollisionMode() && !mPhysics->isOnSolidGround(player)) || isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
-            return 2;
+            return Rest_PlayerIsUnderwater;
 
         if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) || player.getClass().getNpcStats(player).isWerewolf())
-            return 1;
+            return Rest_OnlyWaiting;
 
-        return 0;
+        return Rest_Allowed;
     }
 
     MWRender::Animation* World::getAnimation(const MWWorld::Ptr &ptr)

@@ -551,7 +551,7 @@ namespace MWWorld
 
             void enableActorCollision(const MWWorld::Ptr& actor, bool enable) override;
 
-            int canRest() override;
+            RestPermitted canRest() const override;
             ///< check if the player is allowed to rest \n
             /// 0 - yes \n
             /// 1 - only waiting \n
