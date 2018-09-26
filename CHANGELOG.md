@@ -128,6 +128,7 @@
     Bug #4644: %Name should be available for all actors, not just for NPCs
     Bug #4648: Hud thinks that throwing weapons have condition
     Bug #4649: Levelup fully restores health
+    Bug #4654: Editor: UpdateVisitor does not initialize skeletons for animated objects
     Feature #912: Editor: Add missing icons to UniversalId tables
     Feature #1617: Editor: Enchantment effect record verifier
     Feature #1645: Casting effects from objects
