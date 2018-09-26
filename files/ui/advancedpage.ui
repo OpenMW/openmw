@@ -73,7 +73,7 @@
             </property>
             <property name="text">
              <string>Enchanted weapons are magical</string>
-             </property>
+            </property>
            </widget>
           </item>
           <item>
@@ -83,6 +83,16 @@
             </property>
             <property name="text">
              <string>Barter disposition change is permanent</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="classicReflectedAbsorbSpellsCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Effects of reflected Absorb spells are not mirrored -- like in Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Classic reflected Absorb spells behavior</string>
             </property>
            </widget>
           </item>

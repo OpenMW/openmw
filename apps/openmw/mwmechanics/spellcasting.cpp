@@ -582,7 +582,7 @@ namespace MWMechanics
                                     ActiveSpells::ActiveEffect effect_ = effect;
                                     effect_.mMagnitude *= -1;
                                     absorbEffects.push_back(effect_);
-                                    if (reflected && Settings::Manager::getBool("classic reflect absorb attribute behavior", "Game"))
+                                    if (reflected && Settings::Manager::getBool("classic reflected absorb spells behavior", "Game"))
                                         target.getClass().getCreatureStats(target).getActiveSpells().addSpell("", true,
                                             absorbEffects, mSourceName, caster.getClass().getCreatureStats(caster).getActorId());
                                     else

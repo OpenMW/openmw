@@ -16,7 +16,7 @@ If the setting is 2, the crosshair is the color of the color crosshair owned set
 If the setting is 3, both the tool tip background and the crosshair are colored.
 The crosshair is not visible if crosshair is false.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be configured in Advanced tab of the launcher.
 
 show projectile damage
 ----------------------
@@ -27,7 +27,7 @@ show projectile damage
 
 If this setting is true, the damage bonus of arrows and bolts will show on their tooltip.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be toggled in Advanced tab of the launcher.
 
 show melee info
 ---------------
@@ -38,7 +38,7 @@ show melee info
 
 If this setting is true, the reach and speed of weapons will show on their tooltip.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be toggled in Advanced tab of the launcher.
 
 show enchant chance
 -------------------
@@ -49,7 +49,7 @@ show enchant chance
 
 Whether or not the chance of success will be displayed in the enchanting menu.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be toggled in Advanced tab of the launcher.
 
 best attack
 -----------
@@ -73,13 +73,13 @@ can loot during death animation
 
 If this setting is true, the player is allowed to loot actors (e.g. summoned creatures) during death animation, if they are not in combat.
 However disposing corpses during death animation is not recommended - death counter may not be incremented, and this behaviour can break quests.
-This is how original Morrowind behaves.
+This is how Morrowind behaves.
 
 If this setting is false, player has to wait until end of death animation in all cases.
 This case is more safe, but makes using of summoned creatures exploit (looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder.
 Conflicts with mannequin mods, which use SkipAnim to prevent end of death animation.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be toggled in Advanced tab of the launcher.
 
 difficulty
 ----------
@@ -97,19 +97,19 @@ and values above 500 will result in the player inflicting no damage.
 
 This setting can be controlled in game with the Difficulty slider in the Prefs panel of the Options menu.
 
-classic reflect absorb attribute behavior
+classic reflected absorb spells behavior
 -----------------------------------------
 
 :Type:		boolean
 :Range: 	True/False
 :Default:	True
 
-If this setting is true, "Absorb Attribute" spells which were reflected by the target are not "mirrored",
-and the caster will absorb their own attribute resulting in no effect on both the caster and the target.
+If this setting is true, effects of Absorb spells which were reflected by the target are not mirrored,
+and the caster will absorb their own stat resulting in no effect on either the caster and the target.
 This makes the gameplay as a mage easier, but these spells become imbalanced.
-This is how the original Morrowind behaves.
+This is how Morrowind behaves.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be toggled in Advanced tab of the launcher.
 
 show effect duration
 --------------------
@@ -121,7 +121,7 @@ show effect duration
 Show the remaining duration of magic effects and lights if this setting is true.
 The remaining duration is displayed in the tooltip by hovering over the magical effect.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be toggled in Advanced tab of the launcher.
 
 enchanted weapons are magical
 -----------------------------
@@ -131,9 +131,9 @@ enchanted weapons are magical
 :Default:	True
 
 Make enchanted weapons without Magical flag bypass normal weapons resistance (and weakness) certain creatures have.
-This is how original Morrowind behaves.
+This is how Morrowind behaves.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be toggled in Advanced tab of the launcher.
 
 prevent merchant equipping
 --------------------------
@@ -144,7 +144,7 @@ prevent merchant equipping
 
 Prevent merchants from equipping items that are sold to them.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be toggled in Advanced tab of the launcher.
 
 followers attack on sight
 -------------------------
@@ -157,7 +157,7 @@ Make player followers and escorters start combat with enemies who have started c
 Otherwise they wait for the enemies or the player to do an attack first.
 Please note this setting has not been extensively tested and could have side effects with certain quests.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be toggled in Advanced tab of the launcher.
 
 use additional anim sources
 ---------------------------
@@ -182,4 +182,4 @@ barter disposition change is permanent
 If this setting is true, disposition change of merchants caused by trading will be permanent and won't be discarded upon exiting dialogue with them.
 This imitates the option Morrowind Code Patch offers.
 
-This setting can be toggled with a checkbox in Advanced tab of the launcher.
+This setting can be toggled in Advanced tab of the launcher.
