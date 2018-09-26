@@ -22,6 +22,8 @@
 
 #include <components/nifosg/nifloader.hpp> // TextKeyMapHolder
 
+#include <components/vfs/manager.hpp>
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
@@ -451,6 +453,30 @@ void NpcAnimation::updateNpcBase()
         }
     }
 
+    if(mNpc->mModel.length() > 0)
+    {
+        // An another quirk from vanilla engine:
+        // if a custom animation model is attached to NPC, but it does not have its own KF file,
+        // load animations from NIF file itself, and do not load basic animations.
+        // Some mods use this "feature" (to make mannequins, for example).
+        const std::string originalModel = "meshes\\" + mNpc->mModel;
+        const std::string animatedModel = Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS());
+        std::string kfname = animatedModel;
+        if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
+            kfname.replace(kfname.size()-4, 4, ".kf");
+        else
+            kfname = "";
+
+        if (!kfname.empty() && !mResourceSystem->getVFS()->exists(kfname))
+        {
+            setObjectRoot(originalModel, true, true, false);
+            addAnimSource(originalModel, originalModel, false);
+            updateParts();
+            mWeaponAnimationTime->updateStartTime();
+            return;
+        }
+    }
+
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
 
     std::string smodel;
@@ -491,10 +517,10 @@ void NpcAnimation::updateNpcBase()
 
         if(!isWerewolf)
         {
-            if(mNpc->mModel.length() > 0)
-                addAnimSource(Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS()), smodel);
             if(Misc::StringUtils::lowerCase(mNpc->mRace).find("argonian") != std::string::npos)
                 addAnimSource("meshes\\xargonian_swimkna.nif", smodel);
+            if(mNpc->mModel.length() > 0)
+                addAnimSource(Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS()), smodel);
         }
     }
     else

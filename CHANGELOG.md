@@ -106,6 +106,7 @@
     Bug #4558: Mesh optimizer: check for reserved node name is case-sensitive
     Bug #4560: OpenMW does not update pinned windows properly
     Bug #4563: Fast travel price logic checks destination cell instead of service actor cell
+    Bug #4564: OpenMW does not load animations from custom NIF files attached to NPC
     Bug #4565: Underwater view distance should be limited
     Bug #4573: Player uses headtracking in the 1st-person mode
     Bug #4574: Player turning animations are twitchy

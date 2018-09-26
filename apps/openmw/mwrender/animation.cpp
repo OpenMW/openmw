@@ -725,30 +725,33 @@ namespace MWRender
         }
     }
 
-    void Animation::addAnimSource(const std::string &model, const std::string& baseModel)
+    void Animation::addAnimSource(const std::string &model, const std::string& baseModel, bool useKfFile)
     {
         std::string kfname = model;
         Misc::StringUtils::lowerCaseInPlace(kfname);
 
-        if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
-            kfname.replace(kfname.size()-4, 4, ".kf");
-        else
-            return;
+        if (useKfFile)
+        {
+            if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
+                kfname.replace(kfname.size()-4, 4, ".kf");
+            else
+                return;
+        }
 
-        addSingleAnimSource(kfname, baseModel);
+        addSingleAnimSource(kfname, baseModel, useKfFile);
 
         if (mUseAdditionalSources)
             loadAllAnimationsInFolder(kfname, baseModel);
     }
 
-    void Animation::addSingleAnimSource(const std::string &kfname, const std::string& baseModel)
+    void Animation::addSingleAnimSource(const std::string &kfname, const std::string& baseModel, bool useKfFile)
     {
         if(!mResourceSystem->getVFS()->exists(kfname))
             return;
 
         std::shared_ptr<AnimSource> animsrc;
         animsrc.reset(new AnimSource);
-        animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(kfname);
+        animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(kfname, useKfFile);
 
         if (!animsrc->mKeyframes || animsrc->mKeyframes->mTextKeys.empty() || animsrc->mKeyframes->mKeyframeControllers.empty())
             return;
