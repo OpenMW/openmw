@@ -2,6 +2,7 @@
 #define CSM_WOLRD_ACTORADAPTER_H
 
 #include <array>
+#include <map>
 #include <unordered_set>
 
 #include <QObject>
@@ -31,7 +32,7 @@ namespace CSMWorld
     public:
 
         /// A list indexed by ESM::PartReferenceType
-        using ActorPartList = std::array<std::string, ESM::PRT_Count>;
+        using ActorPartList = std::map<ESM::PartReferenceType, std::pair<std::string, int>>;
         /// A list indexed by ESM::BodyPart::MeshPart
         using RacePartList = std::array<std::string, ESM::BodyPart::MP_Count>;
         /// Tracks unique strings
@@ -93,7 +94,7 @@ namespace CSMWorld
             bool hasDependency(const std::string& id) const;
 
             /// Sets the actor part used and marks a dependency
-            void setPart(ESM::PartReferenceType partIndex, const std::string& partId);
+            void setPart(ESM::PartReferenceType partIndex, const std::string& partId, int priority);
             /// Marks an additional dependency for the actor
             void addOtherDependency(const std::string& id);
             /// Clears race, parts, and dependencies

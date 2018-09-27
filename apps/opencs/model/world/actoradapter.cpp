@@ -112,7 +112,8 @@ namespace CSMWorld
 
     const std::string ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
     {
-        if (mParts[index].empty() && mRaceData && mRaceData->handlesPart(index))
+        auto it = mParts.find(index);
+        if (it == mParts.end() && mRaceData && mRaceData->handlesPart(index))
         {
             if (mFemale)
             {
@@ -124,7 +125,9 @@ namespace CSMWorld
 
             return mRaceData->getMalePart(index);
         }
-        return mParts[index];
+
+        const std::string& partName = it->second.first;
+        return partName;
     }
 
     bool ActorAdapter::ActorData::hasDependency(const std::string& id) const
@@ -132,9 +135,16 @@ namespace CSMWorld
         return mDependencies.find(id) != mDependencies.end();
     }
 
-    void ActorAdapter::ActorData::setPart(ESM::PartReferenceType index, const std::string& partId)
+    void ActorAdapter::ActorData::setPart(ESM::PartReferenceType index, const std::string& partId, int priority)
     {
-        mParts[index] = partId;
+        auto it = mParts.find(index);
+        if (it != mParts.end())
+        {
+            if (it->second.second >= priority)
+                return;
+        }
+
+        mParts[index] = std::make_pair(partId, priority);
         addOtherDependency(partId);
     }
 
@@ -150,8 +160,7 @@ namespace CSMWorld
         mFemale = isFemale;
         mSkeletonOverride = skeleton;
         mRaceData = raceData;
-        for (auto& str : mParts)
-            str.clear();
+        mParts.clear();
         mDependencies.clear();
 
         // Mark self and race as a dependency
@@ -514,8 +523,8 @@ namespace CSMWorld
         }
 
         // Add head and hair
-        data->setPart(ESM::PRT_Head, npc.mHead);
-        data->setPart(ESM::PRT_Hair, npc.mHair);
+        data->setPart(ESM::PRT_Head, npc.mHead, 0);
+        data->setPart(ESM::PRT_Hair, npc.mHair, 0);
     }
 
     void ActorAdapter::addNpcItem(const std::string& itemId, ActorDataPtr data)
@@ -537,8 +546,8 @@ namespace CSMWorld
         }
 
         // Convenience function to add a parts list to actor data
-        auto addParts = [&](const ESM::PartReferenceList& list) {
-            for (auto& part : list.mParts)
+        auto addParts = [&](const std::vector<ESM::PartReference>& list, int priority) {
+            for (auto& part : list)
             {
                 std::string partId;
                 auto partType = (ESM::PartReferenceType) part.mPart;
@@ -548,7 +557,7 @@ namespace CSMWorld
                 if (partId.empty())
                     partId = part.mMale;
 
-                if (!partId.empty()) data->setPart(partType, partId);
+                data->setPart(partType, partId, priority);
             }
         };
 
@@ -557,15 +566,63 @@ namespace CSMWorld
         if (type == UniversalId::Type_Armor)
         {
             auto& armor = dynamic_cast<const Record<ESM::Armor>&>(record).get();
-            addParts(armor.mParts);
+            addParts(armor.mParts.mParts, 1);
 
             // Changing parts could affect what is picked for rendering
             data->addOtherDependency(itemId);
         }
         else if (type == UniversalId::Type_Clothing)
         {
+            int priority = 0;
+            // TODO: reserve bodyparts for robes and skirts
             auto& clothing = dynamic_cast<const Record<ESM::Clothing>&>(record).get();
-            addParts(clothing.mParts);
+
+            if (clothing.mData.mType == ESM::Clothing::Robe)
+            {
+                auto reservedList = std::vector<ESM::PartReference>();
+
+                ESM::PartReference pr;
+                pr.mMale = "";
+                pr.mFemale = "";
+
+                ESM::PartReferenceType parts[] = {
+                    ESM::PRT_Groin, ESM::PRT_Skirt, ESM::PRT_RLeg, ESM::PRT_LLeg,
+                    ESM::PRT_RUpperarm, ESM::PRT_LUpperarm, ESM::PRT_RKnee, ESM::PRT_LKnee,
+                    ESM::PRT_RForearm, ESM::PRT_LForearm
+                };
+                size_t parts_size = sizeof(parts)/sizeof(parts[0]);
+                for(size_t p = 0;p < parts_size;++p)
+                {
+                    pr.mPart = parts[p];
+                    reservedList.push_back(pr);
+                }
+
+                priority = parts_size;
+                addParts(reservedList, priority);
+            }
+            else if (clothing.mData.mType == ESM::Clothing::Skirt)
+            {
+                auto reservedList = std::vector<ESM::PartReference>();
+
+                ESM::PartReference pr;
+                pr.mMale = "";
+                pr.mFemale = "";
+
+                ESM::PartReferenceType parts[] = {
+                    ESM::PRT_Groin, ESM::PRT_RLeg, ESM::PRT_LLeg
+                };
+                size_t parts_size = sizeof(parts)/sizeof(parts[0]);
+                for(size_t p = 0;p < parts_size;++p)
+                {
+                    pr.mPart = parts[p];
+                    reservedList.push_back(pr);
+                }
+
+                priority = parts_size;
+                addParts(reservedList, priority);
+            }
+
+            addParts(clothing.mParts.mParts, priority);
 
             // Changing parts could affect what is picked for rendering
             data->addOtherDependency(itemId);
