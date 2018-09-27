@@ -108,8 +108,9 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     mCfgMgr.readConfiguration(variables, desc, quiet);
 
-    mDocumentManager.setEncoding (
-        ToUTF8::calculateEncoding (variables["encoding"].as<Files::EscapeHashString>().toStdString()));
+    const std::string encoding = variables["encoding"].as<Files::EscapeHashString>().toStdString();
+    mDocumentManager.setEncoding (ToUTF8::calculateEncoding (encoding));
+    mFileDialog.setEncoding (QString::fromUtf8(encoding.c_str()));
 
     mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::EscapeHashString>().toStdString());
 

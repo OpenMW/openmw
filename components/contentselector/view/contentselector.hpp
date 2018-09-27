@@ -32,6 +32,7 @@ namespace ContentSelectorView
         void setProfileContent (const QStringList &fileList);
 
         void clearCheckStates();
+        void setEncoding (const QString &encoding);
         void setContentList(const QStringList &list);
 
         ContentSelectorModel::ContentFileList selectedFiles() const;

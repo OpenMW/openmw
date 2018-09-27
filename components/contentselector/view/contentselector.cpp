@@ -111,6 +111,11 @@ void ContentSelectorView::ContentSelector::clearCheckStates()
     mContentModel->uncheckAll();
 }
 
+void ContentSelectorView::ContentSelector::setEncoding(const QString &encoding)
+{
+    mContentModel->setEncoding(encoding);
+}
+
 void ContentSelectorView::ContentSelector::setContentList(const QStringList &list)
 {
     if (list.isEmpty())

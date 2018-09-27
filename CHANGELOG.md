@@ -80,6 +80,7 @@
     Bug #4460: Script function "Equip" doesn't bypass beast restrictions
     Bug #4461: "Open" spell from non-player caster isn't a crime
     Bug #4464: OpenMW keeps AiState cached storages even after we cancel AI packages
+    Bug #4467: Content selector: cyrillic characters are decoded incorrectly in plugin descriptions
     Bug #4469: Abot Silt Striders – Model turn 90 degrees on horizontal
     Bug #4470: Non-bipedal creatures with Weapon & Shield flag have inconsistent behaviour
     Bug #4474: No fallback when getVampireHead fails
@@ -128,6 +129,7 @@
     Bug #4644: %Name should be available for all actors, not just for NPCs
     Bug #4648: Hud thinks that throwing weapons have condition
     Bug #4649: Levelup fully restores health
+    Bug #4653: Length of non-ASCII strings is handled incorrectly in ESM reader
     Bug #4654: Editor: UpdateVisitor does not initialize skeletons for animated objects
     Feature #912: Editor: Add missing icons to UniversalId tables
     Feature #1617: Editor: Enchantment effect record verifier

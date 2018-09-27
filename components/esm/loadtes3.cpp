@@ -32,8 +32,8 @@ void ESM::Header::load (ESMReader &esm)
       esm.getSubHeader();
       esm.getT(mData.version);
       esm.getT(mData.type);
-      mData.author.assign( esm.getString(mData.author.data_size()) );
-      mData.desc.assign( esm.getString(mData.desc.data_size()) );
+      mData.author.assign( esm.getString(32) );
+      mData.desc.assign( esm.getString(256) );
       esm.getT(mData.records);
     }
 
@@ -73,8 +73,8 @@ void ESM::Header::save (ESMWriter &esm)
     esm.startSubRecord("HEDR");
     esm.writeT(mData.version);
     esm.writeT(mData.type);
-    esm.writeFixedSizeString(mData.author.toString(), mData.author.data_size());
-    esm.writeFixedSizeString(mData.desc.toString(), mData.desc.data_size());
+    esm.writeFixedSizeString(mData.author, 32);
+    esm.writeFixedSizeString(mData.desc, 256);
     esm.writeT(mData.records);
     esm.endRecord("HEDR");
 

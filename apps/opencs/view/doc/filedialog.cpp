@@ -33,6 +33,11 @@ void CSVDoc::FileDialog::addFiles(const QString &path)
     mSelector->addFiles(path);
 }
 
+void CSVDoc::FileDialog::setEncoding(const QString &encoding)
+{
+    mSelector->setEncoding(encoding);
+}
+
 void CSVDoc::FileDialog::clearFiles()
 {
     mSelector->clearFiles();
