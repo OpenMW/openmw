@@ -110,11 +110,19 @@ namespace CSMWorld
         return SceneUtil::getActorSkeleton(firstPerson, mFemale, beast, werewolf);
     }
 
-    const std::string& ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
+    const std::string ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
     {
         if (mParts[index].empty() && mRaceData && mRaceData->handlesPart(index))
         {
-            return mFemale ? mRaceData->getFemalePart(index) : mRaceData->getMalePart(index);
+            if (mFemale)
+            {
+                // Note: we should use male parts for females as fallback
+                const std::string femalePart = mRaceData->getFemalePart(index);
+                if (!femalePart.empty())
+                    return femalePart;
+            }
+
+            return mRaceData->getMalePart(index);
         }
         return mParts[index];
     }
