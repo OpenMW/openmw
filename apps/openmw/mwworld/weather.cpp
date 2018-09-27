@@ -751,14 +751,14 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
 
     float underwaterFog = mUnderwaterFog.getValue(time.getHour(), mTimeSettings, "Fog");
 
-    float peakHour = mSunriseTime + (mSunsetTime - mSunriseTime) / 2;
+    float peakHour = mSunriseTime + (mTimeSettings.mNightStart - mSunriseTime) / 2;
     float glareFade = 1.f;
-    if (time.getHour() < mSunriseTime || time.getHour() > mSunsetTime)
+    if (time.getHour() < mSunriseTime || time.getHour() > mTimeSettings.mNightStart)
         glareFade = 0.f;
     else if (time.getHour() < peakHour)
-        glareFade -= (peakHour - time.getHour()) / (peakHour - mSunriseTime);
+        glareFade = 1.f - (peakHour - time.getHour()) / (peakHour - mSunriseTime);
     else
-        glareFade -= (time.getHour() - peakHour) / (mSunsetTime - peakHour);
+        glareFade = 1.f - (time.getHour() - peakHour) / (mTimeSettings.mNightStart - peakHour);
 
     mRendering.getSkyManager()->setGlareTimeOfDayFade(glareFade);
 
