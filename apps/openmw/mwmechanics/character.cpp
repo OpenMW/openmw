@@ -351,64 +351,69 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
         idle = CharState_None;
 }
 
-void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState jump, CharacterState& idle, bool force)
+void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState jump, CharacterState& idle, CharacterState& movement, bool force)
 {
-    if(force || jump != mJumpState)
+    if (!force && jump == mJumpState && idle == CharState_None && movement == CharState_None)
+        return;
+
+    if (jump != JumpState_None && !(mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson())) // FIXME
     {
-        if (jump != JumpState_None)
-            idle = CharState_None;
+        idle = CharState_None;
+        movement = CharState_None;
+    }
 
-        bool startAtLoop = (jump == mJumpState);
-        mJumpState = jump;
-
-        std::string jumpAnimName;
-        MWRender::Animation::BlendMask jumpmask = MWRender::Animation::BlendMask_All;
-        if(mJumpState != JumpState_None)
+    std::string jumpAnimName;
+    MWRender::Animation::BlendMask jumpmask = MWRender::Animation::BlendMask_All;
+    if (jump != JumpState_None)
+    {
+        jumpAnimName = "jump";
+        if(weap != sWeaponTypeListEnd)
         {
-            jumpAnimName = "jump";
-            if(weap != sWeaponTypeListEnd)
+            jumpAnimName += weap->shortgroup;
+            if(!mAnimation->hasAnimation(jumpAnimName))
             {
-                jumpAnimName += weap->shortgroup;
-                if(!mAnimation->hasAnimation(jumpAnimName))
-                {
-                    jumpmask = MWRender::Animation::BlendMask_LowerBody;
-                    jumpAnimName = "jump";
+                jumpmask = MWRender::Animation::BlendMask_LowerBody;
+                jumpAnimName = "jump";
 
-                    // Since we apply movement only for lower body, do not reset idle animations.
-                    // For upper body there will be idle animation.
-                    if (idle == CharState_None)
-                        idle = CharState_Idle;
+                // Since we apply movement only for lower body, do not reset idle animations.
+                // For upper body there will be idle animation.
+                if (idle == CharState_None)
+                    idle = CharState_Idle;
 
-                    // For crossbow animations use 1h ones as fallback
-                    if (mWeaponType == WeapType_Crossbow)
-                        jumpAnimName += "1h";
-                }
+                // For crossbow animations use 1h ones as fallback
+                if (mWeaponType == WeapType_Crossbow)
+                    jumpAnimName += "1h";
             }
         }
+    }
 
-        if (!mCurrentJump.empty())
-        {
-            mAnimation->disable(mCurrentJump);
-            mCurrentJump.clear();
-        }
+    if (!force && jump == mJumpState)
+        return;
 
-        if(mJumpState == JumpState_InAir)
+    mJumpState = jump;
+
+    if (!mCurrentJump.empty())
+    {
+        mAnimation->disable(mCurrentJump);
+        mCurrentJump.clear();
+    }
+
+    if(mJumpState == JumpState_InAir)
+    {
+        if (mAnimation->hasAnimation(jumpAnimName))
         {
-            if (mAnimation->hasAnimation(jumpAnimName))
-            {
-                mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, false,
-                             1.0f, (startAtLoop?"loop start":"start"), "stop", 0.0f, ~0ul);
-                mCurrentJump = jumpAnimName;
-            }
+            mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, false,
+                         1.0f, "start", "stop", 0.f, ~0ul);
+            mCurrentJump = jumpAnimName;
         }
-        else if (mJumpState == JumpState_Landing)
+    }
+    else if (mJumpState == JumpState_Landing)
+    {
+        if (mAnimation->hasAnimation(jumpAnimName))
         {
-             if (mAnimation->hasAnimation(jumpAnimName))
-             {
-                mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, true,
-                             1.0f, "loop stop", "stop", 0.0f, 0);
-                mCurrentJump = jumpAnimName;
-            }
+            mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, true,
+                         1.0f, "loop stop", "stop", 0.0f, 0);
+            mCurrentJump = jumpAnimName;
         }
     }
 }
@@ -494,10 +499,9 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
         }
 
         // If we're playing the same animation, start it from the point it ended
-        bool sameAnim = (movementAnimName == mCurrentMovement);
-        float startPoint = 0.f;
-        if (sameAnim)
-            mAnimation->getInfo(mCurrentMovement, &startPoint);
+        float startpoint = 0.f;
+        if (!mCurrentMovement.empty() && movementAnimName == mCurrentMovement)
+            mAnimation->getInfo(mCurrentMovement, &startpoint);
 
         mMovementAnimationControlled = true;
 
@@ -546,7 +550,7 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
             }
 
             mAnimation->play(mCurrentMovement, Priority_Movement, movemask, false,
-                             1.f, (!sameAnim ? "start" : "loop start"), "stop", startPoint, ~0ul, true);
+                             1.f, "start", "stop", startpoint, ~0ul, true);
         }
     }
 }
@@ -626,7 +630,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     if (!mPtr.getClass().hasInventoryStore(mPtr))
         weap = sWeaponTypeListEnd;
 
-    refreshJumpAnims(weap, jump, idle, force);
+    refreshJumpAnims(weap, jump, idle, movement, force);
     refreshMovementAnims(weap, movement, idle, force);
 
     // idle handled last as it can depend on the other states
@@ -2164,12 +2168,12 @@ void CharacterController::update(float duration)
         if(mAnimQueue.empty() || inwater || sneak)
         {
             // Note: turning animations should not interrupt idle ones
-            if (inwater)
+            if (movestate != CharState_None && !isTurning())
+                idlestate = CharState_None;
+            else if (inwater)
                 idlestate = CharState_IdleSwim;
             else if (sneak && !inJump)
                 idlestate = CharState_IdleSneak;
-            else if (movestate != CharState_None && !isTurning())
-                idlestate = CharState_None;
             else
                 idlestate = CharState_Idle;
         }
