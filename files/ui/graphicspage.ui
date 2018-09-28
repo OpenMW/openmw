@@ -33,12 +33,6 @@
       </item>
       <item row="2" column="0">
        <widget class="QCheckBox" name="windowBorderCheckBox">
-        <property name="minimumSize">
-         <size>
-          <width>197</width>
-          <height>0</height>
-         </size>
-        </property>
         <property name="text">
          <string>Window border</string>
         </property>
