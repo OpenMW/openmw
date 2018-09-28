@@ -173,21 +173,20 @@ void Launcher::GraphicsPage::saveSettings()
     if (cScreen != mEngineSettings.getInt("screen", "Video"))
         mEngineSettings.setInt("screen", "Video", cScreen);
 	
-	bool cDistantTerrain = distantTerrainCheckBox->checkState();
+	bool cDistantTerrain = distantTerrainCheckBox->valueCall();
 	if (cDistantTerrain != mEngineSettings.getBool("distant terrain", "Terrain"))
 		mEngineSettings.setBool("distant terrain", "Terrain", cDistantTerrain);
-	int cellLoadComboBox->currentText().toInt();
-	if (cLoad != mEngine.getInt("exterior cell load distance", "Cells"))
-		mEngineSettings.setInt("exterior cell load distance", "Cells", cLoad);
-	float cViewingDistance = viewingDistanceSpinBox->checkState();
+	float cViewingDistance = viewingDistanceSpinBox->valueCall();
 	if (cViewingDistance != mEngineSettings.getFloat("viewing distance", "Camera"))
 		mEngineSettings.setFloat("viewing distance", "Camera", cViewingDistance);
+    float viewingDistanceSpinBox->currentText().toFloat();
 	bool cSmallFeatureCulling = smallFeatureCullingCheckBox->checkState();
 	if (cSmallFeatureCulling != mEngineSettings.getBool("small feature culling", "Camera"))
 		mEngineSettings.setBool("small feature culling", "Camera", cSmallFeatureCulling);
-	float cSmallFeatureCullingPixelSize = smallFeatureCullingPixelSizeCheckBox->checkState();
-	if (cSmallFeatureCullingPixelSize != mEngineSettings.getBool("small feature culling pixel size", "Camera"))
+	float cSmallFeatureCullingPixelSize = smallFeatureCullingPixelSizeSpinBox->valueCall();
+	if (cSmallFeatureCullingPixelSize != mEngineSettings.getFloat("small feature culling pixel size", "Camera"))
 		mEngineSettings.setFloat("small feature culling pixel size", "Camera", cSmallFeatureCullingPixelSize);
+    float smallFeatureCullingPixelSizeSpinBox->currentText().toFloat();
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
