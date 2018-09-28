@@ -176,6 +176,7 @@ void Launcher::GraphicsPage::saveSettings()
 	bool cDistantTerrain = distantTerrainCheckBox->checkState();
 	if (cDistantTerrain != mEngineSettings.getBool("distant terrain", "Terrain"))
 		mEngineSettings.setBool("distant terrain", "Terrain", cDistantTerrain);
+	int cellLoadComboBox->currentText().toInt();
 	if (cLoad != mEngine.getInt("exterior cell load distance", "Cells"))
 		mEngineSettings.setInt("exterior cell load distance", "Cells", cLoad);
 	float cViewingDistance = viewingDistanceSpinBox->checkState();
@@ -184,6 +185,9 @@ void Launcher::GraphicsPage::saveSettings()
 	bool cSmallFeatureCulling = smallFeatureCullingCheckBox->checkState();
 	if (cSmallFeatureCulling != mEngineSettings.getBool("small feature culling", "Camera"))
 		mEngineSettings.setBool("small feature culling", "Camera", cSmallFeatureCulling);
+	float cSmallFeatureCullingPixelSize = smallFeatureCullingPixelSizeCheckBox->checkState();
+	if (cSmallFeatureCullingPixelSize != mEngineSettings.getBool("small feature culling pixel size", "Camera"))
+		mEngineSettings.setFloat("small feature culling pixel size", "Camera", cSmallFeatureCullingPixelSize);
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)

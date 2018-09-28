@@ -147,6 +147,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="displayGroup">
+     <property name="title">
+      <string>Display</string>
+     </property>
+	</widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -160,12 +167,6 @@
     </spacer>
    </item>
   </layout>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QGroupBox" name="distantTerrainGroup">
-	 <property name="title">
-	  <string>Distant Terrain</string>
-	 </property>
  </widget>
  <resources/>
  <connections/>
