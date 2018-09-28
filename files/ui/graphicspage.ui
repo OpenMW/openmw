@@ -159,22 +159,8 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="cellLoadLabel">
-        <property name="text">
-         <string>Exterior Cell Load Distance</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QSpinBox" name="cellLoadComboBox">
-        <property name="minimum">
-         <number>1</number>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="cellLoadLabel">
+       <widget class="QLabel" name="viewingDistanceLabel">
         <property name="text">
          <string>Viewing Distance</string>
         </property>
