@@ -160,6 +160,12 @@
     </spacer>
    </item>
   </layout>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="distantTerrainGroup">
+	 <property name="title">
+	  <string>Distant Terrain</string>
+	 </property>
  </widget>
  <resources/>
  <connections/>

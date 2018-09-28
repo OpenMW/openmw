@@ -97,6 +97,11 @@ bool Launcher::GraphicsPage::loadSettings()
 
     if (mEngineSettings.getBool("window border", "Video"))
         windowBorderCheckBox->setCheckState(Qt::Checked);
+	
+	if (mEngineSettings.getBool("distant terrain", "Terrain"))
+		distantTerrainCheckBox->setCheckState(Qt::Checked);
+	
+	
 
     // aaValue is the actual value (0, 1, 2, 4, 8, 16)
     int aaValue = mEngineSettings.getInt("antialiasing", "Video");
@@ -109,6 +114,7 @@ bool Launcher::GraphicsPage::loadSettings()
     int height = mEngineSettings.getInt("resolution y", "Video");
     QString resolution = QString::number(width) + QString(" x ") + QString::number(height);
     screenComboBox->setCurrentIndex(mEngineSettings.getInt("screen", "Video"));
+	
 
     int resIndex = resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
 
@@ -166,12 +172,18 @@ void Launcher::GraphicsPage::saveSettings()
     int cScreen = screenComboBox->currentIndex();
     if (cScreen != mEngineSettings.getInt("screen", "Video"))
         mEngineSettings.setInt("screen", "Video", cScreen);
+	
 	bool cDistantTerrain = distantTerrainCheckBox->checkState();
 	if (cDistantTerrain != mEngineSettings.getBool("distant terrain", "Terrain"))
 		mEngineSettings.setBool("distant terrain", "Terrain", cDistantTerrain);
-	int cLoad = 1;
-	if (cWidth != mEngine.getInt("exterior cell load distance", "Cells"))
+	if (cLoad != mEngine.getInt("exterior cell load distance", "Cells"))
 		mEngineSettings.setInt("exterior cell load distance", "Cells", cLoad);
+	float cViewingDistance = viewingDistanceSpinBox->checkState();
+	if (cViewingDistance != mEngineSettings.getFloat("viewing distance", "Camera"))
+		mEngineSettings.setFloat("viewing distance", "Camera", cViewingDistance);
+	bool cSmallFeatureCulling = smallFeatureCullingCheckBox->checkState();
+	if (cSmallFeatureCulling != mEngineSettings.getBool("small feature culling", "Camera"))
+		mEngineSettings.setBool("small feature culling", "Camera", cSmallFeatureCulling);
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
