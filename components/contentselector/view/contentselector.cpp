@@ -7,6 +7,7 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 
+#include <QClipboard>
 #include <QGridLayout>
 #include <QMessageBox>
 #include <QModelIndex>
@@ -67,6 +68,7 @@ void ContentSelectorView::ContentSelector::buildContextMenu()
     mContextMenu = new QMenu(ui.addonView);
     mContextMenu->addAction(tr("&Check Selected"), this, SLOT(slotCheckMultiSelectedItems()));
     mContextMenu->addAction(tr("&Uncheck Selected"), this, SLOT(slotUncheckMultiSelectedItems()));
+    mContextMenu->addAction(tr("&Copy Path(s) to Clipboard"), this, SLOT(slotCopySelectedItemsPaths()));
 }
 
 void ContentSelectorView::ContentSelector::setProfileContent(const QStringList &fileList)
@@ -244,4 +246,21 @@ void ContentSelectorView::ContentSelector::slotUncheckMultiSelectedItems()
 void ContentSelectorView::ContentSelector::slotCheckMultiSelectedItems()
 {
     setCheckStateForMultiSelectedItems(true);
+}
+
+void ContentSelectorView::ContentSelector::slotCopySelectedItemsPaths()
+{
+    QClipboard *clipboard = QApplication::clipboard();
+    QString filepaths;
+    foreach (const QModelIndex& index, ui.addonView->selectionModel()->selectedIndexes())
+    {
+        int row = mAddonProxyModel->mapToSource(index).row();
+        const ContentSelectorModel::EsmFile *file = mContentModel->item(row);
+        filepaths += file->filePath() + "\n";
+    }
+
+    if (!filepaths.isEmpty())
+    {
+        clipboard->setText(filepaths);
+    }
 }

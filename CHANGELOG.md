@@ -135,6 +135,7 @@
     Feature #1617: Editor: Enchantment effect record verifier
     Feature #1645: Casting effects from objects
     Feature #2606: Editor: Implemented (optional) case sensitive global search
+    Feature #2847: Content selector: allow to copy the path to a file by using the context menu
     Feature #3083: Play animation when NPC is casting spell via script
     Feature #3103: Provide option for disposition to get increased by successful trade
     Feature #3276: Editor: Search - Show number of (remaining) search results and indicate a search without any results
