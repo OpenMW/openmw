@@ -86,7 +86,7 @@ add_component_dir (esmterrain
     )
 
 add_component_dir (misc
-    constants utf8stream stringops resourcehelpers rng messageformatparser
+    constants utf8stream stringops resourcehelpers rng messageformatparser weakcache
     )
 
 add_component_dir (debug
@@ -148,10 +148,6 @@ add_component_dir (version
 
 add_component_dir (fallback
     fallback validate
-    )
-
-add_component_dir(cache
-    weakcache
     )
 
 if(NOT WIN32 AND NOT ANDROID)

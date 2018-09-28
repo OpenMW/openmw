@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace cache
+namespace Misc
 {
     /// \class WeakCache
     /// Provides a container to weakly store pointers to shared data.

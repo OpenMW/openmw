@@ -8,9 +8,9 @@
 #include <QObject>
 #include <QModelIndex>
 
-#include <components/cache/weakcache.hpp>
 #include <components/esm/loadarmo.hpp>
 #include <components/esm/loadbody.hpp>
+#include <components/misc/weakcache.hpp>
 
 #include "refidcollection.hpp"
 #include "idcollection.hpp"
@@ -163,8 +163,8 @@ namespace CSMWorld
         IdCollection<ESM::Race>& mRaces;
         IdCollection<ESM::BodyPart>& mBodyParts;
 
-        cache::WeakCache<std::string, ActorData> mCachedActors; // Key: referenceable id
-        cache::WeakCache<std::string, RaceData> mCachedRaces; // Key: race id
+        Misc::WeakCache<std::string, ActorData> mCachedActors; // Key: referenceable id
+        Misc::WeakCache<std::string, RaceData> mCachedRaces; // Key: race id
 
         StringSet mDirtyActors; // Actors that need updating
         StringSet mDirtyRaces; // Races that need updating
