@@ -166,6 +166,12 @@ void Launcher::GraphicsPage::saveSettings()
     int cScreen = screenComboBox->currentIndex();
     if (cScreen != mEngineSettings.getInt("screen", "Video"))
         mEngineSettings.setInt("screen", "Video", cScreen);
+	bool cDistantTerrain = distantTerrainCheckBox->checkState();
+	if (cDistantTerrain != mEngineSettings.getBool("distant terrain", "Terrain"))
+		mEngineSettings.setBool("distant terrain", "Terrain", cDistantTerrain);
+	int cLoad = 1;
+	if (cWidth != mEngine.getInt("exterior cell load distance", "Cells"))
+		mEngineSettings.setInt("exterior cell load distance", "Cells", cLoad);
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
