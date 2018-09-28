@@ -213,14 +213,12 @@ namespace
         RemoveFinishedCallbackVisitor()
             : RemoveVisitor()
             , mHasMagicEffects(false)
-            , mEffectId(-1)
         {
         }
 
         RemoveFinishedCallbackVisitor(int effectId)
             : RemoveVisitor()
             , mHasMagicEffects(false)
-            , mEffectId(effectId)
         {
         }
 
@@ -240,9 +238,63 @@ namespace
                 MWRender::UpdateVfxCallback* vfxCallback = dynamic_cast<MWRender::UpdateVfxCallback*>(callback);
                 if (vfxCallback)
                 {
-                    bool finished = vfxCallback->mFinished;
-                    bool toRemove = mEffectId >= 0 && vfxCallback->mParams.mEffectId == mEffectId;
-                    if (finished || toRemove)
+                    if (vfxCallback->mFinished)
+                        mToRemove.push_back(std::make_pair(group.asNode(), group.getParent(0)));
+                    else
+                        mHasMagicEffects = true;
+                }
+            }
+        }
+
+        virtual void apply(osg::MatrixTransform &node)
+        {
+            traverse(node);
+        }
+
+        virtual void apply(osg::Geometry&)
+        {
+        }
+
+    private:
+        int mEffectId;
+    };
+
+    class RemoveCallbackVisitor : public RemoveVisitor
+    {
+    public:
+        bool mHasMagicEffects;
+
+        RemoveCallbackVisitor()
+            : RemoveVisitor()
+            , mHasMagicEffects(false)
+            , mEffectId(-1)
+        {
+        }
+
+        RemoveCallbackVisitor(int effectId)
+            : RemoveVisitor()
+            , mHasMagicEffects(false)
+            , mEffectId(effectId)
+        {
+        }
+
+        virtual void apply(osg::Node &node)
+        {
+            traverse(node);
+        }
+
+        virtual void apply(osg::Group &group)
+        {
+            traverse(group);
+
+            osg::Callback* callback = group.getUpdateCallback();
+            if (callback)
+            {
+                MWRender::UpdateVfxCallback* vfxCallback = dynamic_cast<MWRender::UpdateVfxCallback*>(callback);
+                if (vfxCallback)
+                {
+                    bool toRemove = mEffectId < 0 || vfxCallback->mParams.mEffectId == mEffectId;
+                    if (toRemove)
                         mToRemove.push_back(std::make_pair(group.asNode(), group.getParent(0)));
                     else
                         mHasMagicEffects = true;
@@ -1649,10 +1701,15 @@ namespace MWRender
 
     void Animation::removeEffect(int effectId)
     {
-        RemoveFinishedCallbackVisitor visitor(effectId);
+        RemoveCallbackVisitor visitor(effectId);
         mInsert->accept(visitor);
         visitor.remove();
         mHasMagicEffects = visitor.mHasMagicEffects;
+    }
+
+    void Animation::removeEffects()
+    {
+        removeEffect(-1);
     }
 
     void Animation::getLoopingEffects(std::vector<int> &out) const

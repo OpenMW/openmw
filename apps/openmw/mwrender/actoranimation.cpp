@@ -40,6 +40,9 @@ ActorAnimation::ActorAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group>
             addHiddenItemLight(*iter, light);
         }
     }
+
+    // Make sure we cleaned object from effects, just in cast if we re-use node
+    removeEffects();
 }
 
 ActorAnimation::~ActorAnimation()

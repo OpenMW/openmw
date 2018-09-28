@@ -370,6 +370,7 @@ public:
      */
     void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", const std::string& texture = "", float scale = 1.0f);
     void removeEffect (int effectId);
+    void removeEffects ();
     void getLoopingEffects (std::vector<int>& out) const;
 
     // Add a spell casting glow to an object. From measuring video taken from the original engine,
