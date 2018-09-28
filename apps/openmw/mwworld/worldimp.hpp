@@ -552,11 +552,9 @@ namespace MWWorld
             void enableActorCollision(const MWWorld::Ptr& actor, bool enable) override;
 
             RestPermitted canRest() const override;
-            ///< check if the player is allowed to rest \n
-            /// 0 - yes \n
-            /// 1 - only waiting \n
-            /// 2 - player is underwater \n
-            /// 3 - enemies are nearby (not implemented)
+            ///< check if the player is allowed to rest
+
+            void rest() override;
 
             /// \todo Probably shouldn't be here
             MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) override;

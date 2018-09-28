@@ -17,6 +17,7 @@
 #include <components/esm/doorstate.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
@@ -951,6 +952,29 @@ namespace MWWorld
             creatureStats.getTimeOfDeath() + fCorpseClearDelay <= MWBase::Environment::get().getWorld()->getTimeStamp())
         {
             MWBase::Environment::get().getWorld()->deleteObject(ptr);
+        }
+    }
+
+    void CellStore::rest()
+    {
+        if (mState == State_Loaded)
+        {
+            for (CellRefList<ESM::Creature>::List::iterator it (mCreatures.mList.begin()); it!=mCreatures.mList.end(); ++it)
+            {
+                Ptr ptr = getCurrentPtr(&*it);
+                if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+                {
+                    MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, true);
+                }
+            }
+            for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
+            {
+                Ptr ptr = getCurrentPtr(&*it);
+                if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+                {
+                    MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, true);
+                }
+            }
         }
     }
 

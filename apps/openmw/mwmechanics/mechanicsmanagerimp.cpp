@@ -453,7 +453,15 @@ namespace MWMechanics
 
     void MechanicsManager::rest(bool sleep)
     {
+        if (sleep)
+            MWBase::Environment::get().getWorld()->rest();
+
         mActors.rest(sleep);
+    }
+
+    void MechanicsManager::restoreDynamicStats(MWWorld::Ptr actor, bool sleep)
+    {
+        mActors.restoreDynamicStats(actor, sleep);
     }
 
     int MechanicsManager::getHoursToRest() const

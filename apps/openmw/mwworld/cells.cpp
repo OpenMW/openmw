@@ -151,6 +151,19 @@ MWWorld::CellStore *MWWorld::Cells::getInterior (const std::string& name)
     return &result->second;
 }
 
+void MWWorld::Cells::rest ()
+{
+    for (auto &interior : mInteriors)
+    {
+        interior.second.rest();
+    }
+
+    for (auto &exterior : mExteriors)
+    {
+        exterior.second.rest();
+    }
+}
+
 MWWorld::CellStore *MWWorld::Cells::getCell (const ESM::CellId& id)
 {
     if (id.mPaged)

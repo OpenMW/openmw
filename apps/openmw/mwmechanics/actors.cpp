@@ -545,10 +545,10 @@ namespace MWMechanics
 
     void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, bool sleep)
     {
-        if (ptr.getClass().getCreatureStats(ptr).isDead())
+        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
+        if (stats.isDead())
             return;
 
-        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
         const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         if (sleep)
@@ -565,12 +565,6 @@ namespace MWMechanics
             stats.setMagicka(stat);
         }
 
-        int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
-
-        float normalizedEncumbrance = ptr.getClass().getNormalizedEncumbrance(ptr);
-        if (normalizedEncumbrance > 1)
-            normalizedEncumbrance = 1;
- 
         // Current fatigue can be above base value due to a fortify effect.
         // In that case stop here and don't try to restore.
         DynamicStat<float> fatigue = stats.getFatigue();
@@ -581,6 +575,12 @@ namespace MWMechanics
         float fFatigueReturnBase = settings.find("fFatigueReturnBase")->mValue.getFloat ();
         float fFatigueReturnMult = settings.find("fFatigueReturnMult")->mValue.getFloat ();
         float fEndFatigueMult = settings.find("fEndFatigueMult")->mValue.getFloat ();
+
+        int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+
+        float normalizedEncumbrance = ptr.getClass().getNormalizedEncumbrance(ptr);
+        if (normalizedEncumbrance > 1)
+            normalizedEncumbrance = 1;
 
         float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
         x *= fEndFatigueMult * endurance;
@@ -1667,7 +1667,8 @@ namespace MWMechanics
             if (iter->first.getClass().getCreatureStats(iter->first).isDead())
                 continue;
 
-            restoreDynamicStats(iter->first, sleep);
+            if (!sleep || iter->first == player)
+                restoreDynamicStats(iter->first, sleep);
 
             if ((!iter->first.getRefData().getBaseNode()) ||
                     (playerPos - iter->first.getRefData().getPosition().asVec3()).length2() > sqrAiProcessingDistance)

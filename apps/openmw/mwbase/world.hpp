@@ -571,6 +571,8 @@ namespace MWBase
 
             virtual bool isPlayerInJail() const = 0;
 
+            virtual void rest() = 0;
+
             virtual void setPlayerTraveling(bool traveling) = 0;
             virtual bool isPlayerTraveling() const = 0;
 
