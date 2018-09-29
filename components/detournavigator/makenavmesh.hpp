@@ -6,6 +6,7 @@
 #include "navmeshcacheitem.hpp"
 #include "tileposition.hpp"
 #include "tilebounds.hpp"
+#include "sharednavmesh.hpp"
 
 #include <osg/Vec3f>
 
@@ -16,10 +17,7 @@ class dtNavMesh;
 namespace DetourNavigator
 {
     class RecastMesh;
-    class SharedNavMesh;
     struct Settings;
-
-    using NavMeshPtr = std::shared_ptr<dtNavMesh>;
 
     enum class UpdateNavMeshStatus
     {
