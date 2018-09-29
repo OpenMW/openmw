@@ -4,6 +4,7 @@
 #include "tilebounds.hpp"
 
 #include <components/bullethelpers/operators.hpp>
+#include <components/misc/guarded.hpp>
 #include <components/osghelpers/operators.hpp>
 
 #include <chrono>
@@ -11,7 +12,6 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
-#include <mutex>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -77,21 +77,19 @@ namespace DetourNavigator
     public:
         void setSink(std::unique_ptr<Sink> sink)
         {
-            const std::lock_guard<std::mutex> guard(mMutex);
-            mSink = std::move(sink);
+            *mSink.lock() = std::move(sink);
         }
 
-        bool isEnabled() const
+        bool isEnabled()
         {
-            const std::lock_guard<std::mutex> guard(mMutex);
-            return bool(mSink);
+            return bool(*mSink.lockConst());
         }
 
         void write(const std::string& text)
         {
-            const std::lock_guard<std::mutex> guard(mMutex);
-            if (mSink)
-                mSink->write(text);
+            const auto sink = mSink.lock();
+            if (*sink)
+                sink.get()->write(text);
         }
 
         static Log& instance()
@@ -101,8 +99,7 @@ namespace DetourNavigator
         }
 
     private:
-        mutable std::mutex mMutex;
-        std::unique_ptr<Sink> mSink;
+        Misc::ScopeGuarded<std::unique_ptr<Sink>> mSink;
     };
 
     inline void write(std::ostream& stream)

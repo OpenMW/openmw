@@ -4,6 +4,8 @@
 #include "cachedrecastmeshmanager.hpp"
 #include "tileposition.hpp"
 
+#include <components/misc/guarded.hpp>
+
 #include <map>
 #include <mutex>
 
@@ -32,8 +34,7 @@ namespace DetourNavigator
         template <class Function>
         void forEachTilePosition(Function&& function)
         {
-            const std::lock_guard<std::mutex> lock(mTilesMutex);
-            for (const auto& tile : mTiles)
+            for (const auto& tile : *mTiles.lock())
                 function(tile.first);
         }
 
@@ -41,8 +42,7 @@ namespace DetourNavigator
 
     private:
         const Settings& mSettings;
-        std::mutex mTilesMutex;
-        std::map<TilePosition, CachedRecastMeshManager> mTiles;
+        Misc::ScopeGuarded<std::map<TilePosition, CachedRecastMeshManager>> mTiles;
         std::unordered_map<ObjectId, std::vector<TilePosition>> mObjectsTilesPositions;
         std::map<osg::Vec2i, std::vector<TilePosition>> mWaterTilesPositions;
         std::size_t mRevision = 0;

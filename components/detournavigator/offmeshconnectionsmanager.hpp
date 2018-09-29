@@ -6,6 +6,8 @@
 #include "tileposition.hpp"
 #include "objectid.hpp"
 
+#include <components/misc/guarded.hpp>
+
 #include <osg/Vec3f>
 
 #include <boost/optional.hpp>
@@ -33,42 +35,42 @@ namespace DetourNavigator
 
         bool add(const ObjectId id, const OffMeshConnection& value)
         {
-            const std::lock_guard<std::mutex> lock(mMutex);
+            const auto values = mValues.lock();
 
-            if (!mValuesById.insert(std::make_pair(id, value)).second)
+            if (!values->mById.insert(std::make_pair(id, value)).second)
                 return false;
 
             const auto startTilePosition = getTilePosition(mSettings, value.mStart);
             const auto endTilePosition = getTilePosition(mSettings, value.mEnd);
 
-            mValuesByTilePosition[startTilePosition].insert(id);
+            values->mByTilePosition[startTilePosition].insert(id);
 
             if (startTilePosition != endTilePosition)
-                mValuesByTilePosition[endTilePosition].insert(id);
+                values->mByTilePosition[endTilePosition].insert(id);
 
             return true;
         }
 
         boost::optional<OffMeshConnection> remove(const ObjectId id)
         {
-            const std::lock_guard<std::mutex> lock(mMutex);
+            const auto values = mValues.lock();
 
-            const auto itById = mValuesById.find(id);
+            const auto itById = values->mById.find(id);
 
-            if (itById == mValuesById.end())
+            if (itById == values->mById.end())
                 return boost::none;
 
             const auto result = itById->second;
 
-            mValuesById.erase(itById);
+            values->mById.erase(itById);
 
             const auto startTilePosition = getTilePosition(mSettings, result.mStart);
             const auto endTilePosition = getTilePosition(mSettings, result.mEnd);
 
-            removeByTilePosition(startTilePosition, id);
+            removeByTilePosition(values->mByTilePosition, startTilePosition, id);
 
             if (startTilePosition != endTilePosition)
-                removeByTilePosition(endTilePosition, id);
+                removeByTilePosition(values->mByTilePosition, endTilePosition, id);
 
             return result;
         }
@@ -77,18 +79,18 @@ namespace DetourNavigator
         {
             std::vector<OffMeshConnection> result;
 
-            const std::lock_guard<std::mutex> lock(mMutex);
+            const auto values = mValues.lock();
 
-            const auto itByTilePosition = mValuesByTilePosition.find(tilePosition);
+            const auto itByTilePosition = values->mByTilePosition.find(tilePosition);
 
-            if (itByTilePosition == mValuesByTilePosition.end())
+            if (itByTilePosition == values->mByTilePosition.end())
                 return result;
 
             std::for_each(itByTilePosition->second.begin(), itByTilePosition->second.end(),
                 [&] (const ObjectId v)
                 {
-                    const auto itById = mValuesById.find(v);
-                    if (itById != mValuesById.end())
+                    const auto itById = values->mById.find(v);
+                    if (itById != values->mById.end())
                         result.push_back(itById->second);
                 });
 
@@ -96,15 +98,20 @@ namespace DetourNavigator
         }
 
     private:
-        const Settings& mSettings;
-        std::mutex mMutex;
-        std::unordered_map<ObjectId, OffMeshConnection> mValuesById;
-        std::map<TilePosition, std::unordered_set<ObjectId>> mValuesByTilePosition;
-
-        void removeByTilePosition(const TilePosition& tilePosition, const ObjectId id)
+        struct Values
         {
-            const auto it = mValuesByTilePosition.find(tilePosition);
-            if (it != mValuesByTilePosition.end())
+            std::unordered_map<ObjectId, OffMeshConnection> mById;
+            std::map<TilePosition, std::unordered_set<ObjectId>> mByTilePosition;
+        };
+
+        const Settings& mSettings;
+        Misc::ScopeGuarded<Values> mValues;
+
+        void removeByTilePosition(std::map<TilePosition, std::unordered_set<ObjectId>>& valuesByTilePosition,
+            const TilePosition& tilePosition, const ObjectId id)
+        {
+            const auto it = valuesByTilePosition.find(tilePosition);
+            if (it != valuesByTilePosition.end())
                 it->second.erase(id);
         }
     };

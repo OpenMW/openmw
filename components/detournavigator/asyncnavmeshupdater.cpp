@@ -72,9 +72,7 @@ namespace DetourNavigator
         const std::shared_ptr<NavMeshCacheItem>& navMeshCacheItem, const TilePosition& playerTile,
         const std::map<TilePosition, ChangeType>& changedTiles)
     {
-        log("post jobs playerTile=", playerTile);
-
-        setPlayerTile(playerTile);
+        *mPlayerTile.lock() = playerTile;
 
         if (changedTiles.empty())
             return;
@@ -124,10 +122,10 @@ namespace DetourNavigator
 
         const auto start = std::chrono::steady_clock::now();
 
-        setFirstStart(start);
+        const auto firstStart = setFirstStart(start);
 
         const auto recastMesh = mRecastMeshManager.get().getMesh(job.mChangedTile);
-        const auto playerTile = getPlayerTile();
+        const auto playerTile = *mPlayerTile.lockConst();
         const auto offMeshConnections = mOffMeshConnectionsManager.get().get(job.mChangedTile);
 
         const auto status = updateNavMesh(job.mAgentHalfExtents, recastMesh.get(), job.mChangedTile, playerTile,
@@ -143,7 +141,7 @@ namespace DetourNavigator
             " generation=", job.mNavMeshCacheItem->mGeneration,
             " revision=", job.mNavMeshCacheItem->mNavMeshRevision,
             " time=", std::chrono::duration_cast<FloatMs>(finish - start).count(), "ms",
-            " total_time=", std::chrono::duration_cast<FloatMs>(finish - getFirstStart()).count(), "ms");
+            " total_time=", std::chrono::duration_cast<FloatMs>(finish - firstStart).count(), "ms");
     }
 
     boost::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getNextJob()
@@ -188,28 +186,11 @@ namespace DetourNavigator
             writeToFile(*job.mNavMeshCacheItem->mValue.lock(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
     }
 
-    std::chrono::steady_clock::time_point AsyncNavMeshUpdater::getFirstStart()
+    std::chrono::steady_clock::time_point AsyncNavMeshUpdater::setFirstStart(const std::chrono::steady_clock::time_point& value)
     {
-        const std::lock_guard<std::mutex> lock(mFirstStartMutex);
-        return *mFirstStart;
-    }
-
-    void AsyncNavMeshUpdater::setFirstStart(const std::chrono::steady_clock::time_point& value)
-    {
-        const std::lock_guard<std::mutex> lock(mFirstStartMutex);
-        if (!mFirstStart)
-            mFirstStart = value;
-    }
-
-    TilePosition AsyncNavMeshUpdater::getPlayerTile()
-    {
-        const std::lock_guard<std::mutex> lock(mPlayerTileMutex);
-        return mPlayerTile;
-    }
-
-    void AsyncNavMeshUpdater::setPlayerTile(const TilePosition& value)
-    {
-        const std::lock_guard<std::mutex> lock(mPlayerTileMutex);
-        mPlayerTile = value;
+        const auto locked = mFirstStart.lock();
+        if (!*locked)
+            *locked = value;
+        return *locked.get();
     }
 }

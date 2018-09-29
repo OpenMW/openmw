@@ -67,10 +67,8 @@ namespace DetourNavigator
         std::condition_variable mDone;
         Jobs mJobs;
         std::map<osg::Vec3f, std::set<TilePosition>> mPushed;
-        std::mutex mPlayerTileMutex;
-        TilePosition mPlayerTile;
-        std::mutex mFirstStartMutex;
-        boost::optional<std::chrono::steady_clock::time_point> mFirstStart;
+        Misc::ScopeGuarded<TilePosition> mPlayerTile;
+        Misc::ScopeGuarded<boost::optional<std::chrono::steady_clock::time_point>> mFirstStart;
         std::vector<std::thread> mThreads;
 
         void process() throw();
@@ -79,17 +77,9 @@ namespace DetourNavigator
 
         boost::optional<Job> getNextJob();
 
-        void notifyHasJob();
-
         void writeDebugFiles(const Job& job, const RecastMesh* recastMesh) const;
 
-        std::chrono::steady_clock::time_point getFirstStart();
-
-        void setFirstStart(const std::chrono::steady_clock::time_point& value);
-
-        TilePosition getPlayerTile();
-
-        void setPlayerTile(const TilePosition& value);
+        std::chrono::steady_clock::time_point setFirstStart(const std::chrono::steady_clock::time_point& value);
     };
 }
 

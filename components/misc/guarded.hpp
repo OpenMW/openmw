@@ -35,6 +35,35 @@ namespace Misc
     };
 
     template <class T>
+    class ScopeGuarded
+    {
+        public:
+            ScopeGuarded() = default;
+
+            ScopeGuarded(const T& value)
+                : mValue(value)
+            {}
+
+            ScopeGuarded(T&& value)
+                : mValue(std::move(value))
+            {}
+
+            Locked<T> lock()
+            {
+                return Locked<T>(mMutex, mValue);
+            }
+
+            Locked<const T> lockConst()
+            {
+                return Locked<const T>(mMutex, mValue);
+            }
+
+        private:
+            std::mutex mMutex;
+            T mValue;
+    };
+
+    template <class T>
     class SharedGuarded
     {
         public:
