@@ -69,7 +69,7 @@ git reset --soft $CURRENTCOMMIT
 # to be seen on the gh-pages site. Therefore creating an empty .nojekyll file.
 # Presumably this is only needed when the SHORT_NAMES option in Doxygen is set
 # to NO, which it is by default. So creating the file just in case.
-echo "" > .nojekyll
+touch .nojekyll
 
 ################################################################################
 ##### Generate the Doxygen code documentation and log the output.          #####
