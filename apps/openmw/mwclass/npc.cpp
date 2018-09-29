@@ -554,6 +554,7 @@ namespace MWClass
     void Npc::hit(const MWWorld::Ptr& ptr, float attackStrength, int type) const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
 
         const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
 
@@ -628,6 +629,16 @@ namespace MWClass
         else
         {
             MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg, attackStrength);
+            if (ptr.getClass().getNpcStats(ptr).isWerewolf())
+            {
+                const ESM::Sound *sound = world->getStore().get<ESM::Sound>().searchRandom("WolfHit");
+                if (sound)
+                    sndMgr->playSound3D(victim, sound->mId, 1.0f, 1.0f);
+            }
+            else
+            {
+                sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
+            }
         }
         if(ptr == MWMechanics::getPlayer())
         {
@@ -641,7 +652,7 @@ namespace MWClass
             {
                 damage *= store.find("fCombatCriticalStrikeMult")->mValue.getFloat();
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
-                MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+                sndMgr->playSound3D(victim, "critical damage", 1.0f, 1.0f);
             }
         }
 

@@ -318,6 +318,7 @@ namespace MWClass
         else if (isBipedal(ptr))
         {
             MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg, attackStrength);
+            MWBase::Environment::get().getSoundManager()->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
         }
 
         MWMechanics::applyElementalShields(ptr, victim);
