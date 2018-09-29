@@ -50,6 +50,8 @@ matrix:
       env:
         ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
       compiler: clang
+    - os: linux
+      script: ./CI/generateDocumentationAndDeploy.sh
   allow_failures:
     - env: ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
 
