@@ -134,6 +134,7 @@
     Bug #4653: Length of non-ASCII strings is handled incorrectly in ESM reader
     Bug #4654: Editor: UpdateVisitor does not initialize skeletons for animated objects
     Feature #912: Editor: Add missing icons to UniversalId tables
+    Feature #1221: Editor: Creature/NPC rendering
     Feature #1617: Editor: Enchantment effect record verifier
     Feature #1645: Casting effects from objects
     Feature #2606: Editor: Implemented (optional) case sensitive global search

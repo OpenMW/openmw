@@ -1,6 +1,8 @@
 #include "object.hpp"
 
 #include <stdexcept>
+#include <string>
+#include <iostream>
 
 #include <osg/Depth>
 #include <osg/Group>
@@ -29,6 +31,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/fallback/fallback.hpp>
 
+#include "actor.hpp"
 #include "mask.hpp"
 
 
@@ -78,63 +81,61 @@ void CSVRender::Object::update()
 {
     clear();
 
-    std::string model;
-    int error = 0; // 1 referenceable does not exist, 2 referenceable does not specify a mesh
-
     const CSMWorld::RefIdCollection& referenceables = mData.getReferenceables();
+    const int TypeIndex = referenceables.findColumnIndex(CSMWorld::Columns::ColumnId_RecordType);
+    const int ModelIndex = referenceables.findColumnIndex (CSMWorld::Columns::ColumnId_Model);
 
     int index = referenceables.searchId (mReferenceableId);
     const ESM::Light* light = NULL;
 
-    if (index==-1)
-        error = 1;
-    else
-    {
-        /// \todo check for Deleted state (error 1)
-
-        model = referenceables.getData (index,
-            referenceables.findColumnIndex (CSMWorld::Columns::ColumnId_Model)).
-            toString().toUtf8().constData();
-
-        int recordType =
-                referenceables.getData (index,
-                referenceables.findColumnIndex(CSMWorld::Columns::ColumnId_RecordType)).toInt();
-        if (recordType == CSMWorld::UniversalId::Type_Light)
-        {
-            light = &dynamic_cast<const CSMWorld::Record<ESM::Light>& >(referenceables.getRecord(index)).get();
-            if (model.empty())
-                model = "marker_light.nif";
-        }
-
-        if (recordType == CSMWorld::UniversalId::Type_CreatureLevelledList)
-        {
-            if (model.empty())
-                model = "marker_creature.nif";
-        }
-
-        if (model.empty())
-            error = 2;
-    }
-
     mBaseNode->removeChildren(0, mBaseNode->getNumChildren());
 
-    if (error)
+    if (index == -1)
     {
         mBaseNode->addChild(createErrorCube());
+        return;
     }
-    else
+
+    /// \todo check for Deleted state (error 1)
+
+    int recordType = referenceables.getData(index, TypeIndex).toInt();
+    std::string model = referenceables.getData(index, ModelIndex).toString().toUtf8().constData();
+
+    if (recordType == CSMWorld::UniversalId::Type_Light)
     {
-        try
+        light = &dynamic_cast<const CSMWorld::Record<ESM::Light>& >(referenceables.getRecord(index)).get();
+        if (model.empty())
+            model = "marker_light.nif";
+    }
+
+    if (recordType == CSMWorld::UniversalId::Type_CreatureLevelledList)
+    {
+        if (model.empty())
+            model = "marker_creature.nif";
+    }
+
+    try
+    {
+        if (recordType == CSMWorld::UniversalId::Type_Npc || recordType == CSMWorld::UniversalId::Type_Creature)
+        {
+            if (!mActor) mActor.reset(new Actor(mReferenceableId, mData));
+            mActor->update();
+            mBaseNode->addChild(mActor->getBaseNode());
+        }
+        else if (!model.empty())
         {
             std::string path = "meshes\\" + model;
-
             mResourceSystem->getSceneManager()->getInstance(path, mBaseNode);
         }
-        catch (std::exception& e)
+        else
         {
-            // TODO: use error marker mesh
-            Log(Debug::Error) << e.what();
+            throw std::runtime_error(mReferenceableId + " has no model");
         }
+    }
+    catch (std::exception& e)
+    {
+        // TODO: use error marker mesh
+        Log(Debug::Error) << e.what();
     }
 
     if (light)
