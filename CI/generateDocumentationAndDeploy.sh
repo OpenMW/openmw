@@ -65,7 +65,7 @@ touch .nojekyll
 ##### Generate the Doxygen code documentation and log the output.          #####
 echo 'Generating Doxygen code documentation...'
 # Redirect both stderr and stdout to the log file AND the console.
-doxygen $DOXYFILE 2>&1 | tee doxygen.log
+doxygen $DOXYFILE > /dev/null
 
 DOCDIR="$TRAVIS_BUILD_DIR/build/docs/Doxygen"
 echo "Checking existence of $DOCDIR/html/index.html"
