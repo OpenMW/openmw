@@ -48,6 +48,8 @@ namespace ContentSelectorModel
 
         QModelIndex indexFromItem(const EsmFile *item) const;
         const EsmFile *item(const QString &name) const;
+        const EsmFile *item(int row) const;
+        EsmFile *item(int row);
         QStringList gameFiles() const;
 
         bool isEnabled (QModelIndex index) const;
@@ -65,8 +67,6 @@ namespace ContentSelectorModel
     private:
 
         void addFile(EsmFile *file);
-        const EsmFile *item(int row) const;
-        EsmFile *item(int row);
 
         void sortFiles();
 

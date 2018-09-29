@@ -70,6 +70,7 @@ namespace ContentSelectorView
         void slotShowContextMenu(const QPoint& pos);
         void slotCheckMultiSelectedItems();
         void slotUncheckMultiSelectedItems();
+        void slotCopySelectedItemsPaths();
     };
 }
 
