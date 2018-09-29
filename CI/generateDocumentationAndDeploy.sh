@@ -9,32 +9,22 @@ __AUTHOR__="generated"
 #   must be installed.
 # - Doxygen configuration file must have the destination directory empty and
 #   source code directory with a $(TRAVIS_BUILD_DIR) prefix.
-# - An gh-pages branch should already exist. See below for mor info on hoe to
-#   create a gh-pages branch.
 #
 # Required global variables:
-# - TRAVIS_BUILD_NUMBER : The number of the current build.
-# - TRAVIS_COMMIT       : The commit that the current build is testing.
-# - DOXYFILE            : The Doxygen configuration file.
-# - GH_REPO_NAME        : The name of the repository.
-# - GH_REPO_REF         : The GitHub reference to the repository.
-# - GH_REPO_TOKEN       : Secure token to the github repository.
+# - TRAVIS_BUILD_NUMBER    : The number of the current build.
+# - TRAVIS_COMMIT          : The commit that the current build is testing.
+# - DOXYFILE               : The Doxygen configuration file.
+# - OPENMW_GITHUB_IO_TOKEN : Secure token to the github repository.
 #
 # For information on how to encrypt variables for Travis CI please go to
 # https://docs.travis-ci.com/user/environment-variables/#Encrypted-Variables
 # or https://gist.github.com/vidavidorra/7ed6166a46c537d3cbd2
-# For information on how to create a clean gh-pages branch from the master
-# branch, please go to https://gist.github.com/vidavidorra/846a2fc7dd51f4fe56a0
 #
 # This script will generate Doxygen documentation and push the documentation to
-# the gh-pages branch of a repository specified by GH_REPO_REF.
-# Before this script is used there should already be a gh-pages branch in the
-# repository.
+# the epository specified by GH_REPO_REF.
 #
 ################################################################################
 
-################################################################################
-##### Setup this script and get the current gh-pages branch.               #####
 # Exit with nonzero exit code if anything fails
 set -e
 
@@ -56,9 +46,9 @@ git config --global push.default simple
 git config user.name "Travis CI"
 git config user.email "travis@travis-ci.org"
 
-# Remove everything currently in the gh-pages branch.
+# Remove everything currently in the repository.
 # GitHub is smart enough to know which files have changed and which files have
-# stayed the same and will only update the changed files. So the gh-pages branch
+# stayed the same and will only update the changed files. So the repository
 # can be safely cleaned, and it is sure that everything pushed later is the new
 # documentation.
 CURRENTCOMMIT=`git rev-parse HEAD`
@@ -80,7 +70,7 @@ doxygen $DOXYFILE 2>&1 | tee doxygen.log
 DOCDIR="$TRAVIS_BUILD_DIR/build/docs/Doxygen"
 echo "Checking existence of $DOCDIR/html/index.html"
 ################################################################################
-##### Upload the documentation to the gh-pages branch of the repository.   #####
+##### Upload the documentation to the repository.                          #####
 # Only upload if Doxygen successfully created the documentation.
 # Check this by verifying that the html directory and the file html/index.html
 # both exist. This is a good indication that Doxygen did it's work.
@@ -89,8 +79,7 @@ if [ -f "$DOCDIR/html/index.html" ]; then
     cp -R "$DOCDIR/html/." .
 
     echo 'Uploading documentation ...'
-    # Add everything in this directory (the Doxygen code documentation) to the
-    # gh-pages branch.
+    # Add everything in this directory (the Doxygen code documentation).
     # GitHub is smart enough to know which files have changed and which files have
     # stayed the same and will only update the changed files.
     git add --all
@@ -99,10 +88,10 @@ if [ -f "$DOCDIR/html/index.html" ]; then
     # build number and the GitHub commit reference that issued this build.
     git commit -m "Deploy code docs to GitHub Pages Travis build: ${TRAVIS_BUILD_NUMBER}" -m "Commit: ${TRAVIS_COMMIT}"
 
-    # Force push to the remote gh-pages branch.
+    # Force push to the remote repository.
     # The ouput is redirected to /dev/null to hide any sensitive credential data
     # that might otherwise be exposed.
-    git push --force "https://${GH_REPO_TOKEN}@${GH_REPO_REF}" > /dev/null 2>&1
+    git push --force "https://${OPENMW_GITHUB_IO_TOKEN}@${GH_REPO_REF}" > /dev/null 2>&1
 else
     echo '' >&2
     echo 'Warning: No documentation (html) files have been found!' >&2
