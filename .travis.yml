@@ -33,7 +33,7 @@ addons:
       # The other ones from OpenMW ppa
       libbullet-dev, libswresample-dev, libopenscenegraph-3.4-dev, libmygui-dev,
       # Docs dependencies
-      doxygen, doxygen-doc, doxygen-latex, doxygen-gui, graphviz
+      doxygen, doxygen-doc, doxygen-latex, doxygen-gui, graphviz, python-sphinx
     ]
 
   coverity_scan:
