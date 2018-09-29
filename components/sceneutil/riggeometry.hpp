@@ -40,7 +40,6 @@ namespace SceneUtil
         };
 
         void setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap);
-        void setRigTransforms(osg::Matrixf& transform);
 
         /// Initialize this geometry from the source geometry.
         /// @note The source geometry will not be modified.
@@ -66,7 +65,6 @@ namespace SceneUtil
         osg::ref_ptr<osg::RefMatrix> mGeomToSkelMatrix;
 
         osg::ref_ptr<InfluenceMap> mInfluenceMap;
-        osg::Matrixf mRigTransforms;
 
         typedef std::pair<Bone*, osg::Matrixf> BoneBindMatrixPair;
 
