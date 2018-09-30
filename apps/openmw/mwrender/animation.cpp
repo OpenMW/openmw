@@ -1975,12 +1975,12 @@ namespace MWRender
     PartHolder::~PartHolder()
     {
         if (mNode.get() && !mNode->getNumParents())
-            Log(Debug::Verbose) << "Part has no parents" ;
+            Log(Debug::Verbose) << "Part \"" << mNode->getName() << "\" has no parents" ;
 
         if (mNode.get() && mNode->getNumParents())
         {
             if (mNode->getNumParents() > 1)
-                Log(Debug::Verbose) << "Part has multiple (" << mNode->getNumParents() << ") parents";
+                Log(Debug::Verbose) << "Part \"" << mNode->getName() << "\" has multiple (" << mNode->getNumParents() << ") parents";
             mNode->getParent(0)->removeChild(mNode);
         }
     }
