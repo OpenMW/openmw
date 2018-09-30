@@ -100,6 +100,9 @@ bool Launcher::GraphicsPage::loadSettings()
 	
 	if (mEngineSettings.getBool("distant terrain", "Terrain"))
 		distantTerrainCheckBox->setCheckState(Qt::Checked);
+    
+    if (mEngineSettings.getBool("small feature culling", "Camera"))
+        smallFeatureCullingCheckBox->setCheckState(Qt::Checked);
 	
 	
 
@@ -176,13 +179,17 @@ void Launcher::GraphicsPage::saveSettings()
 	bool cDistantTerrain = distantTerrainCheckBox->valueCall();
 	if (cDistantTerrain != mEngineSettings.getBool("distant terrain", "Terrain"))
 		mEngineSettings.setBool("distant terrain", "Terrain", cDistantTerrain);
+    
 	float cViewingDistance = viewingDistanceSpinBox->valueCall();
 	if (cViewingDistance != mEngineSettings.getFloat("viewing distance", "Camera"))
 		mEngineSettings.setFloat("viewing distance", "Camera", cViewingDistance);
+
     float viewingDistanceSpinBox->currentText().toFloat();
+    
 	bool cSmallFeatureCulling = smallFeatureCullingCheckBox->checkState();
 	if (cSmallFeatureCulling != mEngineSettings.getBool("small feature culling", "Camera"))
 		mEngineSettings.setBool("small feature culling", "Camera", cSmallFeatureCulling);
+    
 	float cSmallFeatureCullingPixelSize = smallFeatureCullingPixelSizeSpinBox->valueCall();
 	if (cSmallFeatureCullingPixelSize != mEngineSettings.getFloat("small feature culling pixel size", "Camera"))
 		mEngineSettings.setFloat("small feature culling pixel size", "Camera", cSmallFeatureCullingPixelSize);
