@@ -136,11 +136,12 @@ namespace DetourNavigator
         const auto& cached = getCached(agentHalfExtents);
         const auto changedTiles = mChangedTiles.find(agentHalfExtents);
         {
-            const auto locked = cached->mValue.lock();
+            const auto locked = cached.lock();
+            const auto& navMesh = locked->getValue();
             if (changedTiles != mChangedTiles.end())
             {
                 for (const auto& tile : changedTiles->second)
-                    if (locked->getTileAt(tile.first.x(), tile.first.y(), 0))
+                    if (navMesh.getTileAt(tile.first.x(), tile.first.y(), 0))
                     {
                         auto tileToPost = tilesToPost.find(tile.first);
                         if (tileToPost == tilesToPost.end())
@@ -153,13 +154,13 @@ namespace DetourNavigator
                 if (changedTiles->second.empty())
                     mChangedTiles.erase(changedTiles);
             }
-            const auto maxTiles = locked->getParams()->maxTiles;
+            const auto maxTiles = navMesh.getParams()->maxTiles;
             mRecastMeshManager.forEachTilePosition([&] (const TilePosition& tile)
             {
                 if (tilesToPost.count(tile))
                     return;
                 const auto shouldAdd = shouldAddTile(tile, playerTile, maxTiles);
-                const auto presentInNavMesh = bool(locked->getTileAt(tile.x(), tile.y(), 0));
+                const auto presentInNavMesh = bool(navMesh.getTileAt(tile.x(), tile.y(), 0));
                 if (shouldAdd && !presentInNavMesh)
                     tilesToPost.insert(std::make_pair(tile, ChangeType::add));
                 else if (!shouldAdd && presentInNavMesh)
@@ -169,8 +170,7 @@ namespace DetourNavigator
         mAsyncNavMeshUpdater.post(agentHalfExtents, cached, playerTile, tilesToPost);
         log("cache update posted for agent=", agentHalfExtents,
             " playerTile=", lastPlayerTile->second,
-            " recastMeshManagerRevision=", lastRevision,
-            " changedTiles=", changedTiles->second.size());
+            " recastMeshManagerRevision=", lastRevision);
     }
 
     void NavMeshManager::wait()
@@ -178,12 +178,12 @@ namespace DetourNavigator
         mAsyncNavMeshUpdater.wait();
     }
 
-    SharedNavMesh NavMeshManager::getNavMesh(const osg::Vec3f& agentHalfExtents) const
+    SharedNavMeshCacheItem NavMeshManager::getNavMesh(const osg::Vec3f& agentHalfExtents) const
     {
-        return getCached(agentHalfExtents)->mValue;
+        return getCached(agentHalfExtents);
     }
 
-    std::map<osg::Vec3f, std::shared_ptr<NavMeshCacheItem>> NavMeshManager::getNavMeshes() const
+    std::map<osg::Vec3f, SharedNavMeshCacheItem> NavMeshManager::getNavMeshes() const
     {
         return mCache;
     }
@@ -209,19 +209,16 @@ namespace DetourNavigator
     {
         for (const auto& cached : mCache)
         {
-            if (cached.second)
-            {
-                auto& tiles = mChangedTiles[cached.first];
-                auto tile = tiles.find(tilePosition);
-                if (tile == tiles.end())
-                    tiles.insert(std::make_pair(tilePosition, changeType));
-                else
-                    tile->second = addChangeType(tile->second, changeType);
-            }
+            auto& tiles = mChangedTiles[cached.first];
+            auto tile = tiles.find(tilePosition);
+            if (tile == tiles.end())
+                tiles.insert(std::make_pair(tilePosition, changeType));
+            else
+                tile->second = addChangeType(tile->second, changeType);
         }
     }
 
-    const std::shared_ptr<NavMeshCacheItem>& NavMeshManager::getCached(const osg::Vec3f& agentHalfExtents) const
+    const SharedNavMeshCacheItem& NavMeshManager::getCached(const osg::Vec3f& agentHalfExtents) const
     {
         const auto cached = mCache.find(agentHalfExtents);
         if (cached != mCache.end())

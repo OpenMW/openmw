@@ -9,6 +9,7 @@
 #include "sharednavmesh.hpp"
 #include "settingsutils.hpp"
 #include "flags.hpp"
+#include "navmeshtilescache.hpp"
 
 #include <DetourNavMesh.h>
 #include <DetourNavMeshBuilder.h>
@@ -22,6 +23,8 @@
 namespace
 {
     using namespace DetourNavigator;
+
+    static const int doNotTransferOwnership = 0;
 
     void initPolyMeshDetail(rcPolyMeshDetail& value)
     {
@@ -41,29 +44,6 @@ namespace
     };
 
     using PolyMeshDetailStackPtr = std::unique_ptr<rcPolyMeshDetail, PolyMeshDetailStackDeleter>;
-
-    struct NavMeshDataValueDeleter
-    {
-        void operator ()(unsigned char* value) const
-        {
-            dtFree(value);
-        }
-    };
-
-    using NavMeshDataValue = std::unique_ptr<unsigned char, NavMeshDataValueDeleter>;
-
-    struct NavMeshData
-    {
-        NavMeshDataValue mValue;
-        int mSize;
-
-        NavMeshData() = default;
-
-        NavMeshData(unsigned char* value, int size)
-            : mValue(value)
-            , mSize(size)
-        {}
-    };
 
     osg::Vec3f makeOsgVec3f(const btVector3& value)
     {
@@ -388,7 +368,7 @@ namespace DetourNavigator
     UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh* recastMesh,
         const TilePosition& changedTile, const TilePosition& playerTile,
         const std::vector<OffMeshConnection>& offMeshConnections, const Settings& settings,
-        NavMeshCacheItem& navMeshCacheItem)
+        const SharedNavMeshCacheItem& navMeshCacheItem, NavMeshTilesCache& navMeshTilesCache)
     {
         log("update NavMesh with mutiple tiles:",
             " agentHeight=", std::setprecision(std::numeric_limits<float>::max_exponent10),
@@ -401,17 +381,19 @@ namespace DetourNavigator
             " playerTile=", playerTile,
             " changedTileDistance=", getDistance(changedTile, playerTile));
 
-        auto& navMesh = navMeshCacheItem.mValue;
-        const auto& params = *navMesh.lock()->getParams();
+        const auto params = *navMeshCacheItem.lockConst()->getValue().getParams();
         const osg::Vec3f origin(params.orig[0], params.orig[1], params.orig[2]);
 
         const auto x = changedTile.x();
         const auto y = changedTile.y();
 
         const auto removeTile = [&] {
-            const auto locked = navMesh.lock();
-            const auto removed = dtStatusSucceed(locked->removeTile(locked->getTileRefAt(x, y, 0), nullptr, nullptr));
-            navMeshCacheItem.mNavMeshRevision += removed;
+            const auto locked = navMeshCacheItem.lock();
+            auto& navMesh = locked->getValue();
+            const auto tileRef = navMesh.getTileRefAt(x, y, 0);
+            const auto removed = dtStatusSucceed(navMesh.removeTile(tileRef, nullptr, nullptr));
+            if (removed)
+                locked->removeUsedTile(changedTile);
             return makeUpdateNavMeshStatus(removed, false);
         };
 
@@ -437,42 +419,82 @@ namespace DetourNavigator
             return removeTile();
         }
 
-        const auto maxTiles = navMesh.lock()->getParams()->maxTiles;
-        if (!shouldAddTile(changedTile, playerTile, maxTiles))
+        if (!shouldAddTile(changedTile, playerTile, params.maxTiles))
         {
             log("ignore add tile: too far from player");
             return removeTile();
         }
 
-        const auto tileBounds = makeTileBounds(settings, changedTile);
-        const osg::Vec3f tileBorderMin(tileBounds.mMin.x(), boundsMin.y() - 1, tileBounds.mMin.y());
-        const osg::Vec3f tileBorderMax(tileBounds.mMax.x(), boundsMax.y() + 1, tileBounds.mMax.y());
+        auto cachedNavMeshData = navMeshTilesCache.get(agentHalfExtents, changedTile, *recastMesh, offMeshConnections);
 
-        auto navMeshData = makeNavMeshTileData(agentHalfExtents, *recastMesh, offMeshConnections, x, y,
-            tileBorderMin, tileBorderMax, settings);
-
-        if (!navMeshData.mValue)
+        if (!cachedNavMeshData)
         {
-            log("ignore add tile: NavMeshData is null");
-            return removeTile();
+            const auto tileBounds = makeTileBounds(settings, changedTile);
+            const osg::Vec3f tileBorderMin(tileBounds.mMin.x(), boundsMin.y() - 1, tileBounds.mMin.y());
+            const osg::Vec3f tileBorderMax(tileBounds.mMax.x(), boundsMax.y() + 1, tileBounds.mMax.y());
+
+            auto navMeshData = makeNavMeshTileData(agentHalfExtents, *recastMesh, offMeshConnections, x, y,
+                tileBorderMin, tileBorderMax, settings);
+
+            if (!navMeshData.mValue)
+            {
+                log("ignore add tile: NavMeshData is null");
+                return removeTile();
+            }
+
+            try
+            {
+                cachedNavMeshData = navMeshTilesCache.set(agentHalfExtents, changedTile, *recastMesh,
+                                                          offMeshConnections, std::move(navMeshData));
+            }
+            catch (const InvalidArgument&)
+            {
+                cachedNavMeshData = navMeshTilesCache.get(agentHalfExtents, changedTile, *recastMesh,
+                                                          offMeshConnections);
+            }
+
+            if (!cachedNavMeshData)
+            {
+                log("cache overflow");
+
+                const auto locked = navMeshCacheItem.lock();
+                auto& navMesh = locked->getValue();
+                const auto tileRef = navMesh.getTileRefAt(x, y, 0);
+                const auto removed = dtStatusSucceed(navMesh.removeTile(tileRef, nullptr, nullptr));
+                const auto addStatus = navMesh.addTile(navMeshData.mValue.get(), navMeshData.mSize,
+                                                       doNotTransferOwnership, 0, 0);
+
+                if (dtStatusSucceed(addStatus))
+                {
+                    locked->setUsedTile(changedTile, std::move(navMeshData));
+                    return makeUpdateNavMeshStatus(removed, true);
+                }
+                else
+                {
+                    if (removed)
+                        locked->removeUsedTile(changedTile);
+                    log("failed to add tile with status=", WriteDtStatus {addStatus});
+                    return makeUpdateNavMeshStatus(removed, false);
+                }
+            }
         }
 
-        dtStatus addStatus;
-        bool removed;
-        {
-            const auto locked = navMesh.lock();
-            removed = dtStatusSucceed(locked->removeTile(locked->getTileRefAt(x, y, 0), nullptr, nullptr));
-            addStatus = locked->addTile(navMeshData.mValue.get(), navMeshData.mSize, DT_TILE_FREE_DATA, 0, 0);
-        }
+        const auto locked = navMeshCacheItem.lock();
+        auto& navMesh = locked->getValue();
+        const auto tileRef = navMesh.getTileRefAt(x, y, 0);
+        const auto removed = dtStatusSucceed(navMesh.removeTile(tileRef, nullptr, nullptr));
+        const auto addStatus = navMesh.addTile(cachedNavMeshData.get().mValue, cachedNavMeshData.get().mSize,
+                                               doNotTransferOwnership, 0, 0);
 
         if (dtStatusSucceed(addStatus))
         {
-            ++navMeshCacheItem.mNavMeshRevision;
-            navMeshData.mValue.release();
+            locked->setUsedTile(changedTile, std::move(cachedNavMeshData));
             return makeUpdateNavMeshStatus(removed, true);
         }
         else
         {
+            if (removed)
+                locked->removeUsedTile(changedTile);
             log("failed to add tile with status=", WriteDtStatus {addStatus});
             return makeUpdateNavMeshStatus(removed, false);
         }

@@ -56,6 +56,7 @@ namespace
             mSettings.mRegionMinSize = 8;
             mSettings.mTileSize = 64;
             mSettings.mAsyncNavMeshUpdaterThreads = 1;
+            mSettings.mMaxNavMeshTilesCacheSize = 1024 * 1024;
             mSettings.mMaxPolygonPathSize = 1024;
             mSettings.mMaxSmoothPathSize = 1024;
             mSettings.mTrianglesPerChunk = 256;
@@ -600,6 +601,60 @@ namespace
             osg::Vec3f(21.7975559234619140625, -177.8903350830078125, -111.38809967041015625),
             osg::Vec3f(7.44747829437255859375, -202.3209075927734375, -101.1938323974609375),
             osg::Vec3f(0, -215, -94.753631591796875),
+        })) << mPath;
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, update_remove_and_update_then_find_path_should_return_path)
+    {
+        const std::array<btScalar, 5 * 5> heightfieldData {{
+            0,   0,    0,    0,    0,
+            0, -25,  -25,  -25,  -25,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+        }};
+        btHeightfieldTerrainShape shape(5, 5, heightfieldData.data(), 1, 0, 0, 2, PHY_FLOAT, false);
+        shape.setLocalScaling(btVector3(128, 128, 1));
+
+        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        mNavigator->removeObject(ObjectId(&shape));
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
+
+        EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
+            osg::Vec3f(-215, 215, 1.85963428020477294921875),
+            osg::Vec3f(-194.9653167724609375, 194.9653167724609375, -6.5760211944580078125),
+            osg::Vec3f(-174.930633544921875, 174.930633544921875, -15.01167774200439453125),
+            osg::Vec3f(-154.8959503173828125, 154.8959503173828125, -23.4473323822021484375),
+            osg::Vec3f(-134.86126708984375, 134.86126708984375, -31.8829898834228515625),
+            osg::Vec3f(-114.82657623291015625, 114.82657623291015625, -40.3186492919921875),
+            osg::Vec3f(-94.7918853759765625, 94.7918853759765625, -47.39907073974609375),
+            osg::Vec3f(-74.75719451904296875, 74.75719451904296875, -53.7258148193359375),
+            osg::Vec3f(-54.722499847412109375, 54.722499847412109375, -60.052555084228515625),
+            osg::Vec3f(-34.68780517578125, 34.68780517578125, -66.37929534912109375),
+            osg::Vec3f(-14.6531162261962890625, 14.6531162261962890625, -72.70604705810546875),
+            osg::Vec3f(5.3815765380859375, -5.3815765380859375, -75.35065460205078125),
+            osg::Vec3f(25.41626739501953125, -25.41626739501953125, -67.96945953369140625),
+            osg::Vec3f(45.450958251953125, -45.450958251953125, -60.58824920654296875),
+            osg::Vec3f(65.48564910888671875, -65.48564910888671875, -53.20705413818359375),
+            osg::Vec3f(85.5203399658203125, -85.5203399658203125, -45.825855255126953125),
+            osg::Vec3f(105.55503082275390625, -105.55503082275390625, -38.44464874267578125),
+            osg::Vec3f(125.5897216796875, -125.5897216796875, -31.063449859619140625),
+            osg::Vec3f(145.6244049072265625, -145.6244049072265625, -23.6822509765625),
+            osg::Vec3f(165.659088134765625, -165.659088134765625, -16.3010540008544921875),
+            osg::Vec3f(185.6937713623046875, -185.6937713623046875, -8.91985416412353515625),
+            osg::Vec3f(205.7284698486328125, -205.7284698486328125, -1.53864824771881103515625),
+            osg::Vec3f(215, -215, 1.877177715301513671875),
         })) << mPath;
     }
 }

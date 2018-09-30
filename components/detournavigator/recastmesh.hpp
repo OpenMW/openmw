@@ -5,6 +5,7 @@
 #include "chunkytrimesh.hpp"
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <osg/Vec3f>
@@ -13,8 +14,6 @@
 
 namespace DetourNavigator
 {
-    struct Settings;
-
     class RecastMesh
     {
     public:
@@ -24,8 +23,8 @@ namespace DetourNavigator
             btTransform mTransform;
         };
 
-        RecastMesh(std::vector<int> indices, std::vector<float> vertices,
-                   std::vector<AreaType> areaTypes, std::vector<Water> water, const Settings& settings);
+        RecastMesh(std::vector<int> indices, std::vector<float> vertices, std::vector<AreaType> areaTypes,
+            std::vector<Water> water, const std::size_t trianglesPerChunk);
 
         const std::vector<int>& getIndices() const
         {

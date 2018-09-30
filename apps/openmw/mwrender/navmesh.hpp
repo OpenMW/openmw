@@ -21,9 +21,8 @@ namespace MWRender
 
         bool toggle();
 
-        void update(const DetourNavigator::SharedNavMesh& sharedNavMesh,
-                    const std::size_t number, const std::size_t generation, const std::size_t revision,
-                    const DetourNavigator::Settings& settings);
+        void update(const dtNavMesh& navMesh, const std::size_t number, const std::size_t generation,
+                    const std::size_t revision, const DetourNavigator::Settings& settings);
 
         void reset();
 

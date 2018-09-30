@@ -1,18 +1,17 @@
 #include "recastmesh.hpp"
-#include "settings.hpp"
 #include "exceptions.hpp"
 
 #include <Recast.h>
 
 namespace DetourNavigator
 {
-    RecastMesh::RecastMesh(std::vector<int> indices, std::vector<float> vertices,
-                           std::vector<AreaType> areaTypes, std::vector<Water> water, const Settings& settings)
+    RecastMesh::RecastMesh(std::vector<int> indices, std::vector<float> vertices, std::vector<AreaType> areaTypes,
+            std::vector<Water> water, const std::size_t trianglesPerChunk)
         : mIndices(std::move(indices))
         , mVertices(std::move(vertices))
         , mAreaTypes(std::move(areaTypes))
         , mWater(std::move(water))
-        , mChunkyTriMesh(mVertices, mIndices, mAreaTypes, settings.mTrianglesPerChunk)
+        , mChunkyTriMesh(mVertices, mIndices, mAreaTypes, trianglesPerChunk)
     {
         if (getTrianglesCount() != mAreaTypes.size())
             throw InvalidArgument("number of flags doesn't match number of triangles: triangles="

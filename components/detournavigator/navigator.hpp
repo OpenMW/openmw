@@ -176,7 +176,7 @@ namespace DetourNavigator
                 "out is not an OutputIterator"
             );
             const auto navMesh = mNavMeshManager.getNavMesh(agentHalfExtents);
-            return findSmoothPath(*navMesh.lock(), toNavMeshCoordinates(mSettings, agentHalfExtents),
+            return findSmoothPath(navMesh.lock()->getValue(), toNavMeshCoordinates(mSettings, agentHalfExtents),
                 toNavMeshCoordinates(mSettings, start), toNavMeshCoordinates(mSettings, end), includeFlags,
                 mSettings, out);
         }
@@ -185,7 +185,7 @@ namespace DetourNavigator
          * @brief getNavMeshes returns all current navmeshes
          * @return map of agent half extents to navmesh
          */
-        std::map<osg::Vec3f, std::shared_ptr<NavMeshCacheItem>> getNavMeshes() const;
+        std::map<osg::Vec3f, SharedNavMeshCacheItem> getNavMeshes() const;
 
         const Settings& getSettings() const;
 

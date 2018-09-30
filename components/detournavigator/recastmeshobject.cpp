@@ -4,6 +4,7 @@
 
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 
+#include <cassert>
 #include <numeric>
 
 namespace DetourNavigator

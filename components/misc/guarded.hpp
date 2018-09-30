@@ -48,6 +48,21 @@ namespace Misc
                 : mValue(std::move(value))
             {}
 
+            template <class ... Args>
+            ScopeGuarded(Args&& ... args)
+                : mValue(std::forward<Args>(args) ...)
+            {}
+
+            ScopeGuarded(const ScopeGuarded& other)
+                : mMutex()
+                , mValue(other.lock().get())
+            {}
+
+            ScopeGuarded(ScopeGuarded&& other)
+                : mMutex()
+                , mValue(std::move(other.lock().get()))
+            {}
+
             Locked<T> lock()
             {
                 return Locked<T>(mMutex, mValue);

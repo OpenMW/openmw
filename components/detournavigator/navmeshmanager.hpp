@@ -46,17 +46,17 @@ namespace DetourNavigator
 
         void wait();
 
-        SharedNavMesh getNavMesh(const osg::Vec3f& agentHalfExtents) const;
+        SharedNavMeshCacheItem getNavMesh(const osg::Vec3f& agentHalfExtents) const;
 
-        std::map<osg::Vec3f, std::shared_ptr<NavMeshCacheItem>> getNavMeshes() const;
+        std::map<osg::Vec3f, SharedNavMeshCacheItem> getNavMeshes() const;
 
     private:
         const Settings& mSettings;
         TileCachedRecastMeshManager mRecastMeshManager;
         OffMeshConnectionsManager mOffMeshConnectionsManager;
-        std::map<osg::Vec3f, std::shared_ptr<NavMeshCacheItem>> mCache;
-        std::map<osg::Vec3f, std::map<TilePosition, ChangeType>> mChangedTiles;
         AsyncNavMeshUpdater mAsyncNavMeshUpdater;
+        std::map<osg::Vec3f, SharedNavMeshCacheItem> mCache;
+        std::map<osg::Vec3f, std::map<TilePosition, ChangeType>> mChangedTiles;
         std::size_t mGenerationCounter = 0;
         std::map<osg::Vec3f, TilePosition> mPlayerTile;
         std::map<osg::Vec3f, std::size_t> mLastRecastMeshManagerRevision;
@@ -67,7 +67,7 @@ namespace DetourNavigator
 
         void addChangedTile(const TilePosition& tilePosition, const ChangeType changeType);
 
-        const std::shared_ptr<NavMeshCacheItem>& getCached(const osg::Vec3f& agentHalfExtents) const;
+        const SharedNavMeshCacheItem& getCached(const osg::Vec3f& agentHalfExtents) const;
     };
 }
 

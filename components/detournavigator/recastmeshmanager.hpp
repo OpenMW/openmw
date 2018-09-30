@@ -13,6 +13,7 @@
 
 #include <map>
 #include <unordered_map>
+#include <list>
 
 class btCollisionShape;
 
@@ -53,8 +54,10 @@ namespace DetourNavigator
     private:
         bool mShouldRebuild;
         RecastMeshBuilder mMeshBuilder;
-        std::unordered_map<ObjectId, RecastMeshObject> mObjects;
-        std::map<osg::Vec2i, Water> mWater;
+        std::list<RecastMeshObject> mObjectsOrder;
+        std::unordered_map<ObjectId, std::list<RecastMeshObject>::iterator> mObjects;
+        std::list<Water> mWaterOrder;
+        std::map<osg::Vec2i, std::list<Water>::iterator> mWater;
 
         void rebuild();
     };

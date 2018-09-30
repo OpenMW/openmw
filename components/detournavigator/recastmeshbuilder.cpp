@@ -119,7 +119,7 @@ namespace DetourNavigator
 
     std::shared_ptr<RecastMesh> RecastMeshBuilder::create() const
     {
-        return std::make_shared<RecastMesh>(mIndices, mVertices, mAreaTypes, mWater, mSettings);
+        return std::make_shared<RecastMesh>(mIndices, mVertices, mAreaTypes, mWater, mSettings.get().mTrianglesPerChunk);
     }
 
     void RecastMeshBuilder::reset()

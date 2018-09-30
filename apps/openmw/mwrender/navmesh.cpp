@@ -31,7 +31,7 @@ namespace MWRender
         return mEnabled;
     }
 
-    void NavMesh::update(const DetourNavigator::SharedNavMesh& sharedNavMesh, const std::size_t id,
+    void NavMesh::update(const dtNavMesh& navMesh, const std::size_t id,
         const std::size_t generation, const std::size_t revision, const DetourNavigator::Settings& settings)
     {
         if (!mEnabled || (mId == id && mGeneration >= generation && mRevision >= revision))
@@ -42,7 +42,7 @@ namespace MWRender
         mRevision = revision;
         if (mGroup)
             mRootNode->removeChild(mGroup);
-        mGroup = SceneUtil::createNavMeshGroup(*sharedNavMesh.lock(), settings);
+        mGroup = SceneUtil::createNavMeshGroup(navMesh, settings);
         if (mGroup)
         {
             mGroup->setNodeMask(Mask_Debug);

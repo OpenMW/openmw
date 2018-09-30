@@ -6,9 +6,6 @@
 
 #include <LinearMath/btTransform.h>
 
-#include <osg/Vec2f>
-#include <osg/Vec2i>
-
 class btBoxShape;
 class btCollisionShape;
 class btCompoundShape;
@@ -18,6 +15,8 @@ class btTriangleCallback;
 
 namespace DetourNavigator
 {
+    struct Settings;
+
     class RecastMeshBuilder
     {
     public:

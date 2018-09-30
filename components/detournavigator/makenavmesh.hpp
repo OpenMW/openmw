@@ -7,6 +7,7 @@
 #include "tileposition.hpp"
 #include "tilebounds.hpp"
 #include "sharednavmesh.hpp"
+#include "navmeshtilescache.hpp"
 
 #include <osg/Vec3f>
 
@@ -48,7 +49,7 @@ namespace DetourNavigator
     UpdateNavMeshStatus updateNavMesh(const osg::Vec3f& agentHalfExtents, const RecastMesh* recastMesh,
         const TilePosition& changedTile, const TilePosition& playerTile,
         const std::vector<OffMeshConnection>& offMeshConnections, const Settings& settings,
-        NavMeshCacheItem& navMeshCacheItem);
+        const SharedNavMeshCacheItem& navMeshCacheItem, NavMeshTilesCache& navMeshTilesCache);
 }
 
 #endif

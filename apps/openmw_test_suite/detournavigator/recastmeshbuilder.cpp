@@ -56,6 +56,7 @@ namespace
         btTriangleMesh mesh;
         mesh.addTriangle(btVector3(-1, -1, 0), btVector3(-1, 1, 0), btVector3(1, -1, 0));
         btBvhTriangleMeshShape shape(&mesh, true);
+
         RecastMeshBuilder builder(mSettings, mBounds);
         builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(), AreaType_ground);
         const auto recastMesh = builder.create();

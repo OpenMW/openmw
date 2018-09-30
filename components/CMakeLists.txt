@@ -170,6 +170,7 @@ add_component_dir(detournavigator
     recastmesh
     tilecachedrecastmeshmanager
     recastmeshobject
+    navmeshtilescache
     )
 
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui

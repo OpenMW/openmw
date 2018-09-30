@@ -5,6 +5,7 @@
 #include "settingsutils.hpp"
 #include "tileposition.hpp"
 #include "objectid.hpp"
+#include "offmeshconnection.hpp"
 
 #include <components/misc/guarded.hpp>
 
@@ -20,12 +21,6 @@
 
 namespace DetourNavigator
 {
-    struct OffMeshConnection
-    {
-        osg::Vec3f mStart;
-        osg::Vec3f mEnd;
-    };
-
     class OffMeshConnectionsManager
     {
     public:

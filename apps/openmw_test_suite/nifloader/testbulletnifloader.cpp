@@ -268,7 +268,8 @@ namespace
         value.target = Nif::ControlledPtr(nullptr);
     }
 
-    void copy(const btTransform& src, Nif::Transformation& dst) {
+    void copy(const btTransform& src, Nif::Transformation& dst)
+    {
         dst.pos = osg::Vec3f(src.getOrigin().x(), src.getOrigin().y(), src.getOrigin().z());
         for (int row = 0; row < 3; ++row)
             for (int column = 0; column < 3; ++column)

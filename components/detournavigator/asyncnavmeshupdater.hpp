@@ -5,6 +5,7 @@
 #include "offmeshconnectionsmanager.hpp"
 #include "tilecachedrecastmeshmanager.hpp"
 #include "tileposition.hpp"
+#include "navmeshtilescache.hpp"
 
 #include <osg/Vec3f>
 
@@ -37,7 +38,7 @@ namespace DetourNavigator
             OffMeshConnectionsManager& offMeshConnectionsManager);
         ~AsyncNavMeshUpdater();
 
-        void post(const osg::Vec3f& agentHalfExtents, const std::shared_ptr<NavMeshCacheItem>& mNavMeshCacheItem,
+        void post(const osg::Vec3f& agentHalfExtents, const SharedNavMeshCacheItem& mNavMeshCacheItem,
             const TilePosition& playerTile, const std::map<TilePosition, ChangeType>& changedTiles);
 
         void wait();
@@ -46,7 +47,7 @@ namespace DetourNavigator
         struct Job
         {
             osg::Vec3f mAgentHalfExtents;
-            std::shared_ptr<NavMeshCacheItem> mNavMeshCacheItem;
+            SharedNavMeshCacheItem mNavMeshCacheItem;
             TilePosition mChangedTile;
             std::tuple<ChangeType, int, int> mPriority;
 
@@ -69,6 +70,7 @@ namespace DetourNavigator
         std::map<osg::Vec3f, std::set<TilePosition>> mPushed;
         Misc::ScopeGuarded<TilePosition> mPlayerTile;
         Misc::ScopeGuarded<boost::optional<std::chrono::steady_clock::time_point>> mFirstStart;
+        NavMeshTilesCache mNavMeshTilesCache;
         std::vector<std::thread> mThreads;
 
         void process() throw();

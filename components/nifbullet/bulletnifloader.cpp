@@ -127,7 +127,9 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
             {
                 btTransform trans;
                 trans.setIdentity();
-                mCompoundShape->addChildShape(trans, new Resource::TriangleMeshShape(mStaticMesh.get(), true));
+                std::unique_ptr<btCollisionShape> child(new Resource::TriangleMeshShape(mStaticMesh.get(), true));
+                mCompoundShape->addChildShape(trans, child.get());
+                child.release();
                 mStaticMesh.release();
             }
             mShape->mCollisionShape = mCompoundShape.release();
@@ -139,7 +141,10 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
         }
 
         if (mAvoidStaticMesh)
-            mShape->mAvoidCollisionShape = new Resource::TriangleMeshShape(mAvoidStaticMesh.release(), false);
+        {
+            mShape->mAvoidCollisionShape = new Resource::TriangleMeshShape(mAvoidStaticMesh.get(), false);
+            mAvoidStaticMesh.release();
+        }
 
         return mShape;
     }
