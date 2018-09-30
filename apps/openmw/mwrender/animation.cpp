@@ -624,8 +624,8 @@ namespace MWRender
             }
             else
             {
-                // Remove effect immediately
-                mParams.mObjects.reset();
+                // Hide effect immediately
+                node->setNodeMask(0);
                 mFinished = true;
             }
         }
@@ -1686,7 +1686,6 @@ namespace MWRender
         params.mLoop = loop;
         params.mEffectId = effectId;
         params.mBoneName = bonename;
-        params.mObjects = PartHolderPtr(new PartHolder(node));
         params.mAnimTime = std::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
         trans->addUpdateCallback(new UpdateVfxCallback(params));
 

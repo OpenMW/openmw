@@ -74,7 +74,6 @@ typedef std::shared_ptr<PartHolder> PartHolderPtr;
 struct EffectParams
 {
     std::string mModelName; // Just here so we don't add the same effect twice
-    PartHolderPtr mObjects;
     std::shared_ptr<EffectAnimationTime> mAnimTime;
     float mMaxControllerLength;
     int mEffectId;
