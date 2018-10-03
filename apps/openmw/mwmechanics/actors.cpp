@@ -1684,7 +1684,10 @@ namespace MWMechanics
 
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(iter->first);
             if (animation)
-                animation->updateEffects();
+            {
+                animation->removeEffects();
+                MWBase::Environment::get().getWorld()->applyLoopingParticles(iter->first);
+            }
 
         }
 
