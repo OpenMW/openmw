@@ -44,7 +44,8 @@ Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, Settings:
     connect(fullScreenCheckBox, SIGNAL(stateChanged(int)), this, SLOT(slotFullScreenChanged(int)));
     connect(standardRadioButton, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
     connect(screenComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(screenChanged(int)));
-
+	connect(distantTerrainCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotDistantTerrainChanged(bool)));
+	connect(smallFeatureCullingCheckBox, SIGNAL(toggled(bool), this, SLOT(slotsmallFeatureCullingChanged(bool)));
 }
 
 bool Launcher::GraphicsPage::setupSDL()
@@ -98,14 +99,16 @@ bool Launcher::GraphicsPage::loadSettings()
     if (mEngineSettings.getBool("window border", "Video"))
         windowBorderCheckBox->setCheckState(Qt::Checked);
 	
-	if (mEngineSettings.getBool("distant terrain", "Terrain"))
+    if (mEngineSettings.getBool("distant terrain", "Terrain"))
 		distantTerrainCheckBox->setCheckState(Qt::Checked);
     
     if (mEngineSettings.getBool("small feature culling", "Camera"))
         smallFeatureCullingCheckBox->setCheckState(Qt::Checked);
 	
+    viewingDistanceSpinBox->setValue(mEngineSettings.getFloat("viewing distance", "Camera"));
 	
-
+    smallFeatureCullingPixelSizeSpinBox->setValue(mEngineSettings.getFloat("small feature culling pixel size", "Camera"));
+	
     // aaValue is the actual value (0, 1, 2, 4, 8, 16)
     int aaValue = mEngineSettings.getInt("antialiasing", "Video");
     // aaIndex is the index into the allowed values in the pull down.
@@ -176,24 +179,21 @@ void Launcher::GraphicsPage::saveSettings()
     if (cScreen != mEngineSettings.getInt("screen", "Video"))
         mEngineSettings.setInt("screen", "Video", cScreen);
 	
-	bool cDistantTerrain = distantTerrainCheckBox->valueCall();
-	if (cDistantTerrain != mEngineSettings.getBool("distant terrain", "Terrain"))
-		mEngineSettings.setBool("distant terrain", "Terrain", cDistantTerrain);
+    bool cDistantTerrain = distantTerrainCheckBox->checkState();
+    if (cDistantTerrain != mEngineSettings.getBool("distant terrain", "Terrain"))
+	mEngineSettings.setBool("distant terrain", "Terrain", cDistantTerrain);
     
-	float cViewingDistance = viewingDistanceSpinBox->valueCall();
-	if (cViewingDistance != mEngineSettings.getFloat("viewing distance", "Camera"))
-		mEngineSettings.setFloat("viewing distance", "Camera", cViewingDistance);
-
-    float viewingDistanceSpinBox->currentText().toFloat();
+    float cViewingDistance = viewingDistanceSpinBox->value();
+    if (cViewingDistance != mEngineSettings.getFloat("viewing distance", "Camera"))
+	mEngineSettings.setFloat("viewing distance", "Camera", cViewingDistance);
     
-	bool cSmallFeatureCulling = smallFeatureCullingCheckBox->checkState();
-	if (cSmallFeatureCulling != mEngineSettings.getBool("small feature culling", "Camera"))
-		mEngineSettings.setBool("small feature culling", "Camera", cSmallFeatureCulling);
+    bool cSmallFeatureCulling = smallFeatureCullingCheckBox->checkState();
+    if (cSmallFeatureCulling != mEngineSettings.getBool("small feature culling", "Camera"))
+	mEngineSettings.setBool("small feature culling", "Camera", cSmallFeatureCulling);
     
-	float cSmallFeatureCullingPixelSize = smallFeatureCullingPixelSizeSpinBox->valueCall();
-	if (cSmallFeatureCullingPixelSize != mEngineSettings.getFloat("small feature culling pixel size", "Camera"))
-		mEngineSettings.setFloat("small feature culling pixel size", "Camera", cSmallFeatureCullingPixelSize);
-    float smallFeatureCullingPixelSizeSpinBox->currentText().toFloat();
+    float cSmallFeatureCullingPixelSize = smallFeatureCullingPixelSizeSpinBox->value();
+    if (cSmallFeatureCullingPixelSize != mEngineSettings.getFloat("small feature culling pixel size", "Camera"))
+	mEngineSettings.setFloat("small feature culling pixel size", "Camera", cSmallFeatureCullingPixelSize);
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
@@ -293,4 +293,26 @@ void Launcher::GraphicsPage::slotStandardToggled(bool checked)
         customWidthSpinBox->setEnabled(true);
         customHeightSpinBox->setEnabled(true);
     }
+}
+
+void Launcher::GraphicsPage::slotDistantTerrainChanged(bool checked)
+{
+	if (checked) {
+		viewingDistanceSpinBox->setEnabled(true);
+		smallFeatureCullingCheckBox->setEnabled(true);
+		smallFeatureCullingPixelSizeSpinBox->setEnabled(true);
+	} else {
+		viewingDistanceSpinBox->setEnabled(false);
+		smallFeatureCullingCheckBox->setEnabled(false);
+		smallFeatureCullingPixelSizeSpinBox->setEnabled(false);
+	}
+}
+
+void Launcher::GraphicsPage::slotsmallFeatureCullingChanged(bool checked)
+{
+	if (checked) {
+		smallFeatureCullingPixelSizeSpinBox->setEnabled(true);
+	} else {
+		smallFeatureCullingPixelSizeSpinBox->setEnabled(false);
+	}
 }
