@@ -45,7 +45,7 @@ Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, Settings:
     connect(standardRadioButton, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
     connect(screenComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(screenChanged(int)));
 	connect(distantTerrainCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotDistantTerrainChanged(bool)));
-	connect(smallFeatureCullingCheckBox, SIGNAL(toggled(bool), this, SLOT(slotsmallFeatureCullingChanged(bool)));
+	connect(smallFeatureCullingCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotSmallFeatureCullingChanged(bool)));
 }
 
 bool Launcher::GraphicsPage::setupSDL()
@@ -308,7 +308,7 @@ void Launcher::GraphicsPage::slotDistantTerrainChanged(bool checked)
 	}
 }
 
-void Launcher::GraphicsPage::slotsmallFeatureCullingChanged(bool checked)
+void Launcher::GraphicsPage::slotSmallFeatureCullingChanged(bool checked)
 {
 	if (checked) {
 		smallFeatureCullingPixelSizeSpinBox->setEnabled(true);
