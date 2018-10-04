@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>437</width>
-    <height>343</height>
+    <height>358</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -16,7 +16,17 @@
      <property name="title">
       <string>Display</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,1">
+     <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,1,0">
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="fullScreenCheckBox">
+        <property name="text">
+         <string>Full Screen</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QCheckBox" name="vSyncCheckBox">
         <property name="text">
@@ -24,45 +34,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="fullScreenCheckBox">
-        <property name="text">
-         <string>Full Screen</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QCheckBox" name="windowBorderCheckBox">
-        <property name="text">
-         <string>Window border</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="antiAliasingLabel">
-        <property name="text">
-         <string>Anti-aliasing:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="screenLabel">
-        <property name="text">
-         <string>Screen:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="resolutionLabel">
-        <property name="text">
-         <string>Resolution:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
+      <item row="3" column="2">
        <widget class="QComboBox" name="antiAliasingComboBox">
         <item>
          <property name="text">
@@ -91,11 +63,55 @@
         </item>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="windowBorderCheckBox">
+        <property name="text">
+         <string>Window border</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="screenLabel">
+        <property name="text">
+         <string>Screen:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="resolutionLabel">
+        <property name="text">
+         <string>Resolution:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="antiAliasingLabel">
+        <property name="text">
+         <string>Anti-aliasing:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
        <widget class="QComboBox" name="screenComboBox"/>
       </item>
-      <item row="5" column="1">
+      <item row="5" column="2">
        <layout class="QGridLayout" name="resolutionLayout">
+        <item row="0" column="1">
+         <widget class="QRadioButton" name="standardRadioButton">
+          <property name="text">
+           <string>Standard:</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QComboBox" name="resolutionComboBox"/>
+        </item>
         <item row="1" column="2">
          <layout class="QHBoxLayout" name="customResolutionLayout" stretch="1,0,1">
           <item>
@@ -128,81 +144,121 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QRadioButton" name="standardRadioButton">
-          <property name="text">
-           <string>Standard:</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QComboBox" name="resolutionComboBox"/>
-        </item>
        </layout>
       </item>
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="displayGroup">
+    <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Display</string>
+      <string>Distant Terrain</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,0">
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="distantTerrainCheckBox">
-        <property name="text">
-         <string>Distant Terrain</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="viewingDistanceLabel">
-        <property name="text">
-         <string>Viewing Distance</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QSpinBox" name="viewingDistanceSpinBox">
-	   </widget>
-      </item>
-	  <item row="3" column="0">
-	   <widget class="QCheckBox" name="smallFeatureCullingCheckBox">
-        <property name="text">
-         <string>Small Feature Culling</string>
-        </property>
-	   </widget>
-      </item>
-	  <item row="4" column="0">
-	   <widget class="QLabel" name="smallFeatureCullingPixelSizeCheckBox">
-	    <property name="text">
-		 <string>Small Feature Culling Pixel Size</string>
-		</property>
-	   </widget>
-	  </item>
-	  <item row="4" column="1">
-	   <widget class="QSpinBox" name="smallFeatureCullingPixelSizeSpinBox">
-	   </widget>
-	  </item>
-     </layout>
+     <widget class="QCheckBox" name="distantTerrainCheckBox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>70</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Enable</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="viewingDistanceLabel">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>81</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Viewing Distance</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>40</y>
+        <width>51</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Pixels</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="smallFeatureCullingLabel">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Small Feature Culling</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="smallFeatureCullingCheckBox">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>80</y>
+        <width>70</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Enable</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="smallFeatureCullingPixelSizeSpinBox">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>100</y>
+        <width>42</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <double>2.000000000000000</double>
+      </property>
+      <property name="maximum">
+       <double>16.000000000000000</double>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_5">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>100</y>
+        <width>61</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Pixels</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="viewingDistanceSpinBox">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>40</y>
+        <width>62</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>61</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>
