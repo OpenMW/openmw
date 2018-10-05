@@ -243,11 +243,14 @@ namespace Gui
         std::string textureName = name;
         Ogre::Image image;
         image.loadDynamicImage(&textureData[0], width, height, Ogre::PF_BYTE_RGBA);
-        Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().createManual(textureName,
-            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-            Ogre::TEX_TYPE_2D,
-            width, height, 0, Ogre::PF_BYTE_RGBA);
-        texture->loadImage(image);
+        if (!Ogre::TextureManager::getSingleton().resourceExists(textureName))
+        {
+            Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().createManual(textureName,
+                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                Ogre::TEX_TYPE_2D,
+                width, height, 0, Ogre::PF_BYTE_RGBA);
+            texture->loadImage(image);
+        }
 
         if (exportToFile)
             image.save(resourceName + ".png");

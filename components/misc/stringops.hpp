@@ -73,7 +73,6 @@ public:
     static void lowerCaseInPlace(std::string &inout) {
         for (unsigned int i=0; i<inout.size(); ++i)
             inout[i] = tolower(inout[i]);
-        return inout;
     }
 
     /// Returns lower case copy of input string

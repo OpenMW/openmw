@@ -135,7 +135,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     // FIXME: the .kf has to be loaded both for rendering and physics, ideally it should be opened once and then reused
     mControlledNodes.clear();
     std::string kfname = mResourceName.substr(0, mResourceName.length()-7);
-    Misc::StringUtils::toLower(kfname);
+    Misc::StringUtils::lowerCaseInPlace(kfname);
     if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
         kfname.replace(kfname.size()-4, 4, ".kf");
     if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(kfname))

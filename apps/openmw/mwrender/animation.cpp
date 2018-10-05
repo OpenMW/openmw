@@ -249,7 +249,7 @@ void Animation::addAnimSource(const std::string &model)
         return;
 
     std::string kfname = model;
-    Misc::StringUtils::toLower(kfname);
+    Misc::StringUtils::lowerCaseInPlace(kfname);
 
     if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
         kfname.replace(kfname.size()-4, 4, ".kf");
@@ -430,8 +430,12 @@ NifOgre::TextKeyMap::const_iterator Animation::findGroupStart(const NifOgre::Tex
     NifOgre::TextKeyMap::const_iterator iter(keys.begin());
     for(;iter != keys.end();++iter)
     {
-        std::string kfname = model;
-        Misc::StringUtils::lowerCaseInPlace(kfname);
+        if(iter->second.compare(0, groupname.size(), groupname) == 0 &&
+           iter->second.compare(groupname.size(), 2, ": ") == 0)
+            break;
+    }
+    return iter;
+}
 
 
 bool Animation::hasAnimation(const std::string &anim)
