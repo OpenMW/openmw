@@ -31,38 +31,52 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
 
     ESM::Dialogue *dialogue = 0;
 
-    // Land texture loading needs to use a separate internal store for each plugin.
-    // We set the number of plugins here to avoid continual resizes during loading,
-    // and so we can properly verify if valid plugin indices are being passed to the
-    // LandTexture Store retrieval methods.
-    mLandTextures.resize(esm.getGlobalReaderList()->size());
+    int esmVer = esm.getVer();
+    bool isTes4 = esmVer == ESM::VER_080 || esmVer == ESM::VER_100;
+    bool isTes5 = esmVer == ESM::VER_094 || esmVer == ESM::VER_17;
+    bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 
-    /// \todo Move this to somewhere else. ESMReader?
-    // Cache parent esX files by tracking their indices in the global list of
-    //  all files/readers used by the engine. This will greaty accelerate
-    //  refnumber mangling, as required for handling moved references.
-    const std::vector<ESM::Header::MasterData> &masters = esm.getGameFiles();
-    std::vector<ESM::ESMReader> *allPlugins = esm.getGlobalReaderList();
-    for (size_t j = 0; j < masters.size(); j++) {
-        ESM::Header::MasterData &mast = const_cast<ESM::Header::MasterData&>(masters[j]);
-        std::string fname = mast.name;
-        int index = ~0;
-        for (int i = 0; i < esm.getIndex(); i++) {
-            const std::string &candidate = allPlugins->at(i).getContext().filename;
-            std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
-            if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
-                index = i;
-                break;
+    // FIXME: temporary workaround
+    if (!(isTes4 || isTes5 || isFONV)) // MW only
+    {
+        // Land texture loading needs to use a separate internal store for each plugin.
+        // We set the number of plugins here to avoid continual resizes during loading,
+        // and so we can properly verify if valid plugin indices are being passed to the
+        // LandTexture Store retrieval methods.
+        mLandTextures.resize(esm.getGlobalReaderList()->size()); // FIXME: size should be for MW only
+    }
+
+    // FIXME: for TES4/TES5 whether a dependent file is loaded is already checked in
+    // ESM4::Reader::updateModIndicies() which is called in EsmLoader::load() before this
+    if (!(isTes4 || isTes5 || isFONV)) // MW only
+    {
+        /// \todo Move this to somewhere else. ESMReader?
+        // Cache parent esX files by tracking their indices in the global list of
+        //  all files/readers used by the engine. This will greaty accelerate
+        //  refnumber mangling, as required for handling moved references.
+        const std::vector<ESM::Header::MasterData> &masters = esm.getGameFiles();
+        std::vector<ESM::ESMReader*> *allPlugins = esm.getGlobalReaderList();
+        for (size_t j = 0; j < masters.size(); j++) {
+            ESM::Header::MasterData &mast = const_cast<ESM::Header::MasterData&>(masters[j]);
+            std::string fname = mast.name;
+            int index = ~0;
+            for (int i = 0; i < esm.getIndex(); i++) {
+                const std::string &candidate = allPlugins->at(i)->getContext().filename;
+                std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
+                if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
+                    index = i;
+                    break;
+                }
             }
+            if (index == (int)~0) {
+                // Tried to load a parent file that has not been loaded yet. This is bad,
+                //  the launcher should have taken care of this.
+                std::string fstring = "File " + esm.getName() + " asks for parent file " + masters[j].name
+                    + ", but it has not been loaded yet. Please check your load order.";
+                esm.fail(fstring);
+            }
+            mast.index = index;
         }
-        if (index == (int)~0) {
-            // Tried to load a parent file that has not been loaded yet. This is bad,
-            //  the launcher should have taken care of this.
-            std::string fstring = "File " + esm.getName() + " asks for parent file " + masters[j].name
-                + ", but it has not been loaded yet. Please check your load order.";
-            esm.fail(fstring);
-        }
-        mast.index = index;
     }
 
     // Loop through all records

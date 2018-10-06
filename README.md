@@ -130,6 +130,23 @@ Enhancements for both OpenMW and OpenCS:
 * Experimental support of loading TES4/TES5 records (coming soon).
 * Experimental support of NavMesh (eventually).
 
+openmw.cfg example
+------------------
+
+      ...
+      fallback-archive=Morrowind.bsa
+      fallback-archive=Tribunal.bsa
+      fallback-archive=Bloodmoon.bsa
+      fallback-archive=TR_Data.bsa
+      fallback-tes4archive=Oblivion - Meshes.bsa
+      #fallback-tes4archive=Skyrim - Textures.bsa
+      #fallback-tes4archive=Dragonborn.bsa
+      #fallback-tes4archive=Dawnguard.bsa
+      ...
+      data="C:/Program Files (x86)/Bethesda Softworks/Morrowind/Data Files"
+      data="C:/Program Files (x86)/Bethesda Softworks/Oblivion/Data"
+      ...
+
 Build Dependencies
 ------------------
 
