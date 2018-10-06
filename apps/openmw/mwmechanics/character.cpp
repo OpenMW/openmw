@@ -432,26 +432,37 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
     if(movestate != sMovementListEnd)
     {
         movementAnimName = movestate->groupname;
-        if(weap != sWeaponTypeListEnd && movementAnimName.find("swim") == std::string::npos)
+        if(weap != sWeaponTypeListEnd)
         {
-            if (mWeaponType == WeapType_Spell && (movement == CharState_TurnLeft || movement == CharState_TurnRight)) // Spellcasting stance turning is a special case
-                movementAnimName = weap->shortgroup + movementAnimName;
-            else
-                movementAnimName += weap->shortgroup;
+            std::string::size_type swimpos = movementAnimName.find("swim");
+            if (swimpos == std::string::npos)
+            {
+                if (mWeaponType == WeapType_Spell && (movement == CharState_TurnLeft || movement == CharState_TurnRight)) // Spellcasting stance turning is a special case
+                    movementAnimName = weap->shortgroup + movementAnimName;
+                else
+                    movementAnimName += weap->shortgroup;
+            }
 
             if(!mAnimation->hasAnimation(movementAnimName))
             {
                 movemask = MWRender::Animation::BlendMask_LowerBody;
                 movementAnimName = movestate->groupname;
 
-                // Since we apply movement only for lower body, do not reset idle animations.
-                // For upper body there will be idle animation.
-                if (idle == CharState_None)
-                    idle = CharState_Idle;
+                if (swimpos == std::string::npos)
+                {
+                    // Since we apply movement only for lower body, do not reset idle animations.
+                    // For upper body there will be idle animation.
+                    if (idle == CharState_None)
+                        idle = CharState_Idle;
 
-                // For crossbow animations use 1h ones as fallback
-                if (mWeaponType == WeapType_Crossbow)
-                    movementAnimName += "1h";
+                    // For crossbow animations use 1h ones as fallback
+                    if (mWeaponType == WeapType_Crossbow)
+                        movementAnimName += "1h";
+                }
+                else if (idle == CharState_None)
+                {
+                    idle = CharState_IdleSwim;
+                }
             }
         }
     }
