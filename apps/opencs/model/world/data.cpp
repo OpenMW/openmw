@@ -8,9 +8,12 @@
 #include <QAbstractItemModel>
 
 #include <components/esm/esmreader.hpp>
+#include <components/esm/esm4reader.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/loadglob.hpp>
 #include <components/esm/cellref.hpp>
+
+#include <extern/esm4/common.hpp>
 
 #include "idtable.hpp"
 #include "idtree.hpp"
@@ -933,9 +936,24 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
 
     mReader = new ESM::ESMReader;
     mReader->setEncoder (&mEncoder);
-    mReader->setIndex(mReaderIndex++);
+    mReader->setIndex(mReaderIndex++);  // NOTE: auto increment
     mReader->open (path.string());
 
+    int esmVer = mReader->getVer();
+    bool isTes4 = esmVer == ESM::VER_080 || esmVer == ESM::VER_100;
+    bool isTes5 = esmVer == ESM::VER_094 || esmVer == ESM::VER_17;
+    bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
+    if (isTes4 || isTes5 || isFONV)
+    {
+        mReader->close();
+        delete mReader;
+        mReader = new ESM::ESM4Reader(isTes4); // TES4 headers are 4 bytes shorter
+        mReader->setEncoder(&mEncoder);
+        mReader->setIndex(mReaderIndex-1); // use the same index
+        static_cast<ESM::ESM4Reader*>(mReader)->reader().setModIndex(mReaderIndex-1);
+        static_cast<ESM::ESM4Reader*>(mReader)->openTes4File(path.string());
+        static_cast<ESM::ESM4Reader*>(mReader)->reader().updateModIndicies(mLoadedFiles);
+    }
     mLoadedFiles.push_back(path.filename().string());
 
     // at this point mReader->mHeader.mMaster have been populated for the file being loaded
@@ -986,6 +1004,16 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
     if (!mReader)
         throw std::logic_error ("can't continue loading, because no load has been started");
 
+    int esmVer = mReader->getVer();
+    bool isTes4 = esmVer == ESM::VER_080 || esmVer == ESM::VER_100;
+    bool isTes5 = esmVer == ESM::VER_094 || esmVer == ESM::VER_17;
+    bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
+    // Check if previous record/group was the final one in this group.  Must be done before
+    // calling mReader->hasMoreRecs() below, because all records may have been processed when
+    // the previous group is popped off the stack.
+    if (isTes4 || isTes5 || isFONV)
+        static_cast<ESM::ESM4Reader*>(mReader)->reader().checkGroupStatus();
+
     if (!mReader->hasMoreRecs())
     {
         if (mBase)
@@ -1004,6 +1032,9 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
         mDialogue = 0;
         return true;
     }
+
+    if (isTes4 || isTes5 || isFONV)
+        return loadTes4Group(messages);
 
     ESM::NAME n = mReader->getRecName();
     mReader->getRecHeader();
@@ -1277,4 +1308,128 @@ void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 const CSMWorld::Data& CSMWorld::Data::self ()
 {
     return *this;
+}
+bool CSMWorld::Data::loadTes4Group (CSMDoc::Messages& messages)
+{
+    ESM4::Reader& reader = static_cast<ESM::ESM4Reader*>(mReader)->reader();
+
+    // check for EOF, sometimes there is a empty group at the end e.g. FONV DeadMoney.esm
+    if (!reader.getRecordHeader() || !mReader->hasMoreRecs())
+        return false;
+
+    const ESM4::RecordHeader& hdr = reader.hdr();
+
+    if (hdr.record.typeId != ESM4::REC_GRUP)
+        return loadTes4Record(hdr, messages);
+
+    // Skip groups that are of no interest.  See also:
+    // http://www.uesp.net/wiki/Tes4Mod:Mod_File_Format#Hierarchical_Top_Groups
+    switch (hdr.group.type)
+    {
+        case ESM4::Grp_RecordType:
+        {
+            // FIXME: rewrite to workaround reliability issue
+            if (hdr.group.label.value == ESM4::REC_NAVI || hdr.group.label.value == ESM4::REC_WRLD ||
+                hdr.group.label.value == ESM4::REC_REGN || hdr.group.label.value == ESM4::REC_STAT ||
+                hdr.group.label.value == ESM4::REC_ANIO || hdr.group.label.value == ESM4::REC_CONT ||
+                hdr.group.label.value == ESM4::REC_MISC || hdr.group.label.value == ESM4::REC_ACTI ||
+                hdr.group.label.value == ESM4::REC_ARMO || hdr.group.label.value == ESM4::REC_NPC_ ||
+                hdr.group.label.value == ESM4::REC_FLOR || hdr.group.label.value == ESM4::REC_GRAS ||
+                hdr.group.label.value == ESM4::REC_TREE || hdr.group.label.value == ESM4::REC_LIGH ||
+                hdr.group.label.value == ESM4::REC_BOOK || hdr.group.label.value == ESM4::REC_FURN ||
+                hdr.group.label.value == ESM4::REC_SOUN || hdr.group.label.value == ESM4::REC_WEAP ||
+                hdr.group.label.value == ESM4::REC_DOOR || hdr.group.label.value == ESM4::REC_AMMO ||
+                hdr.group.label.value == ESM4::REC_CLOT || hdr.group.label.value == ESM4::REC_ALCH ||
+                hdr.group.label.value == ESM4::REC_APPA || hdr.group.label.value == ESM4::REC_INGR ||
+                hdr.group.label.value == ESM4::REC_SGST || hdr.group.label.value == ESM4::REC_SLGM ||
+                hdr.group.label.value == ESM4::REC_KEYM || hdr.group.label.value == ESM4::REC_HAIR ||
+                hdr.group.label.value == ESM4::REC_EYES || hdr.group.label.value == ESM4::REC_CELL ||
+                hdr.group.label.value == ESM4::REC_CREA || hdr.group.label.value == ESM4::REC_LVLC ||
+                hdr.group.label.value == ESM4::REC_LVLI || hdr.group.label.value == ESM4::REC_MATO ||
+                hdr.group.label.value == ESM4::REC_IDLE || hdr.group.label.value == ESM4::REC_LTEX
+                )
+            {
+                // NOTE: The label field of a group is not reliable.  See:
+                // http://www.uesp.net/wiki/Tes4Mod:Mod_File_Format
+                //
+                // ASCII Q 0x51 0101 0001
+                //       A 0x41 0100 0001
+                //
+                // Ignore flag  0000 1000 (i.e. probably unrelated)
+                //
+                // Workaround by getting the record header and checking its typeId
+                reader.saveGroupStatus();
+                // FIXME: comment may no longer be releavant
+                loadTes4Group(messages); // CELL group with record type may have sub-groups
+            }
+            else
+            {
+                //std::cout << "Skipping group... "  // FIXME: testing only
+                    //<< ESM4::printLabel(hdr.group.label, hdr.group.type) << std::endl;
+
+                reader.skipGroup();
+                return false;
+            }
+
+            break;
+        }
+        case ESM4::Grp_CellChild:
+        {
+            reader.adjustGRUPFormId();  // not needed or even shouldn't be done? (only labels anyway)
+            reader.saveGroupStatus();
+            if (!mReader->hasMoreRecs())
+                return false; // may have been an empty group followed by EOF
+
+            loadTes4Group(messages);
+
+            break;
+        }
+        case ESM4::Grp_WorldChild:
+        case ESM4::Grp_TopicChild:
+        // FIXME: need to save context if skipping
+        case ESM4::Grp_CellPersistentChild:
+        case ESM4::Grp_CellTemporaryChild:
+        case ESM4::Grp_CellVisibleDistChild:
+        {
+            reader.adjustGRUPFormId();  // not needed or even shouldn't be done? (only labels anyway)
+            reader.saveGroupStatus();
+            if (!mReader->hasMoreRecs())
+                return false; // may have been an empty group followed by EOF
+
+            loadTes4Group(messages);
+
+            break;
+        }
+        case ESM4::Grp_ExteriorCell:
+        case ESM4::Grp_ExteriorSubCell:
+        case ESM4::Grp_InteriorCell:
+        case ESM4::Grp_InteriorSubCell:
+        {
+            reader.saveGroupStatus();
+            loadTes4Group(messages);
+
+            break;
+        }
+        default:
+            break;
+    }
+
+    return false;
+}
+
+// Deal with Tes4 records separately, as some have the same name as Tes3, e.g. REC_CELL
+bool CSMWorld::Data::loadTes4Record (const ESM4::RecordHeader& hdr, CSMDoc::Messages& messages)
+{
+    ESM4::Reader& reader = static_cast<ESM::ESM4Reader*>(mReader)->reader();
+
+    switch (hdr.record.typeId)
+    {
+
+        // FIXME: removed for now
+
+        default:
+            reader.skipRecordData();
+    }
+
+    return false;
 }
