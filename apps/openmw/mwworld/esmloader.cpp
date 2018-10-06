@@ -2,6 +2,7 @@
 #include "esmstore.hpp"
 
 #include <components/esm/esmreader.hpp>
+#include <components/esm/esm4reader.hpp>
 
 namespace MWWorld
 {
@@ -42,8 +43,22 @@ void EsmLoader::load(const boost::filesystem::path& filepath, std::vector<std::v
         else
             tesVerIndex = 3;
 
-        // do nothing for now
-        return;
+        lEsm->close();
+        delete lEsm;
+        ESM::ESM4Reader *esm = new ESM::ESM4Reader(isTes4); // NOTE: TES4 headers are 4 bytes shorter
+        esm->setEncoder(mEncoder);
+
+        index = contentFiles[tesVerIndex].size();
+        contentFiles[tesVerIndex].push_back(filepath.filename().string());
+        esm->setIndex(index);
+
+        esm->reader().setModIndex(index);
+        esm->openTes4File(filepath.string());
+        esm->reader().updateModIndicies(contentFiles[tesVerIndex]);
+        // FIXME: this does not work well (copies the base class pointer)
+        //i.e. have to check TES4/TES5 versions each time before use within EsmStore::load,
+        //static casting as required
+        mEsm[tesVerIndex].push_back(esm);
     }
     else
     {

@@ -8,6 +8,8 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
+#include <components/esm/esm4reader.hpp>
 
 namespace MWWorld
 {
@@ -82,6 +84,16 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     // Loop through all records
     while(esm.hasMoreRecs())
     {
+        if (isTes4 || isTes5 || isFONV)
+        {
+            ESM4::Reader& reader = static_cast<ESM::ESM4Reader*>(&esm)->reader();
+            reader.checkGroupStatus();
+
+            loadTes4Group(esm);
+            listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
+            continue;
+        }
+
         ESM::NAME n = esm.getRecName();
         esm.getRecHeader();
 
@@ -134,6 +146,138 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         }
         listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
     }
+}
+
+// Can't use ESM4::Reader& as the parameter here because we need esm.hasMoreRecs() for
+// checking an empty group followed by EOF
+void ESMStore::loadTes4Group (ESM::ESMReader &esm)
+{
+    ESM4::Reader& reader = static_cast<ESM::ESM4Reader*>(&esm)->reader();
+
+    reader.getRecordHeader();
+    const ESM4::RecordHeader& hdr = reader.hdr();
+
+    if (hdr.record.typeId != ESM4::REC_GRUP)
+        return loadTes4Record(esm);
+
+    switch (hdr.group.type)
+    {
+        case ESM4::Grp_RecordType:
+        {
+            // FIXME: rewrite to workaround reliability issue
+            if (hdr.group.label.value == ESM4::REC_NAVI || hdr.group.label.value == ESM4::REC_WRLD ||
+                hdr.group.label.value == ESM4::REC_REGN || hdr.group.label.value == ESM4::REC_STAT ||
+                hdr.group.label.value == ESM4::REC_ANIO || hdr.group.label.value == ESM4::REC_CONT ||
+                hdr.group.label.value == ESM4::REC_MISC || hdr.group.label.value == ESM4::REC_ACTI ||
+                hdr.group.label.value == ESM4::REC_ARMO || hdr.group.label.value == ESM4::REC_NPC_ ||
+                hdr.group.label.value == ESM4::REC_FLOR || hdr.group.label.value == ESM4::REC_GRAS ||
+                hdr.group.label.value == ESM4::REC_TREE || hdr.group.label.value == ESM4::REC_LIGH ||
+                hdr.group.label.value == ESM4::REC_BOOK || hdr.group.label.value == ESM4::REC_FURN ||
+                hdr.group.label.value == ESM4::REC_SOUN || hdr.group.label.value == ESM4::REC_WEAP ||
+                hdr.group.label.value == ESM4::REC_DOOR || hdr.group.label.value == ESM4::REC_AMMO ||
+                hdr.group.label.value == ESM4::REC_CLOT || hdr.group.label.value == ESM4::REC_ALCH ||
+                hdr.group.label.value == ESM4::REC_APPA || hdr.group.label.value == ESM4::REC_INGR ||
+                hdr.group.label.value == ESM4::REC_SGST || hdr.group.label.value == ESM4::REC_SLGM ||
+                hdr.group.label.value == ESM4::REC_KEYM || hdr.group.label.value == ESM4::REC_HAIR ||
+                hdr.group.label.value == ESM4::REC_EYES || hdr.group.label.value == ESM4::REC_CELL ||
+                hdr.group.label.value == ESM4::REC_CREA || hdr.group.label.value == ESM4::REC_LVLC ||
+                hdr.group.label.value == ESM4::REC_LVLI || hdr.group.label.value == ESM4::REC_MATO ||
+                hdr.group.label.value == ESM4::REC_IDLE || hdr.group.label.value == ESM4::REC_LTEX ||
+                hdr.group.label.value == ESM4::REC_RACE || hdr.group.label.value == ESM4::REC_SBSP
+                )
+            {
+                reader.saveGroupStatus();
+                loadTes4Group(esm);
+            }
+            else
+            {
+                // Skip groups that are of no interest (for now).
+                //  GMST GLOB CLAS FACT SKIL MGEF SCPT ENCH SPEL BSGN WTHR CLMT DIAL
+                //  QUST PACK CSTY LSCR LVSP WATR EFSH
+
+                // FIXME: The label field of a group is not reliable, so we will need to check here as well
+                //std::cout << "skipping group... " << ESM4::printLabel(hdr.group.label, hdr.group.type) << std::endl;
+                reader.skipGroup();
+                return;
+            }
+
+            break;
+        }
+        case ESM4::Grp_CellChild:
+        case ESM4::Grp_WorldChild:
+        case ESM4::Grp_TopicChild:
+        case ESM4::Grp_CellPersistentChild:
+        {
+            reader.adjustGRUPFormId();  // not needed or even shouldn't be done? (only labels anyway)
+            reader.saveGroupStatus();
+//#if 0
+            // Below test shows that Oblivion.esm does not have any persistent cell child
+            // groups under exterior world sub-block group.  Haven't checked other files yet.
+             if (reader.grp(0).type == ESM4::Grp_CellPersistentChild &&
+                 reader.grp(1).type == ESM4::Grp_CellChild &&
+                 !(reader.grp(2).type == ESM4::Grp_WorldChild || reader.grp(2).type == ESM4::Grp_InteriorSubCell))
+                 std::cout << "Unexpected persistent child group in exterior subcell" << std::endl;
+//#endif
+            if (!esm.hasMoreRecs())
+                return; // may have been an empty group followed by EOF
+
+            loadTes4Group(esm);
+
+            break;
+        }
+        case ESM4::Grp_CellTemporaryChild:
+        case ESM4::Grp_CellVisibleDistChild:
+        {
+            // NOTE: preload strategy and persistent records
+            //
+            // Current strategy defers loading of "temporary" or "visible when distant"
+            // references and other records (land and pathgrid) until they are needed.
+            //
+            // The "persistent" records need to be loaded up front, however.  This is to allow,
+            // for example, doors to work.  A door reference will have a FormId of the
+            // destination door FormId.  But we have no way of knowing to which cell the
+            // destination FormId belongs until that cell and that reference is loaded.
+            //
+            // For worldspaces the persistent records are usully (always?) stored in a dummy
+            // cell under a "world child" group.  It may be possible to skip the whole "cell
+            // child" group without scanning for persistent records.  See above short test.
+            reader.skipGroup();
+            break;
+        }
+        case ESM4::Grp_ExteriorCell:
+        case ESM4::Grp_ExteriorSubCell:
+        case ESM4::Grp_InteriorCell:
+        case ESM4::Grp_InteriorSubCell:
+        {
+            reader.saveGroupStatus();
+            loadTes4Group(esm);
+
+            break;
+        }
+        default:
+            reader.skipGroup();
+            break;
+    }
+
+    return;
+}
+
+void ESMStore::loadTes4Record (ESM::ESMReader& esm)
+{
+    // Assumes that the reader has just read the record header only.
+    ESM4::Reader& reader = static_cast<ESM::ESM4Reader*>(&esm)->reader();
+    const ESM4::RecordHeader& hdr = reader.hdr();
+
+    switch (hdr.record.typeId)
+    {
+
+        // FIXME: removed for now
+
+        default:
+            reader.skipRecordData();
+    }
+
+    return;
 }
 
 void ESMStore::setUp()
@@ -213,7 +357,7 @@ void ESMStore::setUp()
                 if (type==ESM::REC_NPC_)
                 {
                     // NPC record will always be last and we know that there can be only one
-                    // dynamic NPC record (player) -> We are done here with dynamic record laoding
+                    // dynamic NPC record (player) -> We are done here with dynamic record loading
                     setUp();
 
                     const ESM::NPC *player = mNpcs.find ("player");
