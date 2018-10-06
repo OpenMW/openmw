@@ -127,7 +127,9 @@ Enhancements for both OpenMW and OpenCS:
 
 * Hash based lookup for TES3 BSA files.
 * TES4/TES5 BSA support.
-* Experimental support of loading TES4/TES5 records (coming soon).
+* Loading TES4/TES5 records (incomplete).
+* Experimental support of using multiple versions of ESM files concurrently in OpenMW (coming soon)
+* Experimental support of loading newer NIF records (coming soon).
 * Experimental support of NavMesh (eventually).
 
 openmw.cfg example
