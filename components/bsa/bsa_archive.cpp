@@ -23,7 +23,10 @@
 
 #include "bsa_archive.hpp"
 
+#include <map>
+
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <OgreFileSystem.h>
 #include <OgreArchive.h>
@@ -41,9 +44,91 @@
 #define OGRE_CONST
 #endif
 
+#include <extern/BSAOpt/hash.hpp>
 #include "bsa_file.hpp"
+#include "tes4bsa_file.hpp"
 
 #include "../files/constrainedfiledatastream.hpp"
+
+namespace
+{
+// Concepts from answer by Remy Lebeau
+// https://stackoverflow.com/questions/15068475/recursive-hard-disk-search-with-findfirstfile-findnextfile-c
+//
+// Also see https://msdn.microsoft.com/en-us/library/aa365200%28VS.85%29.aspx
+//
+// From 34.5 sec down to 18.5 sec on laptop with many of the data files on an external USB drive
+#if defined _WIN32 || defined _WIN64
+
+#include <windows.h>
+#include <memory> // auto_ptr
+
+    // FIXME: not tested unicode path and filenames
+    DWORD indexFiles(const std::string& rootDir, const std::string& subdir,
+                     std::map<std::uint64_t, std::string>& files, std::map<std::string, std::string>& index)
+    {
+        HANDLE hFind = INVALID_HANDLE_VALUE;
+        WIN32_FIND_DATA ffd;
+        std::string path = rootDir + ((subdir == "") ? "" : "\\" +subdir);
+
+        hFind = FindFirstFile((path + "\\*").c_str(), &ffd);
+        if (INVALID_HANDLE_VALUE == hFind)
+            return ERROR_INVALID_HANDLE;
+
+        std::auto_ptr<std::vector<std::string> > subDirs;
+        std::string filename;
+
+        do
+        {
+            filename = std::string(ffd.cFileName);
+
+            if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+            {
+                if (filename != "." && filename != "..")
+                {
+                    if (subDirs.get() == nullptr)
+                        subDirs.reset(new std::vector<std::string>);
+
+                    subDirs->push_back(filename);
+                }
+            }
+            else
+            {
+                std::uint64_t folderHash = GenOBHash(subdir, filename);
+
+                std::map<std::uint64_t, std::string>::iterator iter = files.find(folderHash);
+                if (iter != files.end())
+                    throw std::runtime_error ("duplicate hash found");
+
+                files[folderHash] = path + "\\" + filename;
+
+                std::string entry = ((subdir == "") ? "" : subdir + "\\") + filename;
+                std::replace(entry.begin(), entry.end(), '\\', '/');
+                index.insert(std::make_pair (entry, path + "/" + filename));
+            }
+        } while (FindNextFile(hFind, &ffd) != 0);
+
+        FindClose(hFind);
+
+        DWORD dwError = GetLastError();
+        if (dwError != ERROR_NO_MORE_FILES)
+            return dwError;
+
+        if (subDirs.get() != nullptr)
+        {
+            for (size_t i = 0; i < subDirs->size(); ++i)
+            {
+                std::string dir = subDirs->at(i);
+                boost::algorithm::to_lower(dir);
+                // FIXME: ignoring errors for now
+                dwError = indexFiles(rootDir, ((subdir == "") ? "" : subdir + "\\") + dir, files, index);
+            }
+        }
+
+        return 0;
+    }
+#endif
+}
 
 using namespace Ogre;
 
@@ -78,6 +163,8 @@ class DirArchive: public Ogre::Archive
 
     index mIndex;
 
+    std::map <std::uint64_t, std::string> mFiles;
+
     index::const_iterator lookup_filename (std::string const & filename) const
     {
         std::string normalized = normalize_path (filename.begin (), filename.end ());
@@ -89,6 +176,10 @@ public:
     DirArchive(const String& name)
         : Archive(name, "Dir")
     {
+#if defined _WIN32 || defined _WIN64
+        indexFiles(name, "", mFiles, mIndex);
+#else
+
         typedef boost::filesystem::recursive_directory_iterator directory_iterator;
 
         directory_iterator end;
@@ -109,6 +200,7 @@ public:
 
             mIndex.insert (std::make_pair (searchable, proper));
         }
+#endif
     }
 
     bool isCaseSensitive() const { return fsstrict; }
@@ -119,6 +211,27 @@ public:
 
     virtual DataStreamPtr open(const String& filename, bool readonly = true) OGRE_CONST
     {
+#if defined _WIN32 || defined _WIN64
+        boost::filesystem::path p(filename);
+        std::string file = p.filename().string();
+
+        p.remove_filename();
+        std::string dir = p.string();
+        boost::algorithm::to_lower(dir);
+        std::replace(dir.begin(), dir.end(), '/', '\\');
+
+        std::uint64_t hash = GenOBHash(dir, file);
+
+        std::map<std::uint64_t, std::string>::const_iterator it = mFiles.find(hash);
+        if (it == mFiles.end())
+        {
+            std::ostringstream os;
+            os << "The file '" << filename << "' could not be found.";
+            throw std::runtime_error (os.str());
+        }
+
+        return openConstrainedFileDataStream (it->second.c_str());
+#else
         index::const_iterator i = lookup_filename (filename);
 
         if (i == mIndex.end ())
@@ -129,6 +242,7 @@ public:
         }
 
         return openConstrainedFileDataStream (i->second.c_str ());
+#endif
     }
 
     StringVectorPtr list(bool recursive = true, bool dirs = false)
@@ -157,7 +271,25 @@ public:
 
     bool exists(const String& filename)
     {
+#if defined _WIN32 || defined _WIN64
+        boost::filesystem::path p(filename);
+        std::string file = p.filename().string();
+
+        p.remove_filename();
+        std::string dir = p.string();
+        boost::algorithm::to_lower(dir);
+        std::replace(dir.begin(), dir.end(), '/', '\\');
+
+        std::uint64_t hash = GenOBHash(dir, file);
+
+        std::map<std::uint64_t, std::string>::const_iterator it = mFiles.find(hash);
+        if (it == mFiles.end())
+            return false;
+
+        return true;
+#else
         return lookup_filename(filename) != mIndex.end ();
+#endif
     }
 
     time_t getModifiedTime(const String&) { return 0; }
@@ -223,6 +355,8 @@ public:
              : Archive(name, "BSA")
   { arc.open(name); }
 
+  BSAArchive(const String& name, const std::string& type) : Archive(name, type) {}
+
   bool isCaseSensitive() const { return false; }
 
   // The archive is loaded in the constructor, and never unloaded.
@@ -241,7 +375,7 @@ public:
     return narc->getFile(filename.c_str());
   }
 
-  bool exists(const String& filename) {
+  virtual bool exists(const String& filename) {
     return arc.exists(filename.c_str());
   }
 
@@ -259,7 +393,7 @@ public:
     return findFileInfo ("*", recursive, dirs);
   }
 
-    StringVectorPtr find(const String& pattern, bool recursive = true,
+    virtual StringVectorPtr find(const String& pattern, bool recursive = true,
                          bool dirs = false)
     {
         std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
@@ -304,6 +438,24 @@ public:
 
         return ptr;
     }
+};
+
+class TES4BSAArchive : public BSAArchive
+{
+  Bsa::TES4BSAFile arc;
+
+public:
+  TES4BSAArchive::TES4BSAArchive(const String& name) : BSAArchive(name, "TES4BSA") { arc.open(name); }
+
+  virtual DataStreamPtr open(const String& filename, bool readonly = true)
+  {
+    return arc.getFile(filename);
+  }
+
+  virtual bool exists(const String& filename)
+  {
+    return arc.exists(filename);
+  }
 };
 
 // An archive factory for BSA archives
@@ -351,9 +503,32 @@ public:
     void destroyInstance( Archive* arch) { delete arch; }
 };
 
+class TES4BSAArchiveFactory : public ArchiveFactory
+{
+public:
+  const String& getType() const
+  {
+    static String name = "TES4BSA";
+    return name;
+  }
+
+  Archive *createInstance( const String& name )
+  {
+    return new TES4BSAArchive(name);
+  }
+
+  virtual Archive* createInstance(const String& name, bool readOnly)
+  {
+    return new TES4BSAArchive(name);
+  }
+
+  void destroyInstance( Archive* arch) { delete arch; }
+};
+
 
 static bool init = false;
 static bool init2 = false;
+static bool init3 = false;
 
 static void insertBSAFactory()
 {
@@ -361,6 +536,15 @@ static void insertBSAFactory()
     {
       ArchiveManager::getSingleton().addArchiveFactory( new BSAArchiveFactory );
       init = true;
+    }
+}
+
+static void insertTES4BSAFactory()
+{
+  if(!init3)
+    {
+      ArchiveManager::getSingleton().addArchiveFactory( new TES4BSAArchiveFactory );
+      init3 = true;
     }
 }
 
@@ -384,6 +568,13 @@ void addBSA(const std::string& name, const std::string& group)
   insertBSAFactory();
   ResourceGroupManager::getSingleton().
     addResourceLocation(name, "BSA", group, true);
+}
+
+void addTES4BSA(const std::string& name, const std::string& group)
+{
+  insertTES4BSAFactory();
+  ResourceGroupManager::getSingleton().
+    addResourceLocation(name, "TES4BSA", group, true);
 }
 
 void addDir(const std::string& name, const bool& fs, const std::string& group)

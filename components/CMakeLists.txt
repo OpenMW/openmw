@@ -31,7 +31,7 @@ add_component_dir (nifoverrides
     )
 
 add_component_dir (bsa
-    bsa_archive bsa_file resources
+    bsa_archive bsa_file resources tes4bsa_file
     )
 
 add_component_dir (nif

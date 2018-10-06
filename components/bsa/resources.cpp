@@ -9,7 +9,7 @@
 #include "bsa_archive.hpp"
 
 void Bsa::registerResources (const Files::Collections& collections,
-    const std::vector<std::string>& archives, bool useLooseFiles, bool fsStrict)
+    const std::vector<std::string>& archives, bool useLooseFiles, bool fsStrict, bool isTes4)
 {
     const Files::PathContainer& dataDirs = collections.getPaths();
 
@@ -34,13 +34,16 @@ void Bsa::registerResources (const Files::Collections& collections,
         if (collections.doesExist(*archive))
         {
             // Last BSA has the highest priority
-            std::string groupName = "DataBSA" + Ogre::StringConverter::toString(archives.size()-i, 8, '0');
+            std::string groupName = (isTes4 ? "TES4BSA" : "DataBSA") + Ogre::StringConverter::toString(archives.size()-i, 8, '0');
 
             Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
 
             const std::string archivePath = collections.getPath(*archive).string();
             std::cout << "Adding BSA archive " << archivePath << std::endl;
-            Bsa::addBSA(archivePath, groupName);
+            if (!isTes4)
+                Bsa::addBSA(archivePath, groupName);
+            else
+                Bsa::addTES4BSA(archivePath, groupName);
             ++i;
         }
         else

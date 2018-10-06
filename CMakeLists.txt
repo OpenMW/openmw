@@ -134,6 +134,9 @@ if(USE_SYSTEM_TINYXML)
     endif()
 endif()
 
+# TES4
+find_package(ZLIB REQUIRED)
+
 # Platform specific
 if (WIN32)
     if(NOT MINGW)
@@ -257,9 +260,10 @@ include_directories("." ${LIBS_DIR}
     ${MYGUI_PLATFORM_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
     ${BULLET_INCLUDE_DIRS}
+    ${ZLIB_INCLUDE_DIRS}
 )
 
-link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
+link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR} ${ZLIB_LIB_DIR})
 
 if(MYGUI_STATIC)
    add_definitions(-DMYGUI_STATIC)
@@ -577,6 +581,7 @@ add_subdirectory (extern/ogre-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
 add_subdirectory (extern/sdl4ogre)
 add_subdirectory (extern/murmurhash)
+add_subdirectory (extern/BSAOpt)
 
 # Components
 add_subdirectory (components)

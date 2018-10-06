@@ -73,6 +73,7 @@ namespace CS
             void setupDataFiles (const Files::PathContainer& dataDirs);
 
             std::pair<Files::PathContainer, std::vector<std::string> > readConfig(bool quiet=false);
+            std::vector<std::string> readTES4Config();
             ///< \return data paths
 
             // not implemented

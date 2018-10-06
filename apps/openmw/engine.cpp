@@ -252,6 +252,10 @@ void OMW::Engine::addArchive (const std::string& archive) {
     mArchives.push_back(archive);
 }
 
+void OMW::Engine::addTES4Archive (const std::string& archive) {
+    mTES4Archives.push_back(archive);
+}
+
 // Set resource dir
 void OMW::Engine::setResourceDir (const boost::filesystem::path& parResDir)
 {
@@ -365,6 +369,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mOgre->createWindow("OpenMW", windowSettings);
 
     Bsa::registerResources (mFileCollections, mArchives, true, mFSStrict);
+    // useLooseFiles is set false, since it is already done above
+    Bsa::registerResources (mFileCollections, mTES4Archives, /*useLooseFiles*/false, mFSStrict, /*isTes4*/true);
 
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
