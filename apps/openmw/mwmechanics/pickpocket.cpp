@@ -1,6 +1,6 @@
 #include "pickpocket.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -41,7 +41,7 @@ namespace MWMechanics
         int iPickMaxChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                 .find("iPickMaxChance")->getInt();
 
-        int roll = OEngine::Misc::Rng::roll0to99();
+        int roll = Misc::Rng::roll0to99();
         if (t < pcSneak / iPickMinChance)
         {
             return (roll > int(pcSneak / iPickMinChance));

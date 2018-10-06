@@ -18,7 +18,7 @@
 #include <libs/openengine/bullet/trace.h>
 #include <libs/openengine/bullet/physic.hpp>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/collections.hpp>
@@ -3145,7 +3145,7 @@ namespace MWWorld
         const ESM::CreatureLevList* list = getStore().get<ESM::CreatureLevList>().find(creatureList);
 
         int iNumberCreatures = getStore().get<ESM::GameSetting>().find("iNumberCreatures")->getInt();
-        int numCreatures = 1 + OEngine::Misc::Rng::rollDice(iNumberCreatures); // [1, iNumberCreatures]
+        int numCreatures = 1 + Misc::Rng::rollDice(iNumberCreatures); // [1, iNumberCreatures]
 
         for (int i=0; i<numCreatures; ++i)
         {
@@ -3196,7 +3196,7 @@ namespace MWWorld
 
         std::stringstream modelName;
         modelName << "Blood_Model_";
-        int roll = OEngine::Misc::Rng::rollDice(3); // [0, 2]
+        int roll = Misc::Rng::rollDice(3); // [0, 2]
         modelName << roll;
         std::string model = "meshes\\" + getFallback()->getFallbackString(modelName.str());
 

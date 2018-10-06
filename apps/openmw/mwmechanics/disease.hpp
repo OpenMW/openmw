@@ -1,7 +1,7 @@
 #ifndef OPENMW_MECHANICS_DISEASE_H
 #define OPENMW_MECHANICS_DISEASE_H
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -51,7 +51,7 @@ namespace MWMechanics
                 continue;
 
             int x = static_cast<int>(fDiseaseXferChance * 100 * resist);
-            if (OEngine::Misc::Rng::rollDice(10000) < x)
+            if (Misc::Rng::rollDice(10000) < x)
             {
                 // Contracted disease!
                 actor.getClass().getCreatureStats(actor).getSpells().add(it->first);

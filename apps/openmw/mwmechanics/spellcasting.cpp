@@ -4,7 +4,7 @@
 
 #include <boost/format.hpp>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -282,7 +282,7 @@ namespace MWMechanics
             if (castChance > 0)
                 x *= 50 / castChance;
 
-            float roll = OEngine::Misc::Rng::rollClosedProbability() * 100;
+            float roll = Misc::Rng::rollClosedProbability() * 100;
             if (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude)
                 roll -= resistance;
 
@@ -385,7 +385,7 @@ namespace MWMechanics
                         target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::ResistCommonDisease).getMagnitude()
                       : target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::ResistBlightDisease).getMagnitude();
 
-            if (OEngine::Misc::Rng::roll0to99() <= x)
+            if (Misc::Rng::roll0to99() <= x)
             {
                 // Fully resisted, show message
                 if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
@@ -415,7 +415,7 @@ namespace MWMechanics
         if (spell && caster != target && target.getClass().isActor())
         {
             float absorb = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude();
-            absorbed = (OEngine::Misc::Rng::roll0to99() < absorb);
+            absorbed = (Misc::Rng::roll0to99() < absorb);
             if (absorbed)
             {
                 const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
@@ -463,7 +463,7 @@ namespace MWMechanics
                 if (!reflected && magnitudeMult > 0 && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
                 {
                     float reflect = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Reflect).getMagnitude();
-                    bool isReflected = (OEngine::Misc::Rng::roll0to99() < reflect);
+                    bool isReflected = (Misc::Rng::roll0to99() < reflect);
                     if (isReflected)
                     {
                         const ESM::Static* reflectStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Reflect");
@@ -491,7 +491,7 @@ namespace MWMechanics
 
             if (magnitudeMult > 0 && !absorbed)
             {
-                float random = OEngine::Misc::Rng::rollClosedProbability();
+                float random = Misc::Rng::rollClosedProbability();
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
                 magnitude *= magnitudeMult;
 
@@ -823,7 +823,7 @@ namespace MWMechanics
 
             // Check success
             float successChance = getSpellSuccessChance(spell, mCaster);
-            if (OEngine::Misc::Rng::roll0to99() >= successChance)
+            if (Misc::Rng::roll0to99() >= successChance)
             {
                 if (mCaster == MWBase::Environment::get().getWorld()->getPlayerPtr())
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
@@ -901,7 +901,7 @@ namespace MWMechanics
                     + 0.1f * creatureStats.getAttribute (ESM::Attribute::Luck).getModified())
                     * creatureStats.getFatigueTerm();
 
-        int roll = OEngine::Misc::Rng::roll0to99();
+        int roll = Misc::Rng::roll0to99();
         if (roll > x)
         {
             // "X has no effect on you"

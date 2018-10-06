@@ -2,7 +2,7 @@
 
 #include <OgreSceneNode.h>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -109,7 +109,7 @@ namespace MWMechanics
         int iBlockMinChance = gmst.find("iBlockMinChance")->getInt();
         x = std::min(iBlockMaxChance, std::max(iBlockMinChance, x));
 
-        if (OEngine::Misc::Rng::roll0to99() < x)
+        if (Misc::Rng::roll0to99() < x)
         {
             // Reduce shield durability by incoming damage
             int shieldhealth = shield->getClass().getItemHealth(*shield);
@@ -187,7 +187,7 @@ namespace MWMechanics
         int skillValue = attacker.getClass().getSkill(attacker,
                                            weapon.getClass().getEquipmentSkill(weapon));
 
-        if (OEngine::Misc::Rng::roll0to99() >= getHitChance(attacker, victim, skillValue))
+        if (Misc::Rng::rollProbability() >= getHitChance(attacker, victim, skillValue) / 100.0f)
         {
             victim.getClass().onHit(victim, 0.0f, false, projectile, attacker, false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, attacker);
@@ -225,7 +225,7 @@ namespace MWMechanics
                 && !appliedEnchantment)
         {
             float fProjectileThrownStoreChance = gmst.find("fProjectileThrownStoreChance")->getFloat();
-            if (OEngine::Misc::Rng::rollProbability() < fProjectileThrownStoreChance / 100.f)
+            if (Misc::Rng::rollProbability() < fProjectileThrownStoreChance / 100.f)
                 victim.getClass().getContainerStore(victim).add(projectile, 1, victim);
         }
 
@@ -292,7 +292,7 @@ namespace MWMechanics
 
             saveTerm *= 1.25f * normalisedFatigue;
 
-            float x = std::max(0.f, saveTerm - OEngine::Misc::Rng::roll0to99());
+            float x = std::max(0.f, saveTerm - Misc::Rng::roll0to99());
 
             int element = ESM::MagicEffect::FireDamage;
             if (i == 1)

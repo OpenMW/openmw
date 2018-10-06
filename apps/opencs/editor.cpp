@@ -30,6 +30,7 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
   mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
+    std::vector<std::string> tes4config = readTES4Config();
 
     setupDataFiles (config.first);
 
@@ -44,6 +45,9 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 
     Bsa::registerResources (Files::Collections (config.first, !mFsStrict), config.second, true,
         mFsStrict);
+    // useLooseFiles is set false, since it is already done above
+    Bsa::registerResources (Files::Collections (config.first, !mFsStrict), tes4config, /*useLooseFiles*/false,
+        mFsStrict, /*isTes4*/true);
 
     mDocumentManager.listResources();
 
@@ -180,6 +184,19 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     }
 
     return std::make_pair (canonicalPaths, variables["fallback-archive"].as<std::vector<std::string> >());
+}
+
+std::vector<std::string> CS::Editor::readTES4Config()
+{
+    boost::program_options::variables_map variables;
+    boost::program_options::options_description desc("Syntax: openmw-cs <options>\nAllowed options");
+
+    desc.add_options()
+    ("fallback-tes4archive", boost::program_options::value<std::vector<std::string> >()->
+        default_value(std::vector<std::string>(), "fallback-tes4archive")->multitoken());
+
+    mCfgMgr.readConfiguration(variables, desc, /*quiet*/true);
+    return variables["fallback-tes4archive"].as<std::vector<std::string> >();
 }
 
 void CS::Editor::createGame()

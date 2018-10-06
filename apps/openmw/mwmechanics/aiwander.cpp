@@ -3,7 +3,7 @@
 #include <OgreVector3.h>
 #include <OgreSceneNode.h>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/aisequence.hpp>
 
@@ -329,7 +329,7 @@ namespace MWMechanics
             static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
                     .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
 
-            float roll = OEngine::Misc::Rng::rollProbability() * 10000.0f;
+            float roll = Misc::Rng::rollProbability() * 10000.0f;
 
             // In vanilla MW the chance was FPS dependent, and did not allow proper changing of fVoiceIdleOdds
             // due to the roll being an integer.
@@ -504,7 +504,7 @@ namespace MWMechanics
             if(!storage.mPathFinder.isPathConstructed())
             {
                 assert(mAllowedNodes.size());
-                unsigned int randNode = OEngine::Misc::Rng::rollDice(mAllowedNodes.size());
+                unsigned int randNode = Misc::Rng::rollDice(mAllowedNodes.size());
                 // NOTE: initially constructed with local (i.e. cell) co-ordinates
                 Ogre::Vector3 destNodePos(PathFinder::MakeOgreVector3(mAllowedNodes[randNode]));
 
@@ -631,7 +631,7 @@ namespace MWMechanics
                 .get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
 
             unsigned short idleChance = static_cast<unsigned short>(fIdleChanceMultiplier * mIdle[counter]);
-            unsigned short randSelect = (int)(OEngine::Misc::Rng::rollProbability() * int(100 / fIdleChanceMultiplier));
+            unsigned short randSelect = (int)(Misc::Rng::rollProbability() * int(100 / fIdleChanceMultiplier));
             if(randSelect < idleChance && randSelect > idleRoll)
             {
                 playedIdle = counter+2;
@@ -653,7 +653,7 @@ namespace MWMechanics
 
         state.moveIn(new AiWanderStorage());
 
-        int index = OEngine::Misc::Rng::rollDice(mAllowedNodes.size());
+        int index = Misc::Rng::rollDice(mAllowedNodes.size());
         ESM::Pathgrid::Point dest = mAllowedNodes[index];
 
         // apply a slight offset to prevent overcrowding

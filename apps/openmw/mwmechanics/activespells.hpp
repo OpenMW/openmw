@@ -97,7 +97,7 @@ namespace MWMechanics
             /// Remove all spells
             void clear();
 
-            bool isSpellActive (std::string id) const;
+            bool isSpellActive (const std::string& id) const;
             ///< case insensitive
 
             const MagicEffects& getMagicEffects() const;

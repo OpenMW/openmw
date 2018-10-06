@@ -67,6 +67,7 @@ namespace OMW
             ToUTF8::Utf8Encoder* mEncoder;
             Files::PathContainer mDataDirs;
             std::vector<std::string> mArchives;
+            std::vector<std::string> mTES4Archives;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer *mOgre;
             std::string mCellName;
@@ -137,6 +138,7 @@ namespace OMW
 
             /// Add BSA archive
             void addArchive(const std::string& archive);
+            void addTES4Archive(const std::string& archive);
 
             /// Set resource dir
             void setResourceDir(const boost::filesystem::path& parResDir);

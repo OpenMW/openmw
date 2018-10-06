@@ -11,7 +11,7 @@
 
 #include <SDL.h>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/compiler/extensions0.hpp>
 
@@ -194,7 +194,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mNewGame (false)
   , mCfgMgr(configurationManager)
 {
-    OEngine::Misc::Rng::init();
+    Misc::Rng::init();
     std::srand ( static_cast<unsigned int>(std::time(NULL)) );
     MWClass::registerClasses();
 
@@ -250,6 +250,10 @@ void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 // Add BSA archive
 void OMW::Engine::addArchive (const std::string& archive) {
     mArchives.push_back(archive);
+}
+
+void OMW::Engine::addTES4Archive (const std::string& archive) {
+    mTES4Archives.push_back(archive);
 }
 
 // Set resource dir
@@ -365,6 +369,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mOgre->createWindow("OpenMW", windowSettings);
 
     Bsa::registerResources (mFileCollections, mArchives, true, mFSStrict);
+    // useLooseFiles is set false, since it is already done above
+    Bsa::registerResources (mFileCollections, mTES4Archives, /*useLooseFiles*/false, mFSStrict, /*isTes4*/true);
 
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so

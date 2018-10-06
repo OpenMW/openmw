@@ -33,6 +33,7 @@ namespace Bsa
 /// Add the given BSA file as an input archive in the Ogre resource
 /// system.
 void addBSA(const std::string& file, const std::string& group="General");
+void addTES4BSA(const std::string& file, const std::string& group="General");
 void addDir(const std::string& file, const bool& fs, const std::string& group="General");
 
 }

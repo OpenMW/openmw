@@ -9,7 +9,7 @@
 namespace Bsa
 {
     void registerResources (const Files::Collections& collections,
-        const std::vector<std::string>& archives, bool useLooseFiles, bool fsStrict);
+        const std::vector<std::string>& archives, bool useLooseFiles, bool fsStrict, bool isTes4=false);
     ///< Register resources directories and archives as OGRE resources groups
 }
 

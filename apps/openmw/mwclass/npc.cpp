@@ -2,9 +2,7 @@
 
 #include <memory>
 
-#include <OgreSceneNode.h>
-
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadnpc.hpp>
@@ -382,7 +380,7 @@ namespace MWClass
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ptr.getClass().getSkill(ptr, weapskill));
 
-        if (OEngine::Misc::Rng::roll0to99() >= hitchance)
+        if (Misc::Rng::rollProbability() >= hitchance / 100.0f)
         {
             othercls.onHit(victim, 0.0f, false, weapon, ptr, false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
@@ -512,7 +510,7 @@ namespace MWClass
             const GMST& gmst = getGmst();
 
             int chance = store.get<ESM::GameSetting>().find("iVoiceHitOdds")->getInt();
-            if (OEngine::Misc::Rng::roll0to99() < chance)
+            if (Misc::Rng::roll0to99() < chance)
             {
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
             }
@@ -521,7 +519,7 @@ namespace MWClass
             float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * gmst.fKnockDownMult->getFloat();
             float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
                     * gmst.iKnockDownOddsMult->getInt() * 0.01f + gmst.iKnockDownOddsBase->getInt();
-            if (ishealth && agilityTerm <= damage && knockdownTerm <= OEngine::Misc::Rng::roll0to99())
+            if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99())
             {
                 getCreatureStats(ptr).setKnockedDown(true);
 
@@ -547,7 +545,7 @@ namespace MWClass
                     MWWorld::InventoryStore::Slot_RightPauldron, MWWorld::InventoryStore::Slot_RightPauldron,
                     MWWorld::InventoryStore::Slot_LeftGauntlet, MWWorld::InventoryStore::Slot_RightGauntlet
                 };
-                int hitslot = hitslots[OEngine::Misc::Rng::rollDice(20)];
+                int hitslot = hitslots[Misc::Rng::rollDice(20)];
 
                 float unmitigatedDamage = damage;
                 float x = damage / (damage + getArmorRating(ptr));

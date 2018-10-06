@@ -4,7 +4,7 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_ControllerManager.h>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/widgets/numericeditbox.hpp>
 
@@ -368,7 +368,7 @@ namespace MWGui
             else
                 x += abs(int(npcTerm - pcTerm));
 
-            int roll = OEngine::Misc::Rng::rollDice(100) + 1;
+            int roll = Misc::Rng::rollDice(100) + 1;
             if(roll > x || (mCurrentMerchantOffer < 0) != (mCurrentBalance < 0)) //trade refused
             {
                 MWBase::Environment::get().getWindowManager()->

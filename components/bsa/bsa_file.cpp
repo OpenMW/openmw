@@ -27,8 +27,40 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "../files/constrainedfiledatastream.hpp"
+
+namespace
+{
+    // see: http://en.uesp.net/wiki/Tes3Mod:BSA_File_Format
+    std::uint64_t getHash(const char *name)
+    {
+        unsigned int len = (unsigned int)strlen(name);
+        std::uint64_t hash;
+
+        unsigned l = (len>>1);
+        unsigned sum, off, temp, i, n, hash1;
+
+        for(sum = off = i = 0; i < l; i++) {
+            sum ^= (((unsigned)(name[i]))<<(off&0x1F));
+            off += 8;
+        }
+        hash1 = sum;
+
+        for(sum = off = 0; i < len; i++) {
+            temp = (((unsigned)(name[i]))<<(off&0x1F));
+            sum ^= temp;
+            n = temp & 0x1F;
+            sum = (sum << (32-n)) | (sum >> n);  // binary "rotate right"
+            off += 8;
+        }
+        hash = sum;
+        hash <<= 32;
+        hash += hash1;
+        return  hash;
+    }
+}
 
 using namespace std;
 using namespace Bsa;
@@ -143,7 +175,14 @@ void BSAFile::readHeader()
             fail("Archive contains offsets outside itself");
 
         // Add the file name to the lookup
-        lookup[fs.name] = i;
+        //lookup[fs.name] = i;
+    }
+
+    std::uint64_t hash;
+    for (size_t i = 0; i < filenum; ++i)
+    {
+        input.read(reinterpret_cast<char*>(&hash), 8);
+        mFiles[hash] = files[i];
     }
 
     isLoaded = true;
@@ -152,13 +191,14 @@ void BSAFile::readHeader()
 /// Get the index of a given file name, or -1 if not found
 int BSAFile::getIndex(const char *str) const
 {
-    Lookup::const_iterator it = lookup.find(str);
-    if(it == lookup.end())
+    std::string name(str);
+    boost::algorithm::to_lower(name);
+    std::uint64_t hash = getHash(name.c_str());
+    std::map<std::uint64_t, FileStruct>::const_iterator iter = mFiles.find(hash);
+    if (iter != mFiles.end())
+        return 0; // NOTE: this is a bit of a hack, exists() only checks for '-1'
+    else
         return -1;
-
-    int res = it->second;
-    assert(res >= 0 && (size_t)res < files.size());
-    return res;
 }
 
 /// Open an archive file.
@@ -171,10 +211,15 @@ void BSAFile::open(const string &file)
 Ogre::DataStreamPtr BSAFile::getFile(const char *file)
 {
     assert(file);
-    int i = getIndex(file);
-    if(i == -1)
-        fail("File not found: " + string(file));
 
-    const FileStruct &fs = files[i];
-	return openConstrainedFileDataStream (filename.c_str (), fs.offset, fs.fileSize);
+    std::string name(file);
+    boost::algorithm::to_lower(name);
+    std::uint64_t hash = getHash(name.c_str());
+    std::map<std::uint64_t, FileStruct>::const_iterator it = mFiles.find(hash);
+    if (it != mFiles.end())
+    {
+        const FileStruct &fs = it->second;
+        return openConstrainedFileDataStream (filename.c_str (), fs.offset, fs.fileSize);
+    }
+        fail("File not found: " + string(file));
 }

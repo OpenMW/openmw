@@ -82,6 +82,8 @@ private:
     typedef std::map<const char*, int, iltstr> Lookup;
     Lookup lookup;
 
+    std::map<std::uint64_t, FileStruct> mFiles;
+
     /// Error handling
     void fail(const std::string &msg);
 

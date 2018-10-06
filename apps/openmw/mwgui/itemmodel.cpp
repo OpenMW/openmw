@@ -35,7 +35,7 @@ namespace MWGui
             {
                 const ESM::GameSetting &currentSetting = *currentIteration;
                 std::string currentGMSTID = currentSetting.mId;
-                Misc::StringUtils::toLower(currentGMSTID);
+                Misc::StringUtils::lowerCaseInPlace(currentGMSTID);
 
                 // Don't bother checking this GMST if it's not a sMagicBound* one.
                 const std::string& toFind = "smagicbound";
@@ -44,7 +44,7 @@ namespace MWGui
 
                 // All sMagicBound* GMST's should be of type string
                 std::string currentGMSTValue = currentSetting.getString();
-                Misc::StringUtils::toLower(currentGMSTValue);
+                Misc::StringUtils::lowerCaseInPlace(currentGMSTValue);
 
                 boundItemIDCache.insert(currentGMSTValue);
             }
@@ -52,7 +52,7 @@ namespace MWGui
 
         // Perform bound item check and assign the Flag_Bound bit if it passes
         std::string tempItemID = base.getCellRef().getRefId();
-        Misc::StringUtils::toLower(tempItemID);
+        Misc::StringUtils::lowerCaseInPlace(tempItemID);
 
         if (boundItemIDCache.count(tempItemID) != 0)
             mFlags |= Flag_Bound;

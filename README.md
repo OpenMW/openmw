@@ -17,7 +17,7 @@ Font Licenses:
 Wrong Way, Go Back
 ------------------
 
-This is a fork of an old version of OpenMW.  This version is probably not what you are looking for.  It is still stuck on Ogre 1.9 and hence does not have any of the recent graphics enhancements.  I suggest you use the [official release](https://github.com/OpenMW/openmw) instead.
+This is a fork of an old version of OpenMW.  This version is probably not what you are looking for.  It is still stuck on Ogre 1.10 and hence does not have any of the recent graphics enhancements.  I suggest you use the [official release](https://github.com/OpenMW/openmw) instead.
 
 Getting Started
 ---------------
@@ -106,11 +106,9 @@ Command line options
 Changes
 -------
 
-Some of the differences with the official release are listed below.  They are almost all to do with OpenCS.
+Some of the differences with the official release are listed below.  Initial changes are mostly to do with OpenCS:
 
 * Various minor bug fixes.
-* Experimental support of loading TES4/TES5 records (coming soon).
-* Experimental support of navMesh (coming soon).
 * C++11 features are used (or at least those available on MSVC 2013 onwards).
 * Loading time improvements.
 * Loading progress bar changes.
@@ -124,4 +122,22 @@ Some of the differences with the official release are listed below.  They are al
 * User preferences setting to save the window state (position, geometry, etc) at the time of exit.
 * User preferences setting to workaround some X window managers not keeping pre-maximised state.
 * Use opencs.ini to store window states between sessions.
+
+Enhancements for both OpenMW and OpenCS:
+
+* Hash based lookup for TES3 BSA files.
+* TES4/TES5 BSA support.
+* Experimental support of loading TES4/TES5 records (coming soon).
+* Experimental support of NavMesh (eventually).
+
+Build Dependencies
+------------------
+
+The development was done using MSVC 2013 then MS Visual Studio Community 2015, Version 14.0.25431.01 Update 3.  The code may or may not compile under linux/gcc (probably not).
+
+* bost-1_63
+* Ogre 1.10.0
+* ffmpeg-20140823-git-7444cf9-win64-dev
+* zlib 1.2.8
+* Qt5
 

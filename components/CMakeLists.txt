@@ -31,7 +31,7 @@ add_component_dir (nifoverrides
     )
 
 add_component_dir (bsa
-    bsa_archive bsa_file resources
+    bsa_archive bsa_file resources tes4bsa_file
     )
 
 add_component_dir (nif
@@ -70,7 +70,7 @@ add_component_dir (esmterrain
     )
 
 add_component_dir (misc
-    utf8stream stringops resourcehelpers
+    utf8stream stringops resourcehelpers rng
     )
 
 IF(NOT WIN32 AND NOT APPLE)
@@ -166,14 +166,9 @@ include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 target_link_libraries(components 
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_WAVE_LIBRARY}
+    ${Boost_LIBRARIES} 
     ${OGRE_LIBRARIES}
     ${OENGINE_LIBRARY}    
-    ${BULLET_LIBRARIES}
 )
 
 if (WIN32)

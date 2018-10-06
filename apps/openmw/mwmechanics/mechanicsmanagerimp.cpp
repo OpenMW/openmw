@@ -2,7 +2,7 @@
 #include "mechanicsmanagerimp.hpp"
 #include "npcstats.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/stolenitems.hpp>
 
@@ -607,7 +607,7 @@ namespace MWMechanics
         int rank = 0;
         std::string npcFaction = ptr.getClass().getPrimaryFaction(ptr);
 
-        Misc::StringUtils::toLower(npcFaction);
+        Misc::StringUtils::lowerCaseInPlace(npcFaction);
 
         if (playerStats.getFactionRanks().find(npcFaction) != playerStats.getFactionRanks().end())
         {
@@ -741,7 +741,7 @@ namespace MWMechanics
         float x = 0;
         float y = 0;
 
-        int roll = OEngine::Misc::Rng::roll0to99();
+        float roll = Misc::Rng::rollClosedProbability() * 100;
 
         if (type == PT_Admire)
         {
@@ -1045,7 +1045,7 @@ namespace MWMechanics
             owner.first = ownerCellRef->getFaction();
             owner.second = true;
         }
-        Misc::StringUtils::toLower(owner.first);
+        Misc::StringUtils::lowerCaseInPlace(owner.first);
 
         if (!Misc::StringUtils::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
             mStolenItems[Misc::StringUtils::lowerCase(item.getClass().getId(item))][owner] += count;
@@ -1399,7 +1399,7 @@ namespace MWMechanics
 
         float target = x - y;
 
-        return (OEngine::Misc::Rng::roll0to99() >= target);
+        return (Misc::Rng::roll0to99() >= target);
     }
 
     void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)

@@ -1,6 +1,6 @@
 #include "pickpocketitemmodel.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwworld/class.hpp"
@@ -20,7 +20,7 @@ namespace MWGui
         {
             for (size_t i = 0; i<mSourceModel->getItemCount(); ++i)
             {
-                if (OEngine::Misc::Rng::roll0to99() > chance)
+                if (chance <= Misc::Rng::roll0to99())
                     mHiddenItems.push_back(mSourceModel->getItem(i));
             }
         }
