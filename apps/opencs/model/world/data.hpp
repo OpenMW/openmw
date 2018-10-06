@@ -57,6 +57,11 @@ namespace ESM
     struct Dialogue;
 }
 
+namespace ESM4
+{
+    union RecordHeader;
+}
+
 namespace CSMWorld
 {
     class ResourcesManager;
@@ -126,6 +131,9 @@ namespace CSMWorld
             static int count (RecordBase::State state, const CollectionBase& collection);
 
             const Data& self ();
+
+            bool loadTes4Group (CSMDoc::Messages& messages);
+            bool loadTes4Record (const ESM4::RecordHeader& hdr, CSMDoc::Messages& messages);
 
         public:
 

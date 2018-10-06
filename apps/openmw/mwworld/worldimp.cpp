@@ -90,12 +90,12 @@ namespace MWWorld
             return mLoaders.insert(std::make_pair(extension, loader)).second;
         }
 
-        void load(const boost::filesystem::path& filepath, int& index)
+        void load(const boost::filesystem::path& filepath, std::vector<std::vector<std::string> >& contentFiles)
         {
             LoadersContainer::iterator it(mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string())));
             if (it != mLoaders.end())
             {
-                it->second->load(filepath, index);
+                it->second->load(filepath, contentFiles);
             }
             else
             {
@@ -169,7 +169,7 @@ namespace MWWorld
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
-        mEsm.resize(contentFiles.size());
+        mEsm.resize(3); // FIXME: 0 - TES3, 1 - TES4, 2 - TES5 (TODO: Fallout)
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
 
@@ -187,7 +187,7 @@ namespace MWWorld
         listener->loadingOff();
 
         // insert records that may not be present in all versions of MW
-        if (mEsm[0].getFormat() == 0)
+        if (mEsm[0][0]->getFormat() == 0) // FIXME: first file may not be for MW
             ensureNeededRecords();
 
         mStore.setUp();
@@ -474,6 +474,13 @@ namespace MWWorld
         delete mPhysics;
 
         delete mPlayer;
+
+        for (unsigned int i = 0; i < mEsm.size(); ++i)
+            for (unsigned int j = 0; j < mEsm[i].size(); ++j)
+            {
+                mEsm[i][j]->close();
+                delete mEsm[i][j];
+            }
     }
 
     const ESM::Cell *World::getExterior (const std::string& cellName) const
@@ -542,9 +549,9 @@ namespace MWWorld
         return mStore;
     }
 
-    std::vector<ESM::ESMReader>& World::getEsmReader()
+    std::vector<ESM::ESMReader*>& World::getEsmReader()
     {
-        return mEsm;
+        return mEsm[0]; // FIXME: only MW for now (but doesn't seem to be used anywhere?)
     }
 
     LocalScripts& World::getLocalScripts()
@@ -2609,18 +2616,35 @@ namespace MWWorld
         return mScriptsEnabled;
     }
 
+    // The aim is to allow loading various types of TES files in any combination, as long as
+    // the dependent files are loaded first.  To achieve this, separate indicies for each TES
+    // versions are required.
+    //
+    // The trouble is that until the file is opened by an ESM reader to check the version from
+    // the header we don't know which index to increment.
+    //
+    // One option is to allow the content loader to manage.
+
+    // FIXME: Appears to be loading all the files named in 'content' located in fileCollections
+    // based on the extension string (e.g. .esm).  This probably means that the contents are in
+    // the correct load order.
+    //
+    // 'contentLoader' has a number of loaders that can deal with various extension types.
     void World::loadContentFiles(const Files::Collections& fileCollections,
         const std::vector<std::string>& content, ContentLoader& contentLoader)
     {
+        std::vector<std::vector<std::string> > contentFiles;
+        contentFiles.resize(3);
+
         std::vector<std::string>::const_iterator it(content.begin());
         std::vector<std::string>::const_iterator end(content.end());
-        for (int idx = 0; it != end; ++it, ++idx)
+        for (; it != end; ++it)
         {
             boost::filesystem::path filename(*it);
             const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
             if (col.doesExist(*it))
             {
-                contentLoader.load(col.getPath(*it), idx);
+                contentLoader.load(col.getPath(*it), contentFiles);
             }
             else
             {
@@ -2937,7 +2961,7 @@ namespace MWWorld
         MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition(), false);
         action.execute(ptr);
     }
-    
+
     void World::updateWeather(float duration, bool paused)
     {
         if (mPlayer->wasTeleported())
@@ -2945,7 +2969,7 @@ namespace MWWorld
             mPlayer->setTeleported(false);
             mWeatherManager->switchToNextWeather(true);
         }
-        
+
         mWeatherManager->update(duration, paused);
     }
 

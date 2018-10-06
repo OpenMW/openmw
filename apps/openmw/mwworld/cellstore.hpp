@@ -112,10 +112,10 @@ namespace MWWorld
             int count() const;
             ///< Return total number of references, including deleted ones.
 
-            void load (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+            void load (const MWWorld::ESMStore &store, std::vector<std::vector<ESM::ESMReader*> > &esm);
             ///< Load references from content file.
 
-            void preload (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+            void preload (const MWWorld::ESMStore &store, std::vector<std::vector<ESM::ESMReader*> > &esm);
             ///< Build ID list from content file.
 
             /// Call functor (ref) for each reference. functor must return a bool. Returning
@@ -213,9 +213,9 @@ namespace MWWorld
             }
 
             /// Run through references and store IDs
-            void listRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+            void listRefs(const MWWorld::ESMStore &store, std::vector<std::vector<ESM::ESMReader*> > &esm);
 
-            void loadRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+            void loadRefs(const MWWorld::ESMStore &store, std::vector<std::vector<ESM::ESMReader*> > &esm);
 
             void loadRef (ESM::CellRef& ref, bool deleted, const ESMStore& store);
             ///< Make case-adjustments to \a ref and insert it into the respective container.

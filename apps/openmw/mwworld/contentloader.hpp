@@ -21,7 +21,7 @@ struct ContentLoader
     {
     }
 
-    virtual void load(const boost::filesystem::path& filepath, int& index)
+    virtual void load(const boost::filesystem::path& filepath, std::vector<std::vector<std::string> >& contentFiles)
     {
       std::cout << "Loading content file " << filepath.string() << std::endl;
       mListener.setLabel(filepath.string());

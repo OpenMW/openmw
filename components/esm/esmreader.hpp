@@ -23,6 +23,7 @@ class ESMReader
 public:
 
   ESMReader();
+  virtual ~ESMReader() {}
 
   /*************************************************************************
    *
@@ -74,9 +75,9 @@ public:
   void openRaw(const std::string &file);
 
   /// Get the file size. Make sure that the file has been opened!
-  size_t getFileSize() { return mEsm->size(); }
+  virtual size_t getFileSize() { return mEsm->size(); }
   /// Get the current position in the file. Make sure that the file has been opened!
-  size_t getFileOffset() { return mEsm->tell(); }
+  virtual size_t getFileOffset() { return mEsm->tell(); }
 
   // This is a quick hack for multiple esm/esp files. Each plugin introduces its own
   //  terrain palette, but ESMReader does not pass a reference to the correct plugin
@@ -86,8 +87,8 @@ public:
   void setIndex(const int index) {mIdx = index; mCtx.index = index;}
   int getIndex() {return mIdx;}
 
-  void setGlobalReaderList(std::vector<ESMReader> *list) {mGlobalReaderList = list;}
-  std::vector<ESMReader> *getGlobalReaderList() {return mGlobalReaderList;}
+  void setGlobalReaderList(std::vector<ESMReader*> *list) {mGlobalReaderList = list;}
+  std::vector<ESMReader*> *getGlobalReaderList() {return mGlobalReaderList;}
 
   /*************************************************************************
    *
@@ -292,8 +293,6 @@ public:
 private:
   Ogre::DataStreamPtr mEsm;
 
-  ESM_Context mCtx;
-
   unsigned int mRecordFlags;
 
   // Special file signifier (see SpecialFile enum above)
@@ -301,10 +300,13 @@ private:
   // Buffer for ESM strings
   std::vector<char> mBuffer;
 
-  Header mHeader;
-
-  std::vector<ESMReader> *mGlobalReaderList;
+  std::vector<ESMReader*> *mGlobalReaderList;
   ToUTF8::Utf8Encoder* mEncoder;
+
+protected:
+  ESM_Context mCtx;
+
+  Header mHeader;
 };
 }
 #endif

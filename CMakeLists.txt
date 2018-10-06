@@ -580,6 +580,7 @@ add_subdirectory (extern/shiny)
 add_subdirectory (extern/ogre-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
 add_subdirectory (extern/sdl4ogre)
+add_subdirectory (extern/esm4)
 add_subdirectory (extern/murmurhash)
 add_subdirectory (extern/BSAOpt)
 

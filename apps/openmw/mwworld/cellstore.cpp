@@ -400,7 +400,7 @@ namespace MWWorld
             + mNpcs.mList.size();
     }
 
-    void CellStore::load (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)
+    void CellStore::load (const MWWorld::ESMStore &store, std::vector<std::vector<ESM::ESMReader*> > &esm)
     {
         if (mState!=State_Loaded)
         {
@@ -417,7 +417,7 @@ namespace MWWorld
         }
     }
 
-    void CellStore::preload (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)
+    void CellStore::preload (const MWWorld::ESMStore &store, std::vector<std::vector<ESM::ESMReader*> > &esm)
     {
         if (mState==State_Unloaded)
         {
@@ -427,7 +427,7 @@ namespace MWWorld
         }
     }
 
-    void CellStore::listRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)
+    void CellStore::listRefs(const MWWorld::ESMStore &store, std::vector<std::vector<ESM::ESMReader*> > &esm)
     {
         assert (mCell);
 
@@ -439,13 +439,13 @@ namespace MWWorld
         {
             // Reopen the ESM reader and seek to the right position.
             int index = mCell->mContextList.at(i).index;
-            mCell->restore (esm[index], i);
+            mCell->restore (*esm[0][index], (int)i); // FIXME: hardcoded 0 means TES3
 
             ESM::CellRef ref;
 
             // Get each reference in turn
             bool deleted = false;
-            while (mCell->getNextRef (esm[index], ref, deleted))
+            while (mCell->getNextRef (*esm[0][index], ref, deleted)) // FIXME hardcoded 0 means TES3
             {
                 if (deleted)
                     continue;
@@ -472,7 +472,7 @@ namespace MWWorld
         std::sort (mIds.begin(), mIds.end());
     }
 
-    void CellStore::loadRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)
+    void CellStore::loadRefs(const MWWorld::ESMStore &store, std::vector<std::vector<ESM::ESMReader*> > &esm)
     {
         assert (mCell);
 
@@ -484,14 +484,14 @@ namespace MWWorld
         {
             // Reopen the ESM reader and seek to the right position.
             int index = mCell->mContextList.at(i).index;
-            mCell->restore (esm[index], i);
+            mCell->restore (*esm[0][index], (int)i); // FIXME: hardcoded 0 means TES3
 
             ESM::CellRef ref;
             ref.mRefNum.mContentFile = ESM::RefNum::RefNum_NoContentFile;
 
             // Get each reference in turn
             bool deleted = false;
-            while(mCell->getNextRef(esm[index], ref, deleted))
+            while(mCell->getNextRef(*esm[0][index], ref, deleted)) // FIXME: 0 means TES3
             {
                 // Don't load reference if it was moved to a different cell.
                 ESM::MovedCellRefTracker::const_iterator iter =

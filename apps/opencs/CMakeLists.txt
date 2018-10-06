@@ -211,6 +211,7 @@ target_link_libraries(openmw-cs
     ${OGRE_Overlay_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
     ${SHINY_LIBRARIES}
+    ${ESM4_LIBRARIES}
     ${ZLIB_LIBRARY}
     ${MURMURHASH_LIBRARIES}
     ${BSAOPTHASH_LIBRARIES}
