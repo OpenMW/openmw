@@ -133,6 +133,7 @@
     Bug #4649: Levelup fully restores health
     Bug #4653: Length of non-ASCII strings is handled incorrectly in ESM reader
     Bug #4654: Editor: UpdateVisitor does not initialize skeletons for animated objects
+    Bug #4668: Editor: Light source color is displayed as an integer
     Feature #912: Editor: Add missing icons to UniversalId tables
     Feature #1221: Editor: Creature/NPC rendering
     Feature #1617: Editor: Enchantment effect record verifier

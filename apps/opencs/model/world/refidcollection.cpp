@@ -437,7 +437,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Radius, ColumnBase::Display_Integer));
     lightColumns.mRadius = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Colour, ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Colour, ColumnBase::Display_Colour));
     lightColumns.mColor = &mColumns.back();
 
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Sound, ColumnBase::Display_Sound));
