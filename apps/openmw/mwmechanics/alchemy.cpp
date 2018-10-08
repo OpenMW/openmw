@@ -26,7 +26,6 @@
 
 #include "magiceffects.hpp"
 #include "creaturestats.hpp"
-#include "npcstats.hpp"
 
 MWMechanics::Alchemy::Alchemy()
     : mValue(0)
@@ -318,10 +317,9 @@ void MWMechanics::Alchemy::increaseSkill()
 float MWMechanics::Alchemy::getAlchemyFactor() const
 {
     const CreatureStats& creatureStats = mAlchemist.getClass().getCreatureStats (mAlchemist);
-    const NpcStats& npcStats = mAlchemist.getClass().getNpcStats (mAlchemist);
 
     return
-        (npcStats.getSkill (ESM::Skill::Alchemy).getModified() +
+        (mAlchemist.getClass().getSkill(mAlchemist, ESM::Skill::Alchemy) +
         0.1f * creatureStats.getAttribute (ESM::Attribute::Intelligence).getModified()
         + 0.1f * creatureStats.getAttribute (ESM::Attribute::Luck).getModified());
 }
@@ -472,8 +470,7 @@ MWMechanics::Alchemy::TEffectsIterator MWMechanics::Alchemy::endEffects() const
 
 bool MWMechanics::Alchemy::knownEffect(unsigned int potionEffectIndex, const MWWorld::Ptr &npc)
 {
-    MWMechanics::NpcStats& npcStats = npc.getClass().getNpcStats(npc);
-    int alchemySkill = npcStats.getSkill (ESM::Skill::Alchemy).getBase();
+    int alchemySkill = npc.getClass().getSkill (npc, ESM::Skill::Alchemy);
     static const float fWortChanceValue =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->mValue.getFloat();
     return (potionEffectIndex <= 1 && alchemySkill >= fWortChanceValue)

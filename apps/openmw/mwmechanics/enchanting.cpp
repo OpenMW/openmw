@@ -10,7 +10,6 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "creaturestats.hpp"
-#include "npcstats.hpp"
 #include "spellcasting.hpp"
 #include "actorutil.hpp"
 
@@ -280,11 +279,11 @@ namespace MWMechanics
 
     float Enchanting::getEnchantChance() const
     {
-        const NpcStats& npcStats = mEnchanter.getClass().getNpcStats (mEnchanter);
+        const CreatureStats& stats = mEnchanter.getClass().getCreatureStats(mEnchanter);
 
-        float chance1 = (npcStats.getSkill (ESM::Skill::Enchant).getModified() + 
-        (0.25f * npcStats.getAttribute (ESM::Attribute::Intelligence).getModified())
-        + (0.125f * npcStats.getAttribute (ESM::Attribute::Luck).getModified()));
+        float chance1 = (mEnchanter.getClass().getSkill(mEnchanter, ESM::Skill::Enchant) + 
+        (0.25f * stats.getAttribute (ESM::Attribute::Intelligence).getModified())
+        + (0.125f * stats.getAttribute (ESM::Attribute::Luck).getModified()));
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
