@@ -667,7 +667,7 @@ namespace MWPhysics
                         }
 
                         // safely eject from ground (only if it's walkable; if it's unwalkable this makes us glide up it for a bit before gravity kicks back in)
-                        if (!isFlying && !isOnSlope)
+                        if (!isOnSlope)
                         {
                             from = tracer.mEndPos;
                             to = tracer.mEndPos + osg::Vec3f(0, 0, sGroundOffset);
