@@ -14,7 +14,7 @@ namespace MWGui
     MYGUI_RTTI_DERIVED(BackgroundImage)
 
     public:
-        BackgroundImage() : mChild(NULL), mAspect(0) {}
+        BackgroundImage() : mChild(nullptr), mAspect(0) {}
 
         /**
          * @param fixedRatio Use a fixed ratio of 4:3, regardless of the image dimensions

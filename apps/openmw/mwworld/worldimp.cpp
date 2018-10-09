@@ -1111,7 +1111,7 @@ namespace MWWorld
 
     void World::deleteObject (const Ptr& ptr)
     {
-        if (!ptr.getRefData().isDeleted() && ptr.getContainerStore() == NULL)
+        if (!ptr.getRefData().isDeleted() && ptr.getContainerStore() == nullptr)
         {
             if (ptr == getPlayerPtr())
                 throw std::runtime_error("can not delete player object");
@@ -2192,7 +2192,7 @@ namespace MWWorld
 
         pos.z() += heightRatio*2*mPhysics->getRenderingHalfExtents(object).z();
 
-        const CellStore *currCell = object.isInCell() ? object.getCell() : NULL; // currCell == NULL should only happen for player, during initial startup
+        const CellStore *currCell = object.isInCell() ? object.getCell() : nullptr; // currCell == nullptr should only happen for player, during initial startup
 
         return isUnderwater(currCell, pos);
     }
@@ -2867,7 +2867,7 @@ namespace MWWorld
 
         // if the faced object can not be activated, do not use it
         if (!target.isEmpty() && !target.getClass().canBeActivated(target))
-            target = NULL;
+            target = nullptr;
 
         if (target.isEmpty())
         {
@@ -2920,14 +2920,14 @@ namespace MWWorld
                     target = result1.first;
                     hitPosition = result1.second;
                     if (dist1 > getMaxActivationDistance())
-                        target = NULL;
+                        target = nullptr;
                 }
                 else if (result2.mHit)
                 {
                     target = result2.mHitObject;
                     hitPosition = result2.mHitPointWorld;
                     if (dist2 > getMaxActivationDistance() && !target.isEmpty() && !target.getClass().canBeActivated(target))
-                        target = NULL;
+                        target = nullptr;
                 }
             }
         }

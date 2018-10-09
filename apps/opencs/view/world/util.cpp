@@ -129,7 +129,7 @@ void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemM
 
     // Color columns use a custom editor, so we need to fetch selected color from it.
     CSVWidget::ColorEditor *colorEditor = qobject_cast<CSVWidget::ColorEditor *>(editor);
-    if (colorEditor != NULL)
+    if (colorEditor != nullptr)
     {
         variant = colorEditor->colorInt();
     }
@@ -322,7 +322,7 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
 
     // Color columns use a custom editor, so we need explicitly set a data for it
     CSVWidget::ColorEditor *colorEditor = qobject_cast<CSVWidget::ColorEditor *>(editor);
-    if (colorEditor != NULL)
+    if (colorEditor != nullptr)
     {
         colorEditor->setColor(variant.toInt());
         return;

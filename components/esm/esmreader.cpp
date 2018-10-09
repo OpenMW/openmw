@@ -23,8 +23,8 @@ ESMReader::ESMReader()
     : mIdx(0)
     , mRecordFlags(0)
     , mBuffer(50*1024)
-    , mGlobalReaderList(NULL)
-    , mEncoder(NULL)
+    , mGlobalReaderList(nullptr)
+    , mEncoder(nullptr)
     , mFileSize(0)
 {
 }

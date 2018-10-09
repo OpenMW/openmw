@@ -484,7 +484,7 @@ namespace MWScript
                     if (!player.isInCell())
                         throw std::runtime_error("player not in a cell");
 
-                    MWWorld::CellStore* store = NULL;
+                    MWWorld::CellStore* store = nullptr;
                     if (player.getCell()->isExterior())
                     {
                         int cx,cy;

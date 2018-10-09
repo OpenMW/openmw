@@ -318,7 +318,7 @@ namespace CSMWorld
 
     QVariant BodyPartRaceColumn::get(const Record<ESM::BodyPart> &record) const
     {
-        if (mMeshType != NULL && mMeshType->get(record) == ESM::BodyPart::MT_Skin)
+        if (mMeshType != nullptr && mMeshType->get(record) == ESM::BodyPart::MT_Skin)
         {
             return QString::fromUtf8(record.get().mRace.c_str());
         }

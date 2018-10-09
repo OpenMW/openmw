@@ -203,7 +203,7 @@ namespace MWMechanics
         }
 
         // F_PCStart spells
-        const ESM::Race* race = NULL;
+        const ESM::Race* race = nullptr;
         if (mRaceSelected)
             race = esmStore.get<ESM::Race>().find(player->mRace);
 

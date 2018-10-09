@@ -170,7 +170,7 @@ void CreatureWeaponAnimation::releaseArrow(float attackStrength)
 osg::Group *CreatureWeaponAnimation::getArrowBone()
 {
     if (!mWeapon)
-        return NULL;
+        return nullptr;
 
     SceneUtil::FindByNameVisitor findVisitor ("ArrowBone");
     mWeapon->getNode()->accept(findVisitor);
@@ -180,7 +180,7 @@ osg::Group *CreatureWeaponAnimation::getArrowBone()
 
 osg::Node *CreatureWeaponAnimation::getWeaponNode()
 {
-    return mWeapon ? mWeapon->getNode().get() : NULL;
+    return mWeapon ? mWeapon->getNode().get() : nullptr;
 }
 
 Resource::ResourceSystem *CreatureWeaponAnimation::getResourceSystem()

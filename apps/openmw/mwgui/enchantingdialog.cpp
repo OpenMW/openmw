@@ -28,7 +28,7 @@ namespace MWGui
     EnchantingDialog::EnchantingDialog()
         : WindowBase("openmw_enchanting_dialog.layout")
         , EffectEditorBase(EffectEditorBase::Enchanting)
-        , mItemSelectionDialog(NULL)
+        , mItemSelectionDialog(nullptr)
     {
         getWidget(mName, "NameEdit");
         getWidget(mCancelButton, "CancelButton");

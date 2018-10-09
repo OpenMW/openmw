@@ -367,7 +367,7 @@ namespace
         void applyNode(osg::Node& node)
         {
             if (node.getStateSet())
-                node.setStateSet(NULL);
+                node.setStateSet(nullptr);
 
             if (node.getNodeMask() == 0x1 && node.getNumParents() == 1)
                 mToRemove.push_back(std::make_pair(&node, node.getParent(0)));
@@ -635,12 +635,12 @@ namespace MWRender
 
     Animation::Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
         : mInsert(parentNode)
-        , mSkeleton(NULL)
+        , mSkeleton(nullptr)
         , mNodeMapCreated(false)
         , mPtr(ptr)
         , mResourceSystem(resourceSystem)
         , mAccumulate(1.f, 1.f, 0.f)
-        , mTextKeyListener(NULL)
+        , mTextKeyListener(nullptr)
         , mHeadYawRadians(0.f)
         , mHeadPitchRadians(0.f)
         , mHasMagicEffects(false)
@@ -826,7 +826,7 @@ namespace MWRender
         for(size_t i = 0;i < sNumBlendMasks;i++)
             mAnimationTimePtr[i]->setTimePtr(std::shared_ptr<float>());
 
-        mAccumCtrl = NULL;
+        mAccumCtrl = nullptr;
 
         mAnimSources.clear();
 
@@ -1084,12 +1084,12 @@ namespace MWRender
             node->removeUpdateCallback(it->second);
 
             // Should be no longer needed with OSG 3.4
-            it->second->setNestedCallback(NULL);
+            it->second->setNestedCallback(nullptr);
         }
 
         mActiveControllers.clear();
 
-        mAccumCtrl = NULL;
+        mAccumCtrl = nullptr;
 
         for(size_t blendMask = 0;blendMask < sNumBlendMasks;blendMask++)
         {
@@ -1416,14 +1416,14 @@ namespace MWRender
             previousStateset = mObjectRoot->getStateSet();
             mObjectRoot->getParent(0)->removeChild(mObjectRoot);
         }
-        mObjectRoot = NULL;
-        mSkeleton = NULL;
+        mObjectRoot = nullptr;
+        mSkeleton = nullptr;
 
         mNodeMap.clear();
         mNodeMapCreated = false;
         mActiveControllers.clear();
-        mAccumRoot = NULL;
-        mAccumCtrl = NULL;
+        mAccumRoot = nullptr;
+        mAccumCtrl = nullptr;
 
         if (!forceskeleton)
         {
@@ -1556,7 +1556,7 @@ namespace MWRender
         node->addUpdateCallback(glowUpdater);
 
         // set a texture now so that the ShaderVisitor can find it
-        osg::ref_ptr<osg::StateSet> writableStateSet = NULL;
+        osg::ref_ptr<osg::StateSet> writableStateSet = nullptr;
         if (!node->getStateSet())
             writableStateSet = node->getOrCreateStateSet();
         else
@@ -1735,7 +1735,7 @@ namespace MWRender
         std::string lowerName = Misc::StringUtils::lowerCase(name);
         NodeMap::const_iterator found = getNodeMap().find(lowerName);
         if (found == getNodeMap().end())
-            return NULL;
+            return nullptr;
         else
             return found->second;
     }
@@ -1766,7 +1766,7 @@ namespace MWRender
         }
         else
         {
-            mObjectRoot->setStateSet(NULL);
+            mObjectRoot->setStateSet(nullptr);
 
             mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
         }
@@ -1793,7 +1793,7 @@ namespace MWRender
             if (mGlowLight)
             {
                 mInsert->removeChild(mGlowLight);
-                mGlowLight = NULL;
+                mGlowLight = nullptr;
             }
         }
         else
@@ -1807,7 +1807,7 @@ namespace MWRender
                 if (mGlowLight)
                 {
                     mInsert->removeChild(mGlowLight);
-                    mGlowLight = NULL;
+                    mGlowLight = nullptr;
                 }
 
                 osg::ref_ptr<osg::Light> light (new osg::Light);
@@ -1828,7 +1828,7 @@ namespace MWRender
 
     void Animation::addControllers()
     {
-        mHeadController = NULL;
+        mHeadController = nullptr;
 
         if (mPtr.getClass().isBipedal(mPtr))
         {

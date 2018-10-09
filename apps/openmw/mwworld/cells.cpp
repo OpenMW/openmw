@@ -340,7 +340,7 @@ public:
         }
         catch (...)
         {
-            return NULL;
+            return nullptr;
         }
     }
 };

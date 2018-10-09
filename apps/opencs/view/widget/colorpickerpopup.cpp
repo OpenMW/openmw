@@ -45,7 +45,7 @@ void CSVWidget::ColorPickerPopup::showPicker(const QPoint &position, const QColo
 void CSVWidget::ColorPickerPopup::mousePressEvent(QMouseEvent *event)
 {
     QPushButton *button = qobject_cast<QPushButton *>(parentWidget());
-    if (button != NULL)
+    if (button != nullptr)
     {
         QStyleOptionButton option;
         option.init(button);

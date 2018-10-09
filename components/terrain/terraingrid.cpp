@@ -34,7 +34,7 @@ TerrainGrid::~TerrainGrid()
 void TerrainGrid::cacheCell(View* view, int x, int y)
 {
     osg::Vec2f center(x+0.5f, y+0.5f);
-    static_cast<MyView*>(view)->mLoaded =  buildTerrain(NULL, 1.f, center);
+    static_cast<MyView*>(view)->mLoaded =  buildTerrain(nullptr, 1.f, center);
 }
 
 osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter)
@@ -57,7 +57,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
     {
         osg::ref_ptr<osg::Node> node = mChunkManager->getChunk(chunkSize, chunkCenter, 0, 0);
         if (!node)
-            return NULL;
+            return nullptr;
         if (parent)
             parent->addChild(node);
 
@@ -71,7 +71,7 @@ void TerrainGrid::loadCell(int x, int y)
         return; // already loaded
 
     osg::Vec2f center(x+0.5f, y+0.5f);
-    osg::ref_ptr<osg::Node> terrainNode = buildTerrain(NULL, 1.f, center);
+    osg::ref_ptr<osg::Node> terrainNode = buildTerrain(nullptr, 1.f, center);
     if (!terrainNode)
         return; // no terrain defined
 

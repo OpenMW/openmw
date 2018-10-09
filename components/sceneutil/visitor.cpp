@@ -101,7 +101,7 @@ namespace SceneUtil
     void CleanObjectRootVisitor::applyNode(osg::Node& node)
     {
         if (node.getStateSet())
-            node.setStateSet(NULL);
+            node.setStateSet(nullptr);
 
         if (node.getNodeMask() == 0x1 && node.getNumParents() == 1)
             mToRemove.push_back(std::make_pair(&node, node.getParent(0)));

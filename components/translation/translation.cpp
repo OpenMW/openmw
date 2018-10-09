@@ -5,7 +5,7 @@
 namespace Translation
 {
     Storage::Storage()
-        : mEncoder(NULL)
+        : mEncoder(nullptr)
     {
     }
 

@@ -298,7 +298,7 @@ namespace MWClass
         bool healthdmg = true;
         if (!weapon.isEmpty())
         {
-            const unsigned char *attack = NULL;
+            const unsigned char *attack = nullptr;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
             else if(type == ESM::Weapon::AT_Slash)
@@ -828,7 +828,7 @@ namespace MWClass
                     ptr.getRefData().setCount(1);
 
                 MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
-                ptr.getRefData().setCustomData(NULL);
+                ptr.getRefData().setCustomData(nullptr);
 
                 // Reset to original position
                 MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],

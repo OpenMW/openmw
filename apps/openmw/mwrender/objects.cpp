@@ -126,14 +126,14 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
         if (ptr.getClass().isActor())
         {
             if (ptr.getClass().hasInventoryStore(ptr))
-                ptr.getClass().getInventoryStore(ptr).setInvListener(NULL, ptr);
+                ptr.getClass().getInventoryStore(ptr).setInvListener(nullptr, ptr);
 
-            ptr.getClass().getContainerStore(ptr).setContListener(NULL);
+            ptr.getClass().getContainerStore(ptr).setContListener(nullptr);
         }
 
         ptr.getRefData().getBaseNode()->getParent(0)->removeChild(ptr.getRefData().getBaseNode());
 
-        ptr.getRefData().setBaseNode(NULL);
+        ptr.getRefData().setBaseNode(nullptr);
         return true;
     }
     return false;
@@ -153,8 +153,8 @@ void Objects::removeCell(const MWWorld::CellStore* store)
             if (ptr.getClass().isNpc() && ptr.getRefData().getCustomData())
             {
                 MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
-                invStore.setInvListener(NULL, ptr);
-                invStore.setContListener(NULL);
+                invStore.setInvListener(nullptr, ptr);
+                invStore.setContListener(nullptr);
             }
 
             mObjects.erase(iter++);
@@ -218,7 +218,7 @@ Animation* Objects::getAnimation(const MWWorld::Ptr &ptr)
     if(iter != mObjects.end())
         return iter->second;
 
-    return NULL;
+    return nullptr;
 }
 
 const Animation* Objects::getAnimation(const MWWorld::ConstPtr &ptr) const
@@ -227,7 +227,7 @@ const Animation* Objects::getAnimation(const MWWorld::ConstPtr &ptr) const
     if(iter != mObjects.end())
         return iter->second;
 
-    return NULL;
+    return nullptr;
 }
 
 }

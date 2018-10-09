@@ -23,8 +23,8 @@ namespace MWGui
 
         MWSkill::MWSkill()
             : mSkillId(ESM::Skill::Length)
-            , mSkillNameWidget(NULL)
-            , mSkillValueWidget(NULL)
+            , mSkillNameWidget(nullptr)
+            , mSkillValueWidget(nullptr)
         {
         }
 
@@ -114,8 +114,8 @@ namespace MWGui
 
         MWAttribute::MWAttribute()
             : mId(-1)
-            , mAttributeNameWidget(NULL)
-            , mAttributeValueWidget(NULL)
+            , mAttributeNameWidget(nullptr)
+            , mAttributeValueWidget(nullptr)
         {
         }
 
@@ -204,7 +204,7 @@ namespace MWGui
         /* MWSpell */
 
         MWSpell::MWSpell()
-            : mSpellNameWidget(NULL)
+            : mSpellNameWidget(nullptr)
         {
         }
 
@@ -286,7 +286,7 @@ namespace MWGui
         {
             // We don't know the width of all the elements beforehand, so we do it in
             // 2 steps: first, create all widgets and check their width....
-            MWSpellEffectPtr effect = NULL;
+            MWSpellEffectPtr effect = nullptr;
             int maxwidth = coord.width;
 
             for (SpellEffectList::iterator it=mEffectList.begin();
@@ -359,8 +359,8 @@ namespace MWGui
         /* MWSpellEffect */
 
         MWSpellEffect::MWSpellEffect()
-            : mImageWidget(NULL)
-            , mTextWidget(NULL)
+            : mImageWidget(nullptr)
+            , mTextWidget(nullptr)
             , mRequestedWidth(0)
         {
         }
@@ -489,9 +489,9 @@ namespace MWGui
         MWDynamicStat::MWDynamicStat()
         : mValue(0)
         , mMax(1)
-        , mTextWidget(NULL)
-        , mBarWidget(NULL)
-        , mBarTextWidget(NULL)
+        , mTextWidget(nullptr)
+        , mBarWidget(nullptr)
+        , mBarTextWidget(nullptr)
         {
         }
 

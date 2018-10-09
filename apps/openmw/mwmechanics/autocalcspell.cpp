@@ -149,7 +149,7 @@ namespace MWMechanics
 
         float baseMagicka = fPCbaseMagickaMult * actorAttributes[ESM::Attribute::Intelligence];
         bool reachedLimit = false;
-        const ESM::Spell* weakestSpell = NULL;
+        const ESM::Spell* weakestSpell = nullptr;
         int minCost = std::numeric_limits<int>::max();
 
         std::vector<std::string> selectedSpells;

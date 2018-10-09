@@ -3,7 +3,7 @@
 #include "operation.hpp"
 
 CSMDoc::OperationHolder::OperationHolder (Operation *operation)
-    : mOperation(NULL)
+    : mOperation(nullptr)
     , mRunning (false)
 {
     if (operation)

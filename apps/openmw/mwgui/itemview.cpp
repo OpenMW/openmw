@@ -18,8 +18,8 @@ namespace MWGui
 {
 
 ItemView::ItemView()
-    : mModel(NULL)
-    , mScrollView(NULL)
+    : mModel(nullptr)
+    , mScrollView(nullptr)
 {
 }
 
@@ -44,7 +44,7 @@ void ItemView::initialiseOverride()
     Base::initialiseOverride();
 
     assignWidget(mScrollView, "ScrollView");
-    if (mScrollView == NULL)
+    if (mScrollView == nullptr)
         throw std::runtime_error("Item view needs a scroll view");
 
     mScrollView->setCanvasAlign(MyGUI::Align::Left | MyGUI::Align::Top);

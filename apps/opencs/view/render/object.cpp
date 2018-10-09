@@ -86,7 +86,7 @@ void CSVRender::Object::update()
     const int ModelIndex = referenceables.findColumnIndex (CSMWorld::Columns::ColumnId_Model);
 
     int index = referenceables.searchId (mReferenceableId);
-    const ESM::Light* light = NULL;
+    const ESM::Light* light = nullptr;
 
     mBaseNode->removeChildren(0, mBaseNode->getNumChildren());
 

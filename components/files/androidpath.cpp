@@ -40,15 +40,15 @@ namespace
     boost::filesystem::path getUserHome()
     {
         const char* dir = getenv("HOME");
-        if (dir == NULL)
+        if (dir == nullptr)
         {
             struct passwd* pwd = getpwuid(getuid());
-            if (pwd != NULL)
+            if (pwd != nullptr)
             {
                 dir = pwd->pw_dir;
             }
         }
-        if (dir == NULL)
+        if (dir == nullptr)
             return boost::filesystem::path();
         else
             return boost::filesystem::path(dir);

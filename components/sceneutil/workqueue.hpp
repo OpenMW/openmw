@@ -57,7 +57,7 @@ namespace SceneUtil
         void addWorkItem(osg::ref_ptr<WorkItem> item, bool front=false);
 
         /// Get the next work item from the front of the queue. If the queue is empty, waits until a new item is added.
-        /// If the workqueue is in the process of being destroyed, may return NULL.
+        /// If the workqueue is in the process of being destroyed, may return nullptr.
         /// @par Used internally by the WorkThread.
         osg::ref_ptr<WorkItem> removeWorkItem();
 

@@ -31,8 +31,8 @@ namespace MWGui
     ContainerWindow::ContainerWindow(DragAndDrop* dragAndDrop)
         : WindowBase("openmw_container_window.layout")
         , mDragAndDrop(dragAndDrop)
-        , mSortModel(NULL)
-        , mModel(NULL)
+        , mSortModel(nullptr)
+        , mModel(nullptr)
         , mSelectedItem(-1)
     {
         getWidget(mDisposeCorpseButton, "DisposeCorpseButton");
@@ -83,7 +83,7 @@ namespace MWGui
             dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::dragItem);
         }
         else
-            dragItem (NULL, count);
+            dragItem (nullptr, count);
     }
 
     void ContainerWindow::dragItem(MyGUI::Widget* sender, int count)
@@ -151,9 +151,9 @@ namespace MWGui
     void ContainerWindow::resetReference()
     {
         ReferenceInterface::resetReference();
-        mItemView->setModel(NULL);
-        mModel = NULL;
-        mSortModel = NULL;
+        mItemView->setModel(nullptr);
+        mModel = nullptr;
+        mSortModel = nullptr;
     }
 
     void ContainerWindow::onClose()
@@ -171,7 +171,7 @@ namespace MWGui
 
     void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
     {
-        if(mDragAndDrop != NULL && mDragAndDrop->mIsOnDragAndDrop)
+        if(mDragAndDrop != nullptr && mDragAndDrop->mIsOnDragAndDrop)
             return;
 
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
@@ -219,7 +219,7 @@ namespace MWGui
 
     void ContainerWindow::onDisposeCorpseButtonClicked(MyGUI::Widget *sender)
     {
-        if(mDragAndDrop == NULL || !mDragAndDrop->mIsOnDragAndDrop)
+        if(mDragAndDrop == nullptr || !mDragAndDrop->mIsOnDragAndDrop)
         {
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
 

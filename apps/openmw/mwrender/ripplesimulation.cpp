@@ -196,7 +196,7 @@ void RippleSimulation::emitRipple(const osg::Vec3f &pos)
 {
     if (std::abs(pos.z() - mParticleNode->getPosition().z()) < 20)
     {
-        osgParticle::Particle* p = mParticleSystem->createParticle(NULL);
+        osgParticle::Particle* p = mParticleSystem->createParticle(nullptr);
         p->setPosition(osg::Vec3f(pos.x(), pos.y(), 0.f));
         p->setAngle(osg::Vec3f(0,0, Misc::Rng::rollProbability() * osg::PI * 2 - osg::PI));
     }

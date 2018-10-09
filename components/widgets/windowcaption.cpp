@@ -6,9 +6,9 @@ namespace Gui
 {
 
     WindowCaption::WindowCaption()
-        : mLeft(NULL)
-        , mRight(NULL)
-        , mClient(NULL)
+        : mLeft(nullptr)
+        , mRight(nullptr)
+        , mClient(nullptr)
     {
     }
 

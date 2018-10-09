@@ -115,7 +115,7 @@ namespace Shader
             if (stream.fail())
             {
                 Log(Debug::Error) << "Failed to open " << p.string();
-                return NULL;
+                return nullptr;
             }
             std::stringstream buffer;
             buffer << stream.rdbuf();
@@ -123,7 +123,7 @@ namespace Shader
             // parse includes
             std::string source = buffer.str();
             if (!parseIncludes(boost::filesystem::path(mPath), source))
-                return NULL;
+                return nullptr;
 
             templateIt = mShaderTemplates.insert(std::make_pair(shaderTemplate, source)).first;
         }
@@ -136,7 +136,7 @@ namespace Shader
             {
                 // Add to the cache anyway to avoid logging the same error over and over.
                 mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, defines), nullptr));
-                return NULL;
+                return nullptr;
             }
 
             osg::ref_ptr<osg::Shader> shader (new osg::Shader(shaderType));

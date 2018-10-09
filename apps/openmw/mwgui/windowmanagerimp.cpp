@@ -134,44 +134,44 @@ namespace MWGui
             osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
             const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
             ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap, const std::string& versionDescription, const std::string& userDataPath)
-      : mStore(NULL)
+      : mStore(nullptr)
       , mResourceSystem(resourceSystem)
       , mWorkQueue(workQueue)
       , mViewer(viewer)
       , mConsoleOnlyScripts(consoleOnlyScripts)
       , mCurrentModals()
-      , mHud(NULL)
-      , mMap(NULL)
-      , mLocalMapRender(NULL)
-      , mToolTips(NULL)
-      , mStatsWindow(NULL)
-      , mMessageBoxManager(NULL)
-      , mConsole(NULL)
-      , mDialogueWindow(NULL)
-      , mDragAndDrop(NULL)
-      , mInventoryWindow(NULL)
-      , mScrollWindow(NULL)
-      , mBookWindow(NULL)
-      , mCountDialog(NULL)
-      , mTradeWindow(NULL)
-      , mSettingsWindow(NULL)
-      , mConfirmationDialog(NULL)
-      , mSpellWindow(NULL)
-      , mQuickKeysMenu(NULL)
-      , mLoadingScreen(NULL)
-      , mWaitDialog(NULL)
-      , mSoulgemDialog(NULL)
-      , mVideoBackground(NULL)
-      , mVideoWidget(NULL)
-      , mWerewolfFader(NULL)
-      , mBlindnessFader(NULL)
-      , mHitFader(NULL)
-      , mScreenFader(NULL)
-      , mDebugWindow(NULL)
-      , mJailScreen(NULL)
+      , mHud(nullptr)
+      , mMap(nullptr)
+      , mLocalMapRender(nullptr)
+      , mToolTips(nullptr)
+      , mStatsWindow(nullptr)
+      , mMessageBoxManager(nullptr)
+      , mConsole(nullptr)
+      , mDialogueWindow(nullptr)
+      , mDragAndDrop(nullptr)
+      , mInventoryWindow(nullptr)
+      , mScrollWindow(nullptr)
+      , mBookWindow(nullptr)
+      , mCountDialog(nullptr)
+      , mTradeWindow(nullptr)
+      , mSettingsWindow(nullptr)
+      , mConfirmationDialog(nullptr)
+      , mSpellWindow(nullptr)
+      , mQuickKeysMenu(nullptr)
+      , mLoadingScreen(nullptr)
+      , mWaitDialog(nullptr)
+      , mSoulgemDialog(nullptr)
+      , mVideoBackground(nullptr)
+      , mVideoWidget(nullptr)
+      , mWerewolfFader(nullptr)
+      , mBlindnessFader(nullptr)
+      , mHitFader(nullptr)
+      , mScreenFader(nullptr)
+      , mDebugWindow(nullptr)
+      , mJailScreen(nullptr)
       , mTranslationDataStorage (translationDataStorage)
-      , mCharGen(NULL)
-      , mInputBlocker(NULL)
+      , mCharGen(nullptr)
+      , mInputBlocker(nullptr)
       , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
       , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
       , mHitFaderEnabled(Settings::Manager::getBool ("hit fader", "GUI"))
@@ -185,9 +185,9 @@ namespace MWGui
       , mPlayerMajorSkills()
       , mPlayerMinorSkills()
       , mPlayerSkillValues()
-      , mGui(NULL)
+      , mGui(nullptr)
       , mGuiModes()
-      , mCursorManager(NULL)
+      , mCursorManager(nullptr)
       , mGarbageDialogs()
       , mShown(GW_ALL)
       , mForceHidden(GW_None)
@@ -704,7 +704,7 @@ namespace MWGui
             setCursorVisible(!gameMode);
 
         if (gameMode)
-            setKeyFocusWidget (NULL);
+            setKeyFocusWidget (nullptr);
 
         // Icons of forced hidden windows are displayed
         setMinimapVisibility((mAllowed & GW_Map) && (!mMap->pinned() || (mForceHidden & GW_Map)));
@@ -1651,7 +1651,7 @@ namespace MWGui
     // Remove this method for MyGUI 3.2.2
     void WindowManager::setKeyFocusWidget(MyGUI::Widget *widget)
     {
-        if (widget == NULL)
+        if (widget == nullptr)
             MyGUI::InputManager::getInstance().resetKeyFocusWidget();
         else
             MyGUI::InputManager::getInstance().setKeyFocusWidget(widget);
@@ -1913,7 +1913,7 @@ namespace MWGui
         }
         if (mCurrentModals.empty())
         {
-            mKeyboardNavigation->setModalWindow(NULL);
+            mKeyboardNavigation->setModalWindow(nullptr);
             mKeyboardNavigation->restoreFocus(getMode());
         }
         else

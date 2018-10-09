@@ -31,7 +31,7 @@ namespace MWGui
 
 Recharge::Recharge()
     : WindowBase("openmw_recharge_dialog.layout")
-    , mItemSelectionDialog(NULL)
+    , mItemSelectionDialog(nullptr)
 {
     getWidget(mBox, "Box");
     getWidget(mGemBox, "GemBox");
@@ -90,7 +90,7 @@ void Recharge::updateView()
     mBox->update();
 
     Gui::Box* box = dynamic_cast<Gui::Box*>(mMainWidget);
-    if (box == NULL)
+    if (box == nullptr)
         throw std::runtime_error("main widget must be a box");
 
     box->notifyChildrenSizeChanged();

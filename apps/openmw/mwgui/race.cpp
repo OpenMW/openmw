@@ -129,10 +129,10 @@ namespace MWGui
         updateSkills();
         updateSpellPowers();
 
-        mPreviewImage->setRenderItemTexture(NULL);
+        mPreviewImage->setRenderItemTexture(nullptr);
 
-        mPreview.reset(NULL);
-        mPreviewTexture.reset(NULL);
+        mPreview.reset(nullptr);
+        mPreviewTexture.reset(nullptr);
 
         mPreview.reset(new MWRender::RaceSelectionPreview(mParent, mResourceSystem));
         mPreview->rebuild();
@@ -190,10 +190,10 @@ namespace MWGui
     {
         WindowModal::onClose();
 
-        mPreviewImage->setRenderItemTexture(NULL);
+        mPreviewImage->setRenderItemTexture(nullptr);
 
-        mPreviewTexture.reset(NULL);
-        mPreview.reset(NULL);
+        mPreviewTexture.reset(nullptr);
+        mPreview.reset(nullptr);
     }
 
     // widget controls

@@ -28,7 +28,7 @@ struct ContentFileTest : public ::testing::Test
         for (std::vector<boost::filesystem::path>::const_iterator it = mContentFiles.begin(); it != mContentFiles.end(); ++it)
         {
             ESM::ESMReader lEsm;
-            lEsm.setEncoder(NULL);
+            lEsm.setEncoder(nullptr);
             lEsm.setIndex(index);
             lEsm.setGlobalReaderList(&readerList);
             lEsm.open(it->string());
@@ -309,7 +309,7 @@ TEST_F(StoreTest, overwrite_test)
     // verify that changes were actually applied
     const RecordType* overwrittenRec = mEsmStore.get<RecordType>().search(recordId);
 
-    ASSERT_TRUE (overwrittenRec != NULL);
+    ASSERT_TRUE (overwrittenRec != nullptr);
 
     ASSERT_TRUE (overwrittenRec && overwrittenRec->mModel == "the_new_model");
 }

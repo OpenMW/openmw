@@ -45,7 +45,7 @@ namespace SceneUtil
         SceneUtil::FindByNameVisitor visitor("AttachLight");
         node->accept(visitor);
 
-        osg::Group* attachTo = NULL;
+        osg::Group* attachTo = nullptr;
         if (visitor.mFoundNode)
         {
             attachTo = visitor.mFoundNode;

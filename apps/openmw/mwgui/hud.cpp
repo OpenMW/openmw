@@ -70,20 +70,20 @@ namespace MWGui
     HUD::HUD(CustomMarkerCollection &customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender)
         : WindowBase("openmw_hud.layout")
         , LocalMapBase(customMarkers, localMapRender, Settings::Manager::getBool("local map hud fog of war", "Map"))
-        , mHealth(NULL)
-        , mMagicka(NULL)
-        , mStamina(NULL)
-        , mDrowning(NULL)
-        , mWeapImage(NULL)
-        , mSpellImage(NULL)
-        , mWeapStatus(NULL)
-        , mSpellStatus(NULL)
-        , mEffectBox(NULL)
-        , mMinimap(NULL)
-        , mCrosshair(NULL)
-        , mCellNameBox(NULL)
-        , mDrowningFrame(NULL)
-        , mDrowningFlash(NULL)
+        , mHealth(nullptr)
+        , mMagicka(nullptr)
+        , mStamina(nullptr)
+        , mDrowning(nullptr)
+        , mWeapImage(nullptr)
+        , mSpellImage(nullptr)
+        , mWeapStatus(nullptr)
+        , mSpellStatus(nullptr)
+        , mEffectBox(nullptr)
+        , mMinimap(nullptr)
+        , mCrosshair(nullptr)
+        , mCellNameBox(nullptr)
+        , mDrowningFrame(nullptr)
+        , mDrowningFlash(nullptr)
         , mHealthManaStaminaBaseLeft(0)
         , mWeapBoxBaseLeft(0)
         , mSpellBoxBaseLeft(0)
@@ -247,7 +247,7 @@ namespace MWGui
             float mouseY = cursorPosition.top / float(viewSize.height);
 
             WorldItemModel drop (mouseX, mouseY);
-            mDragAndDrop->drop(&drop, NULL);
+            mDragAndDrop->drop(&drop, nullptr);
 
             MWBase::Environment::get().getWindowManager()->changePointer("arrow");
         }

@@ -31,7 +31,7 @@ namespace MWGui
     ItemStack::ItemStack()
         : mType(Type_Normal)
         , mFlags(0)
-        , mCreator(NULL)
+        , mCreator(nullptr)
         , mCount(0)
     {
     }
@@ -106,7 +106,7 @@ namespace MWGui
 
 
     ProxyItemModel::ProxyItemModel()
-        : mSourceModel(NULL)
+        : mSourceModel(nullptr)
     {
     }
 
@@ -167,7 +167,7 @@ namespace MWGui
         if (mSourceModel)
         {
             delete mSourceModel;
-            mSourceModel = NULL;
+            mSourceModel = nullptr;
         }
 
         mSourceModel = sourceModel;

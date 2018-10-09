@@ -190,7 +190,7 @@ namespace CursorDecompression
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
         SDL_Texture *cursorTexture = SDL_CreateTextureFromSurface(renderer, cursorSurface);
 
-        SDL_RenderCopyEx(renderer, cursorTexture, NULL, NULL, -rotDegrees, NULL, SDL_FLIP_VERTICAL);
+        SDL_RenderCopyEx(renderer, cursorTexture, nullptr, nullptr, -rotDegrees, nullptr, SDL_FLIP_VERTICAL);
 
         SDL_DestroyTexture(cursorTexture);
         SDL_FreeSurface(cursorSurface);

@@ -77,7 +77,7 @@ namespace MWMechanics
             mReaction(0),
             mSaidGreeting(Greet_None),
             mGreetingTimer(0),
-            mCell(NULL),
+            mCell(nullptr),
             mState(Wander_ChooseAction),
             mIsWanderingManually(false),
             mCanWanderAlongPathGrid(true),

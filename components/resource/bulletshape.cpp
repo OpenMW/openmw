@@ -12,7 +12,7 @@ namespace Resource
 {
 
 BulletShape::BulletShape()
-    : mCollisionShape(NULL)
+    : mCollisionShape(nullptr)
 {
 
 }
@@ -32,7 +32,7 @@ BulletShape::~BulletShape()
 
 void BulletShape::deleteShape(btCollisionShape* shape)
 {
-    if(shape!=NULL)
+    if(shape!=nullptr)
     {
         if(shape->isCompound())
         {

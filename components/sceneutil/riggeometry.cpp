@@ -37,7 +37,7 @@ namespace SceneUtil
 {
 
 RigGeometry::RigGeometry()
-    : mSkeleton(NULL)
+    : mSkeleton(nullptr)
     , mLastFrameNumber(0)
     , mBoundsFirstFrame(true)
 {
@@ -47,7 +47,7 @@ RigGeometry::RigGeometry()
 
 RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
     : Drawable(copy, copyop)
-    , mSkeleton(NULL)
+    , mSkeleton(nullptr)
     , mInfluenceMap(copy.mInfluenceMap)
     , mLastFrameNumber(0)
     , mBoundsFirstFrame(true)
@@ -98,7 +98,7 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
             to.setTexCoordArray(7, tangentArray, osg::Array::BIND_PER_VERTEX);
         }
         else
-            mSourceTangents = NULL;
+            mSourceTangents = nullptr;
     }
 }
 
@@ -296,7 +296,7 @@ void RigGeometry::updateGeomToSkelMatrix(const osg::NodePath& nodePath)
             {
                 if (!geomToSkelMatrix)
                     geomToSkelMatrix = new osg::RefMatrix;
-                trans->computeWorldToLocalMatrix(*geomToSkelMatrix, NULL);
+                trans->computeWorldToLocalMatrix(*geomToSkelMatrix, nullptr);
             }
         }
     }

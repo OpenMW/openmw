@@ -572,10 +572,10 @@ std::vector<std::string> OpenAL_Output::enumerate()
     std::vector<std::string> devlist;
     const ALCchar *devnames;
 
-    if(alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT"))
-        devnames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+    if(alcIsExtensionPresent(nullptr, "ALC_ENUMERATE_ALL_EXT"))
+        devnames = alcGetString(nullptr, ALC_ALL_DEVICES_SPECIFIER);
     else
-        devnames = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+        devnames = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
     while(devnames && *devnames)
     {
         devlist.push_back(devnames);

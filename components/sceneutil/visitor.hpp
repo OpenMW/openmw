@@ -9,14 +9,14 @@ namespace SceneUtil
 {
 
     // Find a Group by name, case-insensitive
-    // If not found, mFoundNode will be NULL
+    // If not found, mFoundNode will be nullptr
     class FindByNameVisitor : public osg::NodeVisitor
     {
     public:
         FindByNameVisitor(const std::string& nameToFind)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
             , mNameToFind(nameToFind)
-            , mFoundNode(NULL)
+            , mFoundNode(nullptr)
         {
         }
 
