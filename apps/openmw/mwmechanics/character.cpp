@@ -1666,7 +1666,9 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
     }
 
     mAnimation->setPitchFactor(0.f);
-    if (mWeaponType == WeapType_BowAndArrow || mWeaponType == WeapType_Thrown)
+    if (mWeaponType == WeapType_BowAndArrow ||
+        mWeaponType == WeapType_Thrown ||
+        mWeaponType == WeapType_Crossbow)
     {
         switch (mUpperBodyState)
         {
@@ -1680,29 +1682,14 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             break;
         case UpperCharState_FollowStartToFollowStop:
             if (animPlaying)
-                mAnimation->setPitchFactor(1.f-complete);
-            break;
-        default:
-            break;
-        }
-    }
-    else if (mWeaponType == WeapType_Crossbow)
-    {
-        switch (mUpperBodyState)
-        {
-        case UpperCharState_EquipingWeap:
-            mAnimation->setPitchFactor(complete);
-            break;
-        case UpperCharState_UnEquipingWeap:
-            mAnimation->setPitchFactor(1.f-complete);
-            break;
-        case UpperCharState_WeapEquiped:
-        case UpperCharState_StartToMinAttack:
-        case UpperCharState_MinAttackToMaxAttack:
-        case UpperCharState_MaxAttackToMinHit:
-        case UpperCharState_MinHitToHit:
-        case UpperCharState_FollowStartToFollowStop:
-            mAnimation->setPitchFactor(1.f);
+            {
+                // technically we do not need a pitch for crossbow reload animation,
+                // but we should avoid abrupt repositioning
+                if (mWeaponType == WeapType_Crossbow)
+                    mAnimation->setPitchFactor(std::max(0.f, 1.f-complete*10.f));
+                else
+                    mAnimation->setPitchFactor(1.f-complete);
+            }
             break;
         default:
             break;
