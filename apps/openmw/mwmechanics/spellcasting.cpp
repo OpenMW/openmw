@@ -964,10 +964,9 @@ namespace MWMechanics
             MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
             effect.mEffectID);
 
-        const MWMechanics::NpcStats& npcStats = mCaster.getClass().getNpcStats(mCaster);
         const MWMechanics::CreatureStats& creatureStats = mCaster.getClass().getCreatureStats(mCaster);
 
-        float x = (npcStats.getSkill (ESM::Skill::Alchemy).getModified() +
+        float x = (mCaster.getClass().getSkill(mCaster, ESM::Skill::Alchemy) +
                     0.2f * creatureStats.getAttribute (ESM::Attribute::Intelligence).getModified()
                     + 0.1f * creatureStats.getAttribute (ESM::Attribute::Luck).getModified())
                     * creatureStats.getFatigueTerm();

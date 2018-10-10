@@ -136,6 +136,7 @@
     Bug #4654: Editor: UpdateVisitor does not initialize skeletons for animated objects
     Bug #4668: Editor: Light source color is displayed as an integer
     Bug #4669: ToggleCollision should trace the player down after collision being enabled
+    Bug #4671: knownEffect functions should use modified Alchemy skill
     Bug #4672: Pitch factor is handled incorrectly for crossbow animations
     Feature #912: Editor: Add missing icons to UniversalId tables
     Feature #1221: Editor: Creature/NPC rendering

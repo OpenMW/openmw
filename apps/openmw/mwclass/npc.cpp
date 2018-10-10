@@ -949,7 +949,7 @@ namespace MWClass
         if(sneaking)
             walkSpeed *= gmst.fSneakSpeedMultiplier->mValue.getFloat();
 
-        float runSpeed = walkSpeed*(0.01f * npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified() *
+        float runSpeed = walkSpeed*(0.01f * getSkill(ptr, ESM::Skill::Athletics) *
                                     gmst.fAthleticsRunBonus->mValue.getFloat() + gmst.fBaseRunMultiplier->mValue.getFloat());
 
         float moveSpeed;
@@ -971,7 +971,7 @@ namespace MWClass
             if(running)
                 swimSpeed = runSpeed;
             swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude();
-            swimSpeed *= gmst.fSwimRunBase->mValue.getFloat() + 0.01f*npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified()*
+            swimSpeed *= gmst.fSwimRunBase->mValue.getFloat() + 0.01f*getSkill(ptr, ESM::Skill::Athletics)*
                                                     gmst.fSwimRunAthleticsMult->mValue.getFloat();
             moveSpeed = swimSpeed;
         }
@@ -1004,7 +1004,7 @@ namespace MWClass
                                           gmst.fJumpEncumbranceMultiplier->mValue.getFloat() *
                                           (1.0f - Npc::getNormalizedEncumbrance(ptr));
 
-        float a = static_cast<float>(npcdata->mNpcStats.getSkill(ESM::Skill::Acrobatics).getModified());
+        float a = static_cast<float>(getSkill(ptr, ESM::Skill::Acrobatics));
         float b = 0.0f;
         if(a > 50.0f)
         {
@@ -1129,7 +1129,7 @@ namespace MWClass
 
         float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
         float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
-        int unarmoredSkill = stats.getSkill(ESM::Skill::Unarmored).getModified();
+        int unarmoredSkill = getSkill(ptr, ESM::Skill::Unarmored);
 
         float ratings[MWWorld::InventoryStore::Slots];
         for(int i = 0;i < MWWorld::InventoryStore::Slots;i++)

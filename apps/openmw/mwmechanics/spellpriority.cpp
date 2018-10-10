@@ -14,7 +14,7 @@
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/cellstore.hpp"
 
-#include "npcstats.hpp"
+#include "creaturestats.hpp"
 #include "spellcasting.hpp"
 #include "combat.hpp"
 
@@ -538,7 +538,7 @@ namespace MWMechanics
         case ESM::MagicEffect::DrainSkill:
             if (enemy.isEmpty() || !enemy.getClass().isNpc())
                 return 0.f;
-            if (enemy.getClass().getNpcStats(enemy).getSkill(effect.mSkill).getModified() <= 0)
+            if (enemy.getClass().getSkill(enemy, effect.mSkill) <= 0)
                 return 0.f;
             break;
 

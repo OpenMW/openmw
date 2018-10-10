@@ -639,10 +639,10 @@ namespace MWMechanics
         // I suppose the temporary disposition change (second param to getDerivedDisposition()) _has_ to be considered here,
         // otherwise one would get different prices when exiting and re-entering the dialogue window...
         int clampedDisposition = getDerivedDisposition(ptr);
-        float a = static_cast<float>(std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100));
+        float a = static_cast<float>(std::min(playerPtr.getClass().getSkill(playerPtr, ESM::Skill::Mercantile), 100));
         float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-        float d = static_cast<float>(std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100));
+        float d = static_cast<float>(std::min(ptr.getClass().getSkill(ptr, ESM::Skill::Mercantile), 100));
         float e = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
         float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
