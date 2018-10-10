@@ -25,6 +25,7 @@ namespace MWGui
         Book createTopicIndexBook ();
 
         ToUTF8::FromType mEncoding;
+        int mIndexPagesCount;
 
     private:
         BookTypesetter::Ptr createTypesetter ();

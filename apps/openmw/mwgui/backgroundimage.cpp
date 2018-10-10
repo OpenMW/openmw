@@ -10,7 +10,7 @@ void BackgroundImage::setBackgroundImage (const std::string& image, bool fixedRa
     if (mChild)
     {
         MyGUI::Gui::getInstance().destroyWidget(mChild);
-        mChild = NULL;
+        mChild = nullptr;
     }
     if (!stretch)
     {

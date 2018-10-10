@@ -351,7 +351,7 @@ namespace MWMechanics
 
             case AiCombatStorage::FleeState_RunToDestination:
                 {
-                    static const float fFleeDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fFleeDistance")->getFloat();
+                    static const float fFleeDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fFleeDistance")->mValue.getFloat();
 
                     float dist = (actor.getRefData().getPosition().asVec3() - target.getRefData().getPosition().asVec3()).length();
                     if ((dist > fFleeDistance && !storage.mLOS)
@@ -520,13 +520,13 @@ namespace MWMechanics
 
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-                float baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayCreature")->getFloat();
+                float baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayCreature")->mValue.getFloat();
                 if (actor.getClass().isNpc())
                 {
-                    baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayNPC")->getFloat();
+                    baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayNPC")->mValue.getFloat();
 
                     //say a provoking combat phrase
-                    int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->getInt();
+                    int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->mValue.getInteger();
                     if (Misc::Rng::roll0to99() < chance)
                     {
                         MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
@@ -586,7 +586,7 @@ std::string chooseBestAttack(const ESM::Weapon* weapon)
 {
     std::string attackType;
 
-    if (weapon != NULL)
+    if (weapon != nullptr)
     {
         //the more damage attackType deals the more probability it has
         int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
@@ -616,21 +616,21 @@ osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& t
     // get projectile speed (depending on weapon type)
     if (weapType == ESM::Weapon::MarksmanThrown)
     {
-        static float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->getFloat();
-        static float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->getFloat();
+        static float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->mValue.getFloat();
+        static float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->mValue.getFloat();
 
         projSpeed = fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * strength;
     }
     else if (weapType != 0)
     {
-        static float fProjectileMinSpeed = gmst.find("fProjectileMinSpeed")->getFloat();
-        static float fProjectileMaxSpeed = gmst.find("fProjectileMaxSpeed")->getFloat();
+        static float fProjectileMinSpeed = gmst.find("fProjectileMinSpeed")->mValue.getFloat();
+        static float fProjectileMaxSpeed = gmst.find("fProjectileMaxSpeed")->mValue.getFloat();
 
         projSpeed = fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * strength;
     }
     else // weapType is 0 ==> it's a target spell projectile
     {
-        projSpeed = gmst.find("fTargetSpellMaxSpeed")->getFloat();
+        projSpeed = gmst.find("fTargetSpellMaxSpeed")->mValue.getFloat();
     }
 
     // idea: perpendicular to dir to target speed components of target move vector and projectile vector should be the same

@@ -7,6 +7,7 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 
+#include <QClipboard>
 #include <QGridLayout>
 #include <QMessageBox>
 #include <QModelIndex>
@@ -67,6 +68,7 @@ void ContentSelectorView::ContentSelector::buildContextMenu()
     mContextMenu = new QMenu(ui.addonView);
     mContextMenu->addAction(tr("&Check Selected"), this, SLOT(slotCheckMultiSelectedItems()));
     mContextMenu->addAction(tr("&Uncheck Selected"), this, SLOT(slotUncheckMultiSelectedItems()));
+    mContextMenu->addAction(tr("&Copy Path(s) to Clipboard"), this, SLOT(slotCopySelectedItemsPaths()));
 }
 
 void ContentSelectorView::ContentSelector::setProfileContent(const QStringList &fileList)
@@ -109,6 +111,11 @@ void ContentSelectorView::ContentSelector::setGameFile(const QString &filename)
 void ContentSelectorView::ContentSelector::clearCheckStates()
 {
     mContentModel->uncheckAll();
+}
+
+void ContentSelectorView::ContentSelector::setEncoding(const QString &encoding)
+{
+    mContentModel->setEncoding(encoding);
 }
 
 void ContentSelectorView::ContentSelector::setContentList(const QStringList &list)
@@ -189,7 +196,7 @@ void ContentSelectorView::ContentSelector::setGameFileSelected(int index, bool s
 {
     QString fileName = ui.gameFileView->itemText(index);
     const ContentSelectorModel::EsmFile* file = mContentModel->item(fileName);
-    if (file != NULL)
+    if (file != nullptr)
     {
         QModelIndex index2(mContentModel->indexFromItem(file));
         mContentModel->setData(index2, selected, Qt::UserRole + 1);
@@ -239,4 +246,21 @@ void ContentSelectorView::ContentSelector::slotUncheckMultiSelectedItems()
 void ContentSelectorView::ContentSelector::slotCheckMultiSelectedItems()
 {
     setCheckStateForMultiSelectedItems(true);
+}
+
+void ContentSelectorView::ContentSelector::slotCopySelectedItemsPaths()
+{
+    QClipboard *clipboard = QApplication::clipboard();
+    QString filepaths;
+    foreach (const QModelIndex& index, ui.addonView->selectionModel()->selectedIndexes())
+    {
+        int row = mAddonProxyModel->mapToSource(index).row();
+        const ContentSelectorModel::EsmFile *file = mContentModel->item(row);
+        filepaths += file->filePath() + "\n";
+    }
+
+    if (!filepaths.isEmpty())
+    {
+        clipboard->setText(filepaths);
+    }
 }

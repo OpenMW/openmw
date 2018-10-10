@@ -412,6 +412,7 @@ namespace MWBase
             /// @note throws an exception when invoked on a teleport door
             virtual void activateDoor(const MWWorld::Ptr& door, int state) = 0;
 
+            virtual void getActorsStandingOn (const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr> &actors) = 0; ///< get a list of actors standing on \a object
             virtual bool getPlayerStandingOn (const MWWorld::ConstPtr& object) = 0; ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::ConstPtr& object) = 0; ///< @return true if any actor is standing on \a object
             virtual bool getPlayerCollidingWith(const MWWorld::ConstPtr& object) = 0; ///< @return true if the player is colliding with \a object
@@ -437,12 +438,16 @@ namespace MWBase
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
 
-            virtual int canRest() = 0;
-            ///< check if the player is allowed to rest \n
-            /// 0 - yes \n
-            /// 1 - only waiting \n
-            /// 2 - player is underwater \n
-            /// 3 - enemies are nearby (not implemented)
+            enum RestPermitted
+            {
+                Rest_Allowed = 0,
+                Rest_OnlyWaiting = 1,
+                Rest_PlayerIsUnderwater = 2,
+                Rest_EnemiesAreNearby = 3
+            };
+
+            /// check if the player is allowed to rest
+            virtual RestPermitted canRest() const = 0;
 
             /// \todo Probably shouldn't be here
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) = 0;
@@ -490,8 +495,8 @@ namespace MWBase
             virtual void castSpell (const MWWorld::Ptr& actor, bool manualSpell=false) = 0;
 
             virtual void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection) = 0;
-            virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
-                                           const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength) = 0;
+            virtual void launchProjectile (MWWorld::Ptr& actor, MWWorld::Ptr& projectile,
+                                           const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength) = 0;
 
             virtual void applyLoopingParticles(const MWWorld::Ptr& ptr) = 0;
 
@@ -565,6 +570,8 @@ namespace MWBase
             virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;
 
             virtual bool isPlayerInJail() const = 0;
+
+            virtual void rest() = 0;
 
             virtual void setPlayerTraveling(bool traveling) = 0;
             virtual bool isPlayerTraveling() const = 0;

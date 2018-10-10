@@ -2,7 +2,6 @@
 
 <MyGUI type="Resource" version="1.1">
     <Resource type="ResourceSkin" name="TextBox" size="16 16">
-        <Property key="FontHeight" value = "16" />
         <Property key="TextAlign" value = "ALIGN_DEFAULT" />
         <Property key="TextColour" value = "0.7 0.7 0.7" />
 

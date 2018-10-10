@@ -1,6 +1,5 @@
 #include "classcheck.hpp"
 
-#include <sstream>
 #include <map>
 
 #include <components/esm/loadclas.hpp>
@@ -37,26 +36,22 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
     // A class should have a name
     if (class_.mName.empty())
-        messages.push_back (std::make_pair (id, class_.mId + " doesn't have a name"));
+        messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
 
     // A playable class should have a description
     if (class_.mData.mIsPlayable != 0 && class_.mDescription.empty())
-        messages.push_back (std::make_pair (id, class_.mId + " doesn't have a description and it's playable"));
+        messages.add(id, "Description of a playable class is missing", "", CSMDoc::Message::Severity_Warning);
 
     // test for invalid attributes
     for (int i=0; i<2; ++i)
         if (class_.mData.mAttribute[i]==-1)
         {
-            std::ostringstream stream;
-
-            stream << "Attribute #" << i << " of " << class_.mId << " is not set";
-
-            messages.push_back (std::make_pair (id, stream.str()));
+            messages.add(id, "Attribute #" + std::to_string(i) + " is not set", "", CSMDoc::Message::Severity_Error);
         }
 
     if (class_.mData.mAttribute[0]==class_.mData.mAttribute[1] && class_.mData.mAttribute[0]!=-1)
     {
-        messages.push_back (std::make_pair (id, "Class lists same attribute twice"));
+        messages.add(id, "Same attribute is listed twice", "", CSMDoc::Message::Severity_Error);
     }
 
     // test for non-unique skill
@@ -66,10 +61,9 @@ void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
         for (int i2=0; i2<2; ++i2)
             ++skills[class_.mData.mSkills[i][i2]];
 
-    for (std::map<int, int>::const_iterator iter (skills.begin()); iter!=skills.end(); ++iter)
-        if (iter->second>1)
+    for (auto &skill : skills)
+        if (skill.second>1)
         {
-            messages.push_back (std::make_pair (id,
-                ESM::Skill::indexToId (iter->first) + " is listed more than once"));
+            messages.add(id, "Skill " + ESM::Skill::indexToId (skill.first) + " is listed more than once", "", CSMDoc::Message::Severity_Error);
         }
 }

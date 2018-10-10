@@ -12,6 +12,27 @@ This setting scales the GUI interface windows.
 A value of 1.0 results in the normal scale. Larger values are useful to increase the scale of the GUI for high resolution displays.
 This setting can only be configured by editing the settings configuration file.
 
+font size
+---------
+
+:Type:		integer
+:Range:		12 to 20
+:Default:	16
+
+Allows to specify glyph size for in-game fonts.
+Note: default bitmap fonts are supposed to work with 16px size, otherwise glyphs will be blurry.
+TrueType fonts do not have this issue.
+
+ttf resolution
+--------------
+
+:Type:		integer
+:Range:		48 to 960
+:Default:	96
+
+Allows to specify resolution for in-game TrueType fonts.
+Note: actual resolution depends on "scaling factor" setting value, this value is for 1.0 scaling factor.
+
 menu transparency
 -----------------
 

@@ -21,8 +21,8 @@ namespace ESM
         */
         unsigned int version;
         int type;           // 0=esp, 1=esm, 32=ess (unused)
-        NAME32 author;      // Author's name
-        NAME256 desc;       // File description
+        std::string author; // Author's name
+        std::string desc;   // File description
         int records;        // Number of records
     };
 

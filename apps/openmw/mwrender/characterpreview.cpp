@@ -242,7 +242,7 @@ namespace MWRender
 
     void CharacterPreview::rebuild()
     {
-        mAnimation = NULL;
+        mAnimation = nullptr;
 
         mAnimation = new NpcAnimation(mCharacter, mNode, mResourceSystem, true,
                                       (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
@@ -383,7 +383,7 @@ namespace MWRender
 
     void InventoryPreview::updatePtr(const MWWorld::Ptr &ptr)
     {
-        mCharacter = MWWorld::Ptr(ptr.getBase(), NULL);
+        mCharacter = MWWorld::Ptr(ptr.getBase(), nullptr);
     }
 
     void InventoryPreview::onSetup()
@@ -406,7 +406,7 @@ namespace MWRender
         , mRef(&mBase)
         , mPitchRadians(osg::DegreesToRadians(6.f))
     {
-        mCharacter = MWWorld::Ptr(&mRef, NULL);
+        mCharacter = MWWorld::Ptr(&mRef, nullptr);
     }
 
     RaceSelectionPreview::~RaceSelectionPreview()

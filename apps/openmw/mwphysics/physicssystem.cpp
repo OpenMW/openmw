@@ -21,6 +21,7 @@
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/esm/loadgmst.hpp>
+#include <components/misc/constants.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 
@@ -303,7 +304,7 @@ namespace MWPhysics
             position.z() += halfExtents.z();
 
             static const float fSwimHeightScale = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                    .find("fSwimHeightScale")->getFloat();
+                    .find("fSwimHeightScale")->mValue.getFloat();
             float swimlevel = waterlevel + halfExtents.z() - (physicActor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
 
             ActorTracer tracer;
@@ -339,7 +340,7 @@ namespace MWPhysics
                 osg::Vec3f stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
                 float angleDegrees = osg::RadiansToDegrees(std::acos(stormDirection * velocity / (stormDirection.length() * velocity.length())));
                 static const float fStromWalkMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fStromWalkMult")->getFloat();
+                        .find("fStromWalkMult")->mValue.getFloat();
                 velocity *= 1.f-(fStromWalkMult * (angleDegrees/180.f));
             }
 
@@ -486,7 +487,7 @@ namespace MWPhysics
                 physicActor->setInertialForce(osg::Vec3f(0.f, 0.f, 0.f));
             else
             {
-                inertia.z() += time * -627.2f;
+                inertia.z() -= time * Constants::GravityConst * Constants::UnitsPerMeter;
                 if (inertia.z() < 0)
                     inertia.z() *= slowFall;
                 if (slowFall < 1.f) {
@@ -650,7 +651,6 @@ namespace MWPhysics
 
                 osg::NodePath& nodePath = nodePathFound->second;
                 osg::Matrixf matrix = osg::computeLocalToWorld(nodePath);
-                osg::Vec3f scale = matrix.getScale();
                 matrix.orthoNormalize(matrix);
 
                 btTransform transform;
@@ -659,8 +659,8 @@ namespace MWPhysics
                     for (int j=0; j<3; ++j)
                         transform.getBasis()[i][j] = matrix(j,i); // NB column/row major difference
 
-                if (compound->getLocalScaling() * toBullet(scale) != compound->getChildShape(shapeIndex)->getLocalScaling())
-                    compound->getChildShape(shapeIndex)->setLocalScaling(compound->getLocalScaling() * toBullet(scale));
+                // Note: we can not apply scaling here for now since we treat scaled shapes
+                // as new shapes (btScaledBvhTriangleMeshShape) with 1.0 scale for now
                 if (!(transform == compound->getChildTransform(shapeIndex)))
                     compound->updateChildTransform(shapeIndex, transform);
             }
@@ -810,7 +810,7 @@ namespace MWPhysics
         btScalar mLeastDistSqr;
 
         DeepestNotMeContactTestResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*>& targets, const btVector3 &origin)
-          : mMe(me), mTargets(targets), mOrigin(origin), mObject(NULL), mContactPoint(0,0,0),
+          : mMe(me), mTargets(targets), mOrigin(origin), mObject(nullptr), mContactPoint(0,0,0),
             mLeastDistSqr(std::numeric_limits<float>::max())
         { }
 
@@ -861,8 +861,8 @@ namespace MWPhysics
         // Use cone shape as fallback
         const MWWorld::Store<ESM::GameSetting> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        btConeShape shape (osg::DegreesToRadians(store.find("fCombatAngleXY")->getFloat()/2.0f), queryDistance);
-        shape.setLocalScaling(btVector3(1, 1, osg::DegreesToRadians(store.find("fCombatAngleZ")->getFloat()/2.0f) /
+        btConeShape shape (osg::DegreesToRadians(store.find("fCombatAngleXY")->mValue.getFloat()/2.0f), queryDistance);
+        shape.setLocalScaling(btVector3(1, 1, osg::DegreesToRadians(store.find("fCombatAngleZ")->mValue.getFloat()/2.0f) /
                                               shape.getRadius()));
 
         // The shape origin is its center, so we have to move it forward by half the length. The
@@ -873,7 +873,7 @@ namespace MWPhysics
         object.setCollisionShape(&shape);
         object.setWorldTransform(btTransform(toBullet(orient), toBullet(center)));
 
-        const btCollisionObject* me = NULL;
+        const btCollisionObject* me = nullptr;
         std::vector<const btCollisionObject*> targetCollisionObjects;
 
         const Actor* physactor = getActor(actor);
@@ -906,7 +906,7 @@ namespace MWPhysics
 
     float PhysicsSystem::getHitDistance(const osg::Vec3f &point, const MWWorld::ConstPtr &target) const
     {
-        btCollisionObject* targetCollisionObj = NULL;
+        btCollisionObject* targetCollisionObj = nullptr;
         const Actor* actor = getActor(target);
         if (actor)
             targetCollisionObj = actor->getCollisionObject();
@@ -968,7 +968,7 @@ namespace MWPhysics
         btVector3 btFrom = toBullet(from);
         btVector3 btTo = toBullet(to);
 
-        const btCollisionObject* me = NULL;
+        const btCollisionObject* me = nullptr;
         std::vector<const btCollisionObject*> targetCollisionObjects;
 
         if (!ignore.isEmpty())
@@ -1127,7 +1127,7 @@ namespace MWPhysics
 
     std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const
     {
-        btCollisionObject* me = NULL;
+        btCollisionObject* me = nullptr;
 
         ObjectMap::const_iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
@@ -1255,7 +1255,7 @@ namespace MWPhysics
         ActorMap::iterator found = mActors.find(ptr);
         if (found != mActors.end())
             return found->second;
-        return NULL;
+        return nullptr;
     }
 
     const Actor *PhysicsSystem::getActor(const MWWorld::ConstPtr &ptr) const
@@ -1263,7 +1263,7 @@ namespace MWPhysics
         ActorMap::const_iterator found = mActors.find(ptr);
         if (found != mActors.end())
             return found->second;
-        return NULL;
+        return nullptr;
     }
 
     const Object* PhysicsSystem::getObject(const MWWorld::ConstPtr &ptr) const
@@ -1271,7 +1271,7 @@ namespace MWPhysics
         ObjectMap::const_iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
             return found->second;
-        return NULL;
+        return nullptr;
     }
 
     void PhysicsSystem::updateScale(const MWWorld::Ptr &ptr)
@@ -1395,6 +1395,7 @@ namespace MWPhysics
             mStandingCollisions.clear();
         }
 
+        const MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         PtrVelocityList::iterator iter = mMovementQueue.begin();
         for(;iter != mMovementQueue.end();++iter)
@@ -1452,7 +1453,7 @@ namespace MWPhysics
 
             MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
             if ((wasOnGround && physicActor->getOnGround()) || flying || world->isSwimming(iter->first) || slowFall < 1)
-                stats.land();
+                stats.land(iter->first == player);
             else if (heightDiff < 0)
                 stats.addToFallHeight(-heightDiff);
 

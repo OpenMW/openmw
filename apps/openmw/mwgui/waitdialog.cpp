@@ -83,7 +83,7 @@ namespace MWGui
 
     void WaitDialog::setPtr(const MWWorld::Ptr &ptr)
     {
-        setCanRest(!ptr.isEmpty() || MWBase::Environment::get().getWorld ()->canRest () == 0);
+        setCanRest(!ptr.isEmpty() || MWBase::Environment::get().getWorld ()->canRest () == MWBase::World::Rest_Allowed);
 
         if (mUntilHealedButton->getVisible())
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mUntilHealedButton);
@@ -120,9 +120,14 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->popGuiMode ();
         }
 
-        int canRest = MWBase::Environment::get().getWorld ()->canRest ();
+        MWBase::World::RestPermitted canRest = MWBase::Environment::get().getWorld ()->canRest ();
 
-        if (canRest == 2)
+        if (canRest == MWBase::World::Rest_EnemiesAreNearby)
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
+            MWBase::Environment::get().getWindowManager()->popGuiMode ();
+        }
+        else if (canRest == MWBase::World::Rest_PlayerIsUnderwater)
         {
             // resting underwater or mid-air not allowed
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage1}");
@@ -183,10 +188,10 @@ namespace MWGui
                 {
                     // figure out if player will be woken while sleeping
                     int x = Misc::Rng::rollDice(hoursToWait);
-                    float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->getFloat();
+                    float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->mValue.getFloat();
                     if (x < fSleepRandMod * hoursToWait)
                     {
-                        float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->getFloat();
+                        float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->mValue.getFloat();
                         int interruptAtHoursRemaining = int(fSleepRestMod * hoursToWait);
                         if (interruptAtHoursRemaining != 0)
                         {
@@ -252,7 +257,7 @@ namespace MWGui
         // trigger levelup if possible
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-        if (mSleeping && pcstats.getLevelProgress () >= gmst.find("iLevelUpTotal")->getInt())
+        if (mSleeping && pcstats.getLevelProgress () >= gmst.find("iLevelUpTotal")->mValue.getInteger())
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
         }
@@ -276,7 +281,7 @@ namespace MWGui
         mSleeping = canRest;
 
         Gui::Box* box = dynamic_cast<Gui::Box*>(mMainWidget);
-        if (box == NULL)
+        if (box == nullptr)
             throw std::runtime_error("main widget must be a box");
         box->notifyChildrenSizeChanged();
         center();

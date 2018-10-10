@@ -27,7 +27,7 @@ namespace osgMyGUI
 
         MyGUI::OverlappedLayer::renderToTarget(_target, _update);
 
-        renderManager.setInjectState(NULL);
+        renderManager.setInjectState(nullptr);
     }
 
 }

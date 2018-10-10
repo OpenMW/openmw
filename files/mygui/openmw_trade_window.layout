@@ -48,7 +48,7 @@
                 </Widget>
             </Widget>
 
-            <Widget type="HBox" position="0 28 566 24" align="Left Top HStretch">
+            <Widget type="HBox" position="0 28 566 28" align="Left Top HStretch">
                 <Widget type="Button" skin="MW_Button" position="0 0 40 24" name="DecreaseButton" align="Left Top">
                     <Property key="Caption" value="-"/>
                     <Property key="NeedKey" value="false"/>
@@ -62,7 +62,7 @@
                 </Widget>
             </Widget>
 
-            <Widget type="HBox" position="0 60 566 24" align="Left Bottom HStretch">
+            <Widget type="HBox" position="0 60 566 28" align="Left Bottom HStretch">
                 <Widget type="AutoSizedButton" skin="MW_Button" name="MaxSaleButton">
                     <Property key="Caption" value="#{sMaxSale}"/>
                 </Widget>

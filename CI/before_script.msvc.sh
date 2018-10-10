@@ -346,7 +346,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# OpenAL
 	download "OpenAL-Soft 1.17.2" \
-		"http://kcat.strangesoft.net/openal-binaries/openal-soft-1.17.2-bin.zip" \
+		"http://openal-soft.org/openal-binaries/openal-soft-1.17.2-bin.zip" \
 		"OpenAL-Soft-1.17.2.zip"
 
 	# OSG

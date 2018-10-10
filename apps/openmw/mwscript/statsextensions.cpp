@@ -501,6 +501,7 @@ namespace MWScript
                     runtime.pop();
 
                     ptr.getClass().getCreatureStats (ptr).getActiveSpells().removeEffects(spellid);
+                    ptr.getClass().getCreatureStats (ptr).getSpells().removeEffects(spellid);
                 }
         };
 
@@ -1155,7 +1156,7 @@ namespace MWScript
                         // HACK: disable/enable object to re-add it to the scene properly (need a new Animation).
                         MWBase::Environment::get().getWorld()->disable(ptr);
                         // resets runtime state such as inventory, stats and AI. does not reset position in the world
-                        ptr.getRefData().setCustomData(NULL);
+                        ptr.getRefData().setCustomData(nullptr);
                         if (wasEnabled)
                             MWBase::Environment::get().getWorld()->enable(ptr);
                     }

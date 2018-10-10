@@ -10,10 +10,10 @@ namespace SDLUtil
 InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer, bool grab) :
         mSDLWindow(window),
         mViewer(viewer),
-        mMouseListener(NULL),
-        mKeyboardListener(NULL),
-        mWindowListener(NULL),
-        mConListener(NULL),
+        mMouseListener(nullptr),
+        mKeyboardListener(nullptr),
+        mWindowListener(nullptr),
+        mConListener(nullptr),
         mWarpX(0),
         mWarpY(0),
         mWarpCompensate(false),
@@ -234,7 +234,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
 
     bool InputWrapper::isKeyDown(SDL_Scancode key)
     {
-        return (SDL_GetKeyboardState(NULL)[key]) != 0;
+        return (SDL_GetKeyboardState(nullptr)[key]) != 0;
     }
 
     /// \brief Moves the mouse to the specified point within the viewport

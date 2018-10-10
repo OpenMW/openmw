@@ -23,13 +23,10 @@
 
 namespace MWGui
 {
-
-    const int StatsWindow::sLineHeight = 18;
-
     StatsWindow::StatsWindow (DragAndDrop* drag)
       : WindowPinnableBase("openmw_stats_window.layout")
       , NoDrop(drag, mMainWidget)
-      , mSkillView(NULL)
+      , mSkillView(nullptr)
       , mMajorSkills()
       , mMinorSkills()
       , mMiscSkills()
@@ -61,7 +58,7 @@ namespace MWGui
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         for (int i=0; names[i][0]; ++i)
         {
-            setText (names[i][0], store.get<ESM::GameSetting>().find (names[i][1])->getString());
+            setText (names[i][0], store.get<ESM::GameSetting>().find (names[i][1])->mValue.getString());
         }
 
         getWidget(mSkillView, "SkillView");
@@ -71,7 +68,7 @@ namespace MWGui
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
             mSkillValues.insert(std::make_pair(i, MWMechanics::SkillValue()));
-            mSkillWidgetMap.insert(std::make_pair(i, std::make_pair((MyGUI::TextBox*)NULL, (MyGUI::TextBox*)NULL)));
+            mSkillWidgetMap.insert(std::make_pair(i, std::make_pair((MyGUI::TextBox*)nullptr, (MyGUI::TextBox*)nullptr)));
         }
 
         MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
@@ -306,7 +303,7 @@ namespace MWGui
         MyGUI::Widget* levelWidget;
         for (int i=0; i<2; ++i)
         {
-            int max = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iLevelUpTotal")->getInt();
+            int max = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iLevelUpTotal")->mValue.getInteger();
             getWidget(levelWidget, i==0 ? "Level_str" : "LevelText");
             levelWidget->setUserString("RangePosition_LevelProgress", MyGUI::utility::toString(PCstats.getLevelProgress()));
             levelWidget->setUserString("Range_LevelProgress", MyGUI::utility::toString(max));
@@ -376,8 +373,9 @@ namespace MWGui
         groupWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
         mSkillWidgets.push_back(groupWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        coord1.top += lineHeight;
+        coord2.top += lineHeight;
     }
 
     std::pair<MyGUI::TextBox*, MyGUI::TextBox*> StatsWindow::addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
@@ -401,8 +399,9 @@ namespace MWGui
         mSkillWidgets.push_back(skillNameWidget);
         mSkillWidgets.push_back(skillValueWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        coord1.top += lineHeight;
+        coord2.top += lineHeight;
 
         return std::make_pair(skillNameWidget, skillValueWidget);
     }
@@ -421,8 +420,9 @@ namespace MWGui
 
         mSkillWidgets.push_back(skillNameWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        coord1.top += lineHeight;
+        coord2.top += lineHeight;
 
         return skillNameWidget;
     }

@@ -148,11 +148,13 @@ Programmers
     Scott Howard
     scrawl
     Sebastian Wick (swick)
+    Sergey Fukanchik
     Sergey Shambir
     ShadowRadiance
     Siimacore
     sir_herrbatka
     smbas
+    Sophie Kirschner (pineapplemachine)
     spycrab
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)

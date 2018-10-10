@@ -1,8 +1,6 @@
 #include "util.hpp"
 
 #include <stdexcept>
-#include <climits>
-#include <cfloat>
 
 #include <QUndoStack>
 #include <QMetaProperty>
@@ -131,7 +129,7 @@ void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemM
 
     // Color columns use a custom editor, so we need to fetch selected color from it.
     CSVWidget::ColorEditor *colorEditor = qobject_cast<CSVWidget::ColorEditor *>(editor);
-    if (colorEditor != NULL)
+    if (colorEditor != nullptr)
     {
         variant = colorEditor->colorInt();
     }
@@ -209,7 +207,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_Integer:
         {
             DialogueSpinBox *sb = new DialogueSpinBox(parent);
-            sb->setRange(INT_MIN, INT_MAX);
+            sb->setRange(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
             return sb;
         }
 
@@ -324,7 +322,7 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
 
     // Color columns use a custom editor, so we need explicitly set a data for it
     CSVWidget::ColorEditor *colorEditor = qobject_cast<CSVWidget::ColorEditor *>(editor);
-    if (colorEditor != NULL)
+    if (colorEditor != nullptr)
     {
         colorEditor->setColor(variant.toInt());
         return;

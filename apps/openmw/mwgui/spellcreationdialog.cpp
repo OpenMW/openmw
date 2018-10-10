@@ -32,8 +32,8 @@ namespace
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        return gmst.find(ESM::MagicEffect::effectIdToString (id1))->getString()
-                < gmst.find(ESM::MagicEffect::effectIdToString  (id2))->getString();
+        return gmst.find(ESM::MagicEffect::effectIdToString (id1))->mValue.getString()
+                < gmst.find(ESM::MagicEffect::effectIdToString  (id2))->mValue.getString();
     }
 
     void init(ESM::ENAMstruct& effect)
@@ -55,7 +55,7 @@ namespace MWGui
     EditEffectDialog::EditEffectDialog()
         : WindowModal("openmw_edit_effect.layout")
         , mEditing(false)
-        , mMagicEffect(NULL)
+        , mMagicEffect(nullptr)
         , mConstantEffect(false)
     {
         init(mEffect);
@@ -147,7 +147,9 @@ namespace MWGui
 
         mDurationValue->setCaption("1");
         mMagnitudeMinValue->setCaption("1");
-        mMagnitudeMaxValue->setCaption("- 1");
+        const std::string to = MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "-");
+
+        mMagnitudeMaxValue->setCaption(to + " 1");
         mAreaValue->setCaption("0");
 
         setVisible(true);
@@ -312,8 +314,9 @@ namespace MWGui
         }
 
         mEffect.mMagnMax = pos+1;
+        const std::string to = MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "-");
 
-        mMagnitudeMaxValue->setCaption("- " + MyGUI::utility::toString(pos+1));
+        mMagnitudeMaxValue->setCaption(to + " " + MyGUI::utility::toString(pos+1));
 
         eventEffectModified(mEffect);
     }
@@ -420,6 +423,9 @@ namespace MWGui
     void SpellCreationDialog::onAccept(MyGUI::EditBox *sender)
     {
         onBuyButtonClicked(sender);
+
+        // To do not spam onAccept() again and again
+        MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);
     }
 
     void SpellCreationDialog::onOpen()
@@ -469,13 +475,13 @@ namespace MWGui
         mMagickaCost->setCaption(MyGUI::utility::toString(int(y)));
 
         float fSpellMakingValueMult =
-            store.get<ESM::GameSetting>().find("fSpellMakingValueMult")->getFloat();
+            store.get<ESM::GameSetting>().find("fSpellMakingValueMult")->mValue.getFloat();
 
         int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, static_cast<int>(y * fSpellMakingValueMult),true);
 
         mPriceLabel->setCaption(MyGUI::utility::toString(int(price)));
 
-        float chance = MWMechanics::calcSpellBaseSuccessChance(&mSpell, MWMechanics::getPlayer(), NULL);
+        float chance = MWMechanics::calcSpellBaseSuccessChance(&mSpell, MWMechanics::getPlayer(), nullptr);
 
         int intChance = std::min(100, int(chance));
         mSuccessChance->setCaption(MyGUI::utility::toString(intChance));
@@ -485,11 +491,11 @@ namespace MWGui
 
 
     EffectEditorBase::EffectEditorBase(Type type)
-        : mAvailableEffectsList(NULL)
-        , mUsedEffectsView(NULL)
+        : mAvailableEffectsList(nullptr)
+        , mUsedEffectsView(nullptr)
         , mAddEffectDialog()
-        , mSelectAttributeDialog(NULL)
-        , mSelectSkillDialog(NULL)
+        , mSelectAttributeDialog(nullptr)
+        , mSelectSkillDialog(nullptr)
         , mSelectedEffect(0)
         , mSelectedKnownEffectId(0)
         , mConstantEffect(false)
@@ -547,7 +553,7 @@ namespace MWGui
         for (std::vector<short>::const_iterator it = knownEffects.begin(); it != knownEffects.end(); ++it)
         {
             mAvailableEffectsList->addItem(MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
-                                               ESM::MagicEffect::effectIdToString  (*it))->getString());
+                                               ESM::MagicEffect::effectIdToString  (*it))->mValue.getString());
             mButtonMapping[i] = *it;
             ++i;
         }
@@ -557,7 +563,7 @@ namespace MWGui
         for (std::vector<short>::const_iterator it = knownEffects.begin(); it != knownEffects.end(); ++it)
         {
             std::string name = MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
-                                               ESM::MagicEffect::effectIdToString  (*it))->getString();
+                                               ESM::MagicEffect::effectIdToString  (*it))->mValue.getString();
             MyGUI::Widget* w = mAvailableEffectsList->getItemWidget(name);
 
             ToolTips::createMagicEffectToolTip (w, *it);

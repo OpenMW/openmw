@@ -76,11 +76,11 @@ namespace MWWorld
     template <typename X>
     struct LiveCellRef : public LiveCellRefBase
     {
-        LiveCellRef(const ESM::CellRef& cref, const X* b = NULL)
+        LiveCellRef(const ESM::CellRef& cref, const X* b = nullptr)
             : LiveCellRefBase(typeid(X).name(), cref), mBase(b)
         {}
 
-        LiveCellRef(const X* b = NULL)
+        LiveCellRef(const X* b = nullptr)
             : LiveCellRefBase(typeid(X).name()), mBase(b)
         {}
 

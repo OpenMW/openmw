@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_DialogNoTransp" layer="Windows" position="0 0 217 234" align="Center" name="_Main">
-        <Widget type="Widget" skin="" position="14 14 200 203" align="HCenter VStretch">
+    <Widget type="Window" skin="MW_DialogNoTransp" layer="Windows" position="0 0 247 231" align="Center" name="_Main">
+        <Widget type="Widget" skin="" position="14 14 216 204" align="HCenter VStretch">
 
             <!-- Label -->
-            <Widget type="TextBox" skin="HeaderText" position="0 0 200 18" name="LabelT" align="HCenter Top">
+            <Widget type="TextBox" skin="HeaderText" position="0 0 216 18" name="LabelT" align="HCenter Top">
                 <Property key="Caption" value="#{sAttributesMenu1}"/>
                 <Property key="TextAlign" value="HCenter Top"/>
             </Widget>
 
             <!-- Attribute list -->
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 28 200 18" name="Attribute0" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 46 200 18" name="Attribute1" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 64 200 18" name="Attribute2" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 82 200 18" name="Attribute3" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 100 200 18" name="Attribute4" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 118 200 18" name="Attribute5" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 136 200 18" name="Attribute6" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 154 200 18" name="Attribute7" align="Left Top"/>
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 28 216 18" name="Attribute0" align="Left Top"/>
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 46 216 18" name="Attribute1" align="Left Top"/>
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 64 216 18" name="Attribute2" align="Left Top"/>
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 82 216 18" name="Attribute3" align="Left Top"/>
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 100 216 18" name="Attribute4" align="Left Top"/>
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 118 216 18" name="Attribute5" align="Left Top"/>
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 136 216 18" name="Attribute6" align="Left Top"/>
+            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 154 216 18" name="Attribute7" align="Left Top"/>
 
             <!-- Dialog buttons -->
-            <Widget type="AutoSizedButton" skin="MW_Button" position="120 180 66 21" name="CancelButton">
-                <Property key="ExpandDirection" value="Left"/>
-                <Property key="Caption" value="#{sCancel}"/>
+            <Widget type="HBox" position="0 175 216 28">
+                <Widget type="Spacer" />
+                <Widget type="AutoSizedButton" skin="MW_Button" align="Right Bottom" name="CancelButton">
+                    <Property key="ExpandDirection" value="Left Up"/>
+                    <Property key="Caption" value="#{sCancel}"/>
+                </Widget>
             </Widget>
 
         </Widget>

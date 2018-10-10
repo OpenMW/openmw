@@ -14,8 +14,6 @@
 #include "../mwworld/actioneat.hpp"
 #include "../mwworld/nullaction.hpp"
 
-#include "../mwmechanics/npcstats.hpp"
-
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
@@ -134,11 +132,10 @@ namespace MWClass
         }
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats (player);
-        int alchemySkill = npcStats.getSkill (ESM::Skill::Alchemy).getBase();
+        int alchemySkill = player.getClass().getSkill(player, ESM::Skill::Alchemy);
 
         static const float fWortChanceValue =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->getFloat();
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->mValue.getFloat();
 
         MWGui::Widgets::SpellEffectList list;
         for (int i=0; i<4; ++i)

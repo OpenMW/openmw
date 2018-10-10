@@ -2,8 +2,6 @@
 <MyGUI type="Resource" version="1.1">
     <Resource type="ResourceTrueTypeFont" name="MonoFont">
         <Property key="Source" value="DejaVuLGCSansMono.ttf"/>
-        <Property key="Size" value="17"/>
-        <Property key="Resolution" value="50"/>
         <Property key="Antialias" value="false"/>
         <Property key="TabWidth" value="8"/>
         <Property key="OffsetHeight" value="0"/>

@@ -751,13 +751,16 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
 
     float underwaterFog = mUnderwaterFog.getValue(time.getHour(), mTimeSettings, "Fog");
 
-    float peakHour = mSunriseTime + (mSunsetTime - mSunriseTime) / 2;
-    if (time.getHour() < mSunriseTime || time.getHour() > mSunsetTime)
-        mRendering.getSkyManager()->setGlareTimeOfDayFade(0);
+    float peakHour = mSunriseTime + (mTimeSettings.mNightStart - mSunriseTime) / 2;
+    float glareFade = 1.f;
+    if (time.getHour() < mSunriseTime || time.getHour() > mTimeSettings.mNightStart)
+        glareFade = 0.f;
     else if (time.getHour() < peakHour)
-        mRendering.getSkyManager()->setGlareTimeOfDayFade(1 - (peakHour - time.getHour()) / (peakHour - mSunriseTime));
+        glareFade = 1.f - (peakHour - time.getHour()) / (peakHour - mSunriseTime);
     else
-        mRendering.getSkyManager()->setGlareTimeOfDayFade(1 - (time.getHour() - peakHour) / (mSunsetTime - peakHour));
+        glareFade = 1.f - (time.getHour() - peakHour) / (mTimeSettings.mNightStart - peakHour);
+
+    mRendering.getSkyManager()->setGlareTimeOfDayFade(glareFade);
 
     mRendering.getSkyManager()->setMasserState(mMasser.calculateState(time));
     mRendering.getSkyManager()->setSecundaState(mSecunda.calculateState(time));
@@ -765,7 +768,7 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
     mRendering.configureFog(mResult.mFogDepth, underwaterFog, mResult.mDLFogFactor,
                             mResult.mDLFogOffset/100.0f, mResult.mFogColor);
     mRendering.setAmbientColour(mResult.mAmbientColor);
-    mRendering.setSunColour(mResult.mSunColor, mResult.mSunColor * mResult.mGlareView);
+    mRendering.setSunColour(mResult.mSunColor, mResult.mSunColor * mResult.mGlareView * glareFade);
 
     mRendering.getSkyManager()->setWeather(mResult);
 
@@ -911,7 +914,7 @@ inline void WeatherManager::addWeather(const std::string& name,
                                        float dlFactor, float dlOffset,
                                        const std::string& particleEffect)
 {
-    static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->getFloat();
+    static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->mValue.getFloat();
 
     Weather weather(name, fallback, fStromWindSpeed, mRainSpeed, dlFactor, dlOffset, particleEffect);
 

@@ -32,10 +32,10 @@ namespace MWGui
 {
 
     ItemWidget::ItemWidget()
-        : mItem(NULL)
-        , mItemShadow(NULL)
-        , mFrame(NULL)
-        , mText(NULL)
+        : mItem(nullptr)
+        , mItemShadow(nullptr)
+        , mFrame(nullptr)
+        , mText(nullptr)
     {
 
     }

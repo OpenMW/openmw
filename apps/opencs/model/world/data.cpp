@@ -572,6 +572,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
         UniversalId::Type_Video);
     addModel (new IdTable (&mMetaData), UniversalId::Type_MetaData);
 
+    mActorAdapter.reset(new ActorAdapter(*this));
+
     mRefLoadCache.clear(); // clear here rather than startLoading() and continueLoading() for multiple content files
 }
 
@@ -910,6 +912,16 @@ QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& 
     }
 
     return iter->second;
+}
+
+const CSMWorld::ActorAdapter* CSMWorld::Data::getActorAdapter() const
+{
+    return mActorAdapter.get();
+}
+
+CSMWorld::ActorAdapter* CSMWorld::Data::getActorAdapter()
+{
+    return mActorAdapter.get();
 }
 
 void CSMWorld::Data::merge()

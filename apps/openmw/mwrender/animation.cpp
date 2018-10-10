@@ -91,32 +91,6 @@ namespace
         std::vector<osg::ref_ptr<osg::Node> > mToRemove;
     };
 
-    class NodeMapVisitor : public osg::NodeVisitor
-    {
-    public:
-        typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
-
-        NodeMapVisitor(NodeMap& map)
-            : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
-            , mMap(map)
-        {}
-
-        void apply(osg::MatrixTransform& trans)
-        {
-            // Take transformation for first found node in file
-            const std::string nodeName = Misc::StringUtils::lowerCase(trans.getName());
-            if (mMap.find(nodeName) == mMap.end())
-            {
-                mMap[nodeName] = &trans;
-            }
-
-            traverse(trans);
-        }
-
-    private:
-        NodeMap& mMap;
-    };
-
     NifOsg::TextKeyMap::const_iterator findGroupStart(const NifOsg::TextKeyMap &keys, const std::string &groupname)
     {
         NifOsg::TextKeyMap::const_iterator iter(keys.begin());
@@ -208,15 +182,17 @@ namespace
     class RemoveFinishedCallbackVisitor : public RemoveVisitor
     {
     public:
+        bool mHasMagicEffects;
+
         RemoveFinishedCallbackVisitor()
             : RemoveVisitor()
-            , mEffectId(-1)
+            , mHasMagicEffects(false)
         {
         }
 
         RemoveFinishedCallbackVisitor(int effectId)
             : RemoveVisitor()
-            , mEffectId(effectId)
+            , mHasMagicEffects(false)
         {
         }
 
@@ -234,11 +210,68 @@ namespace
             {
                 // We should remove empty transformation nodes and finished callbacks here
                 MWRender::UpdateVfxCallback* vfxCallback = dynamic_cast<MWRender::UpdateVfxCallback*>(callback);
-                bool finished = vfxCallback && vfxCallback->mFinished;
-                bool toRemove = vfxCallback && mEffectId >= 0 && vfxCallback->mParams.mEffectId == mEffectId;
-                if (finished || toRemove)
+                if (vfxCallback)
                 {
-                    mToRemove.push_back(std::make_pair(group.asNode(), group.getParent(0)));
+                    if (vfxCallback->mFinished)
+                        mToRemove.push_back(std::make_pair(group.asNode(), group.getParent(0)));
+                    else
+                        mHasMagicEffects = true;
+                }
+            }
+        }
+
+        virtual void apply(osg::MatrixTransform &node)
+        {
+            traverse(node);
+        }
+
+        virtual void apply(osg::Geometry&)
+        {
+        }
+
+    private:
+        int mEffectId;
+    };
+
+    class RemoveCallbackVisitor : public RemoveVisitor
+    {
+    public:
+        bool mHasMagicEffects;
+
+        RemoveCallbackVisitor()
+            : RemoveVisitor()
+            , mHasMagicEffects(false)
+            , mEffectId(-1)
+        {
+        }
+
+        RemoveCallbackVisitor(int effectId)
+            : RemoveVisitor()
+            , mHasMagicEffects(false)
+            , mEffectId(effectId)
+        {
+        }
+
+        virtual void apply(osg::Node &node)
+        {
+            traverse(node);
+        }
+
+        virtual void apply(osg::Group &group)
+        {
+            traverse(group);
+
+            osg::Callback* callback = group.getUpdateCallback();
+            if (callback)
+            {
+                MWRender::UpdateVfxCallback* vfxCallback = dynamic_cast<MWRender::UpdateVfxCallback*>(callback);
+                if (vfxCallback)
+                {
+                    bool toRemove = mEffectId < 0 || vfxCallback->mParams.mEffectId == mEffectId;
+                    if (toRemove)
+                        mToRemove.push_back(std::make_pair(group.asNode(), group.getParent(0)));
+                    else
+                        mHasMagicEffects = true;
                 }
             }
         }
@@ -334,7 +367,7 @@ namespace
         void applyNode(osg::Node& node)
         {
             if (node.getStateSet())
-                node.setStateSet(NULL);
+                node.setStateSet(nullptr);
 
             if (node.getNodeMask() == 0x1 && node.getNumParents() == 1)
                 mToRemove.push_back(std::make_pair(&node, node.getParent(0)));
@@ -461,7 +494,7 @@ namespace MWRender
             }
             if (mDone)
                 return;
-            
+
             // Set the starting time to measure glow duration from if this is a temporary glow
             if ((mDuration >= 0) && mStartingTime == 0)
                 mStartingTime = nv->getFrameStamp()->getSimulationTime();
@@ -565,8 +598,8 @@ namespace MWRender
             }
             else
             {
-                // Remove effect immediately
-                mParams.mObjects.reset();
+                // Hide effect immediately
+                node->setNodeMask(0);
                 mFinished = true;
             }
         }
@@ -602,14 +635,15 @@ namespace MWRender
 
     Animation::Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
         : mInsert(parentNode)
-        , mSkeleton(NULL)
+        , mSkeleton(nullptr)
         , mNodeMapCreated(false)
         , mPtr(ptr)
         , mResourceSystem(resourceSystem)
         , mAccumulate(1.f, 1.f, 0.f)
-        , mTextKeyListener(NULL)
+        , mTextKeyListener(nullptr)
         , mHeadYawRadians(0.f)
         , mHeadPitchRadians(0.f)
+        , mHasMagicEffects(false)
         , mAlpha(1.f)
     {
         for(size_t i = 0;i < sNumBlendMasks;i++)
@@ -792,7 +826,7 @@ namespace MWRender
         for(size_t i = 0;i < sNumBlendMasks;i++)
             mAnimationTimePtr[i]->setTimePtr(std::shared_ptr<float>());
 
-        mAccumCtrl = NULL;
+        mAccumCtrl = nullptr;
 
         mAnimSources.clear();
 
@@ -1034,7 +1068,7 @@ namespace MWRender
     {
         if (!mNodeMapCreated && mObjectRoot)
         {
-            NodeMapVisitor visitor(mNodeMap);
+            SceneUtil::NodeMapVisitor visitor(mNodeMap);
             mObjectRoot->accept(visitor);
             mNodeMapCreated = true;
         }
@@ -1050,12 +1084,12 @@ namespace MWRender
             node->removeUpdateCallback(it->second);
 
             // Should be no longer needed with OSG 3.4
-            it->second->setNestedCallback(NULL);
+            it->second->setNestedCallback(nullptr);
         }
 
         mActiveControllers.clear();
 
-        mAccumCtrl = NULL;
+        mAccumCtrl = nullptr;
 
         for(size_t blendMask = 0;blendMask < sNumBlendMasks;blendMask++)
         {
@@ -1305,7 +1339,7 @@ namespace MWRender
 
                     if(state.getTime() >= state.mLoopStopTime)
                         break;
-                } 
+                }
 
                 if(timepassed <= 0.0f)
                     break;
@@ -1321,7 +1355,7 @@ namespace MWRender
                 ++stateiter;
         }
 
-        updateEffects(duration);
+        updateEffects();
 
         if (mHeadController)
         {
@@ -1357,7 +1391,7 @@ namespace MWRender
             {
                 osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
 
-                CleanObjectRootVisitor removeDrawableVisitor;
+                SceneUtil::CleanObjectRootVisitor removeDrawableVisitor;
                 created->accept(removeDrawableVisitor);
                 removeDrawableVisitor.remove();
 
@@ -1382,14 +1416,14 @@ namespace MWRender
             previousStateset = mObjectRoot->getStateSet();
             mObjectRoot->getParent(0)->removeChild(mObjectRoot);
         }
-        mObjectRoot = NULL;
-        mSkeleton = NULL;
+        mObjectRoot = nullptr;
+        mSkeleton = nullptr;
 
         mNodeMap.clear();
         mNodeMapCreated = false;
         mActiveControllers.clear();
-        mAccumRoot = NULL;
-        mAccumCtrl = NULL;
+        mAccumRoot = nullptr;
+        mAccumCtrl = nullptr;
 
         if (!forceskeleton)
         {
@@ -1426,7 +1460,7 @@ namespace MWRender
 
         if (isCreature)
         {
-            RemoveTriBipVisitor removeTriBipVisitor;
+            SceneUtil::RemoveTriBipVisitor removeTriBipVisitor;
             mObjectRoot->accept(removeTriBipVisitor);
             removeTriBipVisitor.remove();
         }
@@ -1520,9 +1554,9 @@ namespace MWRender
         osg::ref_ptr<GlowUpdater> glowUpdater = new GlowUpdater(texUnit, glowColor, textures, node, glowDuration, mResourceSystem);
         mGlowUpdater = glowUpdater;
         node->addUpdateCallback(glowUpdater);
-        
+
         // set a texture now so that the ShaderVisitor can find it
-        osg::ref_ptr<osg::StateSet> writableStateSet = NULL;
+        osg::ref_ptr<osg::StateSet> writableStateSet = nullptr;
         if (!node->getStateSet())
             writableStateSet = node->getOrCreateStateSet();
         else
@@ -1626,25 +1660,36 @@ namespace MWRender
         params.mLoop = loop;
         params.mEffectId = effectId;
         params.mBoneName = bonename;
-        params.mObjects = PartHolderPtr(new PartHolder(node));
         params.mAnimTime = std::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
         trans->addUpdateCallback(new UpdateVfxCallback(params));
 
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
         node->accept(assignVisitor);
 
+        // Notify that this animation has attached magic effects
+        mHasMagicEffects = true;
+
         overrideFirstRootTexture(texture, mResourceSystem, node);
     }
 
     void Animation::removeEffect(int effectId)
     {
-        RemoveFinishedCallbackVisitor visitor(effectId);
+        RemoveCallbackVisitor visitor(effectId);
         mInsert->accept(visitor);
         visitor.remove();
+        mHasMagicEffects = visitor.mHasMagicEffects;
+    }
+
+    void Animation::removeEffects()
+    {
+        removeEffect(-1);
     }
 
     void Animation::getLoopingEffects(std::vector<int> &out) const
     {
+        if (!mHasMagicEffects)
+            return;
+
         FindVfxCallbacksVisitor visitor;
         mInsert->accept(visitor);
 
@@ -1657,13 +1702,19 @@ namespace MWRender
         }
     }
 
-    void Animation::updateEffects(float duration)
+    void Animation::updateEffects()
     {
+        // We do not need to visit scene every frame.
+        // We can use a bool flag to check in spellcasting effect found.
+        if (!mHasMagicEffects)
+            return;
+
         // TODO: objects without animation still will have
         // transformation nodes with finished callbacks
         RemoveFinishedCallbackVisitor visitor;
         mInsert->accept(visitor);
         visitor.remove();
+        mHasMagicEffects = visitor.mHasMagicEffects;
     }
 
     bool Animation::upperBodyReady() const
@@ -1684,7 +1735,7 @@ namespace MWRender
         std::string lowerName = Misc::StringUtils::lowerCase(name);
         NodeMap::const_iterator found = getNodeMap().find(lowerName);
         if (found == getNodeMap().end())
-            return NULL;
+            return nullptr;
         else
             return found->second;
     }
@@ -1715,7 +1766,7 @@ namespace MWRender
         }
         else
         {
-            mObjectRoot->setStateSet(NULL);
+            mObjectRoot->setStateSet(nullptr);
 
             mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
         }
@@ -1742,7 +1793,7 @@ namespace MWRender
             if (mGlowLight)
             {
                 mInsert->removeChild(mGlowLight);
-                mGlowLight = NULL;
+                mGlowLight = nullptr;
             }
         }
         else
@@ -1756,7 +1807,7 @@ namespace MWRender
                 if (mGlowLight)
                 {
                     mInsert->removeChild(mGlowLight);
-                    mGlowLight = NULL;
+                    mGlowLight = nullptr;
                 }
 
                 osg::ref_ptr<osg::Light> light (new osg::Light);
@@ -1777,7 +1828,7 @@ namespace MWRender
 
     void Animation::addControllers()
     {
-        mHeadController = NULL;
+        mHeadController = nullptr;
 
         if (mPtr.getClass().isBipedal(mPtr))
         {
@@ -1897,12 +1948,12 @@ namespace MWRender
     PartHolder::~PartHolder()
     {
         if (mNode.get() && !mNode->getNumParents())
-            Log(Debug::Verbose) << "Part has no parents" ;
+            Log(Debug::Verbose) << "Part \"" << mNode->getName() << "\" has no parents" ;
 
         if (mNode.get() && mNode->getNumParents())
         {
             if (mNode->getNumParents() > 1)
-                Log(Debug::Verbose) << "Part has multiple (" << mNode->getNumParents() << ") parents";
+                Log(Debug::Verbose) << "Part \"" << mNode->getName() << "\" has multiple (" << mNode->getNumParents() << ") parents";
             mNode->getParent(0)->removeChild(mNode);
         }
     }

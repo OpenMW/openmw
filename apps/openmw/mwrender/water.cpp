@@ -27,6 +27,8 @@
 
 #include <components/sceneutil/waterutil.hpp>
 
+#include <components/misc/constants.hpp>
+
 #include <components/nifosg/controller.hpp>
 
 #include <components/shader/shadermanager.hpp>
@@ -401,7 +403,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 {
     mSimulation.reset(new RippleSimulation(parent, resourceSystem, fallback));
 
-    mWaterGeom = SceneUtil::createWaterGeometry(CELL_SIZE*150, 40, 900);
+    mWaterGeom = SceneUtil::createWaterGeometry(Constants::CellSizeInUnits*150, 40, 900);
     mWaterGeom->setDrawCallback(new DepthClampCallback);
     mWaterGeom->setNodeMask(Mask_Water);
 
@@ -439,13 +441,13 @@ void Water::updateWaterMaterial()
     {
         mReflection->removeChildren(0, mReflection->getNumChildren());
         mParent->removeChild(mReflection);
-        mReflection = NULL;
+        mReflection = nullptr;
     }
     if (mRefraction)
     {
         mRefraction->removeChildren(0, mRefraction->getNumChildren());
         mParent->removeChild(mRefraction);
-        mRefraction = NULL;
+        mRefraction = nullptr;
     }
 
     if (Settings::Manager::getBool("shader", "Water"))
@@ -577,7 +579,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     shaderStateset->setAttributeAndModes(program, osg::StateAttribute::ON);
 
     node->setStateSet(shaderStateset);
-    node->setUpdateCallback(NULL);
+    node->setUpdateCallback(nullptr);
 }
 
 void Water::processChangedSettings(const Settings::CategorySettingVector& settings)
@@ -593,13 +595,13 @@ Water::~Water()
     {
         mReflection->removeChildren(0, mReflection->getNumChildren());
         mParent->removeChild(mReflection);
-        mReflection = NULL;
+        mReflection = nullptr;
     }
     if (mRefraction)
     {
         mRefraction->removeChildren(0, mRefraction->getNumChildren());
         mParent->removeChild(mRefraction);
-        mRefraction = NULL;
+        mRefraction = nullptr;
     }
 }
 
@@ -679,7 +681,8 @@ bool Water::isUnderwater(const osg::Vec3f &pos) const
 
 osg::Vec3f Water::getSceneNodeCoordinates(int gridX, int gridY)
 {
-    return osg::Vec3f(static_cast<float>(gridX * CELL_SIZE + (CELL_SIZE / 2)), static_cast<float>(gridY * CELL_SIZE + (CELL_SIZE / 2)), mTop);
+    return osg::Vec3f(static_cast<float>(gridX * Constants::CellSizeInUnits + (Constants::CellSizeInUnits / 2)),
+                      static_cast<float>(gridY * Constants::CellSizeInUnits + (Constants::CellSizeInUnits / 2)), mTop);
 }
 
 void Water::addEmitter (const MWWorld::Ptr& ptr, float scale, float force)

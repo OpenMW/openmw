@@ -16,11 +16,13 @@ namespace MWGui
 {
 
 VideoWidget::VideoWidget()
-    : mVFS(NULL)
+    : mVFS(nullptr)
 {
     mPlayer.reset(new Video::VideoPlayer());
     setNeedKeyFocus(true);
 }
+
+VideoWidget::~VideoWidget() = default;
 
 void VideoWidget::setVFS(const VFS::Manager *vfs)
 {

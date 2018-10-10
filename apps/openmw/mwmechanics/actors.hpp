@@ -28,8 +28,6 @@ namespace MWMechanics
             void addBoundItem (const std::string& itemId, const MWWorld::Ptr& actor);
             void removeBoundItem (const std::string& itemId, const MWWorld::Ptr& actor);
 
-            void updateNpc(const MWWorld::Ptr &ptr, float duration);
-
             void adjustMagicEffects (const MWWorld::Ptr& creature);
 
             void calculateDynamicStats (const MWWorld::Ptr& ptr);
@@ -39,7 +37,7 @@ namespace MWMechanics
 
             void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
 
-            void updateDrowning (const MWWorld::Ptr& ptr, float duration);
+            void updateDrowning (const MWWorld::Ptr& ptr, float duration, bool isKnockedOut, bool isPlayer);
 
             void updateEquippedLight (const MWWorld::Ptr& ptr, float duration, bool mayEquip);
 

@@ -99,7 +99,7 @@ void MWWorld::InventoryStore::readEquipmentState(const MWWorld::ContainerStoreIt
 }
 
 MWWorld::InventoryStore::InventoryStore()
- : mListener(NULL)
+ : mListener(nullptr)
  , mUpdatesEnabled (true)
  , mFirstAutoEquip(true)
  , mSelectedEnchantItem(end())
@@ -250,11 +250,10 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
     const MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
-    MWMechanics::NpcStats& stats = actor.getClass().getNpcStats(actor);
 
-    static float fUnarmoredBase1 = store.find("fUnarmoredBase1")->getFloat();
-    static float fUnarmoredBase2 = store.find("fUnarmoredBase2")->getFloat();
-    int unarmoredSkill = stats.getSkill(ESM::Skill::Unarmored).getModified();
+    static float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
+    static float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
+    int unarmoredSkill = actor.getClass().getSkill(actor, ESM::Skill::Unarmored);
 
     float unarmoredRating = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
 
@@ -384,7 +383,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 
         for (int j = 0; j < static_cast<int>(weaponSkillsLength); ++j)
         {
-            int skillValue = stats.getSkill(static_cast<int>(weaponSkills[j])).getModified();
+            int skillValue = actor.getClass().getSkill(actor, static_cast<int>(weaponSkills[j]));
 
             if (skillValue > max && !weaponSkillVisited[j])
             {
@@ -921,7 +920,7 @@ void MWWorld::InventoryStore::rechargeItems(float duration)
             continue;
 
         static float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                    "fMagicItemRechargePerSecond")->getFloat();
+                    "fMagicItemRechargePerSecond")->mValue.getFloat();
 
         if (it->first->getCellRef().getEnchantmentCharge() <= it->second)
         {

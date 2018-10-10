@@ -45,7 +45,6 @@ namespace CSVWidget
 
         private slots:
             void showPicker();
-            void pickerHid();
             void pickerColorChanged(const QColor &color);
 
         signals:

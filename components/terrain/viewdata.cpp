@@ -64,7 +64,7 @@ void ViewData::reset(unsigned int frame)
 {
     // clear any unused entries
     for (unsigned int i=mNumEntries; i<mEntries.size(); ++i)
-        mEntries[i].set(NULL, false);
+        mEntries[i].set(nullptr, false);
 
     // reset index for next frame
     mNumEntries = 0;
@@ -76,7 +76,7 @@ void ViewData::reset(unsigned int frame)
 void ViewData::clear()
 {
     for (unsigned int i=0; i<mEntries.size(); ++i)
-        mEntries[i].set(NULL, false);
+        mEntries[i].set(nullptr, false);
     mNumEntries = 0;
     mFrameLastUsed = 0;
     mChanged = false;
@@ -91,7 +91,7 @@ bool ViewData::contains(QuadTreeNode *node)
 }
 
 ViewData::Entry::Entry()
-    : mNode(NULL)
+    : mNode(nullptr)
     , mVisible(true)
     , mLodFlags(0)
 {
@@ -107,7 +107,7 @@ bool ViewData::Entry::set(QuadTreeNode *node, bool visible)
     {
         mNode = node;
         // clear cached data
-        mRenderingNode = NULL;
+        mRenderingNode = nullptr;
         return true;
     }
 }
@@ -148,7 +148,7 @@ void ViewDataMap::clearUnusedViews(unsigned int frame)
         ViewData* vd = it->second;
         if (vd->getFrameLastUsed() + 2 < frame)
         {
-            vd->setViewer(NULL);
+            vd->setViewer(nullptr);
             vd->clear();
             mUnusedViews.push_back(vd);
             mViews.erase(it++);

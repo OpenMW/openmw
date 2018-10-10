@@ -630,7 +630,7 @@ private:
         if (mSunFlashNode)
         {
             mSunFlashNode->removeCullCallback(mSunFlashCallback);
-            mSunFlashCallback = NULL;
+            mSunFlashCallback = nullptr;
         }
     }
 
@@ -672,7 +672,7 @@ private:
         if (mSunGlareNode)
         {
             mSunGlareNode->removeCullCallback(mSunGlareCallback);
-            mSunGlareCallback = NULL;
+            mSunGlareCallback = nullptr;
         }
     }
 
@@ -1096,8 +1096,8 @@ private:
 
 SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager)
     : mSceneManager(sceneManager)
-    , mCamera(NULL)
-    , mRainIntensityUniform(NULL)
+    , mCamera(nullptr)
+    , mRainIntensityUniform(nullptr)
     , mAtmosphereNightRoll(0.f)
     , mCreated(false)
     , mIsStorm(false)
@@ -1304,7 +1304,7 @@ public:
             {
                 if (stateset->getAttribute(osg::StateAttribute::MATERIAL))
                 {
-                    SceneUtil::CompositeStateSetUpdater* composite = NULL;
+                    SceneUtil::CompositeStateSetUpdater* composite = nullptr;
                     osg::Callback* callback = node.getUpdateCallback();
 
                     while (callback)
@@ -1385,12 +1385,12 @@ public:
 
     virtual osg::Object *cloneType() const override
     {
-        return NULL;
+        return nullptr;
     }
 
     virtual osg::Object *clone(const osg::CopyOp &op) const override
     {
-        return NULL;
+        return nullptr;
     }
 
     virtual void operate(osgParticle::Particle *P, double dt) override
@@ -1522,10 +1522,10 @@ void SkyManager::destroyRain()
         return;
 
     mRootNode->removeChild(mRainNode);
-    mRainNode = NULL;
-    mRainParticleSystem = NULL;
-    mRainShooter = NULL;
-    mRainFader = NULL;
+    mRainNode = nullptr;
+    mRainParticleSystem = nullptr;
+    mRainShooter = nullptr;
+    mRainFader = nullptr;
 }
 
 SkyManager::~SkyManager()
@@ -1533,7 +1533,7 @@ SkyManager::~SkyManager()
     if (mRootNode)
     {
         mRootNode->getParent(0)->removeChild(mRootNode);
-        mRootNode = NULL;
+        mRootNode = nullptr;
     }
 }
 
@@ -1556,7 +1556,7 @@ bool SkyManager::isEnabled()
 
 bool SkyManager::hasRain()
 {
-    return mRainNode != NULL;
+    return mRainNode != nullptr;
 }
 
 void SkyManager::update(float duration)
@@ -1660,7 +1660,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
         if (mParticleEffect)
         {
             mParticleNode->removeChild(mParticleEffect);
-            mParticleEffect = NULL;
+            mParticleEffect = nullptr;
             mParticleFaders.clear();
         }
 
@@ -1669,7 +1669,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
             if (mParticleNode)
             {
                 mRootNode->removeChild(mParticleNode);
-                mParticleNode = NULL;
+                mParticleNode = nullptr;
             }
         }
         else

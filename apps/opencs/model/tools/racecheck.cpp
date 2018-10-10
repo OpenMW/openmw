@@ -1,9 +1,5 @@
 #include "racecheck.hpp"
 
-#include <sstream>
-
-#include <components/esm/loadrace.hpp>
-
 #include "../prefs/state.hpp"
 
 #include "../world/universalid.hpp"
@@ -29,24 +25,24 @@ void CSMTools::RaceCheckStage::performPerRecord (int stage, CSMDoc::Messages& me
 
     // test for empty name and description
     if (race.mName.empty())
-        messages.push_back (std::make_pair (id, race.mId + " has an empty name"));
+        messages.add(id, "Name is missing", "", (race.mData.mFlags & 0x1) ? CSMDoc::Message::Severity_Error : CSMDoc::Message::Severity_Warning);
 
     if (race.mDescription.empty())
-        messages.push_back (std::make_pair (id, race.mId + " has an empty description"));
+        messages.add(id, "Description is missing", "", CSMDoc::Message::Severity_Warning);
 
     // test for positive height
     if (race.mData.mHeight.mMale<=0)
-        messages.push_back (std::make_pair (id, "male " + race.mId + " has non-positive height"));
+        messages.add(id, "Male height is non-positive", "", CSMDoc::Message::Severity_Error);
 
     if (race.mData.mHeight.mFemale<=0)
-        messages.push_back (std::make_pair (id, "female " + race.mId + " has non-positive height"));
+        messages.add(id, "Female height is non-positive", "", CSMDoc::Message::Severity_Error);
 
     // test for non-negative weight
     if (race.mData.mWeight.mMale<0)
-        messages.push_back (std::make_pair (id, "male " + race.mId + " has negative weight"));
+        messages.add(id, "Male weight is negative", "", CSMDoc::Message::Severity_Error);
 
     if (race.mData.mWeight.mFemale<0)
-        messages.push_back (std::make_pair (id, "female " + race.mId + " has negative weight"));
+        messages.add(id, "Female weight is negative", "", CSMDoc::Message::Severity_Error);
 
     /// \todo check data members that can't be edited in the table view
 }
@@ -56,7 +52,7 @@ void CSMTools::RaceCheckStage::performFinal (CSMDoc::Messages& messages)
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Races);
 
     if (!mPlayable)
-        messages.push_back (std::make_pair (id, "No playable race"));
+        messages.add(id, "No playable race", "", CSMDoc::Message::Severity_SeriousError);
 }
 
 CSMTools::RaceCheckStage::RaceCheckStage (const CSMWorld::IdCollection<ESM::Race>& races)

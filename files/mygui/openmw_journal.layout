@@ -25,10 +25,12 @@
       </Widget>
 
       <Widget type="TextBox" skin="NormalText" position="150 350 32 16" name="PageOneNum">
+        <Property key="FontName" value="Journalbook Magic Cards"/>
         <Property key="TextColour" value="0 0 0"/>
       </Widget>
 
       <Widget type="TextBox" skin="NormalText" position="410 350 32 16" name="PageTwoNum">
+        <Property key="FontName" value="Journalbook Magic Cards"/>
         <Property key="TextColour" value="0 0 0"/>
       </Widget>
 
@@ -59,8 +61,9 @@
       <Property key="ImageTexture" value="textures\tx_menubook_bookmark.dds"/>
       <Property key="ImageCoord" value="0 0 164 256"/>
 
-      <Widget type="BookPage" skin="MW_BookPage" position="20 15 92 250" name="LeftTopicIndex"/>
-      <Widget type="BookPage" skin="MW_BookPage" position="112 15 92 250" name="RightTopicIndex"/>
+      <Widget type="BookPage" skin="MW_BookPage" position="10 10 92 260" name="LeftTopicIndex"/>
+      <Widget type="BookPage" skin="MW_BookPage" position="66 10 92 260" name="CenterTopicIndex"/>
+      <Widget type="BookPage" skin="MW_BookPage" position="122 10 92 260" name="RightTopicIndex"/>
 
       <Widget type="ImageButton" skin="ImageBox" position="71 15 100 20" Align="Top|Left" name="ShowActiveBTN">
         <!-- Image set at runtime since it may not be available in all versions of the game -->

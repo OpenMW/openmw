@@ -99,9 +99,9 @@ namespace MWGui
 
         std::string message;
         if (mDays == 1)
-            message = gmst.find("sNotifyMessage42")->getString();
+            message = gmst.find("sNotifyMessage42")->mValue.getString();
         else
-            message = gmst.find("sNotifyMessage43")->getString();
+            message = gmst.find("sNotifyMessage43")->mValue.getString();
 
         std::stringstream dayStr;
         dayStr << mDays;
@@ -110,12 +110,12 @@ namespace MWGui
 
         for (std::set<int>::iterator it = skills.begin(); it != skills.end(); ++it)
         {
-            std::string skillName = gmst.find(ESM::Skill::sSkillNameIds[*it])->getString();
+            std::string skillName = gmst.find(ESM::Skill::sSkillNameIds[*it])->mValue.getString();
             std::stringstream skillValue;
             skillValue << player.getClass().getNpcStats(player).getSkill(*it).getBase();
-            std::string skillMsg = gmst.find("sNotifyMessage44")->getString();
+            std::string skillMsg = gmst.find("sNotifyMessage44")->mValue.getString();
             if (*it == ESM::Skill::Sneak || *it == ESM::Skill::Security)
-                skillMsg = gmst.find("sNotifyMessage39")->getString();
+                skillMsg = gmst.find("sNotifyMessage39")->mValue.getString();
 
             if (skillMsg.find("%s") != std::string::npos)
                 skillMsg.replace(skillMsg.find("%s"), 2, skillName);

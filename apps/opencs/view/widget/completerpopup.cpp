@@ -11,7 +11,7 @@ CSVWidget::CompleterPopup::CompleterPopup(QWidget *parent)
 
 int CSVWidget::CompleterPopup::sizeHintForRow(int row) const
 {
-    if (model() == NULL)
+    if (model() == nullptr)
     {
         return -1;
     }

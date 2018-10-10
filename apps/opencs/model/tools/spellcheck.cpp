@@ -34,13 +34,13 @@ void CSMTools::SpellCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Spell, spell.mId);
 
-    // test for empty name and description
+    // test for empty name
     if (spell.mName.empty())
-        messages.push_back (std::make_pair (id, spell.mId + " has an empty name"));
+        messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
 
     // test for invalid cost values
     if (spell.mData.mCost<0)
-        messages.push_back (std::make_pair (id, spell.mId + " has a negative spell costs"));
+        messages.add(id, "Spell cost is negative", "", CSMDoc::Message::Severity_Error);
 
     /// \todo check data members that can't be edited in the table view
 }

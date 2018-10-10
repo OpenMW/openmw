@@ -36,6 +36,8 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
     ui.setupUi (this);
     setObjectName ("DataFilesPage");
     mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget);
+    const QString encoding = mGameSettings.value("encoding", "win1252");
+    mSelector->setEncoding(encoding);
 
     mProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
 

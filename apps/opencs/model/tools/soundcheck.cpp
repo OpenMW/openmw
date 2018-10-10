@@ -1,15 +1,13 @@
 #include "soundcheck.hpp"
 
-#include <sstream>
-
-#include <components/esm/loadskil.hpp>
-
 #include "../prefs/state.hpp"
 
 #include "../world/universalid.hpp"
 
-CSMTools::SoundCheckStage::SoundCheckStage (const CSMWorld::IdCollection<ESM::Sound>& sounds)
-: mSounds (sounds)
+CSMTools::SoundCheckStage::SoundCheckStage (const CSMWorld::IdCollection<ESM::Sound> &sounds,
+                                            const CSMWorld::Resources &soundfiles)
+    : mSounds (sounds),
+      mSoundFiles (soundfiles)
 {
     mIgnoreBaseRecords = false;
 }
@@ -34,7 +32,16 @@ void CSMTools::SoundCheckStage::perform (int stage, CSMDoc::Messages& messages)
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Sound, sound.mId);
 
     if (sound.mData.mMinRange>sound.mData.mMaxRange)
-        messages.push_back (std::make_pair (id, "Minimum range larger than maximum range"));
+    {
+        messages.add(id, "Minimum range is larger than maximum range", "", CSMDoc::Message::Severity_Warning);
+    }
 
-    /// \todo check, if the sound file exists
+    if (sound.mSound.empty())
+    {
+        messages.add(id, "Sound file is missing", "", CSMDoc::Message::Severity_Error);
+    }
+    else if (mSoundFiles.searchId(sound.mSound) == -1)
+    {
+        messages.add(id, "Sound file '" + sound.mSound + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    }
 }

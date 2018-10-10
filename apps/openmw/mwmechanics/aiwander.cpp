@@ -300,9 +300,8 @@ namespace MWMechanics
         bool isWaterCreature = actor.getClass().isPureWaterCreature(actor);
         do {
             // Determine a random location within radius of original position
-            const float pi = 3.14159265359f;
             const float wanderRadius = (0.2f + Misc::Rng::rollClosedProbability() * 0.8f) * wanderDistance;
-            const float randomDirection = Misc::Rng::rollClosedProbability() * 2.0f * pi;
+            const float randomDirection = Misc::Rng::rollClosedProbability() * 2.0f * osg::PI;
             const float destinationX = mInitialActorPosition.x() + wanderRadius * std::cos(randomDirection);
             const float destinationY = mInitialActorPosition.y() + wanderRadius * std::sin(randomDirection);
             const float destinationZ = mInitialActorPosition.z();
@@ -495,7 +494,7 @@ namespace MWMechanics
             MWWorld::Ptr player = getPlayer();
 
             static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
-                .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
+                .get<ESM::GameSetting>().find("fVoiceIdleOdds")->mValue.getFloat();
 
             float roll = Misc::Rng::rollProbability() * 10000.0f;
 
@@ -522,7 +521,7 @@ namespace MWMechanics
         int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
         float helloDistance = static_cast<float>(hello);
         static int iGreetDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
-            .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
+            .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->mValue.getInteger();
 
         helloDistance *= iGreetDistanceMultiplier;
 
@@ -700,7 +699,7 @@ namespace MWMechanics
         for(unsigned int counter = 0; counter < mIdle.size(); counter++)
         {
             static float fIdleChanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
-                .get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
+                .get<ESM::GameSetting>().find("fIdleChanceMultiplier")->mValue.getFloat();
 
             unsigned short idleChance = static_cast<unsigned short>(fIdleChanceMultiplier * mIdle[counter]);
             unsigned short randSelect = (int)(Misc::Rng::rollProbability() * int(100 / fIdleChanceMultiplier));

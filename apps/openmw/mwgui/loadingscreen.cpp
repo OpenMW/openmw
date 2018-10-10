@@ -140,7 +140,7 @@ namespace MWGui
 
             // Callback removes itself when done
             if (renderInfo.getCurrentCamera())
-                renderInfo.getCurrentCamera()->setInitialDrawCallback(NULL);
+                renderInfo.getCurrentCamera()->setInitialDrawCallback(nullptr);
         }
 
     private:
@@ -208,7 +208,7 @@ namespace MWGui
         else
             mImportantLabel = false; // label was already shown on loading screen
 
-        mViewer->getSceneData()->setComputeBoundingSphereCallback(NULL);
+        mViewer->getSceneData()->setComputeBoundingSphereCallback(nullptr);
         mViewer->getSceneData()->dirtyBound();
 
         //std::cout << "loading took " << mTimer.time_m() - mLoadingOnTime << std::endl;

@@ -254,6 +254,8 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(mSelected->button->getChildAt(0));
 
         mSelected->type = Type_MagicItem;
+        mSelected->id = item.getCellRef().getRefId();
+        mSelected->name = item.getClass().getName(item);
 
         mSelected->button->setFrame("textures\\menu_icon_select_magic_magic.dds", MyGUI::IntCoord(2, 2, 40, 40));
         mSelected->button->setIcon(item);
@@ -271,20 +273,19 @@ namespace MWGui
         while (mSelected->button->getChildCount()) // Destroy number label
             MyGUI::Gui::getInstance().destroyWidget(mSelected->button->getChildAt(0));
 
+        const MWWorld::ESMStore &esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(spellId);
+
         mSelected->type = Type_Magic;
         mSelected->id = spellId;
+        mSelected->name = spell->mName;
 
         mSelected->button->setItem(MWWorld::Ptr());
         mSelected->button->setUserString("ToolTipType", "Spell");
         mSelected->button->setUserString("Spell", spellId);
 
-        const MWWorld::ESMStore &esmStore = MWBase::Environment::get().getWorld()->getStore();
-
         // use the icon of the first effect
-        const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(spellId);
-
-        const ESM::MagicEffect* effect =
-            esmStore.get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
+        const ESM::MagicEffect* effect = esmStore.get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
 
         std::string path = effect->mIcon;
         int slashPos = path.rfind('\\');
@@ -423,9 +424,7 @@ namespace MWGui
 
             if (!spells.hasSpell(spellId))
             {
-                const ESM::Spell* spell =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sQuickMenu5} " + spell->mName);
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sQuickMenu5} " + key->name);
                 return;
             }
 
@@ -547,28 +546,26 @@ namespace MWGui
                 return;
 
             mSelected = &mKey[i];
-            mSelected->type = (QuickKeysMenu::QuickKeyType) it->mType;
-            mSelected->id = it->mId;
 
-            switch (mSelected->type)
+            switch (it->mType)
             {
             case Type_Magic:
-                if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(mSelected->id))
-                    onAssignMagic(mSelected->id);
+                if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->mId))
+                    onAssignMagic(it->mId);
                 break;
             case Type_Item:
             case Type_MagicItem:
             {
                 // Find the item by id
-                MWWorld::Ptr item = store.findReplacement(mSelected->id);
+                MWWorld::Ptr item = store.findReplacement(it->mId);
 
                 if (item.isEmpty())
-                    unassign(&mKey[i]);
+                    unassign(mSelected);
                 else
                 {
-                    if (mSelected->type == Type_Item)
+                    if (it->mType == Type_Item)
                         onAssignItem(item);
-                    else if (mSelected->type == Type_MagicItem)
+                    else // if (it->mType == Type_MagicItem)
                         onAssignMagicItem(item);
                 }
 
@@ -576,7 +573,7 @@ namespace MWGui
             }
             case Type_Unassigned:
             case Type_HandToHand:
-                unassign(&mKey[i]);
+                unassign(mSelected);
                 break;
             }
 

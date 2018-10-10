@@ -51,10 +51,13 @@ namespace MWMechanics
             TIngredientsContainer mIngredients;
             TEffectsContainer mEffects;
             int mValue;
+            std::string mPotionName;
 
             void applyTools (int flags, float& value) const;
 
             void updateEffects();
+
+            Result getReadyStatus() const;
 
             const ESM::Potion *getRecord(const ESM::Potion& toFind) const;
             ///< Try to find a potion record similar to \a toFind in the record store, or return 0 if not found
@@ -70,6 +73,10 @@ namespace MWMechanics
             void increaseSkill();
             ///< Increase alchemist's skill.
 
+            Result createSingle ();
+            ///< Try to create a potion from the ingredients, place it in the inventory of the alchemist and
+            /// adjust the skills of the alchemist accordingly.
+
             float getAlchemyFactor() const;
 
             int countIngredients() const;
@@ -79,6 +86,8 @@ namespace MWMechanics
             TEffectsIterator endEffects() const;
 
         public:
+            int countPotionsToBrew() const;
+            ///< calculates maximum amount of potions, which you can make from selected ingredients
 
             static bool knownEffect (unsigned int potionEffectIndex, const MWWorld::Ptr& npc);
             ///< Does npc have sufficient alchemy skill to know about this potion effect?
@@ -100,6 +109,9 @@ namespace MWMechanics
             void clear();
             ///< Remove alchemist, tools and ingredients.
 
+            void setPotionName(const std::string& name);
+            ///< Set name of potion to create
+
             std::set<EffectKey> listEffects() const;
             ///< List all effects shared by at least two ingredients.
 
@@ -115,8 +127,8 @@ namespace MWMechanics
             std::string suggestPotionName ();
             ///< Suggest a name for the potion, based on the current effects
 
-            Result create (const std::string& name);
-            ///< Try to create a potion from the ingredients, place it in the inventory of the alchemist and
+            Result create (const std::string& name, int& count);
+            ///< Try to create potions from the ingredients, place them in the inventory of the alchemist and
             /// adjust the skills of the alchemist accordingly.
             /// \param name must not be an empty string, or Result_NoName is returned
     };

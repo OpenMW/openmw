@@ -25,9 +25,12 @@
 
 namespace MWGui
 {
+    const float AlchemyWindow::sCountChangeInitialPause = 0.5f;
+    const float AlchemyWindow::sCountChangeInterval = 0.1f;
+
     AlchemyWindow::AlchemyWindow()
         : WindowBase("openmw_alchemy_window.layout")
-        , mSortModel(NULL)
+        , mSortModel(nullptr)
         , mAlchemy(new MWMechanics::Alchemy())
         , mApparatus (4)
         , mIngredients (4)
@@ -43,9 +46,21 @@ namespace MWGui
         getWidget(mApparatus[2], "Apparatus3");
         getWidget(mApparatus[3], "Apparatus4");
         getWidget(mEffectsBox, "CreatedEffects");
+        getWidget(mBrewCountEdit, "BrewCount");
+        getWidget(mIncreaseButton, "IncreaseButton");
+        getWidget(mDecreaseButton, "DecreaseButton");
         getWidget(mNameEdit, "NameEdit");
         getWidget(mItemView, "ItemView");
 
+        mBrewCountEdit->eventValueChanged += MyGUI::newDelegate(this, &AlchemyWindow::onCountValueChanged);
+        mBrewCountEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &AlchemyWindow::onAccept);
+        mBrewCountEdit->setMinValue(1);
+        mBrewCountEdit->setValue(1);
+
+        mIncreaseButton->eventMouseButtonPressed += MyGUI::newDelegate(this, &AlchemyWindow::onIncreaseButtonPressed);
+        mIncreaseButton->eventMouseButtonReleased += MyGUI::newDelegate(this, &AlchemyWindow::onCountButtonReleased);
+        mDecreaseButton->eventMouseButtonPressed += MyGUI::newDelegate(this, &AlchemyWindow::onDecreaseButtonPressed);
+        mDecreaseButton->eventMouseButtonReleased += MyGUI::newDelegate(this, &AlchemyWindow::onCountButtonReleased);
 
         mItemView->eventItemClicked += MyGUI::newDelegate(this, &AlchemyWindow::onSelectedItem);
 
@@ -65,6 +80,9 @@ namespace MWGui
     void AlchemyWindow::onAccept(MyGUI::EditBox* sender)
     {
         onCreateButtonClicked(sender);
+
+        // To do not spam onAccept() again and again
+        MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);
     }
 
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
@@ -74,7 +92,15 @@ namespace MWGui
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
     {
-        MWMechanics::Alchemy::Result result = mAlchemy->create (mNameEdit->getCaption ());
+        mAlchemy->setPotionName(mNameEdit->getCaption());
+        int count = mAlchemy->countPotionsToBrew();
+        count = std::min(count, mBrewCountEdit->getValue());
+        createPotions(count);
+    }
+
+    void AlchemyWindow::createPotions(int count)
+    {
+        MWMechanics::Alchemy::Result result = mAlchemy->create(mNameEdit->getCaption(), count);
         MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
 
         switch (result)
@@ -89,8 +115,11 @@ namespace MWGui
             winMgr->messageBox("#{sNotifyMessage6a}");
             break;
         case MWMechanics::Alchemy::Result_Success:
-            winMgr->messageBox("#{sPotionSuccess}");
             winMgr->playSound("potion success");
+            if (count == 1)
+                winMgr->messageBox("#{sPotionSuccess}");
+            else
+                winMgr->messageBox("#{sPotionSuccess} "+mNameEdit->getCaption()+" ("+std::to_string(count)+")");
             break;
         case MWMechanics::Alchemy::Result_NoEffects:
         case MWMechanics::Alchemy::Result_RandomFailure:
@@ -123,6 +152,7 @@ namespace MWGui
         mItemView->resetScrollBars();
 
         mNameEdit->setCaption("");
+        mBrewCountEdit->setValue(1);
 
         int index = 0;
         for (MWMechanics::Alchemy::TToolsIterator iter (mAlchemy->beginTools());
@@ -246,5 +276,62 @@ namespace MWGui
                 mAlchemy->removeIngredient (i);
 
         update();
+    }
+
+    void AlchemyWindow::addRepeatController(MyGUI::Widget *widget)
+    {
+        MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(Controllers::ControllerRepeatEvent::getClassTypeName());
+        Controllers::ControllerRepeatEvent* controller = item->castType<Controllers::ControllerRepeatEvent>();
+        controller->eventRepeatClick += MyGUI::newDelegate(this, &AlchemyWindow::onRepeatClick);
+        controller->setRepeat(sCountChangeInitialPause, sCountChangeInterval);
+        MyGUI::ControllerManager::getInstance().addItem(widget, controller);
+    }
+
+    void AlchemyWindow::onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+    {
+        addRepeatController(_sender);
+        onIncreaseButtonTriggered();
+    }
+
+    void AlchemyWindow::onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+    {
+        addRepeatController(_sender);
+        onDecreaseButtonTriggered();
+    }
+
+    void AlchemyWindow::onRepeatClick(MyGUI::Widget* widget, MyGUI::ControllerItem* controller)
+    {
+        if (widget == mIncreaseButton)
+            onIncreaseButtonTriggered();
+        else if (widget == mDecreaseButton)
+            onDecreaseButtonTriggered();
+    }
+
+    void AlchemyWindow::onCountButtonReleased(MyGUI::Widget *_sender, int _left, int _top, MyGUI::MouseButton _id)
+    {
+        MyGUI::ControllerManager::getInstance().removeItem(_sender);
+    }
+
+    void AlchemyWindow::onCountValueChanged(int value)
+    {
+        mBrewCountEdit->setValue(std::abs(value));
+    }
+
+    void AlchemyWindow::onIncreaseButtonTriggered()
+    {
+        int currentCount = mBrewCountEdit->getValue();
+
+        // prevent overflows
+        if (currentCount == std::numeric_limits<int>::max())
+            return;
+
+        mBrewCountEdit->setValue(currentCount+1);
+    }
+
+    void AlchemyWindow::onDecreaseButtonTriggered()
+    {
+        int currentCount = mBrewCountEdit->getValue();
+        if (currentCount > 1)
+            mBrewCountEdit->setValue(currentCount-1);
     }
 }

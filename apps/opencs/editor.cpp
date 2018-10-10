@@ -22,7 +22,7 @@ CS::Editor::Editor (int argc, char **argv)
 : mSettingsState (mCfgMgr), mDocumentManager (mCfgMgr),
   mViewManager (mDocumentManager), mPid(""),
   mLock(), mMerge (mDocumentManager),
-  mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
+  mIpcServerName ("org.openmw.OpenCS"), mServer(nullptr), mClientSocket(nullptr)
 {    
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
@@ -108,8 +108,9 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     mCfgMgr.readConfiguration(variables, desc, quiet);
 
-    mDocumentManager.setEncoding (
-        ToUTF8::calculateEncoding (variables["encoding"].as<Files::EscapeHashString>().toStdString()));
+    const std::string encoding = variables["encoding"].as<Files::EscapeHashString>().toStdString();
+    mDocumentManager.setEncoding (ToUTF8::calculateEncoding (encoding));
+    mFileDialog.setEncoding (QString::fromUtf8(encoding.c_str()));
 
     mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::EscapeHashString>().toStdString());
 
@@ -338,7 +339,7 @@ bool CS::Editor::makeIPCServer()
     }
 
     mServer->close();
-    mServer = NULL;
+    mServer = nullptr;
     return false;
 }
 

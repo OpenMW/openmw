@@ -39,7 +39,7 @@ struct JournalViewModelImpl : JournalViewModel
     static Utf8Span toUtf8Span (std::string const & str)
     {
         if (str.size () == 0)
-            return Utf8Span (Utf8Point (NULL), Utf8Point (NULL));
+            return Utf8Span (Utf8Point (nullptr), Utf8Point (nullptr));
 
         Utf8Point point = reinterpret_cast <Utf8Point> (str.c_str ());
 

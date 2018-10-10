@@ -14,7 +14,7 @@ namespace MWRender
 {
 
 LandManager::LandManager(int loadFlags)
-    : ResourceManager(NULL)
+    : ResourceManager(nullptr)
     , mLoadFlags(loadFlags)
 {
 }
@@ -32,7 +32,7 @@ osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(int x, int y)
     {
         const ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(x,y);
         if (!land)
-            return NULL;
+            return nullptr;
         osg::ref_ptr<ESMTerrain::LandObject> landObj (new ESMTerrain::LandObject(land, mLoadFlags));
         mCache->addEntryToObjectCache(idstr, landObj.get());
         return landObj;

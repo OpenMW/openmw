@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <components/misc/constants.hpp>
 #include <components/misc/rng.hpp>
 
 #include <components/debug/debuglog.hpp>
@@ -372,9 +373,9 @@ namespace MWClass
             if (!ref->mBase->mFaction.empty())
             {
                 static const int iAutoRepFacMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("iAutoRepFacMod")->getInt();
+                        .find("iAutoRepFacMod")->mValue.getInteger();
                 static const int iAutoRepLevMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("iAutoRepLevMod")->getInt();
+                        .find("iAutoRepLevMod")->mValue.getInteger();
                 int rank = ref->mBase->getFactionRank();
 
                 data->mNpcStats.setReputation(iAutoRepFacMod * (rank+1) + iAutoRepLevMod * (data->mNpcStats.getLevel()-1));
@@ -528,7 +529,7 @@ namespace MWClass
             const MWBase::World *world = MWBase::Environment::get().getWorld();
             const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
 
-            return store.find("sWerewolfPopup")->getString();
+            return store.find("sWerewolfPopup")->mValue.getString();
         }
 
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
@@ -565,10 +566,10 @@ namespace MWClass
 
         MWMechanics::applyFatigueLoss(ptr, weapon, attackStrength);
 
-        const float fCombatDistance = store.find("fCombatDistance")->getFloat();
+        const float fCombatDistance = store.find("fCombatDistance")->mValue.getFloat();
         float dist = fCombatDistance * (!weapon.isEmpty() ?
                                weapon.get<ESM::Weapon>()->mBase->mData.mReach :
-                               store.find("fHandToHandReach")->getFloat());
+                               store.find("fHandToHandReach")->mValue.getFloat());
 
         // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
         std::vector<MWWorld::Ptr> targetActors;
@@ -609,7 +610,7 @@ namespace MWClass
         float damage = 0.0f;
         if(!weapon.isEmpty())
         {
-            const unsigned char *attack = NULL;
+            const unsigned char *attack = nullptr;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
             else if(type == ESM::Weapon::AT_Slash)
@@ -638,14 +639,14 @@ namespace MWClass
                     && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(ptr, victim);
             if(unaware)
             {
-                damage *= store.find("fCombatCriticalStrikeMult")->getFloat();
+                damage *= store.find("fCombatCriticalStrikeMult")->mValue.getFloat();
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
                 MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
             }
         }
 
         if (othercls.getCreatureStats(victim).getKnockedDown())
-            damage *= store.find("fCombatKODamageMult")->getFloat();
+            damage *= store.find("fCombatKODamageMult")->mValue.getFloat();
 
         // Apply "On hit" enchanted weapons
         MWMechanics::applyOnStrikeEnchantment(ptr, victim, weapon, hitPosition);
@@ -737,14 +738,14 @@ namespace MWClass
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const GMST& gmst = getGmst();
 
-            int chance = store.get<ESM::GameSetting>().find("iVoiceHitOdds")->getInt();
+            int chance = store.get<ESM::GameSetting>().find("iVoiceHitOdds")->mValue.getInteger();
             if (Misc::Rng::roll0to99() < chance)
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
 
             // Check for knockdown
-            float agilityTerm = stats.getAttribute(ESM::Attribute::Agility).getModified() * gmst.fKnockDownMult->getFloat();
+            float agilityTerm = stats.getAttribute(ESM::Attribute::Agility).getModified() * gmst.fKnockDownMult->mValue.getFloat();
             float knockdownTerm = stats.getAttribute(ESM::Attribute::Agility).getModified()
-                    * gmst.iKnockDownOddsMult->getInt() * 0.01f + gmst.iKnockDownOddsBase->getInt();
+                    * gmst.iKnockDownOddsMult->mValue.getInteger() * 0.01f + gmst.iKnockDownOddsBase->mValue.getInteger();
             if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99())
                 stats.setKnockedDown(true);
             else
@@ -772,7 +773,7 @@ namespace MWClass
 
                 float unmitigatedDamage = damage;
                 float x = damage / (damage + getArmorRating(ptr));
-                damage *= std::max(gmst.fCombatArmorMinMult->getFloat(), x);
+                damage *= std::max(gmst.fCombatArmorMinMult->mValue.getFloat(), x);
                 int damageDiff = static_cast<int>(unmitigatedDamage - damage);
                 damage = std::max(1.f, damage);
                 damageDiff = std::max(1, damageDiff);
@@ -938,18 +939,18 @@ namespace MWClass
 
         const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
-        bool sneaking = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
+        bool sneaking = MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr) && stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
+        bool running = MWBase::Environment::get().getMechanicsManager()->isRunning(ptr) && stats.getStance(MWMechanics::CreatureStats::Stance_Run);
 
-        float walkSpeed = gmst.fMinWalkSpeed->getFloat() + 0.01f*npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()*
-                                                      (gmst.fMaxWalkSpeed->getFloat() - gmst.fMinWalkSpeed->getFloat());
-        walkSpeed *= 1.0f - gmst.fEncumberedMoveEffect->getFloat()*normalizedEncumbrance;
+        float walkSpeed = gmst.fMinWalkSpeed->mValue.getFloat() + 0.01f*npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()*
+                                                      (gmst.fMaxWalkSpeed->mValue.getFloat() - gmst.fMinWalkSpeed->mValue.getFloat());
+        walkSpeed *= 1.0f - gmst.fEncumberedMoveEffect->mValue.getFloat()*normalizedEncumbrance;
         walkSpeed = std::max(0.0f, walkSpeed);
         if(sneaking)
-            walkSpeed *= gmst.fSneakSpeedMultiplier->getFloat();
+            walkSpeed *= gmst.fSneakSpeedMultiplier->mValue.getFloat();
 
-        float runSpeed = walkSpeed*(0.01f * npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified() *
-                                    gmst.fAthleticsRunBonus->getFloat() + gmst.fBaseRunMultiplier->getFloat());
+        float runSpeed = walkSpeed*(0.01f * getSkill(ptr, ESM::Skill::Athletics) *
+                                    gmst.fAthleticsRunBonus->mValue.getFloat() + gmst.fBaseRunMultiplier->mValue.getFloat());
 
         float moveSpeed;
         if(getEncumbrance(ptr) > getCapacity(ptr))
@@ -959,22 +960,22 @@ namespace MWClass
         {
             float flySpeed = 0.01f*(npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified() +
                                     mageffects.get(ESM::MagicEffect::Levitate).getMagnitude());
-            flySpeed = gmst.fMinFlySpeed->getFloat() + flySpeed*(gmst.fMaxFlySpeed->getFloat() - gmst.fMinFlySpeed->getFloat());
-            flySpeed *= 1.0f - gmst.fEncumberedMoveEffect->getFloat() * normalizedEncumbrance;
+            flySpeed = gmst.fMinFlySpeed->mValue.getFloat() + flySpeed*(gmst.fMaxFlySpeed->mValue.getFloat() - gmst.fMinFlySpeed->mValue.getFloat());
+            flySpeed *= 1.0f - gmst.fEncumberedMoveEffect->mValue.getFloat() * normalizedEncumbrance;
             flySpeed = std::max(0.0f, flySpeed);
             moveSpeed = flySpeed;
         }
-        else if(world->isSwimming(ptr))
+        else if (world->isSwimming(ptr))
         {
             float swimSpeed = walkSpeed;
             if(running)
                 swimSpeed = runSpeed;
             swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude();
-            swimSpeed *= gmst.fSwimRunBase->getFloat() + 0.01f*npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified()*
-                                                    gmst.fSwimRunAthleticsMult->getFloat();
+            swimSpeed *= gmst.fSwimRunBase->mValue.getFloat() + 0.01f*getSkill(ptr, ESM::Skill::Athletics)*
+                                                    gmst.fSwimRunAthleticsMult->mValue.getFloat();
             moveSpeed = swimSpeed;
         }
-        else if(running && !sneaking)
+        else if (running)
             moveSpeed = runSpeed;
         else
             moveSpeed = walkSpeed;
@@ -982,7 +983,7 @@ namespace MWClass
             moveSpeed *= 0.75f;
 
         if(npcdata->mNpcStats.isWerewolf() && running && npcdata->mNpcStats.getDrawState() == MWMechanics::DrawState_Nothing)
-            moveSpeed *= gmst.fWereWolfRunMult->getFloat();
+            moveSpeed *= gmst.fWereWolfRunMult->mValue.getFloat();
 
         return moveSpeed;
     }
@@ -992,14 +993,18 @@ namespace MWClass
         if(getEncumbrance(ptr) > getCapacity(ptr))
             return 0.f;
 
+        const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead())
+            return 0.f;
+
         const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
         const GMST& gmst = getGmst();
         const MWMechanics::MagicEffects &mageffects = npcdata->mNpcStats.getMagicEffects();
-        const float encumbranceTerm = gmst.fJumpEncumbranceBase->getFloat() +
-                                          gmst.fJumpEncumbranceMultiplier->getFloat() *
+        const float encumbranceTerm = gmst.fJumpEncumbranceBase->mValue.getFloat() +
+                                          gmst.fJumpEncumbranceMultiplier->mValue.getFloat() *
                                           (1.0f - Npc::getNormalizedEncumbrance(ptr));
 
-        float a = static_cast<float>(npcdata->mNpcStats.getSkill(ESM::Skill::Acrobatics).getModified());
+        float a = static_cast<float>(getSkill(ptr, ESM::Skill::Acrobatics));
         float b = 0.0f;
         if(a > 50.0f)
         {
@@ -1007,16 +1012,16 @@ namespace MWClass
             a = 50.0f;
         }
 
-        float x = gmst.fJumpAcrobaticsBase->getFloat() +
-                  std::pow(a / 15.0f, gmst.fJumpAcroMultiplier->getFloat());
-        x += 3.0f * b * gmst.fJumpAcroMultiplier->getFloat();
+        float x = gmst.fJumpAcrobaticsBase->mValue.getFloat() +
+                  std::pow(a / 15.0f, gmst.fJumpAcroMultiplier->mValue.getFloat());
+        x += 3.0f * b * gmst.fJumpAcroMultiplier->mValue.getFloat();
         x += mageffects.get(ESM::MagicEffect::Jump).getMagnitude() * 64;
         x *= encumbranceTerm;
 
-        if(ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
-            x *= gmst.fJumpRunMultiplier->getFloat();
+        if(stats.getStance(MWMechanics::CreatureStats::Stance_Run))
+            x *= gmst.fJumpRunMultiplier->mValue.getFloat();
         x *= npcdata->mNpcStats.getFatigueTerm();
-        x -= -627.2f;/*gravity constant*/
+        x -= -Constants::GravityConst * Constants::UnitsPerMeter;
         x /= 3.0f;
 
         return x;
@@ -1079,7 +1084,7 @@ namespace MWClass
     float Npc::getCapacity (const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-        static const float fEncumbranceStrMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fEncumbranceStrMult")->getFloat();
+        static const float fEncumbranceStrMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fEncumbranceStrMult")->mValue.getFloat();
         return stats.getAttribute(ESM::Attribute::Strength).getModified()*fEncumbranceStrMult;
     }
 
@@ -1122,9 +1127,9 @@ namespace MWClass
         MWMechanics::NpcStats &stats = getNpcStats(ptr);
         const MWWorld::InventoryStore &invStore = getInventoryStore(ptr);
 
-        float fUnarmoredBase1 = store.find("fUnarmoredBase1")->getFloat();
-        float fUnarmoredBase2 = store.find("fUnarmoredBase2")->getFloat();
-        int unarmoredSkill = stats.getSkill(ESM::Skill::Unarmored).getModified();
+        float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
+        float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
+        int unarmoredSkill = getSkill(ptr, ESM::Skill::Unarmored);
 
         float ratings[MWWorld::InventoryStore::Slots];
         for(int i = 0;i < MWWorld::InventoryStore::Slots;i++)
@@ -1241,11 +1246,10 @@ namespace MWClass
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
-            if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
+            if (world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return "DefaultLandWater";
-            if(world->isOnGround(ptr))
-                return "DefaultLand";
-            return "";
+
+            return "DefaultLand";
         }
         if(name == "swimleft")
             return "Swim Left";
@@ -1364,8 +1368,8 @@ namespace MWClass
             return;
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-        static const float fCorpseRespawnDelay = gmst.find("fCorpseRespawnDelay")->getFloat();
-        static const float fCorpseClearDelay = gmst.find("fCorpseClearDelay")->getFloat();
+        static const float fCorpseRespawnDelay = gmst.find("fCorpseRespawnDelay")->mValue.getFloat();
+        static const float fCorpseClearDelay = gmst.find("fCorpseClearDelay")->mValue.getFloat();
 
         float delay = ptr.getRefData().getCount() == 0 ? fCorpseClearDelay : std::min(fCorpseRespawnDelay, fCorpseClearDelay);
 
@@ -1378,7 +1382,7 @@ namespace MWClass
                     ptr.getRefData().setCount(1);
 
                 MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
-                ptr.getRefData().setCustomData(NULL);
+                ptr.getRefData().setCustomData(nullptr);
 
                 // Reset to original position
                 MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],

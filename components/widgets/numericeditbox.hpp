@@ -3,13 +3,15 @@
 
 #include <MyGUI_EditBox.h>
 
+#include "fontwrapper.hpp"
+
 namespace Gui
 {
 
     /**
      * @brief A variant of the EditBox that only allows integer inputs
      */
-    class NumericEditBox : public MyGUI::EditBox
+    class NumericEditBox : public FontWrapper<MyGUI::EditBox>
     {
         MYGUI_RTTI_DERIVED(NumericEditBox)
 
@@ -17,7 +19,8 @@ namespace Gui
         NumericEditBox()
             : mValue(0), mMinValue(std::numeric_limits<int>::min()),
             mMaxValue(std::numeric_limits<int>::max())
-        {}
+        {
+        }
 
         void initialiseOverride();
         void shutdownOverride();
@@ -27,6 +30,7 @@ namespace Gui
 
         /// @note Does not trigger eventValueChanged
         void setValue (int value);
+        int getValue();
 
         void setMinValue(int minValue);
         void setMaxValue(int maxValue);

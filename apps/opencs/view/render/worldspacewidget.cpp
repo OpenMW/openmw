@@ -648,11 +648,6 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
             mDragX = event->posF().x();
             mDragY = height() - event->posF().y();
 #endif
-
-            if (mDragMode == InteractionType_PrimaryEdit)
-            {
-                editMode.drag (event->pos(), mDragX, mDragY, mDragFactor); // note: terraintexturemode only uses pos
-            }
         }
     }
     else

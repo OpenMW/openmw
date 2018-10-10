@@ -12,13 +12,13 @@ namespace CSMTools
     {
             const CSMWorld::IdCollection<ESM::SoundGenerator> &mSoundGens;
             const CSMWorld::IdCollection<ESM::Sound> &mSounds;
-            const CSMWorld::RefIdCollection &mReferenceables;
+            const CSMWorld::RefIdCollection &mObjects;
             bool mIgnoreBaseRecords;
 
         public:
             SoundGenCheckStage(const CSMWorld::IdCollection<ESM::SoundGenerator> &soundGens,
                                const CSMWorld::IdCollection<ESM::Sound> &sounds,
-                               const CSMWorld::RefIdCollection &referenceables);
+                               const CSMWorld::RefIdCollection &objects);
 
             virtual int setup();
             ///< \return number of steps

@@ -29,7 +29,7 @@
             </Widget>
 
             <!-- Categories -->
-            <Widget type="HBox" position="0 8 350 24" align="Left Top HStretch" name="Categories">
+            <Widget type="HBox" position="0 6 350 28" align="Left Top HStretch" name="Categories">
                 <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 60 24" name="AllButton">
                     <Property key="Caption" value="#{sAllTab}"/>
                     <Property key="NeedKey" value="false"/>

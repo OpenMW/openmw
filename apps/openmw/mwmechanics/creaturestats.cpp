@@ -7,6 +7,7 @@
 #include <components/esm/esmwriter.hpp>
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -48,8 +49,8 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        static const float fFatigueBase = gmst.find("fFatigueBase")->getFloat();
-        static const float fFatigueMult = gmst.find("fFatigueMult")->getFloat();
+        static const float fFatigueBase = gmst.find("fFatigueBase")->mValue.getFloat();
+        static const float fFatigueMult = gmst.find("fFatigueMult")->mValue.getFloat();
 
         return fFatigueBase - fFatigueMult * (1-normalised);
     }
@@ -387,8 +388,11 @@ namespace MWMechanics
         mFallHeight += height;
     }
 
-    float CreatureStats::land()
+    float CreatureStats::land(bool isPlayer)
     {
+        if (isPlayer)
+            MWBase::Environment::get().getWorld()->getPlayer().setJumping(false);
+
         float height = mFallHeight;
         mFallHeight = 0;
         return height;

@@ -22,7 +22,7 @@ namespace Terrain
 {
 
 ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, TextureManager* textureManager, CompositeMapRenderer* renderer)
-    : ResourceManager(NULL)
+    : ResourceManager(nullptr)
     , mStorage(storage)
     , mSceneManager(sceneMgr)
     , mTextureManager(textureManager)

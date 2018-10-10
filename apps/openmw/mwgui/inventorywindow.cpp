@@ -60,14 +60,15 @@ namespace MWGui
         : WindowPinnableBase("openmw_inventory_window.layout")
         , mDragAndDrop(dragAndDrop)
         , mSelectedItem(-1)
-        , mSortModel(NULL)
-        , mTradeModel(NULL)
+        , mSortModel(nullptr)
+        , mTradeModel(nullptr)
         , mGuiMode(GM_Inventory)
         , mLastXSize(0)
         , mLastYSize(0)
         , mPreview(new MWRender::InventoryPreview(parent, resourceSystem, MWMechanics::getPlayer()))
         , mTrading(false)
         , mScaleFactor(1.0f)
+        , mUpdateTimer(0.f)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
         if (uiScale > 1.0)
@@ -156,9 +157,9 @@ namespace MWGui
     void InventoryWindow::clear()
     {
         mPtr = MWWorld::Ptr();
-        mTradeModel = NULL;
-        mSortModel = NULL;
-        mItemView->setModel(NULL);
+        mTradeModel = nullptr;
+        mSortModel = nullptr;
+        mItemView->setModel(nullptr);
     }
 
     void InventoryWindow::setGuiMode(GuiMode mode)
@@ -295,9 +296,9 @@ namespace MWGui
         {
             mSelectedItem = index;
             if (mTrading)
-                sellItem (NULL, count);
+                sellItem (nullptr, count);
             else
-                dragItem (NULL, count);
+                dragItem (nullptr, count);
         }
     }
 
@@ -631,6 +632,22 @@ namespace MWGui
     void InventoryWindow::onFrame(float dt)
     {
         updateEncumbranceBar();
+
+        if (mPinned)
+        {
+            mUpdateTimer += dt;
+            if (0.1f < mUpdateTimer)
+            {
+                mUpdateTimer = 0;
+
+                // Update pinned inventory in-game
+                if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
+                {
+                    mItemView->update();
+                    notifyContentChanged();
+                }
+            }
+        }
     }
 
     void InventoryWindow::setTrading(bool trading)
@@ -681,6 +698,8 @@ namespace MWGui
             return;
 
         int count = object.getRefData().getCount();
+        if (object.getClass().isGold(object))
+            count *= object.getClass().getValue(object);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWBase::Environment::get().getWorld()->breakInvisibility(player);

@@ -53,8 +53,6 @@ namespace MWGui
             void onWindowResize(MyGUI::Window* window);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
-            static const int sLineHeight;
-
             MyGUI::Widget* mLeftPane;
             MyGUI::Widget* mRightPane;
 

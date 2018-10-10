@@ -64,7 +64,7 @@ namespace MWWorld
 
             // Even though fog actually belongs to the player and not cells,
             // it makes sense to store it here since we need it once for each cell.
-            // Note this is NULL until the cell is explored to save some memory
+            // Note this is nullptr until the cell is explored to save some memory
             std::shared_ptr<ESM::FogState> mFogState;
 
             const ESM::Cell *mCell;
@@ -182,6 +182,8 @@ namespace MWWorld
             /// @note throws exception if cellToMoveTo == this
             /// @return updated MWWorld::Ptr with the new CellStore pointer set.
             MWWorld::Ptr moveTo(const MWWorld::Ptr& object, MWWorld::CellStore* cellToMoveTo);
+
+            void rest();
 
             /// Make a copy of the given object and insert it into this cell.
             /// @note If you get a linker error here, this means the given type can not be inserted into a cell.
@@ -365,7 +367,7 @@ namespace MWWorld
             struct GetCellStoreCallback
             {
             public:
-                ///@note must return NULL if the cell is not found
+                ///@note must return nullptr if the cell is not found
                 virtual CellStore* getCellStore(const ESM::CellId& cellId) = 0;
             };
 

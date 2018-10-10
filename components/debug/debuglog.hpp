@@ -43,14 +43,6 @@ public:
 
         return *this;
     }
-    template<typename T>
-    Log& operator<<(const T& rhs)
-    {
-        if (mLevel <= Debug::CurrentDebugLevel)
-            std::cout << std::forward<const T&>(rhs);
-
-        return *this;
-    }
 
     ~Log()
     {

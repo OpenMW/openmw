@@ -254,7 +254,7 @@ namespace MWRender
 
         mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
 
-        if (getenv("OPENMW_DONT_PRECOMPILE") == NULL)
+        if (getenv("OPENMW_DONT_PRECOMPILE") == nullptr)
         {
             mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
             mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
@@ -358,7 +358,7 @@ namespace MWRender
     RenderingManager::~RenderingManager()
     {
         // let background loading thread finish before we delete anything else
-        mWorkQueue = NULL;
+        mWorkQueue = nullptr;
     }
 
     MWRender::Objects& RenderingManager::getObjects()
@@ -858,7 +858,7 @@ namespace MWRender
         stateset->setTextureAttributeAndModes(0,cubeTexture,osg::StateAttribute::ON);
             
         quad->setStateSet(stateset);
-        quad->setUpdateCallback(NULL);
+        quad->setUpdateCallback(nullptr);
 
         screenshotCamera->addChild(quad);
 
@@ -1001,7 +1001,7 @@ namespace MWRender
             result.mHitNormalWorld = intersection.getWorldIntersectNormal();
             result.mRatio = intersection.ratio;
 
-            PtrHolder* ptrHolder = NULL;
+            PtrHolder* ptrHolder = nullptr;
             for (osg::NodePath::const_iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
             {
                 osg::UserDataContainer* userDataContainer = (*it)->getUserDataContainer();
@@ -1139,7 +1139,7 @@ namespace MWRender
 
     void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
     {
-        NpcAnimation *anim = NULL;
+        NpcAnimation *anim = nullptr;
         if(ptr == mPlayerAnimation->getPtr())
             anim = mPlayerAnimation.get();
         else

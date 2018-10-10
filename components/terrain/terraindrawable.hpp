@@ -24,7 +24,7 @@ namespace Terrain
     public:
         virtual osg::Object* cloneType() const { return new TerrainDrawable (); }
         virtual osg::Object* clone(const osg::CopyOp& copyop) const { return new TerrainDrawable (*this,copyop); }
-        virtual bool isSameKindAs(const osg::Object* obj) const { return dynamic_cast<const TerrainDrawable *>(obj)!=NULL; }
+        virtual bool isSameKindAs(const osg::Object* obj) const { return dynamic_cast<const TerrainDrawable *>(obj)!=nullptr; }
         virtual const char* className() const { return "TerrainDrawable"; }
         virtual const char* libraryName() const { return "Terrain"; }
 

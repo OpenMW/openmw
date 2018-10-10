@@ -399,12 +399,12 @@ namespace MWGui
 
     CreateClassDialog::CreateClassDialog()
       : WindowModal("openmw_chargen_create_class.layout")
-      , mSpecDialog(NULL)
-      , mAttribDialog(NULL)
-      , mSkillDialog(NULL)
-      , mDescDialog(NULL)
-      , mAffectedAttribute(NULL)
-      , mAffectedSkill(NULL)
+      , mSpecDialog(nullptr)
+      , mAttribDialog(nullptr)
+      , mSkillDialog(nullptr)
+      , mDescDialog(nullptr)
+      , mAffectedAttribute(nullptr)
+      , mAffectedSkill(nullptr)
     {
         // Centre dialog
         center();

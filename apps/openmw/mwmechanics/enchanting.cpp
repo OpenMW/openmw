@@ -10,7 +10,6 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "creaturestats.hpp"
-#include "npcstats.hpp"
 #include "spellcasting.hpp"
 #include "actorutil.hpp"
 
@@ -107,7 +106,7 @@ namespace MWMechanics
         }
 
         const bool powerfulSoul = getGemCharge() >= \
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("iSoulAmountForConstantEffect")->getInt();
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("iSoulAmountForConstantEffect")->mValue.getInteger();
         if ((mObjectType == typeid(ESM::Armor).name()) || (mObjectType == typeid(ESM::Clothing).name()))
         { // Armor or Clothing
             switch(mCastStyle)
@@ -184,7 +183,7 @@ namespace MWMechanics
             float magnitudeCost = (magMin + magMax) * baseCost * 0.05f;
             if (mCastStyle == ESM::Enchantment::ConstantEffect)
             {
-                magnitudeCost *= store.get<ESM::GameSetting>().find("fEnchantmentConstantDurationMult")->getFloat();
+                magnitudeCost *= store.get<ESM::GameSetting>().find("fEnchantmentConstantDurationMult")->mValue.getFloat();
             }
             else
             {
@@ -193,7 +192,7 @@ namespace MWMechanics
 
             float areaCost = area * 0.05f * baseCost;
 
-            const float fEffectCostMult = store.get<ESM::GameSetting>().find("fEffectCostMult")->getFloat();
+            const float fEffectCostMult = store.get<ESM::GameSetting>().find("fEffectCostMult")->mValue.getFloat();
 
             cost += (magnitudeCost + areaCost) * fEffectCostMult;
 
@@ -230,7 +229,7 @@ namespace MWMechanics
         if(mEnchanter.isEmpty())
             return 0;
 
-        float priceMultipler = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentValueMult")->getFloat();
+        float priceMultipler = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentValueMult")->mValue.getFloat();
         int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mEnchanter, static_cast<int>(getEnchantPoints() * priceMultipler), true);
         return price;
     }
@@ -256,7 +255,7 @@ namespace MWMechanics
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-        return static_cast<int>(mOldItemPtr.getClass().getEnchantmentPoints(mOldItemPtr) * store.get<ESM::GameSetting>().find("fEnchantmentMult")->getFloat());
+        return static_cast<int>(mOldItemPtr.getClass().getEnchantmentPoints(mOldItemPtr) * store.get<ESM::GameSetting>().find("fEnchantmentMult")->mValue.getFloat());
     }
     bool Enchanting::soulEmpty() const
     {
@@ -280,16 +279,16 @@ namespace MWMechanics
 
     float Enchanting::getEnchantChance() const
     {
-        const NpcStats& npcStats = mEnchanter.getClass().getNpcStats (mEnchanter);
+        const CreatureStats& stats = mEnchanter.getClass().getCreatureStats(mEnchanter);
 
-        float chance1 = (npcStats.getSkill (ESM::Skill::Enchant).getModified() + 
-        (0.25f * npcStats.getAttribute (ESM::Attribute::Intelligence).getModified())
-        + (0.125f * npcStats.getAttribute (ESM::Attribute::Luck).getModified()));
+        float chance1 = (mEnchanter.getClass().getSkill(mEnchanter, ESM::Skill::Enchant) + 
+        (0.25f * stats.getAttribute (ESM::Attribute::Intelligence).getModified())
+        + (0.125f * stats.getAttribute (ESM::Attribute::Luck).getModified()));
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        float chance2 = 7.5f / (gmst.find("fEnchantmentChanceMult")->getFloat() * ((mCastStyle == ESM::Enchantment::ConstantEffect) ?
-                                                                          gmst.find("fEnchantmentConstantChanceMult")->getFloat() : 1.0f ))
+        float chance2 = 7.5f / (gmst.find("fEnchantmentChanceMult")->mValue.getFloat() * ((mCastStyle == ESM::Enchantment::ConstantEffect) ?
+                                                                          gmst.find("fEnchantmentConstantChanceMult")->mValue.getFloat() : 1.0f ))
                 * getEnchantPoints();
 
         return (chance1-chance2);

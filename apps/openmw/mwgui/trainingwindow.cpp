@@ -73,14 +73,12 @@ namespace MWGui
 
         mPlayerGold->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
 
-        MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats (actor);
-
         // NPC can train you in his best 3 skills
         std::vector< std::pair<int, int> > skills;
 
         for (int i=0; i<ESM::Skill::Length; ++i)
         {
-            int value = npcStats.getSkill (i).getModified ();
+            int value = actor.getClass().getSkill(actor, i);
 
             skills.push_back(std::make_pair(i, value));
         }
@@ -98,7 +96,7 @@ namespace MWGui
         for (int i=0; i<3; ++i)
         {
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer
-                    (mPtr,pcStats.getSkill (skills[i].first).getBase() * gmst.find("iTrainingMod")->getInt (),true);
+                    (mPtr,pcStats.getSkill (skills[i].first).getBase() * gmst.find("iTrainingMod")->mValue.getInteger(),true);
 
             MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>(price <= playerGold ? "SandTextButton" : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
                 MyGUI::IntCoord(5, 5+i*18, mTrainingOptions->getWidth()-10, 18), MyGUI::Align::Default);
@@ -136,14 +134,13 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->getInt ();
+        int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->mValue.getInteger();
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
         if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
             return;
 
-        MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats (mPtr);
-        if (npcStats.getSkill (skillId).getModified () <= pcStats.getSkill (skillId).getBase ())
+        if (mPtr.getClass().getSkill(mPtr, skillId) <= pcStats.getSkill (skillId).getBase ())
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sServiceTrainingWords}");
             return;
@@ -168,6 +165,7 @@ namespace MWGui
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
         // add gold to NPC trading gold pool
+        MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats(mPtr);
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
         // advance time

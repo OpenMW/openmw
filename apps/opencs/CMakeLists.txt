@@ -19,6 +19,7 @@ opencs_hdrs_noqt (model/doc
 
 opencs_units (model/world
     idtable idtableproxymodel regionmap data commanddispatcher idtablebase resourcetable nestedtableproxymodel idtree infotableproxymodel landtexturetableproxymodel
+    actoradapter
     )
 
 
@@ -42,7 +43,7 @@ opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
     startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
-    mergestages gmstcheck topicinfocheck journalcheck
+    mergestages gmstcheck topicinfocheck journalcheck enchantmentcheck
     )
 
 opencs_hdrs_noqt (model/tools
@@ -88,7 +89,7 @@ opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
     previewwidget editmode instancemode instanceselectionmode instancemovemode
     orbitcameramode pathgridmode selectionmode pathgridselectionmode cameracontroller
-    cellwater terraintexturemode
+    cellwater terraintexturemode actor
     )
 
 opencs_units_noqt (view/render

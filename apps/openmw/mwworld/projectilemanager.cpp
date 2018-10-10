@@ -10,6 +10,8 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/projectilestate.hpp>
 
+#include <components/misc/constants.hpp>
+
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 
@@ -385,7 +387,7 @@ namespace MWWorld
         {
             osg::Quat orient = it->mNode->getAttitude();
             static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fTargetSpellMaxSpeed")->getFloat();
+                        .find("fTargetSpellMaxSpeed")->mValue.getFloat();
             float speed = fTargetSpellMaxSpeed * it->mSpeed;
             osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
             direction.normalize();
@@ -460,7 +462,7 @@ namespace MWWorld
         {
             // gravity constant - must be way lower than the gravity affecting actors, since we're not
             // simulating aerodynamics at all
-            it->mVelocity -= osg::Vec3f(0, 0, 627.2f * 0.1f) * duration;
+            it->mVelocity -= osg::Vec3f(0, 0, Constants::GravityConst * Constants::UnitsPerMeter * 0.1f) * duration;
 
             osg::Vec3f pos(it->mNode->getPosition());
             osg::Vec3f newPos = pos + it->mVelocity * duration;
