@@ -1107,6 +1107,7 @@ namespace MWInput
 
         if(MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Journal
                 && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_MainMenu
+                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings
                 && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Journal);

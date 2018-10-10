@@ -138,6 +138,7 @@
     Bug #4669: ToggleCollision should trace the player down after collision being enabled
     Bug #4671: knownEffect functions should use modified Alchemy skill
     Bug #4672: Pitch factor is handled incorrectly for crossbow animations
+    Bug #4674: Journal can be opened when settings window is open
     Feature #912: Editor: Add missing icons to UniversalId tables
     Feature #1221: Editor: Creature/NPC rendering
     Feature #1617: Editor: Enchantment effect record verifier
