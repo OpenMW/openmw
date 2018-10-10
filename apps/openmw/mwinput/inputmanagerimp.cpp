@@ -46,9 +46,9 @@ namespace MWInput
         , mScreenCaptureHandler(screenCaptureHandler)
         , mScreenCaptureOperation(screenCaptureOperation)
         , mJoystickLastUsed(false)
-        , mPlayer(NULL)
-        , mInputManager(NULL)
-        , mVideoWrapper(NULL)
+        , mPlayer(nullptr)
+        , mInputManager(nullptr)
+        , mVideoWrapper(nullptr)
         , mUserFile(userFile)
         , mDragDrop(false)
         , mGrabCursor (Settings::Manager::getBool("grab cursor", "Input"))
@@ -84,7 +84,7 @@ namespace MWInput
                                         Settings::Manager::getFloat("contrast", "Video"));
 
         std::string file = userFileExists ? userFile : "";
-        mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
+        mInputBinder = new ICS::InputControlSystem(file, true, this, nullptr, A_Last);
 
         loadKeyDefaults();
         loadControllerDefaults();

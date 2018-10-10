@@ -275,7 +275,7 @@ bool MWMechanics::AiPackage::shortcutPath(const ESM::Pathgrid::Point& startPoint
             static_cast<float>(startPoint.mX), static_cast<float>(startPoint.mY), static_cast<float>(startPoint.mZ),
             static_cast<float>(endPoint.mX), static_cast<float>(endPoint.mY), static_cast<float>(endPoint.mZ));
 
-        if (destInLOS != NULL) *destInLOS = isPathClear;
+        if (destInLOS != nullptr) *destInLOS = isPathClear;
 
         if (!isPathClear)
             return false;

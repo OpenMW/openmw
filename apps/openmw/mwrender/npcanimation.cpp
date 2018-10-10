@@ -72,7 +72,7 @@ std::string getVampireHead(const std::string& race, bool female)
     }
 
     if (sVampireMapping.find(thisCombination) == sVampireMapping.end())
-        sVampireMapping[thisCombination] = NULL;
+        sVampireMapping[thisCombination] = nullptr;
 
     const ESM::BodyPart* bodyPart = sVampireMapping[thisCombination];
     if (!bodyPart)
@@ -535,7 +535,7 @@ void NpcAnimation::updateParts()
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
-    bool wasArrowAttached = (mAmmunition.get() != NULL);
+    bool wasArrowAttached = (mAmmunition.get() != nullptr);
     mAmmunition.reset();
 
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
@@ -823,7 +823,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Wrist ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Forearm ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
-                    bodypart = NULL;
+                    bodypart = nullptr;
             }
             else if (!bodypart)
                 Log(Debug::Warning) << "Warning: Failed to find body part '" << part->mFemale << "'";
@@ -838,7 +838,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Wrist ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Forearm ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
-                    bodypart = NULL;
+                    bodypart = nullptr;
             }
             else if (!bodypart)
                 Log(Debug::Warning) << "Warning: Failed to find body part '" << part->mMale << "'";
@@ -855,7 +855,7 @@ void NpcAnimation::addControllers()
 {
     Animation::addControllers();
 
-    mFirstPersonNeckController = NULL;
+    mFirstPersonNeckController = nullptr;
     WeaponAnimation::deleteControllers();
 
     if (mViewMode == VM_FirstPerson)
@@ -947,7 +947,7 @@ osg::Group* NpcAnimation::getArrowBone()
 {
     PartHolderPtr part = mObjectParts[ESM::PRT_Weapon];
     if (!part)
-        return NULL;
+        return nullptr;
 
     SceneUtil::FindByNameVisitor findVisitor ("ArrowBone");
     part->getNode()->accept(findVisitor);
@@ -959,7 +959,7 @@ osg::Node* NpcAnimation::getWeaponNode()
 {
     PartHolderPtr part = mObjectParts[ESM::PRT_Weapon];
     if (!part)
-        return NULL;
+        return nullptr;
     return part->getNode();
 }
 
@@ -1083,7 +1083,7 @@ const std::vector<const ESM::BodyPart *>& NpcAnimation::getBodyParts(const std::
             sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Tail, ESM::PRT_Tail));
         }
 
-        parts.resize(ESM::PRT_Count, NULL);
+        parts.resize(ESM::PRT_Count, nullptr);
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();

@@ -25,7 +25,7 @@ QWidget *CSVWorld::IdCompletionDelegate::createEditor(QWidget *parent,
 {
     if (!index.data(Qt::EditRole).isValid() && !index.data(Qt::DisplayRole).isValid())
     {
-        return NULL;
+        return nullptr;
     }
 
     // The completer for InfoCondVar needs to return a completer based on the first column

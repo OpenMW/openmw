@@ -18,7 +18,7 @@ namespace
 
 void CSMWorld::IdTableProxyModel::updateColumnMap()
 {
-    Q_ASSERT(mSourceModel != NULL);
+    Q_ASSERT(mSourceModel != nullptr);
 
     mColumnMap.clear();
     if (mFilter)
@@ -33,7 +33,7 @@ void CSMWorld::IdTableProxyModel::updateColumnMap()
 bool CSMWorld::IdTableProxyModel::filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent)
     const
 {
-    Q_ASSERT(mSourceModel != NULL);
+    Q_ASSERT(mSourceModel != nullptr);
 
     // It is not possible to use filterAcceptsColumn() and check for
     // sourceModel()->headerData (sourceColumn, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags)
@@ -51,14 +51,14 @@ bool CSMWorld::IdTableProxyModel::filterAcceptsRow (int sourceRow, const QModelI
 
 CSMWorld::IdTableProxyModel::IdTableProxyModel (QObject *parent)
     : QSortFilterProxyModel (parent), 
-      mSourceModel(NULL)
+      mSourceModel(nullptr)
 {
     setSortCaseSensitivity (Qt::CaseInsensitive);
 }
 
 QModelIndex CSMWorld::IdTableProxyModel::getModelIndex (const std::string& id, int column) const
 {
-    Q_ASSERT(mSourceModel != NULL);
+    Q_ASSERT(mSourceModel != nullptr);
 
     return mapFromSource(mSourceModel->getModelIndex (id, column));
 }
@@ -113,7 +113,7 @@ bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex &left, const QModel
 
 QString CSMWorld::IdTableProxyModel::getRecordId(int sourceRow) const
 {
-    Q_ASSERT(mSourceModel != NULL);
+    Q_ASSERT(mSourceModel != nullptr);
 
     int idColumn = mSourceModel->findColumnIndex(Columns::ColumnId_Id);
     return mSourceModel->data(mSourceModel->index(sourceRow, idColumn)).toString();

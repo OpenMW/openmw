@@ -55,7 +55,7 @@ namespace MWGui
     EditEffectDialog::EditEffectDialog()
         : WindowModal("openmw_edit_effect.layout")
         , mEditing(false)
-        , mMagicEffect(NULL)
+        , mMagicEffect(nullptr)
         , mConstantEffect(false)
     {
         init(mEffect);
@@ -481,7 +481,7 @@ namespace MWGui
 
         mPriceLabel->setCaption(MyGUI::utility::toString(int(price)));
 
-        float chance = MWMechanics::calcSpellBaseSuccessChance(&mSpell, MWMechanics::getPlayer(), NULL);
+        float chance = MWMechanics::calcSpellBaseSuccessChance(&mSpell, MWMechanics::getPlayer(), nullptr);
 
         int intChance = std::min(100, int(chance));
         mSuccessChance->setCaption(MyGUI::utility::toString(intChance));
@@ -491,11 +491,11 @@ namespace MWGui
 
 
     EffectEditorBase::EffectEditorBase(Type type)
-        : mAvailableEffectsList(NULL)
-        , mUsedEffectsView(NULL)
+        : mAvailableEffectsList(nullptr)
+        , mUsedEffectsView(nullptr)
         , mAddEffectDialog()
-        , mSelectAttributeDialog(NULL)
-        , mSelectSkillDialog(NULL)
+        , mSelectAttributeDialog(nullptr)
+        , mSelectSkillDialog(nullptr)
         , mSelectedEffect(0)
         , mSelectedKnownEffectId(0)
         , mConstantEffect(false)

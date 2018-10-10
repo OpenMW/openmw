@@ -166,7 +166,7 @@ namespace MWWorld
          */
         bool isDynamic(const std::string &id) const;
 
-        /** Returns a random record that starts with the named ID, or NULL if not found. */
+        /** Returns a random record that starts with the named ID, or nullptr if not found. */
         const T *searchRandom(const std::string &id) const;
 
         const T *find(const std::string &id) const;

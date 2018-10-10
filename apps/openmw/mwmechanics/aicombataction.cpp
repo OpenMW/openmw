@@ -138,7 +138,7 @@ namespace MWMechanics
     const ESM::Weapon* ActionWeapon::getWeapon() const
     {
         if (mWeapon.isEmpty())
-            return NULL;
+            return nullptr;
         return mWeapon.get<ESM::Weapon>()->mBase;
     }
 

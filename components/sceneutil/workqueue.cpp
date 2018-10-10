@@ -97,7 +97,7 @@ osg::ref_ptr<WorkItem> WorkQueue::removeWorkItem()
         return item;
     }
     else
-        return NULL;
+        return nullptr;
 }
 
 unsigned int WorkQueue::getNumItems() const

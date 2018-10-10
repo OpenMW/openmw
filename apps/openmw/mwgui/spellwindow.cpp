@@ -32,7 +32,7 @@ namespace MWGui
     SpellWindow::SpellWindow(DragAndDrop* drag)
         : WindowPinnableBase("openmw_spell_window.layout")
         , NoDrop(drag, mMainWidget)
-        , mSpellView(NULL)
+        , mSpellView(nullptr)
         , mUpdateTimer(0.0f)
     {
         mSpellIcons = new SpellIcons();
@@ -72,7 +72,7 @@ namespace MWGui
         // Reset the filter focus when opening the window
         MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
         if (focus == mFilterEdit)
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(nullptr);
 
         updateSpells();
     }

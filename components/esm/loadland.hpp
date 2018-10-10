@@ -129,9 +129,9 @@ struct Land
 
     /**
      * Actually loads data into target
-     * If target is NULL, assumed target is mLandData
+     * If target is nullptr, assumed target is mLandData
      */
-    void loadData(int flags, LandData* target = NULL) const;
+    void loadData(int flags, LandData* target = nullptr) const;
 
     /**
      * Frees memory allocated for mLandData

@@ -25,7 +25,7 @@ std::string CSVWorld::CellCreator::getId() const
 void CSVWorld::CellCreator::configureCreateCommand(CSMWorld::CreateCommand& command) const
 {
     CSMWorld::IdTree *model = dynamic_cast<CSMWorld::IdTree *>(getData().getTableModel(getCollectionId()));
-    Q_ASSERT(model != NULL);
+    Q_ASSERT(model != nullptr);
     int parentIndex = model->findColumnIndex(CSMWorld::Columns::ColumnId_Cell);
     int index = model->findNestedColumnIndex(parentIndex, CSMWorld::Columns::ColumnId_Interior);
     command.addNestedValue(parentIndex, index, mType->currentIndex() == 0);

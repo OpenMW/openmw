@@ -26,7 +26,7 @@ namespace Shader
         /// @param shaderTemplate The filename of the shader template.
         /// @param defines Define values that can be retrieved by the shader template.
         /// @param shaderType The type of shader (usually vertex or fragment shader).
-        /// @note May return NULL on failure.
+        /// @note May return nullptr on failure.
         /// @note Thread safe.
         osg::ref_ptr<osg::Shader> getShader(const std::string& shaderTemplate, const DefineMap& defines, osg::Shader::Type shaderType);
 

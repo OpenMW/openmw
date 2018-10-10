@@ -18,7 +18,7 @@ namespace CSVRender
         // has to wrap the vertices of the last row and column to the next cell, which may be a nonexisting cell
         int index = mData.getLand().searchId(CSMWorld::Land::createUniqueRecordId(cellX, cellY));
         if (index == -1)
-            return NULL;
+            return nullptr;
 
         const ESM::Land& land = mData.getLand().getRecord(index).get();
         return new ESMTerrain::LandObject(&land, ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX);

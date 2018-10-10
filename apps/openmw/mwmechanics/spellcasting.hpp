@@ -39,8 +39,8 @@ namespace MWMechanics
      * @note actor can be an NPC or a creature
      * @return success chance from 0 to 100 (in percent), if cap=false then chance above 100 may be returned.
      */
-    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool = NULL, bool cap=true, bool checkMagicka=false);
-    float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool = NULL, bool cap=true, bool checkMagicka=false);
+    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool = nullptr, bool cap=true, bool checkMagicka=false);
+    float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool = nullptr, bool cap=true, bool checkMagicka=false);
 
     int getSpellSchool(const std::string& spellId, const MWWorld::Ptr& actor);
     int getSpellSchool(const ESM::Spell* spell, const MWWorld::Ptr& actor);
@@ -58,14 +58,14 @@ namespace MWMechanics
     /// @param effects Override the actor's current magicEffects. Useful if there are effects currently
     ///                being applied (but not applied yet) that should also be considered.
     float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
-                               const ESM::Spell* spell = NULL, const MagicEffects* effects = NULL);
+                               const ESM::Spell* spell = nullptr, const MagicEffects* effects = nullptr);
 
     /// Get an effect multiplier for applying an effect cast by the given actor in the given spell (optional).
     /// @return effect multiplier from 0 to 2.  (100% net resistance to 100% net weakness)
     /// @param effects Override the actor's current magicEffects. Useful if there are effects currently
     ///                being applied (but not applied yet) that should also be considered.
     float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
-                              const ESM::Spell* spell = NULL, const MagicEffects* effects = NULL);
+                              const ESM::Spell* spell = nullptr, const MagicEffects* effects = nullptr);
 
     bool checkEffectTarget (int effectId, const MWWorld::Ptr& target, const MWWorld::Ptr& caster, bool castByPlayer);
 

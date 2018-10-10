@@ -931,7 +931,7 @@ CharacterController::~CharacterController()
     if (mAnimation)
     {
         persistAnimationState();
-        mAnimation->setTextKeyListener(NULL);
+        mAnimation->setTextKeyListener(nullptr);
     }
 }
 
@@ -1159,7 +1159,7 @@ bool CharacterController::updateCreatureState()
 
                 if (!spellid.empty() && canCast)
                 {
-                    MWMechanics::CastSpell cast(mPtr, NULL, false, mCastingManualSpell);
+                    MWMechanics::CastSpell cast(mPtr, nullptr, false, mCastingManualSpell);
                     cast.playSpellCastingEffects(spellid);
 
                     if (!mAnimation->hasAnimation("spellcast"))
@@ -1463,7 +1463,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
 
                 if(!spellid.empty() && canCast)
                 {
-                    MWMechanics::CastSpell cast(mPtr, NULL, false, mCastingManualSpell);
+                    MWMechanics::CastSpell cast(mPtr, nullptr, false, mCastingManualSpell);
                     cast.playSpellCastingEffects(spellid);
 
                     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -2306,7 +2306,7 @@ void CharacterController::persistAnimationState()
         {
             anim.mLoopCount = mAnimation->getCurrentLoopCount(anim.mGroup);
             float complete;
-            mAnimation->getInfo(anim.mGroup, &complete, NULL);
+            mAnimation->getInfo(anim.mGroup, &complete, nullptr);
             anim.mTime = complete;
         }
         else
@@ -2438,7 +2438,7 @@ bool CharacterController::isPersistentAnimPlaying()
 
 bool CharacterController::isAnimPlaying(const std::string &groupName)
 {
-    if(mAnimation == NULL)
+    if(mAnimation == nullptr)
         return false;
     return mAnimation->isPlaying(groupName);
 }
@@ -2735,9 +2735,9 @@ void CharacterController::updateHeadTracking(float duration)
         if (const MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mHeadTrackTarget))
         {
             const osg::Node* node = anim->getNode("Head");
-            if (node == NULL)
+            if (node == nullptr)
                 node = anim->getNode("Bip01 Head");
-            if (node != NULL)
+            if (node != nullptr)
             {
                 nodepaths = node->getParentalNodePaths();
                 if (!nodepaths.empty())

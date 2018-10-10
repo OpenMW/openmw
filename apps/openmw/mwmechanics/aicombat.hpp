@@ -64,7 +64,7 @@ namespace MWMechanics
         mAttackRange(0.0f),
         mCombatMove(false),
         mLastTargetPos(0,0,0),
-        mCell(NULL),
+        mCell(nullptr),
         mCurrentAction(),
         mActionCooldown(0.0f),
         mStrength(),

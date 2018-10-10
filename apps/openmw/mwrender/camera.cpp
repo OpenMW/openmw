@@ -45,7 +45,7 @@ namespace MWRender
     Camera::Camera (osg::Camera* camera)
     : mHeightScale(1.f),
       mCamera(camera),
-      mAnimation(NULL),
+      mAnimation(nullptr),
       mFirstPersonView(true),
       mPreviewMode(false),
       mFreeLook(true),

@@ -586,7 +586,7 @@ std::string chooseBestAttack(const ESM::Weapon* weapon)
 {
     std::string attackType;
 
-    if (weapon != NULL)
+    if (weapon != nullptr)
     {
         //the more damage attackType deals the more probability it has
         int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;

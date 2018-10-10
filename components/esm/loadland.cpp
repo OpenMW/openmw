@@ -16,7 +16,7 @@ namespace ESM
         , mY(0)
         , mPlugin(0)
         , mDataTypes(0)
-        , mLandData(NULL)
+        , mLandData(nullptr)
     {
     }
 
@@ -73,7 +73,7 @@ namespace ESM
 
         mContext = esm.getContext();
 
-        mLandData = NULL;
+        mLandData = nullptr;
 
         // Skip the land data here. Load it when the cell is loaded.
         while (esm.hasMoreSubs())
@@ -298,7 +298,7 @@ namespace ESM
         if (mLandData)
         {
             delete mLandData;
-            mLandData = NULL;
+            mLandData = nullptr;
         }
     }
 

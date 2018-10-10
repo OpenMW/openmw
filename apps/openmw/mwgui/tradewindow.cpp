@@ -50,8 +50,8 @@ namespace MWGui
 
     TradeWindow::TradeWindow()
         : WindowBase("openmw_trade_window.layout")
-        , mSortModel(NULL)
-        , mTradeModel(NULL)
+        , mSortModel(nullptr)
+        , mTradeModel(nullptr)
         , mItemToSell(-1)
         , mCurrentBalance(0)
         , mCurrentMerchantOffer(0)
@@ -205,7 +205,7 @@ namespace MWGui
         else
         {
             mItemToSell = mSortModel->mapToSource(index);
-            sellItem (NULL, count);
+            sellItem (nullptr, count);
         }
     }
 
@@ -514,8 +514,8 @@ namespace MWGui
     void TradeWindow::resetReference()
     {
         ReferenceInterface::resetReference();
-        mItemView->setModel(NULL);
-        mTradeModel = NULL;
-        mSortModel = NULL;
+        mItemView->setModel(nullptr);
+        mTradeModel = nullptr;
+        mSortModel = nullptr;
     }
 }

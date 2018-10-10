@@ -59,7 +59,7 @@ namespace MWMechanics
         
         bool empty() const
         {
-            return mStorage == NULL;
+            return mStorage == nullptr;
         }
         
         const std::type_info& getType() const
@@ -67,16 +67,12 @@ namespace MWMechanics
             return typeid(mStorage);
         }
         
-        
-        DerivedClassStorage():mStorage(NULL){}
+        DerivedClassStorage():mStorage(nullptr){}
         ~DerivedClassStorage()
         {
             if(mStorage)
                 delete mStorage;
         }
-        
-        
-        
     };
 
 

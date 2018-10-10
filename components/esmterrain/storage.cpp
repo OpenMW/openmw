@@ -50,7 +50,7 @@ namespace ESMTerrain
     const ESM::Land::LandData *LandObject::getData(int flags) const
     {
         if ((mData.mDataLoaded & flags) != flags)
-            return NULL;
+            return nullptr;
         return &mData;
     }
 

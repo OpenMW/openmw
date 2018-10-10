@@ -27,7 +27,7 @@
 #include "creator.hpp"
 
 CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id), mScene(NULL), mLayout(new QHBoxLayout), mDocument(document), mToolbar(NULL)
+: SubView (id), mScene(nullptr), mLayout(new QHBoxLayout), mDocument(document), mToolbar(nullptr)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
@@ -35,7 +35,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     mLayout->setContentsMargins (QMargins (0, 0, 0, 0));
 
-    CSVRender::WorldspaceWidget* worldspaceWidget = NULL;
+    CSVRender::WorldspaceWidget* worldspaceWidget = nullptr;
     widgetType whatWidget;
 
     if (id.getId()==ESM::CellId::sDefaultWorldspace)
@@ -189,9 +189,9 @@ void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::CellSelection
 
 void CSVWorld::SceneSubView::handleDrop (const std::vector< CSMWorld::UniversalId >& universalIdData)
 {
-    CSVRender::PagedWorldspaceWidget* pagedNewWidget = NULL;
-    CSVRender::UnpagedWorldspaceWidget* unPagedNewWidget = NULL;
-    CSVWidget::SceneToolbar* toolbar = NULL;
+    CSVRender::PagedWorldspaceWidget* pagedNewWidget = nullptr;
+    CSVRender::UnpagedWorldspaceWidget* unPagedNewWidget = nullptr;
+    CSVWidget::SceneToolbar* toolbar = nullptr;
 
     CSVRender::WorldspaceWidget::DropType type = CSVRender::WorldspaceWidget::getDropType (universalIdData);
 

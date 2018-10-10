@@ -25,7 +25,7 @@ namespace
 
 osg::Matrixf getWorldTransform(const Nif::Node *node)
 {
-    if(node->parent != NULL)
+    if(node->parent != nullptr)
         return node->trafo.toMatrix() * getWorldTransform(node->parent);
     return node->trafo.toMatrix();
 }
@@ -61,8 +61,8 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
 {
     mShape = new Resource::BulletShape;
 
-    mCompoundShape = NULL;
-    mStaticMesh = NULL;
+    mCompoundShape = nullptr;
+    mStaticMesh = nullptr;
 
     if (nif.numRoots() < 1)
     {
@@ -71,10 +71,10 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
     }
 
     Nif::Record *r = nif.getRoot(0);
-    assert(r != NULL);
+    assert(r != nullptr);
 
     Nif::Node *node = dynamic_cast<Nif::Node*>(r);
-    if (node == NULL)
+    if (node == nullptr)
     {
         warn("First root in file was not a node, but a " +
              r->recName + ". Skipping file.");
@@ -216,7 +216,7 @@ void BulletNifLoader::handleNode(const std::string& fileName, const Nif::Node *n
     {
         // Get the next extra data in the list
         e = e->extra.getPtr();
-        assert(e != NULL);
+        assert(e != nullptr);
 
         if (e->recType == Nif::RC_NiStringExtraData)
         {
@@ -263,7 +263,7 @@ void BulletNifLoader::handleNode(const std::string& fileName, const Nif::Node *n
 
 void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, const osg::Matrixf &transform, bool isAnimated)
 {
-    assert(shape != NULL);
+    assert(shape != nullptr);
 
     // If the object was marked "NCO" earlier, it shouldn't collide with
     // anything. So don't do anything.

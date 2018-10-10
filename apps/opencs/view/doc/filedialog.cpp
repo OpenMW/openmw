@@ -189,7 +189,7 @@ void CSVDoc::FileDialog::slotRejected()
     if(mFileWidget)
     {
         delete mFileWidget;
-        mFileWidget = NULL;
+        mFileWidget = nullptr;
     }
     close();
 }
@@ -200,7 +200,7 @@ void CSVDoc::FileDialog::slotNewFile()
     if(mFileWidget)
     {
         delete mFileWidget;
-        mFileWidget = NULL;
+        mFileWidget = nullptr;
     }
     disconnect (ui.projectButtonBox, SIGNAL (accepted()), this, SLOT (slotNewFile()));
     close();

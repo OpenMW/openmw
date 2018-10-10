@@ -441,13 +441,13 @@ void Water::updateWaterMaterial()
     {
         mReflection->removeChildren(0, mReflection->getNumChildren());
         mParent->removeChild(mReflection);
-        mReflection = NULL;
+        mReflection = nullptr;
     }
     if (mRefraction)
     {
         mRefraction->removeChildren(0, mRefraction->getNumChildren());
         mParent->removeChild(mRefraction);
-        mRefraction = NULL;
+        mRefraction = nullptr;
     }
 
     if (Settings::Manager::getBool("shader", "Water"))
@@ -579,7 +579,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     shaderStateset->setAttributeAndModes(program, osg::StateAttribute::ON);
 
     node->setStateSet(shaderStateset);
-    node->setUpdateCallback(NULL);
+    node->setUpdateCallback(nullptr);
 }
 
 void Water::processChangedSettings(const Settings::CategorySettingVector& settings)
@@ -595,13 +595,13 @@ Water::~Water()
     {
         mReflection->removeChildren(0, mReflection->getNumChildren());
         mParent->removeChild(mReflection);
-        mReflection = NULL;
+        mReflection = nullptr;
     }
     if (mRefraction)
     {
         mRefraction->removeChildren(0, mRefraction->getNumChildren());
         mParent->removeChild(mRefraction);
-        mRefraction = NULL;
+        mRefraction = nullptr;
     }
 }
 

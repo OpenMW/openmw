@@ -45,7 +45,7 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
         CompositeMap* node = *mImmediateCompileSet.begin();
         mCompiled.insert(node);
 
-        compile(*node, renderInfo, NULL);
+        compile(*node, renderInfo, nullptr);
 
         mImmediateCompileSet.erase(mImmediateCompileSet.begin());
     }

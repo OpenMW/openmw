@@ -810,7 +810,7 @@ namespace MWPhysics
         btScalar mLeastDistSqr;
 
         DeepestNotMeContactTestResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*>& targets, const btVector3 &origin)
-          : mMe(me), mTargets(targets), mOrigin(origin), mObject(NULL), mContactPoint(0,0,0),
+          : mMe(me), mTargets(targets), mOrigin(origin), mObject(nullptr), mContactPoint(0,0,0),
             mLeastDistSqr(std::numeric_limits<float>::max())
         { }
 
@@ -873,7 +873,7 @@ namespace MWPhysics
         object.setCollisionShape(&shape);
         object.setWorldTransform(btTransform(toBullet(orient), toBullet(center)));
 
-        const btCollisionObject* me = NULL;
+        const btCollisionObject* me = nullptr;
         std::vector<const btCollisionObject*> targetCollisionObjects;
 
         const Actor* physactor = getActor(actor);
@@ -906,7 +906,7 @@ namespace MWPhysics
 
     float PhysicsSystem::getHitDistance(const osg::Vec3f &point, const MWWorld::ConstPtr &target) const
     {
-        btCollisionObject* targetCollisionObj = NULL;
+        btCollisionObject* targetCollisionObj = nullptr;
         const Actor* actor = getActor(target);
         if (actor)
             targetCollisionObj = actor->getCollisionObject();
@@ -968,7 +968,7 @@ namespace MWPhysics
         btVector3 btFrom = toBullet(from);
         btVector3 btTo = toBullet(to);
 
-        const btCollisionObject* me = NULL;
+        const btCollisionObject* me = nullptr;
         std::vector<const btCollisionObject*> targetCollisionObjects;
 
         if (!ignore.isEmpty())
@@ -1127,7 +1127,7 @@ namespace MWPhysics
 
     std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const
     {
-        btCollisionObject* me = NULL;
+        btCollisionObject* me = nullptr;
 
         ObjectMap::const_iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
@@ -1255,7 +1255,7 @@ namespace MWPhysics
         ActorMap::iterator found = mActors.find(ptr);
         if (found != mActors.end())
             return found->second;
-        return NULL;
+        return nullptr;
     }
 
     const Actor *PhysicsSystem::getActor(const MWWorld::ConstPtr &ptr) const
@@ -1263,7 +1263,7 @@ namespace MWPhysics
         ActorMap::const_iterator found = mActors.find(ptr);
         if (found != mActors.end())
             return found->second;
-        return NULL;
+        return nullptr;
     }
 
     const Object* PhysicsSystem::getObject(const MWWorld::ConstPtr &ptr) const
@@ -1271,7 +1271,7 @@ namespace MWPhysics
         ObjectMap::const_iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
             return found->second;
-        return NULL;
+        return nullptr;
     }
 
     void PhysicsSystem::updateScale(const MWWorld::Ptr &ptr)

@@ -379,7 +379,7 @@ namespace MWGui
         // starting spells
         std::vector<std::string> spells;
 
-        const ESM::Race* race = NULL;
+        const ESM::Race* race = nullptr;
         if (!mRaceId.empty())
             race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(mRaceId);
 

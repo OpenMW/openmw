@@ -400,7 +400,7 @@ void CSVDoc::View::updateSubViewIndices(SubView *view)
             else
             {
                 delete subView->titleBarWidget();
-                subView->setTitleBarWidget (NULL);
+                subView->setTitleBarWidget (nullptr);
             }
         }
     }
@@ -429,7 +429,7 @@ void CSVDoc::View::updateActions()
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
-      mViewTotal (totalViews), mScroll(NULL), mScrollbarOnly(false)
+      mViewTotal (totalViews), mScroll(nullptr), mScrollbarOnly(false)
 {
     CSMPrefs::Category& windows = CSMPrefs::State::get()["Windows"];
 
@@ -563,7 +563,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
         return;
     }
 
-    SubView *view = NULL;
+    SubView *view = nullptr;
     if(isReferenceable)
     {
         view = mSubViewFactory.makeSubView (CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, id.getId()), *mDocument);
@@ -631,7 +631,7 @@ void CSVDoc::View::moveScrollBarToEnd(int min, int max)
 void CSVDoc::View::settingChanged (const CSMPrefs::Setting *setting)
 {
     if (*setting=="Windows/hide-subview")
-        updateSubViewIndices (NULL);
+        updateSubViewIndices (nullptr);
     else if (*setting=="Windows/mainwindow-scrollbar")
     {
         if (setting->toString()!="Grow Only")
@@ -659,7 +659,7 @@ void CSVDoc::View::settingChanged (const CSMPrefs::Setting *setting)
             mScroll->takeWidget();
             setCentralWidget (&mSubViewWindow);
             mScroll->deleteLater();
-            mScroll = NULL;
+            mScroll = nullptr;
         }
     }
 }

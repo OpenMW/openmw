@@ -149,7 +149,7 @@ namespace CSVDoc
             void updateTitle();
 
             // called when subviews are added or removed
-            void updateSubViewIndices (SubView *view = NULL);
+            void updateSubViewIndices (SubView *view = nullptr);
 
         private slots:
 

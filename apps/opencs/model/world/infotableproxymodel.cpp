@@ -28,7 +28,7 @@ void CSMWorld::InfoTableProxyModel::setSourceModel(QAbstractItemModel *sourceMod
 {
     IdTableProxyModel::setSourceModel(sourceModel);
 
-    if (mSourceModel != NULL)
+    if (mSourceModel != nullptr)
     {
         mInfoColumnIndex = mSourceModel->findColumnIndex(mInfoColumnId);
         mFirstRowCache.clear();
@@ -37,7 +37,7 @@ void CSMWorld::InfoTableProxyModel::setSourceModel(QAbstractItemModel *sourceMod
 
 bool CSMWorld::InfoTableProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
-    Q_ASSERT(mSourceModel != NULL);
+    Q_ASSERT(mSourceModel != nullptr);
 
     QModelIndex first = mSourceModel->index(getFirstInfoRow(left.row()), left.column());
     QModelIndex second = mSourceModel->index(getFirstInfoRow(right.row()), right.column());
@@ -52,7 +52,7 @@ bool CSMWorld::InfoTableProxyModel::lessThan(const QModelIndex &left, const QMod
 
 int CSMWorld::InfoTableProxyModel::getFirstInfoRow(int currentRow) const
 {
-    Q_ASSERT(mSourceModel != NULL);
+    Q_ASSERT(mSourceModel != nullptr);
 
     int row = currentRow;
     int column = mInfoColumnIndex;

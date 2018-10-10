@@ -20,7 +20,7 @@ Objects::~Objects()
   for (; it != mObjects.end();++it)
   {
     delete it->second;
-    it->second = NULL;
+    it->second = nullptr;
   }
 }
 

@@ -563,7 +563,7 @@ namespace MWRender
 
             requestOverlayTextureUpdate(0, 0, mWidth, mHeight, osg::ref_ptr<osg::Texture2D>(), true, false);
 
-            mWorkItem = NULL;
+            mWorkItem = nullptr;
         }
     }
 

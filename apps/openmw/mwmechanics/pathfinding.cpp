@@ -120,8 +120,8 @@ namespace MWMechanics
     }
 
     PathFinder::PathFinder()
-        : mPathgrid(NULL)
-        , mCell(NULL)
+        : mPathgrid(nullptr)
+        , mCell(nullptr)
     {
     }
 

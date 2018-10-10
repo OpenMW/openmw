@@ -92,7 +92,7 @@ void CSMWorld::IdCompletionManager::generateCompleters(CSMWorld::Data &data)
     {
         QAbstractItemModel *model = data.getTableModel(current->second);
         CSMWorld::IdTableBase *table = dynamic_cast<CSMWorld::IdTableBase *>(model);
-        if (table != NULL)
+        if (table != nullptr)
         {
             int idColumn = table->searchColumnIndex(CSMWorld::Columns::ColumnId_Id);
             if (idColumn != -1)

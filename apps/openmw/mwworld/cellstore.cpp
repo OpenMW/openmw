@@ -156,7 +156,7 @@ namespace
         ESM::RefNum mRefNumToFind;
 
         SearchByRefNumVisitor(const ESM::RefNum& toFind)
-            : mFound(NULL)
+            : mFound(nullptr)
             , mRefNumToFind(toFind)
         {
         }
@@ -259,7 +259,7 @@ namespace MWWorld
         {
             MWWorld::Ptr copied = object.getClass().copyToCell(object, *cellToMoveTo, object.getRefData().getCount());
             object.getRefData().setCount(0);
-            object.getRefData().setBaseNode(NULL);
+            object.getRefData().setBaseNode(nullptr);
             return copied;
         }
 
@@ -901,7 +901,7 @@ namespace MWWorld
 
             CellStore* otherCell = callback->getCellStore(movedTo);
 
-            if (otherCell == NULL)
+            if (otherCell == nullptr)
             {
                 Log(Debug::Warning) << "Warning: Dropping moved ref tag for " << movedRef->mRef.getRefId()
                                     << " (target cell " << movedTo.mWorldspace << " no longer exists). Reference moved back to its original location.";

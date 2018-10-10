@@ -102,7 +102,7 @@ namespace SceneUtil
             if (LightManager* lightManager = dynamic_cast<LightManager*>(path[i]))
                 return lightManager;
         }
-        return NULL;
+        return nullptr;
     }
 
     // Set on a LightSource. Adds the light source to its light manager for the current frame.
@@ -299,7 +299,7 @@ namespace SceneUtil
 
         virtual osg::Object* cloneType() const { return new DisableLight(mIndex); }
         virtual osg::Object* clone(const osg::CopyOp& copyop) const { return new DisableLight(*this,copyop); }
-        virtual bool isSameKindAs(const osg::Object* obj) const { return dynamic_cast<const DisableLight *>(obj)!=NULL; }
+        virtual bool isSameKindAs(const osg::Object* obj) const { return dynamic_cast<const DisableLight *>(obj)!=nullptr; }
         virtual const char* libraryName() const { return "SceneUtil"; }
         virtual const char* className() const { return "DisableLight"; }
         virtual Type getType() const { return LIGHT; }
@@ -323,17 +323,17 @@ namespace SceneUtil
         virtual void apply(osg::State& state) const
         {
             int lightNum = GL_LIGHT0 + mIndex;
-            glLightfv( lightNum, GL_AMBIENT,               mNull.ptr() );
-            glLightfv( lightNum, GL_DIFFUSE,               mNull.ptr() );
-            glLightfv( lightNum, GL_SPECULAR,              mNull.ptr() );
+            glLightfv( lightNum, GL_AMBIENT,               mnullptr.ptr() );
+            glLightfv( lightNum, GL_DIFFUSE,               mnullptr.ptr() );
+            glLightfv( lightNum, GL_SPECULAR,              mnullptr.ptr() );
 
             LightStateCache* cache = getLightStateCache(state.getContextID());
-            cache->lastAppliedLight[mIndex] = NULL;
+            cache->lastAppliedLight[mIndex] = nullptr;
         }
 
     private:
         unsigned int mIndex;
-        osg::Vec4f mNull;
+        osg::Vec4f mnullptr;
     };
 
     void LightManager::setStartLight(int start)
@@ -447,7 +447,7 @@ namespace SceneUtil
         {
             unsigned int maxLights = static_cast<unsigned int> (8 - mLightManager->getStartLight());
 
-            osg::StateSet* stateset = NULL;
+            osg::StateSet* stateset = nullptr;
 
             if (mLightList.size() > maxLights)
             {

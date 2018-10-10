@@ -122,7 +122,7 @@ bool FFmpeg_Decoder::getAVAudioData()
             if(!mDataBuf || mDataBufLen < mFrame->nb_samples)
             {
                 av_freep(&mDataBuf);
-                if(av_samples_alloc(&mDataBuf, NULL, av_get_channel_layout_nb_channels(mOutputChannelLayout),
+                if(av_samples_alloc(&mDataBuf, nullptr, av_get_channel_layout_nb_channels(mOutputChannelLayout),
                                     mFrame->nb_samples, mOutputSampleFormat, 0) < 0)
                     return false;
                 else
@@ -181,34 +181,34 @@ void FFmpeg_Decoder::open(const std::string &fname)
     close();
     mDataStream = mResourceMgr->get(fname);
 
-    if((mFormatCtx=avformat_alloc_context()) == NULL)
+    if((mFormatCtx=avformat_alloc_context()) == nullptr)
         throw std::runtime_error("Failed to allocate context");
 
     try
     {
-        mFormatCtx->pb = avio_alloc_context(NULL, 0, 0, this, readPacket, writePacket, seek);
-        if(!mFormatCtx->pb || avformat_open_input(&mFormatCtx, fname.c_str(), NULL, NULL) != 0)
+        mFormatCtx->pb = avio_alloc_context(nullptr, 0, 0, this, readPacket, writePacket, seek);
+        if(!mFormatCtx->pb || avformat_open_input(&mFormatCtx, fname.c_str(), nullptr, nullptr) != 0)
         {
             // "Note that a user-supplied AVFormatContext will be freed on failure".
             if (mFormatCtx)
             {
-                if (mFormatCtx->pb != NULL)
+                if (mFormatCtx->pb != nullptr)
                 {
-                    if (mFormatCtx->pb->buffer != NULL)
+                    if (mFormatCtx->pb->buffer != nullptr)
                     {
                         av_free(mFormatCtx->pb->buffer);
-                        mFormatCtx->pb->buffer = NULL;
+                        mFormatCtx->pb->buffer = nullptr;
                     }
                     av_free(mFormatCtx->pb);
-                    mFormatCtx->pb = NULL;
+                    mFormatCtx->pb = nullptr;
                 }
                 avformat_free_context(mFormatCtx);
             }
-            mFormatCtx = NULL;
+            mFormatCtx = nullptr;
             throw std::runtime_error("Failed to allocate input stream");
         }
 
-        if(avformat_find_stream_info(mFormatCtx, NULL) < 0)
+        if(avformat_find_stream_info(mFormatCtx, nullptr) < 0)
             throw std::runtime_error("Failed to find stream info in "+fname);
 
         for(size_t j = 0;j < mFormatCtx->nb_streams;j++)
@@ -231,7 +231,7 @@ void FFmpeg_Decoder::open(const std::string &fname)
                              std::to_string((*mStream)->codec->codec_id);
             throw std::runtime_error(ss);
         }
-        if(avcodec_open2((*mStream)->codec, codec, NULL) < 0)
+        if(avcodec_open2((*mStream)->codec, codec, nullptr) < 0)
             throw std::runtime_error(std::string("Failed to open audio codec ") +
                                      codec->long_name);
 
@@ -255,17 +255,17 @@ void FFmpeg_Decoder::open(const std::string &fname)
     {
         if(mStream)
             avcodec_close((*mStream)->codec);
-        mStream = NULL;
+        mStream = nullptr;
 
-        if (mFormatCtx != NULL)
+        if (mFormatCtx != nullptr)
         {
-            if (mFormatCtx->pb->buffer != NULL)
+            if (mFormatCtx->pb->buffer != nullptr)
             {
                 av_free(mFormatCtx->pb->buffer);
-                mFormatCtx->pb->buffer = NULL;
+                mFormatCtx->pb->buffer = nullptr;
             }
             av_free(mFormatCtx->pb);
-            mFormatCtx->pb = NULL;
+            mFormatCtx->pb = nullptr;
 
             avformat_close_input(&mFormatCtx);
         }
@@ -276,7 +276,7 @@ void FFmpeg_Decoder::close()
 {
     if(mStream)
         avcodec_close((*mStream)->codec);
-    mStream = NULL;
+    mStream = nullptr;
 
     av_free_packet(&mPacket);
     av_freep(&mFrame);
@@ -285,20 +285,20 @@ void FFmpeg_Decoder::close()
 
     if(mFormatCtx)
     {
-        if (mFormatCtx->pb != NULL)
+        if (mFormatCtx->pb != nullptr)
         {
             // mFormatCtx->pb->buffer must be freed by hand,
             // if not, valgrind will show memleak, see:
             //
             // https://trac.ffmpeg.org/ticket/1357
             //
-            if (mFormatCtx->pb->buffer != NULL)
+            if (mFormatCtx->pb->buffer != nullptr)
             {
                 av_free(mFormatCtx->pb->buffer);
-                mFormatCtx->pb->buffer = NULL;
+                mFormatCtx->pb->buffer = nullptr;
             }
             av_free(mFormatCtx->pb);
-            mFormatCtx->pb = NULL;
+            mFormatCtx->pb = nullptr;
         }
         avformat_close_input(&mFormatCtx);
     }
@@ -373,7 +373,7 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
                           (*mStream)->codec->sample_fmt,  // input sample format
                           (*mStream)->codec->sample_rate, // input sample rate
                           0,                              // logging level offset
-                          NULL);                          // log context
+                          nullptr);                          // log context
         if(!mSwr)
             throw std::runtime_error("Couldn't allocate SwrContext");
         if(swr_init(mSwr) < 0)
@@ -417,17 +417,17 @@ size_t FFmpeg_Decoder::getSampleOffset()
 
 FFmpeg_Decoder::FFmpeg_Decoder(const VFS::Manager* vfs)
   : Sound_Decoder(vfs)
-  , mFormatCtx(NULL)
-  , mStream(NULL)
-  , mFrame(NULL)
+  , mFormatCtx(nullptr)
+  , mStream(nullptr)
+  , mFrame(nullptr)
   , mFrameSize(0)
   , mFramePos(0)
   , mNextPts(0.0)
   , mSwr(0)
   , mOutputSampleFormat(AV_SAMPLE_FMT_NONE)
   , mOutputChannelLayout(0)
-  , mDataBuf(NULL)
-  , mFrameData(NULL)
+  , mDataBuf(nullptr)
+  , mFrameData(nullptr)
   , mDataBufLen(0)
 {
     memset(&mPacket, 0, sizeof(mPacket));

@@ -819,7 +819,7 @@ namespace MWSound
         }
 
         const ESM::Region *regn = world->getStore().get<ESM::Region>().search(regionName);
-        if(regn == NULL)
+        if(regn == nullptr)
             return;
 
         if(total == 0)

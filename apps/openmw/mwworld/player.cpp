@@ -30,7 +30,7 @@ namespace MWWorld
     Player::Player (const ESM::NPC *player)
       : mCellStore(0),
         mLastKnownExteriorPosition(0,0,0),
-        mMarkedCell(NULL),
+        mMarkedCell(nullptr),
         mAutoMove(false),
         mForwardBackward(0),
         mTeleported(false),
@@ -406,7 +406,7 @@ namespace MWWorld
             {
                 Log(Debug::Warning) << "Warning: Player cell '" << player.mCellId.mWorldspace << "' no longer exists";
                 // Cell no longer exists. The loader will have to choose a default cell.
-                mCellStore = NULL;
+                mCellStore = nullptr;
             }
 
             if (!player.mBirthsign.empty())

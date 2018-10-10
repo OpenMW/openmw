@@ -206,13 +206,13 @@ namespace MWWorld
         {
             mTerrainPreloadItem->abort();
             mTerrainPreloadItem->waitTillDone();
-            mTerrainPreloadItem = NULL;
+            mTerrainPreloadItem = nullptr;
         }
 
         if (mUpdateCacheItem)
         {
             mUpdateCacheItem->waitTillDone();
-            mUpdateCacheItem = NULL;
+            mUpdateCacheItem = nullptr;
         }
 
         for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end();++it)
