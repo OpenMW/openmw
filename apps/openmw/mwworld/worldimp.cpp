@@ -1343,7 +1343,7 @@ namespace MWWorld
 
         if (force || !isFlying(ptr))
         {
-            osg::Vec3f traced = mPhysics->traceDown(ptr, pos, 500);
+            osg::Vec3f traced = mPhysics->traceDown(ptr, pos, Constants::CellSizeInUnits);
             if (traced.z() < pos.z())
                 pos.z() = traced.z();
         }
@@ -1581,7 +1581,13 @@ namespace MWWorld
 
     bool World::toggleCollisionMode()
     {
-        return mPhysics->toggleCollisionMode();
+        if (mPhysics->toggleCollisionMode())
+        {
+            adjustPosition(getPlayerPtr(), true);
+            return true;
+        }
+
+        return false;
     }
 
     bool World::toggleRenderMode (MWRender::RenderMode mode)

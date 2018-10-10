@@ -20,6 +20,7 @@
     Bug #3049: Drain and Fortify effects are not properly applied on health, magicka and fatigue
     Bug #3059: Unable to hit with marksman weapons when too close to an enemy
     Bug #3072: Fatal error on AddItem <item> that has a script containing Equip <item>
+    Bug #3219: NPC and creature initial position tracing down limit is too small
     Bug #3249: Fixed revert function not updating views properly
     Bug #3288: TrueType fonts are handled incorrectly
     Bug #3374: Touch spells not hitting kwama foragers
@@ -134,6 +135,7 @@
     Bug #4653: Length of non-ASCII strings is handled incorrectly in ESM reader
     Bug #4654: Editor: UpdateVisitor does not initialize skeletons for animated objects
     Bug #4668: Editor: Light source color is displayed as an integer
+    Bug #4669: ToggleCollision should trace the player down after collision being enabled
     Bug #4672: Pitch factor is handled incorrectly for crossbow animations
     Feature #912: Editor: Add missing icons to UniversalId tables
     Feature #1221: Editor: Creature/NPC rendering
