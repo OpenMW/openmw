@@ -6,6 +6,7 @@
 #include "flags.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"
+#include "debug.hpp"
 
 #include <DetourCommon.h>
 #include <DetourNavMesh.h>
@@ -97,6 +98,73 @@ namespace DetourNavigator
         const Settings& mSettings;
     };
 
+    inline void initNavMeshQuery(dtNavMeshQuery& value, const dtNavMesh& navMesh, const int maxNodes)
+    {
+        const auto status = value.init(&navMesh, maxNodes);
+        if (!dtStatusSucceed(status))
+            throw NavigatorException("Failed to init navmesh query");
+    }
+
+    struct MoveAlongSurfaceResult
+    {
+        osg::Vec3f mResultPos;
+        std::vector<dtPolyRef> mVisited;
+    };
+
+    inline MoveAlongSurfaceResult moveAlongSurface(const dtNavMeshQuery& navMeshQuery, const dtPolyRef startRef,
+        const osg::Vec3f& startPos, const osg::Vec3f& endPos, const dtQueryFilter& filter,
+        const std::size_t maxVisitedSize)
+    {
+        MoveAlongSurfaceResult result;
+        result.mVisited.resize(maxVisitedSize);
+        int visitedNumber = 0;
+        const auto status = navMeshQuery.moveAlongSurface(startRef, startPos.ptr(), endPos.ptr(),
+            &filter, result.mResultPos.ptr(), result.mVisited.data(), &visitedNumber, static_cast<int>(maxVisitedSize));
+        if (!dtStatusSucceed(status))
+        {
+            std::ostringstream message;
+            message << "Failed to move along surface from " << startPos << " to " << endPos;
+            throw NavigatorException(message.str());
+        }
+        assert(visitedNumber >= 0);
+        assert(visitedNumber <= static_cast<int>(maxVisitedSize));
+        result.mVisited.resize(static_cast<std::size_t>(visitedNumber));
+        return result;
+    }
+
+    inline std::vector<dtPolyRef> findPath(const dtNavMeshQuery& navMeshQuery, const dtPolyRef startRef,
+        const dtPolyRef endRef, const osg::Vec3f& startPos, const osg::Vec3f& endPos, const dtQueryFilter& queryFilter,
+        const std::size_t maxSize)
+    {
+        int pathLen = 0;
+        std::vector<dtPolyRef> result(maxSize);
+        const auto status = navMeshQuery.findPath(startRef, endRef, startPos.ptr(), endPos.ptr(), &queryFilter,
+            result.data(), &pathLen, static_cast<int>(maxSize));
+        if (!dtStatusSucceed(status))
+        {
+            std::ostringstream message;
+            message << "Failed to find path over polygons from " << startRef << " to " << endRef;
+            throw NavigatorException(message.str());
+        }
+        assert(pathLen >= 0);
+        assert(static_cast<std::size_t>(pathLen) <= maxSize);
+        result.resize(static_cast<std::size_t>(pathLen));
+        return result;
+    }
+
+    inline float getPolyHeight(const dtNavMeshQuery& navMeshQuery, const dtPolyRef ref, const osg::Vec3f& pos)
+    {
+        float result = 0.0f;
+        const auto status = navMeshQuery.getPolyHeight(ref, pos.ptr(), &result);
+        if (!dtStatusSucceed(status))
+        {
+            std::ostringstream message;
+            message << "Failed to get polygon height ref=" << ref << " pos=" << pos;
+            throw NavigatorException(message.str());
+        }
+        return result;
+    }
+
     template <class OutputIterator>
     OutputIterator makeSmoothPath(const dtNavMesh& navMesh, const dtNavMeshQuery& navMeshQuery,
             const dtQueryFilter& filter, const osg::Vec3f& start, const osg::Vec3f& end,
@@ -139,25 +207,15 @@ namespace DetourNavigator
                 len = STEP_SIZE / len;
 
             const osg::Vec3f moveTgt = iterPos + delta * len;
+            const auto result = moveAlongSurface(navMeshQuery, polygonPath.front(), iterPos, moveTgt, filter, 16);
 
-            // Move
-            osg::Vec3f result;
-            std::vector<dtPolyRef> visited(16);
-            int nvisited = 0;
-            OPENMW_CHECK_DT_STATUS(navMeshQuery.moveAlongSurface(polygonPath.front(), iterPos.ptr(), moveTgt.ptr(),
-                    &filter, result.ptr(), visited.data(), &nvisited, int(visited.size())));
-
-            assert(nvisited >= 0);
-            assert(nvisited <= int(visited.size()));
-            visited.resize(static_cast<std::size_t>(nvisited));
-
-            polygonPath = fixupCorridor(polygonPath, visited);
+            polygonPath = fixupCorridor(polygonPath, result.mVisited);
             polygonPath = fixupShortcuts(polygonPath, navMeshQuery);
 
             float h = 0;
-            navMeshQuery.getPolyHeight(polygonPath.front(), result.ptr(), &h);
-            result.y() = h;
-            iterPos = result;
+            navMeshQuery.getPolyHeight(polygonPath.front(), result.mResultPos.ptr(), &h);
+            iterPos = result.mResultPos;
+            iterPos.y() = h;
 
             // Handle end of path and off-mesh links when close enough.
             if (endOfPath && inRange(iterPos, steerTarget->steerPos, SLOP, 1.0f))
@@ -203,9 +261,7 @@ namespace DetourNavigator
 
                     // Move position at the other side of the off-mesh link.
                     iterPos = endPos;
-                    float eh = 0.0f;
-                    OPENMW_CHECK_DT_STATUS(navMeshQuery.getPolyHeight(polygonPath.front(), iterPos.ptr(), &eh));
-                    iterPos.y() = eh;
+                    iterPos.y() = getPolyHeight(navMeshQuery, polygonPath.front(), iterPos);
                 }
             }
 
@@ -223,7 +279,7 @@ namespace DetourNavigator
             const Settings& settings, OutputIterator out)
     {
         dtNavMeshQuery navMeshQuery;
-        OPENMW_CHECK_DT_STATUS(navMeshQuery.init(&navMesh, settings.mMaxNavMeshQueryNodes));
+        initNavMeshQuery(navMeshQuery, navMesh, settings.mMaxNavMeshQueryNodes);
 
         dtQueryFilter queryFilter;
         queryFilter.setIncludeFlags(includeFlags);
@@ -239,7 +295,7 @@ namespace DetourNavigator
         }
 
         if (startRef == 0)
-            throw NavigatorException("start polygon is not found at " __FILE__ ":" + std::to_string(__LINE__));
+            throw NavigatorException("Navmesh polygon for start point is not found");
 
         dtPolyRef endRef = 0;
         osg::Vec3f endPolygonPosition;
@@ -252,16 +308,10 @@ namespace DetourNavigator
         }
 
         if (endRef == 0)
-            throw NavigatorException("end polygon is not found at " __FILE__ ":" + std::to_string(__LINE__));
+            throw NavigatorException("Navmesh polygon for end polygon is not found");
 
-        std::vector<dtPolyRef> polygonPath(settings.mMaxPolygonPathSize);
-        int pathLen = 0;
-        OPENMW_CHECK_DT_STATUS(navMeshQuery.findPath(startRef, endRef, start.ptr(), end.ptr(), &queryFilter,
-            polygonPath.data(), &pathLen, static_cast<int>(polygonPath.size())));
-
-        assert(pathLen >= 0);
-
-        polygonPath.resize(static_cast<std::size_t>(pathLen));
+        const auto polygonPath = findPath(navMeshQuery, startRef, endRef, start, end, queryFilter,
+                                          settings.mMaxPolygonPathSize);
 
         if (polygonPath.empty() || polygonPath.back() != endRef)
             return out;

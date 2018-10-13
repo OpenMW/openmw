@@ -1,8 +1,6 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_DTSTATUS_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_DTSTATUS_H
 
-#include "exceptions.hpp"
-
 #include <DetourStatus.h>
 
 #include <sstream>
@@ -35,32 +33,6 @@ namespace DetourNavigator
                 stream << status.second << " ";
         return stream;
     }
-
-    inline void checkDtStatus(dtStatus status, const char* call, int line)
-    {
-        if (!dtStatusSucceed(status))
-        {
-            std::ostringstream message;
-            message << call << " failed with status=" << WriteDtStatus {status} << " at " __FILE__ ":" << line;
-            throw NavigatorException(message.str());
-        }
-    }
-
-    inline void checkDtResult(bool result, const char* call, int line)
-    {
-        if (!result)
-        {
-            std::ostringstream message;
-            message << call << " failed at " __FILE__ ":" << line;
-            throw NavigatorException(message.str());
-        }
-    }
 }
-
-#define OPENMW_CHECK_DT_STATUS(call) \
-    do { DetourNavigator::checkDtStatus((call), #call, __LINE__); } while (false)
-
-#define OPENMW_CHECK_DT_RESULT(call) \
-    do { DetourNavigator::checkDtResult((call), #call, __LINE__); } while (false)
 
 #endif

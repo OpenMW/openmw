@@ -14,7 +14,7 @@ namespace DetourNavigator
         , mChunkyTriMesh(mVertices, mIndices, mAreaTypes, trianglesPerChunk)
     {
         if (getTrianglesCount() != mAreaTypes.size())
-            throw InvalidArgument("number of flags doesn't match number of triangles: triangles="
+            throw InvalidArgument("Number of flags doesn't match number of triangles: triangles="
                 + std::to_string(getTrianglesCount()) + ", areaTypes=" + std::to_string(mAreaTypes.size()));
         if (getVerticesCount())
             rcCalcBounds(mVertices.data(), static_cast<int>(getVerticesCount()), mBoundsMin.ptr(), mBoundsMax.ptr());
