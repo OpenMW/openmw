@@ -3,6 +3,7 @@
 
 #include "areatype.hpp"
 #include "chunkytrimesh.hpp"
+#include "bounds.hpp"
 
 #include <memory>
 #include <string>
@@ -61,14 +62,9 @@ namespace DetourNavigator
             return mChunkyTriMesh;
         }
 
-        const osg::Vec3f& getBoundsMin() const
+        const Bounds& getBounds() const
         {
-            return mBoundsMin;
-        }
-
-        const osg::Vec3f& getBoundsMax() const
-        {
-            return mBoundsMax;
+            return mBounds;
         }
 
     private:
@@ -77,8 +73,7 @@ namespace DetourNavigator
         std::vector<AreaType> mAreaTypes;
         std::vector<Water> mWater;
         ChunkyTriMesh mChunkyTriMesh;
-        osg::Vec3f mBoundsMin;
-        osg::Vec3f mBoundsMax;
+        Bounds mBounds;
     };
 }
 

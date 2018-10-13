@@ -17,6 +17,6 @@ namespace DetourNavigator
             throw InvalidArgument("Number of flags doesn't match number of triangles: triangles="
                 + std::to_string(getTrianglesCount()) + ", areaTypes=" + std::to_string(mAreaTypes.size()));
         if (getVerticesCount())
-            rcCalcBounds(mVertices.data(), static_cast<int>(getVerticesCount()), mBoundsMin.ptr(), mBoundsMax.ptr());
+            rcCalcBounds(mVertices.data(), static_cast<int>(getVerticesCount()), mBounds.mMin.ptr(), mBounds.mMax.ptr());
     }
 }
