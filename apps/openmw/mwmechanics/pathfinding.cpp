@@ -302,7 +302,7 @@ namespace MWMechanics
         catch (const DetourNavigator::NavigatorException& exception)
         {
             DetourNavigator::log("PathFinder::buildPathByNavigator navigator exception: ", exception.what());
-            Log(Debug::Error) << "Build path by navigator exception: " << exception.what();
+            Log(Debug::Warning) << "Build path by navigator exception: " << exception.what();
         }
     }
 }
