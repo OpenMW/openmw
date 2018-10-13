@@ -506,7 +506,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             while (!stream.eof () && !ucsLineBreak (stream.peek ()) && ucsBreakingSpace (stream.peek ()))
             {
                 MWGui::GlyphInfo info = GlyphInfo(style->mFont, stream.peek());
-                if (info.codePoint >= 0)
+                if (info.charFound)
                     space_width += static_cast<int>(info.advance + info.bearingX);
                 stream.consume ();
             }
@@ -516,7 +516,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             while (!stream.eof () && !ucsLineBreak (stream.peek ()) && !ucsBreakingSpace (stream.peek ()))
             {
                 MWGui::GlyphInfo info = GlyphInfo(style->mFont, stream.peek());
-                if (info.codePoint >= 0)
+                if (info.charFound)
                     word_width += static_cast<int>(info.advance + info.bearingX);
                 stream.consume ();
             }
@@ -765,7 +765,7 @@ namespace
         {
             MWGui::GlyphInfo info = GlyphInfo(mFont, ch);
 
-            if (info.codePoint < 0)
+            if (!info.charFound)
                 return;
 
             MyGUI::FloatRect vr;
@@ -787,7 +787,7 @@ namespace
         {
             MWGui::GlyphInfo info = GlyphInfo(mFont, ch);
 
-            if (info.codePoint >= 0)
+            if (info.charFound)
                 mCursor.left += static_cast<int>(info.bearingX + info.advance);
         }
 
