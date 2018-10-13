@@ -30,6 +30,12 @@ namespace ESM
         // The tmp buffer is a null-byte separated string list, we
         // just have to pick out one string at a time.
         char* str = &tmp[0];
+        if (!str && mVarNames.size() > 0)
+        {
+            Log(Debug::Warning) << "SCVR with no variable names";
+            return;
+        }
+
         for (size_t i = 0; i < mVarNames.size(); i++)
         {
             // Support '\r' terminated strings like vanilla.  See Bug #1324.
