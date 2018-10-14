@@ -1,6 +1,7 @@
 #include "activator.hpp"
 
 #include <components/esm/loadacti.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -133,5 +134,74 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
+    }
+
+    std::string Activator::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
+    {
+        std::string model = getModel(ptr);
+        if (model.empty())
+            return std::string();
+
+        const MWWorld::Store<ESM::Creature> &creaturestore = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>();
+        std::string creatureId;
+        
+        for (const ESM::Creature &iter : creaturestore)
+        {
+            if (iter.mModel.empty())
+                continue;
+
+            if (Misc::StringUtils::ciEqual(model, "meshes\\" + iter.mModel))
+            {
+                creatureId = !iter.mOriginal.empty() ? iter.mOriginal : iter.mId;
+                break;
+            }
+        }
+
+        if (creatureId.empty())
+            return std::string();
+
+        const MWWorld::Store<ESM::SoundGenerator> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::SoundGenerator>();
+
+        int type = getSndGenTypeFromName(name);
+        std::vector<const ESM::SoundGenerator*> sounds;
+
+        MWWorld::Store<ESM::SoundGenerator>::iterator sound = store.begin();
+
+        while (sound != store.end())
+        {
+            if (type == sound->mType && !sound->mCreature.empty() && (Misc::StringUtils::ciEqual(creatureId, sound->mCreature)))
+                sounds.push_back(&*sound);
+            ++sound;
+        }
+
+        if (!sounds.empty())
+            return sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
+
+        if (type == ESM::SoundGenerator::Land)
+            return "Body Fall Large";
+
+        return std::string();
+    }
+
+    int Activator::getSndGenTypeFromName(const std::string &name) const
+    {
+        if (name == "left")
+            return 0;
+        if (name == "right")
+            return 1;
+        if (name == "swimleft")
+            return 2;
+        if (name == "swimright")
+            return 3;
+        if (name == "moan")
+            return 4;
+        if (name == "roar")
+            return 5;
+        if (name == "scream")
+            return 6;
+        if (name == "land")
+            return 7;
+
+        throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }
 }

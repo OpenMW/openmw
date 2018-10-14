@@ -155,6 +155,7 @@
     Feature #4012: Editor: Write a log file if OpenCS crashes
     Feature #4222: 360° screenshots
     Feature #4256: Implement ToggleBorders (TB) console command
+    Feature #4285: Support soundgen calls for activators
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
     Feature #4345: Add equivalents for the command line commands to Launcher
     Feature #4404: Editor: All EnumDelegate fields should have their items sorted alphabetically

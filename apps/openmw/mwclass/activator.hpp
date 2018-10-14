@@ -44,6 +44,10 @@ namespace MWClass
             ///< Whether or not to use animated variant of model (default false)
 
             virtual bool isActivator() const;
+
+            virtual std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const;
+
+            virtual int getSndGenTypeFromName(const std::string &name) const;
     };
 }
 
