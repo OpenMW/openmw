@@ -138,19 +138,13 @@ namespace MWClass
 
     std::string Activator::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
     {
-        std::string model = getModel(ptr);
-        if (model.empty())
-            return std::string();
-
-        const MWWorld::Store<ESM::Creature> &creaturestore = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>();
+        std::string model = getModel(ptr); // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore(); 
         std::string creatureId;
-        
-        for (const ESM::Creature &iter : creaturestore)
-        {
-            if (iter.mModel.empty())
-                continue;
 
-            if (Misc::StringUtils::ciEqual(model, "meshes\\" + iter.mModel))
+        for (const ESM::Creature &iter : store.get<ESM::Creature>())
+        {
+            if (!iter.mModel.empty() && Misc::StringUtils::ciEqual(model, "meshes\\" + iter.mModel))
             {
                 creatureId = !iter.mOriginal.empty() ? iter.mOriginal : iter.mId;
                 break;
@@ -160,19 +154,12 @@ namespace MWClass
         if (creatureId.empty())
             return std::string();
 
-        const MWWorld::Store<ESM::SoundGenerator> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::SoundGenerator>();
-
         int type = getSndGenTypeFromName(name);
         std::vector<const ESM::SoundGenerator*> sounds;
 
-        MWWorld::Store<ESM::SoundGenerator>::iterator sound = store.begin();
-
-        while (sound != store.end())
-        {
+        for (auto sound = store.get<ESM::SoundGenerator>().begin(); sound != store.get<ESM::SoundGenerator>().end(); ++sound)
             if (type == sound->mType && !sound->mCreature.empty() && (Misc::StringUtils::ciEqual(creatureId, sound->mCreature)))
                 sounds.push_back(&*sound);
-            ++sound;
-        }
 
         if (!sounds.empty())
             return sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
@@ -183,24 +170,24 @@ namespace MWClass
         return std::string();
     }
 
-    int Activator::getSndGenTypeFromName(const std::string &name) const
+    int Activator::getSndGenTypeFromName(const std::string &name)
     {
         if (name == "left")
-            return 0;
+            return ESM::SoundGenerator::LeftFoot;
         if (name == "right")
-            return 1;
+            return ESM::SoundGenerator::RightFoot;
         if (name == "swimleft")
-            return 2;
+            return ESM::SoundGenerator::SwimLeft;
         if (name == "swimright")
-            return 3;
+            return ESM::SoundGenerator::SwimRight;
         if (name == "moan")
-            return 4;
+            return ESM::SoundGenerator::Moan;
         if (name == "roar")
-            return 5;
+            return ESM::SoundGenerator::Roar;
         if (name == "scream")
-            return 6;
+            return ESM::SoundGenerator::Scream;
         if (name == "land")
-            return 7;
+            return ESM::SoundGenerator::Land;
 
         throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }

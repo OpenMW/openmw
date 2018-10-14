@@ -10,6 +10,8 @@ namespace MWClass
 
             virtual MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const;
 
+            static int getSndGenTypeFromName(const std::string &name);
+
         public:
 
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
@@ -46,8 +48,6 @@ namespace MWClass
             virtual bool isActivator() const;
 
             virtual std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const;
-
-            virtual int getSndGenTypeFromName(const std::string &name) const;
     };
 }
 
