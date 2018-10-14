@@ -3,12 +3,14 @@
 #include <osg/Camera>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/esm/loadcell.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/refdata.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "npcanimation.hpp"
 
@@ -98,6 +100,23 @@ namespace MWRender
         osg::Vec3d position = worldMat.getTrans();
         if (!isFirstPerson())
             position.z() += mHeight * mHeightScale;
+        else
+        {
+            if (mTrackingPtr.getCell()->getState() != MWWorld::CellStore::State_Loaded)
+                return position;
+            if (!mTrackingPtr.getCell()->getCell()->hasWater())
+                return position;
+            const SceneUtil::PositionAttitudeTransform* baseNode = mTrackingPtr.getRefData().getBaseNode();
+            if (!baseNode || baseNode->getParentalNodePaths().empty())
+                return position;
+            const float waterlevel = mTrackingPtr.getCell()->getWaterLevel();
+            const float scale = baseNode->getScale().z();
+            const osg::Vec3d positionBase = osg::computeLocalToWorld(baseNode->getParentalNodePaths()[0]).getTrans();
+            if (positionBase.z() < waterlevel &&
+                positionBase.z() + mHeight * scale > waterlevel &&
+                position.z() < waterlevel)
+                position.z() = waterlevel + 0.5;
+        }
         return position;
     }
 

@@ -1373,12 +1373,13 @@ namespace MWMechanics
                                 !stats.getAiSequence().hasPackage(AiPackage::TypeIdPursue) &&
                                 !firstPersonPlayer)
                             {
-                                for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
-                                {
-                                    if (it->first == iter->first)
-                                        continue;
-                                    updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
-                                }
+                                if (!(iter->first == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson()))
+                                    for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
+                                    {
+                                        if (it->first == iter->first)
+                                            continue;
+                                        updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
+                                    }
                             }
 
                             ctrl->setHeadTrackTarget(headTrackTarget);
