@@ -1,9 +1,6 @@
 #include "actor.hpp"
 
-#include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
-#include <BulletCollision/CollisionShapes/btSphereShape.h>
-#include <BulletCollision/CollisionShapes/btMinkowskiSumShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
@@ -43,6 +40,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
         // - 3: Rounded cylinders. Bullet can actually do these, but they perform very badly and don't render properly in debug collision wireframe rendering.
         // These don't have the bad normals problem that cylinders have, at least at a high enough rounding, but again, they perform very badly.
         // - 4: Capsules. These are touted as some kind of pancea, and they'd be good for total conversions, but they break vanilla Morrowind level design.
+
         // It's true that Vanilla uses AABBs, but there's nowhere that would be SIGNIFICANTLY different from vanilla when using cylinders instead. Capsules, on the other hand, break some staircases.
         // See https://gitlab.com/OpenMW/openmw/issues/4247 for more details.
 

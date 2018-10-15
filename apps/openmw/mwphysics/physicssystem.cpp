@@ -113,7 +113,6 @@ namespace MWPhysics
         // if we're on the ground and it's too steep to walk and we'd be directed upwards from it, pretend it's a wall
         if(onGround && !isWalkableSlope(virtualNormal) && virtualNormal.z() != 0.0)
         {
-            //std::cerr << "wallifying slope" << std::endl;
             virtualNormal.z() = 0;
             virtualNormal.normalize();
         }
@@ -153,7 +152,6 @@ namespace MWPhysics
                 upDistance = mUpStepper.mFraction*sStepSizeUp - upMargin;
             else
             {
-                //std::cerr << "Warning: breaking steps A"  << std::endl;
                 return false;
             }
 
@@ -176,14 +174,12 @@ namespace MWPhysics
                     tracerDest = tracerPos + toMove;
                 else if (!firstIteration) // first attempt failed and not on first movement solver iteration, can't retry
                 {
-                    //std::cerr << "Warning: breaking steps B"  << std::endl;
                     return false;
                 }
                 else if(attempt == 2)
                 {
                     moveDistance = sMinStep;
                     tracerDest = tracerPos + normalMove*sMinStep;
-                    //std::cerr << "trying fallback A\n";
                 }
                 else if(attempt == 3)
                 {
@@ -192,7 +188,6 @@ namespace MWPhysics
                         upDistance = sMinStepShortUp;
                         tracerPos = position + osg::Vec3f(0.0f, 0.0f, upDistance);
                     }
-                    //std::cerr << "trying fallback B\n";
                     moveDistance = sMinStepShort;
                     tracerDest = tracerPos + normalMove*sMinStepShort;
                 }
@@ -205,7 +200,6 @@ namespace MWPhysics
                     moveDistance *= mTracer.mFraction;
                     if(moveDistance <= moveMargin) // didn't move enough to accomplish anything
                     {
-                        //std::cerr << "Warning: breaking steps C"  << std::endl;
                         return false;
                     }
 
@@ -238,7 +232,6 @@ namespace MWPhysics
                 // Switched back to cylinders to avoid that and similer problems.
                 if(canStepDown(mDownStepper))
                 {
-                    //std::cerr << "stepped down\n";
                     break;
                 }
                 else
@@ -247,17 +240,14 @@ namespace MWPhysics
                     // (forces actor to get snug against the defective ledge for attempt 3 to be tried)
                     if(attempt == 2 && moveDistance > upDistance-(mDownStepper.mFraction*downStepSize))
                     {
-                        //std::cerr << "giving up on stepping A\n";
                         return false;
                     }
                     // do next attempt if first iteration of movement solver and not out of attempts
                     if(firstIteration && attempt < 3)
                     {
-                        //std::cerr << "continuing on\n";
                         continue;
                     }
 
-                    //std::cerr << "giving up on stepping B\n";
                     return false;
                 }
             }
@@ -467,18 +457,6 @@ namespace MWPhysics
                     }
                 }
 
-                /*
-                // We are touching something other than an actor.
-                if (tracer.mFraction < 1E-9f && !isActor(tracer.mHitObject))
-                {
-                    // Try to separate by backing off slighly to unstuck the solver
-                    osg::Vec3f backOff = (newPosition - tracer.mHitPoint) * 1E-2f;
-                    newPosition += backOff;
-                }
-                // This way of doing this can cause the actor to enter other geometry, and then the normals for colliding with that other geometry go in incoherent directions.
-                // This needs to be done differently.
-                */
-
                 // We hit something. Check if we can step up.
                 float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + halfExtents.z();
                 osg::Vec3f oldPosition = newPosition;
@@ -487,7 +465,7 @@ namespace MWPhysics
                 // - things that aren't definitely tall (hitHeight can be any point of contact, but will always be a low point of contact for short objects)
                 // - non-actors
                 // - things that are flat walls or facing upwards (no downwards-facing walls or ceilings)
-                // note that we want to attempt stepping with too-steep slopes/sloped walls because they might be the side of a short step
+                // note that we want to attempt stepping even against too-steep slopes/sloped walls because they might be the side of a short step
                 if (hitHeight < sStepSizeUp && !isActor(tracer.mHitObject) && tracer.mPlaneNormal.z() >= 0.0f)
                 {
                     // Try to step up onto it.
@@ -509,7 +487,6 @@ namespace MWPhysics
                     auto moveDistance = normVelocity.normalize();
 
                     // Stairstepping failed, need to advance to and slide across whatever we hit
-                    //std::cerr << "stairstepping failed" << std::endl;
 
                     float traceMargin = pickSafetyMargin(tracer.mHitObject);
                     // advance if distance greater than safety margin
@@ -563,10 +540,9 @@ namespace MWPhysics
                     // check for colliding with acute convex corners; handling of acute crevices
                     if ((numTimesSlid > 0 && lastSlideNormal * virtualNormal <= 0.0f) || (numTimesSlid > 1 && lastSlideFallbackNormal * virtualNormal <= 0.0f))
                     {
-                        // if we've already done crevice detection this it's probably stuck
+                        // if we've already done crevice detection then we're probably stuck
                         if(numTimesSlidFallback > 1)
                         {
-                            //std::cerr << "fallback failure" << std::endl;
                             break;
                         }
 
@@ -587,7 +563,6 @@ namespace MWPhysics
                             // check for all three being acute or right angled; if they are, it's definitely a three-sided pit, we should bail early
                             if(product_older <= 0.0f && product_newer <= 0.0f && product_cross <= 0.0f)
                             {
-                                //std::cerr << "pit" << std::endl;
                                 break;
                             }
                             // otherwise we don't care about product_cross
@@ -612,14 +587,9 @@ namespace MWPhysics
                         }
                     }
 
-                    // Break if our velocity hardly changed (?)
-                    //if ((newVelocity-velocity).length2() < 0.01)
-                    //    break;
-
                     // Break if our velocity got fully deflected
                     if (physicActor->getOnGround() && !physicActor->getOnSlope() && !isFlying && (newVelocity * origVelocity) <= 0.0f)
                     {
-                        //std::cerr << "deflection" << std::endl;
                         break;
                     }
 
@@ -629,8 +599,6 @@ namespace MWPhysics
 
                     velocity = newVelocity;
                 }
-                //if(iterations == sMaxIterations-1)
-                    //std::cerr << "iterations" << std::endl;
             }
 
             bool isOnGround = false;
@@ -682,25 +650,7 @@ namespace MWPhysics
                 else
                 {
                     // standing on actors is not allowed (see above).
-                    // in addition to that, apply a sliding effect away from the center of the actor,
-                    // so that we do not stay suspended in air indefinitely.
-
-                    // Morrowind doesn't do this unless the actors are overlapping and the current one is in the air and moving downwards
-                    // So I commented it out for now.
-                    /*
-                    if (tracer.mFraction < 1.0f && isActor(tracer.mHitObject))
-                    {
-                        if (osg::Vec3f(velocity.x(), velocity.y(), 0).length2() < 100.f*100.f)
-                        {
-                            btVector3 aabbMin, aabbMax;
-                            tracer.mHitObject->getCollisionShape()->getAabb(tracer.mHitObject->getWorldTransform(), aabbMin, aabbMax);
-                            btVector3 center = (aabbMin + aabbMax) / 2.f;
-                            inertia = osg::Vec3f(position.x() - center.x(), position.y() - center.y(), 0);
-                            inertia.normalize();
-                            inertia *= 100;
-                        }
-                    }
-                    */
+                    // this makes it so that standing on actors doesn't act like standing on the ground.
                     isOnGround = false;
                 }
             }
