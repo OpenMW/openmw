@@ -218,7 +218,6 @@ namespace Terrain
                 defineMap["clamp"] = clampLighting ? "1" : "0";
                 defineMap["normalMap"] = (it->mNormalMap) ? "1" : "0";
                 defineMap["blendMap"] = !firstLayer ? "1" : "0";
-                defineMap["colorMode"] = "2";
                 defineMap["specularMap"] = it->mSpecular ? "1" : "0";
                 defineMap["parallax"] = (it->mNormalMap && it->mParallax) ? "1" : "0";
 
@@ -231,6 +230,7 @@ namespace Terrain
                 }
 
                 stateset->setAttributeAndModes(shaderManager->getProgram(vertexShader, fragmentShader));
+                stateset->addUniform(new osg::Uniform("colorMode", 2));
             }
             else
             {

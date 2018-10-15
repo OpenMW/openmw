@@ -1,5 +1,7 @@
 #define MAX_LIGHTS 8
 
+uniform int colorMode;
+
 void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 viewPos, vec3 viewNormal, vec4 diffuse, vec3 ambient)
 {
     vec3 lightDir;
@@ -20,16 +22,23 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, float shadowing
 vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadowDiffuse)
 #endif
 {
-#if @colorMode == 3
-    vec4 diffuse = gl_FrontMaterial.diffuse;
-    vec3 ambient = vertexColor.xyz;
-#elif @colorMode == 2
-    vec4 diffuse = vertexColor;
-    vec3 ambient = vertexColor.xyz;
-#else
-    vec4 diffuse = gl_FrontMaterial.diffuse;
-    vec3 ambient = gl_FrontMaterial.ambient.xyz;
-#endif
+    vec4 diffuse;
+    vec3 ambient;
+    if (colorMode == 3)
+    {
+        diffuse = gl_FrontMaterial.diffuse;
+        ambient - vertexColor.xyz;
+    }
+    else if (colorMode == 2)
+    {
+        diffuse = vertexColor;
+        ambient = vertexColor.xyz;
+    }
+    else
+    {
+        diffuse = gl_FrontMaterial.diffuse;
+        ambient = gl_FrontMaterial.ambient.xyz;
+    }
     vec4 lightResult = vec4(0.0, 0.0, 0.0, diffuse.a);
 
     vec3 diffuseLight, ambientLight;
@@ -48,11 +57,10 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadow
 
     lightResult.xyz += gl_LightModel.ambient.xyz * ambient;
 
-#if @colorMode == 1
-    lightResult.xyz += vertexColor.xyz;
-#else
-    lightResult.xyz += gl_FrontMaterial.emission.xyz;
-#endif
+    if (colorMode == 1)
+        lightResult.xyz += vertexColor.xyz;
+    else
+        lightResult.xyz += gl_FrontMaterial.emission.xyz;
 
 #if @clamp
     lightResult = clamp(lightResult, vec4(0.0, 0.0, 0.0, 0.0), vec4(1.0, 1.0, 1.0, 1.0));

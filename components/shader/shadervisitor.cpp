@@ -23,8 +23,6 @@ namespace Shader
 
     ShaderVisitor::ShaderRequirements::ShaderRequirements()
         : mShaderRequired(false)
-        , mColorMaterial(false)
-        , mVertexColorMode(GL_AMBIENT_AND_DIFFUSE)
         , mMaterialOverridden(false)
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
@@ -230,8 +228,29 @@ namespace Shader
                         mRequirements.back().mMaterialOverridden = true;
 
                     const osg::Material* mat = static_cast<const osg::Material*>(it->second.first.get());
-                    mRequirements.back().mColorMaterial = (mat->getColorMode() != osg::Material::OFF);
-                    mRequirements.back().mVertexColorMode = mat->getColorMode();
+
+                    if (!writableStateSet)
+                        writableStateSet = getWritableStateSet(node);
+
+                    int colorMode;
+                    switch (mat->getColorMode())
+                    {
+                    case osg::Material::OFF:
+                        colorMode = 0;
+                        break;
+                    case GL_AMBIENT:
+                        colorMode = 3;
+                        break;
+                    default:
+                    case GL_AMBIENT_AND_DIFFUSE:
+                        colorMode = 2;
+                        break;
+                    case GL_EMISSION:
+                        colorMode = 1;
+                        break;
+                    }
+
+                    writableStateSet->addUniform(new osg::Uniform("colorMode", colorMode));
                 }
             }
         }
@@ -270,25 +289,6 @@ namespace Shader
         {
             defineMap[texIt->second] = "1";
             defineMap[texIt->second + std::string("UV")] = std::to_string(texIt->first);
-        }
-
-        if (!reqs.mColorMaterial)
-            defineMap["colorMode"] = "0";
-        else
-        {
-            switch (reqs.mVertexColorMode)
-            {
-            case GL_AMBIENT:
-                defineMap["colorMode"] = "3";
-                break;
-            default:
-            case GL_AMBIENT_AND_DIFFUSE:
-                defineMap["colorMode"] = "2";
-                break;
-            case GL_EMISSION:
-                defineMap["colorMode"] = "1";
-                break;
-            }
         }
 
         defineMap["forcePPL"] = mForcePerPixelLighting ? "1" : "0";
