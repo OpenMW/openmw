@@ -111,7 +111,6 @@ namespace DetourNavigator
             catch (const std::exception& e)
             {
                 DetourNavigator::log("AsyncNavMeshUpdater::process exception: ", e.what());
-                ::Log(Debug::Warning) << "Exception while process navmesh updated job: " << e.what();
             }
         }
         log("stop process jobs");
