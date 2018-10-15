@@ -63,7 +63,6 @@ namespace MWPhysics
 
     static const float sGroundOffset = 1.0f; // How far to float above the ground surface
     static const float sSafetyMargin = 0.5f; // How far to stay away from any geometry we collide with (so that we don't go slightly inside of it and end up with bad collision tracing data)
-    static const float sActorSafetyMargin = 0.5f; // makes it harder to shove actors by running/jumping into them (some kind of bug with bullet's cylinder-cylinder collision normals)
 
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
@@ -97,14 +96,6 @@ namespace MWPhysics
     static inline osg::Vec3f reject(const osg::Vec3f& direction, const osg::Vec3f &planeNormal)
     {
         return direction - project(direction, planeNormal);
-    }
-
-    static inline float pickSafetyMargin(const btCollisionObject *obj)
-    {
-        if(obj && isActor(obj))
-            return sActorSafetyMargin;
-        else
-            return sSafetyMargin;
     }
 
     static inline osg::Vec3f wallReject(const osg::Vec3f & velocity, osg::Vec3f & virtualNormal, const bool & onGround)
@@ -144,12 +135,11 @@ namespace MWPhysics
 
             mUpStepper.doTrace(mColObj, position, position+osg::Vec3f(0.0f,0.0f,sStepSizeUp), mColWorld);
 
-            float upMargin = pickSafetyMargin(mUpStepper.mHitObject);
             float upDistance = 0;
             if(!mUpStepper.mHitObject)
                 upDistance = sStepSizeUp;
-            else if(mUpStepper.mFraction*sStepSizeUp > upMargin)
-                upDistance = mUpStepper.mFraction*sStepSizeUp - upMargin;
+            else if(mUpStepper.mFraction*sStepSizeUp > sSafetyMargin)
+                upDistance = mUpStepper.mFraction*sStepSizeUp - sSafetyMargin;
             else
             {
                 return false;
@@ -193,29 +183,28 @@ namespace MWPhysics
                 }
 
                 mTracer.doTrace(mColObj, tracerPos, tracerDest, mColWorld);
-                float moveMargin = pickSafetyMargin(mTracer.mHitObject);
                 if(mTracer.mHitObject)
                 {
                     // map against what we hit, minus the safety margin
                     moveDistance *= mTracer.mFraction;
-                    if(moveDistance <= moveMargin) // didn't move enough to accomplish anything
+                    if(moveDistance <= sSafetyMargin) // didn't move enough to accomplish anything
                     {
                         return false;
                     }
 
-                    moveDistance -= moveMargin;
+                    moveDistance -= sSafetyMargin;
                     tracerDest = tracerPos + normalMove*moveDistance;
 
                     // safely eject from what we hit by the safety margin
-                    auto tempDest = tracerDest + mTracer.mPlaneNormal*moveMargin*2;
+                    auto tempDest = tracerDest + mTracer.mPlaneNormal*sSafetyMargin*2;
 
                     ActorTracer tempTracer;
                     tempTracer.doTrace(mColObj, tracerDest, tempDest, mColWorld);
 
-                    if(tempTracer.mFraction > 0.5f) // distance to any object is greater than moveMargin (we checked moveMargin*2 distance)
+                    if(tempTracer.mFraction > 0.5f) // distance to any object is greater than sSafetyMargin (we checked sSafetyMargin*2 distance)
                     {
                         auto effectiveFraction = tempTracer.mFraction*2.0f - 1.0f;
-                        tracerDest += mTracer.mPlaneNormal*moveMargin*effectiveFraction;
+                        tracerDest += mTracer.mPlaneNormal*sSafetyMargin*effectiveFraction;
                     }
                 }
 
@@ -488,22 +477,21 @@ namespace MWPhysics
 
                     // Stairstepping failed, need to advance to and slide across whatever we hit
 
-                    float traceMargin = pickSafetyMargin(tracer.mHitObject);
                     // advance if distance greater than safety margin
-                    if(moveDistance*tracer.mFraction > traceMargin)
+                    if(moveDistance*tracer.mFraction > sSafetyMargin)
                     {
                         // hack: if it is the case that we are on the ground and it's a steep unwalkable slope, stay even further away from it than normal
                         // this hides some of the movement solver's shortcomings
                         if(physicActor->getOnGround() && !physicActor->getOnSlope() && !isFlying
                             && (tracer.mPlaneNormal.x() != 0.0f || tracer.mPlaneNormal.y() != 0.0f)
                             && !isWalkableSlope(tracer.mPlaneNormal)
-                            && moveDistance*tracer.mFraction > 0.2f+traceMargin)
+                            && moveDistance*tracer.mFraction > 0.2f+sSafetyMargin)
                         {
-                            newPosition = tracer.mEndPos - normVelocity*(0.2f+traceMargin);
+                            newPosition = tracer.mEndPos - normVelocity*(0.2f+sSafetyMargin);
                         }
                         else
                         {
-                            newPosition = tracer.mEndPos - normVelocity*traceMargin;
+                            newPosition = tracer.mEndPos - normVelocity*sSafetyMargin;
                         }
                     }
                     // reduce remaining time to bounce around by how much we moved (ignoring the safety margin)
@@ -515,14 +503,13 @@ namespace MWPhysics
 
                     // eject from whatever we hit, along the normal of contact
                     // (this makes it so that numerical instability doesn't render the motion-directional safety margin moot when hugging walls)
-                    auto testPosition = newPosition + virtualNormal*traceMargin*2;
+                    auto testPosition = newPosition + virtualNormal*sSafetyMargin*2;
                     ActorTracer tempTracer;
                     tempTracer.doTrace(colobj, newPosition, testPosition, collisionWorld);
                     if(tempTracer.mHitObject)
                     {
-                        float otherMargin = pickSafetyMargin(tempTracer.mHitObject);
-                        float hitDistance = tempTracer.mFraction*traceMargin*2;
-                        hitDistance -= otherMargin;
+                        float hitDistance = tempTracer.mFraction*sSafetyMargin*2;
+                        hitDistance -= sSafetyMargin;
                         if(hitDistance > 0.0f)
                         {
                             newPosition += virtualNormal*hitDistance;
@@ -530,7 +517,7 @@ namespace MWPhysics
                     }
                     else
                     {
-                        newPosition += virtualNormal*traceMargin;
+                        newPosition += virtualNormal*sSafetyMargin;
                     }
 
                     // Do not allow sliding upward if we're walking or jumping on land.
