@@ -12,6 +12,7 @@
 namespace MWWorld
 {
     class CellStore;
+    class ConstPtr;
 }
 
 namespace MWMechanics
@@ -74,7 +75,7 @@ namespace MWMechanics
             void buildPathByPathgrid(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                 const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
 
-            void buildPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+            void buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                 const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
                 const DetourNavigator::Flags flags);
 
@@ -180,8 +181,8 @@ namespace MWMechanics
             void buildPathByPathgridImpl(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                 const PathgridGraph& pathgridGraph, std::back_insert_iterator<std::deque<osg::Vec3f>> out);
 
-            void buildPathByNavigatorImpl(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-                const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
+            void buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
+                const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
                 std::back_insert_iterator<std::deque<osg::Vec3f>> out);
     };
 }

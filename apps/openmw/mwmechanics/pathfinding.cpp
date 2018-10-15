@@ -12,6 +12,7 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/class.hpp"
 
 #include "pathgrid.hpp"
 #include "coordinateconverter.hpp"
@@ -275,14 +276,14 @@ namespace MWMechanics
         mConstructed = true;
     }
 
-    void PathFinder::buildPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+    void PathFinder::buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
         const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
         const DetourNavigator::Flags flags)
     {
         mPath.clear();
         mCell = cell;
 
-        buildPathByNavigatorImpl(startPoint, endPoint, halfExtents, flags, std::back_inserter(mPath));
+        buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, std::back_inserter(mPath));
 
         if (mPath.empty())
             buildPathByPathgridImpl(startPoint, endPoint, pathgridGraph, std::back_inserter(mPath));
@@ -290,8 +291,8 @@ namespace MWMechanics
         mConstructed = true;
     }
 
-    void PathFinder::buildPathByNavigatorImpl(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-        const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
+    void PathFinder::buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
+        const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
         std::back_insert_iterator<std::deque<osg::Vec3f>> out)
     {
         try
@@ -302,7 +303,10 @@ namespace MWMechanics
         catch (const DetourNavigator::NavigatorException& exception)
         {
             DetourNavigator::log("PathFinder::buildPathByNavigator navigator exception: ", exception.what());
-            Log(Debug::Warning) << "Build path by navigator exception: " << exception.what();
+            Log(Debug::Verbose) << "Build path by navigator exception: \"" << exception.what()
+                << "\" for \"" << actor.getClass().getName(actor) << "\" (" << actor.getBase()
+                << ") from " << startPoint << " to " << endPoint << " with flags ("
+                << DetourNavigator::WriteFlags {flags} << ")";
         }
     }
 }

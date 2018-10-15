@@ -161,8 +161,8 @@ namespace MWMechanics
             {
                 const auto world = MWBase::Environment::get().getWorld();
                 const auto playerHalfExtents = world->getHalfExtents(world->getPlayerPtr());
-                mPathFinder.buildPath(pos.asVec3(), mDestination, actor.getCell(), getPathGridGraph(actor.getCell()),
-                    playerHalfExtents, getNavigatorFlags(actor));
+                mPathFinder.buildPath(actor, pos.asVec3(), mDestination, actor.getCell(),
+                    getPathGridGraph(actor.getCell()), playerHalfExtents, getNavigatorFlags(actor));
             }
 
             if (mPathFinder.isPathConstructed())
@@ -323,7 +323,7 @@ namespace MWMechanics
             {
                 const auto world = MWBase::Environment::get().getWorld();;
                 const auto playerHalfExtents = world->getHalfExtents(world->getPlayerPtr());
-                mPathFinder.buildPath(currentPosition, destinationPosition, actor.getCell(),
+                mPathFinder.buildPath(actor, currentPosition, destinationPosition, actor.getCell(),
                     getPathGridGraph(actor.getCell()), playerHalfExtents, getNavigatorFlags(actor));
                 mPathFinder.addPointToPath(destinationPosition);
 

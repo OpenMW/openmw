@@ -140,7 +140,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
             if (wasShortcutting || doesPathNeedRecalc(dest, actor.getCell())) // if need to rebuild path
             {
                 const auto playerHalfExtents = world->getHalfExtents(world->getPlayerPtr());
-                mPathFinder.buildPath(position, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
+                mPathFinder.buildPath(actor, position, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
                     playerHalfExtents, getNavigatorFlags(actor));
                 mRotateOnTheRunChecks = 3;
 
