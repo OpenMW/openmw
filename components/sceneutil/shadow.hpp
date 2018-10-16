@@ -16,7 +16,7 @@ namespace SceneUtil
     public:
         static void disableShadowsForStateSet(osg::ref_ptr<osg::StateSet> stateSet);
 
-        ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask);
+        ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, Shader::ShaderManager &shaderManager);
 
         virtual ~ShadowManager() = default;
 

@@ -27,6 +27,7 @@
 
 #include <osgShadow/ShadowTechnique>
 
+#include <components/shader/shadermanager.hpp>
 #include <components/terrain/quadtreeworld.hpp>
 
 namespace SceneUtil {
@@ -72,6 +73,8 @@ namespace SceneUtil {
         virtual void setSplitPointUniformLogarithmicRatio(double ratio);
 
         virtual void setSplitPointDeltaBias(double bias);
+
+        virtual void setupCastingShader(Shader::ShaderManager &shaderManager);
 
         class ComputeLightSpaceBounds : public osg::NodeVisitor, public osg::CullStack
         {
@@ -265,6 +268,7 @@ namespace SceneUtil {
         };
 
         osg::ref_ptr<DebugHUD>                  _debugHud;
+        osg::ref_ptr<osg::Program>              _castingProgram;
     };
 
 }

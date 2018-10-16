@@ -1249,6 +1249,7 @@ namespace NifOsg
                 boundTextures.clear();
             }
 
+            // If this loop is changed such that the base texture isn't guaranteed to end up in texture unit 0, the shadow casting shader will need to be updated accordingly.
             for (int i=0; i<Nif::NiTexturingProperty::NumTextures; ++i)
             {
                 if (texprop->textures[i].inUse)

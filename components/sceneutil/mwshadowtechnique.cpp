@@ -820,6 +820,16 @@ void SceneUtil::MWShadowTechnique::setSplitPointDeltaBias(double bias)
     _splitPointDeltaBias = bias;
 }
 
+void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & shaderManager)
+{
+    // This can't be part of the constructor as OSG mandates that there be a trivial constructor available
+    
+    _castingProgram = new osg::Program();
+
+    _castingProgram->addShader(shaderManager.getShader("shadowcasting_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::VERTEX));
+    _castingProgram->addShader(shaderManager.getShader("shadowcasting_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::FRAGMENT));
+}
+
 MWShadowTechnique::ViewDependentData* MWShadowTechnique::createViewDependentData(osgUtil::CullVisitor* /*cv*/)
 {
     return new ViewDependentData(this);
@@ -1480,6 +1490,14 @@ void MWShadowTechnique::createShaders()
         _fallbackShadowMapTexture->setFilter(osg::Texture2D::MAG_FILTER,osg::Texture2D::NEAREST);
 
     }
+
+    if (!_castingProgram)
+        OSG_NOTICE << "Shadow casting shader has not been set up. Remember to call setupCastingShader(Shader::ShaderManager &)" << std::endl;
+
+    _shadowCastingStateSet->setAttributeAndModes(_castingProgram, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+    // The casting program uses a sampler, so to avoid undefined behaviour, we must bind a dummy texture in case no other is supplied
+    _shadowCastingStateSet->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
+    _shadowCastingStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
 }
 
 osg::Polytope MWShadowTechnique::computeLightViewFrustumPolytope(Frustum& frustum, LightData& positionedLight)

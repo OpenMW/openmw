@@ -68,7 +68,7 @@ namespace SceneUtil
             stateset->setTextureAttributeAndModes(i, fakeShadowMapTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
     }
 
-    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask) : mShadowedScene(new osgShadow::ShadowedScene),
+    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, Shader::ShaderManager &shaderManager) : mShadowedScene(new osgShadow::ShadowedScene),
         mShadowTechnique(new MWShadowTechnique),
         mOutdoorShadowCastingMask(outdoorShadowCastingMask),
         mIndoorShadowCastingMask(indoorShadowCastingMask)
@@ -80,6 +80,8 @@ namespace SceneUtil
 
         mShadowSettings = mShadowedScene->getShadowSettings();
         setupShadowSettings();
+
+        mShadowTechnique->setupCastingShader(shaderManager);
 
         enableOutdoorMode();
     }
