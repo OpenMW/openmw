@@ -181,19 +181,19 @@ void Launcher::GraphicsPage::saveSettings()
 	
     bool cDistantTerrain = distantTerrainCheckBox->checkState();
     if (cDistantTerrain != mEngineSettings.getBool("distant terrain", "Terrain"))
-	mEngineSettings.setBool("distant terrain", "Terrain", cDistantTerrain);
+	    mEngineSettings.setBool("distant terrain", "Terrain", cDistantTerrain);
     
     float cViewingDistance = viewingDistanceSpinBox->value();
     if (cViewingDistance != mEngineSettings.getFloat("viewing distance", "Camera"))
-	mEngineSettings.setFloat("viewing distance", "Camera", cViewingDistance);
+	    mEngineSettings.setFloat("viewing distance", "Camera", cViewingDistance);
     
     bool cSmallFeatureCulling = smallFeatureCullingCheckBox->checkState();
     if (cSmallFeatureCulling != mEngineSettings.getBool("small feature culling", "Camera"))
-	mEngineSettings.setBool("small feature culling", "Camera", cSmallFeatureCulling);
+	    mEngineSettings.setBool("small feature culling", "Camera", cSmallFeatureCulling);
     
     float cSmallFeatureCullingPixelSize = smallFeatureCullingPixelSizeSpinBox->value();
     if (cSmallFeatureCullingPixelSize != mEngineSettings.getFloat("small feature culling pixel size", "Camera"))
-	mEngineSettings.setFloat("small feature culling pixel size", "Camera", cSmallFeatureCullingPixelSize);
+	    mEngineSettings.setFloat("small feature culling pixel size", "Camera", cSmallFeatureCullingPixelSize);
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
