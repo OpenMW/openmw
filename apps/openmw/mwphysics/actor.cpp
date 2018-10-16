@@ -40,7 +40,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
         vertices[5]  = btVector3(-eir, -1.0,  1.0);
         vertices[6]  = btVector3( eir, -1.0,  1.0);
         vertices[7]  = btVector3( 1.0, -eir,  1.0);
-        inited_octagon = false;
+        inited_octagon = true;
     }
     
     auto tempshape = new btConvexHullShape();
