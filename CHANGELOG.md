@@ -134,6 +134,7 @@
     Bug #4649: Levelup fully restores health
     Bug #4653: Length of non-ASCII strings is handled incorrectly in ESM reader
     Bug #4654: Editor: UpdateVisitor does not initialize skeletons for animated objects
+    Bug #4656: Combat AI: back up behaviour is incorrect
     Bug #4668: Editor: Light source color is displayed as an integer
     Bug #4669: ToggleCollision should trace the player down after collision being enabled
     Bug #4671: knownEffect functions should use modified Alchemy skill

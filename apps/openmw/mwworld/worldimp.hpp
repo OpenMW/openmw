@@ -402,8 +402,10 @@ namespace MWWorld
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
-            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreDoors=false) override;
+            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, int mask) override;
             ///< cast a Ray and return true if there is an object in the ray path.
+
+            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) override;
 
             bool toggleCollisionMode() override;
             ///< Toggle collision mode for player. If disabled player object should ignore
