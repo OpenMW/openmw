@@ -1,7 +1,6 @@
 #include "actor.hpp"
 
-#include <BulletCollision/CollisionShapes/btCylinderShape.h>
-#include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -11,7 +10,6 @@
 
 #include "convert.hpp"
 #include "collisiontype.hpp"
-
 namespace MWPhysics
 {
 
@@ -28,39 +26,46 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     mHalfExtents = shape->mCollisionBoxHalfExtents;
     mMeshTranslation = shape->mCollisionBoxTranslate;
 
-    // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
-    if (std::abs(mHalfExtents.x()-mHalfExtents.y())<mHalfExtents.x()*0.05 && mHalfExtents.z() >= mHalfExtents.x())
+    // the ratio between the side length and inradius of a regular octagon is 2tan(pi/8), which is equivalent to 2(sqrt(2)-1)
+    static const double eir = 0.4142135623730951454746218587388284504413604736328125; // edge inradius ratio, divided by two.
+    static bool inited_octagon = false;
+    static btVector3 vertices[8];
+    if(!inited_octagon)
     {
-        // There are basically four shapes that are sensible to use for actor collisions.
-        // - 1: Axis-Aligned Bounding Boxes, or AABBs. These are what vanilla Morrowind uses.
-        // They make world geometry seem to collide differently at different angles, e.g. it's easier to hit the sides of 45 degree hallways.
-        // - 2: Cylinders. These are like AABBs, flat on the bottom and the sides, but colliding with rotated objects at the same local angle is always basically the same, precision excepted.
-        // Bullet seems to give bad normals for cylinder collisions sometimes. This is mostly avoided or worked around, but for cylinder-cylinder collisions
-        // it can trigger a weird bug that makes it so you can shove actors by jumping against them over and over.
-        // - 3: Rounded cylinders. Bullet can actually do these, but they perform very badly and don't render properly in debug collision wireframe rendering.
-        // These don't have the bad normals problem that cylinders have, at least at a high enough rounding, but again, they perform very badly.
-        // - 4: Capsules. These are touted as some kind of pancea, and they'd be good for total conversions, but they break vanilla Morrowind level design.
-
-        // It's true that Vanilla uses AABBs, but there's nowhere that would be SIGNIFICANTLY different from vanilla when using cylinders instead. Capsules, on the other hand, break some staircases.
-        // See https://gitlab.com/OpenMW/openmw/issues/4247 for more details.
-
-        // Also, vanilla's movement solver is kind of screwed up in the first place, so a good movement solver is always going to be different anyway, even if it used AABBs.
-        // An example of this is how some meshes you're supposed to step onto easily actually have tiny steep slopes at their starts. Vanilla just goes inside them then steps onto them.
-        // OpenMW can't go into them. That would be bad.
-        // AABBs and cylinders fail to slide onto them, getting stuck on the steep edge.
-        // Capsules would let the player slide onto them, because of the tapered bottom, but capsules also break OTHER, more obvious/important vanilla level design examples, BECAUSE of the tapered bottom.
-
-        // Cylinders are the best compromise for an actor collision hull shape.
-        // It might be nice to allow content files to choose between cylinders and capsules in the future, probably as a part of post-1.0 dehardcoding.
-
-        mShape.reset(new btCylinderShapeZ(btVector3(mHalfExtents.x(), mHalfExtents.x(), mHalfExtents.z())));
-        mRotationallyInvariant = true;
+        vertices[0]  = btVector3( 1.0,  eir,  1.0);
+        vertices[1]  = btVector3( eir,  1.0,  1.0);
+        vertices[2]  = btVector3(-eir,  1.0,  1.0);
+        vertices[3]  = btVector3(-1.0,  eir,  1.0);
+        vertices[4]  = btVector3(-1.0, -eir,  1.0);
+        vertices[5]  = btVector3(-eir, -1.0,  1.0);
+        vertices[6]  = btVector3( eir, -1.0,  1.0);
+        vertices[7]  = btVector3( 1.0, -eir,  1.0);
+        inited_octagon = false;
     }
-    else
+    
+    auto tempshape = new btConvexHullShape();
+    
+    // we need to fill in the points in a special order to make the debug rendering of the mesh look good
+    // fill in the side edges and top rim
+    for(int i = 0; i < 8; i++)
     {
-        mShape.reset(new btBoxShape(toBullet(mHalfExtents)));
-        mRotationallyInvariant = false;
+        auto vertex = vertices[i] * toBullet(mHalfExtents);
+        tempshape->addPoint(vertex);
+        tempshape->addPoint(vertex * btVector3(1,1,-1));
+        tempshape->addPoint(vertex); // don't make a triangle shape; also causes the top rim to form
     }
+    // fill in first top point again to prevent crossover and finish the rim
+    tempshape->addPoint(vertices[0] * toBullet(mHalfExtents));
+    for(int i = 0; i < 8; i++)
+    {
+        auto vertex = vertices[i] * toBullet(mHalfExtents);
+        tempshape->addPoint(vertex * btVector3(1,1,-1));
+    }
+    // fill in first bottom point again to prevent crossover and finish the rim
+    tempshape->addPoint(vertices[0] * toBullet(mHalfExtents) * btVector3(1,1,-1));
+
+    mShape.reset(tempshape);
+    mRotationallyInvariant = true;
 
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
 
@@ -70,7 +75,6 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     mCollisionObject->setCollisionShape(mShape.get());
     mCollisionObject->setUserPointer(static_cast<PtrHolder*>(this));
 
-    updateRotation();
     updateScale();
     updatePosition();
 
