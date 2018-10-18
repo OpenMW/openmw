@@ -44,8 +44,8 @@ Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, Settings:
     connect(fullScreenCheckBox, SIGNAL(stateChanged(int)), this, SLOT(slotFullScreenChanged(int)));
     connect(standardRadioButton, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
     connect(screenComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(screenChanged(int)));
-	connect(distantTerrainCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotDistantTerrainChanged(bool)));
-	connect(smallFeatureCullingCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotSmallFeatureCullingChanged(bool)));
+    connect(distantTerrainCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotDistantTerrainChanged(bool)));
+    connect(smallFeatureCullingCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotSmallFeatureCullingChanged(bool)));
 }
 
 bool Launcher::GraphicsPage::setupSDL()
