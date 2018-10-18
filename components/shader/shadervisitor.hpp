@@ -81,6 +81,8 @@ namespace Shader
 
             bool mShaderRequired;
 
+            int mColorMode;
+            
             bool mMaterialOverridden;
             bool mNormalHeight; // true if normal map has height info in alpha channel
 

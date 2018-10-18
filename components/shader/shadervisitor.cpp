@@ -23,6 +23,7 @@ namespace Shader
 
     ShaderVisitor::ShaderRequirements::ShaderRequirements()
         : mShaderRequired(false)
+        , mColorMode(2)
         , mMaterialOverridden(false)
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
@@ -257,7 +258,7 @@ namespace Shader
                         break;
                     }
 
-                    writableStateSet->addUniform(new osg::Uniform("colorMode", colorMode));
+                    mRequirements.back().mColorMode = colorMode;
                 }
             }
         }
@@ -302,6 +303,8 @@ namespace Shader
         defineMap["clamp"] = mClampLighting ? "1" : "0";
 
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
+
+        writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));
 
         osg::ref_ptr<osg::Shader> vertexShader (mShaderManager.getShader(mDefaultVsTemplate, defineMap, osg::Shader::VERTEX));
         osg::ref_ptr<osg::Shader> fragmentShader (mShaderManager.getShader(mDefaultFsTemplate, defineMap, osg::Shader::FRAGMENT));
