@@ -130,6 +130,7 @@
     Bug #4633: Sneaking stance affects speed even if the actor is not able to crouch
     Bug #4641: GetPCJumping is handled incorrectly
     Bug #4644: %Name should be available for all actors, not just for NPCs
+    Bug #4646: Weapon force-equipment messes up ongoing attack animations
     Bug #4648: Hud thinks that throwing weapons have condition
     Bug #4649: Levelup fully restores health
     Bug #4653: Length of non-ASCII strings is handled incorrectly in ESM reader
