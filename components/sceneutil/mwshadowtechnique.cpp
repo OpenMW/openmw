@@ -1498,6 +1498,10 @@ void MWShadowTechnique::createShaders()
     // The casting program uses a sampler, so to avoid undefined behaviour, we must bind a dummy texture in case no other is supplied
     _shadowCastingStateSet->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
     _shadowCastingStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
+
+    // TODO: figure out if there's some way to disable depth sorting for translucent objects as we don't care about blending.
+    // TODO: compare performance when alpha testing is handled here versus using a discard in the fragment shader
+    // TODO: compare performance when we set a bunch of GL state to the default here with OVERRIDE set so that there are fewer pointless state switches
 }
 
 osg::Polytope MWShadowTechnique::computeLightViewFrustumPolytope(Frustum& frustum, LightData& positionedLight)
