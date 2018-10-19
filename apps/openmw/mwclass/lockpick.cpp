@@ -1,6 +1,7 @@
 #include "lockpick.hpp"
 
 #include <components/esm/loadlock.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -33,6 +34,15 @@ namespace MWClass
     void Lockpick::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
         // TODO: add option somewhere to enable collision for placeable objects
+        if (!model.empty())
+        {
+            if (Settings::Manager::getBool("lockpick collision", "Collision"))
+            {
+                physics.addObject(ptr, model, MWPhysics::CollisionType_Actor);
+            } else {
+                physics.addObject(ptr, model, MWPhysics::CollisionType_World);
+            }
+        }
     }
 
     std::string Lockpick::getModel(const MWWorld::ConstPtr &ptr) const
