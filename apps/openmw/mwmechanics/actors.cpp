@@ -501,12 +501,6 @@ namespace MWMechanics
         }
     }
 
-    void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration)
-    {
-        updateDrowning(ptr, duration);
-        calculateNpcStatModifiers(ptr, duration);
-    }
-
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
     {
         CreatureStats& creatureStats =  creature.getClass().getCreatureStats (creature);
@@ -551,10 +545,10 @@ namespace MWMechanics
 
     void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, bool sleep)
     {
-        if (ptr.getClass().getCreatureStats(ptr).isDead())
+        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
+        if (stats.isDead())
             return;
 
-        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
         const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         if (sleep)
@@ -571,12 +565,6 @@ namespace MWMechanics
             stats.setMagicka(stat);
         }
 
-        int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
-
-        float normalizedEncumbrance = ptr.getClass().getNormalizedEncumbrance(ptr);
-        if (normalizedEncumbrance > 1)
-            normalizedEncumbrance = 1;
- 
         // Current fatigue can be above base value due to a fortify effect.
         // In that case stop here and don't try to restore.
         DynamicStat<float> fatigue = stats.getFatigue();
@@ -587,6 +575,12 @@ namespace MWMechanics
         float fFatigueReturnBase = settings.find("fFatigueReturnBase")->mValue.getFloat ();
         float fFatigueReturnMult = settings.find("fFatigueReturnMult")->mValue.getFloat ();
         float fEndFatigueMult = settings.find("fEndFatigueMult")->mValue.getFloat ();
+
+        int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+
+        float normalizedEncumbrance = ptr.getClass().getNormalizedEncumbrance(ptr);
+        if (normalizedEncumbrance > 1)
+            normalizedEncumbrance = 1;
 
         float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
         x *= fEndFatigueMult * endurance;
@@ -926,13 +920,8 @@ namespace MWMechanics
         return ctrl->isSneaking();
     }
 
-    void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
+    void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration, bool isKnockedOut, bool isPlayer)
     {
-        PtrActorMap::iterator it = mActors.find(ptr);
-        if (it == mActors.end())
-            return;
-        CharacterController* ctrl = it->second->getCharacterController();
-
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
 
         // When npc stats are just initialized, mTimeToStartDrowning == -1 and we should get value from GMST
@@ -940,9 +929,10 @@ namespace MWMechanics
         if (stats.getTimeToStartDrowning() == -1.f)
             stats.setTimeToStartDrowning(fHoldBreathTime);
 
-        if (ptr.getClass().isNpc() && stats.getTimeToStartDrowning() < fHoldBreathTime / 2)
+        if (stats.getTimeToStartDrowning() < fHoldBreathTime / 2)
         {
-            if(ptr != MWMechanics::getPlayer() ) {
+            if(!isPlayer)
+            {
                 MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
                 if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdBreathe) //Only add it once
                     seq.stack(MWMechanics::AiBreathe(), ptr);
@@ -950,7 +940,7 @@ namespace MWMechanics
         }
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
+        bool knockedOutUnderwater = (isKnockedOut && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
         if((world->isSubmerged(ptr) || knockedOutUnderwater)
            && stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
         {
@@ -965,7 +955,7 @@ namespace MWMechanics
                 stats.setTimeToStartDrowning(timeLeft);
             }
 
-            bool godmode = ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+            bool godmode = isPlayer && MWBase::Environment::get().getWorld()->getGodModeState();
 
             if(timeLeft == 0.0f && !godmode)
             {
@@ -980,7 +970,7 @@ namespace MWMechanics
                 if(!sndmgr->getSoundPlaying(ptr, "drown"))
                     sndmgr->playSound3D(ptr, "drown", 1.0f, 1.0f);
 
-                if(ptr == world->getPlayerPtr())
+                if(isPlayer)
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
             }
         }
@@ -1242,21 +1232,24 @@ namespace MWMechanics
     void Actors::updateCombatMusic ()
     {
         MWWorld::Ptr player = getPlayer();
-        int hostilesCount = 0; // need to know this to play Battle music
+        const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
+        bool hasHostiles = false; // need to know this to play Battle music
+        bool aiActive = MWBase::Environment::get().getMechanicsManager()->isAIActive();
 
-        for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+        if (aiActive)
         {
-            if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
+            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
-                bool inProcessingRange = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2()
-                        <= sqrAiProcessingDistance;
+                if (iter->first == player) continue;
 
-                if (MWBase::Environment::get().getMechanicsManager()->isAIActive() && inProcessingRange)
+                bool inProcessingRange = (playerPos - iter->first.getRefData().getPosition().asVec3()).length2() <= sqrAiProcessingDistance;
+                if (inProcessingRange)
                 {
-                    if (iter->first != player)
+                    MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
+                    if (!stats.isDead() && stats.getAiSequence().isInCombat())
                     {
-                        MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
-                        if (stats.getAiSequence().isInCombat() && !stats.isDead()) hostilesCount++;
+                        hasHostiles = true;
+                        break;
                     }
                 }
             }
@@ -1265,13 +1258,13 @@ namespace MWMechanics
         // check if we still have any player enemies to switch music
         static int currentMusic = 0;
 
-        if (currentMusic != 1 && hostilesCount == 0 && !(player.getClass().getCreatureStats(player).isDead() &&
+        if (currentMusic != 1 && !hasHostiles && !(player.getClass().getCreatureStats(player).isDead() &&
         MWBase::Environment::get().getSoundManager()->isMusicPlaying()))
         {
             MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
             currentMusic = 1;
         }
-        else if (currentMusic != 2 && hostilesCount > 0)
+        else if (currentMusic != 2 && hasHostiles)
         {
             MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Battle"));
             currentMusic = 2;
@@ -1298,17 +1291,29 @@ namespace MWMechanics
             bool showTorches = MWBase::Environment::get().getWorld()->useTorches();
 
             MWWorld::Ptr player = getPlayer();
+            const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
 
             /// \todo move update logic to Actor class where appropriate
 
             std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> > cachedAllies; // will be filled as engageCombat iterates
 
+            bool aiActive = MWBase::Environment::get().getMechanicsManager()->isAIActive();
+            int attackedByPlayerId = player.getClass().getCreatureStats(player).getHitAttemptActorId();
+            if (attackedByPlayerId != -1)
+            {
+                const MWWorld::Ptr playerHitAttemptActor = MWBase::Environment::get().getWorld()->searchPtrViaActorId(attackedByPlayerId);
+
+                if (!playerHitAttemptActor.isInCell())
+                    player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
+            }
+
              // AI and magic effects update
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 bool isPlayer = iter->first == player;
+                CharacterController* ctrl = iter->second->getCharacterController();
 
-                float distSqr = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2();
+                float distSqr = (playerPos - iter->first.getRefData().getPosition().asVec3()).length2();
                 // AI processing is only done within distance of 7168 units to the player. Note the "AI distance" slider doesn't affect this
                 // (it only does some throttling for targets beyond the "AI distance", so doesn't give any guarantees as to whether AI will be enabled or not)
                 // This distance could be made configurable later, but the setting must be marked with a big warning:
@@ -1316,7 +1321,7 @@ namespace MWMechanics
                 bool inProcessingRange = distSqr <= sqrAiProcessingDistance;
 
                 if (isPlayer)
-                    iter->second->getCharacterController()->setAttackingOrSpell(MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell());
+                    ctrl->setAttackingOrSpell(MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell());
 
                 // If dead or no longer in combat, no longer store any actors who attempted to hit us. Also remove for the player.
                 if (iter->first != player && (iter->first.getClass().getCreatureStats(iter->first).isDead()
@@ -1328,11 +1333,6 @@ namespace MWMechanics
                         player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
                 }
 
-                const MWWorld::Ptr playerHitAttemptActor = MWBase::Environment::get().getWorld()->searchPtrViaActorId(player.getClass().getCreatureStats(player).getHitAttemptActorId());
-
-                if (!playerHitAttemptActor.isInCell())
-                    player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
-
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {
                     bool cellChanged = MWBase::Environment::get().getWorld()->hasCellChanged();
@@ -1343,7 +1343,7 @@ namespace MWMechanics
                         return; // for now abort update of the old cell when cell changes by teleportation magic effect
                                 // a better solution might be to apply cell changes at the end of the frame
                     }
-                    if (MWBase::Environment::get().getMechanicsManager()->isAIActive() && inProcessingRange)
+                    if (aiActive && inProcessingRange)
                     {
                         if (timerUpdateAITargets == 0)
                         {
@@ -1381,7 +1381,7 @@ namespace MWMechanics
                                 }
                             }
 
-                            iter->second->getCharacterController()->setHeadTrackTarget(headTrackTarget);
+                            ctrl->setHeadTrackTarget(headTrackTarget);
                         }
 
                         if (iter->first.getClass().isNpc() && iter->first != player)
@@ -1391,13 +1391,14 @@ namespace MWMechanics
                         {
                             CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
                             if (isConscious(iter->first))
-                                stats.getAiSequence().execute(iter->first, *iter->second->getCharacterController(), duration);
+                                stats.getAiSequence().execute(iter->first, *ctrl, duration);
                         }
                     }
 
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())
                     {
-                        updateNpc(iter->first, duration);
+                        updateDrowning(iter->first, duration, ctrl->isKnockedOut(), isPlayer);
+                        calculateNpcStatModifiers(iter->first, duration);
 
                         if (timerUpdateEquippedLight == 0)
                             updateEquippedLight(iter->first, updateEquippedLightInterval, showTorches);
@@ -1419,11 +1420,11 @@ namespace MWMechanics
                 iter->second->getCharacterController()->updateContinuousVfx();
 
             // Animation/movement update
-            CharacterController* playerCharacter = NULL;
+            CharacterController* playerCharacter = nullptr;
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 const float animationDistance = aiProcessingDistance + 400; // Slightly larger than AI distance so there is time to switch back to the idle animation.
-                const float distSqr = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2();
+                const float distSqr = (playerPos - iter->first.getRefData().getPosition().asVec3()).length2();
                 bool isPlayer = iter->first == player;
                 bool inAnimationRange = isPlayer || (animationDistance == 0 || distSqr <= animationDistance*animationDistance);
                 int activeFlag = 1; // Can be changed back to '2' to keep updating bounding boxes off screen (more accurate, but slower)
@@ -1437,22 +1438,24 @@ namespace MWMechanics
                     inAnimationRange = true;
                     active = std::max(1, active);
                 }
-                iter->second->getCharacterController()->setActive(active);
+
+                CharacterController* ctrl = iter->second->getCharacterController();
+                ctrl->setActive(active);
 
                 if (!inAnimationRange)
                     continue;
 
                 if (iter->first.getClass().getCreatureStats(iter->first).isParalyzed())
-                    iter->second->getCharacterController()->skipAnim();
+                    ctrl->skipAnim();
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
                 // (would invalidate the iterator)
                 if (iter->first == getPlayer())
                 {
-                    playerCharacter = iter->second->getCharacterController();
+                    playerCharacter = ctrl;
                     continue;
                 }
-                iter->second->getCharacterController()->update(duration);
+                ctrl->update(duration);
             }
 
             if (playerCharacter)
@@ -1512,7 +1515,7 @@ namespace MWMechanics
                             continue;
 
                         // is the player in range and can they be detected
-                        if ((observer.getRefData().getPosition().asVec3() - player.getRefData().getPosition().asVec3()).length2() <= radius*radius
+                        if ((observer.getRefData().getPosition().asVec3() - playerPos).length2() <= radius*radius
                             && MWBase::Environment::get().getWorld()->getLOS(player, observer))
                         {
                             if (MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, observer))
@@ -1656,17 +1659,19 @@ namespace MWMechanics
     void Actors::rest(bool sleep)
     {
         float duration = 3600.f / MWBase::Environment::get().getWorld()->getTimeScaleFactor();
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
 
         for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
         {
             if (iter->first.getClass().getCreatureStats(iter->first).isDead())
                 continue;
 
-            restoreDynamicStats(iter->first, sleep);
+            if (!sleep || iter->first == player)
+                restoreDynamicStats(iter->first, sleep);
 
             if ((!iter->first.getRefData().getBaseNode()) ||
-                    (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2() > sqrAiProcessingDistance)
+                    (playerPos - iter->first.getRefData().getPosition().asVec3()).length2() > sqrAiProcessingDistance)
                 continue;
 
             adjustMagicEffects (iter->first);
@@ -1679,7 +1684,10 @@ namespace MWMechanics
 
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(iter->first);
             if (animation)
-                animation->updateEffects();
+            {
+                animation->removeEffects();
+                MWBase::Environment::get().getWorld()->applyLoopingParticles(iter->first);
+            }
 
         }
 
@@ -1979,7 +1987,7 @@ namespace MWMechanics
         for (; it != mActors.end(); ++it)
         {
             delete it->second;
-            it->second = NULL;
+            it->second = nullptr;
         }
         mActors.clear();
         mDeathCount.clear();

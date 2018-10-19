@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/constants.hpp>
 #include <components/vfs/manager.hpp>
 
 #include <OpenThreads/Thread>
@@ -33,10 +34,6 @@
 
 namespace
 {
-
-// The game uses 64 units per yard, or approximately 69.99125109 units per meter.
-// Should this be defined publically somewhere?
-const float UnitsPerMeter = 69.99125109f;
 
 const int sLoudnessFPS = 20; // loudness values per second of audio
 
@@ -575,10 +572,10 @@ std::vector<std::string> OpenAL_Output::enumerate()
     std::vector<std::string> devlist;
     const ALCchar *devnames;
 
-    if(alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT"))
-        devnames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+    if(alcIsExtensionPresent(nullptr, "ALC_ENUMERATE_ALL_EXT"))
+        devnames = alcGetString(nullptr, ALC_ALL_DEVICES_SPECIFIER);
     else
-        devnames = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+        devnames = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
     while(devnames && *devnames)
     {
         devlist.push_back(devnames);
@@ -818,13 +815,13 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
             LoadEffect(mWaterEffect, EFX_REVERB_PRESET_UNDERWATER);
         }
 
-        alListenerf(AL_METERS_PER_UNIT, 1.0f / UnitsPerMeter);
+        alListenerf(AL_METERS_PER_UNIT, 1.0f / Constants::UnitsPerMeter);
     }
 skip_efx:
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-    // Speed of sound is in units per second. Given the default speed of sound is 343.3 (assumed
+    // Speed of sound is in units per second. Take the sound speed in air (assumed
     // meters per second), multiply by the units per meter to get the speed in u/s.
-    alSpeedOfSound(343.3f * UnitsPerMeter);
+    alSpeedOfSound(Constants::SoundSpeedInAir * Constants::UnitsPerMeter);
     alGetError();
 
     mInitialized = true;
@@ -1400,8 +1397,7 @@ void OpenAL_Output::updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdi
 
         if(env != mListenerEnv)
         {
-            // Speed of sound in water is 1484m/s, and in air is 343.3m/s (roughly)
-            alSpeedOfSound(((env == Env_Underwater) ? 1484.0f : 343.3f) * UnitsPerMeter);
+            alSpeedOfSound(((env == Env_Underwater) ? Constants::SoundSpeedUnderwater : Constants::SoundSpeedInAir) * Constants::UnitsPerMeter);
 
             // Update active sources with the environment's direct filter
             if(mWaterFilter)
@@ -1483,7 +1479,8 @@ void OpenAL_Output::resumeSounds(int types)
 
 
 OpenAL_Output::OpenAL_Output(SoundManager &mgr)
-  : Sound_Output(mgr), mDevice(0), mContext(0)
+  : Sound_Output(mgr)
+  , mDevice(0), mContext(0)
   , mListenerPos(0.0f, 0.0f, 0.0f), mListenerEnv(Env_Normal)
   , mWaterFilter(0), mWaterEffect(0), mDefaultEffect(0), mEffectSlot(0)
   , mStreamThread(new StreamThread)

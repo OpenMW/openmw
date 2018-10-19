@@ -29,15 +29,13 @@ int CSVRender::InstanceMode::getSubModeFromId (const std::string& id) const
 
 osg::Vec3f CSVRender::InstanceMode::quatToEuler(const osg::Quat& rot) const
 {
-    const float Pi = 3.14159265f;
-
     float x, y, z;
     float test = 2 * (rot.w() * rot.y() + rot.x() * rot.z());
 
     if (std::abs(test) >= 1.f)
     {
         x = atan2(rot.x(), rot.w());
-        y = (test > 0) ? (Pi / 2) : (-Pi / 2);
+        y = (test > 0) ? (osg::PI / 2) : (-osg::PI / 2);
         z = 0;
     }
     else

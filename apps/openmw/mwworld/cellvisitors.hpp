@@ -17,7 +17,7 @@ namespace MWWorld
         {
             if (ptr.getRefData().getBaseNode())
             {
-                ptr.getRefData().setBaseNode(NULL);
+                ptr.getRefData().setBaseNode(nullptr);
                 mObjects.push_back (ptr);
             }
 

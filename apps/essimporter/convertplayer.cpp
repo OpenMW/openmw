@@ -1,5 +1,6 @@
 #include "convertplayer.hpp"
 
+#include <components/misc/constants.hpp>
 #include <components/misc/stringops.hpp>
 
 namespace ESSImport
@@ -78,9 +79,8 @@ namespace ESSImport
 
         if (pcdt.mHasENAM)
         {
-            const int cellSize = 8192;
-            out.mLastKnownExteriorPosition[0] = (pcdt.mENAM.mCellX + 0.5f) * cellSize;
-            out.mLastKnownExteriorPosition[1] = (pcdt.mENAM.mCellY + 0.5f) * cellSize;
+            out.mLastKnownExteriorPosition[0] = (pcdt.mENAM.mCellX + 0.5f) * Constants::CellSizeInUnits;
+            out.mLastKnownExteriorPosition[1] = (pcdt.mENAM.mCellY + 0.5f) * Constants::CellSizeInUnits;
             out.mLastKnownExteriorPosition[2] = 0.0f;
         }
     }

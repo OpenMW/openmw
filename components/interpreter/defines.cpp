@@ -138,7 +138,7 @@ namespace Interpreter{
                             retval << context.getNPCRace();
                         }
                         else if((found = check(temp, "name", &i, &start))){
-                            retval << context.getNPCName();
+                            retval << context.getActorName();
                         }
                     }
                     else { // In messagebox or book, not dialogue

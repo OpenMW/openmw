@@ -1,16 +1,15 @@
 #include "birthsigncheck.hpp"
 
-#include <sstream>
-#include <map>
-
-#include <components/esm/loadbsgn.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../prefs/state.hpp"
 
 #include "../world/universalid.hpp"
 
-CSMTools::BirthsignCheckStage::BirthsignCheckStage (const CSMWorld::IdCollection<ESM::BirthSign>& birthsigns)
-: mBirthsigns (birthsigns)
+CSMTools::BirthsignCheckStage::BirthsignCheckStage (const CSMWorld::IdCollection<ESM::BirthSign>& birthsigns,
+                                                    const CSMWorld::Resources &textures)
+: mBirthsigns(birthsigns),
+  mTextures(textures)
 {
     mIgnoreBaseRecords = false;
 }
@@ -34,17 +33,20 @@ void CSMTools::BirthsignCheckStage::perform (int stage, CSMDoc::Messages& messag
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Birthsign, birthsign.mId);
 
-    // test for empty name, description and texture
     if (birthsign.mName.empty())
-        messages.push_back (std::make_pair (id, birthsign.mId + " has an empty name"));
+        messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
 
     if (birthsign.mDescription.empty())
-        messages.push_back (std::make_pair (id, birthsign.mId + " has an empty description"));
+        messages.add(id, "Description is missing", "", CSMDoc::Message::Severity_Warning);
 
     if (birthsign.mTexture.empty())
-        messages.push_back (std::make_pair (id, birthsign.mId + " is missing a texture"));
-
-    /// \todo test if the texture exists
+        messages.add(id, "Image is missing", "", CSMDoc::Message::Severity_Error);
+    else if (mTextures.searchId(birthsign.mTexture) == -1)
+    {
+        std::string ddsTexture = birthsign.mTexture;
+        if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsTexture) && mTextures.searchId(ddsTexture) != -1))
+            messages.add(id,  "Image '" + birthsign.mTexture + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    }
 
     /// \todo check data members that can't be edited in the table view
 }

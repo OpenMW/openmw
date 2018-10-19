@@ -244,7 +244,7 @@ void CSMWorld::CreateCommand::applyModifications()
     if (!mNestedValues.empty())
     {
         CSMWorld::IdTree *tree = dynamic_cast<CSMWorld::IdTree *>(&mModel);
-        if (tree == NULL)
+        if (tree == nullptr)
         {
             throw std::logic_error("CSMWorld::CreateCommand: Attempt to add nested values to the non-nested model");
         }
@@ -445,16 +445,14 @@ void CSMWorld::UpdateCellCommand::redo()
         int cellColumn = mModel.searchColumnIndex (Columns::ColumnId_Cell);
         mIndex = mModel.index (mRow, cellColumn);
 
-        const int cellSize = 8192;
-
         QModelIndex xIndex = mModel.index (
             mRow, mModel.findColumnIndex (Columns::ColumnId_PositionXPos));
 
         QModelIndex yIndex = mModel.index (
             mRow, mModel.findColumnIndex (Columns::ColumnId_PositionYPos));
 
-        int x = std::floor (mModel.data (xIndex).toFloat() / cellSize);
-        int y = std::floor (mModel.data (yIndex).toFloat() / cellSize);
+        int x = std::floor (mModel.data (xIndex).toFloat() / Constants::CellSizeInUnits);
+        int y = std::floor (mModel.data (yIndex).toFloat() / Constants::CellSizeInUnits);
 
         std::ostringstream stream;
 

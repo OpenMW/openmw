@@ -38,7 +38,7 @@ namespace MWWorld
         osg::Vec3f mLastKnownExteriorPosition;
 
         ESM::Position           mMarkedPosition;
-        // If no position was marked, this is NULL
+        // If no position was marked, this is nullptr
         CellStore*              mMarkedCell;
 
         bool                    mAutoMove;
@@ -56,6 +56,7 @@ namespace MWWorld
         MWMechanics::AttributeValue mSaveAttributes[ESM::Attribute::Length];
 
         bool mAttackingOrSpell;
+        bool mJumping;
 
     public:
 
@@ -110,6 +111,9 @@ namespace MWWorld
 
         void setAttackingOrSpell(bool attackingOrSpell);
         bool getAttackingOrSpell() const;
+
+        void setJumping(bool jumping);
+        bool getJumping() const;
 
         ///Checks all nearby actors to see if anyone has an aipackage against you
         bool isInCombat();

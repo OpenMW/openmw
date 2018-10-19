@@ -32,11 +32,13 @@
             </Widget>
 
             <Widget type="TextBox" skin="NormalText" position="30 358 250 16" name="LeftPageNumber">
+                <Property key="FontName" value="Journalbook Magic Cards"/>
                 <Property key="TextColour" value="0 0 0"/>
                 <Property key="TextAlign" value="Center"/>
                 <Property key="NeedMouse" value="false"/>
             </Widget>
             <Widget type="TextBox" skin="NormalText" position="310 358 250 16" name="RightPageNumber">
+                <Property key="FontName" value="Journalbook Magic Cards"/>
                 <Property key="TextColour" value="0 0 0"/>
                 <Property key="TextAlign" value="Center"/>
                 <Property key="NeedMouse" value="false"/>

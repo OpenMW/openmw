@@ -4,6 +4,10 @@
 
 #include <components/esm/aisequence.hpp>
 
+#include <components/sceneutil/positionattitudetransform.hpp>
+
+#include "../mwphysics/collisiontype.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
@@ -456,7 +460,48 @@ namespace MWMechanics
             mTimerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
             mCombatMove = true;
         }
+        else if (isDistantCombat)
+        {
+            // Backing up behaviour
+            // Actor backs up slightly further away than opponent's weapon range
+            // (in vanilla - only as far as oponent's weapon range),
+            // or not at all if opponent is using a ranged weapon
+
+            if (targetUsesRanged || distToTarget > rangeAttackOfTarget*1.5) // Don't back up if the target is wielding ranged weapon
+                return;
+
+            // actor should not back up into water
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(actor), 0.5f))
+                return;
+
+            int mask = MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Door;
+
+            // Actor can not back up if there is no free space behind
+            // Currently we take the 35% of actor's height from the ground as vector height.
+            // This approach allows us to detect small obstacles (e.g. crates) and curved walls.
+            osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
+            osg::Vec3f pos = actor.getRefData().getPosition().asVec3();
+            osg::Vec3f source = pos + osg::Vec3f(0, 0, 0.75f * halfExtents.z());
+            osg::Vec3f fallbackDirection = actor.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,-1,0);
+            osg::Vec3f destination = source + fallbackDirection * (halfExtents.y() + 16);
+
+            bool isObstacleDetected = MWBase::Environment::get().getWorld()->castRay(source.x(), source.y(), source.z(), destination.x(), destination.y(), destination.z(), mask);
+            if (isObstacleDetected)
+                return;
+
+            // Check if there is nothing behind - probably actor is near cliff.
+            // A current approach: cast ray 1.5-yard ray down in 1.5 yard behind actor from 35% of actor's height.
+            // If we did not hit anything, there is a cliff behind actor.
+            source = pos + osg::Vec3f(0, 0, 0.75f * halfExtents.z()) + fallbackDirection * (halfExtents.y() + 96);
+            destination = source - osg::Vec3f(0, 0, 0.75f * halfExtents.z() + 96);
+            bool isCliffDetected = !MWBase::Environment::get().getWorld()->castRay(source.x(), source.y(), source.z(), destination.x(), destination.y(), destination.z(), mask);
+            if (isCliffDetected)
+                return;
+
+            mMovement.mPosition[1] = -1;
+        }
         // dodge movements (for NPCs and bipedal creatures)
+        // Note: do not use for ranged combat yet since in couple with back up behaviour can move actor out of cliff
         else if (actor.getClass().isBipedal(actor))
         {
             // apply sideway movement (kind of dodging) with some probability
@@ -467,20 +512,6 @@ namespace MWMechanics
                 mTimerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
                 mCombatMove = true;
             }
-        }
-
-        // Backing up behaviour
-        // Actor backs up slightly further away than opponent's weapon range
-        // (in vanilla - only as far as oponent's weapon range),
-        // or not at all if opponent is using a ranged weapon
-        if (isDistantCombat)
-        {
-            // actor should not back up into water
-            if (MWBase::Environment::get().getWorld()->isUnderwater(MWWorld::ConstPtr(actor), 0.5f))
-                return;
-
-            if (!targetUsesRanged && distToTarget <= rangeAttackOfTarget*1.5) // Don't back up if the target is wielding ranged weapon
-                mMovement.mPosition[1] = -1;
         }
     }
 
@@ -586,7 +617,7 @@ std::string chooseBestAttack(const ESM::Weapon* weapon)
 {
     std::string attackType;
 
-    if (weapon != NULL)
+    if (weapon != nullptr)
     {
         //the more damage attackType deals the more probability it has
         int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;

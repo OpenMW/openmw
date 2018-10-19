@@ -8,6 +8,8 @@
 #include <components/esm/creaturestate.hpp>
 #include <components/esm/containerstate.hpp>
 
+#include <components/misc/constants.hpp>
+
 #include "convertcrec.hpp"
 #include "convertcntc.hpp"
 #include "convertscri.hpp"
@@ -288,12 +290,12 @@ namespace ESSImport
             notepos[1] += 31.f;
             notepos[0] += 0.5;
             notepos[1] += 0.5;
-            notepos[0] = 8192 * notepos[0] / 32.f;
-            notepos[1] = 8192 * notepos[1] / 32.f;
+            notepos[0] = Constants::CellSizeInUnits * notepos[0] / 32.f;
+            notepos[1] = Constants::CellSizeInUnits * notepos[1] / 32.f;
             if (cell.isExterior())
             {
-                notepos[0] += 8192 * cell.mData.mX;
-                notepos[1] += 8192 * cell.mData.mY;
+                notepos[0] += Constants::CellSizeInUnits * cell.mData.mX;
+                notepos[1] += Constants::CellSizeInUnits * cell.mData.mY;
             }
             // TODO: what encoding is this in?
             std::string note = esm.getHNString("MPNT");

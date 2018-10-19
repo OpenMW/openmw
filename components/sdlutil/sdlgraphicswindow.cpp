@@ -77,7 +77,7 @@ void GraphicsWindowSDL2::init()
         return;
 
     WindowData *inheritedWindowData = dynamic_cast<WindowData*>(_traits->inheritedWindowData.get());
-    mWindow = inheritedWindowData ? inheritedWindowData->mWindow : NULL;
+    mWindow = inheritedWindowData ? inheritedWindowData->mWindow : nullptr;
 
     mOwnsWindow = (mWindow == 0);
     if(mOwnsWindow)
@@ -162,7 +162,7 @@ bool GraphicsWindowSDL2::releaseContextImplementation()
         return false;
     }
 
-    return SDL_GL_MakeCurrent(NULL, NULL)==0;
+    return SDL_GL_MakeCurrent(nullptr, nullptr)==0;
 }
 
 
@@ -170,11 +170,11 @@ void GraphicsWindowSDL2::closeImplementation()
 {
     if(mContext)
         SDL_GL_DeleteContext(mContext);
-    mContext = NULL;
+    mContext = nullptr;
 
     if(mWindow && mOwnsWindow)
         SDL_DestroyWindow(mWindow);
-    mWindow = NULL;
+    mWindow = nullptr;
 
     mValid = false;
     mRealized = false;

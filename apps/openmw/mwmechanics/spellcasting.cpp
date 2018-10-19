@@ -65,7 +65,7 @@ namespace MWMechanics
             maxMagn = effect.mMagnMax;
         }
 
-        int duration = 0;
+        int duration = 1;
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
             duration = effect.mDuration;
 
@@ -242,9 +242,9 @@ namespace MWMechanics
 
         // This makes spells that are easy to cast harder to resist and vice versa
         float castChance = 100.f;
-        if (spell != NULL && !caster.isEmpty() && caster.getClass().isActor())
+        if (spell != nullptr && !caster.isEmpty() && caster.getClass().isActor())
         {
-            castChance = getSpellSuccessChance(spell, caster, NULL, false); // Uncapped casting chance
+            castChance = getSpellSuccessChance(spell, caster, nullptr, false); // Uncapped casting chance
         }
         if (castChance > 0)
             x *= 50 / castChance;
@@ -582,7 +582,7 @@ namespace MWMechanics
                                     ActiveSpells::ActiveEffect effect_ = effect;
                                     effect_.mMagnitude *= -1;
                                     absorbEffects.push_back(effect_);
-                                    if (reflected && Settings::Manager::getBool("classic reflect absorb attribute behavior", "Game"))
+                                    if (reflected && Settings::Manager::getBool("classic reflected absorb spells behavior", "Game"))
                                         target.getClass().getCreatureStats(target).getActiveSpells().addSpell("", true,
                                             absorbEffects, mSourceName, caster.getClass().getCreatureStats(caster).getActorId());
                                     else
@@ -737,7 +737,7 @@ namespace MWMechanics
             }
             else if (effectId == ESM::MagicEffect::Recall)
             {
-                MWWorld::CellStore* markedCell = NULL;
+                MWWorld::CellStore* markedCell = nullptr;
                 ESM::Position markedPosition;
 
                 MWBase::Environment::get().getWorld()->getPlayer().getMarkedPosition(markedCell, markedPosition);
@@ -964,10 +964,9 @@ namespace MWMechanics
             MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
             effect.mEffectID);
 
-        const MWMechanics::NpcStats& npcStats = mCaster.getClass().getNpcStats(mCaster);
         const MWMechanics::CreatureStats& creatureStats = mCaster.getClass().getCreatureStats(mCaster);
 
-        float x = (npcStats.getSkill (ESM::Skill::Alchemy).getModified() +
+        float x = (mCaster.getClass().getSkill(mCaster, ESM::Skill::Alchemy) +
                     0.2f * creatureStats.getAttribute (ESM::Attribute::Intelligence).getModified()
                     + 0.1f * creatureStats.getAttribute (ESM::Attribute::Luck).getModified())
                     * creatureStats.getFatigueTerm();

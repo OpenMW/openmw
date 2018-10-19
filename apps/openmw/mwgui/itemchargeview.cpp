@@ -21,7 +21,7 @@
 namespace MWGui
 {
     ItemChargeView::ItemChargeView()
-        : mScrollView(NULL),
+        : mScrollView(nullptr),
           mDisplayMode(DisplayMode_Health)
     {
     }
@@ -36,7 +36,7 @@ namespace MWGui
         Base::initialiseOverride();
 
         assignWidget(mScrollView, "ScrollView");
-        if (mScrollView == NULL)
+        if (mScrollView == nullptr)
             throw std::runtime_error("Item charge view needs a scroll view");
 
         mScrollView->setCanvasAlign(MyGUI::Align::Left | MyGUI::Align::Top);

@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <components/misc/constants.hpp>
 #include <components/misc/rng.hpp>
 
 #include <components/debug/debuglog.hpp>
@@ -609,7 +610,7 @@ namespace MWClass
         float damage = 0.0f;
         if(!weapon.isEmpty())
         {
-            const unsigned char *attack = NULL;
+            const unsigned char *attack = nullptr;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
             else if(type == ESM::Weapon::AT_Slash)
@@ -938,8 +939,8 @@ namespace MWClass
 
         const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
-        bool sneaking = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
+        bool sneaking = MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr) && stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
+        bool running = MWBase::Environment::get().getMechanicsManager()->isRunning(ptr) && stats.getStance(MWMechanics::CreatureStats::Stance_Run);
 
         float walkSpeed = gmst.fMinWalkSpeed->mValue.getFloat() + 0.01f*npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()*
                                                       (gmst.fMaxWalkSpeed->mValue.getFloat() - gmst.fMinWalkSpeed->mValue.getFloat());
@@ -948,7 +949,7 @@ namespace MWClass
         if(sneaking)
             walkSpeed *= gmst.fSneakSpeedMultiplier->mValue.getFloat();
 
-        float runSpeed = walkSpeed*(0.01f * npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified() *
+        float runSpeed = walkSpeed*(0.01f * getSkill(ptr, ESM::Skill::Athletics) *
                                     gmst.fAthleticsRunBonus->mValue.getFloat() + gmst.fBaseRunMultiplier->mValue.getFloat());
 
         float moveSpeed;
@@ -964,17 +965,17 @@ namespace MWClass
             flySpeed = std::max(0.0f, flySpeed);
             moveSpeed = flySpeed;
         }
-        else if(world->isSwimming(ptr))
+        else if (world->isSwimming(ptr))
         {
             float swimSpeed = walkSpeed;
             if(running)
                 swimSpeed = runSpeed;
             swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude();
-            swimSpeed *= gmst.fSwimRunBase->mValue.getFloat() + 0.01f*npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified()*
+            swimSpeed *= gmst.fSwimRunBase->mValue.getFloat() + 0.01f*getSkill(ptr, ESM::Skill::Athletics)*
                                                     gmst.fSwimRunAthleticsMult->mValue.getFloat();
             moveSpeed = swimSpeed;
         }
-        else if(running && !sneaking)
+        else if (running)
             moveSpeed = runSpeed;
         else
             moveSpeed = walkSpeed;
@@ -1003,7 +1004,7 @@ namespace MWClass
                                           gmst.fJumpEncumbranceMultiplier->mValue.getFloat() *
                                           (1.0f - Npc::getNormalizedEncumbrance(ptr));
 
-        float a = static_cast<float>(npcdata->mNpcStats.getSkill(ESM::Skill::Acrobatics).getModified());
+        float a = static_cast<float>(getSkill(ptr, ESM::Skill::Acrobatics));
         float b = 0.0f;
         if(a > 50.0f)
         {
@@ -1020,7 +1021,7 @@ namespace MWClass
         if(stats.getStance(MWMechanics::CreatureStats::Stance_Run))
             x *= gmst.fJumpRunMultiplier->mValue.getFloat();
         x *= npcdata->mNpcStats.getFatigueTerm();
-        x -= -627.2f;/*gravity constant*/
+        x -= -Constants::GravityConst * Constants::UnitsPerMeter;
         x /= 3.0f;
 
         return x;
@@ -1128,7 +1129,7 @@ namespace MWClass
 
         float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
         float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
-        int unarmoredSkill = stats.getSkill(ESM::Skill::Unarmored).getModified();
+        int unarmoredSkill = getSkill(ptr, ESM::Skill::Unarmored);
 
         float ratings[MWWorld::InventoryStore::Slots];
         for(int i = 0;i < MWWorld::InventoryStore::Slots;i++)
@@ -1241,15 +1242,9 @@ namespace MWClass
             return "";
         }
 
+        // Morrowind ignores land soundgen for NPCs
         if(name == "land")
-        {
-            MWBase::World *world = MWBase::Environment::get().getWorld();
-            osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
-            if (world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
-                return "DefaultLandWater";
-
-            return "DefaultLand";
-        }
+            return "";
         if(name == "swimleft")
             return "Swim Left";
         if(name == "swimright")
@@ -1381,7 +1376,7 @@ namespace MWClass
                     ptr.getRefData().setCount(1);
 
                 MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
-                ptr.getRefData().setCustomData(NULL);
+                ptr.getRefData().setCustomData(nullptr);
 
                 // Reset to original position
                 MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],

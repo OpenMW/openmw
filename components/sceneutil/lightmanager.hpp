@@ -158,7 +158,7 @@ namespace SceneUtil
     {
     public:
         LightListCallback()
-            : mLightManager(NULL)
+            : mLightManager(nullptr)
             , mLastFrameNumber(0)
         {}
         LightListCallback(const LightListCallback& copy, const osg::CopyOp& copyop)

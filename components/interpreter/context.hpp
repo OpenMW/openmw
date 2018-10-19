@@ -55,7 +55,7 @@ namespace Interpreter
 
             virtual std::string getActionBinding(const std::string& action) const = 0;
 
-            virtual std::string getNPCName() const = 0;
+            virtual std::string getActorName() const = 0;
 
             virtual std::string getNPCRace() const = 0;
 

@@ -23,7 +23,7 @@ namespace MWGui
         public:
         WindowBase(const std::string& parLayout);
 
-        virtual MyGUI::Widget* getDefaultKeyFocus() { return NULL; }
+        virtual MyGUI::Widget* getDefaultKeyFocus() { return nullptr; }
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;

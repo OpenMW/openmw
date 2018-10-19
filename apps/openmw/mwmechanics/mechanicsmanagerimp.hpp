@@ -91,6 +91,8 @@ namespace MWMechanics
             virtual void setPlayerClass (const ESM::Class& class_);
             ///< Set player class to custom class.
 
+            virtual void restoreDynamicStats(MWWorld::Ptr actor, bool sleep);
+
             virtual void rest(bool sleep);
             ///< If the player is sleeping or waiting, this should be called every hour.
             /// @param sleep is the player sleeping or waiting?

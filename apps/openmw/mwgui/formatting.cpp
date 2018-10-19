@@ -27,7 +27,7 @@ namespace MWGui
         BookTextParser::BookTextParser(const std::string & text)
             : mIndex(0), mText(text), mIgnoreNewlineTags(true), mIgnoreLineEndings(true), mClosingTag(false)
         {
-            MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
+            MWScript::InterpreterContext interpreterContext(nullptr, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
             mText = Interpreter::fixDefinesBook(mText, interpreterContext);
 
             boost::algorithm::replace_all(mText, "\r", "");
@@ -377,7 +377,7 @@ namespace MWGui
             if (attr.find("face") != attr.end())
             {
                 std::string face = attr.at("face");
-                mTextStyle.mFont = face;
+                mTextStyle.mFont = "Journalbook "+face;
             }
             if (attr.find("size") != attr.end())
             {
@@ -415,7 +415,7 @@ namespace MWGui
             : GraphicElement(parent, pag, blockStyle),
               mTextStyle(textStyle)
         {
-            MyGUI::EditBox* box = parent->createWidget<MyGUI::EditBox>("NormalText",
+            Gui::EditBox* box = parent->createWidget<Gui::EditBox>("NormalText",
                 MyGUI::IntCoord(0, pag.getCurrentTop(), pag.getPageWidth(), 0), MyGUI::Align::Left | MyGUI::Align::Top,
                 parent->getName() + MyGUI::utility::toString(parent->getChildCount()));
             box->setEditStatic(true);
@@ -432,15 +432,6 @@ namespace MWGui
             mEditBox = box;
         }
 
-        int TextElement::currentFontHeight() const
-        {
-            std::string fontName(mTextStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mTextStyle.mFont);
-            MyGUI::IFont* font = MyGUI::FontManager::getInstance().getByName(fontName);
-            if (!font)
-                return 0;
-            return font->getDefaultHeight();
-        }
-
         int TextElement::getHeight()
         {
             return mEditBox->getTextSize().height;
@@ -449,7 +440,7 @@ namespace MWGui
         int TextElement::pageSplit()
         {
             // split lines
-            const int lineHeight = currentFontHeight();
+            const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
             unsigned int lastLine = (mPaginator.getStartTop() + mPaginator.getPageHeight() - mPaginator.getCurrentTop());
             if (lineHeight > 0)
                 lastLine /= lineHeight;

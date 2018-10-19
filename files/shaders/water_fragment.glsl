@@ -286,6 +286,6 @@ void main(void)
 #if REFRACTION
     gl_FragData[0].w = 1.0;
 #else
-    gl_FragData[0].w = clamp(fresnel*6.0 + specular, 0.0, 1.0);     //clamp(fresnel*2.0 + specular, 0.0, 1.0);
+    gl_FragData[0].w = clamp(fresnel*6.0 + specular * gl_LightSource[0].specular.w, 0.0, 1.0);     //clamp(fresnel*2.0 + specular * gl_LightSource[0].specular.w, 0.0, 1.0);
 #endif
 }

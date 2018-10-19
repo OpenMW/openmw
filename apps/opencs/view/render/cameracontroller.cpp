@@ -38,7 +38,7 @@ namespace CSVRender
         , mCameraSensitivity(1/650.f)
         , mSecondaryMoveMult(50)
         , mWheelMoveMult(8)
-        , mCamera(NULL)
+        , mCamera(nullptr)
     {
     }
 
@@ -81,7 +81,7 @@ namespace CSVRender
         bool wasActive = mActive;
 
         mCamera = camera;
-        mActive = (mCamera != NULL);
+        mActive = (mCamera != nullptr);
 
         if (mActive != wasActive)
         {

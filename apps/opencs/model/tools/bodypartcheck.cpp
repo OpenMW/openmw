@@ -34,25 +34,23 @@ void CSMTools::BodyPartCheckStage::perform (int stage, CSMDoc::Messages &message
 
     // Check BYDT
     if (bodyPart.mData.mPart > 14 )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has out of range part value." ));
+        messages.add(id, "Invalid part", "", CSMDoc::Message::Severity_Error);
 
     if (bodyPart.mData.mFlags > 3 )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has out of range flags value." ));
+        messages.add(id, "Invalid flags", "", CSMDoc::Message::Severity_Error);
 
     if (bodyPart.mData.mType > 2 )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has out of range type value." ));
+        messages.add(id, "Invalid type", "", CSMDoc::Message::Severity_Error);
 
     // Check MODL
-
     if ( bodyPart.mModel.empty() )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has no model." ));
+        messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
     else if ( mMeshes.searchId( bodyPart.mModel ) == -1 )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has invalid model." ));
+        messages.add(id, "Model '" + bodyPart.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     // Check FNAM
-
     if ( bodyPart.mRace.empty() )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has no race." ));
+        messages.add(id, "Race is missing", "", CSMDoc::Message::Severity_Error);
     else if ( mRaces.searchId( bodyPart.mRace ) == -1 )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has invalid race." ));
+        messages.add(id, "Race '" + bodyPart.mRace + " does not exist", "", CSMDoc::Message::Severity_Error);
 }

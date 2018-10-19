@@ -298,7 +298,7 @@ namespace MWClass
         bool healthdmg = true;
         if (!weapon.isEmpty())
         {
-            const unsigned char *attack = NULL;
+            const unsigned char *attack = nullptr;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
             else if(type == ESM::Weapon::AT_Slash)
@@ -688,9 +688,9 @@ namespace MWClass
             MWBase::World *world = MWBase::Environment::get().getWorld();
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
-                return 2;
+                return ESM::SoundGenerator::SwimLeft;
             if(world->isOnGround(ptr))
-                return 0;
+                return ESM::SoundGenerator::LeftFoot;
             return -1;
         }
         if(name == "right")
@@ -698,23 +698,23 @@ namespace MWClass
             MWBase::World *world = MWBase::Environment::get().getWorld();
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
-                return 3;
+                return ESM::SoundGenerator::SwimRight;
             if(world->isOnGround(ptr))
-                return 1;
+                return ESM::SoundGenerator::RightFoot;
             return -1;
         }
         if(name == "swimleft")
-            return 2;
+            return ESM::SoundGenerator::SwimLeft;
         if(name == "swimright")
-            return 3;
+            return ESM::SoundGenerator::SwimRight;
         if(name == "moan")
-            return 4;
+            return ESM::SoundGenerator::Moan;
         if(name == "roar")
-            return 5;
+            return ESM::SoundGenerator::Roar;
         if(name == "scream")
-            return 6;
+            return ESM::SoundGenerator::Scream;
         if(name == "land")
-            return 7;
+            return ESM::SoundGenerator::Land;
 
         throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }
@@ -828,7 +828,7 @@ namespace MWClass
                     ptr.getRefData().setCount(1);
 
                 MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
-                ptr.getRefData().setCustomData(NULL);
+                ptr.getRefData().setCustomData(nullptr);
 
                 // Reset to original position
                 MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],

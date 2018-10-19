@@ -200,7 +200,7 @@ namespace NifOsg
             }
 
             const Nif::Record *r = nif->getRoot(0);
-            assert(r != NULL);
+            assert(r != nullptr);
 
             if(r->recType != Nif::RC_NiSequenceStreamHelper)
             {
@@ -257,12 +257,12 @@ namespace NifOsg
             const Nif::Record* r = nif->getRoot(0);
 
             const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
-            if (nifNode == NULL)
+            if (nifNode == nullptr)
                 nif->fail("First root was not a node, but a " + r->recName);
 
             osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
 
-            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, imageManager, std::vector<int>(), 0, false, false, false, &textkeys->mTextKeys);
+            osg::ref_ptr<osg::Node> created = handleNode(nifNode, nullptr, imageManager, std::vector<int>(), 0, false, false, false, &textkeys->mTextKeys);
 
             if (nif->getUseSkinning())
             {
@@ -297,7 +297,7 @@ namespace NifOsg
                 {
                     // Get the lowest numbered recIndex of the NiTexturingProperty root node.
                     // This is what is overridden when a spell effect "particle texture" is used.
-                    if (nifNode->parent == NULL && !mFoundFirstRootTexturingProperty && props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
+                    if (nifNode->parent == nullptr && !mFoundFirstRootTexturingProperty && props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
                     {
                         mFirstRootTextureIndex = props[i].getPtr()->recIndex;
                         mFoundFirstRootTexturingProperty = true;
@@ -338,7 +338,7 @@ namespace NifOsg
         osg::ref_ptr<osg::Image> handleSourceTexture(const Nif::NiSourceTexture* st, Resource::ImageManager* imageManager)
         {
             if (!st)
-                return NULL;
+                return nullptr;
 
             osg::ref_ptr<osg::Image> image;
             if (!st->external && !st->data.empty())
@@ -464,10 +464,10 @@ namespace NifOsg
         }
 
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
-                                std::vector<int> boundTextures, int animflags, bool skipMeshes, bool hasMarkers, bool isAnimated, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
+                                std::vector<int> boundTextures, int animflags, bool skipMeshes, bool hasMarkers, bool isAnimated, TextKeyMap* textKeys, osg::Node* rootNode=nullptr)
         {
-            if (rootNode != NULL && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
-                return NULL;
+            if (rootNode != nullptr && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
+                return nullptr;
 
             osg::ref_ptr<osg::Group> node = createNode(nifNode);
 
@@ -791,7 +791,7 @@ namespace NifOsg
         // Load the initial state of the particle system, i.e. the initial particles and their positions, velocity and colors.
         void handleParticleInitialState(const Nif::Node* nifNode, osgParticle::ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
         {
-            const Nif::NiAutoNormalParticlesData *particledata = NULL;
+            const Nif::NiAutoNormalParticlesData *particledata = nullptr;
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles)
                 particledata = static_cast<const Nif::NiAutoNormalParticles*>(nifNode)->data.getPtr();
             else if(nifNode->recType == Nif::RC_NiRotatingParticles)
@@ -873,7 +873,7 @@ namespace NifOsg
             osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
 
-            const Nif::NiParticleSystemController* partctrl = NULL;
+            const Nif::NiParticleSystemController* partctrl = nullptr;
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
                 if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
@@ -1193,11 +1193,11 @@ namespace NifOsg
                 break;
             default:
                 Log(Debug::Info) << "Unhandled internal pixel format " << pixelData->fmt << " in " << mFilename;
-                return NULL;
+                return nullptr;
             }
 
             if (pixelData->mipmaps.empty())
-                return NULL;
+                return nullptr;
 
             int width = 0;
             int height = 0;
@@ -1211,7 +1211,7 @@ namespace NifOsg
                 if (mipSize + mip.dataOffset > pixelData->data.size())
                 {
                     Log(Debug::Info) << "Internal texture's mipmap data out of bounds, ignoring texture";
-                    return NULL;
+                    return nullptr;
                 }
 
                 if (i != 0)
@@ -1226,7 +1226,7 @@ namespace NifOsg
             if (width <= 0 || height <= 0)
             {
                 Log(Debug::Info) << "Internal Texture Width and height must be non zero, ignoring texture";
-                return NULL;
+                return nullptr;
             }
 
             unsigned char* data = new unsigned char[pixelData->data.size()];

@@ -98,7 +98,7 @@ public:
     /** @see IRenderTarget::doRender */
     virtual void doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *texture, size_t count);
 
-    /** specify a StateSet to inject for rendering. The StateSet will be used by future doRender calls until you reset it to NULL again. */
+    /** specify a StateSet to inject for rendering. The StateSet will be used by future doRender calls until you reset it to nullptr again. */
     void setInjectState(osg::StateSet* stateSet);
 
     /** @see IRenderTarget::getInfo */

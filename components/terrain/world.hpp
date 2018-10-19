@@ -90,7 +90,7 @@ namespace Terrain
 
         /// Create a View to use with preload feature. The caller is responsible for deleting the view.
         /// @note Thread safe.
-        virtual View* createView() { return NULL; }
+        virtual View* createView() { return nullptr; }
 
         /// @note Thread safe, as long as you do not attempt to load into the same view from multiple threads.
         virtual void preload(View* view, const osg::Vec3f& eyePoint) {}

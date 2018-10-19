@@ -245,20 +245,30 @@ namespace MWSound
 
     DecoderPtr SoundManager::loadVoice(const std::string &voicefile)
     {
-        DecoderPtr decoder = getDecoder();
-        // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
-        if(mVFS->exists(voicefile))
-            decoder->open(voicefile);
-        else
+        try
         {
-            std::string file = voicefile;
-            std::string::size_type pos = file.rfind('.');
-            if(pos != std::string::npos)
-                file = file.substr(0, pos)+".mp3";
-            decoder->open(file);
+            DecoderPtr decoder = getDecoder();
+
+            // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
+            if(mVFS->exists(voicefile))
+                decoder->open(voicefile);
+            else
+            {
+                std::string file = voicefile;
+                std::string::size_type pos = file.rfind('.');
+                if(pos != std::string::npos)
+                    file = file.substr(0, pos)+".mp3";
+                decoder->open(file);
+            }
+
+            return decoder;
+        }
+        catch(std::exception &e)
+        {
+            Log(Debug::Error) << "Failed to load audio from " << voicefile << ": " << e.what();
         }
 
-        return decoder;
+        return nullptr;
     }
 
     Sound *SoundManager::getSoundRef()
@@ -471,6 +481,8 @@ namespace MWSound
 
         mVFS->normalizeFilename(voicefile);
         DecoderPtr decoder = loadVoice(voicefile);
+        if (!decoder)
+            return;
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
@@ -503,6 +515,8 @@ namespace MWSound
 
         mVFS->normalizeFilename(voicefile);
         DecoderPtr decoder = loadVoice(voicefile);
+        if (!decoder)
+            return;
 
         stopSay(MWWorld::ConstPtr());
         Stream *sound = playVoice(decoder, osg::Vec3f(), true);
@@ -819,7 +833,7 @@ namespace MWSound
         }
 
         const ESM::Region *regn = world->getStore().get<ESM::Region>().search(regionName);
-        if(regn == NULL)
+        if(regn == nullptr)
             return;
 
         if(total == 0)

@@ -71,7 +71,7 @@ namespace MWGui
             {
                 newSpell.mType = Spell::Type_Spell;
                 std::string cost = std::to_string(spell->mData.mCost);
-                std::string chance = std::to_string(int(MWMechanics::getSpellSuccessChance(spell, mActor, NULL, true, true)));
+                std::string chance = std::to_string(int(MWMechanics::getSpellSuccessChance(spell, mActor, nullptr, true, true)));
                 newSpell.mCostColumn = cost + "/" + chance;
             }
             else

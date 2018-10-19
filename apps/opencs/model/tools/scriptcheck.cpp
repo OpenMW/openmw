@@ -30,10 +30,7 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, const Compi
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Script, mId);
 
-    stream
-        << "script " << mFile
-        << ", line " << loc.mLine << ", column " << loc.mColumn
-        << " (" << loc.mLiteral << "): " << message;
+    stream << "line " << loc.mLine << ", column " << loc.mColumn << ": " << message << " (" << loc.mLiteral << ")";
 
     std::ostringstream hintStream;
 
@@ -47,7 +44,7 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, Type type)
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Script, mId);
 
     std::ostringstream stream;
-    stream << "script " << mFile << ": " << message;
+    stream << message;
 
     mMessages->add (id, stream.str(), "", getSeverity (type));
 }
@@ -128,7 +125,7 @@ void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
         CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Script, mId);
 
         std::ostringstream stream;
-        stream << "script " << mFile << ": " << error.what();
+        stream << error.what();
 
         messages.add (id, stream.str(), "", CSMDoc::Message::Severity_SeriousError);
     }

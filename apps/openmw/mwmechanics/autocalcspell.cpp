@@ -1,7 +1,6 @@
 #include "autocalcspell.hpp"
 #include "spellcasting.hpp"
 
-#include <climits>
 #include <limits>
 
 #include "../mwworld/esmstore.hpp"
@@ -50,7 +49,7 @@ namespace MWMechanics
             caps.mCount = 0;
             caps.mLimit = iAutoSpellSchoolMax[i];
             caps.mReachedLimit = iAutoSpellSchoolMax[i] <= 0;
-            caps.mMinCost = INT_MAX;
+            caps.mMinCost = std::numeric_limits<int>::max();
             caps.mWeakestSpell.clear();
             schoolCaps[i] = caps;
         }
@@ -101,7 +100,7 @@ namespace MWMechanics
                 if (found != selectedSpells.end())
                     selectedSpells.erase(found);
 
-                cap.mMinCost = INT_MAX;
+                cap.mMinCost = std::numeric_limits<int>::max();
                 for (std::vector<std::string>::iterator weakIt = selectedSpells.begin(); weakIt != selectedSpells.end(); ++weakIt)
                 {
                     const ESM::Spell* testSpell = spells.find(*weakIt);
@@ -150,8 +149,8 @@ namespace MWMechanics
 
         float baseMagicka = fPCbaseMagickaMult * actorAttributes[ESM::Attribute::Intelligence];
         bool reachedLimit = false;
-        const ESM::Spell* weakestSpell = NULL;
-        int minCost = INT_MAX;
+        const ESM::Spell* weakestSpell = nullptr;
+        int minCost = std::numeric_limits<int>::max();
 
         std::vector<std::string> selectedSpells;
 
@@ -188,7 +187,7 @@ namespace MWMechanics
                 if (it != selectedSpells.end())
                     selectedSpells.erase(it);
 
-                minCost = INT_MAX;
+                minCost = std::numeric_limits<int>::max();
                 for (std::vector<std::string>::iterator weakIt = selectedSpells.begin(); weakIt != selectedSpells.end(); ++weakIt)
                 {
                     const ESM::Spell* testSpell = esmStore.get<ESM::Spell>().find(*weakIt);

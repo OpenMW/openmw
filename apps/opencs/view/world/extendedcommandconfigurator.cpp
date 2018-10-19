@@ -95,7 +95,7 @@ void CSVWorld::ExtendedCommandConfigurator::setupGroupLayout()
     int divider = 1;
     do
     {
-        while (layout->itemAt(0) != NULL)
+        while (layout->itemAt(0) != nullptr)
         {
             layout->removeItem(layout->itemAt(0));
         }

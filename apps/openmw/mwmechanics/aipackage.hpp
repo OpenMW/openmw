@@ -114,7 +114,7 @@ namespace MWMechanics
 
             /// Check if there aren't any obstacles along the path to make shortcut possible
             /// If a shortcut is possible then path will be cleared and filled with the destination point.
-            /// \param destInLOS If not NULL function will return ray cast check result
+            /// \param destInLOS If not nullptr function will return ray cast check result
             /// \return If can shortcut the path
             bool shortcutPath(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor, bool *destInLOS, bool isPathClear);
 

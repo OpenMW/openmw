@@ -24,7 +24,7 @@ MyGUI::IDataStream *DataManager::getData(const std::string &name)
     if (stream->fail())
     {
         Log(Debug::Error) << "DataManager::getData: Failed to open '" << name << "'";
-        return NULL;
+        return nullptr;
     }
     return new MyGUI::DataFileStream(stream.release());
 }

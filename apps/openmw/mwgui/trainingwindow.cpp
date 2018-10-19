@@ -73,14 +73,12 @@ namespace MWGui
 
         mPlayerGold->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
 
-        MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats (actor);
-
         // NPC can train you in his best 3 skills
         std::vector< std::pair<int, int> > skills;
 
         for (int i=0; i<ESM::Skill::Length; ++i)
         {
-            int value = npcStats.getSkill (i).getModified ();
+            int value = actor.getClass().getSkill(actor, i);
 
             skills.push_back(std::make_pair(i, value));
         }
@@ -142,8 +140,7 @@ namespace MWGui
         if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
             return;
 
-        MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats (mPtr);
-        if (npcStats.getSkill (skillId).getModified () <= pcStats.getSkill (skillId).getBase ())
+        if (mPtr.getClass().getSkill(mPtr, skillId) <= pcStats.getSkill (skillId).getBase ())
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sServiceTrainingWords}");
             return;
@@ -168,6 +165,7 @@ namespace MWGui
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
         // add gold to NPC trading gold pool
+        MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats(mPtr);
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
         // advance time

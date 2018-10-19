@@ -27,11 +27,11 @@
             </Widget>
 
             <!-- Favorite Attributes -->
-            <Widget type="VBox" skin="" position="0 39 166 72" align="Stretch">
+            <Widget type="VBox" skin="" position="0 39 166 76" align="Stretch">
                 <Property key="Spacing" value="0"/>
 
                 <!-- Favorite Attributes -->
-                <Widget type="AutoSizedEditBox" skin="HeaderText" position="0 0 166 18" name="FavoriteAttributesT" align="Left Top">
+                <Widget type="AutoSizedEditBox" skin="HeaderText" position="0 0 166 22" name="FavoriteAttributesT" align="Left Top">
                     <Property key="Caption" value="#{sChooseClassMenu2}"/>
                     <Property key="TextAlign" value="Left Top"/>
                     <Property key="Static" value="true"/>
@@ -73,7 +73,7 @@
         </Widget>
 
         <!-- Dialog buttons -->
-        <Widget type="HBox" position="0 276 475 24">
+        <Widget type="HBox" position="0 276 475 28">
             <Widget type="Spacer"/>
             <Widget type="AutoSizedButton" skin="MW_Button" name="BackButton">
                 <Property key="Caption" value="#{sBack}"/>

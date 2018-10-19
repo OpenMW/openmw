@@ -14,6 +14,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm/fogstate.hpp>
 #include <components/esm/loadcell.hpp>
+#include <components/misc/constants.hpp>
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/files/memorystream.hpp>
@@ -71,11 +72,16 @@ namespace MWRender
 LocalMap::LocalMap(osg::Group* root)
     : mRoot(root)
     , mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
-    , mMapWorldSize(8192.f)
+    , mMapWorldSize(Constants::CellSizeInUnits)
     , mCellDistance(Settings::Manager::getInt("local map cell distance", "Map"))
     , mAngle(0.f)
     , mInterior(false)
 {
+    // Increase map resolution, if use UI scaling
+    float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
+    if (uiScale > 1.0)
+        mMapResolution *= uiScale;
+
     SceneUtil::FindByNameVisitor find("Scene Root");
     mRoot->accept(find);
     mSceneRoot = find.mFoundNode;

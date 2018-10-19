@@ -5,6 +5,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
+#include "../mwphysics/collisiontype.hpp"
+
 #include "../mwworld/cellstore.hpp"
 
 #include "pathgrid.hpp"
@@ -120,8 +122,8 @@ namespace MWMechanics
     }
 
     PathFinder::PathFinder()
-        : mPathgrid(NULL)
-        , mCell(NULL)
+        : mPathgrid(nullptr)
+        , mCell(nullptr)
     {
     }
 
@@ -246,8 +248,9 @@ namespace MWMechanics
                     converter.toWorld(temp);
                     // Add Z offset since path node can overlap with other objects.
                     // Also ignore doors in raytesting.
+                    int mask = MWPhysics::CollisionType_World;
                     bool isPathClear = !MWBase::Environment::get().getWorld()->castRay(
-                        startPoint.mX, startPoint.mY, startPoint.mZ+16, temp.mX, temp.mY, temp.mZ+16, true);
+                        startPoint.mX, startPoint.mY, startPoint.mZ+16, temp.mX, temp.mY, temp.mZ+16, mask);
                     if (isPathClear)
                         mPath.pop_front();
                 }

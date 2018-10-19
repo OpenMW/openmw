@@ -14,8 +14,8 @@ void CSMWorld::MetaData::blank()
 void CSMWorld::MetaData::load (ESM::ESMReader& esm)
 {
     mFormat = esm.getHeader().mFormat;
-    mAuthor = esm.getHeader().mData.author.toString();
-    mDescription = esm.getHeader().mData.desc.toString();
+    mAuthor = esm.getHeader().mData.author;
+    mDescription = esm.getHeader().mData.desc;
 }
 
 void CSMWorld::MetaData::save (ESM::ESMWriter& esm) const

@@ -21,6 +21,7 @@
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/esm/loadgmst.hpp>
+#include <components/misc/constants.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 
@@ -486,7 +487,7 @@ namespace MWPhysics
                 physicActor->setInertialForce(osg::Vec3f(0.f, 0.f, 0.f));
             else
             {
-                inertia.z() += time * -627.2f;
+                inertia.z() -= time * Constants::GravityConst * Constants::UnitsPerMeter;
                 if (inertia.z() < 0)
                     inertia.z() *= slowFall;
                 if (slowFall < 1.f) {
@@ -809,7 +810,7 @@ namespace MWPhysics
         btScalar mLeastDistSqr;
 
         DeepestNotMeContactTestResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*>& targets, const btVector3 &origin)
-          : mMe(me), mTargets(targets), mOrigin(origin), mObject(NULL), mContactPoint(0,0,0),
+          : mMe(me), mTargets(targets), mOrigin(origin), mObject(nullptr), mContactPoint(0,0,0),
             mLeastDistSqr(std::numeric_limits<float>::max())
         { }
 
@@ -872,7 +873,7 @@ namespace MWPhysics
         object.setCollisionShape(&shape);
         object.setWorldTransform(btTransform(toBullet(orient), toBullet(center)));
 
-        const btCollisionObject* me = NULL;
+        const btCollisionObject* me = nullptr;
         std::vector<const btCollisionObject*> targetCollisionObjects;
 
         const Actor* physactor = getActor(actor);
@@ -905,7 +906,7 @@ namespace MWPhysics
 
     float PhysicsSystem::getHitDistance(const osg::Vec3f &point, const MWWorld::ConstPtr &target) const
     {
-        btCollisionObject* targetCollisionObj = NULL;
+        btCollisionObject* targetCollisionObj = nullptr;
         const Actor* actor = getActor(target);
         if (actor)
             targetCollisionObj = actor->getCollisionObject();
@@ -967,7 +968,7 @@ namespace MWPhysics
         btVector3 btFrom = toBullet(from);
         btVector3 btTo = toBullet(to);
 
-        const btCollisionObject* me = NULL;
+        const btCollisionObject* me = nullptr;
         std::vector<const btCollisionObject*> targetCollisionObjects;
 
         if (!ignore.isEmpty())
@@ -1126,7 +1127,7 @@ namespace MWPhysics
 
     std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const
     {
-        btCollisionObject* me = NULL;
+        btCollisionObject* me = nullptr;
 
         ObjectMap::const_iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
@@ -1254,7 +1255,7 @@ namespace MWPhysics
         ActorMap::iterator found = mActors.find(ptr);
         if (found != mActors.end())
             return found->second;
-        return NULL;
+        return nullptr;
     }
 
     const Actor *PhysicsSystem::getActor(const MWWorld::ConstPtr &ptr) const
@@ -1262,7 +1263,7 @@ namespace MWPhysics
         ActorMap::const_iterator found = mActors.find(ptr);
         if (found != mActors.end())
             return found->second;
-        return NULL;
+        return nullptr;
     }
 
     const Object* PhysicsSystem::getObject(const MWWorld::ConstPtr &ptr) const
@@ -1270,7 +1271,7 @@ namespace MWPhysics
         ObjectMap::const_iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
             return found->second;
-        return NULL;
+        return nullptr;
     }
 
     void PhysicsSystem::updateScale(const MWWorld::Ptr &ptr)
@@ -1336,6 +1337,16 @@ namespace MWPhysics
         if (!shape)
             return;
 
+        // Try to get shape from basic model as fallback for creatures
+        if (!ptr.getClass().isNpc() && shape->mCollisionBoxHalfExtents.length2() == 0)
+        {
+            const std::string fallbackModel = ptr.getClass().getModel(ptr);
+            if (fallbackModel != mesh)
+            {
+                shape = mShapeManager->getShape(fallbackModel);
+            }
+        }
+
         Actor* actor = new Actor(ptr, shape, mCollisionWorld);
         mActors.insert(std::make_pair(ptr, actor));
     }
@@ -1394,6 +1405,7 @@ namespace MWPhysics
             mStandingCollisions.clear();
         }
 
+        const MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         PtrVelocityList::iterator iter = mMovementQueue.begin();
         for(;iter != mMovementQueue.end();++iter)
@@ -1451,7 +1463,7 @@ namespace MWPhysics
 
             MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
             if ((wasOnGround && physicActor->getOnGround()) || flying || world->isSwimming(iter->first) || slowFall < 1)
-                stats.land();
+                stats.land(iter->first == player);
             else if (heightDiff < 0)
                 stats.addToFallHeight(-heightDiff);
 

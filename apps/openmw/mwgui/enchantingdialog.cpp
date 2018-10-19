@@ -28,7 +28,7 @@ namespace MWGui
     EnchantingDialog::EnchantingDialog()
         : WindowBase("openmw_enchanting_dialog.layout")
         , EffectEditorBase(EffectEditorBase::Enchanting)
-        , mItemSelectionDialog(NULL)
+        , mItemSelectionDialog(nullptr)
     {
         getWidget(mName, "NameEdit");
         getWidget(mCancelButton, "CancelButton");
@@ -288,6 +288,9 @@ namespace MWGui
     void EnchantingDialog::onAccept(MyGUI::EditBox *sender)
     {
         onBuyButtonClicked(sender);
+
+        // To do not spam onAccept() again and again
+        MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);
     }
 
     void EnchantingDialog::onBuyButtonClicked(MyGUI::Widget* sender)

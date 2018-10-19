@@ -3,9 +3,16 @@
 
 #include "MyGUI_Colour.h"
 #include "MyGUI_Widget.h"
+#include "MyGUI_FontManager.h"
 
 #include <functional>
 #include <stdint.h>
+
+#include <components/settings/settings.hpp>
+#include <components/widgets/widgets.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 namespace MWGui
 {
@@ -26,6 +33,48 @@ namespace MWGui
         /// right edge. The second integer is the height of all
         /// text combined prior to pagination.
         virtual std::pair <unsigned int, unsigned int> getSize () const = 0;
+    };
+
+    struct GlyphInfo
+    {
+        char codePoint;
+        float width;
+        float height;
+        float advance;
+        float bearingX;
+        float bearingY;
+        bool charFound;
+        MyGUI::FloatRect uvRect;
+
+        GlyphInfo(MyGUI::IFont* font, MyGUI::Char ch)
+        {
+            static const int fontHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
+
+            MyGUI::GlyphInfo* gi = font->getGlyphInfo(ch);
+            if (gi)
+            {
+                const float scale = font->getDefaultHeight() / (float) fontHeight;
+
+                codePoint = gi->codePoint;
+                bearingX = (int) gi->bearingX / scale;
+                bearingY = (int) gi->bearingY / scale;
+                width = (int) gi->width / scale;
+                height = (int) gi->height / scale;
+                advance = (int) gi->advance / scale;
+                uvRect = gi->uvRect;
+                charFound = true;
+            }
+            else
+            {
+                codePoint = 0;
+                bearingX = 0;
+                bearingY = 0;
+                width = 0;
+                height = 0;
+                advance = 0;
+                charFound = false;
+            }
+        }
     };
 
     /// A factory class for creating a typeset book instance.
@@ -56,7 +105,7 @@ namespace MWGui
         static Ptr create (int pageWidth, int pageHeight);
 
         /// Create a simple text style consisting of a font and a text color.
-        virtual Style* createStyle (char const * Font, const Colour& Colour) = 0;
+        virtual Style* createStyle (const std::string& fontName, const Colour& colour, bool useBookFont=true) = 0;
 
         /// Create a hyper-link style with a user-defined identifier based on an
         /// existing style. The unique flag forces a new instance of this style

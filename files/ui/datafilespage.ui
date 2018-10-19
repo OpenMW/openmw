@@ -62,7 +62,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Select a profiile</string>
+         <string>Select a content list</string>
         </property>
        </widget>
       </item>

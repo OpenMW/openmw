@@ -24,7 +24,7 @@ namespace Resource
 struct GetTriangleFunctor
 {
     GetTriangleFunctor()
-        : mTriMesh(NULL)
+        : mTriMesh(nullptr)
     {
     }
 

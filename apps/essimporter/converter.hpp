@@ -526,7 +526,10 @@ public:
 class ConvertGAME : public Converter
 {
 public:
-    ConvertGAME() : mHasGame(false) {}
+    ConvertGAME()
+        : mHasGame(false)
+    {
+    }
 
     virtual void read(ESM::ESMReader &esm)
     {

@@ -145,8 +145,9 @@ namespace
 namespace Gui
 {
 
-    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs)
+    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, const std::string& userDataPath)
         : mVFS(vfs)
+        , mUserDataPath(userDataPath)
     {
         if (encoding == ToUTF8::WINDOWS_1252)
             mEncoding = ToUTF8::CP437;
@@ -161,11 +162,21 @@ namespace Gui
         mTextures.clear();
 
         for (std::vector<MyGUI::ResourceManualFont*>::iterator it = mFonts.begin(); it != mFonts.end(); ++it)
-            MyGUI::ResourceManager::getInstance().removeByName((*it)->getResourceName());
+        {
+            try
+            {
+                MyGUI::ResourceManager::getInstance().removeByName((*it)->getResourceName());
+            }
+            catch(const MyGUI::Exception& e)
+            {
+                Log(Debug::Error) << "Error in the destructor: " << e.what();
+            }
+        }
+
         mFonts.clear();
     }
 
-    void FontLoader::loadAllFonts(bool exportToFile)
+    void FontLoader::loadBitmapFonts(bool exportToFile)
     {
         const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
 
@@ -186,6 +197,25 @@ namespace Gui
                 break;
             ++found;
         }
+    }
+
+    void FontLoader::loadTrueTypeFonts()
+    {
+        osgMyGUI::DataManager* dataManager = dynamic_cast<osgMyGUI::DataManager*>(&osgMyGUI::DataManager::getInstance());
+        if (!dataManager)
+        {
+            Log(Debug::Error) << "Can not load TrueType fonts: osgMyGUI::DataManager is not available.";
+            return;
+        }
+
+        const std::string cfg = dataManager->getDataPath("");
+        const std::string fontFile = mUserDataPath + "/" + "Fonts" + "/" + "openmw_font.xml";
+        if (!boost::filesystem::exists(fontFile))
+            return;
+
+        dataManager->setResourcePath(mUserDataPath + "/" + "Fonts");
+        MyGUI::ResourceManager::getInstance().load("openmw_font.xml");
+        dataManager->setResourcePath(cfg);
     }
 
 
@@ -470,6 +500,14 @@ namespace Gui
 
         font->deserialization(root, MyGUI::Version(3,2,0));
 
+        // Setup "book" version of font as fallback if we will not use TrueType fonts
+        MyGUI::ResourceManualFont* bookFont = static_cast<MyGUI::ResourceManualFont*>(
+                    MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
+        mFonts.push_back(bookFont);
+        bookFont->deserialization(root, MyGUI::Version(3,2,0));
+        bookFont->setResourceName("Journalbook " + resourceName);
+
+        // Remove automatically registered fonts
         for (std::vector<MyGUI::ResourceManualFont*>::iterator it = mFonts.begin(); it != mFonts.end();)
         {
             if ((*it)->getResourceName() == font->getResourceName())
@@ -477,10 +515,17 @@ namespace Gui
                 MyGUI::ResourceManager::getInstance().removeByName(font->getResourceName());
                 it = mFonts.erase(it);
             }
+            else if ((*it)->getResourceName() == bookFont->getResourceName())
+            {
+                MyGUI::ResourceManager::getInstance().removeByName(bookFont->getResourceName());
+                it = mFonts.erase(it);
+            }
             else
                 ++it;
         }
+
         MyGUI::ResourceManager::getInstance().addResource(font);
+        MyGUI::ResourceManager::getInstance().addResource(bookFont);
     }
 
 }

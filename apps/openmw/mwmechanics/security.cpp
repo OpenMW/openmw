@@ -11,7 +11,6 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "npcstats.hpp"
 #include "creaturestats.hpp"
 
 namespace MWMechanics
@@ -21,10 +20,9 @@ namespace MWMechanics
         : mActor(actor)
     {
         CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
-        NpcStats& npcStats = actor.getClass().getNpcStats(actor);
         mAgility = static_cast<float>(creatureStats.getAttribute(ESM::Attribute::Agility).getModified());
         mLuck = static_cast<float>(creatureStats.getAttribute(ESM::Attribute::Luck).getModified());
-        mSecuritySkill = static_cast<float>(npcStats.getSkill(ESM::Skill::Security).getModified());
+        mSecuritySkill = static_cast<float>(actor.getClass().getSkill(actor, ESM::Skill::Security));
         mFatigueTerm = creatureStats.getFatigueTerm();
     }
 

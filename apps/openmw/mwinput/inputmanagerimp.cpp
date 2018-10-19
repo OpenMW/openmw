@@ -46,9 +46,9 @@ namespace MWInput
         , mScreenCaptureHandler(screenCaptureHandler)
         , mScreenCaptureOperation(screenCaptureOperation)
         , mJoystickLastUsed(false)
-        , mPlayer(NULL)
-        , mInputManager(NULL)
-        , mVideoWrapper(NULL)
+        , mPlayer(nullptr)
+        , mInputManager(nullptr)
+        , mVideoWrapper(nullptr)
         , mUserFile(userFile)
         , mDragDrop(false)
         , mGrabCursor (Settings::Manager::getBool("grab cursor", "Input"))
@@ -84,7 +84,7 @@ namespace MWInput
                                         Settings::Manager::getFloat("contrast", "Video"));
 
         std::string file = userFileExists ? userFile : "";
-        mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
+        mInputBinder = new ICS::InputControlSystem(file, true, this, nullptr, A_Last);
 
         loadKeyDefaults();
         loadControllerDefaults();
@@ -214,7 +214,7 @@ namespace MWInput
             break;
         }
 
-        MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0);
+        MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0, false);
     }
 
     void InputManager::channelChanged(ICS::Channel* channel, float currentValue, float previousValue)
@@ -676,6 +676,9 @@ namespace MWInput
                                         Settings::Manager::getInt("resolution y", "Video"),
                                         Settings::Manager::getBool("fullscreen", "Video"),
                                         Settings::Manager::getBool("window border", "Video"));
+
+            // We should reload TrueType fonts to fit new resolution
+            MWBase::Environment::get().getWindowManager()->loadUserFonts();
         }
     }
 
@@ -720,7 +723,7 @@ namespace MWInput
         bool consumed = false;
         if (kc != OIS::KC_UNASSIGNED && !mInputBinder->detectingBindingState())
         {
-            consumed = MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+            consumed = MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Enum(kc), 0, arg.repeat);
             if (SDL_IsTextInputActive() &&  // Little trick to check if key is printable
                                     ( !(SDLK_SCANCODE_MASK & arg.keysym.sym) && std::isprint(arg.keysym.sym)))
                 consumed = true;
@@ -1026,10 +1029,6 @@ namespace MWInput
         if (!MWBase::Environment::get().getWindowManager()->getRestEnabled () || MWBase::Environment::get().getWindowManager()->isGuiMode ())
             return;
 
-        if(mPlayer->enemiesNearby()) {//Check if in combat
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}"); //Nope,
-            return;
-        }
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_Rest); //Open rest GUI
 
     }
@@ -1108,6 +1107,7 @@ namespace MWInput
 
         if(MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Journal
                 && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_MainMenu
+                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings
                 && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Journal);
@@ -1153,7 +1153,7 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             if (!SDL_IsTextInputActive() && !isLeftOrRightButton(A_Activate, mInputBinder, mFakeDeviceID, mJoystickLastUsed))
-                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Return, 0);
+                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Return, 0, false);
         }
         else if (mControlSwitch["playercontrols"])
             mPlayer->activate();

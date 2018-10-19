@@ -298,7 +298,12 @@ void MWMechanics::NpcStats::levelUp()
     // "When you gain a level, in addition to increasing three primary attributes, your Health
     // will automatically increase by 10% of your Endurance attribute. If you increased Endurance this level,
     // the Health increase is calculated from the increased Endurance"
-    setHealth(getHealth().getBase() + endurance * gmst.find("fLevelUpHealthEndMult")->mValue.getFloat());
+    // Note: we should add bonus Health points to current level too.
+    float healthGain = endurance * gmst.find("fLevelUpHealthEndMult")->mValue.getFloat();
+    MWMechanics::DynamicStat<float> health(getHealth());
+    health.setBase(getHealth().getBase() + healthGain);
+    health.setCurrent(std::max(1.f, getHealth().getCurrent() + healthGain));
+    setHealth(health);
 
     setLevel(getLevel()+1);
 }

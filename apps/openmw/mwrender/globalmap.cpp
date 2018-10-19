@@ -1,7 +1,5 @@
 #include "globalmap.hpp"
 
-#include <climits>
-
 #include <osg/Image>
 #include <osg/Texture2D>
 #include <osg/Group>
@@ -273,9 +271,9 @@ namespace MWRender
 
     void GlobalMap::worldPosToImageSpace(float x, float z, float& imageX, float& imageY)
     {
-        imageX = float(x / 8192.f - mMinX) / (mMaxX - mMinX + 1);
+        imageX = float(x / float(Constants::CellSizeInUnits) - mMinX) / (mMaxX - mMinX + 1);
 
-        imageY = 1.f-float(z / 8192.f - mMinY) / (mMaxY - mMinY + 1);
+        imageY = 1.f-float(z / float(Constants::CellSizeInUnits) - mMinY) / (mMaxY - mMinY + 1);
     }
 
     void GlobalMap::cellTopLeftCornerToImageSpace(int x, int y, float& imageX, float& imageY)
@@ -565,7 +563,7 @@ namespace MWRender
 
             requestOverlayTextureUpdate(0, 0, mWidth, mHeight, osg::ref_ptr<osg::Texture2D>(), true, false);
 
-            mWorkItem = NULL;
+            mWorkItem = nullptr;
         }
     }
 

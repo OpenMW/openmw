@@ -232,7 +232,7 @@ namespace MWRender
 
         mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
 
-        if (getenv("OPENMW_DONT_PRECOMPILE") == NULL)
+        if (getenv("OPENMW_DONT_PRECOMPILE") == nullptr)
         {
             mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
             mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
@@ -336,7 +336,7 @@ namespace MWRender
     RenderingManager::~RenderingManager()
     {
         // let background loading thread finish before we delete anything else
-        mWorkQueue = NULL;
+        mWorkQueue = nullptr;
     }
 
     MWRender::Objects& RenderingManager::getObjects()
@@ -805,7 +805,7 @@ namespace MWRender
 
         cubeTexture->setFilter(osg::Texture::MIN_FILTER,osg::Texture::NEAREST);
         cubeTexture->setFilter(osg::Texture::MAG_FILTER,osg::Texture::NEAREST);
-        
+
         cubeTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         cubeTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
@@ -830,18 +830,13 @@ namespace MWRender
         stateset->addUniform(new osg::Uniform("cubeMap",0));
         stateset->addUniform(new osg::Uniform("mapping",screenshotMapping));
         stateset->setTextureAttributeAndModes(0,cubeTexture,osg::StateAttribute::ON);
-            
+
         quad->setStateSet(stateset);
-        quad->setUpdateCallback(NULL);
+        quad->setUpdateCallback(nullptr);
 
         screenshotCamera->addChild(quad);
 
-        mRootNode->addChild(screenshotCamera);
-
         renderCameraToImage(screenshotCamera,image,screenshotW,screenshotH);
-
-        screenshotCamera->removeChildren(0,screenshotCamera->getNumChildren());
-        mRootNode->removeChild(screenshotCamera);
 
         return true;
     }
@@ -867,6 +862,8 @@ namespace MWRender
         image->setDataType(GL_UNSIGNED_BYTE);
         image->setPixelFormat(texture->getInternalFormat());
 
+        mRootNode->addChild(camera);
+
         // The draw needs to complete before we can copy back our image.
         osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
         camera->setFinalDrawCallback(callback);
@@ -882,31 +879,16 @@ namespace MWRender
 
         // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the screenshot is completed
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
+
+        camera->removeChildren(0, camera->getNumChildren());
+        mRootNode->removeChild(camera);
     }
 
     void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Matrixd cameraTransform)
     {
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
-        rttCamera->setNodeMask(Mask_RenderToTexture);
-        rttCamera->attach(osg::Camera::COLOR_BUFFER, image);
-        rttCamera->setRenderOrder(osg::Camera::PRE_RENDER);
-        rttCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
-        rttCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
         rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
         rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * cameraTransform);
-
-        rttCamera->setViewport(0, 0, w, h);
-
-        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
-        texture->setInternalFormat(GL_RGB);
-        texture->setTextureSize(w, h);
-        texture->setResizeNonPowerOfTwoHint(false);
-        texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-        texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-        rttCamera->attach(osg::Camera::COLOR_BUFFER, texture);
-
-        image->setDataType(GL_UNSIGNED_BYTE);
-        image->setPixelFormat(texture->getInternalFormat());
 
         rttCamera->setUpdateCallback(new NoTraverseCallback);
         rttCamera->addChild(mSceneRoot);
@@ -916,14 +898,9 @@ namespace MWRender
 
         rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~Mask_GUI));
 
-        mRootNode->addChild(rttCamera);
-
         rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         renderCameraToImage(rttCamera.get(),image,w,h);
-
-        rttCamera->removeChildren(0, rttCamera->getNumChildren());
-        mRootNode->removeChild(rttCamera);
     }
 
     osg::Vec4f RenderingManager::getScreenBounds(const MWWorld::Ptr& ptr)
@@ -975,7 +952,7 @@ namespace MWRender
             result.mHitNormalWorld = intersection.getWorldIntersectNormal();
             result.mRatio = intersection.ratio;
 
-            PtrHolder* ptrHolder = NULL;
+            PtrHolder* ptrHolder = nullptr;
             for (osg::NodePath::const_iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
             {
                 osg::UserDataContainer* userDataContainer = (*it)->getUserDataContainer();
@@ -1113,7 +1090,7 @@ namespace MWRender
 
     void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
     {
-        NpcAnimation *anim = NULL;
+        NpcAnimation *anim = nullptr;
         if(ptr == mPlayerAnimation->getPtr())
             anim = mPlayerAnimation.get();
         else

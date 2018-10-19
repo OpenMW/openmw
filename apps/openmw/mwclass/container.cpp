@@ -74,7 +74,7 @@ namespace MWClass
         if (ref->mBase->mFlags & ESM::Container::Respawn)
         {
             MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
-            ptr.getRefData().setCustomData(NULL);
+            ptr.getRefData().setCustomData(nullptr);
         }
     }
 

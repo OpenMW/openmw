@@ -140,7 +140,7 @@ namespace MWGui
 
             // Callback removes itself when done
             if (renderInfo.getCurrentCamera())
-                renderInfo.getCurrentCamera()->setInitialDrawCallback(NULL);
+                renderInfo.getCurrentCamera()->setInitialDrawCallback(nullptr);
         }
 
     private:
@@ -169,19 +169,18 @@ namespace MWGui
         // We are already using node masks to avoid the scene from being updated/rendered, but node masks don't work for computeBound()
         mViewer->getSceneData()->setComputeBoundingSphereCallback(new DontComputeBoundCallback);
 
-        mShowWallpaper = visible && (MWBase::Environment::get().getStateManager()->getState()
-                == MWBase::StateManager::State_NoGame);
+        mVisible = visible;
+        mLoadingBox->setVisible(mVisible);
+        setVisible(true);
 
-        if (!visible)
+        if (!mVisible)
         {
+            mShowWallpaper = false;
             draw();
             return;
         }
 
-        mVisible = visible;
-        mLoadingBox->setVisible(mVisible);
-
-        setVisible(true);
+        mShowWallpaper = MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
 
         if (mShowWallpaper)
         {
@@ -208,7 +207,7 @@ namespace MWGui
         else
             mImportantLabel = false; // label was already shown on loading screen
 
-        mViewer->getSceneData()->setComputeBoundingSphereCallback(NULL);
+        mViewer->getSceneData()->setComputeBoundingSphereCallback(nullptr);
         mViewer->getSceneData()->dirtyBound();
 
         //std::cout << "loading took " << mTimer.time_m() - mLoadingOnTime << std::endl;

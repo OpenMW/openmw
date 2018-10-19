@@ -1,6 +1,7 @@
 #ifndef OPENCS_VIEW_OBJECT_H
 #define OPENCS_VIEW_OBJECT_H
 
+#include <memory>
 #include <string>
 
 #include <osg/ref_ptr>
@@ -41,6 +42,7 @@ namespace CSMWorld
 
 namespace CSVRender
 {
+    class Actor;
     class Object;
 
     // An object to attach as user data to the osg::Node, allows us to get an Object back from a Node when we are doing a ray query
@@ -98,6 +100,7 @@ namespace CSVRender
             osg::ref_ptr<osg::Node> mMarker[3];
             int mSubMode;
             float mMarkerTransparency;
+            std::unique_ptr<Actor> mActor;
 
             /// Not implemented
             Object (const Object&);

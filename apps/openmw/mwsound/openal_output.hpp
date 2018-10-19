@@ -26,10 +26,10 @@ namespace MWSound
         struct {
             bool EXT_EFX : 1;
             bool SOFT_HRTF : 1;
-        } ALC;
+        } ALC = {false, false};
         struct {
             bool SOFT_source_spatialize : 1;
-        } AL;
+        } AL = {false};
 
         typedef std::deque<ALuint> IDDq;
         IDDq mFreeSources;

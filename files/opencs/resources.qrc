@@ -15,6 +15,7 @@
         <file>clothing.png</file>
         <file>container.png</file>
         <file>creature.png</file>
+        <file>debug-profile.png</file>
         <file>dialogue-info.png</file>
         <file>dialogue-journal.png</file>
         <file>dialogue-regular.png</file>
@@ -27,34 +28,60 @@
         <file>journal-topics.png</file>
         <file>door.png</file>
         <file>enchantment.png</file>
+        <file>error-log.png</file>
         <file>faction.png</file>
         <file>filter.png</file>
         <file>global-variable.png</file>
         <file>gmst.png</file>
-        <file>Info.png</file>
+        <file>info.png</file>
         <file>ingredient.png</file>
+        <file>instance.png</file>
         <file>land-heightmap.png</file>
         <file>land-texture.png</file>
-        <file>leveled-creature.png</file>
-        <file>leveled-item.png</file>
+        <file>levelled-creature.png</file>
+        <file>levelled-item.png</file>
         <file>light.png</file>
         <file>lockpick.png</file>
         <file>magic-effect.png</file>
         <file>magicrabbit.png</file>
         <file>map.png</file>
+        <file>probe.png</file>
+        <file>menu-close.png</file>
+        <file>menu-exit.png</file>
+        <file>menu-new-addon.png</file>
+        <file>menu-new-game.png</file>
+        <file>menu-new-window.png</file>
+        <file>menu-merge.png</file>
+        <file>menu-open.png</file>
+        <file>menu-preferences.png</file>
+        <file>menu-reload.png</file>
+        <file>menu-redo.png</file>
+        <file>menu-save.png</file>
+        <file>menu-search.png</file>
+        <file>menu-status-bar.png</file>
+        <file>menu-undo.png</file>
+        <file>menu-verify.png</file>
+        <file>metadata.png</file>
         <file>miscellaneous.png</file>
         <file alias="list-modified">list-modified.png</file>
         <file>npc.png</file>
+        <file>object.png</file>
         <file>pathgrid.png</file>
         <file>potion.png</file>
-        <file>probe.png</file>
         <file>race.png</file>
         <file>random-item.png</file>
         <file>random.png</file>
         <file alias="list-removed">list-removed.png</file>
+        <file>region.png</file>
+        <file>region-map.png</file>
         <file>repair.png</file>
+        <file>run-log.png</file>
+        <file>run-openmw.png</file>
+        <file>scene.png</file>
         <file>script.png</file>
         <file>skill.png</file>
+        <file>start-script.png</file>
+        <file>stop-openmw.png</file>
         <file>sound-generator.png</file>
         <file>sound.png</file>
         <file>spell.png</file>
@@ -64,7 +91,6 @@
         <file alias="record-next">record-next.png</file>
         <file alias="record-previous">record-previous.png</file>
         <file alias="edit-delete">record-delete.png</file>
-        <file alias="edit-undo">record-revert.png</file>
         <file alias="edit-preview">record-preview.png</file>
         <file alias="edit-clone">record-clone.png</file>
         <file alias="edit-add">record-add.png</file>

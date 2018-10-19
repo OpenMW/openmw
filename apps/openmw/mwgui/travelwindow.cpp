@@ -22,8 +22,6 @@
 
 namespace MWGui
 {
-    const int TravelWindow::sLineHeight = 18;
-
     TravelWindow::TravelWindow() :
         WindowBase("openmw_travel_window.layout")
         , mCurrentY(0)
@@ -79,9 +77,11 @@ namespace MWGui
         else
             price *= std::max(1, static_cast<int>(followers.size()));
 
-        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>("SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
+        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+
+        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>("SandTextButton", 0, mCurrentY, 200, lineHeight, MyGUI::Align::Default);
         toAdd->setEnabled(price <= playerGold);
-        mCurrentY += sLineHeight;
+        mCurrentY += lineHeight;
         if(interior)
             toAdd->setUserString("interior","y");
         else
@@ -92,7 +92,7 @@ namespace MWGui
         toAdd->setUserString("price",oss.str());
 
         toAdd->setCaptionWithReplacing("#{sCell=" + name + "}   -   " + MyGUI::utility::toString(price)+"#{sgp}");
-        toAdd->setSize(mDestinationsView->getWidth(),sLineHeight);
+        toAdd->setSize(mDestinationsView->getWidth(),lineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &TravelWindow::onMouseWheel);
         toAdd->setUserString("Destination", name);
         toAdd->setUserData(pos);

@@ -37,9 +37,9 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
 
     // check the number of pathgrid points
     if (pathgrid.mData.mS2 < static_cast<int>(pathgrid.mPoints.size()))
-        messages.add (id, pathgrid.mId + " has less points than expected", "", CSMDoc::Message::Severity_Error);
+        messages.add (id, "Less points than expected", "", CSMDoc::Message::Severity_Error);
     else if (pathgrid.mData.mS2 > static_cast<int>(pathgrid.mPoints.size()))
-        messages.add (id, pathgrid.mId + " has more points than expected", "", CSMDoc::Message::Severity_Error);
+        messages.add (id, "More points than expected", "", CSMDoc::Message::Severity_Error);
 
     std::vector<CSMTools::Point> pointList(pathgrid.mPoints.size());
     std::vector<int> duplList;
@@ -56,9 +56,8 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
                 if (pointList[pathgrid.mEdges[i].mV0].mOtherIndex[j] == pathgrid.mEdges[i].mV1)
                 {
                     std::ostringstream ss;
-                    ss << "has a duplicate edge between points" << pathgrid.mEdges[i].mV0
-                        << " and " << pathgrid.mEdges[i].mV1;
-                    messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Error);
+                    ss << "Duplicate edge between points #" << pathgrid.mEdges[i].mV0 << " and #" << pathgrid.mEdges[i].mV1;
+                    messages.add (id, ss.str(), "", CSMDoc::Message::Severity_Error);
                     break;
                 }
             }
@@ -70,8 +69,8 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
         else
         {
             std::ostringstream ss;
-            ss << " has an edge connecting a non-existent point " << pathgrid.mEdges[i].mV0;
-            messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Error);
+            ss << "An edge is connected to a non-existent point #" << pathgrid.mEdges[i].mV0;
+            messages.add (id, ss.str(), "", CSMDoc::Message::Severity_Error);
         }
     }
 
@@ -93,18 +92,15 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
             if (!foundReverse)
             {
                 std::ostringstream ss;
-                ss << " has a missing edge between points " << i << " and " << pointList[i].mOtherIndex[j];
-                messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Error);
+                ss << "Missing edge between points #" << i << " and #" << pointList[i].mOtherIndex[j];
+                messages.add (id, ss.str(), "", CSMDoc::Message::Severity_Error);
             }
         }
 
         // check duplicate points
         // FIXME: how to do this efficiently?
-        for (unsigned int j = 0; j < pathgrid.mPoints.size(); ++j)
+        for (unsigned int j = 0; j != i; ++j)
         {
-            if (j == i)
-                continue;
-
             if (pathgrid.mPoints[i].mX == pathgrid.mPoints[j].mX &&
                 pathgrid.mPoints[i].mY == pathgrid.mPoints[j].mY &&
                 pathgrid.mPoints[i].mZ == pathgrid.mPoints[j].mZ)
@@ -113,11 +109,9 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
                 if (it == duplList.end())
                 {
                     std::ostringstream ss;
-                    ss << " has a duplicated point (" << i
-                        << ") x=" << pathgrid.mPoints[i].mX
-                        << ", y=" << pathgrid.mPoints[i].mY
-                        << ", z=" << pathgrid.mPoints[i].mZ;
-                    messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Warning);
+                    ss << "Point #" << i << " duplicates point #" << j
+                    << " (" << pathgrid.mPoints[i].mX << ", " << pathgrid.mPoints[i].mY << ", " << pathgrid.mPoints[i].mZ << ")";
+                    messages.add (id, ss.str(), "", CSMDoc::Message::Severity_Warning);
 
                     duplList.push_back(i);
                     break;
@@ -132,11 +126,11 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
         if (pointList[i].mConnectionNum == 0)
         {
             std::ostringstream ss;
-            ss << " has an orphaned point (" << i
-                << ") x=" << pathgrid.mPoints[i].mX
-                << ", y=" << pathgrid.mPoints[i].mY
-                << ", z=" << pathgrid.mPoints[i].mZ;
-            messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Warning);
+            ss << "Point #" << i << " ("
+            << pathgrid.mPoints[i].mX << ", "
+            << pathgrid.mPoints[i].mY << ", "
+            << pathgrid.mPoints[i].mZ << ") is disconnected from other points";
+            messages.add (id, ss.str(), "", CSMDoc::Message::Severity_Warning);
         }
     }
 

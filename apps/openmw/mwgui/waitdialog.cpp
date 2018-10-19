@@ -83,7 +83,7 @@ namespace MWGui
 
     void WaitDialog::setPtr(const MWWorld::Ptr &ptr)
     {
-        setCanRest(!ptr.isEmpty() || MWBase::Environment::get().getWorld ()->canRest () == 0);
+        setCanRest(!ptr.isEmpty() || MWBase::Environment::get().getWorld ()->canRest () == MWBase::World::Rest_Allowed);
 
         if (mUntilHealedButton->getVisible())
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mUntilHealedButton);
@@ -120,9 +120,14 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->popGuiMode ();
         }
 
-        int canRest = MWBase::Environment::get().getWorld ()->canRest ();
+        MWBase::World::RestPermitted canRest = MWBase::Environment::get().getWorld ()->canRest ();
 
-        if (canRest == 2)
+        if (canRest == MWBase::World::Rest_EnemiesAreNearby)
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
+            MWBase::Environment::get().getWindowManager()->popGuiMode ();
+        }
+        else if (canRest == MWBase::World::Rest_PlayerIsUnderwater)
         {
             // resting underwater or mid-air not allowed
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage1}");
@@ -276,7 +281,7 @@ namespace MWGui
         mSleeping = canRest;
 
         Gui::Box* box = dynamic_cast<Gui::Box*>(mMainWidget);
-        if (box == NULL)
+        if (box == nullptr)
             throw std::runtime_error("main widget must be a box");
         box->notifyChildrenSizeChanged();
         center();

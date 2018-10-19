@@ -54,9 +54,9 @@ void DebugDrawer::destroyGeometry()
     if (mGeometry)
     {
         mParentNode->removeChild(mGeometry);
-        mGeometry = NULL;
-        mVertices = NULL;
-        mDrawArrays = NULL;
+        mGeometry = nullptr;
+        mVertices = nullptr;
+        mDrawArrays = nullptr;
     }
 }
 

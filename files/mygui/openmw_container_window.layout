@@ -9,7 +9,7 @@
         <Widget type="ItemView" skin="MW_ItemView" position="5 5 575 225" name="ItemView" align="Left Top Stretch">
         </Widget>
 
-        <Widget type="HBox" position="0 235 580 24" align="Right Bottom">
+        <Widget type="HBox" position="0 235 580 28" align="Right Bottom">
             <Widget type="Spacer"/>
             <Widget type="AutoSizedButton" skin="MW_Button" name="DisposeCorpseButton" align="Right Bottom">
                 <Property key="Caption" value="#{sDisposeofCorpse}"/>

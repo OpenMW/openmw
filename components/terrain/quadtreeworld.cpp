@@ -4,6 +4,8 @@
 
 #include <sstream>
 
+#include <components/misc/constants.hpp>
+
 #include "quadtreenode.hpp"
 #include "storage.hpp"
 #include "viewdata.hpp"
@@ -81,7 +83,7 @@ public:
     {
         float dist = distanceToBox(node->getBoundingBox(), eyePoint);
         int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()/mMinSize));
-        int lodLevel = Log2(static_cast<unsigned int>(dist/(8192*mMinSize)));
+        int lodLevel = Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*mMinSize)));
 
         return nativeLodLevel <= lodLevel;
     }
@@ -94,8 +96,8 @@ class RootNode : public QuadTreeNode
 {
 public:
     RootNode(float size, const osg::Vec2f& center)
-        : QuadTreeNode(NULL, Root, size, center)
-        , mWorld(NULL)
+        : QuadTreeNode(nullptr, Root, size, center)
+        , mWorld(nullptr)
     {
     }
 
@@ -315,7 +317,7 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, ChunkManager* chunk
         unsigned int lodFlags = getLodFlags(entry.mNode, ourLod, vd);
         if (lodFlags != entry.mLodFlags)
         {
-            entry.mRenderingNode = NULL;
+            entry.mRenderingNode = nullptr;
             entry.mLodFlags = lodFlags;
         }
     }
@@ -365,7 +367,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
             if (udc && udc->getUserData())
             {
                 mCompositeMapRenderer->setImmediate(static_cast<CompositeMap*>(udc->getUserData()));
-                udc->setUserData(NULL);
+                udc->setUserData(nullptr);
             }
             entry.mRenderingNode->accept(nv);
         }
@@ -428,7 +430,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &eyePoint)
     ensureQuadTreeBuilt();
 
     ViewData* vd = static_cast<ViewData*>(view);
-    traverse(mRootNode.get(), vd, NULL, mRootNode->getLodCallback(), eyePoint, false);
+    traverse(mRootNode.get(), vd, nullptr, mRootNode->getLodCallback(), eyePoint, false);
 
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {

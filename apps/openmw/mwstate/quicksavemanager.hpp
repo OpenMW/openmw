@@ -28,7 +28,7 @@ namespace MWState{
         const Slot *getNextQuickSaveSlot();
         ///< Get the slot that the next quicksave should use.
         ///
-        ///\return Either the oldest quicksave slot visited, or NULL if a new slot can be made
+        ///\return Either the oldest quicksave slot visited, or nullptr if a new slot can be made
     };
 }
 

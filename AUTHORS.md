@@ -148,6 +148,7 @@ Programmers
     Scott Howard
     scrawl
     Sebastian Wick (swick)
+    Sergey Fukanchik
     Sergey Shambir
     ShadowRadiance
     Siimacore

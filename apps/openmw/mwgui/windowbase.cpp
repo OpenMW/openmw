@@ -33,11 +33,11 @@ void WindowBase::setVisible(bool visible)
     if (!visible)
     {
         MyGUI::Widget* keyFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-        while (keyFocus != mMainWidget && keyFocus != NULL)
+        while (keyFocus != mMainWidget && keyFocus != nullptr)
             keyFocus = keyFocus->getParent();
 
         if (keyFocus == mMainWidget)
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(nullptr);
     }
 }
 

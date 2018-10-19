@@ -402,8 +402,10 @@ namespace MWWorld
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
-            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreDoors=false) override;
+            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, int mask) override;
             ///< cast a Ray and return true if there is an object in the ray path.
+
+            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) override;
 
             bool toggleCollisionMode() override;
             ///< Toggle collision mode for player. If disabled player object should ignore
@@ -551,12 +553,10 @@ namespace MWWorld
 
             void enableActorCollision(const MWWorld::Ptr& actor, bool enable) override;
 
-            int canRest() override;
-            ///< check if the player is allowed to rest \n
-            /// 0 - yes \n
-            /// 1 - only waiting \n
-            /// 2 - player is underwater \n
-            /// 3 - enemies are nearby (not implemented)
+            RestPermitted canRest() const override;
+            ///< check if the player is allowed to rest
+
+            void rest() override;
 
             /// \todo Probably shouldn't be here
             MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) override;

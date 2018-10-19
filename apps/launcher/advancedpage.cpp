@@ -72,6 +72,7 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(canLootDuringDeathAnimationCheckBox, "can loot during death animation", "Game");
     loadSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
     loadSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
+    loadSettingBool(classicReflectedAbsorbSpellsCheckBox, "classic reflected absorb spells behavior", "Game");
     loadSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
     loadSettingBool(chargeForEveryFollowerCheckBox, "charge for every follower travelling", "Game");
     loadSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
@@ -131,6 +132,7 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
     saveSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
     saveSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
+    saveSettingBool(classicReflectedAbsorbSpellsCheckBox, "classic reflected absorb spells behavior", "Game");
     saveSettingBool(chargeForEveryFollowerCheckBox, "charge for every follower travelling", "Game");
     saveSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
     saveSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");

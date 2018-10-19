@@ -1,9 +1,5 @@
 #include "skillcheck.hpp"
 
-#include <sstream>
-
-#include <components/esm/loadskil.hpp>
-
 #include "../prefs/state.hpp"
 
 #include "../world/universalid.hpp"
@@ -33,16 +29,12 @@ void CSMTools::SkillCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Skill, skill.mId);
 
+    if (skill.mDescription.empty())
+        messages.add(id, "Description is missing", "", CSMDoc::Message::Severity_Warning);
+
     for (int i=0; i<4; ++i)
         if (skill.mData.mUseValue[i]<0)
         {
-            std::ostringstream stream;
-
-            stream << "Use value #" << i << " of " << skill.mId << " is negative";
-
-            messages.push_back (std::make_pair (id, stream.str()));
+            messages.add(id, "Use value #" + std::to_string(i) + " is negative", "", CSMDoc::Message::Severity_Error);
         }
-
-    if (skill.mDescription.empty())
-        messages.push_back (std::make_pair (id, skill.mId + " has an empty description"));
 }

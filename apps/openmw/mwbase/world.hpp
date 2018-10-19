@@ -297,8 +297,10 @@ namespace MWBase
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
-            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreDoors=false) = 0;
+            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, int mask) = 0;
             ///< cast a Ray and return true if there is an object in the ray path.
+
+            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
 
             virtual bool toggleCollisionMode() = 0;
             ///< Toggle collision mode for player. If disabled player object should ignore
@@ -438,12 +440,16 @@ namespace MWBase
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
 
-            virtual int canRest() = 0;
-            ///< check if the player is allowed to rest \n
-            /// 0 - yes \n
-            /// 1 - only waiting \n
-            /// 2 - player is underwater \n
-            /// 3 - enemies are nearby (not implemented)
+            enum RestPermitted
+            {
+                Rest_Allowed = 0,
+                Rest_OnlyWaiting = 1,
+                Rest_PlayerIsUnderwater = 2,
+                Rest_EnemiesAreNearby = 3
+            };
+
+            /// check if the player is allowed to rest
+            virtual RestPermitted canRest() const = 0;
 
             /// \todo Probably shouldn't be here
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) = 0;
@@ -566,6 +572,8 @@ namespace MWBase
             virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;
 
             virtual bool isPlayerInJail() const = 0;
+
+            virtual void rest() = 0;
 
             virtual void setPlayerTraveling(bool traveling) = 0;
             virtual bool isPlayerTraveling() const = 0;
