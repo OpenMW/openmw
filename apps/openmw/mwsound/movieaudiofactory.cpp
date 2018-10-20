@@ -48,7 +48,7 @@ namespace MWSound
         {
             ssize_t clock_delay = (mFrameSize-mFramePos) / av_get_channel_layout_nb_channels(mOutputChannelLayout) /
                                   av_get_bytes_per_sample(mOutputSampleFormat);
-            return (size_t)(mAudioClock*mAVStream->codec->sample_rate) - clock_delay;
+            return (size_t)(mAudioClock*mAudioContext->sample_rate) - clock_delay;
         }
 
         std::string getStreamName()
@@ -61,7 +61,7 @@ namespace MWSound
 
         virtual double getAudioClock()
         {
-            return (double)getSampleOffset()/(double)mAVStream->codec->sample_rate -
+            return (double)getSampleOffset()/(double)mAudioContext->sample_rate -
                    MWBase::Environment::get().getSoundManager()->getTrackTimeDelay(mAudioTrack);
         }
 
