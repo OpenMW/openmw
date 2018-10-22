@@ -27,7 +27,7 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadow
     if (colorMode == 3)
     {
         diffuse = gl_FrontMaterial.diffuse;
-        ambient - vertexColor.xyz;
+        ambient = vertexColor.xyz;
     }
     else if (colorMode == 2)
     {
