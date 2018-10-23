@@ -291,8 +291,8 @@ namespace MWWorld
             ///< Adjust position after load to be on ground. Must be called after model load.
             /// @param force do this even if the ptr is flying
 
-            void fixPosition (const Ptr& actor) override;
-            ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
+            void fixPosition () override;
+            ///< Attempt to fix position so that the player is not stuck inside the geometry.
 
             void enable (const Ptr& ptr) override;
 

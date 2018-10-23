@@ -738,8 +738,7 @@ namespace MWScript
 
             virtual void execute (Interpreter::Runtime& runtime)
             {
-                const MWWorld::Ptr ptr = MWMechanics::getPlayer();
-                MWBase::Environment::get().getWorld()->fixPosition(ptr);
+                MWBase::Environment::get().getWorld()->fixPosition();
             }
         };
 

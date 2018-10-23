@@ -262,8 +262,8 @@ namespace MWBase
             ///< Adjust position after load to be on ground. Must be called after model load.
             /// @param force do this even if the ptr is flying
 
-            virtual void fixPosition (const MWWorld::Ptr& actor) = 0;
-            ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
+            virtual void fixPosition () = 0;
+            ///< Attempt to fix position so that the player is not stuck inside the geometry.
 
             /// @note No-op for items in containers. Use ContainerStore::removeItem instead.
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
