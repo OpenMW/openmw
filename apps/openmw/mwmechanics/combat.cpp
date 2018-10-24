@@ -371,10 +371,17 @@ namespace MWMechanics
             return;
 
         const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
-        if(weaphashealth)
+        if (weaphashealth)
         {
-            int weaphealth = weapon.getClass().getItemHealth(weapon);
             int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
+
+            if (weapmaxhealth == 0)
+            {
+                damage = 0;
+                return;
+            }
+
+            int weaphealth = weapon.getClass().getItemHealth(weapon);
             damage *= (float(weaphealth) / weapmaxhealth);
         }
 

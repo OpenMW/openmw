@@ -35,8 +35,15 @@ namespace
         float price = static_cast<float>(item.getClass().getValue(item));
         if (item.getClass().hasItemHealth(item))
         {
-            price *= item.getClass().getItemHealth(item);
-            price /= item.getClass().getItemMaxHealth(item);
+            if (item.getClass().getItemMaxHealth(item) == 0)
+            {
+                price = 0;
+            }
+            else
+            {
+                price *= item.getClass().getItemHealth(item);
+                price /= item.getClass().getItemMaxHealth(item);
+            }
         }
         return static_cast<int>(price * count);
     }

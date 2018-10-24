@@ -1369,8 +1369,22 @@ namespace MWGui
         const ESM::Enchantment* ench = mStore->get<ESM::Enchantment>()
                 .find(item.getClass().getEnchantment(item));
 
-        int chargePercent = (item.getCellRef().getEnchantmentCharge() == -1) ? 100
-                : static_cast<int>(item.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
+        int chargePercent = 100;
+
+        int maxEnchCharge = ench->mData.mCharge;
+        if (maxEnchCharge == 0)
+        {
+            chargePercent = 0;
+        }
+        else
+        {
+            float enchCharge = item.getCellRef().getEnchantmentCharge();
+            if (enchCharge != -1)
+            {
+                chargePercent = static_cast<int>(enchCharge / static_cast<float>(maxEnchCharge) * 100);
+            }
+        }
+
         mHud->setSelectedEnchantItem(item, chargePercent);
         mSpellWindow->setTitle(item.getClass().getName(item));
     }
@@ -1386,7 +1400,16 @@ namespace MWGui
         int durabilityPercent = 100;
         if (item.getClass().hasItemHealth(item))
         {
-            durabilityPercent = static_cast<int>(item.getClass().getItemHealth(item) / static_cast<float>(item.getClass().getItemMaxHealth(item)) * 100);
+            int weapmaxhealth = item.getClass().getItemMaxHealth(item);
+            if (weapmaxhealth == 0)
+            {
+                durabilityPercent = 0;
+            }
+            else
+            {
+                int weaphealth = item.getClass().getItemHealth(item);
+                durabilityPercent = static_cast<int>(weaphealth / static_cast<float>(weapmaxhealth) * 100);
+            }
         }
         mHud->setSelectedWeapon(item, durabilityPercent);
         mInventoryWindow->setTitle(item.getClass().getName(item));
