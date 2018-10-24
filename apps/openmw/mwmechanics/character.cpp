@@ -979,17 +979,13 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
             }
         }
 
-        if (soundgen == "land") // Morrowind ignores land soundgen for some reason
-            return;
-
         std::string sound = mPtr.getClass().getSoundIdFromSndGen(mPtr, soundgen);
         if(!sound.empty())
         {
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            if(soundgen == "left" || soundgen == "right")
+            // NB: landing sound is not played for NPCs here
+            if(soundgen == "left" || soundgen == "right" || soundgen == "land")
             {
-                // Don't make foot sounds local for the player, it makes sense to keep them
-                // positioned on the ground.
                 sndMgr->playSound3D(mPtr, sound, volume, pitch, MWSound::Type::Foot,
                                     MWSound::PlayMode::NoPlayerLocal);
             }
@@ -1281,6 +1277,18 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
     // We should not play equipping animation and sound during weapon->weapon transition
     bool isStillWeapon = weaptype > WeapType_HandToHand && weaptype < WeapType_Spell &&
                             mWeaponType > WeapType_HandToHand && mWeaponType < WeapType_Spell;
+
+    // If the current weapon type was changed in the middle of attack (e.g. by Equip console command or when bound spell expires),
+    // we should force actor to the "weapon equipped" state, interrupt attack and update animations.
+    if (isStillWeapon && mWeaponType != weaptype && mUpperBodyState > UpperCharState_WeapEquiped)
+    {
+        forcestateupdate = true;
+        mUpperBodyState = UpperCharState_WeapEquiped;
+        mAttackingOrSpell = false;
+        mAnimation->disable(mCurrentWeapon);
+        if (mPtr == getPlayer())
+            MWBase::Environment::get().getWorld()->getPlayer().setAttackingOrSpell(false);
+    }
 
     if(!isKnockedOut() && !isKnockedDown() && !isRecovery())
     {
@@ -2071,11 +2079,17 @@ void CharacterController::update(float duration)
                 }
             }
 
-            // Play landing sound
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            std::string sound = cls.getSoundIdFromSndGen(mPtr, "land");
-            if (!sound.empty())
+            // Play landing sound for NPCs
+            if (mPtr.getClass().isNpc())
+            {
+                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                std::string sound = "DefaultLand";
+                osg::Vec3f pos(mPtr.getRefData().getPosition().asVec3());
+                if (world->isUnderwater(mPtr.getCell(), pos) || world->isWalkingOnWater(mPtr))
+                    sound = "DefaultLandWater";
+
                 sndMgr->playSound3D(mPtr, sound, 1.f, 1.f, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
+            }
         }
         else
         {

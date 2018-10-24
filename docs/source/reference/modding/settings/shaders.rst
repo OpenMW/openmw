@@ -1,5 +1,5 @@
-Shader Settings
-###############
+Shaders Settings
+################
 
 .. _force-shaders-label:
 force shaders

@@ -262,8 +262,8 @@ namespace MWBase
             ///< Adjust position after load to be on ground. Must be called after model load.
             /// @param force do this even if the ptr is flying
 
-            virtual void fixPosition (const MWWorld::Ptr& actor) = 0;
-            ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
+            virtual void fixPosition () = 0;
+            ///< Attempt to fix position so that the player is not stuck inside the geometry.
 
             /// @note No-op for items in containers. Use ContainerStore::removeItem instead.
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
@@ -297,8 +297,10 @@ namespace MWBase
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
-            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreDoors=false) = 0;
+            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, int mask) = 0;
             ///< cast a Ray and return true if there is an object in the ray path.
+
+            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
 
             virtual bool toggleCollisionMode() = 0;
             ///< Toggle collision mode for player. If disabled player object should ignore

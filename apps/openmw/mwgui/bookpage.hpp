@@ -43,6 +43,7 @@ namespace MWGui
         float advance;
         float bearingX;
         float bearingY;
+        bool charFound;
         MyGUI::FloatRect uvRect;
 
         GlyphInfo(MyGUI::IFont* font, MyGUI::Char ch)
@@ -61,15 +62,17 @@ namespace MWGui
                 height = (int) gi->height / scale;
                 advance = (int) gi->advance / scale;
                 uvRect = gi->uvRect;
+                charFound = true;
             }
             else
             {
-                codePoint = -1;
+                codePoint = 0;
                 bearingX = 0;
                 bearingY = 0;
                 width = 0;
                 height = 0;
                 advance = 0;
+                charFound = false;
             }
         }
     };

@@ -130,15 +130,20 @@
     Bug #4633: Sneaking stance affects speed even if the actor is not able to crouch
     Bug #4641: GetPCJumping is handled incorrectly
     Bug #4644: %Name should be available for all actors, not just for NPCs
+    Bug #4646: Weapon force-equipment messes up ongoing attack animations
     Bug #4648: Hud thinks that throwing weapons have condition
     Bug #4649: Levelup fully restores health
     Bug #4653: Length of non-ASCII strings is handled incorrectly in ESM reader
     Bug #4654: Editor: UpdateVisitor does not initialize skeletons for animated objects
+    Bug #4656: Combat AI: back up behaviour is incorrect
     Bug #4668: Editor: Light source color is displayed as an integer
     Bug #4669: ToggleCollision should trace the player down after collision being enabled
     Bug #4671: knownEffect functions should use modified Alchemy skill
     Bug #4672: Pitch factor is handled incorrectly for crossbow animations
     Bug #4674: Journal can be opened when settings window is open
+    Bug #4677: Crash in ESM reader when NPC record has DNAM record without DODT one
+    Bug #4678: Crash in ESP parser when SCVR has no variable names
+    Bug #4685: Missing sound causes an exception inside Say command
     Feature #912: Editor: Add missing icons to UniversalId tables
     Feature #1221: Editor: Creature/NPC rendering
     Feature #1617: Editor: Enchantment effect record verifier
@@ -153,6 +158,7 @@
     Feature #4012: Editor: Write a log file if OpenCS crashes
     Feature #4222: 360° screenshots
     Feature #4256: Implement ToggleBorders (TB) console command
+    Feature #4285: Support soundgen calls for activators
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
     Feature #4345: Add equivalents for the command line commands to Launcher
     Feature #4404: Editor: All EnumDelegate fields should have their items sorted alphabetically
@@ -172,6 +178,7 @@
     Feature #4632: AI priority: utilize vanilla AI GMSTs for priority rating
     Feature #4636: Use sTo GMST in spellmaking menu
     Feature #4642: Batching potion creation
+    Feature #4682: Use the collision box from basic creature mesh if the X one have no collisions
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test
     Task #4605: Optimize skinning
