@@ -190,12 +190,6 @@ namespace
         {
         }
 
-        RemoveFinishedCallbackVisitor(int effectId)
-            : RemoveVisitor()
-            , mHasMagicEffects(false)
-        {
-        }
-
         virtual void apply(osg::Node &node)
         {
             traverse(node);
@@ -228,9 +222,6 @@ namespace
         virtual void apply(osg::Geometry&)
         {
         }
-
-    private:
-        int mEffectId;
     };
 
     class RemoveCallbackVisitor : public RemoveVisitor
