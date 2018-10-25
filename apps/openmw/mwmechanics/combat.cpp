@@ -373,16 +373,7 @@ namespace MWMechanics
         const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
         if (weaphashealth)
         {
-            int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
-
-            if (weapmaxhealth == 0)
-            {
-                damage = 0;
-                return;
-            }
-
-            int weaphealth = weapon.getClass().getItemHealth(weapon);
-            damage *= (float(weaphealth) / weapmaxhealth);
+            damage *= weapon.getClass().getItemNormalizedHealth(weapon);
         }
 
         static const float fDamageStrengthBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()

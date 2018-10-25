@@ -1400,17 +1400,9 @@ namespace MWGui
         int durabilityPercent = 100;
         if (item.getClass().hasItemHealth(item))
         {
-            int weapmaxhealth = item.getClass().getItemMaxHealth(item);
-            if (weapmaxhealth == 0)
-            {
-                durabilityPercent = 0;
-            }
-            else
-            {
-                int weaphealth = item.getClass().getItemHealth(item);
-                durabilityPercent = static_cast<int>(weaphealth / static_cast<float>(weapmaxhealth) * 100);
-            }
+            durabilityPercent = static_cast<int>(item.getClass().getItemNormalizedHealth(item));
         }
+
         mHud->setSelectedWeapon(item, durabilityPercent);
         mInventoryWindow->setTitle(item.getClass().getName(item));
     }
