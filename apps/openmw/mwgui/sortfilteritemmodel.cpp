@@ -86,66 +86,24 @@ namespace
             if (!leftName.empty())
             {
                 const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(leftName);
-
                 if (ench)
                 {
                     if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
-                    {
                         leftChargePercent = 101;
-                    }
                     else
-                    {
-                        int maxEnchCharge = ench->mData.mCharge;
-                        if (maxEnchCharge == 0)
-                        {
-                            leftChargePercent = 0;
-                        }
-                        else
-                        {
-                            float enchCharge = left.mBase.getCellRef().getEnchantmentCharge();
-                            if (enchCharge == -1)
-                            {
-                                leftChargePercent = 100;
-                            }
-                            else
-                            {
-                                leftChargePercent = static_cast<int>(enchCharge / static_cast<float>(maxEnchCharge) * 100);
-                            }
-                        }
-                    }
+                        leftChargePercent = static_cast<int>(left.mBase.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
                 }
             }
 
             if (!rightName.empty())
             {
                 const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(rightName);
-                
                 if (ench)
                 {
                     if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
-                    {
                         rightChargePercent = 101;
-                    }
                     else
-                    {
-                        int maxEnchCharge = ench->mData.mCharge;
-                        if (maxEnchCharge == 0)
-                        {
-                            rightChargePercent = 0;
-                        }
-                        else
-                        {
-                            float enchCharge = right.mBase.getCellRef().getEnchantmentCharge();
-                            if (enchCharge == -1)
-                            {
-                                rightChargePercent = 100;
-                            }
-                            else
-                            {
-                                rightChargePercent = static_cast<int>(enchCharge / static_cast<float>(maxEnchCharge) * 100);
-                            }
-                        }
-                    }
+                        rightChargePercent = static_cast<int>(right.mBase.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
                 }
             }
 

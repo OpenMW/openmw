@@ -1369,22 +1369,7 @@ namespace MWGui
         const ESM::Enchantment* ench = mStore->get<ESM::Enchantment>()
                 .find(item.getClass().getEnchantment(item));
 
-        int chargePercent = 100;
-
-        int maxEnchCharge = ench->mData.mCharge;
-        if (maxEnchCharge == 0)
-        {
-            chargePercent = 0;
-        }
-        else
-        {
-            float enchCharge = item.getCellRef().getEnchantmentCharge();
-            if (enchCharge != -1)
-            {
-                chargePercent = static_cast<int>(enchCharge / static_cast<float>(maxEnchCharge) * 100);
-            }
-        }
-
+        int chargePercent = static_cast<int>(item.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
         mHud->setSelectedEnchantItem(item, chargePercent);
         mSpellWindow->setTitle(item.getClass().getName(item));
     }
@@ -1402,7 +1387,6 @@ namespace MWGui
         {
             durabilityPercent = static_cast<int>(item.getClass().getItemNormalizedHealth(item));
         }
-
         mHud->setSelectedWeapon(item, durabilityPercent);
         mInventoryWindow->setTitle(item.getClass().getName(item));
     }

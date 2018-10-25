@@ -34,8 +34,9 @@ namespace
     {
         float price = static_cast<float>(item.getClass().getValue(item));
         if (item.getClass().hasItemHealth(item))
+        {
             price *= item.getClass().getItemNormalizedHealth(item);
-
+        }
         return static_cast<int>(price * count);
     }
 
