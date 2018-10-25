@@ -6,6 +6,7 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/resource/bulletshape.hpp>
+#include <components/debug/debuglog.hpp>
 
 #include "../mwworld/class.hpp"
 
@@ -27,6 +28,31 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
 
     mHalfExtents = shape->mCollisionBoxHalfExtents;
     mMeshTranslation = shape->mCollisionBoxTranslate;
+
+    // We can not create actor without collisions - he will fall through the ground.
+    // In this case we should autogenerate collision box based on mesh shape
+    // (NPCs have bodyparts and use a different approach)
+    if (!ptr.getClass().isNpc() && mHalfExtents.length2() == 0.f)
+    {
+        const Resource::BulletShape* collisionShape = shape.get();
+        if (collisionShape && collisionShape->mCollisionShape)
+        {
+            btTransform transform;
+            transform.setIdentity();
+            btVector3 min;
+            btVector3 max;
+
+            collisionShape->mCollisionShape->getAabb(transform, min, max);
+            mHalfExtents.x() = (max[0] - min[0])/2.f;
+            mHalfExtents.y() = (max[1] - min[1])/2.f;
+            mHalfExtents.z() = (max[2] - min[2])/2.f;
+
+            mMeshTranslation = osg::Vec3f(0.f, 0.f, mHalfExtents.z());
+        }
+
+        if (mHalfExtents.length2() == 0.f)
+            Log(Debug::Error) << "Error: Failed to calculate bounding box for actor \"" << ptr.getCellRef().getRefId() << "\".";
+    }
 
     // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
     if (std::abs(mHalfExtents.x()-mHalfExtents.y())<mHalfExtents.x()*0.05 && mHalfExtents.z() >= mHalfExtents.x())
