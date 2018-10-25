@@ -632,24 +632,26 @@ namespace MWClass
         if(type >= 0)
         {
             std::vector<const ESM::SoundGenerator*> sounds;
+            std::vector<const ESM::SoundGenerator*> fallbacksounds;
 
             MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
 
             const std::string& ourId = (ref->mBase->mOriginal.empty()) ? ptr.getCellRef().getRefId() : ref->mBase->mOriginal;
 
             MWWorld::Store<ESM::SoundGenerator>::iterator sound = store.begin();
-            while(sound != store.end())
+            while (sound != store.end())
             {
                 if (type == sound->mType && !sound->mCreature.empty() && (Misc::StringUtils::ciEqual(ourId, sound->mCreature)))
                     sounds.push_back(&*sound);
+                if (type == sound->mType && sound->mCreature.empty())
+                    fallbacksounds.push_back(&*sound);
                 ++sound;
             }
-            if(!sounds.empty())
+            if (!sounds.empty())
                 return sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
+            if (!fallbacksounds.empty())
+                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size())]->mSound;
         }
-
-        if (type == ESM::SoundGenerator::Land)
-            return "Body Fall Large";
 
         return "";
     }
