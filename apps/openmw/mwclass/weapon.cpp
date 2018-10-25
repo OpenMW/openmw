@@ -383,7 +383,7 @@ namespace MWClass
 
     std::pair<int, std::string> Weapon::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
     {
-        if (hasItemHealth(ptr) && ptr.getCellRef().getCharge() == 0)
+        if (hasItemHealth(ptr) && getItemHealth(ptr) == 0)
             return std::make_pair(0, "#{sInventoryMessage1}");
 
         // Do not allow equip weapons from inventory during attack

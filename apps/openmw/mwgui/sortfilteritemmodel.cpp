@@ -91,8 +91,7 @@ namespace
                     if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
                         leftChargePercent = 101;
                     else
-                        leftChargePercent = (left.mBase.getCellRef().getEnchantmentCharge() == -1) ? 100
-                            : static_cast<int>(left.mBase.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
+                        leftChargePercent = static_cast<int>(left.mBase.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
                 }
             }
 
@@ -104,8 +103,7 @@ namespace
                     if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
                         rightChargePercent = 101;
                     else
-                        rightChargePercent = (right.mBase.getCellRef().getEnchantmentCharge() == -1) ? 100
-                            : static_cast<int>(right.mBase.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
+                        rightChargePercent = static_cast<int>(right.mBase.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
                 }
             }
 

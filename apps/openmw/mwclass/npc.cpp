@@ -1148,9 +1148,7 @@ namespace MWClass
                 const bool hasHealth = it->getClass().hasItemHealth(*it);
                 if (hasHealth)
                 {
-                    int armorHealth = it->getClass().getItemHealth(*it);
-                    int armorMaxHealth = it->getClass().getItemMaxHealth(*it);
-                    ratings[i] *= (float(armorHealth) / armorMaxHealth);
+                    ratings[i] *= it->getClass().getItemNormalizedHealth(*it);
                 }
             }
         }
