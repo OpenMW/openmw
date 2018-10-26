@@ -3,13 +3,66 @@
 #include <components/debug/debuglog.hpp>
 
 // OpenGL constants not provided by OSG:
-#define GL_DEBUG_OUTPUT 0x92E0
-#define GL_DEBUG_SEVERITY_MEDIUM 0x9147
-#define GL_DEBUG_TYPE_ERROR 0x824C
+#include <SDL_opengl_glext.h>
 
 void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
 {
-    Log(Debug::Error) << message;
+    std::string srcStr;
+    switch (source)
+    {
+    case GL_DEBUG_SOURCE_API:
+        srcStr = "API";
+        break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+        srcStr = "WINDOW_SYSTEM";
+        break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER:
+        srcStr = "SHADER_COMPILER";
+        break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY:
+        srcStr = "THIRD_PARTY";
+        break;
+    case GL_DEBUG_SOURCE_APPLICATION:
+        srcStr = "APPLICATION";
+        break;
+    case GL_DEBUG_SOURCE_OTHER:
+        srcStr = "OTHER";
+        break;
+    default:
+        srcStr = "UNDEFINED";
+        break;
+    }
+
+    std::string typeStr;
+
+    Debug::Level logSeverity = Debug::Warning;
+    switch (type)
+    {
+    case GL_DEBUG_TYPE_ERROR:
+        typeStr = "ERROR";
+        logSeverity = Debug::Error;
+        break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+        typeStr = "DEPRECATED_BEHAVIOR";
+        break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+        typeStr = "UNDEFINED_BEHAVIOR";
+        break;
+    case GL_DEBUG_TYPE_PORTABILITY:
+        typeStr = "PORTABILITY";
+        break;
+    case GL_DEBUG_TYPE_PERFORMANCE:
+        typeStr = "PERFORMANCE";
+        break;
+    case GL_DEBUG_TYPE_OTHER:
+        typeStr = "OTHER";
+        break;
+    default:
+        typeStr = "UNDEFINED";
+        break;
+    }
+
+    Log(logSeverity) << "OpenGL " << typeStr << " [" << srcStr << "]: " << message;
 }
 
 void enableGLDebugExtension(unsigned int contextID)
@@ -45,6 +98,8 @@ void enableGLDebugExtension(unsigned int contextID)
 
         Log(Debug::Info) << "OpenGL debug callback attached.";
     }
+    else
+        Log(Debug::Error) << "Unable to attach OpenGL debug callback.";
 }
 
 EnableGLDebugOperation::EnableGLDebugOperation() : osg::GraphicsOperation("EnableGLDebugOperation", false)
