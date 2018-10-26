@@ -57,7 +57,6 @@
     Bug #4293: Faction members are not aware of faction ownerships in barter
     Bug #4304: "Follow" not working as a second AI package
     Bug #4307: World cleanup should remove dead bodies only if death animation is finished
-    Bug #4311: OpenMW does not handle RootCollisionNode correctly
     Bug #4327: Missing animations during spell/weapon stance switching
     Bug #4333: Keyboard navigation in containers is not intuitive
     Bug #4358: Running animation is interrupted when magic mode is toggled
