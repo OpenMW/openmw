@@ -62,7 +62,11 @@ namespace MWPhysics
     static const float sMinStepShortUp = 25.0f; // hack to skip over shorter but longer/wider/further unwalkable slopes
 
     static const float sGroundOffset = 1.0f; // How far to float above the ground surface
-    static const float sSafetyMargin = 0.5f; // How far to stay away from any geometry we collide with (so that we don't go slightly inside of it and end up with bad collision tracing data)
+    static const float sSafetyMargin = 0.05f; // How far to stay away from any geometry we collide with (so that we don't go slightly inside of it and end up with bad collision tracing data)
+    // Having high sSafetyMargin values can actually cause problems with "snagging" on smooth surfaces when running almost tangentially along them,
+    //   because bullet can give bad collision normals when Just Barely coming into contact with meshes.
+    //   Anything from 0.5 to 0.01 is relatively sane, but very small values may experience problems the further away from the world's origin you get.
+    //   0.5 starts to result in obvious snagging at relatively normal angles at normal speeds.
 
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;

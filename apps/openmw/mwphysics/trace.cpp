@@ -77,9 +77,6 @@ public:
                     return btScalar(1);
                 }
             }
-            // TODO: It might be a nice idea to not use bullet for normal (non-overlapping) actor-actor collisions anyway, at least as long as they remain cylinders.
-            // Bullet seems to give bad tracing results for cylinder-cylinder collisions in some situations.
-            // The math for cylinder-cylinder collisions is probably very easy. The only issue is that we'd have to roll our own actor-actor broadpass.
         }
 
         btVector3 hitNormalWorld;
