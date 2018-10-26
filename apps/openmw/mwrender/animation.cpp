@@ -1789,9 +1789,12 @@ namespace MWRender
         }
         else
         {
-            effect += 3;
-            float radius = effect * 66.f;
-            float linearAttenuation = 0.5f / effect;
+            // TODO: use global attenuation settings
+
+            // 1 pt of Light effect magnitude corresponds to 1 foot of light source radius, which is about 21.33 game units,
+            // but Morrowind uses imprecise value of foot for magic effects.
+            float radius = effect * 22.f;
+            float linearAttenuation = 3.f / radius;
 
             if (!mGlowLight || linearAttenuation != mGlowLight->getLight(0)->getLinearAttenuation())
             {
@@ -1813,7 +1816,8 @@ namespace MWRender
                 mGlowLight->setLight(light);
             }
 
-            mGlowLight->setRadius(radius);
+            // Make the obvious cut-off a bit less obvious
+            mGlowLight->setRadius(radius * 3);
         }
     }
 
