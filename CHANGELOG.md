@@ -143,6 +143,7 @@
     Bug #4674: Journal can be opened when settings window is open
     Bug #4677: Crash in ESM reader when NPC record has DNAM record without DODT one
     Bug #4678: Crash in ESP parser when SCVR has no variable names
+    Bug #4684: Spell Absorption is additive
     Bug #4685: Missing sound causes an exception inside Say command
     Bug #4689: Default creature soundgen entries are not used
     Feature #912: Editor: Add missing icons to UniversalId tables
