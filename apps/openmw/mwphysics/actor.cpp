@@ -1,5 +1,6 @@
 #include "actor.hpp"
 
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
@@ -26,46 +27,16 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     mHalfExtents = shape->mCollisionBoxHalfExtents;
     mMeshTranslation = shape->mCollisionBoxTranslate;
 
-    // the ratio between the side length and inradius of a regular octagon is 2tan(pi/8), which is equivalent to 2(sqrt(2)-1)
-    static const double eir = 0.4142135623730951454746218587388284504413604736328125; // edge inradius ratio, divided by two.
-    static bool inited_octagon = false;
-    static btVector3 vertices[8];
-    if(!inited_octagon)
-    {
-        vertices[0]  = btVector3( 1.0,  eir,  1.0);
-        vertices[1]  = btVector3( eir,  1.0,  1.0);
-        vertices[2]  = btVector3(-eir,  1.0,  1.0);
-        vertices[3]  = btVector3(-1.0,  eir,  1.0);
-        vertices[4]  = btVector3(-1.0, -eir,  1.0);
-        vertices[5]  = btVector3(-eir, -1.0,  1.0);
-        vertices[6]  = btVector3( eir, -1.0,  1.0);
-        vertices[7]  = btVector3( 1.0, -eir,  1.0);
-        inited_octagon = true;
-    }
-    
-    auto tempshape = new btConvexHullShape();
-    
-    // we need to fill in the points in a special order to make the debug rendering of the mesh look good
-    // fill in the side edges and top rim
-    for(int i = 0; i < 8; i++)
-    {
-        auto vertex = vertices[i] * toBullet(mHalfExtents);
-        tempshape->addPoint(vertex);
-        tempshape->addPoint(vertex * btVector3(1,1,-1));
-        tempshape->addPoint(vertex); // don't make a triangle shape; also causes the top rim to form
-    }
-    // fill in first top point again to prevent crossover and finish the rim
-    tempshape->addPoint(vertices[0] * toBullet(mHalfExtents));
-    for(int i = 0; i < 8; i++)
-    {
-        auto vertex = vertices[i] * toBullet(mHalfExtents);
-        tempshape->addPoint(vertex * btVector3(1,1,-1));
-    }
-    // fill in first bottom point again to prevent crossover and finish the rim
-    tempshape->addPoint(vertices[0] * toBullet(mHalfExtents) * btVector3(1,1,-1));
-
-    mShape.reset(tempshape);
     mRotationallyInvariant = true;
+
+    // With vanilla Morrowind's assets, bounding boxes can not only be non-square, but also off-center!
+    // Vanilla Morrowind's engine seems to do... something...? with this, but rotating hulls are a serious no-no.
+
+    double halfExtentWidth = (mHalfExtents.x() + mHalfExtents.y())/2;
+    mHalfExtents.x() = halfExtentWidth;
+    mHalfExtents.y() = halfExtentWidth;
+
+    mShape.reset(new btBoxShape(toBullet(mHalfExtents)));
 
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
 
@@ -76,6 +47,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     mCollisionObject->setUserPointer(static_cast<PtrHolder*>(this));
 
     updateScale();
+
     updatePosition();
 
     addCollisionMask(getCollisionMask());
@@ -136,6 +108,12 @@ void Actor::updateCollisionObjectPosition()
 {
     btTransform tr = mCollisionObject->getWorldTransform();
     osg::Vec3f scaledTranslation = mRotation * osg::componentMultiply(mMeshTranslation, mScale);
+    // forcibly center horizontal position if hull doesn't rotate
+    if(mRotationallyInvariant)
+    {
+        scaledTranslation.x() = 0.0;
+        scaledTranslation.y() = 0.0;
+    }
     osg::Vec3f newPosition = scaledTranslation + mPosition;
     tr.setOrigin(toBullet(newPosition));
     mCollisionObject->setWorldTransform(tr);
