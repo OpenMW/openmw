@@ -1410,6 +1410,12 @@ namespace MWMechanics
                     // Mark as Alarmed for dialogue
                     observerStats.setAlarmed(true);
                 }
+                else if (type == OT_Assault && *it == victim)
+                {
+                    // Still decrease disposition for victim of attack, even if Alarm = 0
+                    NpcStats& observerStats = it->getClass().getNpcStats(*it);
+                    observerStats.setBaseDisposition(observerStats.getBaseDisposition() + static_cast<int>(dispTerm));
+                }
             }
         }
 
