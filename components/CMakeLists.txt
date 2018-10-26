@@ -86,11 +86,11 @@ add_component_dir (esmterrain
     )
 
 add_component_dir (misc
-    constants utf8stream stringops resourcehelpers rng messageformatparser weakcache gldebug
+    constants utf8stream stringops resourcehelpers rng messageformatparser weakcache
     )
 
 add_component_dir (debug
-    debugging debuglog
+    debugging debuglog gldebug
     )
 
 IF(NOT WIN32 AND NOT APPLE)

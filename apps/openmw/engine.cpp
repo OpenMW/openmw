@@ -11,9 +11,9 @@
 #include <SDL.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/debug/gldebug.hpp>
 
 #include <components/misc/rng.hpp>
-#include <components/misc/gldebug.hpp>
 
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
@@ -427,7 +427,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     camera->setGraphicsContext(graphicsWindow);
     camera->setViewport(0, 0, width, height);
 
-    mViewer->setRealizeOperation(new EnableGLDebugOperation());
+    mViewer->setRealizeOperation(new Debug::EnableGLDebugOperation());
 
     mViewer->realize();
 

@@ -1,16 +1,19 @@
-#ifndef OPENMW_COMPONENTS_MISC_GLDEBUG_H
-#define OPENMW_COMPONENTS_MISC_GLDEBUG_H
+#ifndef OPENMW_COMPONENTS_DEBUG_GLDEBUG_H
+#define OPENMW_COMPONENTS_DEBUG_GLDEBUG_H
 
 #include <osgViewer/ViewerEventHandlers>
 
-class EnableGLDebugOperation : public osg::GraphicsOperation
+namespace Debug
 {
-public:
-    EnableGLDebugOperation();
+    class EnableGLDebugOperation : public osg::GraphicsOperation
+    {
+    public:
+        EnableGLDebugOperation();
 
-    virtual void operator()(osg::GraphicsContext* graphicsContext);
+        virtual void operator()(osg::GraphicsContext* graphicsContext);
 
-private:
-    OpenThreads::Mutex mMutex;
-};
+    private:
+        OpenThreads::Mutex mMutex;
+    };
+}
 #endif
