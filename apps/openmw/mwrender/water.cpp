@@ -19,16 +19,19 @@
 #include <osgUtil/IncrementalCompileOperation>
 #include <osgUtil/CullVisitor>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/waterutil.hpp>
 
+#include <components/misc/constants.hpp>
+
 #include <components/nifosg/controller.hpp>
 
 #include <components/shader/shadermanager.hpp>
-
 
 #include <components/esm/loadcell.hpp>
 
@@ -193,16 +196,16 @@ osg::ref_ptr<osg::Image> readPngImage (const std::string& file)
     boost::filesystem::ifstream inStream;
     inStream.open(file, std::ios_base::in | std::ios_base::binary);
     if (inStream.fail())
-        std::cerr << "Error: Failed to open " << file << std::endl;
+        Log(Debug::Error) << "Error: Failed to open " << file;
     osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
     if (!reader)
     {
-        std::cerr << "Error: Failed to read " << file << ", no png readerwriter found" << std::endl;
+        Log(Debug::Error) << "Error: Failed to read " << file << ", no png readerwriter found";
         return osg::ref_ptr<osg::Image>();
     }
     osgDB::ReaderWriter::ReadResult result = reader->readImage(inStream);
     if (!result.success())
-        std::cerr << "Error: Failed to read " << file << ": " << result.message() << " code " << result.status() << std::endl;
+        Log(Debug::Error) << "Error: Failed to read " << file << ": " << result.message() << " code " << result.status();
 
     return result.getImage();
 }
@@ -400,7 +403,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 {
     mSimulation.reset(new RippleSimulation(parent, resourceSystem, fallback));
 
-    mWaterGeom = SceneUtil::createWaterGeometry(CELL_SIZE*150, 40, 900);
+    mWaterGeom = SceneUtil::createWaterGeometry(Constants::CellSizeInUnits*150, 40, 900);
     mWaterGeom->setDrawCallback(new DepthClampCallback);
     mWaterGeom->setNodeMask(Mask_Water);
 
@@ -438,13 +441,13 @@ void Water::updateWaterMaterial()
     {
         mReflection->removeChildren(0, mReflection->getNumChildren());
         mParent->removeChild(mReflection);
-        mReflection = NULL;
+        mReflection = nullptr;
     }
     if (mRefraction)
     {
         mRefraction->removeChildren(0, mRefraction->getNumChildren());
         mParent->removeChild(mRefraction);
-        mRefraction = NULL;
+        mRefraction = nullptr;
     }
 
     if (Settings::Manager::getBool("shader", "Water"))
@@ -576,7 +579,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     shaderStateset->setAttributeAndModes(program, osg::StateAttribute::ON);
 
     node->setStateSet(shaderStateset);
-    node->setUpdateCallback(NULL);
+    node->setUpdateCallback(nullptr);
 }
 
 void Water::processChangedSettings(const Settings::CategorySettingVector& settings)
@@ -592,13 +595,13 @@ Water::~Water()
     {
         mReflection->removeChildren(0, mReflection->getNumChildren());
         mParent->removeChild(mReflection);
-        mReflection = NULL;
+        mReflection = nullptr;
     }
     if (mRefraction)
     {
         mRefraction->removeChildren(0, mRefraction->getNumChildren());
         mParent->removeChild(mRefraction);
-        mRefraction = NULL;
+        mRefraction = nullptr;
     }
 }
 
@@ -678,7 +681,8 @@ bool Water::isUnderwater(const osg::Vec3f &pos) const
 
 osg::Vec3f Water::getSceneNodeCoordinates(int gridX, int gridY)
 {
-    return osg::Vec3f(static_cast<float>(gridX * CELL_SIZE + (CELL_SIZE / 2)), static_cast<float>(gridY * CELL_SIZE + (CELL_SIZE / 2)), mTop);
+    return osg::Vec3f(static_cast<float>(gridX * Constants::CellSizeInUnits + (Constants::CellSizeInUnits / 2)),
+                      static_cast<float>(gridY * Constants::CellSizeInUnits + (Constants::CellSizeInUnits / 2)), mTop);
 }
 
 void Water::addEmitter (const MWWorld::Ptr& ptr, float scale, float force)

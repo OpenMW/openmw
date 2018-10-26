@@ -20,11 +20,9 @@ namespace CSVWidget
 
     protected:
         virtual void mousePressEvent(QMouseEvent *event);
-        virtual void hideEvent(QHideEvent *event);
         virtual bool eventFilter(QObject *object, QEvent *event);
 
     signals:
-        void hid();
         void colorChanged(const QColor &color);
     };
 }

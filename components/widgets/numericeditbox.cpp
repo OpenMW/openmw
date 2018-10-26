@@ -59,6 +59,11 @@ namespace Gui
         }
     }
 
+    int NumericEditBox::getValue()
+    {
+        return mValue;
+    }
+
     void NumericEditBox::setMinValue(int minValue)
     {
         mMinValue = minValue;

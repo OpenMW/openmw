@@ -71,6 +71,16 @@ private:
 };
 typedef std::shared_ptr<PartHolder> PartHolderPtr;
 
+struct EffectParams
+{
+    std::string mModelName; // Just here so we don't add the same effect twice
+    std::shared_ptr<EffectAnimationTime> mAnimTime;
+    float mMaxControllerLength;
+    int mEffectId;
+    bool mLoop;
+    std::string mBoneName;
+};
+
 class Animation : public osg::Referenced
 {
 public:
@@ -247,24 +257,12 @@ protected:
 
     osg::Vec3f mAccumulate;
 
-    struct EffectParams
-    {
-        std::string mModelName; // Just here so we don't add the same effect twice
-        PartHolderPtr mObjects;
-        std::shared_ptr<EffectAnimationTime> mAnimTime;
-        float mMaxControllerLength;
-        int mEffectId;
-        bool mLoop;
-        std::string mBoneName;
-    };
-
-    std::vector<EffectParams> mEffects;
-
     TextKeyListener* mTextKeyListener;
 
     osg::ref_ptr<RotateController> mHeadController;
     float mHeadYawRadians;
     float mHeadPitchRadians;
+    bool mHasMagicEffects;
 
     osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
     osg::ref_ptr<GlowUpdater> mGlowUpdater;
@@ -369,8 +367,9 @@ public:
      * @param texture override the texture specified in the model's materials - if empty, do not override
      * @note Will not add an effect twice.
      */
-    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", const std::string& texture = "");
+    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", const std::string& texture = "", float scale = 1.0f);
     void removeEffect (int effectId);
+    void removeEffects ();
     void getLoopingEffects (std::vector<int>& out) const;
 
     // Add a spell casting glow to an object. From measuring video taken from the original engine,
@@ -426,7 +425,7 @@ public:
      * \param speedmult Stores the animation speed multiplier
      * \return True if the animation is active, false otherwise.
      */
-    bool getInfo(const std::string &groupname, float *complete=NULL, float *speedmult=NULL) const;
+    bool getInfo(const std::string &groupname, float *complete=nullptr, float *speedmult=nullptr) const;
 
     /// Get the absolute position in the animation track of the first text key with the given group.
     float getStartTime(const std::string &groupname) const;
@@ -452,9 +451,9 @@ public:
     void setLoopingEnabled(const std::string &groupname, bool enabled);
 
     /// This is typically called as part of runAnimation, but may be called manually if needed.
-    void updateEffects(float duration);
+    void updateEffects();
 
-    /// Return a node with the specified name, or NULL if not existing.
+    /// Return a node with the specified name, or nullptr if not existing.
     /// @note The matching is case-insensitive.
     const osg::Node* getNode(const std::string& name) const;
 
@@ -487,6 +486,25 @@ private:
 class ObjectAnimation : public Animation {
 public:
     ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, Resource::ResourceSystem* resourceSystem, bool animated, bool allowLight);
+};
+
+class UpdateVfxCallback : public osg::NodeCallback
+{
+public:
+    UpdateVfxCallback(EffectParams& params)
+        : mFinished(false)
+        , mParams(params)
+        , mStartingTime(0)
+    {
+    }
+
+    bool mFinished;
+    EffectParams mParams;
+
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
+
+private:
+    double mStartingTime;
 };
 
 }

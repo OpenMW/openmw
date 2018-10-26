@@ -5,6 +5,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
+#include "../mwphysics/collisiontype.hpp"
+
 #include "../mwworld/cellstore.hpp"
 
 #include "pathgrid.hpp"
@@ -120,8 +122,8 @@ namespace MWMechanics
     }
 
     PathFinder::PathFinder()
-        : mPathgrid(NULL)
-        , mCell(NULL)
+        : mPathgrid(nullptr)
+        , mCell(nullptr)
     {
     }
 
@@ -230,6 +232,29 @@ namespace MWMechanics
         else
         {
             mPath = pathgridGraph.aStarSearch(startNode, endNode.first);
+
+            // If nearest path node is in opposite direction from second, remove it from path.
+            // Especially useful for wandering actors, if the nearest node is blocked for some reason.
+            if (mPath.size() > 1)
+            {
+                ESM::Pathgrid::Point secondNode = *(++mPath.begin());
+                osg::Vec3f firstNodeVec3f = MakeOsgVec3(mPathgrid->mPoints[startNode]);
+                osg::Vec3f secondNodeVec3f = MakeOsgVec3(secondNode);
+                osg::Vec3f toSecondNodeVec3f = secondNodeVec3f - firstNodeVec3f;
+                osg::Vec3f toStartPointVec3f = startPointInLocalCoords - firstNodeVec3f;
+                if (toSecondNodeVec3f * toStartPointVec3f > 0)
+                {
+                    ESM::Pathgrid::Point temp(secondNode);
+                    converter.toWorld(temp);
+                    // Add Z offset since path node can overlap with other objects.
+                    // Also ignore doors in raytesting.
+                    int mask = MWPhysics::CollisionType_World;
+                    bool isPathClear = !MWBase::Environment::get().getWorld()->castRay(
+                        startPoint.mX, startPoint.mY, startPoint.mZ+16, temp.mX, temp.mY, temp.mZ+16, mask);
+                    if (isPathClear)
+                        mPath.pop_front();
+                }
+            }
 
             // convert supplied path to world coordinates
             for (std::list<ESM::Pathgrid::Point>::iterator iter(mPath.begin()); iter != mPath.end(); ++iter)

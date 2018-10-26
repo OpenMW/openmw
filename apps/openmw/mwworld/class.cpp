@@ -83,6 +83,18 @@ namespace MWWorld
             return ptr.getCellRef().getCharge();
     }
 
+    float Class::getItemNormalizedHealth (const ConstPtr& ptr) const
+    {
+        if (getItemMaxHealth(ptr) == 0)
+        {
+            return 0.f;
+        }
+        else
+        {
+            return getItemHealth(ptr) / static_cast<float>(getItemMaxHealth(ptr));
+        }
+    }
+
     int Class::getItemMaxHealth (const ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not have item health");
@@ -113,7 +125,7 @@ namespace MWWorld
         return std::shared_ptr<Action> (new NullAction);
     }
 
-    std::shared_ptr<Action> Class::use (const Ptr& ptr) const
+    std::shared_ptr<Action> Class::use (const Ptr& ptr, bool force) const
     {
         return std::shared_ptr<Action> (new NullAction);
     }

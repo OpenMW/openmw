@@ -27,8 +27,6 @@ protected:
     void onMouseWheel(MyGUI::Widget* _sender, int _rel);
     void onRepairButtonClick(MyGUI::Widget* sender);
     void onOkButtonClick(MyGUI::Widget* sender);
-
-    static const int sLineHeight;
 };
 
 }

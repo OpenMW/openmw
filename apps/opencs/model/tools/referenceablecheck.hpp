@@ -5,6 +5,7 @@
 #include "../doc/stage.hpp"
 #include "../world/data.hpp"
 #include "../world/refiddata.hpp"
+#include "../world/resources.hpp"
 
 namespace CSMTools
 {
@@ -16,7 +17,10 @@ namespace CSMTools
                 const CSMWorld::IdCollection<ESM::Race>& races,
                 const CSMWorld::IdCollection<ESM::Class>& classes,
                 const CSMWorld::IdCollection<ESM::Faction>& factions,
-                const CSMWorld::IdCollection<ESM::Script>& scripts);
+                const CSMWorld::IdCollection<ESM::Script>& scripts,
+                const CSMWorld::Resources& models,
+                const CSMWorld::Resources& icons,
+                const CSMWorld::IdCollection<ESM::BodyPart>& bodyparts);
 
             virtual void perform(int stage, CSMDoc::Messages& messages);
             virtual int setup();
@@ -81,6 +85,9 @@ namespace CSMTools
             const CSMWorld::IdCollection<ESM::Class>& mClasses;
             const CSMWorld::IdCollection<ESM::Faction>& mFactions;
             const CSMWorld::IdCollection<ESM::Script>& mScripts;
+            const CSMWorld::Resources& mModels;
+            const CSMWorld::Resources& mIcons;
+            const CSMWorld::IdCollection<ESM::BodyPart>& mBodyParts;
             bool mPlayerPresent;
             bool mIgnoreBaseRecords;
     };

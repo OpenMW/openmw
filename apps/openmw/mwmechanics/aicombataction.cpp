@@ -23,8 +23,8 @@ namespace MWMechanics
 {
     float suggestCombatRange(int rangeTypes)
     {
-        static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
-        static float fHandToHandReach = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
+        static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat();
+        static float fHandToHandReach = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->mValue.getFloat();
 
         // This distance is a possible distance of melee attack
         static float distance = fCombatDistance * std::max(2.f, fHandToHandReach);
@@ -114,13 +114,13 @@ namespace MWMechanics
     {
         isRanged = false;
 
-        static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
-        static const float fProjectileMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMaxSpeed")->getFloat();
+        static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat();
+        static const float fProjectileMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMaxSpeed")->mValue.getFloat();
 
         if (mWeapon.isEmpty())
         {
             static float fHandToHandReach =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->mValue.getFloat();
             return fHandToHandReach * fCombatDistance;
         }
 
@@ -138,7 +138,7 @@ namespace MWMechanics
     const ESM::Weapon* ActionWeapon::getWeapon() const
     {
         if (mWeapon.isEmpty())
-            return NULL;
+            return nullptr;
         return mWeapon.get<ESM::Weapon>()->mBase;
     }
 
@@ -190,11 +190,6 @@ namespace MWMechanics
 
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {
-                std::vector<int> equipmentSlots = it->getClass().getEquipmentSlots(*it).first;
-                if (std::find(equipmentSlots.begin(), equipmentSlots.end(), (int)MWWorld::InventoryStore::Slot_CarriedRight)
-                        == equipmentSlots.end())
-                    continue;
-
                 float rating = rateWeapon(*it, actor, enemy, -1, bestArrowRating, bestBoltRating);
                 if (rating > bestActionRating)
                 {
@@ -215,14 +210,12 @@ namespace MWMechanics
 
         for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            const ESM::Spell* spell = it->first;
-
-            float rating = rateSpell(spell, actor, enemy);
+            float rating = rateSpell(it->first, actor, enemy);
             if (rating > bestActionRating)
             {
                 bestActionRating = rating;
-                bestAction.reset(new ActionSpell(spell->mId));
-                antiFleeRating = vanillaRateSpell(spell, actor, enemy);
+                bestAction.reset(new ActionSpell(it->first->mId));
+                antiFleeRating = vanillaRateSpell(it->first, actor, enemy);
             }
         }
 
@@ -265,11 +258,6 @@ namespace MWMechanics
 
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {
-                std::vector<int> equipmentSlots = it->getClass().getEquipmentSlots(*it).first;
-                if (std::find(equipmentSlots.begin(), equipmentSlots.end(), (int)MWWorld::InventoryStore::Slot_CarriedRight)
-                        == equipmentSlots.end())
-                    continue;
-
                 float rating = rateWeapon(*it, actor, enemy, -1, bestArrowRating, bestBoltRating);
                 if (rating > bestActionRating)
                 {
@@ -280,9 +268,7 @@ namespace MWMechanics
 
         for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            const ESM::Spell* spell = it->first;
-
-            float rating = rateSpell(spell, actor, enemy);
+            float rating = rateSpell(it->first, actor, enemy);
             if (rating > bestActionRating)
             {
                 bestActionRating = rating;
@@ -336,7 +322,7 @@ namespace MWMechanics
         float dist = 1.0f;
         if (activeWeapon.isEmpty() && !selectedSpellId.empty() && !selectedEnchItem.isEmpty())
         {
-            static const float fHandToHandReach = gmst.find("fHandToHandReach")->getFloat();
+            static const float fHandToHandReach = gmst.find("fHandToHandReach")->mValue.getFloat();
             dist = fHandToHandReach;
         }
         else if (stats.getDrawState() == MWMechanics::DrawState_Spell)
@@ -375,7 +361,7 @@ namespace MWMechanics
                 }
             }
 
-            static const float fTargetSpellMaxSpeed = gmst.find("fTargetSpellMaxSpeed")->getFloat();
+            static const float fTargetSpellMaxSpeed = gmst.find("fTargetSpellMaxSpeed")->mValue.getFloat();
             dist *= std::max(1000.0f, fTargetSpellMaxSpeed);
         }
         else if (!activeWeapon.isEmpty())
@@ -383,7 +369,7 @@ namespace MWMechanics
             const ESM::Weapon* esmWeap = activeWeapon.get<ESM::Weapon>()->mBase;
             if (esmWeap->mData.mType >= ESM::Weapon::MarksmanBow)
             {
-                static const float fTargetSpellMaxSpeed = gmst.find("fProjectileMaxSpeed")->getFloat();
+                static const float fTargetSpellMaxSpeed = gmst.find("fProjectileMaxSpeed")->mValue.getFloat();
                 dist = fTargetSpellMaxSpeed;
                 if (!activeAmmo.isEmpty())
                 {
@@ -399,8 +385,8 @@ namespace MWMechanics
 
         dist = (dist > 0.f) ? dist : 1.0f;
 
-        static const float fCombatDistance = gmst.find("fCombatDistance")->getFloat();
-        static const float fCombatDistanceWerewolfMod = gmst.find("fCombatDistanceWerewolfMod")->getFloat();
+        static const float fCombatDistance = gmst.find("fCombatDistance")->mValue.getFloat();
+        static const float fCombatDistanceWerewolfMod = gmst.find("fCombatDistanceWerewolfMod")->mValue.getFloat();
 
         float combatDistance = fCombatDistance;
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
@@ -485,19 +471,22 @@ namespace MWMechanics
         if (flee >= 100)
             return flee;
 
-        static const float fAIFleeHealthMult = gmst.find("fAIFleeHealthMult")->getFloat();
-        static const float fAIFleeFleeMult = gmst.find("fAIFleeFleeMult")->getFloat();
+        static const float fAIFleeHealthMult = gmst.find("fAIFleeHealthMult")->mValue.getFloat();
+        static const float fAIFleeFleeMult = gmst.find("fAIFleeFleeMult")->mValue.getFloat();
 
         float healthPercentage = (stats.getHealth().getModified() == 0.0f)
                                     ? 1.0f : stats.getHealth().getCurrent() / stats.getHealth().getModified();
         float rating = (1.0f - healthPercentage) * fAIFleeHealthMult + flee * fAIFleeFleeMult;
 
-        static const int iWereWolfLevelToAttack = gmst.find("iWereWolfLevelToAttack")->getInt();
+        static const int iWereWolfLevelToAttack = gmst.find("iWereWolfLevelToAttack")->mValue.getInteger();
 
-        if (enemy.getClass().isNpc() && enemy.getClass().getNpcStats(enemy).isWerewolf() && stats.getLevel() < iWereWolfLevelToAttack)
+        if (actor.getClass().isNpc() && enemy.getClass().isNpc())
         {
-            static const int iWereWolfFleeMod = gmst.find("iWereWolfFleeMod")->getInt();
-            rating = iWereWolfFleeMod;
+            if (enemy.getClass().getNpcStats(enemy).isWerewolf() && stats.getLevel() < iWereWolfLevelToAttack)
+            {
+                static const int iWereWolfFleeMod = gmst.find("iWereWolfFleeMod")->mValue.getInteger();
+                rating = iWereWolfFleeMod;
+            }
         }
 
         if (rating != 0.0f)

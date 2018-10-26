@@ -83,7 +83,7 @@ namespace Compiler
             std::string mArguments;
 
         protected:
-            virtual void visitedPlaceholder(Placeholder placeholder, char padding, int width, int precision);
+            virtual void visitedPlaceholder(Placeholder placeholder, char padding, int width, int precision, Notation notation);
             virtual void visitedCharacter(char c) {}
 
         public:

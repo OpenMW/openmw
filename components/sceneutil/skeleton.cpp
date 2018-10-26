@@ -3,9 +3,8 @@
 #include <osg/Transform>
 #include <osg/MatrixTransform>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
-
-#include <iostream>
 
 namespace SceneUtil
 {
@@ -65,7 +64,7 @@ Bone* Skeleton::getBone(const std::string &name)
 
     BoneCache::iterator found = mBoneCache.find(Misc::StringUtils::lowerCase(name));
     if (found == mBoneCache.end())
-        return NULL;
+        return nullptr;
 
     // find or insert in the bone hierarchy
 
@@ -82,7 +81,7 @@ Bone* Skeleton::getBone(const std::string &name)
         if (!matrixTransform)
             continue;
 
-        Bone* child = NULL;
+        Bone* child = nullptr;
         for (unsigned int i=0; i<bone->mChildren.size(); ++i)
         {
             if (bone->mChildren[i]->mNode == *it)
@@ -118,7 +117,7 @@ void Skeleton::updateBoneMatrices(unsigned int traversalNumber)
         if (mRootBone.get())
         {
             for (unsigned int i=0; i<mRootBone->mChildren.size(); ++i)
-                mRootBone->mChildren[i]->update(NULL);
+                mRootBone->mChildren[i]->update(nullptr);
         }
 
         mNeedToUpdateBoneMatrices = false;
@@ -168,7 +167,7 @@ void Skeleton::childRemoved(unsigned int, unsigned int)
 }
 
 Bone::Bone()
-    : mNode(NULL)
+    : mNode(nullptr)
 {
 }
 
@@ -183,7 +182,7 @@ void Bone::update(const osg::Matrixf* parentMatrixInSkeletonSpace)
 {
     if (!mNode)
     {
-        std::cerr << "Error: Bone without node " << std::endl;
+        Log(Debug::Error) << "Error: Bone without node";
         return;
     }
     if (parentMatrixInSkeletonSpace)

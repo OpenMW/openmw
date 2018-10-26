@@ -22,6 +22,8 @@
 
 #include <osgViewer/Viewer>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -47,6 +49,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/class.hpp"
 #include "../mwgui/loadingscreen.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -203,6 +206,7 @@ namespace MWRender
         , mNightEyeFactor(0.f)
         , mDistantFog(false)
         , mDistantTerrain(false)
+        , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
         , mBorders(false)
     {
@@ -228,7 +232,7 @@ namespace MWRender
 
         mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
 
-        if (getenv("OPENMW_DONT_PRECOMPILE") == NULL)
+        if (getenv("OPENMW_DONT_PRECOMPILE") == nullptr)
         {
             mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
             mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
@@ -332,7 +336,7 @@ namespace MWRender
     RenderingManager::~RenderingManager()
     {
         // let background loading thread finish before we delete anything else
-        mWorkQueue = NULL;
+        mWorkQueue = nullptr;
     }
 
     MWRender::Objects& RenderingManager::getObjects()
@@ -553,8 +557,8 @@ namespace MWRender
                 mLandFogStart = mViewDistance * (1 - fogDepth);
                 mLandFogEnd = mViewDistance;
             }
-            mUnderwaterFogStart = mViewDistance * (1 - underwaterFog);
-            mUnderwaterFogEnd = mViewDistance;
+            mUnderwaterFogStart = std::min(mViewDistance, 6666.f) * (1 - underwaterFog);
+            mUnderwaterFogEnd = std::min(mViewDistance, 6666.f);
         }
         mFogColor = color;
     }
@@ -584,8 +588,6 @@ namespace MWRender
         mCurrentCameraPos = cameraPos;
         if (mWater->isUnderwater(cameraPos))
         {
-            float viewDistance = mViewDistance;
-            viewDistance = std::min(viewDistance, 6666.f);
             setFogColor(mUnderwaterColor * mUnderwaterWeight + mFogColor * (1.f-mUnderwaterWeight));
             mStateUpdater->setFogStart(mUnderwaterFogStart);
             mStateUpdater->setFogEnd(mUnderwaterFogEnd);
@@ -691,9 +693,6 @@ namespace MWRender
         int screenshotW = mViewer->getCamera()->getViewport()->width();
         int screenshotH = mViewer->getCamera()->getViewport()->height();
         int screenshotMapping = 0;
-        int cubeSize = screenshotMapping == 2 ?
-            screenshotW:         // planet mapping needs higher resolution
-            screenshotW / 2;    
 
         std::vector<std::string> settingArgs;
         boost::algorithm::split(settingArgs,settingStr,boost::is_any_of(" "));
@@ -713,11 +712,14 @@ namespace MWRender
 
             if (!found)
             {
-                std::cerr << "Wrong screenshot type: " << settingArgs[0] << "." << std::endl;
+                Log(Debug::Warning) << "Wrong screenshot type: " << settingArgs[0] << ".";
                 return false;
             }
         }
-    
+
+        // planet mapping needs higher resolution
+        int cubeSize = screenshotMapping == 2 ? screenshotW : screenshotW / 2;
+
         if (settingArgs.size() > 1)
             screenshotW = std::min(10000,std::atoi(settingArgs[1].c_str()));
 
@@ -729,7 +731,7 @@ namespace MWRender
 
         if (mCamera->isVanityOrPreviewModeEnabled())
         {
-            std::cerr << "Spherical screenshots are not allowed in preview mode." << std::endl;
+            Log(Debug::Warning) << "Spherical screenshots are not allowed in preview mode.";
             return false;
         }
 
@@ -803,7 +805,7 @@ namespace MWRender
 
         cubeTexture->setFilter(osg::Texture::MIN_FILTER,osg::Texture::NEAREST);
         cubeTexture->setFilter(osg::Texture::MAG_FILTER,osg::Texture::NEAREST);
-        
+
         cubeTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         cubeTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
@@ -828,18 +830,13 @@ namespace MWRender
         stateset->addUniform(new osg::Uniform("cubeMap",0));
         stateset->addUniform(new osg::Uniform("mapping",screenshotMapping));
         stateset->setTextureAttributeAndModes(0,cubeTexture,osg::StateAttribute::ON);
-            
+
         quad->setStateSet(stateset);
-        quad->setUpdateCallback(NULL);
+        quad->setUpdateCallback(nullptr);
 
         screenshotCamera->addChild(quad);
 
-        mRootNode->addChild(screenshotCamera);
-
         renderCameraToImage(screenshotCamera,image,screenshotW,screenshotH);
-
-        screenshotCamera->removeChildren(0,screenshotCamera->getNumChildren());
-        mRootNode->removeChild(screenshotCamera);
 
         return true;
     }
@@ -865,6 +862,8 @@ namespace MWRender
         image->setDataType(GL_UNSIGNED_BYTE);
         image->setPixelFormat(texture->getInternalFormat());
 
+        mRootNode->addChild(camera);
+
         // The draw needs to complete before we can copy back our image.
         osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
         camera->setFinalDrawCallback(callback);
@@ -880,31 +879,16 @@ namespace MWRender
 
         // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the screenshot is completed
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
+
+        camera->removeChildren(0, camera->getNumChildren());
+        mRootNode->removeChild(camera);
     }
 
     void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Matrixd cameraTransform)
     {
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
-        rttCamera->setNodeMask(Mask_RenderToTexture);
-        rttCamera->attach(osg::Camera::COLOR_BUFFER, image);
-        rttCamera->setRenderOrder(osg::Camera::PRE_RENDER);
-        rttCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
-        rttCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
         rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
         rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * cameraTransform);
-
-        rttCamera->setViewport(0, 0, w, h);
-
-        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
-        texture->setInternalFormat(GL_RGB);
-        texture->setTextureSize(w, h);
-        texture->setResizeNonPowerOfTwoHint(false);
-        texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-        texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-        rttCamera->attach(osg::Camera::COLOR_BUFFER, texture);
-
-        image->setDataType(GL_UNSIGNED_BYTE);
-        image->setPixelFormat(texture->getInternalFormat());
 
         rttCamera->setUpdateCallback(new NoTraverseCallback);
         rttCamera->addChild(mSceneRoot);
@@ -914,14 +898,9 @@ namespace MWRender
 
         rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~Mask_GUI));
 
-        mRootNode->addChild(rttCamera);
-
         rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         renderCameraToImage(rttCamera.get(),image,w,h);
-
-        rttCamera->removeChildren(0, rttCamera->getNumChildren());
-        mRootNode->removeChild(rttCamera);
     }
 
     osg::Vec4f RenderingManager::getScreenBounds(const MWWorld::Ptr& ptr)
@@ -973,7 +952,7 @@ namespace MWRender
             result.mHitNormalWorld = intersection.getWorldIntersectNormal();
             result.mRatio = intersection.ratio;
 
-            PtrHolder* ptrHolder = NULL;
+            PtrHolder* ptrHolder = nullptr;
             for (osg::NodePath::const_iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
             {
                 osg::UserDataContainer* userDataContainer = (*it)->getUserDataContainer();
@@ -1111,7 +1090,7 @@ namespace MWRender
 
     void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
     {
-        NpcAnimation *anim = NULL;
+        NpcAnimation *anim = nullptr;
         if(ptr == mPlayerAnimation->getPtr())
             anim = mPlayerAnimation.get();
         else
@@ -1318,6 +1297,29 @@ namespace MWRender
             mFieldOfViewOverride = val;
             updateProjectionMatrix();
         }
+    }
+
+    osg::Vec3f RenderingManager::getHalfExtents(const MWWorld::ConstPtr& object) const
+    {
+        osg::Vec3f halfExtents(0, 0, 0);
+        std::string modelName = object.getClass().getModel(object);
+        if (modelName.empty())
+            return halfExtents;
+
+        osg::ref_ptr<const osg::Node> node = mResourceSystem->getSceneManager()->getTemplate(modelName);
+        osg::ComputeBoundsVisitor computeBoundsVisitor;
+        computeBoundsVisitor.setTraversalMask(~(MWRender::Mask_ParticleSystem|MWRender::Mask_Effect));
+        const_cast<osg::Node*>(node.get())->accept(computeBoundsVisitor);
+        osg::BoundingBox bounds = computeBoundsVisitor.getBoundingBox();
+
+        if (bounds.valid())
+        {
+            halfExtents[0] = std::abs(bounds.xMax() - bounds.xMin()) / 2.f;
+            halfExtents[1] = std::abs(bounds.yMax() - bounds.yMin()) / 2.f;
+            halfExtents[2] = std::abs(bounds.zMax() - bounds.zMin()) / 2.f;
+        }
+
+        return halfExtents;
     }
 
     void RenderingManager::resetFieldOfView()

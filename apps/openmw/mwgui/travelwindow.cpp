@@ -22,8 +22,6 @@
 
 namespace MWGui
 {
-    const int TravelWindow::sLineHeight = 18;
-
     TravelWindow::TravelWindow() :
         WindowBase("openmw_travel_window.layout")
         , mCurrentY(0)
@@ -46,7 +44,7 @@ namespace MWGui
                           mSelect->getHeight());
     }
 
-    void TravelWindow::addDestination(const std::string& name,ESM::Position pos,bool interior)
+    void TravelWindow::addDestination(const std::string& name, ESM::Position pos, bool interior)
     {
         int price;
 
@@ -56,15 +54,15 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-        if(interior)
+        if (!mPtr.getCell()->isExterior())
         {
-            price = gmst.find("fMagesGuildTravel")->getInt();
+            price = gmst.find("fMagesGuildTravel")->mValue.getInteger();
         }
         else
         {
             ESM::Position PlayerPos = player.getRefData().getPosition();
             float d = sqrt(pow(pos.pos[0] - PlayerPos.pos[0], 2) + pow(pos.pos[1] - PlayerPos.pos[1], 2) + pow(pos.pos[2] - PlayerPos.pos[2], 2));
-            price = static_cast<int>(d / gmst.find("fTravelMult")->getFloat());
+            price = static_cast<int>(d / gmst.find("fTravelMult")->mValue.getFloat());
         }
 
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
@@ -79,9 +77,11 @@ namespace MWGui
         else
             price *= std::max(1, static_cast<int>(followers.size()));
 
-        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>("SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
+        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+
+        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>("SandTextButton", 0, mCurrentY, 200, lineHeight, MyGUI::Align::Default);
         toAdd->setEnabled(price <= playerGold);
-        mCurrentY += sLineHeight;
+        mCurrentY += lineHeight;
         if(interior)
             toAdd->setUserString("interior","y");
         else
@@ -92,7 +92,7 @@ namespace MWGui
         toAdd->setUserString("price",oss.str());
 
         toAdd->setCaptionWithReplacing("#{sCell=" + name + "}   -   " + MyGUI::utility::toString(price)+"#{sgp}");
-        toAdd->setSize(mDestinationsView->getWidth(),sLineHeight);
+        toAdd->setSize(mDestinationsView->getWidth(),lineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &TravelWindow::onMouseWheel);
         toAdd->setUserString("Destination", name);
         toAdd->setUserData(pos);
@@ -154,6 +154,10 @@ namespace MWGui
         if (playerGold<price)
             return;
 
+        // Set "traveling" flag, so GetPCTraveling can detect teleportation.
+        // We will reset this flag during next world update.
+        MWBase::Environment::get().getWorld()->setPlayerTraveling(true);
+
         if (!mPtr.getCell()->isExterior())
             // Interior cell -> mages guild transport
             MWBase::Environment::get().getWindowManager()->playSound("mysticism cast");
@@ -168,11 +172,11 @@ namespace MWGui
         ESM::Position pos = *_sender->getUserData<ESM::Position>();
         std::string cellname = _sender->getUserString("Destination");
         bool interior = _sender->getUserString("interior") == "y";
-        if (!interior)
+        if (mPtr.getCell()->isExterior())
         {
             ESM::Position playerPos = player.getRefData().getPosition();
             float d = (osg::Vec3f(pos.pos[0], pos.pos[1], 0) - osg::Vec3f(playerPos.pos[0], playerPos.pos[1], 0)).length();
-            int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->getFloat());
+            int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->mValue.getFloat());
             for(int i = 0;i < hours;i++)
             {
                 MWBase::Environment::get().getMechanicsManager ()->rest (true);

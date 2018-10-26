@@ -91,6 +91,8 @@ namespace MWMechanics
             virtual void setPlayerClass (const ESM::Class& class_);
             ///< Set player class to custom class.
 
+            virtual void restoreDynamicStats(MWWorld::Ptr actor, bool sleep);
+
             virtual void rest(bool sleep);
             ///< If the player is sleeping or waiting, this should be called every hour.
             /// @param sleep is the player sleeping or waiting?
@@ -131,6 +133,12 @@ namespace MWMechanics
             /// Notify that actor was killed, add a murder bounty if applicable
             /// @note No-op for non-player attackers
             virtual void actorKilled (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
+
+            /// Checks if commiting a crime is currently valid
+            /// @param victim The actor being attacked
+            /// @param attacker The actor commiting the crime
+            /// @return true if the victim is a valid target for crime
+            virtual bool canCommitCrimeAgainst(const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
 
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             /// @param container The container the item is in; may be empty for an item in the world
@@ -190,9 +198,13 @@ namespace MWMechanics
 
             virtual void keepPlayerAlive();
 
+            virtual bool isCastingSpell (const MWWorld::Ptr& ptr) const;
+
             virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const;
             /// Is \a ptr casting spell or using weapon now?
             virtual bool isAttackingOrSpell(const MWWorld::Ptr &ptr) const;
+
+            virtual void castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell=false);
 
             /// Check if the target actor was detected by an observer
             /// If the observer is a non-NPC, check all actors in AI processing distance as observers
@@ -219,7 +231,7 @@ namespace MWMechanics
 
             virtual void confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count);
 
-            virtual bool isAttackPrepairing(const MWWorld::Ptr& ptr);
+            virtual bool isAttackPreparing(const MWWorld::Ptr& ptr);
             virtual bool isRunning(const MWWorld::Ptr& ptr);
             virtual bool isSneaking(const MWWorld::Ptr& ptr);
 

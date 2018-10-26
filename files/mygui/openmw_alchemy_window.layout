@@ -74,7 +74,20 @@
 
         <!-- Buttons -->
 
-        <Widget type="HBox" skin="" position="110 374 452 24" align="Bottom Right">
+        <Widget type="HBox" skin="" position="10 374 552 28" align="Bottom HStretch">
+            <Widget type="AutoSizedButton" skin="MW_Button" name="DecreaseButton">
+                <Property key="Caption" value=" - "/>
+                <Property key="NeedKey" value="false"/>
+            </Widget>
+
+            <Widget type="NumericEditBox" skin="MW_TextEdit" position="0 0 96 25" name="BrewCount">
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+
+            <Widget type="AutoSizedButton" skin="MW_Button" name="IncreaseButton">
+                <Property key="Caption" value=" + "/>
+                <Property key="NeedKey" value="false"/>
+            </Widget>
 
             <Widget type="Spacer"/>
 

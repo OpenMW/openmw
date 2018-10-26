@@ -166,7 +166,7 @@ class CollectLowestTransformsVisitor : public BaseOptimizerVisitor
             }
             else
             {
-                // for all current objects mark a NULL transform for them.
+                // for all current objects mark a nullptr transform for them.
                 registerWithCurrentObjects(0);
             }
         }
@@ -826,7 +826,7 @@ void Optimizer::RemoveRedundantNodesVisitor::apply(osg::Transform& transform)
         isOperationPermissible(transform))
     {
         osg::Matrix matrix;
-        transform.computeWorldToLocalMatrix(matrix,NULL);
+        transform.computeWorldToLocalMatrix(matrix,nullptr);
         if (matrix.isIdentity())
         {
             _redundantNodeList.insert(&transform);
@@ -1000,7 +1000,7 @@ struct LessGeometryPrimitiveType
 };
 
 
-/// Shortcut to get size of an array, even if pointer is NULL.
+/// Shortcut to get size of an array, even if pointer is nullptr.
 inline unsigned int getSize(const osg::Array * a) { return a ? a->getNumElements() : 0; }
 
 /// When merging geometries, tests if two arrays can be merged, regarding to their number of components, and the number of vertices.
@@ -1170,7 +1170,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
                 MergeList::iterator eachMergeList=mergeListTmp.begin();
                 for(;eachMergeList!=mergeListTmp.end();++eachMergeList)
                 {
-                    if (!eachMergeList->empty() && eachMergeList->front()!=NULL
+                    if (!eachMergeList->empty() && eachMergeList->front()!=nullptr
                         && isAbleToMerge(*eachMergeList->front(),*geomToPush))
                     {
                         eachMergeList->push_back(geomToPush);

@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <fstream>
-#include <iostream>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -12,6 +11,8 @@
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
 #endif
+
+#include <components/debug/debuglog.hpp>
 
 void CSMDoc::Document::addGmsts()
 {
@@ -435,7 +436,7 @@ void CSMDoc::Document::modificationStateChanged (bool clean)
 void CSMDoc::Document::reportMessage (const CSMDoc::Message& message, int type)
 {
     /// \todo find a better way to get these messages to the user.
-    std::cout << message.mMessage << std::endl;
+    Log(Debug::Info) << message.mMessage;
 }
 
 void CSMDoc::Document::operationDone2 (int type, bool failed)

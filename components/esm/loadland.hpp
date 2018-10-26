@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include <components/misc/constants.hpp>
+
 #include "esmcommon.hpp"
 
 namespace ESM
@@ -53,7 +55,7 @@ struct Land
     static const int LAND_SIZE = 65;
 
     // cell terrain size in world coords
-    static const int REAL_SIZE = 8192;
+    static const int REAL_SIZE = Constants::CellSizeInUnits;
 
     // total number of vertices
     static const int LAND_NUM_VERTS = LAND_SIZE * LAND_SIZE;
@@ -127,9 +129,9 @@ struct Land
 
     /**
      * Actually loads data into target
-     * If target is NULL, assumed target is mLandData
+     * If target is nullptr, assumed target is mLandData
      */
-    void loadData(int flags, LandData* target = NULL) const;
+    void loadData(int flags, LandData* target = nullptr) const;
 
     /**
      * Frees memory allocated for mLandData

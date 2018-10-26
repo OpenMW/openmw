@@ -1,7 +1,5 @@
 #include "globalmap.hpp"
 
-#include <climits>
-
 #include <osg/Image>
 #include <osg/Texture2D>
 #include <osg/Group>
@@ -14,6 +12,8 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/settings/settings.hpp>
 #include <components/files/memorystream.hpp>
+
+#include <components/debug/debuglog.hpp>
 
 #include <components/sceneutil/workqueue.hpp>
 
@@ -271,9 +271,9 @@ namespace MWRender
 
     void GlobalMap::worldPosToImageSpace(float x, float z, float& imageX, float& imageY)
     {
-        imageX = float(x / 8192.f - mMinX) / (mMaxX - mMinX + 1);
+        imageX = float(x / float(Constants::CellSizeInUnits) - mMinX) / (mMaxX - mMinX + 1);
 
-        imageY = 1.f-float(z / 8192.f - mMinY) / (mMaxY - mMinY + 1);
+        imageY = 1.f-float(z / float(Constants::CellSizeInUnits) - mMinY) / (mMaxY - mMinY + 1);
     }
 
     void GlobalMap::cellTopLeftCornerToImageSpace(int x, int y, float& imageX, float& imageY)
@@ -411,14 +411,14 @@ namespace MWRender
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
         if (!readerwriter)
         {
-            std::cerr << "Error: Can't write map overlay: no png readerwriter found" << std::endl;
+            Log(Debug::Error) << "Error: Can't write map overlay: no png readerwriter found";
             return;
         }
 
         osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*mOverlayImage, ostream);
         if (!result.success())
         {
-            std::cerr << "Error: Can't write map overlay: " << result.message() << " code " << result.status() << std::endl;
+            Log(Debug::Warning) << "Error: Can't write map overlay: " << result.message() << " code " << result.status();
             return;
         }
 
@@ -463,14 +463,14 @@ namespace MWRender
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
         if (!readerwriter)
         {
-            std::cerr << "Error: Can't read map overlay: no png readerwriter found" << std::endl;
+            Log(Debug::Error) << "Error: Can't read map overlay: no png readerwriter found";
             return;
         }
 
         osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(istream);
         if (!result.success())
         {
-            std::cerr << "Error: Can't read map overlay: " << result.message() << " code " << result.status() << std::endl;
+            Log(Debug::Error) << "Error: Can't read map overlay: " << result.message() << " code " << result.status();
             return;
         }
 
@@ -563,7 +563,7 @@ namespace MWRender
 
             requestOverlayTextureUpdate(0, 0, mWidth, mHeight, osg::ref_ptr<osg::Texture2D>(), true, false);
 
-            mWorkItem = NULL;
+            mWorkItem = nullptr;
         }
     }
 
@@ -572,7 +572,7 @@ namespace MWRender
         CameraVector::iterator found = std::find(mActiveCameras.begin(), mActiveCameras.end(), camera);
         if (found == mActiveCameras.end())
         {
-            std::cerr << "Error: GlobalMap trying to remove an inactive camera" << std::endl;
+            Log(Debug::Error) << "Error: GlobalMap trying to remove an inactive camera";
             return;
         }
         mActiveCameras.erase(found);

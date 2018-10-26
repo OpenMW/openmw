@@ -8,10 +8,26 @@ If you are familiar with ``.ini`` tweaks in Morrowind or the other games, this w
 All settings described in this section are changed in ``settings.cfg``, located in your OpenMW user directory.
 See :doc:`../paths` for this location.
 
+Changing Settings
+#################
+
+#.	Once you have located your ``settings.cfg`` file, open it in a plain text editor.
+#.	Find the setting(s) you wish to change in the following pages.
+#.	If the setting is not already in ``settings.cfg``,
+	add it by copy and pasting the name exactly as written in this guide.
+#.	Set the value of the setting by typing ``= <value>`` after the setting on the same line,
+	using an appropriate value in place of ``<value>``.
+#.	If this is the first setting from it's category that you're adding,
+	be sure to add the heading in square brackets ``[]`` above it using just the setting type,
+	i.e. without the word "Settings".
+
+	For example, to delay tooltips popping up by 1 second, add the line ``tooltip delay = 1.0``.
+	Then to the line above, type ``[GUI]``, as the tooltip delay setting comes from the "GUI Settings" section.
+
 Although this guide attempts to be comprehensive and up to date,
 you will always be able to find the full list of settings available and their default values in ``settings-default.cfg``
 in your main OpenMW installation directory.
-The ranges I have included with each setting are the physically possible ranges, not recommendations.
+The ranges included with each setting are the physically possible ranges, not recommendations.
 
 .. warning::
 	As the title suggests, these are advanced settings.

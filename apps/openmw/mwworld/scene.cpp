@@ -1,8 +1,8 @@
 #include "scene.hpp"
 
 #include <limits>
-#include <iostream>
 
+#include <components/debug/debuglog.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
@@ -56,7 +56,7 @@ namespace
     {
         if (ptr.getRefData().getBaseNode() || physics.getActor(ptr))
         {
-            std::cerr << "Warning: Tried to add " << ptr.getCellRef().getRefId() << " to the scene twice" << std::endl;
+            Log(Debug::Warning) << "Warning: Tried to add " << ptr.getCellRef().getRefId() << " to the scene twice";
             return;
         }
 
@@ -94,7 +94,7 @@ namespace
     void updateObjectScale(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
                             MWRender::RenderingManager& rendering)
     {
-        if (ptr.getRefData().getBaseNode() != NULL)
+        if (ptr.getRefData().getBaseNode() != nullptr)
         {
             float scale = ptr.getCellRef().getScale();
             osg::Vec3f scaleVec (scale, scale, scale);
@@ -160,7 +160,7 @@ namespace
                 catch (const std::exception& e)
                 {
                     std::string error ("failed to render '" + ptr.getCellRef().getRefId() + "': ");
-                    std::cerr << error + e.what() << std::endl;
+                    Log(Debug::Error) << error + e.what();
                 }
             }
 
@@ -232,7 +232,7 @@ namespace MWWorld
 
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
-        std::cout << "Unloading cell\n";
+        Log(Debug::Info) << "Unloading cell " << (*iter)->getCell()->getDescription();
         ListAndResetObjectsVisitor visitor;
 
         (*iter)->forEach<ListAndResetObjectsVisitor>(visitor);
@@ -270,7 +270,7 @@ namespace MWWorld
 
         if(result.second)
         {
-            std::cout << "Loading cell " << cell->getCell()->getDescription() << std::endl;
+            Log(Debug::Info) << "Loading cell " << cell->getCell()->getDescription();
 
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
@@ -330,7 +330,7 @@ namespace MWWorld
         while (active!=mActiveCells.end())
             unloadCell (active++);
         assert(mActiveCells.empty());
-        mCurrentCell = NULL;
+        mCurrentCell = nullptr;
 
         mPreloader->clear();
     }
@@ -345,7 +345,7 @@ namespace MWWorld
         getGridCenter(cellX, cellY);
         float centerX, centerY;
         MWBase::Environment::get().getWorld()->indexToPosition(cellX, cellY, centerX, centerY, true);
-        const float maxDistance = 8192/2 + mCellLoadingThreshold; // 1/2 cell size + threshold
+        const float maxDistance = Constants::CellSizeInUnits / 2 + mCellLoadingThreshold; // 1/2 cell size + threshold
         float distance = std::max(std::abs(centerX-pos.x()), std::abs(centerY-pos.y()));
         if (distance > maxDistance)
         {
@@ -519,7 +519,7 @@ namespace MWWorld
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
-        bool loadcell = (mCurrentCell == NULL);
+        bool loadcell = (mCurrentCell == nullptr);
         if(!loadcell)
             loadcell = *mCurrentCell != *cell;
 
@@ -546,7 +546,7 @@ namespace MWWorld
             return;
         }
 
-        std::cout << "Changing to interior\n";
+        Log(Debug::Info) << "Changing to interior";
 
         // unload
         CellStoreCollection::iterator active = mActiveCells.begin();
@@ -624,7 +624,7 @@ namespace MWWorld
         }
         catch (std::exception& e)
         {
-            std::cerr << "failed to render '" << ptr.getCellRef().getRefId() << "': " << e.what() << std::endl;
+            Log(Debug::Error) << "failed to render '" << ptr.getCellRef().getRefId() << "': " << e.what();
         }
     }
 
@@ -793,7 +793,7 @@ namespace MWWorld
 
                 float dist = std::max(std::abs(thisCellCenterX - playerPos.x()), std::abs(thisCellCenterY - playerPos.y()));
                 dist = std::min(dist,std::max(std::abs(thisCellCenterX - predictedPos.x()), std::abs(thisCellCenterY - predictedPos.y())));
-                float loadDist = 8192/2 + 8192 - mCellLoadingThreshold + mPreloadDistance;
+                float loadDist = Constants::CellSizeInUnits / 2 + Constants::CellSizeInUnits - mCellLoadingThreshold + mPreloadDistance;
 
                 if (dist < loadDist)
                     preloadCell(MWBase::Environment::get().getWorld()->getExterior(cellX+dx, cellY+dy));

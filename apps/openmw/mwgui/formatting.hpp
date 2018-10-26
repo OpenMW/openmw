@@ -4,6 +4,8 @@
 #include <MyGUI_Colour.h>
 #include <map>
 
+#include <components/widgets/box.hpp>
+
 namespace MWGui
 {
     namespace Formatting
@@ -12,7 +14,7 @@ namespace MWGui
         {
             TextStyle() :
                 mColour(0,0,0)
-                , mFont("Default")
+                , mFont("Journalbook Magic Cards")
                 , mTextSize(16)
             {
             }
@@ -152,7 +154,7 @@ namespace MWGui
             private:
                 int currentFontHeight() const;
                 TextStyle mTextStyle;
-                MyGUI::EditBox * mEditBox;
+                Gui::EditBox * mEditBox;
         };
 
         class ImageElement : public GraphicElement

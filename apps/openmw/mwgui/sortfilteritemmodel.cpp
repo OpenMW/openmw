@@ -1,9 +1,7 @@
 #include "sortfilteritemmodel.hpp"
 
-#include <iostream>
-
 #include <components/misc/stringops.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/esm/loadalch.hpp>
 #include <components/esm/loadappa.hpp>
 #include <components/esm/loadarmo.hpp>
@@ -93,8 +91,7 @@ namespace
                     if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
                         leftChargePercent = 101;
                     else
-                        leftChargePercent = (left.mBase.getCellRef().getEnchantmentCharge() == -1) ? 100
-                            : static_cast<int>(left.mBase.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
+                        leftChargePercent = static_cast<int>(left.mBase.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
                 }
             }
 
@@ -106,8 +103,7 @@ namespace
                     if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
                         rightChargePercent = 101;
                     else
-                        rightChargePercent = (right.mBase.getCellRef().getEnchantmentCharge() == -1) ? 100
-                            : static_cast<int>(right.mBase.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
+                        rightChargePercent = static_cast<int>(right.mBase.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
                 }
             }
 
@@ -245,7 +241,7 @@ namespace MWGui
             const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchId);
             if (!ench)
             {
-                std::cerr << "Warning: Can't find enchantment '" << enchId << "' on item " << base.getCellRef().getRefId() << std::endl;
+                Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchId << "' on item " << base.getCellRef().getRefId();
                 return false;
             }
 

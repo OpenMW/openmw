@@ -90,6 +90,8 @@ namespace MWBase
             virtual void setPlayerClass (const ESM::Class& class_) = 0;
             ///< Set player class to custom class.
 
+            virtual void restoreDynamicStats(MWWorld::Ptr actor, bool sleep) = 0;
+
             virtual void rest(bool sleep) = 0;
             ///< If the player is sleeping or waiting, this should be called every hour.
             /// @param sleep is the player sleeping or waiting?
@@ -225,8 +227,11 @@ namespace MWBase
             /// Resurrects the player if necessary
             virtual void keepPlayerAlive() = 0;
 
+            virtual bool isCastingSpell (const MWWorld::Ptr& ptr) const = 0;
             virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const = 0;
             virtual bool isAttackingOrSpell(const MWWorld::Ptr &ptr) const = 0;
+
+            virtual void castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell) = 0;
 
             /// Check if the target actor was detected by an observer
             /// If the observer is a non-NPC, check all actors in AI processing distance as observers
@@ -254,7 +259,7 @@ namespace MWBase
             virtual void cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId) = 0;
 
             virtual void confiscateStolenItemToOwner(const MWWorld::Ptr &player, const MWWorld::Ptr &item, const MWWorld::Ptr& victim, int count) = 0;
-            virtual bool isAttackPrepairing(const MWWorld::Ptr& ptr) = 0;
+            virtual bool isAttackPreparing(const MWWorld::Ptr& ptr) = 0;
             virtual bool isRunning(const MWWorld::Ptr& ptr) = 0;
             virtual bool isSneaking(const MWWorld::Ptr& ptr) = 0;
     };

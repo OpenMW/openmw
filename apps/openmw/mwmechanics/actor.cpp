@@ -4,7 +4,6 @@
 
 namespace MWMechanics
 {
-
     Actor::Actor(const MWWorld::Ptr &ptr, MWRender::Animation *animation)
     {
         mCharacterController.reset(new CharacterController(ptr, animation));
@@ -19,10 +18,4 @@ namespace MWMechanics
     {
         return mCharacterController.get();
     }
-
-    AiState& Actor::getAiState()
-    {
-        return mAiState;
-    }
-
 }

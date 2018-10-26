@@ -16,12 +16,12 @@
             <Property key="Page" value="1"/>
             <Property key="WheelPage" value="1"/>
         </Widget>
-        <Widget type="HBox" skin="" position="0 91 592 24" align="Center Bottom HStretch">
+        <Widget type="HBox" skin="" position="0 91 592 28" align="Center Bottom HStretch">
             <Widget type="Spacer" />
-            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 53 24" align="Left Top" name="OkButton">
+            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 53 28" align="Left Top" name="OkButton">
                 <Property key="Caption" value="#{sOk}"/>
             </Widget>
-            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 86 24" align="Right Top" name="CancelButton">
+            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 86 28" align="Right Top" name="CancelButton">
                 <Property key="Caption" value="#{sCancel}"/>
             </Widget>
             <Widget type="Spacer" />

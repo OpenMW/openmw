@@ -1,5 +1,7 @@
 #include "transport.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 
@@ -16,7 +18,11 @@ namespace ESM
         }
         else if (esm.retSubName().intval == ESM::FourCC<'D','N','A','M'>::value)
         {
-            mList.back().mCellName = esm.getHString();
+            const std::string name = esm.getHString();
+            if (mList.empty())
+                Log(Debug::Warning) << "Encountered DNAM record without DODT record, skipped.";
+            else
+                mList.back().mCellName = name;
         }
     }
 

@@ -17,7 +17,7 @@ namespace MWMechanics
         virtual void prepare(const MWWorld::Ptr& actor) = 0;
         virtual float getCombatRange (bool& isRanged) const = 0;
         virtual float getActionCooldown() { return 0.f; }
-        virtual const ESM::Weapon* getWeapon() const { return NULL; };
+        virtual const ESM::Weapon* getWeapon() const { return nullptr; };
         virtual bool isAttackingOrSpell() const { return true; }
         virtual bool isFleeing() const { return false; }
     };

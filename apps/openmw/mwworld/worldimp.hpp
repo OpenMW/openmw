@@ -168,6 +168,8 @@ namespace MWWorld
             bool mLevitationEnabled;
             bool mGoToJail;
             int mDaysInPrison;
+            bool mPlayerTraveling;
+            bool mPlayerInJail;
 
             float mSpellPreloadTimer;
 
@@ -289,8 +291,8 @@ namespace MWWorld
             ///< Adjust position after load to be on ground. Must be called after model load.
             /// @param force do this even if the ptr is flying
 
-            void fixPosition (const Ptr& actor) override;
-            ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
+            void fixPosition () override;
+            ///< Attempt to fix position so that the player is not stuck inside the geometry.
 
             void enable (const Ptr& ptr) override;
 
@@ -400,8 +402,10 @@ namespace MWWorld
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
-            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) override;
+            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, int mask) override;
             ///< cast a Ray and return true if there is an object in the ray path.
+
+            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) override;
 
             bool toggleCollisionMode() override;
             ///< Toggle collision mode for player. If disabled player object should ignore
@@ -523,6 +527,7 @@ namespace MWWorld
             /// @note throws an exception when invoked on a teleport door
             void activateDoor(const MWWorld::Ptr& door, int state) override;
 
+            void getActorsStandingOn (const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr> &actors) override; ///< get a list of actors standing on \a object
             bool getPlayerStandingOn (const MWWorld::ConstPtr& object) override; ///< @return true if the player is standing on \a object
             bool getActorStandingOn (const MWWorld::ConstPtr& object) override; ///< @return true if any actor is standing on \a object
             bool getPlayerCollidingWith(const MWWorld::ConstPtr& object) override; ///< @return true if the player is colliding with \a object
@@ -548,12 +553,10 @@ namespace MWWorld
 
             void enableActorCollision(const MWWorld::Ptr& actor, bool enable) override;
 
-            int canRest() override;
-            ///< check if the player is allowed to rest \n
-            /// 0 - yes \n
-            /// 1 - only waiting \n
-            /// 2 - player is underwater \n
-            /// 3 - enemies are nearby (not implemented)
+            RestPermitted canRest() const override;
+            ///< check if the player is allowed to rest
+
+            void rest() override;
 
             /// \todo Probably shouldn't be here
             MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) override;
@@ -602,13 +605,13 @@ namespace MWWorld
              * @brief Cast the actual spell, should be called mid-animation
              * @param actor
              */
-            void castSpell (const MWWorld::Ptr& actor) override;
+            void castSpell (const MWWorld::Ptr& actor, bool manualSpell=false) override;
 
             void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection) override;
-            void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
-                                           const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength) override;
+            void launchProjectile (MWWorld::Ptr& actor, MWWorld::Ptr& projectile,
+                                           const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength) override;
 
-            void applyLoopingParticles(const MWWorld::Ptr& ptr);
+            void applyLoopingParticles(const MWWorld::Ptr& ptr) override;
 
             const std::vector<std::string>& getContentFiles() const override;
             void breakInvisibility (const MWWorld::Ptr& actor) override;
@@ -644,7 +647,7 @@ namespace MWWorld
             /// Spawn a blood effect for \a ptr at \a worldPosition
             void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;
 
-            void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos) override;
+            void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true) override;
 
             void explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster, const MWWorld::Ptr& ignore,
                                       ESM::RangeType rangeType, const std::string& id, const std::string& sourceName,
@@ -671,6 +674,9 @@ namespace MWWorld
             float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) override;
 
             bool isPlayerInJail() const override;
+
+            void setPlayerTraveling(bool traveling) override;
+            bool isPlayerTraveling() const override;
 
             /// Return terrain height at \a worldPos position.
             float getTerrainHeightAt(const osg::Vec3f& worldPos) const override;

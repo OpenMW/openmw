@@ -6,6 +6,8 @@
 
 #include <MyGUI_LanguageManager.h>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 
@@ -20,6 +22,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/actionequip.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -189,16 +192,16 @@ namespace MWScript
                     if (it == invStore.end())
                     {
                         it = ptr.getClass().getContainerStore (ptr).add (item, 1, ptr);
-                        std::cerr << "Implicitly adding one " << item << " to container "
-                            "to fulfil requirements of Equip instruction" << std::endl;
+                        Log(Debug::Warning) << "Implicitly adding one " << item << 
+                            " to the inventory store of " << ptr.getCellRef().getRefId() <<
+                            " to fulfill the requirements of Equip instruction";
                     }
 
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
-                        MWBase::Environment::get().getWindowManager()->useItem(*it);
+                    if (ptr == MWMechanics::getPlayer())
+                        MWBase::Environment::get().getWindowManager()->useItem(*it, true);
                     else
                     {
-                        std::shared_ptr<MWWorld::Action> action = it->getClass().use(*it);
-                        // No equip sound for actors other than the player
+                        std::shared_ptr<MWWorld::Action> action = it->getClass().use(*it, true);
                         action->execute(ptr, true);
                     }
                 }

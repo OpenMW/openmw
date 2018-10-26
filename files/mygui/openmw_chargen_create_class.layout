@@ -11,7 +11,7 @@
             <Property key="Caption" value="#{sCustomClassName}"/>
         </Widget>
 
-        <Widget type="Widget" skin="" position="8 38 480 110" align="Stretch">
+        <Widget type="Widget" skin="" position="8 38 480 116" align="Stretch">
 
             <!-- Specialization -->
             <Widget type="TextBox" skin="HeaderText" position="0 0 156 18" name="SpecializationT" align="Left Top">
@@ -26,7 +26,7 @@
                 <Property key="TextAlign" value="Left Top"/>
             </Widget>
 
-            <Widget type="VBox" skin="" position="0 41 166 72" align="Stretch">
+            <Widget type="VBox" skin="" position="0 41 166 76" align="Stretch">
                 <Property key="Spacing" value="0"/>
 
                 <!-- Favorite Attributes -->
@@ -74,7 +74,7 @@
         </Widget>
 
         <!-- Dialog buttons -->
-        <Widget type="HBox" position="0 158 482 24">
+        <Widget type="HBox" position="0 158 482 28">
             <Widget type="Spacer"/>
             <Widget type="AutoSizedButton" skin="MW_Button" name="DescriptionButton">
                 <Property key="Caption" value="#{sCreateClassMenu1}"/>

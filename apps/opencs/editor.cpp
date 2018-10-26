@@ -5,8 +5,9 @@
 #include <QLocalSocket>
 #include <QMessageBox>
 
+#include <components/debug/debuglog.hpp>
 #include <components/fallback/validate.hpp>
-
+#include <components/misc/rng.hpp>
 #include <components/nifosg/nifloader.hpp>
 
 #include "model/doc/document.hpp"
@@ -18,12 +19,12 @@
 
 using namespace Fallback;
 
-CS::Editor::Editor ()
+CS::Editor::Editor (int argc, char **argv)
 : mSettingsState (mCfgMgr), mDocumentManager (mCfgMgr),
   mViewManager (mDocumentManager), mPid(""),
   mLock(), mMerge (mDocumentManager),
-  mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
-{
+  mIpcServerName ("org.openmw.OpenCS"), mServer(nullptr), mClientSocket(nullptr)
+{    
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
     setupDataFiles (config.first);
@@ -108,8 +109,9 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     mCfgMgr.readConfiguration(variables, desc, quiet);
 
-    mDocumentManager.setEncoding (
-        ToUTF8::calculateEncoding (variables["encoding"].as<Files::EscapeHashString>().toStdString()));
+    const std::string encoding = variables["encoding"].as<Files::EscapeHashString>().toStdString();
+    mDocumentManager.setEncoding (ToUTF8::calculateEncoding (encoding));
+    mFileDialog.setEncoding (QString::fromUtf8(encoding.c_str()));
 
     mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::EscapeHashString>().toStdString());
 
@@ -294,7 +296,7 @@ bool CS::Editor::makeIPCServer()
         mLock = boost::interprocess::file_lock(mPid.string().c_str());
         if(!mLock.try_lock())
         {
-            std::cerr << "OpenCS already running."  << std::endl;
+            Log(Debug::Error) << "Error: OpenMW-CS is already running.";
             return false;
         }
 
@@ -317,17 +319,17 @@ bool CS::Editor::makeIPCServer()
             if(boost::filesystem::exists(fullPath.toUtf8().constData()))
             {
                 // TODO: compare pid of the current process with that in the file
-                std::cout << "Detected unclean shutdown." << std::endl;
+                Log(Debug::Info) << "Detected unclean shutdown.";
                 // delete the stale file
                 if(remove(fullPath.toUtf8().constData()))
-                    std::cerr << "ERROR removing stale connection file" << std::endl;
+                    Log(Debug::Error) << "Error: can not remove stale connection file.";
             }
         }
     }
 
     catch(const std::exception& e)
     {
-        std::cerr << "ERROR " << e.what() << std::endl;
+        Log(Debug::Error) << "Error: " << e.what();
         return false;
     }
 
@@ -338,7 +340,7 @@ bool CS::Editor::makeIPCServer()
     }
 
     mServer->close();
-    mServer = NULL;
+    mServer = nullptr;
     return false;
 }
 
@@ -353,6 +355,8 @@ int CS::Editor::run()
 {
     if (mLocal.empty())
         return 1;
+
+    Misc::Rng::init();
 
     mStartup.show();
 

@@ -1,37 +1,68 @@
 0.45.0
 ------
 
+    Bug #1875: Actors in inactive cells don't heal from resting
     Bug #1990: Sunrise/sunset not set correct
+    Bug #2131: Lustidrike's spell misses the player every time
     Bug #2222: Fatigue's effect on selling price is backwards
+    Bug #2256: Landing sound not playing when jumping immediately after landing
+    Bug #2274: Thin platform clips through player character instead of lifting
     Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
     Bug #2455: Creatures attacks degrade armor
     Bug #2562: Forcing AI to activate a teleport door sometimes causes a crash
+    Bug #2626: Resurrecting the player does not resume the game
     Bug #2772: Non-existing class or faction freezes the game
     Bug #2835: Player able to slowly move when overencumbered
     Bug #2852: No murder bounty when a player follower commits murder
     Bug #2862: [macOS] Can't quit launcher using Command-Q or OpenMW->Quit
+    Bug #2872: Tab completion in console doesn't work with explicit reference
     Bug #2971: Compiler did not reject lines with naked expressions beginning with x.y
+    Bug #3049: Drain and Fortify effects are not properly applied on health, magicka and fatigue
+    Bug #3059: Unable to hit with marksman weapons when too close to an enemy
+    Bug #3072: Fatal error on AddItem <item> that has a script containing Equip <item>
+    Bug #3219: NPC and creature initial position tracing down limit is too small
+    Bug #3249: Fixed revert function not updating views properly
+    Bug #3288: TrueType fonts are handled incorrectly
     Bug #3374: Touch spells not hitting kwama foragers
     Bug #3486: [Mod] NPC Commands does not work
+    Bug #3533: GetSpellEffects should detect effects with zero duration
     Bug #3591: Angled hit distance too low
     Bug #3629: DB assassin attack never triggers creature spawning
+    Bug #3681: OpenMW-CS: Clicking Scripts in Preferences spawns many color pickers
+    Bug #3762: AddSoulGem and RemoveSpell redundant count arguments break script execution
+    Bug #3788: GetPCInJail and GetPCTraveling do not work as in vanilla
+    Bug #3836: Script fails to compile when command argument contains "\n"
     Bug #3876: Landscape texture painting is misaligned
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
     Bug #3911: [macOS] Typing in the "Content List name" dialog box produces double characters
+    Bug #3920: RemoveSpellEffects doesn't remove constant effects
+    Bug #3948: AiCombat moving target aiming uses incorrect speed for magic projectiles
+    Bug #3950: FLATTEN_STATIC_TRANSFORMS optimization breaks animated collision shapes
     Bug #3993: Terrain texture blending map is not upscaled
     Bug #3997: Almalexia doesn't pace
     Bug #4036: Weird behaviour of AI packages if package target has non-unique ID
     Bug #4047: OpenMW not reporting its version number in MacOS; OpenMW-CS not doing it fully
+    Bug #4110: Fixed undo / redo menu text losing the assigned shortcuts
     Bug #4125: OpenMW logo cropped on bugtracker
     Bug #4215: OpenMW shows book text after last EOL tag
     Bug #4221: Characters get stuck in V-shaped terrain
+    Bug #4230: AiTravel package issues break some Tribunal quests
+    Bug #4231: Infected rats from the "Crimson Plague" quest rendered unconscious by change in Drain Fatigue functionality
     Bug #4251: Stationary NPCs do not return to their position after combat
+    Bug #4260: Keyboard navigation makes persuasion exploitable
+    Bug #4271: Scamp flickers when attacking
+    Bug #4274: Pre-0.43 death animations are not forward-compatible with 0.43+
     Bug #4286: Scripted animations can be interrupted
     Bug #4291: Non-persistent actors that started the game as dead do not play death animations
     Bug #4293: Faction members are not aware of faction ownerships in barter
+    Bug #4304: "Follow" not working as a second AI package
     Bug #4307: World cleanup should remove dead bodies only if death animation is finished
+    Bug #4311: OpenMW does not handle RootCollisionNode correctly
     Bug #4327: Missing animations during spell/weapon stance switching
+    Bug #4333: Keyboard navigation in containers is not intuitive
+    Bug #4358: Running animation is interrupted when magic mode is toggled
     Bug #4368: Settings window ok button doesn't have key focus by default
+    Bug #4378: On-self absorb spells restore stats
     Bug #4393: NPCs walk back to where they were after using ResetActors
     Bug #4416: Handle exception if we try to play non-music file
     Bug #4419: MRK NiStringExtraData is handled incorrectly
@@ -47,19 +78,118 @@
     Bug #4457: Item without CanCarry flag prevents shield autoequipping in dark areas
     Bug #4458: AiWander console command handles idle chances incorrectly
     Bug #4459: NotCell dialogue condition doesn't support partial matches
+    Bug #4460: Script function "Equip" doesn't bypass beast restrictions
     Bug #4461: "Open" spell from non-player caster isn't a crime
+    Bug #4464: OpenMW keeps AiState cached storages even after we cancel AI packages
+    Bug #4467: Content selector: cyrillic characters are decoded incorrectly in plugin descriptions
     Bug #4469: Abot Silt Striders – Model turn 90 degrees on horizontal
+    Bug #4470: Non-bipedal creatures with Weapon & Shield flag have inconsistent behaviour
     Bug #4474: No fallback when getVampireHead fails
     Bug #4475: Scripted animations should not cause movement
     Bug #4479: "Game" category on Advanced page is getting too long
-    Bug #4480: Segfalt in QuickKeysMenu when item no longer in inventory
-    Feature #3276: Editor: Search- Show number of (remaining) search results and indicate a search without any results
+    Bug #4480: Segfault in QuickKeysMenu when item no longer in inventory
+    Bug #4489: Goodbye doesn't block dialogue hyperlinks
+    Bug #4490: PositionCell on player gives "Error: tried to add local script twice"
+    Bug #4494: Training cap based off Base Skill instead of Modified Skill
+    Bug #4495: Crossbow animations blending is buggy
+    Bug #4496: SpellTurnLeft and SpellTurnRight animation groups are unused
+    Bug #4497: File names starting with x or X are not classified as animation
+    Bug #4503: Cast and ExplodeSpell commands increase alteration skill
+    Bug #4510: Division by zero in MWMechanics::CreatureStats::setAttribute
+    Bug #4519: Knockdown does not discard movement in the 1st-person mode
+    Bug #4527: Sun renders on water shader in some situations where it shouldn't
+    Bug #4531: Movement does not reset idle animations
+    Bug #4532: Underwater sfx isn't tied to 3rd person camera
+    Bug #4539: Paper Doll is affected by GUI scaling
+    Bug #4543: Picking cursed items through inventory (menumode) makes it disappear
+    Bug #4545: Creatures flee from werewolves
+    Bug #4551: Replace 0 sound range with default range separately
+    Bug #4553: Forcegreeting on non-actor opens a dialogue window which cannot be closed
+    Bug #4557: Topics with reserved names are handled differently from vanilla
+    Bug #4558: Mesh optimizer: check for reserved node name is case-sensitive
+    Bug #4560: OpenMW does not update pinned windows properly
+    Bug #4563: Fast travel price logic checks destination cell instead of service actor cell
+    Bug #4565: Underwater view distance should be limited
+    Bug #4573: Player uses headtracking in the 1st-person mode
+    Bug #4574: Player turning animations are twitchy
+    Bug #4575: Weird result of attack animation blending with movement animations
+    Bug #4576: Reset of idle animations when attack can not be started
+    Bug #4591: Attack strength should be 0 if player did not hold the attack button
+    Bug #4593: Editor: Instance dragging is broken
+    Bug #4597: <> operator causes a compile error
+    Bug #4604: Picking up gold from the ground only makes 1 grabbed
+    Bug #4607: Scaling for animated collision shapes is applied twice
+    Bug #4608: Falling damage is applied twice
+    Bug #4611: Instant magic effects have 0 duration in custom spell cost calculations unlike vanilla
+    Bug #4614: Crash due to division by zero when FlipController has no textures
+    Bug #4615: Flicker effects for light sources are handled incorrectly
+    Bug #4617: First person sneaking offset is not applied while the character is in air
+    Bug #4618: Sneaking is possible while the character is flying
+    Bug #4622: Recharging enchanted items with Soul Gems does not award experience if it fails
+    Bug #4628: NPC record reputation, disposition and faction rank should have unsigned char type
+    Bug #4633: Sneaking stance affects speed even if the actor is not able to crouch
+    Bug #4641: GetPCJumping is handled incorrectly
+    Bug #4644: %Name should be available for all actors, not just for NPCs
+    Bug #4646: Weapon force-equipment messes up ongoing attack animations
+    Bug #4648: Hud thinks that throwing weapons have condition
+    Bug #4649: Levelup fully restores health
+    Bug #4653: Length of non-ASCII strings is handled incorrectly in ESM reader
+    Bug #4654: Editor: UpdateVisitor does not initialize skeletons for animated objects
+    Bug #4656: Combat AI: back up behaviour is incorrect
+    Bug #4668: Editor: Light source color is displayed as an integer
+    Bug #4669: ToggleCollision should trace the player down after collision being enabled
+    Bug #4671: knownEffect functions should use modified Alchemy skill
+    Bug #4672: Pitch factor is handled incorrectly for crossbow animations
+    Bug #4674: Journal can be opened when settings window is open
+    Bug #4677: Crash in ESM reader when NPC record has DNAM record without DODT one
+    Bug #4678: Crash in ESP parser when SCVR has no variable names
+    Bug #4685: Missing sound causes an exception inside Say command
+    Bug #4689: Default creature soundgen entries are not used
+    Feature #912: Editor: Add missing icons to UniversalId tables
+    Feature #1221: Editor: Creature/NPC rendering
+    Feature #1617: Editor: Enchantment effect record verifier
+    Feature #1645: Casting effects from objects
+    Feature #2606: Editor: Implemented (optional) case sensitive global search
+    Feature #2787: Use the autogenerated collision box, if the creature mesh has no predefined one
+    Feature #2847: Content selector: allow to copy the path to a file by using the context menu
+    Feature #3083: Play animation when NPC is casting spell via script
+    Feature #3103: Provide option for disposition to get increased by successful trade
+    Feature #3276: Editor: Search - Show number of (remaining) search results and indicate a search without any results
+    Feature #3641: Editor: Limit FPS in 3d preview window
+    Feature #3703: Ranged sneak attack criticals
+    Feature #4012: Editor: Write a log file if OpenCS crashes
     Feature #4222: 360° screenshots
     Feature #4256: Implement ToggleBorders (TB) console command
+    Feature #4285: Support soundgen calls for activators
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
     Feature #4345: Add equivalents for the command line commands to Launcher
+    Feature #4404: Editor: All EnumDelegate fields should have their items sorted alphabetically
     Feature #4444: Per-group KF-animation files support
     Feature #4466: Editor: Add option to ignore "Base" records when running verifier
+    Feature #4488: Make water shader rougher during rain
+    Feature #4509: Show count of enchanted items in stack in the spells list
+    Feature #4512: Editor: Use markers for lights and creatures levelled lists
+    Feature #4548: Weapon priority: use the actual chance to hit the target instead of weapon skill
+    Feature #4549: Weapon priority: use the actual damage in weapon rating calculations
+    Feature #4550: Weapon priority: make ranged weapon bonus more sensible
+    Feature #4579: Add option for applying Strength into hand to hand damage
+    Feature #4581: Use proper logging system
+    Feature #4624: Spell priority: don't cast hit chance-affecting spells if the enemy is not in respective stance at the moment
+    Feature #4625: Weapon priority: use weighted mean for melee damage rating
+    Feature #4626: Weapon priority: account for weapon speed
+    Feature #4632: AI priority: utilize vanilla AI GMSTs for priority rating
+    Feature #4636: Use sTo GMST in spellmaking menu
+    Feature #4642: Batching potion creation
+    Feature #4682: Use the collision box from basic creature mesh if the X one have no collisions
+    Task #2490: Don't open command prompt window on Release-mode builds automatically
+    Task #4545: Enable is_pod string test
+    Task #4605: Optimize skinning
+    Task #4606: Support Rapture3D's OpenAL driver
+    Task #4613: Incomplete type errors when compiling with g++ on OSX 10.9
+    Task #4621: Optimize combat AI
+    Task #4643: Revise editor record verifying functionality
+    Task #4645: Use constants instead of widely used magic numbers
+    Task #4652: Move call to enemiesNearby() from InputManager::rest() to World::canRest()
 
 0.44.0
 ------

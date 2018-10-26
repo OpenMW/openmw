@@ -75,8 +75,8 @@ namespace MWBase
             virtual void persuade (int type, ResponseCallback* callback) = 0;
             virtual int getTemporaryDispositionChange () const = 0;
 
-            /// @note This change is temporary and gets discarded when dialogue ends.
-            virtual void applyDispositionChange (int delta) = 0;
+            /// @note Controlled by an option, gets discarded when dialogue ends by default
+            virtual void applyBarterDispositionChange (int delta) = 0;
 
             virtual int countSavedGameRecords() const = 0;
 

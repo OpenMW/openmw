@@ -140,9 +140,9 @@ namespace MWClass
         return info;
     }
 
-    std::shared_ptr<MWWorld::Action> Probe::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Probe::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
+        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
 
         action->setSound(getUpSoundId(ptr));
 

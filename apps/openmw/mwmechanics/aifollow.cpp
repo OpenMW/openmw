@@ -17,22 +17,6 @@
 namespace MWMechanics
 {
 
-
-struct AiFollowStorage : AiTemporaryBase
-{
-    float mTimer;
-    bool mMoving;
-    float mTargetAngleRadians;
-    bool mTurnActorToTarget;
-
-    AiFollowStorage() :
-        mTimer(0.f),
-        mMoving(false),
-        mTargetAngleRadians(0.f),
-        mTurnActorToTarget(false)
-    {}
-};
-
 int AiFollow::mFollowIndexCounter = 0;
 
 AiFollow::AiFollow(const std::string &actorId, float duration, float x, float y, float z)

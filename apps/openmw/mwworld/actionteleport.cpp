@@ -36,7 +36,7 @@ namespace MWWorld
     void ActionTeleport::teleport(const Ptr &actor)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        actor.getClass().getCreatureStats(actor).land();
+        actor.getClass().getCreatureStats(actor).land(actor == world->getPlayerPtr());
         if(actor == world->getPlayerPtr())
         {
             world->getPlayer().setTeleported(true);

@@ -7,12 +7,15 @@
 #include <osgUtil/RenderBin>
 #include <osgUtil/CullVisitor>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/misc/rng.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/actorutil.hpp>
 #include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/skeleton.hpp>
@@ -69,7 +72,7 @@ std::string getVampireHead(const std::string& race, bool female)
     }
 
     if (sVampireMapping.find(thisCombination) == sVampireMapping.end())
-        sVampireMapping[thisCombination] = NULL;
+        sVampireMapping[thisCombination] = nullptr;
 
     const ESM::BodyPart* bodyPart = sVampireMapping[thisCombination];
     if (!bodyPart)
@@ -302,7 +305,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
 void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
 {
     assert(viewMode != VM_HeadOnly);
-    if(mViewMode == viewMode) 
+    if(mViewMode == viewMode)
         return;
 
     mViewMode = viewMode;
@@ -435,7 +438,7 @@ void NpcAnimation::updateNpcBase()
             if (bp)
                 mHeadModel = "meshes\\" + bp->mModel;
             else
-                std::cerr << "Warning: Failed to load body part '" << mNpc->mHead << "'" << std::endl;
+                Log(Debug::Warning) << "Warning: Failed to load body part '" << mNpc->mHead << "'";
         }
 
         mHairModel = "";
@@ -445,41 +448,19 @@ void NpcAnimation::updateNpcBase()
             if (bp)
                 mHairModel = "meshes\\" + bp->mModel;
             else
-                std::cerr << "Warning: Failed to load body part '" << mNpc->mHair << "'" << std::endl;
+                Log(Debug::Warning) << "Warning: Failed to load body part '" << mNpc->mHair << "'";
         }
     }
 
+    bool is1stPerson = mViewMode == VM_FirstPerson;
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
 
-    std::string smodel;
-    if (mViewMode != VM_FirstPerson)
-    {
-        if (isWerewolf)
-            smodel = "meshes\\wolf\\skin.nif";
-        else if (isBeast)
-            smodel = "meshes\\base_animkna.nif";
-        else if (isFemale)
-            smodel = "meshes\\base_anim_female.nif";
-        else
-            smodel = "meshes\\base_anim.nif";
-    }
-    else
-    {
-        if (isWerewolf)
-            smodel = "meshes\\wolf\\skin.1st.nif";
-        else if (isBeast)
-            smodel = "meshes\\base_animkna.1st.nif";
-        else if (isFemale)
-            smodel = "meshes\\base_anim_female.1st.nif";
-        else
-            smodel = "meshes\\base_anim.1st.nif";
-    }
-
+    std::string smodel = SceneUtil::getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf);
     smodel = Misc::ResourceHelpers::correctActorModelPath(smodel, mResourceSystem->getVFS());
 
     setObjectRoot(smodel, true, true, false);
 
-    if(mViewMode != VM_FirstPerson)
+    if(!is1stPerson)
     {
         const std::string base = "meshes\\xbase_anim.nif";
         if (smodel != base)
@@ -554,7 +535,7 @@ void NpcAnimation::updateParts()
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
-    bool wasArrowAttached = (mAmmunition.get() != NULL);
+    bool wasArrowAttached = (mAmmunition.get() != nullptr);
     mAmmunition.reset();
 
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
@@ -673,7 +654,7 @@ PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const st
 }
 
 osg::Vec3f NpcAnimation::runAnimation(float timepassed)
-{    
+{
     osg::Vec3f ret = Animation::runAnimation(timepassed);
 
     mHeadAnimationTime->update(timepassed);
@@ -758,7 +739,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     }
     catch (std::exception& e)
     {
-        std::cerr << "Error adding NPC part: " << e.what() << std::endl;
+        Log(Debug::Error) << "Error adding NPC part: " << e.what();
         return false;
     }
 
@@ -842,10 +823,10 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Wrist ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Forearm ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
-                    bodypart = NULL;
+                    bodypart = nullptr;
             }
             else if (!bodypart)
-                std::cerr << "Warning: Failed to find body part '" << part->mFemale << "'" << std::endl;
+                Log(Debug::Warning) << "Warning: Failed to find body part '" << part->mFemale << "'";
         }
         if(!bodypart && !part->mMale.empty())
         {
@@ -857,10 +838,10 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Wrist ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Forearm ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
-                    bodypart = NULL;
+                    bodypart = nullptr;
             }
             else if (!bodypart)
-                std::cerr << "Warning: Failed to find body part '" << part->mMale << "'" << std::endl;
+                Log(Debug::Warning) << "Warning: Failed to find body part '" << part->mMale << "'";
         }
 
         if(bodypart)
@@ -874,7 +855,7 @@ void NpcAnimation::addControllers()
 {
     Animation::addControllers();
 
-    mFirstPersonNeckController = NULL;
+    mFirstPersonNeckController = nullptr;
     WeaponAnimation::deleteControllers();
 
     if (mViewMode == VM_FirstPerson)
@@ -966,7 +947,7 @@ osg::Group* NpcAnimation::getArrowBone()
 {
     PartHolderPtr part = mObjectParts[ESM::PRT_Weapon];
     if (!part)
-        return NULL;
+        return nullptr;
 
     SceneUtil::FindByNameVisitor findVisitor ("ArrowBone");
     part->getNode()->accept(findVisitor);
@@ -978,7 +959,7 @@ osg::Node* NpcAnimation::getWeaponNode()
 {
     PartHolderPtr part = mObjectParts[ESM::PRT_Weapon];
     if (!part)
-        return NULL;
+        return nullptr;
     return part->getNode();
 }
 
@@ -1102,7 +1083,7 @@ const std::vector<const ESM::BodyPart *>& NpcAnimation::getBodyParts(const std::
             sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Tail, ESM::PRT_Tail));
         }
 
-        parts.resize(ESM::PRT_Count, NULL);
+        parts.resize(ESM::PRT_Count, nullptr);
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();

@@ -5,6 +5,7 @@
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_Button.h>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -19,8 +20,8 @@ namespace MWGui
 
     MessageBoxManager::MessageBoxManager (float timePerChar)
     {
-        mInterMessageBoxe = NULL;
-        mStaticMessageBox = NULL;
+        mInterMessageBoxe = nullptr;
+        mStaticMessageBox = nullptr;
         mLastButtonPressed = -1;
         mMessageBoxSpeed = timePerChar;
     }
@@ -41,14 +42,14 @@ namespace MWGui
             mInterMessageBoxe->setVisible(false);
 
             delete mInterMessageBoxe;
-            mInterMessageBoxe = NULL;
+            mInterMessageBoxe = nullptr;
         }
 
         std::vector<MessageBox*>::iterator it(mMessageBoxes.begin());
         for (; it != mMessageBoxes.end(); ++it)
         {
             if (*it == mStaticMessageBox)
-                mStaticMessageBox = NULL;
+                mStaticMessageBox = nullptr;
             delete *it;
         }
         mMessageBoxes.clear();
@@ -80,11 +81,11 @@ namespace MWGui
                 ++it;
         }
 
-        if(mInterMessageBoxe != NULL && mInterMessageBoxe->mMarkedToDelete) {
+        if(mInterMessageBoxe != nullptr && mInterMessageBoxe->mMarkedToDelete) {
             mLastButtonPressed = mInterMessageBoxe->readPressedButton();
             mInterMessageBoxe->setVisible(false);
             delete mInterMessageBoxe;
-            mInterMessageBoxe = NULL;
+            mInterMessageBoxe = nullptr;
             MWBase::Environment::get().getInputManager()->changeInputMode(
                         MWBase::Environment::get().getWindowManager()->isGuiMode());
         }
@@ -118,17 +119,17 @@ namespace MWGui
     void MessageBoxManager::removeStaticMessageBox ()
     {
         removeMessageBox(mStaticMessageBox);
-        mStaticMessageBox = NULL;
+        mStaticMessageBox = nullptr;
     }
 
     bool MessageBoxManager::createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons)
     {
-        if (mInterMessageBoxe != NULL)
+        if (mInterMessageBoxe != nullptr)
         {
-            std::cerr << "Warning: replacing an interactive message box that was not answered yet" << std::endl;
+            Log(Debug::Warning) << "Warning: replacing an interactive message box that was not answered yet";
             mInterMessageBoxe->setVisible(false);
             delete mInterMessageBoxe;
-            mInterMessageBoxe = NULL;
+            mInterMessageBoxe = nullptr;
         }
 
         mInterMessageBoxe = new InteractiveMessageBox(*this, message, buttons);
@@ -139,7 +140,7 @@ namespace MWGui
 
     bool MessageBoxManager::isInteractiveMessageBox ()
     {
-        return mInterMessageBoxe != NULL;
+        return mInterMessageBoxe != nullptr;
     }
 
 
@@ -372,7 +373,7 @@ namespace MWGui
                 }
             }
         }
-        return NULL;
+        return nullptr;
     }
 
     void InteractiveMessageBox::mousePressed (MyGUI::Widget* pressed)

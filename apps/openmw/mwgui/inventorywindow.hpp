@@ -58,7 +58,7 @@ namespace MWGui
 
             void clear();
 
-            void useItem(const MWWorld::Ptr& ptr);
+            void useItem(const MWWorld::Ptr& ptr, bool force=false);
 
             void setGuiMode(GuiMode mode);
 
@@ -101,6 +101,8 @@ namespace MWGui
             std::unique_ptr<MWRender::InventoryPreview> mPreview;
 
             bool mTrading;
+            float mScaleFactor;
+            float mUpdateTimer;
 
             void onItemSelected(int index);
             void onItemSelectedFromSourceModel(int index);

@@ -5,6 +5,7 @@
 
 #include <osg/Texture2D>
 
+#include <components/debug/debuglog.hpp>
 #include <components/resource/imagemanager.hpp>
 
 namespace osgMyGUI
@@ -22,7 +23,7 @@ namespace osgMyGUI
     }
 
     OSGTexture::OSGTexture(osg::Texture2D *texture)
-        : mImageManager(NULL)
+        : mImageManager(nullptr)
         , mTexture(texture)
         , mFormat(MyGUI::PixelFormat::Unknow)
         , mUsage(MyGUI::TextureUsage::Default)
@@ -112,7 +113,7 @@ namespace osgMyGUI
 
     void OSGTexture::saveToFile(const std::string &fname)
     {
-        std::cerr << "Would save image to file " << fname << std::endl;
+        Log(Debug::Warning) << "Would save image to file " << fname;
     }
 
     int OSGTexture::getWidth()

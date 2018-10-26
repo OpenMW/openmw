@@ -14,7 +14,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "creaturestats.hpp"
-#include "npcstats.hpp"
 #include "actorutil.hpp"
 
 namespace MWMechanics
@@ -34,15 +33,14 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     mTool.getCellRef().setCharge(uses-1);
 
     MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
-    MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats(player);
 
     float fatigueTerm = stats.getFatigueTerm();
     int pcStrength = stats.getAttribute(ESM::Attribute::Strength).getModified();
     int pcLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
-    int armorerSkill = npcStats.getSkill(ESM::Skill::Armorer).getModified();
+    int armorerSkill = player.getClass().getSkill(player, ESM::Skill::Armorer);
 
     float fRepairAmountMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-            .find("fRepairAmountMult")->getFloat();
+            .find("fRepairAmountMult")->mValue.getFloat();
 
     float toolQuality = ref->mBase->mData.mQuality;
 
@@ -87,7 +85,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
         store.remove(mTool, 1, player);
 
         std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("sNotifyMessage51")->getString();
+                .find("sNotifyMessage51")->mValue.getString();
 
         MWBase::Environment::get().getWindowManager()->messageBox((boost::format(message) % mTool.getClass().getName(mTool)).str());
 

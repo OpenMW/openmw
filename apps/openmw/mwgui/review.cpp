@@ -26,9 +26,6 @@ namespace
 
 namespace MWGui
 {
-
-    const int ReviewDialog::sLineHeight = 18;
-
     ReviewDialog::ReviewDialog()
         : WindowModal("openmw_chargen_review.layout"),
           mUpdateSkillArea(false)
@@ -261,8 +258,9 @@ namespace MWGui
         groupWidget->setCaption(label);
         mSkillWidgets.push_back(groupWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        coord1.top += lineHeight;
+        coord2.top += lineHeight;
     }
 
     MyGUI::TextBox* ReviewDialog::addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
@@ -282,8 +280,9 @@ namespace MWGui
         mSkillWidgets.push_back(skillNameWidget);
         mSkillWidgets.push_back(skillValueWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        coord1.top += lineHeight;
+        coord2.top += lineHeight;
 
         return skillValueWidget;
     }
@@ -298,8 +297,9 @@ namespace MWGui
 
         mSkillWidgets.push_back(skillNameWidget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        coord1.top += lineHeight;
+        coord2.top += lineHeight;
     }
 
     void ReviewDialog::addItem(const ESM::Spell* spell, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
@@ -312,8 +312,9 @@ namespace MWGui
 
         mSkillWidgets.push_back(widget);
 
-        coord1.top += sLineHeight;
-        coord2.top += sLineHeight;
+        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        coord1.top += lineHeight;
+        coord2.top += lineHeight;
     }
 
     void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
@@ -378,7 +379,7 @@ namespace MWGui
         // starting spells
         std::vector<std::string> spells;
 
-        const ESM::Race* race = NULL;
+        const ESM::Race* race = nullptr;
         if (!mRaceId.empty())
             race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(mRaceId);
 

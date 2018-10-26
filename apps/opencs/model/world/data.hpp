@@ -36,6 +36,7 @@
 
 #include "../doc/stage.hpp"
 
+#include "actoradapter.hpp"
 #include "idcollection.hpp"
 #include "nestedidcollection.hpp"
 #include "universalid.hpp"
@@ -110,6 +111,7 @@ namespace CSMWorld
             RefCollection mRefs;
             IdCollection<ESM::Filter> mFilters;
             Collection<MetaData> mMetaData;
+            std::unique_ptr<ActorAdapter> mActorAdapter;
             const Fallback::Map* mFallbackMap;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
@@ -286,6 +288,10 @@ namespace CSMWorld
             ///
             /// \note The returned table may either be the model for the ID itself or the model that
             /// contains the record specified by the ID.
+
+            const ActorAdapter* getActorAdapter() const;
+
+            ActorAdapter* getActorAdapter();
 
             void merge();
             ///< Merge modified into base.

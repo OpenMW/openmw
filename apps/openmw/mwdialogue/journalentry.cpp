@@ -30,7 +30,7 @@ namespace MWDialogue
             {
                 if (actor.isEmpty())
                 {
-                    MWScript::InterpreterContext interpreterContext(NULL,MWWorld::Ptr());
+                    MWScript::InterpreterContext interpreterContext(nullptr, MWWorld::Ptr());
                     mText = Interpreter::fixDefinesDialog(iter->mResponse, interpreterContext);
                 }
                 else

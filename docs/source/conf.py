@@ -23,7 +23,7 @@ sys.path.insert(0, project_root)
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-#needs_sphinx = '1.0'
+needs_sphinx = '1.7'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -34,7 +34,10 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
+    'sphinx.ext.autosectionlabel',
 ]
+
+#autosectionlabel_prefix_document = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -131,7 +134,7 @@ primary_domain = 'c'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -141,27 +144,33 @@ html_theme = 'default'
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
 
+#html_css_files = 'figures.css'         use this once Sphinx 1.8 is released!!!
+
+def setup(app):
+    app.add_stylesheet('figures.css')
+
+
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
 #html_title = None
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-#html_short_title = None
+#html_short_title = 'OpenMW Documentation'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+#html_logo = 'https://gitlab.com/OpenMW/openmw-docs/raw/master/docs/source/_static/images/openmw.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-#html_favicon = None
+#html_favicon = 'https://gitlab.com/OpenMW/openmw-docs/raw/master/docs/source/_static/images/favicon.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static',
-                    'manuals/openmw-cs/_static'
+html_static_path = [
+                    '_static'
                     ]
 
 # Add any extra paths that contain custom files (such as robots.txt or

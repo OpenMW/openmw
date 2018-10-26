@@ -41,7 +41,7 @@ bool adjacent(ChildDirection dir, Direction dir2)
 QuadTreeNode* searchNeighbour (QuadTreeNode* currentNode, Direction dir)
 {
     if (currentNode->getDirection() == Root)
-        return NULL; // Arrived at root node, the root node does not have neighbours
+        return nullptr; // Arrived at root node, the root node does not have neighbours
 
     QuadTreeNode* nextNode;
     if (adjacent(currentNode->getDirection(), dir))
@@ -52,7 +52,7 @@ QuadTreeNode* searchNeighbour (QuadTreeNode* currentNode, Direction dir)
     if (nextNode && nextNode->getNumChildren())
         return nextNode->getChild(reflect(currentNode->getDirection(), dir));
     else
-        return NULL;
+        return nullptr;
 }
 
 QuadTreeNode::QuadTreeNode(QuadTreeNode* parent, ChildDirection direction, float size, const osg::Vec2f& center)

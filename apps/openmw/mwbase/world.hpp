@@ -262,8 +262,8 @@ namespace MWBase
             ///< Adjust position after load to be on ground. Must be called after model load.
             /// @param force do this even if the ptr is flying
 
-            virtual void fixPosition (const MWWorld::Ptr& actor) = 0;
-            ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
+            virtual void fixPosition () = 0;
+            ///< Attempt to fix position so that the player is not stuck inside the geometry.
 
             /// @note No-op for items in containers. Use ContainerStore::removeItem instead.
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
@@ -297,8 +297,10 @@ namespace MWBase
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
-            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
+            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, int mask) = 0;
             ///< cast a Ray and return true if there is an object in the ray path.
+
+            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
 
             virtual bool toggleCollisionMode() = 0;
             ///< Toggle collision mode for player. If disabled player object should ignore
@@ -412,6 +414,7 @@ namespace MWBase
             /// @note throws an exception when invoked on a teleport door
             virtual void activateDoor(const MWWorld::Ptr& door, int state) = 0;
 
+            virtual void getActorsStandingOn (const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr> &actors) = 0; ///< get a list of actors standing on \a object
             virtual bool getPlayerStandingOn (const MWWorld::ConstPtr& object) = 0; ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::ConstPtr& object) = 0; ///< @return true if any actor is standing on \a object
             virtual bool getPlayerCollidingWith(const MWWorld::ConstPtr& object) = 0; ///< @return true if the player is colliding with \a object
@@ -437,12 +440,16 @@ namespace MWBase
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
 
-            virtual int canRest() = 0;
-            ///< check if the player is allowed to rest \n
-            /// 0 - yes \n
-            /// 1 - only waiting \n
-            /// 2 - player is underwater \n
-            /// 3 - enemies are nearby (not implemented)
+            enum RestPermitted
+            {
+                Rest_Allowed = 0,
+                Rest_OnlyWaiting = 1,
+                Rest_PlayerIsUnderwater = 2,
+                Rest_EnemiesAreNearby = 3
+            };
+
+            /// check if the player is allowed to rest
+            virtual RestPermitted canRest() const = 0;
 
             /// \todo Probably shouldn't be here
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) = 0;
@@ -487,11 +494,11 @@ namespace MWBase
              */
             virtual bool startSpellCast (const MWWorld::Ptr& actor) = 0;
 
-            virtual void castSpell (const MWWorld::Ptr& actor) = 0;
+            virtual void castSpell (const MWWorld::Ptr& actor, bool manualSpell=false) = 0;
 
             virtual void launchMagicBolt (const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection) = 0;
-            virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
-                                           const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength) = 0;
+            virtual void launchProjectile (MWWorld::Ptr& actor, MWWorld::Ptr& projectile,
+                                           const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength) = 0;
 
             virtual void applyLoopingParticles(const MWWorld::Ptr& ptr) = 0;
 
@@ -536,7 +543,7 @@ namespace MWBase
             /// Spawn a blood effect for \a ptr at \a worldPosition
             virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) = 0;
 
-            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos) = 0;
+            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true) = 0;
 
             virtual void explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster,
                                       const MWWorld::Ptr& ignore, ESM::RangeType rangeType, const std::string& id,
@@ -565,6 +572,11 @@ namespace MWBase
             virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;
 
             virtual bool isPlayerInJail() const = 0;
+
+            virtual void rest() = 0;
+
+            virtual void setPlayerTraveling(bool traveling) = 0;
+            virtual bool isPlayerTraveling() const = 0;
 
             virtual void rotateWorldObject (const MWWorld::Ptr& ptr, osg::Quat rotate) = 0;
 

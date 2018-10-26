@@ -162,7 +162,7 @@ namespace MWClass
         return record->mId;
     }
 
-    std::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr, bool force) const
     {
         return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
     }

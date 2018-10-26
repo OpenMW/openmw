@@ -3,6 +3,8 @@
 
 #include <MyGUI_Button.h>
 
+#include "fontwrapper.hpp"
+
 namespace Gui
 {
 
@@ -11,7 +13,7 @@ namespace Gui
     typedef std::vector<SharedStateButton*> ButtonGroup;
 
     /// @brief A button that applies its own state changes to other widgets, to do this you define it as part of a ButtonGroup.
-    class SharedStateButton : public MyGUI::Button
+    class SharedStateButton : public FontWrapper<MyGUI::Button>
     {
     MYGUI_RTTI_DERIVED(SharedStateButton)
 

@@ -8,6 +8,8 @@
 
 #include <components/esm/loadland.hpp>
 
+#include <components/misc/constants.hpp>
+
 #include "../../model/prefs/shortcut.hpp"
 
 #include "../../model/world/tablemimedata.hpp"
@@ -506,13 +508,11 @@ void CSVRender::PagedWorldspaceWidget::moveCellSelection (int x, int y)
 
 void CSVRender::PagedWorldspaceWidget::addCellToSceneFromCamera (int offsetX, int offsetY)
 {
-    const int CellSize = 8192;
-
     osg::Vec3f eye, center, up;
     getCamera()->getViewMatrixAsLookAt(eye, center, up);
 
-    int cellX = (int)std::floor(center.x() / CellSize) + offsetX;
-    int cellY = (int)std::floor(center.y() / CellSize) + offsetY;
+    int cellX = (int)std::floor(center.x() / Constants::CellSizeInUnits) + offsetX;
+    int cellY = (int)std::floor(center.y() / Constants::CellSizeInUnits) + offsetY;
 
     CSMWorld::CellCoordinates cellCoordinates(cellX, cellY);
 
@@ -527,7 +527,7 @@ void CSVRender::PagedWorldspaceWidget::addCellToSceneFromCamera (int offsetX, in
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
 : WorldspaceWidget (document, parent), mDocument (document), mWorldspace ("std::default"),
-  mControlElements(NULL), mDisplayCellCoord(true)
+  mControlElements(nullptr), mDisplayCellCoord(true)
 {
     QAbstractItemModel *cells =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells);
@@ -738,22 +738,18 @@ void CSVRender::PagedWorldspaceWidget::selectAllWithSameParentId (int elementMas
 
 std::string CSVRender::PagedWorldspaceWidget::getCellId (const osg::Vec3f& point) const
 {
-    const int cellSize = 8192;
-
     CSMWorld::CellCoordinates cellCoordinates (
-        static_cast<int> (std::floor (point.x()/cellSize)),
-        static_cast<int> (std::floor (point.y()/cellSize)));
+        static_cast<int> (std::floor (point.x() / Constants::CellSizeInUnits)),
+        static_cast<int> (std::floor (point.y() / Constants::CellSizeInUnits)));
 
     return cellCoordinates.getId (mWorldspace);
 }
 
 CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const osg::Vec3d& point) const
 {
-    const int cellSize = 8192;
-
     CSMWorld::CellCoordinates coords(
-        static_cast<int> (std::floor (point.x()/cellSize)),
-        static_cast<int> (std::floor (point.y()/cellSize)));
+        static_cast<int> (std::floor (point.x() / Constants::CellSizeInUnits)),
+        static_cast<int> (std::floor (point.y() / Constants::CellSizeInUnits)));
 
     std::map<CSMWorld::CellCoordinates, Cell*>::const_iterator searchResult = mCells.find(coords);
     if (searchResult != mCells.end())

@@ -1,7 +1,8 @@
 #include "player.hpp"
 
 #include <stdexcept>
-#include <iostream>
+
+#include <components/debug/debuglog.hpp>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
@@ -29,13 +30,14 @@ namespace MWWorld
     Player::Player (const ESM::NPC *player)
       : mCellStore(0),
         mLastKnownExteriorPosition(0,0,0),
-        mMarkedCell(NULL),
+        mMarkedCell(nullptr),
         mAutoMove(false),
         mForwardBackward(0),
         mTeleported(false),
         mCurrentCrimeId(-1),
         mPaidCrimeId(-1),
-        mAttackingOrSpell(false)
+        mAttackingOrSpell(false),
+        mJumping(false)
     {
         ESM::CellRef cellRef;
         cellRef.blank();
@@ -63,7 +65,7 @@ namespace MWWorld
         MWMechanics::CreatureStats& creatureStats = getPlayer().getClass().getCreatureStats(getPlayer());
         MWMechanics::NpcStats& npcStats = getPlayer().getClass().getNpcStats(getPlayer());
         MWMechanics::DynamicStat<float> health = creatureStats.getDynamic(0);
-        creatureStats.setHealth(int(health.getBase() / gmst.find("fWereWolfHealth")->getFloat()));
+        creatureStats.setHealth(int(health.getBase() / gmst.find("fWereWolfHealth")->mValue.getFloat()));
         for (int i=0; i<ESM::Skill::Length; ++i)
             npcStats.setSkill(i, mSaveSkills[i]);
         for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -76,7 +78,7 @@ namespace MWWorld
         MWMechanics::CreatureStats& creatureStats = getPlayer().getClass().getCreatureStats(getPlayer());
         MWMechanics::NpcStats& npcStats = getPlayer().getClass().getNpcStats(getPlayer());
         MWMechanics::DynamicStat<float> health = creatureStats.getDynamic(0);
-        creatureStats.setHealth(int(health.getBase() * gmst.find("fWereWolfHealth")->getFloat()));
+        creatureStats.setHealth(int(health.getBase() * gmst.find("fWereWolfHealth")->mValue.getFloat()));
         for(size_t i = 0;i < ESM::Attribute::Length;++i)
         {
             // Oh, Bethesda. It's "Intelligence".
@@ -84,7 +86,7 @@ namespace MWWorld
                                             ESM::Attribute::sAttributeNames[i]);
 
             MWMechanics::AttributeValue value = npcStats.getAttribute(i);
-            value.setBase(int(gmst.find(name)->getFloat()));
+            value.setBase(int(gmst.find(name)->mValue.getFloat()));
             npcStats.setAttribute(i, value);
         }
 
@@ -99,7 +101,7 @@ namespace MWWorld
                                             ESM::Skill::sSkillNames[i]);
 
             MWMechanics::SkillValue value = npcStats.getSkill(i);
-            value.setBase(int(gmst.find(name)->getFloat()));
+            value.setBase(int(gmst.find(name)->mValue.getFloat()));
             npcStats.setSkill(i, value);
         }
     }
@@ -254,6 +256,16 @@ namespace MWWorld
         return mAttackingOrSpell;
     }
 
+    void Player::setJumping(bool jumping)
+    {
+        mJumping = jumping;
+    }
+
+    bool Player::getJumping() const
+    {
+        return mJumping;
+    }
+
     bool Player::isInCombat() {
         return MWBase::Environment::get().getMechanicsManager()->getActorsFighting(getPlayer()).size() != 0;
     }
@@ -285,6 +297,7 @@ namespace MWWorld
         mForwardBackward = 0;
         mTeleported = false;
         mAttackingOrSpell = false;
+        mJumping = false;
         mCurrentCrimeId = -1;
         mPaidCrimeId = -1;
         mPreviousItems.clear();
@@ -364,7 +377,7 @@ namespace MWWorld
 
             if (!player.mObject.mEnabled)
             {
-                std::cerr << "Warning: Savegame attempted to disable the player." << std::endl;
+                Log(Debug::Warning) << "Warning: Savegame attempted to disable the player.";
                 player.mObject.mEnabled = true;
             }
 
@@ -391,9 +404,9 @@ namespace MWWorld
             }
             catch (...)
             {
-                std::cerr << "Warning: Player cell '" << player.mCellId.mWorldspace << "' no longer exists" << std::endl;
+                Log(Debug::Warning) << "Warning: Player cell '" << player.mCellId.mWorldspace << "' no longer exists";
                 // Cell no longer exists. The loader will have to choose a default cell.
-                mCellStore = NULL;
+                mCellStore = nullptr;
             }
 
             if (!player.mBirthsign.empty())

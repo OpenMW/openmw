@@ -12,6 +12,7 @@
 
 #include <SDL_video.h>
 
+#include <components/debug/debuglog.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 #include <components/settings/settings.hpp>
 
@@ -31,7 +32,8 @@ namespace
         if (val == "linear")  return "Trilinear";
         if (val == "nearest") return "Bilinear";
         if (val != "none")
-            std::cerr<< "Warning: Invalid texture mipmap option: "<<val <<std::endl;
+            Log(Debug::Warning) << "Warning: Invalid texture mipmap option: "<< val;
+
         return "Other";
     }
 
@@ -398,7 +400,7 @@ namespace MWGui
         else if(pos == 1)
             Settings::Manager::setString("texture mipmap", "General", "linear");
         else
-            std::cerr<< "Unexpected option pos "<<pos <<std::endl;
+            Log(Debug::Warning) << "Unexpected option pos " << pos;
         apply();
     }
 

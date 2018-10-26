@@ -1,6 +1,5 @@
 #include "localmap.hpp"
 
-#include <iostream>
 #include <stdint.h>
 
 #include <osg/Fog>
@@ -12,8 +11,10 @@
 
 #include <osgDB/ReadFile>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/fogstate.hpp>
 #include <components/esm/loadcell.hpp>
+#include <components/misc/constants.hpp>
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/files/memorystream.hpp>
@@ -71,11 +72,16 @@ namespace MWRender
 LocalMap::LocalMap(osg::Group* root)
     : mRoot(root)
     , mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
-    , mMapWorldSize(8192.f)
+    , mMapWorldSize(Constants::CellSizeInUnits)
     , mCellDistance(Settings::Manager::getInt("local map cell distance", "Map"))
     , mAngle(0.f)
     , mInterior(false)
 {
+    // Increase map resolution, if use UI scaling
+    float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
+    if (uiScale > 1.0)
+        mMapResolution *= uiScale;
+
     SceneUtil::FindByNameVisitor find("Scene Root");
     mRoot->accept(find);
     mSceneRoot = find.mFoundNode;
@@ -320,7 +326,7 @@ void LocalMap::markForRemoval(osg::Camera *cam)
     CameraVector::iterator found = std::find(mActiveCameras.begin(), mActiveCameras.end(), cam);
     if (found == mActiveCameras.end())
     {
-        std::cerr << "Error: trying to remove an inactive camera" << std::endl;
+        Log(Debug::Error) << "Error: trying to remove an inactive camera";
         return;
     }
     mActiveCameras.erase(found);
@@ -492,7 +498,7 @@ void LocalMap::requestInteriorMap(const MWWorld::CellStore* cell)
                     // We are using the same bounds and angle as we were using when the textures were originally made. Segments should come out the same.
                     if (i >= int(fog->mFogTextures.size()))
                     {
-                        std::cout << "Error: fog texture count mismatch" << std::endl;
+                        Log(Debug::Warning) << "Warning: fog texture count mismatch";
                         break;
                     }
 
@@ -684,7 +690,7 @@ void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
     osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
     if (!readerwriter)
     {
-        std::cerr << "Error: Unable to load fog, can't find a tga ReaderWriter" << std::endl;
+        Log(Debug::Error) << "Error: Unable to load fog, can't find a tga ReaderWriter" ;
         return;
     }
 
@@ -693,7 +699,7 @@ void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
     osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(in);
     if (!result.success())
     {
-        std::cerr << "Error: Failed to read fog: " << result.message() << " code " << result.status() << std::endl;
+        Log(Debug::Error) << "Error: Failed to read fog: " << result.message() << " code " << result.status();
         return;
     }
 
@@ -716,7 +722,7 @@ void LocalMap::MapSegment::saveFogOfWar(ESM::FogTexture &fog) const
     osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
     if (!readerwriter)
     {
-        std::cerr << "Error: Unable to write fog, can't find a tga ReaderWriter" << std::endl;
+        Log(Debug::Error) << "Error: Unable to write fog, can't find a tga ReaderWriter";
         return;
     }
 
@@ -725,7 +731,7 @@ void LocalMap::MapSegment::saveFogOfWar(ESM::FogTexture &fog) const
     osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*mFogOfWarImage, ostream);
     if (!result.success())
     {
-        std::cerr << "Error: Unable to write fog: " << result.message() << " code " << result.status() << std::endl;
+        Log(Debug::Error) << "Error: Unable to write fog: " << result.message() << " code " << result.status();
         return;
     }
     mFogOfWarImage->flipVertical();

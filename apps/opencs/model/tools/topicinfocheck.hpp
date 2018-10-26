@@ -80,17 +80,6 @@ namespace CSMTools
         template <typename T>
         bool verifyId(const std::string& name, const CSMWorld::IdCollection<T>& collection,
             const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
-
-        // Common error messages
-        void writeMissingIdError(const std::string& specifier, const std::string& missingId,
-            const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
-
-        void writeDeletedRecordError(const std::string& specifier, const std::string& recordId,
-            const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
-
-        void writeInvalidTypeError(const std::string& specifier, const std::string& invalidId,
-            CSMWorld::UniversalId::Type invalidType, const std::string& expectedType,
-            const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
     };
 }
 

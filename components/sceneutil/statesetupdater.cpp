@@ -30,8 +30,8 @@ namespace SceneUtil
 
     void StateSetUpdater::reset()
     {
-        mStateSets[0] = NULL;
-        mStateSets[1] = NULL;
+        mStateSets[0] = nullptr;
+        mStateSets[1] = nullptr;
     }
 
     StateSetUpdater::StateSetUpdater()

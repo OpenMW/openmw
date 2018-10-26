@@ -151,6 +151,9 @@ CompositeViewer::CompositeViewer()
 
     connect( &mTimer, SIGNAL(timeout()), this, SLOT(update()) );
     mTimer.start( 10 );
+
+    int frameRateLimit = CSMPrefs::get()["Rendering"]["framerate-limit"].toInt();
+    setRunMaxFrameRate(frameRateLimit);
 }
 
 CompositeViewer &CompositeViewer::get()
@@ -168,6 +171,12 @@ void CompositeViewer::update()
 
     mSimulationTime += dt;
     frame(mSimulationTime);
+
+    double minFrameTime = _runMaxFrameRate > 0.0 ? 1.0 / _runMaxFrameRate : 0.0;
+    if (dt < minFrameTime)
+    {
+        OpenThreads::Thread::microSleep(1000*1000*(minFrameTime-dt));
+    }
 }
 
 // ---------------------------------------------------
@@ -176,7 +185,7 @@ SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSyste
     bool retrieveInput)
     : RenderWidget(parent, f)
     , mResourceSystem(resourceSystem)
-    , mLighting(NULL)
+    , mLighting(nullptr)
     , mHasDefaultAmbient(false)
     , mPrevMouseX(0)
     , mPrevMouseY(0)
@@ -376,6 +385,10 @@ void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
     {
         mOrbitCamControl->setConstRoll(setting->isTrue());
     }
+    else if (*setting=="Rendering/framerate-limit")
+    {
+        CompositeViewer::get().setRunMaxFrameRate(setting->toInt());
+    }
     else if (*setting=="Rendering/camera-fov" ||
              *setting=="Rendering/camera-ortho" ||
              *setting=="Rendering/camera-ortho-size")
@@ -412,21 +425,21 @@ void SceneWidget::selectNavigationMode (const std::string& mode)
 {
     if (mode=="1st")
     {
-        mCurrentCamControl->setCamera(NULL);
+        mCurrentCamControl->setCamera(nullptr);
         mCurrentCamControl = mFreeCamControl;
         mFreeCamControl->setCamera(getCamera());
         mFreeCamControl->fixUpAxis(CameraController::WorldUp);
     }
     else if (mode=="free")
     {
-        mCurrentCamControl->setCamera(NULL);
+        mCurrentCamControl->setCamera(nullptr);
         mCurrentCamControl = mFreeCamControl;
         mFreeCamControl->setCamera(getCamera());
         mFreeCamControl->unfixUpAxis();
     }
     else if (mode=="orbit")
     {
-        mCurrentCamControl->setCamera(NULL);
+        mCurrentCamControl->setCamera(nullptr);
         mCurrentCamControl = mOrbitCamControl;
         mOrbitCamControl->setCamera(getCamera());
         mOrbitCamControl->reset();

@@ -10,6 +10,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/MatrixTransform>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
 #include <components/sceneutil/skeleton.hpp>
@@ -63,7 +64,7 @@ namespace SceneUtil
             {
                 osg::ref_ptr<osg::Node> node = *it;
                 if (node->getNumParents() > 1)
-                    std::cerr << "Error CopyRigVisitor: node has multiple parents" << std::endl;
+                    Log(Debug::Error) << "Error CopyRigVisitor: node has multiple parents";
                 while (node->getNumParents())
                     node->getParent(0)->removeChild(node);
 

@@ -1,6 +1,7 @@
 #include "mechanicsmanagerimp.hpp"
 
 #include <limits.h>
+#include <set>
 
 #include <components/misc/rng.hpp>
 
@@ -35,7 +36,7 @@ namespace
     float getFightDispositionBias(float disposition)
     {
         static const float fFightDispMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                    "fFightDispMult")->getFloat();
+                    "fFightDispMult")->mValue.getFloat();
         return ((50.f - disposition)  * fFightDispMult);
     }
 
@@ -44,11 +45,11 @@ namespace
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        float persTerm = stats.getAttribute(ESM::Attribute::Personality).getModified() / gmst.find("fPersonalityMod")->getFloat();
-        float luckTerm = stats.getAttribute(ESM::Attribute::Luck).getModified() / gmst.find("fLuckMod")->getFloat();
-        float repTerm = stats.getReputation() * gmst.find("fReputationMod")->getFloat();
+        float persTerm = stats.getAttribute(ESM::Attribute::Personality).getModified() / gmst.find("fPersonalityMod")->mValue.getFloat();
+        float luckTerm = stats.getAttribute(ESM::Attribute::Luck).getModified() / gmst.find("fLuckMod")->mValue.getFloat();
+        float repTerm = stats.getReputation() * gmst.find("fReputationMod")->mValue.getFloat();
         float fatigueTerm = stats.getFatigueTerm();
-        float levelTerm = stats.getLevel() * gmst.find("fLevelMod")->getFloat();
+        float levelTerm = stats.getLevel() * gmst.find("fLevelMod")->mValue.getFloat();
 
         rating1 = (repTerm + luckTerm + persTerm + stats.getSkill(ESM::Skill::Speechcraft).getModified()) * fatigueTerm;
 
@@ -202,7 +203,7 @@ namespace MWMechanics
         }
 
         // F_PCStart spells
-        const ESM::Race* race = NULL;
+        const ESM::Race* race = nullptr;
         if (mRaceSelected)
             race = esmStore.get<ESM::Race>().find(player->mRace);
 
@@ -251,6 +252,12 @@ namespace MWMechanics
             mActors.addActor(ptr);
         else
             mObjects.addObject(ptr);
+    }
+
+    void MechanicsManager::castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell)
+    {
+        if(ptr.getClass().isActor())
+            mActors.castSpell(ptr, spellId, manualSpell);
     }
 
     void MechanicsManager::remove(const MWWorld::Ptr& ptr)
@@ -335,7 +342,7 @@ namespace MWMechanics
             if(timeToDrown != mWatchedTimeToStartDrowning)
             {
                 static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fHoldBreathTime")->getFloat();
+                        .find("fHoldBreathTime")->mValue.getFloat();
 
                 mWatchedTimeToStartDrowning = timeToDrown;
 
@@ -429,9 +436,9 @@ namespace MWMechanics
         return mActors.isActorDetected(actor, observer);
     }
 
-    bool MechanicsManager::isAttackPrepairing(const MWWorld::Ptr& ptr)
+    bool MechanicsManager::isAttackPreparing(const MWWorld::Ptr& ptr)
     {
-        return mActors.isAttackPrepairing(ptr);
+        return mActors.isAttackPreparing(ptr);
     }
 
     bool MechanicsManager::isRunning(const MWWorld::Ptr& ptr)
@@ -446,7 +453,15 @@ namespace MWMechanics
 
     void MechanicsManager::rest(bool sleep)
     {
+        if (sleep)
+            MWBase::Environment::get().getWorld()->rest();
+
         mActors.rest(sleep);
+    }
+
+    void MechanicsManager::restoreDynamicStats(MWWorld::Ptr actor, bool sleep)
+    {
+        mActors.restoreDynamicStats(actor, sleep);
     }
 
     int MechanicsManager::getHoursToRest() const
@@ -536,12 +551,12 @@ namespace MWMechanics
         const MWMechanics::NpcStats &playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-        static const float fDispRaceMod = gmst.find("fDispRaceMod")->getFloat();
+        static const float fDispRaceMod = gmst.find("fDispRaceMod")->mValue.getFloat();
         if (Misc::StringUtils::ciEqual(npc->mBase->mRace, player->mBase->mRace))
             x += fDispRaceMod;
 
-        static const float fDispPersonalityMult = gmst.find("fDispPersonalityMult")->getFloat();
-        static const float fDispPersonalityBase = gmst.find("fDispPersonalityBase")->getFloat();
+        static const float fDispPersonalityMult = gmst.find("fDispPersonalityMult")->mValue.getFloat();
+        static const float fDispPersonalityBase = gmst.find("fDispPersonalityBase")->mValue.getFloat();
         x += fDispPersonalityMult * (playerStats.getAttribute(ESM::Attribute::Personality).getModified() - fDispPersonalityBase);
 
         float reaction = 0;
@@ -585,20 +600,20 @@ namespace MWMechanics
             rank = 0;
         }
 
-        static const float fDispFactionRankMult = gmst.find("fDispFactionRankMult")->getFloat();
-        static const float fDispFactionRankBase = gmst.find("fDispFactionRankBase")->getFloat();
-        static const float fDispFactionMod = gmst.find("fDispFactionMod")->getFloat();
+        static const float fDispFactionRankMult = gmst.find("fDispFactionRankMult")->mValue.getFloat();
+        static const float fDispFactionRankBase = gmst.find("fDispFactionRankBase")->mValue.getFloat();
+        static const float fDispFactionMod = gmst.find("fDispFactionMod")->mValue.getFloat();
         x += (fDispFactionRankMult * rank
             + fDispFactionRankBase)
             * fDispFactionMod * reaction;
 
-        static const float fDispCrimeMod = gmst.find("fDispCrimeMod")->getFloat();
-        static const float fDispDiseaseMod = gmst.find("fDispDiseaseMod")->getFloat();
+        static const float fDispCrimeMod = gmst.find("fDispCrimeMod")->mValue.getFloat();
+        static const float fDispDiseaseMod = gmst.find("fDispDiseaseMod")->mValue.getFloat();
         x -= fDispCrimeMod * playerStats.getBounty();
         if (playerStats.hasCommonDisease() || playerStats.hasBlightDisease())
             x += fDispDiseaseMod;
 
-        static const float fDispWeaponDrawn = gmst.find("fDispWeaponDrawn")->getFloat();
+        static const float fDispWeaponDrawn = gmst.find("fDispWeaponDrawn")->mValue.getFloat();
         if (playerStats.getDrawState() == MWMechanics::DrawState_Weapon)
             x += fDispWeaponDrawn;
 
@@ -624,10 +639,10 @@ namespace MWMechanics
         // I suppose the temporary disposition change (second param to getDerivedDisposition()) _has_ to be considered here,
         // otherwise one would get different prices when exiting and re-entering the dialogue window...
         int clampedDisposition = getDerivedDisposition(ptr);
-        float a = static_cast<float>(std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100));
+        float a = static_cast<float>(std::min(playerPtr.getClass().getSkill(playerPtr, ESM::Skill::Mercantile), 100));
         float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-        float d = static_cast<float>(std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100));
+        float d = static_cast<float>(std::min(ptr.getClass().getSkill(ptr, ESM::Skill::Mercantile), 100));
         float e = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
         float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
@@ -666,16 +681,16 @@ namespace MWMechanics
         float target2 = d * (playerRating2 - npcRating2 + 50);
 
         float bribeMod;
-        if (type == PT_Bribe10) bribeMod = gmst.find("fBribe10Mod")->getFloat();
-        else if (type == PT_Bribe100) bribeMod = gmst.find("fBribe100Mod")->getFloat();
-        else bribeMod = gmst.find("fBribe1000Mod")->getFloat();
+        if (type == PT_Bribe10) bribeMod = gmst.find("fBribe10Mod")->mValue.getFloat();
+        else if (type == PT_Bribe100) bribeMod = gmst.find("fBribe100Mod")->mValue.getFloat();
+        else bribeMod = gmst.find("fBribe1000Mod")->mValue.getFloat();
 
         float target3 = d * (playerRating3 - npcRating3 + 50) + bribeMod;
 
-        float iPerMinChance = floor(gmst.find("iPerMinChance")->getFloat());
-        float iPerMinChange = floor(gmst.find("iPerMinChange")->getFloat());
-        float fPerDieRollMult = gmst.find("fPerDieRollMult")->getFloat();
-        float fPerTempMult = gmst.find("fPerTempMult")->getFloat();
+        float iPerMinChance = floor(gmst.find("iPerMinChance")->mValue.getFloat());
+        float iPerMinChange = floor(gmst.find("iPerMinChange")->mValue.getFloat());
+        float fPerDieRollMult = gmst.find("fPerDieRollMult")->mValue.getFloat();
+        float fPerTempMult = gmst.find("fPerTempMult")->mValue.getFloat();
 
         float x = 0;
         float y = 0;
@@ -860,7 +875,7 @@ namespace MWMechanics
                     continue;
 
                 // All sMagicBound* GMST's should be of type string
-                std::string currentGMSTValue = currentSetting.getString();
+                std::string currentGMSTValue = currentSetting.mValue.getString();
                 Misc::StringUtils::lowerCaseInPlace(currentGMSTValue);
 
                 boundItemIDCache.insert(currentGMSTValue);
@@ -1156,7 +1171,7 @@ namespace MWMechanics
 
         osg::Vec3f from (player.getRefData().getPosition().asVec3());
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
-        float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
+        float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->mValue.getFloat();
 
         mActors.getObjectsInRange(from, radius, neighbors);
 
@@ -1254,29 +1269,29 @@ namespace MWMechanics
         float disp = 0.f, dispVictim = 0.f;
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
         {
-            arg = store.find("iCrimeTresspass")->getInt();
-            disp = dispVictim = store.find("iDispTresspass")->getFloat();
+            arg = store.find("iCrimeTresspass")->mValue.getInteger();
+            disp = dispVictim = store.find("iDispTresspass")->mValue.getFloat();
         }
         else if (type == OT_Pickpocket)
         {
-            arg = store.find("iCrimePickPocket")->getInt();
-            disp = dispVictim = store.find("fDispPickPocketMod")->getFloat();
+            arg = store.find("iCrimePickPocket")->mValue.getInteger();
+            disp = dispVictim = store.find("fDispPickPocketMod")->mValue.getFloat();
         }
         else if (type == OT_Assault)
         {
-            arg = store.find("iCrimeAttack")->getInt();
-            disp = store.find("iDispAttackMod")->getFloat();
-            dispVictim = store.find("fDispAttacking")->getFloat();
+            arg = store.find("iCrimeAttack")->mValue.getInteger();
+            disp = store.find("iDispAttackMod")->mValue.getFloat();
+            dispVictim = store.find("fDispAttacking")->mValue.getFloat();
         }
         else if (type == OT_Murder)
         {
-            arg = store.find("iCrimeKilling")->getInt();
-            disp = dispVictim = store.find("iDispKilling")->getFloat();
+            arg = store.find("iCrimeKilling")->mValue.getInteger();
+            disp = dispVictim = store.find("iDispKilling")->mValue.getFloat();
         }
         else if (type == OT_Theft)
         {
-            disp = dispVictim = store.find("fDispStealing")->getFloat() * arg;
-            arg = static_cast<int>(arg * store.find("fCrimeStealing")->getFloat());
+            disp = dispVictim = store.find("fDispStealing")->mValue.getFloat() * arg;
+            arg = static_cast<int>(arg * store.find("fCrimeStealing")->mValue.getFloat());
             arg = std::max(1, arg); // Minimum bounty of 1, in case items with zero value are stolen
         }
 
@@ -1286,7 +1301,7 @@ namespace MWMechanics
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
         osg::Vec3f from (player.getRefData().getPosition().asVec3());
-        float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
+        float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->mValue.getFloat();
 
         mActors.getObjectsInRange(from, radius, neighbors);
 
@@ -1300,21 +1315,21 @@ namespace MWMechanics
         // Controls whether witnesses will engage combat with the criminal.
         int fight = 0, fightVictim = 0;
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
-            fight = fightVictim = esmStore.get<ESM::GameSetting>().find("iFightTrespass")->getInt();
+            fight = fightVictim = esmStore.get<ESM::GameSetting>().find("iFightTrespass")->mValue.getInteger();
         else if (type == OT_Pickpocket)
         {
-            fight = esmStore.get<ESM::GameSetting>().find("iFightPickpocket")->getInt();
-            fightVictim = esmStore.get<ESM::GameSetting>().find("iFightPickpocket")->getInt() * 4; // *4 according to research wiki
+            fight = esmStore.get<ESM::GameSetting>().find("iFightPickpocket")->mValue.getInteger();
+            fightVictim = esmStore.get<ESM::GameSetting>().find("iFightPickpocket")->mValue.getInteger() * 4; // *4 according to research wiki
         }
         else if (type == OT_Assault)
         {
-            fight = esmStore.get<ESM::GameSetting>().find("iFightAttacking")->getInt();
-            fightVictim = esmStore.get<ESM::GameSetting>().find("iFightAttack")->getInt();
+            fight = esmStore.get<ESM::GameSetting>().find("iFightAttacking")->mValue.getInteger();
+            fightVictim = esmStore.get<ESM::GameSetting>().find("iFightAttack")->mValue.getInteger();
         }
         else if (type == OT_Murder)
-            fight = fightVictim = esmStore.get<ESM::GameSetting>().find("iFightKilling")->getInt();
+            fight = fightVictim = esmStore.get<ESM::GameSetting>().find("iFightKilling")->mValue.getInteger();
         else if (type == OT_Theft)
-            fight = fightVictim = esmStore.get<ESM::GameSetting>().find("fFightStealing")->getInt();
+            fight = fightVictim = esmStore.get<ESM::GameSetting>().find("fFightStealing")->mValue.getInteger();
 
         bool reported = false;
 
@@ -1439,11 +1454,12 @@ namespace MWMechanics
         if (target == getPlayer() || !attacker.getClass().isActor())
             return false;
 
-        std::list<MWWorld::Ptr> followersAttacker = getActorsSidingWith(attacker);
+        std::set<MWWorld::Ptr> followersAttacker;
+        getActorsSidingWith(attacker, followersAttacker);
 
         MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
 
-        if (std::find(followersAttacker.begin(), followersAttacker.end(), target) != followersAttacker.end())
+        if (followersAttacker.find(target) != followersAttacker.end())
         {
             statsTarget.friendlyHit();
 
@@ -1454,23 +1470,10 @@ namespace MWMechanics
             }
         }
 
-        // Attacking an NPC that is already in combat with any other NPC is not a crime
-        AiSequence& seq = statsTarget.getAiSequence();
-        bool isFightingNpc = false;
-        for (std::list<AiPackage*>::const_iterator it = seq.begin(); it != seq.end(); ++it)
-        {
-            if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
-            {
-                MWWorld::Ptr target2 = (*it)->getTarget();
-                if (!target2.isEmpty() && target2.getClass().isNpc())
-                    isFightingNpc = true;
-            }
-        }
-
-        if (target.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
-                && !isAggressive(target, attacker) && !isFightingNpc
-                && !target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+        if (canCommitCrimeAgainst(target, attacker))
             commitCrime(attacker, target, MWBase::MechanicsManager::OT_Assault);
+
+        AiSequence& seq = statsTarget.getAiSequence();
 
         if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(target)
                                     || attacker == getPlayer())
@@ -1498,6 +1501,14 @@ namespace MWMechanics
         return true;
     }
 
+    bool MechanicsManager::canCommitCrimeAgainst(const MWWorld::Ptr &target, const MWWorld::Ptr &attacker)
+    {
+        MWMechanics::AiSequence seq = target.getClass().getCreatureStats(target).getAiSequence();
+        return target.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
+                && !isAggressive(target, attacker) && !seq.isEngagedWithActor()
+                && !target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackage::TypeIdPursue);
+    }
+
     void MechanicsManager::actorKilled(const MWWorld::Ptr &victim, const MWWorld::Ptr &attacker)
     {
         if (attacker.isEmpty() || victim.isEmpty())
@@ -1510,11 +1521,10 @@ namespace MWMechanics
             return; // TODO: implement animal rights
 
         const MWMechanics::NpcStats& victimStats = victim.getClass().getNpcStats(victim);
-        if (victimStats.getCrimeId() == -1)
-            return;
+        const MWWorld::Ptr &player = getPlayer();
+        bool canCommit = attacker == player && canCommitCrimeAgainst(victim, attacker);
 
         // For now we report only about crimes of player and player's followers
-        const MWWorld::Ptr &player = getPlayer();
         if (attacker != player)
         {
             std::set<MWWorld::Ptr> playerFollowers;
@@ -1522,6 +1532,9 @@ namespace MWMechanics
             if (playerFollowers.find(attacker) == playerFollowers.end())
                 return;
         }
+
+        if (!canCommit && victimStats.getCrimeId() == -1)
+            return;
 
         // Simple check for who attacked first: if the player attacked first, a crimeId should be set
         // Doesn't handle possible edge case where no one reported the assault, but in such a case,
@@ -1547,8 +1560,8 @@ namespace MWMechanics
                 && !MWBase::Environment::get().getWorld()->isSwimming(ptr)
                 && MWBase::Environment::get().getWorld()->isOnGround(ptr))
         {
-            static float fSneakSkillMult = store.find("fSneakSkillMult")->getFloat();
-            static float fSneakBootMult = store.find("fSneakBootMult")->getFloat();
+            static float fSneakSkillMult = store.find("fSneakSkillMult")->mValue.getFloat();
+            static float fSneakBootMult = store.find("fSneakBootMult")->mValue.getFloat();
             float sneak = static_cast<float>(ptr.getClass().getSkill(ptr, ESM::Skill::Sneak));
             int agility = stats.getAttribute(ESM::Attribute::Agility).getModified();
             int luck = stats.getAttribute(ESM::Attribute::Luck).getModified();
@@ -1563,8 +1576,8 @@ namespace MWMechanics
             sneakTerm = fSneakSkillMult * sneak + 0.2f * agility + 0.1f * luck + bootWeight * fSneakBootMult;
         }
 
-        static float fSneakDistBase = store.find("fSneakDistanceBase")->getFloat();
-        static float fSneakDistMult = store.find("fSneakDistanceMultiplier")->getFloat();
+        static float fSneakDistBase = store.find("fSneakDistanceBase")->mValue.getFloat();
+        static float fSneakDistMult = store.find("fSneakDistanceMultiplier")->mValue.getFloat();
 
         osg::Vec3f pos1 (ptr.getRefData().getPosition().asVec3());
         osg::Vec3f pos2 (observer.getRefData().getPosition().asVec3());
@@ -1582,8 +1595,8 @@ namespace MWMechanics
         float obsTerm = obsSneak + 0.2f * obsAgility + 0.1f * obsLuck - obsBlind;
 
         // is ptr behind the observer?
-        static float fSneakNoViewMult = store.find("fSneakNoViewMult")->getFloat();
-        static float fSneakViewMult = store.find("fSneakViewMult")->getFloat();
+        static float fSneakNoViewMult = store.find("fSneakNoViewMult")->mValue.getFloat();
+        static float fSneakViewMult = store.find("fSneakViewMult")->mValue.getFloat();
         float y = 0;
         osg::Vec3f vec = pos1 - pos2;
         if (observer.getRefData().getBaseNode())
@@ -1743,7 +1756,7 @@ namespace MWMechanics
                      MWBase::Environment::get().getWorld()->getGlobalInt("pcknownwerewolf")))
             {
                 const ESM::GameSetting * iWerewolfFightMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iWerewolfFightMod");
-                fight += iWerewolfFightMod->getInt();
+                fight += iWerewolfFightMod->mValue.getInteger();
             }
         }
 
@@ -1756,6 +1769,11 @@ namespace MWMechanics
         CreatureStats& stats = player.getClass().getCreatureStats(player);
         if (stats.isDead())
             stats.resurrect();
+    }
+
+    bool MechanicsManager::isCastingSpell(const MWWorld::Ptr &ptr) const
+    {
+        return mActors.isCastingSpell(ptr);
     }
 
     bool MechanicsManager::isReadyToBlock(const MWWorld::Ptr &ptr) const
@@ -1831,7 +1849,7 @@ namespace MWMechanics
             // Witnesses of the player's transformation will make them a globally known werewolf
             std::vector<MWWorld::Ptr> closeActors;
             const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-            getActorsInRange(actor.getRefData().getPosition().asVec3(), gmst.find("fAlarmRadius")->getFloat(), closeActors);
+            getActorsInRange(actor.getRefData().getPosition().asVec3(), gmst.find("fAlarmRadius")->mValue.getFloat(), closeActors);
 
             bool detected = false, reported = false;
             for (std::vector<MWWorld::Ptr>::const_iterator it = closeActors.begin(); it != closeActors.end(); ++it)
@@ -1856,7 +1874,7 @@ namespace MWMechanics
                 if (reported)
                 {
                     npcStats.setBounty(npcStats.getBounty()+
-                                       gmst.find("iWereWolfBounty")->getInt());
+                                       gmst.find("iWereWolfBounty")->mValue.getInteger());
                     windowManager->messageBox("#{sCrimeMessage}");
                 }
             }
@@ -1868,7 +1886,7 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         MWMechanics::NpcStats &stats = actor.getClass().getNpcStats(actor);
 
-        stats.getSkill(ESM::Skill::Acrobatics).setBase(gmst.find("fWerewolfAcrobatics")->getInt());
+        stats.getSkill(ESM::Skill::Acrobatics).setBase(gmst.find("fWerewolfAcrobatics")->mValue.getInteger());
     }
 
     void MechanicsManager::cleanupSummonedCreature(const MWWorld::Ptr &caster, int creatureActorId)

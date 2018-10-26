@@ -48,6 +48,8 @@ namespace MWState
 
             virtual void endGame();
 
+            virtual void resumeGame();
+
             virtual void deleteGame (const MWState::Character *character, const MWState::Slot *slot);
             ///< Delete a saved game slot from this character. If all save slots are deleted, the character will be deleted too.
 

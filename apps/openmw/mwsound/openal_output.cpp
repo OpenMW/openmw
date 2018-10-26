@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <stdexcept>
-#include <iostream>
 #include <cstring>
 #include <vector>
 #include <memory>
@@ -8,6 +7,8 @@
 
 #include <stdint.h>
 
+#include <components/debug/debuglog.hpp>
+#include <components/misc/constants.hpp>
 #include <components/vfs/manager.hpp>
 
 #include <OpenThreads/Thread>
@@ -34,18 +35,13 @@
 namespace
 {
 
-// The game uses 64 units per yard, or approximately 69.99125109 units per meter.
-// Should this be defined publically somewhere?
-const float UnitsPerMeter = 69.99125109f;
-
 const int sLoudnessFPS = 20; // loudness values per second of audio
 
 ALCenum checkALCError(ALCdevice *device, const char *func, int line)
 {
     ALCenum err = alcGetError(device);
     if(err != ALC_NO_ERROR)
-        std::cerr<< ">>>>>>>>> ALC error "<<alcGetString(device, err)<<" ("<<err<<") @ "<<
-                    func<<":"<<line <<std::endl;
+        Log(Debug::Error) << "ALC error "<< alcGetString(device, err) << " (" << err << ") @ " << func << ":" << line;
     return err;
 }
 #define getALCError(d) checkALCError((d), __FUNCTION__, __LINE__)
@@ -54,8 +50,7 @@ ALenum checkALError(const char *func, int line)
 {
     ALenum err = alGetError();
     if(err != AL_NO_ERROR)
-        std::cerr<< ">>>>>>>>> AL error "<<alGetString(err)<<" ("<<err<<") @ "<<
-                    func<<":"<<line <<std::endl;
+        Log(Debug::Error) << "AL error " << alGetString(err) << " (" << err << ") @ " << func << ":" << line;
     return err;
 }
 #define getALError() checkALError(__FUNCTION__, __LINE__)
@@ -256,8 +251,7 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
         }
     }
 
-    std::cerr<< "Unsupported sound format ("<<getChannelConfigName(chans)<<", "<<
-                getSampleTypeName(type)<<")" <<std::endl;
+    Log(Debug::Warning) << "Unsupported sound format (" << getChannelConfigName(chans) << ", " << getSampleTypeName(type) << ")";
     return AL_NONE;
 }
 
@@ -415,8 +409,9 @@ bool OpenAL_SoundStream::init(bool getLoudnessData)
         mDecoder->getInfo(&mSampleRate, &chans, &type);
         mFormat = getALFormat(chans, type);
     }
-    catch(std::exception &e) {
-        std::cerr<< "Failed to get stream info: "<<e.what() <<std::endl;
+    catch(std::exception &e)
+    {
+        Log(Debug::Error) << "Failed to get stream info: " << e.what();
         return false;
     }
 
@@ -522,7 +517,7 @@ bool OpenAL_SoundStream::process()
         }
     }
     catch(std::exception&) {
-        std::cout<< "Error updating stream \""<<mDecoder->getName()<<"\"" <<std::endl;
+        Log(Debug::Error) << "Error updating stream \"" << mDecoder->getName() << "\"";
         mIsFinished = true;
     }
     return !mIsFinished;
@@ -577,10 +572,10 @@ std::vector<std::string> OpenAL_Output::enumerate()
     std::vector<std::string> devlist;
     const ALCchar *devnames;
 
-    if(alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT"))
-        devnames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+    if(alcIsExtensionPresent(nullptr, "ALC_ENUMERATE_ALL_EXT"))
+        devnames = alcGetString(nullptr, ALC_ALL_DEVICES_SPECIFIER);
     else
-        devnames = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+        devnames = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
     while(devnames && *devnames)
     {
         devlist.push_back(devnames);
@@ -593,17 +588,18 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
 {
     deinit();
 
-    std::cout<< "Initializing OpenAL..." <<std::endl;
+    Log(Debug::Info) << "Initializing OpenAL...";
 
     mDevice = alcOpenDevice(devname.c_str());
     if(!mDevice && !devname.empty())
     {
-        std::cerr<< "Failed to open \""<<devname<<"\", trying default" <<std::endl;
+        Log(Debug::Warning) << "Failed to open \"" << devname << "\", trying default";
         mDevice = alcOpenDevice(nullptr);
     }
+
     if(!mDevice)
     {
-        std::cerr<< "Failed to open default audio device" <<std::endl;
+        Log(Debug::Error) << "Failed to open default audio device";
         return false;
     }
 
@@ -612,13 +608,13 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
         name = alcGetString(mDevice, ALC_ALL_DEVICES_SPECIFIER);
     if(alcGetError(mDevice) != AL_NO_ERROR || !name)
         name = alcGetString(mDevice, ALC_DEVICE_SPECIFIER);
-    std::cout<< "Opened \""<<name<<"\"" <<std::endl;
+    Log(Debug::Info) << "Opened \"" << name << "\"";
 
     ALCint major=0, minor=0;
     alcGetIntegerv(mDevice, ALC_MAJOR_VERSION, 1, &major);
     alcGetIntegerv(mDevice, ALC_MINOR_VERSION, 1, &minor);
-    std::cout<< "  ALC Version: "<<major<<"."<<minor<<"\n"<<
-                "  ALC Extensions: "<<alcGetString(mDevice, ALC_EXTENSIONS) <<std::endl;
+    Log(Debug::Info) << "  ALC Version: " << major << "." << minor <<"\n" <<
+                        "  ALC Extensions: " << alcGetString(mDevice, ALC_EXTENSIONS);
 
     ALC.EXT_EFX = alcIsExtensionPresent(mDevice, "ALC_EXT_EFX");
     ALC.SOFT_HRTF = alcIsExtensionPresent(mDevice, "ALC_SOFT_HRTF");
@@ -650,7 +646,7 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
             }
 
             if(index < 0)
-                std::cerr<< "Failed to find HRTF \""<<hrtfname<<"\", using default" <<std::endl;
+                Log(Debug::Warning) << "Failed to find HRTF \"" << hrtfname << "\", using default";
             else
             {
                 attrs.push_back(ALC_HRTF_ID_SOFT);
@@ -663,7 +659,7 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
     mContext = alcCreateContext(mDevice, attrs.data());
     if(!mContext || alcMakeContextCurrent(mContext) == ALC_FALSE)
     {
-        std::cerr<< "Failed to setup audio context: "<<alcGetString(mDevice, alcGetError(mDevice)) <<std::endl;
+        Log(Debug::Error) << "Failed to setup audio context: "<<alcGetString(mDevice, alcGetError(mDevice));
         if(mContext)
             alcDestroyContext(mContext);
         mContext = nullptr;
@@ -672,23 +668,23 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
         return false;
     }
 
-    std::cout<< "  Vendor: "<<alGetString(AL_VENDOR)<<"\n"<<
-                "  Renderer: "<<alGetString(AL_RENDERER)<<"\n"<<
-                "  Version: "<<alGetString(AL_VERSION)<<"\n"<<
-                "  Extensions: "<<alGetString(AL_EXTENSIONS)<<std::endl;
+    Log(Debug::Info) << "  Vendor: "<<alGetString(AL_VENDOR)<<"\n"<<
+                        "  Renderer: "<<alGetString(AL_RENDERER)<<"\n"<<
+                        "  Version: "<<alGetString(AL_VERSION)<<"\n"<<
+                        "  Extensions: "<<alGetString(AL_EXTENSIONS);
 
     if(!ALC.SOFT_HRTF)
-        std::cout<< "HRTF status unavailable" <<std::endl;
+        Log(Debug::Warning) << "HRTF status unavailable";
     else
     {
         ALCint hrtf_state;
         alcGetIntegerv(mDevice, ALC_HRTF_SOFT, 1, &hrtf_state);
         if(!hrtf_state)
-            std::cout<< "HRTF disabled" <<std::endl;
+            Log(Debug::Info) << "HRTF disabled";
         else
         {
             const ALCchar *hrtf = alcGetString(mDevice, ALC_HRTF_SPECIFIER_SOFT);
-            std::cout<< "Enabled HRTF "<<hrtf <<std::endl;
+            Log(Debug::Info) << "Enabled HRTF " << hrtf;
         }
     }
 
@@ -716,7 +712,7 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
     }
     if(mFreeSources.empty())
     {
-        std::cerr<< "Could not allocate any sound sources" <<std::endl;
+        Log(Debug::Warning) << "Could not allocate any sound sourcess";
         alcMakeContextCurrent(nullptr);
         alcDestroyContext(mContext);
         mContext = nullptr;
@@ -724,7 +720,7 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
         mDevice = nullptr;
         return false;
     }
-    std::cout<< "Allocated "<<mFreeSources.size()<<" sound sources" <<std::endl;
+    Log(Debug::Info) << "Allocated " << mFreeSources.size() << " sound sources";
 
     if(ALC.EXT_EFX)
     {
@@ -775,7 +771,7 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
             alFilteri(mWaterFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
             if(alGetError() == AL_NO_ERROR)
             {
-                std::cout<< "Low-pass filter supported" <<std::endl;
+                Log(Debug::Info) << "Low-pass filter supported";
                 alFilterf(mWaterFilter, AL_LOWPASS_GAIN, 0.9f);
                 alFilterf(mWaterFilter, AL_LOWPASS_GAINHF, 0.125f);
             }
@@ -795,12 +791,12 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
         {
             alEffecti(mDefaultEffect, AL_EFFECT_TYPE, AL_EFFECT_EAXREVERB);
             if(alGetError() == AL_NO_ERROR)
-                std::cout<< "EAX Reverb supported" <<std::endl;
+                Log(Debug::Info) << "EAX Reverb supported";
             else
             {
                 alEffecti(mDefaultEffect, AL_EFFECT_TYPE, AL_EFFECT_REVERB);
                 if(alGetError() == AL_NO_ERROR)
-                    std::cout<< "Standard Reverb supported" <<std::endl;
+                    Log(Debug::Info) << "Standard Reverb supported";
             }
             EFXEAXREVERBPROPERTIES props = EFX_REVERB_PRESET_GENERIC;
             props.flGain = 0.0f;
@@ -819,13 +815,13 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
             LoadEffect(mWaterEffect, EFX_REVERB_PRESET_UNDERWATER);
         }
 
-        alListenerf(AL_METERS_PER_UNIT, 1.0f / UnitsPerMeter);
+        alListenerf(AL_METERS_PER_UNIT, 1.0f / Constants::UnitsPerMeter);
     }
 skip_efx:
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-    // Speed of sound is in units per second. Given the default speed of sound is 343.3 (assumed
+    // Speed of sound is in units per second. Take the sound speed in air (assumed
     // meters per second), multiply by the units per meter to get the speed in u/s.
-    alSpeedOfSound(343.3f * UnitsPerMeter);
+    alSpeedOfSound(Constants::SoundSpeedInAir * Constants::UnitsPerMeter);
     alGetError();
 
     mInitialized = true;
@@ -891,7 +887,7 @@ void OpenAL_Output::setHrtf(const std::string &hrtfname, HrtfMode hrtfmode)
 {
     if(!mDevice || !ALC.SOFT_HRTF)
     {
-        std::cerr<< "HRTF extension not present" <<std::endl;
+        Log(Debug::Info) << "HRTF extension not present";
         return;
     }
 
@@ -924,7 +920,7 @@ void OpenAL_Output::setHrtf(const std::string &hrtfname, HrtfMode hrtfmode)
         }
 
         if(index < 0)
-            std::cerr<< "Failed to find HRTF name \""<<hrtfname<<"\", using default" <<std::endl;
+            Log(Debug::Warning) << "Failed to find HRTF name \"" << hrtfname << "\", using default";
         else
         {
             attrs.push_back(ALC_HRTF_ID_SOFT);
@@ -937,11 +933,11 @@ void OpenAL_Output::setHrtf(const std::string &hrtfname, HrtfMode hrtfmode)
     ALCint hrtf_state;
     alcGetIntegerv(mDevice, ALC_HRTF_SOFT, 1, &hrtf_state);
     if(!hrtf_state)
-        std::cout<< "HRTF disabled" <<std::endl;
+        Log(Debug::Info) << "HRTF disabled";
     else
     {
         const ALCchar *hrtf = alcGetString(mDevice, ALC_HRTF_SPECIFIER_SOFT);
-        std::cout<< "Enabled HRTF "<<hrtf <<std::endl;
+        Log(Debug::Info) << "Enabled HRTF " << hrtf;
     }
 }
 
@@ -977,7 +973,7 @@ std::pair<Sound_Handle,size_t> OpenAL_Output::loadSound(const std::string &fname
     }
     catch(std::exception &e)
     {
-        std::cerr<< "Failed to load audio from "<<fname<<": "<<e.what() <<std::endl;
+        Log(Debug::Error) << "Failed to load audio from " << fname << ": " << e.what();
     }
 
     if(data.empty())
@@ -1139,21 +1135,31 @@ bool OpenAL_Output::playSound(Sound *sound, Sound_Handle data, float offset)
 
     if(mFreeSources.empty())
     {
-        std::cerr<< "No free sources!" <<std::endl;
+        Log(Debug::Warning) << "No free sources!";
         return false;
     }
     source = mFreeSources.front();
 
     initCommon2D(source, sound->getPosition(), sound->getRealVolume(), sound->getPitch(),
                  sound->getIsLooping(), sound->getUseEnv());
+    alSourcei(source, AL_BUFFER, GET_PTRID(data));
     alSourcef(source, AL_SEC_OFFSET, offset);
     if(getALError() != AL_NO_ERROR)
+    {
+        alSourceRewind(source);
+        alSourcei(source, AL_BUFFER, 0);
+        alGetError();
         return false;
+    }
 
-    alSourcei(source, AL_BUFFER, GET_PTRID(data));
     alSourcePlay(source);
     if(getALError() != AL_NO_ERROR)
+    {
+        alSourceRewind(source);
+        alSourcei(source, AL_BUFFER, 0);
+        alGetError();
         return false;
+    }
 
     mFreeSources.pop_front();
     sound->mHandle = MAKE_PTRID(source);
@@ -1168,7 +1174,7 @@ bool OpenAL_Output::playSound3D(Sound *sound, Sound_Handle data, float offset)
 
     if(mFreeSources.empty())
     {
-        std::cerr<< "No free sources!" <<std::endl;
+        Log(Debug::Warning) << "No free sources!";
         return false;
     }
     source = mFreeSources.front();
@@ -1176,14 +1182,24 @@ bool OpenAL_Output::playSound3D(Sound *sound, Sound_Handle data, float offset)
     initCommon3D(source, sound->getPosition(), sound->getMinDistance(), sound->getMaxDistance(),
                  sound->getRealVolume(), sound->getPitch(), sound->getIsLooping(),
                  sound->getUseEnv());
+    alSourcei(source, AL_BUFFER, GET_PTRID(data));
     alSourcef(source, AL_SEC_OFFSET, offset);
     if(getALError() != AL_NO_ERROR)
+    {
+        alSourceRewind(source);
+        alSourcei(source, AL_BUFFER, 0);
+        alGetError();
         return false;
+    }
 
-    alSourcei(source, AL_BUFFER, GET_PTRID(data));
     alSourcePlay(source);
     if(getALError() != AL_NO_ERROR)
+    {
+        alSourceRewind(source);
+        alSourcei(source, AL_BUFFER, 0);
+        alGetError();
         return false;
+    }
 
     mFreeSources.pop_front();
     sound->mHandle = MAKE_PTRID(source);
@@ -1198,9 +1214,8 @@ void OpenAL_Output::finishSound(Sound *sound)
     ALuint source = GET_PTRID(sound->mHandle);
     sound->mHandle = 0;
 
-    // Rewind the stream instead of stopping it, this puts the source into an AL_INITIAL state,
-    // which works around a bug in the MacOS OpenAL implementation which would otherwise think
-    // the initial queue already played when it hasn't.
+    // Rewind the stream to put the source back into an AL_INITIAL state, for
+    // the next time it's used.
     alSourceRewind(source);
     alSourcei(source, AL_BUFFER, 0);
     getALError();
@@ -1236,13 +1251,14 @@ bool OpenAL_Output::streamSound(DecoderPtr decoder, Stream *sound)
 {
     if(mFreeSources.empty())
     {
-        std::cerr<< "No free sources!" <<std::endl;
+        Log(Debug::Warning) << "No free sources!";
         return false;
     }
     ALuint source = mFreeSources.front();
 
     if(sound->getIsLooping())
-        std::cout <<"Warning: cannot loop stream \""<<decoder->getName()<<"\""<< std::endl;
+        Log(Debug::Warning) << "Warning: cannot loop stream \"" << decoder->getName() << "\"";
+
     initCommon2D(source, sound->getPosition(), sound->getRealVolume(), sound->getPitch(),
                  false, sound->getUseEnv());
     if(getALError() != AL_NO_ERROR)
@@ -1266,13 +1282,14 @@ bool OpenAL_Output::streamSound3D(DecoderPtr decoder, Stream *sound, bool getLou
 {
     if(mFreeSources.empty())
     {
-        std::cerr<< "No free sources!" <<std::endl;
+        Log(Debug::Warning) << "No free sources!";
         return false;
     }
     ALuint source = mFreeSources.front();
 
     if(sound->getIsLooping())
-        std::cout <<"Warning: cannot loop stream \""<<decoder->getName()<<"\""<< std::endl;
+        Log(Debug::Warning) << "Warning: cannot loop stream \"" << decoder->getName() << "\"";
+
     initCommon3D(source, sound->getPosition(), sound->getMinDistance(), sound->getMaxDistance(),
                  sound->getRealVolume(), sound->getPitch(), false, sound->getUseEnv());
     if(getALError() != AL_NO_ERROR)
@@ -1301,9 +1318,8 @@ void OpenAL_Output::finishStream(Stream *sound)
     sound->mHandle = 0;
     mStreamThread->remove(stream);
 
-    // Rewind the stream instead of stopping it, this puts the source into an AL_INITIAL state,
-    // which works around a bug in the MacOS OpenAL implementation which would otherwise think
-    // the initial queue already played when it hasn't.
+    // Rewind the stream to put the source back into an AL_INITIAL state, for
+    // the next time it's used.
     alSourceRewind(source);
     alSourcei(source, AL_BUFFER, 0);
     getALError();
@@ -1381,8 +1397,7 @@ void OpenAL_Output::updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdi
 
         if(env != mListenerEnv)
         {
-            // Speed of sound in water is 1484m/s, and in air is 343.3m/s (roughly)
-            alSpeedOfSound(((env == Env_Underwater) ? 1484.0f : 343.3f) * UnitsPerMeter);
+            alSpeedOfSound(((env == Env_Underwater) ? Constants::SoundSpeedUnderwater : Constants::SoundSpeedInAir) * Constants::UnitsPerMeter);
 
             // Update active sources with the environment's direct filter
             if(mWaterFilter)
@@ -1464,7 +1479,8 @@ void OpenAL_Output::resumeSounds(int types)
 
 
 OpenAL_Output::OpenAL_Output(SoundManager &mgr)
-  : Sound_Output(mgr), mDevice(0), mContext(0)
+  : Sound_Output(mgr)
+  , mDevice(0), mContext(0)
   , mListenerPos(0.0f, 0.0f, 0.0f), mListenerEnv(Env_Normal)
   , mWaterFilter(0), mWaterEffect(0), mDefaultEffect(0), mEffectSlot(0)
   , mStreamThread(new StreamThread)

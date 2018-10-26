@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QCheckBox>
 #include <QStackedWidget>
 #include <QPushButton>
 #include <QLabel>
@@ -24,6 +25,7 @@ namespace CSVTools
             QStackedWidget mInput;
             QLineEdit mText;
             QComboBox mRecordState;
+            QCheckBox mCaseSensitive;
             QPushButton mSearch;
             QGridLayout *mLayout;
             QComboBox mMode;

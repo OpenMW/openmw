@@ -27,7 +27,7 @@ namespace MWGui
 
 Repair::Repair()
     : WindowBase("openmw_repair.layout")
-    , mItemSelectionDialog(NULL)
+    , mItemSelectionDialog(nullptr)
 {
     getWidget(mRepairBox, "RepairBox");
     getWidget(mToolBox, "ToolBox");
@@ -99,7 +99,7 @@ void Repair::updateRepairView()
     mRepairBox->update();
 
     Gui::Box* box = dynamic_cast<Gui::Box*>(mMainWidget);
-    if (box == NULL)
+    if (box == nullptr)
         throw std::runtime_error("main widget must be a box");
 
     box->notifyChildrenSizeChanged();

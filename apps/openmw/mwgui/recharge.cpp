@@ -18,7 +18,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
 #include "itemwidget.hpp"
@@ -31,7 +30,7 @@ namespace MWGui
 
 Recharge::Recharge()
     : WindowBase("openmw_recharge_dialog.layout")
-    , mItemSelectionDialog(NULL)
+    , mItemSelectionDialog(nullptr)
 {
     getWidget(mBox, "Box");
     getWidget(mGemBox, "GemBox");
@@ -90,7 +89,7 @@ void Recharge::updateView()
     mBox->update();
 
     Gui::Box* box = dynamic_cast<Gui::Box*>(mMainWidget);
-    if (box == NULL)
+    if (box == nullptr)
         throw std::runtime_error("main widget must be a box");
 
     box->notifyChildrenSizeChanged();
@@ -139,7 +138,6 @@ void Recharge::onItemClicked(MyGUI::Widget *sender, const MWWorld::Ptr& item)
 
     MWWorld::Ptr player = MWMechanics::getPlayer();
     MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
-    MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats(player);
 
     float luckTerm = 0.1f * stats.getAttribute(ESM::Attribute::Luck).getModified();
     if (luckTerm < 1|| luckTerm > 10)
@@ -152,7 +150,7 @@ void Recharge::onItemClicked(MyGUI::Widget *sender, const MWWorld::Ptr& item)
     if (intelligenceTerm < 1)
         intelligenceTerm = 1;
 
-    float x = (npcStats.getSkill(ESM::Skill::Enchant).getModified() + intelligenceTerm + luckTerm) * stats.getFatigueTerm();
+    float x = (player.getClass().getSkill(player, ESM::Skill::Enchant) + intelligenceTerm + luckTerm) * stats.getFatigueTerm();
     int roll = Misc::Rng::roll0to99();
     if (roll < x)
     {
@@ -169,19 +167,18 @@ void Recharge::onItemClicked(MyGUI::Widget *sender, const MWWorld::Ptr& item)
         MWBase::Environment::get().getWindowManager()->playSound("Enchant Success");
 
         player.getClass().getContainerStore(player).restack(item);
-
-        player.getClass().skillUsageSucceeded (player, ESM::Skill::Enchant, 0);
     }
     else
     {
         MWBase::Environment::get().getWindowManager()->playSound("Enchant Fail");
     }
 
+    player.getClass().skillUsageSucceeded (player, ESM::Skill::Enchant, 0);
     gem.getContainerStore()->remove(gem, 1, player);
 
     if (gem.getRefData().getCount() == 0)
     {
-        std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage51")->getString();
+        std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage51")->mValue.getString();
         message = boost::str(boost::format(message) % gem.getClass().getName(gem));
         MWBase::Environment::get().getWindowManager()->messageBox(message);
 

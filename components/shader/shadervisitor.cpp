@@ -10,6 +10,7 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/sceneutil/riggeometry.hpp>
@@ -27,7 +28,7 @@ namespace Shader
         , mMaterialOverridden(false)
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
-        , mNode(NULL)
+        , mNode(nullptr)
     {
     }
 
@@ -101,15 +102,15 @@ namespace Shader
 
     void ShaderVisitor::applyStateSet(osg::ref_ptr<osg::StateSet> stateset, osg::Node& node)
     {
-        osg::StateSet* writableStateSet = NULL;
+        osg::StateSet* writableStateSet = nullptr;
         if (mAllowedToModifyStateSets)
             writableStateSet = node.getStateSet();
         const osg::StateSet::TextureAttributeList& texAttributes = stateset->getTextureAttributeList();
         if (!texAttributes.empty())
         {
-            const osg::Texture* diffuseMap = NULL;
-            const osg::Texture* normalMap = NULL;
-            const osg::Texture* specularMap = NULL;
+            const osg::Texture* diffuseMap = nullptr;
+            const osg::Texture* normalMap = nullptr;
+            const osg::Texture* specularMap = nullptr;
             for(unsigned int unit=0;unit<texAttributes.size();++unit)
             {
                 const osg::StateAttribute *attr = stateset->getTextureAttribute(unit, osg::StateAttribute::TEXTURE);
@@ -147,12 +148,12 @@ namespace Shader
                                 specularMap = texture;
                         }
                         else
-                            std::cerr << "ShaderVisitor encountered unknown texture " << texture << std::endl;
+                            Log(Debug::Error) << "ShaderVisitor encountered unknown texture " << texture;
                     }
                 }
             }
 
-            if (mAutoUseNormalMaps && diffuseMap != NULL && normalMap == NULL && diffuseMap->getImage(0))
+            if (mAutoUseNormalMaps && diffuseMap != nullptr && normalMap == nullptr && diffuseMap->getImage(0))
             {
                 std::string normalMapFileName = diffuseMap->getImage(0)->getFileName();
 
@@ -194,7 +195,7 @@ namespace Shader
                     mRequirements.back().mNormalHeight = normalHeight;
                 }
             }
-            if (mAutoUseSpecularMaps && diffuseMap != NULL && specularMap == NULL && diffuseMap->getImage(0))
+            if (mAutoUseSpecularMaps && diffuseMap != nullptr && specularMap == nullptr && diffuseMap->getImage(0))
             {
                 std::string specularMapFileName = diffuseMap->getImage(0)->getFileName();
                 boost::replace_last(specularMapFileName, ".", mSpecularMapPattern + ".");
@@ -253,7 +254,7 @@ namespace Shader
             return;
 
         osg::Node& node = *reqs.mNode;
-        osg::StateSet* writableStateSet = NULL;
+        osg::StateSet* writableStateSet = nullptr;
         if (mAllowedToModifyStateSets)
             writableStateSet = node.getOrCreateStateSet();
         else
@@ -320,7 +321,7 @@ namespace Shader
             // make sure that all UV sets are there
             for (std::map<int, std::string>::const_iterator it = reqs.mTextures.begin(); it != reqs.mTextures.end(); ++it)
             {
-                if (sourceGeometry.getTexCoordArray(it->first) == NULL)
+                if (sourceGeometry.getTexCoordArray(it->first) == nullptr)
                 {
                     sourceGeometry.setTexCoordArray(it->first, sourceGeometry.getTexCoordArray(0));
                     changed = true;
@@ -341,7 +342,7 @@ namespace Shader
 
     void ShaderVisitor::apply(osg::Geometry& geometry)
     {
-        bool needPop = (geometry.getStateSet() != NULL);
+        bool needPop = (geometry.getStateSet() != nullptr);
         if (geometry.getStateSet()) // TODO: check if stateset affects shader permutation before pushing it
         {
             pushRequirements(geometry);
@@ -364,7 +365,7 @@ namespace Shader
     void ShaderVisitor::apply(osg::Drawable& drawable)
     {
         // non-Geometry drawable (e.g. particle system)
-        bool needPop = (drawable.getStateSet() != NULL);
+        bool needPop = (drawable.getStateSet() != nullptr);
 
         if (drawable.getStateSet())
         {

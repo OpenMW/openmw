@@ -64,7 +64,7 @@ namespace CSVDoc
 
             void updateTitle();
 
-            void updateSubViewIndices (SubView *view = NULL);
+            void updateSubViewIndices (SubView *view = nullptr);
 
             void universalIdChanged (const CSMWorld::UniversalId& universalId);
 

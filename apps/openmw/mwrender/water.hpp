@@ -50,8 +50,6 @@ namespace MWRender
     /// Water rendering
     class Water
     {
-        static const int CELL_SIZE = 8192;
-
         osg::ref_ptr<osg::Uniform> mRainIntensityUniform;
 
         osg::ref_ptr<osg::Group> mParent;

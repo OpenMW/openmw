@@ -146,7 +146,7 @@ namespace MWBase
             virtual MWGui::TradeWindow* getTradeWindow() = 0;
 
             /// Make the player use an item, while updating GUI state accordingly
-            virtual void useItem(const MWWorld::Ptr& item) = 0;
+            virtual void useItem(const MWWorld::Ptr& item, bool force=false) = 0;
 
             virtual void updateSpellWindow() = 0;
 
@@ -219,6 +219,7 @@ namespace MWBase
             virtual const MWWorld::Ptr& getSelectedEnchantItem() const = 0;
             virtual void setSelectedWeapon(const MWWorld::Ptr& item) = 0;
             virtual const MWWorld::Ptr& getSelectedWeapon() const = 0;
+            virtual int getFontHeight() const = 0;
             virtual void unsetSelectedSpell() = 0;
             virtual void unsetSelectedWeapon() = 0;
 
@@ -289,6 +290,8 @@ namespace MWBase
             /// Warning: do not use MyGUI::InputManager::setKeyFocusWidget directly. Instead use this.
             virtual void setKeyFocusWidget (MyGUI::Widget* widget) = 0;
 
+            virtual void loadUserFonts() = 0;
+
             virtual Loading::Listener* getLoadingScreen() = 0;
 
             /// Should the cursor be visible?
@@ -350,7 +353,8 @@ namespace MWBase
 
             virtual const MWGui::TextColours& getTextColours() = 0;
 
-            virtual bool injectKeyPress(MyGUI::KeyCode key, unsigned int text) = 0;
+            virtual bool injectKeyPress(MyGUI::KeyCode key, unsigned int text, bool repeat) = 0;
+            virtual bool injectKeyRelease(MyGUI::KeyCode key) = 0;
     };
 }
 

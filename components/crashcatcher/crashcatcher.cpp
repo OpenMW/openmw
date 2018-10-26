@@ -14,7 +14,11 @@
 #include <stdbool.h>
 #include <sys/ptrace.h>
 
-#include <string>
+#include <components/debug/debuglog.hpp>
+
+#include <boost/filesystem/fstream.hpp>
+
+namespace bfs = boost::filesystem;
 
 #include <SDL_messagebox.h>
 
@@ -26,6 +30,10 @@
 #endif
 #elif defined (__APPLE__) || defined (__FreeBSD__) || defined(__OpenBSD__)
 #include <signal.h>
+#endif
+
+#if defined(__APPLE__)
+#include <sys/sysctl.h>
 #endif
 
 #define UNUSED(x) (void)(x)
@@ -63,7 +71,7 @@ static const struct {
 { "Illegal instruction", SIGILL },
 { "FPU exception", SIGFPE },
 { "System BUS error", SIGBUS },
-{ NULL, 0 }
+{ nullptr, 0 }
 };
 
 static const struct {
@@ -80,7 +88,7 @@ static const struct {
     { ILL_COPROC, "Coprocessor error" },
     { ILL_BADSTK, "Internal stack error" },
     #endif
-    { 0, NULL }
+    { 0, nullptr }
 };
 
 static const struct {
@@ -95,7 +103,7 @@ static const struct {
     { FPE_FLTRES, "Floating point inexact result" },
     { FPE_FLTINV, "Floating point invalid operation" },
     { FPE_FLTSUB, "Subscript out of range" },
-    { 0, NULL }
+    { 0, nullptr }
 };
 
 static const struct {
@@ -106,7 +114,7 @@ static const struct {
     { SEGV_MAPERR, "Address not mapped to object" },
     { SEGV_ACCERR, "Invalid permissions for mapped object" },
     #endif
-    { 0, NULL }
+    { 0, nullptr }
 };
 
 static const struct {
@@ -118,7 +126,7 @@ static const struct {
     { BUS_ADRERR, "Non-existent physical address" },
     { BUS_OBJERR, "Object specific hardware error" },
     #endif
-    { 0, NULL }
+    { 0, nullptr }
 };
 
 static int (*cc_user_info)(char*, char*);
@@ -132,7 +140,7 @@ static void gdb_info(pid_t pid)
 
     /* Create a temp file to put gdb commands into */
     strcpy(respfile, "/tmp/gdb-respfile-XXXXXX");
-    if((fd=mkstemp(respfile)) >= 0 && (f=fdopen(fd, "w")) != NULL)
+    if((fd=mkstemp(respfile)) >= 0 && (f=fdopen(fd, "w")) != nullptr)
     {
         fprintf(f, "attach %d\n"
                 "shell echo \"\"\n"
@@ -167,15 +175,18 @@ static void gdb_info(pid_t pid)
         fflush(stdout);
 
         /* Clean up */
-        remove(respfile);
+        if (remove(respfile) != 0)
+            Log(Debug::Warning) << "Warning: can not remove file '" << respfile << "': " << std::strerror(errno);
     }
     else
     {
         /* Error creating temp file */
         if(fd >= 0)
         {
-            close(fd);
-            remove(respfile);
+            if (close(fd) != 0)
+                Log(Debug::Warning) << "Warning: can not close file '" << respfile << "': " << std::strerror(errno);
+            else if (remove(respfile) != 0)
+                Log(Debug::Warning) << "Warning: can not remove file '" << respfile << "': " << std::strerror(errno);
         }
         printf("!!! Could not create gdb command file\n");
     }
@@ -256,7 +267,7 @@ static void crash_catcher(int signum, siginfo_t *siginfo, void *context)
         close(fd[0]);
         close(fd[1]);
 
-        execl(argv0, argv0, crash_switch, NULL);
+        execl(argv0, argv0, crash_switch, nullptr);
 
         safe_write(STDERR_FILENO, exec_err, sizeof(exec_err)-1);
         _exit(1);
@@ -396,13 +407,13 @@ static void crash_handler(const char *logfile)
     if(logfile)
     {
         std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(logfile) + "'.\n Please report this to https://bugs.openmw.org !";
-        SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), NULL);
+        SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
     }
 
     exit(0);
 }
 
-int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, const char *logfile, int (*user_info)(char*, char*))
+int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *signals, const char *logfile, int (*user_info)(char*, char*))
 {
     struct sigaction sa;
     stack_t altss;
@@ -433,7 +444,7 @@ int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, co
     altss.ss_sp = altstack;
     altss.ss_flags = 0;
     altss.ss_size = sizeof(altstack);
-    sigaltstack(&altss, NULL);
+    sigaltstack(&altss, nullptr);
 
     memset(&sa, 0, sizeof(sa));
     sa.sa_sigaction = crash_catcher;
@@ -444,7 +455,7 @@ int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, co
     while(num_signals--)
     {
         if((*signals != SIGSEGV && *signals != SIGILL && *signals != SIGFPE && *signals != SIGABRT &&
-            *signals != SIGBUS) || sigaction(*signals, &sa, NULL) == -1)
+            *signals != SIGBUS) || sigaction(*signals, &sa, nullptr) == -1)
         {
             *signals = 0;
             retval = -1;
@@ -454,19 +465,62 @@ int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, co
     return retval;
 }
 
-
-// gdb apparently opens FD(s) 3,4,5 (whereas a typical prog uses only stdin=0, stdout=1,stderr=2)
-bool
-is_debugger_attached(void)
+static bool is_debugger_present()
 {
-    bool rc = false;
-    FILE *fd = fopen("/tmp", "r");
-
-    if (fileno(fd) > 5)
+#if !defined (__APPLE__)
+    bfs::ifstream file((bfs::path("/proc/self/status")));
+    while (!file.eof())
     {
-        rc = true;
+        std::string word;
+        file >> word;
+        if (word == "TracerPid:")
+        {
+            file >> word;
+            return word != "0";
+        }
     }
+    return false;
+#else
+    int junk;
+    int mib[4];
+    struct kinfo_proc info;
+    size_t size;
 
-    fclose(fd);
-    return rc;
+    // Initialize the flags so that, if sysctl fails for some bizarre
+    // reason, we get a predictable result.
+
+    info.kp_proc.p_flag = 0;
+
+    // Initialize mib, which tells sysctl the info we want, in this case
+    // we're looking for information about a specific process ID.
+
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_PID;
+    mib[3] = getpid();
+
+    // Call sysctl.
+
+    size = sizeof(info);
+    junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, nullptr, 0);
+    assert(junk == 0);
+
+    // We're being debugged if the P_TRACED flag is set.
+
+    return (info.kp_proc.p_flag & P_TRACED) != 0;
+#endif
+}
+
+void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath)
+{
+    if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_present())
+    {
+        int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
+        if (crashCatcherInstallHandlers(argc, argv, 5, s, crashLogPath.c_str(), nullptr) == -1)
+        {
+            Log(Debug::Warning) << "Installing crash handler failed";
+        }
+        else
+            Log(Debug::Info) << "Crash handler installed";
+    }
 }

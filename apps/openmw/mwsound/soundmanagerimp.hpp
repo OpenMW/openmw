@@ -117,7 +117,7 @@ namespace MWSound
         Sound_Buffer *lookupSound(const std::string &soundId) const;
         Sound_Buffer *loadSound(const std::string &soundId);
 
-        // returns a decoder to start streaming
+        // returns a decoder to start streaming, or nullptr if the sound was not found
         DecoderPtr loadVoice(const std::string &voicefile);
 
         Sound *getSoundRef();

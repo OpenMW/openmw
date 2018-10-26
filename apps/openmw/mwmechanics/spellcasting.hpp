@@ -3,6 +3,7 @@
 
 #include <components/esm/effectlist.hpp>
 #include <components/esm/loadskil.hpp>
+#include <components/esm/loadmgef.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -25,6 +26,7 @@ namespace MWMechanics
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
 
     float calcEffectCost(const ESM::ENAMstruct& effect);
+    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect);
 
     bool isSummoningEffect(int effectId);
 
@@ -37,8 +39,8 @@ namespace MWMechanics
      * @note actor can be an NPC or a creature
      * @return success chance from 0 to 100 (in percent), if cap=false then chance above 100 may be returned.
      */
-    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool = NULL, bool cap=true, bool checkMagicka=false);
-    float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool = NULL, bool cap=true, bool checkMagicka=false);
+    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool = nullptr, bool cap=true, bool checkMagicka=false);
+    float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool = nullptr, bool cap=true, bool checkMagicka=false);
 
     int getSpellSchool(const std::string& spellId, const MWWorld::Ptr& actor);
     int getSpellSchool(const ESM::Spell* spell, const MWWorld::Ptr& actor);
@@ -56,14 +58,14 @@ namespace MWMechanics
     /// @param effects Override the actor's current magicEffects. Useful if there are effects currently
     ///                being applied (but not applied yet) that should also be considered.
     float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
-                               const ESM::Spell* spell = NULL, const MagicEffects* effects = NULL);
+                               const ESM::Spell* spell = nullptr, const MagicEffects* effects = nullptr);
 
     /// Get an effect multiplier for applying an effect cast by the given actor in the given spell (optional).
     /// @return effect multiplier from 0 to 2.  (100% net resistance to 100% net weakness)
     /// @param effects Override the actor's current magicEffects. Useful if there are effects currently
     ///                being applied (but not applied yet) that should also be considered.
     float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
-                              const ESM::Spell* spell = NULL, const MagicEffects* effects = NULL);
+                              const ESM::Spell* spell = nullptr, const MagicEffects* effects = nullptr);
 
     bool checkEffectTarget (int effectId, const MWWorld::Ptr& target, const MWWorld::Ptr& caster, bool castByPlayer);
 
@@ -88,9 +90,10 @@ namespace MWMechanics
         osg::Vec3f mHitPosition; // Used for spawning area orb
         bool mAlwaysSucceed; // Always succeed spells casted by NPCs/creatures regardless of their chance (default: false)
         bool mFromProjectile; // True if spell is cast by enchantment of some projectile (arrow, bolt or thrown weapon)
+        bool mManualSpell; // True if spell is casted from script and ignores some checks (mana level, success chance, etc.)
 
     public:
-        CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const bool fromProjectile=false);
+        CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const bool fromProjectile=false, const bool manualSpell=false);
 
         bool cast (const ESM::Spell* spell);
 
@@ -107,6 +110,8 @@ namespace MWMechanics
         bool cast (const std::string& id);
 
         void playSpellCastingEffects(const std::string &spellid);
+
+        bool spellIncreasesSkill();
 
         /// Launch a bolt with the given effects.
         void launchMagicBolt ();

@@ -64,7 +64,7 @@ TEST(EsmFixedString, struct_size)
     ASSERT_EQ(256, sizeof(ESM::NAME256));
 }
 
-TEST(EsmFixedString, DISABLED_is_pod)
+TEST(EsmFixedString, is_pod)
 {
      ASSERT_TRUE(std::is_pod<ESM::NAME>::value);
      ASSERT_TRUE(std::is_pod<ESM::NAME32>::value);

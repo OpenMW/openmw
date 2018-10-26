@@ -175,5 +175,16 @@ CSVWorld::CommandDelegate *CSVWorld::EnumDelegateFactory::makeDelegate (
 
 void CSVWorld::EnumDelegateFactory::add (int value, const QString& name)
 {
-    mValues.push_back (std::make_pair (value, name));
+    auto pair = std::make_pair (value, name);
+
+    for (auto it=mValues.begin(); it!=mValues.end(); ++it)
+    {
+        if (it->second > name)
+        {
+            mValues.insert(it, pair);
+            return;
+        }
+    }
+
+    mValues.push_back(std::make_pair (value, name));
 }

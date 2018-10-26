@@ -1,11 +1,9 @@
 #include "creatureanimation.hpp"
 
-#include <iostream>
-
 #include <osg/MatrixTransform>
 
 #include <components/esm/loadcrea.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/attach.hpp>
@@ -155,7 +153,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     }
     catch (std::exception& e)
     {
-        std::cerr << "Can not add creature part: " << e.what() << std::endl;
+        Log(Debug::Error) << "Can not add creature part: " << e.what();
     }
 }
 
@@ -172,7 +170,7 @@ void CreatureWeaponAnimation::releaseArrow(float attackStrength)
 osg::Group *CreatureWeaponAnimation::getArrowBone()
 {
     if (!mWeapon)
-        return NULL;
+        return nullptr;
 
     SceneUtil::FindByNameVisitor findVisitor ("ArrowBone");
     mWeapon->getNode()->accept(findVisitor);
@@ -182,7 +180,7 @@ osg::Group *CreatureWeaponAnimation::getArrowBone()
 
 osg::Node *CreatureWeaponAnimation::getWeaponNode()
 {
-    return mWeapon ? mWeapon->getNode().get() : NULL;
+    return mWeapon ? mWeapon->getNode().get() : nullptr;
 }
 
 Resource::ResourceSystem *CreatureWeaponAnimation::getResourceSystem()

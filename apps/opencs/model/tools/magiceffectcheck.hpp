@@ -6,13 +6,9 @@
 
 #include "../world/idcollection.hpp"
 #include "../world/refidcollection.hpp"
+#include "../world/resources.hpp"
 
 #include "../doc/stage.hpp"
-
-namespace CSMWorld
-{
-    class Resources;
-}
 
 namespace CSMTools
 {
@@ -21,23 +17,18 @@ namespace CSMTools
     {
             const CSMWorld::IdCollection<ESM::MagicEffect> &mMagicEffects;
             const CSMWorld::IdCollection<ESM::Sound> &mSounds;
-            const CSMWorld::RefIdCollection &mReferenceables;
+            const CSMWorld::RefIdCollection &mObjects;
             const CSMWorld::Resources &mIcons;
             const CSMWorld::Resources &mTextures;
             bool mIgnoreBaseRecords;
 
         private:
-            bool isTextureExists(const std::string &texture, bool isIcon) const;
-
-            std::string checkReferenceable(const std::string &id,
-                                           const CSMWorld::UniversalId &type,
-                                           const std::string &column) const;
-            std::string checkSound(const std::string &id, const std::string &column) const;
+            std::string checkObject(const std::string &id, const CSMWorld::UniversalId &type, const std::string &column) const;
 
         public:
             MagicEffectCheckStage(const CSMWorld::IdCollection<ESM::MagicEffect> &effects,
                                   const CSMWorld::IdCollection<ESM::Sound> &sounds,
-                                  const CSMWorld::RefIdCollection &referenceables,
+                                  const CSMWorld::RefIdCollection &objects,
                                   const CSMWorld::Resources &icons,
                                   const CSMWorld::Resources &textures);
 

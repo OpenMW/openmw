@@ -10,6 +10,8 @@
 #include "../../model/prefs/state.hpp"
 #include "../../model/prefs/shortcutmanager.hpp"
 
+#include <components/misc/constants.hpp>
+
 #include "mask.hpp"
 
 CSVRender::CellArrowTag::CellArrowTag (CellArrow *arrow)
@@ -57,7 +59,7 @@ QString CSVRender::CellArrowTag::getToolTip (bool hideBasics) const
 void CSVRender::CellArrow::adjustTransform()
 {
     // position
-    const int cellSize = 8192;
+    const int cellSize = Constants::CellSizeInUnits;
     const int offset = cellSize / 2 + 800;
 
     int x = mCoordinates.getX()*cellSize + cellSize/2;

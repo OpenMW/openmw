@@ -17,6 +17,8 @@
 #include <osg/Version>
 #include <osgViewer/GraphicsWindow>
 
+#include <components/debug/debuglog.hpp>
+
 #include "imagetosurface.hpp"
 
 #if defined(OSG_LIBRARY_STATIC) && !defined(ANDROID)
@@ -63,7 +65,7 @@ namespace CursorDecompression
 
                 if (!_gc)
                 {
-                    std::cerr << "Failed to create pbuffer, failing back to normal graphics window." << std::endl;
+                    Log(Debug::Warning) << "Failed to create pbuffer, failing back to normal graphics window.";
 
                     traits->pbuffer = false;
                     _gc = osg::GraphicsContext::createGraphicsContext(traits.get());
@@ -188,7 +190,7 @@ namespace CursorDecompression
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
         SDL_Texture *cursorTexture = SDL_CreateTextureFromSurface(renderer, cursorSurface);
 
-        SDL_RenderCopyEx(renderer, cursorTexture, NULL, NULL, -rotDegrees, NULL, SDL_FLIP_VERTICAL);
+        SDL_RenderCopyEx(renderer, cursorTexture, nullptr, nullptr, -rotDegrees, nullptr, SDL_FLIP_VERTICAL);
 
         SDL_DestroyTexture(cursorTexture);
         SDL_FreeSurface(cursorSurface);
@@ -283,8 +285,8 @@ namespace SDLUtil
 
             mCursorMap.insert(CursorMap::value_type(std::string(name), curs));
         } catch (std::exception& e) {
-            std::cerr << e.what() << std::endl;
-            std::cerr <<"Using default cursor."<<std::endl;
+            Log(Debug::Warning) << e.what();
+            Log(Debug::Warning) << "Using default cursor.";
             return;
         }
     }

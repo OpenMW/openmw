@@ -3,6 +3,8 @@
 
 #include <list>
 
+#include "aistate.hpp"
+
 #include <components/esm/loadnpc.hpp>
 
 namespace MWWorld
@@ -47,6 +49,7 @@ namespace MWMechanics
 
             /// The type of AI package that ran last
             int mLastAiPackage;
+            AiState mAiState;
 
         public:
             ///Default constructor
@@ -85,6 +88,9 @@ namespace MWMechanics
             /// Is there any combat package?
             bool isInCombat () const;
 
+            /// Are we in combat with any other actor, who's also engaging us?
+            bool isEngagedWithActor () const;
+
             /// Does this AI sequence have the given package type?
             bool hasPackage(int typeId) const;
 
@@ -104,10 +110,10 @@ namespace MWMechanics
             void stopPursuit();
 
             /// Execute current package, switching if needed.
-            void execute (const MWWorld::Ptr& actor, CharacterController& characterController, MWMechanics::AiState& state, float duration);
+            void execute (const MWWorld::Ptr& actor, CharacterController& characterController, float duration);
 
             /// Simulate the passing of time using the currently active AI package
-            void fastForward(const MWWorld::Ptr &actor, AiState &state);
+            void fastForward(const MWWorld::Ptr &actor);
 
             /// Remove all packages.
             void clear();

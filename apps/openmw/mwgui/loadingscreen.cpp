@@ -10,9 +10,8 @@
 #include <MyGUI_TextBox.h>
 
 #include <components/misc/rng.hpp>
-
+#include <components/debug/debuglog.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
-
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
 
@@ -37,6 +36,7 @@ namespace MWGui
         , mLastRenderTime(0.0)
         , mLoadingOnTime(0.0)
         , mImportantLabel(false)
+        , mVisible(false)
         , mProgress(0)
         , mShowWallpaper(true)
     {
@@ -93,7 +93,7 @@ namespace MWGui
             ++found;
         }
         if (mSplashScreens.empty())
-            std::cerr << "No splash screens found!" << std::endl;
+            Log(Debug::Warning) << "Warning: no splash screens found!";
     }
 
     void LoadingScreen::setLabel(const std::string &label, bool important)
@@ -140,7 +140,7 @@ namespace MWGui
 
             // Callback removes itself when done
             if (renderInfo.getCurrentCamera())
-                renderInfo.getCurrentCamera()->setInitialDrawCallback(NULL);
+                renderInfo.getCurrentCamera()->setInitialDrawCallback(nullptr);
         }
 
     private:
@@ -171,11 +171,16 @@ namespace MWGui
 
         mVisible = visible;
         mLoadingBox->setVisible(mVisible);
-
-        mShowWallpaper = mVisible && (MWBase::Environment::get().getStateManager()->getState()
-                == MWBase::StateManager::State_NoGame);
-
         setVisible(true);
+
+        if (!mVisible)
+        {
+            mShowWallpaper = false;
+            draw();
+            return;
+        }
+
+        mShowWallpaper = MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
 
         if (mShowWallpaper)
         {
@@ -183,9 +188,6 @@ namespace MWGui
         }
 
         MWBase::Environment::get().getWindowManager()->pushGuiMode(mShowWallpaper ? GM_LoadingWallpaper : GM_Loading);
-
-        if (!mVisible)
-            draw();
     }
 
     void LoadingScreen::loadingOff()
@@ -205,7 +207,7 @@ namespace MWGui
         else
             mImportantLabel = false; // label was already shown on loading screen
 
-        mViewer->getSceneData()->setComputeBoundingSphereCallback(NULL);
+        mViewer->getSceneData()->setComputeBoundingSphereCallback(nullptr);
         mViewer->getSceneData()->dirtyBound();
 
         //std::cout << "loading took " << mTimer.time_m() - mLoadingOnTime << std::endl;

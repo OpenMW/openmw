@@ -41,7 +41,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
-        assert (ref->mBase != NULL);
+        assert (ref->mBase != nullptr);
 
         // TODO: add option somewhere to enable collision for placeable objects
         if (!model.empty() && (ref->mBase->mData.mFlags & ESM::Light::Carry) == 0)
@@ -161,7 +161,12 @@ namespace MWClass
         std::string text;
 
         if (Settings::Manager::getBool("show effect duration","Game"))
-            text += "\n#{sDuration}: " + MWGui::ToolTips::toString(ptr.getClass().getRemainingUsageTime(ptr));
+        {
+            // -1 is infinite light source, so duration makes no sense here. Other negative values are treated as 0.
+            float remainingTime = ptr.getClass().getRemainingUsageTime(ptr);
+            if (remainingTime != -1.0f)
+                text += "\n#{sDuration}: " + MWGui::ToolTips::toString(std::max(0.f, remainingTime));
+        }
 
         text += MWGui::ToolTips::getWeightString(ref->mBase->mData.mWeight, "#{sWeight}");
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
@@ -186,9 +191,9 @@ namespace MWClass
         return Class::showsInInventory(ptr);
     }
 
-    std::shared_ptr<MWWorld::Action> Light::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Light::use (const MWWorld::Ptr& ptr, bool force) const
     {
-        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
+        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr, force));
 
         action->setSound(getUpSoundId(ptr));
 

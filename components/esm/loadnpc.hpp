@@ -90,7 +90,7 @@ struct NPC
 
         char mFactionID;
         unsigned short mHealth, mMana, mFatigue;
-        signed char mDisposition, mReputation, mRank;
+        unsigned char mDisposition, mReputation, mRank;
         char mUnknown;
         int mGold;
     }; // 52 bytes
@@ -101,7 +101,7 @@ struct NPC
     {
         short mLevel;
         // see above
-        signed char mDisposition, mReputation, mRank;
+        unsigned char mDisposition, mReputation, mRank;
         char mUnknown1, mUnknown2, mUnknown3;
         int mGold;
     }; // 12 bytes

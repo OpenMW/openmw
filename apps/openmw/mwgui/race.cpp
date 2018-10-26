@@ -6,6 +6,7 @@
 
 #include <osg/Texture2D>
 
+#include <components/debug/debuglog.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -128,10 +129,10 @@ namespace MWGui
         updateSkills();
         updateSpellPowers();
 
-        mPreviewImage->setRenderItemTexture(NULL);
+        mPreviewImage->setRenderItemTexture(nullptr);
 
-        mPreview.reset(NULL);
-        mPreviewTexture.reset(NULL);
+        mPreview.reset(nullptr);
+        mPreviewTexture.reset(nullptr);
 
         mPreview.reset(new MWRender::RaceSelectionPreview(mParent, mResourceSystem));
         mPreview->rebuild();
@@ -189,10 +190,10 @@ namespace MWGui
     {
         WindowModal::onClose();
 
-        mPreviewImage->setRenderItemTexture(NULL);
+        mPreviewImage->setRenderItemTexture(nullptr);
 
-        mPreviewTexture.reset(NULL);
-        mPreview.reset(NULL);
+        mPreviewTexture.reset(nullptr);
+        mPreview.reset(nullptr);
     }
 
     // widget controls
@@ -211,7 +212,7 @@ namespace MWGui
 
     void RaceDialog::onHeadRotate(MyGUI::ScrollBar* scroll, size_t _position)
     {
-        float angle = (float(_position) / (scroll->getScrollRange()-1) - 0.5f) * 3.14f * 2;
+        float angle = (float(_position) / (scroll->getScrollRange()-1) - 0.5f) * osg::PI * 2;
         mPreview->setAngle (angle);
 
         mCurrentAngle = angle;
@@ -340,7 +341,7 @@ namespace MWGui
         }
         catch (std::exception& e)
         {
-            std::cerr << "Error creating preview: " << e.what() << std::endl;
+            Log(Debug::Error) << "Error creating preview: " << e.what();
         }
     }
 

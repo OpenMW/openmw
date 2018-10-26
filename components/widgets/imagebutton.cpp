@@ -2,6 +2,8 @@
 
 #include <MyGUI_RenderManager.h>
 
+#include <components/debug/debuglog.hpp>
+
 namespace Gui
 {
 
@@ -77,7 +79,7 @@ namespace Gui
         MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture(mImageNormal);
         if (!texture)
         {
-            std::cerr << "ImageButton: can't find " << mImageNormal << std::endl;
+            Log(Debug::Error) << "ImageButton: can't find image " << mImageNormal;
             return MyGUI::IntSize(0,0);
         }
         return MyGUI::IntSize (texture->getWidth(), texture->getHeight());

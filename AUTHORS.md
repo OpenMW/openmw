@@ -22,6 +22,7 @@ Programmers
     alexanderkjall
     Alexander Nadeau (wareya)
     Alexander Olofsson (Ace)
+    Alex S (docwest)
     Allofich
     Andrei Kortunov (akortunov)
     AnyOldName3
@@ -142,15 +143,18 @@ Programmers
     Rohit Nirmal
     Roman Melnik (Kromgart)
     Roman Proskuryakov (kpp)
+    Roman Siromakha (elsid)
     Sandy Carter (bwrsandman)
     Scott Howard
     scrawl
     Sebastian Wick (swick)
+    Sergey Fukanchik
     Sergey Shambir
     ShadowRadiance
     Siimacore
     sir_herrbatka
     smbas
+    Sophie Kirschner (pineapplemachine)
     spycrab
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)
@@ -169,7 +173,9 @@ Programmers
     viadanna
     Vincent Heuken
     vocollapse
+    Yohaulticetl
     zelurker
+    James Carty (MrTopCat)
 
 Documentation
 -------------
@@ -178,9 +184,11 @@ Documentation
     Alejandro Sanchez (HiPhish)
     Bodillium
     Bret Curtis (psi29a)
+    David Walley (Loriel)
     Cramal
     Ryan Tucker (Ravenwing)
     sir_herrbatka
+    Diego Crespo
 
 Packagers
 ---------

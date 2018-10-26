@@ -5,6 +5,9 @@
     <file alias="openmw.png">images/openmw.png</file>
     <file alias="openmw-plugin.png">images/openmw-plugin.png</file>
     <file alias="openmw-header.png">images/openmw-header.png</file>
+    <file alias="preferences.png">images/preferences.png</file>
+    <file alias="preferences-advanced.png">images/preferences-advanced.png</file>
+    <file alias="preferences-video.png">images/preferences-video.png</file>
     <file alias="playpage-background.png">images/playpage-background.png</file>
 </qresource>
 <qresource prefix="icons/tango">

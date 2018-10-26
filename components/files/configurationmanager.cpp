@@ -1,7 +1,6 @@
 #include "configurationmanager.hpp"
 
-#include <iostream>
-
+#include <components/debug/debuglog.hpp>
 #include <components/files/escape.hpp>
 
 #include <boost/algorithm/string/erase.hpp>
@@ -134,7 +133,7 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
     if (boost::filesystem::is_regular_file(cfgFile))
     {
         if (!mSilent)
-            std::cout << "Loading config file: " << cfgFile.string() << "... ";
+            Log(Debug::Info) << "Loading config file: " << cfgFile.string();
 
         boost::filesystem::ifstream configFileStreamUnfiltered(cfgFile);
         boost::iostreams::filtering_istream configFileStream;
@@ -145,14 +144,13 @@ bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
             boost::program_options::store(boost::program_options::parse_config_file(
                 configFileStream, description, true), variables);
 
-            if (!mSilent)
-                std::cout << "done." << std::endl;
             return true;
         }
         else
         {
             if (!mSilent)
-                std::cout << "failed." << std::endl;
+                Log(Debug::Error) << "Loading failed.";
+
             return false;
         }
     }

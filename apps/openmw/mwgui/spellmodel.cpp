@@ -1,6 +1,6 @@
 #include "spellmodel.hpp"
 
-#include <iostream>
+#include <components/debug/debuglog.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -71,7 +71,7 @@ namespace MWGui
             {
                 newSpell.mType = Spell::Type_Spell;
                 std::string cost = std::to_string(spell->mData.mCost);
-                std::string chance = std::to_string(int(MWMechanics::getSpellSuccessChance(spell, mActor, NULL, true, true)));
+                std::string chance = std::to_string(int(MWMechanics::getSpellSuccessChance(spell, mActor, nullptr, true, true)));
                 newSpell.mCostColumn = cost + "/" + chance;
             }
             else
@@ -80,6 +80,7 @@ namespace MWGui
 
             newSpell.mSelected = (MWBase::Environment::get().getWindowManager()->getSelectedSpell() == spell->mId);
             newSpell.mActive = true;
+            newSpell.mCount = 1;
             mSpells.push_back(newSpell);
         }
 
@@ -93,7 +94,7 @@ namespace MWGui
             const ESM::Enchantment* enchant = esmStore.get<ESM::Enchantment>().search(enchantId);
             if (!enchant)
             {
-                std::cerr << "Warning: Can't find enchantment '" << enchantId << "' on item " << item.getCellRef().getRefId() << std::endl;
+                Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantId << "' on item " << item.getCellRef().getRefId();
                 continue;
             }
 
@@ -109,6 +110,7 @@ namespace MWGui
             newSpell.mItem = item;
             newSpell.mId = item.getCellRef().getRefId();
             newSpell.mName = item.getClass().getName(item);
+            newSpell.mCount = item.getRefData().getCount();
             newSpell.mType = Spell::Type_EnchantedItem;
             newSpell.mSelected = invStore.getSelectedEnchantItem() == it;
 

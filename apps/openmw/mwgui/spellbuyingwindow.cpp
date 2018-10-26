@@ -18,8 +18,6 @@
 
 namespace MWGui
 {
-    const int SpellBuyingWindow::sLineHeight = 18;
-
     SpellBuyingWindow::SpellBuyingWindow() :
         WindowBase("openmw_spell_buying_window.layout")
         , mCurrentY(0)
@@ -44,7 +42,7 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        int price = static_cast<int>(spell.mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->getFloat());
+        int price = static_cast<int>(spell.mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->mValue.getFloat());
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -52,21 +50,23 @@ namespace MWGui
 
         // TODO: refactor to use MyGUI::ListBox
 
+        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+
         MyGUI::Button* toAdd =
             mSpellsView->createWidget<MyGUI::Button>(
                 price <= playerGold ? "SandTextButton" : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
                 0,
                 mCurrentY,
                 200,
-                sLineHeight,
+                lineHeight,
                 MyGUI::Align::Default
             );
 
-        mCurrentY += sLineHeight;
+        mCurrentY += lineHeight;
 
         toAdd->setUserData(price);
         toAdd->setCaptionWithReplacing(spell.mName+"   -   "+MyGUI::utility::toString(price)+"#{sgp}");
-        toAdd->setSize(mSpellsView->getWidth(),sLineHeight);
+        toAdd->setSize(mSpellsView->getWidth(), lineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
         toAdd->setUserString("Spell", spell.mId);

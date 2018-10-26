@@ -1,11 +1,11 @@
 #include "bulletdebugdraw.hpp"
 
-#include <iostream>
-
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
 #include <osg/Geometry>
 #include <osg/Group>
+
+#include <components/debug/debuglog.hpp>
 
 #include "vismask.hpp"
 
@@ -54,9 +54,9 @@ void DebugDrawer::destroyGeometry()
     if (mGeometry)
     {
         mParentNode->removeChild(mGeometry);
-        mGeometry = NULL;
-        mVertices = NULL;
-        mDrawArrays = NULL;
+        mGeometry = nullptr;
+        mVertices = nullptr;
+        mDrawArrays = nullptr;
     }
 }
 
@@ -91,7 +91,7 @@ void DebugDrawer::drawContactPoint(const btVector3 &PointOnB, const btVector3 &n
 
 void DebugDrawer::reportErrorWarning(const char *warningString)
 {
-    std::cerr << warningString << std::endl;
+    Log(Debug::Warning) << warningString;
 }
 
 void DebugDrawer::setDebugMode(int isOn)

@@ -20,8 +20,6 @@
 
 namespace MWGui
 {
-const int MerchantRepair::sLineHeight = 18;
-
 MerchantRepair::MerchantRepair()
     : WindowBase("openmw_merchantrepair.layout")
 {
@@ -39,6 +37,7 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
     while (mList->getChildCount())
         MyGUI::Gui::getInstance().destroyWidget(mList->getChildAt(0));
 
+    int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
     int currentY = 0;
 
     MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -52,12 +51,12 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
         {
             int maxDurability = iter->getClass().getItemMaxHealth(*iter);
             int durability = iter->getClass().getItemHealth(*iter);
-            if (maxDurability == durability)
+            if (maxDurability == durability || maxDurability == 0)
                 continue;
 
             int basePrice = iter->getClass().getValue(*iter);
             float fRepairMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                    .find("fRepairMult")->getFloat();
+                    .find("fRepairMult")->mValue.getFloat();
 
             float p = static_cast<float>(std::max(1, basePrice));
             float r = static_cast<float>(std::max(1, static_cast<int>(maxDurability / p)));
@@ -67,28 +66,26 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
 
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mActor, x, true);
 
-
             std::string name = iter->getClass().getName(*iter)
                     + " - " + MyGUI::utility::toString(price)
                     + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                    .find("sgp")->getString();
-
+                    .find("sgp")->mValue.getString();
 
             MyGUI::Button* button =
                 mList->createWidget<MyGUI::Button>(price <= playerGold ? "SandTextButton" : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
                     0,
                     currentY,
                     0,
-                    sLineHeight,
+                    lineHeight,
                     MyGUI::Align::Default
                 );
 
-            currentY += sLineHeight;
+            currentY += lineHeight;
 
             button->setUserString("Price", MyGUI::utility::toString(price));
             button->setUserData(MWWorld::Ptr(*iter));
             button->setCaptionWithReplacing(name);
-            button->setSize(mList->getWidth(),sLineHeight);
+            button->setSize(mList->getWidth(), lineHeight);
             button->eventMouseWheel += MyGUI::newDelegate(this, &MerchantRepair::onMouseWheel);
             button->setUserString("ToolTipType", "ItemPtr");
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onRepairButtonClick);

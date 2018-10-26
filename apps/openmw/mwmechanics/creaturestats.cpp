@@ -7,6 +7,7 @@
 #include <components/esm/esmwriter.hpp>
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -48,8 +49,8 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        static const float fFatigueBase = gmst.find("fFatigueBase")->getFloat();
-        static const float fFatigueMult = gmst.find("fFatigueMult")->getFloat();
+        static const float fFatigueBase = gmst.find("fFatigueBase")->mValue.getFloat();
+        static const float fFatigueMult = gmst.find("fFatigueMult")->mValue.getFloat();
 
         return fFatigueBase - fFatigueMult * (1-normalised);
     }
@@ -157,7 +158,7 @@ namespace MWMechanics
                 int endurance    = getAttribute(ESM::Attribute::Endurance).getModified();
                 DynamicStat<float> fatigue = getFatigue();
                 float diff = (strength+willpower+agility+endurance) - fatigue.getBase();
-                float currentToBaseRatio = (fatigue.getCurrent() / fatigue.getBase());
+                float currentToBaseRatio = fatigue.getBase() > 0 ? (fatigue.getCurrent() / fatigue.getBase()) : 0;
                 fatigue.setModified(fatigue.getModified() + diff, 0);
                 fatigue.setCurrent(fatigue.getBase() * currentToBaseRatio);
                 setFatigue(fatigue);
@@ -195,6 +196,7 @@ namespace MWMechanics
             mDead = true;
 
             mDynamic[index].setModifier(0);
+            mDynamic[index].setCurrentModifier(0);
             mDynamic[index].setCurrent(0);
 
             if (MWBase::Environment::get().getWorld()->getGodModeState())
@@ -386,8 +388,11 @@ namespace MWMechanics
         mFallHeight += height;
     }
 
-    float CreatureStats::land()
+    float CreatureStats::land(bool isPlayer)
     {
+        if (isPlayer)
+            MWBase::Environment::get().getWorld()->getPlayer().setJumping(false);
+
         float height = mFallHeight;
         mFallHeight = 0;
         return height;

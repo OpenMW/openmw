@@ -5,6 +5,8 @@
 #include <osg/MatrixTransform>
 #include <osg/Geometry>
 
+#include <components/debug/debuglog.hpp>
+#include <components/misc/rng.hpp>
 #include <components/nif/controlled.hpp>
 #include <components/nif/nifkey.hpp>
 #include <components/nif/data.hpp>
@@ -38,7 +40,7 @@ osgParticle::Particle* ParticleSystem::createParticle(const osgParticle::Particl
 {
     if (numParticles()-numDeadParticles() < mQuota)
         return osgParticle::ParticleSystem::createParticle(ptemplate);
-    return NULL;
+    return nullptr;
 }
 
 void InverseWorldMatrix::operator()(osg::Node *node, osg::NodeVisitor *nv)
@@ -80,17 +82,17 @@ ParticleShooter::ParticleShooter(const ParticleShooter &copy, const osg::CopyOp 
 
 void ParticleShooter::shoot(osgParticle::Particle *particle) const
 {
-    float hdir = mHorizontalDir + mHorizontalAngle * (2.f * (std::rand() / static_cast<double>(RAND_MAX)) - 1.f);
-    float vdir = mVerticalDir + mVerticalAngle * (2.f * (std::rand() / static_cast<double>(RAND_MAX)) - 1.f);
+    float hdir = mHorizontalDir + mHorizontalAngle * (2.f * Misc::Rng::rollClosedProbability() - 1.f);
+    float vdir = mVerticalDir + mVerticalAngle * (2.f * Misc::Rng::rollClosedProbability() - 1.f);
 
     osg::Vec3f dir = (osg::Quat(vdir, osg::Vec3f(0,1,0)) * osg::Quat(hdir, osg::Vec3f(0,0,1)))
              * osg::Vec3f(0,0,1);
 
-    float vel = mMinSpeed + (mMaxSpeed - mMinSpeed) * std::rand() / static_cast<float>(RAND_MAX);
+    float vel = mMinSpeed + (mMaxSpeed - mMinSpeed) * Misc::Rng::rollClosedProbability();
     particle->setVelocity(dir * vel);
 
     // Not supposed to set this here, but there doesn't seem to be a better way of doing it
-    particle->setLifeTime(mLifetime + mLifetimeRandom * std::rand() / static_cast<float>(RAND_MAX));
+    particle->setLifeTime(mLifetime + mLifetimeRandom * Misc::Rng::rollClosedProbability());
 }
 
 GrowFadeAffector::GrowFadeAffector(float growTime, float fadeTime)
@@ -276,7 +278,8 @@ void Emitter::emitParticles(double dt)
 
     if (!mTargets.empty())
     {
-        int randomRecIndex = mTargets[(std::rand() / (static_cast<double>(RAND_MAX)+1.0)) * mTargets.size()];
+        int randomIndex = Misc::Rng::rollClosedProbability() * (mTargets.size() - 1);
+        int randomRecIndex = mTargets[randomIndex];
 
         // we could use a map here for faster lookup
         FindGroupByRecIndex visitor(randomRecIndex);
@@ -284,7 +287,7 @@ void Emitter::emitParticles(double dt)
 
         if (!visitor.mFound)
         {
-            std::cerr << "Error: Can't find emitter node" << randomRecIndex << std::endl;
+            Log(Debug::Info) << "Can't find emitter node" << randomRecIndex;
             return;
         }
 
@@ -311,7 +314,7 @@ void Emitter::emitParticles(double dt)
 
 FindGroupByRecIndex::FindGroupByRecIndex(int recIndex)
     : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-    , mFound(NULL)
+    , mFound(nullptr)
     , mRecIndex(recIndex)
 {
 }

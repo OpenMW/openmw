@@ -11,11 +11,18 @@ namespace CSMPrefs
 
 namespace CSVWorld
 {
+    struct Icon
+    {
+        int mValue;
+        QIcon mIcon;
+        QString mName;
+    };
+
     class DataDisplayDelegate : public EnumDelegate
     {
     public:
 
-        typedef std::vector < std::pair < int, QIcon > > IconList;
+        typedef std::vector<Icon> IconList;
         typedef std::vector<std::pair<int, QString> > ValueList;
 
     protected:

@@ -28,8 +28,6 @@ namespace MWMechanics
             void addBoundItem (const std::string& itemId, const MWWorld::Ptr& actor);
             void removeBoundItem (const std::string& itemId, const MWWorld::Ptr& actor);
 
-            void updateNpc(const MWWorld::Ptr &ptr, float duration);
-
             void adjustMagicEffects (const MWWorld::Ptr& creature);
 
             void calculateDynamicStats (const MWWorld::Ptr& ptr);
@@ -39,7 +37,7 @@ namespace MWMechanics
 
             void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
 
-            void updateDrowning (const MWWorld::Ptr& ptr, float duration);
+            void updateDrowning (const MWWorld::Ptr& ptr, float duration, bool isKnockedOut, bool isPlayer);
 
             void updateEquippedLight (const MWWorld::Ptr& ptr, float duration, bool mayEquip);
 
@@ -76,6 +74,8 @@ namespace MWMechanics
             ///< Deregister an actor for stats management
             ///
             /// \note Ignored, if \a ptr is not a registered actor.
+
+            void castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell=false);
 
             void updateActor(const MWWorld::Ptr &old, const MWWorld::Ptr& ptr);
             ///< Updates an actor with a new Ptr
@@ -116,7 +116,7 @@ namespace MWMechanics
             int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
 
-            bool isAttackPrepairing(const MWWorld::Ptr& ptr);
+            bool isAttackPreparing(const MWWorld::Ptr& ptr);
             bool isRunning(const MWWorld::Ptr& ptr);
             bool isSneaking(const MWWorld::Ptr& ptr);
 
@@ -161,6 +161,7 @@ namespace MWMechanics
 
             void clear(); // Clear death counter
 
+            bool isCastingSpell(const MWWorld::Ptr& ptr) const;
             bool isReadyToBlock(const MWWorld::Ptr& ptr) const;
             bool isAttackingOrSpell(const MWWorld::Ptr& ptr) const;
 

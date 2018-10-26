@@ -1,5 +1,5 @@
-Shader Settings
-###############
+Shaders Settings
+################
 
 force shaders
 -------------

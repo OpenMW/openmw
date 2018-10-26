@@ -11,9 +11,11 @@ namespace Files
 class ConstrainedFileStream : public std::istream
 {
 public:
-    ConstrainedFileStream(const char *filename,
-                          size_t start=0, size_t length=0xFFFFFFFF);
-    virtual ~ConstrainedFileStream();
+    ConstrainedFileStream(std::unique_ptr<std::streambuf> buf);
+    virtual ~ConstrainedFileStream() {};
+
+private:
+    std::unique_ptr<std::streambuf> mBuf;
 };
 
 typedef std::shared_ptr<std::istream> IStreamPtr;

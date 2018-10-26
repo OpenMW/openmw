@@ -1,4 +1,4 @@
-#include <iostream>
+#include <components/debug/debuglog.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -29,6 +29,18 @@ namespace MWScript
 {
     namespace Transformation
     {
+        void moveStandingActors(const MWWorld::Ptr &ptr, const osg::Vec3f& diff)
+        {
+            std::vector<MWWorld::Ptr> actors;
+            MWBase::Environment::get().getWorld()->getActorsStandingOn (ptr, actors);
+            for (auto& actor : actors)
+            {
+                osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
+                actorPos += diff;
+                MWBase::Environment::get().getWorld()->moveObject(actor, actorPos.x(), actorPos.y(), actorPos.z());
+            }
+        }
+
         template<class R>
         class OpSetScale : public Interpreter::Opcode0
         {
@@ -317,7 +329,7 @@ namespace MWScript
                         {
                             std::string error = "Warning: PositionCell: unknown interior cell (" + cellID + "), moving to exterior instead";
                             runtime.getContext().report (error);
-                            std::cerr << error << std::endl;
+                            Log(Debug::Warning) << error;
                         }
                     }
                     if(store)
@@ -429,7 +441,7 @@ namespace MWScript
                         if(!cell)
                         {
                             runtime.getContext().report ("unknown cell (" + cellID + ")");
-                            std::cerr << "unknown cell (" << cellID << ")\n";
+                            Log(Debug::Error) << "Error: unknown cell (" << cellID << ")";
                         }
                     }
                     if(store)
@@ -472,7 +484,7 @@ namespace MWScript
                     if (!player.isInCell())
                         throw std::runtime_error("player not in a cell");
 
-                    MWWorld::CellStore* store = NULL;
+                    MWWorld::CellStore* store = nullptr;
                     if (player.getCell()->isExterior())
                     {
                         int cx,cy;
@@ -666,6 +678,10 @@ namespace MWScript
                     osg::Vec3f diff = ptr.getRefData().getBaseNode()->getAttitude() * posChange;
                     osg::Vec3f worldPos(ptr.getRefData().getPosition().asVec3());
                     worldPos += diff;
+
+                    // We should move actors, standing on moving object, too.
+                    // This approach can be used to create elevators.
+                    moveStandingActors(ptr, diff);
                     MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x(), worldPos.y(), worldPos.z());
                 }
         };
@@ -688,22 +704,21 @@ namespace MWScript
                     runtime.pop();
 
                     const float *objPos = ptr.getRefData().getPosition().pos;
+                    osg::Vec3f diff;
 
-                    MWWorld::Ptr updated;
                     if (axis == "x")
-                    {
-                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0]+movement, objPos[1], objPos[2]);
-                    }
+                        diff.x() += movement;
                     else if (axis == "y")
-                    {
-                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0], objPos[1]+movement, objPos[2]);
-                    }
+                        diff.y() += movement;
                     else if (axis == "z")
-                    {
-                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0], objPos[1], objPos[2]+movement);
-                    }
+                        diff.z() += movement;
                     else
                         throw std::runtime_error ("invalid movement axis: " + axis);
+
+                    // We should move actors, standing on moving object, too.
+                    // This approach can be used to create elevators.
+                    moveStandingActors(ptr, diff);
+                    MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0]+diff.x(), objPos[1]+diff.y(), objPos[2]+diff.z());
                 }
         };
 
@@ -717,15 +732,13 @@ namespace MWScript
             }
         };
 
-        template <class R>
         class OpFixme : public Interpreter::Opcode0
         {
         public:
 
             virtual void execute (Interpreter::Runtime& runtime)
             {
-                MWWorld::Ptr ptr = R()(runtime);
-                MWBase::Environment::get().getWorld()->fixPosition(ptr);
+                MWBase::Environment::get().getWorld()->fixPosition();
             }
         };
 
@@ -769,8 +782,7 @@ namespace MWScript
             interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingAngle, new OpGetStartingAngle<ImplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingAngleExplicit, new OpGetStartingAngle<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodeResetActors, new OpResetActors);
-            interpreter.installSegment5(Compiler::Transformation::opcodeFixme, new OpFixme<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodeFixmeExplicit, new OpFixme<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeFixme, new OpFixme);
         }
     }
 }

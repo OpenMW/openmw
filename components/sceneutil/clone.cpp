@@ -26,7 +26,7 @@ namespace SceneUtil
     osg::StateSet* CopyOp::operator ()(const osg::StateSet* stateset) const
     {
         if (!stateset)
-            return NULL;
+            return nullptr;
         if (stateset->getDataVariance() == osg::StateSet::DYNAMIC)
             return osg::clone(stateset, *this);
         return const_cast<osg::StateSet*>(stateset);

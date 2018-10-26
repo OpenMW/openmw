@@ -1,6 +1,6 @@
 #include "summoning.hpp"
 
-#include <iostream>
+#include <components/debug/debuglog.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -76,7 +76,7 @@ namespace MWMechanics
                     }
                     catch (std::exception& e)
                     {
-                        std::cerr << "Failed to spawn summoned creature: " << e.what() << std::endl;
+                        Log(Debug::Error) << "Failed to spawn summoned creature: " << e.what();
                         // still insert into creatureMap so we don't try to spawn again every frame, that would spam the warning log
                     }
 

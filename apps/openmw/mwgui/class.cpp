@@ -12,6 +12,8 @@
 
 #include "../mwworld/esmstore.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include "tooltips.hpp"
 
 namespace
@@ -397,12 +399,12 @@ namespace MWGui
 
     CreateClassDialog::CreateClassDialog()
       : WindowModal("openmw_chargen_create_class.layout")
-      , mSpecDialog(NULL)
-      , mAttribDialog(NULL)
-      , mSkillDialog(NULL)
-      , mDescDialog(NULL)
-      , mAffectedAttribute(NULL)
-      , mAffectedSkill(NULL)
+      , mSpecDialog(nullptr)
+      , mAttribDialog(nullptr)
+      , mSkillDialog(nullptr)
+      , mDescDialog(nullptr)
+      , mAffectedAttribute(nullptr)
+      , mAffectedSkill(nullptr)
     {
         // Centre dialog
         center();
@@ -924,7 +926,7 @@ namespace MWGui
         std::string classImage = std::string("textures\\levelup\\") + classId + ".dds";
         if (!MWBase::Environment::get().getWindowManager()->textureExists(classImage))
         {
-            std::cout << "No class image for " << classId << ", falling back to default" << std::endl;
+            Log(Debug::Warning) << "No class image for " << classId << ", falling back to default";
             classImage = "textures\\levelup\\warrior.dds";
         }
         imageBox->setImageTexture(classImage);

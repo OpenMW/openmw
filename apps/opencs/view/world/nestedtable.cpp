@@ -23,9 +23,9 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
                                    bool editable,
                                    bool fixedRows)
     : DragRecordTable(document, parent),
-      mAddNewRowAction(NULL),
-      mRemoveRowAction(NULL),
-      mEditIdAction(NULL),
+      mAddNewRowAction(nullptr),
+      mRemoveRowAction(nullptr),
+      mEditIdAction(nullptr),
       mModel(model)
 {
     mDispatcher = new CSMWorld::CommandDispatcher (document, id, this);

@@ -20,6 +20,7 @@ namespace ESSImport
             item.mId = contItem.mItem.toString();
             item.mCount = contItem.mCount;
             item.mRelativeEquipmentSlot = -1;
+            item.mLockLevel = 0;
 
             unsigned int itemCount = std::abs(item.mCount);
             bool separateStacks = false;

@@ -23,6 +23,8 @@ class RecordPtrT
 public:
     RecordPtrT() : index(-2) {}
 
+    RecordPtrT(X* ptr) : ptr(ptr) {}
+
     /// Read the index from the nif
     void read(NIFStream *nif)
     {
@@ -38,25 +40,25 @@ public:
     void post(NIFFile *nif)
     {
         if(index < 0)
-            ptr = NULL;
+            ptr = nullptr;
         else
         {
             Record *r = nif->getRecord(index);
             // And cast it
             ptr = dynamic_cast<X*>(r);
-            assert(ptr != NULL);
+            assert(ptr != nullptr);
         }
     }
 
     /// Look up the actual object from the index
     const X* getPtr() const
     {
-        assert(ptr != NULL);
+        assert(ptr != nullptr);
         return ptr;
     }
     X* getPtr()
     {
-        assert(ptr != NULL);
+        assert(ptr != nullptr);
         return ptr;
     }
 
@@ -73,7 +75,7 @@ public:
 
     /// Pointers are allowed to be empty
     bool empty() const
-    { return ptr == NULL; }
+    { return ptr == nullptr; }
 };
 
 /** A list of references to other records. These are read as a list,
@@ -87,6 +89,12 @@ class RecordListT
     std::vector<Ptr> list;
 
 public:
+    RecordListT() = default;
+
+    RecordListT(std::vector<Ptr> list)
+        : list(std::move(list))
+    {}
+
     void read(NIFStream *nif)
     {
         int len = nif->getInt();

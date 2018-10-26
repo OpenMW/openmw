@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_DialogNoTransp" layer="Windows" position="0 0 477 270" align="Center" name="_Main">
-        <Widget type="Widget" skin="" position="17 14 447 239" align="Stretch">
+    <Widget type="Window" skin="MW_DialogNoTransp" layer="Windows" position="0 0 487 275" align="Center" name="_Main">
+        <Widget type="Widget" skin="" position="17 14 457 246" align="Stretch">
 
             <!-- Label -->
-            <Widget type="TextBox" skin="HeaderText" position="0 0 447 18" name="LabelT" align="HCenter Top">
+            <Widget type="TextBox" skin="HeaderText" position="0 0 457 18" name="LabelT" align="HCenter Top">
                 <Property key="Caption" value="#{sSkillsMenu1}"/>
                 <Property key="TextAlign" value="HCenter Top"/>
             </Widget>
@@ -44,20 +44,23 @@
                 <Property key="Caption" value="#{sSpecializationStealth}"/>
                 <Property key="TextAlign" value="Left Top"/>
             </Widget>
-            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 50 131 18" name="StealthSkill0" align="Left Top"/>
-            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 68 131 18" name="StealthSkill1" align="Left Top"/>
-            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 86 131 18" name="StealthSkill2" align="Left Top"/>
-            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 104 131 18" name="StealthSkill3" align="Left Top"/>
-            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 122 131 18" name="StealthSkill4" align="Left Top"/>
-            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 140 131 18" name="StealthSkill5" align="Left Top"/>
-            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 158 131 18" name="StealthSkill6" align="Left Top"/>
-            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 176 131 18" name="StealthSkill7" align="Left Top"/>
-            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 194 131 18" name="StealthSkill8" align="Left Top"/>
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 50 154 18" name="StealthSkill0" align="Left Top"/>
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 68 154 18" name="StealthSkill1" align="Left Top"/>
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 86 154 18" name="StealthSkill2" align="Left Top"/>
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 104 154 18" name="StealthSkill3" align="Left Top"/>
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 122 154 18" name="StealthSkill4" align="Left Top"/>
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 140 154 18" name="StealthSkill5" align="Left Top"/>
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 158 154 18" name="StealthSkill6" align="Left Top"/>
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 176 154 18" name="StealthSkill7" align="Left Top"/>
+            <Widget type="MWSkill" skin="MW_StatNameButton" position="316 194 154 18" name="StealthSkill8" align="Left Top"/>
 
             <!-- Dialog buttons -->
-            <Widget type="AutoSizedButton" skin="MW_Button" position="381 218 66 21" name="CancelButton">
-                <Property key="ExpandDirection" value="Left"/>
-                <Property key="Caption" value="#{sCancel}"/>
+            <Widget type="HBox" position="0 218 457 28">
+                <Widget type="Spacer" />
+                <Widget type="AutoSizedButton" skin="MW_Button" align="Right Bottom" name="CancelButton">
+                    <Property key="ExpandDirection" value="Left Up"/>
+                    <Property key="Caption" value="#{sCancel}"/>
+                </Widget>
             </Widget>
 
         </Widget>

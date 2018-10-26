@@ -87,8 +87,6 @@ namespace MWGui
         void addItem(const ESM::Spell* spell, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void updateSkillArea();
 
-        static const int sLineHeight;
-
         MyGUI::TextBox *mNameWidget, *mRaceWidget, *mClassWidget, *mBirthSignWidget;
         MyGUI::ScrollView* mSkillView;
 

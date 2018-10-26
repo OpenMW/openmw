@@ -1,7 +1,6 @@
 #include "cells.hpp"
 
-#include <iostream>
-
+#include <components/debug/debuglog.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/defs.hpp>
@@ -150,6 +149,19 @@ MWWorld::CellStore *MWWorld::Cells::getInterior (const std::string& name)
     }
 
     return &result->second;
+}
+
+void MWWorld::Cells::rest ()
+{
+    for (auto &interior : mInteriors)
+    {
+        interior.second.rest();
+    }
+
+    for (auto &exterior : mExteriors)
+    {
+        exterior.second.rest();
+    }
 }
 
 MWWorld::CellStore *MWWorld::Cells::getCell (const ESM::CellId& id)
@@ -328,7 +340,7 @@ public:
         }
         catch (...)
         {
-            return NULL;
+            return nullptr;
         }
     }
 };
@@ -350,7 +362,7 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, uint32_t type,
         catch (...)
         {
             // silently drop cells that don't exist anymore
-            std::cerr << "Warning: Dropping state for cell " << state.mId.mWorldspace << " (cell no longer exists)" << std::endl;
+            Log(Debug::Warning) << "Warning: Dropping state for cell " << state.mId.mWorldspace << " (cell no longer exists)";
             reader.skipRecord();
             return true;
         }

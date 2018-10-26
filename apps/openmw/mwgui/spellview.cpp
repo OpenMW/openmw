@@ -6,6 +6,9 @@
 #include <MyGUI_Gui.h>
 
 #include <components/widgets/sharedstatebutton.hpp>
+#include <components/widgets/box.hpp>
+
+#include "tooltips.hpp"
 
 namespace MWGui
 {
@@ -21,7 +24,7 @@ namespace MWGui
     }
 
     SpellView::SpellView()
-        : mScrollView(NULL)
+        : mScrollView(nullptr)
         , mShowCostColumn(true)
         , mHighlightSelected(true)
     {
@@ -32,7 +35,7 @@ namespace MWGui
         Base::initialiseOverride();
 
         assignWidget(mScrollView, "ScrollView");
-        if (mScrollView == NULL)
+        if (mScrollView == nullptr)
             throw std::runtime_error("Item view needs a scroll view");
 
         mScrollView->setCanvasAlign(MyGUI::Align::Left | MyGUI::Align::Top);
@@ -103,11 +106,12 @@ namespace MWGui
             }
 
             const std::string skin = spell.mActive ? "SandTextButton" : "SpellTextUnequipped";
+            const std::string captionSuffix = MWGui::ToolTips::getCountString(spell.mCount);
 
             Gui::SharedStateButton* t = mScrollView->createWidget<Gui::SharedStateButton>(skin,
                 MyGUI::IntCoord(0, 0, 0, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setNeedKeyFocus(true);
-            t->setCaption(spell.mName);
+            t->setCaption(spell.mName + captionSuffix);
             t->setTextAlign(MyGUI::Align::Left);
             adjustSpellWidget(spell, i, t);
 
@@ -127,7 +131,7 @@ namespace MWGui
                 mLines.push_back(LineInfo(t, costChance, i));
             }
             else
-                mLines.push_back(LineInfo(t, (MyGUI::Widget*)NULL, i));
+                mLines.push_back(LineInfo(t, (MyGUI::Widget*)nullptr, i));
 
             t->setStateSelected(spell.mSelected);
         }
@@ -163,7 +167,8 @@ namespace MWGui
 
                 // more checking for major change.
                 const Spell& spell = mModel->getItem(spellIndex);
-                if (nameButton->getCaption() != spell.mName)
+                const std::string captionSuffix = MWGui::ToolTips::getCountString(spell.mCount);
+                if (nameButton->getCaption() != (spell.mName + captionSuffix))
                 {
                     fullUpdateRequired = true;
                     break;
@@ -172,7 +177,7 @@ namespace MWGui
                 {
                     maxSpellIndexFound = spellIndex;
                     Gui::SharedStateButton* costButton = reinterpret_cast<Gui::SharedStateButton*>(it->mRightWidget);
-                    if ((costButton != NULL) && (costButton->getCaption() != spell.mCostColumn))
+                    if ((costButton != nullptr) && (costButton->getCaption() != spell.mCostColumn))
                     {
                         costButton->setCaption(spell.mCostColumn);
                     }
@@ -233,10 +238,10 @@ namespace MWGui
                 MyGUI::IntCoord(0, 0, mScrollView->getWidth(), 18),
                 MyGUI::Align::Left | MyGUI::Align::Top);
             separator->setNeedMouseFocus(false);
-            mLines.push_back(LineInfo(separator, (MyGUI::Widget*)NULL, NoSpellIndex));
+            mLines.push_back(LineInfo(separator, (MyGUI::Widget*)nullptr, NoSpellIndex));
         }
 
-        MyGUI::TextBox* groupWidget = mScrollView->createWidget<MyGUI::TextBox>("SandBrightText",
+        MyGUI::TextBox* groupWidget = mScrollView->createWidget<Gui::TextBox>("SandBrightText",
             MyGUI::IntCoord(0, 0, mScrollView->getWidth(), 24),
             MyGUI::Align::Left | MyGUI::Align::Top);
         groupWidget->setCaptionWithReplacing(label);
@@ -245,7 +250,7 @@ namespace MWGui
 
         if (label2 != "")
         {
-            MyGUI::TextBox* groupWidget2 = mScrollView->createWidget<MyGUI::TextBox>("SandBrightText",
+            MyGUI::TextBox* groupWidget2 = mScrollView->createWidget<Gui::TextBox>("SandBrightText",
                 MyGUI::IntCoord(0, 0, mScrollView->getWidth(), 24),
                 MyGUI::Align::Left | MyGUI::Align::Top);
             groupWidget2->setCaptionWithReplacing(label2);
@@ -255,7 +260,7 @@ namespace MWGui
             mLines.push_back(LineInfo(groupWidget, groupWidget2, NoSpellIndex));
         }
         else
-            mLines.push_back(LineInfo(groupWidget, (MyGUI::Widget*)NULL, NoSpellIndex));
+            mLines.push_back(LineInfo(groupWidget, (MyGUI::Widget*)nullptr, NoSpellIndex));
     }
 
 

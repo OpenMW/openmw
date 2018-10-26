@@ -5,7 +5,8 @@
 #include <algorithm>
 #include <iterator>
 #include <list>
-#include <iostream>
+
+#include <components/debug/debuglog.hpp>
 
 #include <components/esm/loaddial.hpp>
 #include <components/esm/loadinfo.hpp>
@@ -21,6 +22,8 @@
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/defines.hpp>
+
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -201,16 +204,14 @@ namespace MWDialogue
         }
         catch (const std::exception& error)
         {
-            std::cerr << std::string ("Dialogue error: An exception has been thrown: ") + error.what() << std::endl;
+            Log(Debug::Error) << std::string ("Dialogue error: An exception has been thrown: ") + error.what();
             success = false;
         }
 
         if (!success)
         {
-            std::cerr
-                << "Warning: compiling failed (dialogue script)" << std::endl
-                << cmd
-                << std::endl << std::endl;
+            Log(Debug::Warning)
+                << "Warning: compiling failed (dialogue script)\n" << cmd << "\n\n";
         }
 
         return success;
@@ -230,7 +231,7 @@ namespace MWDialogue
             }
             catch (const std::exception& error)
             {
-                std::cerr << std::string ("Dialogue error: An exception has been thrown: ") + error.what() << std::endl;
+               Log(Debug::Error) << std::string ("Dialogue error: An exception has been thrown: ") + error.what();
             }
         }
     }
@@ -260,7 +261,7 @@ namespace MWDialogue
                 const MWWorld::Store<ESM::GameSetting>& gmsts =
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-                title = gmsts.find (modifiedTopic)->getString();
+                title = gmsts.find (modifiedTopic)->mValue.getString();
             }
             else
                 title = topic;
@@ -508,9 +509,11 @@ namespace MWDialogue
         return static_cast<int>(mTemporaryDispositionChange);
     }
 
-    void DialogueManager::applyDispositionChange(int delta)
+    void DialogueManager::applyBarterDispositionChange(int delta)
     {
         mTemporaryDispositionChange += delta;
+        if (Settings::Manager::getBool("barter disposition change is permanent", "Game"))
+            mPermanentDispositionChange += delta;
     }
 
     bool DialogueManager::checkServiceRefused(ResponseCallback* callback)
@@ -534,7 +537,7 @@ namespace MWDialogue
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
 
-            callback->addResponse(gmsts.find ("sServiceRefusal")->getString(), Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+            callback->addResponse(gmsts.find ("sServiceRefusal")->mValue.getString(), Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
 
             executeScript (info->mResultScript, mActor);
             return true;
@@ -569,7 +572,7 @@ namespace MWDialogue
         const MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
         Filter filter(actor, 0, creatureStats.hasTalkedToPlayer());
         const ESM::DialInfo *info = filter.search(*dial, false);
-        if(info != NULL)
+        if(info != nullptr)
         {
             MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
             if(winMgr->getSubtitlesEnabled())

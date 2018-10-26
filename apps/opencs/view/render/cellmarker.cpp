@@ -5,6 +5,8 @@
 #include <osg/Geode>
 #include <osgText/Text>
 
+#include <components/misc/constants.hpp>
+
 CSVRender::CellMarkerTag::CellMarkerTag(CellMarker *marker)
 : TagBase(Mask_CellMarker), mMarker(marker)
 {}
@@ -49,7 +51,7 @@ void CSVRender::CellMarker::buildMarker()
 
 void CSVRender::CellMarker::positionMarker()
 {
-    const int cellSize = 8192;
+    const int cellSize = Constants::CellSizeInUnits;
     const int markerHeight = 0;
 
     // Move marker to center of cell.
