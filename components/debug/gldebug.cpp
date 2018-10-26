@@ -102,11 +102,11 @@ void enableGLDebugExtension(unsigned int contextID)
         Log(Debug::Error) << "Unable to attach OpenGL debug callback.";
 }
 
-EnableGLDebugOperation::EnableGLDebugOperation() : osg::GraphicsOperation("EnableGLDebugOperation", false)
+Debug::EnableGLDebugOperation::EnableGLDebugOperation() : osg::GraphicsOperation("EnableGLDebugOperation", false)
 {
 }
 
-void EnableGLDebugOperation::operator()(osg::GraphicsContext* graphicsContext)
+void Debug::EnableGLDebugOperation::operator()(osg::GraphicsContext* graphicsContext)
 {
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
 
