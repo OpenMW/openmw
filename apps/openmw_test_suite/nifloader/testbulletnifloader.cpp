@@ -929,10 +929,8 @@ namespace
         mNiStringExtraData.string = "MRK";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
-        mNiNode3.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
-        mNiNode3.recType = Nif::RC_RootCollisionNode;
-        mNiNode2.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(nullptr), Nif::NodePtr(&mNiNode3)}));
-        mNiNode2.recType = Nif::RC_NiNode;
+        mNiNode2.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
+        mNiNode2.recType = Nif::RC_RootCollisionNode;
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiNode2)}));
         mNiNode.recType = Nif::RC_NiNode;
 
