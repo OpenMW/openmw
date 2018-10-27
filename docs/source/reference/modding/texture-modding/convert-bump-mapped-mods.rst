@@ -20,29 +20,43 @@ General introduction to normal map conversion
 :Authors: Joakim (Lysol) Berg
 :Updated: 2016-11-11
 
-This page has general information and tutorials on how normal mapping works in OpenMW and how you can make mods using the old fake normal mapping technique (such as `Netch Bump mapped`_ and `Hlaalu Bump mapped`_, and maybe the most (in)famous one to give shiny rocks in OpenMW, the mod `On the Rocks`_!, featured in MGSO and Morrowind Rebirth) work in OpenMW.
+This page has general information and tutorials on how normal mapping works in OpenMW and how you can make mods using 
+the old fake normal mapping technique (such as `Netch Bump mapped`_ and `Hlaalu Bump mapped`_, and maybe the most 
+(in)famous one to give shiny rocks in OpenMW, the mod `On the Rocks`_!, featured in MGSO and Morrowind Rebirth) work in OpenMW.
 
 *Note:* The conversion made in the `Converting Apel's Various Things - Sacks`_-part of this tutorial require the use of the application NifSkope_.
 
-*Another note:* I will use the terms bump mapping and normal mapping simultaneously. Normal mapping is one form of bump mapping. In other words, normal mapping is bump mapping, but bump mapping isn't necessarily normal mapping. There are several techniques for bump mapping, and normal mapping is the most common one today.
+*Another note:* I will use the terms bump mapping and normal mapping simultaneously. 
+Normal mapping is one form of bump mapping. In other words, normal mapping is bump mapping, 
+but bump mapping isn't necessarily normal mapping. 
+There are several techniques for bump mapping, and normal mapping is the most common one today.
 
 So let's get on with it.
 
 Normal Mapping in OpenMW
 ************************
 
-Normal mapping in OpenMW works in a very simple way: The engine just looks for a texture with a *_n.dds* suffix, and you're done.
+Normal mapping in OpenMW works in a very simple way: The engine just looks for a texture with a *_n.dds* suffix, 
+and you're done.
 
 So to expand on this a bit, let's take a look at how a model seeks for textures.
 
-Let us assume we have the model *example.nif*. In this model file, there should be a tag (NiSourceTexture) that states what texture it should use and where to find it. Typically, it will point to something like *exampletexture_01.dds*. This texture is supposed to be located directly in the Textures folder since it does not state anything else. If the model is a custom made one, modders tend to group their textures in separate folders, just to easily keep track of them. It might be something like *./Textures/moddername/exampletexture_02.dds*.
+Let us assume we have the model *example.nif*. In this model file, 
+there should be a tag (NiSourceTexture) that states what texture it should use and where to find it. Typically, 
+it will point to something like *exampletexture_01.dds*. This texture is supposed to be located directly in the 
+Textures folder since it does not state anything else. If the model is a custom made one, modders tend to group 
+their textures in separate folders, just to easily keep track of them. 
+It might be something like *./Textures/moddername/exampletexture_02.dds*.
 
-When OpenMW finally adds normal mapping, it simply takes the NiSourceTexture file path, e.g., *exampletexture_01.dds*, and looks for a *exampletexture_01_n.dds*. If it can't find this file, no normal mapping is added. If it *does* find this file, the model will use this texture as a normal map. Simple.
+When OpenMW finally adds normal mapping, it simply takes the NiSourceTexture file path, e.g., 
+*exampletexture_01.dds*, and looks for a *exampletexture_01_n.dds*. If it can't find this file, no normal mapping is added. 
+If it *does* find this file, the model will use this texture as a normal map. Simple.
 
 Activating normal mapping shaders in OpenMW
 *******************************************
 
-Before normal (and specular and parallax) maps will show up in OpenMW, you'll need to activate them in the settings.cfg_-file. Add these rows where it would make sense:
+Before normal (and specular and parallax) maps will show up in OpenMW, you'll need to activate them in the 
+settings.cfg_-file. Add these rows where it would make sense:
 
 ::
 
@@ -72,13 +86,26 @@ Normal mapping in Morrowind with Morrowind Code Patch
 **Conversion difficulty:**
 *Varies. Sometimes quick and easy, sometimes time-consuming and hard.*
 
-You might have bumped (pun intended) on a few bump-mapped texture packs for Morrowind that require the Morrowind Code Patch (MCP). You might even be thinking: Why doesn't OpenMW just support these instead of reinventing the wheel? I know it sounds strange, but it will make sense. Here's how MCP handles normal maps:
+You might have bumped (pun intended) on a few bump-mapped texture packs for Morrowind that require the 
+Morrowind Code Patch (MCP). You might even be thinking: Why doesn't OpenMW just support these instead of reinventing 
+the wheel? I know it sounds strange, but it will make sense. Here's how MCP handles normal maps:
 
-Morrowind does not recognize normal maps (they weren't really a "thing" yet in 2002), so even if you have a normal map, Morrowind will not load and display it. MCP has a clever way to solve this issue, by using something Morrowind *does* support, namely environment maps. You could add a tag for an environment map and then add a normal map as the environment map, but you'd end up with a shiny ugly model in the game. MCP solves this by turning down the brightness of the environment maps, making the model look *kind of* as if it had a normal map applied to it. I say kind of because it does not really look as good as normal mapping usually does. It was a hacky way to do it, but it was the only way at the time, and therefore the best way.
+Morrowind does not recognize normal maps (they weren't really a "thing" yet in 2002), so even if you have a normal map,
+Morrowind will not load and display it. MCP has a clever way to solve this issue, by using something Morrowind *does* support, 
+namely environment maps. You could add a tag for an environment map and then add a normal map as the environment map, 
+but you'd end up with a shiny ugly model in the game. MCP solves this by turning down the brightness of the environment maps, 
+making the model look *kind of* as if it had a normal map applied to it. 
+I say kind of because it does not really look as good as normal mapping usually does. It was a hacky way to do it, 
+but it was the only way at the time, and therefore the best way.
 
-The biggest problem with this is not that it doesn't look as good as it could – no, the biggest problem in my opinion is that it requires you to state the file paths for your normal map textures *in the models*! For buildings, which often use several textures for one single model file, it could take *ages* to do this, and you had to do it for dozens of model files too. You also had to ship your texture pack with model files, making your mod bigger in file size.
+The biggest problem with this is not that it doesn't look as good as it could – no, 
+the biggest problem in my opinion is that it requires you to state the file paths for your normal map textures *in the models*!
+For buildings, which often use several textures for one single model file, it could take *ages* to do this, 
+and you had to do it for dozens of model files too. You also had to ship your texture pack with model files, 
+making your mod bigger in file size.
 
-These are basically the reasons why OpenMW does not support fake bump maps like MCP does. It is just a really bad way to enhance your models, all the more when you have the possibility to do it in a better way.
+These are basically the reasons why OpenMW does not support fake bump maps like MCP does. 
+It is just a really bad way to enhance your models, all the more when you have the possibility to do it in a better way.
 
 Normal mapping in Morrowind with MGE XE
 ***************************************
@@ -86,9 +113,18 @@ Normal mapping in Morrowind with MGE XE
 **Conversion difficulty:**
 *Easy*
 
-The most recent feature on this topic is that the Morrowind Graphics Extender (MGE) finally started to support real normal mapping in an experimental version available here: `MGE XE`_ (you can't use MGE with OpenMW!). Not only this but it also adds full support for physically based rendering (PBR), making it one step ahead of OpenMW in terms of texturing techniques. However, OpenMW will probably have this feature in the future too – and let's hope that OpenMW and MGE will handle PBR in a similar fashion in the future so that mods can be used for both MGE and OpenMW without any hassle.
+The most recent feature on this topic is that the Morrowind Graphics Extender (MGE) finally started to support real 
+normal mapping in an experimental version available here: `MGE XE`_ (you can't use MGE with OpenMW!). 
+Not only this but it also adds full support for physically based rendering (PBR), 
+making it one step ahead of OpenMW in terms of texturing techniques. However, 
+OpenMW will probably have this feature in the future too – and let's hope that OpenMW and MGE will handle PBR in a 
+similar fashion in the future so that mods can be used for both MGE and OpenMW without any hassle.
 
-I haven't researched that much on the MGE variant yet but it does support real implementation of normal mapping, making it really easy to convert mods made for MGE into OpenMW (I'm only talking about the normal map textures though). There's some kind of text file if I understood it correctly that MGE uses to find the normal map. OpenMW does not need this, you just have to make sure the normal map has the same name as the diffuse texture but with the correct suffix after.
+I haven't researched that much on the MGE variant yet but it does support real implementation of normal mapping, 
+making it really easy to convert mods made for MGE into OpenMW (I'm only talking about the normal map textures though). 
+There's some kind of text file if I understood it correctly that MGE uses to find the normal map. 
+OpenMW does not need this, you just have to make sure the normal map has the same name as the diffuse texture but with 
+the correct suffix after.
 
 Now, on to the tutorials.
 
@@ -99,14 +135,21 @@ Converting PeterBitt's Scamp Replacer
 :Authors: Joakim (Lysol) Berg
 :Updated: 2016-11-11
 
-So, let's say you've found out that PeterBitt_ makes awesome models and textures featuring physically based rendering (PBR) and normal maps. Let's say that you tried to run his `PBR Scamp Replacer`_ in OpenMW and that you were greatly disappointed when the normal map didn't seem to work. Lastly, let's say you came here, looking for some answers. Am I right? Great. Because you've come to the right place!
+So, let's say you've found out that PeterBitt_ makes awesome models and textures featuring physically based rendering 
+(PBR) and normal maps. Let's say that you tried to run his `PBR Scamp Replacer`_ in OpenMW and that you were greatly 
+disappointed when the normal map didn't seem to work. Lastly, let's say you came here, looking for some answers. 
+Am I right? Great. Because you've come to the right place!
 
-*A quick note before we begin*: Please note that you can only use the normal map texture and not the rest of the materials, since PBR isn't implemented in OpenMW yet. Sometimes PBR textures can look dull without all of the texture files, so have that in mind.
+*A quick note before we begin*: Please note that you can only use the normal map texture and not the rest of the materials, 
+since PBR isn't implemented in OpenMW yet. Sometimes PBR textures can look dull without all of the texture files, 
+so have that in mind.
 
 Tutorial - MGE
 **************
 
-In this tutorial, I will use PeterBitt's `PBR Scamp Replacer`_ as an example, but any mod featuring PBR that requires the PBR version of MGE will do, provided it also includes a normal map (which it probably does).
+In this tutorial, I will use PeterBitt's `PBR Scamp Replacer`_ as an example, 
+but any mod featuring PBR that requires the PBR version of MGE will do, 
+provided it also includes a normal map (which it probably does).
 
 So, follow these steps:
 
@@ -120,11 +163,14 @@ So, follow these steps:
 #. Rename your newly extracted file (``tx_Scamp_normals.dds``) to ``tx_Scamp_n.dds`` (which is exactly the same name as the diffuse texture file, except for the added *_n* suffix before the filename extention).
 #. You're actually done!
 
-So as you might notice, converting these mods is very simple and takes just a couple of minutes. It's more or less just a matter of renaming and moving a few files.
+So as you might notice, converting these mods is very simple and takes just a couple of minutes. 
+It's more or less just a matter of renaming and moving a few files.
 
-I totally recommend you to also try this on PeterBitt's Nix Hound replacer and Flash3113's various replacers. It should be the same principle to get those to work.
+I totally recommend you to also try this on PeterBitt's Nix Hound replacer and Flash3113's various replacers. 
+It should be the same principle to get those to work.
 
-And let's hope that some one implements PBR shaders to OpenMW too, so that we can use all the material files of these mods in the future.
+And let's hope that some one implements PBR shaders to OpenMW too, 
+so that we can use all the material files of these mods in the future.
 
 Converting Lougian's Hlaalu Bump mapped
 ---------------------------------------
@@ -133,12 +179,17 @@ Converting Lougian's Hlaalu Bump mapped
 :Authors: Joakim (Lysol) Berg
 :Updated: 2016-11-11
 
-Converting textures made for the Morrowind Code Patch (MCP) fake bump mapping can be really easy or a real pain, depending on a few circumstances. In this tutorial, we will look at a very easy, although in some cases a bit time-consuming, example.
+Converting textures made for the Morrowind Code Patch (MCP) fake bump mapping can be really easy or a real pain, 
+depending on a few circumstances. In this tutorial, we will look at a very easy, 
+although in some cases a bit time-consuming, example.
 
 Tutorial - MCP, Part 1
 **********************
 
-We will be converting a quite popular texture replacer of the Hlaalu architecture, namely Lougian's `Hlaalu Bump mapped`_. Since this is just a texture pack and not a model replacer, we can convert the mod in a few minutes by just renaming a few dozen files and by *not* extracting the included model (``.nif``) files when installing the mod.
+We will be converting a quite popular texture replacer of the Hlaalu architecture, namely Lougian's `Hlaalu Bump mapped`_.
+Since this is just a texture pack and not a model replacer, 
+we can convert the mod in a few minutes by just renaming a few dozen files and by *not* extracting the included model 
+(``.nif``) files when installing the mod.
 
 #. Download Lougian's `Hlaalu Bump mapped`_.
 #. Install the mod by extracting the ``./Textures`` folder to a data folder the way you usually install mods (**Pro tip**: Install using OpenMW's `Multiple data folders`_ function!).
@@ -149,7 +200,8 @@ We will be converting a quite popular texture replacer of the Hlaalu architectur
     - As a nice bonus to this tutorial, this pack actually included one specularity texture too. We should use it of course. It's the one called "``tx_glass_amber_02_reflection.dds``". For OpenMW to recognize this file and use it as a specular map, you need to change the *_reflection.dds* part to *_spec.dds*, resulting in the name ``tx_glass_amber_01_spec.dds``.
 #. That should be it. Really simple, but I do know that it takes a few minutes to rename all those files.
 
-Now – if the mod you want to change includes custom made models it gets a bit more complicated I'm afraid. But that is for the next tutorial.
+Now – if the mod you want to change includes custom made models it gets a bit more complicated I'm afraid. 
+But that is for the next tutorial.
 
 Converting Apel's Various Things - Sacks
 ----------------------------------------
@@ -158,12 +210,16 @@ Converting Apel's Various Things - Sacks
 :Authors: Joakim (Lysol) Berg
 :Updated: 2016-11-09
 
-In part one of this tutorial, we converted a mod that only included modified Morrowind model (``.nif``) files so that the normal maps could be loaded in Morrowind with MCP. We ignored those model files since they are not needed with OpenMW. In this tutorial however, we will convert a mod that includes new, custom made models. In other words, we cannot just ignore those files this time.
+In part one of this tutorial, we converted a mod that only included modified Morrowind model (``.nif``) 
+files so that the normal maps could be loaded in Morrowind with MCP. 
+We ignored those model files since they are not needed with OpenMW. In this tutorial however, 
+we will convert a mod that includes new, custom made models. In other words, we cannot just ignore those files this time.
 
 Tutorial - MCP, Part 2
 **********************
 
-The sacks included in Apel's `Various Things - Sacks`_ come in two versions – Without bump mapping, and with bump mapping. Since we want the glory of normal mapping in our OpenMW setup, we will go with the bump-mapped version.
+The sacks included in Apel's `Various Things - Sacks`_ come in two versions – Without bump mapping, and with bump mapping. 
+Since we want the glory of normal mapping in our OpenMW setup, we will go with the bump-mapped version.
 
 #. Start by downloading Apel's `Various Things - Sacks`_ from Nexus.
 #. Once downloaded, install it the way you'd normally install your mods (**Pro tip**: Install using OpenMW's `Multiple data folders`_ function!).
@@ -181,7 +237,9 @@ The sacks included in Apel's `Various Things - Sacks`_ come in two versions – 
 #. OpenMW detects normal maps if they have the same name as the base diffuse texture, but with a *_n.dds* suffix. In this mod, the normal maps has a suffix of *_nm.dds*. Change all the files that ends with *_nm.dds* to instead end with *_n.dds*.
 #. Finally, `we are done`_!
 
-Since these models have one or two textures applied to them, the fix was not that time-consuming. It gets worse when you have to fix a model that uses loads of textures. The principle is the same, it just requires more manual work which is annoying and takes time.
+Since these models have one or two textures applied to them, the fix was not that time-consuming. 
+It gets worse when you have to fix a model that uses loads of textures. The principle is the same, 
+it just requires more manual work which is annoying and takes time.
 
 .. _`Netch Bump mapped`: https://www.nexusmods.com/morrowind/mods/42851/?
 .. _`Hlaalu Bump mapped`: https://www.nexusmods.com/morrowind/mods/42396/?
