@@ -472,28 +472,31 @@ namespace MWMechanics
                 MWBase::Environment::get().getWindowManager()->setEnemy(target);
 
             // Try absorbing if it's a spell
-            // NOTE: Vanilla does this once per spell absorption effect source instead of adding the % from all sources together, so use the same approach here
+            // Unlike Reflect, this is done once per spell absorption effect source
             bool absorbed = false;
             if (spell && caster != target && target.getClass().isActor())
             {
-                GetAbsorptionProbability check(target);
-                MWMechanics::CreatureStats& stats = target.getClass().getCreatureStats(target);
-                stats.getActiveSpells().visitEffectSources(check);
-                stats.getSpells().visitEffectSources(check);
-                if (target.getClass().hasInventoryStore(target))
-                    target.getClass().getInventoryStore(target).visitEffectSources(check);
-
-                int absorb = check.mProbability * 100;
-                absorbed = (Misc::Rng::roll0to99() < absorb);
-                if (absorbed)
+                CreatureStats& stats = target.getClass().getCreatureStats(target);
+                if (stats.getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude() > 0.f)
                 {
-                    const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
-                    MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
-                                "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, "");
-                    // Magicka is increased by cost of spell
-                    DynamicStat<float> magicka = target.getClass().getCreatureStats(target).getMagicka();
-                    magicka.setCurrent(magicka.getCurrent() + spell->mData.mCost);
-                    target.getClass().getCreatureStats(target).setMagicka(magicka);
+                    GetAbsorptionProbability check(target);
+                    stats.getActiveSpells().visitEffectSources(check);
+                    stats.getSpells().visitEffectSources(check);
+                    if (target.getClass().hasInventoryStore(target))
+                        target.getClass().getInventoryStore(target).visitEffectSources(check);
+
+                    int absorb = check.mProbability * 100;
+                    absorbed = (Misc::Rng::roll0to99() < absorb);
+                    if (absorbed)
+                    {
+                        const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
+                        MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
+                                    "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, "");
+                        // Magicka is increased by cost of spell
+                        DynamicStat<float> magicka = stats.getMagicka();
+                        magicka.setCurrent(magicka.getCurrent() + spell->mData.mCost);
+                        stats.setMagicka(magicka);
+                    }
                 }
             }
 
