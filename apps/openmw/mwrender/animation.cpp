@@ -15,12 +15,12 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/nifosg/nifloader.hpp>
-
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
 #include <components/resource/imagemanager.hpp>
+
+#include <components/misc/constants.hpp>
 
 #include <components/nifosg/nifloader.hpp> // KeyframeHolder
 #include <components/nifosg/controller.hpp>
@@ -1791,10 +1791,10 @@ namespace MWRender
         {
             // TODO: use global attenuation settings
 
-            // 1 pt of Light effect magnitude corresponds to 1 foot of light source radius, which is about 21.33 game units,
-            // but Morrowind uses imprecise value of foot for magic effects.
-            float radius = effect * 22.f;
-            float linearAttenuation = 3.f / radius;
+            // 1 pt of Light magnitude corresponds to 1 foot of radius
+            float radius = effect * std::ceil(Constants::UnitsPerFoot);
+            const float linearValue = 3.f; // Currently hardcoded: unmodified Morrowind attenuation settings
+            float linearAttenuation = linearValue / radius;
 
             if (!mGlowLight || linearAttenuation != mGlowLight->getLight(0)->getLinearAttenuation())
             {
