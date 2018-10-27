@@ -15,12 +15,12 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/nifosg/nifloader.hpp>
-
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
 #include <components/resource/imagemanager.hpp>
+
+#include <components/misc/constants.hpp>
 
 #include <components/nifosg/nifloader.hpp> // KeyframeHolder
 #include <components/nifosg/controller.hpp>
@@ -1789,9 +1789,12 @@ namespace MWRender
         }
         else
         {
-            effect += 3;
-            float radius = effect * 66.f;
-            float linearAttenuation = 0.5f / effect;
+            // TODO: use global attenuation settings
+
+            // 1 pt of Light magnitude corresponds to 1 foot of radius
+            float radius = effect * std::ceil(Constants::UnitsPerFoot);
+            const float linearValue = 3.f; // Currently hardcoded: unmodified Morrowind attenuation settings
+            float linearAttenuation = linearValue / radius;
 
             if (!mGlowLight || linearAttenuation != mGlowLight->getLight(0)->getLinearAttenuation())
             {
@@ -1813,7 +1816,8 @@ namespace MWRender
                 mGlowLight->setLight(light);
             }
 
-            mGlowLight->setRadius(radius);
+            // Make the obvious cut-off a bit less obvious
+            mGlowLight->setRadius(radius * 3);
         }
     }
 

@@ -33,6 +33,7 @@
     Bug #3788: GetPCInJail and GetPCTraveling do not work as in vanilla
     Bug #3836: Script fails to compile when command argument contains "\n"
     Bug #3876: Landscape texture painting is misaligned
+    Bug #3890: Magic light source attenuation is inaccurate
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
     Bug #3911: [macOS] Typing in the "Content List name" dialog box produces double characters
     Bug #3920: RemoveSpellEffects doesn't remove constant effects
