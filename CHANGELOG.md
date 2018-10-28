@@ -8,6 +8,7 @@
     Bug #2256: Landing sound not playing when jumping immediately after landing
     Bug #2274: Thin platform clips through player character instead of lifting
     Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
+    Bug #2446: Restore Attribute/Skill should allow restoring drained attributes
     Bug #2455: Creatures attacks degrade armor
     Bug #2562: Forcing AI to activate a teleport door sometimes causes a crash
     Bug #2626: Resurrecting the player does not resume the game
@@ -46,6 +47,7 @@
     Bug #4110: Fixed undo / redo menu text losing the assigned shortcuts
     Bug #4125: OpenMW logo cropped on bugtracker
     Bug #4215: OpenMW shows book text after last EOL tag
+    Bug #4217: Fixme implementation differs from Morrowind's
     Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4230: AiTravel package issues break some Tribunal quests
     Bug #4231: Infected rats from the "Crimson Plague" quest rendered unconscious by change in Drain Fatigue functionality
@@ -55,6 +57,7 @@
     Bug #4274: Pre-0.43 death animations are not forward-compatible with 0.43+
     Bug #4286: Scripted animations can be interrupted
     Bug #4291: Non-persistent actors that started the game as dead do not play death animations
+    Bug #4292: CenterOnCell implementation differs from vanilla
     Bug #4293: Faction members are not aware of faction ownerships in barter
     Bug #4304: "Follow" not working as a second AI package
     Bug #4307: World cleanup should remove dead bodies only if death animation is finished
@@ -65,7 +68,7 @@
     Bug #4368: Settings window ok button doesn't have key focus by default
     Bug #4378: On-self absorb spells restore stats
     Bug #4393: NPCs walk back to where they were after using ResetActors
-    Bug #4416: Handle exception if we try to play non-music file
+    Bug #4416: Non-music files crash the game when they are tried to be played
     Bug #4419: MRK NiStringExtraData is handled incorrectly
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4429: [Windows] Error on build INSTALL.vcxproj project (debug) with cmake 3.7.2
@@ -81,6 +84,7 @@
     Bug #4459: NotCell dialogue condition doesn't support partial matches
     Bug #4460: Script function "Equip" doesn't bypass beast restrictions
     Bug #4461: "Open" spell from non-player caster isn't a crime
+    Bug #4463: %g format doesn't return more digits
     Bug #4464: OpenMW keeps AiState cached storages even after we cancel AI packages
     Bug #4467: Content selector: cyrillic characters are decoded incorrectly in plugin descriptions
     Bug #4469: Abot Silt Striders – Model turn 90 degrees on horizontal
