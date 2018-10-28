@@ -1670,6 +1670,15 @@ namespace MWGui
         mHud->setEnemy(enemy);
     }
 
+    int WindowManager::getMessagesCount() const
+    {
+        int count = 0;
+        if (mMessageBoxManager)
+            count = mMessageBoxManager->getMessagesCount();
+
+        return count;
+    }
+
     Loading::Listener* WindowManager::getLoadingScreen()
     {
         return mLoadingScreen;

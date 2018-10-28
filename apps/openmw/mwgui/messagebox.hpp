@@ -28,6 +28,8 @@ namespace MWGui
             bool createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons);
             bool isInteractiveMessageBox ();
 
+            int getMessagesCount();
+
             const InteractiveMessageBox* getInteractiveMessageBox() const { return mInterMessageBoxe; }
 
             /// Remove all message boxes
