@@ -187,6 +187,7 @@
     Feature #4632: AI priority: utilize vanilla AI GMSTs for priority rating
     Feature #4636: Use sTo GMST in spellmaking menu
     Feature #4642: Batching potion creation
+    Feature #4647: Cull actors outside of AI processing range
     Feature #4682: Use the collision box from basic creature mesh if the X one have no collisions
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test

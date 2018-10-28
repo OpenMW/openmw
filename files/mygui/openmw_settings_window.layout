@@ -75,7 +75,7 @@
                 </Widget>
                 <Widget type="Widget" skin="" position="4 184 352 54" align="Left Top HStretch">
                     <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top" name="ActorProcessingText">
-                        <Property key="Caption" value="Actors processing range"/>
+                        <Property key="Caption" value="Actors Processing Range"/>
                     </Widget>
                     <Widget type="MWScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
                         <Property key="Range" value="3584"/>
@@ -87,7 +87,7 @@
                         <UserString key="SettingMin" value="3584"/>
                         <UserString key="SettingMax" value="7168"/>
                         <UserString key="SettingLabelWidget" value="ActorProcessingText"/>
-                        <UserString key="SettingLabelCaption" value="Actors processing range"/>
+                        <UserString key="SettingLabelCaption" value="Actors Processing Range"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
                         <Property key="Caption" value="#{sLow}"/>
@@ -224,7 +224,7 @@
                     </Widget>
                 </Widget>
                 <Widget type="TextBox" skin="NormalText" position="4 254 336 18" align="Left Bottom">
-                    <Property key="Caption" value="Camera sensitivity"/>
+                    <Property key="Caption" value="Camera Sensitivity"/>
                 </Widget>
                 <Widget type="MWScrollBar" skin="MW_HScroll" position="4 278 336 18" align="HStretch Bottom">
                     <Property key="Range" value="10000"/>
