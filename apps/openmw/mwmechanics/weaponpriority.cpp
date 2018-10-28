@@ -58,8 +58,16 @@ namespace MWMechanics
         }
 
         const float chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1]) / 2.f;
-        if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
+        // We need to account for the fact that thrown weapons have 2x real damage applied to the target
+        // as they're both the weapon and the ammo of the hit
+        if (weapon->mData.mType == ESM::Weapon::MarksmanThrown)
+        {
+            rating = chop * 2;
+        }
+        else if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
+        {
             rating = chop;
+        }
         else
         {
             const float slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1]) / 2.f;
