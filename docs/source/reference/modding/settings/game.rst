@@ -168,11 +168,11 @@ use additional anim sources
 :Range:		True/False
 :Default:	False
 
-Allow to load additional animation sources when enabled.
+Allow the engine to load additional animation sources when enabled.
 For example, if the main animation mesh has name Meshes/x.nif, 
-an engine will load all KF-files from Animations/x folder and its child folders.
-Can be useful if you want to use several animation replacers without merging them.
-Attention: animations from AnimKit have own format and are not supposed to be directly loaded in-game!
+the engine will load all KF-files from Animations/x folder and its child folders.
+This can be useful if you want to use several animation replacers without merging them.
+Attention: animations from AnimKit have their own format and are not supposed to be directly loaded in-game!
 This setting can only be configured by editing the settings configuration file.
 
 barter disposition change is permanent
@@ -184,6 +184,6 @@ barter disposition change is permanent
 
 If this setting is true, 
 disposition change of merchants caused by trading will be permanent and won't be discarded upon exiting dialogue with them.
-This imitates the option Morrowind Code Patch offers.
+This imitates the option that Morrowind Code Patch offers.
 
 This setting can be toggled in Advanced tab of the launcher.
