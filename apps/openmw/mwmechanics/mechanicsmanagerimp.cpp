@@ -17,6 +17,7 @@
 #include "../mwworld/ptr.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/statemanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
@@ -437,6 +438,10 @@ namespace MWMechanics
         {
             if (it->first == "Game" && it->second == "actors processing range")
             {
+                int state = MWBase::Environment::get().getStateManager()->getState();
+                if (state != MWBase::StateManager::State_Running)
+                    continue;
+
                 mActors.updateProcessingRange();
 
                 // Update mechanics for new processing range immediately
