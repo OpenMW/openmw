@@ -96,6 +96,8 @@
         <file alias="edit-preview">record-preview.png</file>
         <file alias="edit-clone">record-clone.png</file>
         <file alias="edit-add">record-add.png</file>
+        <file alias="edit-edit">record-edit.png</file>
+        <file alias="edit-touch">record-touch.png</file>
         <file alias="edit-undo">record-revert.png</file>
         <file alias="resources-icon">resources-icon.png</file>
         <file alias="resources-mesh">resources-mesh.png</file>

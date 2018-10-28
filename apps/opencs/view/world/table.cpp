@@ -292,6 +292,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
 
     mEditAction = new QAction (tr ("Edit Record"), this);
     connect (mEditAction, SIGNAL (triggered()), this, SLOT (editRecord()));
+    mEditAction->setIcon(QIcon(":edit-edit"));
     addAction (mEditAction);
     CSMPrefs::Shortcut* editShortcut = new CSMPrefs::Shortcut("table-edit", this);
     editShortcut->associateAction(mEditAction);
@@ -317,6 +318,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     {
         mTouchAction = new QAction(tr("Touch Record"), this);
         connect(mTouchAction, SIGNAL(triggered()), this, SLOT(touchRecord()));
+        mTouchAction->setIcon(QIcon(":edit-touch"));
         addAction(mTouchAction);
         CSMPrefs::Shortcut* touchShortcut = new CSMPrefs::Shortcut("table-touch", this);
         touchShortcut->associateAction(mTouchAction);
