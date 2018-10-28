@@ -297,7 +297,7 @@ namespace
     TEST_F(DetourNavigatorRecastMeshBuilderTest, with_bounds_add_rotated_by_x_bhv_triangle_shape_should_filter_by_bounds)
     {
         mBounds.mMin = osg::Vec2f(-5, -5);
-        mBounds.mMax = osg::Vec2f(5, -3);
+        mBounds.mMax = osg::Vec2f(5, -2);
         btTriangleMesh mesh;
         mesh.addTriangle(btVector3(0, -1, -1), btVector3(0, -1, -1), btVector3(0, 1, -1));
         mesh.addTriangle(btVector3(0, -3, -3), btVector3(0, -3, -2), btVector3(0, -2, -3));

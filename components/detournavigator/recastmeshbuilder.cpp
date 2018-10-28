@@ -135,24 +135,35 @@ namespace DetourNavigator
     {
         btVector3 aabbMin;
         btVector3 aabbMax;
+
         shape.getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
-        const btVector3 boundsMinMin(mBounds.mMin.x(), mBounds.mMin.y(), 0);
-        const btVector3 boundsMinMax(mBounds.mMin.x(), mBounds.mMax.y(), 0);
-        const btVector3 boundsMaxMin(mBounds.mMax.x(), mBounds.mMin.y(), 0);
-        const btVector3 boundsMaxMax(mBounds.mMax.x(), mBounds.mMax.y(), 0);
+
+        aabbMin = transform(aabbMin);
+        aabbMax = transform(aabbMax);
+
+        aabbMin.setX(std::max(mBounds.mMin.x(), aabbMin.x()));
+        aabbMin.setX(std::min(mBounds.mMax.x(), aabbMin.x()));
+        aabbMin.setY(std::max(mBounds.mMin.y(), aabbMin.y()));
+        aabbMin.setY(std::min(mBounds.mMax.y(), aabbMin.y()));
+
+        aabbMax.setX(std::max(mBounds.mMin.x(), aabbMax.x()));
+        aabbMax.setX(std::min(mBounds.mMax.x(), aabbMax.x()));
+        aabbMax.setY(std::max(mBounds.mMin.y(), aabbMax.y()));
+        aabbMax.setY(std::min(mBounds.mMax.y(), aabbMax.y()));
+
         const auto inversedTransform = transform.inverse();
-        const auto localBoundsMinMin = inversedTransform(boundsMinMin);
-        const auto localBoundsMinMax = inversedTransform(boundsMinMax);
-        const auto localBoundsMaxMin = inversedTransform(boundsMaxMin);
-        const auto localBoundsMaxMax = inversedTransform(boundsMaxMax);
-        aabbMin.setX(std::min({localBoundsMinMin.x(), localBoundsMinMax.x(),
-                               localBoundsMaxMin.x(), localBoundsMaxMax.x()}));
-        aabbMin.setY(std::min({localBoundsMinMin.y(), localBoundsMinMax.y(),
-                               localBoundsMaxMin.y(), localBoundsMaxMax.y()}));
-        aabbMax.setX(std::max({localBoundsMinMin.x(), localBoundsMinMax.x(),
-                               localBoundsMaxMin.x(), localBoundsMaxMax.x()}));
-        aabbMax.setY(std::max({localBoundsMinMin.y(), localBoundsMinMax.y(),
-                               localBoundsMaxMin.y(), localBoundsMaxMax.y()}));
+
+        aabbMin = inversedTransform(aabbMin);
+        aabbMax = inversedTransform(aabbMax);
+
+        aabbMin.setX(std::min(aabbMin.x(), aabbMax.x()));
+        aabbMin.setY(std::min(aabbMin.y(), aabbMax.y()));
+        aabbMin.setZ(std::min(aabbMin.z(), aabbMax.z()));
+
+        aabbMax.setX(std::max(aabbMin.x(), aabbMax.x()));
+        aabbMax.setY(std::max(aabbMin.y(), aabbMax.y()));
+        aabbMax.setZ(std::max(aabbMin.z(), aabbMax.z()));
+
         shape.processAllTriangles(&callback, aabbMin, aabbMax);
     }
 
