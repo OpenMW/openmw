@@ -20,6 +20,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "confirmationdialog.hpp"
@@ -437,6 +438,7 @@ namespace MWGui
         MWBase::Environment::get().getSoundManager()->processChangedSettings(changed);
         MWBase::Environment::get().getWindowManager()->processChangedSettings(changed);
         MWBase::Environment::get().getInputManager()->processChangedSettings(changed);
+        MWBase::Environment::get().getMechanicsManager()->processChangedSettings(changed);
     }
 
     void SettingsWindow::onKeyboardSwitchClicked(MyGUI::Widget* _sender)

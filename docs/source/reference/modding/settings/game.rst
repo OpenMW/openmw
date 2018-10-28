@@ -97,8 +97,21 @@ and values above 500 will result in the player inflicting no damage.
 
 This setting can be controlled in game with the Difficulty slider in the Prefs panel of the Options menu.
 
+actors processing range
+-----------------------
+
+:Type:		integer
+:Range:		3584 to 7168
+:Default:	7168
+
+This setting allows to specify a distance from player in game units, in which OpenMW updates actor's state.
+Actor state update includes AI, animations, and physics processing.
+Actors near that border start softly fade out instead of just appearing/disapperaing.
+
+This setting can be controlled in game with the "Actors processing range slider" in the Prefs panel of the Options menu.
+
 classic reflected absorb spells behavior
------------------------------------------
+----------------------------------------
 
 :Type:		boolean
 :Range: 	True/False

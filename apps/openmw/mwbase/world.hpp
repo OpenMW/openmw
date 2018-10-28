@@ -302,6 +302,9 @@ namespace MWBase
 
             virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
 
+            virtual void setActorCollisionMode(const MWWorld::Ptr& ptr, bool enabled) = 0;
+            virtual bool isActorCollisionEnabled(const MWWorld::Ptr& ptr) = 0;
+
             virtual bool toggleCollisionMode() = 0;
             ///< Toggle collision mode for player. If disabled player object should ignore
             /// collisions and gravity.

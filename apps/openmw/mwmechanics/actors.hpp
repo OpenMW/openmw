@@ -65,6 +65,9 @@ namespace MWMechanics
             /// paused we may want to do it manually (after equipping permanent enchantment)
             void updateMagicEffects (const MWWorld::Ptr& ptr);
 
+            void updateProcessingRange();
+            float getProcessingRange() const;
+
             void addActor (const MWWorld::Ptr& ptr, bool updateImmediately=false);
             ///< Register an actor for stats management
             ///
@@ -168,6 +171,7 @@ namespace MWMechanics
     private:
         PtrActorMap mActors;
         float mTimerDisposeSummonsCorpses;
+        float mActorsProcessingRange;
 
     };
 }
