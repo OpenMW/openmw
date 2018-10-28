@@ -72,7 +72,7 @@ namespace DetourNavigator
 
     NavMeshTilesCache::Value NavMeshTilesCache::set(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
         const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections,
-        NavMeshData value)
+        NavMeshData&& value)
     {
         const auto navMeshSize = static_cast<std::size_t>(value.mSize);
 

@@ -105,7 +105,7 @@ namespace DetourNavigator
 
         Value set(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
             const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections,
-            NavMeshData value);
+            NavMeshData&& value);
 
     private:
         std::mutex mMutex;
