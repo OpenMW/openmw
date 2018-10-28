@@ -215,7 +215,7 @@ namespace MWClass
     std::pair<int, std::string> Clothing::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
     {
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots_ = ptr.getClass().getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
 
         if (slots_.first.empty())
             return std::make_pair(0, "");
