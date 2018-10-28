@@ -456,6 +456,15 @@ namespace
         else
             return UpdateNavMeshStatus::ignore;
     }
+
+    template <class T>
+    unsigned long getMinValuableBitsNumber(const T value)
+    {
+        unsigned long power = 0;
+        while (power < sizeof(T) * 8 && (static_cast<T>(1) << power) < value)
+            ++power;
+        return power;
+    }
 }
 
 namespace DetourNavigator
@@ -464,17 +473,20 @@ namespace DetourNavigator
     {
         // Max tiles and max polys affect how the tile IDs are caculated.
         // There are 22 bits available for identifying a tile and a polygon.
-        const auto tileBits = 10;
-        const auto polyBits = 22 - tileBits;
-        const auto maxTiles = 1 << tileBits;
-        const auto maxPolysPerTile = 1 << polyBits;
+        const int polysAndTilesBits = 22;
+        const auto polysBits = getMinValuableBitsNumber(settings.mMaxPolys);
+
+        if (polysBits >= polysAndTilesBits)
+            throw InvalidArgument("Too many polygons per tile");
+
+        const auto tilesBits = polysAndTilesBits - polysBits;
 
         dtNavMeshParams params;
         std::fill_n(params.orig, 3, 0.0f);
         params.tileWidth = settings.mTileSize * settings.mCellSize;
         params.tileHeight = settings.mTileSize * settings.mCellSize;
-        params.maxTiles = maxTiles;
-        params.maxPolys = maxPolysPerTile;
+        params.maxTiles = 1 << tilesBits;
+        params.maxPolys = 1 << polysBits;
 
         NavMeshPtr navMesh(dtAllocNavMesh(), &dtFreeNavMesh);
         const auto status = navMesh->init(&params);

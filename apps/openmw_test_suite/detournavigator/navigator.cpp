@@ -60,6 +60,7 @@ namespace
             mSettings.mMaxPolygonPathSize = 1024;
             mSettings.mMaxSmoothPathSize = 1024;
             mSettings.mTrianglesPerChunk = 256;
+            mSettings.mMaxPolys = 4096;
             mNavigator.reset(new Navigator(mSettings));
         }
     };

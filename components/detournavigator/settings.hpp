@@ -23,6 +23,7 @@ namespace DetourNavigator
         int mBorderSize;
         int mMaxEdgeLen;
         int mMaxNavMeshQueryNodes;
+        int mMaxPolys;
         int mMaxVertsPerPoly;
         int mRegionMergeSize;
         int mRegionMinSize;
