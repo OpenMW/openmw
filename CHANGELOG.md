@@ -147,6 +147,7 @@
     Bug #4684: Spell Absorption is additive
     Bug #4685: Missing sound causes an exception inside Say command
     Bug #4689: Default creature soundgen entries are not used
+    Bug #4691: Loading bar for cell should be moved up when text is still active at bottom of screen
     Feature #912: Editor: Add missing icons to UniversalId tables
     Feature #1221: Editor: Creature/NPC rendering
     Feature #1617: Editor: Enchantment effect record verifier
