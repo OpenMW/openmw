@@ -1,6 +1,7 @@
 #include "activator.hpp"
 
 #include <components/esm/loadacti.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -133,5 +134,75 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
+    }
+
+    std::string Activator::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
+    {
+        const std::string model = getModel(ptr); // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore(); 
+        std::string creatureId;
+
+        for (const ESM::Creature &iter : store.get<ESM::Creature>())
+        {
+            if (!iter.mModel.empty() && Misc::StringUtils::ciEqual(model, "meshes\\" + iter.mModel))
+            {
+                creatureId = !iter.mOriginal.empty() ? iter.mOriginal : iter.mId;
+                break;
+            }
+        }
+
+        int type = getSndGenTypeFromName(name);
+
+        std::vector<const ESM::SoundGenerator*> fallbacksounds;
+        if (!creatureId.empty())
+        {
+            std::vector<const ESM::SoundGenerator*> sounds;
+            for (auto sound = store.get<ESM::SoundGenerator>().begin(); sound != store.get<ESM::SoundGenerator>().end(); ++sound)
+            {
+                if (type == sound->mType && !sound->mCreature.empty() && (Misc::StringUtils::ciEqual(creatureId, sound->mCreature)))
+                    sounds.push_back(&*sound);
+                if (type == sound->mType && sound->mCreature.empty())
+                    fallbacksounds.push_back(&*sound);
+            }
+
+            if (!sounds.empty())
+                return sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
+            if (!fallbacksounds.empty())
+                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size())]->mSound;
+        }
+        else
+        {
+            // The activator doesn't have a corresponding creature ID, but we can try to use the defaults
+            for (auto sound = store.get<ESM::SoundGenerator>().begin(); sound != store.get<ESM::SoundGenerator>().end(); ++sound)
+                if (type == sound->mType && sound->mCreature.empty())
+                    fallbacksounds.push_back(&*sound);
+
+            if (!fallbacksounds.empty())
+                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size())]->mSound;
+        }
+
+        return std::string();
+    }
+
+    int Activator::getSndGenTypeFromName(const std::string &name)
+    {
+        if (name == "left")
+            return ESM::SoundGenerator::LeftFoot;
+        if (name == "right")
+            return ESM::SoundGenerator::RightFoot;
+        if (name == "swimleft")
+            return ESM::SoundGenerator::SwimLeft;
+        if (name == "swimright")
+            return ESM::SoundGenerator::SwimRight;
+        if (name == "moan")
+            return ESM::SoundGenerator::Moan;
+        if (name == "roar")
+            return ESM::SoundGenerator::Roar;
+        if (name == "scream")
+            return ESM::SoundGenerator::Scream;
+        if (name == "land")
+            return ESM::SoundGenerator::Land;
+
+        throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }
 }

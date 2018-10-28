@@ -1394,8 +1394,9 @@ namespace MWWorld
         moveObject(ptr, ptr.getCell(), pos.x(), pos.y(), pos.z());
     }
 
-    void World::fixPosition(const Ptr &actor)
+    void World::fixPosition()
     {
+        const MWWorld::Ptr actor = getPlayerPtr();
         const float distance = 128.f;
         ESM::Position esmPos = actor.getRefData().getPosition();
         osg::Quat orientation(esmPos.rot[2], osg::Vec3f(0,0,-1));
@@ -1425,7 +1426,7 @@ namespace MWWorld
             esmPos.pos[0] = traced.x();
             esmPos.pos[1] = traced.y();
             esmPos.pos[2] = traced.z();
-            MWWorld::ActionTeleport("", esmPos, false).execute(actor);
+            MWWorld::ActionTeleport(actor.getCell()->isExterior() ? "" : actor.getCell()->getCell()->mName, esmPos, false).execute(actor);
         }
     }
 
@@ -1574,14 +1575,17 @@ namespace MWWorld
         return mNavigator->updateObject(DetourNavigator::ObjectId(object), shapes, object->getCollisionObject()->getWorldTransform());
     }
 
-    bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreDoors)
+    bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
+    {
+        int mask = MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door;
+        bool result = castRay(x1, y1, z1, x2, y2, z2, mask);
+        return result;
+    }
+
+    bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2, int mask)
     {
         osg::Vec3f a(x1,y1,z1);
         osg::Vec3f b(x2,y2,z2);
-
-        int mask = MWPhysics::CollisionType_World;
-        if (!ignoreDoors)
-            mask |= MWPhysics::CollisionType_Door;
 
         MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), mask);
         return result.mHit;
@@ -1646,6 +1650,16 @@ namespace MWWorld
                     ++it;
             }
         }
+    }
+
+    void World::setActorCollisionMode(const MWWorld::Ptr& ptr, bool enabled)
+    {
+        mPhysics->setActorCollisionMode(ptr, enabled);
+    }
+
+    bool World::isActorCollisionEnabled(const MWWorld::Ptr& ptr)
+    {
+        return mPhysics->isActorCollisionEnabled(ptr);
     }
 
     bool World::toggleCollisionMode()
@@ -3631,7 +3645,13 @@ namespace MWWorld
             MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
                         origin, feetToGameUnits(static_cast<float>(effectIt->mArea)), objects);
             for (std::vector<MWWorld::Ptr>::iterator affected = objects.begin(); affected != objects.end(); ++affected)
+            {
+                // Ignore actors without collisions here, otherwise it will be possible to hit actors outside processing range.
+                if (affected->getClass().isActor() && !isActorCollisionEnabled(*affected))
+                    continue;
+
                 toApply[*affected].push_back(*effectIt);
+            }
         }
 
         // Now apply the appropriate effects to each actor in range

@@ -1148,9 +1148,7 @@ namespace MWClass
                 const bool hasHealth = it->getClass().hasItemHealth(*it);
                 if (hasHealth)
                 {
-                    int armorHealth = it->getClass().getItemHealth(*it);
-                    int armorMaxHealth = it->getClass().getItemMaxHealth(*it);
-                    ratings[i] *= (float(armorHealth) / armorMaxHealth);
+                    ratings[i] *= it->getClass().getItemNormalizedHealth(*it);
                 }
             }
         }
@@ -1242,15 +1240,9 @@ namespace MWClass
             return "";
         }
 
+        // Morrowind ignores land soundgen for NPCs
         if(name == "land")
-        {
-            MWBase::World *world = MWBase::Environment::get().getWorld();
-            osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
-            if (world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
-                return "DefaultLandWater";
-
-            return "DefaultLand";
-        }
+            return "";
         if(name == "swimleft")
             return "Swim Left";
         if(name == "swimright")

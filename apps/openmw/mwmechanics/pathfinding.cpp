@@ -11,6 +11,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
+#include "../mwphysics/collisiontype.hpp"
+
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 
@@ -196,8 +198,9 @@ namespace MWMechanics
                     converter.toWorld(temp);
                     // Add Z offset since path node can overlap with other objects.
                     // Also ignore doors in raytesting.
+                    const int mask = MWPhysics::CollisionType_World;
                     bool isPathClear = !MWBase::Environment::get().getWorld()->castRay(
-                        startPoint.x(), startPoint.y(), startPoint.z() + 16, temp.mX, temp.mY, temp.mZ + 16, true);
+                        startPoint.x(), startPoint.y(), startPoint.z() + 16, temp.mX, temp.mY, temp.mZ + 16, mask);
                     if (isPathClear)
                         path.pop_front();
                 }

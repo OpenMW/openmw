@@ -8,6 +8,7 @@
     Bug #2256: Landing sound not playing when jumping immediately after landing
     Bug #2274: Thin platform clips through player character instead of lifting
     Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
+    Bug #2446: Restore Attribute/Skill should allow restoring drained attributes
     Bug #2455: Creatures attacks degrade armor
     Bug #2562: Forcing AI to activate a teleport door sometimes causes a crash
     Bug #2626: Resurrecting the player does not resume the game
@@ -33,6 +34,7 @@
     Bug #3788: GetPCInJail and GetPCTraveling do not work as in vanilla
     Bug #3836: Script fails to compile when command argument contains "\n"
     Bug #3876: Landscape texture painting is misaligned
+    Bug #3890: Magic light source attenuation is inaccurate
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
     Bug #3911: [macOS] Typing in the "Content List name" dialog box produces double characters
     Bug #3920: RemoveSpellEffects doesn't remove constant effects
@@ -45,6 +47,7 @@
     Bug #4110: Fixed undo / redo menu text losing the assigned shortcuts
     Bug #4125: OpenMW logo cropped on bugtracker
     Bug #4215: OpenMW shows book text after last EOL tag
+    Bug #4217: Fixme implementation differs from Morrowind's
     Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4230: AiTravel package issues break some Tribunal quests
     Bug #4231: Infected rats from the "Crimson Plague" quest rendered unconscious by change in Drain Fatigue functionality
@@ -54,6 +57,7 @@
     Bug #4274: Pre-0.43 death animations are not forward-compatible with 0.43+
     Bug #4286: Scripted animations can be interrupted
     Bug #4291: Non-persistent actors that started the game as dead do not play death animations
+    Bug #4292: CenterOnCell implementation differs from vanilla
     Bug #4293: Faction members are not aware of faction ownerships in barter
     Bug #4304: "Follow" not working as a second AI package
     Bug #4307: World cleanup should remove dead bodies only if death animation is finished
@@ -64,7 +68,7 @@
     Bug #4368: Settings window ok button doesn't have key focus by default
     Bug #4378: On-self absorb spells restore stats
     Bug #4393: NPCs walk back to where they were after using ResetActors
-    Bug #4416: Handle exception if we try to play non-music file
+    Bug #4416: Non-music files crash the game when they are tried to be played
     Bug #4419: MRK NiStringExtraData is handled incorrectly
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4429: [Windows] Error on build INSTALL.vcxproj project (debug) with cmake 3.7.2
@@ -80,6 +84,7 @@
     Bug #4459: NotCell dialogue condition doesn't support partial matches
     Bug #4460: Script function "Equip" doesn't bypass beast restrictions
     Bug #4461: "Open" spell from non-player caster isn't a crime
+    Bug #4463: %g format doesn't return more digits
     Bug #4464: OpenMW keeps AiState cached storages even after we cancel AI packages
     Bug #4467: Content selector: cyrillic characters are decoded incorrectly in plugin descriptions
     Bug #4469: Abot Silt Striders – Model turn 90 degrees on horizontal
@@ -130,10 +135,12 @@
     Bug #4633: Sneaking stance affects speed even if the actor is not able to crouch
     Bug #4641: GetPCJumping is handled incorrectly
     Bug #4644: %Name should be available for all actors, not just for NPCs
+    Bug #4646: Weapon force-equipment messes up ongoing attack animations
     Bug #4648: Hud thinks that throwing weapons have condition
     Bug #4649: Levelup fully restores health
     Bug #4653: Length of non-ASCII strings is handled incorrectly in ESM reader
     Bug #4654: Editor: UpdateVisitor does not initialize skeletons for animated objects
+    Bug #4656: Combat AI: back up behaviour is incorrect
     Bug #4668: Editor: Light source color is displayed as an integer
     Bug #4669: ToggleCollision should trace the player down after collision being enabled
     Bug #4671: knownEffect functions should use modified Alchemy skill
@@ -141,11 +148,16 @@
     Bug #4674: Journal can be opened when settings window is open
     Bug #4677: Crash in ESM reader when NPC record has DNAM record without DODT one
     Bug #4678: Crash in ESP parser when SCVR has no variable names
+    Bug #4684: Spell Absorption is additive
+    Bug #4685: Missing sound causes an exception inside Say command
+    Bug #4689: Default creature soundgen entries are not used
+    Bug #4691: Loading bar for cell should be moved up when text is still active at bottom of screen
     Feature #912: Editor: Add missing icons to UniversalId tables
     Feature #1221: Editor: Creature/NPC rendering
     Feature #1617: Editor: Enchantment effect record verifier
     Feature #1645: Casting effects from objects
     Feature #2606: Editor: Implemented (optional) case sensitive global search
+    Feature #2787: Use the autogenerated collision box, if the creature mesh has no predefined one
     Feature #2847: Content selector: allow to copy the path to a file by using the context menu
     Feature #3083: Play animation when NPC is casting spell via script
     Feature #3103: Provide option for disposition to get increased by successful trade
@@ -155,6 +167,7 @@
     Feature #4012: Editor: Write a log file if OpenCS crashes
     Feature #4222: 360° screenshots
     Feature #4256: Implement ToggleBorders (TB) console command
+    Feature #4285: Support soundgen calls for activators
     Feature #4324: Add CFBundleIdentifier in Info.plist to allow for macOS function key shortcuts
     Feature #4345: Add equivalents for the command line commands to Launcher
     Feature #4404: Editor: All EnumDelegate fields should have their items sorted alphabetically
@@ -174,6 +187,8 @@
     Feature #4632: AI priority: utilize vanilla AI GMSTs for priority rating
     Feature #4636: Use sTo GMST in spellmaking menu
     Feature #4642: Batching potion creation
+    Feature #4647: Cull actors outside of AI processing range
+    Feature #4682: Use the collision box from basic creature mesh if the X one have no collisions
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test
     Task #4605: Optimize skinning

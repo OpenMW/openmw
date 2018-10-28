@@ -1,5 +1,5 @@
-Shader Settings
-###############
+Shaders Settings
+################
 
 force shaders
 -------------
@@ -39,7 +39,8 @@ Only affects objects that render with shaders (see 'force shaders' option).
 Always affects terrain.
 
 Leaving this option at its default makes the lighting compatible with Morrowind's fixed-function method,
-but the lighting may appear dull and there might be color shifts. Setting this option to 'false' results in more dynamic lighting.
+but the lighting may appear dull and there might be colour shifts. 
+Setting this option to 'false' results in more dynamic lighting.
 
 auto use object normal maps
 ---------------------------
@@ -83,7 +84,7 @@ auto use terrain specular maps
 :Default:	False
 
 If a file with pattern 'terrain specular map pattern' exists, use that file as a 'diffuse specular' map.
-The texture must contain the layer color in the RGB channel (as usual), and a specular multiplier in the alpha channel.
+The texture must contain the layer colour in the RGB channel (as usual), and a specular multiplier in the alpha channel.
 
 normal map pattern
 ------------------

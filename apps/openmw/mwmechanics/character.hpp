@@ -257,7 +257,7 @@ public:
 
     void updatePtr(const MWWorld::Ptr &ptr);
 
-    void update(float duration);
+    void update(float duration, bool animationOnly=false);
 
     void persistAnimationState();
     void unpersistAnimationState();
@@ -292,6 +292,7 @@ public:
     bool isTurning() const;
     bool isAttackingOrSpell() const;
 
+    void setVisibility(float visibility);
     void setAttackingOrSpell(bool attackingOrSpell);
     void castSpell(const std::string spellId, bool manualSpell=false);
     void setAIAttackType(const std::string& attackType);

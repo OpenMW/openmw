@@ -301,8 +301,8 @@ namespace MWWorld
             ///< Adjust position after load to be on ground. Must be called after model load.
             /// @param force do this even if the ptr is flying
 
-            void fixPosition (const Ptr& actor) override;
-            ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
+            void fixPosition () override;
+            ///< Attempt to fix position so that the player is not stuck inside the geometry.
 
             void enable (const Ptr& ptr) override;
 
@@ -412,8 +412,13 @@ namespace MWWorld
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
-            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, bool ignoreDoors=false) override;
+            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, int mask) override;
             ///< cast a Ray and return true if there is an object in the ray path.
+
+            bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) override;
+
+            void setActorCollisionMode(const Ptr& ptr, bool enabled) override;
+            bool isActorCollisionEnabled(const Ptr& ptr) override;
 
             bool toggleCollisionMode() override;
             ///< Toggle collision mode for player. If disabled player object should ignore

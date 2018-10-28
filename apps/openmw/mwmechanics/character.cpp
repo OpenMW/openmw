@@ -30,6 +30,7 @@
 #include "../mwrender/animation.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -979,17 +980,13 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
             }
         }
 
-        if (soundgen == "land") // Morrowind ignores land soundgen for some reason
-            return;
-
         std::string sound = mPtr.getClass().getSoundIdFromSndGen(mPtr, soundgen);
         if(!sound.empty())
         {
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            if(soundgen == "left" || soundgen == "right")
+            // NB: landing sound is not played for NPCs here
+            if(soundgen == "left" || soundgen == "right" || soundgen == "land")
             {
-                // Don't make foot sounds local for the player, it makes sense to keep them
-                // positioned on the ground.
                 sndMgr->playSound3D(mPtr, sound, volume, pitch, MWSound::Type::Foot,
                                     MWSound::PlayMode::NoPlayerLocal);
             }
@@ -1281,6 +1278,18 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
     // We should not play equipping animation and sound during weapon->weapon transition
     bool isStillWeapon = weaptype > WeapType_HandToHand && weaptype < WeapType_Spell &&
                             mWeaponType > WeapType_HandToHand && mWeaponType < WeapType_Spell;
+
+    // If the current weapon type was changed in the middle of attack (e.g. by Equip console command or when bound spell expires),
+    // we should force actor to the "weapon equipped" state, interrupt attack and update animations.
+    if (isStillWeapon && mWeaponType != weaptype && mUpperBodyState > UpperCharState_WeapEquiped)
+    {
+        forcestateupdate = true;
+        mUpperBodyState = UpperCharState_WeapEquiped;
+        mAttackingOrSpell = false;
+        mAnimation->disable(mCurrentWeapon);
+        if (mPtr == getPlayer())
+            MWBase::Environment::get().getWorld()->getPlayer().setAttackingOrSpell(false);
+    }
 
     if(!isKnockedOut() && !isKnockedDown() && !isRecovery())
     {
@@ -1841,7 +1850,7 @@ void CharacterController::updateAnimQueue()
         mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, mAnimQueue.size() <= 1);
 }
 
-void CharacterController::update(float duration)
+void CharacterController::update(float duration, bool animationOnly)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = mPtr.getClass();
@@ -2071,11 +2080,17 @@ void CharacterController::update(float duration)
                 }
             }
 
-            // Play landing sound
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            std::string sound = cls.getSoundIdFromSndGen(mPtr, "land");
-            if (!sound.empty())
+            // Play landing sound for NPCs
+            if (mPtr.getClass().isNpc())
+            {
+                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                std::string sound = "DefaultLand";
+                osg::Vec3f pos(mPtr.getRefData().getPosition().asVec3());
+                if (world->isUnderwater(mPtr.getCell(), pos) || world->isWalkingOnWater(mPtr))
+                    sound = "DefaultLandWater";
+
                 sndMgr->playSound3D(mPtr, sound, 1.f, 1.f, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
+            }
         }
         else
         {
@@ -2221,10 +2236,10 @@ void CharacterController::update(float duration)
                     world->rotateObject(mPtr, rot.x(), rot.y(), 0.0f, true);
             }
 
-            if (!mMovementAnimationControlled)
+            if (!animationOnly && !mMovementAnimationControlled)
                 world->queueMovement(mPtr, vec);
         }
-        else
+        else if (!animationOnly)
             // We must always queue movement, even if there is none, to apply gravity.
             world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
 
@@ -2247,7 +2262,8 @@ void CharacterController::update(float duration)
                 playDeath(1.f, mDeathState);
         }
         // We must always queue movement, even if there is none, to apply gravity.
-        world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
+        if (!animationOnly)
+            world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
     }
 
     bool isPersist = isPersistentAnimPlaying();
@@ -2281,7 +2297,7 @@ void CharacterController::update(float duration)
         moved.z() = 1.0;
 
     // Update movement
-    if(mMovementAnimationControlled && mPtr.getClass().isActor())
+    if(!animationOnly && mMovementAnimationControlled && mPtr.getClass().isActor())
         world->queueMovement(mPtr, moved);
 
     mSkipAnim = false;
@@ -2530,26 +2546,38 @@ void CharacterController::updateMagicEffects()
 {
     if (!mPtr.getClass().isActor())
         return;
-    float alpha = 1.f;
-    if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).getModifier()) // Ignore base magnitude (see bug #3555).
-    {
-        if (mPtr == getPlayer())
-            alpha = 0.4f;
-        else
-            alpha = 0.f;
-    }
-    float chameleon = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
-    if (chameleon)
-    {
-        alpha *= std::max(0.2f, (100.f - chameleon)/100.f);
-    }
-    mAnimation->setAlpha(alpha);
 
     bool vampire = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0.0f;
     mAnimation->setVampire(vampire);
 
     float light = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Light).getMagnitude();
     mAnimation->setLightEffect(light);
+}
+
+void CharacterController::setVisibility(float visibility)
+{
+    // We should take actor's invisibility in account
+    if (mPtr.getClass().isActor())
+    {
+        float alpha = 1.f;
+        if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).getModifier()) // Ignore base magnitude (see bug #3555).
+        {
+            if (mPtr == getPlayer())
+                alpha = 0.4f;
+            else
+                alpha = 0.f;
+        }
+        float chameleon = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
+        if (chameleon)
+        {
+            alpha *= std::max(0.2f, (100.f - chameleon)/100.f);
+        }
+
+        visibility = std::min(visibility, alpha);
+    }
+
+    // TODO: implement a dithering shader rather than just change object transparency.
+    mAnimation->setAlpha(visibility);
 }
 
 void CharacterController::setAttackTypeBasedOnMovement()

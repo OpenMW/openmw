@@ -8,12 +8,13 @@ namespace Debug
 {
     enum Level
     {
-        NoLevel = 0,
         Error = 1,
         Warning = 2,
         Info = 3,
         Verbose = 4,
-        Marker = Verbose
+        Marker = Verbose,
+
+        NoLevel = 5 // Do not filter messages in this case
     };
 
     extern Level CurrentDebugLevel;
@@ -30,6 +31,11 @@ public:
     mLock(sLock),
     mLevel(level)
     {
+        // If the app has no logging system enabled, log level is not specified.
+        // Show all messages without marker - we just use the plain cout in this case.
+        if (Debug::CurrentDebugLevel == Debug::NoLevel)
+            return;
+
         if (mLevel <= Debug::CurrentDebugLevel)
             std::cout << static_cast<unsigned char>(mLevel);
     }

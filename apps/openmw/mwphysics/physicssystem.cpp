@@ -1187,6 +1187,16 @@ namespace MWPhysics
         if (!shape)
             return;
 
+        // Try to get shape from basic model as fallback for creatures
+        if (!ptr.getClass().isNpc() && shape->mCollisionBoxHalfExtents.length2() == 0)
+        {
+            const std::string fallbackModel = ptr.getClass().getModel(ptr);
+            if (fallbackModel != mesh)
+            {
+                shape = mShapeManager->getShape(fallbackModel);
+            }
+        }
+
         Actor* actor = new Actor(ptr, shape, mCollisionWorld);
         mActors.insert(std::make_pair(ptr, actor));
     }
@@ -1200,6 +1210,33 @@ namespace MWPhysics
             cmode = !cmode;
             found->second->enableCollisionMode(cmode);
             found->second->enableCollisionBody(cmode);
+            return cmode;
+        }
+
+        return false;
+    }
+
+    void PhysicsSystem::setActorCollisionMode(const MWWorld::Ptr& ptr, bool enabled)
+    {
+        ActorMap::iterator found = mActors.find(ptr);
+        if (found != mActors.end())
+        {
+            bool cmode = found->second->getCollisionMode();
+            if (cmode == enabled)
+                return;
+
+            cmode = enabled;
+            found->second->enableCollisionMode(cmode);
+            found->second->enableCollisionBody(cmode);
+        }
+    }
+
+    bool PhysicsSystem::isActorCollisionEnabled(const MWWorld::Ptr& ptr)
+    {
+        ActorMap::iterator found = mActors.find(ptr);
+        if (found != mActors.end())
+        {
+            bool cmode = found->second->getCollisionMode();
             return cmode;
         }
 

@@ -632,24 +632,26 @@ namespace MWClass
         if(type >= 0)
         {
             std::vector<const ESM::SoundGenerator*> sounds;
+            std::vector<const ESM::SoundGenerator*> fallbacksounds;
 
             MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
 
             const std::string& ourId = (ref->mBase->mOriginal.empty()) ? ptr.getCellRef().getRefId() : ref->mBase->mOriginal;
 
             MWWorld::Store<ESM::SoundGenerator>::iterator sound = store.begin();
-            while(sound != store.end())
+            while (sound != store.end())
             {
                 if (type == sound->mType && !sound->mCreature.empty() && (Misc::StringUtils::ciEqual(ourId, sound->mCreature)))
                     sounds.push_back(&*sound);
+                if (type == sound->mType && sound->mCreature.empty())
+                    fallbacksounds.push_back(&*sound);
                 ++sound;
             }
-            if(!sounds.empty())
+            if (!sounds.empty())
                 return sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
+            if (!fallbacksounds.empty())
+                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size())]->mSound;
         }
-
-        if (type == ESM::SoundGenerator::Land)
-            return "Body Fall Large";
 
         return "";
     }
@@ -688,9 +690,9 @@ namespace MWClass
             MWBase::World *world = MWBase::Environment::get().getWorld();
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
-                return 2;
+                return ESM::SoundGenerator::SwimLeft;
             if(world->isOnGround(ptr))
-                return 0;
+                return ESM::SoundGenerator::LeftFoot;
             return -1;
         }
         if(name == "right")
@@ -698,23 +700,23 @@ namespace MWClass
             MWBase::World *world = MWBase::Environment::get().getWorld();
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
-                return 3;
+                return ESM::SoundGenerator::SwimRight;
             if(world->isOnGround(ptr))
-                return 1;
+                return ESM::SoundGenerator::RightFoot;
             return -1;
         }
         if(name == "swimleft")
-            return 2;
+            return ESM::SoundGenerator::SwimLeft;
         if(name == "swimright")
-            return 3;
+            return ESM::SoundGenerator::SwimRight;
         if(name == "moan")
-            return 4;
+            return ESM::SoundGenerator::Moan;
         if(name == "roar")
-            return 5;
+            return ESM::SoundGenerator::Roar;
         if(name == "scream")
-            return 6;
+            return ESM::SoundGenerator::Scream;
         if(name == "land")
-            return 7;
+            return ESM::SoundGenerator::Land;
 
         throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }

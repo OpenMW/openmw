@@ -1369,8 +1369,7 @@ namespace MWGui
         const ESM::Enchantment* ench = mStore->get<ESM::Enchantment>()
                 .find(item.getClass().getEnchantment(item));
 
-        int chargePercent = (item.getCellRef().getEnchantmentCharge() == -1) ? 100
-                : static_cast<int>(item.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
+        int chargePercent = static_cast<int>(item.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
         mHud->setSelectedEnchantItem(item, chargePercent);
         mSpellWindow->setTitle(item.getClass().getName(item));
     }
@@ -1386,7 +1385,7 @@ namespace MWGui
         int durabilityPercent = 100;
         if (item.getClass().hasItemHealth(item))
         {
-            durabilityPercent = static_cast<int>(item.getClass().getItemHealth(item) / static_cast<float>(item.getClass().getItemMaxHealth(item)) * 100);
+            durabilityPercent = static_cast<int>(item.getClass().getItemNormalizedHealth(item) * 100);
         }
         mHud->setSelectedWeapon(item, durabilityPercent);
         mInventoryWindow->setTitle(item.getClass().getName(item));
@@ -1669,6 +1668,15 @@ namespace MWGui
     void WindowManager::setEnemy(const MWWorld::Ptr &enemy)
     {
         mHud->setEnemy(enemy);
+    }
+
+    int WindowManager::getMessagesCount() const
+    {
+        int count = 0;
+        if (mMessageBoxManager)
+            count = mMessageBoxManager->getMessagesCount();
+
+        return count;
     }
 
     Loading::Listener* WindowManager::getLoadingScreen()

@@ -509,8 +509,9 @@ namespace MWWorld
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
 
+        int messagesCount = MWBase::Environment::get().getWindowManager()->getMessagesCount();
         std::string loadingExteriorText = "#{sLoadingMessage3}";
-        loadingListener->setLabel(loadingExteriorText);
+        loadingListener->setLabel(loadingExteriorText, false, messagesCount > 0);
 
         CellStoreCollection::iterator active = mActiveCells.begin();
         while (active!=mActiveCells.end())
@@ -695,8 +696,9 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+        int messagesCount = MWBase::Environment::get().getWindowManager()->getMessagesCount();
         std::string loadingInteriorText = "#{sLoadingMessage2}";
-        loadingListener->setLabel(loadingInteriorText);
+        loadingListener->setLabel(loadingInteriorText, false, messagesCount > 0);
         Loading::ScopedLoad load(loadingListener);
 
         if(!loadcell)
