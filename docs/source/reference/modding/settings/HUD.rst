@@ -8,7 +8,8 @@ crosshair
 :Range:		True/False
 :Default:	True
 
-This setting determines whether the crosshair or reticle is displayed. Enabling the crosshair provides more immediate feedback about which object is currently the focus of actions.
+This setting determines whether the crosshair or reticle is displayed. 
+Enabling the crosshair provides more immediate feedback about which object is currently the focus of actions.
 Some players perceive that disabling the crosshair provides a more immersive experience.
 Another common use is to disable the crosshair for screen shots.
 

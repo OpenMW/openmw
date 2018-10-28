@@ -11,7 +11,10 @@ exterior cell load distance
 This setting determines the number of exterior cells adjacent to the character that will be loaded for rendering.
 
 .. Warning::
-	Values greater than 1 will significantly affect the frame rate and loading times. This setting is mainly intended for making screenshots of scenic vistas and not for real-time gameplay. Loading more cells can break certain scripts or quests in the game that expect cells to not be loaded until the player is there. These limitations will be addressed in a future version with a separate technique for rendering distant cells.
+	Values greater than 1 will significantly affect the frame rate and loading times. 
+	This setting is mainly intended for making screenshots of scenic vistas and not for real-time gameplay. 
+	Loading more cells can break certain scripts or quests in the game that expect cells to not be loaded until the player is there. 
+	These limitations will be addressed in a future version with a separate technique for rendering distant cells.
 
 This setting interacts with viewing distance and field of view settings.
 
@@ -163,11 +166,13 @@ prediction time
 :Range:		>=0
 :Default:	1
 
-The amount of time (in seconds) in the future to predict the player position for. This predicted position is used to preload any cells and/or distant terrain required at that position.
+The amount of time (in seconds) in the future to predict the player position for. 
+This predicted position is used to preload any cells and/or distant terrain required at that position.
 
 This setting will only have an effect if 'preload enabled' is set or the 'distant terrain' in the Terrain section is set.
 
-Increasing this setting from its default may help if your computer/hard disk is too slow to preload in time and you see loading screens and/or lag spikes.
+Increasing this setting from its default may help if your computer/hard disk is too slow to preload in time and you see
+loading screens and/or lag spikes.
 
 cache expiry delay
 ------------------
@@ -185,7 +190,10 @@ target framerate
 :Range:         >0
 :Default:       60
 
-Affects the time to be set aside each frame for graphics preloading operations. The game will distribute the preloading over several frames so as to not go under the specified framerate. For best results, set this value to the monitor's refresh rate. If you still experience stutters on turning around, you can try a lower value, although the framerate during loading will suffer a bit in that case.
+Affects the time to be set aside each frame for graphics preloading operations.
+The game will distribute the preloading over several frames so as to not go under the specified framerate. 
+For best results, set this value to the monitor's refresh rate. If you still experience stutters on turning around, 
+you can try a lower value, although the framerate during loading will suffer a bit in that case.
 
 pointers cache size
 -------------------
@@ -194,4 +202,6 @@ pointers cache size
 :Range:		>0
 :Default:	40
 
-The count of object pointers that will be saved for a faster search by object ID. This is a temporary setting that can be used to mitigate scripting performance issues with certain game files. If your profiler (press F3 twice) displays a large overhead for the Scripting section, try increasing this setting. 
+The count of object pointers that will be saved for a faster search by object ID.
+This is a temporary setting that can be used to mitigate scripting performance issues with certain game files. 
+If your profiler (press F3 twice) displays a large overhead for the Scripting section, try increasing this setting. 
