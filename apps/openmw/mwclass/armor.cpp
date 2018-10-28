@@ -301,7 +301,7 @@ namespace MWClass
             return std::make_pair(0, "#{sInventoryMessage1}");
 
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots_ = ptr.getClass().getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
 
         if (slots_.first.empty())
             return std::make_pair(0, "");

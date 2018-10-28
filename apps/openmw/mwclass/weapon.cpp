@@ -391,7 +391,7 @@ namespace MWClass
             && MWBase::Environment::get().getWindowManager()->isGuiMode())
             return std::make_pair(0, "#{sCantEquipWeapWarning}");
 
-        std::pair<std::vector<int>, bool> slots_ = ptr.getClass().getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
 
         if (slots_.first.empty())
             return std::make_pair (0, "");
