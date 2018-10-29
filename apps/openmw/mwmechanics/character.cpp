@@ -2523,6 +2523,7 @@ void CharacterController::resurrect()
         mAnimation->disable(mCurrentDeath);
     mCurrentDeath.clear();
     mDeathState = CharState_None;
+    mWeaponType = WeapType_None;
 }
 
 void CharacterController::updateContinuousVfx()
