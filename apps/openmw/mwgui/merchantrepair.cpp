@@ -51,7 +51,7 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
         {
             int maxDurability = iter->getClass().getItemMaxHealth(*iter);
             int durability = iter->getClass().getItemHealth(*iter);
-            if (maxDurability == durability)
+            if (maxDurability == durability || maxDurability == 0)
                 continue;
 
             int basePrice = iter->getClass().getValue(*iter);

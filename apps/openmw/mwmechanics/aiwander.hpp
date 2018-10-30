@@ -137,15 +137,15 @@ namespace MWMechanics
             short unsigned getRandomIdle();
             void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);
             void playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage);
-            void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration, ESM::Position& pos);
+            void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void playIdleDialogueRandomly(const MWWorld::Ptr& actor);
             void turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage);
-            void doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos);
+            void doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
-            void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos);
+            void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
-            const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos, float duration);
+            const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos);
             bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
             bool destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination);
@@ -164,6 +164,7 @@ namespace MWMechanics
 
             bool mHasDestination;
             osg::Vec3f mDestination;
+            bool mUsePathgrid;
 
             void getNeighbouringNodes(ESM::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM::Pathgrid::PointList& points);
 

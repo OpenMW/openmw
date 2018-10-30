@@ -233,6 +233,10 @@ namespace MWBase
 
             virtual void castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell) = 0;
 
+            virtual void processChangedSettings (const std::set< std::pair<std::string, std::string> >& settings) = 0;
+
+            virtual float getActorsProcessingRange() const = 0;
+
             /// Check if the target actor was detected by an observer
             /// If the observer is a non-NPC, check all actors in AI processing distance as observers
             virtual bool isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer) = 0;

@@ -4,6 +4,7 @@
 #include <memory>
 #include <map>
 #include <set>
+#include <algorithm>
 
 #include <osg/Quat>
 #include <osg/ref_ptr>
@@ -49,6 +50,9 @@ namespace MWPhysics
     class Object;
     class Actor;
 
+    static const float sMaxSlope = 49.0f;
+    static const float sStepSizeUp = 34.0f;
+
     class PhysicsSystem
     {
         public:
@@ -85,7 +89,11 @@ namespace MWPhysics
 
             void removeHeightField (int x, int y);
 
+            const HeightField* getHeightField(int x, int y) const;
+
             bool toggleCollisionMode();
+            bool isActorCollisionEnabled(const MWWorld::Ptr& ptr);
+            void setActorCollisionMode(const MWWorld::Ptr& ptr, bool enabled);
 
             void stepSimulation(float dt);
             void debugDraw();
@@ -169,6 +177,12 @@ namespace MWPhysics
             void markAsNonSolid (const MWWorld::ConstPtr& ptr);
 
             bool isOnSolidGround (const MWWorld::Ptr& actor) const;
+
+            template <class Function>
+            void forEachAnimatedObject(Function&& function) const
+            {
+                std::for_each(mAnimatedObjects.begin(), mAnimatedObjects.end(), function);
+            }
 
         private:
 

@@ -170,7 +170,8 @@ contrast
 
 This setting controls the contrast correction for all video in the game.
 
-This setting can only be configured by editing the settings configuration file. It has been reported to not work on some Linux systems.
+This setting can only be configured by editing the settings configuration file. 
+It has been reported to not work on some Linux systems.
 
 gamma
 -----
@@ -183,4 +184,5 @@ This setting controls the gamma correction for all video in the game.
 Gamma is an exponent that makes colors brighter if greater than 1.0 and darker if less than 1.0.
 
 This setting can be changed in the Detail tab of the Video panel of the Options menu.
-It has been reported to not work on some Linux systems, and therefore the in-game setting in the Options menu has been disabled on Linux systems.
+It has been reported to not work on some Linux systems, 
+and therefore the in-game setting in the Options menu has been disabled on Linux systems.

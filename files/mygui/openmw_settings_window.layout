@@ -73,7 +73,32 @@
                         <Property key="TextAlign" value="Right"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 200 260 24">
+                <Widget type="Widget" skin="" position="4 184 352 54" align="Left Top HStretch">
+                    <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top" name="ActorProcessingText">
+                        <Property key="Caption" value="Actors Processing Range"/>
+                    </Widget>
+                    <Widget type="MWScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
+                        <Property key="Range" value="3584"/>
+                        <Property key="Page" value="300"/>
+                        <UserString key="SettingType" value="Slider"/>
+                        <UserString key="SettingCategory" value="Game"/>
+                        <UserString key="SettingName" value="actors processing range"/>
+                        <UserString key="SettingValueType" value="Float"/>
+                        <UserString key="SettingMin" value="3584"/>
+                        <UserString key="SettingMax" value="7168"/>
+                        <UserString key="SettingLabelWidget" value="ActorProcessingText"/>
+                        <UserString key="SettingLabelCaption" value="Actors Processing Range"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
+                        <Property key="Caption" value="#{sLow}"/>
+                        <Property key="TextAlign" value="Left"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Right Top">
+                        <Property key="Caption" value="#{sHigh}"/>
+                        <Property key="TextAlign" value="Right"/>
+                    </Widget>
+                </Widget>
+                <Widget type="HBox" skin="" position="4 250 260 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="Saves"/>
                         <UserString key="SettingName" value="autosave"/>
@@ -83,7 +108,7 @@
                         <Property key="Caption" value="#{sQuick_Save}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 230 260 24">
+                <Widget type="HBox" skin="" position="4 280 260 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="Game"/>
                         <UserString key="SettingName" value="best attack"/>
@@ -93,7 +118,7 @@
                         <Property key="Caption" value="#{sBestAttack}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 260 260 24">
+                <Widget type="HBox" skin="" position="4 310 260 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="GUI"/>
                         <UserString key="SettingName" value="subtitles"/>
@@ -103,7 +128,7 @@
                         <Property key="Caption" value="#{sSubtitles}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 290 260 24">
+                <Widget type="HBox" skin="" position="4 340 260 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="HUD"/>
                         <UserString key="SettingName" value="crosshair"/>
@@ -199,7 +224,7 @@
                     </Widget>
                 </Widget>
                 <Widget type="TextBox" skin="NormalText" position="4 254 336 18" align="Left Bottom">
-                    <Property key="Caption" value="Camera sensitivity"/>
+                    <Property key="Caption" value="Camera Sensitivity"/>
                 </Widget>
                 <Widget type="MWScrollBar" skin="MW_HScroll" position="4 278 336 18" align="HStretch Bottom">
                     <Property key="Range" value="10000"/>

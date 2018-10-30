@@ -1317,6 +1317,53 @@ namespace MWScript
             }
         };
 
+        class OpToggleNavMesh : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    bool enabled =
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_NavMesh);
+
+                    runtime.getContext().report (enabled ?
+                        "Navigation Mesh Rendering -> On" : "Navigation Mesh Rendering -> Off");
+                }
+        };
+
+        class OpToggleActorsPaths : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    bool enabled =
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_ActorsPaths);
+
+                    runtime.getContext().report (enabled ?
+                        "Agents Paths Rendering -> On" : "Agents Paths Rendering -> Off");
+                }
+        };
+
+        class OpSetNavMeshNumberToRender : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    const auto navMeshNumber = runtime[0].mInteger;
+                    runtime.pop();
+
+                    if (navMeshNumber < 0)
+                    {
+                        runtime.getContext().report("Invalid navmesh number: use not less than zero values");
+                        return;
+                    }
+
+                    MWBase::Environment::get().getWorld()->setNavMeshNumberToRender(static_cast<std::size_t>(navMeshNumber));
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -1417,6 +1464,9 @@ namespace MWScript
             interpreter.installSegment3 (Compiler::Misc::opcodeShowSceneGraph, new OpShowSceneGraph<ImplicitRef>);
             interpreter.installSegment3 (Compiler::Misc::opcodeShowSceneGraphExplicit, new OpShowSceneGraph<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleBorders, new OpToggleBorders);
+            interpreter.installSegment5 (Compiler::Misc::opcodeToggleNavMesh, new OpToggleNavMesh);
+            interpreter.installSegment5 (Compiler::Misc::opcodeToggleActorsPaths, new OpToggleActorsPaths);
+            interpreter.installSegment5 (Compiler::Misc::opcodeSetNavMeshNumberToRender, new OpSetNavMeshNumberToRender);
         }
     }
 }

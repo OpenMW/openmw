@@ -455,5 +455,8 @@ op 0x2000304: Show
 op 0x2000305: Show, explicit
 op 0x2000306: OnActivate, explicit
 op 0x2000307: ToggleBorders, tb
+op 0x2000308: ToggleNavMesh
+op 0x2000309: ToggleActorsPaths
+op 0x200030a: SetNavMeshNumber
 
-opcodes 0x2000308-0x3ffffff unused
+opcodes 0x200030b-0x3ffffff unused

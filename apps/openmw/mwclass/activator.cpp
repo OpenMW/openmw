@@ -138,7 +138,7 @@ namespace MWClass
 
     std::string Activator::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
     {
-        std::string model = getModel(ptr); // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
+        const std::string model = getModel(ptr); // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore(); 
         std::string creatureId;
 
@@ -151,21 +151,35 @@ namespace MWClass
             }
         }
 
-        if (creatureId.empty())
-            return std::string();
-
         int type = getSndGenTypeFromName(name);
-        std::vector<const ESM::SoundGenerator*> sounds;
 
-        for (auto sound = store.get<ESM::SoundGenerator>().begin(); sound != store.get<ESM::SoundGenerator>().end(); ++sound)
-            if (type == sound->mType && !sound->mCreature.empty() && (Misc::StringUtils::ciEqual(creatureId, sound->mCreature)))
-                sounds.push_back(&*sound);
+        std::vector<const ESM::SoundGenerator*> fallbacksounds;
+        if (!creatureId.empty())
+        {
+            std::vector<const ESM::SoundGenerator*> sounds;
+            for (auto sound = store.get<ESM::SoundGenerator>().begin(); sound != store.get<ESM::SoundGenerator>().end(); ++sound)
+            {
+                if (type == sound->mType && !sound->mCreature.empty() && (Misc::StringUtils::ciEqual(creatureId, sound->mCreature)))
+                    sounds.push_back(&*sound);
+                if (type == sound->mType && sound->mCreature.empty())
+                    fallbacksounds.push_back(&*sound);
+            }
 
-        if (!sounds.empty())
-            return sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
+            if (!sounds.empty())
+                return sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
+            if (!fallbacksounds.empty())
+                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size())]->mSound;
+        }
+        else
+        {
+            // The activator doesn't have a corresponding creature ID, but we can try to use the defaults
+            for (auto sound = store.get<ESM::SoundGenerator>().begin(); sound != store.get<ESM::SoundGenerator>().end(); ++sound)
+                if (type == sound->mType && sound->mCreature.empty())
+                    fallbacksounds.push_back(&*sound);
 
-        if (type == ESM::SoundGenerator::Land)
-            return "Body Fall Large";
+            if (!fallbacksounds.empty())
+                return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size())]->mSound;
+        }
 
         return std::string();
     }

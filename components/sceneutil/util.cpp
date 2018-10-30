@@ -42,4 +42,15 @@ osg::Vec4f colourFromRGB(unsigned int clr)
     return colour;
 }
 
+osg::Vec4f colourFromRGBA(unsigned int value)
+{
+    return osg::Vec4f(makeOsgColorComponent(value, 0), makeOsgColorComponent(value, 8),
+                      makeOsgColorComponent(value, 16), makeOsgColorComponent(value, 24));
+}
+
+float makeOsgColorComponent(unsigned int value, unsigned int shift)
+{
+    return float((value >> shift) & 0xFFu) / 255.0f;
+}
+
 }

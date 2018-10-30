@@ -6,6 +6,7 @@
 
 #include <set>
 #include <memory>
+#include <unordered_map>
 
 namespace osg
 {
@@ -25,6 +26,12 @@ namespace Files
 namespace Loading
 {
     class Listener;
+}
+
+namespace DetourNavigator
+{
+    class Navigator;
+    class Water;
 }
 
 namespace MWRender
@@ -57,6 +64,7 @@ namespace MWWorld
             bool mCellChanged;
             MWPhysics::PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
+            DetourNavigator::Navigator& mNavigator;
             std::unique_ptr<CellPreloader> mPreloader;
             float mPreloadTimer;
             int mHalfGridSize;
@@ -74,7 +82,7 @@ namespace MWWorld
             void insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener);
 
             // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
-            void changeCellGrid (int X, int Y, bool changeEvent = true);
+            void changeCellGrid (int playerCellX, int playerCellY, bool changeEvent = true);
 
             void getGridCenter(int& cellX, int& cellY);
 
@@ -85,7 +93,8 @@ namespace MWWorld
 
         public:
 
-            Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics);
+            Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics,
+                   DetourNavigator::Navigator& navigator);
 
             ~Scene();
 

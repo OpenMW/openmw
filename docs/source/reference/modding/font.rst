@@ -4,14 +4,20 @@ Fonts
 Morrowind .fnt fonts
 --------------------
 
-Morrowind uses a custom ``.fnt`` file format. It is not compatible with the Windows Font File ``.fnt`` format, nor compatible with ``.fnt`` formats from any other Bethesda games. To our knowledge, the format is undocumented and no tools for viewing or editing these fonts exist.
+Morrowind uses a custom ``.fnt`` file format. It is not compatible with the Windows Font File ``.fnt`` format, 
+nor compatible with ``.fnt`` formats from any other Bethesda games. To our knowledge, 
+the format is undocumented and no tools for viewing or editing these fonts exist.
 
-OpenMW can load this format and convert it on the fly into something usable (see font loader `source code <https://github.com/OpenMW/openmw/blob/master/components/fontloader/fontloader.cpp#L210>`_). In OpenMW 0.32, an --export-fonts command line option was added to write the converted font (a PNG image and an XML file describing the position of each glyph in the image) to the current directory.
+OpenMW can load this format and convert it on the fly into something usable 
+(see font loader `source code <https://github.com/OpenMW/openmw/blob/master/components/fontloader/fontloader.cpp#L210>`_). 
+In OpenMW 0.32, an --export-fonts command line option was added to write the converted font 
+(a PNG image and an XML file describing the position of each glyph in the image) to the current directory.
 
 TrueType fonts
 --------------
 
-Unlike vanilla Morrowind, OpenMW directly supports TrueType (``.ttf``) fonts. This is the recommended way to create new fonts.
+Unlike vanilla Morrowind, OpenMW directly supports TrueType (``.ttf``) fonts. 
+This is the recommended way to create new fonts.
 
 -	To replace the primary "Magic Cards" font:
 
@@ -74,4 +80,7 @@ Unlike vanilla Morrowind, OpenMW directly supports TrueType (``.ttf``) fonts. Th
 Bitmap fonts
 ------------
 
-Morrowind ``.fnt`` files are essentially a bitmap font, but using them is discouraged because of no Unicode support. MyGUI has its own format for bitmap fonts. An example can be seen by using the --export-fonts command line option (see above), which converts Morrowind ``.fnt`` to a MyGUI bitmap font. This is the recommended format to use if you wish to edit Morrowind's bitmap font or create a new bitmap font.
+Morrowind ``.fnt`` files are essentially a bitmap font, but using them is discouraged because of no Unicode support. 
+MyGUI has its own format for bitmap fonts. An example can be seen by using the --export-fonts command line option (see above), 
+which converts Morrowind ``.fnt`` to a MyGUI bitmap font. 
+This is the recommended format to use if you wish to edit Morrowind's bitmap font or create a new bitmap font.

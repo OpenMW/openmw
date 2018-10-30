@@ -17,6 +17,7 @@
 #include "../mwworld/ptr.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/statemanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
@@ -429,6 +430,29 @@ namespace MWMechanics
 
         mActors.update(duration, paused);
         mObjects.update(duration, paused);
+    }
+
+    void MechanicsManager::processChangedSettings(const Settings::CategorySettingVector &changed)
+    {
+        for (Settings::CategorySettingVector::const_iterator it = changed.begin(); it != changed.end(); ++it)
+        {
+            if (it->first == "Game" && it->second == "actors processing range")
+            {
+                int state = MWBase::Environment::get().getStateManager()->getState();
+                if (state != MWBase::StateManager::State_Running)
+                    continue;
+
+                mActors.updateProcessingRange();
+
+                // Update mechanics for new processing range immediately
+                update(0.f, false);
+            }
+        }
+    }
+
+    float MechanicsManager::getActorsProcessingRange() const
+    {
+        return mActors.getProcessingRange();
     }
 
     bool MechanicsManager::isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer)

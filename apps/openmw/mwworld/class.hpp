@@ -112,6 +112,9 @@ namespace MWWorld
             virtual int getItemHealth (const ConstPtr& ptr) const;
             ///< Return current item health or throw an exception if class does not have item health
 
+            virtual float getItemNormalizedHealth (const ConstPtr& ptr) const;
+            ///< Return current item health re-scaled to maximum health
+
             virtual int getItemMaxHealth (const ConstPtr& ptr) const;
             ///< Return item max health or throw an exception, if class does not have item health
             /// (default implementation: throw an exception)

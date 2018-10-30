@@ -90,10 +90,15 @@
         <file>multitype.png</file>
         <file alias="record-next">record-next.png</file>
         <file alias="record-previous">record-previous.png</file>
+        <file alias="record-down">record-down.png</file>
+        <file alias="record-up">record-up.png</file>
         <file alias="edit-delete">record-delete.png</file>
         <file alias="edit-preview">record-preview.png</file>
         <file alias="edit-clone">record-clone.png</file>
         <file alias="edit-add">record-add.png</file>
+        <file alias="edit-edit">record-edit.png</file>
+        <file alias="edit-touch">record-touch.png</file>
+        <file alias="edit-undo">record-revert.png</file>
         <file alias="resources-icon">resources-icon.png</file>
         <file alias="resources-mesh">resources-mesh.png</file>
         <file alias="resources-music">resources-music.png</file>

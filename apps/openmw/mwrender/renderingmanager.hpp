@@ -12,6 +12,8 @@
 #include "renderinginterface.hpp"
 #include "rendermode.hpp"
 
+#include <deque>
+
 namespace osg
 {
     class Group;
@@ -56,6 +58,12 @@ namespace SceneUtil
     class UnrefQueue;
 }
 
+namespace DetourNavigator
+{
+    class Navigator;
+    struct Settings;
+}
+
 namespace MWRender
 {
 
@@ -69,12 +77,16 @@ namespace MWRender
     class Water;
     class TerrainStorage;
     class LandManager;
+    class NavMesh;
+    class ActorsPaths;
 
     class RenderingManager : public MWRender::RenderingInterface
     {
     public:
-        RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                         const Fallback::Map* fallback, const std::string& resourcePath);
+        RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
+                         Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
+                         const Fallback::Map* fallback, const std::string& resourcePath,
+                         DetourNavigator::Navigator& navigator);
         ~RenderingManager();
 
         MWRender::Objects& getObjects();
@@ -212,6 +224,13 @@ namespace MWRender
 
         bool toggleBorders();
 
+        void updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
+                const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const;
+
+        void removeActorPath(const MWWorld::ConstPtr& actor) const;
+
+        void setNavMeshNumber(const std::size_t value);
+
     private:
         void updateProjectionMatrix();
         void updateTextureFiltering();
@@ -236,6 +255,10 @@ namespace MWRender
 
         osg::ref_ptr<osg::Light> mSunLight;
 
+        DetourNavigator::Navigator& mNavigator;
+        std::unique_ptr<NavMesh> mNavMesh;
+        std::size_t mNavMeshNumber = 0;
+        std::unique_ptr<ActorsPaths> mActorsPaths;
         std::unique_ptr<Pathgrid> mPathgrid;
         std::unique_ptr<Objects> mObjects;
         std::unique_ptr<Water> mWater;
