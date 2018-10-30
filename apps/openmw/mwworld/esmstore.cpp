@@ -141,6 +141,7 @@ void ESMStore::setUp(bool validateRecords)
     mAttributes.setUp();
     mDialogs.setUp();
     mStatics.setUp();
+    mDoors.setUp();
 
     if (validateRecords)
         validate();
