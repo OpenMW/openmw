@@ -65,7 +65,11 @@ namespace SceneUtil
         fakeShadowMapTexture->setShadowComparison(true);
         fakeShadowMapTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
         for (int i = baseShadowTextureUnit; i < baseShadowTextureUnit + numberOfShadowMapsPerLight; ++i)
+        {
             stateset->setTextureAttributeAndModes(i, fakeShadowMapTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
+            stateset->addUniform(new osg::Uniform(("shadowTexture" + std::to_string(i - baseShadowTextureUnit)).c_str(), i));
+            stateset->addUniform(new osg::Uniform(("shadowTextureUnit" + std::to_string(i - baseShadowTextureUnit)).c_str(), i));
+        }
     }
 
     ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, Shader::ShaderManager &shaderManager) : mShadowedScene(new osgShadow::ShadowedScene),
