@@ -1,6 +1,11 @@
-#include "physicssystem.hpp"
+﻿#include "physicssystem.hpp"
 
 #include <stdexcept>
+#include <unordered_map>
+#include <fstream>
+#include <array>
+
+#include <boost/optional.hpp>
 
 #include <osg/Group>
 
@@ -15,6 +20,12 @@
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 
 #include <LinearMath/btQuickprof.h>
+
+#include <DetourCommon.h>
+#include <DetourNavMesh.h>
+#include <DetourNavMeshBuilder.h>
+#include <DetourNavMeshQuery.h>
+#include <Recast.h>
 
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -48,12 +59,12 @@
 #include "actor.hpp"
 #include "convert.hpp"
 #include "trace.h"
+#include "object.hpp"
+#include "heightfield.hpp"
 
 namespace MWPhysics
 {
 
-    static const float sMaxSlope = 49.0f;
-    static const float sStepSizeUp = 34.0f;
     static const float sStepSizeDown = 62.0f;
     static const float sMinStep = 10.f;
     static const float sGroundOffset = 1.0f;
@@ -507,175 +518,6 @@ namespace MWPhysics
 
     // ---------------------------------------------------------------
 
-    class HeightField
-    {
-    public:
-        HeightField(const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject)
-        {
-            mShape = new btHeightfieldTerrainShape(
-                sqrtVerts, sqrtVerts, heights, 1,
-                minH, maxH, 2,
-                PHY_FLOAT, false
-            );
-            mShape->setUseDiamondSubdivision(true);
-            mShape->setLocalScaling(btVector3(triSize, triSize, 1));
-
-            btTransform transform(btQuaternion::getIdentity(),
-                                  btVector3((x+0.5f) * triSize * (sqrtVerts-1),
-                                            (y+0.5f) * triSize * (sqrtVerts-1),
-                                            (maxH+minH)*0.5f));
-
-            mCollisionObject = new btCollisionObject;
-            mCollisionObject->setCollisionShape(mShape);
-            mCollisionObject->setWorldTransform(transform);
-
-            mHoldObject = holdObject;
-        }
-        ~HeightField()
-        {
-            delete mCollisionObject;
-            delete mShape;
-        }
-        btCollisionObject* getCollisionObject()
-        {
-            return mCollisionObject;
-        }
-
-    private:
-        btHeightfieldTerrainShape* mShape;
-        btCollisionObject* mCollisionObject;
-        osg::ref_ptr<const osg::Object> mHoldObject;
-
-        void operator=(const HeightField&);
-        HeightField(const HeightField&);
-    };
-
-    // --------------------------------------------------------------
-
-    class Object : public PtrHolder
-    {
-    public:
-        Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance)
-            : mShapeInstance(shapeInstance)
-            , mSolid(true)
-        {
-            mPtr = ptr;
-
-            mCollisionObject.reset(new btCollisionObject);
-            mCollisionObject->setCollisionShape(shapeInstance->getCollisionShape());
-
-            mCollisionObject->setUserPointer(static_cast<PtrHolder*>(this));
-
-            setScale(ptr.getCellRef().getScale());
-            setRotation(toBullet(ptr.getRefData().getBaseNode()->getAttitude()));
-            const float* pos = ptr.getRefData().getPosition().pos;
-            setOrigin(btVector3(pos[0], pos[1], pos[2]));
-        }
-
-        const Resource::BulletShapeInstance* getShapeInstance() const
-        {
-            return mShapeInstance.get();
-        }
-
-        void setScale(float scale)
-        {
-            mShapeInstance->getCollisionShape()->setLocalScaling(btVector3(scale,scale,scale));
-        }
-
-        void setRotation(const btQuaternion& quat)
-        {
-            mCollisionObject->getWorldTransform().setRotation(quat);
-        }
-
-        void setOrigin(const btVector3& vec)
-        {
-            mCollisionObject->getWorldTransform().setOrigin(vec);
-        }
-
-        btCollisionObject* getCollisionObject()
-        {
-            return mCollisionObject.get();
-        }
-
-        const btCollisionObject* getCollisionObject() const
-        {
-            return mCollisionObject.get();
-        }
-
-        /// Return solid flag. Not used by the object itself, true by default.
-        bool isSolid() const
-        {
-            return mSolid;
-        }
-
-        void setSolid(bool solid)
-        {
-            mSolid = solid;
-        }
-
-        bool isAnimated() const
-        {
-            return !mShapeInstance->mAnimatedShapes.empty();
-        }
-
-        void animateCollisionShapes(btCollisionWorld* collisionWorld)
-        {
-            if (mShapeInstance->mAnimatedShapes.empty())
-                return;
-
-            assert (mShapeInstance->getCollisionShape()->isCompound());
-
-            btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->getCollisionShape());
-            for (std::map<int, int>::const_iterator it = mShapeInstance->mAnimatedShapes.begin(); it != mShapeInstance->mAnimatedShapes.end(); ++it)
-            {
-                int recIndex = it->first;
-                int shapeIndex = it->second;
-
-                std::map<int, osg::NodePath>::iterator nodePathFound = mRecIndexToNodePath.find(recIndex);
-                if (nodePathFound == mRecIndexToNodePath.end())
-                {
-                    NifOsg::FindGroupByRecIndex visitor(recIndex);
-                    mPtr.getRefData().getBaseNode()->accept(visitor);
-                    if (!visitor.mFound)
-                    {
-                        Log(Debug::Warning) << "Warning: animateCollisionShapes can't find node " << recIndex << " for " << mPtr.getCellRef().getRefId();
-
-                        // Remove nonexistent nodes from animated shapes map and early out
-                        mShapeInstance->mAnimatedShapes.erase(recIndex);
-                        return;
-                    }
-                    osg::NodePath nodePath = visitor.mFoundPath;
-                    nodePath.erase(nodePath.begin());
-                    nodePathFound = mRecIndexToNodePath.insert(std::make_pair(recIndex, nodePath)).first;
-                }
-
-                osg::NodePath& nodePath = nodePathFound->second;
-                osg::Matrixf matrix = osg::computeLocalToWorld(nodePath);
-                matrix.orthoNormalize(matrix);
-
-                btTransform transform;
-                transform.setOrigin(toBullet(matrix.getTrans()) * compound->getLocalScaling());
-                for (int i=0; i<3; ++i)
-                    for (int j=0; j<3; ++j)
-                        transform.getBasis()[i][j] = matrix(j,i); // NB column/row major difference
-
-                // Note: we can not apply scaling here for now since we treat scaled shapes
-                // as new shapes (btScaledBvhTriangleMeshShape) with 1.0 scale for now
-                if (!(transform == compound->getChildTransform(shapeIndex)))
-                    compound->updateChildTransform(shapeIndex, transform);
-            }
-
-            collisionWorld->updateSingleAabb(mCollisionObject.get());
-        }
-
-    private:
-        std::unique_ptr<btCollisionObject> mCollisionObject;
-        osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
-        std::map<int, osg::NodePath> mRecIndexToNodePath;
-        bool mSolid;
-    };
-
-    // ---------------------------------------------------------------
 
     PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
         : mShapeManager(new Resource::BulletShapeManager(resourceSystem->getVFS(), resourceSystem->getSceneManager(), resourceSystem->getNifFileManager()))
@@ -1169,6 +1011,14 @@ namespace MWPhysics
             delete heightfield->second;
             mHeightFields.erase(heightfield);
         }
+    }
+
+    const HeightField* PhysicsSystem::getHeightField(int x, int y) const
+    {
+        const auto heightField = mHeightFields.find(std::make_pair(x, y));
+        if (heightField == mHeightFields.end())
+            return nullptr;
+        return heightField->second;
     }
 
     void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh, int collisionType)

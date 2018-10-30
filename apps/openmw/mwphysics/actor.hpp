@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "../mwworld/ptr.hpp"
+#include "ptrholder.hpp"
 
 #include <osg/Vec3f>
 #include <osg/Quat>
@@ -21,30 +21,6 @@ namespace Resource
 
 namespace MWPhysics
 {
-
-    class PtrHolder
-    {
-    public:
-        virtual ~PtrHolder() {}
-
-        void updatePtr(const MWWorld::Ptr& updated)
-        {
-            mPtr = updated;
-        }
-
-        MWWorld::Ptr getPtr()
-        {
-            return mPtr;
-        }
-
-        MWWorld::ConstPtr getPtr() const
-        {
-            return mPtr;
-        }
-
-    protected:
-        MWWorld::Ptr mPtr;
-    };
 
     class Actor : public PtrHolder
     {

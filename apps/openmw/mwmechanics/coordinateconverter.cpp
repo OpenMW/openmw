@@ -33,11 +33,12 @@ namespace MWMechanics
         point.y() -= static_cast<float>(mCellY);
     }
 
-    osg::Vec3f CoordinateConverter::toLocalVec3(const ESM::Pathgrid::Point& point)
+    osg::Vec3f CoordinateConverter::toLocalVec3(const osg::Vec3f& point)
     {
         return osg::Vec3f(
-            static_cast<float>(point.mX - mCellX),
-            static_cast<float>(point.mY - mCellY),
-            static_cast<float>(point.mZ));
+            point.x() - static_cast<float>(mCellX),
+            point.y() - static_cast<float>(mCellY),
+            point.z()
+        );
     }
 }

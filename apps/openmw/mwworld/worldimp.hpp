@@ -61,6 +61,11 @@ namespace ToUTF8
 
 struct ContentLoader;
 
+namespace MWPhysics
+{
+    class Object;
+}
+
 namespace MWWorld
 {
     class WeatherManager;
@@ -94,6 +99,7 @@ namespace MWWorld
 
             std::unique_ptr<MWWorld::Player> mPlayer;
             std::unique_ptr<MWPhysics::PhysicsSystem> mPhysics;
+            std::unique_ptr<DetourNavigator::Navigator> mNavigator;
             std::unique_ptr<MWRender::RenderingManager> mRendering;
             std::unique_ptr<MWWorld::Scene> mWorldScene;
             std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
@@ -146,6 +152,10 @@ namespace MWWorld
 
             void doPhysics(float duration);
             ///< Run physics simulation and modify \a world accordingly.
+
+            void updateNavigator();
+
+            bool updateNavigatorObject(const MWPhysics::Object* object);
 
             void ensureNeededRecords();
 
@@ -693,6 +703,13 @@ namespace MWWorld
 
             /// Preload VFX associated with this effect list
             void preloadEffects(const ESM::EffectList* effectList) override;
+
+            DetourNavigator::Navigator* getNavigator() const override;
+
+            void updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
+                    const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const override;
+
+            void setNavMeshNumberToRender(const std::size_t value) override;
     };
 }
 

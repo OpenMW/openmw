@@ -304,6 +304,10 @@ if ! [ -z $UNITY_BUILD ]; then
 	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
 fi
 
+if [ ${BITS} -eq 64 ]; then
+	GENERATOR="${GENERATOR} Win64"
+fi
+
 echo
 echo "==================================="
 echo "Starting prebuild on MSVC${MSVC_DISPLAY_YEAR} WIN${BITS}"
@@ -449,7 +453,7 @@ fi
 		else
 			LIB_SUFFIX="0"
 		fi
-		
+
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
 			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.${LIB_SUFFIX}"
 		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
@@ -642,6 +646,13 @@ printf "SDL 2.0.7... "
 	export SDL2DIR="$(real_pwd)/SDL2-2.0.7"
 	add_runtime_dlls "$(pwd)/SDL2-2.0.7/lib/x${ARCHSUFFIX}/SDL2.dll"
 	echo Done.
+}
+echo
+# recastnavigation
+printf 'recastnavigation...'
+{
+	env GENERATOR="${GENERATOR}" CONFIGURATION="${CONFIGURATION}" ${DEPS_INSTALL}/../../CI/build_recastnavigation.sh
+	add_cmake_opts -DRecastNavigation_ROOT="$(pwd)/recastnavigation/build"
 }
 echo
 cd $DEPS_INSTALL/..

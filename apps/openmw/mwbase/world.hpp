@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <deque>
 
 #include <components/esm/cellid.hpp>
 
@@ -52,6 +53,11 @@ namespace MWRender
 namespace MWMechanics
 {
     struct Movement;
+}
+
+namespace DetourNavigator
+{
+    class Navigator;
 }
 
 namespace MWWorld
@@ -595,6 +601,13 @@ namespace MWBase
 
             /// Preload VFX associated with this effect list
             virtual void preloadEffects(const ESM::EffectList* effectList) = 0;
+
+            virtual DetourNavigator::Navigator* getNavigator() const = 0;
+
+            virtual void updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
+                    const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const = 0;
+
+            virtual void setNavMeshNumberToRender(const std::size_t value) = 0;
     };
 }
 

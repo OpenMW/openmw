@@ -46,6 +46,8 @@
 #include <components/esm/loadcell.hpp>
 #include <components/fallback/fallback.hpp>
 
+#include <components/detournavigator/navigator.hpp>
+
 #include <boost/algorithm/string.hpp>
 
 #include "../mwworld/cellstore.hpp"
@@ -63,6 +65,8 @@
 #include "water.hpp"
 #include "terrainstorage.hpp"
 #include "util.hpp"
+#include "navmesh.hpp"
+#include "actorspaths.hpp"
 
 namespace
 {
@@ -189,13 +193,16 @@ namespace MWRender
         Resource::ResourceSystem* mResourceSystem;
     };
 
-    RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                                       const Fallback::Map* fallback, const std::string& resourcePath)
+    RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
+                                       Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
+                                       const Fallback::Map* fallback, const std::string& resourcePath,
+                                       DetourNavigator::Navigator& navigator)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
         , mWorkQueue(workQueue)
         , mUnrefQueue(new SceneUtil::UnrefQueue)
+        , mNavigator(navigator)
         , mLandFogStart(0.f)
         , mLandFogEnd(std::numeric_limits<float>::max())
         , mUnderwaterFogStart(0.f)
@@ -228,6 +235,8 @@ namespace MWRender
 
         mRootNode->addChild(mSceneRoot);
 
+        mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
+        mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
         mPathgrid.reset(new Pathgrid(mRootNode));
 
         mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
@@ -465,6 +474,7 @@ namespace MWRender
     void RenderingManager::removeCell(const MWWorld::CellStore *store)
     {
         mPathgrid->removeCell(store);
+        mActorsPaths->removeCell(store);
         mObjects->removeCell(store);
 
         if (store->getCell()->isExterior())
@@ -482,7 +492,7 @@ namespace MWRender
     {
         mSky->setEnabled(enabled);
     }
-    
+
     bool RenderingManager::toggleBorders()
     {
         mBorders = !mBorders;
@@ -515,6 +525,14 @@ namespace MWRender
                 mask &= ~Mask_Scene;
             mViewer->getCamera()->setCullMask(mask);
             return enabled;
+        }
+        else if (mode == Render_NavMesh)
+        {
+            return mNavMesh->toggle();
+        }
+        else if (mode == Render_ActorsPaths)
+        {
+            return mActorsPaths->toggle();
         }
         return false;
     }
@@ -581,6 +599,28 @@ namespace MWRender
             mWater->update(dt);
         }
 
+        const auto navMeshes = mNavigator.getNavMeshes();
+
+        auto it = navMeshes.begin();
+        for (std::size_t i = 0; it != navMeshes.end() && i < mNavMeshNumber; ++i)
+            ++it;
+        if (it == navMeshes.end())
+        {
+            mNavMesh->reset();
+        }
+        else
+        {
+            try
+            {
+                const auto locked = it->second.lockConst();
+                mNavMesh->update(locked->getValue(), mNavMeshNumber, locked->getGeneration(),
+                                 locked->getNavMeshRevision(), mNavigator.getSettings());
+            }
+            catch (const std::exception& e)
+            {
+                Log(Debug::Error) << "NavMesh render update exception: " << e.what();
+            }
+        }
         mCamera->update(dt, paused);
 
         osg::Vec3f focal, cameraPos;
@@ -642,6 +682,7 @@ namespace MWRender
 
     void RenderingManager::removeObject(const MWWorld::Ptr &ptr)
     {
+        mActorsPaths->remove(ptr);
         mObjects->removeObject(ptr);
         mWater->removeEmitter(ptr);
     }
@@ -749,8 +790,8 @@ namespace MWRender
 
         osg::Vec3 directions[6] = {
             rawCubemap ? osg::Vec3(1,0,0) : osg::Vec3(0,0,1),
-            osg::Vec3(0,0,-1),  
-            osg::Vec3(-1,0,0),   
+            osg::Vec3(0,0,-1),
+            osg::Vec3(-1,0,0),
             rawCubemap ? osg::Vec3(0,0,1) : osg::Vec3(1,0,0),
             osg::Vec3(0,1,0),
             osg::Vec3(0,-1,0)};
@@ -789,7 +830,7 @@ namespace MWRender
         mFieldOfView = fovBackup;
 
         if (rawCubemap)    // for raw cubemap don't run on GPU, just merge the images
-        {    
+        {
             image->allocateImage(cubeSize * 6,cubeSize,images[0]->r(),images[0]->getPixelFormat(),images[0]->getDataType());
 
             for (int i = 0; i < 6; ++i)
@@ -797,7 +838,7 @@ namespace MWRender
 
             return true;
         }
-        
+
         // run on GPU now:
 
         osg::ref_ptr<osg::TextureCubeMap> cubeTexture (new osg::TextureCubeMap);
@@ -1025,6 +1066,7 @@ namespace MWRender
     void RenderingManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
     {
         mObjects->updatePtr(old, updated);
+        mActorsPaths->updatePtr(old, updated);
     }
 
     void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale, bool isMagicVFX)
@@ -1345,5 +1387,19 @@ namespace MWRender
         return mTerrainStorage->getLandManager();
     }
 
+    void RenderingManager::updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
+            const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const
+    {
+        mActorsPaths->update(actor, path, halfExtents, start, end, mNavigator.getSettings());
+    }
 
+    void RenderingManager::removeActorPath(const MWWorld::ConstPtr& actor) const
+    {
+        mActorsPaths->remove(actor);
+    }
+
+    void RenderingManager::setNavMeshNumber(const std::size_t value)
+    {
+        mNavMeshNumber = value;
+    }
 }

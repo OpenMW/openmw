@@ -21,7 +21,7 @@ add_openmw_dir (mwrender
     actors objects renderingmanager animation rotatecontroller sky npcanimation vismask
     creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation
     bulletdebugdraw globalmap characterpreview camera localmap water terrainstorage ripplesimulation
-    renderbin actoranimation landmanager
+    renderbin actoranimation landmanager navmesh actorspaths
     )
 
 add_openmw_dir (mwinput
@@ -70,7 +70,7 @@ add_openmw_dir (mwworld
     )
 
 add_openmw_dir (mwphysics
-    physicssystem trace collisiontype actor convert
+    physicssystem trace collisiontype actor convert object heightfield
     )
 
 add_openmw_dir (mwclass
@@ -117,6 +117,10 @@ include_directories(
     ${FFmpeg_INCLUDE_DIRS}
 )
 
+find_package(RecastNavigation COMPONENTS DebugUtils Detour Recast REQUIRED)
+
+include_directories(SYSTEM ${RecastNavigation_INCLUDE_DIRS})
+
 target_link_libraries(openmw
     ${OSG_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
@@ -133,6 +137,7 @@ target_link_libraries(openmw
     ${FFmpeg_LIBRARIES}
     ${MyGUI_LIBRARIES}
     ${SDL2_LIBRARY}
+    ${RecastNavigation_LIBRARIES}
     "osg-ffmpeg-videoplayer"
     "oics"
     components

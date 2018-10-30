@@ -36,7 +36,7 @@ namespace MWMechanics
         return true;   //Target doesn't exist
 
         //Set the target destination for the actor
-        ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
+        const auto dest = target.getRefData().getPosition().asVec3();
 
         if (pathTo(actor, dest, duration, MWBase::Environment::get().getWorld()->getMaxActivationDistance())) //Stop when you get in activation range
         {

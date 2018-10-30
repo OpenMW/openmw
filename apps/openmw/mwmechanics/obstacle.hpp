@@ -27,15 +27,13 @@ namespace MWMechanics
             // Clear the timers and set the state machine to default
             void clear();
 
-            bool isNormalState() const;
             bool isEvading() const;
 
-            // Returns true if there is an obstacle and an evasive action
-            // should be taken
-            bool check(const MWWorld::Ptr& actor, float duration, float scaleMinimumDistance = 1.0f);
+            // Updates internal state, call each frame for moving actor
+            void update(const MWWorld::Ptr& actor, float duration, float scaleMinimumDistance = 1.0f);
 
             // change direction to try to fix "stuck" actor
-            void takeEvasiveAction(MWMechanics::Movement& actorMovement);
+            void takeEvasiveAction(MWMechanics::Movement& actorMovement) const;
 
         private:
 
