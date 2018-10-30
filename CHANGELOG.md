@@ -1,3 +1,10 @@
+0.46.0
+------
+
+    Feature #2229: Improve pathfinding AI
+    Feature #3442: Default values for fallbacks from ini file
+
+
 0.45.0
 ------
 
