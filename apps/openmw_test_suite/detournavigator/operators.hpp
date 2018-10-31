@@ -3,7 +3,6 @@
 
 #include <components/bullethelpers/operators.hpp>
 #include <components/detournavigator/debug.hpp>
-#include <components/osghelpers/operators.hpp>
 
 #include <deque>
 #include <iomanip>
