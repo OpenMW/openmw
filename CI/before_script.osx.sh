@@ -3,9 +3,6 @@
 export CXX=clang++
 export CC=clang
 
-env GENERATOR='Unix Makefiles' CONFIGURATION=Release CI/build_recastnavigation.sh
-RECASTNAVIGATION_DIR="$(pwd)/recastnavigation/build"
-
 DEPENDENCIES_ROOT="/private/tmp/openmw-deps/openmw-deps"
 QT_PATH=`brew --prefix qt`
 mkdir build
@@ -20,6 +17,5 @@ cmake \
 -D DESIRED_QT_VERSION=5 \
 -D BUILD_ESMTOOL=FALSE \
 -D BUILD_MYGUI_PLUGIN=FALSE \
--D RecastNavigation_ROOT="${RECASTNAVIGATION_DIR}" \
 -G"Unix Makefiles" \
 ..

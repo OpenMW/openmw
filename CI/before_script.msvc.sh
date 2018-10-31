@@ -648,13 +648,6 @@ printf "SDL 2.0.7... "
 	echo Done.
 }
 echo
-# recastnavigation
-printf 'recastnavigation...'
-{
-	env GENERATOR="${GENERATOR}" CONFIGURATION="${CONFIGURATION}" ${DEPS_INSTALL}/../../CI/build_recastnavigation.sh
-	add_cmake_opts -DRecastNavigation_ROOT="$(pwd)/recastnavigation/build"
-}
-echo
 cd $DEPS_INSTALL/..
 echo
 echo "Setting up OpenMW build..."

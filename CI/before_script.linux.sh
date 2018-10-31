@@ -5,9 +5,6 @@ free -m
 env GENERATOR='Unix Makefiles' CONFIGURATION=Release CI/build_googletest.sh
 GOOGLETEST_DIR="$(pwd)/googletest/build"
 
-env GENERATOR='Unix Makefiles' CONFIGURATION=Release CI/build_recastnavigation.sh
-RECASTNAVIGATION_DIR="$(pwd)/recastnavigation/build"
-
 mkdir build
 cd build
 export CODE_COVERAGE=1
@@ -21,5 +18,4 @@ ${ANALYZE}cmake \
     -DUSE_SYSTEM_TINYXML=TRUE \
     -DGTEST_ROOT="${GOOGLETEST_DIR}" \
     -DGMOCK_ROOT="${GOOGLETEST_DIR}" \
-    -DRecastNavigation_ROOT="${RECASTNAVIGATION_DIR}" \
     ..
