@@ -213,10 +213,6 @@ include_directories(${Bullet_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
-find_package(RecastNavigation COMPONENTS DebugUtils Detour Recast REQUIRED)
-
-include_directories(SYSTEM ${RecastNavigation_INCLUDE_DIRS})
-
 target_link_libraries(components
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
@@ -235,7 +231,9 @@ target_link_libraries(components
     ${SDL2_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
     ${MyGUI_LIBRARIES}
-    ${RecastNavigation_LIBRARIES}
+    RecastNavigation::DebugUtils
+    RecastNavigation::Detour
+    RecastNavigation::Recast
     )
 
 if (WIN32)
