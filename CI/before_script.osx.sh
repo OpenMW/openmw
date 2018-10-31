@@ -3,7 +3,7 @@
 export CXX=clang++
 export CC=clang
 
-env GENERATOR='Unix Makefiles' CONFIGURATION=Release CI/build_recastnavigation.sh
+env GENERATOR='Unix Makefiles' CONFIGURATION=Release BUILD_DIR="$(pwd)/recastnavigation/build" CI/build_recastnavigation.sh
 RECASTNAVIGATION_DIR="$(pwd)/recastnavigation/build"
 
 DEPENDENCIES_ROOT="/private/tmp/openmw-deps/openmw-deps"

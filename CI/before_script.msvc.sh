@@ -649,10 +649,10 @@ printf "SDL 2.0.7... "
 }
 echo
 # recastnavigation
-printf 'recastnavigation...'
+printf 'recastnavigation... '
 {
-	env GENERATOR="${GENERATOR}" CONFIGURATION="${CONFIGURATION}" ${DEPS_INSTALL}/../../CI/build_recastnavigation.sh
-	add_cmake_opts -DRecastNavigation_ROOT="$(pwd)/recastnavigation/build"
+	env GENERATOR="${GENERATOR}" CONFIGURATION="${BUILD_CONFIG}" BUILD_DIR="${DEPS_INSTALL}/recastnavigation/${BUILD_CONFIG}" ${DEPS}/../CI/build_recastnavigation.sh
+	add_cmake_opts -DRecastNavigation_ROOT="${DEPS_INSTALL}/recastnavigation/${BUILD_CONFIG}"
 }
 echo
 cd $DEPS_INSTALL/..
