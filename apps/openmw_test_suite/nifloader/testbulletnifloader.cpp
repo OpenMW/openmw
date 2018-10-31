@@ -115,17 +115,6 @@ static std::ostream& operator <<(std::ostream& stream, const btCollisionShape* v
     return value ? stream << "&" << *value : stream << "nullptr";
 }
 
-namespace osg
-{
-    static std::ostream& operator <<(std::ostream& stream, const Vec3f& value)
-    {
-        return stream << "osg::Vec3f {"
-            << value.x() << ", "
-            << value.y() << ", "
-            << value.z() << "}";
-    }
-}
-
 namespace std
 {
     static std::ostream& operator <<(std::ostream& stream, const map<int, int>& value)
@@ -153,7 +142,7 @@ namespace Resource
         return stream << "Resource::BulletShape {"
             << value.mCollisionShape << ", "
             << value.mAvoidCollisionShape << ", "
-            << value.mCollisionBoxHalfExtents << ", "
+            << "osg::Vec3f {" << value.mCollisionBoxHalfExtents << "}" << ", "
             << value.mAnimatedShapes
             << "}";
     }

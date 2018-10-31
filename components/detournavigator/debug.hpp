@@ -3,9 +3,10 @@
 
 #include "tilebounds.hpp"
 
+#include <osg/io_utils>
+
 #include <components/bullethelpers/operators.hpp>
 #include <components/misc/guarded.hpp>
-#include <components/osghelpers/operators.hpp>
 
 #include <chrono>
 #include <fstream>
