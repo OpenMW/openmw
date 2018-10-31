@@ -1,11 +1,11 @@
 #!/bin/sh -e
 
 if [ ! -d recastnavigation ]; then
-	git clone https://github.com/recastnavigation/recastnavigation.git
+    git clone https://github.com/recastnavigation/recastnavigation.git
 else
-	cd recastnavigation
-	git pull
-	cd ..
+    cd recastnavigation
+    git pull
+    cd ..
 fi
 
 cd recastnavigation
@@ -22,7 +22,7 @@ cmake \
     -DCMAKE_INSTALL_PREFIX=. \
     -G "${GENERATOR}" \
     "${SOURCE_DIR}" \
-	>/dev/null
+    >/dev/null
 printf "Done. Building... "
 cmake --build . --config "${CONFIGURATION}" >/dev/null
 printf "Done. Installing... "
