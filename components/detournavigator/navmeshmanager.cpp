@@ -6,6 +6,8 @@
 #include "navmeshcacheitem.hpp"
 #include "settings.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include <DetourNavMesh.h>
 
 namespace
@@ -95,7 +97,7 @@ namespace DetourNavigator
             return;
         mCache.insert(std::make_pair(agentHalfExtents,
             std::make_shared<GuardedNavMeshCacheItem>(makeEmptyNavMesh(mSettings), ++mGenerationCounter)));
-        log("cache add for agent=", agentHalfExtents);
+        Log(Debug::Debug) << "cache add for agent=" << agentHalfExtents;
     }
 
     bool NavMeshManager::reset(const osg::Vec3f& agentHalfExtents)
@@ -193,9 +195,9 @@ namespace DetourNavigator
         mAsyncNavMeshUpdater.post(agentHalfExtents, cached, playerTile, tilesToPost);
         if (changedTiles != mChangedTiles.end())
             changedTiles->second.clear();
-        log("cache update posted for agent=", agentHalfExtents,
-            " playerTile=", lastPlayerTile->second,
-            " recastMeshManagerRevision=", lastRevision);
+        Log(Debug::Debug) << "cache update posted for agent=" << agentHalfExtents <<
+            " playerTile=" << lastPlayerTile->second <<
+            " recastMeshManagerRevision=" << lastRevision;
     }
 
     void NavMeshManager::wait()
