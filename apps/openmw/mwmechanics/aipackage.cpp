@@ -173,7 +173,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
     const auto pointTolerance = std::min(actor.getClass().getSpeed(actor), DEFAULT_TOLERANCE);
 
-    mPathFinder.update(position, pointTolerance, destTolerance);
+    mPathFinder.update(position, pointTolerance, DEFAULT_TOLERANCE);
 
     if (isDestReached || mPathFinder.checkPathCompleted()) // if path is finished
     {
