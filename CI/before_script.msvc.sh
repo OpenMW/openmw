@@ -328,7 +328,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	if [ -z $APPVEYOR ]; then
 		download "Boost 1.67.0" \
 			"https://sourceforge.net/projects/boost/files/boost-binaries/1.67.0/boost_1_67_0-msvc-${MSVC_VER}-${BITS}.exe" \
-			"boost-1.67.0-msvc${MSVC_YEAR}-win${BITS}.exe"
+			"boost-1.67.0-msvc${MSVC_VER}-win${BITS}.exe"
 	fi
 
 	# Bullet
@@ -434,7 +434,7 @@ fi
 			rm -rf Boost
 			CI_EXTRA_INNO_OPTIONS=""
 			[ -n "$CI" ] && CI_EXTRA_INNO_OPTIONS="//SUPPRESSMSGBOXES //LOG='boost_install.log'"
-			"${DEPS}/boost-1.67.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="${CWD_DRIVE_ROOT}" //VERYSILENT //NORESTART ${CI_EXTRA_INNO_OPTIONS}
+			"${DEPS}/boost-1.67.0-msvc${MSVC_VER}-win${BITS}.exe" //DIR="${CWD_DRIVE_ROOT}" //VERYSILENT //NORESTART ${CI_EXTRA_INNO_OPTIONS}
 			mv "${CWD_DRIVE_ROOT_BASH}" "${BOOST_SDK}"
 		fi
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
@@ -646,13 +646,6 @@ printf "SDL 2.0.7... "
 	export SDL2DIR="$(real_pwd)/SDL2-2.0.7"
 	add_runtime_dlls "$(pwd)/SDL2-2.0.7/lib/x${ARCHSUFFIX}/SDL2.dll"
 	echo Done.
-}
-echo
-# recastnavigation
-printf 'recastnavigation...'
-{
-	env GENERATOR="${GENERATOR}" CONFIGURATION="${CONFIGURATION}" ${DEPS_INSTALL}/../../CI/build_recastnavigation.sh
-	add_cmake_opts -DRecastNavigation_ROOT="$(pwd)/recastnavigation/build"
 }
 echo
 cd $DEPS_INSTALL/..

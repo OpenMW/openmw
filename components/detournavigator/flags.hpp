@@ -17,7 +17,8 @@ namespace DetourNavigator
 
     inline std::ostream& operator <<(std::ostream& stream, const Flag value)
     {
-        switch (value) {
+        switch (value)
+        {
             case Flag_none:
                 return stream << "none";
             case Flag_walk:
@@ -27,6 +28,8 @@ namespace DetourNavigator
             case Flag_openDoor:
                 return stream << "openDoor";
         }
+
+        return stream;
     }
 
     struct WriteFlags

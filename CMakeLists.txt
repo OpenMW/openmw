@@ -469,7 +469,7 @@ if(WIN32)
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Debug/resources" DESTINATION "." CONFIGURATIONS Debug)
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Release/resources" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
-    
+
     FILE(GLOB plugin_dir_debug "${OpenMW_BINARY_DIR}/Debug/osgPlugins-*")
     FILE(GLOB plugin_dir_release "${OpenMW_BINARY_DIR}/Release/osgPlugins-*")
     INSTALL(DIRECTORY ${plugin_dir_debug} DESTINATION "." CONFIGURATIONS Debug)
@@ -536,6 +536,11 @@ if(WIN32)
 endif(WIN32)
 
 # Extern
+set(RECASTNAVIGATION_DEMO OFF CACHE BOOL "Do not build RecastDemo")
+set(RECASTNAVIGATION_STATIC ON CACHE BOOL "Build recastnavigation static libraries")
+set(RECASTNAVIGATION_TESTS OFF CACHE BOOL "Do not build recastnavigation tests")
+
+add_subdirectory (extern/recastnavigation)
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
 if (BUILD_OPENCS)

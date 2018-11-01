@@ -117,10 +117,6 @@ include_directories(
     ${FFmpeg_INCLUDE_DIRS}
 )
 
-find_package(RecastNavigation COMPONENTS DebugUtils Detour Recast REQUIRED)
-
-include_directories(SYSTEM ${RecastNavigation_INCLUDE_DIRS})
-
 target_link_libraries(openmw
     ${OSG_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
