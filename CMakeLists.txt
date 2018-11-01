@@ -537,6 +537,7 @@ endif(WIN32)
 
 # Extern
 set(RECASTNAVIGATION_DEMO OFF CACHE BOOL "Do not build RecastDemo")
+set(RECASTNAVIGATION_STATIC ON CACHE BOOL "Build recastnavigation static libraries")
 
 add_subdirectory (extern/recastnavigation)
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
