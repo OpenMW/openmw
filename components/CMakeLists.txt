@@ -26,6 +26,12 @@ else (GIT_CHECKOUT)
     configure_resource_file(${VERSION_IN_FILE} ${VERSION_FILE_PATH_BASE} ${VERSION_FILE_PATH_RELATIVE})
 endif (GIT_CHECKOUT)
 
+set(RECASTNAVIGATION_DEMO OFF CACHE BOOL "Do not build RecastDemo")
+set(RECASTNAVIGATION_STATIC ON CACHE BOOL "Build recastnavigation static libraries")
+set(RECASTNAVIGATION_TESTS OFF CACHE BOOL "Do not build recastnavigation tests")
+
+add_subdirectory(recastnavigation)
+
 # source files
 
 add_component_dir (settings
