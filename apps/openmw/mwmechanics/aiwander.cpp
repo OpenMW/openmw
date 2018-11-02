@@ -124,14 +124,13 @@ namespace MWMechanics
      */
     bool AiWander::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
-        // get or create temporary storage
-        AiWanderStorage& storage = state.get<AiWanderStorage>();
-
-        const MWWorld::CellStore*& currentCell = storage.mCell;
         MWMechanics::CreatureStats& cStats = actor.getClass().getCreatureStats(actor);
-        if(cStats.isDead() || cStats.getHealth().getCurrent() <= 0)
+        if (cStats.isDead() || cStats.getHealth().getCurrent() <= 0)
             return true; // Don't bother with dead actors
 
+        // get or create temporary storage
+        AiWanderStorage& storage = state.get<AiWanderStorage>();
+        const MWWorld::CellStore*& currentCell = storage.mCell;
         bool cellChange = currentCell && (actor.getCell() != currentCell);
         if(!currentCell || cellChange)
         {
@@ -159,8 +158,7 @@ namespace MWMechanics
             }
             else
             {
-                const auto world = MWBase::Environment::get().getWorld();
-                const auto playerHalfExtents = world->getHalfExtents(world->getPlayerPtr());
+                const osg::Vec3f playerHalfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(getPlayer()); // Using player half extents for better performance
                 mPathFinder.buildPath(actor, pos.asVec3(), mDestination, actor.getCell(),
                     getPathGridGraph(actor.getCell()), playerHalfExtents, getNavigatorFlags(actor));
             }
@@ -279,9 +277,7 @@ namespace MWMechanics
         if (mHasDestination)
             return mDestination;
 
-        const ESM::Pathgrid::Point currentPosition = actor.getRefData().getPosition().pos;
-        const osg::Vec3f currentPositionVec3f = osg::Vec3f(currentPosition.mX, currentPosition.mY, currentPosition.mZ);
-        return currentPositionVec3f;
+        return actor.getRefData().getPosition().asVec3();
     }
 
     bool AiWander::isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage)
@@ -314,18 +310,17 @@ namespace MWMechanics
             const float destinationX = mInitialActorPosition.x() + wanderRadius * std::cos(randomDirection);
             const float destinationY = mInitialActorPosition.y() + wanderRadius * std::sin(randomDirection);
             const float destinationZ = mInitialActorPosition.z();
-            const osg::Vec3f destinationPosition(destinationX, destinationY, destinationZ);
             mDestination = osg::Vec3f(destinationX, destinationY, destinationZ);
 
             // Check if land creature will walk onto water or if water creature will swim onto land
             if ((!isWaterCreature && !destinationIsAtWater(actor, mDestination)) ||
                 (isWaterCreature && !destinationThroughGround(currentPosition, mDestination)))
             {
-                const auto world = MWBase::Environment::get().getWorld();;
-                const auto playerHalfExtents = world->getHalfExtents(world->getPlayerPtr());
-                mPathFinder.buildPath(actor, currentPosition, destinationPosition, actor.getCell(),
+                // Using player half extents for better performance
+                const osg::Vec3f playerHalfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(getPlayer());
+                mPathFinder.buildPath(actor, currentPosition, mDestination, actor.getCell(),
                     getPathGridGraph(actor.getCell()), playerHalfExtents, getNavigatorFlags(actor));
-                mPathFinder.addPointToPath(destinationPosition);
+                mPathFinder.addPointToPath(mDestination);
 
                 if (mPathFinder.isPathConstructed())
                 {
@@ -520,9 +515,9 @@ namespace MWMechanics
             // Only say Idle voices when player is in LOS
             // A bit counterintuitive, likely vanilla did this to reduce the appearance of
             // voices going through walls?
-            const ESM::Position& pos = actor.getRefData().getPosition();
-            if (roll < x && (player.getRefData().getPosition().asVec3() - pos.asVec3()).length2()
-                < 3000 * 3000 // maybe should be fAudioVoiceDefaultMaxDistance*fAudioMaxDistanceMult instead
+            const osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
+            const osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
+            if (roll < x && (playerPos - actorPos).length2() < 3000 * 3000 // maybe should be fAudioVoiceDefaultMaxDistance*fAudioMaxDistanceMult instead
                 && MWBase::Environment::get().getWorld()->getLOS(player, actor))
                 MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
         }
@@ -541,13 +536,12 @@ namespace MWMechanics
         MWWorld::Ptr player = getPlayer();
         osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
         osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
-        float playerDistSqr = (playerPos - actorPos).length2();
 
         int& greetingTimer = storage.mGreetingTimer;
         AiWanderStorage::GreetingState& greetingState = storage.mSaidGreeting;
         if (greetingState == AiWanderStorage::Greet_None)
         {
-            if ((playerDistSqr <= helloDistance*helloDistance) &&
+            if ((playerPos - actorPos).length2() <= helloDistance*helloDistance &&
                 !player.getClass().getCreatureStats(player).isDead() && MWBase::Environment::get().getWorld()->getLOS(player, actor)
                 && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
                 greetingTimer++;
@@ -583,7 +577,7 @@ namespace MWMechanics
         if (greetingState == AiWanderStorage::Greet_Done)
         {
             float resetDist = 2 * helloDistance;
-            if (playerDistSqr >= resetDist*resetDist)
+            if ((playerPos - actorPos).length2() >= resetDist*resetDist)
                 greetingState = AiWanderStorage::Greet_None;
         }
     }
@@ -605,10 +599,10 @@ namespace MWMechanics
         ToWorldCoordinates(dest, storage.mCell->getCell());
 
         // actor position is already in world coordinates
-        const auto start = actorPos.asVec3();
+        const osg::Vec3f start = actorPos.asVec3();
 
         // don't take shortcuts for wandering
-        const auto destVec3f = PathFinder::makeOsgVec3(dest);
+        const osg::Vec3f destVec3f = PathFinder::makeOsgVec3(dest);
         mPathFinder.buildPathByPathgrid(start, destVec3f, actor.getCell(), getPathGridGraph(actor.getCell()));
 
         if (mPathFinder.isPathConstructed())
