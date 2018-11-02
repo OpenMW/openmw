@@ -57,7 +57,6 @@ install:
 
 before_build:
     - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -c %configuration% -p %PLATFORM% -v %msvc% -V
-    - sh: ./CI/before_script.linux.sh
     - sh: sudo add-apt-repository ppa:openmw/openmw -y
     - sh: sudo apt-get update
     - sh: sudo apt-get --yes install build-essential cmake pkg-config git
@@ -65,6 +64,7 @@ before_build:
     - sh: sudo apt-get --yes install libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
     - sh: sudo apt-get --yes install libsdl2-dev libqt4-dev libopenal-dev libunshield-dev libtinyxml-dev
     - sh: sudo apt-get --yes install libbullet-dev libswresample-dev libopenscenegraph-3.4-dev libmygui-dev
+    - sh: ./CI/before_script.linux.sh
 
 build_script:
     - cmd: if %PLATFORM%==Win32 set build=MSVC%msvc%_32
