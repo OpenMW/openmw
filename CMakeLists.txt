@@ -614,7 +614,6 @@ if (WIN32)
     if (BUILD_OPENMW)
         # Release builds don't use the debug console
         set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-        set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:Release>:_WINDOWS>)
         set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
     endif()
 
