@@ -276,7 +276,7 @@ if (APPLE)
 endif (APPLE)
 
 # Set up DEBUG define
-set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_DEBUG DEBUG=1)
+set_directory_properties(PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DEBUG=1>)
 
 if (NOT APPLE)
     set(OPENMW_MYGUI_FILES_ROOT ${OpenMW_BINARY_DIR})
@@ -607,7 +607,7 @@ if (WIN32)
     if (USE_DEBUG_CONSOLE AND BUILD_OPENMW)
       set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
       set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-      set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+      set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:Debug>:_CONSOLE>)
     elseif (BUILD_OPENMW)
       # Turn off debug console, debug output will be written to visual studio output instead
       set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
@@ -617,7 +617,7 @@ if (WIN32)
     if (BUILD_OPENMW)
         # Release builds don't use the debug console
         set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-        set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_WINDOWS")
+        set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:Release>:_WINDOWS>)
         set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
     endif()
 
