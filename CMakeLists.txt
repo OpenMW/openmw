@@ -275,9 +275,6 @@ if (APPLE)
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 endif (APPLE)
 
-# Set up DEBUG define
-set_directory_properties(PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DEBUG=1>)
-
 if (NOT APPLE)
     set(OPENMW_MYGUI_FILES_ROOT ${OpenMW_BINARY_DIR})
     set(OPENMW_SHADERS_ROOT ${OpenMW_BINARY_DIR})
