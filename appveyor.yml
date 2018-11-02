@@ -8,10 +8,13 @@ branches:
 
 environment:
     matrix:
-        - msvc: 2015
-          APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-        - msvc: 2017
-          APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+          msvc: 2015
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+          msvc: 2017
+        - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1604
+        - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+
 matrix:
     allow_failures:
         - msvc: 2015
