@@ -63,6 +63,7 @@ namespace DetourNavigator
         if (tileValues == agentValues->second.end())
             return Value();
 
+        // TODO: use different function to make key to avoid unnecessary std::string allocation
         const auto tile = tileValues->second.find(makeNavMeshKey(recastMesh, offMeshConnections));
         if (tile == tileValues->second.end())
             return Value();
@@ -96,6 +97,7 @@ namespace DetourNavigator
             removeLeastRecentlyUsed();
 
         const auto iterator = mFreeItems.emplace(mFreeItems.end(), agentHalfExtents, changedTile, navMeshKey);
+        // TODO: use std::string_view or some alternative to avoid navMeshKey copy into both mFreeItems and mValues
         const auto emplaced = mValues[agentHalfExtents][changedTile].emplace(navMeshKey, iterator);
 
         if (!emplaced.second)
