@@ -13,7 +13,9 @@ environment:
         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
           msvc: 2017
         - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1604
+          ubuntu_version: 1604
         - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+          ubuntu_version: 1804
 
 matrix:
     allow_failures:
@@ -76,6 +78,7 @@ build_script:
 after_build:
     - cmd: if %PLATFORM%==x64 7z a OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%.zip %APPVEYOR_BUILD_FOLDER%\MSVC%msvc%_64\%configuration%\ -xr"!*.pdb"
     #- cmd: if %PLATFORM%==x64 7z a OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%_pdb.zip %APPVEYOR_BUILD_FOLDER%\MSVC%msvc%_64\%configuration%\*.pdb
+    - sh: 7z a OpenMW_Ubuntu_${ubuntu_version}_${platform}_${appveyor_pull_request_number}_${appveyor_pull_request_head_commit}.zip ${APPVEYOR_BUILD_FOLDER}
 
 test: off
 
@@ -91,3 +94,6 @@ artifacts:
     name: OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%
   #- path: OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%_pdb.zip
   #  name: OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%_pdb
+  - path: OpenMW_Ubuntu_${ubuntu_version}_${platform}_${appveyor_pull_request_number}_${appveyor_pull_request_head_commit}.zip
+    name: OpenMW_Ubuntu_${ubuntu_version}_${platform}_${appveyor_pull_request_number}_${appveyor_pull_request_head_commit}
+
