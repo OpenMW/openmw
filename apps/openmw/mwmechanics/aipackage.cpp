@@ -104,10 +104,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     const osg::Vec3f position = actor.getRefData().getPosition().asVec3(); //position of the actor
     MWBase::World* world = MWBase::Environment::get().getWorld();
 
-    {
-        const osg::Vec3f halfExtents = world->getHalfExtents(actor);
-        world->updateActorPath(actor, mPathFinder.getPath(), halfExtents, position, dest);
-    }
+    const osg::Vec3f halfExtents = world->getHalfExtents(actor);
 
     /// Stops the actor when it gets too close to a unloaded cell
     //... At current time, this test is unnecessary. AI shuts down when actor is more than "actors processing range" setting value
@@ -116,6 +113,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     if (isNearInactiveCell(position))
     {
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+        world->updateActorPath(actor, mPathFinder.getPath(), halfExtents, position, dest);
         return false;
     }
 
@@ -180,8 +178,11 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         // turn to destination point
         zTurn(actor, getZAngleToPoint(position, dest));
         smoothTurn(actor, getXAngleToPoint(position, dest), 0);
+        world->removeActorPath(actor);
         return true;
     }
+
+    world->updateActorPath(actor, mPathFinder.getPath(), halfExtents, position, dest);
 
     if (mRotateOnTheRunChecks == 0
         || isReachableRotatingOnTheRun(actor, *mPathFinder.getPath().begin())) // to prevent circling around a path point

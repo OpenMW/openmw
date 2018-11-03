@@ -1603,6 +1603,7 @@ namespace MWMechanics
                     continue;
             }
 
+            MWBase::Environment::get().getWorld()->removeActorPath(iter->first);
             CharacterController::KillResult killResult = iter->second->getCharacterController()->kill();
             if (killResult == CharacterController::Result_DeathAnimStarted)
             {

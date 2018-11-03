@@ -3790,6 +3790,11 @@ namespace MWWorld
         mRendering->updateActorPath(actor, path, halfExtents, start, end);
     }
 
+    void World::removeActorPath(const MWWorld::ConstPtr& actor) const
+    {
+        mRendering->removeActorPath(actor);
+    }
+
     void World::setNavMeshNumberToRender(const std::size_t value)
     {
         mRendering->setNavMeshNumber(value);
