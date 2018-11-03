@@ -38,19 +38,25 @@ namespace Misc
     class ScopeGuarded
     {
         public:
-            ScopeGuarded() = default;
+            ScopeGuarded()
+                : mMutex()
+                , mValue()
+            {}
 
             ScopeGuarded(const T& value)
-                : mValue(value)
+                : mMutex()
+                , mValue(value)
             {}
 
             ScopeGuarded(T&& value)
-                : mValue(std::move(value))
+                : mMutex()
+                , mValue(std::move(value))
             {}
 
             template <class ... Args>
             ScopeGuarded(Args&& ... args)
-                : mValue(std::forward<Args>(args) ...)
+                : mMutex()
+                , mValue(std::forward<Args>(args) ...)
             {}
 
             ScopeGuarded(const ScopeGuarded& other)
@@ -83,7 +89,7 @@ namespace Misc
     {
         public:
             SharedGuarded()
-                : mMutex(std::make_shared<std::mutex>())
+                : mMutex(std::make_shared<std::mutex>()), mValue()
             {}
 
             SharedGuarded(std::shared_ptr<T> value)
