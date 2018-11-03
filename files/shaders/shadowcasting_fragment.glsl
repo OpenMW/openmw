@@ -16,6 +16,6 @@ void main()
         gl_FragData[0].a = alphaPassthrough;
 
     // Prevent translucent things casting shadow (including the player using an invisibility effect)
-    if (gl_FragData[0].a < 0.5)
+    if (gl_FragData[0].a <= 0.5)
         discard;
 }
