@@ -1,6 +1,7 @@
 0.46.0
 ------
 
+    Bug #3623: Fix HiDPI on Windows
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
     Task #4686: Upgrade media decoder to a more current FFmpeg API
