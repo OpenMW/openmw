@@ -194,7 +194,11 @@ download() {
 }
 
 real_pwd() {
-	pwd | sed "s,/\(.\),\1:,"
+	if type cygpath >/dev/null 2>&1; then
+		cygpath -am "$PWD"
+	else
+		pwd # not git bash, Cygwin or the like
+	fi
 }
 
 CMAKE_OPTS=""
