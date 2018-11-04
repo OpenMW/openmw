@@ -132,6 +132,7 @@ namespace DetourNavigator
             return;
 
         mUsedNavMeshDataSize -= static_cast<std::size_t>(item.mNavMeshData.mSize) + item.mNavMeshKey.size();
+        mFreeNavMeshDataSize -= static_cast<std::size_t>(item.mNavMeshData.mSize) + item.mNavMeshKey.size();
         mFreeItems.pop_back();
 
         tileValues->second.Map.erase(value);
