@@ -157,7 +157,7 @@ void Objects::removeCell(const MWWorld::CellStore* store)
                 invStore.setContListener(nullptr);
             }
 
-            mObjects.erase(iter++);
+            iter = mObjects.erase(iter);
         }
         else
             ++iter;

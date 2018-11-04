@@ -226,7 +226,7 @@ namespace MWMechanics
             const ESM::Spell *spell = iter->first;
             if (spell->mData.mType == ESM::Spell::ST_Disease)
             {
-                mSpells.erase(iter++);
+                iter = mSpells.erase(iter);
                 mSpellsChanged = true;
             }
             else
@@ -241,7 +241,7 @@ namespace MWMechanics
             const ESM::Spell *spell = iter->first;
             if (spell->mData.mType == ESM::Spell::ST_Blight && !hasCorprusEffect(spell))
             {
-                mSpells.erase(iter++);
+                iter = mSpells.erase(iter);
                 mSpellsChanged = true;
             }
             else
@@ -256,7 +256,7 @@ namespace MWMechanics
             const ESM::Spell *spell = iter->first;
             if (hasCorprusEffect(spell))
             {
-                mSpells.erase(iter++);
+                iter = mSpells.erase(iter);
                 mSpellsChanged = true;
             }
             else
@@ -271,7 +271,7 @@ namespace MWMechanics
             const ESM::Spell *spell = iter->first;
             if (spell->mData.mType == ESM::Spell::ST_Curse)
             {
-                mSpells.erase(iter++);
+                iter = mSpells.erase(iter);
                 mSpellsChanged = true;
             }
             else

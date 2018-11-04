@@ -1109,7 +1109,7 @@ namespace MWMechanics
                 itemCount -= toRemove;
                 ownerIt->second -= toRemove;
                 if (ownerIt->second == 0)
-                    owners.erase(ownerIt++);
+                    ownerIt = owners.erase(ownerIt);
                 else
                     ++ownerIt;
             }

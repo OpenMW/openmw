@@ -63,7 +63,7 @@ void Objects::dropObjects (const MWWorld::CellStore *cellStore)
         if(iter->first.getCell()==cellStore)
         {
             delete iter->second;
-            mObjects.erase(iter++);
+            iter = mObjects.erase(iter);
         }
         else
             ++iter;

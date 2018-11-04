@@ -31,7 +31,7 @@ namespace CSMPrefs
         {
             if (it->second == shortcut)
             {
-                mShortcuts.erase(it++);
+                it = mShortcuts.erase(it);
             }
             else
             {

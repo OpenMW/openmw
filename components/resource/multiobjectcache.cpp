@@ -30,7 +30,7 @@ namespace Resource
                 if (oitr->second->referenceCount() <= 1)
                 {
                     objectsToRemove.push_back(oitr->second);
-                    _objectCache.erase(oitr++);
+                    oitr = _objectCache.erase(oitr);
                 }
                 else
                 {

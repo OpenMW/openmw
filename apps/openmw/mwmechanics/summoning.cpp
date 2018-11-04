@@ -93,7 +93,7 @@ namespace MWMechanics
             {
                 // Effect has ended
                 MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mActor, it->second);
-                creatureMap.erase(it++);
+                it = creatureMap.erase(it);
                 continue;
             }
             ++it;
@@ -133,7 +133,7 @@ namespace MWMechanics
                     mActor.getClass().getInventoryStore(mActor).purgeEffect(it->first.first, it->first.second);
 
                 MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mActor, it->second);
-                creatureMap.erase(it++);
+                it = creatureMap.erase(it);
             }
             else
                 ++it;

@@ -1240,7 +1240,7 @@ namespace MWMechanics
             if((iter->first.isInCell() && iter->first.getCell()==cellStore) && iter->first != ignore)
             {
                 delete iter->second;
-                mActors.erase(iter++);
+                iter = mActors.erase(iter);
             }
             else
                 ++iter;

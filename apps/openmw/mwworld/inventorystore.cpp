@@ -627,7 +627,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
             }
         }
         if (!found)
-            mPermanentMagicEffectMagnitudes.erase(it++);
+            it = mPermanentMagicEffectMagnitudes.erase(it);
         else
             ++it;
     }

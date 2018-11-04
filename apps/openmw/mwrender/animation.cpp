@@ -912,7 +912,7 @@ namespace MWRender
         while(stateiter != mStates.end())
         {
             if(stateiter->second.mPriority == priority)
-                mStates.erase(stateiter++);
+                stateiter = mStates.erase(stateiter);
             else
                 ++stateiter;
         }
@@ -1338,7 +1338,7 @@ namespace MWRender
 
             if(!state.mPlaying && state.mAutoDisable)
             {
-                mStates.erase(stateiter++);
+                stateiter = mStates.erase(stateiter);
 
                 resetActiveGroups();
             }

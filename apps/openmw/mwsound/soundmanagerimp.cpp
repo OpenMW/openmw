@@ -1061,7 +1061,7 @@ namespace MWSound
             {
                 mOutput->finishStream(sound);
                 mUnusedStreams.push_back(sound);
-                mActiveSaySounds.erase(sayiter++);
+                sayiter = mActiveSaySounds.erase(sayiter);
             }
             else
             {

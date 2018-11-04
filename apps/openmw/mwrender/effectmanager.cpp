@@ -65,7 +65,7 @@ void EffectManager::update(float dt)
         if (it->second.mAnimTime->getTime() >= it->second.mMaxControllerLength)
         {
             mParentNode->removeChild(it->first);
-            mEffects.erase(it++);
+            it = mEffects.erase(it);
         }
         else
             ++it;

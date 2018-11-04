@@ -36,7 +36,7 @@ namespace MWWorld
             for (typename List::iterator it = mList.begin(); it != mList.end();)
             {
                 if (*it == refNum)
-                    mList.erase(it++);
+                    it = mList.erase(it);
                 else
                     ++it;
             }

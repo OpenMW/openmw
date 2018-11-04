@@ -301,7 +301,7 @@ namespace MWWorld
                 mUnrefQueue->push(it->second.mWorkItem);
             }
 
-            mPreloadCells.erase(it++);
+            it = mPreloadCells.erase(it);
         }
     }
 
@@ -316,7 +316,7 @@ namespace MWWorld
                     it->second.mWorkItem->abort();
                     mUnrefQueue->push(it->second.mWorkItem);
                 }
-                mPreloadCells.erase(it++);
+                it = mPreloadCells.erase(it);
             }
             else
                 ++it;

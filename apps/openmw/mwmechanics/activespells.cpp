@@ -246,7 +246,7 @@ namespace MWMechanics
             }
 
             if (Misc::Rng::roll0to99() < chance)
-                mSpells.erase(it++);
+                it = mSpells.erase(it);
             else
                 ++it;
         }

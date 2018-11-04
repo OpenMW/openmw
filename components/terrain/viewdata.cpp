@@ -151,7 +151,7 @@ void ViewDataMap::clearUnusedViews(unsigned int frame)
             vd->setViewer(nullptr);
             vd->clear();
             mUnusedViews.push_back(vd);
-            mViews.erase(it++);
+            it = mViews.erase(it);
         }
         else
             ++it;

@@ -98,7 +98,7 @@ void ObjectCache::removeExpiredObjectsInCache(double expiryTime)
             if (oitr->second.second<=expiryTime)
             {
                 objectsToRemove.push_back(oitr->second.first);
-                _objectCache.erase(oitr++);
+                oitr = _objectCache.erase(oitr);
             }
             else
             {

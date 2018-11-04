@@ -531,7 +531,7 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
                 //Remove it, from shop,
                 remove(it->first.first, itemCount, ptr);//ptr is the NPC
                 //And remove it from map, so that when we restock, the new item will have proper parent.
-                mLevelledItemMap.erase(it++);
+                it = mLevelledItemMap.erase(it);
                 continue;
             }
             //Create the entry if it does not exist yet
@@ -543,7 +543,7 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
         //If every of the item was sold
         else if (itemCount == 0)
         {
-            mLevelledItemMap.erase(it++);
+            it = mLevelledItemMap.erase(it);
             continue;
         }
         //If some was sold, but some remain

@@ -1601,7 +1601,7 @@ namespace MWWorld
                 // The door is no longer in an active cell, or it was disabled.
                 // Erase from mDoorStates, since we no longer need to move it.
                 // Once we load the door's cell again (or re-enable the door), Door::insertObject will reinsert to mDoorStates.
-                mDoorStates.erase(it++);
+                it = mDoorStates.erase(it);
             }
             else
             {
@@ -1644,7 +1644,7 @@ namespace MWWorld
                 {
                     // Mark as non-moving
                     it->first.getClass().setDoorState(it->first, 0);
-                    mDoorStates.erase(it++);
+                    it = mDoorStates.erase(it);
                 }
                 else
                     ++it;
