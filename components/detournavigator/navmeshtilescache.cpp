@@ -64,8 +64,8 @@ namespace DetourNavigator
             return Value();
 
         // TODO: use different function to make key to avoid unnecessary std::string allocation
-        const auto tile = tileValues->second.find(makeNavMeshKey(recastMesh, offMeshConnections));
-        if (tile == tileValues->second.end())
+        const auto tile = tileValues->second.Map.find(makeNavMeshKey(recastMesh, offMeshConnections));
+        if (tile == tileValues->second.Map.end())
             return Value();
 
         acquireItemUnsafe(tile->second);
@@ -98,7 +98,7 @@ namespace DetourNavigator
 
         const auto iterator = mFreeItems.emplace(mFreeItems.end(), agentHalfExtents, changedTile, navMeshKey);
         // TODO: use std::string_view or some alternative to avoid navMeshKey copy into both mFreeItems and mValues
-        const auto emplaced = mValues[agentHalfExtents][changedTile].emplace(navMeshKey, iterator);
+        const auto emplaced = mValues[agentHalfExtents][changedTile].Map.emplace(navMeshKey, iterator);
 
         if (!emplaced.second)
         {
@@ -127,15 +127,15 @@ namespace DetourNavigator
         if (tileValues == agentValues->second.end())
             return;
 
-        const auto value = tileValues->second.find(item.mNavMeshKey);
-        if (value == tileValues->second.end())
+        const auto value = tileValues->second.Map.find(item.mNavMeshKey);
+        if (value == tileValues->second.Map.end())
             return;
 
         mUsedNavMeshDataSize -= static_cast<std::size_t>(item.mNavMeshData.mSize) + item.mNavMeshKey.size();
         mFreeItems.pop_back();
 
-        tileValues->second.erase(value);
-        if (!tileValues->second.empty())
+        tileValues->second.Map.erase(value);
+        if (!tileValues->second.Map.empty())
             return;
 
         agentValues->second.erase(tileValues);
