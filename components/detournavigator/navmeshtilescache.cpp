@@ -88,7 +88,7 @@ namespace DetourNavigator
             return Value();
 
         const auto navMeshKey = makeNavMeshKey(recastMesh, offMeshConnections);
-        const auto itemSize = navMeshSize + navMeshKey.size();
+        const auto itemSize = navMeshSize + 2 * navMeshKey.size();
 
         if (itemSize > mFreeNavMeshDataSize + (mMaxNavMeshDataSize - mUsedNavMeshDataSize))
             return Value();
@@ -131,8 +131,8 @@ namespace DetourNavigator
         if (value == tileValues->second.Map.end())
             return;
 
-        mUsedNavMeshDataSize -= static_cast<std::size_t>(item.mNavMeshData.mSize) + item.mNavMeshKey.size();
-        mFreeNavMeshDataSize -= static_cast<std::size_t>(item.mNavMeshData.mSize) + item.mNavMeshKey.size();
+        mUsedNavMeshDataSize -= getSize(item);
+        mFreeNavMeshDataSize -= getSize(item);
         mFreeItems.pop_back();
 
         tileValues->second.Map.erase(value);
@@ -152,7 +152,7 @@ namespace DetourNavigator
             return;
 
         mBusyItems.splice(mBusyItems.end(), mFreeItems, iterator);
-        mFreeNavMeshDataSize -= static_cast<std::size_t>(iterator->mNavMeshData.mSize) + iterator->mNavMeshKey.size();
+        mFreeNavMeshDataSize -= getSize(*iterator);
     }
 
     void NavMeshTilesCache::releaseItem(ItemIterator iterator)
@@ -163,6 +163,6 @@ namespace DetourNavigator
         const std::lock_guard<std::mutex> lock(mMutex);
 
         mFreeItems.splice(mFreeItems.begin(), mBusyItems, iterator);
-        mFreeNavMeshDataSize += static_cast<std::size_t>(iterator->mNavMeshData.mSize) + iterator->mNavMeshKey.size();
+        mFreeNavMeshDataSize += getSize(*iterator);
     }
 }
