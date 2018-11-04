@@ -149,62 +149,61 @@ namespace
         std::vector<unsigned char> areas(chunkyMesh.getMaxTrisPerChunk(), AreaType_null);
         const osg::Vec2f tileBoundsMin(config.bmin[0], config.bmin[2]);
         const osg::Vec2f tileBoundsMax(config.bmax[0], config.bmax[2]);
-        std::vector<std::size_t> cids;
-        chunkyMesh.getChunksOverlappingRect(Rect {tileBoundsMin, tileBoundsMax}, std::back_inserter(cids));
+        bool result = false;
 
-        if (cids.empty())
-            return false;
+        chunkyMesh.forEachChunksOverlappingRect(Rect {tileBoundsMin, tileBoundsMax},
+            [&] (const std::size_t cid)
+            {
+                const auto chunk = chunkyMesh.getChunk(cid);
 
-        for (const auto cid : cids)
-        {
-            const auto chunk = chunkyMesh.getChunk(cid);
+                std::fill(
+                    areas.begin(),
+                    std::min(areas.begin() + static_cast<std::ptrdiff_t>(chunk.mSize),
+                    areas.end()),
+                    AreaType_null
+                );
 
-            std::fill(
-                areas.begin(),
-                std::min(areas.begin() + static_cast<std::ptrdiff_t>(chunk.mSize),
-                areas.end()),
-                AreaType_null
-            );
+                rcMarkWalkableTriangles(
+                    &context,
+                    config.walkableSlopeAngle,
+                    recastMesh.getVertices().data(),
+                    static_cast<int>(recastMesh.getVerticesCount()),
+                    chunk.mIndices,
+                    static_cast<int>(chunk.mSize),
+                    areas.data()
+                );
 
-            rcMarkWalkableTriangles(
-                &context,
-                config.walkableSlopeAngle,
-                recastMesh.getVertices().data(),
-                static_cast<int>(recastMesh.getVerticesCount()),
-                chunk.mIndices,
-                static_cast<int>(chunk.mSize),
-                areas.data()
-            );
+                for (std::size_t i = 0; i < chunk.mSize; ++i)
+                    areas[i] = chunk.mAreaTypes[i];
 
-            for (std::size_t i = 0; i < chunk.mSize; ++i)
-                areas[i] = chunk.mAreaTypes[i];
+                rcClearUnwalkableTriangles(
+                    &context,
+                    config.walkableSlopeAngle,
+                    recastMesh.getVertices().data(),
+                    static_cast<int>(recastMesh.getVerticesCount()),
+                    chunk.mIndices,
+                    static_cast<int>(chunk.mSize),
+                    areas.data()
+                );
 
-            rcClearUnwalkableTriangles(
-                &context,
-                config.walkableSlopeAngle,
-                recastMesh.getVertices().data(),
-                static_cast<int>(recastMesh.getVerticesCount()),
-                chunk.mIndices,
-                static_cast<int>(chunk.mSize),
-                areas.data()
-            );
+                const auto trianglesRasterized = rcRasterizeTriangles(
+                    &context,
+                    recastMesh.getVertices().data(),
+                    static_cast<int>(recastMesh.getVerticesCount()),
+                    chunk.mIndices,
+                    areas.data(),
+                    static_cast<int>(chunk.mSize),
+                    solid,
+                    config.walkableClimb
+                );
 
-            const auto trianglesRasterized = rcRasterizeTriangles(
-                &context,
-                recastMesh.getVertices().data(),
-                static_cast<int>(recastMesh.getVerticesCount()),
-                chunk.mIndices,
-                areas.data(),
-                static_cast<int>(chunk.mSize),
-                solid,
-                config.walkableClimb
-            );
+                if (!trianglesRasterized)
+                    throw NavigatorException("Failed to create rasterize triangles from recast mesh for navmesh");
 
-            if (!trianglesRasterized)
-                throw NavigatorException("Failed to create rasterize triangles from recast mesh for navmesh");
-        }
+                result = true;
+            });
 
-        return true;
+        return result;
     }
 
     void rasterizeWaterTriangles(rcContext& context, const osg::Vec3f& agentHalfExtents, const RecastMesh& recastMesh,
