@@ -25,7 +25,7 @@
 
 #include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/navigator.hpp>
-#include <components/detournavigator/debug.hpp>
+#include <components/detournavigator/recastglobalallocator.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -230,6 +230,7 @@ namespace MWWorld
         if (Settings::Manager::getBool("enable log", "Navigator"))
             DetourNavigator::Log::instance().setSink(std::unique_ptr<DetourNavigator::FileSink>(
                 new DetourNavigator::FileSink(Settings::Manager::getString("log path", "Navigator"))));
+        DetourNavigator::RecastGlobalAllocator::init();
         mNavigator.reset(new DetourNavigator::Navigator(navigatorSettings));
 
         mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath, *mNavigator));
