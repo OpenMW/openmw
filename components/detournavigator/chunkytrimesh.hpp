@@ -50,8 +50,8 @@ namespace DetourNavigator
         ChunkyTriMesh& operator=(const ChunkyTriMesh&) = delete;
 
         /// Returns the chunk indices which overlap the input rectable.
-        template <class OutputIterator>
-        void getChunksOverlappingRect(const Rect& rect, OutputIterator out) const
+        template <class Function>
+        void forEachChunksOverlappingRect(const Rect& rect, Function&& function) const
         {
             // Traverse tree
             for (std::size_t i = 0; i < mNodes.size(); )
@@ -61,7 +61,7 @@ namespace DetourNavigator
                 const bool isLeafNode = node->mOffset >= 0;
 
                 if (isLeafNode && overlap)
-                    *out++ = i;
+                    function(i);
 
                 if (overlap || isLeafNode)
                     i++;
