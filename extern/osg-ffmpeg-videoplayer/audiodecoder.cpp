@@ -6,15 +6,9 @@
 
 extern "C"
 {
-
     #include <libavcodec/avcodec.h>
 
     #include <libswresample/swresample.h>
-
-    #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
-    #define av_frame_alloc  avcodec_alloc_frame
-    #endif
-
 }
 
 #include "videostate.hpp"
@@ -61,6 +55,7 @@ MovieAudioDecoder::MovieAudioDecoder(VideoState* videoState)
     , mFrameData(NULL)
     , mDataBufLen(0)
     , mFrame(av_frame_alloc())
+    , mGetNextPacket(true)
     , mAudioDiffAccum(0.0)
     , mAudioDiffAvgCoef(exp(log(0.01 / AUDIO_DIFF_AVG_NB)))
     /* Correct audio only if larger error than this */
@@ -68,10 +63,34 @@ MovieAudioDecoder::MovieAudioDecoder(VideoState* videoState)
     , mAudioDiffAvgCount(0)
 {
     mAudioResampler.reset(new AudioResampler());
+
+    AVCodec *codec = avcodec_find_decoder(mAVStream->codecpar->codec_id);
+    if(!codec)
+    {
+        std::string ss = "No codec found for id " +
+                            std::to_string(mAVStream->codecpar->codec_id);
+        throw std::runtime_error(ss);
+    }
+
+    AVCodecContext *avctx = avcodec_alloc_context3(codec);
+    avcodec_parameters_to_context(avctx, mAVStream->codecpar);
+
+// This is not needed anymore above FFMpeg version 4.0
+#if LIBAVCODEC_VERSION_INT < 3805796
+    av_codec_set_pkt_timebase(avctx, mAVStream->time_base);
+#endif
+
+    mAudioContext = avctx;
+
+    if(avcodec_open2(mAudioContext, codec, nullptr) < 0)
+        throw std::runtime_error(std::string("Failed to open audio codec ") + codec->long_name);
 }
 
 MovieAudioDecoder::~MovieAudioDecoder()
 {
+    if(mAudioContext)
+        avcodec_free_context(&mAudioContext);
+
     av_freep(&mFrame);
     av_freep(&mDataBuf);
 }
@@ -81,13 +100,13 @@ void MovieAudioDecoder::setupFormat()
     if (mAudioResampler->mSwr)
         return; // already set up
 
-    AVSampleFormat inputSampleFormat = mAVStream->codec->sample_fmt;
+    AVSampleFormat inputSampleFormat = mAudioContext->sample_fmt;
 
-    uint64_t inputChannelLayout = mAVStream->codec->channel_layout;
+    uint64_t inputChannelLayout = mAudioContext->channel_layout;
     if (inputChannelLayout == 0)
-        inputChannelLayout = av_get_default_channel_layout(mAVStream->codec->channels);
+        inputChannelLayout = av_get_default_channel_layout(mAudioContext->channels);
 
-    int inputSampleRate = mAVStream->codec->sample_rate;
+    int inputSampleRate = mAudioContext->sample_rate;
 
     mOutputSampleRate = inputSampleRate;
     mOutputSampleFormat = inputSampleFormat;
@@ -133,7 +152,7 @@ int MovieAudioDecoder::synchronize_audio()
         {
             int n = av_get_bytes_per_sample(mOutputSampleFormat) *
                     av_get_channel_layout_nb_channels(mOutputChannelLayout);
-            sample_skip = ((int)(diff * mAVStream->codec->sample_rate) * n);
+            sample_skip = ((int)(diff * mAudioContext->sample_rate) * n);
         }
     }
 
@@ -146,23 +165,31 @@ int MovieAudioDecoder::audio_decode_frame(AVFrame *frame, int &sample_skip)
 
     for(;;)
     {
-        while(pkt->size > 0)
+        /* send the packet with the compressed data to the decoder */
+        int ret = 0;
+        if (mGetNextPacket)
+            ret = avcodec_send_packet(mAudioContext, pkt);
+
+        /* read all the output frames (in general there may be any number of them */
+        while (ret >= 0)
         {
-            int len1, got_frame;
-
-            len1 = avcodec_decode_audio4(mAVStream->codec, frame, &got_frame, pkt);
-            if(len1 < 0) break;
-
-            if(len1 <= pkt->size)
+            ret = avcodec_receive_frame(mAudioContext, frame);
+            if (ret == AVERROR_EOF || ret == AVERROR(EAGAIN))
             {
-                /* Move the unread data to the front and clear the end bits */
-                int remaining = pkt->size - len1;
-                memmove(pkt->data, &pkt->data[len1], remaining);
-                av_shrink_packet(pkt, remaining);
+                // EAGAIN means that we need additional packages to decode this frame.
+                // AVERROR_EOF means the end of package.
+                mGetNextPacket = true;
+                break;
+            }
+            else if (ret < 0)
+            {
+                // Error encountered. Stop to decode audio stream.
+                av_packet_unref(&mPacket);
+                mGetNextPacket = true;
+                return -1;
             }
 
-            /* No data yet? Look for more frames */
-            if(!got_frame || frame->nb_samples <= 0)
+            if(frame->nb_samples <= 0)
                 continue;
 
             if(mAudioResampler->mSwr)
@@ -170,7 +197,7 @@ int MovieAudioDecoder::audio_decode_frame(AVFrame *frame, int &sample_skip)
                 if(!mDataBuf || mDataBufLen < frame->nb_samples)
                 {
                     av_freep(&mDataBuf);
-                    if(av_samples_alloc(&mDataBuf, NULL, av_get_channel_layout_nb_channels(mOutputChannelLayout),
+                    if(av_samples_alloc(&mDataBuf, nullptr, av_get_channel_layout_nb_channels(mOutputChannelLayout),
                                         frame->nb_samples, mOutputSampleFormat, 0) < 0)
                         break;
                     else
@@ -187,14 +214,16 @@ int MovieAudioDecoder::audio_decode_frame(AVFrame *frame, int &sample_skip)
             else
                 mFrameData = &frame->data[0];
 
-            mAudioClock += (double)frame->nb_samples /
-                           (double)mAVStream->codec->sample_rate;
+            int result = frame->nb_samples * av_get_channel_layout_nb_channels(mOutputChannelLayout) *
+                    av_get_bytes_per_sample(mOutputSampleFormat);
 
             /* We have data, return it and come back for more later */
-            return frame->nb_samples * av_get_channel_layout_nb_channels(mOutputChannelLayout) *
-                   av_get_bytes_per_sample(mOutputSampleFormat);
+            mGetNextPacket = false;
+            return result;
         }
-        av_free_packet(pkt);
+
+        av_packet_unref(&mPacket);
+        mGetNextPacket = true;
 
         /* next packet */
         if(mVideoState->audioq.get(pkt, mVideoState) < 0)
@@ -202,7 +231,7 @@ int MovieAudioDecoder::audio_decode_frame(AVFrame *frame, int &sample_skip)
 
         if(pkt->data == mVideoState->mFlushPktData)
         {
-            avcodec_flush_buffers(mAVStream->codec);
+            avcodec_flush_buffers(mAudioContext);
             mAudioDiffAccum = 0.0;
             mAudioDiffAvgCount = 0;
             mAudioClock = av_q2d(mAVStream->time_base)*pkt->pts;

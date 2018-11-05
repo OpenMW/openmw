@@ -15,6 +15,19 @@ namespace osg
     class Texture2D;
 }
 
+extern "C"
+{
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavutil/imgutils.h>
+#include <libavutil/channel_layout.h>
+
+// From version 54.56 binkaudio encoding format changed from S16 to FLTP. See:
+// https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d
+// https://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
+#include <libswresample/swresample.h>
+}
+
 #include "videodefs.hpp"
 
 #define VIDEO_PICTURE_QUEUE_SIZE 50
@@ -131,6 +144,8 @@ struct VideoState {
 
     std::shared_ptr<std::istream> stream;
     AVFormatContext* format_ctx;
+    AVCodecContext* video_ctx;
+    AVCodecContext* audio_ctx;
 
     int av_sync_type;
 
