@@ -127,6 +127,11 @@ namespace DetourNavigator
         void acquireItemUnsafe(ItemIterator iterator);
 
         void releaseItem(ItemIterator iterator);
+
+        static std::size_t getSize(const Item& item)
+        {
+            return static_cast<std::size_t>(item.mNavMeshData.mSize) + 2 * item.mNavMeshKey.size();
+        }
     };
 }
 
