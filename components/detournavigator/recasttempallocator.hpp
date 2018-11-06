@@ -21,7 +21,7 @@ namespace DetourNavigator
             std::size_t space = mStack.size() - getUsedSize();
             void* top = mTop;
             const auto itemSize = 2 * sizeof(std::size_t) + size;
-            if (rcUnlikely(!align(sizeof(std::size_t), itemSize, top, space)))
+            if (rcUnlikely(!std::align(sizeof(std::size_t), itemSize, top, space)))
                 return nullptr;
             setTempPtrBufferType(top, BufferType_temp);
             setTempPtrPrev(top, mPrev);
