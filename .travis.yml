@@ -20,7 +20,7 @@ addons:
       - llvm-toolchain-precise-3.6
     packages: [
       # Dev
-      cmake, clang-3.6, libunshield-dev, libtinyxml-dev,
+      cmake, clang-3.6, gcc-8, g++-8, libunshield-dev, libtinyxml-dev,
       # Boost
       libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
@@ -44,7 +44,7 @@ matrix:
     - os: osx
     - os: linux
       env:
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
     - os: linux
       env:
         ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
