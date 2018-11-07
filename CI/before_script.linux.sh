@@ -10,8 +10,8 @@ cd build
 export CODE_COVERAGE=1
 
 if [[ "${CC}" =~ "clang" ]]; then export CODE_COVERAGE=0; fi
-if [[ -v BUILD_OPENMW ]]; then export BUILD_OPENMW=1; fi
-if [[ -v BUILD_OPENMW_CS ]]; then export BUILD_OPENMW_CS=1; fi
+if [[ -z ${BUILD_OPENMW+x} ]]; then export BUILD_OPENMW=1; fi
+if [[ -z ${BUILD_OPENMW_CS+x} ]]; then export BUILD_OPENMW_CS=1; fi
 
 ${ANALYZE} cmake \
     -DBUILD_OPENMW=${BUILD_OPENMW} \
