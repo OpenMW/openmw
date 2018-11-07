@@ -8,8 +8,14 @@ GOOGLETEST_DIR="$(pwd)/googletest/build"
 mkdir build
 cd build
 export CODE_COVERAGE=1
+
 if [[ "${CC}" =~ "clang" ]]; then export CODE_COVERAGE=0; fi
+if [[ -v BUILD_OPENMW ]]; then export BUILD_OPENMW=1; fi
+if [[ -v BUILD_OPENMW_CS ]]; then export BUILD_OPENMW_CS=1; fi
+
 ${ANALYZE} cmake \
+    -DBUILD_OPENMW=${BUILD_OPENMW} \
+    -DBUILD_OPENCS=${BUILD_OPENMW_CS} \
     -DBUILD_WITH_CODE_COVERAGE=${CODE_COVERAGE} \
     -DBUILD_UNITTESTS=1 \
     -DCMAKE_INSTALL_PREFIX=/usr \

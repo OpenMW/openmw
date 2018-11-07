@@ -38,19 +38,30 @@ addons:
     branch_pattern: coverity_scan
 matrix:
   include:
-    - os: osx
+    - name: OpenMW (all) on MacOS xcode9.4
+      os: osx
       osx_image: xcode9.4
-    - os: linux
+    - name: OpenMW (all) on Ubuntu Trusty GCC-8
+      os: linux
       dist: trusty
       sudo: required
       env:
         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-    - os: linux
+    - name: OpenMW (openmw) on Ubuntu Trusty Clang-6.0 with Static Analysis
+      os: linux
       dist: trusty
       sudo: required
       env:
-        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
+        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0 && BUILD_OPENMW_CS=OFF"
         - ANALYZE="scan-build-6.0 --use-cc clang-6.0 --use-c++ clang++-6.0"
+      compiler: clang
+    - name: OpenMW (openmw-cs) on Ubuntu Trusty Clang-6.0 with Static Analysis
+      os: linux
+      dist: trusty
+      sudo: required
+      env:
+      - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0 && BUILD_OPENMW=OFF"
+      - ANALYZE="scan-build-6.0 --use-cc clang-6.0 --use-c++ clang++-6.0"
       compiler: clang
 #   allow_failures:
 #    - env:
