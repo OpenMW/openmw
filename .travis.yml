@@ -49,10 +49,13 @@ matrix:
       dist: trusty
       sudo: required
       env:
-        ANALYZE="scan-build-6.0 --use-cc clang-6.0 --use-c++ clang++-6.0 "
+        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
+        - ANALYZE="scan-build-6.0 --use-cc clang-6.0 --use-c++ clang++-6.0 "
       compiler: clang
-  allow_failures:
-    - env: ANALYZE="scan-build-6.0 --use-cc clang-6.0 --use-c++ clang++-6.0 "
+#   allow_failures:
+#    - env:
+#      - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
+#      - ANALYZE="scan-build-6.0 --use-cc clang-6.0 --use-c++ clang++-6.0 "
 
 before_install:
     - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then eval "${MATRIX_EVAL}"; fi
