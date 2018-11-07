@@ -17,13 +17,13 @@ addons:
       - llvm-toolchain-trusty-6.0
     packages: [
       # Dev
-      cmake, clang-6.0, clang-tools-6.0, gcc-8, g++-8, libunshield-dev, libtinyxml-dev,
+      cmake, clang-6.0, clang-tools-6.0, gcc-8, g++-8,
       # Boost
       libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
       libavcodec-dev, libavformat-dev, libavutil-dev, libswscale-dev,
-      # Audio & Video
-      libsdl2-dev, libqt4-dev, libopenal-dev,
+      # Audio, Video and Misc. deps
+      libsdl2-dev, libqt4-dev, libopenal-dev, libunshield-dev, libtinyxml-dev,
       # The other ones from OpenMW ppa
       libbullet-dev, libswresample-dev, libopenscenegraph-3.4-dev, libmygui-dev
     ]
@@ -49,14 +49,13 @@ matrix:
       dist: trusty
       sudo: required
       env:
-#        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
-        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-        - ANALYZE="scan-build-6.0 --use-cc clang-6.0 --use-c++ clang++-6.0 "
+        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
+        - ANALYZE="scan-build-6.0 --use-cc clang-6.0 --use-c++ clang++-6.0"
       compiler: clang
 #   allow_failures:
 #    - env:
 #      - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
-#      - ANALYZE="scan-build-6.0 --use-cc clang-6.0 --use-c++ clang++-6.0 "
+#      - ANALYZE="scan-build-6.0 --use-cc clang-6.0 --use-c++ clang++-6.0"
 
 before_install:
     - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then eval "${MATRIX_EVAL}"; fi
@@ -65,7 +64,7 @@ before_script:
     - ./CI/before_script.${TRAVIS_OS_NAME}.sh
 script:
  - cd ./build
- - if [ "$COVERITY_SCAN_BRANCH" != 1 ]; then ${ANALYZE}make -j3; fi
+ - if [ "$COVERITY_SCAN_BRANCH" != 1 ]; then ${ANALYZE} make -j3; fi
  - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then make package; fi
  - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./openmw_test_suite; fi
  - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then cd .. && ./CI/check_tabs.sh; fi
