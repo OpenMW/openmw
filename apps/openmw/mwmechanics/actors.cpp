@@ -491,8 +491,8 @@ namespace MWMechanics
         // If any of the above conditions turned actor1 aggressive towards actor2, do an awareness check. If it passes, start combat with actor2.
         if (aggressive)
         {
-            bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor1, actor2);
-            LOS &= MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor2, actor1);
+            bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor1, actor2)
+                    && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor2, actor1);
 
             if (LOS)
                 MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
@@ -1205,8 +1205,8 @@ namespace MWMechanics
             if (neighbor == actor)
                 continue;
 
-            bool result = MWBase::Environment::get().getWorld()->getLOS(neighbor, actor);
-            result &= MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, neighbor);
+            bool result = MWBase::Environment::get().getWorld()->getLOS(neighbor, actor)
+                       && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, neighbor);
 
             if (result)
                 return true;
