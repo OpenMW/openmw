@@ -17,7 +17,7 @@ addons:
       - llvm-toolchain-trusty-6.0
     packages: [
       # Dev
-      cmake, clang-6.0, gcc-8, g++-8, libunshield-dev, libtinyxml-dev,
+      cmake, clang-6.0, clang-tools-6.0, gcc-8, g++-8, libunshield-dev, libtinyxml-dev,
       # Boost
       libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
