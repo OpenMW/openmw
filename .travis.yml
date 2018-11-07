@@ -52,16 +52,18 @@ matrix:
       dist: trusty
       sudo: required
       env:
-        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0 && BUILD_OPENMW_CS=OFF"
+        - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
         - ANALYZE="scan-build-6.0 --use-cc clang-6.0 --use-c++ clang++-6.0"
+        - BUILD_OPENMW_CS="OFF"
       compiler: clang
     - name: OpenMW (openmw-cs) on Ubuntu Trusty Clang-6.0 with Static Analysis
       os: linux
       dist: trusty
       sudo: required
       env:
-      - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0 && BUILD_OPENMW=OFF"
+      - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0 &&"
       - ANALYZE="scan-build-6.0 --use-cc clang-6.0 --use-c++ clang++-6.0"
+      - BUILD_OPENMW="OFF"
       compiler: clang
 #   allow_failures:
 #    - env:
