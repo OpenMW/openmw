@@ -100,7 +100,7 @@ namespace MWMechanics
             return 0.f;
 
         const ESM::Potion* potion = item.get<ESM::Potion>()->mBase;
-        return rateEffects(potion->mEffects, actor, MWWorld::Ptr());
+        return rateEffects(potion->mEffects, actor, MWWorld::Ptr(), true);
     }
 
     float rateSpell(const ESM::Spell *spell, const MWWorld::Ptr &actor, const MWWorld::Ptr& enemy)
@@ -114,15 +114,6 @@ namespace MWMechanics
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 0.f;
 
-        // Don't make use of racial bonus spells, like MW. Can be made optional later
-        if (actor.getClass().isNpc())
-        {
-            std::string raceid = actor.get<ESM::NPC>()->mBase->mRace;
-            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(raceid);
-            if (race->mPowers.exists(spell->mId))
-                return 0.f;
-        }
-
         if (spell->mData.mCost > stats.getMagicka().getCurrent())
             return 0.f;
 
@@ -133,7 +124,7 @@ namespace MWMechanics
         if ( ((types & Touch) || (types & Target)) && enemy.getClass().getCreatureStats(enemy).getActiveSpells().isSpellActive(spell->mId))
             return 0.f;
 
-        return rateEffects(spell->mEffects, actor, enemy) * (successChance / 100.f);
+        return rateEffects(spell->mEffects, actor, enemy) * (successChance / 100.f) * spell->mData.mCost;
     }
 
     float rateMagicItem(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor, const MWWorld::Ptr& enemy)
@@ -153,7 +144,7 @@ namespace MWMechanics
 
         if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
         {
-            return rateEffects(enchantment->mEffects, actor, enemy);
+            return rateEffects(enchantment->mEffects, actor, enemy, true);
         }
         else if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
         {
@@ -169,7 +160,7 @@ namespace MWMechanics
                && ptr.getCellRef().getEnchantmentCharge() < castCost)
                 return 0.f;
 
-            float rating = rateEffects(enchantment->mEffects, actor, enemy);
+            float rating = rateEffects(enchantment->mEffects, actor, enemy) * castCost;
 
             rating *= 2; // prefer rechargable magic items over spells
             return rating;
@@ -178,7 +169,7 @@ namespace MWMechanics
         return 0.f;
     }
 
-    float rateEffect(const ESM::ENAMstruct &effect, const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
+    float rateEffect(const ESM::ENAMstruct &effect, const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy, bool autoCalcCost)
     {
         // NOTE: enemy may be empty
 
@@ -604,7 +595,8 @@ namespace MWMechanics
             }
         }
 
-        rating *= calcEffectCost(effect, magicEffect);
+        if (autoCalcCost)
+            rating *= calcEffectCost(effect, magicEffect);
 
         // Currently treating all "on target" or "on touch" effects to target the enemy actor.
         // Combat AI is egoistic, so doesn't consider applying positive effects to friendly actors.
@@ -614,7 +606,7 @@ namespace MWMechanics
         return rating;
     }
 
-    float rateEffects(const ESM::EffectList &list, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy)
+    float rateEffects(const ESM::EffectList &list, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool autoCalcCost)
     {
         // NOTE: enemy may be empty
 
@@ -629,7 +621,7 @@ namespace MWMechanics
         {
             ratingMult = (it->mRange == ESM::RT_Target) ? fAIRangeMagicSpellMult : fAIMagicSpellMult;
 
-            rating += rateEffect(*it, actor, enemy) * ratingMult;
+            rating += rateEffect(*it, actor, enemy, autoCalcCost) * ratingMult;
         }
         return rating;
     }

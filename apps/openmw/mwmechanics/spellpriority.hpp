@@ -22,9 +22,13 @@ namespace MWMechanics
     float ratePotion (const MWWorld::Ptr& item, const MWWorld::Ptr &actor);
 
     /// @note target may be empty
-    float rateEffect (const ESM::ENAMstruct& effect, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
+    /// @param autoCalcCost toggles effect cost autocalculation which is then applied to the rating
+    /// @note autoCalcCost must be false if (and must only be false if) you apply a predetermined cost to the rating
+    float rateEffect (const ESM::ENAMstruct& effect, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool autoCalcCost = false);
     /// @note target may be empty
-    float rateEffects (const ESM::EffectList& list, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
+    /// @param autoCalcCost toggles effect cost autocalculation in the rateEffect() calls that follow
+    /// @note autoCalcCost must be false if (and must only be false if) you apply a predetermined cost to the rating
+    float rateEffects (const ESM::EffectList& list, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool autoCalcCost = false);
 
     float vanillaRateSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
 }
