@@ -1,7 +1,4 @@
-osx_image: xcode9.4
 language: cpp
-sudo: required
-dist: trusty
 branches:
   only:
     - master
@@ -42,10 +39,15 @@ addons:
 matrix:
   include:
     - os: osx
+      osx_image: xcode9.4
     - os: linux
+      dist: trusty
+      sudo: required
       env:
         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
     - os: linux
+      dist: trusty
+      sudo: required
       env:
         ANALYZE="scan-build-6.0 --use-cc clang-6.0 --use-c++ clang++-6.0 "
       compiler: clang
