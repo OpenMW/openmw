@@ -171,8 +171,19 @@ followers attack on sight
 Make player followers and escorters start combat with enemies who have started combat with them or the player.
 Otherwise they wait for the enemies or the player to do an attack first.
 Please note this setting has not been extensively tested and could have side effects with certain quests.
-
 This setting can be toggled in Advanced tab of the launcher.
+
+weapon sheathing
+----------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true, OpenMW will utilize weapon sheathing-compatible assets to display holstered weapons.
+
+To make use of this, you need to have an xbase_anim_sh.nif file with weapon bones that will be injected into the skeleton.
+Additional _sh suffix models are not essential for weapon sheathing to work but will act as quivers or scabbards for the weapons they correspond to.
 
 use additional anim sources
 ---------------------------

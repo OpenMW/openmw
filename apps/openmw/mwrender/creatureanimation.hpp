@@ -54,6 +54,8 @@ namespace MWRender
         /// to indicate the facing orientation of the character.
         virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
 
+    protected:
+        virtual bool isArrowAttached() const;
 
     private:
         PartHolderPtr mWeapon;

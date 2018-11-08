@@ -95,6 +95,7 @@ private:
 
 protected:
     virtual void addControllers();
+    virtual bool isArrowAttached() const;
 
 public:
     /**
