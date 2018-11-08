@@ -129,7 +129,7 @@ namespace MWMechanics
                 npcStats.getSkill (i).setBase (5 + bonus);
             }
 
-            for (const std::string power : race->mPowers.mList)
+            for (const std::string &power : race->mPowers.mList)
             {
                 creatureStats.getSpells().add(power);
             }
@@ -144,7 +144,7 @@ namespace MWMechanics
             const ESM::BirthSign *sign =
                 esmStore.get<ESM::BirthSign>().find(signId);
 
-            for (const std::string power : sign->mPowers.mList)
+            for (const std::string &power : sign->mPowers.mList)
             {
                 creatureStats.getSpells().add(power);
             }
@@ -216,7 +216,7 @@ namespace MWMechanics
 
         std::vector<std::string> selectedSpells = autoCalcPlayerSpells(skills, attributes, race);
 
-        for (const std::string spell : selectedSpells)
+        for (const std::string &spell : selectedSpells)
             creatureStats.getSpells().add(spell);
 
         // forced update and current value adjustments
