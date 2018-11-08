@@ -53,7 +53,7 @@ matrix:
       sudo: required
       env:
         - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
-        - ANALYZE="scan-build-7 --use-cc clang-7 --use-c++ clang++-7"
+        - ANALYZE="scan-build-7 --force-analyze-debug-code --use-cc clang-7 --use-c++ clang++-7"
         - BUILD_OPENMW_CS="OFF"
       compiler: clang
     - name: OpenMW (openmw-cs) on Ubuntu Trusty Clang-7 with Static Analysis
@@ -62,7 +62,7 @@ matrix:
       sudo: required
       env:
       - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
-      - ANALYZE="scan-build-7 --use-cc clang-7 --use-c++ clang++-7"
+      - ANALYZE="scan-build-7 --force-analyze-debug-code --use-cc clang-7 --use-c++ clang++-7"
       - BUILD_OPENMW="OFF"
       compiler: clang
 #   allow_failures:
