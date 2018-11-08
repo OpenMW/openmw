@@ -330,7 +330,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
             item.getRefData().getLocals().setVarByInt(script, "onpcadd", 1);
     }
 
-    if (mListener)
+    // we should not fire event for InventoryStore yet - it has some custom logic
+    if (mListener && !actorPtr.getClass().hasInventoryStore(actorPtr))
         mListener->itemAdded(item, count);
 
     return it;
@@ -439,7 +440,8 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
 
     flagAsModified();
 
-    if (mListener)
+    // we should not fire event for InventoryStore yet - it has some custom logic
+    if (mListener && !actor.getClass().hasInventoryStore(actor))
         mListener->itemRemoved(item, count - toRemove);
 
     // number of removed items
