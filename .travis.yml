@@ -16,10 +16,10 @@ addons:
       - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-7 main'
         key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
       - ubuntu-toolchain-r-test
-     # - llvm-toolchain-trusty-7.0
+     # - llvm-toolchain-trusty-7
     packages: [
       # Dev
-      cmake, clang-7.0, clang-tools-7.0, gcc-8, g++-8,
+      cmake, clang-7, clang-tools-7, gcc-8, g++-8,
       # Boost
       libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
@@ -49,26 +49,26 @@ matrix:
       sudo: required
       env:
         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-    - name: OpenMW (openmw) on Ubuntu Trusty Clang-7.0 with Static Analysis
+    - name: OpenMW (openmw) on Ubuntu Trusty Clang-7 with Static Analysis
       os: linux
       dist: trusty
       sudo: required
       env:
-        - MATRIX_EVAL="CC=clang-7.0 && CXX=clang++-7.0"
-        - ANALYZE="scan-build-7.0 --use-cc clang-7.0 --use-c++ clang++-7.0"
+        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
+        - ANALYZE="scan-build-7 --use-cc clang-7 --use-c++ clang++-7"
         - BUILD_OPENMW_CS="OFF"
       compiler: clang
-    - name: OpenMW (openmw-cs) on Ubuntu Trusty Clang-7.0 with Static Analysis
+    - name: OpenMW (openmw-cs) on Ubuntu Trusty Clang-7 with Static Analysis
       os: linux
       dist: trusty
       sudo: required
       env:
-      - MATRIX_EVAL="CC=clang-7.0 && CXX=clang++-7.0"
-      - ANALYZE="scan-build-7.0 --use-cc clang-7.0 --use-c++ clang++-7.0"
+      - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
+      - ANALYZE="scan-build-7 --use-cc clang-7 --use-c++ clang++-7"
       - BUILD_OPENMW="OFF"
       compiler: clang
 #   allow_failures:
-#    - name: OpenMW (openmw) on Ubuntu Trusty Clang-7.0 with Static Analysis
+#    - name: OpenMW (openmw) on Ubuntu Trusty Clang-7 with Static Analysis
 
 before_install:
     - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then eval "${MATRIX_EVAL}"; fi
