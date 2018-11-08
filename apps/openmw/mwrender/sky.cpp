@@ -401,11 +401,15 @@ public:
     {
     }
 
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    bool isUnderwater()
     {
         osg::Vec3f eyePoint = mCameraRelativeTransform->getLastEyePoint();
+        return mEnabled && eyePoint.z() < mWaterLevel;
+    }
 
-        if (mEnabled && eyePoint.z() < mWaterLevel)
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        if (isUnderwater())
             return;
 
         traverse(node, nv);
@@ -1575,6 +1579,8 @@ void SkyManager::update(float duration)
             mRainIntensityUniform->set((float) mWeatherAlpha);
     }
 
+    switchUnderwaterRain();
+
     if (mIsStorm)
     {
         osg::Quat quat;
@@ -1624,6 +1630,15 @@ void SkyManager::updateRainParameters()
         mRainShooter->setVelocity(osg::Vec3f(0, mRainSpeed * windFactor, -mRainSpeed));
         mRainShooter->setAngle(angle);
     }
+}
+
+void SkyManager::switchUnderwaterRain()
+{
+    if (!mRainParticleSystem)
+        return;
+
+    bool freeze = mUnderwaterSwitch->isUnderwater();
+    mRainParticleSystem->setFrozen(freeze);
 }
 
 void SkyManager::setWeather(const WeatherResult& weather)
