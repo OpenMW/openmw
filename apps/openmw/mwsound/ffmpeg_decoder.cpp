@@ -90,7 +90,7 @@ bool FFmpeg_Decoder::getNextPacket()
 
 bool FFmpeg_Decoder::getAVAudioData()
 {
-    bool got_frame;
+    bool got_frame = false;
 
     if(mCodecCtx->codec_type != AVMEDIA_TYPE_AUDIO)
         return false;
