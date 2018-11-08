@@ -86,17 +86,6 @@ namespace DetourNavigator
         return static_cast<std::size_t*>(ptr) + 1;
     }
 
-    // TODO: use std::align
-    inline void* align(std::size_t align, std::size_t size, void*& ptr, std::size_t& space) noexcept
-    {
-        const auto intptr = reinterpret_cast<std::uintptr_t>(ptr);
-        const auto aligned = (intptr - 1u + align) & - align;
-        const auto diff = aligned - intptr;
-        if ((size + diff) > space)
-            return nullptr;
-        space -= diff;
-        return ptr = reinterpret_cast<void*>(aligned);
-    }
 }
 
 #endif
