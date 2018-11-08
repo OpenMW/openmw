@@ -13,10 +13,8 @@ addons:
   apt:
     sources:
       - sourceline: 'ppa:openmw/openmw'
-      - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-7 main'
-        key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
       - ubuntu-toolchain-r-test
-     # - llvm-toolchain-trusty-7
+      - llvm-toolchain-trusty-7
     packages: [
       # Dev
       cmake, clang-7, clang-tools-7, gcc-8, g++-8,
