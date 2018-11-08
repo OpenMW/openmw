@@ -1,6 +1,7 @@
 0.46.0
 ------
 
+    Bug #3623: Fix HiDPI on Windows
     Bug #4540: Rain delay when exiting water
     Bug #4701: PrisonMarker record is not hardcoded like other markers
     Feature #2229: Improve pathfinding AI
