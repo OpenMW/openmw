@@ -168,7 +168,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
     case Qt::DisplayRole:
     {
         if (column >=0 && column <=EsmFile::FileProperty_GameFile)
-            return file->fileProperty(static_cast<const EsmFile::FileProperty>(column));
+            return file->fileProperty(static_cast<EsmFile::FileProperty>(column));
 
         return QVariant();
     }

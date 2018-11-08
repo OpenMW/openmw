@@ -166,7 +166,7 @@ namespace MWClass
             getContainerStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
 
             if (hasInventory)
-                getInventoryStore(ptr).autoEquipShield(ptr);
+                getInventoryStore(ptr).autoEquip(ptr);
         }
     }
 

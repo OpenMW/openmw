@@ -1,11 +1,12 @@
 0.46.0
 ------
 
+    Bug #4540: Rain delay when exiting water
     Bug #4701: PrisonMarker record is not hardcoded like other markers
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
+    Feature #4673: Weapon sheathing
     Task #4686: Upgrade media decoder to a more current FFmpeg API
-
 
 0.45.0
 ------

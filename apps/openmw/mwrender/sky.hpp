@@ -180,6 +180,7 @@ namespace MWRender
 
         void createRain();
         void destroyRain();
+        void switchUnderwaterRain();
         void updateRainParameters();
 
         Resource::SceneManager* mSceneManager;
