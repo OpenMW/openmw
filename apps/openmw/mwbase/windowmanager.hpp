@@ -285,6 +285,8 @@ namespace MWBase
 
             virtual void setEnemy (const MWWorld::Ptr& enemy) = 0;
 
+            virtual int getMessagesCount() const = 0;
+
             virtual const Translation::Storage& getTranslationDataStorage() const = 0;
 
             /// Warning: do not use MyGUI::InputManager::setKeyFocusWidget directly. Instead use this.

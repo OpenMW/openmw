@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <deque>
 
 #include <components/esm/cellid.hpp>
 
@@ -52,6 +53,11 @@ namespace MWRender
 namespace MWMechanics
 {
     struct Movement;
+}
+
+namespace DetourNavigator
+{
+    class Navigator;
 }
 
 namespace MWWorld
@@ -262,8 +268,8 @@ namespace MWBase
             ///< Adjust position after load to be on ground. Must be called after model load.
             /// @param force do this even if the ptr is flying
 
-            virtual void fixPosition (const MWWorld::Ptr& actor) = 0;
-            ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
+            virtual void fixPosition () = 0;
+            ///< Attempt to fix position so that the player is not stuck inside the geometry.
 
             /// @note No-op for items in containers. Use ContainerStore::removeItem instead.
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
@@ -301,6 +307,9 @@ namespace MWBase
             ///< cast a Ray and return true if there is an object in the ray path.
 
             virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
+
+            virtual void setActorCollisionMode(const MWWorld::Ptr& ptr, bool enabled) = 0;
+            virtual bool isActorCollisionEnabled(const MWWorld::Ptr& ptr) = 0;
 
             virtual bool toggleCollisionMode() = 0;
             ///< Toggle collision mode for player. If disabled player object should ignore
@@ -592,6 +601,15 @@ namespace MWBase
 
             /// Preload VFX associated with this effect list
             virtual void preloadEffects(const ESM::EffectList* effectList) = 0;
+
+            virtual DetourNavigator::Navigator* getNavigator() const = 0;
+
+            virtual void updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
+                    const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const = 0;
+
+            virtual void removeActorPath(const MWWorld::ConstPtr& actor) const = 0;
+
+            virtual void setNavMeshNumberToRender(const std::size_t value) = 0;
     };
 }
 

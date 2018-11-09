@@ -4,6 +4,7 @@ set(GAME
     engine.cpp
 
     ${CMAKE_SOURCE_DIR}/files/windows/openmw.rc
+    ${CMAKE_SOURCE_DIR}/files/windows/openmw.exe.manifest
 )
 
 if (ANDROID)
@@ -21,7 +22,7 @@ add_openmw_dir (mwrender
     actors objects renderingmanager animation rotatecontroller sky npcanimation vismask
     creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation
     bulletdebugdraw globalmap characterpreview camera localmap water terrainstorage ripplesimulation
-    renderbin actoranimation landmanager
+    renderbin actoranimation landmanager navmesh actorspaths
     )
 
 add_openmw_dir (mwinput
@@ -70,7 +71,7 @@ add_openmw_dir (mwworld
     )
 
 add_openmw_dir (mwphysics
-    physicssystem trace collisiontype actor convert
+    physicssystem trace collisiontype actor convert object heightfield
     )
 
 add_openmw_dir (mwclass
@@ -133,6 +134,7 @@ target_link_libraries(openmw
     ${FFmpeg_LIBRARIES}
     ${MyGUI_LIBRARIES}
     ${SDL2_LIBRARY}
+    ${RecastNavigation_LIBRARIES}
     "osg-ffmpeg-videoplayer"
     "oics"
     components

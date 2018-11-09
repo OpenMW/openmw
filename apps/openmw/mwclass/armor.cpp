@@ -297,11 +297,11 @@ namespace MWClass
     {
         const MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
 
-        if (ptr.getCellRef().getCharge() == 0)
+        if (getItemHealth(ptr) == 0)
             return std::make_pair(0, "#{sInventoryMessage1}");
 
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots_ = ptr.getClass().getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
 
         if (slots_.first.empty())
             return std::make_pair(0, "");

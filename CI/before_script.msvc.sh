@@ -194,7 +194,11 @@ download() {
 }
 
 real_pwd() {
-	pwd | sed "s,/\(.\),\1:,"
+	if type cygpath >/dev/null 2>&1; then
+		cygpath -am "$PWD"
+	else
+		pwd # not git bash, Cygwin or the like
+	fi
 }
 
 CMAKE_OPTS=""
@@ -304,6 +308,10 @@ if ! [ -z $UNITY_BUILD ]; then
 	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
 fi
 
+if [ ${BITS} -eq 64 ]; then
+	GENERATOR="${GENERATOR} Win64"
+fi
+
 echo
 echo "==================================="
 echo "Starting prebuild on MSVC${MSVC_DISPLAY_YEAR} WIN${BITS}"
@@ -324,7 +332,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	if [ -z $APPVEYOR ]; then
 		download "Boost 1.67.0" \
 			"https://sourceforge.net/projects/boost/files/boost-binaries/1.67.0/boost_1_67_0-msvc-${MSVC_VER}-${BITS}.exe" \
-			"boost-1.67.0-msvc${MSVC_YEAR}-win${BITS}.exe"
+			"boost-1.67.0-msvc${MSVC_VER}-win${BITS}.exe"
 	fi
 
 	# Bullet
@@ -430,7 +438,7 @@ fi
 			rm -rf Boost
 			CI_EXTRA_INNO_OPTIONS=""
 			[ -n "$CI" ] && CI_EXTRA_INNO_OPTIONS="//SUPPRESSMSGBOXES //LOG='boost_install.log'"
-			"${DEPS}/boost-1.67.0-msvc${MSVC_YEAR}-win${BITS}.exe" //DIR="${CWD_DRIVE_ROOT}" //VERYSILENT //NORESTART ${CI_EXTRA_INNO_OPTIONS}
+			"${DEPS}/boost-1.67.0-msvc${MSVC_VER}-win${BITS}.exe" //DIR="${CWD_DRIVE_ROOT}" //VERYSILENT //NORESTART ${CI_EXTRA_INNO_OPTIONS}
 			mv "${CWD_DRIVE_ROOT_BASH}" "${BOOST_SDK}"
 		fi
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
@@ -449,7 +457,7 @@ fi
 		else
 			LIB_SUFFIX="0"
 		fi
-		
+
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
 			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.${LIB_SUFFIX}"
 		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"

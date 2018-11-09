@@ -134,9 +134,9 @@ public:
             {
                 state->bindVertexBufferObject(bufferobject);
 
-                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)nullptr);
-                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)nullptr + 12);
-                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)nullptr + 16);
+                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), static_cast<char*>(0));
+                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), static_cast<char*>(0) + 12);
+                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), static_cast<char*>(0) + 16);
             }
             else
             {

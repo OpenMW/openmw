@@ -56,6 +56,9 @@ namespace MWWorld
         // Remaining enchantment charge. This could be -1 if the charge was not touched yet (i.e. full).
         float getEnchantmentCharge() const;
 
+        // Remaining enchantment charge rescaled to the supplied maximum charge (such as one of the enchantment).
+        float getNormalizedEnchantmentCharge(int maxCharge) const;
+
         void setEnchantmentCharge(float charge);
 
         // For weapon or armor, this is the remaining item health.

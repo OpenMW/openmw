@@ -7,6 +7,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/validate.hpp>
+#include <components/misc/rng.hpp>
 #include <components/nifosg/nifloader.hpp>
 
 #include "model/doc/document.hpp"
@@ -354,6 +355,8 @@ int CS::Editor::run()
 {
     if (mLocal.empty())
         return 1;
+
+    Misc::Rng::init();
 
     mStartup.show();
 

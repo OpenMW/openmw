@@ -70,6 +70,22 @@ namespace MWWorld
         return mCellRef.mEnchantmentCharge;
     }
 
+    float CellRef::getNormalizedEnchantmentCharge(int maxCharge) const
+    {
+        if (maxCharge == 0)
+        {
+            return 0;
+        }
+        else if (mCellRef.mEnchantmentCharge == -1)
+        {
+            return 1;
+        }
+        else
+        {
+            return mCellRef.mEnchantmentCharge / static_cast<float>(maxCharge);
+        }
+    }
+
     void CellRef::setEnchantmentCharge(float charge)
     {
         if (charge != mCellRef.mEnchantmentCharge)

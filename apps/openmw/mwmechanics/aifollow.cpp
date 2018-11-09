@@ -74,12 +74,12 @@ AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
 
 bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
-    MWWorld::Ptr target = getTarget();
+    const MWWorld::Ptr target = getTarget();
 
-    if (target.isEmpty() || !target.getRefData().getCount() || !target.getRefData().isEnabled()  // Really we should be checking whether the target is currently registered
-                                                                                                 // with the MechanicsManager
-            )
-        return false; // Target is not here right now, wait for it to return
+    // Target is not here right now, wait for it to return
+    // Really we should be checking whether the target is currently registered with the MechanicsManager
+    if (target == MWWorld::Ptr() || !target.getRefData().getCount() || !target.getRefData().isEnabled())
+        return false;
 
     actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
@@ -94,6 +94,10 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
         return false;
     }
 
+    const osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
+    const osg::Vec3f targetPos(target.getRefData().getPosition().asVec3());
+    const osg::Vec3f targetDir = targetPos - actorPos;
+
     // AiFollow requires the target to be in range and within sight for the initial activation
     if (!mActive)
     {
@@ -101,17 +105,13 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
 
         if (storage.mTimer < 0)
         {
-            if ((actor.getRefData().getPosition().asVec3() - target.getRefData().getPosition().asVec3()).length2()
-                    < 500*500
-                    && MWBase::Environment::get().getWorld()->getLOS(actor, target))
+            if (targetDir.length2() < 500*500 && MWBase::Environment::get().getWorld()->getLOS(actor, target))
                 mActive = true;
             storage.mTimer = 0.5f;
         }
     }
     if (!mActive)
         return false;
-
-    ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 
     // The distances below are approximations based on observations of the original engine.
     // If only one actor is following the target, it uses 186.
@@ -145,9 +145,8 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
             }
         }
 
-        if ((pos.pos[0]-mX)*(pos.pos[0]-mX) +
-            (pos.pos[1]-mY)*(pos.pos[1]-mY) +
-            (pos.pos[2]-mZ)*(pos.pos[2]-mZ) < followDistance*followDistance) //Close-ish to final position
+        osg::Vec3f finalPos(mX, mY, mZ);
+        if ((actorPos-finalPos).length2() < followDistance*followDistance) //Close-ish to final position
         {
             if (actor.getCell()->isExterior()) //Outside?
             {
@@ -162,8 +161,6 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
         }
     }
 
-    //Set the target destination from the actor
-    ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
     short baseFollowDistance = followDistance;
     short threshold = 30; // to avoid constant switching between moving/stopping
@@ -172,15 +169,9 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
     else
         followDistance += threshold;
 
-    osg::Vec3f targetPos(target.getRefData().getPosition().asVec3());
-    osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
-
-    osg::Vec3f dir = targetPos - actorPos;
-    float targetDistSqr = dir.length2();
-
-    if (targetDistSqr <= followDistance * followDistance)
+    if (targetDir.length2() <= followDistance * followDistance)
     {
-        float faceAngleRadians = std::atan2(dir.x(), dir.y());
+        float faceAngleRadians = std::atan2(targetDir.x(), targetDir.y());
 
         if (!zTurn(actor, faceAngleRadians, osg::DegreesToRadians(45.f)))
         {
@@ -191,16 +182,14 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
         return false;
     }
 
-    storage.mMoving = !pathTo(actor, dest, duration, baseFollowDistance); // Go to the destination
+    storage.mMoving = !pathTo(actor, targetPos, duration, baseFollowDistance); // Go to the destination
 
     if (storage.mMoving)
     {
         //Check if you're far away
-        float dist = distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]);
-
-        if (dist > 450)
+        if (targetDir.length2() > 450 * 450)
             actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, true); //Make NPC run
-        else if (dist < 325) //Have a bit of a dead zone, otherwise npc will constantly flip between running and not when right on the edge of the running threshold
+        else if (targetDir.length2() < 325 * 325) //Have a bit of a dead zone, otherwise npc will constantly flip between running and not when right on the edge of the running threshold
             actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, false); //make NPC walk
     }
 

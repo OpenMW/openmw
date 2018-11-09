@@ -153,7 +153,52 @@ if (USE_QT)
 endif()
 
 # Sound setup
+
+# Require at least ffmpeg 3.2 for now
+SET(FFVER_OK FALSE)
+
 find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
+
+if(FFmpeg_FOUND)
+    SET(FFVER_OK TRUE)
+
+    # Can not detect FFmpeg version on Windows for now
+    if (NOT WIN32)
+        if(FFmpeg_AVFORMAT_VERSION VERSION_LESS "57.56.100")
+            message(STATUS "libavformat is too old! (${FFmpeg_AVFORMAT_VERSION}, wanted 57.56.100)")
+            set(FFVER_OK FALSE)
+        endif()
+        if(FFmpeg_AVCODEC_VERSION VERSION_LESS "57.64.100")
+            message(STATUS "libavcodec is too old! (${FFmpeg_AVCODEC_VERSION}, wanted 57.64.100)")
+            set(FFVER_OK FALSE)
+        endif()
+        if(FFmpeg_AVUTIL_VERSION VERSION_LESS "55.34.100")
+            message(STATUS "libavutil is too old! (${FFmpeg_AVUTIL_VERSION}, wanted 55.34.100)")
+            set(FFVER_OK FALSE)
+        endif()
+        if(FFmpeg_SWSCALE_VERSION VERSION_LESS "4.2.100")
+            message(STATUS "libswscale is too old! (${FFmpeg_SWSCALE_VERSION}, wanted 4.2.100)")
+            set(FFVER_OK FALSE)
+        endif()
+        if(FFmpeg_SWRESAMPLE_VERSION VERSION_LESS "2.3.100")
+            message(STATUS "libswresample is too old! (${FFmpeg_SWRESAMPLE_VERSION}, wanted 2.3.100)")
+            set(FFVER_OK FALSE)
+        endif()
+    endif()
+endif()
+
+if(NOT FFmpeg_FOUND)
+    message(FATAL_ERROR "FFmpeg was not found" )
+endif()
+
+if(NOT FFVER_OK)
+    message(FATAL_ERROR "FFmpeg version is too old, 3.2 is required" )
+endif()
+
+if(WIN32)
+    message("Can not detect FFmpeg version, at least the 3.2 is required" )
+endif()
+
 # Required for building the FFmpeg headers
 add_definitions(-D__STDC_CONSTANT_MACROS)
 
@@ -274,9 +319,6 @@ if (APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw.icns
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 endif (APPLE)
-
-# Set up DEBUG define
-set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_DEBUG DEBUG=1)
 
 if (NOT APPLE)
     set(OPENMW_MYGUI_FILES_ROOT ${OpenMW_BINARY_DIR})
@@ -469,7 +511,7 @@ if(WIN32)
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Debug/resources" DESTINATION "." CONFIGURATIONS Debug)
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Release/resources" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
-    
+
     FILE(GLOB plugin_dir_debug "${OpenMW_BINARY_DIR}/Debug/osgPlugins-*")
     FILE(GLOB plugin_dir_release "${OpenMW_BINARY_DIR}/Release/osgPlugins-*")
     INSTALL(DIRECTORY ${plugin_dir_debug} DESTINATION "." CONFIGURATIONS Debug)
@@ -536,6 +578,11 @@ if(WIN32)
 endif(WIN32)
 
 # Extern
+set(RECASTNAVIGATION_DEMO OFF CACHE BOOL "Do not build RecastDemo")
+set(RECASTNAVIGATION_STATIC ON CACHE BOOL "Build recastnavigation static libraries")
+set(RECASTNAVIGATION_TESTS OFF CACHE BOOL "Do not build recastnavigation tests")
+
+add_subdirectory (extern/recastnavigation)
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
 if (BUILD_OPENCS)
@@ -602,7 +649,7 @@ if (WIN32)
     if (USE_DEBUG_CONSOLE AND BUILD_OPENMW)
       set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
       set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-      set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+      set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:Debug>:_CONSOLE>)
     elseif (BUILD_OPENMW)
       # Turn off debug console, debug output will be written to visual studio output instead
       set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
@@ -612,7 +659,6 @@ if (WIN32)
     if (BUILD_OPENMW)
         # Release builds don't use the debug console
         set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-        set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_WINDOWS")
         set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
     endif()
 

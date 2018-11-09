@@ -44,6 +44,10 @@ namespace Debug
     };
 
 #if defined(_WIN32) && defined(_DEBUG)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
+#endif // !WIN32_LEAN_AND_MEAN
+#include <Windows.h>
     class DebugOutput : public DebugOutputBase
     {
     public:

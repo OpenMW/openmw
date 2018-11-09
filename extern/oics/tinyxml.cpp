@@ -1046,58 +1046,35 @@ bool TiXmlDocument::LoadFile( FILE* file, TiXmlEncoding encoding )
 		return false;
 	}
 
-	const char* lastPos = buf;
-	const char* p = buf;
+	const char* p = buf;	// the read head
+	char* q = buf;			// the write head
+	const char CR = 0x0d;
+	const char LF = 0x0a;
 
 	buf[length] = 0;
 	while( *p ) {
 		assert( p < (buf+length) );
-		if ( *p == 0xa ) {
-			// Newline character. No special rules for this. Append all the characters
-			// since the last string, and include the newline.
-			data.append( lastPos, (p-lastPos+1) );	// append, include the newline
-			++p;									// move past the newline
-			lastPos = p;							// and point to the new buffer (may be 0)
-			assert( p <= (buf+length) );
-		}
-		else if ( *p == 0xd ) {
-			// Carriage return. Append what we have so far, then
-			// handle moving forward in the buffer.
-			if ( (p-lastPos) > 0 ) {
-				data.append( lastPos, p-lastPos );	// do not add the CR
-			}
-			data += (char)0xa;						// a proper newline
+		assert( q <= (buf+length) );
+		assert( q <= p );
 
-			if ( *(p+1) == 0xa ) {
-				// Carriage return - new line sequence
-				p += 2;
-				lastPos = p;
-				assert( p <= (buf+length) );
-			}
-			else {
-				// it was followed by something else...that is presumably characters again.
-				++p;
-				lastPos = p;
-				assert( p <= (buf+length) );
+		if ( *p == CR ) {
+			*q++ = LF;
+			p++;
+			if ( *p == LF ) {		// check for CR+LF (and skip LF)
+				p++;
 			}
 		}
 		else {
-			++p;
+			*q++ = *p++;
 		}
 	}
-	// Handle any left over characters.
-	if ( p-lastPos ) {
-		data.append( lastPos, p-lastPos );
-	}		
+	assert( q <= (buf+length) );
+	*q = 0;
+
+	Parse( buf, 0, encoding );
+
 	delete [] buf;
-	buf = 0;
-
-	Parse( data.c_str(), 0, encoding );
-
-	if (  Error() )
-		return false;
-	else
-		return true;
+	return !Error();
 }
 
 

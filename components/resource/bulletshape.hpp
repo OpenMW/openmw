@@ -25,9 +25,9 @@ namespace Resource
         META_Object(Resource, BulletShape)
 
         btCollisionShape* mCollisionShape;
+        btCollisionShape* mAvoidCollisionShape;
 
-        // Used for actors. Note, ideally actors would use a separate loader - as it is
-        // we have to keep a redundant copy of the actor model around in mCollisionShape, which isn't used.
+        // Used for actors. mCollisionShape is used for actors only when we need to autogenerate collision box for creatures.
         // For now, use one file <-> one resource for simplicity.
         osg::Vec3f mCollisionBoxHalfExtents;
         osg::Vec3f mCollisionBoxTranslate;
@@ -42,7 +42,11 @@ namespace Resource
 
         btCollisionShape* duplicateCollisionShape(const btCollisionShape* shape) const;
 
-        btCollisionShape* getCollisionShape();
+        btCollisionShape* getCollisionShape() const;
+
+        btCollisionShape* getAvoidCollisionShape() const;
+
+        void setLocalScaling(const btVector3& scale);
 
     private:
 

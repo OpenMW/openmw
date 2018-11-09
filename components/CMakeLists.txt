@@ -51,7 +51,7 @@ add_component_dir (shader
 add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry morphgeometry lightcontroller
     lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil waterutil writescene serialize optimizer
-    actorutil
+    actorutil detourdebugdraw navmesh agentpath
     )
 
 add_component_dir (nif
@@ -156,6 +156,23 @@ if(NOT WIN32 AND NOT ANDROID)
     )
 endif()
 
+add_component_dir(detournavigator
+    debug
+    makenavmesh
+    findsmoothpath
+    recastmeshbuilder
+    recastmeshmanager
+    cachedrecastmeshmanager
+    navmeshmanager
+    navigator
+    asyncnavmeshupdater
+    chunkytrimesh
+    recastmesh
+    tilecachedrecastmeshmanager
+    recastmeshobject
+    navmeshtilescache
+    )
+
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 
@@ -214,6 +231,9 @@ target_link_libraries(components
     ${SDL2_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
     ${MyGUI_LIBRARIES}
+    RecastNavigation::DebugUtils
+    RecastNavigation::Detour
+    RecastNavigation::Recast
     )
 
 if (WIN32)

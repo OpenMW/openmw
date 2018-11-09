@@ -357,7 +357,7 @@ namespace MWClass
 
             // Persistent actors with 0 health do not play death animation
             if (data->mNpcStats.isDead())
-                data->mNpcStats.setDeathAnimationFinished(ptr.getClass().isPersistent(ptr));
+                data->mNpcStats.setDeathAnimationFinished(isPersistent(ptr));
 
             // race powers
             const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
@@ -469,41 +469,38 @@ namespace MWClass
 
         // FIXME: use const version of InventoryStore functions once they are available
         // preload equipped items
-        if (ptr.getClass().hasInventoryStore(ptr))
+        const MWWorld::InventoryStore& invStore = getInventoryStore(ptr);
+        for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
         {
-            const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
-            for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+            MWWorld::ConstContainerStoreIterator equipped = invStore.getSlot(slot);
+            if (equipped != invStore.end())
             {
-                MWWorld::ConstContainerStoreIterator equipped = invStore.getSlot(slot);
-                if (equipped != invStore.end())
+                std::vector<ESM::PartReference> parts;
+                if(equipped->getTypeName() == typeid(ESM::Clothing).name())
                 {
-                    std::vector<ESM::PartReference> parts;
-                    if(equipped->getTypeName() == typeid(ESM::Clothing).name())
-                    {
-                        const ESM::Clothing *clothes = equipped->get<ESM::Clothing>()->mBase;
-                        parts = clothes->mParts.mParts;
-                    }
-                    else if(equipped->getTypeName() == typeid(ESM::Armor).name())
-                    {
-                        const ESM::Armor *armor = equipped->get<ESM::Armor>()->mBase;
-                        parts = armor->mParts.mParts;
-                    }
-                    else
-                    {
-                        std::string model = equipped->getClass().getModel(*equipped);
-                        if (!model.empty())
-                            models.push_back(model);
-                    }
+                    const ESM::Clothing *clothes = equipped->get<ESM::Clothing>()->mBase;
+                    parts = clothes->mParts.mParts;
+                }
+                else if(equipped->getTypeName() == typeid(ESM::Armor).name())
+                {
+                    const ESM::Armor *armor = equipped->get<ESM::Armor>()->mBase;
+                    parts = armor->mParts.mParts;
+                }
+                else
+                {
+                    std::string model = equipped->getClass().getModel(*equipped);
+                    if (!model.empty())
+                        models.push_back(model);
+                }
 
-                    for (std::vector<ESM::PartReference>::const_iterator it = parts.begin(); it != parts.end(); ++it)
-                    {
-                        std::string partname = female ? it->mFemale : it->mMale;
-                        if (partname.empty())
-                            partname = female ? it->mMale : it->mFemale;
-                        const ESM::BodyPart* part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(partname);
-                        if (part && !part->mModel.empty())
-                            models.push_back("meshes/"+part->mModel);
-                    }
+                for (std::vector<ESM::PartReference>::const_iterator it = parts.begin(); it != parts.end(); ++it)
+                {
+                    std::string partname = female ? it->mFemale : it->mMale;
+                    if (partname.empty())
+                        partname = female ? it->mMale : it->mFemale;
+                    const ESM::BodyPart* part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(partname);
+                    if (part && !part->mModel.empty())
+                        models.push_back("meshes/"+part->mModel);
                 }
             }
         }
@@ -573,8 +570,8 @@ namespace MWClass
 
         // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
         std::vector<MWWorld::Ptr> targetActors;
-        if (!ptr.isEmpty() && ptr.getClass().isActor() && ptr != MWMechanics::getPlayer())
-            ptr.getClass().getCreatureStats(ptr).getAiSequence().getCombatTargets(targetActors);
+        if (ptr != MWMechanics::getPlayer())
+            getCreatureStats(ptr).getAiSequence().getCombatTargets(targetActors);
 
         // TODO: Use second to work out the hit angle
         std::pair<MWWorld::Ptr, osg::Vec3f> result = world->getHitContact(ptr, dist, targetActors);
@@ -597,7 +594,7 @@ namespace MWClass
         if(!weapon.isEmpty())
             weapskill = weapon.getClass().getEquipmentSkill(weapon);
 
-        float hitchance = MWMechanics::getHitChance(ptr, victim, ptr.getClass().getSkill(ptr, weapskill));
+        float hitchance = MWMechanics::getHitChance(ptr, victim, getSkill(ptr, weapskill));
 
         if (Misc::Rng::roll0to99() >= hitchance)
         {
@@ -667,7 +664,7 @@ namespace MWClass
     void Npc::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) const
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+        MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
         bool wasDead = stats.isDead();
 
         // Note OnPcHitMe is not set for friendly hits.
@@ -681,7 +678,7 @@ namespace MWClass
         }
 
         // Attacker and target store each other as hitattemptactor if they have no one stored yet
-        if (!attacker.isEmpty() && attacker.getClass().isActor() && !ptr.isEmpty() && ptr.getClass().isActor())
+        if (!attacker.isEmpty() && attacker.getClass().isActor())
         {
             MWMechanics::CreatureStats& statsAttacker = attacker.getClass().getCreatureStats(attacker);
             // First handle the attacked actor
@@ -702,7 +699,7 @@ namespace MWClass
 
         if (setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
         {
-            const std::string &script = ptr.getClass().getScript(ptr);
+            const std::string &script = getScript(ptr);
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
             if(!script.empty())
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
@@ -891,12 +888,11 @@ namespace MWClass
         if(stats.getAiSequence().isInCombat())
             return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
 
-        if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak)
-            || ptr.getClass().getCreatureStats(ptr).getKnockedDown())
+        if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak) || stats.getKnockedDown())
             return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
 
         // Can't talk to werewolfs
-        if(ptr.getClass().isNpc() && ptr.getClass().getNpcStats(ptr).isWerewolf())
+        if(getNpcStats(ptr).isWerewolf())
             return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
 
         return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
@@ -927,7 +923,7 @@ namespace MWClass
 
     float Npc::getSpeed(const MWWorld::Ptr& ptr) const
     {
-        const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
         if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead())
             return 0.f;
 
@@ -993,7 +989,7 @@ namespace MWClass
         if(getEncumbrance(ptr) > getCapacity(ptr))
             return 0.f;
 
-        const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
         if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead())
             return 0.f;
 
@@ -1148,9 +1144,7 @@ namespace MWClass
                 const bool hasHealth = it->getClass().hasItemHealth(*it);
                 if (hasHealth)
                 {
-                    int armorHealth = it->getClass().getItemHealth(*it);
-                    int armorMaxHealth = it->getClass().getItemMaxHealth(*it);
-                    ratings[i] *= (float(armorHealth) / armorMaxHealth);
+                    ratings[i] *= it->getClass().getItemNormalizedHealth(*it);
                 }
             }
         }
@@ -1215,13 +1209,13 @@ namespace MWClass
                 return (name == "left") ? "FootWaterLeft" : "FootWaterRight";
             if(world->isOnGround(ptr))
             {
-                if (ptr.getClass().getNpcStats(ptr).isWerewolf()
-                        && ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
+                if (getNpcStats(ptr).isWerewolf()
+                        && getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
                 {
                     MWMechanics::WeaponType weaponType = MWMechanics::WeapType_None;
-                    MWMechanics::getActiveWeapon(ptr.getClass().getCreatureStats(ptr), ptr.getClass().getInventoryStore(ptr), &weaponType);
+                    MWMechanics::getActiveWeapon(getCreatureStats(ptr), getInventoryStore(ptr), &weaponType);
                     if (weaponType == MWMechanics::WeapType_None)
-                        return "";
+                        return std::string();
                 }
 
                 const MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
@@ -1239,12 +1233,12 @@ namespace MWClass
                         return (name == "left") ? "FootHeavyLeft" : "FootHeavyRight";
                 }
             }
-            return "";
+            return std::string();
         }
 
         // Morrowind ignores land soundgen for NPCs
         if(name == "land")
-            return "";
+            return std::string();
         if(name == "swimleft")
             return "Swim Left";
         if(name == "swimright")
@@ -1254,11 +1248,11 @@ namespace MWClass
         // only for biped creatures?
 
         if(name == "moan")
-            return "";
+            return std::string();
         if(name == "roar")
-            return "";
+            return std::string();
         if(name == "scream")
-            return "";
+            return std::string();
 
         throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }
@@ -1272,7 +1266,7 @@ namespace MWClass
 
     int Npc::getSkill(const MWWorld::Ptr& ptr, int skill) const
     {
-        return ptr.getClass().getNpcStats(ptr).getSkill(skill).getModified();
+        return getNpcStats(ptr).getSkill(skill).getModified();
     }
 
     int Npc::getBloodTexture(const MWWorld::ConstPtr &ptr) const
@@ -1354,7 +1348,7 @@ namespace MWClass
 
     void Npc::respawn(const MWWorld::Ptr &ptr) const
     {
-        const MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
+        const MWMechanics::CreatureStats& creatureStats = getCreatureStats(ptr);
         if (ptr.getRefData().getCount() > 0 && !creatureStats.isDead())
             return;
 

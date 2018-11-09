@@ -3,6 +3,9 @@
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
 
+#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
+#include <BulletCollision/CollisionShapes/btCompoundShape.h>
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/esmreader.hpp>
@@ -15,9 +18,14 @@
 
 #include <components/files/collections.hpp>
 
+#include <components/resource/bulletshape.hpp>
 #include <components/resource/resourcesystem.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+
+#include <components/detournavigator/debug.hpp>
+#include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/recastglobalallocator.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -47,6 +55,7 @@
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwphysics/actor.hpp"
 #include "../mwphysics/collisiontype.hpp"
+#include "../mwphysics/object.hpp"
 
 #include "player.hpp"
 #include "manualref.hpp"
@@ -159,12 +168,6 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
       mPlayerTraveling(false), mPlayerInJail(false), mSpellPreloadTimer(0.f)
     {
-        mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
-        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath));
-        mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));
-
-        mRendering->preloadCommonAssets();
-
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
@@ -193,9 +196,50 @@ namespace MWWorld
 
         mSwimHeightScale = mStore.get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
 
+        mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
+
+        DetourNavigator::Settings navigatorSettings;
+        navigatorSettings.mBorderSize = Settings::Manager::getInt("border size", "Navigator");
+        navigatorSettings.mCellHeight = Settings::Manager::getFloat("cell height", "Navigator");
+        navigatorSettings.mCellSize = Settings::Manager::getFloat("cell size", "Navigator");
+        navigatorSettings.mDetailSampleDist = Settings::Manager::getFloat("detail sample dist", "Navigator");
+        navigatorSettings.mDetailSampleMaxError = Settings::Manager::getFloat("detail sample max error", "Navigator");
+        navigatorSettings.mMaxClimb = MWPhysics::sStepSizeUp;
+        navigatorSettings.mMaxSimplificationError = Settings::Manager::getFloat("max simplification error", "Navigator");
+        navigatorSettings.mMaxSlope = MWPhysics::sMaxSlope;
+        navigatorSettings.mRecastScaleFactor = Settings::Manager::getFloat("recast scale factor", "Navigator");
+        navigatorSettings.mSwimHeightScale = mSwimHeightScale;
+        navigatorSettings.mMaxEdgeLen = Settings::Manager::getInt("max edge len", "Navigator");
+        navigatorSettings.mMaxNavMeshQueryNodes = Settings::Manager::getInt("max nav mesh query nodes", "Navigator");
+        navigatorSettings.mMaxPolys = Settings::Manager::getInt("max polygons per tile", "Navigator");
+        navigatorSettings.mMaxVertsPerPoly = Settings::Manager::getInt("max verts per poly", "Navigator");
+        navigatorSettings.mRegionMergeSize = Settings::Manager::getInt("region merge size", "Navigator");
+        navigatorSettings.mRegionMinSize = Settings::Manager::getInt("region min size", "Navigator");
+        navigatorSettings.mTileSize = Settings::Manager::getInt("tile size", "Navigator");
+        navigatorSettings.mAsyncNavMeshUpdaterThreads = static_cast<std::size_t>(Settings::Manager::getInt("async nav mesh updater threads", "Navigator"));
+        navigatorSettings.mMaxNavMeshTilesCacheSize = static_cast<std::size_t>(Settings::Manager::getInt("max nav mesh tiles cache size", "Navigator"));
+        navigatorSettings.mMaxPolygonPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max polygon path size", "Navigator"));
+        navigatorSettings.mMaxSmoothPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max smooth path size", "Navigator"));
+        navigatorSettings.mTrianglesPerChunk = static_cast<std::size_t>(Settings::Manager::getInt("triangles per chunk", "Navigator"));
+        navigatorSettings.mEnableWriteRecastMeshToFile = Settings::Manager::getBool("enable write recast mesh to file", "Navigator");
+        navigatorSettings.mEnableWriteNavMeshToFile = Settings::Manager::getBool("enable write nav mesh to file", "Navigator");
+        navigatorSettings.mRecastMeshPathPrefix = Settings::Manager::getString("recast mesh path prefix", "Navigator");
+        navigatorSettings.mNavMeshPathPrefix = Settings::Manager::getString("nav mesh path prefix", "Navigator");
+        navigatorSettings.mEnableRecastMeshFileNameRevision = Settings::Manager::getBool("enable recast mesh file name revision", "Navigator");
+        navigatorSettings.mEnableNavMeshFileNameRevision = Settings::Manager::getBool("enable nav mesh file name revision", "Navigator");
+        if (Settings::Manager::getBool("enable log", "Navigator"))
+            DetourNavigator::Log::instance().setSink(std::unique_ptr<DetourNavigator::FileSink>(
+                new DetourNavigator::FileSink(Settings::Manager::getString("log path", "Navigator"))));
+        DetourNavigator::RecastGlobalAllocator::init();
+        mNavigator.reset(new DetourNavigator::Navigator(navigatorSettings));
+
+        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath, *mNavigator));
+        mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));
+        mRendering->preloadCommonAssets();
+
         mWeatherManager.reset(new MWWorld::WeatherManager(*mRendering, mFallback, mStore));
 
-        mWorldScene.reset(new Scene(*mRendering.get(), mPhysics.get()));
+        mWorldScene.reset(new Scene(*mRendering.get(), mPhysics.get(), *mNavigator));
     }
 
     void World::fillGlobalVariables()
@@ -1351,8 +1395,9 @@ namespace MWWorld
         moveObject(ptr, ptr.getCell(), pos.x(), pos.y(), pos.z());
     }
 
-    void World::fixPosition(const Ptr &actor)
+    void World::fixPosition()
     {
+        const MWWorld::Ptr actor = getPlayerPtr();
         const float distance = 128.f;
         ESM::Position esmPos = actor.getRefData().getPosition();
         osg::Quat orientation(esmPos.rot[2], osg::Vec3f(0,0,-1));
@@ -1382,7 +1427,7 @@ namespace MWWorld
             esmPos.pos[0] = traced.x();
             esmPos.pos[1] = traced.y();
             esmPos.pos[2] = traced.z();
-            MWWorld::ActionTeleport("", esmPos, false).execute(actor);
+            MWWorld::ActionTeleport(actor.getCell()->isExterior() ? "" : actor.getCell()->getCell()->mName, esmPos, false).execute(actor);
         }
     }
 
@@ -1505,6 +1550,32 @@ namespace MWWorld
             moveObjectImp(player->first, player->second.x(), player->second.y(), player->second.z(), false);
     }
 
+    void World::updateNavigator()
+    {
+        bool updated = false;
+
+        mPhysics->forEachAnimatedObject([&] (const MWPhysics::Object* object)
+        {
+            updated = updateNavigatorObject(object) || updated;
+        });
+
+        for (const auto& door : mDoorStates)
+            if (const auto object = mPhysics->getObject(door.first))
+                updated = updateNavigatorObject(object) || updated;
+
+        if (updated)
+            mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3());
+    }
+
+    bool World::updateNavigatorObject(const MWPhysics::Object* object)
+    {
+        const DetourNavigator::ObjectShapes shapes {
+            *object->getShapeInstance()->getCollisionShape(),
+            object->getShapeInstance()->getAvoidCollisionShape()
+        };
+        return mNavigator->updateObject(DetourNavigator::ObjectId(object), shapes, object->getCollisionObject()->getWorldTransform());
+    }
+
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
     {
         int mask = MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door;
@@ -1580,6 +1651,16 @@ namespace MWWorld
                     ++it;
             }
         }
+    }
+
+    void World::setActorCollisionMode(const MWWorld::Ptr& ptr, bool enabled)
+    {
+        mPhysics->setActorCollisionMode(ptr, enabled);
+    }
+
+    bool World::isActorCollisionEnabled(const MWWorld::Ptr& ptr)
+    {
+        return mPhysics->isActorCollisionEnabled(ptr);
     }
 
     bool World::toggleCollisionMode()
@@ -1697,7 +1778,10 @@ namespace MWWorld
         updateWeather(duration, paused);
 
         if (!paused)
+        {
             doPhysics (duration);
+            updateNavigator();
+        }
 
         updatePlayer();
 
@@ -2225,7 +2309,7 @@ namespace MWWorld
 
         float waterlevel = cell->getWaterLevel();
 
-        // SwimHeightScale affects the upper z position an actor can swim to 
+        // SwimHeightScale affects the upper z position an actor can swim to
         // while in water. Based on observation from the original engine,
         // the upper z position you get with a +1 SwimHeightScale is the depth
         // limit for being able to cast water walking on an underwater target.
@@ -2294,6 +2378,7 @@ namespace MWWorld
         {
             // Remove the old CharacterController
             MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
+            mNavigator->removeAgent(mPhysics->getHalfExtents(getPlayerPtr()));
             mPhysics->remove(getPlayerPtr());
             mRendering->removePlayer(getPlayerPtr());
 
@@ -2328,6 +2413,8 @@ namespace MWWorld
         mPhysics->addActor(getPlayerPtr(), model);
 
         applyLoopingParticles(player);
+
+        mNavigator->addAgent(mPhysics->getHalfExtents(getPlayerPtr()));
     }
 
     World::RestPermitted World::canRest () const
@@ -2368,7 +2455,7 @@ namespace MWWorld
     {
         mRendering->screenshot(image, w, h);
     }
-    
+
     bool World::screenshot360(osg::Image* image, std::string settingStr)
     {
         return mRendering->screenshot360(image,settingStr);
@@ -3541,7 +3628,7 @@ namespace MWWorld
                 continue;
             }
             else
-                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, static_cast<float>(effectIt->mArea * 2));              
+                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, static_cast<float>(effectIt->mArea * 2));
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             static const std::string schools[] = {
@@ -3559,7 +3646,13 @@ namespace MWWorld
             MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
                         origin, feetToGameUnits(static_cast<float>(effectIt->mArea)), objects);
             for (std::vector<MWWorld::Ptr>::iterator affected = objects.begin(); affected != objects.end(); ++affected)
+            {
+                // Ignore actors without collisions here, otherwise it will be possible to hit actors outside processing range.
+                if (affected->getClass().isActor() && !isActorCollisionEnabled(*affected))
+                    continue;
+
                 toApply[*affected].push_back(*effectIt);
+            }
         }
 
         // Now apply the appropriate effects to each actor in range
@@ -3685,6 +3778,27 @@ namespace MWWorld
             if (it->mRange == ESM::RT_Target)
                 preload(mWorldScene.get(), mStore, effect->mBolt);
         }
+    }
+
+    DetourNavigator::Navigator* World::getNavigator() const
+    {
+        return mNavigator.get();
+    }
+
+    void World::updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
+            const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const
+    {
+        mRendering->updateActorPath(actor, path, halfExtents, start, end);
+    }
+
+    void World::removeActorPath(const MWWorld::ConstPtr& actor) const
+    {
+        mRendering->removeActorPath(actor);
+    }
+
+    void World::setNavMeshNumberToRender(const std::size_t value)
+    {
+        mRendering->setNavMeshNumber(value);
     }
 
 }

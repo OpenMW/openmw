@@ -15,12 +15,12 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/nifosg/nifloader.hpp>
-
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
 #include <components/resource/imagemanager.hpp>
+
+#include <components/misc/constants.hpp>
 
 #include <components/nifosg/nifloader.hpp> // KeyframeHolder
 #include <components/nifosg/controller.hpp>
@@ -190,12 +190,6 @@ namespace
         {
         }
 
-        RemoveFinishedCallbackVisitor(int effectId)
-            : RemoveVisitor()
-            , mHasMagicEffects(false)
-        {
-        }
-
         virtual void apply(osg::Node &node)
         {
             traverse(node);
@@ -228,9 +222,6 @@ namespace
         virtual void apply(osg::Geometry&)
         {
         }
-
-    private:
-        int mEffectId;
     };
 
     class RemoveCallbackVisitor : public RemoveVisitor
@@ -1748,21 +1739,29 @@ namespace MWRender
 
         if (alpha != 1.f)
         {
-            osg::StateSet* stateset (new osg::StateSet);
+            // If we have an existing material for alpha transparency, just override alpha level
+            osg::StateSet* stateset = mObjectRoot->getOrCreateStateSet();
+            osg::Material* material = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+            if (material)
+            {
+                material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
+            }
+            else
+            {
+                osg::BlendFunc* blendfunc (new osg::BlendFunc);
+                stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
-            osg::BlendFunc* blendfunc (new osg::BlendFunc);
-            stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                // FIXME: overriding diffuse/ambient/emissive colors
+                material = new osg::Material;
+                material->setColorMode(osg::Material::OFF);
+                material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,alpha));
+                material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+                stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
-            // FIXME: overriding diffuse/ambient/emissive colors
-            osg::Material* material (new osg::Material);
-            material->setColorMode(osg::Material::OFF);
-            material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,alpha));
-            material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
-            stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                mObjectRoot->setStateSet(stateset);
 
-            mObjectRoot->setStateSet(stateset);
-
-            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
+                mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
+            }
         }
         else
         {
@@ -1798,9 +1797,12 @@ namespace MWRender
         }
         else
         {
-            effect += 3;
-            float radius = effect * 66.f;
-            float linearAttenuation = 0.5f / effect;
+            // TODO: use global attenuation settings
+
+            // 1 pt of Light magnitude corresponds to 1 foot of radius
+            float radius = effect * std::ceil(Constants::UnitsPerFoot);
+            const float linearValue = 3.f; // Currently hardcoded: unmodified Morrowind attenuation settings
+            float linearAttenuation = linearValue / radius;
 
             if (!mGlowLight || linearAttenuation != mGlowLight->getLight(0)->getLinearAttenuation())
             {
@@ -1822,7 +1824,8 @@ namespace MWRender
                 mGlowLight->setLight(light);
             }
 
-            mGlowLight->setRadius(radius);
+            // Make the obvious cut-off a bit less obvious
+            mGlowLight->setRadius(radius * 3);
         }
     }
 

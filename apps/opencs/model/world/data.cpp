@@ -977,15 +977,19 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
 void CSMWorld::Data::loadFallbackEntries()
 {
     // Load default marker definitions, if game files do not have them for some reason
-    std::pair<std::string, std::string> markers[] = {
-        std::make_pair("divinemarker", "marker_divine.nif"),
-        std::make_pair("doormarker", "marker_arrow.nif"),
-        std::make_pair("northmarker", "marker_north.nif"),
-        std::make_pair("templemarker", "marker_temple.nif"),
-        std::make_pair("travelmarker", "marker_travel.nif")
+    std::pair<std::string, std::string> staticMarkers[] = {
+        std::make_pair("DivineMarker", "marker_divine.nif"),
+        std::make_pair("DoorMarker", "marker_arrow.nif"),
+        std::make_pair("NorthMarker", "marker_north.nif"),
+        std::make_pair("TempleMarker", "marker_temple.nif"),
+        std::make_pair("TravelMarker", "marker_travel.nif")
     };
 
-    for (const std::pair<std::string, std::string> marker : markers)
+    std::pair<std::string, std::string> doorMarkers[] = {
+        std::make_pair("PrisonMarker", "marker_prison.nif")
+    };
+
+    for (const std::pair<std::string, std::string> marker : staticMarkers)
     {
         if (mReferenceables.searchId (marker.first)==-1)
         {
@@ -993,6 +997,17 @@ void CSMWorld::Data::loadFallbackEntries()
             record.mBase = ESM::Static(marker.first, marker.second);
             record.mState = CSMWorld::RecordBase::State_BaseOnly;
             mReferenceables.appendRecord (record, CSMWorld::UniversalId::Type_Static);
+        }
+    }
+
+    for (const std::pair<std::string, std::string> marker : doorMarkers)
+    {
+        if (mReferenceables.searchId (marker.first)==-1)
+        {
+            CSMWorld::Record<ESM::Door> record;
+            record.mBase = ESM::Door(marker.first, std::string(), marker.second, std::string(), std::string(), std::string());
+            record.mState = CSMWorld::RecordBase::State_BaseOnly;
+            mReferenceables.appendRecord (record, CSMWorld::UniversalId::Type_Door);
         }
     }
 }

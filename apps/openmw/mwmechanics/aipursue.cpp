@@ -35,27 +35,27 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
 
     const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId); //The target to follow
 
-    if(target == MWWorld::Ptr() || !target.getRefData().getCount() || !target.getRefData().isEnabled()  // Really we should be checking whether the target is currently registered
-                                                                                                        // with the MechanicsManager
-            )
-        return true; //Target doesn't exist
+    // Stop if the target doesn't exist
+    // Really we should be checking whether the target is currently registered with the MechanicsManager
+    if (target == MWWorld::Ptr() || !target.getRefData().getCount() || !target.getRefData().isEnabled())
+        return true;
 
     if (isTargetMagicallyHidden(target))
         return true;
 
-    if(target.getClass().getCreatureStats(target).isDead())
+    if (target.getClass().getCreatureStats(target).isDead())
         return true;
 
     actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
-    //Set the target desition from the actor
-    ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
-    ESM::Position aPos = actor.getRefData().getPosition();
+    //Set the target destination
+    const osg::Vec3f dest = target.getRefData().getPosition().asVec3();
+    const osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
 
-    float pathTolerance = 100.0;
+    const float pathTolerance = 100.f;
 
     if (pathTo(actor, dest, duration, pathTolerance) &&
-        std::abs(dest.mZ - aPos.pos[2]) < pathTolerance)      // check the true distance in case the target is far away in Z-direction
+        std::abs(dest.z() - actorPos.z()) < pathTolerance) // check the true distance in case the target is far away in Z-direction
     {
         target.getClass().activate(target,actor).get()->execute(actor); //Arrest player when reached
         return true;

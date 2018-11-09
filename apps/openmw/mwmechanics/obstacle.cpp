@@ -96,11 +96,6 @@ namespace MWMechanics
         mEvadeDuration = 0;
     }
 
-    bool ObstacleCheck::isNormalState() const
-    {
-        return mWalkState == State_Norm;
-    }
-
     bool ObstacleCheck::isEvading() const
     {
         return mWalkState == State_Evade;
@@ -128,7 +123,7 @@ namespace MWMechanics
      * u = how long to move sideways
      *
      */
-    bool ObstacleCheck::check(const MWWorld::Ptr& actor, float duration, float scaleMinimumDistance)
+    void ObstacleCheck::update(const MWWorld::Ptr& actor, float duration, float scaleMinimumDistance)
     {
         const MWWorld::Class& cls = actor.getClass();
         ESM::Position pos = actor.getRefData().getPosition();
@@ -180,9 +175,7 @@ namespace MWMechanics
             case State_Evade:
             {
                 mEvadeDuration += duration;
-                if(mEvadeDuration < DURATION_TO_EVADE)
-                    return true;
-                else
+                if(mEvadeDuration >= DURATION_TO_EVADE)
                 {
                     // tried to evade, assume all is ok and start again
                     mWalkState = State_Norm;
@@ -191,10 +184,9 @@ namespace MWMechanics
             }
             /* NO DEFAULT CASE */
         }
-        return false; // no obstacles to evade (yet)
     }
 
-    void ObstacleCheck::takeEvasiveAction(MWMechanics::Movement& actorMovement)
+    void ObstacleCheck::takeEvasiveAction(MWMechanics::Movement& actorMovement) const
     {
         actorMovement.mPosition[0] = evadeDirections[mEvadeDirectionIndex][0];
         actorMovement.mPosition[1] = evadeDirections[mEvadeDirectionIndex][1];
