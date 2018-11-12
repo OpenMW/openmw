@@ -13,7 +13,7 @@ addons:
   apt:
     sources:
       - sourceline: 'ppa:openmw/openmw'
-      - ubuntu-toolchain-r-test
+      - ubuntu-toolchain-r-ppa
       - llvm-toolchain-trusty-7
     packages: [
       # Dev
