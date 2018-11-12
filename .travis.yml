@@ -17,7 +17,7 @@ addons:
       - llvm-toolchain-trusty-7
     packages: [
       # Dev
-      cmake, clang-7, clang-tools-7, gcc-8, g++-8,
+      cmake, clang-7, clang-tools-7, gcc-7, g++-7,
       # Boost
       libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
@@ -33,7 +33,7 @@ addons:
       description: "<Your project description here>"
     branch_pattern: coverity_scan
     notification_email: 720642+scrawl@users.noreply.github.com
-    build_command_prepend: "cov-configure --comptype gcc --compiler gcc-8 --template; cmake . -DBUILD_OPENCS=FALSE -DBUILD_WIZARD=FALSE -DBUILD_UNITTESTS=FALSE -DBUILD_BSATOOL=FALSE -DBUILD_ESMTOOL=FALSE -DBUILD_MWINIIMPORTER=FALSE -DBUILD_ESSIMPORTER=FALSE -DBUILD_LAUNCHER=FALSE -DBUILD_MYGUI_PLUGIN=FALSE"
+    build_command_prepend: "cov-configure --comptype gcc --compiler gcc-7 --template; cmake . -DBUILD_OPENCS=FALSE -DBUILD_WIZARD=FALSE -DBUILD_UNITTESTS=FALSE -DBUILD_BSATOOL=FALSE -DBUILD_ESMTOOL=FALSE -DBUILD_MWINIIMPORTER=FALSE -DBUILD_ESSIMPORTER=FALSE -DBUILD_LAUNCHER=FALSE -DBUILD_MYGUI_PLUGIN=FALSE"
     build_command: "make VERBOSE=1 -j3"
 matrix:
   include:
@@ -41,12 +41,12 @@ matrix:
       os: osx
       osx_image: xcode9.4
       if: branch != coverity_scan
-    - name: OpenMW (all) on Ubuntu Trusty GCC-8
+    - name: OpenMW (all) on Ubuntu Trusty GCC-7
       os: linux
       dist: trusty
       sudo: required
       env:
-        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
       if: branch != coverity_scan
     - name: OpenMW (openmw) on Ubuntu Trusty Clang-7 with Static Analysis
       os: linux
@@ -73,7 +73,7 @@ matrix:
       dist: trusty
       sudo: required
       env:
-      - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+      - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
       if: branch = coverity_scan
 #   allow_failures:
 #    - name: OpenMW (openmw) on Ubuntu Trusty Clang-7 with Static Analysis
