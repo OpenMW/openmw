@@ -32,12 +32,14 @@ matrix:
     - name: OpenMW (all) on MacOS xcode9.4
       os: osx
       osx_image: xcode9.4
+      if: branch != coverity_scan
     - name: OpenMW (all) on Ubuntu Trusty GCC-8
       os: linux
       dist: trusty
       sudo: required
       env:
         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+      if: branch != coverity_scan
     - name: OpenMW (openmw) on Ubuntu Trusty Clang-7 with Static Analysis
       os: linux
       dist: trusty
@@ -46,6 +48,7 @@ matrix:
         - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
         - ANALYZE="scan-build-7 --use-cc clang-7 --use-c++ clang++-7"
         - BUILD_OPENMW_CS="OFF"
+      if: branch != coverity_scan
       compiler: clang
     - name: OpenMW (openmw-cs) on Ubuntu Trusty Clang-7 with Static Analysis
       os: linux
@@ -55,21 +58,27 @@ matrix:
       - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
       - ANALYZE="scan-build-7 --use-cc clang-7 --use-c++ clang++-7"
       - BUILD_OPENMW="OFF"
+      if: branch != coverity_scan
       compiler: clang
     - name: OpenMW Coverity Scan
       os: linux
       dist: trusty
       sudo: required
-      coverity_scan:
-        project:
-          name: "OpenMW/openmw"
-          description: "<Your project description here>"
-        branch_pattern: coverity_scan
-        notification_email: 720642+scrawl@users.noreply.github.com
-        build_command_prepend:
-        - "cov-configure --comptype gcc --compiler gcc-8 --template"
-        - "cmake . -DBUILD_OPENCS=FALSE -DBUILD_WIZARD=FALSE -DBUILD_UNITTESTS=FALSE -DBUILD_BSATOOL=FALSE -DBUILD_ESMTOOL=FALSE -DBUILD_MWINIIMPORTER=FALSE -DBUILD_ESSIMPORTER=FALSE -DBUILD_LAUNCHER=FALSE -DBUILD_MYGUI_PLUGIN=FALSE"
-        build_command: "make VERBOSE=1 -j3"
+      env:
+      - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+      if: branch = coverity_scan
+      addons:
+        coverity_scan:
+          project:
+            name: "OpenMW/openmw"
+            description: "<Your project description here>"
+          branch_pattern: coverity_scan
+          notification_email: 720642+scrawl@users.noreply.github.com
+          build_command_prepend:
+          - "cov-configure --comptype gcc --compiler gcc-8 --template"
+          - "cmake . -DBUILD_OPENCS=FALSE -DBUILD_WIZARD=FALSE -DBUILD_UNITTESTS=FALSE -DBUILD_BSATOOL=FALSE -DBUILD_ESMTOOL=FALSE -DBUILD_MWINIIMPORTER=FALSE -DBUILD_ESSIMPORTER=FALSE -DBUILD_LAUNCHER=FALSE -DBUILD_MYGUI_PLUGIN=FALSE"
+          build_command: "make VERBOSE=1 -j3"
+
 #   allow_failures:
 #    - name: OpenMW (openmw) on Ubuntu Trusty Clang-7 with Static Analysis
 
