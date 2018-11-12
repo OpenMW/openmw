@@ -27,6 +27,16 @@ addons:
       # The other ones from OpenMW ppa
       libbullet-dev, libswresample-dev, libopenscenegraph-3.4-dev, libmygui-dev
     ]
+  coverity_scan:
+    project:
+      name: "OpenMW/openmw"
+      description: "<Your project description here>"
+    branch_pattern: coverity_scan
+    notification_email: 720642+scrawl@users.noreply.github.com
+    build_command_prepend:
+    - "cov-configure --comptype gcc --compiler gcc-8 --template"
+    - "cmake . -DBUILD_OPENCS=FALSE -DBUILD_WIZARD=FALSE -DBUILD_UNITTESTS=FALSE -DBUILD_BSATOOL=FALSE -DBUILD_ESMTOOL=FALSE -DBUILD_MWINIIMPORTER=FALSE -DBUILD_ESSIMPORTER=FALSE -DBUILD_LAUNCHER=FALSE -DBUILD_MYGUI_PLUGIN=FALSE"
+    build_command: "make VERBOSE=1 -j3"
 matrix:
   include:
     - name: OpenMW (all) on MacOS xcode9.4
@@ -67,18 +77,6 @@ matrix:
       env:
       - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
       if: branch = coverity_scan
-      addons:
-        coverity_scan:
-          project:
-            name: "OpenMW/openmw"
-            description: "<Your project description here>"
-          branch_pattern: coverity_scan
-          notification_email: 720642+scrawl@users.noreply.github.com
-          build_command_prepend:
-          - "cov-configure --comptype gcc --compiler gcc-8 --template"
-          - "cmake . -DBUILD_OPENCS=FALSE -DBUILD_WIZARD=FALSE -DBUILD_UNITTESTS=FALSE -DBUILD_BSATOOL=FALSE -DBUILD_ESMTOOL=FALSE -DBUILD_MWINIIMPORTER=FALSE -DBUILD_ESSIMPORTER=FALSE -DBUILD_LAUNCHER=FALSE -DBUILD_MYGUI_PLUGIN=FALSE"
-          build_command: "make VERBOSE=1 -j3"
-
 #   allow_failures:
 #    - name: OpenMW (openmw) on Ubuntu Trusty Clang-7 with Static Analysis
 
