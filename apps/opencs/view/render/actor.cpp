@@ -49,9 +49,7 @@ namespace CSVRender
             cleanVisitor.remove();
 
             // Attach parts to skeleton
-            // Hotfix: avoid loading body parts for now, since this can trigger not yet
-            // pinned down bad_alloc exceptions.
-            // loadBodyParts();
+            loadBodyParts();
         }
         else
         {
