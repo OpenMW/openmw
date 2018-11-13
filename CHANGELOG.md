@@ -4,6 +4,7 @@
     Bug #3623: Fix HiDPI on Windows
     Bug #4540: Rain delay when exiting water
     Bug #4701: PrisonMarker record is not hardcoded like other markers
+    Bug #4714: Crash upon game load in the repair menu while the "Your repair failed!" message is active
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
     Feature #4673: Weapon sheathing

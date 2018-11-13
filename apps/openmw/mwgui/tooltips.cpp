@@ -330,6 +330,21 @@ namespace MWGui
         }
     }
 
+    void ToolTips::clear()
+    {
+        mFocusObject = MWWorld::Ptr();
+
+        while (mDynamicToolTipBox->getChildCount())
+        {
+            MyGUI::Gui::getInstance().destroyWidget(mDynamicToolTipBox->getChildAt(0));
+        }
+
+        for (unsigned int i=0; i < mMainWidget->getChildCount(); ++i)
+        {
+            mMainWidget->getChildAt(i)->setVisible(false);
+        }
+    }
+
     void ToolTips::setFocusObject(const MWWorld::Ptr& focus)
     {
         mFocusObject = focus;
