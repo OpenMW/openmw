@@ -507,7 +507,7 @@ int clone(Arguments& info)
         esm.endRecord(typeName.toString());
 
         saved++;
-        int perc = (int)((saved / (float)recordCount)*100);
+        int perc = recordCount == 0 ? 100 : (int)((saved / (float)recordCount)*100);
         if (perc % 10 == 0)
         {
             std::cerr << "\r" << perc << "%";

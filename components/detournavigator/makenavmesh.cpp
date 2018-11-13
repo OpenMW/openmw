@@ -129,6 +129,7 @@ namespace
         config.bmin[2] -= getBorderSize(settings);
         config.bmax[0] += getBorderSize(settings);
         config.bmax[2] += getBorderSize(settings);
+        config.tileSize = settings.mTileSize;
 
         return config;
     }

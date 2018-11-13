@@ -256,9 +256,9 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
     std::string mBrushTextureInt = mBrushTexture.substr (hashlocation+1);
     int brushInt = stoi(mBrushTexture.substr (hashlocation+1))+1; // All indices are offset by +1
 
-    float rf = mBrushSize/2;
-    int r = (mBrushSize/2)+1;
-    float distance = 0;
+    int rf = mBrushSize / 2;
+    int r = mBrushSize / 2 + 1;
+    int distance = 0;
 
     if (mBrushShape == 0)
     {
