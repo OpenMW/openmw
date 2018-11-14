@@ -8,6 +8,8 @@
 #include <QStackedWidget>
 #include <QListWidgetItem>
 
+#include <components/debug/debuglog.hpp>
+
 #include "../../model/prefs/state.hpp"
 
 #include "page.hpp"
@@ -77,8 +79,15 @@ CSVPrefs::Dialogue::Dialogue()
 
 CSVPrefs::Dialogue::~Dialogue()
 {
-    if (isVisible())
-        CSMPrefs::State::get().save();
+    try
+    {
+        if (isVisible())
+            CSMPrefs::State::get().save();
+    }
+    catch(const std::exception& e)
+    {
+        Log(Debug::Error) << "Error in the destructor: " << e.what();
+    }
 }
 
 void CSVPrefs::Dialogue::closeEvent (QCloseEvent *event)

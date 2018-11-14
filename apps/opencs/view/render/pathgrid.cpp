@@ -227,6 +227,8 @@ namespace CSVRender
         CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
                 CSMWorld::UniversalId::Type_Pathgrids));
 
+        assert(model != nullptr);
+
         const CSMWorld::Pathgrid* source = getPathgridSource();
         if (source)
         {
@@ -360,6 +362,8 @@ namespace CSVRender
             CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
                 CSMWorld::UniversalId::Type_Pathgrids));
 
+            assert(model != nullptr);
+
             // Want to remove nodes from end of list first
             std::sort(mSelected.begin(), mSelected.end(), std::greater<int>());
 
@@ -460,6 +464,8 @@ namespace CSVRender
 
             CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
                 CSMWorld::UniversalId::Type_Pathgrids));
+
+            assert(model != nullptr);
 
             int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);
 
@@ -635,6 +641,8 @@ namespace CSVRender
     {
         CSMWorld::IdTree* model = dynamic_cast<CSMWorld::IdTree*>(mData.getTableModel(
             CSMWorld::UniversalId::Type_Pathgrids));
+
+        assert(model != nullptr);
 
         int recordIndex = mPathgridCollection.getIndex(mId);
         int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);
