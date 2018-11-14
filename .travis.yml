@@ -14,7 +14,7 @@ addons:
     sources:
       - sourceline: 'ppa:openmw/openmw'
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-trusty-7
+      - llvm-toolchain-xenial-7
     packages: [
       # Dev
       cmake, clang-7, clang-tools-7, gcc-5, g++-5,
@@ -41,16 +41,16 @@ matrix:
       os: osx
       osx_image: xcode9.4
       if: branch != coverity_scan
-    - name: OpenMW (all) on Ubuntu Trusty GCC-5
+    - name: OpenMW (all) on Ubuntu Xenial GCC-5
       os: linux
-      dist: trusty
+      dist: xenial
       sudo: required
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
       if: branch != coverity_scan
-    - name: OpenMW (openmw) on Ubuntu Trusty Clang-7 with Static Analysis
+    - name: OpenMW (openmw) on Ubuntu Xenial Clang-7 with Static Analysis
       os: linux
-      dist: trusty
+      dist: xenial
       sudo: required
       env:
         - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
@@ -58,9 +58,9 @@ matrix:
         - BUILD_OPENMW_CS="OFF"
       if: branch != coverity_scan
       compiler: clang
-    - name: OpenMW (openmw-cs) on Ubuntu Trusty Clang-7 with Static Analysis
+    - name: OpenMW (openmw-cs) on Ubuntu Xenial Clang-7 with Static Analysis
       os: linux
-      dist: trusty
+      dist: xenial
       sudo: required
       env:
       - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
@@ -70,13 +70,13 @@ matrix:
       compiler: clang
     - name: OpenMW Coverity Scan
       os: linux
-      dist: trusty
+      dist: xenial
       sudo: required
       env:
       - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
       if: branch = coverity_scan
 #   allow_failures:
-#    - name: OpenMW (openmw) on Ubuntu Trusty Clang-7 with Static Analysis
+#    - name: OpenMW (openmw) on Ubuntu Xenial Clang-7 with Static Analysis
 
 before_install:
     - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then eval "${MATRIX_EVAL}"; fi
