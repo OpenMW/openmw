@@ -33,7 +33,7 @@ addons:
       description: "<Your project description here>"
     branch_pattern: coverity_scan
     notification_email: 720642+scrawl@users.noreply.github.com
-    build_command_prepend: "cov-configure --comptype gcc --compiler gcc-5 --template; cmake . -DBUILD_OPENMW=FALSE" -DBUILD_OPENCS=FALSE"
+    build_command_prepend: "cov-configure --comptype gcc --compiler gcc-5 --template; cmake . -DBUILD_OPENMW=FALSE -DBUILD_OPENCS=FALSE"
     build_command: "make VERBOSE=1 -j3"
 matrix:
   include:
