@@ -90,7 +90,7 @@ bool FFmpeg_Decoder::getNextPacket()
 
 bool FFmpeg_Decoder::getAVAudioData()
 {
-    bool got_frame;
+    bool got_frame = false;
 
     if(mCodecCtx->codec_type != AVMEDIA_TYPE_AUDIO)
         return false;
@@ -431,6 +431,7 @@ size_t FFmpeg_Decoder::getSampleOffset()
 FFmpeg_Decoder::FFmpeg_Decoder(const VFS::Manager* vfs)
   : Sound_Decoder(vfs)
   , mFormatCtx(nullptr)
+  , mCodecCtx(nullptr)
   , mStream(nullptr)
   , mFrame(nullptr)
   , mFrameSize(0)

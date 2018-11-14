@@ -955,6 +955,7 @@ namespace MWMechanics
         , mStoredInitialActorPosition(wander->mStoredInitialActorPosition)
         , mHasDestination(false)
         , mDestination(osg::Vec3f(0, 0, 0))
+        , mUsePathgrid(false)
     {
         if (mStoredInitialActorPosition)
             mInitialActorPosition = wander->mInitialActorPosition;

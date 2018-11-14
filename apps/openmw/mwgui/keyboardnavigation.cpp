@@ -25,6 +25,8 @@ bool shouldAcceptKeyFocus(MyGUI::Widget* w)
 /// Recursively get all child widgets that accept keyboard input
 void getKeyFocusWidgets(MyGUI::Widget* parent, std::vector<MyGUI::Widget*>& results)
 {
+    assert(parent != nullptr);
+
     if (!parent->getVisible() || !parent->getEnabled())
         return;
 

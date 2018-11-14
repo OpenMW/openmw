@@ -743,6 +743,7 @@ namespace
             mVertices (vertices),
             mRenderXform (renderXform)
         {
+            assert(font != nullptr);
             mVertexColourType = MyGUI::RenderManager::getInstance().getVertexFormat();
         }
 

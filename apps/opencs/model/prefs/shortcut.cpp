@@ -5,6 +5,8 @@
 #include <QAction>
 #include <QWidget>
 
+#include <components/debug/debuglog.hpp>
+
 #include "state.hpp"
 #include "shortcutmanager.hpp"
 
@@ -71,7 +73,14 @@ namespace CSMPrefs
 
     Shortcut::~Shortcut()
     {
-        State::get().getShortcutManager().removeShortcut(this);
+        try
+        {
+            State::get().getShortcutManager().removeShortcut(this);
+        }
+        catch(const std::exception& e)
+        {
+            Log(Debug::Error) << "Error in the destructor: " << e.what();
+        }
     }
 
     bool Shortcut::isEnabled() const

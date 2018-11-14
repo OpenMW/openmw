@@ -21,6 +21,11 @@ namespace CSMWorld
         return mIsBeast;
     }
 
+    ActorAdapter::RaceData::RaceData()
+    {
+        mIsBeast = false;
+    }
+
     bool ActorAdapter::RaceData::handlesPart(ESM::PartReferenceType type) const
     {
         switch (type)
@@ -82,6 +87,12 @@ namespace CSMWorld
         addOtherDependency(id);
     }
 
+
+    ActorAdapter::ActorData::ActorData()
+    {
+        mCreature = false;
+        mFemale = false;
+    }
 
     const std::string& ActorAdapter::ActorData::getId() const
     {

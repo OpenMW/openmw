@@ -10,6 +10,7 @@
 #include <components/vfs/bsaarchive.hpp>
 #include <components/vfs/filesystemarchive.hpp>
 
+#include <boost/exception/all.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
@@ -128,14 +129,24 @@ std::vector<std::string> parseOptions (int argc, char** argv)
 
 int main(int argc, char **argv)
 {
-    std::vector<std::string> files = parseOptions (argc, argv);
+    std::vector<std::string> files;
+    try
+    {
+        files = parseOptions (argc, argv);
+    }
+    catch( boost::exception &e )
+    {
+        std::cout << "ERROR parsing arguments: " << boost::diagnostic_information(e) << std::endl;
+        exit(1);
+    }
 
 //     std::cout << "Reading Files" << std::endl;
     for(std::vector<std::string>::const_iterator it=files.begin(); it!=files.end(); ++it)
     {
-         std::string name = *it;
+        std::string name = *it;
 
-        try{
+        try
+        {
             if(isNIF(name))
             {
                 //std::cout << "Decoding: " << name << std::endl;
