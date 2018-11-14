@@ -17,15 +17,15 @@ addons:
       - llvm-toolchain-xenial-7
     packages: [
       # Dev
-      cmake, clang-7, clang-tools-7, gcc-5, g++-5,
+      cmake, clang-7, clang-tools-7, gcc-8, g++-8,
       # Boost
       libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
-      libavcodec-dev, libavformat-dev, libavutil-dev, libswscale-dev,
+      libavcodec-dev, libavformat-dev, libavutil-dev, libswresample-dev, libswscale-dev,
       # Audio, Video and Misc. deps
-      libsdl2-dev, libqt4-dev, libopenal-dev, libunshield-dev, libtinyxml-dev,
+      libsdl2-dev, libqt5opengl5-dev, libopenal-dev, libunshield-dev, libtinyxml-dev,
       # The other ones from OpenMW ppa
-      libbullet-dev, libswresample-dev, libopenscenegraph-3.4-dev, libmygui-dev
+      libbullet-dev, libopenscenegraph-3.4-dev, libmygui-dev
     ]
   coverity_scan:
     project:
@@ -45,8 +45,13 @@ matrix:
       os: linux
       dist: xenial
       sudo: required
+      if: branch != coverity_scan
+    - name: OpenMW (all) on Ubuntu Xenial GCC-8
+      os: linux
+      dist: xenial
+      sudo: required
       env:
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
       if: branch != coverity_scan
     - name: OpenMW (openmw) on Ubuntu Xenial Clang-7 with Static Analysis
       os: linux
@@ -63,17 +68,15 @@ matrix:
       dist: xenial
       sudo: required
       env:
-      - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
-      - ANALYZE="scan-build-7 --force-analyze-debug-code --use-cc clang-7 --use-c++ clang++-7"
-      - BUILD_OPENMW="OFF"
+        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
+        - ANALYZE="scan-build-7 --force-analyze-debug-code --use-cc clang-7 --use-c++ clang++-7"
+        - BUILD_OPENMW="OFF"
       if: branch != coverity_scan
       compiler: clang
-    - name: OpenMW Coverity Scan
+    - name: OpenMW Components Coverity Scan
       os: linux
       dist: xenial
       sudo: required
-      env:
-      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
       if: branch = coverity_scan
 #   allow_failures:
 #    - name: OpenMW (openmw) on Ubuntu Xenial Clang-7 with Static Analysis
