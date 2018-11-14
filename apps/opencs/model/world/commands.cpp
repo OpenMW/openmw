@@ -199,8 +199,10 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
     if (mIndex.parent().isValid())
     {
         CSMWorld::IdTree* tree = dynamic_cast<CSMWorld::IdTree*>(mModel);
-
-        assert(tree != nullptr);
+        if (tree == nullptr)
+        {
+            throw std::logic_error("CSMWorld::ModifyCommand: Attempt to add nested values to the non-nested model");
+        }
 
         setText ("Modify " + tree->nestedHeaderData (
                     mIndex.parent().column(), mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
