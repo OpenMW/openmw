@@ -267,8 +267,6 @@ namespace
 
     struct NifFileMock : Nif::File
     {
-        MOCK_CONST_METHOD1(fail, void (const std::string&));
-        MOCK_CONST_METHOD1(warn, void (const std::string&));
         MOCK_CONST_METHOD1(getRecord, Nif::Record* (std::size_t));
         MOCK_CONST_METHOD0(numRecords, std::size_t ());
         MOCK_CONST_METHOD1(getRoot, Nif::Record* (std::size_t));
