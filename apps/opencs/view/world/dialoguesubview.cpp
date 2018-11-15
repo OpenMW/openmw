@@ -555,12 +555,7 @@ void CSVWorld::EditWidget::remake(int row)
             if (mTable->hasChildren(mTable->index(row, i)) &&
                     !(flags & CSMWorld::ColumnBase::Flag_Dialogue_List))
             {
-                CSMWorld::IdTree *innerTable = dynamic_cast<CSMWorld::IdTree*>(mTable);
-                if (innerTable == nullptr)
-                {
-                    throw std::logic_error("CSVWorld::EditWidget: Attempt to add nested values to the non-nested model");
-                }
-
+                CSMWorld::IdTree* innerTable = &dynamic_cast<CSMWorld::IdTree&>(*mTable);
                 mNestedModels.push_back(new CSMWorld::NestedTableProxyModel (mTable->index(row, i), display, innerTable));
 
                 int idColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
