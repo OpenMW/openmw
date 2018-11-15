@@ -740,6 +740,9 @@ namespace MWGui
 
     bool DialogueWindow::isCompanion(const MWWorld::Ptr& actor)
     {
+        if (actor.isEmpty())
+            return false;
+
         return !actor.getClass().getScript(actor).empty()
                 && actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion");
     }
