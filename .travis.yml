@@ -27,12 +27,12 @@ addons:
       # The other ones from OpenMW ppa
       libbullet-dev, libopenscenegraph-3.4-dev, libmygui-dev
     ]
-  coverity_scan:
+  coverity_scan:  # TODO: currently takes too long, disabled openmw/openmw-cs for now.
     project:
       name: "OpenMW/openmw"
       description: "<Your project description here>"
     branch_pattern: coverity_scan
-    notification_email: 720642+scrawl@users.noreply.github.com
+    notification_email: 1122069+psi29a@users.noreply.github.com
     build_command_prepend: "cov-configure --comptype gcc --compiler gcc-5 --template; cmake . -DBUILD_OPENMW=FALSE -DBUILD_OPENCS=FALSE"
     build_command: "make VERBOSE=1 -j3"
 matrix:
