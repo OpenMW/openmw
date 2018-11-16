@@ -198,12 +198,7 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
 
     if (mIndex.parent().isValid())
     {
-        CSMWorld::IdTree* tree = dynamic_cast<CSMWorld::IdTree*>(mModel);
-        if (tree == nullptr)
-        {
-            throw std::logic_error("CSMWorld::ModifyCommand: Attempt to add nested values to the non-nested model");
-        }
-
+        CSMWorld::IdTree* tree = &dynamic_cast<CSMWorld::IdTree&>(*mModel);
         setText ("Modify " + tree->nestedHeaderData (
                     mIndex.parent().column(), mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
     }
@@ -249,12 +244,7 @@ void CSMWorld::CreateCommand::applyModifications()
 {
     if (!mNestedValues.empty())
     {
-        CSMWorld::IdTree *tree = dynamic_cast<CSMWorld::IdTree *>(&mModel);
-        if (tree == nullptr)
-        {
-            throw std::logic_error("CSMWorld::CreateCommand: Attempt to add nested values to the non-nested model");
-        }
-
+        CSMWorld::IdTree* tree = &dynamic_cast<CSMWorld::IdTree&>(mModel);
         std::map<int, std::pair<int, QVariant> >::const_iterator current = mNestedValues.begin();
         std::map<int, std::pair<int, QVariant> >::const_iterator end = mNestedValues.end();
         for (; current != end; ++current)

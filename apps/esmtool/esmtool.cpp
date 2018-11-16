@@ -123,14 +123,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
 
         bpo::store(valid_opts, variables);
     }
-    catch(boost::program_options::unknown_option & x)
+    catch(std::exception &e)
     {
-        std::cerr << "ERROR: " << x.what() << std::endl;
-        return false;
-    }
-    catch(boost::program_options::invalid_command_line_syntax & x)
-    {
-        std::cerr << "ERROR: " << x.what() << std::endl;
+        std::cout << "ERROR parsing arguments: " << e.what() << std::endl;
         return false;
     }
 

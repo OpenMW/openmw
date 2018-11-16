@@ -24,11 +24,7 @@ std::string CSVWorld::CellCreator::getId() const
 
 void CSVWorld::CellCreator::configureCreateCommand(CSMWorld::CreateCommand& command) const
 {
-    CSMWorld::IdTree *model = dynamic_cast<CSMWorld::IdTree *>(getData().getTableModel(getCollectionId()));
-    if (model == nullptr)
-    {
-        throw std::logic_error("CSVWorld::CellCreator: Attempt to add nested values to the non-nested model");
-    }
+    CSMWorld::IdTree* model = &dynamic_cast<CSMWorld::IdTree&>(*getData().getTableModel(getCollectionId()));
 
     int parentIndex = model->findColumnIndex(CSMWorld::Columns::ColumnId_Cell);
     int index = model->findNestedColumnIndex(parentIndex, CSMWorld::Columns::ColumnId_Interior);
