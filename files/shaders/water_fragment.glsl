@@ -129,7 +129,9 @@ vec2 normalCoords(vec2 uv, float scale, float speed, float time, float timer1, f
 
 varying vec3 screenCoordsPassthrough;
 varying vec4 position;
+#if !@accurateFog
 varying float depthPassthrough;
+#endif
 
 uniform sampler2D normalMap;
 
@@ -274,6 +276,9 @@ void main(void)
     gl_FragData[0].xyz = mix(reflection,  waterColor,  (1.0-fresnel)*0.5) + specular * gl_LightSource[0].specular.xyz;
 #endif
     // fog
+#if @accurateFog
+    float depthPassthrough = length(position.xyz - cameraPos);
+#endif
     float fogValue = clamp((depthPassthrough - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz,  gl_Fog.color.xyz,  fogValue);
 

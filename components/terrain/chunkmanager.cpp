@@ -220,8 +220,14 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
         layer.mDiffuseMap = compositeMap->mTexture;
         layer.mParallax = false;
         layer.mSpecular = false;
-        geometry->setPasses(::Terrain::createPasses(mSceneManager->getForceShaders() || !mSceneManager->getClampLighting(), mSceneManager->getForcePerPixelLighting(),
-                                                    mSceneManager->getClampLighting(), &mSceneManager->getShaderManager(), std::vector<TextureLayer>(1, layer), std::vector<osg::ref_ptr<osg::Texture2D> >(), 1.f, 1.f));
+        geometry->setPasses(::Terrain::createPasses(mSceneManager->getForceShaders(),
+                                                    mSceneManager->getForcePerPixelLighting(),
+                                                    mSceneManager->getClampLighting(),
+                                                    mSceneManager->getAccurateFog(),
+                                                    &mSceneManager->getShaderManager(),
+                                                    std::vector<TextureLayer>(1, layer),
+                                                    std::vector<osg::ref_ptr<osg::Texture2D>>(),
+                                                    1.f, 1.f);
     }
     else
     {

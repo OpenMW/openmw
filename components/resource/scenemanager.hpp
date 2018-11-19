@@ -67,6 +67,9 @@ namespace Resource
         /// @see ShaderVisitor::setAutoUseNormalMaps
         void setAutoUseNormalMaps(bool use);
 
+        void setAccurateFog(bool enable);
+        bool getAccurateFog();
+
         /// @see ShaderVisitor::setNormalMapPattern
         void setNormalMapPattern(const std::string& pattern);
 
@@ -161,6 +164,7 @@ namespace Resource
         std::string mNormalHeightMapPattern;
         bool mAutoUseSpecularMaps;
         std::string mSpecularMapPattern;
+        bool mAccurateFog;
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 

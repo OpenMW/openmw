@@ -45,6 +45,7 @@ namespace Shader
         , mAllowedToModifyStateSets(true)
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
+        , mAccurateFog(false)
         , mShaderManager(shaderManager)
         , mImageManager(imageManager)
         , mDefaultVsTemplate(defaultVsTemplate)
@@ -292,6 +293,7 @@ namespace Shader
         }
 
         defineMap["forcePPL"] = mForcePerPixelLighting ? "1" : "0";
+        defineMap["accurateFog"] = mAccurateFog ? "1" : "0";
         defineMap["clamp"] = mClampLighting ? "1" : "0";
 
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
@@ -424,6 +426,11 @@ namespace Shader
     void ShaderVisitor::setSpecularMapPattern(const std::string &pattern)
     {
         mSpecularMapPattern = pattern;
+    }
+
+    void ShaderVisitor::setAccurateFog(bool enable)
+    {
+        mAccurateFog = enable;
     }
 
 }

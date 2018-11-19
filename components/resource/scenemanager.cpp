@@ -221,6 +221,7 @@ namespace Resource
         , mForcePerPixelLighting(false)
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
+        , mAccurateFog(false)
         , mInstanceCache(new MultiObjectCache)
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
@@ -273,6 +274,16 @@ namespace Resource
     void SceneManager::setAutoUseNormalMaps(bool use)
     {
         mAutoUseNormalMaps = use;
+    }
+
+    void SceneManager::setAccurateFog(bool enable)
+    {
+        mAccurateFog = enable;
+    }
+
+    bool SceneManager::getAccurateFog()
+    {
+        return mAccurateFog;
     }
 
     void SceneManager::setNormalMapPattern(const std::string &pattern)
@@ -755,6 +766,7 @@ namespace Resource
         shaderVisitor->setNormalHeightMapPattern(mNormalHeightMapPattern);
         shaderVisitor->setAutoUseSpecularMaps(mAutoUseSpecularMaps);
         shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
+        shaderVisitor->setAccurateFog(mAccurateFog);
         return shaderVisitor;
     }
 

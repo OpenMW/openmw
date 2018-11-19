@@ -528,6 +528,8 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     // use a define map to conditionally compile the shader
     std::map<std::string, std::string> defineMap;
     defineMap.insert(std::make_pair(std::string("refraction_enabled"), std::string(refraction ? "1" : "0")));
+    bool accurateFog = mResourceSystem->getSceneManager()->getAccurateFog();
+    defineMap.insert(std::make_pair(std::string("accurateFog"), std::string(accurateFog ? "1" : "0")));
 
     Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
     osg::ref_ptr<osg::Shader> vertexShader (shaderMgr.getShader("water_vertex.glsl", defineMap, osg::Shader::VERTEX));

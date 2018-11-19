@@ -1,9 +1,12 @@
 #version 120
 
 varying vec2 uv;
-varying float depth;
 
 #define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
+
+#if !@accurateFog
+varying float depth;
+#endif
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec4 lighting;
@@ -18,7 +21,9 @@ varying vec3 passNormal;
 void main(void)
 {
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+#if !@accurateFog
     depth = gl_Position.z;
+#endif
 
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_ClipVertex = viewPos;

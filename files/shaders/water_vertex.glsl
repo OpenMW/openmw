@@ -2,7 +2,9 @@
     
 varying vec3  screenCoordsPassthrough;
 varying vec4  position;
-varying float  depthPassthrough;
+#if !@accurateFog
+varying float depthPassthrough;
+#endif
 
 void main(void)
 {
@@ -18,5 +20,7 @@ void main(void)
 
     position = gl_Vertex;
 
+#if !@accurateFog
     depthPassthrough = gl_Position.z;
+#endif
 }

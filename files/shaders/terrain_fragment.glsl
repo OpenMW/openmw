@@ -12,7 +12,9 @@ uniform sampler2D normalMap;
 uniform sampler2D blendMap;
 #endif
 
+#if !@accurateFog
 varying float depth;
+#endif
 
 #define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
 
@@ -45,9 +47,11 @@ void main()
     vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
 #endif
 
-#if @parallax
+#if @parallax || @accurateFog
     vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
     vec3 objectPos = (gl_ModelViewMatrixInverse * vec4(passViewPos, 1)).xyz;
+#endif
+#if @parallax
     vec3 eyeDir = normalize(cameraPos - objectPos);
     adjustedUV += getParallaxOffset(eyeDir, tbnTranspose, normalTex.a, 1.f);
 
@@ -80,6 +84,9 @@ void main()
 
     gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos), shininess, matSpec);
 
+#if @accurateFog
+    float depth = length(objectPos - cameraPos);
+#endif
     float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
 }

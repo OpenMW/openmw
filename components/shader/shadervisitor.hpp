@@ -45,6 +45,9 @@ namespace Shader
 
         void setSpecularMapPattern(const std::string& pattern);
 
+        /// Use accurate metric. Otherwise the distance is larger on screen edges.
+        void setAccurateFog(bool enable);
+
         virtual void apply(osg::Node& node);
 
         virtual void apply(osg::Drawable& drawable);
@@ -67,6 +70,8 @@ namespace Shader
 
         bool mAutoUseSpecularMaps;
         std::string mSpecularMapPattern;
+
+        bool mAccurateFog;
 
         ShaderManager& mShaderManager;
         Resource::ImageManager& mImageManager;
