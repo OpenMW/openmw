@@ -115,7 +115,7 @@ std::string debugFragmentShaderSource =
 #endif
         "}                                                                       \n";
 
-std::string debugFrustumVertexShaderSource = "varying float depth; uniform mat4 transform; void main(void){gl_Position = transform * gl_Vertex; depth = gl_Position.z;}";
+std::string debugFrustumVertexShaderSource = "varying float depth; uniform mat4 transform; void main(void){gl_Position = transform * gl_Vertex; depth = gl_Position.z / gl_Position.w;}";
 std::string debugFrustumFragmentShaderSource =
         "varying float depth;                                                    \n"
         "                                                                        \n"
