@@ -1499,6 +1499,8 @@ void MWShadowTechnique::createShaders()
     _shadowCastingStateSet->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
     _shadowCastingStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
 
+    _shadowCastingStateSet->setMode(GL_DEPTH_CLAMP, osg::StateAttribute::ON);
+
     // TODO: figure out if there's some way to disable depth sorting for translucent objects as we don't care about blending.
     // TODO: compare performance when alpha testing is handled here versus using a discard in the fragment shader
     // TODO: compare performance when we set a bunch of GL state to the default here with OVERRIDE set so that there are fewer pointless state switches
@@ -2437,12 +2439,12 @@ bool MWShadowTechnique::cropShadowCameraToMainFrustum(Frustum& frustum, osg::Cam
         xMax = osg::minimum(1.0, convexHull.max(0));
         yMin = osg::maximum(-1.0, convexHull.min(1));
         yMax = osg::minimum(1.0, convexHull.max(1));
+        zMin = osg::maximum(-1.0, convexHull.min(2));
+        zMax = osg::minimum(1.0, convexHull.max(2));
     }
     else
         return false;
 
-    // we always want the lightspace to include the computed near plane.
-    zMin = -1.0;
     if (xMin != -1.0 || yMin != -1.0 || zMin != -1.0 ||
         xMax != 1.0 || yMax != 1.0 || zMax != 1.0)
     {
@@ -2464,11 +2466,14 @@ bool MWShadowTechnique::cropShadowCameraToMainFrustum(Frustum& frustum, osg::Cam
         xMax = convexHull.max(0);
         yMin = convexHull.min(1);
         yMax = convexHull.max(1);
+        zMax = convexHull.max(2);
 
         planeList.push_back(osg::Plane(0.0, -1.0, 0.0, yMax));
         planeList.push_back(osg::Plane(0.0, 1.0, 0.0, -yMin));
         planeList.push_back(osg::Plane(-1.0, 0.0, 0.0, xMax));
         planeList.push_back(osg::Plane(1.0, 0.0, 0.0, -xMin));
+        planeList.push_back(osg::Plane(0.0, 0.0, -1.0, zMax));
+        // Don't add a zMin culling plane - we still want those objects, but don't care about their depth buffer value.
     }
 
     return true;
