@@ -233,6 +233,8 @@ namespace MWWorld
 
             float getWaterLevel() const;
 
+            bool movedHere(const MWWorld::Ptr& ptr) const;
+
             void setWaterLevel (float level);
 
             void setFog (ESM::FogState* fog);

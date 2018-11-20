@@ -7,6 +7,7 @@
     Bug #4714: Crash upon game load in the repair menu while the "Your repair failed!" message is active
     Bug #4715: "Cannot get class of an empty object" exception after pressing ESC in the dialogue mode
     Bug #4720: Inventory avatar has shield with two-handed weapon during [un]equipping animation
+    Bug #4723: ResetActors command works incorrectly
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
     Feature #4673: Weapon sheathing
