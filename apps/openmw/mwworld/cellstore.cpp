@@ -330,6 +330,17 @@ namespace MWWorld
         visitor.merge();
     }
 
+    bool CellStore::movedHere(const MWWorld::Ptr& ptr) const
+    {
+        if (ptr.isEmpty())
+            return false;
+
+        if (mMovedHere.find(ptr.getBase()) != mMovedHere.end())
+            return true;
+
+        return false;
+    }
+
     CellStore::CellStore (const ESM::Cell *cell, const MWWorld::ESMStore& esmStore, std::vector<ESM::ESMReader>& readerList)
         : mStore(esmStore), mReader(readerList), mCell (cell), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0)
     {

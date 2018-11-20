@@ -3698,10 +3698,13 @@ namespace MWWorld
         {
             if (ptr.getClass().isActor() && ptr.getCellRef().hasContentFile())
             {
+                if (ptr.getCell()->movedHere(ptr))
+                    return true;
+
                 const ESM::Position& origPos = ptr.getCellRef().getPosition();
                 MWBase::Environment::get().getWorld()->moveObject(ptr, origPos.pos[0], origPos.pos[1], origPos.pos[2]);
                 MWBase::Environment::get().getWorld()->rotateObject(ptr, origPos.rot[0], origPos.rot[1], origPos.rot[2]);
-                ptr.getClass().adjustPosition(ptr, false);
+                ptr.getClass().adjustPosition(ptr, true);
             }
             return true;
         }
