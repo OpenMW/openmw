@@ -942,7 +942,12 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
     Frustum frustum(&cv, minZNear, maxZFar);
     if (_debugHud)
-        _debugHud->setFrustumVertices(new osg::Vec3dArray(8, &frustum.corners[0]));
+    {
+        osg::ref_ptr<osg::Vec3Array> vertexArray = new osg::Vec3Array(8);
+        for (osg::Vec3d &vertex : frustum.corners)
+            vertexArray->push_back((osg::Vec3)vertex);
+        _debugHud->setFrustumVertices(vertexArray);
+    }
 
     double reducedNear, reducedFar;
     if (cv.getComputeNearFarMode() != osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR)
@@ -2984,7 +2989,7 @@ SceneUtil::MWShadowTechnique::DebugHUD::DebugHUD(int numberOfShadowMapsPerLight)
     mFrustumGeometry->getOrCreateStateSet()->setAttributeAndModes(frustumProgram, osg::StateAttribute::ON);
     //mFrustumGeometry->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
 
-    osg::ref_ptr<osg::DrawElementsUByte> frustumDrawElements = new osg::DrawElementsUByte(osg::PrimitiveSet::LINE_STRIP);
+    osg::ref_ptr<osg::DrawElementsUShort> frustumDrawElements = new osg::DrawElementsUShort(osg::PrimitiveSet::LINE_STRIP);
     mFrustumGeometry->addPrimitiveSet(frustumDrawElements);
     frustumDrawElements->push_back(0);
     frustumDrawElements->push_back(1);
@@ -2997,7 +3002,7 @@ SceneUtil::MWShadowTechnique::DebugHUD::DebugHUD(int numberOfShadowMapsPerLight)
     frustumDrawElements->push_back(7);
     frustumDrawElements->push_back(4);
 
-    frustumDrawElements = new osg::DrawElementsUByte(osg::PrimitiveSet::LINES);
+    frustumDrawElements = new osg::DrawElementsUShort(osg::PrimitiveSet::LINES);
     mFrustumGeometry->addPrimitiveSet(frustumDrawElements);
     frustumDrawElements->push_back(1);
     frustumDrawElements->push_back(5);
@@ -3044,7 +3049,7 @@ void SceneUtil::MWShadowTechnique::DebugHUD::releaseGLObjects(osg::State* state)
     mFrustumGeometry->releaseGLObjects(state);
 }
 
-void SceneUtil::MWShadowTechnique::DebugHUD::setFrustumVertices(osg::ref_ptr<osg::Vec3dArray> vertices)
+void SceneUtil::MWShadowTechnique::DebugHUD::setFrustumVertices(osg::ref_ptr<osg::Vec3Array> vertices)
 {
     mFrustumGeometry->setVertexArray(vertices);
 }

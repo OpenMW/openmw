@@ -253,7 +253,7 @@ namespace SceneUtil {
 
             virtual void releaseGLObjects(osg::State* state = 0) const;
 
-            virtual void setFrustumVertices(osg::ref_ptr<osg::Vec3dArray> vertices);
+            virtual void setFrustumVertices(osg::ref_ptr<osg::Vec3Array> vertices);
         protected:
             virtual void addAnotherShadowMap();
 
