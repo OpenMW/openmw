@@ -943,7 +943,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
     Frustum frustum(&cv, minZNear, maxZFar);
     if (_debugHud)
     {
-        osg::ref_ptr<osg::Vec3Array> vertexArray = new osg::Vec3Array(8);
+        osg::ref_ptr<osg::Vec3Array> vertexArray = new osg::Vec3Array();
         for (osg::Vec3d &vertex : frustum.corners)
             vertexArray->push_back((osg::Vec3)vertex);
         _debugHud->setFrustumVertices(vertexArray);
