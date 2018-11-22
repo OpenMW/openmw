@@ -28,6 +28,7 @@ const float BUMP = 0.5;                            // overall water surface bump
 const float BUMP_RAIN = 2.5;
 const float REFL_BUMP = 0.10;                      // reflection distortion amount
 const float REFR_BUMP = 0.07;                      // refraction distortion amount
+const float BUMP_UNDERWATER = 8;                   // distortion increase coefficient when underwater, >1
 
 const float SCATTER_AMOUNT = 0.3;                  // amount of sunlight scattering
 const vec3 SCATTER_COLOUR = vec3(0.0,1.0,0.95);    // colour of sunlight scattering
@@ -235,6 +236,7 @@ void main(void)
     float fresnel = fresnel_dielectric(vVec, normal, ior);
 
     fresnel = clamp(fresnel, 0.0, 1.0);
+    fresnel *= 1 - isUnderwater;
 
 #if REFRACTION
     float normalization = frustumDepth / 1000;
@@ -247,6 +249,7 @@ void main(void)
     float shore = 1.0;
 #endif
     vec2 screenCoordsOffset = normal.xy * REFL_BUMP * shore;
+    screenCoordsOffset *= max(1, isUnderwater * BUMP_UNDERWATER);
 
     // reflection
     vec3 reflection = texture2D(reflectionMap, screenCoords + screenCoordsOffset).rgb;
