@@ -355,10 +355,6 @@ void ActorAnimation::updateQuiver()
                 addGlow(arrow, glowColor);
         }
     }
-
-    // recreate shaders for invisible actors, otherwise new nodes will be visible
-    if (mAlpha != 1.f)
-        mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
 }
 
 void ActorAnimation::itemAdded(const MWWorld::ConstPtr& item, int /*count*/)

@@ -925,6 +925,10 @@ void NpcAnimation::showWeapons(bool showWeapon)
 
     updateHolsteredWeapon(!mShowWeapons);
     updateQuiver();
+
+    // Recreate shaders for invisible actors, otherwise sheath nodes will be visible
+    if (mAlpha != 1.f && mWeaponSheathing)
+        mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
 }
 
 void NpcAnimation::showCarriedLeft(bool show)
