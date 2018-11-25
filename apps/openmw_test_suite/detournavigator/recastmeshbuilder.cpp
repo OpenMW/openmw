@@ -363,11 +363,11 @@ namespace
             AreaType_ground
         );
         const auto recastMesh = builder.create(mGeneration, mRevision);
-        EXPECT_EQ(recastMesh->getVertices(), std::vector<float>({
+        EXPECT_THAT(recastMesh->getVertices(), Pointwise(FloatNear(1e-5), std::vector<float>({
             1.41421353816986083984375, 0, 1.1920928955078125e-07,
             -1.41421353816986083984375, 0, -1.1920928955078125e-07,
             1.1920928955078125e-07, 0, -1.41421353816986083984375,
-        }));
+        })));
         EXPECT_EQ(recastMesh->getIndices(), std::vector<int>({0, 1, 2}));
         EXPECT_EQ(recastMesh->getAreaTypes(), std::vector<AreaType>({AreaType_ground}));
     }
