@@ -326,9 +326,9 @@ void VDSMCameraCullCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
         OSG_INFO<<"RTT Projection matrix after clamping "<<projection<<std::endl;
 
         camera->setProjectionMatrix(projection);
-
-        _projectionMatrix = cv->getProjectionMatrix();
     }
+
+    _projectionMatrix = cv->getProjectionMatrix();
 }
 
 MWShadowTechnique::ComputeLightSpaceBounds::ComputeLightSpaceBounds(osg::Viewport* viewport, const osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix) :
@@ -552,8 +552,15 @@ MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* 
     //_camera->setClearColor(osg::Vec4(1.0f,1.0f,1.0f,1.0f));
     _camera->setClearColor(osg::Vec4(0.0f,0.0f,0.0f,0.0f));
 
-    _camera->setComputeNearFarMode(osg::Camera::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
+    //_camera->setComputeNearFarMode(osg::Camera::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
     //_camera->setComputeNearFarMode(osg::Camera::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
+
+    // Now we are using Depth Clamping, we want to not cull things on the wrong side of the near plane.
+    // When the near and far planes are computed, OSG always culls anything on the wrong side of the near plane, even if it's told not to.
+    // Even if that weren't an issue, the near plane can't go past any shadow receivers or the depth-clamped fragments which ended up on the near plane can't cast shadows on those receivers.
+    // Unfortunately, this change will make shadows have less depth precision when there are no casters outside the view frustum.
+    // TODO: Find a better solution. E.g. detect when there are no casters outside the view frustum, write a new cull visitor that does all the wacky things we'd need it to.
+    _camera->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
 
     // switch off small feature culling as this can cull out geometry that will still be large enough once perspective correction takes effect.
     _camera->setCullingMode(_camera->getCullingMode() & ~osg::CullSettings::SMALL_FEATURE_CULLING);
@@ -2432,8 +2439,6 @@ bool MWShadowTechnique::cropShadowCameraToMainFrustum(Frustum& frustum, osg::Cam
 
     convexHull.transform(light_vp);
 
-    convexHull.extendTowardsNegativeZ();
-
     double xMin = -1.0, xMax = 1.0;
     double yMin = -1.0, yMax = 1.0;
     double zMin = -1.0, zMax = 1.0;
@@ -2471,14 +2476,15 @@ bool MWShadowTechnique::cropShadowCameraToMainFrustum(Frustum& frustum, osg::Cam
         xMax = convexHull.max(0);
         yMin = convexHull.min(1);
         yMax = convexHull.max(1);
-        zMax = convexHull.max(2);
+        zMin = convexHull.min(2);
 
         planeList.push_back(osg::Plane(0.0, -1.0, 0.0, yMax));
         planeList.push_back(osg::Plane(0.0, 1.0, 0.0, -yMin));
         planeList.push_back(osg::Plane(-1.0, 0.0, 0.0, xMax));
         planeList.push_back(osg::Plane(1.0, 0.0, 0.0, -xMin));
-        planeList.push_back(osg::Plane(0.0, 0.0, -1.0, zMax));
-        // Don't add a zMin culling plane - we still want those objects, but don't care about their depth buffer value.
+        // In view space, the light is at the most positive value, and we want to cull stuff beyond the minimum value.
+        planeList.push_back(osg::Plane(0.0, 0.0, 1.0, -zMin));
+        // Don't add a zMax culling plane - we still want those objects, but don't care about their depth buffer value.
     }
 
     return true;
@@ -2531,6 +2537,8 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
 
     convexHull.transform(light_vp);
 
+    ConvexHull convexHullUnextended = convexHull;
+
     convexHull.extendTowardsNegativeZ();
 
 #if 0
@@ -2581,6 +2589,9 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
 #if 1
         convexHull.clip(osg::Plane(1.0,0.0,0.0,-rli.min_x));
         convexHull.clip(osg::Plane(-1.0,0.0,0.0,rli.max_x));
+
+        convexHullUnextended.clip(osg::Plane(1.0, 0.0, 0.0, -rli.min_x));
+        convexHullUnextended.clip(osg::Plane(-1.0, 0.0, 0.0, rli.max_x));
 #else
         convexHull.clip(osg::Plane(1.0,0.0,0.0,widest_x));
         convexHull.clip(osg::Plane(-1.0,0.0,0.0,widest_x));
@@ -2588,12 +2599,18 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
 #if 1
         convexHull.clip(osg::Plane(0.0,1.0,0.0,-rli.min_y));
         convexHull.clip(osg::Plane(0.0,-1.0,0.0,rli.max_y));
+
+        convexHullUnextended.clip(osg::Plane(0.0, 1.0, 0.0, -rli.min_y));
+        convexHullUnextended.clip(osg::Plane(0.0, -1.0, 0.0, rli.max_y));
 #endif
 #endif
 
 #if 1
         convexHull.clip(osg::Plane(0.0,0.0,1.0,-rli.min_z));
         convexHull.clip(osg::Plane(0.0,0.0,-1.0,rli.max_z));
+
+        convexHullUnextended.clip(osg::Plane(0.0, 0.0, 1.0, -rli.min_z));
+        convexHullUnextended.clip(osg::Plane(0.0, 0.0, -1.0, rli.max_z));
 #elif 0
         convexHull.clip(osg::Plane(0.0,0.0,1.0,1.0));
         convexHull.clip(osg::Plane(0.0,0.0,-1.0,1.0));
@@ -2656,6 +2673,7 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
                                    2.0/(zMax-zMin)));
 
         convexHull.transform(m);
+        convexHullUnextended.transform(m);
         light_p.postMult(m);
         light_vp = light_v * light_p;
 
@@ -2748,6 +2766,12 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
     //min_z_ratio = convexHull.minRatio(virtual_eye,2);
     //max_z_ratio = convexHull.maxRatio(virtual_eye,2);
 
+    if (convexHullUnextended.valid())
+    {
+        min_z_ratio = convexHullUnextended.minRatio(virtual_eye, 2);
+        max_z_ratio = convexHullUnextended.maxRatio(virtual_eye, 2);
+    }
+
 #if 0
     OSG_NOTICE<<"convexHull min_x_ratio = "<<min_x_ratio<<std::endl;
     OSG_NOTICE<<"convexHull max_x_ratio = "<<max_x_ratio<<std::endl;
@@ -2782,8 +2806,10 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
         if (rli.min_x_ratio>min_x_ratio) min_x_ratio = rli.min_x_ratio;
         if (rli.max_x_ratio<max_x_ratio) max_x_ratio = rli.max_x_ratio;
 
-        /*if (rli.min_z_ratio>min_z_ratio)*/ min_z_ratio = rli.min_z_ratio;
-        /*if (rli.max_z_ratio<max_z_ratio)*/ max_z_ratio = rli.max_z_ratio;
+        if (min_z_ratio == FLT_MAX || rli.min_z_ratio > min_z_ratio)
+            min_z_ratio = rli.min_z_ratio;
+        if (max_z_ratio == -FLT_MAX || rli.max_z_ratio < max_z_ratio)
+            max_z_ratio = rli.max_z_ratio;
     }
 #endif
     double best_x_ratio = osg::maximum(fabs(min_x_ratio),fabs(max_x_ratio));
