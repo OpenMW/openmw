@@ -80,7 +80,7 @@ void readVFS(VFS::Archive* anArchive,std::string archivePath = "")
     }
 }
 
-std::vector<std::string> parseOptions (int argc, char** argv)
+bool parseOptions (int argc, char** argv, std::vector<std::string>& files)
 {
     bpo::options_description desc("Ensure that OpenMW can use the provided NIF and BSA files\n\n"
         "Usages:\n"
@@ -107,35 +107,39 @@ std::vector<std::string> parseOptions (int argc, char** argv)
     {
         std::cout << "ERROR parsing arguments: " << e.what() << "\n\n"
             << desc << std::endl;
-        exit(1);
+        return false;
     }
 
     bpo::notify(variables);
     if (variables.count ("help"))
     {
         std::cout << desc << std::endl;
-        exit(1);
+        return false;
     }
     if (variables.count("input-file"))
     {
-        return variables["input-file"].as< std::vector<std::string> >();
+        files = variables["input-file"].as< std::vector<std::string> >();
+        return true;
     }
 
     std::cout << "No input files or directories specified!" << std::endl;
     std::cout << desc << std::endl;
-    exit(1);
+    return false;
 }
 
 int main(int argc, char **argv)
 {
-    std::vector<std::string> files = parseOptions (argc, argv);
+    std::vector<std::string> files;
+    if(!parseOptions (argc, argv, files))
+        return 1;
 
 //     std::cout << "Reading Files" << std::endl;
     for(std::vector<std::string>::const_iterator it=files.begin(); it!=files.end(); ++it)
     {
-         std::string name = *it;
+        std::string name = *it;
 
-        try{
+        try
+        {
             if(isNIF(name))
             {
                 //std::cout << "Decoding: " << name << std::endl;

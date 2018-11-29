@@ -55,17 +55,22 @@ namespace
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_should_return_cached_value)
     {
-        const std::size_t maxSize = 1;
+        const std::size_t navMeshDataSize = 1;
+        const std::size_t navMeshKeySize = 49;
+        const std::size_t maxSize = navMeshDataSize + 2 * navMeshKeySize;
         NavMeshTilesCache cache(maxSize);
 
         const auto result = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, mOffMeshConnections,
                                       std::move(mNavMeshData));
+        ASSERT_TRUE(result);
         EXPECT_EQ(result.get(), (NavMeshDataRef {mData, 1}));
     }
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_existing_element_should_throw_exception)
     {
-        const std::size_t maxSize = 2;
+        const std::size_t navMeshDataSize = 1;
+        const std::size_t navMeshKeySize = 49;
+        const std::size_t maxSize = 2 * (navMeshDataSize + 2 * navMeshKeySize);
         NavMeshTilesCache cache(maxSize);
         const auto anotherData = reinterpret_cast<unsigned char*>(dtAlloc(1, DT_ALLOC_PERM));
         NavMeshData anotherNavMeshData {anotherData, 1};
@@ -79,7 +84,9 @@ namespace
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, get_should_return_cached_value)
     {
-        const std::size_t maxSize = 1;
+        const std::size_t navMeshDataSize = 1;
+        const std::size_t navMeshKeySize = 49;
+        const std::size_t maxSize = navMeshDataSize + 2 * navMeshKeySize;
         NavMeshTilesCache cache(maxSize);
 
         cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, mOffMeshConnections, std::move(mNavMeshData));
@@ -121,7 +128,9 @@ namespace
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_should_replace_unused_value)
     {
-        const std::size_t maxSize = 1;
+        const std::size_t navMeshDataSize = 1;
+        const std::size_t navMeshKeySize = 117;
+        const std::size_t maxSize = navMeshDataSize + 2 * navMeshKeySize;
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -139,7 +148,9 @@ namespace
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_should_not_replace_used_value)
     {
-        const std::size_t maxSize = 1;
+        const std::size_t navMeshDataSize = 1;
+        const std::size_t navMeshKeySize = 49;
+        const std::size_t maxSize = navMeshDataSize + 2 * navMeshKeySize;
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -155,7 +166,9 @@ namespace
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_should_replace_unused_least_recently_set_value)
     {
-        const std::size_t maxSize = 2;
+        const std::size_t navMeshDataSize = 1;
+        const std::size_t navMeshKeySize = 117;
+        const std::size_t maxSize = 2 * (navMeshDataSize + 2 * navMeshKeySize);
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> leastRecentlySetWater {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -185,7 +198,9 @@ namespace
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_should_replace_unused_least_recently_used_value)
     {
-        const std::size_t maxSize = 2;
+        const std::size_t navMeshDataSize = 1;
+        const std::size_t navMeshKeySize = 117;
+        const std::size_t maxSize = 2 * (navMeshDataSize + 2 * navMeshKeySize);
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> leastRecentlyUsedWater {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -227,7 +242,9 @@ namespace
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_should_not_replace_unused_least_recently_used_value_when_item_does_not_not_fit_cache_max_size)
     {
-        const std::size_t maxSize = 1;
+        const std::size_t navMeshDataSize = 1;
+        const std::size_t navMeshKeySize = 49;
+        const std::size_t maxSize = 2 * (navMeshDataSize + 2 * navMeshKeySize);
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -243,7 +260,10 @@ namespace
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_should_not_replace_unused_least_recently_used_value_when_item_does_not_not_fit_size_of_unused_items)
     {
-        const std::size_t maxSize = 2;
+        const std::size_t navMeshDataSize = 1;
+        const std::size_t navMeshKeySize1 = 49;
+        const std::size_t navMeshKeySize2 = 117;
+        const std::size_t maxSize = 2 * navMeshDataSize + 2 * navMeshKeySize1 + 2 * navMeshKeySize2;
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> anotherWater {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -269,7 +289,9 @@ namespace
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, release_used_after_set_then_used_by_get_item_should_left_this_item_available)
     {
-        const std::size_t maxSize = 1;
+        const std::size_t navMeshDataSize = 1;
+        const std::size_t navMeshKeySize = 49;
+        const std::size_t maxSize = navMeshDataSize + 2 * navMeshKeySize;
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -290,7 +312,9 @@ namespace
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, release_twice_used_item_should_left_this_item_available)
     {
-        const std::size_t maxSize = 1;
+        const std::size_t navMeshDataSize = 1;
+        const std::size_t navMeshKeySize = 49;
+        const std::size_t maxSize = navMeshDataSize + 2 * navMeshKeySize;
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};

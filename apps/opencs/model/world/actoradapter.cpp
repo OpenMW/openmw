@@ -21,6 +21,11 @@ namespace CSMWorld
         return mIsBeast;
     }
 
+    ActorAdapter::RaceData::RaceData()
+    {
+        mIsBeast = false;
+    }
+
     bool ActorAdapter::RaceData::handlesPart(ESM::PartReferenceType type) const
     {
         switch (type)
@@ -83,6 +88,12 @@ namespace CSMWorld
     }
 
 
+    ActorAdapter::ActorData::ActorData()
+    {
+        mCreature = false;
+        mFemale = false;
+    }
+
     const std::string& ActorAdapter::ActorData::getId() const
     {
         return mId;
@@ -113,17 +124,22 @@ namespace CSMWorld
     const std::string ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
     {
         auto it = mParts.find(index);
-        if (it == mParts.end() && mRaceData && mRaceData->handlesPart(index))
+        if (it == mParts.end())
         {
-            if (mFemale)
+            if (mRaceData && mRaceData->handlesPart(index))
             {
-                // Note: we should use male parts for females as fallback
-                const std::string femalePart = mRaceData->getFemalePart(index);
-                if (!femalePart.empty())
-                    return femalePart;
+                if (mFemale)
+                {
+                    // Note: we should use male parts for females as fallback
+                    const std::string femalePart = mRaceData->getFemalePart(index);
+                    if (!femalePart.empty())
+                        return femalePart;
+                }
+
+                return mRaceData->getMalePart(index);
             }
 
-            return mRaceData->getMalePart(index);
+            return "";
         }
 
         const std::string& partName = it->second.first;

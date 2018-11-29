@@ -13,6 +13,7 @@
 #include <osg/Material>
 #include <osg/Version>
 
+#include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/lightmanager.hpp>
@@ -96,7 +97,14 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
 
 RenderWidget::~RenderWidget()
 {
-    CompositeViewer::get().removeView(mView);
+    try
+    {
+        CompositeViewer::get().removeView(mView);
+    }
+    catch(const std::exception& e)
+    {
+        Log(Debug::Error) << "Error in the destructor: " << e.what();
+    }
 }
 
 void RenderWidget::flagAsModified()

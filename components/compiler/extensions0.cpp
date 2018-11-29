@@ -321,6 +321,7 @@ namespace Compiler
             extensions.registerInstruction ("tb", "", opcodeToggleBorders);
             extensions.registerInstruction ("toggleborders", "", opcodeToggleBorders);
             extensions.registerInstruction ("togglenavmesh", "", opcodeToggleNavMesh);
+            extensions.registerInstruction ("tap", "", opcodeToggleActorsPaths);
             extensions.registerInstruction ("toggleactorspaths", "", opcodeToggleActorsPaths);
             extensions.registerInstruction ("setnavmeshnumber", "l", opcodeSetNavMeshNumberToRender);
         }

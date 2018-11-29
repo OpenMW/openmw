@@ -1,17 +1,17 @@
 # Apps and tools
-option(BUILD_OPENMW "build OpenMW" ON)
-option(BUILD_BSATOOL "build BSA extractor" ON)
-option(BUILD_ESMTOOL "build ESM inspector" ON)
-option(BUILD_LAUNCHER "build Launcher" ON)
-option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
-option(BUILD_ESSIMPORTER "build ESS (Morrowind save game) importer" ON)
-option(BUILD_OPENCS "build OpenMW Construction Set" ON)
-option(BUILD_WIZARD "build Installation Wizard" ON)
+option(BUILD_OPENMW             "Build OpenMW" ON)
+option(BUILD_LAUNCHER           "Build Launcher" ON)
+option(BUILD_WIZARD             "Build Installation Wizard" ON)
+option(BUILD_MWINIIMPORTER      "Build MWiniImporter" ON)
+option(BUILD_OPENCS             "Build OpenMW Construction Set" ON)
+option(BUILD_ESSIMPORTER        "Build ESS (Morrowind save game) importer" ON)
+option(BUILD_BSATOOL            "Build BSA extractor" ON)
+option(BUILD_ESMTOOL            "Build ESM inspector" ON)
+option(BUILD_NIFTEST            "Build nif file tester" ON)
+option(BUILD_MYGUI_PLUGIN       "Build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
+option(BUILD_DOCS               "Build documentation." OFF )
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
-option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest" OFF)
-option(BUILD_NIFTEST "build nif file tester" OFF)
-option(BUILD_MYGUI_PLUGIN "build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
-option(BUILD_DOCS        "build documentation." OFF )
+option(BUILD_UNITTESTS          "Enable Unittests with Google C++ Unittest" OFF)
 
 if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
    set(USE_QT FALSE)
@@ -54,7 +54,7 @@ endif()
 message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
-set(OPENMW_VERSION_MINOR 44)
+set(OPENMW_VERSION_MINOR 46)
 set(OPENMW_VERSION_RELEASE 0)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -153,7 +153,52 @@ if (USE_QT)
 endif()
 
 # Sound setup
+
+# Require at least ffmpeg 3.2 for now
+SET(FFVER_OK FALSE)
+
 find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
+
+if(FFmpeg_FOUND)
+    SET(FFVER_OK TRUE)
+
+    # Can not detect FFmpeg version on Windows for now
+    if (NOT WIN32)
+        if(FFmpeg_AVFORMAT_VERSION VERSION_LESS "57.56.100")
+            message(STATUS "libavformat is too old! (${FFmpeg_AVFORMAT_VERSION}, wanted 57.56.100)")
+            set(FFVER_OK FALSE)
+        endif()
+        if(FFmpeg_AVCODEC_VERSION VERSION_LESS "57.64.100")
+            message(STATUS "libavcodec is too old! (${FFmpeg_AVCODEC_VERSION}, wanted 57.64.100)")
+            set(FFVER_OK FALSE)
+        endif()
+        if(FFmpeg_AVUTIL_VERSION VERSION_LESS "55.34.100")
+            message(STATUS "libavutil is too old! (${FFmpeg_AVUTIL_VERSION}, wanted 55.34.100)")
+            set(FFVER_OK FALSE)
+        endif()
+        if(FFmpeg_SWSCALE_VERSION VERSION_LESS "4.2.100")
+            message(STATUS "libswscale is too old! (${FFmpeg_SWSCALE_VERSION}, wanted 4.2.100)")
+            set(FFVER_OK FALSE)
+        endif()
+        if(FFmpeg_SWRESAMPLE_VERSION VERSION_LESS "2.3.100")
+            message(STATUS "libswresample is too old! (${FFmpeg_SWRESAMPLE_VERSION}, wanted 2.3.100)")
+            set(FFVER_OK FALSE)
+        endif()
+    endif()
+endif()
+
+if(NOT FFmpeg_FOUND)
+    message(FATAL_ERROR "FFmpeg was not found" )
+endif()
+
+if(NOT FFVER_OK)
+    message(FATAL_ERROR "FFmpeg version is too old, 3.2 is required" )
+endif()
+
+if(WIN32)
+    message("Can not detect FFmpeg version, at least the 3.2 is required" )
+endif()
+
 # Required for building the FFmpeg headers
 add_definitions(-D__STDC_CONSTANT_MACROS)
 

@@ -29,6 +29,7 @@ namespace DetourNavigator
         remove = 0,
         mixed = 1,
         add = 2,
+        update = 3,
     };
 
     class AsyncNavMeshUpdater

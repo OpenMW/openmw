@@ -1748,8 +1748,6 @@ namespace MWRender
             }
             else
             {
-                osg::StateSet* stateset (new osg::StateSet);
-
                 osg::BlendFunc* blendfunc (new osg::BlendFunc);
                 stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 

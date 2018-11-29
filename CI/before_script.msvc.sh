@@ -194,7 +194,11 @@ download() {
 }
 
 real_pwd() {
-	pwd | sed "s,/\(.\),\1:,"
+	if type cygpath >/dev/null 2>&1; then
+		cygpath -am "$PWD"
+	else
+		pwd # not git bash, Cygwin or the like
+	fi
 }
 
 CMAKE_OPTS=""
@@ -349,9 +353,9 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"MyGUI-3.2.2-msvc${MSVC_YEAR}-win${BITS}.7z"
 
 	# OpenAL
-	download "OpenAL-Soft 1.17.2" \
-		"http://openal-soft.org/openal-binaries/openal-soft-1.17.2-bin.zip" \
-		"OpenAL-Soft-1.17.2.zip"
+	download "OpenAL-Soft 1.19.1" \
+		"http://openal-soft.org/openal-binaries/openal-soft-1.19.1-bin.zip" \
+		"OpenAL-Soft-1.19.1.zip"
 
 	# OSG
 	download "OpenSceneGraph 3.4.1-scrawl" \
@@ -529,18 +533,18 @@ printf "MyGUI 3.2.2... "
 cd $DEPS
 echo
 # OpenAL
-printf "OpenAL-Soft 1.17.2... "
+printf "OpenAL-Soft 1.19.1... "
 {
-	if [ -d openal-soft-1.17.2-bin ]; then
+	if [ -d openal-soft-1.19.1-bin ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf openal-soft-1.17.2-bin
-		eval 7z x -y OpenAL-Soft-1.17.2.zip $STRIP
+		rm -rf openal-soft-1.19.1-bin
+		eval 7z x -y OpenAL-Soft-1.19.1.zip $STRIP
 	fi
-	OPENAL_SDK="$(real_pwd)/openal-soft-1.17.2-bin"
+	OPENAL_SDK="$(real_pwd)/openal-soft-1.19.1-bin"
 	add_cmake_opts -DOPENAL_INCLUDE_DIR="${OPENAL_SDK}/include/AL" \
 		-DOPENAL_LIBRARY="${OPENAL_SDK}/libs/Win${BITS}/OpenAL32.lib"
-	add_runtime_dlls "$(pwd)/openal-soft-1.17.2-bin/bin/WIN${BITS}/soft_oal.dll:OpenAL32.dll"
+	add_runtime_dlls "$(pwd)/openal-soft-1.19.1-bin/bin/WIN${BITS}/soft_oal.dll:OpenAL32.dll"
 	echo Done.
 }
 cd $DEPS

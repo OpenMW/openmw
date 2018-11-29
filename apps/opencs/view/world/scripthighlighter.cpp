@@ -81,8 +81,11 @@ void CSVWorld::ScriptHighlighter::highlight (const Compiler::TokenLoc& loc, Type
 
 CSVWorld::ScriptHighlighter::ScriptHighlighter (const CSMWorld::Data& data, Mode mode,
     QTextDocument *parent)
-: QSyntaxHighlighter (parent), Compiler::Parser (mErrorHandler, mContext), mContext (data),
-  mMode (mode)
+    : QSyntaxHighlighter (parent)
+    , Compiler::Parser (mErrorHandler, mContext)
+    , mContext (data)
+    , mMode (mode)
+    , mMarkOccurrences (false)
 {
     QColor color ("black");
     QTextCharFormat format;

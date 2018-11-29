@@ -25,7 +25,7 @@
 
 #include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/navigator.hpp>
-#include <components/detournavigator/debug.hpp>
+#include <components/detournavigator/recastglobalallocator.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -230,6 +230,7 @@ namespace MWWorld
         if (Settings::Manager::getBool("enable log", "Navigator"))
             DetourNavigator::Log::instance().setSink(std::unique_ptr<DetourNavigator::FileSink>(
                 new DetourNavigator::FileSink(Settings::Manager::getString("log path", "Navigator"))));
+        DetourNavigator::RecastGlobalAllocator::init();
         mNavigator.reset(new DetourNavigator::Navigator(navigatorSettings));
 
         mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath, *mNavigator));
@@ -3697,10 +3698,13 @@ namespace MWWorld
         {
             if (ptr.getClass().isActor() && ptr.getCellRef().hasContentFile())
             {
+                if (ptr.getCell()->movedHere(ptr))
+                    return true;
+
                 const ESM::Position& origPos = ptr.getCellRef().getPosition();
                 MWBase::Environment::get().getWorld()->moveObject(ptr, origPos.pos[0], origPos.pos[1], origPos.pos[2]);
                 MWBase::Environment::get().getWorld()->rotateObject(ptr, origPos.rot[0], origPos.rot[1], origPos.rot[2]);
-                ptr.getClass().adjustPosition(ptr, false);
+                ptr.getClass().adjustPosition(ptr, true);
             }
             return true;
         }
@@ -3788,6 +3792,11 @@ namespace MWWorld
             const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const
     {
         mRendering->updateActorPath(actor, path, halfExtents, start, end);
+    }
+
+    void World::removeActorPath(const MWWorld::ConstPtr& actor) const
+    {
+        mRendering->removeActorPath(actor);
     }
 
     void World::setNavMeshNumberToRender(const std::size_t value)

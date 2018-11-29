@@ -46,7 +46,7 @@ namespace DetourNavigator
     {
         if (!mRecastMeshManager.updateObject(id, transform, areaType))
             return false;
-        addChangedTiles(shape, transform, ChangeType::mixed);
+        addChangedTiles(shape, transform, ChangeType::update);
         return true;
     }
 

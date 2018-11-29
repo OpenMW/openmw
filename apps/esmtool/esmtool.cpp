@@ -123,14 +123,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
 
         bpo::store(valid_opts, variables);
     }
-    catch(boost::program_options::unknown_option & x)
+    catch(std::exception &e)
     {
-        std::cerr << "ERROR: " << x.what() << std::endl;
-        return false;
-    }
-    catch(boost::program_options::invalid_command_line_syntax & x)
-    {
-        std::cerr << "ERROR: " << x.what() << std::endl;
+        std::cout << "ERROR parsing arguments: " << e.what() << std::endl;
         return false;
     }
 
@@ -507,7 +502,7 @@ int clone(Arguments& info)
         esm.endRecord(typeName.toString());
 
         saved++;
-        int perc = (int)((saved / (float)recordCount)*100);
+        int perc = recordCount == 0 ? 100 : (int)((saved / (float)recordCount)*100);
         if (perc % 10 == 0)
         {
             std::cerr << "\r" << perc << "%";

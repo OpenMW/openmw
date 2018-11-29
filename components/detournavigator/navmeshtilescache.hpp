@@ -108,19 +108,30 @@ namespace DetourNavigator
             NavMeshData&& value);
 
     private:
+
+        struct TileMap
+        {
+            std::map<std::string, ItemIterator> Map;
+        };
+
         std::mutex mMutex;
         std::size_t mMaxNavMeshDataSize;
         std::size_t mUsedNavMeshDataSize;
         std::size_t mFreeNavMeshDataSize;
         std::list<Item> mBusyItems;
         std::list<Item> mFreeItems;
-        std::map<osg::Vec3f, std::map<TilePosition, std::map<std::string, ItemIterator>>> mValues;
+        std::map<osg::Vec3f, std::map<TilePosition, TileMap>> mValues;
 
         void removeLeastRecentlyUsed();
 
         void acquireItemUnsafe(ItemIterator iterator);
 
         void releaseItem(ItemIterator iterator);
+
+        static std::size_t getSize(const Item& item)
+        {
+            return static_cast<std::size_t>(item.mNavMeshData.mSize) + 2 * item.mNavMeshKey.size();
+        }
     };
 }
 

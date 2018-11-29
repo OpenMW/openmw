@@ -99,7 +99,8 @@ void MWWorld::InventoryStore::readEquipmentState(const MWWorld::ContainerStoreIt
 }
 
 MWWorld::InventoryStore::InventoryStore()
- : mListener(nullptr)
+ : ContainerStore()
+ , mInventoryListener(nullptr)
  , mUpdatesEnabled (true)
  , mFirstAutoEquip(true)
  , mSelectedEnchantItem(end())
@@ -111,7 +112,7 @@ MWWorld::InventoryStore::InventoryStore()
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
  : ContainerStore (store)
  , mMagicEffects(store.mMagicEffects)
- , mListener(store.mListener)
+ , mInventoryListener(store.mInventoryListener)
  , mUpdatesEnabled(store.mUpdatesEnabled)
  , mFirstAutoEquip(store.mFirstAutoEquip)
  , mPermanentMagicEffectMagnitudes(store.mPermanentMagicEffectMagnitudes)
@@ -124,6 +125,7 @@ MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
 MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStore& store)
 {
     mListener = store.mListener;
+    mInventoryListener = store.mInventoryListener;
     mMagicEffects = store.mMagicEffects;
     mFirstAutoEquip = store.mFirstAutoEquip;
     mPermanentMagicEffectMagnitudes = store.mPermanentMagicEffectMagnitudes;
@@ -146,6 +148,9 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
         if (type == typeid(ESM::Armor).name() || type == typeid(ESM::Clothing).name())
             autoEquip(actorPtr);
     }
+
+    if (mListener)
+        mListener->itemAdded(itemPtr, count);
 
     return retVal;
 }
@@ -246,25 +251,195 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::findSlot (int slot) con
     return mSlots[slot];
 }
 
-void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
+void MWWorld::InventoryStore::autoEquipWeapon (const MWWorld::Ptr& actor, TSlots& slots_)
 {
+    if (!actor.getClass().isNpc())
+    {
+        // In original game creatures do not autoequip weapon, but we need it for weapon sheathing.
+        // The only case when the difference is noticable - when this creature sells weapon.
+        // So just disable weapon autoequipping for creatures which sells weapon.
+        int services = actor.getClass().getServices(actor);
+        bool sellsWeapon = services & (ESM::NPC::Weapon|ESM::NPC::MagicItems);
+        if (sellsWeapon)
+            return;
+    }
+
+    static const ESM::Skill::SkillEnum weaponSkills[] =
+    {
+        ESM::Skill::LongBlade,
+        ESM::Skill::Axe,
+        ESM::Skill::Spear,
+        ESM::Skill::ShortBlade,
+        ESM::Skill::Marksman,
+        ESM::Skill::BluntWeapon
+    };
+    const size_t weaponSkillsLength = sizeof(weaponSkills) / sizeof(weaponSkills[0]);
+
+    bool weaponSkillVisited[weaponSkillsLength] = { false };
+
+    // give arrows/bolt with max damage by default
+    int arrowMax = 0;
+    int boltMax = 0;
+    ContainerStoreIterator arrow(end());
+    ContainerStoreIterator bolt(end());
+
+    // rate ammo
+    for (ContainerStoreIterator iter(begin(ContainerStore::Type_Weapon)); iter!=end(); ++iter)
+    {
+        const ESM::Weapon* esmWeapon = iter->get<ESM::Weapon>()->mBase;
+
+        if (esmWeapon->mData.mType == ESM::Weapon::Arrow)
+        {
+            if (esmWeapon->mData.mChop[1] >= arrowMax)
+            {
+                arrowMax = esmWeapon->mData.mChop[1];
+                arrow = iter;
+            }
+        }
+        else if (esmWeapon->mData.mType == ESM::Weapon::Bolt)
+        {
+            if (esmWeapon->mData.mChop[1] >= boltMax)
+            {
+                boltMax = esmWeapon->mData.mChop[1];
+                bolt = iter;
+            }
+        }
+    }
+
+    // rate weapon
+    for (int i = 0; i < static_cast<int>(weaponSkillsLength); ++i)
+    {
+        int max = 0;
+        int maxWeaponSkill = -1;
+
+        for (int j = 0; j < static_cast<int>(weaponSkillsLength); ++j)
+        {
+            int skillValue = actor.getClass().getSkill(actor, static_cast<int>(weaponSkills[j]));
+            if (skillValue > max && !weaponSkillVisited[j])
+            {
+                max = skillValue;
+                maxWeaponSkill = j;
+            }
+        }
+
+        if (maxWeaponSkill == -1)
+            break;
+
+        max = 0;
+        ContainerStoreIterator weapon(end());
+
+        for (ContainerStoreIterator iter(begin(ContainerStore::Type_Weapon)); iter!=end(); ++iter)
+        {
+            if (!canActorAutoEquip(actor, *iter))
+                continue;
+
+            const ESM::Weapon* esmWeapon = iter->get<ESM::Weapon>()->mBase;
+
+            if (esmWeapon->mData.mType == ESM::Weapon::Arrow || esmWeapon->mData.mType == ESM::Weapon::Bolt)
+                continue;
+
+            if (iter->getClass().getEquipmentSkill(*iter) == weaponSkills[maxWeaponSkill])
+            {
+                if (esmWeapon->mData.mChop[1] >= max)
+                {
+                    max = esmWeapon->mData.mChop[1];
+                    weapon = iter;
+                }
+
+                if (esmWeapon->mData.mSlash[1] >= max)
+                {
+                    max = esmWeapon->mData.mSlash[1];
+                    weapon = iter;
+                }
+
+                if (esmWeapon->mData.mThrust[1] >= max)
+                {
+                    max = esmWeapon->mData.mThrust[1];
+                    weapon = iter;
+                }
+            }
+        }
+
+        bool isBow = false;
+        bool isCrossbow = false;
+        if (weapon != end())
+        {
+            const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
+            ESM::Weapon::Type type = (ESM::Weapon::Type)ref->mBase->mData.mType;
+
+            if (type == ESM::Weapon::MarksmanBow)
+                isBow = true;
+            else if (type == ESM::Weapon::MarksmanCrossbow)
+                isCrossbow = true;
+        }
+
+        if (weapon != end() && weapon->getClass().canBeEquipped(*weapon, actor).first)
+        {
+            // Do not equip ranged weapons, if there is no suitable ammo
+            bool hasAmmo = true;
+            if (isBow == true)
+            {
+                if (arrow == end())
+                    hasAmmo = false;
+                else
+                    slots_[Slot_Ammunition] = arrow;
+            }
+            if (isCrossbow == true)
+            {
+                if (bolt == end())
+                    hasAmmo = false;
+                else
+                    slots_[Slot_Ammunition] = bolt;
+            }
+
+            if (hasAmmo)
+            {
+                std::pair<std::vector<int>, bool> itemsSlots = weapon->getClass().getEquipmentSlots (*weapon);
+
+                if (!itemsSlots.first.empty())
+                {
+                    if (!itemsSlots.second)
+                    {
+                        if (weapon->getRefData().getCount() > 1)
+                        {
+                            unstack(*weapon, actor);
+                        }
+                    }
+
+                    int slot = itemsSlots.first.front();
+                    slots_[slot] = weapon;
+
+                    if (!isBow && !isCrossbow)
+                        slots_[Slot_Ammunition] = end();
+                }
+
+                break;
+            }
+        }
+
+        weaponSkillVisited[maxWeaponSkill] = true;
+    }
+}
+
+void MWWorld::InventoryStore::autoEquipArmor (const MWWorld::Ptr& actor, TSlots& slots_)
+{
+    // Only NPCs can wear armor for now.
+    // For creatures we equip only shields.
+    if (!actor.getClass().isNpc())
+    {
+        autoEquipShield(actor, slots_);
+        return;
+    }
+
     const MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
 
     static float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
     static float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
-    int unarmoredSkill = actor.getClass().getSkill(actor, ESM::Skill::Unarmored);
 
+    int unarmoredSkill = actor.getClass().getSkill(actor, ESM::Skill::Unarmored);
     float unarmoredRating = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
 
-    TSlots slots_;
-    initSlots (slots_);
-
-    // Disable model update during auto-equip
-    mUpdatesEnabled = false;
-
-    // Autoequip clothing, armor and weapons.
-    // Equipping lights is handled in Actors::updateEquippedLight based on environment light.
     for (ContainerStoreIterator iter (begin(ContainerStore::Type_Clothing | ContainerStore::Type_Armor)); iter!=end(); ++iter)
     {
         Ptr test = *iter;
@@ -289,12 +464,12 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         std::pair<std::vector<int>, bool> itemsSlots =
             iter->getClass().getEquipmentSlots (*iter);
 
-        // checking if current item poited by iter can be equipped
+        // checking if current item pointed by iter can be equipped
         for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
             iter2!=itemsSlots.first.end(); ++iter2)
         {
             // if true then it means slot is equipped already
-            // check if slot may require swapping if current item is more valueable
+            // check if slot may require swapping if current item is more valuable
             if (slots_.at (*iter2)!=end())
             {
                 Ptr old = *slots_.at (*iter2);
@@ -362,98 +537,48 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
             break;
         }
     }
+}
 
-    static const ESM::Skill::SkillEnum weaponSkills[] =
+void MWWorld::InventoryStore::autoEquipShield(const MWWorld::Ptr& actor, TSlots& slots_)
+{
+    for (ContainerStoreIterator iter(begin(ContainerStore::Type_Armor)); iter != end(); ++iter)
     {
-        ESM::Skill::LongBlade,
-        ESM::Skill::Axe,
-        ESM::Skill::Spear,
-        ESM::Skill::ShortBlade,
-        ESM::Skill::Marksman,
-        ESM::Skill::BluntWeapon
-    };
-    const size_t weaponSkillsLength = sizeof(weaponSkills) / sizeof(weaponSkills[0]);
-
-    bool weaponSkillVisited[weaponSkillsLength] = { false };
-
-    for (int i = 0; i < static_cast<int>(weaponSkillsLength); ++i)
-    {
-        int max = 0;
-        int maxWeaponSkill = -1;
-
-        for (int j = 0; j < static_cast<int>(weaponSkillsLength); ++j)
+        if (iter->get<ESM::Armor>()->mBase->mData.mType != ESM::Armor::Shield)
+            continue;
+        if (iter->getClass().canBeEquipped(*iter, actor).first != 1)
+            continue;
+        if (iter->getClass().getItemHealth(*iter) <= 0)
+            continue;
+        std::pair<std::vector<int>, bool> shieldSlots =
+            iter->getClass().getEquipmentSlots(*iter);
+        if (shieldSlots.first.empty())
+            continue;
+        int slot = shieldSlots.first[0];
+        const ContainerStoreIterator& shield = mSlots[slot];
+        if (shield != end()
+                && shield.getType() == Type_Armor && shield->get<ESM::Armor>()->mBase->mData.mType == ESM::Armor::Shield)
         {
-            int skillValue = actor.getClass().getSkill(actor, static_cast<int>(weaponSkills[j]));
-
-            if (skillValue > max && !weaponSkillVisited[j])
-            {
-                max = skillValue;
-                maxWeaponSkill = j;
-            }
-        }
-
-        if (maxWeaponSkill == -1)
-            break;
-
-        max = 0;
-        ContainerStoreIterator weapon(end());
-
-        for (ContainerStoreIterator iter(begin(ContainerStore::Type_Weapon)); iter!=end(); ++iter)
-        {
-            if (!canActorAutoEquip(actor, *iter))
+            if (shield->getClass().getItemHealth(*shield) >= iter->getClass().getItemHealth(*iter))
                 continue;
-
-            const ESM::Weapon* esmWeapon = iter->get<ESM::Weapon>()->mBase;
-
-            if (esmWeapon->mData.mType == ESM::Weapon::Arrow || esmWeapon->mData.mType == ESM::Weapon::Bolt)
-                continue;
-
-            if (iter->getClass().getEquipmentSkill(*iter) == weaponSkills[maxWeaponSkill])
-            {
-                if (esmWeapon->mData.mChop[1] >= max)
-                {
-                    max = esmWeapon->mData.mChop[1];
-                    weapon = iter;
-                }
-
-                if (esmWeapon->mData.mSlash[1] >= max)
-                {
-                    max = esmWeapon->mData.mSlash[1];
-                    weapon = iter;
-                }
-
-                if (esmWeapon->mData.mThrust[1] >= max)
-                {
-                    max = esmWeapon->mData.mThrust[1];
-                    weapon = iter;
-                }
-            }
         }
-
-        if (weapon != end() && weapon->getClass().canBeEquipped(*weapon, actor).first)
-        {
-            std::pair<std::vector<int>, bool> itemsSlots =
-                weapon->getClass().getEquipmentSlots (*weapon);
-
-            if (!itemsSlots.first.empty())
-            {
-                if (!itemsSlots.second)
-                {
-                    if (weapon->getRefData().getCount() > 1)
-                    {
-                        unstack(*weapon, actor);
-                    }
-                }
-
-                int slot = itemsSlots.first.front();
-                slots_[slot] = weapon;
-            }
-
-            break;
-        }
-
-        weaponSkillVisited[maxWeaponSkill] = true;
+        slots_[slot] = iter;
     }
+}
+
+void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
+{
+    TSlots slots_;
+    initSlots (slots_);
+
+    // Disable model update during auto-equip
+    mUpdatesEnabled = false;
+
+    // Autoequip clothing, armor and weapons.
+    // Equipping lights is handled in Actors::updateEquippedLight based on environment light.
+    // Note: creatures do not use the armor mitigation and can equip only shields
+    // Use a custom logic for them - select shield based on its health instead of armor rating (since it useless for creatures)
+    autoEquipWeapon(actor, slots_);
+    autoEquipArmor(actor, slots_);
 
     bool changed = false;
 
@@ -476,50 +601,6 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     }
 }
 
-void MWWorld::InventoryStore::autoEquipShield(const MWWorld::Ptr& actor)
-{
-    bool updated = false;
-
-    mUpdatesEnabled = false;
-    for (ContainerStoreIterator iter(begin(ContainerStore::Type_Armor)); iter != end(); ++iter)
-    {
-        if (iter->get<ESM::Armor>()->mBase->mData.mType != ESM::Armor::Shield)
-            continue;
-
-        if (iter->getClass().canBeEquipped(*iter, actor).first != 1)
-            continue;
-
-        if (iter->getClass().getItemHealth(*iter) <= 0)
-            continue;
-
-        std::pair<std::vector<int>, bool> shieldSlots =
-            iter->getClass().getEquipmentSlots(*iter);
-
-        if (shieldSlots.first.empty())
-            continue;
-
-        int slot = shieldSlots.first[0];
-        const ContainerStoreIterator& shield = mSlots[slot];
-
-        if (shield != end()
-                && shield.getType() == Type_Armor && shield->get<ESM::Armor>()->mBase->mData.mType == ESM::Armor::Shield)
-        {
-            if (shield->getClass().getItemHealth(*shield) >= iter->getClass().getItemHealth(*iter))
-                continue;
-        }
-
-        equip(slot, iter, actor);
-        updated = true;
-    }
-    mUpdatesEnabled = true;
-
-    if (updated)
-    {
-        fireEquipmentChangedEvent(actor);
-        updateMagicEffects(actor);
-    }
-}
-
 const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects() const
 {
     return mMagicEffects;
@@ -532,7 +613,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
         return;
 
     // Delay update until the listener is set up
-    if (!mListener)
+    if (!mInventoryListener)
         return;
 
     mMagicEffects = MWMechanics::MagicEffects();
@@ -603,7 +684,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                     // During first auto equip, we don't play any sounds.
                     // Basically we don't want sounds when the actor is first loaded,
                     // the items should appear as if they'd always been equipped.
-                    mListener->permanentEffectAdded(magicEffect, !mFirstAutoEquip);
+                    mInventoryListener->permanentEffectAdded(magicEffect, !mFirstAutoEquip);
                 }
 
                 if (magnitude)
@@ -737,6 +818,9 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
         mSelectedEnchantItem = end();
     }
 
+    if (mListener)
+        mListener->itemRemoved(item, retCount);
+
     return retCount;
 }
 
@@ -822,12 +906,12 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItemQuantity(con
 
 MWWorld::InventoryStoreListener* MWWorld::InventoryStore::getInvListener()
 {
-    return mListener;
+    return mInventoryListener;
 }
 
 void MWWorld::InventoryStore::setInvListener(InventoryStoreListener *listener, const Ptr& actor)
 {
-    mListener = listener;
+    mInventoryListener = listener;
     updateMagicEffects(actor);
 }
 
@@ -835,8 +919,8 @@ void MWWorld::InventoryStore::fireEquipmentChangedEvent(const Ptr& actor)
 {
     if (!mUpdatesEnabled)
         return;
-    if (mListener)
-        mListener->equipmentChanged();
+    if (mInventoryListener)
+        mInventoryListener->equipmentChanged();
 
     // if player, update inventory window
     /*
