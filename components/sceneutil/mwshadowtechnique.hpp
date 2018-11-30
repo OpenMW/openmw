@@ -74,6 +74,8 @@ namespace SceneUtil {
 
         virtual void setSplitPointDeltaBias(double bias);
 
+        virtual void setPolygonOffset(float factor, float units);
+
         virtual void setupCastingShader(Shader::ShaderManager &shaderManager);
 
         class ComputeLightSpaceBounds : public osg::NodeVisitor, public osg::CullStack
@@ -243,6 +245,9 @@ namespace SceneUtil {
 
         double                                  _splitPointUniformLogRatio = 0.5;
         double                                  _splitPointDeltaBias = 0.0;
+
+        float                                   _polygonOffsetFactor = 1.1;
+        float                                   _polygonOffsetUnits = 4.0;
 
         class DebugHUD : public osg::Referenced
         {

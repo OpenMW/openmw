@@ -807,9 +807,6 @@ void MWShadowTechnique::disableShadows()
 void SceneUtil::MWShadowTechnique::enableDebugHUD()
 {
     _debugHud = new DebugHUD(getShadowedScene()->getShadowSettings()->getNumShadowMapsPerLight());
-    
-
-    
 }
 
 void SceneUtil::MWShadowTechnique::disableDebugHUD()
@@ -825,6 +822,18 @@ void SceneUtil::MWShadowTechnique::setSplitPointUniformLogarithmicRatio(double r
 void SceneUtil::MWShadowTechnique::setSplitPointDeltaBias(double bias)
 {
     _splitPointDeltaBias = bias;
+}
+
+void SceneUtil::MWShadowTechnique::setPolygonOffset(float factor, float units)
+{
+    _polygonOffsetFactor = factor;
+    _polygonOffsetUnits = units;
+
+    if (_polygonOffset)
+    {
+        _polygonOffset->setFactor(factor);
+        _polygonOffset->setUnits(units);
+    }
 }
 
 void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & shaderManager)
@@ -1422,14 +1431,7 @@ void MWShadowTechnique::createShaders()
         _shadowCastingStateSet->setMode( GL_CULL_FACE, osg::StateAttribute::OFF );
     }
 
-#if 1
-    float factor = 1.1;
-    float units =  4.0;
-#else
-    float factor = -1.1;
-    float units =  -4.0;
-#endif
-    _polygonOffset = new osg::PolygonOffset(factor, units);
+    _polygonOffset = new osg::PolygonOffset(_polygonOffsetFactor, _polygonOffsetUnits);
     _shadowCastingStateSet->setAttribute(_polygonOffset.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
     _shadowCastingStateSet->setMode(GL_POLYGON_OFFSET_FILL, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 

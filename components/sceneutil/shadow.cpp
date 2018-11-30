@@ -42,6 +42,8 @@ namespace SceneUtil
         mShadowTechnique->setSplitPointUniformLogarithmicRatio(Settings::Manager::getFloat("split point uniform logarithmic ratio", "Shadows"));
         mShadowTechnique->setSplitPointDeltaBias(Settings::Manager::getFloat("split point bias", "Shadows"));
 
+        mShadowTechnique->setPolygonOffset(Settings::Manager::getFloat("polygon offset factor", "Shadows"), Settings::Manager::getFloat("polygon offset units", "Shadows"));
+
         if (Settings::Manager::getBool("allow shadow map overlap", "Shadows"))
             mShadowSettings->setMultipleShadowMapHint(osgShadow::ShadowSettings::CASCADED);
         else

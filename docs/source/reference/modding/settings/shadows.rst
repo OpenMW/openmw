@@ -135,9 +135,33 @@ Some might feel this is distracting as shadows can be cast through other objects
 Expert settings
 ***************
 
-You probably shouldn't be changing these yourself if you haven't read `this paper on Parallel Split Shadow Maps <https://pdfs.semanticscholar.org/15a9/f2a7cf6b1494f45799617c017bd42659d753.pdf>`_ and understood how they interact with the transformation used with Light Space Perspective Shadow Maps.
-If you have, then you may get better results tuning these for your specific view distance.
+These settings are probably too complicated for regular users to judge what might be good values to set them to.
+If you've got a good understanding of how shadow mapping works, or you've got enough time to try a large set of values, you may get better results tuning these yourself.
 Copying values from another user who's done careful tuning is the recommended way of arriving at an optimal value for these settings.
+
+Understanding what some of these do might be easier for people who've read `this paper on Parallel Split Shadow Maps <https://pdfs.semanticscholar.org/15a9/f2a7cf6b1494f45799617c017bd42659d753.pdf>`_ and understood how they interact with the transformation used with Light Space Perspective Shadow Maps.
+
+polygon offset factor
+---------------------
+
+:Type:		float
+:Range:		Theoretically the whole range of 32-bit floating point, but values just above 1.0 are most sensible.
+:Default:	1.1
+
+Used as the factor parameter for the polygon offset used for shadow map rendering.
+Higher values reduce shadow flicker, but risk increasing Peter Panning.
+See `the OpenGL documentation for glPolygonOffset <https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glPolygonOffset.xhtml>`_ for details.
+
+polygon offset units
+---------------------
+
+:Type:		float
+:Range:		Theoretically the whole range of 32-bit floating point, but values between 1 and 10 are most sensible.
+:Default:	4.0
+
+Used as the units parameter for the polygon offset used for shadow map rendering.
+Higher values reduce shadow flicker, but risk increasing Peter Panning.
+See `the OpenGL documentation for glPolygonOffset <https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glPolygonOffset.xhtml>`_ for details.
 
 split point uniform logarithmic ratio
 -------------------------------------
