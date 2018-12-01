@@ -9,9 +9,10 @@
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
-#endif
+
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
+#endif
 
 namespace Wizard
 {
