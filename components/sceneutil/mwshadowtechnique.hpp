@@ -76,6 +76,10 @@ namespace SceneUtil {
 
         virtual void setPolygonOffset(float factor, float units);
 
+        virtual void enableFrontFaceCulling();
+
+        virtual void disableFrontFaceCulling();
+
         virtual void setupCastingShader(Shader::ShaderManager &shaderManager);
 
         class ComputeLightSpaceBounds : public osg::NodeVisitor, public osg::CullStack
@@ -248,6 +252,8 @@ namespace SceneUtil {
 
         float                                   _polygonOffsetFactor = 1.1;
         float                                   _polygonOffsetUnits = 4.0;
+
+        bool                                    _useFrontFaceCulling = true;
 
         class DebugHUD : public osg::Referenced
         {

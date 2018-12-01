@@ -44,6 +44,11 @@ namespace SceneUtil
 
         mShadowTechnique->setPolygonOffset(Settings::Manager::getFloat("polygon offset factor", "Shadows"), Settings::Manager::getFloat("polygon offset units", "Shadows"));
 
+        if (Settings::Manager::getBool("use front face culling", "Shadows"))
+            mShadowTechnique->enableFrontFaceCulling();
+        else
+            mShadowTechnique->disableFrontFaceCulling();
+
         if (Settings::Manager::getBool("allow shadow map overlap", "Shadows"))
             mShadowSettings->setMultipleShadowMapHint(osgShadow::ShadowSettings::CASCADED);
         else

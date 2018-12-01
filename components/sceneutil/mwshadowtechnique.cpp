@@ -836,6 +836,22 @@ void SceneUtil::MWShadowTechnique::setPolygonOffset(float factor, float units)
     }
 }
 
+void SceneUtil::MWShadowTechnique::enableFrontFaceCulling()
+{
+    _useFrontFaceCulling = true;
+
+    if (_shadowCastingStateSet)
+        _shadowCastingStateSet->setAttribute(new osg::CullFace(osg::CullFace::FRONT), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+}
+
+void SceneUtil::MWShadowTechnique::disableFrontFaceCulling()
+{
+    _useFrontFaceCulling = false;
+
+    if (_shadowCastingStateSet)
+        _shadowCastingStateSet->removeAttribute(osg::StateAttribute::CULLFACE);
+}
+
 void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & shaderManager)
 {
     // This can't be part of the constructor as OSG mandates that there be a trivial constructor available
@@ -1422,8 +1438,8 @@ void MWShadowTechnique::createShaders()
         //    backface nor front face so they usually use CullMode off set here.
         //    In this case we will draw them in their entirety.
 
-        _shadowCastingStateSet->setAttribute( new osg::CullFace( osg::CullFace::FRONT ),
-                osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE );
+        if (_useFrontFaceCulling)
+            _shadowCastingStateSet->setAttribute(new osg::CullFace(osg::CullFace::FRONT), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         // make sure GL_CULL_FACE is off by default
         // we assume that if object has cull face attribute set to back

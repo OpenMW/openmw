@@ -163,6 +163,16 @@ Used as the units parameter for the polygon offset used for shadow map rendering
 Higher values reduce shadow flicker, but risk increasing Peter Panning.
 See `the OpenGL documentation for glPolygonOffset <https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glPolygonOffset.xhtml>`_ for details.
 
+use front face culling
+----------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Excludes theoretically unnecessary faces from shadow maps, slightly increasing performance.
+In practice, Peter Panning can be much less visible with these faces included, so if you have high polygon offset values, disabling this may help minimise the side effects.
+
 split point uniform logarithmic ratio
 -------------------------------------
 
