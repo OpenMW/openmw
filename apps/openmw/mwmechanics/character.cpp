@@ -446,11 +446,10 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
 
             if(!mAnimation->hasAnimation(movementAnimName))
             {
-                movemask = MWRender::Animation::BlendMask_LowerBody;
                 movementAnimName = movestate->groupname;
-
                 if (swimpos == std::string::npos)
                 {
+                    movemask = MWRender::Animation::BlendMask_LowerBody;
                     // Since we apply movement only for lower body, do not reset idle animations.
                     // For upper body there will be idle animation.
                     if (idle == CharState_None)
@@ -462,7 +461,11 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
                 }
                 else if (idle == CharState_None)
                 {
-                    idle = CharState_IdleSwim;
+                    // In the 1st-person mode use ground idle animations as fallback
+                    if (mPtr == getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson())
+                        idle = CharState_Idle;
+                    else
+                        idle = CharState_IdleSwim;
                 }
             }
         }
@@ -1247,6 +1250,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
 
     std::string upSoundId;
     std::string downSoundId;
+    bool weaponChanged = false;
     if (mPtr.getClass().hasInventoryStore(mPtr))
     {
         MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
@@ -1264,7 +1268,13 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
         if(weapon == inv.end() && !mWeapon.isEmpty() && weaptype == WeapType_HandToHand && mWeaponType != WeapType_Spell)
             downSoundId = mWeapon.getClass().getDownSoundId(mWeapon);
 
-        mWeapon = weapon != inv.end() ? *weapon : MWWorld::Ptr();
+        MWWorld::Ptr newWeapon = weapon != inv.end() ? *weapon : MWWorld::Ptr();
+
+        if (mWeapon != newWeapon)
+        {
+            mWeapon = newWeapon;
+            weaponChanged = true;
+        }
     }
 
     // Use blending only with 3d-person movement animations for bipedal actors
@@ -1299,9 +1309,8 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             && mUpperBodyState != UpperCharState_UnEquipingWeap
             && !isStillWeapon)
         {
-            // We can not play un-equip animation when we switch to HtH
-            // because we already un-equipped weapon
-            if (weaptype != WeapType_HandToHand || mWeaponType == WeapType_Spell)
+            // We can not play un-equip animation if weapon changed since last update
+            if (!weaponChanged)
             {
                 // Note: we do not disable unequipping animation automatically to avoid body desync
                 getWeaponGroup(mWeaponType, weapgroup);
@@ -1618,8 +1627,12 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             idle = CharState_None;
 
         // In other cases we should not break swim and sneak animations
-        if (resetIdle && mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
+        if (resetIdle &&
+            idle != CharState_IdleSneak && idle != CharState_IdleSwim &&
+            mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
+        {
             idle = CharState_None;
+        }
 
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
         if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && !isKnockedDown())
@@ -1993,6 +2006,7 @@ void CharacterController::update(float duration, bool animationOnly)
             vec.z() = 0.0f;
 
         bool inJump = true;
+        bool playLandingSound = false;
         if(!onground && !flying && !inwater)
         {
             // In the air (either getting up —ascending part of jump— or falling).
@@ -2080,20 +2094,14 @@ void CharacterController::update(float duration, bool animationOnly)
                 }
             }
 
-            // Play landing sound for NPCs
             if (mPtr.getClass().isNpc())
-            {
-                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                std::string sound = "DefaultLand";
-                osg::Vec3f pos(mPtr.getRefData().getPosition().asVec3());
-                if (world->isUnderwater(mPtr.getCell(), pos) || world->isWalkingOnWater(mPtr))
-                    sound = "DefaultLandWater";
-
-                sndMgr->playSound3D(mPtr, sound, 1.f, 1.f, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
-            }
+                playLandingSound = true;
         }
         else
         {
+            if(mPtr.getClass().isNpc() && mJumpState == JumpState_InAir && !flying)
+                playLandingSound = true;
+
             jumpstate = mAnimation->isPlaying(mCurrentJump) ? JumpState_Landing : JumpState_None;
 
             vec.z() = 0.0f;
@@ -2141,6 +2149,17 @@ void CharacterController::update(float duration, bool animationOnly)
                         movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
                 }
             }
+        }
+
+        if (playLandingSound)
+        {
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            std::string sound = "DefaultLand";
+            osg::Vec3f pos(mPtr.getRefData().getPosition().asVec3());
+            if (world->isUnderwater(mPtr.getCell(), pos) || world->isWalkingOnWater(mPtr))
+                sound = "DefaultLandWater";
+
+            sndMgr->playSound3D(mPtr, sound, 1.f, 1.f, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
         }
 
         // Player can not use smooth turning as NPCs, so we play turning animation a bit to avoid jittering
