@@ -88,6 +88,7 @@ namespace MWRender
             : mFogStart(0.f)
             , mFogEnd(0.f)
             , mWireframe(false)
+            , mAccurateFog(false)
         {
         }
 
@@ -97,6 +98,8 @@ namespace MWRender
             stateset->setAttribute(lightModel, osg::StateAttribute::ON);
             osg::Fog* fog = new osg::Fog;
             fog->setMode(osg::Fog::LINEAR);
+            if (mAccurateFog)
+                fog->setUseRadialFog(true);
             stateset->setAttributeAndModes(fog, osg::StateAttribute::ON);
             if (mWireframe)
             {
@@ -152,12 +155,22 @@ namespace MWRender
             return mWireframe;
         }
 
+        void setAccurateFog(bool enable)
+        {
+            mAccurateFog = enable;
+        }
+
+        bool getAccurateFog() const
+        {
+            return mAccurateFog;
+        }
+
     private:
         osg::Vec4f mAmbientColor;
         osg::Vec4f mFogColor;
         float mFogStart;
         float mFogEnd;
-        bool mWireframe;
+        bool mWireframe, mAccurateFog;
     };
 
     class PreloadCommonAssetsWorkItem : public SceneUtil::WorkItem
@@ -310,6 +323,8 @@ namespace MWRender
         source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
 
         mStateUpdater = new StateUpdater;
+        mStateUpdater->setAccurateFog(resourceSystem->getSceneManager()->getAccurateFog());
+
         sceneRoot->addUpdateCallback(mStateUpdater);
 
         osg::Camera::CullingMode cullingMode = osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING;
