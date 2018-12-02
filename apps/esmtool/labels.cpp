@@ -651,7 +651,7 @@ std::string ruleFunction(int idx)
 
 std::string bodyPartFlags(int flags)
 {
-    std::string properties = "";
+    std::string properties;
     if (flags == 0) properties += "[None] ";
     if (flags & ESM::BodyPart::BPF_Female) properties += "Female ";
     if (flags & ESM::BodyPart::BPF_NotPlayable) properties += "NotPlayable ";
@@ -665,7 +665,7 @@ std::string bodyPartFlags(int flags)
 
 std::string cellFlags(int flags)
 {
-    std::string properties = "";
+    std::string properties;
     if (flags == 0) properties += "[None] ";
     if (flags & ESM::Cell::HasWater) properties += "HasWater ";
     if (flags & ESM::Cell::Interior) properties += "Interior ";
@@ -686,7 +686,7 @@ std::string cellFlags(int flags)
 
 std::string containerFlags(int flags)
 {
-    std::string properties = "";
+    std::string properties;
     if (flags == 0) properties += "[None] ";
     if (flags & ESM::Container::Unknown) properties += "Unknown ";
     if (flags & ESM::Container::Organic) properties += "Organic ";
@@ -702,7 +702,7 @@ std::string containerFlags(int flags)
 
 std::string creatureFlags(int flags)
 {
-    std::string properties = "";
+    std::string properties;
     if (flags == 0) properties += "[None] ";
     if (flags & ESM::Creature::None) properties += "All ";
     if (flags & ESM::Creature::Walks) properties += "Walks ";
@@ -732,7 +732,7 @@ std::string creatureFlags(int flags)
 
 std::string landFlags(int flags)
 {
-    std::string properties = "";
+    std::string properties;
     // The ESM component says that this first four bits are used, but
     // only the first three bits are used as far as I can tell.
     // There's also no enumeration of the bit in the ESM component.
@@ -747,7 +747,7 @@ std::string landFlags(int flags)
 
 std::string itemListFlags(int flags)
 {
-    std::string properties = "";
+    std::string properties;
     if (flags == 0) properties += "[None] ";
     if (flags & ESM::ItemLevList::AllLevels) properties += "AllLevels ";
     if (flags & ESM::ItemLevList::Each) properties += "Each ";
@@ -761,7 +761,7 @@ std::string itemListFlags(int flags)
 
 std::string creatureListFlags(int flags)
 {
-    std::string properties = "";
+    std::string properties;
     if (flags == 0) properties += "[None] ";
     if (flags & ESM::CreatureLevList::AllLevels) properties += "AllLevels ";
     int unused = (0xFFFFFFFF ^ ESM::CreatureLevList::AllLevels);
@@ -800,7 +800,7 @@ std::string lightFlags(int flags)
 
 std::string magicEffectFlags(int flags)
 {
-    std::string properties = "";
+    std::string properties;
     if (flags == 0) properties += "[None] ";
     if (flags & ESM::MagicEffect::TargetAttribute) properties += "TargetAttribute ";
     if (flags & ESM::MagicEffect::TargetSkill) properties += "TargetSkill ";
@@ -826,7 +826,7 @@ std::string magicEffectFlags(int flags)
 
 std::string npcFlags(int flags)
 {
-    std::string properties = "";
+    std::string properties;
     if (flags == 0) properties += "[None] ";
     // Mythicmods and the ESM component differ.  Mythicmods says
     // 0x8=None and 0x10=AutoCalc, while our code previously defined
@@ -860,7 +860,7 @@ std::string npcFlags(int flags)
 
 std::string raceFlags(int flags)
 {
-    std::string properties = "";
+    std::string properties;
     if (flags == 0) properties += "[None] ";
     // All races have the playable flag set in Bethesda files.
     if (flags & ESM::Race::Playable) properties += "Playable ";
@@ -875,7 +875,7 @@ std::string raceFlags(int flags)
 
 std::string spellFlags(int flags)
 {
-    std::string properties = "";
+    std::string properties;
     if (flags == 0) properties += "[None] ";
     if (flags & ESM::Spell::F_Autocalc) properties += "Autocalc ";
     if (flags & ESM::Spell::F_PCStart) properties += "PCStart ";
@@ -891,7 +891,7 @@ std::string spellFlags(int flags)
 
 std::string weaponFlags(int flags)
 {
-    std::string properties = "";
+    std::string properties;
     if (flags == 0) properties += "[None] ";
     // The interpretation of the flags are still unclear to me.
     // Apparently you can't be Silver without being Magical?  Many of
