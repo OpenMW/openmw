@@ -1059,11 +1059,11 @@ namespace MWWorld
     {
         // Load default marker definitions, if game files do not have them for some reason
         std::pair<std::string, std::string> markers[] = {
-            std::make_pair("DivineMarker", "marker_divine.nif"),
-            std::make_pair("DoorMarker", "marker_arrow.nif"),
-            std::make_pair("NorthMarker", "marker_north.nif"),
-            std::make_pair("TempleMarker", "marker_temple.nif"),
-            std::make_pair("TravelMarker", "marker_travel.nif")
+            std::make_pair("divinemarker", "marker_divine.nif"),
+            std::make_pair("doormarker", "marker_arrow.nif"),
+            std::make_pair("northmarker", "marker_north.nif"),
+            std::make_pair("templemarker", "marker_temple.nif"),
+            std::make_pair("travelmarker", "marker_travel.nif")
         };
 
         for (const std::pair<std::string, std::string> marker : markers)
@@ -1085,7 +1085,7 @@ namespace MWWorld
     {
         // Load default Door type marker definitions
         std::pair<std::string, std::string> markers[] = {
-            std::make_pair("PrisonMarker", "marker_prison.nif")
+            std::make_pair("prisonmarker", "marker_prison.nif")
         };
 
         for (const std::pair<std::string, std::string> marker : markers)
