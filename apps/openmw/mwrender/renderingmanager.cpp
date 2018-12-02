@@ -242,7 +242,19 @@ namespace MWRender
         resourceSystem->getSceneManager()->setAutoUseSpecularMaps(Settings::Manager::getBool("auto use object specular maps", "Shaders"));
         resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
 
+
+        if (resourceSystem->getSceneManager()->getAccurateFog() &&
+            !resourceSystem->getSceneManager()->getForceShaders())
+        {
+            static bool ext = osg::isGLExtensionSupported(0, "GL_NV_fog_distance");
+
+            // force shader-based fog if lacking ffp extension
+            if (!ext)
+                resourceSystem->getSceneManager()->setForceShaders(true);
+        }
+
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager;
+
         sceneRoot->setLightingMask(Mask_Lighting);
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
