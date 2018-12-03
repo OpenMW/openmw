@@ -475,6 +475,7 @@ public:
     virtual float getHeadPitch() const;
     virtual float getHeadYaw() const;
     virtual void setAccurateAiming(bool enabled) {}
+    virtual bool canBeHarvested() const { return false; }
 
 private:
     Animation(const Animation&);
@@ -484,6 +485,8 @@ private:
 class ObjectAnimation : public Animation {
 public:
     ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, Resource::ResourceSystem* resourceSystem, bool animated, bool allowLight);
+
+    bool canBeHarvested() const;
 };
 
 class UpdateVfxCallback : public osg::NodeCallback

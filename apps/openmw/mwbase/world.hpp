@@ -578,6 +578,7 @@ namespace MWBase
             /// Return the distance between actor's weapon and target's collision box.
             virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) = 0;
 
+            virtual void addContainerScripts(const MWWorld::Ptr& reference, MWWorld::CellStore* cell) = 0;
             virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;
 
             virtual bool isPlayerInJail() const = 0;

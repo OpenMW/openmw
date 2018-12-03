@@ -949,6 +949,9 @@ namespace MWMechanics
             return true;
         }
 
+        if (!target.getClass().canBeActivated(target))
+            return true;
+
         // TODO: implement a better check to check if target is owned bed
         if (target.getClass().isActivator() && target.getClass().getScript(target).compare(0, 3, "Bed") != 0)
             return true;

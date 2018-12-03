@@ -131,6 +131,25 @@ namespace
         }
     };
 
+    class HarvestVisitor : public osg::NodeVisitor
+    {
+    public:
+        HarvestVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        virtual void apply(osg::Switch& node)
+        {
+            if (node.getName() == Constants::HerbalismLabel)
+            {
+                node.setSingleChildOn(1);
+            }
+
+            traverse(node);
+        }
+    };
+
     NifOsg::TextKeyMap::const_iterator findGroupStart(const NifOsg::TextKeyMap &keys, const std::string &groupname)
     {
         NifOsg::TextKeyMap::const_iterator iter(keys.begin());
@@ -1970,6 +1989,30 @@ namespace MWRender
             AddSwitchCallbacksVisitor visitor;
             mObjectRoot->accept(visitor);
         }
+
+        if (ptr.getTypeName() == typeid(ESM::Container).name() &&
+            SceneUtil::hasUserDescription(mObjectRoot, Constants::HerbalismLabel) &&
+            ptr.getRefData().getCustomData() != nullptr)
+        {
+            const MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+            if (!store.hasVisibleItems())
+            {
+                HarvestVisitor visitor;
+                mObjectRoot->accept(visitor);
+            }
+        }
+    }
+
+    bool ObjectAnimation::canBeHarvested() const
+    {
+        if (mPtr.getTypeName() != typeid(ESM::Container).name())
+            return false;
+
+        const MWWorld::LiveCellRef<ESM::Container>* ref = mPtr.get<ESM::Container>();
+        if (!(ref->mBase->mFlags & ESM::Container::Organic))
+            return false;
+
+        return SceneUtil::hasUserDescription(mObjectRoot, Constants::HerbalismLabel);
     }
 
     Animation::AnimState::~AnimState()

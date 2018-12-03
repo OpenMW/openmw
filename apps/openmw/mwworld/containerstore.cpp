@@ -422,6 +422,17 @@ int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const 
     return count - toRemove;
 }
 
+bool MWWorld::ContainerStore::hasVisibleItems() const
+{
+    for (auto iter(begin()); iter != end(); ++iter)
+    {
+        if (iter->getClass().showsInInventory(*iter))
+            return true;
+    }
+
+    return false;
+}
+
 int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor)
 {
     assert(this == item.getContainerStore());

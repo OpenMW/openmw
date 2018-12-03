@@ -63,6 +63,8 @@ namespace MWClass
                 const;
             ///< Write additional state from \a ptr into \a state.
 
+            virtual bool canBeActivated(const MWWorld::Ptr& ptr) const;
+
             static void registerSelf();
 
             virtual void respawn (const MWWorld::Ptr& ptr) const;

@@ -15,6 +15,7 @@
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/actionharvest.hpp"
 #include "../mwworld/actionopen.hpp"
 #include "../mwworld/actiontrap.hpp"
 #include "../mwphysics/physicssystem.hpp"
@@ -22,6 +23,7 @@
 
 #include "../mwgui/tooltips.hpp"
 
+#include "../mwrender/animation.hpp"
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
@@ -37,6 +39,10 @@ namespace MWClass
         virtual MWWorld::CustomData *clone() const;
 
         virtual ContainerCustomData& asContainerCustomData()
+        {
+            return *this;
+        }
+        virtual const ContainerCustomData& asContainerCustomData() const
         {
             return *this;
         }
@@ -63,7 +69,18 @@ namespace MWClass
 
             // store
             ptr.getRefData().setCustomData (data.release());
+
+            MWBase::Environment::get().getWorld()->addContainerScripts(ptr, ptr.getCell());
         }
+    }
+
+    bool canBeHarvested(const MWWorld::ConstPtr& ptr)
+    {
+        const MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+        if (animation == nullptr)
+            return false;
+
+        return animation->canBeHarvested();
     }
 
     void Container::respawn(const MWWorld::Ptr &ptr) const
@@ -175,6 +192,12 @@ namespace MWClass
         {
             if(!isTrapped)
             {
+                if (canBeHarvested(ptr))
+                {
+                    std::shared_ptr<MWWorld::Action> action (new MWWorld::ActionHarvest(ptr));
+                    return action;
+                }
+
                 std::shared_ptr<MWWorld::Action> action (new MWWorld::ActionOpen(ptr));
                 return action;
             }
@@ -225,9 +248,18 @@ namespace MWClass
 
     bool Container::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+        if (getName(ptr).empty())
+            return false;
 
-        return (ref->mBase->mName != "");
+        if (const MWWorld::CustomData* data = ptr.getRefData().getCustomData())
+            return !canBeHarvested(ptr) || data->asContainerCustomData().mContainerStore.hasVisibleItems();
+
+        return true;
+    }
+
+    bool Container::canBeActivated(const MWWorld::Ptr& ptr) const
+    {
+        return hasToolTip(ptr);
     }
 
     MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
