@@ -23,7 +23,7 @@ namespace Shader
 
     ShaderVisitor::ShaderRequirements::ShaderRequirements()
         : mShaderRequired(false)
-        , mColorMode(2)
+        , mColorMode(0)
         , mMaterialOverridden(false)
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
