@@ -1385,7 +1385,7 @@ namespace MWWorld
 
         pos.z() += 20; // place slightly above. will snap down to ground with code below
 
-        if (force || !isFlying(ptr))
+        if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && isActorCollisionEnabled(ptr)))
         {
             osg::Vec3f traced = mPhysics->traceDown(ptr, pos, Constants::CellSizeInUnits);
             if (traced.z() < pos.z())
@@ -2229,10 +2229,10 @@ namespace MWWorld
 
     bool World::isFlying(const MWWorld::Ptr &ptr) const
     {
-        const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-
         if(!ptr.getClass().isActor())
             return false;
+
+        const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
 
         if (stats.isDead())
             return false;
@@ -2245,7 +2245,7 @@ namespace MWWorld
             return true;
 
         const MWPhysics::Actor* actor = mPhysics->getActor(ptr);
-        if(!actor || !actor->getCollisionMode())
+        if(!actor)
             return true;
 
         return false;

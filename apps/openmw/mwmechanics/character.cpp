@@ -1886,6 +1886,7 @@ void CharacterController::update(float duration, bool animationOnly)
         bool incapacitated = (cls.getCreatureStats(mPtr).isParalyzed() || cls.getCreatureStats(mPtr).getKnockedDown());
         bool inwater = world->isSwimming(mPtr);
         bool flying = world->isFlying(mPtr);
+        bool solid = world->isActorCollisionEnabled(mPtr);
         // Can't run and sneak while flying (see speed formula in Npc/Creature::getSpeed)
         bool sneak = cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Sneak) && !flying;
         bool isrunning = cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run) && !flying;
@@ -1894,7 +1895,7 @@ void CharacterController::update(float duration, bool animationOnly)
         //Force Jump Logic
 
         bool isMoving = (std::abs(cls.getMovementSettings(mPtr).mPosition[0]) > .5 || std::abs(cls.getMovementSettings(mPtr).mPosition[1]) > .5);
-        if(!inwater && !flying)
+        if(!inwater && !flying && solid)
         {
             //Force Jump
             if(stats.getMovementFlag(MWMechanics::CreatureStats::Flag_ForceJump))
@@ -2002,12 +2003,12 @@ void CharacterController::update(float duration, bool animationOnly)
             cls.getCreatureStats(mPtr).setFatigue(fatigue);
         }
 
-        if(sneak || inwater || flying || incapacitated)
+        if(sneak || inwater || flying || incapacitated || !solid)
             vec.z() = 0.0f;
 
         bool inJump = true;
         bool playLandingSound = false;
-        if(!onground && !flying && !inwater)
+        if(!onground && !flying && !inwater && solid)
         {
             // In the air (either getting up —ascending part of jump— or falling).
 
@@ -2060,7 +2061,7 @@ void CharacterController::update(float duration, bool animationOnly)
                 }
             }
         }
-        else if(mJumpState == JumpState_InAir && !inwater && !flying)
+        else if(mJumpState == JumpState_InAir && !inwater && !flying && solid)
         {
             forcestateupdate = true;
             jumpstate = JumpState_Landing;
@@ -2099,7 +2100,7 @@ void CharacterController::update(float duration, bool animationOnly)
         }
         else
         {
-            if(mPtr.getClass().isNpc() && mJumpState == JumpState_InAir && !flying)
+            if(mPtr.getClass().isNpc() && mJumpState == JumpState_InAir && !flying && solid)
                 playLandingSound = true;
 
             jumpstate = mAnimation->isPlaying(mCurrentJump) ? JumpState_Landing : JumpState_None;
