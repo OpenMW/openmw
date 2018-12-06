@@ -696,24 +696,14 @@ if (WIN32)
         4297 # function assumed not to throw an exception but does
 
         # OpenMW specific warnings
-        4099 # Type mismatch, declared class or struct is defined with other type
         4100 # Unreferenced formal parameter (-Wunused-parameter)
         4101 # Unreferenced local variable (-Wunused-variable)
-        4127 # Conditional expression is constant
-        4242 # Storing value in a variable of a smaller type, possible loss of data
-        4244 # Storing value of one type in variable of another (size_t in int, for example)
-        4245 # Signed/unsigned mismatch
         4267 # Conversion from 'size_t' to 'int', possible loss of data
-        4305 # Truncating value (double to float, for example)
-        4309 # Variable overflow, trying to store 128 in a signed char for example
         4351 # New behavior: elements of array 'array' will be default initialized (desired behavior)
         4355 # Using 'this' in member initialization list
         4464 # relative include path contains '..'
         4505 # Unreferenced local function has been removed
-        4701 # Potentially uninitialized local variable used
-        4702 # Unreachable code
         4714 # function 'QString QString::trimmed(void) &&' marked as __forceinline not inlined
-        4800 # Boolean optimization warning, e.g. myBool = (myInt != 0) instead of myBool = myInt
         )
 
     if (MSVC_VERSION GREATER 1800)
