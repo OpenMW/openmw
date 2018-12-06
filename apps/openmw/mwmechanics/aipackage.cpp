@@ -413,5 +413,5 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
 bool MWMechanics::AiPackage::canActorMoveByZAxis(const MWWorld::Ptr& actor) const
 {
     MWBase::World* world = MWBase::Environment::get().getWorld();
-    return (actor.getClass().canSwim(actor) && world->isSwimming(actor)) || world->isFlying(actor);
+    return (actor.getClass().canSwim(actor) && world->isSwimming(actor)) || world->isFlying(actor) || !world->isActorCollisionEnabled(actor);
 }
