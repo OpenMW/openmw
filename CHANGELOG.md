@@ -1,6 +1,7 @@
 0.46.0
 ------
 
+    Bug #2969: Scripted items can stack
     Bug #2987: Editor: some chance and AI data fields can overflow
     Bug #3623: Fix HiDPI on Windows
     Bug #4411: Reloading a saved game while falling prevents damage in some cases
