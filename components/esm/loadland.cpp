@@ -200,9 +200,9 @@ namespace ESM
             mLandData->mTextures[i] = 0;
         for (int i = 0; i < LAND_NUM_VERTS; ++i)
         {
-            mLandData->mColours[i*3+0] = -1;
-            mLandData->mColours[i*3+1] = -1;
-            mLandData->mColours[i*3+2] = -1;
+            mLandData->mColours[i*3+0] = 255;
+            mLandData->mColours[i*3+1] = 255;
+            mLandData->mColours[i*3+2] = 255;
         }
         mLandData->mUnk1 = 0;
         mLandData->mUnk2 = 0;
