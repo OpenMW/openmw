@@ -12,6 +12,7 @@
     Bug #4746: Non-solid player can't run or sneak
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
+    Feature #3610: Option to invert X axis
     Feature #4673: Weapon sheathing
     Task #4686: Upgrade media decoder to a more current FFmpeg API
 

@@ -175,6 +175,7 @@ namespace MWInput
 
         bool mGrabCursor;
 
+        bool mInvertX;
         bool mInvertY;
 
         bool mControlsDisabled;
