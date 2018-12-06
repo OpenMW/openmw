@@ -8,6 +8,7 @@
     Bug #4715: "Cannot get class of an empty object" exception after pressing ESC in the dialogue mode
     Bug #4720: Inventory avatar has shield with two-handed weapon during [un]equipping animation
     Bug #4723: ResetActors command works incorrectly
+    Bug #4745: Editor: Interior cell lighting field values are not displayed as colors
     Bug #4746: Non-solid player can't run or sneak
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
