@@ -31,6 +31,7 @@ SKIP_EXTRACT=""
 KEEP=""
 UNITY_BUILD=""
 VS_VERSION=""
+NMAKE=""
 PLATFORM=""
 CONFIGURATION=""
 
@@ -66,6 +67,9 @@ while [ $# -gt 0 ]; do
 				VS_VERSION=$1
 				shift ;;
 
+			n )
+				NMAKE=true ;;
+
 			p )
 				PLATFORM=$1
 				shift ;;
@@ -94,6 +98,8 @@ Options:
 		Configure for unity builds.
 	-v <2013/2015/2017>
 		Choose the Visual Studio version to use.
+	-n
+		Produce NMake makefiles instead of a Visual Studio solution.
 	-V
 		Run verbosely
 EOF
@@ -107,6 +113,10 @@ EOF
 		esac
 	done
 done
+
+if [ -n "$NMAKE" ]; then
+	command -v nmake -? >/dev/null 2>&1 || { echo "Error: nmake (NMake) is not on the path. Make sure you have the necessary environment variables set for command-line C++ development (for example, by starting from a Developer Command Prompt)."; exit 1; }
+fi
 
 if [ -z $VERBOSE ]; then
 	STRIP="> /dev/null 2>&1"
@@ -267,18 +277,12 @@ case $PLATFORM in
 		ARCHNAME="x86-64"
 		ARCHSUFFIX="64"
 		BITS="64"
-
-		BASE_OPTS="-G\"$GENERATOR Win64\""
-		add_cmake_opts "-G\"$GENERATOR Win64\""
 		;;
 
 	x32|x86|i686|i386|win32|Win32 )
 		ARCHNAME="x86"
 		ARCHSUFFIX="86"
 		BITS="32"
-
-		BASE_OPTS="-G\"$GENERATOR\""
-		add_cmake_opts "-G\"$GENERATOR\""
 		;;
 
 	* )
@@ -304,12 +308,22 @@ case $CONFIGURATION in
 		;;
 esac
 
-if ! [ -z $UNITY_BUILD ]; then
-	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
-fi
-
 if [ ${BITS} -eq 64 ]; then
 	GENERATOR="${GENERATOR} Win64"
+fi
+
+if [ -n "$NMAKE" ]; then
+	GENERATOR="NMake Makefiles"
+fi
+
+add_cmake_opts "-G\"$GENERATOR\""
+
+if [ -n "$NMAKE" ]; then
+	add_cmake_opts "-DCMAKE_BUILD_TYPE=${BUILD_CONFIG}"
+fi
+
+if ! [ -z $UNITY_BUILD ]; then
+	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
 fi
 
 echo
@@ -387,6 +401,11 @@ cd .. #/..
 
 # Set up dependencies
 BUILD_DIR="MSVC${MSVC_DISPLAY_YEAR}_${BITS}"
+
+if [ -n "$NMAKE" ]; then
+	BUILD_DIR="${BUILD_DIR}_NMake_${BUILD_CONFIG}"
+fi
+
 if [ -z $KEEP ]; then
 	echo
 	echo "(Re)Creating build directory."
@@ -696,7 +715,11 @@ fi
 # NOTE: Disable this when/if we want to run test cases
 #if [ -z $CI ]; then
 	echo "- Copying Runtime DLLs..."
-	mkdir -p $BUILD_CONFIG
+	DLL_PREFIX=""
+	if [ -z $NMAKE ]; then
+		mkdir -p $BUILD_CONFIG
+		DLL_PREFIX="$BUILD_CONFIG/"
+	fi
 	for DLL in $RUNTIME_DLLS; do
 		TARGET="$(basename "$DLL")"
 		if [[ "$DLL" == *":"* ]]; then
@@ -705,21 +728,21 @@ fi
 			TARGET=${SPLIT[1]}
 		fi
 		echo "    ${TARGET}."
-		cp "$DLL" "$BUILD_CONFIG/$TARGET"
+		cp "$DLL" "${DLL_PREFIX}$TARGET"
 	done
 	echo
 	echo "- OSG Plugin DLLs..."
-	mkdir -p $BUILD_CONFIG/osgPlugins-3.4.1
+	mkdir -p ${DLL_PREFIX}osgPlugins-3.4.1
 	for DLL in $OSG_PLUGINS; do
 		echo "    $(basename $DLL)."
-		cp "$DLL" $BUILD_CONFIG/osgPlugins-3.4.1
+		cp "$DLL" ${DLL_PREFIX}osgPlugins-3.4.1
 	done
 	echo
 	echo "- Qt Platform DLLs..."
-	mkdir -p ${BUILD_CONFIG}/platforms
+	mkdir -p ${DLL_PREFIX}platforms
 	for DLL in $QT_PLATFORMS; do
 		echo "    $(basename $DLL)"
-		cp "$DLL" "${BUILD_CONFIG}/platforms"
+		cp "$DLL" "${DLL_PREFIX}platforms"
 	done
 	echo
 #fi
