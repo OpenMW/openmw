@@ -656,12 +656,6 @@ if (WIN32)
       set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:WINDOWS")
     endif()
 
-    if (BUILD_OPENMW)
-        # Release builds don't use the debug console
-        set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-        set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
-    endif()
-
     # Play a bit with the warning levels
 
     set(WARNINGS "/Wall") # Since windows can only disable specific warnings, not enable them
