@@ -114,7 +114,7 @@ EOF
 	done
 done
 
-if [ -n $NMAKE ]; then
+if [ -n "$NMAKE" ]; then
 	command -v nmake -? >/dev/null 2>&1 || { echo "Error: nmake (NMake) is not on the path. Make sure you have the necessary environment variables set for command-line C++ development (for example, by starting from a Developer Command Prompt)."; exit 1; }
 fi
 
@@ -312,13 +312,13 @@ if [ ${BITS} -eq 64 ]; then
 	GENERATOR="${GENERATOR} Win64"
 fi
 
-if [ -n $NMAKE ]; then
+if [ -n "$NMAKE" ]; then
 	GENERATOR="NMake Makefiles"
 fi
 
 add_cmake_opts "-G\"$GENERATOR\""
 
-if [ -n $NMAKE ]; then
+if [ -n "$NMAKE" ]; then
 	add_cmake_opts "-DCMAKE_BUILD_TYPE=${BUILD_CONFIG}"
 fi
 
@@ -402,7 +402,7 @@ cd .. #/..
 # Set up dependencies
 BUILD_DIR="MSVC${MSVC_DISPLAY_YEAR}_${BITS}"
 
-if [ -n $NMAKE ]; then
+if [ -n "$NMAKE" ]; then
 	BUILD_DIR="${BUILD_DIR}_NMake_${BUILD_CONFIG}"
 fi
 
