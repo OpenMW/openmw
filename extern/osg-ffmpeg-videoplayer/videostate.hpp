@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <vector>
 #include <memory>
+#include <string>
 
 #include <OpenThreads/Thread>
 #include <OpenThreads/Mutex>
