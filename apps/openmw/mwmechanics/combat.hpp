@@ -15,8 +15,7 @@ bool blockMeleeAttack (const MWWorld::Ptr& attacker, const MWWorld::Ptr& blocker
 /// @return does normal weapon resistance and weakness apply to the weapon?
 bool isNormalWeapon (const MWWorld::Ptr& weapon);
 
-/// @return was the damage fully resisted?
-bool resistNormalWeapon (const MWWorld::Ptr& actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float& damage);
+void resistNormalWeapon (const MWWorld::Ptr& actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float& damage);
 
 void applyWerewolfDamageMult (const MWWorld::Ptr& actor, const MWWorld::Ptr& weapon, float &damage);
 
