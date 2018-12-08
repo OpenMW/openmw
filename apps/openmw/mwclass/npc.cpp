@@ -621,6 +621,7 @@ namespace MWClass
             }
             MWMechanics::adjustWeaponDamage(damage, weapon, ptr);
             resisted = MWMechanics::resistNormalWeapon(victim, ptr, weapon, damage);
+            MWMechanics::applyWerewolfDamageMult(victim, weapon, damage);
             MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
             healthdmg = true;
         }

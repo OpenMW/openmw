@@ -163,23 +163,28 @@ namespace MWMechanics
 
     bool resistNormalWeapon(const MWWorld::Ptr &actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr &weapon, float &damage)
     {
-        if (damage == 0)
+        if (damage == 0 || weapon.isEmpty() || !isNormalWeapon(weapon))
             return false;
 
-        if (isNormalWeapon(weapon))
-        {
-            const MWMechanics::MagicEffects& effects = actor.getClass().getCreatureStats(actor).getMagicEffects();
-            const float resistance = effects.get(ESM::MagicEffect::ResistNormalWeapons).getMagnitude() / 100.f;
-            const float weakness = effects.get(ESM::MagicEffect::WeaknessToNormalWeapons).getMagnitude() / 100.f;
+        const MWMechanics::MagicEffects& effects = actor.getClass().getCreatureStats(actor).getMagicEffects();
+        const float resistance = effects.get(ESM::MagicEffect::ResistNormalWeapons).getMagnitude() / 100.f;
+        const float weakness = effects.get(ESM::MagicEffect::WeaknessToNormalWeapons).getMagnitude() / 100.f;
 
-            damage *= 1.f - std::min(1.f, resistance-weakness);
-        }
-
-        if ((weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver)
-                && actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
-            damage *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWereWolfSilverWeaponDamageMult")->mValue.getFloat();
+        damage *= 1.f - std::min(1.f, resistance-weakness);
 
         return (damage == 0);
+    }
+
+    void applyWerewolfDamageMult(const MWWorld::Ptr &actor, const MWWorld::Ptr &weapon, float &damage)
+    {
+        if (damage == 0 || weapon.isEmpty())
+            return;
+
+        const int &flags = weapon.get<ESM::Weapon>()->mBase->mData.mFlags;
+        bool isSilver = flags & ESM::Weapon::Silver;
+
+        if (isSilver && actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
+            damage *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWereWolfSilverWeaponDamageMult")->mValue.getFloat();
     }
 
     void projectileHit(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, MWWorld::Ptr weapon, const MWWorld::Ptr& projectile,
@@ -219,6 +224,7 @@ namespace MWMechanics
 
             adjustWeaponDamage(damage, weapon, attacker);
             bool resisted = resistNormalWeapon(victim, attacker, projectile, damage);
+            applyWerewolfDamageMult(victim, projectile, damage);
 
             if (attacker == getPlayer())
             {

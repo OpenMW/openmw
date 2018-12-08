@@ -78,7 +78,10 @@ namespace MWMechanics
         adjustWeaponDamage(rating, item, actor);
 
         if (weapon->mData.mType != ESM::Weapon::MarksmanBow && weapon->mData.mType != ESM::Weapon::MarksmanCrossbow)
+        {
             resistNormalWeapon(enemy, actor, item, rating);
+            applyWerewolfDamageMult(enemy, item, rating);
+        }
         else if (weapon->mData.mType == ESM::Weapon::MarksmanBow)
         {
             if (arrowRating <= 0.f)

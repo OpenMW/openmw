@@ -18,6 +18,8 @@ bool isNormalWeapon (const MWWorld::Ptr& weapon);
 /// @return was the damage fully resisted?
 bool resistNormalWeapon (const MWWorld::Ptr& actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float& damage);
 
+void applyWerewolfDamageMult (const MWWorld::Ptr& actor, const MWWorld::Ptr& weapon, float &damage);
+
 /// @note for a thrown weapon, \a weapon == \a projectile, for bows/crossbows, \a projectile is the arrow/bolt
 /// @note \a victim may be empty (e.g. for a hit on terrain), a non-actor (environment objects) or an actor
 void projectileHit (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, MWWorld::Ptr weapon, const MWWorld::Ptr& projectile,
