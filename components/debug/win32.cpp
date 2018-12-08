@@ -22,7 +22,7 @@ bool attachParentConsole()
     if (AttachConsole(ATTACH_PARENT_PROCESS))
     {
         // start with consistent state
-        fflush(stdin);
+        fflush(stdout);
         fflush(stderr);
         std::cout.flush();
         std::cerr.flush();
@@ -34,7 +34,7 @@ bool attachParentConsole()
         _wfreopen(L"CON", L"r", stdin);
         freopen("CON", "w", stdout);
         freopen("CON", "w", stderr);
-        freopen("CON", "w", stderr);
+        freopen("CON", "r", stdin);
 
         // it can be verified that input/output works as expected.
 #if 0
