@@ -148,28 +148,38 @@ namespace MWMechanics
         return false;
     }
 
-    void resistNormalWeapon(const MWWorld::Ptr &actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr &weapon, float &damage)
+    bool isNormalWeapon(const MWWorld::Ptr &weapon)
     {
-        const MWMechanics::MagicEffects& effects = actor.getClass().getCreatureStats(actor).getMagicEffects();
-        float resistance = std::min(100.f, effects.get(ESM::MagicEffect::ResistNormalWeapons).getMagnitude()
-                - effects.get(ESM::MagicEffect::WeaknessToNormalWeapons).getMagnitude());
+        if (weapon.isEmpty())
+            return false;
 
-        float multiplier = 1.f - resistance / 100.f;
+        const int &flags = weapon.get<ESM::Weapon>()->mBase->mData.mFlags;
+        bool isSilver = flags & ESM::Weapon::Silver;
+        bool isMagical = flags & ESM::Weapon::Magical;
+        bool isEnchanted = !weapon.getClass().getEnchantment(weapon).empty();
 
-        if (!(weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver
-              || weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Magical))
+        return !isSilver && !isMagical && (!isEnchanted || !Settings::Manager::getBool("enchanted weapons are magical", "Game"));
+    }
+
+    bool resistNormalWeapon(const MWWorld::Ptr &actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr &weapon, float &damage)
+    {
+        if (damage == 0)
+            return false;
+
+        if (isNormalWeapon(weapon))
         {
-            if (weapon.getClass().getEnchantment(weapon).empty()
-              || !Settings::Manager::getBool("enchanted weapons are magical", "Game"))
-                damage *= multiplier;
+            const MWMechanics::MagicEffects& effects = actor.getClass().getCreatureStats(actor).getMagicEffects();
+            const float resistance = effects.get(ESM::MagicEffect::ResistNormalWeapons).getMagnitude() / 100.f;
+            const float weakness = effects.get(ESM::MagicEffect::WeaknessToNormalWeapons).getMagnitude() / 100.f;
+
+            damage *= 1.f - std::min(1.f, resistance-weakness);
         }
 
         if ((weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver)
                 && actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
             damage *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWereWolfSilverWeaponDamageMult")->mValue.getFloat();
 
-        if (damage == 0 && attacker == getPlayer())
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResistsWeapons}");
+        return (damage == 0);
     }
 
     void projectileHit(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, MWWorld::Ptr weapon, const MWWorld::Ptr& projectile,
@@ -208,9 +218,13 @@ namespace MWMechanics
             damage += attack[0] + ((attack[1] - attack[0]) * attackStrength);
 
             adjustWeaponDamage(damage, weapon, attacker);
+            bool resisted = resistNormalWeapon(victim, attacker, projectile, damage);
 
             if (attacker == getPlayer())
             {
+                if (resisted)
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResistsWeapons}");
+
                 attacker.getClass().skillUsageSucceeded(attacker, weaponSkill, 0);
                 const MWMechanics::AiSequence& sequence = victim.getClass().getCreatureStats(victim).getAiSequence();
 
