@@ -3,6 +3,8 @@
 #include <components/files/escape.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/debug/debugging.hpp>
+#include <components/config/launchersettings.hpp>
+
 
 #include "engine.hpp"
 
@@ -131,7 +133,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("export-fonts", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "Export Morrowind .fnt fonts to PNG image and XML file in current directory")
 
-        ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
+        ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override")
+    
+        ("set-contentlist", bpo::value<Files::EscapeHashString>()->default_value(""), "select a file containing a list of console commands that is executed on startup");
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
         .options(desc).allow_unregistered().run();
@@ -231,6 +235,11 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
     engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
     engine.enableFontExport(variables["export-fonts"].as<bool>());
+    
+    QString qstr = QString::fromStdString(variables["set-contentlist"].as<Files::EscapeHashString>().toStdString());
+    
+    Config::LauncherSettings Settings;
+    Settings.setCurrentContentListName(qstr);
 
     return true;
 }
