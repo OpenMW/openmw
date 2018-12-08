@@ -119,6 +119,12 @@ namespace SceneUtil
         else
             definesWithShadows["useShadowDebugOverlay"] = "0";
 
+        // switch this to reading settings if it's ever exposed to the user
+        if (mShadowSettings->getShadowMapProjectionHint() == ShadowSettings::PERSPECTIVE_SHADOW_MAP)
+            definesWithShadows["perspectiveShadowMaps"] = "1";
+        else
+            definesWithShadows["perspectiveShadowMaps"] = "0";
+
         return definesWithShadows;
     }
 
@@ -131,6 +137,8 @@ namespace SceneUtil
         definesWithShadows["shadowMapsOverlap"] = "0";
 
         definesWithShadows["useShadowDebugOverlay"] = "0";
+
+        definesWithShadows["perspectiveShadowMaps"] = "0";
 
         return definesWithShadows;
     }

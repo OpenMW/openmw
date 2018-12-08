@@ -4,6 +4,11 @@
     @foreach shadow_texture_unit_index @shadow_texture_unit_list
         uniform int shadowTextureUnit@shadow_texture_unit_index;
         varying vec4 shadowSpaceCoords@shadow_texture_unit_index;
+
+#if @perspectiveShadowMaps
+        uniform mat4 validRegionMatrix@shadow_texture_unit_index;
+        varying vec4 shadowRegionCoords@shadow_texture_unit_index;
+#endif
     @endforeach
 #endif // SHADOWS
 
@@ -15,6 +20,10 @@ void setupShadowCoords(vec4 viewPos)
     @foreach shadow_texture_unit_index @shadow_texture_unit_list
         eyePlaneMat = mat4(gl_EyePlaneS[shadowTextureUnit@shadow_texture_unit_index], gl_EyePlaneT[shadowTextureUnit@shadow_texture_unit_index], gl_EyePlaneR[shadowTextureUnit@shadow_texture_unit_index], gl_EyePlaneQ[shadowTextureUnit@shadow_texture_unit_index]);
         shadowSpaceCoords@shadow_texture_unit_index = viewPos * eyePlaneMat;
+
+#if @perspectiveShadowMaps
+        shadowRegionCoords@shadow_texture_unit_index = validRegionMatrix@shadow_texture_unit_index * viewPos;
+#endif
     @endforeach
 #endif // SHADOWS
 }

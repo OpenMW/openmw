@@ -1315,6 +1315,29 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
             if (!orthographicViewFrustum && settings->getShadowMapProjectionHint()==ShadowSettings::PERSPECTIVE_SHADOW_MAP)
             {
+                {
+                    osg::Matrix validRegionMatrix = cv.getCurrentCamera()->getInverseViewMatrix() *  camera->getViewMatrix() * camera->getProjectionMatrix();
+
+                    std::string validRegionUniformName = "validRegionMatrix" + std::to_string(sm_i);
+                    osg::ref_ptr<osg::Uniform> validRegionUniform;
+
+                    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_accessUniformsAndProgramMutex);
+
+                    for (auto uniform : _uniforms)
+                    {
+                        if (uniform->getName() == validRegionUniformName)
+                            validRegionUniform = uniform;
+                    }
+
+                    if (!validRegionUniform)
+                    {
+                        validRegionUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, validRegionUniformName);
+                        _uniforms.push_back(validRegionUniform);
+                    }
+
+                    validRegionUniform->set(validRegionMatrix);
+                }
+
                 if (settings->getMultipleShadowMapHint() == ShadowSettings::CASCADED)
                     adjustPerspectiveShadowMapCameraSettings(vdsmCallback->getRenderStage(), frustum, pl, camera.get(), cascaseNear, cascadeFar);
                 else
