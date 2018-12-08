@@ -256,7 +256,14 @@ set(USED_OSG_PLUGINS
                     osgdb_tga
                   )
 
-get_filename_component(OSG_LIB_DIR ${OSGDB_LIBRARY} DIRECTORY)
+if(OSGDB_LIBRARY_DEBUG)
+    set(osgdb-libpath "${OSGDB_LIBRARY_DEBUG}")
+elseif(OSGDB_LIBRARY_RELEASE)
+    set(osgdb-libpath "${OSGDB_LIBRARY_RELEASE}")
+else()
+    set(osgdb-libpath "${OSGDB_LIBRARY}")
+endif()
+get_filename_component(OSG_LIB_DIR ${osgdb-libpath} DIRECTORY)
 set(OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
 
 if(OSG_STATIC)
