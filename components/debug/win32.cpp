@@ -1,3 +1,5 @@
+#ifdef _WIN32
+
 #include "win32.hpp"
 
 #undef  _CRT_SECURE_NO_WARNINGS
@@ -54,3 +56,5 @@ bool attachParentConsole()
 }
 
 } // ns Debug
+
+#endif
