@@ -9,6 +9,9 @@
 #include <SDL_messagebox.h>
 
 #include "debuglog.hpp"
+#if defined _WIN32
+#   include "win32.hpp"
+#endif
 
 namespace Debug
 {

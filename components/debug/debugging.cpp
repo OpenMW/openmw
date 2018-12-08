@@ -52,6 +52,11 @@ namespace Debug
 
 int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, char *argv[], const std::string& appName)
 {
+#if defined _WIN32
+    // grab a console window if we don't have one
+    (void)Debug::attachParentConsole();
+#endif
+
     // Some objects used to redirect cout and cerr
     // Scope must be here, so this still works inside the catch block for logging exceptions
     std::streambuf* cout_rdbuf = std::cout.rdbuf ();
