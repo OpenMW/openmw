@@ -14,18 +14,10 @@ namespace Gui
         virtual void setFontName(const std::string& name)
         {
             T::setFontName(name);
-            T::setPropertyOverride ("FontHeight", mFontSize);
+            T::setPropertyOverride ("FontHeight", getFontSize());
         }
 
     protected:
-        FontWrapper()
-        {
-            // Note: we can not use the WindowManager here, so there is a code duplication a bit.
-            int fontSize = Settings::Manager::getInt("font size", "GUI");
-            fontSize = std::min(std::max(12, fontSize), 20);
-            mFontSize = std::to_string(fontSize);
-        }
-
         virtual void setPropertyOverride(const std::string& _key, const std::string& _value)
         {
             T::setPropertyOverride (_key, _value);
@@ -34,11 +26,22 @@ namespace Gui
             // We should restore it.
             if (_key == "FontName")
             {
-                T::setPropertyOverride ("FontHeight", mFontSize);
+                T::setPropertyOverride ("FontHeight", getFontSize());
             }
         }
 
-        std::string mFontSize;
+    private:
+        static int clamp(const int& value, const int& lowBound, const int& highBound)
+        {
+            return std::min(std::max(lowBound, value), highBound);
+        }
+
+        std::string getFontSize()
+        {
+            // Note: we can not use the WindowManager here, so there is a code duplication a bit.
+            static const std::string fontSize = std::to_string(clamp(Settings::Manager::getInt("font size", "GUI"), 12, 20));
+            return fontSize;
+        }
     };
 }
 
