@@ -2,6 +2,7 @@
 #define OPENMW_MWPHYSICS_PHYSICSSYSTEM_H
 
 #include <memory>
+#include <mutex>
 #include <map>
 #include <set>
 #include <algorithm>
@@ -191,6 +192,8 @@ namespace MWPhysics
 
             void updateWater();
 
+            void solveTask(int offset, int module, int numSteps);
+
             osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
             btBroadphaseInterface* mBroadphase;
@@ -238,9 +241,12 @@ namespace MWPhysics
             osg::ref_ptr<osg::Group> mParentNode;
 
             float mPhysicsDt;
+            int mNumThreads;
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);
+
+            mutable std::mutex mMutex;
     };
 }
 

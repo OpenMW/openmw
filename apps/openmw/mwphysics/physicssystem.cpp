@@ -1,5 +1,7 @@
 ﻿#include "physicssystem.hpp"
 
+#include <thread>
+
 #include <osg/Group>
 
 #include <BulletCollision/CollisionShapes/btConeShape.h>
@@ -19,6 +21,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/misc/constants.hpp>
+#include <components/settings/settings.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 #include <components/misc/convert.hpp>
@@ -270,7 +273,7 @@ namespace MWPhysics
 
         static osg::Vec3f move(osg::Vec3f position, const MWWorld::Ptr &ptr, Actor* physicActor, const osg::Vec3f &movement, float time,
                                   bool isFlying, float waterlevel, float slowFall, const btCollisionWorld* collisionWorld,
-                               std::map<MWWorld::Ptr, MWWorld::Ptr>& standingCollisionTracker)
+                               std::map<MWWorld::Ptr, MWWorld::Ptr>& standingCollisionTracker, std::mutex& mutex)
         {
             const ESM::Position& refpos = ptr.getRefData().getPosition();
             // Early-out for totally static creatures
@@ -444,7 +447,11 @@ namespace MWPhysics
                     const btCollisionObject* standingOn = tracer.mHitObject;
                     PtrHolder* ptrHolder = static_cast<PtrHolder*>(standingOn->getUserPointer());
                     if (ptrHolder)
+                    {
+                        mutex.lock();
                         standingCollisionTracker[ptr] = ptrHolder->getPtr();
+                        mutex.unlock();
+                    }
 
                     if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
                         physicActor->setWalkingOnWater(true);
@@ -511,6 +518,7 @@ namespace MWPhysics
         , mWaterEnabled(false)
         , mParentNode(parentNode)
         , mPhysicsDt(1.f / 60.f)
+        , mNumThreads(Settings::Manager::getInt("num threads", "Physics"))
     {
         mResourceSystem->addResourceManager(mShapeManager.get());
 
@@ -1246,11 +1254,42 @@ namespace MWPhysics
             mStandingCollisions.clear();
         }
 
+        if (mNumThreads > 1)
+        {
+            int currentThread = 0;
+            std::vector<std::thread> threads(mNumThreads);
+            for(auto&& thread : threads)
+            {
+                thread = std::thread(&PhysicsSystem::solveTask, this, currentThread, mNumThreads, numSteps);
+                currentThread++;
+            }
+
+            for(auto&& thread : threads)
+            {
+                thread.join();
+            }
+        }
+        else
+            solveTask(0, 1, numSteps);
+
+
+        mMovementQueue.clear();
+
+        return mMovementResults;
+    }
+
+    void PhysicsSystem::solveTask(int offset, int module, int numSteps)
+    {
+        int i = 0;
         const MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         PtrVelocityList::iterator iter = mMovementQueue.begin();
         for(;iter != mMovementQueue.end();++iter)
         {
+            i++;
+            if (i % module != offset)
+                continue;
+
             ActorMap::iterator foundActor = mActors.find(iter->first);
             if (foundActor == mActors.end()) // actor was already removed from the scene
                 continue;
@@ -1290,13 +1329,17 @@ namespace MWPhysics
             for (int i=0; i<numSteps; ++i)
             {
                 position = MovementSolver::move(position, physicActor->getPtr(), physicActor, iter->second, mPhysicsDt,
-                                                flying, waterlevel, slowFall, mCollisionWorld, mStandingCollisions);
+                                                flying, waterlevel, slowFall, mCollisionWorld, mStandingCollisions, mMutex);
                 if (position != physicActor->getPosition())
                     positionChanged = true;
                 physicActor->setPosition(position); // always set even if unchanged to make sure interpolation is correct
             }
             if (positionChanged)
+            {
+                mMutex.lock();
                 mCollisionWorld->updateSingleAabb(physicActor->getCollisionObject());
+                mMutex.unlock();
+            }
 
             float interpolationFactor = mTimeAccum / mPhysicsDt;
             osg::Vec3f interpolated = position * interpolationFactor + physicActor->getPreviousPosition() * (1.f - interpolationFactor);
@@ -1310,12 +1353,10 @@ namespace MWPhysics
             else if (heightDiff < 0)
                 stats.addToFallHeight(-heightDiff);
 
+            mMutex.lock();
             mMovementResults.push_back(std::make_pair(iter->first, interpolated));
+            mMutex.unlock();
         }
-
-        mMovementQueue.clear();
-
-        return mMovementResults;
     }
 
     void PhysicsSystem::stepSimulation(float dt)
