@@ -69,9 +69,6 @@ namespace DetourNavigator
 
             Value& operator =(Value&& other)
             {
-                if (mIterator == other.mIterator)
-                    return *this;
-
                 if (mIterator != ItemIterator())
                     mOwner->releaseItem(mIterator);
 
