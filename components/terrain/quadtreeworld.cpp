@@ -363,7 +363,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
             traverseToCell(mRootNode.get(), vd, x,y);
         }
         else
-            traverse(mRootNode.get(), vd, cv, mRootNode->getLodCallback(), cv->getEyePoint(), true);
+            traverse(mRootNode.get(), vd, cv, mRootNode->getLodCallback(), cv->getViewPoint(), true);
     }
     else
         mRootNode->traverse(nv);
