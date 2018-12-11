@@ -2,6 +2,12 @@
 
 #include <components/crashcatcher/crashcatcher.hpp>
 
+#ifdef _WIN32
+#   undef WIN32_LEAN_AND_MEAN
+#   define WIN32_LEAN_AND_MEAN
+#   include <windows.h>
+#endif
+
 namespace Debug
 {
 #ifdef _WIN32
