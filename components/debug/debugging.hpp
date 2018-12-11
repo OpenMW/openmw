@@ -9,9 +9,6 @@
 #include <SDL_messagebox.h>
 
 #include "debuglog.hpp"
-#if defined _WIN32
-#   include "win32.hpp"
-#endif
 
 namespace Debug
 {
@@ -45,6 +42,10 @@ namespace Debug
             return size;
         }
     };
+
+#ifdef _WIN32
+    bool attachParentConsole();
+#endif
 
 #if defined(_WIN32) && defined(_DEBUG)
 #ifndef WIN32_LEAN_AND_MEAN

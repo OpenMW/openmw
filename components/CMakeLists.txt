@@ -90,7 +90,7 @@ add_component_dir (misc
     )
 
 add_component_dir (debug
-    debugging debuglog win32
+    debugging debuglog
     )
 
 IF(NOT WIN32 AND NOT APPLE)
