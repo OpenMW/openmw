@@ -344,7 +344,10 @@ endif (APPLE)
 # Other files
 
 configure_resource_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
-    "${OpenMW_BINARY_DIR}" "settings-default.cfg")
+        "${OpenMW_BINARY_DIR}" "settings-default.cfg")
+
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.appdata.xml
+        "${OpenMW_BINARY_DIR}" "openmw.appdata.xml")
 
 if (NOT APPLE)
     configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
