@@ -53,7 +53,6 @@ namespace Debug
 int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, char *argv[], const std::string& appName)
 {
 #if defined _WIN32
-    // grab a console window if we don't have one
     (void)Debug::attachParentConsole();
 #endif
 
