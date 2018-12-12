@@ -769,3 +769,5 @@ if [ -z $VERBOSE ]; then
 	fi
 fi
 exit $RET
+
+# vim: noet sts=4 ts=4 sw=4
