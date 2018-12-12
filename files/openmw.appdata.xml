@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 Copyright 2015 Alexandre Moine <nobrakal@gmail.com>
-Copyright 2017 Bret Curtis <psi29a@gmail.com>
+Copyright 2018 Bret Curtis <psi29a@gmail.com>
 -->
 <component type="desktop">
  <id>org.openmw.desktop</id>
@@ -46,6 +46,6 @@ Copyright 2017 Bret Curtis <psi29a@gmail.com>
   <release version="@OPENMW_VERSION@" date="@OPENMW_VERSION_COMMITDATE@"/>
  </releases>
  <url type="homepage">https://openmw.org</url>
- <url type="bugtracker">https://bugs.openmw.org/</url>
+ <url type="bugtracker">https://gitlab.com/OpenMW/openmw/issues</url>
  <url type="faq">https://openmw.org/faq/</url>
 </component>
