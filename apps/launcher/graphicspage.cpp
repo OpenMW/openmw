@@ -1,6 +1,6 @@
 #include "graphicspage.hpp"
 
-#include <boost/math/common_factor_rt.hpp>
+#include <boost/math/common_factor.hpp>
 #include <csignal>
 #include <QDesktopWidget>
 #include <QMessageBox>
