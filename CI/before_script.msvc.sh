@@ -313,7 +313,7 @@ if [ ${BITS} -eq 64 ]; then
 fi
 
 if [ -n "$NMAKE" ]; then
-	GENERATOR="NMake Makefiles"
+	GENERATOR="CodeBlocks - NMake Makefiles"
 fi
 
 add_cmake_opts "-G\"$GENERATOR\""
