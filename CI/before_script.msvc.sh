@@ -32,6 +32,7 @@ KEEP=""
 UNITY_BUILD=""
 VS_VERSION=""
 NMAKE=""
+FORCE_GENERATOR=""
 PLATFORM=""
 CONFIGURATION=""
 
@@ -68,7 +69,12 @@ while [ $# -gt 0 ]; do
 				shift ;;
 
 			n )
-				NMAKE=true ;;
+				FORCE_GENERATOR="CodeBlocks - NMake Makefiles"
+				NMAKE=1 ;;
+
+			G )
+				FORCE_GENERATOR="$1"
+				shift ;;
 
 			p )
 				PLATFORM=$1
@@ -100,6 +106,8 @@ Options:
 		Choose the Visual Studio version to use.
 	-n
 		Produce NMake makefiles instead of a Visual Studio solution.
+	 G
+		Force using a specific CMake generator.
 	-V
 		Run verbosely
 EOF
@@ -312,13 +320,13 @@ if [ ${BITS} -eq 64 ]; then
 	GENERATOR="${GENERATOR} Win64"
 fi
 
-if [ -n "$NMAKE" ]; then
-	GENERATOR="CodeBlocks - NMake Makefiles"
+if test -n "$FORCE_GENERATOR"; then
+	GENERATOR="$FORCE_GENERATOR"
 fi
 
 add_cmake_opts "-G\"$GENERATOR\""
 
-if [ -n "$NMAKE" ]; then
+if [ -n "$FORCE_GENERATOR" ]; then
 	add_cmake_opts "-DCMAKE_BUILD_TYPE=${BUILD_CONFIG}"
 fi
 
@@ -402,7 +410,7 @@ cd .. #/..
 # Set up dependencies
 BUILD_DIR="MSVC${MSVC_DISPLAY_YEAR}_${BITS}"
 
-if [ -n "$NMAKE" ]; then
+if [ -n "$FORCE_GENERATOR" ]; then
 	BUILD_DIR="${BUILD_DIR}_NMake_${BUILD_CONFIG}"
 fi
 
@@ -716,7 +724,7 @@ fi
 #if [ -z $CI ]; then
 	echo "- Copying Runtime DLLs..."
 	DLL_PREFIX=""
-	if [ -z $NMAKE ]; then
+	if [ -z "$FORCE_GENERATOR" ]; then
 		mkdir -p $BUILD_CONFIG
 		DLL_PREFIX="$BUILD_CONFIG/"
 	fi
