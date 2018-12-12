@@ -58,6 +58,7 @@ namespace Terrain
         unsigned int mCompositeMapSize;
 
         bool mCullingActive;
+        osg::ref_ptr<osg::VertexBufferObject> _globalvbo;
     };
 
 }

@@ -29,8 +29,8 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
     , mCompositeMapRenderer(renderer)
     , mCompositeMapSize(512)
     , mCullingActive(true)
+    ,_globalvbo(new osg::VertexBufferObject)
 {
-
 }
 
 osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &center, int lod, unsigned int lodFlags)
@@ -178,10 +178,10 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
     osg::ref_ptr<osg::Vec3Array> normals (new osg::Vec3Array);
     osg::ref_ptr<osg::Vec4Array> colors (new osg::Vec4Array);
 
-    osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
-    positions->setVertexBufferObject(vbo);
-    normals->setVertexBufferObject(vbo);
-    colors->setVertexBufferObject(vbo);
+
+    positions->setVertexBufferObject(_globalvbo);
+    normals->setVertexBufferObject(_globalvbo);
+    colors->setVertexBufferObject(_globalvbo);
 
     mStorage->fillVertexBuffers(lod, chunkSize, chunkCenter, positions, normals, colors);
 
