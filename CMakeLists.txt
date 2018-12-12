@@ -309,6 +309,11 @@ if (DEFINED ENV{TRAVIS_BRANCH} OR DEFINED ENV{APPVEYOR})
     set(REQUIRED_BULLET_VERSION 283) # but for build testing, 283 is fine
 endif()
 
+if(POLICY CMP0074)
+    # don't complain when looking for Bullet
+    cmake_policy(SET CMP0074 NEW)
+endif()
+
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(MyGUI 3.2.1 REQUIRED)
 find_package(SDL2 REQUIRED)
