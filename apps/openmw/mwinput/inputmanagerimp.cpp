@@ -1173,7 +1173,7 @@ namespace MWInput
 
     void InputManager::toggleWalking()
     {
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode() || SDL_IsTextInputActive()) return;
         mAlwaysRunActive = !mAlwaysRunActive;
 
         Settings::Manager::setBool("always run", "Input", mAlwaysRunActive);
