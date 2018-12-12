@@ -246,6 +246,25 @@ endif()
 find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX)
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
+function(find_osg_lib_dir var)
+    set(ret "")
+    list(LENGTH "${OSGDB_LIBRARY}" len)
+    if(OSGDB_LIBRARY AND len EQUAL 1)
+        get_filename_component(ret "${OSGDB_LIBRARY}" DIRECTORY)
+    elseif(OSGDB_LIBRARY_DEBUG)
+        get_filename_component(ret "${OSGDB_LIBRARY_DEBUG}" DIRECTORY)
+    elseif(OSGDB_LIBRARY_RELEASE)
+        get_filename_component(ret "${OSGDB_LIBRARY_RELEASE}" DIRECTORY)
+    elseif(OSG_DIR AND DIRECTORY "${OSG_DIR}/lib")
+        set(ret "${OSG_DIR}/lib")
+    else()
+        message(FATAL_ERROR "Can't find OpenSceneGraph library directory")
+    endif()
+    set("${var}" "${ret}" PARENT_SCOPE)
+endfunction()
+
+find_osg_lib_dir(OSG_LIB_DIR)
+
 set(USED_OSG_PLUGINS
                     osgdb_bmp
                     osgdb_dds
@@ -256,7 +275,6 @@ set(USED_OSG_PLUGINS
                     osgdb_tga
                   )
 
-get_filename_component(OSG_LIB_DIR ${OSGDB_LIBRARY} DIRECTORY)
 set(OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
 
 if(OSG_STATIC)
