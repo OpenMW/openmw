@@ -277,7 +277,7 @@ void main(void)
 #endif
     // fog
 #if @accurateFog
-    float depthPassthrough = length(position.xyz - cameraPos);
+    float depthPassthrough = distance(position.xyz, cameraPos);
 #endif
     float fogValue = clamp((depthPassthrough - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz,  gl_Fog.color.xyz,  fogValue);

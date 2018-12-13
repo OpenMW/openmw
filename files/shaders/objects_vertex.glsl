@@ -33,9 +33,7 @@ varying vec2 envMapUV;
 varying vec2 specularMapUV;
 #endif
 
-#if !@accurateFog
 varying float depth;
-#endif
 
 #define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
 
@@ -52,13 +50,15 @@ varying vec3 passNormal;
 void main(void)
 {
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-#if !@accurateFog
-    depth = gl_Position.z;
-#endif
-
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_ClipVertex = viewPos;
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
+
+#if !@accurateFog
+    depth = gl_Position.z;
+#else
+    depth = length(viewPos.xyz);
+#endif
 
 #if @envMap
     vec3 viewVec = normalize(viewPos.xyz);

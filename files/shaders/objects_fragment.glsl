@@ -42,9 +42,7 @@ uniform sampler2D specularMap;
 varying vec2 specularMapUV;
 #endif
 
-#if !@accurateFog
 varying float depth;
-#endif
 
 #define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
 
@@ -78,11 +76,9 @@ void main()
     vec3 viewNormal = gl_NormalMatrix * normalize(passNormal);
 #endif
 
-#if @parallax || @accurateFog
+#if @parallax
     vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
     vec3 objectPos = (gl_ModelViewMatrixInverse * vec4(passViewPos, 1)).xyz;
-#endif
-#if @parallax
     vec3 eyeDir = normalize(cameraPos - objectPos);
     vec2 offset = getParallaxOffset(eyeDir, tbnTranspose, normalTex.a, (passTangent.w > 0) ? -1.f : 1.f);
     adjustedDiffuseUV += offset; // only offset diffuse for now, other textures are more likely to be using a completely different UV set
@@ -153,9 +149,6 @@ void main()
 
     gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos.xyz), shininess, matSpec);
 
-#if @accurateFog
-    float depth = length(objectPos - cameraPos);
-#endif
     float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
 }
