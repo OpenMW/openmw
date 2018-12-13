@@ -30,7 +30,6 @@ void MorphGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom)
     for (unsigned int i=0; i<2; ++i)
     {
         mGeometry[i] = new osg::Geometry(*mSourceGeometry, osg::CopyOp::SHALLOW_COPY);
-        mGeometry[i]->setDataVariance(osg::Object::DYNAMIC);
 
         const osg::Geometry& from = *mSourceGeometry;
         osg::Geometry& to = *mGeometry[i];
