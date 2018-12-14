@@ -59,6 +59,7 @@ set(OPENMW_VERSION_RELEASE 0)
 
 set(OPENMW_VERSION_COMMITHASH "")
 set(OPENMW_VERSION_TAGHASH "")
+set(OPENMW_VERSION_COMMITDATE "")
 
 set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
@@ -72,6 +73,14 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
         message(WARNING "Git executable not found")
     endif(GIT_FOUND)
 endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
+
+execute_process (
+        COMMAND ${GIT_EXECUTABLE} log -1 --format='%aI'
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        RESULT_VARIABLE EXITCODE3
+        OUTPUT_VARIABLE COMMITDATE
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+string(SUBSTRING ${COMMITDATE} 1 10 OPENMW_VERSION_COMMITDATE)
 
 # Macros
 include(OpenMWMacros)
@@ -345,6 +354,9 @@ endif (APPLE)
 
 configure_resource_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
     "${OpenMW_BINARY_DIR}" "settings-default.cfg")
+
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.appdata.xml
+    "${OpenMW_BINARY_DIR}" "openmw.appdata.xml")
 
 if (NOT APPLE)
     configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
