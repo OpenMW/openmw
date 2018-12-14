@@ -63,7 +63,6 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
     {
         const osg::Geometry& from = *sourceGeometry;
         mGeometry[i] = new osg::Geometry(from, osg::CopyOp::SHALLOW_COPY);
-        mGeometry[i]->setDataVariance(osg::Object::DYNAMIC);
         osg::Geometry& to = *mGeometry[i];
         to.setSupportsDisplayList(false);
         to.setUseVertexBufferObjects(true);
