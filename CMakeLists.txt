@@ -259,7 +259,7 @@ set(USED_OSG_PLUGINS
 set(OSGPlugins_LIB_DIR "")
 foreach(OSGDB_LIB ${OSGDB_LIBRARY})
 	# Skip library type names
-	if(EXISTS ${OSGDB_LIB})
+	if(EXISTS ${OSGDB_LIB} AND NOT IS_DIRECTORY ${OSGDB_LIB})
 		get_filename_component(OSG_LIB_DIR ${OSGDB_LIB} DIRECTORY)
 		list(APPEND OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
 	endif()
