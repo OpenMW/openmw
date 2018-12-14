@@ -8,6 +8,7 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -346,6 +347,33 @@ namespace MWMechanics
             sqrHeadTrackDistance = sqrDist;
             headTrackTarget = targetActor;
         }
+    }
+
+    void Actors::playIdleDialogue(const MWWorld::Ptr& actor)
+    {
+        if (!actor.getClass().isActor() || actor == getPlayer() || !MWBase::Environment::get().getSoundManager()->sayDone(actor))
+            return;
+
+        const CreatureStats &stats = actor.getClass().getCreatureStats(actor);
+        if (stats.getAiSetting(CreatureStats::AI_Hello).getModified() == 0)
+            return;
+
+        const MWMechanics::AiSequence& seq = stats.getAiSequence();
+        if (seq.isInCombat() || seq.hasPackage(AiPackage::TypeIdFollow) || seq.hasPackage(AiPackage::TypeIdEscort))
+            return;
+
+        const osg::Vec3f playerPos(getPlayer().getRefData().getPosition().asVec3());
+        const osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        if (world->isSwimming(actor) || (playerPos - actorPos).length2() >= 3000 * 3000)
+            return;
+
+        // Our implementation is not FPS-dependent unlike Morrowind's so it needs to be recalibrated. 
+        // We chose to use the chance MW would have when run at 60 FPS with the default value of the GMST.
+        const float delta = MWBase::Environment::get().getFrameDuration() * 6.f;
+        static const float fVoiceIdleOdds = world->getStore().get<ESM::GameSetting>().find("fVoiceIdleOdds")->mValue.getFloat();
+        if (Misc::Rng::rollProbability() * 10000.f < fVoiceIdleOdds * delta && world->getLOS(getPlayer(), actor))
+            MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
     }
 
     void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies, bool againstPlayer)
@@ -1408,7 +1436,10 @@ namespace MWMechanics
                         {
                             CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
                             if (isConscious(iter->first))
+                            {
                                 stats.getAiSequence().execute(iter->first, *ctrl, duration);
+                                playIdleDialogue(iter->first);
+                            }
                         }
                     }
 
