@@ -61,7 +61,9 @@ namespace MWWorld
 
             /// @note name must be lower case
             Ptr getPtr (const std::string& name);
+
             void rest (double hours);
+            void recharge (float duration);
 
             /// Get all Ptrs referencing \a name in exterior cells
             /// @note Due to the current implementation of getPtr this only supports one Ptr per cell.

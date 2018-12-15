@@ -13,6 +13,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/levelledlist.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/recharge.hpp"
 
 #include "manualref.hpp"
 #include "refdata.hpp"
@@ -114,7 +115,11 @@ void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
 
 const std::string MWWorld::ContainerStore::sGoldId = "gold_001";
 
-MWWorld::ContainerStore::ContainerStore() : mListener(nullptr), mCachedWeight (0), mWeightUpToDate (false) {}
+MWWorld::ContainerStore::ContainerStore()
+    : mListener(nullptr)
+    , mRechargingItemsUpToDate(false)
+    , mCachedWeight (0)
+    , mWeightUpToDate (false) {}
 
 MWWorld::ContainerStore::~ContainerStore() {}
 
@@ -408,6 +413,46 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const Cons
     return it;
 }
 
+void MWWorld::ContainerStore::rechargeItems(float duration)
+{
+    if (!mRechargingItemsUpToDate)
+    {
+        updateRechargingItems();
+        mRechargingItemsUpToDate = true;
+    }
+    for (TRechargingItems::iterator it = mRechargingItems.begin(); it != mRechargingItems.end(); ++it)
+    {
+        if (!MWMechanics::rechargeItem(*it->first, it->second, duration))
+            continue;
+
+        // attempt to restack when fully recharged
+        if (it->first->getCellRef().getEnchantmentCharge() == it->second)
+            it->first = restack(*it->first);
+    }
+}
+
+void MWWorld::ContainerStore::updateRechargingItems()
+{
+    mRechargingItems.clear();
+    for (ContainerStoreIterator it = begin(); it != end(); ++it)
+    {
+        const std::string& enchantmentId = it->getClass().getEnchantment(*it);
+        if (!enchantmentId.empty())
+        {
+            const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchantmentId);
+            if (!enchantment)
+            {
+                Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantmentId << "' on item " << it->getCellRef().getRefId();
+                continue;
+            }
+
+            if (enchantment->mData.mType == ESM::Enchantment::WhenUsed
+                    || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
+                mRechargingItems.emplace_back(it, static_cast<float>(enchantment->mData.mCharge));
+        }
+    }
+}
+
 int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const Ptr& actor)
 {
     int toRemove = count;
@@ -633,6 +678,7 @@ void MWWorld::ContainerStore::clear()
 void MWWorld::ContainerStore::flagAsModified()
 {
     mWeightUpToDate = false;
+    mRechargingItemsUpToDate = false;
 }
 
 float MWWorld::ContainerStore::getWeight() const

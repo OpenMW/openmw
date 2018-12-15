@@ -118,6 +118,16 @@ namespace MWWorld
             /// Repopulate mMergedRefs.
             void updateMergedRefs();
 
+            // (item, max charge)
+            typedef std::vector<std::pair<LiveCellRefBase*, float> > TRechargingItems;
+            TRechargingItems mRechargingItems;
+
+            bool mRechargingItemsUpToDate;
+
+            void updateRechargingItems();
+            void rechargeItems(float duration);
+            void checkItem(Ptr ptr);
+
             // helper function for forEachInternal
             template<class Visitor, class List>
             bool forEachImp (Visitor& visitor, List& list)
@@ -184,6 +194,7 @@ namespace MWWorld
             MWWorld::Ptr moveTo(const MWWorld::Ptr& object, MWWorld::CellStore* cellToMoveTo);
 
             void rest(double hours);
+            void recharge(float duration);
 
             /// Make a copy of the given object and insert it into this cell.
             /// @note If you get a linker error here, this means the given type can not be inserted into a cell.
