@@ -845,6 +845,20 @@ namespace MWMechanics
             return false;
     }
 
+    bool MechanicsManager::onOpen(const MWWorld::Ptr& ptr)
+    {
+        if(ptr.getClass().isActor())
+            return true;
+        else
+            return mObjects.onOpen(ptr);
+    }
+
+    void MechanicsManager::onClose(const MWWorld::Ptr& ptr)
+    {
+        if(!ptr.getClass().isActor())
+            mObjects.onClose(ptr);
+    }
+
     void MechanicsManager::persistAnimationStates()
     {
         mActors.persistAnimationStates();

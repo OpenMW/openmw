@@ -303,6 +303,8 @@ namespace MWBase
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
+            virtual void updateAnimatedCollisionShape(const MWWorld::Ptr &ptr) = 0;
+
             virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, int mask) = 0;
             ///< cast a Ray and return true if there is an object in the ray path.
 

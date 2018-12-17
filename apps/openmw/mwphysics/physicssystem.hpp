@@ -178,6 +178,8 @@ namespace MWPhysics
 
             bool isOnSolidGround (const MWWorld::Ptr& actor) const;
 
+            void updateAnimatedCollisionShape(const MWWorld::Ptr& object);
+
             template <class Function>
             void forEachAnimatedObject(Function&& function) const
             {

@@ -1363,6 +1363,13 @@ namespace MWPhysics
 #endif
     }
 
+    void PhysicsSystem::updateAnimatedCollisionShape(const MWWorld::Ptr& object)
+    {
+        ObjectMap::iterator found = mObjects.find(object);
+        if (found != mObjects.end())
+            found->second->animateCollisionShapes(mCollisionWorld);
+    }
+
     void PhysicsSystem::debugDraw()
     {
         if (mDebugDrawer.get())

@@ -1527,6 +1527,11 @@ namespace MWWorld
         mPhysics->queueObjectMovement(ptr, velocity);
     }
 
+    void World::updateAnimatedCollisionShape(const Ptr &ptr)
+    {
+        mPhysics->updateAnimatedCollisionShape(ptr);
+    }
+
     void World::doPhysics(float duration)
     {
         mPhysics->stepSimulation(duration);
