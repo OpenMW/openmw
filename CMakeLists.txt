@@ -72,15 +72,19 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
     else(GIT_FOUND)
         message(WARNING "Git executable not found")
     endif(GIT_FOUND)
-endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 
-execute_process (
-        COMMAND ${GIT_EXECUTABLE} log -1 --format='%aI'
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-        RESULT_VARIABLE EXITCODE3
-        OUTPUT_VARIABLE OPENMW_VERSION_COMMITDATE
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-string(SUBSTRING ${OPENMW_VERSION_COMMITDATE} 1 10 OPENMW_VERSION_COMMITDATE)
+    if(GIT_FOUND)
+        execute_process (
+                COMMAND ${GIT_EXECUTABLE} log -1 --format='%aI'
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                RESULT_VARIABLE EXITCODE3
+                OUTPUT_VARIABLE OPENMW_VERSION_COMMITDATE
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if(NOT EXITCODE3)
+            string(SUBSTRING ${OPENMW_VERSION_COMMITDATE} 1 10 OPENMW_VERSION_COMMITDATE)
+        endif(NOT EXITCODE3)
+    endif(GIT_FOUND)
+endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 
 # Macros
 include(OpenMWMacros)
