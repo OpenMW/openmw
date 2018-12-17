@@ -1622,11 +1622,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             }
         }
 
-        // We should reset player's idle animation in the first-person mode.
-        if (resetIdle && mPtr == player && MWBase::Environment::get().getWorld()->isFirstPerson())
-            idle = CharState_None;
-
-        // In other cases we should not break swim and sneak animations
+        // We should not break swim and sneak animations
         if (resetIdle &&
             idle != CharState_IdleSneak && idle != CharState_IdleSwim &&
             mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
