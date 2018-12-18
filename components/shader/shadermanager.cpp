@@ -104,7 +104,8 @@ namespace Shader
     osg::ref_ptr<osg::Shader> ShaderManager::getShader(const std::string &shaderTemplate, const ShaderManager::DefineMap &defines, osg::Shader::Type shaderType)
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
-
+        ShaderManager::DefineMap localdefines = defines;
+        localdefines.insert(_globaldefines.begin(), _globaldefines.end());
         // read the template if we haven't already
         TemplateMap::iterator templateIt = mShaderTemplates.find(shaderTemplate);
         if (templateIt == mShaderTemplates.end())
@@ -128,14 +129,14 @@ namespace Shader
             templateIt = mShaderTemplates.insert(std::make_pair(shaderTemplate, source)).first;
         }
 
-        ShaderMap::iterator shaderIt = mShaders.find(std::make_pair(shaderTemplate, defines));
+        ShaderMap::iterator shaderIt = mShaders.find(std::make_pair(shaderTemplate, localdefines));
         if (shaderIt == mShaders.end())
         {
             std::string shaderSource = templateIt->second;
-            if (!parseDefines(shaderSource, defines))
+            if (!parseDefines(shaderSource, localdefines))
             {
                 // Add to the cache anyway to avoid logging the same error over and over.
-                mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, defines), nullptr));
+                mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, localdefines), nullptr));
                 return nullptr;
             }
 
@@ -145,7 +146,7 @@ namespace Shader
             static unsigned int counter = 0;
             shader->setName(std::to_string(counter++));
 
-            shaderIt = mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, defines), shader)).first;
+            shaderIt = mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, localdefines), shader)).first;
         }
         return shaderIt->second;
     }

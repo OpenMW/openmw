@@ -21,7 +21,7 @@ namespace Shader
         void setShaderPath(const std::string& path);
 
         typedef std::map<std::string, std::string> DefineMap;
-
+        DefineMap& getGlobalDefines(){return _globaldefines;}
         /// Create or retrieve a shader instance.
         /// @param shaderTemplate The filename of the shader template.
         /// @param defines Define values that can be retrieved by the shader template.
@@ -49,6 +49,8 @@ namespace Shader
         ProgramMap mPrograms;
 
         OpenThreads::Mutex mMutex;
+
+        DefineMap _globaldefines;
     };
 
 }
