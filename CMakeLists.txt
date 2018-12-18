@@ -269,8 +269,14 @@ set(USED_OSG_PLUGINS
                     osgdb_tga
                   )
 
-get_filename_component(OSG_LIB_DIR ${OSGDB_LIBRARY} DIRECTORY)
-set(OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
+set(OSGPlugins_LIB_DIR "")
+foreach(OSGDB_LIB ${OSGDB_LIBRARY})
+	# Skip library type names
+	if(EXISTS ${OSGDB_LIB} AND NOT IS_DIRECTORY ${OSGDB_LIB})
+		get_filename_component(OSG_LIB_DIR ${OSGDB_LIB} DIRECTORY)
+		list(APPEND OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
+	endif()
+endforeach(OSGDB_LIB)
 
 if(OSG_STATIC)
     add_definitions(-DOSG_LIBRARY_STATIC)
@@ -823,15 +829,24 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE AND DESIRED_QT_VERSION MATCHES 5)
 
     set(ABSOLUTE_PLUGINS "")
 
+    set(OSGPlugins_DONT_FIND_DEPENDENCIES 1)
+    find_package(OSGPlugins REQUIRED COMPONENTS ${USED_OSG_PLUGINS})
+
     foreach (PLUGIN_NAME ${USED_OSG_PLUGINS})
-      set(PLUGIN_ABS "${OSGPlugins_LIB_DIR}/${PLUGIN_NAME}.so")
-      set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
+        string(TOUPPER ${PLUGIN_NAME} PLUGIN_NAME_UC)
+        if(${PLUGIN_NAME_UC}_LIBRARY_RELEASE)
+            set(PLUGIN_ABS ${${PLUGIN_NAME_UC}_LIBRARY_RELEASE})
+        elseif(${PLUGIN_NAME_UC}_LIBRARY)
+            set(PLUGIN_ABS ${${PLUGIN_NAME_UC}_LIBRARY})
+        else()
+            message(FATAL_ERROR "Can't find library file for ${PLUGIN_NAME}")
+            # We used to construct the path manually from OSGPlugins_LIB_DIR and the plugin name.
+            # Maybe that could be restored as a fallback?
+        endif()
+        set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
     endforeach ()
 
-    get_filename_component(OSG_PLUGIN_PREFIX_DIR "${OSGPlugins_LIB_DIR}" NAME)
-    if (NOT OSG_PLUGIN_PREFIX_DIR)
-      message(FATAL_ERROR "Can't get directory name for OSG plugins from '${OSGPlugins_LIB_DIR}'")
-    endif()
+    set(OSG_PLUGIN_PREFIX_DIR "osgPlugins-${OPENSCENEGRAPH_VERSION}")
 
     # installs used plugins in bundle at given path (bundle_path must be relative to ${CMAKE_INSTALL_PREFIX})
     # and returns list of install paths for all installed plugins

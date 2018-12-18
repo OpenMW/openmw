@@ -1,5 +1,6 @@
 # This module accepts the following env variable
 #  OSGPlugins_LIB_DIR - <OpenSceneGraph>/lib/osgPlugins-<X.X.X> , path to search plugins
+#  OSGPlugins_DONT_FIND_DEPENDENCIES - Set to skip also finding png, zlib and jpeg
 #
 # Once done this will define
 #  OSGPlugins_FOUND         - System has the all required components.
@@ -41,10 +42,12 @@ foreach(_library ${OSGPlugins_FIND_COMPONENTS})
     list(APPEND OSGPlugins_PROCESS_LIBS ${_component}_LIBRARY)
 endforeach()
 
-foreach(_dependency PNG ZLIB JPEG) # needed by osgdb_png or osgdb_jpeg
-    libfind_package(OSGPlugins ${_dependency})
-    set(${_dependency}_LIBRARY_OPTS ${_dependency}_LIBRARY)
-    #list(APPEND OSGPlugins_PROCESS_LIBS ${_dependency}_LIBRARY)
-endforeach()
+if(NOT DEFINED OSGPlugins_DONT_FIND_DEPENDENCIES)
+    foreach(_dependency PNG ZLIB JPEG) # needed by osgdb_png or osgdb_jpeg
+        libfind_package(OSGPlugins ${_dependency})
+        set(${_dependency}_LIBRARY_OPTS ${_dependency}_LIBRARY)
+        #list(APPEND OSGPlugins_PROCESS_LIBS ${_dependency}_LIBRARY)
+    endforeach()
+endif()
 
 libfind_process(OSGPlugins)
