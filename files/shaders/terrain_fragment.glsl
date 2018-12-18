@@ -26,6 +26,7 @@ varying vec3 passNormal;
 
 #include "lighting.glsl"
 #include "parallax.glsl"
+#include "shadows_fragment.glsl"
 
 void main()
 {
@@ -64,12 +65,13 @@ void main()
     gl_FragData[0].a *= texture2D(blendMap, blendMapUV).a;
 #endif
 
+    float shadowing = unshadowedLightRatio();
 #if !PER_PIXEL_LIGHTING
     gl_FragData[0] *= lighting;
 #else
     gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor);
 #endif
-
+    gl_FragData[0].xyz*=(shadowing+ambientBias.y);
 #if @specularMap
     float shininess = 128; // TODO: make configurable
     vec3 matSpec = vec3(diffuseTex.a, diffuseTex.a, diffuseTex.a);
@@ -78,7 +80,7 @@ void main()
     vec3 matSpec = gl_FrontMaterial.specular.xyz;
 #endif
 
-    gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos), shininess, matSpec);
+    gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos), shininess, matSpec)*(shadowing+ambientBias.y);
 
     float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);

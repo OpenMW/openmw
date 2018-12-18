@@ -57,6 +57,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "sky.hpp"
+#include "shadow.hpp"
 #include "effectmanager.hpp"
 #include "npcanimation.hpp"
 #include "vismask.hpp"
@@ -261,12 +262,11 @@ namespace MWRender
         int shadowCastingTraversalMask = Mask_Scene | Mask_Actor| Mask_Player;
         int indoorShadowCastingTraversalMask = shadowCastingTraversalMask;
 
-        sceneRoot->addChild(scenegroup);
+        mShadowManager.reset(new ShadowManager( sceneRoot, scenegroup , shadowCastingTraversalMask, indoorShadowCastingTraversalMask, mResourceSystem->getSceneManager()->getShaderManager()));
 
         mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
         mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
         mPathgrid.reset(new Pathgrid(mRootNode));
-
 
         if (getenv("OPENMW_DONT_PRECOMPILE") == nullptr)
         {

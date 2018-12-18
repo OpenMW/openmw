@@ -19,7 +19,7 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    actors objects renderingmanager animation rotatecontroller sky npcanimation vismask
+    actors objects renderingmanager animation rotatecontroller sky shadow npcanimation vismask
     creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation
     bulletdebugdraw globalmap characterpreview camera localmap water terrainstorage ripplesimulation
     renderbin actoranimation landmanager navmesh actorspaths
@@ -125,6 +125,7 @@ target_link_libraries(openmw
     ${OSGUTIL_LIBRARIES}
     ${OSGDB_LIBRARIES}
     ${OSGVIEWER_LIBRARIES}
+    ${OSGSHADOW_LIBRARIES}
     ${OSGGA_LIBRARIES}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_THREAD_LIBRARY}

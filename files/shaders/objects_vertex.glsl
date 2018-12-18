@@ -45,6 +45,7 @@ centroid varying vec4 passColor;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
+#include "shadows_vertex.glsl"
 #include "lighting.glsl"
 
 void main(void)
@@ -99,4 +100,6 @@ void main(void)
 #endif
     passViewPos = viewPos.xyz;
     passNormal = gl_Normal.xyz;
+
+    setupShadowCoords(viewPos);
 }

@@ -70,6 +70,7 @@ namespace MWRender
 
     class EffectManager;
     class SkyManager;
+    class ShadowManager;
     class NpcAnimation;
     class Pathgrid;
     class Camera;
@@ -264,6 +265,7 @@ namespace MWRender
         std::unique_ptr<Terrain::World> mTerrain;
         TerrainStorage* mTerrainStorage;
         std::unique_ptr<SkyManager> mSky;
+        std::unique_ptr<ShadowManager> mShadowManager;
         std::unique_ptr<EffectManager> mEffectManager;
         osg::ref_ptr<NpcAnimation> mPlayerAnimation;
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mPlayerNode;
