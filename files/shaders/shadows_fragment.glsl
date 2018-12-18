@@ -31,7 +31,8 @@ float unshadowedLightRatio()
         if(@num_pssm_texture >3) map0[3] =  step(zShadow2,testZ)*step(testZ, zShadow3);
         if(@num_pssm_texture >4) map0[4] =  step(zShadow3,testZ)*step(testZ, zShadow4);
 
-	float term=0;  
+        float term=0.0;
+
         float shadowOrg0 = shadow2D( shadowTexture0, gl_TexCoord[@texture_offset +0].xyz+vec3(0.0,0.0,fZOffSet) ).r;
         float shadow00 = shadow2D( shadowTexture0, gl_TexCoord[@texture_offset +0].xyz+vec3(-fTexelSize,-fTexelSize,fZOffSet) ).r;
         float shadow10 = shadow2D( shadowTexture0, gl_TexCoord[@texture_offset +0].xyz+vec3(fTexelSize,-fTexelSize,fZOffSet) ).r;
