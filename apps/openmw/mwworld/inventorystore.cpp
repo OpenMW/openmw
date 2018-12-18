@@ -150,7 +150,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
     }
 
     if (mListener)
-        mListener->itemAdded(itemPtr, count);
+        mListener->itemAdded(*retVal, count);
 
     return retVal;
 }

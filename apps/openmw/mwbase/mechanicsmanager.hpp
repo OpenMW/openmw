@@ -237,6 +237,9 @@ namespace MWBase
 
             virtual float getActorsProcessingRange() const = 0;
 
+            virtual bool onOpen(const MWWorld::Ptr& ptr) = 0;
+            virtual void onClose(const MWWorld::Ptr& ptr) = 0;
+
             /// Check if the target actor was detected by an observer
             /// If the observer is a non-NPC, check all actors in AI processing distance as observers
             virtual bool isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer) = 0;

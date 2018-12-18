@@ -14,9 +14,11 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 
+#ifndef Q_MOC_RUN
 #include "scenetool.hpp"
 
 #include "../../model/doc/document.hpp"
+#endif
 
 class QTableWidget;
 

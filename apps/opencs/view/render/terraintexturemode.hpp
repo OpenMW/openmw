@@ -8,6 +8,7 @@
 #include <QWidget>
 #include <QEvent>
 
+#ifndef Q_MOC_RUN
 #include "../../model/world/data.hpp"
 #include "../../model/world/land.hpp"
 
@@ -15,6 +16,7 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/landtexture.hpp"
+#endif
 
 namespace CSVWidget
 {

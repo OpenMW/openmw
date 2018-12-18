@@ -259,6 +259,9 @@ public:
 
     void update(float duration, bool animationOnly=false);
 
+    bool onOpen();
+    void onClose();
+
     void persistAnimationState();
     void unpersistAnimationState();
 

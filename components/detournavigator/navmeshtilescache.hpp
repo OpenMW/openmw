@@ -56,12 +56,12 @@ namespace DetourNavigator
             Value(Value&& other)
                 : mOwner(other.mOwner), mIterator(other.mIterator)
             {
-                other.mIterator = ItemIterator();
+                other.mOwner = nullptr;
             }
 
             ~Value()
             {
-                if (mIterator != ItemIterator())
+                if (mOwner)
                     mOwner->releaseItem(mIterator);
             }
 
@@ -69,16 +69,13 @@ namespace DetourNavigator
 
             Value& operator =(Value&& other)
             {
-                if (mIterator == other.mIterator)
-                    return *this;
-
-                if (mIterator != ItemIterator())
+                if (mOwner)
                     mOwner->releaseItem(mIterator);
 
                 mOwner = other.mOwner;
                 mIterator = other.mIterator;
 
-                other.mIterator = ItemIterator();
+                other.mOwner = nullptr;
 
                 return *this;
             }
@@ -90,7 +87,7 @@ namespace DetourNavigator
 
             operator bool() const
             {
-                return mIterator != ItemIterator();
+                return mOwner;
             }
 
         private:

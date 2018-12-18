@@ -81,5 +81,4 @@ moc_*.cxx
 *ui_playpage.h
 *.[ao]
 *.so
-openmw.appdata.xml
 venv/

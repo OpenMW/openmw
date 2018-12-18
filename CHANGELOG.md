@@ -8,9 +8,14 @@
     Bug #4715: "Cannot get class of an empty object" exception after pressing ESC in the dialogue mode
     Bug #4720: Inventory avatar has shield with two-handed weapon during [un]equipping animation
     Bug #4723: ResetActors command works incorrectly
+    Bug #4745: Editor: Interior cell lighting field values are not displayed as colors
+    Bug #4746: Non-solid player can't run or sneak
+    Bug #4750: Sneaking doesn't work in first person view if the player is in attack ready state
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
+    Feature #3610: Option to invert X axis
     Feature #4673: Weapon sheathing
+    Feature #4730: Native animated containers support
     Task #4686: Upgrade media decoder to a more current FFmpeg API
 
 0.45.0

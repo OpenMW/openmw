@@ -94,6 +94,20 @@ meaning that it should remain set at 1.0 unless the player desires to have diffe
 
 This setting can only be configured by editing the settings configuration file.
 
+invert x axis
+-------------
+
+:Type:      boolean
+:Range:     True/False
+:Default:   False
+
+
+Invert the horizontal axis while not in GUI mode.
+If this setting is true, moving the mouse to the left will cause the view to rotate counter-clockwise,
+while moving it to the right will cause the view to rotate clockwise. This setting does not affect cursor movement in GUI mode.
+
+This setting can be toggled in game with the Invert X Axis button in the Controls panel of the Options menu.
+
 invert y axis
 -------------
 

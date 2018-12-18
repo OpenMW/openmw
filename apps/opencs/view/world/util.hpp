@@ -6,8 +6,11 @@
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
 
+
+#ifndef Q_MOC_RUN
 #include "../../model/world/columnbase.hpp"
 #include "../../model/doc/document.hpp"
+#endif
 
 class QUndoStack;
 

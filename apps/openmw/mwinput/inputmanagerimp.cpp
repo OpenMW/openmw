@@ -52,6 +52,7 @@ namespace MWInput
         , mUserFile(userFile)
         , mDragDrop(false)
         , mGrabCursor (Settings::Manager::getBool("grab cursor", "Input"))
+        , mInvertX (Settings::Manager::getBool("invert x axis", "Input"))
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
         , mControlsDisabled(false)
         , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
@@ -467,7 +468,7 @@ namespace MWInput
                 float rot[3];
                 rot[0] = yAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
                 rot[1] = 0.0f;
-                rot[2] = xAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f);
+                rot[2] = xAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertX ? -1 : 1);
 
                 // Only actually turn player when we're not in vanity mode
                 if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
@@ -646,6 +647,9 @@ namespace MWInput
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
         it != changed.end(); ++it)
         {
+            if (it->first == "Input" && it->second == "invert x axis")
+                mInvertX = Settings::Manager::getBool("invert x axis", "Input");
+
             if (it->first == "Input" && it->second == "invert y axis")
                 mInvertY = Settings::Manager::getBool("invert y axis", "Input");
 
@@ -827,7 +831,7 @@ namespace MWInput
         {
             resetIdleTime();
 
-            float x = arg.xrel * mCameraSensitivity * (1.0f/256.f);
+            float x = arg.xrel * mCameraSensitivity * (1.0f/256.f) * (mInvertX ? -1 : 1);
             float y = arg.yrel * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
 
             float rot[3];
@@ -1169,7 +1173,7 @@ namespace MWInput
 
     void InputManager::toggleWalking()
     {
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode() || SDL_IsTextInputActive()) return;
         mAlwaysRunActive = !mAlwaysRunActive;
 
         Settings::Manager::setBool("always run", "Input", mAlwaysRunActive);

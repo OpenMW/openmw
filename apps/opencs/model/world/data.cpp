@@ -326,11 +326,11 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
         new NestedChildColumn (Columns::ColumnId_Interior, ColumnBase::Display_Boolean,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
     mCells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Ambient, ColumnBase::Display_Integer));
+        new NestedChildColumn (Columns::ColumnId_Ambient, ColumnBase::Display_Colour));
     mCells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Sunlight, ColumnBase::Display_Integer));
+        new NestedChildColumn (Columns::ColumnId_Sunlight, ColumnBase::Display_Colour));
     mCells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Fog, ColumnBase::Display_Integer));
+        new NestedChildColumn (Columns::ColumnId_Fog, ColumnBase::Display_Colour));
     mCells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_FogDensity, ColumnBase::Display_Float));
     mCells.getNestableColumn(index)->addColumn(
