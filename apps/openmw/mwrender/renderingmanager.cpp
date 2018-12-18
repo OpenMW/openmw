@@ -219,7 +219,7 @@ namespace MWRender
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
-        resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders"));
+        resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders") || Settings::Manager::getBool("enable shadows", "Shadows")); // Shadows have problems with fixed-function mode
         resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
         resourceSystem->getSceneManager()->setForcePerPixelLighting(Settings::Manager::getBool("force per pixel lighting", "Shaders"));
         resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::Manager::getBool("auto use object normal maps", "Shaders"));
@@ -228,58 +228,13 @@ namespace MWRender
         resourceSystem->getSceneManager()->setAutoUseSpecularMaps(Settings::Manager::getBool("auto use object specular maps", "Shaders"));
         resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
 
+        osg::ref_ptr<osg::Group> scenegroup=new osg::Group;
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager;
         sceneRoot->setLightingMask(Mask_Lighting);
-        mSceneRoot = sceneRoot;
-        sceneRoot->setStartLight(1);
-
-        mRootNode->addChild(mSceneRoot);
-
-        mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
-        mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
-        mPathgrid.reset(new Pathgrid(mRootNode));
-
-        mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
-
-        if (getenv("OPENMW_DONT_PRECOMPILE") == nullptr)
-        {
-            mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
-            mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
-        }
-
-        mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
-
-        mEffectManager.reset(new EffectManager(sceneRoot, mResourceSystem));
-
-        mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
-
-        DLLandFogStart = Settings::Manager::getFloat("distant land fog start", "Fog");
-        DLLandFogEnd = Settings::Manager::getFloat("distant land fog end", "Fog");
-        DLUnderwaterFogStart = Settings::Manager::getFloat("distant underwater fog start", "Fog");
-        DLUnderwaterFogEnd = Settings::Manager::getFloat("distant underwater fog end", "Fog");
-        DLInteriorFogStart = Settings::Manager::getFloat("distant interior fog start", "Fog");
-        DLInteriorFogEnd = Settings::Manager::getFloat("distant interior fog end", "Fog");
-
-        mDistantFog = Settings::Manager::getBool("use distant fog", "Fog");
-        mDistantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
-        mTerrainStorage = new TerrainStorage(mResourceSystem, Settings::Manager::getString("normal map pattern", "Shaders"), Settings::Manager::getString("normal height map pattern", "Shaders"),
-                                             Settings::Manager::getBool("auto use terrain normal maps", "Shaders"), Settings::Manager::getString("terrain specular map pattern", "Shaders"),
-                                             Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
-
-        if (mDistantTerrain)
-            mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
-        else
-            mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
-
-        mTerrain->setDefaultViewer(mViewer->getCamera());
-        mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
-
-        mCamera.reset(new Camera(mViewer->getCamera()));
-
-        mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
-
         osg::ref_ptr<osg::LightSource> source = new osg::LightSource;
+        mRootNode->addChild(sceneRoot);
         source->setNodeMask(Mask_Lighting);
+        source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
         mSunLight = new osg::Light;
         source->setLight(mSunLight);
         mSunLight->setDiffuse(osg::Vec4f(0,0,0,1));
@@ -298,15 +253,64 @@ namespace MWRender
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         sceneRoot->getOrCreateStateSet()->setAttribute(defaultMat);
 
-        sceneRoot->setNodeMask(Mask_Scene);
-        sceneRoot->setName("Scene Root");
+        scenegroup->setNodeMask(Mask_Scene);
+        scenegroup->setName("Scene Root");
+        mSceneRoot = sceneRoot;
+        sceneRoot->setStartLight(1);
 
+        int shadowCastingTraversalMask = Mask_Scene | Mask_Actor| Mask_Player;
+        int indoorShadowCastingTraversalMask = shadowCastingTraversalMask;
+
+        sceneRoot->addChild(scenegroup);
+
+        mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
+        mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
+        mPathgrid.reset(new Pathgrid(mRootNode));
+
+
+        if (getenv("OPENMW_DONT_PRECOMPILE") == nullptr)
+        {
+            mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
+            mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
+        }
+
+        mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
+
+        mEffectManager.reset(new EffectManager(sceneRoot, mResourceSystem));
+
+        mObjects.reset(new Objects(mResourceSystem, scenegroup, mUnrefQueue.get()));
+        mWater.reset(new Water(mRootNode, scenegroup, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
         mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
 
         mSky->setCamera(mViewer->getCamera());
         mSky->setRainIntensityUniform(mWater->getRainIntensityUniform());
 
-        source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
+        DLLandFogStart = Settings::Manager::getFloat("distant land fog start", "Fog");
+        DLLandFogEnd = Settings::Manager::getFloat("distant land fog end", "Fog");
+        DLUnderwaterFogStart = Settings::Manager::getFloat("distant underwater fog start", "Fog");
+        DLUnderwaterFogEnd = Settings::Manager::getFloat("distant underwater fog end", "Fog");
+        DLInteriorFogStart = Settings::Manager::getFloat("distant interior fog start", "Fog");
+        DLInteriorFogEnd = Settings::Manager::getFloat("distant interior fog end", "Fog");
+
+        mDistantFog = Settings::Manager::getBool("use distant fog", "Fog");
+        mDistantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
+        mTerrainStorage = new TerrainStorage(mResourceSystem, Settings::Manager::getString("normal map pattern", "Shaders"), Settings::Manager::getString("normal height map pattern", "Shaders"),
+                                             Settings::Manager::getBool("auto use terrain normal maps", "Shaders"), Settings::Manager::getString("terrain specular map pattern", "Shaders"),
+                                             Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
+
+        if (mDistantTerrain)
+            mTerrain.reset(new Terrain::QuadTreeWorld(scenegroup, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
+        else
+            mTerrain.reset(new Terrain::TerrainGrid(scenegroup, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
+
+        mTerrain->setDefaultViewer(mViewer->getCamera());
+        mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
+
+        mCamera.reset(new Camera(mViewer->getCamera()));
+
+        mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
+
+
 
         mStateUpdater = new StateUpdater;
         sceneRoot->addUpdateCallback(mStateUpdater);
