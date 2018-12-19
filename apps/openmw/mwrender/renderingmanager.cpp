@@ -256,7 +256,7 @@ namespace MWRender
 
         scenegroup->setNodeMask(Mask_Scene);
         scenegroup->setName("Scene Root");
-        mSceneRoot = sceneRoot;
+        mSceneRoot = scenegroup;
         sceneRoot->setStartLight(1);
 
         int shadowCastingTraversalMask = Mask_Scene | Mask_Actor| Mask_Player;
