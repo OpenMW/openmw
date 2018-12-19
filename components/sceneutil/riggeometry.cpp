@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <cstdlib>
 
+#include <osg/Version>
+
 #include <components/debug/debuglog.hpp>
 
 #include "skeleton.hpp"
@@ -234,6 +236,10 @@ void RigGeometry::cull(osg::NodeVisitor* nv)
         normalDst->dirty();
     if (tangentDst)
         tangentDst->dirty();
+
+#if OSG_MIN_VERSION_REQUIRED(3, 5, 6)
+    geom.dirtyGLObjects();
+#endif
 
     nv->pushOntoNodePath(&geom);
     nv->apply(geom);
