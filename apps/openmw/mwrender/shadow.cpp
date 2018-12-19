@@ -13,9 +13,9 @@ namespace MWRender
 Shader::ShaderManager::DefineMap ShadowManager::getShadowDefines()
 {
     Shader::ShaderManager::DefineMap definesWithShadows;
-    definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("1")));
-    definesWithShadows["texture_offset"] = "2";
-    definesWithShadows["num_pssm_texture"] = "3";
+    definesWithShadows["shadows_enabled"] = "1";
+    definesWithShadows["texture_offset"] = std::to_string(mOutdoorShadowTechnique->getTextureOffset());
+    definesWithShadows["num_pssm_texture"] = std::to_string(mOutdoorShadowTechnique->getSplitCount());
     definesWithShadows["pssm_texture_size"] = std::to_string(mOutdoorShadowTechnique->getTextureResolution());
     return definesWithShadows;
 }
@@ -23,7 +23,7 @@ Shader::ShaderManager::DefineMap ShadowManager::getShadowDefines()
 Shader::ShaderManager::DefineMap getShadowsDisabledDefines()
 {
     Shader::ShaderManager::DefineMap definesWithShadows;
-    definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("0")));
+    definesWithShadows["shadows_enabled"] = "0";
     return definesWithShadows;
 }
 
@@ -65,7 +65,11 @@ ShadowManager::ShadowManager(osg::Group* parent, osg::Group* sceneRoot,
         float ftemp=Settings::Manager::getFloat("pssm distlight", "Shadows");
         if(ftemp>0) pssm->setMinNearDistanceForSplits(ftemp);
         int itemp= Settings::Manager::getInt("pssm textures resolution", "Shadows");
-        if(itemp>0) pssm->setTextureResolution(itemp);
+        if(itemp>0) pssm->setTextureResolution(itemp);        
+        itemp= Settings::Manager::getInt("pssm shadowmap count", "Shadows");
+        if(itemp>0) pssm->setSplitCount(itemp);
+        itemp= Settings::Manager::getInt("pssm texunitoffset", "Shadows");
+        if(itemp>0) pssm->setTextureOffset(itemp);
         ftemp=Settings::Manager::getFloat("pssm shadow ambient", "Shadows");
         if(ftemp>0)
         {

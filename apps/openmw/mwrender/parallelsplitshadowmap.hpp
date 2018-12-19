@@ -71,6 +71,17 @@ class  ParallelSplitShadowMap :  public osgShadow::ShadowTechnique
 
         /** Get the texture resolution */
         inline unsigned int getTextureResolution() const { return _resolution; }
+        /** Set the texture resolution */
+        inline void setSplitCount(unsigned int i) { _number_of_splits = i; }
+
+        /** Get the texture resolution */
+        inline unsigned int getSplitCount() const { return _number_of_splits; }
+
+        /** Set shadow textures offset */
+        inline void setTextureOffset(unsigned int i) { _textureUnitOffset = i; }
+
+        /** Get shadow textures offset */
+        inline unsigned int getTextureOffset() const { return _textureUnitOffset; }
 
         /** Set the max far distance */
         inline void setMaxFarDistance(double farDist) { _setMaxFarDistance = farDist; _isSetMaxFarDistance = true; }
