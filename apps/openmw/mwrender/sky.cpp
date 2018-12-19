@@ -467,9 +467,9 @@ const float CelestialBody::mDistance = 1000.0f;
 class Sun : public CelestialBody
 {
 public:
-    Sun(osg::Group* parentNode, Resource::ImageManager& imageManager)
+    Sun(osg::Group* parentNode, osg::Light *sunlight, Resource::ImageManager& imageManager)
         : CelestialBody(parentNode, 1.0f, 1, Mask_Sun)
-        , mUpdater(new Updater)
+        , mUpdater(new Updater) ,_sunlight(sunlight)
     {
         mTransform->addUpdateCallback(mUpdater);
 
@@ -532,7 +532,7 @@ public:
     {
         osg::Vec3f normalizedDirection = direction / direction.length();
         mTransform->setPosition(normalizedDirection * mDistance);
-
+        _sunlight->setDirection(-normalizedDirection);
         osg::Quat quat;
         quat.makeRotate(osg::Vec3f(0.0f, 0.0f, 1.0f), normalizedDirection);
         mTransform->setAttitude(quat);
@@ -543,7 +543,6 @@ public:
         if (mSunGlareCallback)
             mSunGlareCallback->setTimeOfDayFade(val);
     }
-
 private:
     class DummyComputeBoundCallback : public osg::Node::ComputeBoundingSphereCallback
     {
@@ -916,6 +915,7 @@ private:
     osg::ref_ptr<osg::Node> mSunGlareNode;
     osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryVisiblePixels;
     osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryTotalPixels;
+    osg::ref_ptr<osg::Light> _sunlight;
 };
 
 class Moon : public CelestialBody
@@ -1142,6 +1142,18 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     mRootNode->addChild(mEarlyRenderBinRoot);
 
     mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
+
+    _sunlightsource = new osg::LightSource;
+    _sunlight = new osg::Light;
+    _sunlightsource->setLight(_sunlight);
+    _sunlight->setDiffuse(osg::Vec4f(0,0,0,1));
+    _sunlight->setAmbient(osg::Vec4f(0,0,0,1));
+    _sunlight->setSpecular(osg::Vec4f(0,0,0,0));
+    _sunlight->setConstantAttenuation(1.f);
+    _sunlightsource->setNodeMask(Mask_Lighting);
+
+
+
 }
 
 void SkyManager::setRainIntensityUniform(osg::Uniform *uniform)
@@ -1175,7 +1187,7 @@ void SkyManager::create()
     mAtmosphereNightUpdater = new AtmosphereNightUpdater(mSceneManager->getImageManager());
     atmosphereNight->addUpdateCallback(mAtmosphereNightUpdater);
 
-    mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager->getImageManager()));
+    mSun.reset(new Sun(mEarlyRenderBinRoot, _sunlight, *mSceneManager->getImageManager()));
 
     const Fallback::Map* fallback=MWBase::Environment::get().getWorld()->getFallback();
     mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), fallback->getFallbackFloat("Moons_Masser_Size")/125, Moon::Type_Masser));

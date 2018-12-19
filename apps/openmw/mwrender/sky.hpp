@@ -9,6 +9,7 @@
 #include <osg/ref_ptr>
 #include <osg/Vec4f>
 #include <osg/Uniform>
+#include <osg/LightSource>
 
 namespace osg
 {
@@ -174,6 +175,9 @@ namespace MWRender
 
         void setRainIntensityUniform(osg::Uniform *uniform);
 
+        osg::LightSource * getSunLightSource() { return _sunlightsource; }
+    protected:
+
     private:
         void create();
         ///< no need to call this, automatically done on first enable()
@@ -210,6 +214,9 @@ namespace MWRender
         osg::ref_ptr<AtmosphereNightUpdater> mAtmosphereNightUpdater;
 
         osg::ref_ptr<AtmosphereUpdater> mAtmosphereUpdater;
+
+        osg::ref_ptr<osg::LightSource> _sunlightsource;
+        osg::ref_ptr<osg::Light> _sunlight;
 
         std::unique_ptr<Sun> mSun;
         std::unique_ptr<Moon> mMasser;

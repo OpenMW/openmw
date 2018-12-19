@@ -231,18 +231,16 @@ namespace MWRender
 
         osg::ref_ptr<osg::Group> scenegroup=new osg::Group;
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager;
+        mSceneRoot = scenegroup;
         sceneRoot->setLightingMask(Mask_Lighting);
-        osg::ref_ptr<osg::LightSource> source = new osg::LightSource;
+
         mRootNode->addChild(sceneRoot);
-        source->setNodeMask(Mask_Lighting);
-        source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
-        mSunLight = new osg::Light;
-        source->setLight(mSunLight);
-        mSunLight->setDiffuse(osg::Vec4f(0,0,0,1));
-        mSunLight->setAmbient(osg::Vec4f(0,0,0,1));
-        mSunLight->setSpecular(osg::Vec4f(0,0,0,0));
-        mSunLight->setConstantAttenuation(1.f);
-        sceneRoot->addChild(source);
+
+        mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
+        mSky->getSunLightSource()->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
+
+        mSunLight = mSky->getSunLightSource()->getLight();
+        sceneRoot->addChild(mSky->getSunLightSource());
 
         sceneRoot->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
         sceneRoot->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
@@ -256,7 +254,6 @@ namespace MWRender
 
         scenegroup->setNodeMask(Mask_Scene);
         scenegroup->setName("Scene Root");
-        mSceneRoot = scenegroup;
         sceneRoot->setStartLight(1);
 
         int shadowCastingTraversalMask = Mask_Scene | Mask_Actor| Mask_Player;
@@ -280,7 +277,6 @@ namespace MWRender
 
         mObjects.reset(new Objects(mResourceSystem, scenegroup, mUnrefQueue.get()));
         mWater.reset(new Water(mRootNode, scenegroup, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
-        mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
 
         mSky->setCamera(mViewer->getCamera());
         mSky->setRainIntensityUniform(mWater->getRainIntensityUniform());
