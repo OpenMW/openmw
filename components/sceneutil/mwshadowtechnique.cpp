@@ -1554,7 +1554,8 @@ void MWShadowTechnique::createShaders()
 
     _shadowCastingStateSet->setMode(GL_DEPTH_CLAMP, osg::StateAttribute::ON);
 
-    // TODO: figure out if there's some way to disable depth sorting for translucent objects as we don't care about blending.
+    _shadowCastingStateSet->setRenderBinDetails(osg::StateSet::OPAQUE_BIN, "RenderBin", osg::StateSet::OVERRIDE_PROTECTED_RENDERBIN_DETAILS);
+
     // TODO: compare performance when alpha testing is handled here versus using a discard in the fragment shader
     // TODO: compare performance when we set a bunch of GL state to the default here with OVERRIDE set so that there are fewer pointless state switches
 }
