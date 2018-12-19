@@ -1,7 +1,6 @@
 #include "shadow.hpp"
 
 #include <osgShadow/ShadowSettings>
-#include <osgShadow/ParallelSplitShadowMap>
 #include <osgShadow/ViewDependentShadowMap>
 
 #include <components/settings/settings.hpp>
@@ -15,7 +14,7 @@ Shader::ShaderManager::DefineMap ShadowManager::getShadowDefines()
 {
     Shader::ShaderManager::DefineMap definesWithShadows;
     definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("1")));
-    definesWithShadows["texture_offset"] = "1";
+    definesWithShadows["texture_offset"] = "2";
     definesWithShadows["num_pssm_texture"] = "3";
     definesWithShadows["pssm_texture_size"] = std::to_string(mOutdoorShadowTechnique->getTextureResolution());
     return definesWithShadows;
@@ -54,12 +53,13 @@ ShadowManager::ShadowManager(osg::Group* parent, osg::Group* sceneRoot,
     mShadowedScene->addChild(sceneRoot);
     parent->addChild(mShadowedScene);
     mShadowSettings = mShadowedScene->getShadowSettings();
+    mShadowSettings->setReceivesShadowTraversalMask(~0u);
 
     mEnableShadows=Settings::Manager::getBool("enable shadows", "Shadows");
     Shader::ShaderManager::DefineMap shadowDefines;
     if(mEnableShadows) {
         ///PSSM Setup
-        osgShadow::ParallelSplitShadowMap* pssm=new osgShadow::ParallelSplitShadowMap;
+        ParallelSplitShadowMap* pssm=new ParallelSplitShadowMap;
 
         pssm->setMinNearDistanceForSplits(5000);
         float ftemp=Settings::Manager::getFloat("pssm distlight", "Shadows");

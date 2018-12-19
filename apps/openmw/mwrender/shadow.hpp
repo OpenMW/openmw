@@ -3,8 +3,8 @@
 
 #include <osgShadow/ShadowSettings>
 #include <osgShadow/ShadowedScene>
-#include <osgShadow/ParallelSplitShadowMap>
 #include <components/shader/shadermanager.hpp>
+#include "parallelsplitshadowmap.hpp"
 
 namespace MWRender
 {
@@ -29,7 +29,7 @@ namespace MWRender
         osg::ref_ptr<osgShadow::ShadowedScene> mShadowedScene;
         osg::ref_ptr<osgShadow::ShadowSettings> mShadowSettings;
         osg::ref_ptr<osgShadow::ShadowTechnique> mIndoorShadowTechnique;
-        osg::ref_ptr<osgShadow::ParallelSplitShadowMap> mOutdoorShadowTechnique;
+        osg::ref_ptr<ParallelSplitShadowMap> mOutdoorShadowTechnique;
         unsigned int mOutdoorShadowCastingMask;
         unsigned int mIndoorShadowCastingMask;
     };
