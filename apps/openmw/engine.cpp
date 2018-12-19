@@ -649,7 +649,8 @@ void OMW::Engine::go()
 
     // Setup viewer
     mViewer = new osgViewer::Viewer;
-    if(!Settings::Manager::getBool("multi thread viewer", "General"));
+    bool mt=Settings::Manager::getBool("multi thread viewer", "General");
+    if(!mt)
         mViewer->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
