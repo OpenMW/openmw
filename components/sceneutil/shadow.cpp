@@ -9,8 +9,6 @@
 
 #include <components/settings/settings.hpp>
 
-#include "mwshadowtechnique.hpp"
-
 namespace SceneUtil
 {
     using namespace osgShadow;

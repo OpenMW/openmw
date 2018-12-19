@@ -7,10 +7,10 @@
 #include <components/terrain/quadtreeworld.hpp>
 #include <components/shader/shadermanager.hpp>
 
+#include "mwshadowtechnique.hpp"
+
 namespace SceneUtil
 {
-    class MWShadowTechnique;
-
     class ShadowManager
     {
     public:
