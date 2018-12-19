@@ -300,22 +300,27 @@ void ParallelSplitShadowMap::releaseGLObjects(osg::State* state) const
 
 void ParallelSplitShadowMap::PSSMShadowSplitTexture::resizeGLObjectBuffers(unsigned int maxSize)
 {
+#if OSG_VERSION_MAJOR >=3 && OSG_VERSION_MINOR >=6
     osg::resizeGLObjectBuffers(_camera, maxSize);
     osg::resizeGLObjectBuffers(_texture, maxSize);
     osg::resizeGLObjectBuffers(_stateset, maxSize);
     osg::resizeGLObjectBuffers(_debug_camera, maxSize);
     osg::resizeGLObjectBuffers(_debug_texture, maxSize);
     osg::resizeGLObjectBuffers(_debug_stateset, maxSize);
+#endif
 }
 
 void ParallelSplitShadowMap::PSSMShadowSplitTexture::releaseGLObjects(osg::State* state) const
 {
+
+#if OSG_VERSION_MAJOR >=3 && OSG_VERSION_MINOR >=6
     osg::releaseGLObjects(_camera, state);
     osg::releaseGLObjects(_texture, state);
     osg::releaseGLObjects(_stateset, state);
     osg::releaseGLObjects(_debug_camera, state);
     osg::releaseGLObjects(_debug_texture, state);
     osg::releaseGLObjects(_debug_stateset, state);
+#endif
 }
 
 void ParallelSplitShadowMap::setAmbientBias(const osg::Vec2& ambientBias)
