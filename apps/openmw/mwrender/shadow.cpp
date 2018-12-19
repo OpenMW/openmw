@@ -29,7 +29,7 @@ Shader::ShaderManager::DefineMap getShadowsDisabledDefines()
 
 void ShadowManager::setupShadowSettings()
 {
-    /*useless (for the moment current upstream pssm don't use shadowsettings)*/
+    /*useless (for the moment current pssm don't use shadowsettings)*/
     mShadowSettings->setLightNum(0);
     mShadowSettings->setReceivesShadowTraversalMask(~0u);
 

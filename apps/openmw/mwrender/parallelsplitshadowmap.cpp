@@ -374,10 +374,12 @@ void ParallelSplitShadowMap::init()
 
             pssmShadowSplitTexture._camera->setCullCallback(new CameraCullCallback(this));
 
+            pssmShadowSplitTexture._camera->setReadBuffer(GL_BACK);
 
+            pssmShadowSplitTexture._camera->setDrawBuffer(GL_BACK);
 #ifndef SHADOW_TEXTURE_DEBUG
             pssmShadowSplitTexture._camera->setClearMask(GL_DEPTH_BUFFER_BIT);
-            pssmShadowSplitTexture._camera->setClearColor(osg::Vec4(1.0,1.0,1.0,1.0));
+           // pssmShadowSplitTexture._camera->setClearColor(osg::Vec4(1.0,1.0,1.0,1.0));
 #else
             pssmShadowSplitTexture._camera->setClearMask(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
             switch(iCameras)
@@ -403,7 +405,7 @@ void ParallelSplitShadowMap::init()
             pssmShadowSplitTexture._camera->setViewport(0,0,pssmShadowSplitTexture._resolution,pssmShadowSplitTexture._resolution);
 
             // set the camera to render before the main camera.
-            pssmShadowSplitTexture._camera->setRenderOrder(osg::Camera::PRE_RENDER,-10);
+            pssmShadowSplitTexture._camera->setRenderOrder(osg::Camera::PRE_RENDER,-100+pssmShadowSplitTexture._splitID);
 
             // tell the camera to use OpenGL frame buffer object where supported.
             pssmShadowSplitTexture._camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
@@ -645,39 +647,15 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
     unsigned int traversalMask = cv.getTraversalMask();
     osgUtil::RenderStage* orig_rs = cv.getRenderStage();
 
-    cv.setTraversalMask(traversalMask&getShadowedScene()->getShadowSettings()->getReceivesShadowTraversalMask());
-#ifdef SHADOW_TEXTURE_GLSL
-    PSSMShadowSplitTextureMap::iterator tm_itr=_PSSMShadowSplitTextureMap.begin();
-#else
-    // do traversal of shadow receiving scene which does need to be decorated by the shadow map
-    for (PSSMShadowSplitTextureMap::iterator tm_itr=_PSSMShadowSplitTextureMap.begin();it!=_PSSMShadowSplitTextureMap.end();it++)
-#endif
-    {
-        PSSMShadowSplitTexture pssmShadowSplitTexture = tm_itr->second;
-        cv.pushStateSet(pssmShadowSplitTexture._stateset.get());
 
-        //////////////////////////////////////////////////////////////////////////
-        // DEBUG
-        if ( _displayTexturesGroupingNode ) {
-            cv.pushStateSet(pssmShadowSplitTexture._debug_stateset.get());
-        }
-        //////////////////////////////////////////////////////////////////////////
-
-        _shadowedScene->osg::Group::traverse(cv);
-
-        cv.popStateSet();
-
-    }
 
     // need to compute view frustum for RTT camera.
     // get the bounds of the model.
-   /* osg::ComputeBoundsVisitor cbbv(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN);
+    osg::ComputeBoundsVisitor cbbv(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN);
     cbbv.setTraversalMask(getShadowedScene()->getCastsShadowTraversalMask());
-    //_shadowedScene->osg::Group::traverse(cbbv);
+     _shadowedScene->osg::Group::traverse(cbbv);
 
 
-
-    OSG_WARN<<cbbv.getBoundingBox()._min<<std::endl;*/
     //////////////////////////////////////////////////////////////////////////
     const osg::Light* selectLight = 0;
 
@@ -716,7 +694,9 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
         lightDirection = _userLight->getDirection();
         selectLight = _userLight.get();
     }
+    osg::BoundingSphere sp(cbbv.getBoundingBox());
 
+    cv.setTraversalMask( traversalMask&  getShadowedScene()->getCastsShadowTraversalMask() );
     if (selectLight)
     {
         osg::Vec3d pCorners[8];
@@ -779,8 +759,7 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
             _iMVPT->setElement(it->first,MVPT);
 
             //////////////////////////////////////////////////////////////////////////
-            cv.setTraversalMask( traversalMask&  getShadowedScene()->getCastsShadowTraversalMask() );
-
+pssmShadowSplitTexture._camera->setInitialBound(sp);
             // do RTT camera traversal
              pssmShadowSplitTexture._camera->accept(cv);
 
@@ -796,7 +775,29 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
 
         }
     } // if light
+    cv.setTraversalMask(traversalMask&getShadowedScene()->getShadowSettings()->getReceivesShadowTraversalMask());
+#ifdef SHADOW_TEXTURE_GLSL
+    PSSMShadowSplitTextureMap::iterator tm_itr=_PSSMShadowSplitTextureMap.begin();
+#else
+    // do traversal of shadow receiving scene which does need to be decorated by the shadow map
+    for (PSSMShadowSplitTextureMap::iterator tm_itr=_PSSMShadowSplitTextureMap.begin();it!=_PSSMShadowSplitTextureMap.end();it++)
+#endif
+    {
+        PSSMShadowSplitTexture pssmShadowSplitTexture = tm_itr->second;
+        cv.pushStateSet(pssmShadowSplitTexture._stateset.get());
 
+        //////////////////////////////////////////////////////////////////////////
+        // DEBUG
+        if ( _displayTexturesGroupingNode ) {
+            cv.pushStateSet(pssmShadowSplitTexture._debug_stateset.get());
+        }
+        //////////////////////////////////////////////////////////////////////////
+
+        _shadowedScene->osg::Group::traverse(cv);
+
+        cv.popStateSet();
+
+    }
     // reapply the original traversal mask
     cv.setTraversalMask( traversalMask );
 }
@@ -891,7 +892,7 @@ void ParallelSplitShadowMap::calculateFrustumCorners(PSSMShadowSplitTexture &pss
     frustumCorners[6] = const_pointNearBL* invProjViewMat;
     frustumCorners[7] = const_pointNearTL* invProjViewMat;
 
-   // std::cout << "camFar : "<<pssmShadowSplitTexture._splitID << " / " << camNear << "," << camFar << std::endl;
+    //std::cout << "camFar : "<<pssmShadowSplitTexture._splitID << " / " << camNear << "," << camFar << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////
