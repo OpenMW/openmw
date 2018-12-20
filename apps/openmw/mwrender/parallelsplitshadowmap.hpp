@@ -119,7 +119,7 @@ class  ParallelSplitShadowMap :  public osgShadow::ShadowTechnique
         /**
          * you can overwrite the fragment shader if you like to modify it yourself, own fragment shader can be used
          */
-        class OSGSHADOW_EXPORT FragmentShaderGenerator : public osg::Referenced {
+        class  FragmentShaderGenerator : public osg::Referenced {
             public:
                 /**
                  * generate the GLSL fragment shader
