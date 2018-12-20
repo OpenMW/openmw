@@ -667,21 +667,21 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
             const osg::Light* light = dynamic_cast<const osg::Light*>(itr->first.get());
             if (light)
             {
-                osg::RefMatrix* matrix = itr->second.get();
-                if (matrix) lightpos = light->getPosition() * (*matrix);
-                else lightpos = light->getPosition();
-                if (matrix) lightDirection = light->getDirection() * (*matrix);
-                else lightDirection = light->getDirection();
+                //ignore LightSource  ModelView Transform to avoid numeric oscillation meltdown
+                // if (matrix) lightpos = light->getPosition() * (*matrix);else
+                lightpos = light->getPosition();
+                //  if (matrix) lightDirection = light->getDirection() * (*matrix);else
+                lightDirection = light->getDirection();
 
                 selectLight = light;
             }
         }
 
-        osg::Matrix eyeToWorld;
+      /*  osg::Matrix eyeToWorld;
         eyeToWorld.invert(*cv.getModelViewMatrix());
 
         lightpos = lightpos * eyeToWorld;
-        lightDirection = lightDirection * eyeToWorld;
+        lightDirection = lightDirection * eyeToWorld;*/
     } else {
         // take the user light as light source
         lightpos = _userLight->getPosition();
