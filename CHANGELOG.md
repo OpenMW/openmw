@@ -1,6 +1,7 @@
 0.46.0
 ------
 
+    Bug #2987: Editor: some chance and AI data fields can overflow
     Bug #3623: Fix HiDPI on Windows
     Bug #4540: Rain delay when exiting water
     Bug #4701: PrisonMarker record is not hardcoded like other markers

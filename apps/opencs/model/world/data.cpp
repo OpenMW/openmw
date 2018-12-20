@@ -205,7 +205,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_SoundName, ColumnBase::Display_Sound));
     mRegions.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_SoundChance, ColumnBase::Display_Integer));
+        new NestedChildColumn (Columns::ColumnId_SoundChance, ColumnBase::Display_UnsignedInteger8));
 
     mBirthsigns.addColumn (new StringIdColumn<ESM::BirthSign>);
     mBirthsigns.addColumn (new RecordStateColumn<ESM::BirthSign>);
