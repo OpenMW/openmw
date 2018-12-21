@@ -364,6 +364,11 @@ int CSMDoc::Document::getState() const
     return state;
 }
 
+const boost::filesystem::path& CSMDoc::Document::getResourceDir() const
+{
+    return mResDir;
+}
+
 const boost::filesystem::path& CSMDoc::Document::getSavePath() const
 {
     return mSavePath;
