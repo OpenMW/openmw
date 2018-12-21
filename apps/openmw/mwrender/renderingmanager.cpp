@@ -237,15 +237,16 @@ namespace MWRender
         mRootNode->addChild(sceneRoot);
 
         mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
-         osg::LightSource *sunlightsource = new osg::LightSource;
-            mSunLight = new osg::Light;
-            sunlightsource->setLight(mSunLight.get());
-            mSunLight->setDiffuse(osg::Vec4f(0,0,0,1));
-            mSunLight->setAmbient(osg::Vec4f(0,0,0,1));
-            mSunLight->setSpecular(osg::Vec4f(0,0,0,0));
-            mSunLight->setConstantAttenuation(1.f);
-            sunlightsource->setNodeMask(Mask_Lighting);
-            sceneRoot->addChild(sunlightsource);
+        osg::LightSource *sunlightsource = new osg::LightSource;
+        mSunLight = new osg::Light;
+        mSunLight->setDiffuse(osg::Vec4f(0,0,0,1));
+        mSunLight->setAmbient(osg::Vec4f(0,0,0,1));
+        mSunLight->setSpecular(osg::Vec4f(0,0,0,0));
+        mSunLight->setConstantAttenuation(1.f);
+
+        sunlightsource->setLight(mSunLight.get());
+        sunlightsource->setNodeMask(Mask_Lighting);
+        sceneRoot->addChild(sunlightsource);
         sunlightsource->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
 
 
