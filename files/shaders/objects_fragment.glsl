@@ -114,15 +114,11 @@ void main()
 #endif
 
     float shadowing = unshadowedLightRatio();
-    vec3 unlighted = gl_FragData[0].xyz;
 #if !PER_PIXEL_LIGHTING
     gl_FragData[0] *= lighting;
 #else
     gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor);
 #endif
-    // mix shadow before emmissive ( perhaps emissive+shadow may be putted lower in the code)
-    //simplistic shadowing mix: if shadow:unlighted else fragdata
-    gl_FragData[0].xyz= mix(ambientBias.y * unlighted.xyz, gl_FragData[0].xyz, shadowing);
 #if @emissiveMap
     gl_FragData[0].xyz += texture2D(emissiveMap, emissiveMapUV).xyz;
 #endif
@@ -151,8 +147,9 @@ void main()
     float shininess = gl_FrontMaterial.shininess;
     vec3 matSpec = gl_FrontMaterial.specular.xyz;
 #endif
-    //add shadow factor to specular : no shiny in shadows
-    gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos.xyz), shininess, matSpec)*shadowing;
+    gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos.xyz), shininess, matSpec);
+
+    gl_FragData[0].xyz = mix(ambientBias.y * gl_FragData[0].xyz, gl_FragData[0].xyz, shadowing);
     float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
 }
