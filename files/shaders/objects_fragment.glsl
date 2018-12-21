@@ -115,9 +115,10 @@ void main()
 
     float shadowing = unshadowedLightRatio();
 #if !PER_PIXEL_LIGHTING
+    //no shadowing
     gl_FragData[0] *= lighting;
 #else
-    gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor);
+    gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor,shadowing);
 #endif
 #if @emissiveMap
     gl_FragData[0].xyz += texture2D(emissiveMap, emissiveMapUV).xyz;
@@ -149,7 +150,6 @@ void main()
 #endif
     gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos.xyz), shininess, matSpec);
 
-    gl_FragData[0].xyz = mix(ambientBias.y * gl_FragData[0].xyz, gl_FragData[0].xyz, shadowing);
     float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
 }

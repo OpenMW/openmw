@@ -94,7 +94,7 @@ void main(void)
 #endif
 
 #if !PER_PIXEL_LIGHTING
-    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color);
+    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color, 1.0);
 #else
     passColor = gl_Color;
 #endif

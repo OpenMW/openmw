@@ -26,7 +26,7 @@ void main(void)
 
 #if !PER_PIXEL_LIGHTING
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
-    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color);
+    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color, 1.0);
 #else
     passColor = gl_Color;
 #endif
