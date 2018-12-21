@@ -132,6 +132,23 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mFactions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_FactionReaction, ColumnBase::Display_Integer));
 
+    // Faction Ranks
+    mFactions.addColumn (new NestedParentColumn<ESM::Faction> (Columns::ColumnId_FactionRanks));
+    index = mFactions.getColumns()-1;
+    mFactions.addAdapter (std::make_pair(&mFactions.getColumn(index), new FactionRanksAdapter ()));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_RankName, ColumnBase::Display_Rank));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_FactionAttrib1, ColumnBase::Display_Integer));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_FactionAttrib2, ColumnBase::Display_Integer));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_FactionPrimSkill, ColumnBase::Display_Integer));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_FactionFavSkill, ColumnBase::Display_Integer));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_FactionRep, ColumnBase::Display_Integer));
+
     mRaces.addColumn (new StringIdColumn<ESM::Race>);
     mRaces.addColumn (new RecordStateColumn<ESM::Race>);
     mRaces.addColumn (new FixedRecordTypeColumn<ESM::Race> (UniversalId::Type_Race));

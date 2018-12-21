@@ -46,6 +46,7 @@ namespace CSMWorld
             Display_Skill,
             Display_Class,
             Display_Faction,
+            Display_Rank,
             Display_Race,
             Display_Sound,
             Display_Region,

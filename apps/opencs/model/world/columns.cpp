@@ -234,8 +234,16 @@ namespace CSMWorld
             { ColumnId_SoundChance, "Chance" },
 
             { ColumnId_FactionReactions, "Reactions" },
+            { ColumnId_FactionRanks, "Ranks" },
             //{ ColumnId_FactionID, "Faction ID" },
             { ColumnId_FactionReaction, "Reaction" },
+
+            { ColumnId_FactionAttrib1, "Attrib 1" },
+            { ColumnId_FactionAttrib2, "Attrib 2" },
+            { ColumnId_FactionPrimSkill, "Prim Skill" },
+            { ColumnId_FactionFavSkill, "Fav Skill" },
+            { ColumnId_FactionRep, "Fact Rep" },
+            { ColumnId_RankName, "Rank Name" },
 
             { ColumnId_EffectList, "Effects" },
             { ColumnId_EffectId, "Effect" },
