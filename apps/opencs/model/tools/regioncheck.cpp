@@ -42,5 +42,11 @@ void CSMTools::RegionCheckStage::perform (int stage, CSMDoc::Messages& messages)
     if (chances != 100)
         messages.add(id, "Weather chances do not add up to 100", "", CSMDoc::Message::Severity_Error);
 
+    for (const ESM::Region::SoundRef& sound : region.mSoundList)
+    {
+        if (sound.mChance > 100)
+            messages.add(id, "Chance of '" + sound.mSound.toString() + "' sound to play is over 100 percent", "", CSMDoc::Message::Severity_Warning);
+    }
+
     /// \todo check data members that can't be edited in the table view
 }
