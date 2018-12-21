@@ -652,7 +652,30 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
     osgUtil::RenderStage* orig_rs = cv.getRenderStage();
 
 
+    cv.setTraversalMask(traversalMask&getShadowedScene()->getShadowSettings()->getReceivesShadowTraversalMask());
+#ifdef SHADOW_TEXTURE_GLSL
+    PSSMShadowSplitTextureMap::iterator tm_itr=_PSSMShadowSplitTextureMap.begin();
+#else
+    // do traversal of shadow receiving scene which does need to be decorated by the shadow map
+    for (PSSMShadowSplitTextureMap::iterator tm_itr=_PSSMShadowSplitTextureMap.begin();it!=_PSSMShadowSplitTextureMap.end();it++)
+#endif
+    {
+        PSSMShadowSplitTexture pssmShadowSplitTexture = tm_itr->second;
+        cv.pushStateSet(pssmShadowSplitTexture._stateset.get());
 
+        //////////////////////////////////////////////////////////////////////////
+        // DEBUG
+        if ( _displayTexturesGroupingNode ) {
+            cv.pushStateSet(pssmShadowSplitTexture._debug_stateset.get());
+        }
+        //////////////////////////////////////////////////////////////////////////
+
+        _shadowedScene->osg::Group::traverse(cv);
+
+        cv.popStateSet();
+
+    }
+    // reapply the original traversal mask
 
     //////////////////////////////////////////////////////////////////////////
     const osg::Light* selectLight = 0;
@@ -773,30 +796,7 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
 
         }
     } // if light
-    cv.setTraversalMask(traversalMask&getShadowedScene()->getShadowSettings()->getReceivesShadowTraversalMask());
-#ifdef SHADOW_TEXTURE_GLSL
-    PSSMShadowSplitTextureMap::iterator tm_itr=_PSSMShadowSplitTextureMap.begin();
-#else
-    // do traversal of shadow receiving scene which does need to be decorated by the shadow map
-    for (PSSMShadowSplitTextureMap::iterator tm_itr=_PSSMShadowSplitTextureMap.begin();it!=_PSSMShadowSplitTextureMap.end();it++)
-#endif
-    {
-        PSSMShadowSplitTexture pssmShadowSplitTexture = tm_itr->second;
-        cv.pushStateSet(pssmShadowSplitTexture._stateset.get());
 
-        //////////////////////////////////////////////////////////////////////////
-        // DEBUG
-        if ( _displayTexturesGroupingNode ) {
-            cv.pushStateSet(pssmShadowSplitTexture._debug_stateset.get());
-        }
-        //////////////////////////////////////////////////////////////////////////
-
-        _shadowedScene->osg::Group::traverse(cv);
-
-        cv.popStateSet();
-
-    }
-    // reapply the original traversal mask
     cv.setTraversalMask( traversalMask );
 }
 
