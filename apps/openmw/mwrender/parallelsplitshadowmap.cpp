@@ -447,6 +447,10 @@ void ParallelSplitShadowMap::init()
                 cull_face->setMode(osg::CullFace::FRONT);
                 stateset->setAttribute(cull_face.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
                 stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            }else
+            {
+                ///OPEMW :terrain don't stop light at night with backface culling so disable face culling
+                stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
             }
 
             //////////////////////////////////////////////////////////////////////////
