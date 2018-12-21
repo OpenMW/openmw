@@ -24,6 +24,9 @@ Shader::ShaderManager::DefineMap getShadowsDisabledDefines()
 {
     Shader::ShaderManager::DefineMap definesWithShadows;
     definesWithShadows["shadows_enabled"] = "0";
+    definesWithShadows["texture_offset"] =  "0";
+    definesWithShadows["num_pssm_texture"] =  "0";
+    definesWithShadows["pssm_texture_size"] = "0";
     return definesWithShadows;
 }
 
@@ -65,7 +68,7 @@ ShadowManager::ShadowManager(osg::Group* parent, osg::Group* sceneRoot,
         float ftemp=Settings::Manager::getFloat("pssm distlight", "Shadows");
         if(ftemp>0) pssm->setMinNearDistanceForSplits(ftemp);
         int itemp= Settings::Manager::getInt("pssm textures resolution", "Shadows");
-        if(itemp>0) pssm->setTextureResolution(itemp);        
+        if(itemp>0) pssm->setTextureResolution(itemp);
         itemp= Settings::Manager::getInt("pssm shadowmap count", "Shadows");
         if(itemp>0) pssm->setSplitCount(itemp);
         itemp= Settings::Manager::getInt("pssm texunitoffset", "Shadows");
