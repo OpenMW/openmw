@@ -649,9 +649,6 @@ void OMW::Engine::go()
 
     // Setup viewer
     mViewer = new osgViewer::Viewer;
-    bool mt=Settings::Manager::getBool("multi thread viewer", "General");
-    if(!mt)
-        mViewer->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
     mScreenCaptureOperation = new WriteScreenshotToFileOperation(mCfgMgr.getUserDataPath().string(),
