@@ -44,6 +44,11 @@ class  ParallelSplitShadowMap :  public osgShadow::ShadowTechnique
 
         META_Object(MWRender, ParallelSplitShadowMap);
 
+        /** set Shadow Camera cull mode */
+        void setCullingMode(bool b) { _enableCulling=b;}
+
+        /** get Shadow Camera cull mode */
+        bool getCullingMode() const { return _enableCulling;}
 
         /** Initialize the ShadowedScene and local cached data structures.*/
         virtual void init();
@@ -236,6 +241,8 @@ class  ParallelSplitShadowMap :  public osgShadow::ShadowTechnique
 
         osg::Uniform*   _ambientBiasUniform;
         osg::Vec2       _ambientBias;
+        //OPEMW
+        bool _enableCulling;
 
 };
 }

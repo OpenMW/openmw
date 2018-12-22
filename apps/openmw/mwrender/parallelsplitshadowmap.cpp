@@ -245,7 +245,8 @@ ParallelSplitShadowMap::ParallelSplitShadowMap(osg::Geode** gr, int icountplanes
     _userLight(NULL),
     _GLSL_shadow_filtered(true),
     _ambientBiasUniform(NULL),
-    _ambientBias(0.1f,0.3f)
+    _ambientBias(0.1f,0.3f),
+    _enableCulling(false)
 {
     _displayTexturesGroupingNode = gr;
     _number_of_splits = icountplanes;
@@ -273,7 +274,8 @@ ParallelSplitShadowMap::ParallelSplitShadowMap(const ParallelSplitShadowMap& cop
     _GLSL_shadow_filtered(copy._GLSL_shadow_filtered),
     _SplitCalcMode(copy._SplitCalcMode),
     _ambientBiasUniform(NULL),
-    _ambientBias(copy._ambientBias)
+    _ambientBias(copy._ambientBias),
+    _enableCulling(copy._enableCulling)
 {
 }
 
@@ -447,10 +449,6 @@ void ParallelSplitShadowMap::init()
                 cull_face->setMode(osg::CullFace::FRONT);
                 stateset->setAttribute(cull_face.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
                 stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-            }else
-            {
-                ///OPEMW :terrain don't stop light at night with backface culling so disable face culling
-                stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
             }
 
             //////////////////////////////////////////////////////////////////////////
@@ -717,7 +715,13 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
     }
 
 
-    cv.setTraversalMask( traversalMask&  getShadowedScene()->getCastsShadowTraversalMask() );
+    cv.setTraversalMask(   getShadowedScene()->getCastsShadowTraversalMask() );
+
+    //OPENMW
+    osg::StateAttribute::GLModeValue cullmode=(_enableCulling)?
+                osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE:
+                osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE;
+
     if (selectLight)
     {
         osg::Vec3d pCorners[8];
@@ -735,6 +739,8 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
              pssmShadowSplitTexture._cameraView    = cv.getRenderInfo().getView()->getCamera()->getViewMatrix();
             pssmShadowSplitTexture._cameraProj    = cv.getRenderInfo().getView()->getCamera()->getProjectionMatrix();
 
+            pssmShadowSplitTexture._cameraView    = *cv.getModelViewMatrix();
+           pssmShadowSplitTexture._cameraProj    = *cv.getProjectionMatrix();
             //////////////////////////////////////////////////////////////////////////
             // CALCULATE
 
@@ -778,7 +784,8 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
             mv.invert(mv);
             MVPT =( mv* MVPT) ;
             _iMVPT->setElement(it->first,MVPT);
-
+            ///OPEMW :terrain don't stop light at night with backface culling so disable face culling
+            pssmShadowSplitTexture._camera->getStateSet()->setMode(GL_CULL_FACE,cullmode);
             //////////////////////////////////////////////////////////////////////////
 
             // do RTT camera traversal
