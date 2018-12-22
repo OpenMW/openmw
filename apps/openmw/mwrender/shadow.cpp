@@ -32,17 +32,13 @@ Shader::ShaderManager::DefineMap getShadowsDisabledDefines()
 
 void ShadowManager::setupShadowSettings()
 {
-    /*useless (for the moment current pssm don't use shadowsettings)*/
+    /*useless (for the moment current pssm don't use shadowsettings for the moment)*/
     mShadowSettings->setLightNum(0);
     mShadowSettings->setReceivesShadowTraversalMask(~0u);
 
     int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
     mShadowSettings->setNumShadowMapsPerLight(numberOfShadowMapsPerLight);
-    mShadowSettings->setBaseShadowTextureUnit(8 - numberOfShadowMapsPerLight);
 
-    mShadowSettings->setMinimumShadowMapNearFarRatio(Settings::Manager::getFloat("minimum lispsm near far ratio", "Shadows"));
-    if (Settings::Manager::getBool("compute tight scene bounds", "Shadows"))
-        mShadowSettings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
 }
 
 ShadowManager::ShadowManager(osg::Group* parent, osg::Group* sceneRoot,
@@ -64,16 +60,15 @@ ShadowManager::ShadowManager(osg::Group* parent, osg::Group* sceneRoot,
         ///PSSM Setup
         ParallelSplitShadowMap* pssm=new ParallelSplitShadowMap;
 
-        pssm->setMinNearDistanceForSplits(5000);
-        float ftemp=Settings::Manager::getFloat("pssm distlight", "Shadows");
+        float ftemp = Settings::Manager::getFloat("pssm distlight", "Shadows");
         if(ftemp>0) pssm->setMinNearDistanceForSplits(ftemp);
-        int itemp= Settings::Manager::getInt("pssm textures resolution", "Shadows");
+        int itemp = Settings::Manager::getInt("pssm textures resolution", "Shadows");
         if(itemp>0) pssm->setTextureResolution(itemp);
-        itemp= Settings::Manager::getInt("pssm shadowmap count", "Shadows");
+        itemp = Settings::Manager::getInt("pssm shadowmap count", "Shadows");
         if(itemp>0) pssm->setSplitCount(itemp);
-        itemp= Settings::Manager::getInt("pssm texunitoffset", "Shadows");
+        itemp = Settings::Manager::getInt("pssm texunitoffset", "Shadows");
         if(itemp>0) pssm->setTextureOffset(itemp);
-        ftemp=Settings::Manager::getFloat("pssm shadow ambient", "Shadows");
+        ftemp = Settings::Manager::getFloat("pssm shadow ambient", "Shadows");
         if(ftemp>0)
         {
             osg::Vec2 ambiant=pssm->getAmbientBias();
@@ -94,10 +89,12 @@ ShadowManager::ShadowManager(osg::Group* parent, osg::Group* sceneRoot,
     }
     else shadowDefines = getShadowsDisabledDefines();
 
-    Shader::ShaderManager::DefineMap &globalDefines = shaderManager.getGlobalDefines();
+    Shader::ShaderManager::DefineMap globalDefines = shaderManager.getGlobalDefines();
 
     for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
         globalDefines[itr->first] = itr->second;
+    shaderManager.setGlobalDefines(globalDefines);
+    shaderManager.lockGlobalDefines();
 
 }
 

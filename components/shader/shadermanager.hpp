@@ -18,10 +18,13 @@ namespace Shader
     class ShaderManager
     {
     public:
+        ShaderManager(): _lockglobaldefines(false) {}
         void setShaderPath(const std::string& path);
 
         typedef std::map<std::string, std::string> DefineMap;
-        DefineMap& getGlobalDefines(){return _globaldefines;}
+        const DefineMap& getGlobalDefines() { return _globaldefines; }
+        void setGlobalDefines(DefineMap&m) { if(!_lockglobaldefines) _globaldefines=m;else OSG_WARN<<"forbidden call to ShaderManager::setGlobalDefines during main loop"<<std::endl; }
+        void lockGlobalDefines() { _lockglobaldefines=true; }
         /// Create or retrieve a shader instance.
         /// @param shaderTemplate The filename of the shader template.
         /// @param defines Define values that can be retrieved by the shader template.
@@ -51,6 +54,7 @@ namespace Shader
         OpenThreads::Mutex mMutex;
 
         DefineMap _globaldefines;
+        bool _lockglobaldefines;
     };
 
 }
