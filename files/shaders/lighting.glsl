@@ -23,11 +23,7 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor,float shadow)
         lightDir = gl_LightSource[i].position.xyz - (viewPos.xyz * gl_LightSource[i].position.w);
         d = length(lightDir);
         lightDir = normalize(lightDir);
-        vec3 lightres=(ambient * gl_LightSource[i].ambient.xyz + diffuse.xyz * gl_LightSource[i].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0)) * clamp(1.0 / (gl_LightSource[i].constantAttenuation + gl_LightSource[i].linearAttenuation * d + gl_LightSource[i].quadraticAttenuation * d * d), 0.0, 1.0);
-#ifdef SHADOWS
-        lightres *= ambientBias.y * shadow;
-#endif
-        lightResult.xyz +=lightres;
+        lightResult.xyz +=(ambient * gl_LightSource[i].ambient.xyz + diffuse.xyz * gl_LightSource[i].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0)) * clamp(1.0 / (gl_LightSource[i].constantAttenuation + gl_LightSource[i].linearAttenuation * d + gl_LightSource[i].quadraticAttenuation * d * d), 0.0, 1.0);
     }
 
     lightResult.xyz += gl_LightModel.ambient.xyz * ambient;
@@ -43,6 +39,10 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor,float shadow)
 #else
     lightResult = max(lightResult, 0.0);
 #endif
+#ifdef SHADOWS
+    lightResult.xyz = mix(ambientBias.y * lightResult.xyz, lightResult.xyz, shadow);
+#endif
+
     return lightResult;
 }
 
