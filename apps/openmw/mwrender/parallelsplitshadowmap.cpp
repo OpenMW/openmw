@@ -339,8 +339,6 @@ void ParallelSplitShadowMap::init()
     sharedStateSet->setDataVariance(osg::Object::DYNAMIC);
 
     unsigned int iCamerasMax=_number_of_splits;
-    _iMVPT=new osg::Uniform(osg::Uniform::FLOAT_MAT4,"texgenmat",_number_of_splits);
-    _cams.clear();
     for (unsigned int iCameras=0; iCameras<iCamerasMax; iCameras++)
     {
         PSSMShadowSplitTexture pssmShadowSplitTexture;
@@ -357,7 +355,7 @@ void ParallelSplitShadowMap::init()
 #ifndef SHADOW_TEXTURE_DEBUG
             pssmShadowSplitTexture._texture->setInternalFormat(GL_DEPTH_COMPONENT);
 #ifndef GL3
-             pssmShadowSplitTexture._texture->setShadowComparison(true);
+            pssmShadowSplitTexture._texture->setShadowComparison(true);
             pssmShadowSplitTexture._texture->setShadowTextureMode(osg::Texture2D::LUMINANCE);
 #endif
 #else
@@ -381,7 +379,7 @@ void ParallelSplitShadowMap::init()
             pssmShadowSplitTexture._camera->setDrawBuffer(GL_BACK);
 #ifndef SHADOW_TEXTURE_DEBUG
             pssmShadowSplitTexture._camera->setClearMask(GL_DEPTH_BUFFER_BIT);
-           // pssmShadowSplitTexture._camera->setClearColor(osg::Vec4(1.0,1.0,1.0,1.0));
+            // pssmShadowSplitTexture._camera->setClearColor(osg::Vec4(1.0,1.0,1.0,1.0));
 #else
             pssmShadowSplitTexture._camera->setClearMask(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
             switch(iCameras)
@@ -470,9 +468,6 @@ void ParallelSplitShadowMap::init()
             pssmShadowSplitTexture._stateset->setTextureMode(pssmShadowSplitTexture._textureUnit,GL_TEXTURE_GEN_T,osg::StateAttribute::ON);
             pssmShadowSplitTexture._stateset->setTextureMode(pssmShadowSplitTexture._textureUnit,GL_TEXTURE_GEN_R,osg::StateAttribute::ON);
             pssmShadowSplitTexture._stateset->setTextureMode(pssmShadowSplitTexture._textureUnit,GL_TEXTURE_GEN_Q,osg::StateAttribute::ON);
-
-
-            pssmShadowSplitTexture._stateset->addUniform( _iMVPT);
 
             /// generate a TexGen object
             pssmShadowSplitTexture._texgen = new osg::TexGen;
@@ -621,7 +616,6 @@ void ParallelSplitShadowMap::init()
 
         _PSSMShadowSplitTextureMap.insert(PSSMShadowSplitTextureMap::value_type(iCameras,pssmShadowSplitTexture));
 
-        _cams.push_back( pssmShadowSplitTexture._camera);
     }
 
     _dirty = false;
@@ -644,6 +638,7 @@ const osg::Vec3d const_pointNearBR(  1.0, -1.0, -1.0);
 const osg::Vec3d const_pointNearTL( -1.0,  1.0, -1.0);
 const osg::Vec3d const_pointNearBL( -1.0, -1.0, -1.0);
 
+
 void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
     // record the traversal mask on entry so we can reapply it later.
     unsigned int traversalMask = cv.getTraversalMask();
@@ -655,7 +650,7 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
     PSSMShadowSplitTextureMap::iterator tm_itr=_PSSMShadowSplitTextureMap.begin();
 #else
     // do traversal of shadow receiving scene which does need to be decorated by the shadow map
-    for (PSSMShadowSplitTextureMap::iterator tm_itr=_PSSMShadowSplitTextureMap.begin();it!=_PSSMShadowSplitTextureMap.end();it++)
+    for (PSSMShadowSplitTextureMap::iterator tm_itr=_PSSMShadowSplitTextureMap.begin(); it!=_PSSMShadowSplitTextureMap.end(); it++)
 #endif
     {
         PSSMShadowSplitTexture pssmShadowSplitTexture = tm_itr->second;
@@ -692,7 +687,7 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
             const osg::Light* light = dynamic_cast<const osg::Light*>(itr->first.get());
             if (light)
             {
-                //ignore LightSource  ModelView Transform to avoid numeric oscillation meltdown
+                //OPEMW ignore LightSource ModelView Transform to avoid numeric oscillation meltdown
                 // if (matrix) lightpos = light->getPosition() * (*matrix);else
                 lightpos = light->getPosition();
                 //  if (matrix) lightDirection = light->getDirection() * (*matrix);else
@@ -702,11 +697,11 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
             }
         }
 
-      /*  osg::Matrix eyeToWorld;
-        eyeToWorld.invert(*cv.getModelViewMatrix());
+        /*  osg::Matrix eyeToWorld;
+          eyeToWorld.invert(*cv.getModelViewMatrix());
 
-        lightpos = lightpos * eyeToWorld;
-        lightDirection = lightDirection * eyeToWorld;*/
+          lightpos = lightpos * eyeToWorld;
+          lightDirection = lightDirection * eyeToWorld;*/
     } else {
         // take the user light as light source
         lightpos = _userLight->getPosition();
@@ -719,8 +714,8 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
 
     //OPENMW
     osg::StateAttribute::GLModeValue cullmode=(_enableCulling)?
-                osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE:
-                osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE;
+            osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE:
+            osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE;
 
     if (selectLight)
     {
@@ -736,11 +731,8 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
             // SETUP pssmShadowSplitTexture for rendering
             //
             pssmShadowSplitTexture._lightDirection = lightDirection;
-             pssmShadowSplitTexture._cameraView    = cv.getRenderInfo().getView()->getCamera()->getViewMatrix();
-            pssmShadowSplitTexture._cameraProj    = cv.getRenderInfo().getView()->getCamera()->getProjectionMatrix();
-
             pssmShadowSplitTexture._cameraView    = *cv.getModelViewMatrix();
-           pssmShadowSplitTexture._cameraProj    = *cv.getProjectionMatrix();
+            pssmShadowSplitTexture._cameraProj    = *cv.getProjectionMatrix();
             //////////////////////////////////////////////////////////////////////////
             // CALCULATE
 
@@ -779,17 +771,13 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
 
             pssmShadowSplitTexture._texgen->setMode(osg::TexGen::EYE_LINEAR);
             pssmShadowSplitTexture._texgen->setPlanesFromMatrix(MVPT);
-            //  MVPT.invert(MVPT);
-            osg::Matrix mv=* cv.getModelViewMatrix();
-            mv.invert(mv);
-            MVPT =( mv* MVPT) ;
-            _iMVPT->setElement(it->first,MVPT);
+
             ///OPEMW :terrain don't stop light at night with backface culling so disable face culling
             pssmShadowSplitTexture._camera->getStateSet()->setMode(GL_CULL_FACE,cullmode);
             //////////////////////////////////////////////////////////////////////////
 
             // do RTT camera traversal
-             pssmShadowSplitTexture._camera->accept(cv);
+            pssmShadowSplitTexture._camera->accept(cv);
 
             //////////////////////////////////////////////////////////////////////////
             // DEBUG
@@ -797,16 +785,15 @@ void ParallelSplitShadowMap::cull(osgUtil::CullVisitor& cv) {
                 pssmShadowSplitTexture._debug_camera->accept(cv);
             }
 
-#ifndef GL3
+
             orig_rs->getPositionalStateContainer()->addPositionedTextureAttribute(pssmShadowSplitTexture._textureUnit, cv.getModelViewMatrix(), pssmShadowSplitTexture._texgen.get());
-#endif
+
 
         }
     } // if light
 
     cv.setTraversalMask( traversalMask );
 }
-
 void ParallelSplitShadowMap::cleanSceneGraph() {
 
 }
