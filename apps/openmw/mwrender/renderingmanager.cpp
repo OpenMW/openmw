@@ -265,7 +265,7 @@ namespace MWRender
         sceneRoot->setStartLight(1);
 
         int shadowCastingTraversalMask = Mask_Scene | Mask_Actor| Mask_Player | Mask_Terrain;
-        int indoorShadowCastingTraversalMask = shadowCastingTraversalMask;
+        int indoorShadowCastingTraversalMask =   Mask_Actor| Mask_Player ;
 
         mShadowManager.reset(new ShadowManager( sceneRoot, scenegroup , shadowCastingTraversalMask, indoorShadowCastingTraversalMask, mResourceSystem->getSceneManager()->getShaderManager()));
 
@@ -499,6 +499,13 @@ namespace MWRender
     void RenderingManager::setSkyEnabled(bool enabled)
     {
         mSky->setEnabled(enabled);
+        if (enabled)
+            mShadowManager->enableOutdoorMode();
+        else
+        {
+            mSunLight->setDirection(osg::Vec3(0,0,-1));
+            mShadowManager->enableIndoorMode();
+        }
     }
 
     bool RenderingManager::toggleBorders()
