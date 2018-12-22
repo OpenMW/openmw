@@ -67,8 +67,9 @@ void main()
 
     float shadowing = unshadowedLightRatio();
 #if !PER_PIXEL_LIGHTING
-    //not shadowed
     gl_FragData[0] *= lighting;
+    gl_FragData[0].xyz = mix(ambientBias.y * gl_FragData[0].xyz, gl_FragData[0].xyz, shadowing);
+
 #else
     gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor,shadowing);
 
@@ -86,4 +87,5 @@ void main()
 
     float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
+
 }

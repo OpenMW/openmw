@@ -1,4 +1,7 @@
 #define SHADOWS @shadows_enabled
+#if !PER_PIXEL_LIGHTING
+uniform vec2 ambientBias;
+#endif
 #define NUMTEX @num_pssm_texture
 #define TEXOFFSET @texture_offset
 void setupShadowCoords(vec4 viewPos)

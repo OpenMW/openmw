@@ -115,8 +115,9 @@ void main()
 
     float shadowing = unshadowedLightRatio();
 #if !PER_PIXEL_LIGHTING
-    //no shadowing
     gl_FragData[0] *= lighting;
+    gl_FragData[0].xyz = mix(ambientBias.y * gl_FragData[0].xyz, gl_FragData[0].xyz, shadowing);
+
 #else
     gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor,shadowing);
 #endif
