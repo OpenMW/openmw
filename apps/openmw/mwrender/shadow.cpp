@@ -64,6 +64,8 @@ ShadowManager::ShadowManager(osg::Group* parent, osg::Group* sceneRoot,
 
         float ftemp = Settings::Manager::getFloat("pssm distlight", "Shadows");
         if(ftemp>0) pssm->setMinNearDistanceForSplits(ftemp);
+        ftemp = Settings::Manager::getFloat("viewing distance", "Camera");
+        if(ftemp>0) pssm->setMaxFarDistance(ftemp);
         int itemp = Settings::Manager::getInt("pssm textures resolution", "Shadows");
         if(itemp>0) pssm->setTextureResolution(itemp);
         itemp = Settings::Manager::getInt("pssm shadowmap count", "Shadows");
