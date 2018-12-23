@@ -52,6 +52,8 @@ namespace MWScript
 
                     Interpreter::Type_Float scale = runtime[0].mFloat;
                     runtime.pop();
+                    
+                    if (scale < 0) return;
 
                     MWBase::Environment::get().getWorld()->scaleObject(ptr,scale);
                 }
