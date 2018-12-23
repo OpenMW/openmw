@@ -108,7 +108,7 @@ namespace MWClass
             virtual bool canSwim (const MWWorld::ConstPtr &ptr) const;
             virtual bool canWalk (const MWWorld::ConstPtr &ptr) const;
 
-            virtual int getSkill(const MWWorld::Ptr &ptr, int skill) const;
+            virtual float getSkill(const MWWorld::Ptr &ptr, int skill) const;
 
             /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
             virtual int getBloodTexture (const MWWorld::ConstPtr& ptr) const;

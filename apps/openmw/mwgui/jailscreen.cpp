@@ -95,9 +95,9 @@ namespace MWGui
 
             MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill);
             if (skill == ESM::Skill::Security || skill == ESM::Skill::Sneak)
-                value.setBase(std::min(100, value.getBase()+1));
+                value.setBase(std::min(100.f, value.getBase()+1));
             else
-                value.setBase(std::max(0, value.getBase()-1));
+                value.setBase(std::max(0.f, value.getBase()-1));
         }
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();

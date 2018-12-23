@@ -468,7 +468,7 @@ MWMechanics::Alchemy::TEffectsIterator MWMechanics::Alchemy::endEffects() const
 
 bool MWMechanics::Alchemy::knownEffect(unsigned int potionEffectIndex, const MWWorld::Ptr &npc)
 {
-    int alchemySkill = npc.getClass().getSkill (npc, ESM::Skill::Alchemy);
+    float alchemySkill = npc.getClass().getSkill (npc, ESM::Skill::Alchemy);
     static const float fWortChanceValue =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->mValue.getFloat();
     return (potionEffectIndex <= 1 && alchemySkill >= fWortChanceValue)

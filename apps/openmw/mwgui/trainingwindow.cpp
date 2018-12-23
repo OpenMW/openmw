@@ -74,11 +74,11 @@ namespace MWGui
         mPlayerGold->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
 
         // NPC can train you in his best 3 skills
-        std::vector< std::pair<int, int> > skills;
+        std::vector< std::pair<int, float> > skills;
 
         for (int i=0; i<ESM::Skill::Length; ++i)
         {
-            int value = actor.getClass().getSkill(actor, i);
+            float value = actor.getClass().getSkill(actor, i);
 
             skills.push_back(std::make_pair(i, value));
         }

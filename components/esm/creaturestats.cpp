@@ -4,8 +4,9 @@
 
 void ESM::CreatureStats::load (ESMReader &esm)
 {
+    bool intFallback = esm.getFormat() < 11;
     for (int i=0; i<8; ++i)
-        mAttributes[i].load (esm);
+        mAttributes[i].load (esm, intFallback);
 
     for (int i=0; i<3; ++i)
         mDynamic[i].load (esm);

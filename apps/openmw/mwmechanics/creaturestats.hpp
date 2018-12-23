@@ -138,7 +138,7 @@ namespace MWMechanics
 
         void setAttribute(int index, const AttributeValue &value);
         // Shortcut to set only the base
-        void setAttribute(int index, int base);
+        void setAttribute(int index, float base);
 
         void setHealth(const DynamicStat<float> &value);
 

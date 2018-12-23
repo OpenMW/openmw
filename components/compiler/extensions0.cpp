@@ -423,13 +423,13 @@ namespace Compiler
 
             for (int i=0; i<numberOfAttributes; ++i)
             {
-                extensions.registerFunction (get + attributes[i], 'l', "",
+                extensions.registerFunction (get + attributes[i], 'f', "",
                     opcodeGetAttribute+i, opcodeGetAttributeExplicit+i);
 
-                extensions.registerInstruction (set + attributes[i], "l",
+                extensions.registerInstruction (set + attributes[i], "f",
                     opcodeSetAttribute+i, opcodeSetAttributeExplicit+i);
 
-                extensions.registerInstruction (mod + attributes[i], "l",
+                extensions.registerInstruction (mod + attributes[i], "f",
                     opcodeModAttribute+i, opcodeModAttributeExplicit+i);
             }
 
@@ -453,13 +453,13 @@ namespace Compiler
 
             for (int i=0; i<numberOfSkills; ++i)
             {
-                extensions.registerFunction (get + skills[i], 'l', "",
+                extensions.registerFunction (get + skills[i], 'f', "",
                     opcodeGetSkill+i, opcodeGetSkillExplicit+i);
 
-                extensions.registerInstruction (set + skills[i], "l",
+                extensions.registerInstruction (set + skills[i], "f",
                     opcodeSetSkill+i, opcodeSetSkillExplicit+i);
 
-                extensions.registerInstruction (mod + skills[i], "l",
+                extensions.registerInstruction (mod + skills[i], "f",
                     opcodeModSkill+i, opcodeModSkillExplicit+i);
             }
 

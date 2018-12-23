@@ -31,8 +31,8 @@ namespace ESM
         int mCurrentCrimeId;
         int mPaidCrimeId;
 
-        StatState<int> mSaveAttributes[ESM::Attribute::Length];
-        StatState<int> mSaveSkills[ESM::Skill::Length];
+        StatState<float> mSaveAttributes[ESM::Attribute::Length];
+        StatState<float> mSaveSkills[ESM::Skill::Length];
 
         typedef std::map<std::string, std::string> PreviousItems; // previous equipped items, needed for bound spells
         PreviousItems mPreviousItems;

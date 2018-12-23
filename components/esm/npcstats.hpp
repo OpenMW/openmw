@@ -31,7 +31,7 @@ namespace ESM
 
         std::map<std::string, Faction> mFactions; // lower case IDs
         int mDisposition;
-        StatState<int> mSkills[27];
+        StatState<float> mSkills[27];
         int mBounty;
         int mReputation;
         int mWerewolfKills;

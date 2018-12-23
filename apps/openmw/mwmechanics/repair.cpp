@@ -32,9 +32,9 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
 
     float fatigueTerm = stats.getFatigueTerm();
-    int pcStrength = stats.getAttribute(ESM::Attribute::Strength).getModified();
-    int pcLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
-    int armorerSkill = player.getClass().getSkill(player, ESM::Skill::Armorer);
+    float pcStrength = stats.getAttribute(ESM::Attribute::Strength).getModified();
+    float pcLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
+    float armorerSkill = player.getClass().getSkill(player, ESM::Skill::Armorer);
 
     float fRepairAmountMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
             .find("fRepairAmountMult")->mValue.getFloat();

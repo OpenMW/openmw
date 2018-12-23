@@ -20,7 +20,7 @@ namespace ESM
 
         StatState();
 
-        void load (ESMReader &esm);
+        void load (ESMReader &esm, bool intFallback = false);
         void save (ESMWriter &esm) const;
     };
 }

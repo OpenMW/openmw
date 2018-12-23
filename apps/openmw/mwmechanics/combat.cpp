@@ -101,7 +101,7 @@ namespace MWMechanics
             blockerTerm *= gmst.find("fBlockStillBonus")->mValue.getFloat();
         blockerTerm *= blockerStats.getFatigueTerm();
 
-        int attackerSkill = 0;
+        float attackerSkill = 0;
         if (weapon.isEmpty())
             attackerSkill = attacker.getClass().getSkill(attacker, ESM::Skill::HandToHand);
         else

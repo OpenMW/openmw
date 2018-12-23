@@ -126,7 +126,7 @@ namespace MWMechanics
         return mMagicEffects;
     }
 
-    void CreatureStats::setAttribute(int index, int base)
+    void CreatureStats::setAttribute(int index, float base)
     {
         AttributeValue current = getAttribute(index);
         current.setBase(base);
@@ -152,10 +152,10 @@ namespace MWMechanics
                      index == ESM::Attribute::Agility ||
                      index == ESM::Attribute::Endurance)
             {
-                int strength     = getAttribute(ESM::Attribute::Strength).getModified();
-                int willpower    = getAttribute(ESM::Attribute::Willpower).getModified();
-                int agility      = getAttribute(ESM::Attribute::Agility).getModified();
-                int endurance    = getAttribute(ESM::Attribute::Endurance).getModified();
+                float strength     = getAttribute(ESM::Attribute::Strength).getModified();
+                float willpower    = getAttribute(ESM::Attribute::Willpower).getModified();
+                float agility      = getAttribute(ESM::Attribute::Agility).getModified();
+                float endurance    = getAttribute(ESM::Attribute::Endurance).getModified();
                 DynamicStat<float> fatigue = getFatigue();
                 float diff = (strength+willpower+agility+endurance) - fatigue.getBase();
                 float currentToBaseRatio = fatigue.getBase() > 0 ? (fatigue.getCurrent() / fatigue.getBase()) : 0;
