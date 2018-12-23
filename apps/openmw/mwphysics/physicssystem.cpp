@@ -1339,7 +1339,7 @@ namespace MWPhysics
             float heightDiff = position.z() - oldHeight;
 
             MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
-            if ((wasOnGround && physicActor->getOnGround()) || flying || world->isSwimming(iter->first) || slowFall < 1)
+            if ((numSteps > 0 && wasOnGround && physicActor->getOnGround()) || flying || world->isSwimming(iter->first) || slowFall < 1)
                 stats.land(iter->first == player);
             else if (heightDiff < 0)
                 stats.addToFallHeight(-heightDiff);
