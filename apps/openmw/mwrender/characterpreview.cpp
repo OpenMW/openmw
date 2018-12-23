@@ -24,6 +24,7 @@
 
 #include "../mwmechanics/actorutil.hpp"
 
+#include "shadow.hpp"
 #include "npcanimation.hpp"
 #include "vismask.hpp"
 
@@ -151,6 +152,7 @@ namespace MWRender
         defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         stateset->setAttribute(defaultMat);
+        stateset->addUniform(ShadowManager::getUnshadowedUniform());
 
         // assign large value to effectively turn off fog
         // shaders don't respect glDisable(GL_FOG)

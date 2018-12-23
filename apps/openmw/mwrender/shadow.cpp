@@ -1,5 +1,5 @@
 #include "shadow.hpp"
-
+#include "parallelsplitshadowmap.hpp"
 #include <osgShadow/ShadowSettings>
 #include <osgShadow/ViewDependentShadowMap>
 
@@ -9,6 +9,13 @@ using namespace osgShadow;
 
 namespace MWRender
 {
+
+/*static */osg::ref_ptr<osg::Uniform> ShadowManager::_unshadowedAmbientBias=0;
+/*static */osg::Uniform* ShadowManager::getUnshadowedUniform()
+{
+    if(!_unshadowedAmbientBias.valid()) _unshadowedAmbientBias = new osg::Uniform("ambientBias",osg::Vec2(1,1));
+    return _unshadowedAmbientBias ;
+}
 
 Shader::ShaderManager::DefineMap ShadowManager::getShadowDefines()
 {
@@ -30,15 +37,10 @@ Shader::ShaderManager::DefineMap getShadowsDisabledDefines()
     return definesWithShadows;
 }
 
+/*useless (for the moment current pssm don't use shadowsettings for the moment)*/
 void ShadowManager::setupShadowSettings()
 {
-    /*useless (for the moment current pssm don't use shadowsettings for the moment)*/
     mShadowSettings->setLightNum(0);
-    mShadowSettings->setReceivesShadowTraversalMask(~0u);
-
-    int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
-    mShadowSettings->setNumShadowMapsPerLight(numberOfShadowMapsPerLight);
-
 }
 
 ShadowManager::ShadowManager(osg::Group* parent, osg::Group* sceneRoot,

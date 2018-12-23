@@ -231,7 +231,8 @@ namespace MWRender
 
         osg::ref_ptr<osg::Group> scenegroup=new osg::Group;
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager;
-        mSceneRoot = scenegroup;
+        mSceneRoot = sceneRoot;
+        mShadoweSceneRoot = scenegroup;
         sceneRoot->setLightingMask(Mask_Lighting);
 
         mRootNode->addChild(sceneRoot);
@@ -268,7 +269,6 @@ namespace MWRender
         int indoorShadowCastingTraversalMask =   Mask_Actor| Mask_Player ;
 
         mShadowManager.reset(new ShadowManager( sceneRoot, scenegroup , shadowCastingTraversalMask, indoorShadowCastingTraversalMask, mResourceSystem->getSceneManager()->getShaderManager()));
-
         mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
         mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
         mPathgrid.reset(new Pathgrid(mRootNode));
@@ -947,8 +947,21 @@ namespace MWRender
         rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * cameraTransform);
 
         rttCamera->setUpdateCallback(new NoTraverseCallback);
-        rttCamera->addChild(mSceneRoot);
 
+        ///remove shadowedscene from scenegraph to avoid infinite loop
+        osg::ref_ptr<osg::Group> sceneclone=(osg::Group* )mSceneRoot-> clone(osg::CopyOp::SHALLOW_COPY);
+        sceneclone->removeChild(mShadoweSceneRoot->getParent(0));
+        sceneclone->addChild(mShadoweSceneRoot);
+
+        osg::ref_ptr<osg::StateSet> stateset=new osg::StateSet();
+        stateset->merge(*mSceneRoot->getOrCreateStateSet());
+        if(mShadowManager->isShadowEnable())
+            stateset->merge(*mShadowManager->getShadowedStateSet());
+        else
+            stateset->addUniform(ShadowManager::getUnshadowedUniform());
+        sceneclone->setStateSet(stateset);
+
+        rttCamera->addChild(sceneclone);
         rttCamera->addChild(mWater->getReflectionCamera());
         rttCamera->addChild(mWater->getRefractionCamera());
 
@@ -1124,7 +1137,7 @@ namespace MWRender
             mPlayerNode = new SceneUtil::PositionAttitudeTransform;
             mPlayerNode->setNodeMask(Mask_Player);
             mPlayerNode->setName("Player Root");
-            mSceneRoot->addChild(mPlayerNode);
+            mShadoweSceneRoot->addChild(mPlayerNode);
         }
 
         mPlayerNode->setUserDataContainer(new osg::DefaultUserDataContainer);

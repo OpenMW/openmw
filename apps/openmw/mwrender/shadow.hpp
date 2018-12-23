@@ -17,11 +17,22 @@ namespace MWRender
                       Shader::ShaderManager &shaderManager);
         ~ShadowManager() = default;
 
+        /// @return true if Shadowing is enabled
+        inline bool isShadowEnable() const { return mEnableShadows;}
+
+        /// @return current shadowStateSet (to reuse shadowmap result map&texgen)
+        osg::StateSet * getShadowedStateSet(){ return mOutdoorShadowTechnique->getShadowedStateSet(); }
+
+        /// @return an uniform to nullify shadow
+        static osg::Uniform* getUnshadowedUniform();
+
         void enableIndoorMode();
 
         void enableOutdoorMode();
 
+        osgShadow::ShadowSettings* getShadowSettings(){return mShadowSettings;}
     protected:
+        static osg::ref_ptr<osg::Uniform> _unshadowedAmbientBias;
         void setupShadowSettings();
         Shader::ShaderManager::DefineMap getShadowDefines();
 
