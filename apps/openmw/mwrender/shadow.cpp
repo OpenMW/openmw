@@ -93,7 +93,11 @@ ShadowManager::ShadowManager(osg::Group* parent, osg::Group* sceneRoot,
         enableOutdoorMode();
         shadowDefines = getShadowDefines();
     }
-    else shadowDefines = getShadowsDisabledDefines();
+    else{
+        //ensure parent aware shadow is disable
+        parent->getOrCreateStateSet()->addUniform(ShadowManager::getUnshadowedUniform());
+        shadowDefines = getShadowsDisabledDefines();
+    }
 
     Shader::ShaderManager::DefineMap globalDefines = shaderManager.getGlobalDefines();
 
