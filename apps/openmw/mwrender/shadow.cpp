@@ -64,6 +64,8 @@ ShadowManager::ShadowManager(osg::Group* parent, osg::Group* sceneRoot,
 
         float ftemp = Settings::Manager::getFloat("pssm distlight", "Shadows");
         if(ftemp>0) pssm->setMinNearDistanceForSplits(ftemp);
+        bool btemp = Settings::Manager::getBool("pssm exp split scheme", "Shadows");
+        pssm->setSplitCalculationMode(btemp?ParallelSplitShadowMap::SPLIT_EXP:ParallelSplitShadowMap::SPLIT_LINEAR);
         ftemp = Settings::Manager::getFloat("viewing distance", "Camera");
         if(ftemp>0) pssm->setMaxFarDistance(ftemp);
         int itemp = Settings::Manager::getInt("pssm textures resolution", "Shadows");
