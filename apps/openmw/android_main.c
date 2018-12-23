@@ -20,14 +20,14 @@ void releaseArgv();
 
 int Java_org_libsdl_app_SDLActivity_getMouseX(JNIEnv *env, jclass cls, jobject obj) {
     int ret = 0;
-    SDL_GetMouseState(&ret, nullptr);
+    SDL_GetMouseState(&ret, NULL);
     return ret;
 }
 
 
 int Java_org_libsdl_app_SDLActivity_getMouseY(JNIEnv *env, jclass cls, jobject obj) {
     int ret = 0;
-    SDL_GetMouseState(nullptr, &ret);
+    SDL_GetMouseState(NULL, &ret);
     return ret;
 }
 
