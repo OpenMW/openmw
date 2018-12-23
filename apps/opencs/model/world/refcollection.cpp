@@ -1,8 +1,5 @@
 #include "refcollection.hpp"
 
-#include <sstream>
-
-#include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/esm/loadcell.hpp>
 
@@ -32,40 +29,31 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
         if (cell.get().isExterior())
         {
-            // ignoring moved references sub-record; instead calculate cell from coordinates
+            // Autocalculate the cell index from coordinates first
             std::pair<int, int> index = ref.getCellIndex();
 
-            std::ostringstream stream;
-            stream << "#" << index.first << " " << index.second;
+            ref.mCell = "#" + std::to_string(index.first) + " " + std::to_string(index.second);
 
-            ref.mCell = stream.str();
-
-            if (!base &&                  // don't try to update base records
-                mref.mRefNum.mIndex != 0) // MVRF tag found
+            // Handle non-base moved references
+            if (!base && mref.mRefNum.mIndex != 0)
             {
-                // there is a requirement for a placeholder where the original object was
-                //
-                // see the forum discussions here for more details:
-                // https://forum.openmw.org/viewtopic.php?f=6&t=577&start=30
+                // Moved references must have a link back to their original cell
+                // See discussion: https://forum.openmw.org/viewtopic.php?f=6&t=577&start=30
                 ref.mOriginalCell = cell2.mId;
 
-                // It is not always possibe to ignore moved references sub-record and
-                // calculate from coordinates. Some mods may place the ref in positions
-                // outside normal bounds, resulting in non sensical cell id's.  This often
-                // happens if the moved ref was deleted.
-                //
-                // Use the target cell from the MVRF tag but if different output an error
-                // message
+                // Some mods may move references outside of the bounds, which often happens they are deleted.
+                // This results in nonsensical autocalculated cell IDs, so we must use the record target cell.
+
+                // Log a warning if the record target cell is different
                 if (index.first != mref.mTarget[0] || index.second != mref.mTarget[1])
                 {
-                    Log(Debug::Warning) << "Warning: the Position of moved ref "
-                        << ref.mRefID << " does not match the target cell";
-                    Log(Debug::Warning) << "Position: #" << index.first << " " << index.second
-                        <<", Target #"<< mref.mTarget[0] << " " << mref.mTarget[1];
+                    std::string indexCell = ref.mCell;
+                    ref.mCell = "#" + std::to_string(mref.mTarget[0]) + " " + std::to_string(mref.mTarget[1]);
 
-                    stream.clear();
-                    stream << "#" << mref.mTarget[0] << " " << mref.mTarget[1];
-                    ref.mCell = stream.str(); // overwrite
+                    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Cell, mCells.getId (cellIndex));
+                    messages.add(id, "The position of the moved reference " + ref.mRefID + " (cell " + indexCell + ")"
+                                     " does not match the target cell (" + ref.mCell + ")",
+                                     std::string(), CSMDoc::Message::Severity_Warning);
                 }
             }
         }
@@ -87,7 +75,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
                 CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Cell,
                     mCells.getId (cellIndex));
 
-                messages.add (id, "Attempt to delete a non-existing reference");
+                messages.add (id, "Attempt to delete a non-existent reference");
                 continue;
             }
 
@@ -140,7 +128,5 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
 std::string CSMWorld::RefCollection::getNewId()
 {
-    std::ostringstream stream;
-    stream << "ref#" << mNextId++;
-    return stream.str();
+    return "ref#" + std::to_string(mNextId++);
 }
