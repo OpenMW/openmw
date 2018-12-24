@@ -141,10 +141,6 @@ namespace MWGui
             int w = renderInfo.getCurrentCamera()->getViewport()->width();
             int h = renderInfo.getCurrentCamera()->getViewport()->height();
             mTexture->copyTexImage2D(*renderInfo.getState(), 0, 0, w, h);
-
-            // Callback removes itself when done
-            if (renderInfo.getCurrentCamera())
-                renderInfo.getCurrentCamera()->setInitialDrawCallback(nullptr);
         }
 
     private:
@@ -308,6 +304,8 @@ namespace MWGui
             mGuiTexture.reset(new osgMyGUI::OSGTexture(mTexture));
         }
 
+        // Notice that the next time this is called, the current CopyFramebufferToTextureCallback will be deleted
+        // so there's no memory leak as at most one object of type CopyFramebufferToTextureCallback is allocated at a time.
         mViewer->getCamera()->setInitialDrawCallback(new CopyFramebufferToTextureCallback(mTexture));
 
         mBackgroundImage->setBackgroundImage("");
