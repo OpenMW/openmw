@@ -952,6 +952,8 @@ namespace MWRender
         ///remove shadowedscene from scenegraph to avoid infinite loop
         osg::ref_ptr<osg::Group> sceneclone=(osg::Group* )mSceneRoot-> clone(osg::CopyOp::SHALLOW_COPY);
         sceneclone->removeChild(mShadoweSceneRoot->getParent(0));
+        osgUtil::UpdateVisitor fakecv;
+        mStateUpdater->operator ()(sceneclone,&fakecv);
         sceneclone->addChild(mShadoweSceneRoot);
 
         osg::ref_ptr<osg::StateSet> stateset=new osg::StateSet();
@@ -962,6 +964,7 @@ namespace MWRender
             stateset->addUniform(ShadowManager::getUnshadowedUniform());
         sceneclone->setStateSet(stateset);
 
+
         rttCamera->addChild(sceneclone);
         rttCamera->addChild(mWater->getReflectionCamera());
         rttCamera->addChild(mWater->getRefractionCamera());
@@ -971,6 +974,8 @@ namespace MWRender
         rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         renderCameraToImage(rttCamera.get(),image,w,h);
+
+
     }
 
     osg::Vec4f RenderingManager::getScreenBounds(const MWWorld::Ptr& ptr)
