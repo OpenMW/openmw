@@ -133,11 +133,15 @@ namespace MWGui
     public:
         CopyFramebufferToTextureCallback(osg::Texture2D* texture)
             : mTexture(texture)
+            , oneshot(true)
         {
         }
 
         virtual void operator () (osg::RenderInfo& renderInfo) const
         {
+            if (!oneshot)
+                return;
+            oneshot = false;
             int w = renderInfo.getCurrentCamera()->getViewport()->width();
             int h = renderInfo.getCurrentCamera()->getViewport()->height();
             mTexture->copyTexImage2D(*renderInfo.getState(), 0, 0, w, h);
@@ -145,6 +149,7 @@ namespace MWGui
 
     private:
         osg::ref_ptr<osg::Texture2D> mTexture;
+        mutable bool oneshot;
     };
 
     class DontComputeBoundCallback : public osg::Node::ComputeBoundingSphereCallback
