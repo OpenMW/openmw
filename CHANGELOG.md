@@ -3,8 +3,9 @@
 
     Bug #2987: Editor: some chance and AI data fields can overflow
     Bug #3623: Fix HiDPI on Windows
-    Bug #4411: Reloading a saved game while falling prevents damage in some cases
+    Bug #4329: Removed birthsign abilities are restored after reloading the save
     Bug #4383: Bow model obscures crosshair when arrow is drawn
+    Bug #4411: Reloading a saved game while falling prevents damage in some cases
     Bug #4540: Rain delay when exiting water
     Bug #4701: PrisonMarker record is not hardcoded like other markers
     Bug #4714: Crash upon game load in the repair menu while the "Your repair failed!" message is active
