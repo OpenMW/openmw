@@ -48,7 +48,8 @@ public:
             return btScalar( 1 );
 
         // override data for actor-actor collisions
-        // vanilla Morrowind seems to make overlapping actors collide as though they both have a diameter of the distance between them
+        // vanilla Morrowind seems to make overlapping actors collide as though they are both cylinders with a diameter of the distance between them
+        // For some reason this doesn't work as well as it should when using capsules, but it still helps a lot.
         if(convexResult.m_hitCollisionObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor)
         {
             ActorOverlapTester isOverlapping;

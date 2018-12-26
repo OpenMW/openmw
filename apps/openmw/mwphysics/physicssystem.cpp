@@ -459,6 +459,7 @@ namespace MWPhysics
                 // - non-actors
                 // - things that are flat walls or facing upwards (no downwards-facing walls or ceilings)
                 // note that we want to attempt stepping even against too-steep slopes/sloped walls because they might be the side of a short step
+                // the third test can cause problems when bullet returns inaccurate collision normals; should we consider making it tolerate a small downwards slope?
                 if (hitHeight < sStepSizeUp && !isActor(tracer.mHitObject) && tracer.mPlaneNormal.z() >= 0.0f)
                 {
                     // Try to step up onto it.
@@ -479,7 +480,7 @@ namespace MWPhysics
                     auto normVelocity = velocity;
                     auto moveDistance = normVelocity.normalize();
 
-                    // Stairstepping failed, need to advance to and slide across whatever we hit
+                    // Stairstepping failed, need to advance to, eject from, and slide across whatever we hit
 
                     // advance if distance greater than safety margin
                     if(moveDistance*tracer.mFraction > sSafetyMargin)
@@ -524,9 +525,13 @@ namespace MWPhysics
                         newPosition += virtualNormal*sSafetyMargin;
                     }
 
-                    // Do not allow sliding upward if we're walking or jumping on land.
+                    // then do not allow sliding upward if we're walking or jumping on land
+                    // FIXME: this shouldn't be triggered if the actor is standing on walkable land
                     if(newPosition.z() >= swimlevel && !isFlying)
                         newVelocity.z() = std::min(newVelocity.z(), std::max(velocity.z(), 0.0f));
+
+                    // If we're in a crevice, we need to slide along the seam between two collision surfaces,
+                    // or else we get bounced back and forth between two of them until we run out of iterations.
 
                     // check for colliding with acute convex corners; handling of acute crevices
                     if ((numTimesSlid > 0 && lastSlideNormal * virtualNormal <= 0.0f) || (numTimesSlid > 1 && lastSlideFallbackNormal * virtualNormal <= 0.0f))
@@ -537,7 +542,7 @@ namespace MWPhysics
                             break;
                         }
 
-                        // if we've already slid we should pick the best last normal to use
+                        // if we've already slid we should pick the best previous collision normal to use
                         osg::Vec3f bestNormal = lastSlideNormal;
                         float product_older = 1;
                         float product_newer = 1;

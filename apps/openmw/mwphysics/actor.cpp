@@ -74,7 +74,8 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     mCollisionObject->setCollisionShape(mShape.get());
     mCollisionObject->setUserPointer(static_cast<PtrHolder*>(this));
 
-    updateRotation();
+    if (!mRotationallyInvariant)
+        updateRotation();
     updateScale();
     updatePosition();
 
@@ -120,7 +121,6 @@ int Actor::getCollisionMask()
     if (mCanWaterWalk)
         collisionMask |= CollisionType_Water;
     return collisionMask;
-    
 }
 
 void Actor::updatePosition()
