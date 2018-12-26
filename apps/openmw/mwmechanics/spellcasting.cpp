@@ -26,6 +26,7 @@
 #include "npcstats.hpp"
 #include "actorutil.hpp"
 #include "aifollow.hpp"
+#include "weapontype.hpp"
 
 namespace MWMechanics
 {
@@ -880,8 +881,9 @@ namespace MWMechanics
         bool isProjectile = false;
         if (item.getTypeName() == typeid(ESM::Weapon).name())
         {
-            const MWWorld::LiveCellRef<ESM::Weapon> *ref = item.get<ESM::Weapon>();
-            isProjectile = ref->mBase->mData.mType == ESM::Weapon::Arrow || ref->mBase->mData.mType == ESM::Weapon::Bolt || ref->mBase->mData.mType == ESM::Weapon::MarksmanThrown;
+            int type = item.get<ESM::Weapon>()->mBase->mData.mType;
+            MWMechanics::WeaponClass weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
+            isProjectile = (weapclass == MWMechanics::WeaponClass::Thrown || weapclass == MWMechanics::WeaponClass::Ranged);
         }
 
         if (isProjectile || !mTarget.isEmpty())

@@ -32,6 +32,7 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/aipackage.hpp"
+#include "../mwmechanics/weapontype.hpp"
 
 #include "../mwrender/animation.hpp"
 #include "../mwrender/vismask.hpp"
@@ -317,7 +318,11 @@ namespace MWWorld
         state.mIdArrow = projectile.getCellRef().getRefId();
         state.mCasterHandle = actor;
         state.mAttackStrength = attackStrength;
-        state.mThrown = projectile.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown;
+        state.mThrown = false;
+
+        int type = projectile.get<ESM::Weapon>()->mBase->mData.mType;
+        if (MWMechanics::getWeaponType(type)->mWeaponClass == MWMechanics::WeaponClass::Thrown)
+            state.mThrown = true;
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
@@ -602,7 +607,11 @@ namespace MWWorld
                 MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), esm.mId);
                 MWWorld::Ptr ptr = ref.getPtr();
                 model = ptr.getClass().getModel(ptr);
-                state.mThrown = ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown;
+                state.mThrown = false;
+
+                int weaponType = ptr.get<ESM::Weapon>()->mBase->mData.mType;
+                if (MWMechanics::getWeaponType(weaponType)->mWeaponClass == MWMechanics::WeaponClass::Thrown)
+                    state.mThrown = true;
             }
             catch(...)
             {

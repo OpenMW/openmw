@@ -537,6 +537,13 @@ namespace NifOsg
                         // Marker objects. These meshes are only visible in the editor.
                         hasMarkers = true;
                     }
+                    else if(sd->string == "BONE")
+                    {
+                        // Do not allow to optimize custom bones
+                        // TODO: find a better solution
+                        node->getOrCreateUserDataContainer()->addDescription("CustomBone");
+                        node->setDataVariance(osg::Object::DYNAMIC);
+                    }
                 }
             }
 

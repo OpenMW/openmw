@@ -238,6 +238,25 @@ namespace
         std::vector<std::pair<osg::Node*, osg::Group*> > mToRemove;
     };
 
+    class GetExtendedBonesVisitor : public osg::NodeVisitor
+    {
+    public:
+        GetExtendedBonesVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        void apply(osg::Node& node)
+        {
+            if (SceneUtil::hasUserDescription(&node, "CustomBone"))
+                mFoundBones.push_back(std::make_pair(&node, node.getParent(0)));
+
+            traverse(node);
+        }
+
+        std::vector<std::pair<osg::Node*, osg::Group*> > mFoundBones;
+    };
+
     class RemoveFinishedCallbackVisitor : public RemoveVisitor
     {
     public:
@@ -1469,8 +1488,66 @@ namespace MWRender
             state->second.mLoopingEnabled = enabled;
     }
 
-    osg::ref_ptr<osg::Node> getModelInstance(Resource::SceneManager* sceneMgr, const std::string& model, bool baseonly)
+    void loadBonesFromFile(osg::ref_ptr<osg::Node>& baseNode, const std::string &model, Resource::ResourceSystem* resourceSystem)
     {
+        const osg::Node* node = resourceSystem->getSceneManager()->getTemplate(model).get();
+        osg::ref_ptr<osg::Node> sheathSkeleton (const_cast<osg::Node*>(node)); // const-trickery required because there is no const version of NodeVisitor
+
+        GetExtendedBonesVisitor getBonesVisitor;
+        sheathSkeleton->accept(getBonesVisitor);
+        for (auto& nodePair : getBonesVisitor.mFoundBones)
+        {
+            SceneUtil::FindByNameVisitor findVisitor (nodePair.second->getName());
+            baseNode->accept(findVisitor);
+
+            osg::Group* sheathParent = findVisitor.mFoundNode;
+            if (sheathParent)
+            {
+                osg::Node* copy = osg::clone(nodePair.first, osg::CopyOp::DEEP_COPY_NODES);
+                sheathParent->addChild(copy);
+            }
+        }
+    }
+
+    void injectCustomBones(osg::ref_ptr<osg::Node>& node, const std::string& model, Resource::ResourceSystem* resourceSystem)
+    {
+        const std::map<std::string, VFS::File*>& index = resourceSystem->getVFS()->getIndex();
+
+        std::string animationPath = model;
+        if (animationPath.find("meshes") == 0)
+        {
+            animationPath.replace(0, 6, "animations");
+        }
+        animationPath.replace(animationPath.size()-4, 4, "/");
+
+        resourceSystem->getVFS()->normalizeFilename(animationPath);
+
+        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(animationPath);
+        while (found != index.end())
+        {
+            const std::string& name = found->first;
+            if (name.size() >= animationPath.size() && name.substr(0, animationPath.size()) == animationPath)
+            {
+                size_t pos = name.find_last_of('.');
+                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".nif") == 0)
+                    loadBonesFromFile(node, name, resourceSystem);
+            }
+            else
+                break;
+            ++found;
+        }
+    }
+
+    enum InjectType
+    {
+        None,
+        Model,
+        ModelWithFallback
+    };
+
+    osg::ref_ptr<osg::Node> getModelInstance(Resource::ResourceSystem* resourceSystem, const std::string& model, bool baseonly, InjectType inject)
+    {
+        Resource::SceneManager* sceneMgr = resourceSystem->getSceneManager();
         if (baseonly)
         {
             typedef std::map<std::string, osg::ref_ptr<osg::Node> > Cache;
@@ -1479,6 +1556,12 @@ namespace MWRender
             if (found == cache.end())
             {
                 osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
+
+                if (inject == InjectType::ModelWithFallback)
+                    injectCustomBones(created, "meshes\\xbase_anim.nif", resourceSystem);
+
+                if (inject != InjectType::None)
+                    injectCustomBones(created, model, resourceSystem);
 
                 SceneUtil::CleanObjectRootVisitor removeDrawableVisitor;
                 created->accept(removeDrawableVisitor);
@@ -1492,7 +1575,17 @@ namespace MWRender
                 return sceneMgr->createInstance(found->second);
         }
         else
-            return sceneMgr->getInstance(model);
+        {
+            osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
+
+            if (inject == InjectType::ModelWithFallback)
+                injectCustomBones(created, "meshes\\xbase_anim.nif", resourceSystem);
+
+            if (inject != InjectType::None)
+                injectCustomBones(created, model, resourceSystem);
+
+            return created;
+        }
     }
 
     void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature)
@@ -1514,9 +1607,18 @@ namespace MWRender
         mAccumRoot = nullptr;
         mAccumCtrl = nullptr;
 
+        static const bool useAdditionalSources = Settings::Manager::getBool ("use additional anim sources", "Game");
+        InjectType inject = useAdditionalSources && mPtr.getClass().isActor() ? InjectType::Model : InjectType::None;
+        if (inject != InjectType::None && isCreature)
+        {
+            MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
+            if((ref->mBase->mFlags&ESM::Creature::Bipedal))
+                inject = InjectType::ModelWithFallback;
+        }
+
         if (!forceskeleton)
         {
-            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem->getSceneManager(), model, baseonly);
+            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem, model, baseonly, inject);
             mInsert->addChild(created);
             mObjectRoot = created->asGroup();
             if (!mObjectRoot)
@@ -1532,7 +1634,7 @@ namespace MWRender
         }
         else
         {
-            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem->getSceneManager(), model, baseonly);
+            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem, model, baseonly, inject);
             osg::ref_ptr<SceneUtil::Skeleton> skel = dynamic_cast<SceneUtil::Skeleton*>(created.get());
             if (!skel)
             {

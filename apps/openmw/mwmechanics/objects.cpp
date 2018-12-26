@@ -9,6 +9,7 @@
 
 #include "character.hpp"
 #include "movement.hpp"
+#include "weapontype.hpp"
 
 namespace MWMechanics
 {

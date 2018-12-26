@@ -21,6 +21,10 @@ struct Weapon
 
     enum Type
     {
+        PickProbe = -4,
+        HandToHand = -3,
+        Spell = -2,
+        None = -1,
         ShortBladeOneHand = 0,
         LongBladeOneHand = 1,
         LongBladeTwoHand = 2,
