@@ -1,7 +1,7 @@
 #include "actor.hpp"
 
+#include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
-#include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -12,6 +12,7 @@
 
 #include "convert.hpp"
 #include "collisiontype.hpp"
+
 namespace MWPhysics
 {
 
@@ -28,7 +29,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     mHalfExtents = shape->mCollisionBoxHalfExtents;
     mMeshTranslation = shape->mCollisionBoxTranslate;
 
-    // We can not create actors without collisions - they will fall through the ground.
+    // We can not create actor without collisions - he will fall through the ground.
     // In this case we should autogenerate collision box based on mesh shape
     // (NPCs have bodyparts and use a different approach)
     if (!ptr.getClass().isNpc() && mHalfExtents.length2() == 0.f)
@@ -53,16 +54,17 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
             Log(Debug::Error) << "Error: Failed to calculate bounding box for actor \"" << ptr.getCellRef().getRefId() << "\".";
     }
 
-    mRotationallyInvariant = true;
-
-    // With vanilla Morrowind's assets, bounding boxes can not only be non-square, but also off-center!
-    // Vanilla Morrowind's engine seems to do... something...? with this, but rotating hulls are a serious no-no.
-
-    double halfExtentWidth = (mHalfExtents.x() + mHalfExtents.y())/2;
-    mHalfExtents.x() = halfExtentWidth;
-    mHalfExtents.y() = halfExtentWidth;
-
-    mShape.reset(new btBoxShape(toBullet(mHalfExtents)));
+    // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
+    if (std::abs(mHalfExtents.x()-mHalfExtents.y())<mHalfExtents.x()*0.05 && mHalfExtents.z() >= mHalfExtents.x())
+    {
+        mShape.reset(new btCapsuleShapeZ(mHalfExtents.x(), 2*mHalfExtents.z() - 2*mHalfExtents.x()));
+        mRotationallyInvariant = true;
+    }
+    else
+    {
+        mShape.reset(new btBoxShape(toBullet(mHalfExtents)));
+        mRotationallyInvariant = false;
+    }
 
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
 
@@ -72,8 +74,8 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     mCollisionObject->setCollisionShape(mShape.get());
     mCollisionObject->setUserPointer(static_cast<PtrHolder*>(this));
 
+    updateRotation();
     updateScale();
-
     updatePosition();
 
     addCollisionMask(getCollisionMask());
@@ -118,6 +120,7 @@ int Actor::getCollisionMask()
     if (mCanWaterWalk)
         collisionMask |= CollisionType_Water;
     return collisionMask;
+    
 }
 
 void Actor::updatePosition()
@@ -134,12 +137,6 @@ void Actor::updateCollisionObjectPosition()
 {
     btTransform tr = mCollisionObject->getWorldTransform();
     osg::Vec3f scaledTranslation = mRotation * osg::componentMultiply(mMeshTranslation, mScale);
-    // forcibly center horizontal position if hull doesn't rotate
-    if(mRotationallyInvariant)
-    {
-        scaledTranslation.x() = 0.0;
-        scaledTranslation.y() = 0.0;
-    }
     osg::Vec3f newPosition = scaledTranslation + mPosition;
     tr.setOrigin(toBullet(newPosition));
     mCollisionObject->setWorldTransform(tr);
