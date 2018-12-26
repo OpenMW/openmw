@@ -26,6 +26,7 @@
 #include "npcstats.hpp"
 #include "actorutil.hpp"
 #include "aifollow.hpp"
+#include "weapontype.hpp"
 
 namespace MWMechanics
 {
@@ -826,8 +827,9 @@ namespace MWMechanics
         bool isProjectile = false;
         if (item.getTypeName() == typeid(ESM::Weapon).name())
         {
-            const ESM::Weapon* ref = item.get<ESM::Weapon>()->mBase;
-            isProjectile = ref->mData.mType >= ESM::Weapon::MarksmanThrown;
+            int type = item.get<ESM::Weapon>()->mBase->mData.mType;
+            ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
+            isProjectile = (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ranged);
         }
         int type = enchantment->mData.mType;
 

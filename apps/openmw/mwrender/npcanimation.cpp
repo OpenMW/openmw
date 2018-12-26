@@ -31,6 +31,7 @@
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/weapontype.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -275,7 +276,7 @@ static NpcAnimation::PartBoneMap createPartListMap()
     result.insert(std::make_pair(ESM::PRT_LLeg, "Left Upper Leg"));
     result.insert(std::make_pair(ESM::PRT_RPauldron, "Right Clavicle"));
     result.insert(std::make_pair(ESM::PRT_LPauldron, "Left Clavicle"));
-    result.insert(std::make_pair(ESM::PRT_Weapon, "Weapon Bone"));
+    result.insert(std::make_pair(ESM::PRT_Weapon, "Weapon Bone")); // Fallback. The real node name depends on the current weapon type.
     result.insert(std::make_pair(ESM::PRT_Tail, "Tail"));
     return result;
 }
@@ -317,12 +318,6 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     assert(viewMode != VM_HeadOnly);
     if(mViewMode == viewMode)
         return;
-
-    // Disable weapon sheathing in the 1st-person mode
-    if (viewMode == VM_FirstPerson)
-        mWeaponSheathing = false;
-    else
-        mWeaponSheathing = Settings::Manager::getBool("weapon sheathing", "Game");
 
     mViewMode = viewMode;
     MWBase::Environment::get().getWorld()->scaleObject(mPtr, mPtr.getCellRef().getScale()); // apply race height after view change
@@ -484,9 +479,6 @@ void NpcAnimation::updateNpcBase()
         smodel = Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS());
 
     setObjectRoot(smodel, true, true, false);
-
-    if (mWeaponSheathing)
-        injectWeaponBones();
 
     updateParts();
 
@@ -745,7 +737,18 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     mPartPriorities[type] = priority;
     try
     {
-        const std::string& bonename = sPartList.at(type);
+        std::string bonename = sPartList.at(type);
+        if (type == ESM::PRT_Weapon)
+        {
+            const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+            MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            if(weapon != inv.end() && weapon->getTypeName() == typeid(ESM::Weapon).name())
+            {
+                int weaponType = weapon->get<ESM::Weapon>()->mBase->mData.mType;
+                bonename = MWMechanics::getWeaponType(weaponType)->mAttachBone;
+            }
+        }
+
         // PRT_Hair seems to be the only type that breaks consistency and uses a filter that's different from the attachment bone
         const std::string bonefilter = (type == ESM::PRT_Hair) ? "hair" : bonename;
         mObjectParts[type] = insertBoundedPart(mesh, bonename, bonefilter, enchantedGlow, glowColor);
@@ -906,8 +909,9 @@ void NpcAnimation::showWeapons(bool showWeapon)
             if (weapon->getTypeName() == typeid(ESM::Weapon).name() &&
                     weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
             {
+                int ammotype = MWMechanics::getWeaponType(ESM::Weapon::MarksmanCrossbow)->mAmmoType;
                 MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
-                if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt)
+                if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ammotype)
                     attachArrow();
             }
         }
@@ -972,7 +976,15 @@ osg::Group* NpcAnimation::getArrowBone()
     if (!part)
         return nullptr;
 
-    SceneUtil::FindByNameVisitor findVisitor ("ArrowBone");
+    const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+    MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+    if(weapon == inv.end() || weapon->getTypeName() != typeid(ESM::Weapon).name())
+        return nullptr;
+
+    int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
+    int ammoType = MWMechanics::getWeaponType(type)->mAmmoType;
+
+    SceneUtil::FindByNameVisitor findVisitor (MWMechanics::getWeaponType(ammoType)->mAttachBone);
     part->getNode()->accept(findVisitor);
 
     return findVisitor.mFoundNode;

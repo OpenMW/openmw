@@ -26,7 +26,7 @@
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/autocalcspell.hpp"
 #include "../mwmechanics/difficultyscaling.hpp"
-#include "../mwmechanics/character.hpp"
+#include "../mwmechanics/weapontype.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/ptr.hpp"
@@ -1228,9 +1228,9 @@ namespace MWClass
                 if (getNpcStats(ptr).isWerewolf()
                         && getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
                 {
-                    MWMechanics::WeaponType weaponType = MWMechanics::WeapType_None;
-                    MWMechanics::getActiveWeapon(getCreatureStats(ptr), getInventoryStore(ptr), &weaponType);
-                    if (weaponType == MWMechanics::WeapType_None)
+                    int weaponType = ESM::Weapon::None;
+                    MWMechanics::getActiveWeapon(ptr, &weaponType);
+                    if (weaponType == ESM::Weapon::None)
                         return std::string();
                 }
 
