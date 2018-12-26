@@ -795,6 +795,10 @@ endif()
 
 # Apple bundling
 if (OPENMW_OSX_DEPLOYMENT AND APPLE AND DESIRED_QT_VERSION MATCHES 5)
+    if (${CMAKE_MAJOR_VERSION} STREQUAL "3" AND ${CMAKE_MINOR_VERSION} STREQUAL "13")
+        message(FATAL_ERROR "macOS packaging is broken in CMake 3.13.*, see https://gitlab.com/OpenMW/openmw/issues/4767. Please use an older version like 3.12.4")
+    endif ()
+
     get_property(QT_COCOA_PLUGIN_PATH TARGET Qt5::QCocoaIntegrationPlugin PROPERTY LOCATION_RELEASE)
     get_filename_component(QT_COCOA_PLUGIN_DIR "${QT_COCOA_PLUGIN_PATH}" DIRECTORY)
     get_filename_component(QT_COCOA_PLUGIN_GROUP "${QT_COCOA_PLUGIN_DIR}" NAME)
