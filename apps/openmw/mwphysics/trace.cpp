@@ -9,8 +9,6 @@
 #include "actor.hpp"
 #include "convert.hpp"
 
-#include <iostream>
-
 namespace MWPhysics
 {
 
@@ -175,6 +173,5 @@ void ActorTracer::findGround(const Actor* actor, const osg::Vec3f& start, const 
         mFraction = 1.0f;
     }
 }
-
 
 }
