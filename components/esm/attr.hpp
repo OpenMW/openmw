@@ -32,13 +32,6 @@ struct Attribute
     static const std::string sGmstAttributeIds[Length];
     static const std::string sGmstAttributeDescIds[Length];
     static const std::string sAttributeIcons[Length];
-
-    Attribute(AttributeID id, const std::string &name, const std::string &description)
-        : mId(id)
-        , mName(name)
-        , mDescription(description)
-    {
-    }
 };
 }
 #endif
