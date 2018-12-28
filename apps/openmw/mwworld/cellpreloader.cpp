@@ -1,5 +1,7 @@
 #include "cellpreloader.hpp"
 
+#include <atomic>
+
 #include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -159,7 +161,7 @@ namespace MWWorld
         MWRender::LandManager* mLandManager;
         bool mPreloadInstances;
 
-        volatile bool mAbort;
+        std::atomic<bool> mAbort;
 
         osg::ref_ptr<Terrain::View> mTerrainView;
 
@@ -392,7 +394,7 @@ namespace MWWorld
         }
 
     private:
-        volatile bool mAbort;
+        std::atomic<bool> mAbort;
         std::vector<osg::ref_ptr<Terrain::View> > mTerrainViews;
         Terrain::World* mWorld;
         std::vector<osg::Vec3f> mPreloadPositions;

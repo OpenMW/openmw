@@ -9,6 +9,7 @@
 #include <osg/Referenced>
 #include <osg/ref_ptr>
 
+#include <atomic>
 #include <queue>
 
 namespace SceneUtil
@@ -87,7 +88,7 @@ namespace SceneUtil
 
     private:
         WorkQueue* mWorkQueue;
-        volatile bool mActive;
+        std::atomic<bool> mActive;
     };
 
 
