@@ -82,6 +82,7 @@ void CSVWidget::ColorEditor::setColor(const int colorInt)
 void CSVWidget::ColorEditor::showPicker()
 {
     mColorPicker->showPicker(calculatePopupPosition(), mColor);
+    emit pickingFinished();
 }
 
 void CSVWidget::ColorEditor::pickerColorChanged(const QColor &color)
