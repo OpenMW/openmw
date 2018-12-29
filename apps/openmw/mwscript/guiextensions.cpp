@@ -190,14 +190,16 @@ namespace MWScript
                 else
                 {
                     MWGui::GuiWindow gw = MWGui::GW_None;
-                    if (arg == 3)
+                    switch (gw) {
+                    case 3:
                         gw = MWGui::GW_Stats;
-                    if (arg == 4)
+                    case 4:
                         gw = MWGui::GW_Inventory;
-                    if (arg == 5)
+                    case 5:
                         gw = MWGui::GW_Magic;
-                    if (arg == 6)
+                    case 6:
                         gw = MWGui::GW_Map;
+                    }
 
                     MWBase::Environment::get().getWindowManager()->pinWindow(gw);
                 }
