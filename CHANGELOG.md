@@ -12,6 +12,7 @@
     Bug #4745: Editor: Interior cell lighting field values are not displayed as colors
     Bug #4746: Non-solid player can't run or sneak
     Bug #4750: Sneaking doesn't work in first person view if the player is in attack ready state
+    Bug #4768: Fallback numerical value recovery chokes on invalid arguments
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
     Feature #3610: Option to invert X axis
