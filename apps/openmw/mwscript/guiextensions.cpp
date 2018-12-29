@@ -193,12 +193,16 @@ namespace MWScript
                     switch (gw) {
                     case 3:
                         gw = MWGui::GW_Stats;
+                        break;
                     case 4:
                         gw = MWGui::GW_Inventory;
+                        break;
                     case 5:
                         gw = MWGui::GW_Magic;
+                        break;
                     case 6:
                         gw = MWGui::GW_Map;
+                        break;
                     }
 
                     MWBase::Environment::get().getWindowManager()->pinWindow(gw);
