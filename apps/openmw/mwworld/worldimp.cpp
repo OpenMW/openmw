@@ -387,10 +387,8 @@ namespace MWWorld
     void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
         // Active cells could have a dirty fog of war, sync it to the CellStore first
-        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
-            iter!=mWorldScene->getActiveCells().end(); ++iter)
+        for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
-            CellStore* cellstore = *iter;
             MWBase::Environment::get().getWindowManager()->writeFog(cellstore);
         }
 
@@ -546,22 +544,19 @@ namespace MWWorld
     {
         // first try named cells
         const ESM::Cell *cell = mStore.get<ESM::Cell>().searchExtByName (cellName);
-        if (cell != 0) {
+        if (cell)
             return cell;
-        }
 
         // didn't work -> now check for regions
-        const MWWorld::Store<ESM::Region> &regions = mStore.get<ESM::Region>();
-        MWWorld::Store<ESM::Region>::iterator it = regions.begin();
-        for (; it != regions.end(); ++it)
+        for (const ESM::Region &region : mStore.get<ESM::Region>())
         {
-            if (Misc::StringUtils::ciEqual(cellName, it->mName))
+            if (Misc::StringUtils::ciEqual(cellName, region.mName))
             {
-                return mStore.get<ESM::Cell>().searchExtByRegion(it->mId);
+                return mStore.get<ESM::Cell>().searchExtByRegion(region.mId);
             }
         }
 
-        return 0;
+        return nullptr;
     }
 
     const Fallback::Map *World::getFallback() const
@@ -692,11 +687,9 @@ namespace MWWorld
 
         std::string lowerCaseName = Misc::StringUtils::lowerCase(name);
 
-        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
-            iter!=mWorldScene->getActiveCells().end(); ++iter)
+        for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
             // TODO: caching still doesn't work efficiently here (only works for the one CellStore that the reference is in)
-            CellStore* cellstore = *iter;
             Ptr ptr = mCells.getPtr (lowerCaseName, *cellstore, false);
 
             if (!ptr.isEmpty())
@@ -710,10 +703,8 @@ namespace MWWorld
                 return ret;
         }
 
-        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
-            iter!=mWorldScene->getActiveCells().end(); ++iter)
+        for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
-            CellStore* cellstore = *iter;
             Ptr ptr = cellstore->searchInContainer(lowerCaseName);
             if (!ptr.isEmpty())
                 return ptr;
@@ -770,15 +761,14 @@ namespace MWWorld
         if (ptr.getContainerStore() == &player.getClass().getContainerStore(player))
             return player;
 
-        const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
-        for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
+        for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
             FindContainerVisitor visitor(ptr);
-            (*cellIt)->forEachType<ESM::Container>(visitor);
+            cellstore->forEachType<ESM::Container>(visitor);
             if (visitor.mResult.isEmpty())
-                (*cellIt)->forEachType<ESM::Creature>(visitor);
+                cellstore->forEachType<ESM::Creature>(visitor);
             if (visitor.mResult.isEmpty())
-                (*cellIt)->forEachType<ESM::NPC>(visitor);
+                cellstore->forEachType<ESM::NPC>(visitor);
 
             if (!visitor.mResult.isEmpty())
                 return visitor.mResult;
@@ -2535,9 +2525,8 @@ namespace MWWorld
 
         std::vector<MWWorld::Ptr> actors;
         mPhysics->getActorsStandingOn(object, actors);
-        for (std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); ++it)
+        for (const Ptr &actor : actors)
         {
-            MWWorld::Ptr actor = *it;
             MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
             if (stats.isDead())
                 continue;
@@ -2545,7 +2534,7 @@ namespace MWWorld
             mPhysics->markAsNonSolid (object);
 
             if (actor == getPlayerPtr() && MWBase::Environment::get().getWorld()->getGodModeState())
-                return;
+                continue;
 
             MWMechanics::DynamicStat<float> health = stats.getHealth();
             health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
@@ -2567,19 +2556,18 @@ namespace MWWorld
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
 
-        std::vector<MWWorld::Ptr> actors;
+        std::vector<Ptr> actors;
         mPhysics->getActorsCollidingWith(object, actors);
-        for (std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); ++it)
+        for (const Ptr &actor : actors)
         {
-            MWWorld::Ptr actor = *it;
             MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
             if (stats.isDead())
                 continue;
 
             mPhysics->markAsNonSolid (object);
 
-            if (actor == getPlayerPtr() && MWBase::Environment::get().getWorld()->getGodModeState())
-                return;
+            if (actor == getPlayerPtr() && getGodModeState())
+                continue;;
 
             MWMechanics::DynamicStat<float> health = stats.getHealth();
             health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
@@ -2649,11 +2637,10 @@ namespace MWWorld
 
     void World::getContainersOwnedBy (const MWWorld::ConstPtr& owner, std::vector<MWWorld::Ptr>& out)
     {
-        const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
-        for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
+        for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
             GetContainersOwnedByVisitor visitor (owner, out);
-            (*cellIt)->forEachType<ESM::Container>(visitor);
+            cellstore->forEachType<ESM::Container>(visitor);
         }
     }
 
@@ -2671,15 +2658,14 @@ namespace MWWorld
 
     void World::getItemsOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out)
     {
-        const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
-        for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
+        for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
             ListObjectsVisitor visitor;
-            (*cellIt)->forEach(visitor);
+            cellstore->forEach(visitor);
 
-            for (std::vector<MWWorld::Ptr>::iterator it = visitor.mObjects.begin(); it != visitor.mObjects.end(); ++it)
-                if (Misc::StringUtils::ciEqual(it->getCellRef().getOwner(), npc.getCellRef().getRefId()))
-                    out.push_back(*it);
+            for (const Ptr &object : visitor.mObjects)
+                if (Misc::StringUtils::ciEqual(object.getCellRef().getOwner(), npc.getCellRef().getRefId()))
+                    out.push_back(object);
         }
     }
 
@@ -2720,28 +2706,21 @@ namespace MWWorld
 
     bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)
     {
-        typedef MWWorld::CellRefList<ESM::Door>::List DoorList;
-        typedef MWWorld::CellRefList<ESM::Static>::List StaticList;
-
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
         pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
 
         MWWorld::CellStore *cellStore = getInterior(name);
 
-        if (0 == cellStore) {
+        if (!cellStore)
             return false;
-        }
 
         std::vector<const MWWorld::CellRef *> sortedDoors;
-        const DoorList &doors = cellStore->getReadOnlyDoors().mList;
-        for (DoorList::const_iterator it = doors.begin(); it != doors.end(); ++it)
+        for (const MWWorld::LiveCellRef<ESM::Door>& door : cellStore->getReadOnlyDoors().mList)
         {
-            if (!it->mRef.getTeleport())
-            {
+            if (!door.mRef.getTeleport())
                 continue;
-            }
 
-            sortedDoors.push_back(&it->mRef);
+            sortedDoors.push_back(&door.mRef);
         }
 
         // Sort teleporting doors alphabetically, first by ID, then by destination cell to make search consistent
@@ -2753,44 +2732,43 @@ namespace MWWorld
             return lhs->getDestCell() < rhs->getDestCell();
         });
 
-        for (std::vector<const MWWorld::CellRef *>::const_iterator it = sortedDoors.begin(); it != sortedDoors.end(); ++it)
+        for (const MWWorld::CellRef* door : sortedDoors)
         {
-            MWWorld::CellStore *source = 0;
+            MWWorld::CellStore *source = nullptr;
 
             // door to exterior
-            if ((*it)->getDestCell().empty())
+            if (door->getDestCell().empty())
             {
                 int x, y;
-                ESM::Position doorDest = (*it)->getDoorDest();
+                ESM::Position doorDest = door->getDoorDest();
                 positionToIndex(doorDest.pos[0], doorDest.pos[1], x, y);
                 source = getExterior(x, y);
             }
             // door to interior
             else
             {
-                source = getInterior((*it)->getDestCell());
+                source = getInterior(door->getDestCell());
             }
-            if (0 != source)
+            if (source)
             {
                 // Find door leading to our current teleport door
                 // and use its destination to position inside cell.
-                const DoorList &destinationDoors = source->getReadOnlyDoors().mList;
-                for (DoorList::const_iterator jt = destinationDoors.begin(); jt != destinationDoors.end(); ++jt)
+                for (const MWWorld::LiveCellRef<ESM::Door>& destDoor : source->getReadOnlyDoors().mList)
                 {
-                    if ((*it)->getTeleport() &&
-                        Misc::StringUtils::ciEqual(name, jt->mRef.getDestCell()))
+                    if (Misc::StringUtils::ciEqual(name, destDoor.mRef.getDestCell()))
                     {
                         /// \note Using _any_ door pointed to the interior,
                         /// not the one pointed to current door.
-                        pos = jt->mRef.getDoorDest();
+                        pos = destDoor.mRef.getDoorDest();
                         return true;
                     }
                 }
             }
         }
         // Fall back to the first static location.
-        const StaticList &statics = cellStore->getReadOnlyStatics().mList;
-        if ( statics.begin() != statics.end() ) {
+        const MWWorld::CellRefList<ESM::Static>::List &statics = cellStore->getReadOnlyStatics().mList;
+        if (!statics.empty())
+        {
             pos = statics.begin()->mRef.getPosition();
             return true;
         }
@@ -2885,22 +2863,21 @@ namespace MWWorld
     void World::loadContentFiles(const Files::Collections& fileCollections,
         const std::vector<std::string>& content, ContentLoader& contentLoader)
     {
-        std::vector<std::string>::const_iterator it(content.begin());
-        std::vector<std::string>::const_iterator end(content.end());
-        for (int idx = 0; it != end; ++it, ++idx)
+        int idx = 0;
+        for (const std::string &file : content)
         {
-            boost::filesystem::path filename(*it);
+            boost::filesystem::path filename(file);
             const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
-            if (col.doesExist(*it))
+            if (col.doesExist(file))
             {
-                contentLoader.load(col.getPath(*it), idx);
+                contentLoader.load(col.getPath(file), idx);
             }
             else
             {
-                std::stringstream msg;
-                msg << "Failed loading " << *it << ": the content file does not exist";
-                throw std::runtime_error(msg.str());
+                std::string message = "Failed loading " + file + ": the content file does not exist";
+                throw std::runtime_error(message);
             }
+            idx++;
         }
     }
 
@@ -2975,14 +2952,13 @@ namespace MWWorld
             // For scripted spells we should not use hit contact
             if (manualSpell)
             {
-                // Actors that are targeted by this actor's Follow or Escort packages also side with them
                 if (actor != MWMechanics::getPlayer())
                 {
-                    for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
+                    for (const MWMechanics::AiPackage* package : stats.getAiSequence())
                     {
-                        if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdCast)
+                        if (package->getTypeId() == MWMechanics::AiPackage::TypeIdCast)
                         {
-                            target = (*it)->getTarget();
+                            target = package->getTarget();
                             break;
                         }
                     }
@@ -3151,17 +3127,13 @@ namespace MWWorld
         while ( !nextCells.empty() ) {
             currentCells = nextCells;
             nextCells.clear();
-            for( std::set< std::string >::const_iterator i = currentCells.begin(); i != currentCells.end(); ++i ) {
-                MWWorld::CellStore *next = getInterior( *i );
+            for (const std::string &cell : currentCells) {
+                MWWorld::CellStore *next = getInterior(cell);
                 if ( !next ) continue;
 
-                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnlyDoors();
-                const CellRefList<ESM::Door>::List& refList = doors.mList;
-
                 // Check if any door in the cell leads to an exterior directly
-                for (CellRefList<ESM::Door>::List::const_iterator it = refList.begin(); it != refList.end(); ++it)
+                for (const MWWorld::LiveCellRef<ESM::Door>& ref : next->getReadOnlyDoors().mList)
                 {
-                    const MWWorld::LiveCellRef<ESM::Door>& ref = *it;
                     if (!ref.mRef.getTeleport()) continue;
 
                     if (ref.mRef.getDestCell().empty())
@@ -3178,7 +3150,7 @@ namespace MWWorld
                     }
                 }
 
-                checkedCells.insert( *i );
+                checkedCells.insert(cell);
             }
         }
 
@@ -3204,9 +3176,9 @@ namespace MWWorld
         while ( !nextCells.empty() ) {
             currentCells = nextCells;
             nextCells.clear();
-            for( std::set< std::string >::const_iterator i = currentCells.begin(); i != currentCells.end(); ++i ) {
-                MWWorld::CellStore *next = getInterior( *i );
-                checkedCells.insert( *i );
+            for (const std::string &cell : currentCells) {
+                MWWorld::CellStore *next = getInterior(cell);
+                checkedCells.insert(cell);
                 if ( !next ) continue;
 
                 closestMarker = next->searchConst( id );
@@ -3215,14 +3187,9 @@ namespace MWWorld
                     return closestMarker;
                 }
 
-                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnlyDoors();
-                const CellRefList<ESM::Door>::List& doorList = doors.mList;
-
                 // Check if any door in the cell leads to an exterior directly
-                for (CellRefList<ESM::Door>::List::const_iterator it = doorList.begin(); it != doorList.end(); ++it)
+                for (const MWWorld::LiveCellRef<ESM::Door>& ref : next->getReadOnlyDoors().mList)
                 {
-                    const MWWorld::LiveCellRef<ESM::Door>& ref = *it;
-
                     if (!ref.mRef.getTeleport()) continue;
 
                     if (ref.mRef.getDestCell().empty())
@@ -3248,15 +3215,14 @@ namespace MWWorld
 
         std::vector<MWWorld::Ptr> markers;
         mCells.getExteriorPtrs(id, markers);
-        for (std::vector<MWWorld::Ptr>::iterator it2 = markers.begin(); it2 != markers.end(); ++it2)
+        for (const Ptr& marker : markers)
         {
-            ESM::Position pos = it2->getRefData().getPosition();
-            osg::Vec3f markerPos = pos.asVec3();
+            osg::Vec3f markerPos = marker.getRefData().getPosition().asVec3();
             float distance = (worldPos - markerPos).length2();
             if (distance < closestDistance)
             {
                 closestDistance = distance;
-                closestMarker = *it2;
+                closestMarker = marker;
             }
 
         }
@@ -3387,10 +3353,8 @@ namespace MWWorld
 
         AddDetectedReferenceVisitor visitor (out, ptr, type, dist*dist);
 
-        const Scene::CellStoreCollection& active = mWorldScene->getActiveCells();
-        for (Scene::CellStoreCollection::const_iterator it = active.begin(); it != active.end(); ++it)
+        for (CellStore* cellStore : mWorldScene->getActiveCells())
         {
-            MWWorld::CellStore* cellStore = *it;
             cellStore->forEach(visitor);
         }
     }
@@ -3569,27 +3533,8 @@ namespace MWWorld
         if (ptr == getPlayerPtr() && Settings::Manager::getBool("hit fader", "GUI"))
             return;
 
-        int type = ptr.getClass().getBloodTexture(ptr);
-        std::string texture;
-        switch (type)
-        {
-        case 2:
-            texture = getFallback()->getFallbackString("Blood_Texture_2");
-            break;
-        case 1:
-            texture = getFallback()->getFallbackString("Blood_Texture_1");
-            break;
-        case 0:
-        default:
-            texture = getFallback()->getFallbackString("Blood_Texture_0");
-            break;
-        }
-
-        std::stringstream modelName;
-        modelName << "Blood_Model_";
-        int roll = Misc::Rng::rollDice(3); // [0, 2]
-        modelName << roll;
-        std::string model = "meshes\\" + getFallback()->getFallbackString(modelName.str());
+        std::string texture = getFallback()->getFallbackString("Blood_Texture_" + std::to_string(ptr.getClass().getBloodTexture(ptr)));
+        std::string model = "meshes\\" + getFallback()->getFallbackString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))); // [0, 2]
 
         mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
     }
@@ -3650,13 +3595,13 @@ namespace MWWorld
             std::vector<MWWorld::Ptr> objects;
             MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
                         origin, feetToGameUnits(static_cast<float>(effectIt->mArea)), objects);
-            for (std::vector<MWWorld::Ptr>::iterator affected = objects.begin(); affected != objects.end(); ++affected)
+            for (const Ptr& affected : objects)
             {
                 // Ignore actors without collisions here, otherwise it will be possible to hit actors outside processing range.
-                if (affected->getClass().isActor() && !isActorCollisionEnabled(*affected))
+                if (affected.getClass().isActor() && !isActorCollisionEnabled(affected))
                     continue;
 
-                toApply[*affected].push_back(*effectIt);
+                toApply[affected].push_back(*effectIt);
             }
         }
 
@@ -3716,10 +3661,8 @@ namespace MWWorld
     };
     void World::resetActors()
     {
-        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
-            iter!=mWorldScene->getActiveCells().end(); ++iter)
+        for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
-            CellStore* cellstore = *iter;
             ResetActorsVisitor visitor;
             cellstore->forEach(visitor);
         }
