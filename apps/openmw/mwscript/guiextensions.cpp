@@ -189,7 +189,7 @@ namespace MWScript
                 }
                 else
                 {
-                    MWGui::GuiWindow gw = MWGui::GW_None;
+                    MWGui::GuiWindow gw;
                     switch (arg) {
                     case 3:
                         gw = MWGui::GW_Stats;
@@ -203,6 +203,8 @@ namespace MWScript
                     case 6:
                         gw = MWGui::GW_Map;
                         break;
+                    default:
+                        gw = MWGui::GW_None;
                     }
 
                     MWBase::Environment::get().getWindowManager()->pinWindow(gw);
