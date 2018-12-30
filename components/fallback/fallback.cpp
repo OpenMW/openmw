@@ -2,6 +2,8 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include <boost/lexical_cast.hpp>
+
 namespace Fallback
 {
     Map::Map(const std::map<std::string,std::string>& fallback):mFallbackMap(fallback)
@@ -24,9 +26,11 @@ namespace Fallback
         {
             try
             {
-                return std::stof(fallback);
+                // We have to rely on Boost because std::stof from C++11
+                // uses the current locale for separators which we don't want and often silently ignores parsing errors.
+                return boost::lexical_cast<float>(fallback);
             }
-            catch (const std::invalid_argument&)
+            catch (boost::bad_lexical_cast&)
             {
                 Log(Debug::Error) << "Error: '" << fall << "' setting value (" << fallback << ") is not a valid number, using 0 as a fallback";
             }
@@ -47,6 +51,10 @@ namespace Fallback
             catch (const std::invalid_argument&)
             {
                 Log(Debug::Error) << "Error: '" << fall << "' setting value (" << fallback << ") is not a valid number, using 0 as a fallback";
+            }
+            catch (const std::out_of_range&)
+            {
+                Log(Debug::Error) << "Error: '" << fall << "' setting value (" << fallback << ") is out of range, using 0 as a fallback";
             }
         }
 
