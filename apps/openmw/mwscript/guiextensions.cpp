@@ -190,7 +190,7 @@ namespace MWScript
                 else
                 {
                     MWGui::GuiWindow gw = MWGui::GW_None;
-                    switch (gw) {
+                    switch (arg) {
                     case 3:
                         gw = MWGui::GW_Stats;
                         break;
