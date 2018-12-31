@@ -1684,14 +1684,20 @@ namespace MWWorld
         }
     }
 
-    void World::setActorCollisionMode(const MWWorld::Ptr& ptr, bool enabled)
+    void World::setActorCollisionMode(const MWWorld::Ptr& ptr, bool internal, bool external)
     {
-        mPhysics->setActorCollisionMode(ptr, enabled);
+        MWPhysics::Actor *physicActor = mPhysics->getActor(ptr);
+        if (physicActor && physicActor->getCollisionMode() != internal)
+        {
+            physicActor->enableCollisionMode(internal);
+            physicActor->enableCollisionBody(external);
+        }
     }
 
     bool World::isActorCollisionEnabled(const MWWorld::Ptr& ptr)
     {
-        return mPhysics->isActorCollisionEnabled(ptr);
+        MWPhysics::Actor *physicActor = mPhysics->getActor(ptr);
+        return physicActor && physicActor->getCollisionMode();
     }
 
     bool World::toggleCollisionMode()

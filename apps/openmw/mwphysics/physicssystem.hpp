@@ -92,8 +92,6 @@ namespace MWPhysics
             const HeightField* getHeightField(int x, int y) const;
 
             bool toggleCollisionMode();
-            bool isActorCollisionEnabled(const MWWorld::Ptr& ptr);
-            void setActorCollisionMode(const MWWorld::Ptr& ptr, bool enabled);
 
             void stepSimulation(float dt);
             void debugDraw();
