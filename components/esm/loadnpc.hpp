@@ -56,12 +56,11 @@ struct NPC
 
   enum Flags
     {
-      Female        = 0x0001,
-      Essential     = 0x0002,
-      Respawn       = 0x0004,
-      Autocalc      = 0x0010,
-      Skeleton      = 0x0400, // Skeleton blood effect (white)
-      Metal         = 0x0800  // Metal blood effect (golden?)
+      Female        = 0x01,
+      Essential     = 0x02,
+      Respawn       = 0x04,
+      Base          = 0x08,
+      Autocalc      = 0x10
     };
 
   enum NpcType
@@ -114,7 +113,8 @@ struct NPC
 
     int getFactionRank() const; /// wrapper for mNpdt*, -1 = no rank
 
-    int mFlags;
+    int mBloodType;
+    unsigned char mFlags;
 
     bool mPersistent;
 

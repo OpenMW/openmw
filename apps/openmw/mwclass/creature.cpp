@@ -766,13 +766,7 @@ namespace MWClass
 
     int Creature::getBloodTexture(const MWWorld::ConstPtr &ptr) const
     {
-        int flags = ptr.get<ESM::Creature>()->mBase->mFlags;
-
-        if (flags & ESM::Creature::Skeleton)
-            return 1;
-        if (flags & ESM::Creature::Metal)
-            return 2;
-        return 0;
+        return ptr.get<ESM::Creature>()->mBase->mBloodType;
     }
 
     void Creature::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)

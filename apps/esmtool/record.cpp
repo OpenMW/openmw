@@ -618,7 +618,8 @@ void Record<ESM::Creature>::print()
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
     std::cout << "  Script: " << mData.mScript << std::endl;
-    std::cout << "  Flags: " << creatureFlags(mData.mFlags) << std::endl;
+    std::cout << "  Flags: " << creatureFlags((int)mData.mFlags) << std::endl;
+    std::cout << "  Blood Type: " << mData.mBloodType+1 << std::endl;
     std::cout << "  Original: " << mData.mOriginal << std::endl;
     std::cout << "  Scale: " << mData.mScale << std::endl;
 
@@ -1022,7 +1023,9 @@ void Record<ESM::NPC>::print()
         std::cout << "  Script: " << mData.mScript << std::endl;
     if (!mData.mFaction.empty())
         std::cout << "  Faction: " << mData.mFaction << std::endl;
-    std::cout << "  Flags: " << npcFlags(mData.mFlags) << std::endl;
+    std::cout << "  Flags: " << npcFlags((int)mData.mFlags) << std::endl;
+    if (mData.mBloodType != 0)
+        std::cout << "  Blood Type: " << mData.mBloodType+1 << std::endl;
 
     if (mData.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
     {

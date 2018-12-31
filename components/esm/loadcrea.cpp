@@ -55,7 +55,10 @@ namespace ESM {
                     hasNpdt = true;
                     break;
                 case ESM::FourCC<'F','L','A','G'>::value:
-                    esm.getHT(mFlags);
+                    int flags;
+                    esm.getHT(flags);
+                    mFlags = flags & 0xFF;
+                    mBloodType = ((flags >> 8) & 0xFF) >> 2;
                     hasFlags = true;
                     break;
                 case ESM::FourCC<'X','S','C','L'>::value:
@@ -121,7 +124,7 @@ namespace ESM {
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNOCString("SCRI", mScript);
         esm.writeHNT("NPDT", mData, 96);
-        esm.writeHNT("FLAG", mFlags);
+        esm.writeHNT("FLAG", ((mBloodType << 10) + mFlags));
         if (mScale != 1.0) {
             esm.writeHNT("XSCL", mScale);
         }
@@ -144,6 +147,7 @@ namespace ESM {
         mData.mCombat = mData.mMagic = mData.mStealth = 0;
         for (int i=0; i<6; ++i) mData.mAttack[i] = 0;
         mData.mGold = 0;
+        mBloodType = 0;
         mFlags = 0;
         mScale = 1.f;
         mModel.clear();

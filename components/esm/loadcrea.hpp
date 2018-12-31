@@ -28,20 +28,14 @@ struct Creature
     // Default is 0x48?
     enum Flags
     {
-        // Movement types
-        Bipedal       = 0x001,
-        Swims       = 0x010,
-        Flies       = 0x020, // Don't know what happens if several
-        Walks       = 0x040, // of these are set
-
-        Respawn     = 0x002,
-        Weapon      = 0x004, // Has weapon and shield
-        None        = 0x008, // ?? This flag appears set for every creature in Morrowind.esm
-        Essential   = 0x080,
-
-        // Blood types
-        Skeleton    = 0x400,
-        Metal       = 0x800
+        Bipedal       = 0x01,
+        Respawn       = 0x02,
+        Weapon        = 0x04, // Has weapon and shield
+        Base          = 0x08, // This flag is set for every actor in Bethesda ESMs
+        Swims         = 0x10,
+        Flies         = 0x20, // Don't know what happens if several
+        Walks         = 0x40, // of these are set
+        Essential     = 0x80
     };
 
     enum Type
@@ -79,7 +73,8 @@ struct Creature
 
     NPDTstruct mData;
 
-    int mFlags;
+    int mBloodType;
+    unsigned char mFlags;
 
     bool mPersistent;
 
