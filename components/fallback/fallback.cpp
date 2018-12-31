@@ -63,7 +63,8 @@ namespace Fallback
 
     bool Map::getFallbackBool(const std::string& fall) const
     {
-        return getFallbackString(fall) != "0";
+        std::string fallback = getFallbackString(fall);
+        return !fallback.empty() && fallback != "0";
     }
 
     osg::Vec4f Map::getFallbackColour(const std::string& fall) const
