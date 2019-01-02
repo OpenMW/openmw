@@ -494,6 +494,17 @@ namespace MWWorld
         gmst["iWereWolfBounty"] = ESM::Variant(1000);
         gmst["fCombatDistanceWerewolfMod"] = ESM::Variant(0.3f);
 
+        for (const std::pair<std::string, ESM::Variant> &params : gmst)
+        {
+            if (!mStore.get<ESM::GameSetting>().search(params.first))
+            {
+                ESM::GameSetting record;
+                record.mId = params.first;
+                record.mValue = params.second;
+                mStore.insertStatic(record);
+            }
+        }
+
         std::map<std::string, ESM::Variant> globals;
         // vanilla Morrowind does not define dayspassed.
         globals["dayspassed"] = ESM::Variant(1); // but the addons start counting at 1 :(
@@ -513,25 +524,47 @@ namespace MWWorld
         globals["crimegoldturnin"] = ESM::Variant(0);
         globals["pchasturnin"] = ESM::Variant(0);
 
-        for (std::map<std::string, ESM::Variant>::iterator it = gmst.begin(); it != gmst.end(); ++it)
+        for (const std::pair<std::string, ESM::Variant> &params : globals)
         {
-            if (!mStore.get<ESM::GameSetting>().search(it->first))
+            if (!mStore.get<ESM::Global>().search(params.first))
             {
-                ESM::GameSetting setting;
-                setting.mId = it->first;
-                setting.mValue = it->second;
-                mStore.insertStatic(setting);
+                ESM::Global record;
+                record.mId = params.first;
+                record.mValue = params.second;
+                mStore.insertStatic(record);
             }
         }
 
-        for (std::map<std::string, ESM::Variant>::iterator it = globals.begin(); it != globals.end(); ++it)
+        std::map<std::string, std::string> statics;
+        // Total conversions from SureAI lack marker records
+        statics["divinemarker"] = "marker_divine.nif";
+        statics["doormarker"] = "marker_arrow.nif";
+        statics["northmarker"] = "marker_north.nif";
+        statics["templemarker"] = "marker_temple.nif";
+        statics["travelmarker"] = "marker_travel.nif";
+
+        for (const std::pair<std::string, std::string> &params : statics)
         {
-            if (!mStore.get<ESM::Global>().search(it->first))
+            if (!mStore.get<ESM::Static>().search(params.first))
             {
-                ESM::Global setting;
-                setting.mId = it->first;
-                setting.mValue = it->second;
-                mStore.insertStatic(setting);
+                ESM::Static record;
+                record.mId = params.first;
+                record.mModel = params.second;
+                mStore.insertStatic(record);
+            }
+        }
+
+        std::map<std::string, std::string> doors;
+        doors["prisonmarker"] = "marker_prison.nif";
+
+        for (const std::pair<std::string, std::string> &params : doors)
+        {
+            if (!mStore.get<ESM::Door>().search(params.first))
+            {
+                ESM::Door record;
+                record.mId = params.first;
+                record.mModel = params.second;
+                mStore.insertStatic(record);
             }
         }
     }
