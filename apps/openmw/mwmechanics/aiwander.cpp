@@ -1,7 +1,5 @@
 #include "aiwander.hpp"
 
-#include <cfloat>
-
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
 #include <components/esm/aisequence.hpp>

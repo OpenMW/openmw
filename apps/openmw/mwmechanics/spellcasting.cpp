@@ -1,6 +1,5 @@
 #include "spellcasting.hpp"
 
-#include <cfloat>
 #include <limits>
 #include <iomanip>
 
