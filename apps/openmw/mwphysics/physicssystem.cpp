@@ -1317,6 +1317,7 @@ namespace MWPhysics
             float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
 
             bool flying = world->isFlying(iter->first);
+            bool swimming = world->isSwimming(iter->first);
 
             bool wasOnGround = physicActor->getOnGround();
             osg::Vec3f position = physicActor->getPosition();
@@ -1339,8 +1340,9 @@ namespace MWPhysics
             float heightDiff = position.z() - oldHeight;
 
             MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
-            if ((numSteps > 0 && wasOnGround && physicActor->getOnGround()) || flying || world->isSwimming(iter->first) || slowFall < 1)
-                stats.land(iter->first == player);
+            bool isStillOnGround = (numSteps > 0 && wasOnGround && physicActor->getOnGround());
+            if (isStillOnGround || flying || swimming || slowFall < 1)
+                stats.land(iter->first == player && (flying || swimming));
             else if (heightDiff < 0)
                 stats.addToFallHeight(-heightDiff);
 
