@@ -75,7 +75,7 @@ namespace ESMTerrain
         virtual void fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
                                 osg::ref_ptr<osg::Vec3Array> positions,
                                 osg::ref_ptr<osg::Vec3Array> normals,
-                                osg::ref_ptr<osg::Vec4Array> colours);
+                                osg::ref_ptr<osg::Vec4ubArray> colours);
 
         /// Create textures holding layer blend values for a terrain chunk.
         /// @note The terrain chunk shouldn't be larger than one cell since otherwise we might
@@ -106,7 +106,7 @@ namespace ESMTerrain
         const VFS::Manager* mVFS;
 
         void fixNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row, LandCache& cache);
-        void fixColour (osg::Vec4f& colour, int cellX, int cellY, int col, int row, LandCache& cache);
+        void fixColour (osg::Vec4ub& colour, int cellX, int cellY, int col, int row, LandCache& cache);
         void averageNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row, LandCache& cache);
 
         float getVertexHeight (const ESM::Land::LandData* data, int x, int y);
