@@ -334,6 +334,8 @@ namespace MWRender
         mFirstPersonFieldOfView = Settings::Manager::getFloat("first person field of view", "Camera");
         mStateUpdater->setFogEnd(mViewDistance);
 
+        mTerrain->setViewDistance(mViewDistance);
+
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
 
@@ -1234,6 +1236,7 @@ namespace MWRender
                 mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
                 if(!mDistantFog)
                     mStateUpdater->setFogEnd(mViewDistance);
+                mTerrain->setViewDistance(mViewDistance);
                 updateProjectionMatrix();
             }
             else if (it->first == "General" && (it->second == "texture filter" ||
