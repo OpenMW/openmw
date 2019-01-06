@@ -45,13 +45,12 @@ namespace MWRender
         void clear();
 
         /**
-         * Request a map render for the given cells. Render textures will be immediately created and can be retrieved with the getMapTexture function.
+         * Request a map render for the given cell. Render textures will be immediately created and can be retrieved with the getMapTexture function.
          */
-        void requestMap (std::set<const MWWorld::CellStore*> cells);
+        void requestMap (const MWWorld::CellStore* cell);
 
-        /**
-         * Remove map and fog textures for the given cell.
-         */
+        void addCell(MWWorld::CellStore* cell);
+
         void removeCell (MWWorld::CellStore* cell);
 
         osg::ref_ptr<osg::Texture2D> getMapTexture (int x, int y);
@@ -110,6 +109,9 @@ namespace MWRender
 
         CameraVector mCamerasPendingRemoval;
 
+        typedef std::set<std::pair<int, int> > Grid;
+        Grid mCurrentGrid;
+
         struct MapSegment
         {
             MapSegment();
@@ -124,7 +126,7 @@ namespace MWRender
             osg::ref_ptr<osg::Texture2D> mFogOfWarTexture;
             osg::ref_ptr<osg::Image> mFogOfWarImage;
 
-            std::set<std::pair<int, int> > mGrid; // the grid that was active at the time of rendering this segment
+            Grid mGrid; // the grid that was active at the time of rendering this segment
 
             bool mHasFogState;
         };

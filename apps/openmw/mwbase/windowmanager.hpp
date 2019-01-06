@@ -350,6 +350,7 @@ namespace MWBase
             virtual std::string correctTexturePath(const std::string& path) = 0;
             virtual bool textureExists(const std::string& path) = 0;
 
+            virtual void addCell(MWWorld::CellStore* cell) = 0;
             virtual void removeCell(MWWorld::CellStore* cell) = 0;
             virtual void writeFog(MWWorld::CellStore* cell) = 0;
 

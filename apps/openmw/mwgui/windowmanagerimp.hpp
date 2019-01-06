@@ -378,6 +378,7 @@ namespace MWGui
     virtual std::string correctTexturePath(const std::string& path);
     virtual bool textureExists(const std::string& path);
 
+    void addCell(MWWorld::CellStore* cell);
     void removeCell(MWWorld::CellStore* cell);
     void writeFog(MWWorld::CellStore* cell);
 

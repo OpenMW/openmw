@@ -2168,6 +2168,11 @@ namespace MWGui
         tex->unlock();
     }
 
+    void WindowManager::addCell(MWWorld::CellStore* cell)
+    {
+        mLocalMapRender->addCell(cell);
+    }
+
     void WindowManager::removeCell(MWWorld::CellStore *cell)
     {
         mLocalMapRender->removeCell(cell);

@@ -128,12 +128,14 @@ namespace MWGui
         struct MapEntry
         {
             MapEntry(MyGUI::ImageBox* mapWidget, MyGUI::ImageBox* fogWidget)
-                : mMapWidget(mapWidget), mFogWidget(fogWidget) {}
+                : mMapWidget(mapWidget), mFogWidget(fogWidget), mCellX(0), mCellY(0) {}
 
             MyGUI::ImageBox* mMapWidget;
             MyGUI::ImageBox* mFogWidget;
             std::shared_ptr<MyGUI::ITexture> mMapTexture;
             std::shared_ptr<MyGUI::ITexture> mFogTexture;
+            int mCellX;
+            int mCellY;
         };
         std::vector<MapEntry> mMaps;
 
@@ -153,6 +155,8 @@ namespace MWGui
 
         virtual void customMarkerCreated(MyGUI::Widget* marker) {}
         virtual void doorMarkerCreated(MyGUI::Widget* marker) {}
+
+        void updateRequiredMaps();
 
         void updateMagicMarkers();
         void addDetectionMarkers(int type);

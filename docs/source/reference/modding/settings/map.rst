@@ -112,5 +112,5 @@ local map cell distance
 :Default:	1
 
 Similar to "exterior cell load distance" in the Cells section, controls how many cells are rendered on the local map. 
-Values higher than the default may result in longer loading times. Please note that only loaded cells can be rendered, 
+Please note that only loaded cells can be rendered,
 so this setting must be lower or equal to "exterior cell load distance" to work properly.
