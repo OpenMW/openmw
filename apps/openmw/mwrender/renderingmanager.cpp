@@ -265,9 +265,9 @@ namespace MWRender
                                              Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
 
         mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug, Settings::Manager::getInt("composite map resolution", "Terrain"), Settings::Manager::getFloat("composite map level", "Terrain"), Settings::Manager::getFloat("lod factor", "Terrain"), Settings::Manager::getBool("wait for composite maps", "Terrain")));
-
         mTerrain->setDefaultViewer(mViewer->getCamera());
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
+        mTerrain->setWorkQueue(mWorkQueue.get());
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
