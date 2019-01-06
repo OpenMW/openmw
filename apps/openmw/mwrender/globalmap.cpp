@@ -293,7 +293,7 @@ namespace MWRender
         camera->setViewMatrix(osg::Matrix::identity());
         camera->setProjectionMatrix(osg::Matrix::identity());
         camera->setProjectionResizePolicy(osg::Camera::FIXED);
-        camera->setRenderOrder(osg::Camera::PRE_RENDER);
+        camera->setRenderOrder(osg::Camera::PRE_RENDER, 1); // make sure this is rendered after the local map that this depends on are rendered
         y = mHeight - y - height; // convert top-left origin to bottom-left
         camera->setViewport(x, y, width, height);
 
