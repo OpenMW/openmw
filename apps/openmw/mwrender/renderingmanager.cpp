@@ -212,7 +212,6 @@ namespace MWRender
         , mUnderwaterIndoorFog(fallback->getFallbackFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
         , mDistantFog(false)
-        , mDistantTerrain(false)
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
         , mBorders(false)
@@ -261,15 +260,11 @@ namespace MWRender
         DLInteriorFogEnd = Settings::Manager::getFloat("distant interior fog end", "Fog");
 
         mDistantFog = Settings::Manager::getBool("use distant fog", "Fog");
-        mDistantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
         mTerrainStorage = new TerrainStorage(mResourceSystem, Settings::Manager::getString("normal map pattern", "Shaders"), Settings::Manager::getString("normal height map pattern", "Shaders"),
                                              Settings::Manager::getBool("auto use terrain normal maps", "Shaders"), Settings::Manager::getString("terrain specular map pattern", "Shaders"),
                                              Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
 
-        if (mDistantTerrain)
-            mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug, Settings::Manager::getInt("composite map resolution", "Terrain"), Settings::Manager::getFloat("composite map level", "Terrain"), Settings::Manager::getFloat("lod factor", "Terrain"), Settings::Manager::getBool("wait for composite maps", "Terrain")));
-        else
-            mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
+        mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug, Settings::Manager::getInt("composite map resolution", "Terrain"), Settings::Manager::getFloat("composite map level", "Terrain"), Settings::Manager::getFloat("lod factor", "Terrain"), Settings::Manager::getBool("wait for composite maps", "Terrain")));
 
         mTerrain->setDefaultViewer(mViewer->getCamera());
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
