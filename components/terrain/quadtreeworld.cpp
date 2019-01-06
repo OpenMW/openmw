@@ -146,20 +146,21 @@ public:
 
     osg::ref_ptr<QuadTreeNode> addChild(QuadTreeNode* parent, ChildDirection direction, float size)
     {
+        float halfSize = size/2.f;
         osg::Vec2f center;
         switch (direction)
         {
         case SW:
-            center = parent->getCenter() + osg::Vec2f(-size/2.f,-size/2.f);
+            center = parent->getCenter() + osg::Vec2f(-halfSize,-halfSize);
             break;
         case SE:
-            center = parent->getCenter() + osg::Vec2f(size/2.f, -size/2.f);
+            center = parent->getCenter() + osg::Vec2f(halfSize, -halfSize);
             break;
         case NW:
-            center = parent->getCenter() + osg::Vec2f(-size/2.f, size/2.f);
+            center = parent->getCenter() + osg::Vec2f(-halfSize, halfSize);
             break;
         case NE:
-            center = parent->getCenter() + osg::Vec2f(size/2.f, size/2.f);
+            center = parent->getCenter() + osg::Vec2f(halfSize, halfSize);
             break;
         default:
             break;
@@ -169,10 +170,10 @@ public:
         node->setLodCallback(parent->getLodCallback());
         node->setViewDataMap(mViewDataMap);
 
-        if (center.x() - size > mMaxX
-                || center.x() + size < mMinX
-                || center.y() - size > mMaxY
-                || center.y() + size < mMinY )
+        if (center.x() - halfSize > mMaxX
+                || center.x() + halfSize < mMinX
+                || center.y() - halfSize > mMaxY
+                || center.y() + halfSize < mMinY )
             // Out of bounds of the actual terrain - this will happen because
             // we rounded the size up to the next power of two
         {
@@ -190,8 +191,8 @@ public:
             if (mStorage->getMinMaxHeights(size, center, minZ, maxZ))
             {
                 float cellWorldSize = mStorage->getCellWorldSize();
-                osg::BoundingBox boundingBox(osg::Vec3f((center.x()-size)*cellWorldSize, (center.y()-size)*cellWorldSize, minZ),
-                                        osg::Vec3f((center.x()+size)*cellWorldSize, (center.y()+size)*cellWorldSize, maxZ));
+                osg::BoundingBox boundingBox(osg::Vec3f((center.x()-halfSize)*cellWorldSize, (center.y()-halfSize)*cellWorldSize, minZ),
+                                        osg::Vec3f((center.x()+halfSize)*cellWorldSize, (center.y()+halfSize)*cellWorldSize, maxZ));
                 node->setBoundingBox(boundingBox);
             }
             return node;
