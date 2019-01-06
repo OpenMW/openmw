@@ -5,6 +5,7 @@
 #include <osg/Group>
 
 #include "chunkmanager.hpp"
+#include "compositemaprenderer.hpp"
 
 namespace Terrain
 {
@@ -60,6 +61,10 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             return nullptr;
         if (parent)
             parent->addChild(node);
+
+        osg::UserDataContainer* udc = node->getUserDataContainer();
+        if (udc && udc->getUserData())
+            mCompositeMapRenderer->setImmediate(static_cast<CompositeMap*>(udc->getUserData()));
 
         return node;
     }
