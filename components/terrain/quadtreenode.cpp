@@ -61,7 +61,6 @@ QuadTreeNode::QuadTreeNode(QuadTreeNode* parent, ChildDirection direction, float
     , mValidBounds(false)
     , mSize(size)
     , mCenter(center)
-    , mViewDataMap(nullptr)
 {
 }
 
@@ -271,34 +270,6 @@ void QuadTreeNode::setLodCallback(LodCallback *lodCallback)
 LodCallback *QuadTreeNode::getLodCallback()
 {
     return mLodCallback;
-}
-
-void QuadTreeNode::setViewDataMap(ViewDataMap *map)
-{
-    mViewDataMap = map;
-}
-
-ViewDataMap *QuadTreeNode::getViewDataMap()
-{
-    return mViewDataMap;
-}
-
-ViewData* QuadTreeNode::getView(osg::NodeVisitor &nv, bool& needsUpdate)
-{
-    ViewData* vd = NULL;
-    if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
-    {
-        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
-        vd = mViewDataMap->getViewData(cv->getCurrentCamera(), nv.getViewPoint(), needsUpdate);
-    }
-    else // INTERSECTION_VISITOR
-    {
-        osg::Vec3f viewPoint = nv.getViewPoint();
-        static osg::ref_ptr<osg::Object> dummyObj = new osg::DummyObject;
-        vd = mViewDataMap->getViewData(dummyObj.get(), viewPoint, needsUpdate);
-        needsUpdate = true;
-    }
-    return vd;
 }
 
 void QuadTreeNode::setBoundingBox(const osg::BoundingBox &boundingBox)

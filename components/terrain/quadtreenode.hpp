@@ -83,14 +83,6 @@ namespace Terrain
 
         LodCallback* getLodCallback();
 
-        /// Set the view data map that the finally used nodes for a given camera/intersection are pushed onto.
-        void setViewDataMap(ViewDataMap* map);
-
-        ViewDataMap* getViewDataMap();
-
-        /// Create or retrieve a view for the given traversal.
-        ViewData* getView(osg::NodeVisitor& nv, bool& needsUpdate);
-
     private:
         QuadTreeNode* mParent;
 
@@ -102,8 +94,6 @@ namespace Terrain
         osg::Vec2f mCenter;
 
         osg::ref_ptr<LodCallback> mLodCallback;
-
-        ViewDataMap* mViewDataMap;
     };
 
 }
