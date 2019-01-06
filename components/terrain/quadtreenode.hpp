@@ -35,10 +35,9 @@ namespace Terrain
         QuadTreeNode(QuadTreeNode* parent, ChildDirection dir, float size, const osg::Vec2f& center);
         virtual ~QuadTreeNode();
 
-        QuadTreeNode* getParent();
-
-        QuadTreeNode* getChild(unsigned int i);
-        using osg::Group::getNumChildren;
+        inline QuadTreeNode* getParent() { return mParent; }
+        inline QuadTreeNode* getChild(unsigned int i) { return static_cast<QuadTreeNode*>(Group::getChild(i)); }
+        inline unsigned int getNumChildren() const { return _children.size(); }
 
         /// Faster version of osg::Group::addChild
         void addChild(QuadTreeNode* child)
@@ -57,16 +56,16 @@ namespace Terrain
         QuadTreeNode* getNeighbour (Direction dir);
 
         void setBoundingBox(const osg::BoundingBox& boundingBox);
-        const osg::BoundingBox& getBoundingBox() const;
+        const osg::BoundingBox& getBoundingBox() const { return mBoundingBox; }
         bool hasValidBounds() const { return mValidBounds; }
 
         virtual osg::BoundingSphere computeBound() const;
 
         /// size in cell coordinates
-        float getSize() const;
+        float getSize() const { return mSize; }
 
         /// center in cell coordinates
-        const osg::Vec2f& getCenter() const;
+        const osg::Vec2f& getCenter() const { return mCenter; }
 
         /// Traverse nodes according to LOD selection.
         void traverse(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback, float maxDist);

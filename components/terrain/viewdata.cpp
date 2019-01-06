@@ -38,21 +38,6 @@ void ViewData::add(QuadTreeNode *node, bool visible)
         mChanged = true;
 }
 
-unsigned int ViewData::getNumEntries() const
-{
-    return mNumEntries;
-}
-
-ViewData::Entry &ViewData::getEntry(unsigned int i)
-{
-    return mEntries[i];
-}
-
-bool ViewData::hasChanged() const
-{
-    return mChanged;
-}
-
 bool ViewData::hasViewPoint() const
 {
     return mHasViewPoint;

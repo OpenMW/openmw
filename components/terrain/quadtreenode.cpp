@@ -68,16 +68,6 @@ QuadTreeNode::~QuadTreeNode()
 {
 }
 
-QuadTreeNode* QuadTreeNode::getParent()
-{
-    return mParent;
-}
-
-QuadTreeNode *QuadTreeNode::getChild(unsigned int i)
-{
-    return static_cast<QuadTreeNode*>(Group::getChild(i));
-}
-
 QuadTreeNode *QuadTreeNode::getNeighbour(Direction dir)
 {
     return searchNeighbour(this, dir);
@@ -270,24 +260,9 @@ void QuadTreeNode::setBoundingBox(const osg::BoundingBox &boundingBox)
     getBound();
 }
 
-const osg::BoundingBox &QuadTreeNode::getBoundingBox() const
-{
-    return mBoundingBox;
-}
-
 osg::BoundingSphere QuadTreeNode::computeBound() const
 {
     return osg::BoundingSphere(mBoundingBox);
-}
-
-float QuadTreeNode::getSize() const
-{
-    return mSize;
-}
-
-const osg::Vec2f &QuadTreeNode::getCenter() const
-{
-    return mCenter;
 }
 
 }

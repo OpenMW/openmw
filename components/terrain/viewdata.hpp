@@ -42,15 +42,15 @@ namespace Terrain
             osg::ref_ptr<osg::Node> mRenderingNode;
         };
 
-        unsigned int getNumEntries() const;
+        unsigned int getNumEntries() const { return mNumEntries; }
 
-        Entry& getEntry(unsigned int i);
+        Entry& getEntry(unsigned int i) { return mEntries[i]; }
 
         double getLastUsageTimeStamp() const { return mLastUsageTimeStamp; }
         void setLastUsageTimeStamp(double timeStamp) { mLastUsageTimeStamp = timeStamp; }
 
         /// @return Have any nodes changed since the last frame
-        bool hasChanged() const;
+        bool hasChanged() const { return mChanged; }
         void markUnchanged() { mChanged = false; }
 
         bool hasViewPoint() const;
