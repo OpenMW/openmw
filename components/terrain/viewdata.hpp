@@ -46,9 +46,6 @@ namespace Terrain
 
         Entry& getEntry(unsigned int i);
 
-        osg::Object* getViewer() const { return mViewer.get(); }
-        void setViewer(osg::Object* viewer) { mViewer = viewer; }
-
         double getLastUsageTimeStamp() const { return mLastUsageTimeStamp; }
         void setLastUsageTimeStamp(double timeStamp) { mLastUsageTimeStamp = timeStamp; }
 
@@ -66,7 +63,6 @@ namespace Terrain
         unsigned int mNumEntries;
         double mLastUsageTimeStamp;
         bool mChanged;
-        osg::ref_ptr<osg::Object> mViewer;
         osg::Vec3f mViewPoint;
         bool mHasViewPoint;
         float mReuseDistance;
@@ -96,7 +92,7 @@ namespace Terrain
     private:
         std::list<ViewData> mViewVector;
 
-        typedef std::map<osg::Object*, ViewData*> Map;
+        typedef std::map<osg::ref_ptr<osg::Object>, ViewData*> Map;
         Map mViews;
 
         float mReuseDistance;

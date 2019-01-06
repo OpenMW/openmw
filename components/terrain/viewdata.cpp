@@ -132,7 +132,6 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPo
     if (found == mViews.end())
     {
         vd = createOrReuseView();
-        vd->setViewer(viewer);
         mViews[viewer] = vd;
     }
     else
@@ -180,7 +179,6 @@ void ViewDataMap::clearUnusedViews(double referenceTime)
         ViewData* vd = it->second;
         if (vd->getLastUsageTimeStamp() + mExpiryDelay < referenceTime)
         {
-            vd->setViewer(nullptr);
             vd->clear();
             mUnusedViews.push_back(vd);
             mViews.erase(it++);
