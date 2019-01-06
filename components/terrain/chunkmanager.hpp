@@ -32,6 +32,9 @@ namespace Terrain
 
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, int lod, unsigned int lodFlags);
 
+        void setCompositeMapSize(unsigned int size) { mCompositeMapSize = size; }
+        void setCompositeMapLevel(float level) { mCompositeMapLevel = level; }
+
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 
         void clearCache() override;
@@ -56,6 +59,7 @@ namespace Terrain
         BufferCache mBufferCache;
 
         unsigned int mCompositeMapSize;
+        float mCompositeMapLevel;
 
         bool mCullingActive;
     };

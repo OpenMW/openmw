@@ -267,7 +267,7 @@ namespace MWRender
                                              Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
 
         if (mDistantTerrain)
-            mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
+            mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug, Settings::Manager::getInt("composite map resolution", "Terrain"), Settings::Manager::getFloat("composite map level", "Terrain"), Settings::Manager::getFloat("lod factor", "Terrain"), Settings::Manager::getBool("wait for composite maps", "Terrain")));
         else
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
 
