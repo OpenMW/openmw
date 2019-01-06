@@ -216,13 +216,14 @@ private:
     osg::ref_ptr<RootNode> mRootNode;
 };
 
-QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask, int borderMask, int compositeMapResolution, float compositeMapLevel, float lodFactor, bool waitForCompositeMaps)
+QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask, int borderMask, int compositeMapResolution, float compositeMapLevel, float lodFactor, bool waitForCompositeMaps, int vertexLodMod)
     : TerrainGrid(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
     , mLodFactor(lodFactor)
     , mWaitForCompositeMaps(waitForCompositeMaps)
     , mViewDistance(std::numeric_limits<float>::max())
+    , mVertexLodMod(vertexLodMod)
 {
     // No need for culling on the Drawable / Transform level as the quad tree performs the culling already.
     mChunkManager->setCullingActive(false);
@@ -282,7 +283,31 @@ void traverseToCell(QuadTreeNode* node, ViewData* vd, int cellX, int cellY)
     }
 }
 
-unsigned int getLodFlags(QuadTreeNode* node, int ourLod, ViewData* vd)
+/// get the level of vertex detail to render this node at, expressed relative to the native resolution of the data set.
+unsigned int getVertexLod(QuadTreeNode* node, int vertexLodMod)
+{
+    int lod = Log2(int(node->getSize()));
+    if (vertexLodMod > 0)
+    {
+        lod = std::max(0, lod-vertexLodMod);
+    }
+    else if (vertexLodMod < 0)
+    {
+        float size = node->getSize();
+        // stop simplyfing at this level since smaller chunks are already less dense compared to the farther stuff in view relative terms
+        // the cutoff is 1 because at size = 1 a node has getCellVertices() (ie 65) vertices just like larger nodes 
+        while (size < 1)
+        {
+            size *= 2;
+            vertexLodMod = std::min(0, vertexLodMod+1);
+        }
+        lod += std::abs(vertexLodMod);
+    }
+    return lod;
+}
+
+/// get the flags to use for stitching in the index buffer so that chunks of different LOD connect seamlessly
+unsigned int getLodFlags(QuadTreeNode* node, int ourLod, int vertexLodMod, ViewData* vd)
 {
     unsigned int lodFlags = 0;
     for (unsigned int i=0; i<4; ++i)
@@ -297,7 +322,7 @@ unsigned int getLodFlags(QuadTreeNode* node, int ourLod, ViewData* vd)
             neighbour = neighbour->getParent();
         int lod = 0;
         if (neighbour)
-            lod = Log2(int(neighbour->getSize()));
+            lod = getVertexLod(neighbour, vertexLodMod);
 
         if (lod <= ourLod) // We only need to worry about neighbours less detailed than we are -
             lod = 0;         // neighbours with more detail will do the stitching themselves
@@ -310,13 +335,17 @@ unsigned int getLodFlags(QuadTreeNode* node, int ourLod, ViewData* vd)
     return lodFlags;
 }
 
-void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, ChunkManager* chunkManager)
+void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, ChunkManager* chunkManager)
 {
+    if (!vd->hasChanged() && entry.mRenderingNode)
+        return;
+
+    int ourLod = getVertexLod(entry.mNode, vertexLodMod);
+
     if (vd->hasChanged())
     {
         // have to recompute the lodFlags in case a neighbour has changed LOD.
-        int ourLod = Log2(int(entry.mNode->getSize()));
-        unsigned int lodFlags = getLodFlags(entry.mNode, ourLod, vd);
+        unsigned int lodFlags = getLodFlags(entry.mNode, ourLod, vertexLodMod, vd);
         if (lodFlags != entry.mLodFlags)
         {
             entry.mRenderingNode = nullptr;
@@ -325,10 +354,7 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, ChunkManager* chunk
     }
 
     if (!entry.mRenderingNode)
-    {
-        int ourLod = Log2(int(entry.mNode->getSize()));
         entry.mRenderingNode = chunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags);
-    }
 }
 
 void QuadTreeWorld::accept(osg::NodeVisitor &nv)
@@ -361,7 +387,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     {
         ViewData::Entry& entry = vd->getEntry(i);
 
-        loadRenderingNode(entry, vd, mChunkManager.get());
+        loadRenderingNode(entry, vd, mVertexLodMod, mChunkManager.get());
 
         if (entry.mVisible)
         {
@@ -419,7 +445,7 @@ void QuadTreeWorld::cacheCell(View *view, int x, int y)
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
-        loadRenderingNode(entry, vd, mChunkManager.get());
+        loadRenderingNode(entry, vd, mVertexLodMod, mChunkManager.get());
     }
 }
 
@@ -438,7 +464,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &eyePoint, volatile boo
     for (unsigned int i=0; i<vd->getNumEntries() && !abort; ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
-        loadRenderingNode(entry, vd, mChunkManager.get());
+        loadRenderingNode(entry, vd, mVertexLodMod, mChunkManager.get());
     }
 }
 
