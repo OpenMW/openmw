@@ -60,8 +60,8 @@ namespace
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 
         osg::ref_ptr<osg::PolygonOffset> polygonOffset (new osg::PolygonOffset);
-        polygonOffset->setUnits(-1);
-        polygonOffset->setFactor(-1);
+        polygonOffset->setUnits(-1.1);
+        polygonOffset->setFactor(-4.0);
         stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
 
         stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
