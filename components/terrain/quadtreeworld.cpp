@@ -352,7 +352,14 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
                 mRootNode->traverse(vd, &nv, cv->getViewPoint(), true, mViewDistance);
         }
         else
-            mRootNode->traverse(nv);
+        {
+            osgUtil::IntersectionVisitor* iv = static_cast<osgUtil::IntersectionVisitor*>(&nv);
+            osgUtil::Intersector* intersector = iv->getIntersector();
+            osg::ref_ptr<osgUtil::LineSegmentIntersector> line = static_cast<osgUtil::LineSegmentIntersector*>(intersector->clone(*iv)); // if you crash here you'll have to write code for another intersector
+            osg::Vec3f start = line->getStart();
+            osg::Vec3f end = line->getEnd();
+            mRootNode->intersect(vd, start, end);
+        }
     }
     else if (isCullVisitor)
     {

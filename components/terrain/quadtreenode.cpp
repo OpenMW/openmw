@@ -153,18 +153,117 @@ void QuadTreeNode::traverseTo(ViewData* vd, float size, const osg::Vec2f& center
     }
 }
 
-void QuadTreeNode::traverse(osg::NodeVisitor &nv)
+// copied from LineSegmentIntersector::intersectAndClip (protected function)
+bool intersectAndClip(osg::Vec3f& s, osg::Vec3f& e,const osg::BoundingBox& bbInput)
+{
+    osg::Vec3f bb_min(bbInput._min);
+    osg::Vec3f bb_max(bbInput._max);
+
+    double epsilon = 1e-5;
+
+    // compate s and e against the xMin to xMax range of bb.
+    if (s.x()<=e.x())
+    {
+        // trivial reject of segment wholely outside.
+        if (e.x()<bb_min.x()) return false;
+        if (s.x()>bb_max.x()) return false;
+
+        if (s.x()<bb_min.x())
+        {
+            // clip s to xMin.
+            double r = (bb_min.x()-s.x())/(e.x()-s.x()) - epsilon;
+            if (r>0.0) s = s + (e-s)*r;
+        }
+
+        if (e.x()>bb_max.x())
+        {
+            // clip e to xMax.
+            double r = (bb_max.x()-s.x())/(e.x()-s.x()) + epsilon;
+            if (r<1.0) e = s+(e-s)*r;
+        }
+    }
+    else
+    {
+        if (s.x()<bb_min.x()) return false;
+        if (e.x()>bb_max.x()) return false;
+
+        if (e.x()<bb_min.x())
+        {
+            // clip e to xMin.
+            double r = (bb_min.x()-e.x())/(s.x()-e.x()) - epsilon;
+            if (r>0.0) e = e + (s-e)*r;
+        }
+
+        if (s.x()>bb_max.x())
+        {
+            // clip s to xMax.
+            double r = (bb_max.x()-e.x())/(s.x()-e.x()) + epsilon;
+            if (r<1.0) s = e + (s-e)*r;
+        }
+    }
+
+    // compate s and e against the yMin to yMax range of bb.
+    if (s.y()<=e.y())
+    {
+        // trivial reject of segment wholely outside.
+        if (e.y()<bb_min.y()) return false;
+        if (s.y()>bb_max.y()) return false;
+
+        if (s.y()<bb_min.y())
+        {
+            // clip s to yMin.
+            double r = (bb_min.y()-s.y())/(e.y()-s.y()) - epsilon;
+            if (r>0.0) s = s + (e-s)*r;
+        }
+
+        if (e.y()>bb_max.y())
+        {
+            // clip e to yMax.
+            double r = (bb_max.y()-s.y())/(e.y()-s.y()) + epsilon;
+            if (r<1.0) e = s+(e-s)*r;
+        }
+    }
+    else
+    {
+        if (s.y()<bb_min.y()) return false;
+        if (e.y()>bb_max.y()) return false;
+
+        if (e.y()<bb_min.y())
+        {
+            // clip e to yMin.
+            double r = (bb_min.y()-e.y())/(s.y()-e.y()) - epsilon;
+            if (r>0.0) e = e + (s-e)*r;
+        }
+
+        if (s.y()>bb_max.y())
+        {
+            // clip s to yMax.
+            double r = (bb_max.y()-e.y())/(s.y()-e.y()) + epsilon;
+            if (r<1.0) s = e + (s-e)*r;
+        }
+    }
+
+    return true;
+}
+
+
+void QuadTreeNode::intersect(ViewData* vd, const osg::Vec3f& start, const osg::Vec3f& end)
 {
     if (!hasValidBounds())
         return;
 
-    bool needsUpdate = true;
-    ViewData* vd = getView(nv, needsUpdate);
+    osg::Vec3f s = start;
+    osg::Vec3f e = end;
+    if (!intersectAndClip(s, e, getBoundingBox()))
+        return;
 
-    if ((mLodCallback && mLodCallback->isSufficientDetail(this, distance(vd->getViewPoint()))) || !getNumChildren())
+    if (getNumChildren() == 0)
         vd->add(this, true);
     else
-        osg::Group::traverse(nv);
+    {
+        for (unsigned int i=0; i<getNumChildren(); ++i)
+            getChild(i)->intersect(vd, start, end);
+    }
 }
 
 void QuadTreeNode::setLodCallback(LodCallback *lodCallback)
