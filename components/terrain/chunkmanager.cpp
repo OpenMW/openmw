@@ -90,7 +90,12 @@ osg::ref_ptr<osg::Texture2D> ChunkManager::createCompositeMapRTT()
 
 void ChunkManager::createCompositeMapGeometry(float chunkSize, const osg::Vec2f& chunkCenter, const osg::Vec4f& texCoords, CompositeMap& compositeMap)
 {
-    if (chunkSize > 1.f)
+    // Smaller value uses more draw calls and textures
+    // Higher value creates more overdraw (not every texture layer is used everywhere)
+    // This seems to be the sweet spot
+    float maxCompositePiece = 4.f;
+
+    if (chunkSize > maxCompositePiece)
     {
         createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(chunkSize/4.f, chunkSize/4.f), osg::Vec4f(texCoords.x() + texCoords.z()/2.f, texCoords.y(), texCoords.z()/2.f, texCoords.w()/2.f), compositeMap);
         createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(-chunkSize/4.f, chunkSize/4.f), osg::Vec4f(texCoords.x(), texCoords.y(), texCoords.z()/2.f, texCoords.w()/2.f), compositeMap);
