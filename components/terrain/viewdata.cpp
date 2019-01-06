@@ -195,22 +195,4 @@ void ViewDataMap::clear()
     mViewVector.clear();
 }
 
-void ViewDataMap::setDefaultViewer(osg::Object *viewer)
-{
-    mDefaultViewer = viewer;
-}
-
-bool ViewDataMap::getDefaultViewPoint(osg::Vec3f& viewPoint)
-{
-     Map::const_iterator found = mViews.find(mDefaultViewer);
-     if (found != mViews.end() && found->second->hasViewPoint())
-     {
-        viewPoint = found->second->getViewPoint();
-        return true;
-     }
-     else
-        return false;
-}
-
-
 }

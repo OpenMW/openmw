@@ -85,10 +85,6 @@ namespace Terrain
 
         void clear();
 
-        void setDefaultViewer(osg::Object* viewer);
-
-        bool getDefaultViewPoint(osg::Vec3f& viewPoint);
-
     private:
         std::list<ViewData> mViewVector;
 
@@ -99,8 +95,6 @@ namespace Terrain
         float mExpiryDelay; // time in seconds for unused view to be removed
 
         std::deque<ViewData*> mUnusedViews;
-
-        osg::ref_ptr<osg::Object> mDefaultViewer;
     };
 
 }
