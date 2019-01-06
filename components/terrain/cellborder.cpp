@@ -7,7 +7,7 @@
 #include "world.hpp"
 #include "../esm/loadland.hpp"
 
-namespace MWRender
+namespace Terrain
 {
 
 CellBorder::CellBorder(Terrain::World *world, osg::Group *root, int borderMask):

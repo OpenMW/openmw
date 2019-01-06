@@ -84,7 +84,7 @@ void TerrainGrid::loadCell(int x, int y)
 
 void TerrainGrid::unloadCell(int x, int y)
 {
-    MWRender::CellBorder::CellGrid::iterator it = mGrid.find(std::make_pair(x,y));
+    CellBorder::CellGrid::iterator it = mGrid.find(std::make_pair(x,y));
     if (it == mGrid.end())
         return;
 
