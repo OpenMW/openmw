@@ -98,9 +98,8 @@ private:
 class QuadTreeBuilder
 {
 public:
-    QuadTreeBuilder(Terrain::Storage* storage, float lodFactor, float minSize)
+    QuadTreeBuilder(Terrain::Storage* storage, float minSize)
         : mStorage(storage)
-        , mLodFactor(lodFactor)
         , mMinX(0.f), mMaxX(0.f), mMinY(0.f), mMaxY(0.f)
         , mMinSize(minSize)
     {
@@ -120,7 +119,6 @@ public:
         float centerY = (mMinY+mMaxY)/2.f + (size-origSizeY)/2.f;
 
         mRootNode = new RootNode(size, osg::Vec2f(centerX, centerY));
-        mRootNode->setLodCallback(new DefaultLodCallback(mLodFactor, mMinSize));
         addChildren(mRootNode);
     }
 
@@ -167,7 +165,6 @@ public:
         }
 
         osg::ref_ptr<QuadTreeNode> node = new QuadTreeNode(parent, direction, size, center);
-        node->setLodCallback(parent->getLodCallback());
 
         if (center.x() - halfSize > mMaxX
                 || center.x() + halfSize < mMinX
@@ -218,6 +215,7 @@ private:
     float mMinSize;
 
     osg::ref_ptr<RootNode> mRootNode;
+    osg::ref_ptr<LodCallback> mLodCallback;
 };
 
 QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask, int borderMask, int compositeMapResolution, float compositeMapLevel, float lodFactor, bool waitForCompositeMaps, int vertexLodMod)
@@ -354,7 +352,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
                 mRootNode->traverseTo(vd, 1, osg::Vec2f(x+0.5,y+0.5));
             }
             else
-                mRootNode->traverse(vd, cv->getViewPoint(), mViewDistance);
+                mRootNode->traverse(vd, cv->getViewPoint(), mLodCallback, mViewDistance);
         }
         else
         {
@@ -416,7 +414,8 @@ void QuadTreeWorld::ensureQuadTreeBuilt()
         return;
 
     const float minSize = 1/8.f;
-    QuadTreeBuilder builder(mStorage, mLodFactor, minSize);
+    mLodCallback = new DefaultLodCallback(mLodFactor, minSize);
+    QuadTreeBuilder builder(mStorage, minSize);
     builder.build();
 
     mRootNode = builder.getRootNode();
@@ -462,7 +461,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, volatile bo
 
     ViewData* vd = static_cast<ViewData*>(view);
     vd->setViewPoint(viewPoint);
-    mRootNode->traverse(vd, viewPoint, mViewDistance);
+    mRootNode->traverse(vd, viewPoint, mLodCallback, mViewDistance);
 
     for (unsigned int i=0; i<vd->getNumEntries() && !abort; ++i)
     {

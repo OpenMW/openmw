@@ -15,6 +15,7 @@ namespace Terrain
 {
     class RootNode;
     class ViewDataMap;
+    class LodCallback;
 
     /// @brief Terrain implementation that loads cells into a Quad Tree, with geometry LOD and texture LOD.
     /// @note The geometry LOD relies on Stitching to connect different LODs. This gives a seamless appearance but with Sticthing you cant use more advanced LOD techniques because siblings must have the same LOD for the connections to work.. I think its a bad choice but i wont rewrite it for now
@@ -48,6 +49,7 @@ namespace Terrain
         osg::ref_ptr<RootNode> mRootNode;
 
         osg::ref_ptr<ViewDataMap> mViewDataMap;
+        osg::ref_ptr<LodCallback> mLodCallback;
 
         OpenThreads::Mutex mQuadTreeMutex;
         bool mQuadTreeBuilt;
