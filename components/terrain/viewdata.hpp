@@ -49,11 +49,12 @@ namespace Terrain
         osg::Object* getViewer() const { return mViewer.get(); }
         void setViewer(osg::Object* viewer) { mViewer = viewer; }
 
-        unsigned int getFrameLastUsed() const { return mFrameLastUsed; }
-        void finishFrame(unsigned int frame) { mFrameLastUsed = frame; mChanged = false; }
+        double getLastUsageTimeStamp() const { return mLastUsageTimeStamp; }
+        void setLastUsageTimeStamp(double timeStamp) { mLastUsageTimeStamp = timeStamp; }
 
         /// @return Have any nodes changed since the last frame
         bool hasChanged() const;
+        void markUnchanged() { mChanged = false; }
 
         bool hasViewPoint() const;
 
@@ -63,7 +64,7 @@ namespace Terrain
     private:
         std::vector<Entry> mEntries;
         unsigned int mNumEntries;
-        unsigned int mFrameLastUsed;
+        double mLastUsageTimeStamp;
         bool mChanged;
         osg::ref_ptr<osg::Object> mViewer;
         osg::Vec3f mViewPoint;
@@ -75,14 +76,16 @@ namespace Terrain
     {
     public:
         ViewDataMap()
-            : mReuseDistance(100) // large value should be safe because the visibility of each node is still updated individually for each camera even if the base view was reused.
+            : mReuseDistance(300) // large value should be safe because the visibility of each node is still updated individually for each camera even if the base view was reused.
+                                  // this value also serves as a threshold for when a newly loaded LOD gets unloaded again so that if you hover around an LOD transition point the LODs won't keep loading and unloading all the time.
+            , mExpiryDelay(1.f)
         {}
 
         ViewData* getViewData(osg::Object* viewer, const osg::Vec3f& viewPoint, bool& needsUpdate);
 
         ViewData* createOrReuseView();
 
-        void clearUnusedViews(unsigned int frame);
+        void clearUnusedViews(double referenceTime);
 
         void clear();
 
@@ -97,6 +100,7 @@ namespace Terrain
         Map mViews;
 
         float mReuseDistance;
+        float mExpiryDelay; // time in seconds for unused view to be removed
 
         std::deque<ViewData*> mUnusedViews;
 

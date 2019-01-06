@@ -31,6 +31,7 @@ namespace MWRender
 namespace MWWorld
 {
     class CellStore;
+    class TerrainPreloadItem;
 
     class CellPreloader
     {
@@ -105,7 +106,7 @@ namespace MWWorld
 
         std::vector<osg::ref_ptr<Terrain::View> > mTerrainViews;
         std::vector<osg::Vec3f> mTerrainPreloadPositions;
-        osg::ref_ptr<SceneUtil::WorkItem> mTerrainPreloadItem;
+        osg::ref_ptr<TerrainPreloadItem> mTerrainPreloadItem;
         osg::ref_ptr<SceneUtil::WorkItem> mUpdateCacheItem;
     };
 
