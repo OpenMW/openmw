@@ -294,7 +294,7 @@ void traverseToCell(QuadTreeNode* node, ViewData* vd, int cellX, int cellY)
             || node->getCenter().y() - node->getSize()/2.f >= cellY+1)
         return;
 
-    bool stopTraversal = !node->getNumChildren();
+    bool stopTraversal = (node->getSize() == 1);
 
     if (stopTraversal)
         vd->add(node, true);
