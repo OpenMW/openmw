@@ -397,75 +397,44 @@ namespace ESMTerrain
 
         int rowStart = (origin.x() - cellX) * realTextureSize;
         int colStart = (origin.y() - cellY) * realTextureSize;
-        int rowEnd = rowStart + chunkSize * (realTextureSize-1) + 1;
-        int colEnd = colStart + chunkSize * (realTextureSize-1) + 1;
 
-        // Save the used texture indices so we know the total number of textures
-        // and number of required blend maps
-        std::set<UniqueTextureId> textureIndices;
-
-        LandCache cache;
-
-        for (int y=colStart; y<colEnd; ++y)
-            for (int x=rowStart; x<rowEnd; ++x)
-            {
-                UniqueTextureId id = getVtexIndexAt(cellX, cellY, x, y, cache);
-                textureIndices.insert(id);
-            }
-
-        std::map<UniqueTextureId, int> textureIndicesMap;
-        for (std::set<UniqueTextureId>::iterator it = textureIndices.begin(); it != textureIndices.end(); ++it)
-        {
-            int size = textureIndicesMap.size();
-            textureIndicesMap[*it] = size;
-            layerList.push_back(getLayerInfo(getTextureName(*it)));
-        }
-
-        int numTextures = textureIndices.size();
-        if (numTextures == 1)
-            return; // 1 texture filling the whole terrain so no need to blend
-
-        int numBlendmaps = pack ? static_cast<int>(std::ceil((numTextures) / 4.f)) : numTextures;
-
-        int channels = pack ? 4 : 1;
-
-        // Second iteration - create and fill in the blend maps
         const int blendmapSize = (realTextureSize-1) * chunkSize + 1;
         // We need to upscale the blendmap 2x with nearest neighbor sampling to look like Vanilla
         const int imageScaleFactor = 2;
         const int blendmapImageSize = blendmapSize * imageScaleFactor;
 
-        for (int i=0; i<numBlendmaps; ++i)
+        LandCache cache;
+        std::map<UniqueTextureId, int> textureIndicesMap;
+
+        for (int y=0; y<blendmapSize; ++y)
         {
-            GLenum format = pack ? GL_RGBA : GL_ALPHA;
-
-            osg::ref_ptr<osg::Image> image (new osg::Image);
-            image->allocateImage(blendmapImageSize, blendmapImageSize, 1, format, GL_UNSIGNED_BYTE);
-            unsigned char* pData = image->data();
-
-            for (int y=0; y<blendmapSize; ++y)
+            for (int x=0; x<blendmapSize; ++x)
             {
-                for (int x=0; x<blendmapSize; ++x)
+                UniqueTextureId id = getVtexIndexAt(cellX, cellY, x+rowStart, y+colStart, cache);
+                std::map<UniqueTextureId, int>::iterator found = textureIndicesMap.find(id);
+                if (found == textureIndicesMap.end())
                 {
-                    UniqueTextureId id = getVtexIndexAt(cellX, cellY, x+rowStart, y+colStart, cache);
-                    assert(textureIndicesMap.find(id) != textureIndicesMap.end());
-                    int layerIndex = textureIndicesMap.find(id)->second;
-                    int blendIndex = (pack ? static_cast<int>(std::floor((layerIndex) / 4.f)) : layerIndex);
-                    int channel = pack ? std::max(0, layerIndex % 4) : 0;
-
-                    int alpha = (blendIndex == i) ? 255 : 0;
-
-                    int realY = (blendmapSize - y - 1)*imageScaleFactor;
-                    int realX = x*imageScaleFactor;
-
-                    pData[((realY+0)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
-                    pData[((realY+1)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
-                    pData[((realY+0)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
-                    pData[((realY+1)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
+                    found = textureIndicesMap.insert(std::make_pair(id, textureIndicesMap.size())).first;
+                    layerList.push_back(getLayerInfo(getTextureName(id)));
+                    osg::ref_ptr<osg::Image> image (new osg::Image);
+                    image->allocateImage(blendmapImageSize, blendmapImageSize, 1, GL_ALPHA, GL_UNSIGNED_BYTE);
+                    unsigned char* pData = image->data();
+                    memset(pData, 0, image->getTotalDataSize());
+                    blendmaps.push_back(image);
                 }
+                int layerIndex = found->second;
+                unsigned char* pData = blendmaps[layerIndex]->data();
+                int realY = (blendmapSize - y - 1)*imageScaleFactor;
+                int realX = x*imageScaleFactor;
+                pData[((realY+0)*blendmapImageSize + realX + 0)] = 255;
+                pData[((realY+1)*blendmapImageSize + realX + 0)] = 255;
+                pData[((realY+0)*blendmapImageSize + realX + 1)] = 255;
+                pData[((realY+1)*blendmapImageSize + realX + 1)] = 255;
             }
-            blendmaps.push_back(image);
         }
+
+        if (blendmaps.size() == 1)
+            blendmaps.clear(); // 1 texture filling the whole terrain so no need to blend
     }
 
     float Storage::getHeightAt(const osg::Vec3f &worldPos)
