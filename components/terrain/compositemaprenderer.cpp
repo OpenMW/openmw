@@ -122,6 +122,8 @@ void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &
 
         ++compositeMap.mCompiled;
 
+        compositeMap.mDrawables[i] = nullptr;
+
         if (timeLeft)
         {
             *timeLeft -= timer.time_s();
@@ -131,6 +133,8 @@ void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &
                 break;
         }
     }
+    if (compositeMap.mCompiled == compositeMap.mDrawables.size())
+        compositeMap.mDrawables = std::vector<osg::ref_ptr<osg::Drawable>>();
 
     state.haveAppliedAttribute(osg::StateAttribute::VIEWPORT);
 
