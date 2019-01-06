@@ -1,5 +1,8 @@
 #include "unrefqueue.hpp"
 
+#include <cstdlib>
+#include <iostream>
+
 //#include <osg/Timer>
 
 //#include <components/debug/debuglog.hpp>
@@ -12,8 +15,14 @@ namespace SceneUtil
     }
 
     UnrefQueue::UnrefQueue()
+        : mUseWorkQueue(true)
     {
         mWorkItem = new UnrefWorkItem;
+        if (getenv("OPENMW_DISABLE_DEFERRED_DELETE"))
+        {
+            std::cout << "Detected OPENMW_DISABLE_DEFERRED_DELETE, will disable threaded deletion of objects." << std::endl;
+            mUseWorkQueue = false;
+        }
     }
 
     void UnrefQueue::push(const osg::Referenced *obj)
@@ -26,7 +35,8 @@ namespace SceneUtil
         if (mWorkItem->mObjects.empty())
             return;
 
-        workQueue->addWorkItem(mWorkItem, true);
+        if (mUseWorkQueue)
+            workQueue->addWorkItem(mWorkItem, true);
 
         mWorkItem = new UnrefWorkItem;
     }

@@ -37,6 +37,7 @@ namespace SceneUtil
 
     private:
         osg::ref_ptr<UnrefWorkItem> mWorkItem;
+        bool mUseWorkQueue;
     };
 
 }
