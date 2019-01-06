@@ -180,6 +180,9 @@ public:
             return node;
         }
 
+        if (node->getSize() == 1 && !mStorage->hasData(center.x()-0.5, center.y()-0.5))
+            return node;
+
         if (node->getSize() <= mMinSize)
         {
             // We arrived at a leaf

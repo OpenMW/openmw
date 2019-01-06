@@ -28,6 +28,14 @@ namespace Terrain
         /// Get bounds of the whole terrain in cell units
         virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY) = 0;
 
+        /// Return true if there is land data for this cell
+        /// May be overriden for a faster implementation
+        virtual bool hasData(int cellX, int cellY)
+        {
+            float dummy;
+            return getMinMaxHeights(1, osg::Vec2f(cellX+0.5, cellY+0.5), dummy, dummy);
+        }
+
         /// Get the minimum and maximum heights of a terrain region.
         /// @note Will only be called for chunks with size = minBatchSize, i.e. leafs of the quad tree.
         ///        Larger chunks can simply merge AABB of children.

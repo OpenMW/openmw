@@ -23,6 +23,8 @@ namespace MWRender
         virtual osg::ref_ptr<const ESMTerrain::LandObject> getLand (int cellX, int cellY);
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin);
 
+        virtual bool hasData(int cellX, int cellY) override;
+
         /// Get bounds of the whole terrain in cell units
         virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY);
 
