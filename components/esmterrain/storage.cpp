@@ -366,11 +366,6 @@ namespace ESMTerrain
 
     std::string Storage::getTextureName(UniqueTextureId id)
     {
-        // Goes under used terrain blend transitions
-        static const std::string baseTexture = "textures\\tx_black_01.dds";
-        if (id.first == -1)
-            return baseTexture;
-
         static const std::string defaultTexture = "textures\\_land_default.dds";
         if (id.first == 0)
             return defaultTexture; // Not sure if the default texture really is hardcoded?
@@ -406,9 +401,6 @@ namespace ESMTerrain
         // Save the used texture indices so we know the total number of textures
         // and number of required blend maps
         std::set<UniqueTextureId> textureIndices;
-        // Due to the way the blending works, the base layer will bleed between texture transitions so we want it to be a black texture
-        // The subsequent passes are added instead of blended, so this gives the correct result
-        textureIndices.insert(std::make_pair(-1,0)); // -1 goes to tx_black_01
 
         LandCache cache;
 
@@ -419,9 +411,6 @@ namespace ESMTerrain
                 textureIndices.insert(id);
             }
 
-        // Makes sure the indices are sorted, or rather,
-        // retrieved as sorted. This is important to keep the splatting order
-        // consistent across cells.
         std::map<UniqueTextureId, int> textureIndicesMap;
         for (std::set<UniqueTextureId>::iterator it = textureIndices.begin(); it != textureIndices.end(); ++it)
         {
@@ -431,8 +420,10 @@ namespace ESMTerrain
         }
 
         int numTextures = textureIndices.size();
-        // numTextures-1 since the base layer doesn't need blending
-        int numBlendmaps = pack ? static_cast<int>(std::ceil((numTextures - 1) / 4.f)) : (numTextures - 1);
+        if (numTextures == 1)
+            return; // 1 texture filling the whole terrain so no need to blend
+
+        int numBlendmaps = pack ? static_cast<int>(std::ceil((numTextures) / 4.f)) : numTextures;
 
         int channels = pack ? 4 : 1;
 
@@ -457,8 +448,8 @@ namespace ESMTerrain
                     UniqueTextureId id = getVtexIndexAt(cellX, cellY, x+rowStart, y+colStart, cache);
                     assert(textureIndicesMap.find(id) != textureIndicesMap.end());
                     int layerIndex = textureIndicesMap.find(id)->second;
-                    int blendIndex = (pack ? static_cast<int>(std::floor((layerIndex - 1) / 4.f)) : layerIndex - 1);
-                    int channel = pack ? std::max(0, (layerIndex-1) % 4) : 0;
+                    int blendIndex = (pack ? static_cast<int>(std::floor((layerIndex) / 4.f)) : layerIndex);
+                    int channel = pack ? std::max(0, layerIndex % 4) : 0;
 
                     int alpha = (blendIndex == i) ? 255 : 0;
 
