@@ -35,6 +35,9 @@ namespace Terrain
         QuadTreeNode(QuadTreeNode* parent, ChildDirection dir, float size, const osg::Vec2f& center);
         virtual ~QuadTreeNode();
 
+        const char* libraryName() const { return "Terrain"; }
+        const char* className() const { return "QuadTreeNode"; }
+
         inline QuadTreeNode* getParent() { return mParent; }
         inline QuadTreeNode* getChild(unsigned int i) { return static_cast<QuadTreeNode*>(Group::getChild(i)); }
         inline unsigned int getNumChildren() const { return _children.size(); }

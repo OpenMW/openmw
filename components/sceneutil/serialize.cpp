@@ -117,6 +117,7 @@ void registerSerializers()
             "SceneUtil::StateSetUpdater",
             "NifOsg::NodeUserData",
             "NifOsg::FlipController",
+            "NifOsg::VisController",
             "NifOsg::KeyframeController",
             "NifOsg::TextKeyMapHolder",
             "NifOsg::Emitter",
@@ -130,7 +131,9 @@ void registerSerializers()
             "osg::DrawCallback",
             "osgOQ::ClearQueriesCallback",
             "osgOQ::RetrieveQueriesCallback",
-            "osg::DummyObject"
+            "osg::DummyObject",
+            "SceneUtil::DisableLight",
+            "Terrain::QuadTreeNode"
         };
         for (size_t i=0; i<sizeof(ignore)/sizeof(ignore[0]); ++i)
         {
