@@ -40,6 +40,14 @@ namespace Terrain
         QuadTreeNode* getChild(unsigned int i);
         using osg::Group::getNumChildren;
 
+        /// Faster version of osg::Group::addChild
+        void addChild(QuadTreeNode* child)
+        {
+            _children.reserve(4);
+            _children.push_back(child);
+            child->addParent(this);
+        };
+
         float distance(const osg::Vec3f& v) const;
 
         /// Returns our direction relative to the parent node, or Root if we are the root node.
