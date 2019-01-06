@@ -242,6 +242,7 @@ void main(void)
     float depthSampleDistorted = linearizeDepth(texture2D(refractionDepthMap,screenCoords-(normal.xy*REFR_BUMP)).x) * normalization;
     float surfaceDepth = linearizeDepth(gl_FragCoord.z) * normalization;
     float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
+    float realWaterDepthDistorted = depthSampleDistorted - surfaceDepth;
     float shore = clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH,0,1);
 #else
     float shore = 1.0;
@@ -267,7 +268,7 @@ void main(void)
 
 #if REFRACTION
     if (cameraPos.z > 0.0)
-        refraction = mix(refraction, waterColor, clamp(depthSampleDistorted/VISIBILITY, 0.0, 1.0));
+        refraction = mix(refraction, waterColor, clamp(realWaterDepthDistorted/VISIBILITY, 0.0, 1.0));
 
     gl_FragData[0].xyz = mix( mix(refraction,  scatterColour,  lightScatter),  reflection,  fresnel) + specular * gl_LightSource[0].specular.xyz;
 #else
