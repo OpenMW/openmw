@@ -138,7 +138,10 @@ public:
             }
         }
 
-        parent->setBoundingBox(boundingBox);
+        if (!boundingBox.valid())
+            parent->removeChildren(0, 4);
+        else
+            parent->setBoundingBox(boundingBox);
     }
 
     osg::ref_ptr<QuadTreeNode> addChild(QuadTreeNode* parent, ChildDirection direction, float size)
