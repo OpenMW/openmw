@@ -80,8 +80,6 @@ osg::ref_ptr<osg::Texture2D> ChunkManager::createCompositeMapRTT()
     texture->setTextureWidth(mCompositeMapSize);
     texture->setTextureHeight(mCompositeMapSize);
     texture->setInternalFormat(GL_RGB);
-    texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-    texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
     texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
     texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
@@ -210,6 +208,14 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
     {
         osg::ref_ptr<CompositeMap> compositeMap = new CompositeMap;
         compositeMap->mTexture = createCompositeMapRTT();
+        // use provided settings but no mipmapping (there are no mip maps..)
+        mSceneManager->applyFilterSettings(compositeMap->mTexture);
+        osg::Texture::FilterMode filter = compositeMap->mTexture->getFilter(osg::Texture::MIN_FILTER);
+        if (filter == osg::Texture::LINEAR || filter == osg::Texture::LINEAR_MIPMAP_LINEAR || filter == osg::Texture::LINEAR_MIPMAP_NEAREST)
+            filter = osg::Texture::LINEAR;
+        else
+            filter = osg::Texture::NEAREST;
+        compositeMap->mTexture->setFilter(osg::Texture::MIN_FILTER, filter);
 
         createCompositeMapGeometry(chunkSize, chunkCenter, osg::Vec4f(0,0,1,1), *compositeMap);
 
