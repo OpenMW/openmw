@@ -122,8 +122,6 @@ public:
         mRootNode->setViewDataMap(mViewDataMap);
         mRootNode->setLodCallback(new DefaultLodCallback(mLodFactor, mMinSize));
         addChildren(mRootNode);
-
-        mRootNode->initNeighbours();
     }
 
     void addChildren(QuadTreeNode* parent)

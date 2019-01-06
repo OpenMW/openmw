@@ -48,9 +48,6 @@ namespace Terrain
         /// Get neighbour node in this direction
         QuadTreeNode* getNeighbour (Direction dir);
 
-        /// Initialize neighbours - do this after the quadtree is built
-        void initNeighbours();
-
         void setBoundingBox(const osg::BoundingBox& boundingBox);
         const osg::BoundingBox& getBoundingBox() const;
         bool hasValidBounds() const { return mValidBounds; }
@@ -88,8 +85,6 @@ namespace Terrain
 
     private:
         QuadTreeNode* mParent;
-
-        QuadTreeNode* mNeighbours[4];
 
         ChildDirection mDirection;
 

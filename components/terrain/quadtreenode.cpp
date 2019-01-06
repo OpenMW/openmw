@@ -63,8 +63,6 @@ QuadTreeNode::QuadTreeNode(QuadTreeNode* parent, ChildDirection direction, float
     , mCenter(center)
     , mViewDataMap(nullptr)
 {
-    for (unsigned int i=0; i<4; ++i)
-        mNeighbours[i] = 0;
 }
 
 QuadTreeNode::~QuadTreeNode()
@@ -83,7 +81,7 @@ QuadTreeNode *QuadTreeNode::getChild(unsigned int i)
 
 QuadTreeNode *QuadTreeNode::getNeighbour(Direction dir)
 {
-    return mNeighbours[dir];
+    return searchNeighbour(this, dir);
 }
 
 float QuadTreeNode::distance(const osg::Vec3f& v) const
@@ -108,15 +106,6 @@ float QuadTreeNode::distance(const osg::Vec3f& v) const
             maxDist.z() = v.z() - box.zMax();
         return maxDist.length();
     }
-}
-
-void QuadTreeNode::initNeighbours()
-{
-    for (int i=0; i<4; ++i)
-        mNeighbours[i] = searchNeighbour(this, (Direction)i);
-
-    for (unsigned int i=0; i<getNumChildren(); ++i)
-        getChild(i)->initNeighbours();
 }
 
 void QuadTreeNode::traverse(ViewData* vd, osg::NodeVisitor* nv, const osg::Vec3f& viewPoint, bool visible, float maxDist)
