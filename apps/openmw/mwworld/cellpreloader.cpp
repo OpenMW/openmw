@@ -404,28 +404,35 @@ namespace MWWorld
     {
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
             return;
-        else if (positions == mTerrainPreloadPositions)
-            return;
-        else
+        else if (positions.size() == mTerrainPreloadPositions.size())
         {
-            if (mTerrainViews.size() > positions.size())
-            {
-                for (unsigned int i=positions.size(); i<mTerrainViews.size(); ++i)
-                    mUnrefQueue->push(mTerrainViews[i]);
-                mTerrainViews.resize(positions.size());
-            }
-            else if (mTerrainViews.size() < positions.size())
-            {
-                for (unsigned int i=mTerrainViews.size(); i<positions.size(); ++i)
-                    mTerrainViews.push_back(mTerrain->createView());
-            }
-
-            // TODO: provide some way of giving the preloaded view to the main thread when we enter the cell
-            // right now, we just use it to make sure the resources are preloaded
-            mTerrainPreloadPositions = positions;
-            mTerrainPreloadItem = new TerrainPreloadItem(mTerrainViews, mTerrain, positions);
-            mWorkQueue->addWorkItem(mTerrainPreloadItem);
+            bool different = false;
+            for (size_t i=0; i<positions.size(); ++i)
+                if ((positions[i]-mTerrainPreloadPositions[i]).length2() > 1)
+                {
+                    different = true;
+                    break;
+                }
+            if (!different)
+                return;
         }
+        if (mTerrainViews.size() > positions.size())
+        {
+            for (unsigned int i=positions.size(); i<mTerrainViews.size(); ++i)
+                mUnrefQueue->push(mTerrainViews[i]);
+            mTerrainViews.resize(positions.size());
+        }
+        else if (mTerrainViews.size() < positions.size())
+        {
+            for (unsigned int i=mTerrainViews.size(); i<positions.size(); ++i)
+                mTerrainViews.push_back(mTerrain->createView());
+        }
+
+        // TODO: provide some way of giving the preloaded view to the main thread when we enter the cell
+        // right now, we just use it to make sure the resources are preloaded
+        mTerrainPreloadPositions = positions;
+        mTerrainPreloadItem = new TerrainPreloadItem(mTerrainViews, mTerrain, positions);
+        mWorkQueue->addWorkItem(mTerrainPreloadItem);
     }
 
 }
