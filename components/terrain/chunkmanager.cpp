@@ -24,7 +24,7 @@ namespace Terrain
 {
 
 ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, TextureManager* textureManager, CompositeMapRenderer* renderer)
-    : ResourceManager(nullptr)
+    : GenericResourceManager<ChunkId>(nullptr)
     , mStorage(storage)
     , mSceneManager(sceneMgr)
     , mTextureManager(textureManager)
@@ -36,12 +36,9 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
 
 }
 
-osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &center, int lod, unsigned int lodFlags)
+osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &center, unsigned char lod, unsigned int lodFlags)
 {
-    std::ostringstream stream;
-    stream << size << " " << center.x() << " " << center.y() << " " << lod << " " << lodFlags;
-    std::string id = stream.str();
-
+    ChunkId id = std::make_tuple(center, lod, lodFlags);
     osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
     if (obj)
         return obj->asNode();
@@ -60,14 +57,14 @@ void ChunkManager::reportStats(unsigned int frameNumber, osg::Stats *stats) cons
 
 void ChunkManager::clearCache()
 {
-    ResourceManager::clearCache();
+    GenericResourceManager<ChunkId>::clearCache();
 
     mBufferCache.clearCache();
 }
 
 void ChunkManager::releaseGLObjects(osg::State *state)
 {
-    ResourceManager::releaseGLObjects(state);
+    GenericResourceManager<ChunkId>::releaseGLObjects(state);
     mBufferCache.releaseGLObjects(state);
 }
 
@@ -208,7 +205,7 @@ std::vector<osg::ref_ptr<osg::StateSet> > ChunkManager::createPasses(float chunk
                                      mSceneManager->getClampLighting(), &mSceneManager->getShaderManager(), layers, blendmapTextures, blendmapScale, blendmapScale);
 }
 
-osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f &chunkCenter, int lod, unsigned int lodFlags)
+osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f &chunkCenter, unsigned char lod, unsigned int lodFlags)
 {
     osg::Vec2f worldCenter = chunkCenter*mStorage->getCellWorldSize();
     osg::ref_ptr<SceneUtil::PositionAttitudeTransform> transform (new SceneUtil::PositionAttitudeTransform);
