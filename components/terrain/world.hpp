@@ -47,7 +47,7 @@ namespace Terrain
         virtual ~View() {}
 
         /// Reset internal structure so that the next addition to the view will override the previous frame's contents.
-        virtual void reset(unsigned int frame) = 0;
+        virtual void reset() = 0;
     };
 
     /**
@@ -101,7 +101,7 @@ namespace Terrain
         virtual View* createView() { return nullptr; }
 
         /// @note Thread safe, as long as you do not attempt to load into the same view from multiple threads.
-        virtual void preload(View* view, const osg::Vec3f& eyePoint, volatile bool& abort) {}
+        virtual void preload(View* view, const osg::Vec3f& viewPoint, volatile bool& abort) {}
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
 
