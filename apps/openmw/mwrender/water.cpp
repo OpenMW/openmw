@@ -575,18 +575,17 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
         shaderStateset->setTextureAttributeAndModes(3, refraction->getRefractionDepthTexture(), osg::StateAttribute::ON);
         shaderStateset->addUniform(new osg::Uniform("refractionMap", 2));
         shaderStateset->addUniform(new osg::Uniform("refractionDepthMap", 3));
-        shaderStateset->setRenderBinDetails(MWRender::RenderBin_Default, "RenderBin");
     }
     else
     {
         shaderStateset->setMode(GL_BLEND, osg::StateAttribute::ON);
 
-        shaderStateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
-
         osg::ref_ptr<osg::Depth> depth (new osg::Depth);
         depth->setWriteMask(false);
         shaderStateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+
     }
+    shaderStateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
 
     shaderStateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
 
