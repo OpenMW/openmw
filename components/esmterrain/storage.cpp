@@ -203,9 +203,12 @@ namespace ESMTerrain
 
         size_t numVerts = static_cast<size_t>(size*(ESM::Land::LAND_SIZE - 1) / increment + 1);
 
-        positions->resize(numVerts*numVerts);
-        normals->resize(numVerts*numVerts);
-        colours->resize(numVerts*numVerts);
+        if (positions)
+            positions->resize(numVerts*numVerts);
+        if (normals)
+            normals->resize(numVerts*numVerts);
+        if (colours)
+            colours->resize(numVerts*numVerts);
 
         osg::Vec3f normal;
         osg::Vec4ub color;
@@ -227,9 +230,12 @@ namespace ESMTerrain
                 const ESM::Land::LandData *colourData = 0;
                 if (land)
                 {
-                    heightData = land->getData(ESM::Land::DATA_VHGT);
-                    normalData = land->getData(ESM::Land::DATA_VNML);
-                    colourData = land->getData(ESM::Land::DATA_VCLR);
+                    if (positions)
+                        heightData = land->getData(ESM::Land::DATA_VHGT);
+                    if (normals)
+                        normalData = land->getData(ESM::Land::DATA_VNML);
+                    if (colours)
+                        colourData = land->getData(ESM::Land::DATA_VCLR);
                 }
 
                 int rowStart = 0;
@@ -262,56 +268,65 @@ namespace ESMTerrain
                         assert (vertX < numVerts);
                         assert (vertY < numVerts);
 
-                        float height = defaultHeight;
-                        if (heightData)
-                            height = heightData->mHeights[col*ESM::Land::LAND_SIZE + row];
-
-                        (*positions)[static_cast<unsigned int>(vertX*numVerts + vertY)]
-                            = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * Constants::CellSizeInUnits,
-                                         (vertY / float(numVerts - 1) - 0.5f) * size * Constants::CellSizeInUnits,
-                                         height);
-
-                        if (normalData)
+                        if (positions)
                         {
-                            for (int i=0; i<3; ++i)
-                                normal[i] = normalData->mNormals[srcArrayIndex+i];
+                            float height = defaultHeight;
+                            if (heightData)
+                                height = heightData->mHeights[col*ESM::Land::LAND_SIZE + row];
 
-                            normal.normalize();
-                        }
-                        else
-                            normal = osg::Vec3f(0,0,1);
-
-                        // Normals apparently don't connect seamlessly between cells
-                        if (col == ESM::Land::LAND_SIZE-1 || row == ESM::Land::LAND_SIZE-1)
-                            fixNormal(normal, cellX, cellY, col, row, cache);
-
-                        // some corner normals appear to be complete garbage (z < 0)
-                        if ((row == 0 || row == ESM::Land::LAND_SIZE-1) && (col == 0 || col == ESM::Land::LAND_SIZE-1))
-                            averageNormal(normal, cellX, cellY, col, row, cache);
-
-                        assert(normal.z() > 0);
-
-                        (*normals)[static_cast<unsigned int>(vertX*numVerts + vertY)] = normal;
-
-                        if (colourData)
-                        {
-                            for (int i=0; i<3; ++i)
-                                color[i] = colourData->mColours[srcArrayIndex+i];
-                        }
-                        else
-                        {
-                            color[0] = 255;
-                            color[1] = 255;
-                            color[2] = 255;
+                            (*positions)[static_cast<unsigned int>(vertX*numVerts + vertY)]
+                                = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * Constants::CellSizeInUnits,
+                                             (vertY / float(numVerts - 1) - 0.5f) * size * Constants::CellSizeInUnits,
+                                             height);
                         }
 
-                        // Unlike normals, colors mostly connect seamlessly between cells, but not always...
-                        if (col == ESM::Land::LAND_SIZE-1 || row == ESM::Land::LAND_SIZE-1)
-                            fixColour(color, cellX, cellY, col, row, cache);
+                        if (normals)
+                        {
+                            if (normalData)
+                            {
+                                for (int i=0; i<3; ++i)
+                                    normal[i] = normalData->mNormals[srcArrayIndex+i];
 
-                        color[3] = 255;
+                                normal.normalize();
+                            }
+                            else
+                                normal = osg::Vec3f(0,0,1);
 
-                        (*colours)[static_cast<unsigned int>(vertX*numVerts + vertY)] = color;
+                            // Normals apparently don't connect seamlessly between cells
+                            if (col == ESM::Land::LAND_SIZE-1 || row == ESM::Land::LAND_SIZE-1)
+                                fixNormal(normal, cellX, cellY, col, row, cache);
+
+                            // some corner normals appear to be complete garbage (z < 0)
+                            if ((row == 0 || row == ESM::Land::LAND_SIZE-1) && (col == 0 || col == ESM::Land::LAND_SIZE-1))
+                                averageNormal(normal, cellX, cellY, col, row, cache);
+
+                            assert(normal.z() > 0);
+
+                            (*normals)[static_cast<unsigned int>(vertX*numVerts + vertY)] = normal;
+                        }
+
+                        if (colours)
+                        {
+                            if (colourData)
+                            {
+                                for (int i=0; i<3; ++i)
+                                    color[i] = colourData->mColours[srcArrayIndex+i];
+                            }
+                            else
+                            {
+                                color[0] = 255;
+                                color[1] = 255;
+                                color[2] = 255;
+                            }
+
+                            // Unlike normals, colors mostly connect seamlessly between cells, but not always...
+                            if (col == ESM::Land::LAND_SIZE-1 || row == ESM::Land::LAND_SIZE-1)
+                                fixColour(color, cellX, cellY, col, row, cache);
+
+                            color[3] = 255;
+
+                            (*colours)[static_cast<unsigned int>(vertX*numVerts + vertY)] = color;
+                        }
 
                         ++vertX;
                     }

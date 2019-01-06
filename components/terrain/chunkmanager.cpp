@@ -116,8 +116,7 @@ void ChunkManager::createCompositeMapGeometry(float chunkSize, const osg::Vec2f&
         colorMap->allocateImage(colorMapSize, colorMapSize, 1, GL_RGBA, GL_UNSIGNED_BYTE);
 
         osg::ref_ptr<osg::Vec4ubArray> colours = new osg::Vec4ubArray;
-        osg::ref_ptr<osg::Vec3Array> dummy = new osg::Vec3Array; // fixme: maybe add another variant so we dont have to populate verts needlessly...
-        mStorage->fillVertexBuffers(0, chunkSize, chunkCenter, dummy, dummy, colours);
+        mStorage->fillVertexBuffers(0, chunkSize, chunkCenter, nullptr, nullptr, colours);
         unsigned char* data = colorMap->data();
         memcpy(data, colours->getDataPointer(), colours->getTotalDataSize());
 
@@ -225,9 +224,9 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
     normals->setVertexBufferObject(vbo);
     colors->setVertexBufferObject(vbo);
 
-    mStorage->fillVertexBuffers(lod, chunkSize, chunkCenter, positions, normals, colors);
-
     bool useCompositeMap = chunkSize >= mCompositeMapLevel;
+
+    mStorage->fillVertexBuffers(lod, chunkSize, chunkCenter, positions, normals, useCompositeMap ? nullptr : colors);
 
     osg::ref_ptr<TerrainDrawable> geometry (new TerrainDrawable);
     geometry->setVertexArray(positions);
