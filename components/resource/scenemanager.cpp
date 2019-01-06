@@ -542,6 +542,8 @@ namespace Resource
 
             if (mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
+            else
+                loaded->getBound(); // IncrementalCompileOperation does this also
 
             mCache->addEntryToObjectCache(normalized, loaded);
             return loaded;
@@ -554,6 +556,11 @@ namespace Resource
         mVFS->normalizeFilename(normalized);
 
         osg::ref_ptr<osg::Node> node = createInstance(normalized);
+
+        // force a compute of the bound of the subgraph to avoid the update traversal from having to do this work
+        // and reducing the change of frame drop.
+        node->getBound();
+
         mInstanceCache->addEntryToObjectCache(normalized, node.get());
         return node;
     }
