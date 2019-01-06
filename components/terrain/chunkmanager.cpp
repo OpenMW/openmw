@@ -3,6 +3,8 @@
 #include <sstream>
 
 #include <osg/Texture2D>
+#include <osg/TexEnv>
+#include <osg/TexMat>
 
 #include <osgUtil/IncrementalCompileOperation>
 
@@ -103,14 +105,49 @@ void ChunkManager::createCompositeMapGeometry(float chunkSize, const osg::Vec2f&
         float height = texCoords.w()*2.f;
 
         std::vector<osg::ref_ptr<osg::StateSet> > passes = createPasses(chunkSize, chunkCenter, true);
+
+        osg::ref_ptr<osg::Image> colorMap = new osg::Image;
+        unsigned int colorMapSize = (mStorage->getCellVertices()-1)*chunkSize+1;
+        colorMap->allocateImage(colorMapSize, colorMapSize, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+
+        osg::ref_ptr<osg::Vec4ubArray> colours = new osg::Vec4ubArray;
+        osg::ref_ptr<osg::Vec3Array> dummy = new osg::Vec3Array; // fixme: maybe add another variant so we dont have to populate verts needlessly...
+        mStorage->fillVertexBuffers(0, chunkSize, chunkCenter, dummy, dummy, colours);
+        unsigned char* data = colorMap->data();
+        memcpy(data, colours->getDataPointer(), colours->getTotalDataSize());
+
+        osg::ref_ptr<osg::Texture2D> colorMapTexture = new osg::Texture2D(colorMap);
+        mSceneManager->applyFilterSettings(colorMapTexture);
+        colorMapTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        colorMapTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        colorMapTexture->setResizeNonPowerOfTwoHint(false);
+
+        osg::ref_ptr<osg::TexEnv> texEnv = new osg::TexEnv;
+        texEnv->setMode(osg::TexEnv::MODULATE);
+
+        osg::Matrixf matrix;
+        float scale = (colorMapSize-1)/(static_cast<float>(colorMapSize));
+        matrix.preMultTranslate(osg::Vec3f(0.5f, 0.5f, 0.f));
+        matrix.preMultScale(osg::Vec3f(scale, scale, 1.f));
+        matrix.preMultRotate(osg::Quat(osg::PI/2, osg::Vec3f(0,0,1)));
+        matrix.preMultTranslate(osg::Vec3f(-0.5f, -0.5f, 0.f));
+        osg::ref_ptr<osg::TexMat> texMat = new osg::TexMat(matrix);
+
         for (std::vector<osg::ref_ptr<osg::StateSet> >::iterator it = passes.begin(); it != passes.end(); ++it)
         {
             osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3(left,top,0), osg::Vec3(width,0,0), osg::Vec3(0,height,0));
             geom->setUseDisplayList(false); // don't bother making a display list for an object that is just rendered once.
             geom->setUseVertexBufferObjects(false);
             geom->setTexCoordArray(1, geom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
+            geom->setTexCoordArray(2, geom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
 
             geom->setStateSet(*it);
+
+            osg::StateSet* ss = (*it);
+            int unit = ss->getTextureModeList().size();
+            ss->setTextureAttributeAndModes(unit, colorMapTexture, osg::StateAttribute::ON);
+            ss->setTextureAttributeAndModes(unit, texEnv, osg::StateAttribute::ON);
+            ss->setTextureAttributeAndModes(unit, texMat, osg::StateAttribute::ON);
 
             compositeMap.mDrawables.push_back(geom);
         }
@@ -185,10 +222,21 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     mStorage->fillVertexBuffers(lod, chunkSize, chunkCenter, positions, normals, colors);
 
+    bool useCompositeMap = chunkSize >= mCompositeMapLevel;
+
     osg::ref_ptr<TerrainDrawable> geometry (new TerrainDrawable);
     geometry->setVertexArray(positions);
     geometry->setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
-    geometry->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
+    if (!useCompositeMap)
+        geometry->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
+    else
+    {
+        osg::ref_ptr<osg::Vec4ubArray> colors = new osg::Vec4ubArray;
+        colors->push_back(osg::Vec4ub(255,255,255,255));
+        colors->setNormalize(true);
+        geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+    }
+
     geometry->setUseDisplayList(false);
     geometry->setUseVertexBufferObjects(true);
 
@@ -199,7 +247,6 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     geometry->addPrimitiveSet(mBufferCache.getIndexBuffer(numVerts, lodFlags));
 
-    bool useCompositeMap = chunkSize >= mCompositeMapLevel;
     unsigned int numUvSets = useCompositeMap ? 1 : 2;
 
     for (unsigned int i=0; i<numUvSets; ++i)
