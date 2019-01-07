@@ -9,7 +9,6 @@
 #include <components/misc/rng.hpp>
 
 #include <stdexcept>
-#include <sstream>
 
 namespace
 {
@@ -102,10 +101,10 @@ namespace MWWorld
     const T *IndexedStore<T>::find(int index) const
     {
         const T *ptr = search(index);
-        if (ptr == 0) {
-            std::ostringstream msg;
-            msg << T::getRecordType() << " with index " << index << " not found";
-            throw std::runtime_error(msg.str());
+        if (ptr == 0)
+        {
+            const std::string msg = T::getRecordType() + " with index " + std::to_string(index) + " not found";
+            throw std::runtime_error(msg);
         }
         return ptr;
     }
@@ -171,10 +170,10 @@ namespace MWWorld
     const T *Store<T>::find(const std::string &id) const
     {
         const T *ptr = search(id);
-        if (ptr == 0) {
-            std::ostringstream msg;
-            msg << T::getRecordType() << " '" << id << "' not found";
-            throw std::runtime_error(msg.str());
+        if (ptr == 0)
+        {
+            const std::string msg = T::getRecordType() + " '" + id + "' not found";
+            throw std::runtime_error(msg);
         }
         return ptr;
     }
@@ -184,14 +183,13 @@ namespace MWWorld
         const T *ptr = searchRandom(id);
         if(ptr == 0)
         {
-            std::ostringstream msg;
-            msg << T::getRecordType() << " starting with '"<<id<<"' not found";
-            throw std::runtime_error(msg.str());
+            const std::string msg = T::getRecordType() + " starting with '" + id + "' not found";
+            throw std::runtime_error(msg);
         }
         return ptr;
     }
     template<typename T>
-    RecordId Store<T>::load(ESM::ESMReader &esm) 
+    RecordId Store<T>::load(ESM::ESMReader &esm)
     {
         T record;
         bool isDeleted = false;
@@ -364,10 +362,10 @@ namespace MWWorld
     const ESM::LandTexture *Store<ESM::LandTexture>::find(size_t index, size_t plugin) const
     {
         const ESM::LandTexture *ptr = search(index, plugin);
-        if (ptr == 0) {
-            std::ostringstream msg;
-            msg << "Land texture with index " << index << " not found";
-            throw std::runtime_error(msg.str());
+        if (ptr == 0)
+        {
+            const std::string msg = "Land texture with index " + std::to_string(index) + " not found";
+            throw std::runtime_error(msg);
         }
         return ptr;
     }
@@ -456,10 +454,10 @@ namespace MWWorld
     const ESM::Land *Store<ESM::Land>::find(int x, int y) const
     {
         const ESM::Land *ptr = search(x, y);
-        if (ptr == 0) {
-            std::ostringstream msg;
-            msg << "Land at (" << x << ", " << y << ") not found";
-            throw std::runtime_error(msg.str());
+        if (ptr == 0)
+        {
+            const std::string msg = "Land at (" + std::to_string(x) + ", " + std::to_string(y) + ") not found";
+            throw std::runtime_error(msg);
         }
         return ptr;
     }
@@ -591,20 +589,20 @@ namespace MWWorld
     const ESM::Cell *Store<ESM::Cell>::find(const std::string &id) const
     {
         const ESM::Cell *ptr = search(id);
-        if (ptr == 0) {
-            std::ostringstream msg;
-            msg << "Cell '" << id << "' not found";
-            throw std::runtime_error(msg.str());
+        if (ptr == 0)
+        {
+            const std::string msg = "Cell '" + id + "' not found";
+            throw std::runtime_error(msg);
         }
         return ptr;
     }
     const ESM::Cell *Store<ESM::Cell>::find(int x, int y) const
     {
         const ESM::Cell *ptr = search(x, y);
-        if (ptr == 0) {
-            std::ostringstream msg;
-            msg << "Exterior at (" << x << ", " << y << ") not found";
-            throw std::runtime_error(msg.str());
+        if (ptr == 0)
+        {
+            const std::string msg = "Exterior at (" + std::to_string(x) + ", " + std::to_string(y) + ") not found";
+            throw std::runtime_error(msg);
         }
         return ptr;
     }
@@ -784,13 +782,10 @@ namespace MWWorld
     }
     ESM::Cell *Store<ESM::Cell>::insert(const ESM::Cell &cell)
     {
-        if (search(cell) != 0) {
-            std::ostringstream msg;
-            msg << "Failed to create ";
-            msg << ((cell.isExterior()) ? "exterior" : "interior");
-            msg << " cell";
-
-            throw std::runtime_error(msg.str());
+        if (search(cell) != 0)
+        {
+            const std::string cellType = (cell.isExterior()) ? "exterior" : "interior";
+            throw std::runtime_error("Failed to create " + cellType + " cell");
         }
         ESM::Cell *ptr;
         if (cell.isExterior()) {
@@ -931,9 +926,8 @@ namespace MWWorld
         const ESM::Pathgrid* pathgrid = search(x,y);
         if (!pathgrid)
         {
-            std::ostringstream msg;
-            msg << "Pathgrid in cell '" << x << " " << y << "' not found";
-            throw std::runtime_error(msg.str());
+            const std::string msg = "Pathgrid in cell '" + std::to_string(x) + " " + std::to_string(y) + "' not found";
+            throw std::runtime_error(msg);
         }
         return pathgrid;
     }
@@ -942,9 +936,8 @@ namespace MWWorld
         const ESM::Pathgrid* pathgrid = search(name);
         if (!pathgrid)
         {
-            std::ostringstream msg;
-            msg << "Pathgrid in cell '" << name << "' not found";
-            throw std::runtime_error(msg.str());
+            const std::string msg = "Pathgrid in cell '" + name + "' not found";
+            throw std::runtime_error(msg);
         }
         return pathgrid;
     }
@@ -998,10 +991,10 @@ namespace MWWorld
     const ESM::Attribute *Store<ESM::Attribute>::find(size_t index) const
     {
         const ESM::Attribute *ptr = search(index);
-        if (ptr == 0) {
-            std::ostringstream msg;
-            msg << "Attribute with index " << index << " not found";
-            throw std::runtime_error(msg.str());
+        if (ptr == 0)
+        {
+            const std::string msg = "Attribute with index " + std::to_string(index) + " not found";
+            throw std::runtime_error(msg);
         }
         return ptr;
     }

@@ -1,7 +1,6 @@
 #include "loadcell.hpp"
 
 #include <string>
-#include <sstream>
 #include <list>
 
 #include <boost/concept_check.hpp>
@@ -209,9 +208,7 @@ namespace ESM
         }
         else
         {
-            std::ostringstream stream;
-            stream << mData.mX << ", " << mData.mY;
-            return stream.str();
+            return std::to_string(mData.mX) + ", " + std::to_string(mData.mY);
         }
     }
 

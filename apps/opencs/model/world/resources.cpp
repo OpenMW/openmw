@@ -77,7 +77,7 @@ int CSMWorld::Resources::getIndex (const std::string& id) const
         std::ostringstream stream;
         stream << "Invalid resource: " << mBaseDirectory << '/' << id;
 
-        throw std::runtime_error (stream.str().c_str());
+        throw std::runtime_error (stream.str());
     }
 
     return index;
