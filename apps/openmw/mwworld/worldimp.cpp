@@ -3127,8 +3127,9 @@ namespace MWWorld
         while ( !nextCells.empty() ) {
             currentCells = nextCells;
             nextCells.clear();
-            for (const std::string &cell : currentCells) {
-                MWWorld::CellStore *next = getInterior(cell);
+            for (const std::string &currentCell : currentCells)
+            {
+                MWWorld::CellStore *next = getInterior(currentCell);
                 if ( !next ) continue;
 
                 // Check if any door in the cell leads to an exterior directly
@@ -3150,7 +3151,7 @@ namespace MWWorld
                     }
                 }
 
-                checkedCells.insert(cell);
+                checkedCells.insert(currentCell);
             }
         }
 
