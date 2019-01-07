@@ -1817,7 +1817,6 @@ namespace MWWorld
 
         if (!paused)
         {
-            doPhysics (duration);
             updateNavigator();
         }
 
@@ -1834,6 +1833,14 @@ namespace MWWorld
         {
             mSpellPreloadTimer = 0.1f;
             preloadSpells();
+        }
+    }
+
+    void World::updatePhysics (float duration, bool paused)
+    {
+        if (!paused)
+        {
+            doPhysics (duration);
         }
     }
 
