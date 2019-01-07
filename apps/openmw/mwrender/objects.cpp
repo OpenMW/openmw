@@ -1,7 +1,5 @@
 #include "objects.hpp"
 
-#include <cmath>
-
 #include <osg/Group>
 #include <osg/UserDataContainer>
 
