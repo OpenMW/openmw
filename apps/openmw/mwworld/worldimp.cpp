@@ -665,10 +665,10 @@ namespace MWWorld
         if (!cell->getCell()->isExterior() || !cell->getCell()->mName.empty())
             return cell->getCell()->mName;
 
-        if (const ESM::Region* region = getStore().get<ESM::Region>().search (cell->getCell()->mRegion))
+        if (const ESM::Region* region = mStore.get<ESM::Region>().search (cell->getCell()->mRegion))
             return region->mName;
 
-        return getStore().get<ESM::GameSetting>().find ("sDefaultCellname")->mValue.getString();
+        return mStore.get<ESM::GameSetting>().find ("sDefaultCellname")->mValue.getString();
     }
 
     void World::removeRefScript (MWWorld::RefData *ref)
@@ -972,7 +972,7 @@ namespace MWWorld
             "sMonthHeartfire", "sMonthFrostfall", "sMonthSunsdusk", "sMonthEveningstar"
         };
 
-        return getStore().get<ESM::GameSetting>().find (monthNames[month])->mValue.getString();
+        return mStore.get<ESM::GameSetting>().find (monthNames[month])->mValue.getString();
     }
 
     TimeStamp World::getTimeStamp() const
@@ -1061,7 +1061,7 @@ namespace MWWorld
         if (mActivationDistanceOverride >= 0)
             return static_cast<float>(mActivationDistanceOverride);
 
-        static const int iMaxActivateDist = getStore().get<ESM::GameSetting>().find("iMaxActivateDist")->mValue.getInteger();
+        static const int iMaxActivateDist = mStore.get<ESM::GameSetting>().find("iMaxActivateDist")->mValue.getInteger();
         return static_cast<float>(iMaxActivateDist);
     }
 
@@ -1826,7 +1826,7 @@ namespace MWWorld
         bool swimming = isSwimming(player);
         bool flying = isFlying(player);
 
-        static const float i1stPersonSneakDelta = getStore().get<ESM::GameSetting>().find("i1stPersonSneakDelta")->mValue.getFloat();
+        static const float i1stPersonSneakDelta = mStore.get<ESM::GameSetting>().find("i1stPersonSneakDelta")->mValue.getFloat();
         if (sneaking && !swimming && !flying)
             mRendering->getCamera()->setSneakOffset(i1stPersonSneakDelta);
         else
@@ -2533,7 +2533,7 @@ namespace MWWorld
 
             mPhysics->markAsNonSolid (object);
 
-            if (actor == getPlayerPtr() && MWBase::Environment::get().getWorld()->getGodModeState())
+            if (actor == getPlayerPtr() && mGodMode)
                 continue;
 
             MWMechanics::DynamicStat<float> health = stats.getHealth();
@@ -2566,8 +2566,8 @@ namespace MWWorld
 
             mPhysics->markAsNonSolid (object);
 
-            if (actor == getPlayerPtr() && getGodModeState())
-                continue;;
+            if (actor == getPlayerPtr() && mGodMode)
+                continue;
 
             MWMechanics::DynamicStat<float> health = stats.getHealth();
             health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
@@ -2893,10 +2893,10 @@ namespace MWWorld
 
         if (!selectedSpell.empty())
         {
-            const ESM::Spell* spell = getStore().get<ESM::Spell>().find(selectedSpell);
+            const ESM::Spell* spell = mStore.get<ESM::Spell>().find(selectedSpell);
 
             // Check mana
-            bool godmode = (isPlayer && getGodModeState());
+            bool godmode = (isPlayer && mGodMode);
             MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
             if (magicka.getCurrent() < spell->mData.mCost && !godmode)
             {
@@ -2934,7 +2934,7 @@ namespace MWWorld
         if (!actor.isEmpty() && actor != MWMechanics::getPlayer() && !manualSpell)
             stats.getAiSequence().getCombatTargets(targetActors);
 
-        const float fCombatDistance = getStore().get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat();
+        const float fCombatDistance = mStore.get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat();
 
         osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
 
@@ -3016,7 +3016,7 @@ namespace MWWorld
 
         if (!selectedSpell.empty())
         {
-            const ESM::Spell* spell = getStore().get<ESM::Spell>().find(selectedSpell);
+            const ESM::Spell* spell = mStore.get<ESM::Spell>().find(selectedSpell);
             cast.cast(spell);
         }
         else if (actor.getClass().hasInventoryStore(actor))
@@ -3389,8 +3389,8 @@ namespace MWWorld
         int bounty = player.getClass().getNpcStats(player).getBounty();
         int playerGold = player.getClass().getContainerStore(player).count(ContainerStore::sGoldId);
 
-        float fCrimeGoldDiscountMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->mValue.getFloat();
-        float fCrimeGoldTurnInMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldTurnInMult")->mValue.getFloat();
+        static float fCrimeGoldDiscountMult = mStore.get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->mValue.getFloat();
+        static float fCrimeGoldTurnInMult = mStore.get<ESM::GameSetting>().find("fCrimeGoldTurnInMult")->mValue.getFloat();
 
         int discount = static_cast<int>(bounty * fCrimeGoldDiscountMult);
         int turnIn = static_cast<int>(bounty * fCrimeGoldTurnInMult);
@@ -3455,7 +3455,7 @@ namespace MWWorld
             mPlayer->recordCrimeId();
             confiscateStolenItems(player);
 
-            int iDaysinPrisonMod = getStore().get<ESM::GameSetting>().find("iDaysinPrisonMod")->mValue.getInteger();
+            static int iDaysinPrisonMod = mStore.get<ESM::GameSetting>().find("iDaysinPrisonMod")->mValue.getInteger();
             mDaysInPrison = std::max(1, bounty / iDaysinPrisonMod);
 
             return;
@@ -3511,18 +3511,18 @@ namespace MWWorld
 
     void World::spawnRandomCreature(const std::string &creatureList)
     {
-        const ESM::CreatureLevList* list = getStore().get<ESM::CreatureLevList>().find(creatureList);
+        const ESM::CreatureLevList* list = mStore.get<ESM::CreatureLevList>().find(creatureList);
 
-        int iNumberCreatures = getStore().get<ESM::GameSetting>().find("iNumberCreatures")->mValue.getInteger();
+        static int iNumberCreatures = mStore.get<ESM::GameSetting>().find("iNumberCreatures")->mValue.getInteger();
         int numCreatures = 1 + Misc::Rng::rollDice(iNumberCreatures); // [1, iNumberCreatures]
 
         for (int i=0; i<numCreatures; ++i)
         {
             std::string selectedCreature = MWMechanics::getLevelledItem(list, true);
             if (selectedCreature.empty())
-                return;
+                continue;
 
-            MWWorld::ManualRef ref(getStore(), selectedCreature, 1);
+            MWWorld::ManualRef ref(mStore, selectedCreature, 1);
 
             safePlaceObject(ref.getPtr(), getPlayerPtr(), getPlayerPtr().getCell(), 0, 220.f);
         }
@@ -3551,7 +3551,7 @@ namespace MWWorld
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = effects.mList.begin();
              effectIt != effects.mList.end(); ++effectIt)
         {
-            const ESM::MagicEffect* effect = getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
+            const ESM::MagicEffect* effect = mStore.get<ESM::MagicEffect>().find(effectIt->mEffectID);
 
             if (effectIt->mRange != rangeType || (effectIt->mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()))
                 continue; // Not right range type, or not area effect and hit an actor
@@ -3565,9 +3565,9 @@ namespace MWWorld
             // Spawn the explosion orb effect
             const ESM::Static* areaStatic;
             if (!effect->mArea.empty())
-                areaStatic = getStore().get<ESM::Static>().find (effect->mArea);
+                areaStatic = mStore.get<ESM::Static>().find (effect->mArea);
             else
-                areaStatic = getStore().get<ESM::Static>().find ("VFX_DefaultArea");
+                areaStatic = mStore.get<ESM::Static>().find ("VFX_DefaultArea");
 
             std::string texture = effect->mParticle;
 
