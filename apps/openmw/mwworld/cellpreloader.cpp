@@ -415,41 +415,6 @@ namespace MWWorld
         mUnrefQueue = unrefQueue;
     }
 
-<<<<<<< HEAD
-    class TerrainPreloadItem : public SceneUtil::WorkItem
-    {
-    public:
-        TerrainPreloadItem(const std::vector<osg::ref_ptr<Terrain::View> >& views, Terrain::World* world, const std::vector<osg::Vec3f>& preloadPositions)
-            : mAbort(false)
-            , mTerrainViews(views)
-            , mWorld(world)
-            , mPreloadPositions(preloadPositions)
-        {
-        }
-
-        virtual void doWork()
-        {
-            for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size() && !mAbort; ++i)
-            {
-                mWorld->preload(mTerrainViews[i], mPreloadPositions[i], mAbort);
-                mTerrainViews[i]->reset();
-            }
-        }
-
-        virtual void abort()
-        {
-            mAbort = true;
-        }
-
-    private:
-        std::atomic<bool> mAbort;
-        std::vector<osg::ref_ptr<Terrain::View> > mTerrainViews;
-        Terrain::World* mWorld;
-        std::vector<osg::Vec3f> mPreloadPositions;
-    };
-
-=======
->>>>>>> a1d82c517... store preloaded terrain view for the main thread to grab it
     void CellPreloader::setTerrainPreloadPositions(const std::vector<osg::Vec3f> &positions)
     {
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
