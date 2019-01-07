@@ -1,6 +1,7 @@
 #include "cellpreloader.hpp"
 
 #include <atomic>
+#include <limits>
 
 #include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -251,7 +252,7 @@ namespace MWWorld
         {
             // throw out oldest cell to make room
             PreloadMap::iterator oldestCell = mPreloadCells.begin();
-            double oldestTimestamp = DBL_MAX;
+            double oldestTimestamp = std::numeric_limits<double>::max();
             double threshold = 1.0; // seconds
             for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end(); ++it)
             {
