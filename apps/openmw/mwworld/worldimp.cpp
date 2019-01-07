@@ -2445,9 +2445,8 @@ namespace MWWorld
         player.getClass().getInventoryStore(player).setInvListener(anim, player);
         player.getClass().getInventoryStore(player).setContListener(anim);
 
-        scaleObject(getPlayerPtr(), 1.f); // apply race height
-
-        rotateObject(getPlayerPtr(), 0.f, 0.f, 0.f, true);
+        scaleObject(player, player.getCellRef().getScale()); // apply race height
+        rotateObject(player, 0.f, 0.f, 0.f, true);
 
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
         MWBase::Environment::get().getMechanicsManager()->watchActor(getPlayerPtr());
