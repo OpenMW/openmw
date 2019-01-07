@@ -1172,6 +1172,17 @@ namespace MWClass
         const ESM::Race* race =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
 
+        // Race weight should not affect 1st-person meshes, otherwise it will change hand proportions and can break aiming.
+        if (ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson())
+        {
+            if (ref->mBase->isMale())
+                scale *= race->mData.mHeight.mMale;
+            else
+                scale *= race->mData.mHeight.mFemale;
+
+            return;
+        }
+
         if (ref->mBase->isMale())
         {
             scale.x() *= race->mData.mWeight.mMale;
@@ -1184,7 +1195,6 @@ namespace MWClass
             scale.y() *= race->mData.mWeight.mFemale;
             scale.z() *= race->mData.mHeight.mFemale;
         }
-
     }
 
     int Npc::getServices(const MWWorld::ConstPtr &actor) const
