@@ -18,6 +18,7 @@ namespace ESM
         mInventory.mList.clear();
         mTransport.mList.clear();
         mAiPackage.mList.clear();
+        mAiData.blank();
         mHasAI = false;
 
         bool hasName = false;
