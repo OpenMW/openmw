@@ -1098,7 +1098,7 @@ namespace NifOsg
                 influence.mInvBindMatrix = data->bones[i].trafo.toMatrix();
                 influence.mBoundSphere = osg::BoundingSpheref(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
 
-                map->mMap.insert(std::make_pair(boneName, influence));
+                map->mData.emplace_back(boneName, influence);
             }
             rig->setInfluenceMap(map);
 
