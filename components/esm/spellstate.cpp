@@ -5,6 +5,30 @@
 
 namespace ESM
 {
+    void restoreFromOldFormat(ESMReader &esm, std::vector<SpellState::PermanentSpellEffectInfo>& permEffectList)
+    {
+        while (true)
+        {
+            ESM_Context restorePoint = esm.getContext();
+
+            if (!esm.isNextSub("EFID"))
+                break;
+
+            SpellState::PermanentSpellEffectInfo info;
+            esm.getHT(info.mId);
+            if (esm.isNextSub("BASE"))
+            {
+                esm.restoreContext(restorePoint);
+                return;
+            }
+            else
+                esm.getHNT(info.mArg, "ARG_");
+
+            esm.getHNT(info.mMagnitude, "MAGN");
+
+            permEffectList.push_back(info);
+        }
+    }
 
     void SpellState::load(ESMReader &esm)
     {
@@ -38,7 +62,7 @@ namespace ESM
             std::string spellId = esm.getHString();
 
             std::vector<PermanentSpellEffectInfo> permEffectList;
-            while (esm.isNextSub("EFID"))
+            while (esm.isNextSub("PEID"))
             {
                 PermanentSpellEffectInfo info;
                 esm.getHT(info.mId);
@@ -47,6 +71,12 @@ namespace ESM
 
                 permEffectList.push_back(info);
             }
+
+            // Note: an old "EFID" field conflicted with MagicEffects's "EFID".
+            // Attempt to restore savegame.
+            if (esm.getFormat() < 6)
+                restoreFromOldFormat(esm, permEffectList);
+
             mPermanentSpellEffects[spellId] = permEffectList;
         }
 
@@ -98,7 +128,7 @@ namespace ESM
             const std::vector<PermanentSpellEffectInfo> & effects = it->second;
             for (std::vector<PermanentSpellEffectInfo>::const_iterator effectIt = effects.begin(); effectIt != effects.end(); ++effectIt)
             {
-                esm.writeHNT("EFID", effectIt->mId);
+                esm.writeHNT("PEID", effectIt->mId);
                 esm.writeHNT("ARG_", effectIt->mArg);
                 esm.writeHNT("MAGN", effectIt->mMagnitude);
             }
