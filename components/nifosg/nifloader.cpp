@@ -1092,8 +1092,7 @@ namespace NifOsg
                 const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[i].weights;
                 for(size_t j = 0;j < weights.size();j++)
                 {
-                    std::pair<unsigned short, float> indexWeight = std::make_pair(weights[j].vertex, weights[j].weight);
-                    influence.mWeights.insert(indexWeight);
+                    influence.mWeights.emplace_back(weights[j].vertex, weights[j].weight);
                 }
                 influence.mInvBindMatrix = data->bones[i].trafo.toMatrix();
                 influence.mBoundSphere = osg::BoundingSpheref(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);

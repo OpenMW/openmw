@@ -146,18 +146,14 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
             continue;
         }
 
-        mBoneSphereVector.emplace_back(bone, influencePair.second.mBoundSphere);
-
         const BoneInfluence& bi = influencePair.second;
+        mBoneSphereVector.emplace_back(bone, bi.mBoundSphere);
 
-        const std::map<unsigned short, float>& weights = influencePair.second.mWeights;
-        for (std::map<unsigned short, float>::const_iterator weightIt = weights.begin(); weightIt != weights.end(); ++weightIt)
+        for (auto& weightPair: bi.mWeights)
         {
-            std::vector<BoneWeight>& vec = vertex2BoneMap[weightIt->first];
+            std::vector<BoneWeight>& vec = vertex2BoneMap[weightPair.first];
 
-            BoneWeight b = std::make_pair(std::make_pair(bone, bi.mInvBindMatrix), weightIt->second);
-
-            vec.push_back(b);
+            vec.emplace_back(std::make_pair(bone, bi.mInvBindMatrix), weightPair.second);
         }
     }
 

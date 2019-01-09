@@ -31,7 +31,7 @@ namespace SceneUtil
             osg::Matrixf mInvBindMatrix;
             osg::BoundingSpheref mBoundSphere;
             // <vertex index, weight>
-            std::map<unsigned short, float> mWeights;
+            std::vector<std::pair<unsigned short, float>> mWeights;
         };
 
         struct InfluenceMap : public osg::Referenced
