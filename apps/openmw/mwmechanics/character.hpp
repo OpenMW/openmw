@@ -31,10 +31,8 @@ enum Priority {
     Priority_WeaponLowerBody,
     Priority_SneakIdleLowerBody,
     Priority_SwimIdle,
-    Priority_Movement,
-    // Note: in vanilla movement anims have higher priority than jump ones.
-    // It causes issues with landing animations during movement.
     Priority_Jump,
+    Priority_Movement,
     Priority_Hit,
     Priority_Weapon,
     Priority_Block,
@@ -214,7 +212,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
     void refreshHitRecoilAnims(CharacterState& idle);
-    void refreshJumpAnims(const WeaponInfo* weap, JumpingState jump, CharacterState& idle, CharacterState& movement, bool force=false);
+    void refreshJumpAnims(const WeaponInfo* weap, JumpingState jump, CharacterState& idle, bool force=false);
     void refreshMovementAnims(const WeaponInfo* weap, CharacterState movement, CharacterState& idle, bool force=false);
     void refreshIdleAnims(const WeaponInfo* weap, CharacterState idle, bool force=false);
 
