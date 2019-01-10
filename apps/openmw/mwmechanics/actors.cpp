@@ -860,8 +860,13 @@ namespace MWMechanics
 
         bool hasSummonEffect = false;
         for (MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
+        {
             if (isSummoningEffect(it->first.mId))
+            {
                 hasSummonEffect = true;
+                break;
+            }
+        }
 
         if (!creatureStats.getSummonedCreatureMap().empty() || !creatureStats.getSummonedCreatureGraveyard().empty() || hasSummonEffect)
         {
