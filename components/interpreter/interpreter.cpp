@@ -1,7 +1,6 @@
 #include "interpreter.hpp"
 
 #include <cassert>
-#include <sstream>
 #include <stdexcept>
 
 #include "opcodes.hpp"
@@ -116,20 +115,14 @@ namespace Interpreter
 
     void Interpreter::abortUnknownCode (int segment, int opcode)
     {
-        std::ostringstream error;
-
-        error << "unknown opcode " << opcode << " in segment " << segment;
-
-        throw std::runtime_error (error.str());
+        const std::string error = "unknown opcode " + std::to_string(opcode) + " in segment " + std::to_string(segment);
+        throw std::runtime_error (error);
     }
 
     void Interpreter::abortUnknownSegment (Type_Code code)
     {
-        std::ostringstream error;
-
-        error << "opcode outside of the allocated segment range: " << code;
-
-        throw std::runtime_error (error.str());
+        const std::string error = "opcode outside of the allocated segment range: " + std::to_string(code);
+        throw std::runtime_error (error);
     }
 
     void Interpreter::begin()

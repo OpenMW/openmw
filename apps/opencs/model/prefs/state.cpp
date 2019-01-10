@@ -3,7 +3,6 @@
 
 #include <stdexcept>
 #include <algorithm>
-#include <sstream>
 
 #include "intsetting.hpp"
 #include "doublesetting.hpp"
@@ -393,9 +392,7 @@ CSMPrefs::IntSetting& CSMPrefs::State::declareInt (const std::string& key,
     if (mCurrentCategory==mCategories.end())
         throw std::logic_error ("no category for setting");
 
-    std::ostringstream stream;
-    stream << default_;
-    setDefault (key, stream.str());
+    setDefault(key, std::to_string(default_));
 
     default_ = mSettings.getInt (key, mCurrentCategory->second.getKey());
 
@@ -414,9 +411,7 @@ CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble (const std::string& key,
     if (mCurrentCategory==mCategories.end())
         throw std::logic_error ("no category for setting");
 
-    std::ostringstream stream;
-    stream << default_;
-    setDefault (key, stream.str());
+    setDefault(key, std::to_string(default_));
 
     default_ = mSettings.getFloat (key, mCurrentCategory->second.getKey());
 

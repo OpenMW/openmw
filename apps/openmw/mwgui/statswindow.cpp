@@ -125,9 +125,7 @@ namespace MWGui
         for (int i=0; ids[i]; ++i)
             if (ids[i]==id)
             {
-                std::ostringstream valueString;
-                valueString << value.getModified();
-                setText (id, valueString.str());
+                setText (id, std::to_string(value.getModified()));
 
                 MyGUI::TextBox* box;
                 getWidget(box, id);
