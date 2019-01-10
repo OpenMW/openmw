@@ -31,12 +31,12 @@ namespace SceneUtil
             osg::Matrixf mInvBindMatrix;
             osg::BoundingSpheref mBoundSphere;
             // <vertex index, weight>
-            std::map<unsigned short, float> mWeights;
+            std::vector<std::pair<unsigned short, float>> mWeights;
         };
 
         struct InfluenceMap : public osg::Referenced
         {
-            std::map<std::string, BoneInfluence> mMap;
+            std::vector<std::pair<std::string, BoneInfluence>> mData;
         };
 
         void setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap);
@@ -73,12 +73,13 @@ namespace SceneUtil
         typedef std::vector<unsigned short> VertexList;
 
         typedef std::map<std::vector<BoneWeight>, VertexList> Bone2VertexMap;
+        typedef std::vector<std::pair<std::vector<BoneWeight>, VertexList>> Bone2VertexVector;
 
-        Bone2VertexMap mBone2VertexMap;
+        Bone2VertexVector mBone2VertexVector;
 
-        typedef std::map<Bone*, osg::BoundingSpheref> BoneSphereMap;
+        typedef std::vector<std::pair<Bone*, osg::BoundingSpheref>> BoneSphereVector;
 
-        BoneSphereMap mBoneSphereMap;
+        BoneSphereVector mBoneSphereVector;
 
         unsigned int mLastFrameNumber;
         bool mBoundsFirstFrame;
