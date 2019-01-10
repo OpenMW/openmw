@@ -1,5 +1,6 @@
 #include "util.hpp"
 
+#include <limits>
 #include <stdexcept>
 
 #include <QUndoStack>
@@ -214,7 +215,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_UnsignedInteger8:
         {
             DialogueSpinBox *sb = new DialogueSpinBox(parent);
-            sb->setRange(0, UCHAR_MAX);
+            sb->setRange(0, std::numeric_limits<unsigned char>::max());
             return sb;
         }
 
@@ -225,7 +226,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_Float:
         {
             DialogueDoubleSpinBox *dsb = new DialogueDoubleSpinBox(parent);
-            dsb->setRange(-FLT_MAX, FLT_MAX);
+            dsb->setRange(-std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
             dsb->setSingleStep(0.01f);
             dsb->setDecimals(3);
             return dsb;
@@ -234,7 +235,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_Double:
         {
             DialogueDoubleSpinBox *dsb = new DialogueDoubleSpinBox(parent);
-            dsb->setRange(-FLT_MAX, FLT_MAX);
+            dsb->setRange(-std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
             dsb->setSingleStep(0.01f);
             dsb->setDecimals(6);
             return dsb;
