@@ -385,8 +385,8 @@ namespace MWWorld
         for (std::vector<MagicBoltState>::iterator it = mMagicBolts.begin(); it != mMagicBolts.end();)
         {
             osg::Quat orient = it->mNode->getAttitude();
-            static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fTargetSpellMaxSpeed")->mValue.getFloat();
+            static const float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                               .find("fTargetSpellMaxSpeed")->mValue.getFloat();
             float speed = fTargetSpellMaxSpeed * it->mSpeed;
             osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
             direction.normalize();

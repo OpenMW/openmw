@@ -296,6 +296,7 @@ namespace MWClass
             gmst.iKnockDownOddsMult = store.find("iKnockDownOddsMult");
             gmst.iKnockDownOddsBase = store.find("iKnockDownOddsBase");
             gmst.fCombatArmorMinMult = store.find("fCombatArmorMinMult");
+            gmst.iVoiceHitOdds = store.find("iVoiceHitOdds");
 
             inited = true;
         }
@@ -564,9 +565,8 @@ namespace MWClass
         MWMechanics::applyFatigueLoss(ptr, weapon, attackStrength);
 
         const float fCombatDistance = store.find("fCombatDistance")->mValue.getFloat();
-        float dist = fCombatDistance * (!weapon.isEmpty() ?
-                               weapon.get<ESM::Weapon>()->mBase->mData.mReach :
-                               store.find("fHandToHandReach")->mValue.getFloat());
+        const float fHandToHandReach = store.find("fHandToHandReach")->mValue.getFloat();
+        float dist = fCombatDistance * (!weapon.isEmpty() ? weapon.get<ESM::Weapon>()->mBase->mData.mReach : fHandToHandReach);
 
         // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
         std::vector<MWWorld::Ptr> targetActors;
@@ -636,14 +636,18 @@ namespace MWClass
                     && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(ptr, victim);
             if(unaware)
             {
-                damage *= store.find("fCombatCriticalStrikeMult")->mValue.getFloat();
+                const float fCombatCriticalStrikeMult = store.find("fCombatCriticalStrikeMult")->mValue.getFloat();
+                damage *= fCombatCriticalStrikeMult;
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
                 MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
             }
         }
 
         if (othercls.getCreatureStats(victim).getKnockedDown())
-            damage *= store.find("fCombatKODamageMult")->mValue.getFloat();
+        {
+            const float fCombatKODamageMult = store.find("fCombatKODamageMult")->mValue.getFloat();
+            damage *= fCombatKODamageMult;
+        }
 
         // Apply "On hit" enchanted weapons
         MWMechanics::applyOnStrikeEnchantment(ptr, victim, weapon, hitPosition);
@@ -731,12 +735,9 @@ namespace MWClass
         {
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
             // something, alert the character controller, scripts, etc.
-
-            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
             const GMST& gmst = getGmst();
 
-            int chance = store.get<ESM::GameSetting>().find("iVoiceHitOdds")->mValue.getInteger();
-            if (Misc::Rng::roll0to99() < chance)
+            if (Misc::Rng::roll0to99() < gmst.iVoiceHitOdds->mValue.getFloat())
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
 
             // Check for knockdown

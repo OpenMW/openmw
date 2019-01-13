@@ -1293,8 +1293,8 @@ namespace MWMechanics
             float timeDiff = std::min(7.f, std::max(0.f, std::abs(time - 13)));
             float damageScale = 1.f - timeDiff / 7.f;
             // When cloudy, the sun damage effect is halved
-            static float fMagicSunBlockedMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                        "fMagicSunBlockedMult")->mValue.getFloat();
+            const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            static const float fMagicSunBlockedMult = gmst.find("fMagicSunBlockedMult")->mValue.getFloat();
 
             int weather = MWBase::Environment::get().getWorld()->getCurrentWeather();
             if (weather > 1)

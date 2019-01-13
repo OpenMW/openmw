@@ -339,8 +339,8 @@ namespace MWClass
         if (ref->mBase->mData.mType < ESM::Weapon::MarksmanBow && verbose)
         {
             // display value in feet
-            const float combatDistance = store.get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat() * ref->mBase->mData.mReach;
-            text += MWGui::ToolTips::getWeightString(combatDistance / Constants::UnitsPerFoot, "#{sRange}");
+            const float fCombatDistance = store.get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat();
+            text += MWGui::ToolTips::getWeightString(fCombatDistance * ref->mBase->mData.mReach / Constants::UnitsPerFoot, "#{sRange}");
             text += " #{sFeet}";
         }
 

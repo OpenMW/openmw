@@ -116,7 +116,6 @@ float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
-
     const float fallDistanceMin = store.find("fFallDamageDistanceMin")->mValue.getFloat();
 
     if (fallHeight >= fallDistanceMin)
@@ -1910,6 +1909,20 @@ void CharacterController::update(float duration, bool animationOnly)
         updateAnimQueue();
     else if(!cls.getCreatureStats(mPtr).isDead())
     {
+        const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+        static const float fFatigueRunBase = gmst.find("fFatigueRunBase")->mValue.getFloat();
+        static const float fFatigueRunMult = gmst.find("fFatigueRunMult")->mValue.getFloat();
+        static const float fFatigueSwimWalkBase = gmst.find("fFatigueSwimWalkBase")->mValue.getFloat();
+        static const float fFatigueSwimRunBase = gmst.find("fFatigueSwimRunBase")->mValue.getFloat();
+        static const float fFatigueSwimWalkMult = gmst.find("fFatigueSwimWalkMult")->mValue.getFloat();
+        static const float fFatigueSwimRunMult = gmst.find("fFatigueSwimRunMult")->mValue.getFloat();
+        static const float fFatigueSneakBase = gmst.find("fFatigueSneakBase")->mValue.getFloat();
+        static const float fFatigueSneakMult = gmst.find("fFatigueSneakMult")->mValue.getFloat();
+        static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->mValue.getFloat();
+        static const float fJumpMoveMult = gmst.find("fJumpMoveMult")->mValue.getFloat();
+        static const float fFatigueJumpBase = gmst.find("fFatigueJumpBase")->mValue.getFloat();
+        static const float fFatigueJumpMult = gmst.find("fFatigueJumpMult")->mValue.getFloat();
+
         bool onground = world->isOnGround(mPtr);
         bool incapacitated = (cls.getCreatureStats(mPtr).isParalyzed() || cls.getCreatureStats(mPtr).getKnockedDown());
         bool inwater = world->isSwimming(mPtr);
@@ -1993,16 +2006,7 @@ void CharacterController::update(float duration, bool animationOnly)
         }
 
         // reduce fatigue
-        const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
         float fatigueLoss = 0;
-        static const float fFatigueRunBase = gmst.find("fFatigueRunBase")->mValue.getFloat();
-        static const float fFatigueRunMult = gmst.find("fFatigueRunMult")->mValue.getFloat();
-        static const float fFatigueSwimWalkBase = gmst.find("fFatigueSwimWalkBase")->mValue.getFloat();
-        static const float fFatigueSwimRunBase = gmst.find("fFatigueSwimRunBase")->mValue.getFloat();
-        static const float fFatigueSwimWalkMult = gmst.find("fFatigueSwimWalkMult")->mValue.getFloat();
-        static const float fFatigueSwimRunMult = gmst.find("fFatigueSwimRunMult")->mValue.getFloat();
-        static const float fFatigueSneakBase = gmst.find("fFatigueSneakBase")->mValue.getFloat();
-        static const float fFatigueSneakMult = gmst.find("fFatigueSneakMult")->mValue.getFloat();
 
         if (cls.getEncumbrance(mPtr) <= cls.getCapacity(mPtr))
         {
@@ -2043,8 +2047,6 @@ void CharacterController::update(float duration, bool animationOnly)
             forcestateupdate = (mJumpState != JumpState_InAir);
             jumpstate = JumpState_InAir;
 
-            static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->mValue.getFloat();
-            static const float fJumpMoveMult = gmst.find("fJumpMoveMult")->mValue.getFloat();
             float factor = fJumpMoveBase + fJumpMoveMult * mPtr.getClass().getSkill(mPtr, ESM::Skill::Acrobatics)/100.f;
             factor = std::min(1.f, factor);
             vec.x() *= factor;
@@ -2075,12 +2077,8 @@ void CharacterController::update(float duration, bool animationOnly)
                 }
 
                 // decrease fatigue
-                const float fatigueJumpBase = gmst.find("fFatigueJumpBase")->mValue.getFloat();
-                const float fatigueJumpMult = gmst.find("fFatigueJumpMult")->mValue.getFloat();
-                float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
-                if (normalizedEncumbrance > 1)
-                    normalizedEncumbrance = 1;
-                const float fatigueDecrease = fatigueJumpBase + normalizedEncumbrance * fatigueJumpMult;
+                float normalizedEncumbrance = std::min(1.f, mPtr.getClass().getNormalizedEncumbrance(mPtr));
+                const float fatigueDecrease = fFatigueJumpBase + normalizedEncumbrance * fFatigueJumpMult;
 
                 if (!godmode)
                 {

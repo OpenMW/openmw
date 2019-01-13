@@ -527,7 +527,7 @@ namespace MWMechanics
         // Play a random voice greeting if the player gets too close
         int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
         float helloDistance = static_cast<float>(hello);
-        static int iGreetDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
+        static const int iGreetDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
             .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->mValue.getInteger();
 
         helloDistance *= iGreetDistanceMultiplier;
@@ -706,7 +706,7 @@ namespace MWMechanics
 
         for(unsigned int counter = 0; counter < mIdle.size(); counter++)
         {
-            static float fIdleChanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
+            static const float fIdleChanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
                 .get<ESM::GameSetting>().find("fIdleChanceMultiplier")->mValue.getFloat();
 
             unsigned short idleChance = static_cast<unsigned short>(fIdleChanceMultiplier * mIdle[counter]);

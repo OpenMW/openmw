@@ -255,9 +255,9 @@ namespace MWGui
         const MWMechanics::NpcStats &pcstats = player.getClass().getNpcStats(player);
 
         // trigger levelup if possible
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-        if (mSleeping && pcstats.getLevelProgress () >= gmst.find("iLevelUpTotal")->mValue.getInteger())
+        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const int iLevelUpTotal = gmst.find("iLevelUpTotal")->mValue.getInteger();
+        if (mSleeping && pcstats.getLevelProgress () >= iLevelUpTotal)
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
         }

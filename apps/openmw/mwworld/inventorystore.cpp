@@ -434,8 +434,8 @@ void MWWorld::InventoryStore::autoEquipArmor (const MWWorld::Ptr& actor, TSlots&
     const MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
 
-    static float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
-    static float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
+    static const float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
+    static const float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
 
     int unarmoredSkill = actor.getClass().getSkill(actor, ESM::Skill::Unarmored);
     float unarmoredRating = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
@@ -1003,8 +1003,8 @@ void MWWorld::InventoryStore::rechargeItems(float duration)
                 || it->first->getCellRef().getEnchantmentCharge() == it->second)
             continue;
 
-        static float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                    "fMagicItemRechargePerSecond")->mValue.getFloat();
+        static const float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                          "fMagicItemRechargePerSecond")->mValue.getFloat();
 
         if (it->first->getCellRef().getEnchantmentCharge() <= it->second)
         {

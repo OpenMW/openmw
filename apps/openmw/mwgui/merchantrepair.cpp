@@ -45,6 +45,8 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
 
     MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
     int categories = MWWorld::ContainerStore::Type_Weapon | MWWorld::ContainerStore::Type_Armor;
+    const float fRepairMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fRepairMult")->mValue.getFloat();
+    const std::string sgp = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sgp")->mValue.getString();
     for (MWWorld::ContainerStoreIterator iter (store.begin(categories)); iter!=store.end(); ++iter)
     {
         if (iter->getClass().hasItemHealth(*iter))
@@ -55,8 +57,6 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
                 continue;
 
             int basePrice = iter->getClass().getValue(*iter);
-            float fRepairMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                    .find("fRepairMult")->mValue.getFloat();
 
             float p = static_cast<float>(std::max(1, basePrice));
             float r = static_cast<float>(std::max(1, static_cast<int>(maxDurability / p)));
@@ -66,10 +66,7 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
 
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mActor, x, true);
 
-            std::string name = iter->getClass().getName(*iter)
-                    + " - " + MyGUI::utility::toString(price)
-                    + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                    .find("sgp")->mValue.getString();
+            std::string name = iter->getClass().getName(*iter) + " - " + MyGUI::utility::toString(price) + sgp;
 
             MyGUI::Button* button =
                 mList->createWidget<MyGUI::Button>(price <= playerGold ? "SandTextButton" : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip

@@ -39,8 +39,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     int pcLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
     int armorerSkill = player.getClass().getSkill(player, ESM::Skill::Armorer);
 
-    float fRepairAmountMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-            .find("fRepairAmountMult")->mValue.getFloat();
+    const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
     float toolQuality = ref->mBase->mData.mQuality;
 
@@ -49,6 +48,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     int roll = Misc::Rng::roll0to99();
     if (roll <= x)
     {
+        const float fRepairAmountMult = gmst.find("fRepairAmountMult")->mValue.getFloat();
         int y = static_cast<int>(fRepairAmountMult * toolQuality * roll);
         y = std::max(1, y);
 
@@ -84,8 +84,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
 
         store.remove(mTool, 1, player);
 
-        std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("sNotifyMessage51")->mValue.getString();
+        const std::string message = gmst.find("sNotifyMessage51")->mValue.getString();
 
         MWBase::Environment::get().getWindowManager()->messageBox((boost::format(message) % mTool.getClass().getName(mTool)).str());
 

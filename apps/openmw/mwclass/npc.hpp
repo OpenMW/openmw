@@ -38,6 +38,7 @@ namespace MWClass
                 const ESM::GameSetting *iKnockDownOddsMult;
                 const ESM::GameSetting *iKnockDownOddsBase;
                 const ESM::GameSetting *fCombatArmorMinMult;
+                const ESM::GameSetting *iVoiceHitOdds;
             };
 
             static const GMST& getGmst();

@@ -48,21 +48,22 @@ namespace MWGui
     {
         int price;
 
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         if (!mPtr.getCell()->isExterior())
         {
-            price = gmst.find("fMagesGuildTravel")->mValue.getInteger();
+            const int fMagesGuildTravel = gmst.find("fMagesGuildTravel")->mValue.getInteger();
+            price = fMagesGuildTravel;
         }
         else
         {
             ESM::Position PlayerPos = player.getRefData().getPosition();
             float d = sqrt(pow(pos.pos[0] - PlayerPos.pos[0], 2) + pow(pos.pos[1] - PlayerPos.pos[1], 2) + pow(pos.pos[2] - PlayerPos.pos[2], 2));
-            price = static_cast<int>(d / gmst.find("fTravelMult")->mValue.getFloat());
+            const float fTravelMult = gmst.find("fTravelMult")->mValue.getFloat();
+            price = static_cast<int>(d / fTravelMult);
         }
 
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
@@ -173,7 +174,8 @@ namespace MWGui
         {
             ESM::Position playerPos = player.getRefData().getPosition();
             float d = (osg::Vec3f(pos.pos[0], pos.pos[1], 0) - osg::Vec3f(playerPos.pos[0], playerPos.pos[1], 0)).length();
-            int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->mValue.getFloat());
+            const float fTravelTimeMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->mValue.getFloat();
+            int hours = static_cast<int>(d / fTravelTimeMult);
             for(int i = 0;i < hours;i++)
             {
                 MWBase::Environment::get().getMechanicsManager ()->rest (true);

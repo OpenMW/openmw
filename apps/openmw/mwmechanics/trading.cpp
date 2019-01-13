@@ -50,12 +50,13 @@ namespace MWMechanics
         float e1 = 0.1f * merchantStats.getAttribute(ESM::Attribute::Luck).getModified();
         float f1 = 0.2f * merchantStats.getAttribute(ESM::Attribute::Personality).getModified();
 
-        float dispositionTerm = gmst.find("fDispositionMod")->mValue.getFloat() * (clampedDisposition - 50);
+        const float fDispositionMod = gmst.find("fDispositionMod")->mValue.getFloat();
+        const float fBargainOfferMulti = gmst.find("fBargainOfferMulti")->mValue.getFloat();
+        const float fBargainOfferBase = gmst.find("fBargainOfferBase")->mValue.getFloat();
+        float dispositionTerm = fDispositionMod * (clampedDisposition - 50);
         float pcTerm = (dispositionTerm + a1 + b1 + c1) * playerStats.getFatigueTerm();
         float npcTerm = (d1 + e1 + f1) * merchantStats.getFatigueTerm();
-        float x = gmst.find("fBargainOfferMulti")->mValue.getFloat() * d
-            + gmst.find("fBargainOfferBase")->mValue.getFloat()
-            + int(pcTerm - npcTerm);
+        float x = fBargainOfferBase + fBargainOfferMulti * d + pcTerm - npcTerm;
 
         int roll = Misc::Rng::rollDice(100) + 1;
 

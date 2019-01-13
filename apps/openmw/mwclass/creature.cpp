@@ -247,7 +247,8 @@ namespace MWClass
 
         MWMechanics::applyFatigueLoss(ptr, weapon, attackStrength);
 
-        float dist = gmst.find("fCombatDistance")->mValue.getFloat();
+        const float fCombatDistance = gmst.find("fCombatDistance")->mValue.getFloat();
+        float dist = fCombatDistance;
         if (!weapon.isEmpty())
             dist *= weapon.get<ESM::Weapon>()->mBase->mData.mReach;
 

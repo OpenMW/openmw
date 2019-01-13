@@ -24,10 +24,10 @@ namespace MWMechanics
     float suggestCombatRange(int rangeTypes)
     {
         static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat();
-        static float fHandToHandReach = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->mValue.getFloat();
+        static const float fHandToHandReach = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->mValue.getFloat();
 
         // This distance is a possible distance of melee attack
-        static float distance = fCombatDistance * std::max(2.f, fHandToHandReach);
+        static const float distance = fCombatDistance * std::max(2.f, fHandToHandReach);
 
         if (rangeTypes & RangeTypes::Touch)
         {
@@ -114,13 +114,13 @@ namespace MWMechanics
     {
         isRanged = false;
 
-        static const float fCombatDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat();
-        static const float fProjectileMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fProjectileMaxSpeed")->mValue.getFloat();
+        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        static const float fCombatDistance = gmst.find("fCombatDistance")->mValue.getFloat();
+        static const float fHandToHandReach = gmst.find("fHandToHandReach")->mValue.getFloat();
+        static const float fProjectileMaxSpeed = gmst.find("fProjectileMaxSpeed")->mValue.getFloat();
 
         if (mWeapon.isEmpty())
         {
-            static float fHandToHandReach =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->mValue.getFloat();
             return fHandToHandReach * fCombatDistance;
         }
 

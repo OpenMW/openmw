@@ -128,16 +128,12 @@ void adjustCommandedActor (const MWWorld::Ptr& actor)
 void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float& magicka)
 {
     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
-    const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
-    bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).getMagnitude() > 0;
-    int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
-
-    health = 0.1f * endurance;
+    health = stats.getAttribute (ESM::Attribute::Endurance).getModified() / 10.f;
 
     magicka = 0;
-    if (!stunted)
+    if (stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).getMagnitude() == 0)
     {
+        const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         float fRestMagicMult = settings.find("fRestMagicMult")->mValue.getFloat ();
         magicka = fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
     }
@@ -525,10 +521,18 @@ namespace MWMechanics
         int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
 
         float base = 1.f;
+        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
         if (ptr == getPlayer())
-            base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fPCbaseMagickaMult")->mValue.getFloat();
+        {
+            const float fPCbaseMagickaMult = gmst.find("fPCbaseMagickaMult")->mValue.getFloat();
+            base = fPCbaseMagickaMult;
+        }
         else
-            base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCbaseMagickaMult")->mValue.getFloat();
+        {
+            const float fNPCbaseMagickaMult = gmst.find("fNPCbaseMagickaMult")->mValue.getFloat();
+            base = fNPCbaseMagickaMult;
+        }
 
         double magickaFactor = base +
             creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).getMagnitude() * 0.1;
@@ -576,9 +580,7 @@ namespace MWMechanics
 
         int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
 
-        float normalizedEncumbrance = ptr.getClass().getNormalizedEncumbrance(ptr);
-        if (normalizedEncumbrance > 1)
-            normalizedEncumbrance = 1;
+        float normalizedEncumbrance = std::min(1.f, ptr.getClass().getNormalizedEncumbrance(ptr));
 
         float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
         x *= fEndFatigueMult * endurance;
@@ -1086,16 +1088,16 @@ namespace MWMechanics
                 && creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid).getMagnitude() == 0)
             {
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
-                static const int cutoff = esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->mValue.getInteger();
-                // Force dialogue on sight if bounty is greater than the cutoff
+                static const int iCrimeThreshold = esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->mValue.getInteger();
+                static const int iCrimeThresholdMultiplier = esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->mValue.getInteger();
+                // Force dialogue on sight if bounty is greater than the cutoff (iCrimeThreshold)
                 // In vanilla morrowind, the greeting dialogue is scripted to either arrest the player (< 5000 bounty) or attack (>= 5000 bounty)
-                if (   player.getClass().getNpcStats(player).getBounty() >= cutoff
+                if (   player.getClass().getNpcStats(player).getBounty() >= iCrimeThreshold
                        // TODO: do not run these two every frame. keep an Aware state for each actor and update it every 0.2 s or so?
                     && MWBase::Environment::get().getWorld()->getLOS(ptr, player)
                     && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr))
                 {
-                    static const int iCrimeThresholdMultiplier = esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->mValue.getInteger();
-                    if (player.getClass().getNpcStats(player).getBounty() >= cutoff * iCrimeThresholdMultiplier)
+                    if (player.getClass().getNpcStats(player).getBounty() >= iCrimeThreshold * iCrimeThresholdMultiplier)
                     {
                         MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
                         creatureStats.setHitAttemptActorId(player.getClass().getCreatureStats(player).getActorId()); // Stops the guard from quitting combat if player is unreachable

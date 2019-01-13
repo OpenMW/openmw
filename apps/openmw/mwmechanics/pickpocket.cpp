@@ -36,10 +36,9 @@ namespace MWMechanics
         float t = 2*x - y;
 
         float pcSneak = static_cast<float>(mThief.getClass().getSkill(mThief, ESM::Skill::Sneak));
-        int iPickMinChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("iPickMinChance")->mValue.getInteger();
-        int iPickMaxChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("iPickMaxChance")->mValue.getInteger();
+        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const int iPickMinChance = gmst.find("iPickMinChance")->mValue.getInteger();
+        const float iPickMaxChance = floor(gmst.find("iPickMaxChance")->mValue.getFloat());
 
         int roll = Misc::Rng::roll0to99();
         if (t < pcSneak / iPickMinChance)
@@ -48,7 +47,7 @@ namespace MWMechanics
         }
         else
         {
-            t = std::min(float(iPickMaxChance), t);
+            t = std::min(iPickMaxChance, t);
             return (roll > int(t));
         }
     }
@@ -56,8 +55,8 @@ namespace MWMechanics
     bool Pickpocket::pick(MWWorld::Ptr item, int count)
     {
         float stackValue = static_cast<float>(item.getClass().getValue(item) * count);
-        float fPickPocketMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("fPickPocketMod")->mValue.getFloat();
+        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const float fPickPocketMod = gmst.find("fPickPocketMod")->mValue.getFloat();
         float valueTerm = 10 * fPickPocketMod * stackValue;
 
         return getDetected(valueTerm);
