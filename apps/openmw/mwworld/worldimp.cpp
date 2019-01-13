@@ -1314,7 +1314,10 @@ namespace MWWorld
         {
             mRendering->moveObject(newPtr, vec);
             if (movePhysics)
+            {
                 mPhysics->updatePosition(newPtr);
+                mPhysics->updatePtr(ptr, newPtr);
+            }
         }
         if (isPlayer)
         {
