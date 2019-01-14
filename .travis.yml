@@ -99,8 +99,8 @@ deploy:
  script: ./CI/deploy.osx.sh
  skip_cleanup: true
  on:
-  branch: master
-  condition: "$TRAVIS_EVENT_TYPE = cron && $TRAVIS_OS_NAME = osx"
+  branch: macos-deploy
+  condition: "$TRAVIS_OS_NAME = osx"
   repo: OpenMW/openmw
 notifications:
   email:
