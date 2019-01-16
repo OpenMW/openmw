@@ -1,4 +1,5 @@
 #include "bsaarchive.hpp"
+#include <components/bsa/tes4bsa_file.hpp>
 
 namespace VFS
 {
@@ -6,13 +7,28 @@ namespace VFS
 
 BsaArchive::BsaArchive(const std::string &filename)
 {
-    mFile.open(filename);
+    mFile = new Bsa::BSAFile();
 
-    const Bsa::BSAFile::FileList &filelist = mFile.getList();
+    Bsa::BsaVersion bsaVersion = Bsa::TES4BSAFile::detectVersion(filename);
+
+    if (bsaVersion == Bsa::BSAVER_TES4PLUS) {
+        mFile = new Bsa::TES4BSAFile();
+    }
+    else {
+        mFile = new Bsa::BSAFile();
+    }
+
+    mFile->open(filename);
+
+    const Bsa::BSAFile::FileList &filelist = mFile->getList();
     for(Bsa::BSAFile::FileList::const_iterator it = filelist.begin();it != filelist.end();++it)
     {
-        mResources.push_back(BsaArchiveFile(&*it, &mFile));
+        mResources.push_back(BsaArchiveFile(&*it, mFile));
     }
+}
+
+BsaArchive::~BsaArchive() {
+    delete mFile;
 }
 
 void BsaArchive::listResources(std::map<std::string, File *> &out, char (*normalize_function)(char))

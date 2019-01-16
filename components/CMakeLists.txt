@@ -33,7 +33,7 @@ add_component_dir (settings
     )
 
 add_component_dir (bsa
-    bsa_file
+    bsa_file tes4bsa_file memorystream
     )
 
 add_component_dir (vfs
@@ -218,6 +218,8 @@ target_link_libraries(components
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_THREAD_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
+	${Boost_IOSTREAMS_LIBRARY}
+	${Boost_ZLIB_LIBRARY}
     ${OSG_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
     ${OSGPARTICLE_LIBRARIES}
@@ -231,6 +233,7 @@ target_link_libraries(components
     ${SDL2_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
     ${MyGUI_LIBRARIES}
+	${BSAOPTHASH_LIBRARIES}
     RecastNavigation::DebugUtils
     RecastNavigation::Detour
     RecastNavigation::Recast

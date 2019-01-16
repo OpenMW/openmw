@@ -296,7 +296,7 @@ if(QT_STATIC)
 endif()
 
 
-set(BOOST_COMPONENTS system filesystem program_options)
+set(BOOST_COMPONENTS system filesystem program_options iostreams zlib)
 if(WIN32)
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
 endif(WIN32)
@@ -610,6 +610,7 @@ add_subdirectory (extern/oics)
 if (BUILD_OPENCS)
     add_subdirectory (extern/osgQt)
 endif()
+add_subdirectory (extern/bsaopthash)
 
 # Components
 add_subdirectory (components)
