@@ -218,8 +218,7 @@ target_link_libraries(components
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_THREAD_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
-	${Boost_IOSTREAMS_LIBRARY}
-	${Boost_ZLIB_LIBRARY}
+    ${Boost_IOSTREAMS_LIBRARY}
     ${OSG_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
     ${OSGPARTICLE_LIBRARIES}
@@ -241,7 +240,8 @@ target_link_libraries(components
 
 if (WIN32)
     target_link_libraries(components
-    ${Boost_LOCALE_LIBRARY})
+    ${Boost_LOCALE_LIBRARY}
+    ${Boost_ZLIB_LIBRARY})
 endif()
 
 if (USE_QT)
