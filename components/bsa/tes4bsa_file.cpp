@@ -127,7 +127,7 @@ void TES4BSAFile::readHeader()
 
     // Get essential header numbers
     //size_t dirsize, filenum;
-    std::uint32_t archiveFlags, folderCount, fileCount, totalFileNameLength;
+    std::uint32_t archiveFlags, folderCount, totalFileNameLength;
     {
         // First 36 bytes
         std::uint32_t header[9];
@@ -154,7 +154,6 @@ void TES4BSAFile::readHeader()
         //
         archiveFlags = header[3];
         folderCount = header[4];
-        fileCount = header[5];
         totalFileNameLength = header[7];
         
         mCompressedByDefault = (archiveFlags & 0x4) != 0;
@@ -381,23 +380,21 @@ BsaVersion TES4BSAFile::detectVersion(std::string filePath)
         return BSAVER_UNKNOWN;
     }
 
-
     // Get essential header numbers
-    size_t dirsize, filenum;
-    {
-        // First 12 bytes
-        uint32_t head[3];
+    
+    // First 12 bytes
+    uint32_t head[3];
 
-        input.read(reinterpret_cast<char*>(head), 12);
+    input.read(reinterpret_cast<char*>(head), 12);
 
-        if (head[0] == static_cast<uint32_t>(BSAVER_TES3)) {
-            return BSAVER_TES3;
-        }
-
-        if (head[0] = static_cast<uint32_t>(BSAVER_TES4PLUS)) {
-            return BSAVER_TES4PLUS;
-        }
+    if (head[0] == static_cast<uint32_t>(BSAVER_TES3)) {
+        return BSAVER_TES3;
     }
+
+    if (head[0] == static_cast<uint32_t>(BSAVER_TES4PLUS)) {
+        return BSAVER_TES4PLUS;
+    }
+    
     return BSAVER_UNKNOWN;
 }
 
