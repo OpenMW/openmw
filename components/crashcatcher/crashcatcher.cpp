@@ -17,6 +17,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/operations.hpp>
 
 namespace bfs = boost::filesystem;
 
@@ -34,9 +35,13 @@ namespace bfs = boost::filesystem;
 
 #if defined(__APPLE__)
 #include <sys/sysctl.h>
+#include <libproc.h>
 #endif
 
-#define UNUSED(x) (void)(x)
+#if defined(__FreeBSD__)
+#include <sys/sysctl.h>
+#include <sys/user.h>
+#endif
 
 static const char crash_switch[] = "--cc-handle-crash";
 
@@ -413,6 +418,39 @@ static void crash_handler(const char *logfile)
     exit(0);
 }
 
+static void getExecPath(char **argv)
+{
+#if defined (__FreeBSD__)
+    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
+    size_t size = sizeof(argv0);
+
+    if (sysctl(mib, 4, argv0, &size, nullptr, 0) == 0)
+        return;
+#endif
+
+#if defined (__APPLE__)
+    if(proc_pidpath(getpid(), argv0, sizeof(argv0)) > 0)
+        return;
+#endif
+    int cwdlen;
+    const char *statusPaths[] = {"/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file"};
+    memset(argv0, 0, sizeof(argv0));
+
+    for(const char *path : statusPaths)
+    {
+        if (readlink(path, argv0, sizeof(argv0)) != -1)
+            return;
+    }
+
+    if(argv[0][0] == '/')
+        snprintf(argv0, sizeof(argv0), "%s", argv[0]);
+    else if (getcwd(argv0, sizeof(argv0)) != NULL)
+    {
+        cwdlen = strlen(argv0);
+        snprintf(argv0+cwdlen, sizeof(argv0)-cwdlen, "/%s", argv[0]);
+    }
+}
+
 int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *signals, const char *logfile, int (*user_info)(char*, char*))
 {
     struct sigaction sa;
@@ -424,20 +462,7 @@ int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *sig
 
     cc_user_info = user_info;
 
-    if(argv[0][0] == '/')
-        snprintf(argv0, sizeof(argv0), "%s", argv[0]);
-    else
-    {
-        {
-            /* we don't want to disable "ignoring return value" warnings, so we make
-             * a special exception here. */
-            char * unused;
-            unused = getcwd(argv0, sizeof(argv0));
-            UNUSED(unused);
-        }
-        retval = strlen(argv0);
-        snprintf(argv0+retval, sizeof(argv0)-retval, "/%s", argv[0]);
-    }
+    getExecPath(argv);
 
     /* Set an alternate signal stack so SIGSEGVs caused by stack overflows
      * still run */
@@ -467,20 +492,24 @@ int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *sig
 
 static bool is_debugger_present()
 {
-#if !defined (__APPLE__)
-    bfs::ifstream file((bfs::path("/proc/self/status")));
-    while (!file.eof())
+#if defined (__linux__)
+    bfs::path procstatus = bfs::path("/proc/self/status");
+    if (bfs::exists(procstatus))
     {
-        std::string word;
-        file >> word;
-        if (word == "TracerPid:")
+        bfs::ifstream file((procstatus));
+        while (!file.eof())
         {
+            std::string word;
             file >> word;
-            return word != "0";
+            if (word == "TracerPid:")
+            {
+                file >> word;
+                return word != "0";
+            }
         }
     }
     return false;
-#else
+#elif defined(__APPLE__)
     int junk;
     int mib[4];
     struct kinfo_proc info;
@@ -508,12 +537,24 @@ static bool is_debugger_present()
     // We're being debugged if the P_TRACED flag is set.
 
     return (info.kp_proc.p_flag & P_TRACED) != 0;
+#elif defined(__FreeBSD__)
+    struct kinfo_proc info;
+    size_t size = sizeof(info);
+    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
+
+    if (sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, nullptr, 0) == 0)
+        return (info.ki_flag & P_TRACED) != 0;
+    else
+        perror("Failed to retrieve process info");
+    return false;
+#else
+    return false;
 #endif
 }
 
 void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath)
 {
-    if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_present())
+    if ((argc == 2 && strcmp(argv[1], crash_switch) == 0) || !is_debugger_present())
     {
         int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
         if (crashCatcherInstallHandlers(argc, argv, 5, s, crashLogPath.c_str(), nullptr) == -1)
