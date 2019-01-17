@@ -353,13 +353,12 @@ Files::IStreamPtr TES4BSAFile::getFile(const FileRecord& fileRecord) {
         inputStreamBuf.push(boost::iostreams::zlib_decompressor());
         inputStreamBuf.push(*fileStream);
 
-        std::shared_ptr<std::vector<char> > bufferVec = std::make_shared<std::vector<char>>(uncompressedSize);
-        Bsa::MemoryInputStream* result = new MemoryInputStream(uncompressedSize);
+        std::shared_ptr<Bsa::MemoryInputStream> memoryStreamPtr = std::make_shared<MemoryInputStream>(uncompressedSize);
 
-        boost::iostreams::basic_array_sink<char> sr(result->getRawData(), uncompressedSize);
+        boost::iostreams::basic_array_sink<char> sr(memoryStreamPtr->getRawData(), uncompressedSize);
         boost::iostreams::copy(inputStreamBuf, sr);
-        std::istream* pPtr = (std::istream*) result;
-        return std::shared_ptr<std::istream>(pPtr);
+
+        return std::shared_ptr<std::istream>(memoryStreamPtr, (std::istream*)memoryStreamPtr.get());
     }
 
     return Files::openConstrainedFileStream(mFilename.c_str(), fileRecord.offset, fileRecord.size);
