@@ -1,10 +1,8 @@
 #include "bsaarchive.hpp"
 #include <components/bsa/tes4bsa_file.hpp>
-#include <memory>
 
 namespace VFS
 {
-
 
 BsaArchive::BsaArchive(const std::string &filename)
 {

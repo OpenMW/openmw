@@ -4,6 +4,7 @@
 #include "archive.hpp"
 
 #include <components/bsa/bsa_file.hpp>
+#include <memory>
 
 namespace VFS
 {
