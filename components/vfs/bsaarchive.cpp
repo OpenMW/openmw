@@ -1,5 +1,6 @@
 #include "bsaarchive.hpp"
 #include <components/bsa/tes4bsa_file.hpp>
+#include <memory>
 
 namespace VFS
 {
@@ -9,10 +10,10 @@ BsaArchive::BsaArchive(const std::string &filename)
     Bsa::BsaVersion bsaVersion = Bsa::TES4BSAFile::detectVersion(filename);
 
     if (bsaVersion == Bsa::BSAVER_TES4PLUS) {
-        mFile = std::make_unique<Bsa::TES4BSAFile>();
+        mFile = std::unique_ptr<Bsa::TES4BSAFile>(new Bsa::TES4BSAFile());
     }
     else {
-        mFile = std::make_unique<Bsa::BSAFile>();
+        mFile = std::unique_ptr<Bsa::BSAFile>(new Bsa::BSAFile());
     }
 
     mFile->open(filename);
