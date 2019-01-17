@@ -7,7 +7,7 @@ namespace VFS
 
 BsaArchive::BsaArchive(const std::string &filename)
 {
-    mFile = new Bsa::BSAFile();
+    mFile = nullptr;
 
     Bsa::BsaVersion bsaVersion = Bsa::TES4BSAFile::detectVersion(filename);
 
