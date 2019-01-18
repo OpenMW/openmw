@@ -146,6 +146,7 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
             QModelIndex index = mModel->index (row,
                 mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Modification));
+
             CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State> (
                 mModel->data (index).toInt());
 
