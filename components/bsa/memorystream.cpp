@@ -19,7 +19,7 @@
   version 3 along with this program. If not, see
   http://www.gnu.org/licenses/ .
 
-  TES4 stuff upgrade added by Azdul 2019
+  Compressed BSA upgrade added by Azdul 2019
 
  */
 #include "memorystream.hpp"

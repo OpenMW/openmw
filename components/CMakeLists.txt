@@ -33,7 +33,7 @@ add_component_dir (settings
     )
 
 add_component_dir (bsa
-    bsa_file tes4bsa_file memorystream
+    bsa_file compressedbsafile memorystream
     )
 
 add_component_dir (vfs

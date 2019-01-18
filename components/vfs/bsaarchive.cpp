@@ -1,5 +1,5 @@
 #include "bsaarchive.hpp"
-#include <components/bsa/tes4bsa_file.hpp>
+#include <components/bsa/compressedbsafile.hpp>
 #include <memory>
 
 namespace VFS
@@ -7,10 +7,10 @@ namespace VFS
 
 BsaArchive::BsaArchive(const std::string &filename)
 {
-    Bsa::BsaVersion bsaVersion = Bsa::TES4BSAFile::detectVersion(filename);
+    Bsa::BsaVersion bsaVersion = Bsa::CompressedBSAFile::detectVersion(filename);
 
-    if (bsaVersion == Bsa::BSAVER_TES4PLUS) {
-        mFile = std::unique_ptr<Bsa::TES4BSAFile>(new Bsa::TES4BSAFile());
+    if (bsaVersion == Bsa::BSAVER_COMPRESSED) {
+        mFile = std::unique_ptr<Bsa::CompressedBSAFile>(new Bsa::CompressedBSAFile());
     }
     else {
         mFile = std::unique_ptr<Bsa::BSAFile>(new Bsa::BSAFile());
