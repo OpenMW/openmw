@@ -61,16 +61,19 @@ bool CompressedBSAFile::FileRecord::isValid() const
 
 bool CompressedBSAFile::FileRecord::isCompressed(bool bsaCompressedByDefault) const
 {
-    bool compressionFlagEnabled = ((size & sCompressedFlag) == sCompressedFlag);
+    bool recordCompressionFlagEnabled = ((size & sCompressedFlag) == sCompressedFlag);
 
-    if (bsaCompressedByDefault) {
-        return !compressionFlagEnabled;
-    }
-    return compressionFlagEnabled;
+    //record is compressed when:
+    //- bsaCompressedByDefault flag is set and 30th bit is NOT set, or
+    //- bsaCompressedByDefault flag is NOT set and 30th bit is set
+    //record is NOT compressed when:
+    //- bsaCompressedByDefault flag is NOT set and 30th bit is NOT set, or
+    //- bsaCompressedByDefault flag is set and 30th bit is set
+    return (bsaCompressedByDefault != recordCompressionFlagEnabled);
 }
 
 std::uint32_t CompressedBSAFile::FileRecord::getSizeWithoutCompressionFlag() const {
-    return  size & (~sCompressedFlag);
+    return size & (~sCompressedFlag);
 }
 
 void CompressedBSAFile::getBZString(std::string& str, std::istream& filestream)
