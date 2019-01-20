@@ -154,7 +154,7 @@ void MWMechanics::Alchemy::updateEffects()
 
         if (magicEffect->mData.mBaseCost<=0)
         {
-            const std::string os = "invalid base cost for magic effect " + iter->mId;
+            const std::string os = "invalid base cost for magic effect " + std::to_string(iter->mId);
             throw std::runtime_error (os);
         }
 
