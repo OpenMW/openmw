@@ -822,7 +822,9 @@ namespace NifOsg
                 if (particle.vertex < int(particledata->colors.size()))
                     partcolor = particledata->colors.at(particle.vertex);
 
-                float size = particledata->sizes.at(particle.vertex) * partctrl->size;
+                float size = partctrl->size;
+                if (particle.vertex < int(particledata->sizes.size()))
+                    size *= particledata->sizes.at(particle.vertex);
 
                 created->setSizeRange(osgParticle::rangef(size, size));
                 box.expandBy(osg::BoundingSphere(position, size));
