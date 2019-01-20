@@ -610,7 +610,6 @@ add_subdirectory (extern/oics)
 if (BUILD_OPENCS)
     add_subdirectory (extern/osgQt)
 endif()
-add_subdirectory (extern/BSAOpt)
 
 # Components
 add_subdirectory (components)

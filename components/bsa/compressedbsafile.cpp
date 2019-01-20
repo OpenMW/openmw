@@ -28,11 +28,8 @@
 #include <cassert>
 
 #include <boost/scoped_array.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
-
-#include <extern/BSAOpt/hash.hpp> // see: http://en.uesp.net/wiki/Tes4Mod:Hash_Calculation
 
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/copy.hpp>
@@ -197,8 +194,7 @@ void CompressedBSAFile::readHeader()
         if ((archiveFlags & 0x1) != 0)
             getBZString(folder, input);
 
-        std::string emptyString;
-        folderHash = GenOBHash(folder, emptyString);
+        folderHash = generateHash(folder, std::string());
 
         std::map<std::uint64_t, FolderRecord>::iterator iter = mFolders.find(folderHash);
         if (iter == mFolders.end())
@@ -297,20 +293,13 @@ CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(const std::string
     p.remove_filename();
 
     std::string folder = p.string();
-    // GenOBHash already converts to lowercase and replaces file separators but not for path
-    boost::algorithm::to_lower(folder);
-    std::replace(folder.begin(), folder.end(), '/', '\\');
-
-    std::string emptyString;
-    std::uint64_t folderHash = GenOBHash(folder, emptyString);
+    std::uint64_t folderHash = generateHash(folder, std::string());
 
     std::map<std::uint64_t, FolderRecord>::const_iterator it = mFolders.find(folderHash);
     if (it == mFolders.end())
         return FileRecord(); // folder not found, return default which has offset of sInvalidOffset
 
-    boost::algorithm::to_lower(stem);
-    boost::algorithm::to_lower(ext);
-    std::uint64_t fileHash = GenOBHashPair(stem, ext);
+    std::uint64_t fileHash = generateHash(stem, ext);
     std::map<std::uint64_t, FileRecord>::const_iterator iter = it->second.files.find(fileHash);
     if (iter == it->second.files.end())
         return FileRecord(); // file not found, return default which has offset of sInvalidOffset
@@ -428,6 +417,37 @@ void CompressedBSAFile::convertCompressedSizesToUncompressed()
 
         dataBegin->read(reinterpret_cast<char*>(&(iter->fileSize)), sizeof(iter->fileSize));
     }
+}
+
+std::uint64_t CompressedBSAFile::generateHash(std::string stem, std::string extension) const
+{
+    size_t len = stem.length();
+    if (len == 0) return 0;
+    std::uint64_t hash = 0;
+    unsigned int hash2 = 0;
+    Misc::StringUtils::lowerCaseInPlace(stem);
+    if (extension.empty()) // It's a folder.
+        std::replace(stem.begin(), stem.end(), '/', '\\');
+    else
+    {
+        Misc::StringUtils::lowerCaseInPlace(extension);
+        for (const char &c : extension)
+            hash = hash * 0x1003f + c;
+    }
+    for (size_t i = 1; i < len-2 && len > 3; i++)
+        hash2 = hash2 * 0x1003f + stem[i];
+    hash = (hash + hash2) << 32;
+    hash2 = (stem[0] << 24) | (len << 16);
+    if (len >= 3) hash2 |= stem[len-2] << 8;
+    if (len >= 2) hash2 |= stem[len-1];
+    if (!extension.empty())
+    {
+        if (extension == ".kf")       hash2 |= 0x80;
+        else if (extension == ".nif") hash2 |= 0x8000;
+        else if (extension == ".dds") hash2 |= 0x8080;
+        else if (extension == ".wav") hash2 |= 0x80000000;
+    }
+    return hash + hash2;
 }
 
 } //namespace Bsa
