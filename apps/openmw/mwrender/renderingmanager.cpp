@@ -1385,6 +1385,9 @@ namespace MWRender
 
     void RenderingManager::updateNavMesh()
     {
+        if (!mNavMesh->isEnabled())
+            return;
+
         const auto navMeshes = mNavigator.getNavMeshes();
 
         auto it = navMeshes.begin();
