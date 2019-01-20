@@ -19,7 +19,7 @@ addons:
       # Dev
       cmake, clang-7, clang-tools-7, gcc-8, g++-8,
       # Boost
-      libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev,
+      libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
       libavcodec-dev, libavformat-dev, libavutil-dev, libswresample-dev, libswscale-dev,
       # Audio, Video and Misc. deps
