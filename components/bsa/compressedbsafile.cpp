@@ -285,10 +285,15 @@ void CompressedBSAFile::readHeader()
 
 CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(const std::string& str) const
 {
-    boost::filesystem::path p(str);
+    // Force-convert the path into something both Windows and UNIX can handle first
+    // to make sure Boost doesn't think the entire path is the filename on Linux
+    // and subsequently purge it to determine the file folder.
+    std::string path = str;
+    std::replace(path.begin(), path.end(), '\\', '/');
+
+    boost::filesystem::path p(path);
     std::string stem = p.stem().string();
     std::string ext = p.extension().string();
-    std::string filename = p.filename().string();
     p.remove_filename();
 
     std::string folder = p.string();
