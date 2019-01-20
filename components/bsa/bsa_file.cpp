@@ -35,7 +35,7 @@ using namespace Bsa;
 /// Error handling
 void BSAFile::fail(const string &msg)
 {
-    throw std::runtime_error("BSA Error: " + msg + "\nArchive: " + filename);
+    throw std::runtime_error("BSA Error: " + msg + "\nArchive: " + mFilename);
 }
 
 /// Read header information from the input source
@@ -71,10 +71,10 @@ void BSAFile::readHeader()
      *   the beginning of this buffer.
      *
      */
-    assert(!isLoaded);
+    assert(!mIsLoaded);
 
     namespace bfs = boost::filesystem;
-    bfs::ifstream input(bfs::path(filename), std::ios_base::binary);
+    bfs::ifstream input(bfs::path(mFilename), std::ios_base::binary);
 
     // Total archive size
     std::streamoff fsize = 0;
@@ -117,8 +117,8 @@ void BSAFile::readHeader()
     input.read(reinterpret_cast<char*>(&offsets[0]), 12*filenum);
 
     // Read the string table
-    stringBuf.resize(dirsize-12*filenum);
-    input.read(&stringBuf[0], stringBuf.size());
+    mStringBuf.resize(dirsize-12*filenum);
+    input.read(&mStringBuf[0], mStringBuf.size());
 
     // Check our position
     assert(input.tellg() == std::streampos(12+dirsize));
@@ -129,40 +129,40 @@ void BSAFile::readHeader()
     size_t fileDataOffset = 12 + dirsize + 8*filenum;
 
     // Set up the the FileStruct table
-    files.resize(filenum);
+    mFiles.resize(filenum);
     for(size_t i=0;i<filenum;i++)
     {
-        FileStruct &fs = files[i];
+        FileStruct &fs = mFiles[i];
         fs.fileSize = offsets[i*2];
         fs.offset = offsets[i*2+1] + fileDataOffset;
-        fs.name = &stringBuf[offsets[2*filenum+i]];
+        fs.name = &mStringBuf[offsets[2*filenum+i]];
 
         if(fs.offset + fs.fileSize > fsize)
             fail("Archive contains offsets outside itself");
 
         // Add the file name to the lookup
-        lookup[fs.name] = i;
+        mLookup[fs.name] = i;
     }
 
-    isLoaded = true;
+    mIsLoaded = true;
 }
 
 /// Get the index of a given file name, or -1 if not found
 int BSAFile::getIndex(const char *str) const
 {
-    Lookup::const_iterator it = lookup.find(str);
-    if(it == lookup.end())
+    Lookup::const_iterator it = mLookup.find(str);
+    if(it == mLookup.end())
         return -1;
 
     int res = it->second;
-    assert(res >= 0 && (size_t)res < files.size());
+    assert(res >= 0 && (size_t)res < mFiles.size());
     return res;
 }
 
 /// Open an archive file.
 void BSAFile::open(const string &file)
 {
-    filename = file;
+    mFilename = file;
     readHeader();
 }
 
@@ -173,12 +173,12 @@ Files::IStreamPtr BSAFile::getFile(const char *file)
     if(i == -1)
         fail("File not found: " + string(file));
 
-    const FileStruct &fs = files[i];
+    const FileStruct &fs = mFiles[i];
 
-    return Files::openConstrainedFileStream (filename.c_str (), fs.offset, fs.fileSize);
+    return Files::openConstrainedFileStream (mFilename.c_str (), fs.offset, fs.fileSize);
 }
 
 Files::IStreamPtr BSAFile::getFile(const FileStruct *file)
 {
-    return Files::openConstrainedFileStream (filename.c_str (), file->offset, file->fileSize);
+    return Files::openConstrainedFileStream (mFilename.c_str (), file->offset, file->fileSize);
 }
