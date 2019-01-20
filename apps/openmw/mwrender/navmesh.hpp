@@ -30,6 +30,11 @@ namespace MWRender
 
         void disable();
 
+        bool isEnabled() const
+        {
+            return mEnabled;
+        }
+
     private:
         osg::ref_ptr<osg::Group> mRootNode;
         bool mEnabled;

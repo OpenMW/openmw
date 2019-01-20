@@ -240,6 +240,8 @@ namespace MWRender
 
         void renderCameraToImage(osg::Camera *camera, osg::Image *image, int w, int h);
 
+        void updateNavMesh();
+
         osg::ref_ptr<osgUtil::IntersectionVisitor> getIntersectionVisitor(osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors);
 
         osg::ref_ptr<osgUtil::IntersectionVisitor> mIntersectionVisitor;

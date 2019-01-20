@@ -599,28 +599,8 @@ namespace MWRender
             mWater->update(dt);
         }
 
-        const auto navMeshes = mNavigator.getNavMeshes();
+        updateNavMesh();
 
-        auto it = navMeshes.begin();
-        for (std::size_t i = 0; it != navMeshes.end() && i < mNavMeshNumber; ++i)
-            ++it;
-        if (it == navMeshes.end())
-        {
-            mNavMesh->reset();
-        }
-        else
-        {
-            try
-            {
-                const auto locked = it->second.lockConst();
-                mNavMesh->update(locked->getValue(), mNavMeshNumber, locked->getGeneration(),
-                                 locked->getNavMeshRevision(), mNavigator.getSettings());
-            }
-            catch (const std::exception& e)
-            {
-                Log(Debug::Error) << "NavMesh render update exception: " << e.what();
-            }
-        }
         mCamera->update(dt, paused);
 
         osg::Vec3f focal, cameraPos;
@@ -1401,5 +1381,34 @@ namespace MWRender
     void RenderingManager::setNavMeshNumber(const std::size_t value)
     {
         mNavMeshNumber = value;
+    }
+
+    void RenderingManager::updateNavMesh()
+    {
+        if (!mNavMesh->isEnabled())
+            return;
+
+        const auto navMeshes = mNavigator.getNavMeshes();
+
+        auto it = navMeshes.begin();
+        for (std::size_t i = 0; it != navMeshes.end() && i < mNavMeshNumber; ++i)
+            ++it;
+        if (it == navMeshes.end())
+        {
+            mNavMesh->reset();
+        }
+        else
+        {
+            try
+            {
+                const auto locked = it->second.lockConst();
+                mNavMesh->update(locked->getValue(), mNavMeshNumber, locked->getGeneration(),
+                                 locked->getNavMeshRevision(), mNavigator.getSettings());
+            }
+            catch (const std::exception& e)
+            {
+                Log(Debug::Error) << "NavMesh render update exception: " << e.what();
+            }
+        }
     }
 }
