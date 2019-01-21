@@ -670,6 +670,33 @@ void CSVRender::Object::apply (CSMWorld::CommandMacro& commands)
 
     if (mOverrideFlags & Override_Position)
     {
+        //Do cell check first so positions can be compared
+        const CSMWorld::CellRef& ref = collection.getRecord(recordIndex).get();
+
+        if (CSMWorld::CellCoordinates::isExteriorCell(ref.mCell))
+        {
+            // Find cell index at new position
+            std::pair<int, int> cellIndex = CSMWorld::CellCoordinates::coordinatesToCellIndex(
+                mPositionOverride.pos[0], mPositionOverride.pos[1]);
+            std::pair<int, int> originalIndex = ref.getCellIndex();
+
+            int cellColumn = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
+                CSMWorld::Columns::ColumnId_Cell));
+            int refNumColumn = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
+                CSMWorld::Columns::ColumnId_RefNum));
+
+            if (cellIndex != originalIndex)
+            {
+                /// \todo figure out worldspace (not important until multiple worldspaces are supported)
+                std::string cellId = CSMWorld::CellCoordinates (cellIndex).getId ("");
+
+                commands.push (new CSMWorld::ModifyCommand (*model,
+                    model->index (recordIndex, cellColumn), QString::fromUtf8 (cellId.c_str())));
+                commands.push (new CSMWorld::ModifyCommand( *model,
+                    model->index (recordIndex, refNumColumn), 0));
+            }
+        }
+
         for (int i=0; i<3; ++i)
         {
             int column = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
@@ -677,20 +704,6 @@ void CSVRender::Object::apply (CSMWorld::CommandMacro& commands)
 
             commands.push (new CSMWorld::ModifyCommand (*model,
                 model->index (recordIndex, column), mPositionOverride.pos[i]));
-        }
-
-        int column = collection.findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (
-            CSMWorld::Columns::ColumnId_Cell));
-
-        if (CSMWorld::CellCoordinates::isExteriorCell(collection.getRecord (recordIndex).get().mCell))
-        {
-            std::pair<int, int> cellIndex = collection.getRecord (recordIndex).get().getCellIndex();
-
-            /// \todo figure out worldspace (not important until multiple worldspaces are supported)
-            std::string cellId = CSMWorld::CellCoordinates (cellIndex).getId ("");
-
-            commands.push (new CSMWorld::ModifyCommand (*model,
-                model->index (recordIndex, column), QString::fromUtf8 (cellId.c_str())));
         }
     }
 
