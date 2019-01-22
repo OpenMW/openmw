@@ -26,10 +26,6 @@
 #ifndef BSA_COMPRESSED_BSA_FILE_H
 #define BSA_COMPRESSED_BSA_FILE_H
 
-#include <stdint.h>
-#include <string>
-#include <vector>
-#include <map>
 #include <components/bsa/bsa_file.hpp>
 
 namespace Bsa
@@ -81,6 +77,8 @@ namespace Bsa
         void getBZString(std::string& str, std::istream& filestream);
         //mFiles used by OpenMW will contain uncompressed file sizes
         void convertCompressedSizesToUncompressed();
+        /// \brief Normalizes given filename or folder and generates format-compatible hash. See https://en.uesp.net/wiki/Tes4Mod:Hash_Calculation.
+        std::uint64_t generateHash(std::string stem, std::string extension) const;
         Files::IStreamPtr getFile(const FileRecord& fileRecord);
     public:
         CompressedBSAFile();
