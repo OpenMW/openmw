@@ -164,7 +164,7 @@ namespace CSVRender
         mWaterGeometry->setStateSet(SceneUtil::createSimpleWaterStateSet(Alpha, RenderBin));
 
         // Add water texture
-        std::string textureName = mData.getFallbackMap()->getFallbackString("Water_SurfaceTexture");
+        std::string textureName = Fallback::Map::getString("Water_SurfaceTexture");
         textureName = "textures/water/" + textureName + "00.dds";
 
         Resource::ImageManager* imageManager = mData.getResourceSystem()->getImageManager();

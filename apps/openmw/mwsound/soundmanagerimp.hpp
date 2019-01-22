@@ -46,7 +46,6 @@ namespace MWSound
     {
         const VFS::Manager* mVFS;
 
-        Fallback::Map mFallback;
         std::unique_ptr<Sound_Output> mOutput;
 
         // Caches available music tracks by <playlist name, (sound files) >
@@ -149,7 +148,7 @@ namespace MWSound
         ///< Stop the given object from playing given sound buffer.
 
     public:
-        SoundManager(const VFS::Manager* vfs, const std::map<std::string, std::string>& fallbackMap, bool useSound);
+        SoundManager(const VFS::Manager* vfs, bool useSound);
         virtual ~SoundManager();
 
         virtual void processChangedSettings(const Settings::CategorySettingVector& settings);

@@ -72,11 +72,6 @@ namespace MWWorld
     typedef std::vector<std::pair<MWWorld::Ptr,MWMechanics::Movement> > PtrMovementList;
 }
 
-namespace Fallback
-{
-    class Map;
-}
-
 namespace MWBase
 {
     /// \brief Interface for the World (implemented in MWWorld)
@@ -129,8 +124,6 @@ namespace MWBase
             virtual bool toggleBorders() = 0;
 
             virtual void adjustSky() = 0;
-
-            virtual const Fallback::Map *getFallback () const = 0;
 
             virtual MWWorld::Player& getPlayer() = 0;
             virtual MWWorld::Ptr getPlayerPtr() = 0;

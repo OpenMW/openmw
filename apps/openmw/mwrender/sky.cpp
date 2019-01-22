@@ -828,10 +828,9 @@ private:
             , mTimeOfDayFade(1.f)
             , mGlareView(1.f)
         {
-            const Fallback::Map* fallback = MWBase::Environment::get().getWorld()->getFallback();
-            mColor = fallback->getFallbackColour("Weather_Sun_Glare_Fader_Color");
-            mSunGlareFaderMax = fallback->getFallbackFloat("Weather_Sun_Glare_Fader_Max");
-            mSunGlareFaderAngleMax = fallback->getFallbackFloat("Weather_Sun_Glare_Fader_Angle_Max");
+            mColor = Fallback::Map::getColour("Weather_Sun_Glare_Fader_Color");
+            mSunGlareFaderMax = Fallback::Map::getFloat("Weather_Sun_Glare_Fader_Max");
+            mSunGlareFaderAngleMax = Fallback::Map::getFloat("Weather_Sun_Glare_Fader_Angle_Max");
 
             // Replicating a design flaw in MW. The color was being set on both ambient and emissive properties, which multiplies the result by two,
             // then finally gets clamped by the fixed function pipeline. With the default INI settings, only the red component gets clamped,
@@ -1179,9 +1178,8 @@ void SkyManager::create()
 
     mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager->getImageManager()));
 
-    const Fallback::Map* fallback=MWBase::Environment::get().getWorld()->getFallback();
-    mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), fallback->getFallbackFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
-    mSecunda.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), fallback->getFallbackFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
+    mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), Fallback::Map::getFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
+    mSecunda.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), Fallback::Map::getFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
 
     mCloudNode = new osg::PositionAttitudeTransform;
     mEarlyRenderBinRoot->addChild(mCloudNode);
@@ -1205,7 +1203,7 @@ void SkyManager::create()
     mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
     mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF);
 
-    mMoonScriptColor = fallback->getFallbackColour("Moons_Script_Color");
+    mMoonScriptColor = Fallback::Map::getColour("Moons_Script_Color");
 
     mCreated = true;
 }

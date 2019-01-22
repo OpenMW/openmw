@@ -26,13 +26,13 @@
 
 namespace
 {
-    void createWaterRippleStateSet(Resource::ResourceSystem* resourceSystem, const Fallback::Map* fallback, osg::Node* node)
+    void createWaterRippleStateSet(Resource::ResourceSystem* resourceSystem,osg::Node* node)
     {
-        int rippleFrameCount = fallback->getFallbackInt("Water_RippleFrameCount");
+        int rippleFrameCount = Fallback::Map::getInt("Water_RippleFrameCount");
         if (rippleFrameCount <= 0)
             return;
 
-        std::string tex = fallback->getFallbackString("Water_RippleTexture");
+        const std::string& tex = Fallback::Map::getString("Water_RippleTexture");
 
         std::vector<osg::ref_ptr<osg::Texture2D> > textures;
         for (int i=0; i<rippleFrameCount; ++i)
@@ -81,7 +81,7 @@ namespace
 namespace MWRender
 {
 
-RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem* resourceSystem, const Fallback::Map* fallback)
+RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem* resourceSystem)
     : mParent(parent)
 {
     mParticleSystem = new osgParticle::ParticleSystem;
@@ -94,8 +94,8 @@ RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem*
     particleTemplate.setSizeRange(osgParticle::rangef(15, 180));
     particleTemplate.setColorRange(osgParticle::rangev4(osg::Vec4f(1,1,1,0.7), osg::Vec4f(1,1,1,0.7)));
     particleTemplate.setAlphaRange(osgParticle::rangef(1.f, 0.f));
-    particleTemplate.setAngularVelocity(osg::Vec3f(0,0,fallback->getFallbackFloat("Water_RippleRotSpeed")));
-    particleTemplate.setLifeTime(fallback->getFallbackFloat("Water_RippleLifetime"));
+    particleTemplate.setAngularVelocity(osg::Vec3f(0,0,Fallback::Map::getFloat("Water_RippleRotSpeed")));
+    particleTemplate.setLifeTime(Fallback::Map::getFloat("Water_RippleLifetime"));
 
     osg::ref_ptr<osgParticle::ParticleSystemUpdater> updater (new osgParticle::ParticleSystemUpdater);
     updater->addParticleSystem(mParticleSystem);
@@ -105,7 +105,7 @@ RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem*
     mParticleNode->addChild(mParticleSystem);
     mParticleNode->setNodeMask(Mask_Effect);
 
-    createWaterRippleStateSet(resourceSystem, fallback, mParticleNode);
+    createWaterRippleStateSet(resourceSystem, mParticleNode);
 
     mParent->addChild(mParticleNode);
 }

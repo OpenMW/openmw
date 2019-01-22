@@ -115,67 +115,66 @@ template class MWWorld::TimeOfDayInterpolator<float>;
 template class MWWorld::TimeOfDayInterpolator<osg::Vec4f>;
 
 Weather::Weather(const std::string& name,
-                 const Fallback::Map& fallback,
                  float stormWindSpeed,
                  float rainSpeed,
                  float dlFactor,
                  float dlOffset,
                  const std::string& particleEffect)
-    : mCloudTexture(fallback.getFallbackString("Weather_" + name + "_Cloud_Texture"))
-    , mSkyColor(fallback.getFallbackColour("Weather_" + name +"_Sky_Sunrise_Color"),
-                fallback.getFallbackColour("Weather_" + name + "_Sky_Day_Color"),
-                fallback.getFallbackColour("Weather_" + name + "_Sky_Sunset_Color"),
-                fallback.getFallbackColour("Weather_" + name + "_Sky_Night_Color"))
-    , mFogColor(fallback.getFallbackColour("Weather_" + name + "_Fog_Sunrise_Color"),
-                fallback.getFallbackColour("Weather_" + name + "_Fog_Day_Color"),
-                fallback.getFallbackColour("Weather_" + name + "_Fog_Sunset_Color"),
-                fallback.getFallbackColour("Weather_" + name + "_Fog_Night_Color"))
-    , mAmbientColor(fallback.getFallbackColour("Weather_" + name + "_Ambient_Sunrise_Color"),
-                    fallback.getFallbackColour("Weather_" + name + "_Ambient_Day_Color"),
-                    fallback.getFallbackColour("Weather_" + name + "_Ambient_Sunset_Color"),
-                    fallback.getFallbackColour("Weather_" + name + "_Ambient_Night_Color"))
-    , mSunColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Sunrise_Color"),
-                fallback.getFallbackColour("Weather_" + name + "_Sun_Day_Color"),
-                fallback.getFallbackColour("Weather_" + name + "_Sun_Sunset_Color"),
-                fallback.getFallbackColour("Weather_" + name + "_Sun_Night_Color"))
-    , mLandFogDepth(fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
-                    fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
-                    fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
-                    fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Night_Depth"))
-    , mSunDiscSunsetColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Disc_Sunset_Color"))
-    , mWindSpeed(fallback.getFallbackFloat("Weather_" + name + "_Wind_Speed"))
-    , mCloudSpeed(fallback.getFallbackFloat("Weather_" + name + "_Cloud_Speed"))
-    , mGlareView(fallback.getFallbackFloat("Weather_" + name + "_Glare_View"))
+    : mCloudTexture(Fallback::Map::getString("Weather_" + name + "_Cloud_Texture"))
+    , mSkyColor(Fallback::Map::getColour("Weather_" + name +"_Sky_Sunrise_Color"),
+                Fallback::Map::getColour("Weather_" + name + "_Sky_Day_Color"),
+                Fallback::Map::getColour("Weather_" + name + "_Sky_Sunset_Color"),
+                Fallback::Map::getColour("Weather_" + name + "_Sky_Night_Color"))
+    , mFogColor(Fallback::Map::getColour("Weather_" + name + "_Fog_Sunrise_Color"),
+                Fallback::Map::getColour("Weather_" + name + "_Fog_Day_Color"),
+                Fallback::Map::getColour("Weather_" + name + "_Fog_Sunset_Color"),
+                Fallback::Map::getColour("Weather_" + name + "_Fog_Night_Color"))
+    , mAmbientColor(Fallback::Map::getColour("Weather_" + name + "_Ambient_Sunrise_Color"),
+                    Fallback::Map::getColour("Weather_" + name + "_Ambient_Day_Color"),
+                    Fallback::Map::getColour("Weather_" + name + "_Ambient_Sunset_Color"),
+                    Fallback::Map::getColour("Weather_" + name + "_Ambient_Night_Color"))
+    , mSunColor(Fallback::Map::getColour("Weather_" + name + "_Sun_Sunrise_Color"),
+                Fallback::Map::getColour("Weather_" + name + "_Sun_Day_Color"),
+                Fallback::Map::getColour("Weather_" + name + "_Sun_Sunset_Color"),
+                Fallback::Map::getColour("Weather_" + name + "_Sun_Night_Color"))
+    , mLandFogDepth(Fallback::Map::getFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
+                    Fallback::Map::getFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
+                    Fallback::Map::getFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
+                    Fallback::Map::getFloat("Weather_" + name + "_Land_Fog_Night_Depth"))
+    , mSunDiscSunsetColor(Fallback::Map::getColour("Weather_" + name + "_Sun_Disc_Sunset_Color"))
+    , mWindSpeed(Fallback::Map::getFloat("Weather_" + name + "_Wind_Speed"))
+    , mCloudSpeed(Fallback::Map::getFloat("Weather_" + name + "_Cloud_Speed"))
+    , mGlareView(Fallback::Map::getFloat("Weather_" + name + "_Glare_View"))
     , mIsStorm(mWindSpeed > stormWindSpeed)
     , mRainSpeed(rainSpeed)
-    , mRainFrequency(fallback.getFallbackFloat("Weather_" + name + "_Rain_Entrance_Speed"))
+    , mRainFrequency(Fallback::Map::getFloat("Weather_" + name + "_Rain_Entrance_Speed"))
     , mParticleEffect(particleEffect)
-    , mRainEffect(fallback.getFallbackBool("Weather_" + name + "_Using_Precip") ? "meshes\\raindrop.nif" : "")
-    , mTransitionDelta(fallback.getFallbackFloat("Weather_" + name + "_Transition_Delta"))
-    , mCloudsMaximumPercent(fallback.getFallbackFloat("Weather_" + name + "_Clouds_Maximum_Percent"))
-    , mThunderFrequency(fallback.getFallbackFloat("Weather_" + name + "_Thunder_Frequency"))
-    , mThunderThreshold(fallback.getFallbackFloat("Weather_" + name + "_Thunder_Threshold"))
+    , mRainEffect(Fallback::Map::getBool("Weather_" + name + "_Using_Precip") ? "meshes\\raindrop.nif" : "")
+    , mTransitionDelta(Fallback::Map::getFloat("Weather_" + name + "_Transition_Delta"))
+    , mCloudsMaximumPercent(Fallback::Map::getFloat("Weather_" + name + "_Clouds_Maximum_Percent"))
+    , mThunderFrequency(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Frequency"))
+    , mThunderThreshold(Fallback::Map::getFloat("Weather_" + name + "_Thunder_Threshold"))
     , mThunderSoundID()
-    , mFlashDecrement(fallback.getFallbackFloat("Weather_" + name + "_Flash_Decrement"))
+    , mFlashDecrement(Fallback::Map::getFloat("Weather_" + name + "_Flash_Decrement"))
     , mFlashBrightness(0.0f)
 {
     mDL.FogFactor = dlFactor;
     mDL.FogOffset = dlOffset;
-    mThunderSoundID[0] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_0");
-    mThunderSoundID[1] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_1");
-    mThunderSoundID[2] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_2");
-    mThunderSoundID[3] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_3");
+    mThunderSoundID[0] = Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_0");
+    mThunderSoundID[1] = Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_1");
+    mThunderSoundID[2] = Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_2");
+    mThunderSoundID[3] = Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_3");
 
     // TODO: support weathers that have both "Ambient Loop Sound ID" and "Rain Loop Sound ID", need to play both sounds at the same time.
 
     if (!mRainEffect.empty()) // NOTE: in vanilla, the weathers with rain seem to be hardcoded; changing Using_Precip has no effect
     {
-        mAmbientLoopSoundID = fallback.getFallbackString("Weather_" + name + "_Rain_Loop_Sound_ID");
+        mAmbientLoopSoundID = Fallback::Map::getString("Weather_" + name + "_Rain_Loop_Sound_ID");
         if (mAmbientLoopSoundID.empty()) // default to "rain" if not set
             mAmbientLoopSoundID = "rain";
     }
     else
-        mAmbientLoopSoundID = fallback.getFallbackString("Weather_" + name + "_Ambient_Loop_Sound_ID");
+        mAmbientLoopSoundID = Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID");
 
     if (Misc::StringUtils::ciEqual(mAmbientLoopSoundID, "None"))
         mAmbientLoopSoundID.clear();
@@ -351,17 +350,17 @@ void RegionWeather::chooseNewWeather()
     mWeather = 0;
 }
 
-MoonModel::MoonModel(const std::string& name, const Fallback::Map& fallback)
-  : mFadeInStart(fallback.getFallbackFloat("Moons_" + name + "_Fade_In_Start"))
-  , mFadeInFinish(fallback.getFallbackFloat("Moons_" + name + "_Fade_In_Finish"))
-  , mFadeOutStart(fallback.getFallbackFloat("Moons_" + name + "_Fade_Out_Start"))
-  , mFadeOutFinish(fallback.getFallbackFloat("Moons_" + name + "_Fade_Out_Finish"))
-  , mAxisOffset(fallback.getFallbackFloat("Moons_" + name + "_Axis_Offset"))
-  , mSpeed(fallback.getFallbackFloat("Moons_" + name + "_Speed"))
-  , mDailyIncrement(fallback.getFallbackFloat("Moons_" + name + "_Daily_Increment"))
-  , mFadeStartAngle(fallback.getFallbackFloat("Moons_" + name + "_Fade_Start_Angle"))
-  , mFadeEndAngle(fallback.getFallbackFloat("Moons_" + name + "_Fade_End_Angle"))
-  , mMoonShadowEarlyFadeAngle(fallback.getFallbackFloat("Moons_" + name + "_Moon_Shadow_Early_Fade_Angle"))
+MoonModel::MoonModel(const std::string& name)
+  : mFadeInStart(Fallback::Map::getFloat("Moons_" + name + "_Fade_In_Start"))
+  , mFadeInFinish(Fallback::Map::getFloat("Moons_" + name + "_Fade_In_Finish"))
+  , mFadeOutStart(Fallback::Map::getFloat("Moons_" + name + "_Fade_Out_Start"))
+  , mFadeOutFinish(Fallback::Map::getFloat("Moons_" + name + "_Fade_Out_Finish"))
+  , mAxisOffset(Fallback::Map::getFloat("Moons_" + name + "_Axis_Offset"))
+  , mSpeed(Fallback::Map::getFloat("Moons_" + name + "_Speed"))
+  , mDailyIncrement(Fallback::Map::getFloat("Moons_" + name + "_Daily_Increment"))
+  , mFadeStartAngle(Fallback::Map::getFloat("Moons_" + name + "_Fade_Start_Angle"))
+  , mFadeEndAngle(Fallback::Map::getFloat("Moons_" + name + "_Fade_End_Angle"))
+  , mMoonShadowEarlyFadeAngle(Fallback::Map::getFloat("Moons_" + name + "_Moon_Shadow_Early_Fade_Angle"))
 {
     // Morrowind appears to have a minimum speed in order to avoid situations where the moon couldn't conceivably
     // complete a rotation in a single 24 hour period. The value of 180/23 was deduced from reverse engineering.
@@ -520,24 +519,24 @@ inline float MoonModel::earlyMoonShadowAlpha(float angle) const
         return 0.0f;
 }
 
-WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const Fallback::Map& fallback, MWWorld::ESMStore& store)
+WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, MWWorld::ESMStore& store)
     : mStore(store)
     , mRendering(rendering)
-    , mSunriseTime(fallback.getFallbackFloat("Weather_Sunrise_Time"))
-    , mSunsetTime(fallback.getFallbackFloat("Weather_Sunset_Time"))
-    , mSunriseDuration(fallback.getFallbackFloat("Weather_Sunrise_Duration"))
-    , mSunsetDuration(fallback.getFallbackFloat("Weather_Sunset_Duration"))
-    , mSunPreSunsetTime(fallback.getFallbackFloat("Weather_Sun_Pre-Sunset_Time"))
+    , mSunriseTime(Fallback::Map::getFloat("Weather_Sunrise_Time"))
+    , mSunsetTime(Fallback::Map::getFloat("Weather_Sunset_Time"))
+    , mSunriseDuration(Fallback::Map::getFloat("Weather_Sunrise_Duration"))
+    , mSunsetDuration(Fallback::Map::getFloat("Weather_Sunset_Duration"))
+    , mSunPreSunsetTime(Fallback::Map::getFloat("Weather_Sun_Pre-Sunset_Time"))
     , mNightFade(0, 0, 0, 1)
-    , mHoursBetweenWeatherChanges(fallback.getFallbackFloat("Weather_Hours_Between_Weather_Changes"))
-    , mRainSpeed(fallback.getFallbackFloat("Weather_Precip_Gravity"))
-    , mUnderwaterFog(fallback.getFallbackFloat("Water_UnderwaterSunriseFog"),
-                    fallback.getFallbackFloat("Water_UnderwaterDayFog"),
-                    fallback.getFallbackFloat("Water_UnderwaterSunsetFog"),
-                    fallback.getFallbackFloat("Water_UnderwaterNightFog"))
+    , mHoursBetweenWeatherChanges(Fallback::Map::getFloat("Weather_Hours_Between_Weather_Changes"))
+    , mRainSpeed(Fallback::Map::getFloat("Weather_Precip_Gravity"))
+    , mUnderwaterFog(Fallback::Map::getFloat("Water_UnderwaterSunriseFog"),
+                    Fallback::Map::getFloat("Water_UnderwaterDayFog"),
+                    Fallback::Map::getFloat("Water_UnderwaterSunsetFog"),
+                    Fallback::Map::getFloat("Water_UnderwaterNightFog"))
     , mWeatherSettings()
-    , mMasser("Masser", fallback)
-    , mSecunda("Secunda", fallback)
+    , mMasser("Masser")
+    , mSecunda("Secunda")
     , mWindSpeed(0.f)
     , mIsStorm(false)
     , mPrecipitation(false)
@@ -561,15 +560,15 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const Fall
     mTimeSettings.mDayStart = mSunriseTime + mSunriseDuration;
     mTimeSettings.mDayEnd = mSunsetTime;
 
-    mTimeSettings.addSetting(fallback, "Sky");
-    mTimeSettings.addSetting(fallback, "Ambient");
-    mTimeSettings.addSetting(fallback, "Fog");
-    mTimeSettings.addSetting(fallback, "Sun");
+    mTimeSettings.addSetting("Sky");
+    mTimeSettings.addSetting("Ambient");
+    mTimeSettings.addSetting("Fog");
+    mTimeSettings.addSetting("Sun");
 
     // Morrowind handles stars settings differently for other ones
-    mTimeSettings.mStarsPostSunsetStart = fallback.getFallbackFloat("Weather_Stars_Post-Sunset_Start");
-    mTimeSettings.mStarsPreSunriseFinish = fallback.getFallbackFloat("Weather_Stars_Pre-Sunrise_Finish");
-    mTimeSettings.mStarsFadingDuration = fallback.getFallbackFloat("Weather_Stars_Fading_Duration");
+    mTimeSettings.mStarsPostSunsetStart = Fallback::Map::getFloat("Weather_Stars_Post-Sunset_Start");
+    mTimeSettings.mStarsPreSunriseFinish = Fallback::Map::getFloat("Weather_Stars_Pre-Sunrise_Finish");
+    mTimeSettings.mStarsFadingDuration = Fallback::Map::getFloat("Weather_Stars_Fading_Duration");
 
     WeatherSetting starSetting = {
         mTimeSettings.mStarsPreSunriseFinish,
@@ -583,16 +582,16 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const Fall
     mWeatherSettings.reserve(10);
     // These distant land fog factor and offset values are the defaults MGE XE provides. Should be
     // provided by settings somewhere?
-    addWeather("Clear", fallback, 1.0f, 0.0f); // 0
-    addWeather("Cloudy", fallback, 0.9f, 0.0f); // 1
-    addWeather("Foggy", fallback, 0.2f, 30.0f); // 2
-    addWeather("Overcast", fallback, 0.7f, 0.0f); // 3
-    addWeather("Rain", fallback, 0.5f, 10.0f); // 4
-    addWeather("Thunderstorm", fallback, 0.5f, 20.0f); // 5
-    addWeather("Ashstorm", fallback, 0.2f, 50.0f, "meshes\\ashcloud.nif"); // 6
-    addWeather("Blight", fallback, 0.2f, 60.0f, "meshes\\blightcloud.nif"); // 7
-    addWeather("Snow", fallback, 0.5f, 40.0f, "meshes\\snow.nif"); // 8
-    addWeather("Blizzard", fallback, 0.16f, 70.0f, "meshes\\blizzard.nif"); // 9
+    addWeather("Clear", 1.0f, 0.0f); // 0
+    addWeather("Cloudy", 0.9f, 0.0f); // 1
+    addWeather("Foggy", 0.2f, 30.0f); // 2
+    addWeather("Overcast", 0.7f, 0.0f); // 3
+    addWeather("Rain", 0.5f, 10.0f); // 4
+    addWeather("Thunderstorm", 0.5f, 20.0f); // 5
+    addWeather("Ashstorm", 0.2f, 50.0f, "meshes\\ashcloud.nif"); // 6
+    addWeather("Blight", 0.2f, 60.0f, "meshes\\blightcloud.nif"); // 7
+    addWeather("Snow", 0.5f, 40.0f, "meshes\\snow.nif"); // 8
+    addWeather("Blizzard", 0.16f, 70.0f, "meshes\\blizzard.nif"); // 9
 
     Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
     for(; it != store.get<ESM::Region>().end(); ++it)
@@ -924,13 +923,12 @@ void WeatherManager::clear()
 }
 
 inline void WeatherManager::addWeather(const std::string& name,
-                                       const Fallback::Map& fallback,
                                        float dlFactor, float dlOffset,
                                        const std::string& particleEffect)
 {
     static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->mValue.getFloat();
 
-    Weather weather(name, fallback, fStromWindSpeed, mRainSpeed, dlFactor, dlOffset, particleEffect);
+    Weather weather(name, fStromWindSpeed, mRainSpeed, dlFactor, dlOffset, particleEffect);
 
     mWeatherSettings.push_back(weather);
 }

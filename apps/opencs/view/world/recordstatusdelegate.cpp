@@ -22,7 +22,7 @@ CSVWorld::CommandDelegate *CSVWorld::RecordStatusDelegateFactory::makeDelegate (
 
 CSVWorld::RecordStatusDelegateFactory::RecordStatusDelegateFactory()
 {
-    std::vector<std::string> enums =
+    std::vector<std::pair<int,std::string>> enums =
         CSMWorld::Columns::getEnums (CSMWorld::Columns::ColumnId_Modification);
 
     static const char *sIcons[] =
@@ -31,5 +31,8 @@ CSVWorld::RecordStatusDelegateFactory::RecordStatusDelegateFactory()
     };
 
     for (int i=0; sIcons[i]; ++i)
-        add (i, enums.at (i).c_str(), sIcons[i]);
+    {
+        auto& enumPair = enums.at(i);
+        add (enumPair.first, enumPair.second.c_str(), sIcons[i]);
+    }
 }

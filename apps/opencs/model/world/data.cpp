@@ -64,9 +64,9 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 }
 
 CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
-    const std::vector<std::string>& archives, const Fallback::Map* fallback, const boost::filesystem::path& resDir)
+    const std::vector<std::string>& archives, const boost::filesystem::path& resDir)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mFallbackMap(fallback), mReader (0), mDialogue (0), mReaderIndex(1),
+  mReader (0), mDialogue (0), mReaderIndex(1),
   mFsStrict(fsStrict), mDataPaths(dataPaths), mArchives(archives)
 {
     mVFS.reset(new VFS::Manager(mFsStrict));
@@ -1359,9 +1359,4 @@ void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 const VFS::Manager* CSMWorld::Data::getVFS() const
 {
     return mVFS.get();
-}
-
-const Fallback::Map* CSMWorld::Data::getFallbackMap() const
-{
-    return mFallbackMap;
 }

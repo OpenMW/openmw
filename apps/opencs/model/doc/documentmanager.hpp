@@ -41,7 +41,6 @@ namespace CSMDoc
             std::vector<std::string> mBlacklistedScripts;
 
             boost::filesystem::path mResDir;
-            Fallback::Map mFallbackMap;
 
             bool mFsStrict;
             Files::PathContainer mDataPaths;
@@ -71,8 +70,6 @@ namespace CSMDoc
                 const boost::filesystem::path& savePath, bool new_);
 
             void setResourceDir (const boost::filesystem::path& parResDir);
-
-            void setFallbackMap (const std::map<std::string, std::string>& fallbackMap);
 
             void setEncoding (ToUTF8::FromType encoding);
 

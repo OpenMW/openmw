@@ -73,11 +73,11 @@ CSVWorld::CommandDelegate *CSVWorld::VarTypeDelegateFactory::makeDelegate (
 
 void CSVWorld::VarTypeDelegateFactory::add (ESM::VarType type)
 {
-    std::vector<std::string> enums =
+    std::vector<std::pair<int,std::string>> enums =
         CSMWorld::Columns::getEnums (CSMWorld::Columns::ColumnId_ValueType);
 
     if (static_cast<size_t>(type) >= enums.size())
         throw std::logic_error ("Unsupported variable type");
 
-    mValues.push_back (std::make_pair (type, QString::fromUtf8 (enums[type].c_str())));
+    mValues.emplace_back(type, QString::fromUtf8 (enums[type].second.c_str()));
 }

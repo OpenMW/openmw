@@ -129,7 +129,7 @@ namespace MWGui
     WindowManager::WindowManager(
             osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
             const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
-            ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap, const std::string& versionDescription, const std::string& userDataPath)
+            ToUTF8::FromType encoding, bool exportFonts, const std::string& versionDescription, const std::string& userDataPath)
       : mStore(nullptr)
       , mResourceSystem(resourceSystem)
       , mWorkQueue(workQueue)
@@ -189,7 +189,6 @@ namespace MWGui
       , mForceHidden(GW_None)
       , mAllowed(GW_ALL)
       , mRestAllowed(true)
-      , mFallbackMap(fallbackMap)
       , mShowOwned(0)
       , mEncoding(encoding)
       , mFontHeight(16)
@@ -1184,7 +1183,7 @@ namespace MWGui
         {
             _result = mTranslationDataStorage.translateCellName(tag.substr(tokenLength));
         }
-        else if (Gui::replaceTag(tag, _result, mFallbackMap))
+        else if (Gui::replaceTag(tag, _result))
         {
             return;
         }

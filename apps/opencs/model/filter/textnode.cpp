@@ -38,11 +38,11 @@ bool CSMFilter::TextNode::test (const CSMWorld::IdTableBase& table, int row,
     {
         int value = data.toInt();
 
-        std::vector<std::string> enums =
+        std::vector<std::pair<int,std::string>> enums =
             CSMWorld::Columns::getEnums (static_cast<CSMWorld::Columns::ColumnId> (mColumnId));
 
         if (value>=0 && value<static_cast<int> (enums.size()))
-            string = QString::fromUtf8 (enums[value].c_str());
+            string = QString::fromUtf8 (enums[value].second.c_str());
     }
     else if (data.type()==QVariant::Bool)
     {

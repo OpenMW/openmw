@@ -6,13 +6,13 @@
 
 namespace
 {
-    std::string getEnumValue(const std::vector<std::string> &values, int index)
+    std::string getEnumValue(const std::vector<std::pair<int,std::string>> &values, int index)
     {
         if (index < 0 || index >= static_cast<int>(values.size()))
         {
             return "";
         }
-        return values[index];
+        return values[index].second;
     }
 }
 

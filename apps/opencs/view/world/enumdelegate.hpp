@@ -65,7 +65,7 @@ namespace CSVWorld
             ///< \param names Array of char pointer with a 0-pointer as end mark
             /// \param allowNone Use value of -1 for "none selected" (empty string)
 
-            EnumDelegateFactory (const std::vector<std::string>& names, bool allowNone = false);
+            EnumDelegateFactory (const std::vector<std::pair<int,std::string>>& names, bool allowNone = false);
             /// \param allowNone Use value of -1 for "none selected" (empty string)
 
             virtual CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const;

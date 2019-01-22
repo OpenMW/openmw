@@ -140,10 +140,10 @@ namespace MWGui
         mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + MyGUI::utility::toString(level));
 
         std::string levelupdescription;
-        levelupdescription=world->getFallback()->getFallbackString("Level_Up_Level"+MyGUI::utility::toString(level));
+        levelupdescription = Fallback::Map::getString("Level_Up_Level"+MyGUI::utility::toString(level));
 
         if (levelupdescription == "")
-            levelupdescription=world->getFallback()->getFallbackString("Level_Up_Default");
+            levelupdescription = Fallback::Map::getString("Level_Up_Default");
 
         mLevelDescription->setCaption (levelupdescription);
 
