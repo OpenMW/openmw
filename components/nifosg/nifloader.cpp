@@ -5,6 +5,7 @@
 #include <osg/Geometry>
 #include <osg/Array>
 #include <osg/LOD>
+#include <osg/Switch>
 #include <osg/TexGen>
 #include <osg/ValueObject>
 
@@ -335,6 +336,13 @@ namespace NifOsg
             return lod;
         }
 
+        osg::ref_ptr<osg::Switch> handleSwitchNode(const Nif::NiSwitchNode* niSwitchNode)
+        {
+            osg::ref_ptr<osg::Switch> switchNode (new osg::Switch);
+            switchNode->setNewChildDefaultValue(false);
+            return switchNode;
+        }
+
         osg::ref_ptr<osg::Image> handleSourceTexture(const Nif::NiSourceTexture* st, Resource::ImageManager* imageManager)
         {
             if (!st)
@@ -591,6 +599,23 @@ namespace NifOsg
                 osg::ref_ptr<osg::LOD> lod = handleLodNode(niLodNode);
                 node->addChild(lod); // unsure if LOD should be above or below this node's transform
                 node = lod;
+            }
+
+            if (nifNode->recType == Nif::RC_NiSwitchNode)
+            {
+                const Nif::NiSwitchNode* niSwitchNode = static_cast<const Nif::NiSwitchNode*>(nifNode);
+                osg::ref_ptr<osg::Switch> switchNode = handleSwitchNode(niSwitchNode);
+                node->addChild(switchNode);
+                const Nif::NodeList &children = niSwitchNode->children;
+                for(size_t i = 0;i < children.length();++i)
+                {
+                    if(!children[i].empty())
+                        handleNode(children[i].getPtr(), switchNode, imageManager, boundTextures, animflags, skipMeshes, hasMarkers, isAnimated, textKeys, rootNode);
+                }
+
+                // show only first child by default
+                switchNode->setSingleChildOn(0);
+                return switchNode;
             }
 
             const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);

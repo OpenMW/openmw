@@ -807,6 +807,13 @@ void Optimizer::RemoveRedundantNodesVisitor::apply(osg::LOD& lod)
         traverse(*lod.getChild(i));
 }
 
+void Optimizer::RemoveRedundantNodesVisitor::apply(osg::Switch& switchNode)
+{
+    // We should keep all switch child nodes since they reflect different switch states.
+    for (unsigned int i=0; i<switchNode.getNumChildren(); ++i)
+        traverse(*switchNode.getChild(i));
+}
+
 void Optimizer::RemoveRedundantNodesVisitor::apply(osg::Group& group)
 {
     if (typeid(group)==typeid(osg::Group) &&
@@ -1860,6 +1867,12 @@ void Optimizer::MergeGroupsVisitor::apply(osg::LOD &lod)
 {
     // don't merge the direct children of the LOD because they are used to define each LOD level.
     traverse(lod);
+}
+
+void Optimizer::MergeGroupsVisitor::apply(osg::Switch &switchNode)
+{
+    // We should keep all switch child nodes since they reflect different switch states.
+    traverse(switchNode);
 }
 
 void Optimizer::MergeGroupsVisitor::apply(osg::Group &group)
