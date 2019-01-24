@@ -43,6 +43,7 @@ namespace MWGui
     void ItemWidget::registerComponents()
     {
         MyGUI::FactoryManager::getInstance().registerFactory<ItemWidget>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<SpellWidget>("Widget");
     }
 
     void ItemWidget::initialiseOverride()
@@ -151,6 +152,16 @@ namespace MWGui
             setFrame(backgroundTex, MyGUI::IntCoord(0,0,42,42));
 
         setIcon(ptr);
+    }
+
+    void SpellWidget::setSpellIcon(const std::string& icon)
+    {
+        if (mFrame)
+            mFrame->setImageTexture("");
+        if (mItemShadow)
+            mItemShadow->setImageTexture(icon);
+        if (mItem)
+            mItem->setImageTexture(icon);
     }
 
 }

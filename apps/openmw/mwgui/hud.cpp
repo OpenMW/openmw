@@ -417,8 +417,7 @@ namespace MWGui
         icon.insert(slashPos+1, "b_");
         icon = MWBase::Environment::get().getWindowManager()->correctIconPath(icon);
 
-        mSpellImage->setItem(MWWorld::Ptr());
-        mSpellImage->setIcon(icon);
+        mSpellImage->setSpellIcon(icon);
     }
 
     void HUD::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)

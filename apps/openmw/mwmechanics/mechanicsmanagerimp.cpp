@@ -236,7 +236,7 @@ namespace MWMechanics
     // mWatchedTimeToStartDrowning = -1 for correct drowning state check,
     // if stats.getTimeToStartDrowning() == 0 already on game start
     MechanicsManager::MechanicsManager()
-    : mWatchedTimeToStartDrowning(-1), mWatchedStatsEmpty (true), mUpdatePlayer (true), mClassSelected (false),
+    : mWatchedLevel(-1), mWatchedTimeToStartDrowning(-1), mWatchedStatsEmpty (true), mUpdatePlayer (true), mClassSelected (false),
       mRaceSelected (false), mAI(true)
     {
         //buildPlayer no longer here, needs to be done explicitly after all subsystems are up and running
@@ -361,7 +361,11 @@ namespace MWMechanics
                 }
             }
 
-            winMgr->setValue("level", stats.getLevel());
+            if(stats.getLevel() != mWatchedLevel)
+            {
+                mWatchedLevel = stats.getLevel();
+                winMgr->setValue("level", mWatchedLevel);
+            }
 
             mWatchedStatsEmpty = false;
 
@@ -377,10 +381,15 @@ namespace MWMechanics
             MWWorld::ContainerStoreIterator enchantItem = inv.getSelectedEnchantItem();
             if (enchantItem != inv.end())
                 winMgr->setSelectedEnchantItem(*enchantItem);
-            else if (!winMgr->getSelectedSpell().empty())
-                winMgr->setSelectedSpell(winMgr->getSelectedSpell(), int(MWMechanics::getSpellSuccessChance(winMgr->getSelectedSpell(), mWatched)));
             else
-                winMgr->unsetSelectedSpell();
+            {
+                const std::string& spell = winMgr->getSelectedSpell();
+                if (!spell.empty())
+                    winMgr->setSelectedSpell(spell, int(MWMechanics::getSpellSuccessChance(spell, mWatched)));
+                else
+                    winMgr->unsetSelectedSpell();
+            }
+
         }
 
         if (mUpdatePlayer)
