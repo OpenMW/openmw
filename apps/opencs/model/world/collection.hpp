@@ -17,6 +17,7 @@
 #include "collectionbase.hpp"
 #include "land.hpp"
 #include "landtexture.hpp"
+#include "ref.hpp"
 
 namespace CSMWorld
 {
@@ -258,6 +259,11 @@ namespace CSMWorld
         copy.mModified = getRecord(origin).get();
         copy.mState = RecordBase::State_ModifiedOnly;
         IdAccessorT().setId(copy.get(), destination);
+
+        if (type == UniversalId::Type_Reference) {
+            CSMWorld::CellRef* ptr = (CSMWorld::CellRef*) &copy.mModified;
+            ptr->mRefNum.mIndex = 0;
+        }
 
         int index = getAppendIndex(destination, type);
         insertRecord(copy, getAppendIndex(destination, type));

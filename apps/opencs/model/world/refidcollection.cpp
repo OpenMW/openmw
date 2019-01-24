@@ -128,13 +128,13 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     ActorColumns actorsColumns (nameColumns);
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiHello, ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiHello, ColumnBase::Display_UnsignedInteger8));
     actorsColumns.mHello = &mColumns.back();
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiFlee, ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiFlee, ColumnBase::Display_UnsignedInteger8));
     actorsColumns.mFlee = &mColumns.back();
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiFight, ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiFight, ColumnBase::Display_UnsignedInteger8));
     actorsColumns.mFight = &mColumns.back();
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiAlarm, ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiAlarm, ColumnBase::Display_UnsignedInteger8));
     actorsColumns.mAlarm = &mColumns.back();
 
     // Nested table
@@ -645,7 +645,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
         new RefIdColumn (Columns::ColumnId_LevelledItemType, CSMWorld::ColumnBase::Display_Boolean));
     mColumns.back().addColumn(
-        new RefIdColumn (Columns::ColumnId_LevelledItemChanceNone, CSMWorld::ColumnBase::Display_Integer));
+        new RefIdColumn (Columns::ColumnId_LevelledItemChanceNone, CSMWorld::ColumnBase::Display_UnsignedInteger8));
 
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));

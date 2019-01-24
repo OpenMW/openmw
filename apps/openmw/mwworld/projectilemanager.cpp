@@ -109,11 +109,10 @@ namespace
         
         if (projectileEffects.mList.size() > 1) // insert a VFX_Multiple projectile if there are multiple projectile effects
         {
-            std::ostringstream ID;
-            ID << "VFX_Multiple" << effects->mList.size();
+            const std::string ID = "VFX_Multiple" + std::to_string(effects->mList.size());
             std::vector<std::string>::iterator it;
             it = projectileIDs.begin();
-            it = projectileIDs.insert(it, ID.str());
+            it = projectileIDs.insert(it, ID);
         }
         return projectileEffects;
     }

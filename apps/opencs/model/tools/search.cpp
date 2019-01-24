@@ -77,14 +77,9 @@ void CSMTools::Search::searchRecordStateCell (const CSMWorld::IdTableBase *model
     {
         std::vector<std::string> states =
             CSMWorld::Columns::getEnums (CSMWorld::Columns::ColumnId_Modification);
-    
-        std::ostringstream message;
-        message << states.at (data);
 
-        std::ostringstream hint;
-        hint << "r: " << model->getColumnId (index.column());
-        
-        messages.add (id, message.str(), hint.str());
+        const std::string hint = "r: " + std::to_string(model->getColumnId(index.column()));
+        messages.add (id, states.at(data), hint);
     }
 }
 

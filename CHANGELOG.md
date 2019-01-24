@@ -1,7 +1,11 @@
 0.46.0
 ------
 
+    Bug #2987: Editor: some chance and AI data fields can overflow
     Bug #3623: Fix HiDPI on Windows
+    Bug #4329: Removed birthsign abilities are restored after reloading the save
+    Bug #4383: Bow model obscures crosshair when arrow is drawn
+    Bug #4411: Reloading a saved game while falling prevents damage in some cases
     Bug #4540: Rain delay when exiting water
     Bug #4701: PrisonMarker record is not hardcoded like other markers
     Bug #4714: Crash upon game load in the repair menu while the "Your repair failed!" message is active
@@ -11,11 +15,18 @@
     Bug #4745: Editor: Interior cell lighting field values are not displayed as colors
     Bug #4746: Non-solid player can't run or sneak
     Bug #4750: Sneaking doesn't work in first person view if the player is in attack ready state
+    Bug #4768: Fallback numerical value recovery chokes on invalid arguments
+    Bug #4775: Slowfall effect resets player jumping flag
+    Bug #4778: Interiors of Illusion puzzle in Sotha Sil Expanded mod is broken
+    Bug #4800: Standing collisions are not updated immediately when an object is teleported without a cell change
+    Bug #4803: Stray special characters before begin statement break script compilation
+    Bug #4804: Particle system with the "Has Sizes = false" causes an exception
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
     Feature #3610: Option to invert X axis
     Feature #4673: Weapon sheathing
     Feature #4730: Native animated containers support
+    Feature #4812: Support NiSwitchNode
     Task #4686: Upgrade media decoder to a more current FFmpeg API
 
 0.45.0

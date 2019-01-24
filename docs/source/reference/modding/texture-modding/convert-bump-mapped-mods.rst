@@ -237,9 +237,9 @@ Since we want the glory of normal mapping in our OpenMW setup, we will go with t
 #. OpenMW detects normal maps if they have the same name as the base diffuse texture, but with a *_n.dds* suffix. In this mod, the normal maps has a suffix of *_nm.dds*. Change all the files that ends with *_nm.dds* to instead end with *_n.dds*.
 #. Finally, `we are done`_!
 
-Since these models have one or two textures applied to them, the fix was not that time-consuming. 
-It gets worse when you have to fix a model that uses loads of textures. The principle is the same, 
-it just requires more manual work which is annoying and takes time.
+Since these models have one or two textures applied to them, the fix was not that time-consuming. The process continues to work for more complex models that use more textures, but looking through each category for texture effects and normal mapped textures rapidly becomes tedious. Luckily, NifSkope provides a feature to do the same automatically. 
+
+Rightclick in NifSkope to access the *Spells* dropdown menu, also available via the top bar, hover over the *Blocks* section, and `choose the action to Remove by ID`_. You can then input the RegEx expression ``^NiTextureEffect`` (directing it to remove any block whose name starts with "NiTextureEffect") to automatically remove all texture effect blocks within the NIF. This also has the helpful side effect of listing `all the blocks within the NIF in the bottom section`_, allowing you to additionally root out any blocks referencing *_nm.dds* textures without having to painstakingly open each category.  
 
 .. _`Netch Bump mapped`: https://www.nexusmods.com/morrowind/mods/42851/?
 .. _`Hlaalu Bump mapped`: https://www.nexusmods.com/morrowind/mods/42396/?
@@ -256,3 +256,5 @@ it just requires more manual work which is annoying and takes time.
 .. _Blocks: https://imgur.com/VmQC0WG
 .. _`no longer have shiny models`: https://imgur.com/vu1k7n1
 .. _`we are done`: https://imgur.com/yyZxlTw
+.. _`choose the action to Remove by ID`: https://imgur.com/a/qs2t0tC
+.. _`all the blocks within the NIF in the bottom section`: https://imgur.com/a/UFFNyWt

@@ -536,7 +536,7 @@ namespace MWScript
 
                     Interpreter::Type_Integer value = 0;
 
-                    if (ptr.getClass().getCreatureStats(ptr).getSpells().hasSpell(id))
+                    if (ptr.getClass().isActor() && ptr.getClass().getCreatureStats(ptr).getSpells().hasSpell(id))
                         value = 1;
 
                     runtime.push (value);

@@ -13,10 +13,10 @@ Debian:
   before_script:
     - export APT_CACHE_DIR=`pwd`/apt-cache && mkdir -pv $APT_CACHE_DIR
     - apt-get update -yq 
-    - apt-get -o dir::cache::archives="$APT_CACHE_DIR" install -y cmake libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libsdl2-dev libqt4-dev libopenal-dev libopenscenegraph-3.4-dev libunshield-dev libtinyxml-dev
+    - apt-get -o dir::cache::archives="$APT_CACHE_DIR" install -y cmake libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libboost-iostreams-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libsdl2-dev libqt4-dev libopenal-dev libopenscenegraph-3.4-dev libunshield-dev libtinyxml-dev
   # - apt-get install -y libmygui-dev libbullet-dev  # to be updated to latest below because stretch is too old
-    - curl -L http://ftp.us.debian.org/debian/pool/main/b/bullet/libbullet-dev_2.87+dfsg-3_amd64.deb -o libbullet-dev_2.87+dfsg-3_amd64.deb
-    - curl -L http://ftp.us.debian.org/debian/pool/main/b/bullet/libbullet2.87_2.87+dfsg-3_amd64.deb -o libbullet2.87_2.87+dfsg-3_amd64.deb
+    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/b/bullet/libbullet-dev_2.87+dfsg-2_amd64.deb -o libbullet-dev_2.87+dfsg-2_amd64.deb
+    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/b/bullet/libbullet2.87_2.87+dfsg-2_amd64.deb -o libbullet2.87_2.87+dfsg-2_amd64.deb
     - curl -L https://http.kali.org/pool/main/m/mygui/libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb -o libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb
     - curl -L https://http.kali.org/pool/main/m/mygui/libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb -o libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb
     - curl -L https://http.kali.org/pool/main/m/mygui/libmygui-dev_3.2.2+dfsg-1_amd64.deb -o libmygui-dev_3.2.2+dfsg-1_amd64.deb

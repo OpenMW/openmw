@@ -1,8 +1,5 @@
 #include "mechanicsmanagerimp.hpp"
 
-#include <limits.h>
-#include <set>
-
 #include <components/misc/rng.hpp>
 
 #include <components/esm/esmwriter.hpp>

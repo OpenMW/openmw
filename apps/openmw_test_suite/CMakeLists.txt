@@ -40,4 +40,13 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         add_definitions(--coverage)
         target_link_libraries(openmw_test_suite gcov)
     endif()
+
+    if (MSVC)
+        if (CMAKE_CL_64)
+            # Debug version of openmw_unit_tests needs increased number of sections beyond 2^16
+            # just like openmw and openmw-cs
+            set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
+        endif (CMAKE_CL_64)
+    endif (MSVC)
+
 endif()

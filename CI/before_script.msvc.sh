@@ -34,6 +34,8 @@ VS_VERSION=""
 NMAKE=""
 PLATFORM=""
 CONFIGURATION=""
+TEST_FRAMEWORK=""
+GOOGLE_INSTALL_ROOT=""
 
 while [ $# -gt 0 ]; do
 	ARGSTR=$1
@@ -78,6 +80,9 @@ while [ $# -gt 0 ]; do
 				CONFIGURATION=$1
 				shift ;;
 
+			t )
+				TEST_FRAMEWORK=true ;;
+				
 			h )
 				cat <<EOF
 Usage: $0 [-cdehkpuvV]
@@ -94,6 +99,8 @@ Options:
 		Keep the old build directory, default is to delete it.
 	-p <Win32/Win64>
 		Set the build platform, can also be set with environment variable PLATFORM.
+	-t 
+		Build unit tests / Google test 	
 	-u
 		Configure for unity builds.
 	-v <2013/2015/2017>
@@ -395,6 +402,16 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	download "SDL 2.0.7" \
 		"https://www.libsdl.org/release/SDL2-devel-2.0.7-VC.zip" \
 		"SDL2-2.0.7.zip"
+		
+	# Google test and mock
+	if [ ! -z $TEST_FRAMEWORK ]; then
+		echo "Google test 1.8.1..."
+		if [ -d googletest ]; then
+			printf "  Google test exists, skipping."
+		else
+			git clone -b release-1.8.1 https://github.com/google/googletest.git
+		fi
+	fi
 fi
 
 cd .. #/..
@@ -670,6 +687,52 @@ printf "SDL 2.0.7... "
 	add_runtime_dlls "$(pwd)/SDL2-2.0.7/lib/x${ARCHSUFFIX}/SDL2.dll"
 	echo Done.
 }
+cd $DEPS
+echo
+# Google Test and Google Mock
+if [ ! -z $TEST_FRAMEWORK ]; then
+	printf "Google test 1.8.1 ..."
+	
+	cd googletest
+	if [ ! -d build ]; then
+		mkdir build
+	fi
+	
+	cd build
+	
+	GOOGLE_INSTALL_ROOT="${DEPS_INSTALL}/GoogleTest"
+	if [ $CONFIGURATION == "Debug" ]; then
+			DEBUG_SUFFIX="d"
+		else
+			DEBUG_SUFFIX=""
+	fi
+		
+	if [ ! -d $GOOGLE_INSTALL_ROOT ]; then
+		
+		cmake .. -DCMAKE_BUILD_TYPE="${CONFIGURATION}" -DCMAKE_INSTALL_PREFIX="${GOOGLE_INSTALL_ROOT}" -DCMAKE_USE_WIN32_THREADS_INIT=1 -G "${GENERATOR}" -DBUILD_SHARED_LIBS=1
+		cmake --build . --config "${CONFIGURATION}"
+		cmake --build . --target install --config "${CONFIGURATION}"
+		
+		add_runtime_dlls "${GOOGLE_INSTALL_ROOT}\bin\gtest_main${DEBUG_SUFFIX}.dll"
+		add_runtime_dlls "${GOOGLE_INSTALL_ROOT}\bin\gtest${DEBUG_SUFFIX}.dll"
+		add_runtime_dlls "${GOOGLE_INSTALL_ROOT}\bin\gmock_main${DEBUG_SUFFIX}.dll"
+		add_runtime_dlls "${GOOGLE_INSTALL_ROOT}\bin\gmock${DEBUG_SUFFIX}.dll"
+	fi
+	
+	add_cmake_opts -DBUILD_UNITTESTS=yes
+	# FindGTest and FindGMock do not work perfectly on Windows
+	# but we can help them by telling them everything we know about installation
+	add_cmake_opts -DGMOCK_ROOT="$GOOGLE_INSTALL_ROOT"
+	add_cmake_opts -DGTEST_ROOT="$GOOGLE_INSTALL_ROOT"
+	add_cmake_opts -DGTEST_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gtest${DEBUG_SUFFIX}.lib"
+	add_cmake_opts -DGTEST_MAIN_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gtest_main${DEBUG_SUFFIX}.lib"
+	add_cmake_opts -DGMOCK_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gmock${DEBUG_SUFFIX}.lib"
+	add_cmake_opts -DGMOCK_MAIN_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gmock_main${DEBUG_SUFFIX}.lib"
+	add_cmake_opts -DGTEST_LINKED_AS_SHARED_LIBRARY=True
+	echo Done.
+	
+fi
+
 echo
 cd $DEPS_INSTALL/..
 echo

@@ -154,14 +154,23 @@ bool OMW::Engine::frame(float frametime)
                 mEnvironment.getStateManager()->endGame();
         }
 
+        // update physics
+        osg::Timer_t beforePhysicsTick = osg::Timer::instance()->tick();
+        if (mEnvironment.getStateManager()->getState()!=
+            MWBase::StateManager::State_NoGame)
+        {
+            mEnvironment.getWorld()->updatePhysics(frametime, guiActive);
+        }
+        osg::Timer_t afterPhysicsTick = osg::Timer::instance()->tick();
+
         // update world
-        osg::Timer_t beforePhysicsTick = osg::Timer::instance()->tick();;
+        osg::Timer_t beforeWorldTick = osg::Timer::instance()->tick();
         if (mEnvironment.getStateManager()->getState()!=
             MWBase::StateManager::State_NoGame)
         {
             mEnvironment.getWorld()->update(frametime, guiActive);
         }
-        osg::Timer_t afterPhysicsTick = osg::Timer::instance()->tick();
+        osg::Timer_t afterWorldTick = osg::Timer::instance()->tick();
 
         // update GUI
         mEnvironment.getWindowManager()->onFrame(frametime);
@@ -179,6 +188,10 @@ bool OMW::Engine::frame(float frametime)
         stats->setAttribute(frameNumber, "physics_time_begin", osg::Timer::instance()->delta_s(mStartTick, beforePhysicsTick));
         stats->setAttribute(frameNumber, "physics_time_taken", osg::Timer::instance()->delta_s(beforePhysicsTick, afterPhysicsTick));
         stats->setAttribute(frameNumber, "physics_time_end", osg::Timer::instance()->delta_s(mStartTick, afterPhysicsTick));
+
+        stats->setAttribute(frameNumber, "world_time_begin", osg::Timer::instance()->delta_s(mStartTick, beforeWorldTick));
+        stats->setAttribute(frameNumber, "world_time_taken", osg::Timer::instance()->delta_s(beforeWorldTick, afterWorldTick));
+        stats->setAttribute(frameNumber, "world_time_end", osg::Timer::instance()->delta_s(mStartTick, afterWorldTick));
 
         if (stats->collectStats("resource"))
         {
@@ -667,10 +680,12 @@ void OMW::Engine::go()
 
     statshandler->addUserStatsLine("Script", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
                                    "script_time_taken", 1000.0, true, false, "script_time_begin", "script_time_end", 10000);
-    statshandler->addUserStatsLine("Mechanics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+    statshandler->addUserStatsLine("Mech", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
                                    "mechanics_time_taken", 1000.0, true, false, "mechanics_time_begin", "mechanics_time_end", 10000);
-    statshandler->addUserStatsLine("Physics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+    statshandler->addUserStatsLine("Phys", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
                                    "physics_time_taken", 1000.0, true, false, "physics_time_begin", "physics_time_end", 10000);
+    statshandler->addUserStatsLine("World", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+                                   "world_time_taken", 1000.0, true, false, "world_time_begin", "world_time_end", 10000);
 
     mViewer->addEventHandler(statshandler);
 

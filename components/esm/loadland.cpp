@@ -1,5 +1,6 @@
 #include "loadland.hpp"
 
+#include <limits>
 #include <utility>
 
 #include "esmreader.hpp"
@@ -200,9 +201,9 @@ namespace ESM
             mLandData->mTextures[i] = 0;
         for (int i = 0; i < LAND_NUM_VERTS; ++i)
         {
-            mLandData->mColours[i*3+0] = -1;
-            mLandData->mColours[i*3+1] = -1;
-            mLandData->mColours[i*3+2] = -1;
+            mLandData->mColours[i*3+0] = 255;
+            mLandData->mColours[i*3+1] = 255;
+            mLandData->mColours[i*3+2] = 255;
         }
         mLandData->mUnk1 = 0;
         mLandData->mUnk2 = 0;
@@ -252,8 +253,8 @@ namespace ESM
         if (reader.isNextSub("VHGT")) {
             VHGT vhgt;
             if (condLoad(reader, flags, target->mDataLoaded, DATA_VHGT, &vhgt, sizeof(vhgt))) {
-                target->mMinHeight = FLT_MAX;
-                target->mMaxHeight = -FLT_MAX;
+                target->mMinHeight = std::numeric_limits<float>::max();
+                target->mMaxHeight = -std::numeric_limits<float>::max();
                 float rowOffset = vhgt.mHeightOffset;
                 for (int y = 0; y < LAND_SIZE; y++) {
                     rowOffset += vhgt.mHeightData[y * LAND_SIZE];

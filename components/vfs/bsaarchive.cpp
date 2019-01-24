@@ -1,18 +1,31 @@
 #include "bsaarchive.hpp"
+#include <components/bsa/compressedbsafile.hpp>
+#include <memory>
 
 namespace VFS
 {
 
-
 BsaArchive::BsaArchive(const std::string &filename)
 {
-    mFile.open(filename);
+    Bsa::BsaVersion bsaVersion = Bsa::CompressedBSAFile::detectVersion(filename);
 
-    const Bsa::BSAFile::FileList &filelist = mFile.getList();
+    if (bsaVersion == Bsa::BSAVER_COMPRESSED) {
+        mFile = std::unique_ptr<Bsa::CompressedBSAFile>(new Bsa::CompressedBSAFile());
+    }
+    else {
+        mFile = std::unique_ptr<Bsa::BSAFile>(new Bsa::BSAFile());
+    }
+
+    mFile->open(filename);
+
+    const Bsa::BSAFile::FileList &filelist = mFile->getList();
     for(Bsa::BSAFile::FileList::const_iterator it = filelist.begin();it != filelist.end();++it)
     {
-        mResources.push_back(BsaArchiveFile(&*it, &mFile));
+        mResources.push_back(BsaArchiveFile(&*it, mFile.get()));
     }
+}
+
+BsaArchive::~BsaArchive() {
 }
 
 void BsaArchive::listResources(std::map<std::string, File *> &out, char (*normalize_function)(char))

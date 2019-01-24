@@ -431,6 +431,12 @@ namespace MWScript
                     std::string effect = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
+                    if (!ptr.getClass().isActor())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
                     char *end;
                     long key = strtol(effect.c_str(), &end, 10);
                     if(key < 0 || key > 32767 || *end != '\0')
@@ -658,6 +664,12 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
                     std::string id = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
+
+                    if (!ptr.getClass().isActor())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
 
                     const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
                     runtime.push(stats.getActiveSpells().isSpellActive(id) || stats.getSpells().isSpellActive(id));

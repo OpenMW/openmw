@@ -110,7 +110,11 @@ QModelIndex CSMWorld::ResourceTable::parent (const QModelIndex& index) const
 
 QModelIndex CSMWorld::ResourceTable::getModelIndex (const std::string& id, int column) const
 {
-    return index (mResources->getIndex (id), column);
+    int row = mResources->searchId(id);
+    if (row != -1)
+        return index (row, column);
+
+    return QModelIndex();
 }
 
 int CSMWorld::ResourceTable::searchColumnIndex (Columns::ColumnId id) const

@@ -22,21 +22,6 @@ struct Door
 
     void blank();
     ///< Set record to default state (does not touch the ID).
-
-    Door(const std::string id, const std::string name, const std::string &model,
-         const std::string script, const std::string opensound, const std::string closesound)
-    : mId(id)
-    , mName(name)
-    , mModel(model)
-    , mScript(script)
-    , mOpenSound(opensound)
-    , mCloseSound(closesound)
-    {
-    }
-
-    Door()
-    {
-    }
 };
 }
 #endif

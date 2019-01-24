@@ -23,6 +23,7 @@ namespace ESM {
 
         mScale = 1.f;
         mHasAI = false;
+        mAiData.blank();
 
         bool hasName = false;
         bool hasNpdt = false;
@@ -160,7 +161,6 @@ namespace ESM {
         mSpells.mList.clear();
         mHasAI = false;
         mAiData.blank();
-        mAiData.mServices = 0;
         mAiPackage.mList.clear();
         mTransport.mList.clear();
     }

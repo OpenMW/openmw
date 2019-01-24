@@ -60,13 +60,6 @@ void wrap(float& rad)
         rad = std::fmod(rad-osg::PI, 2.0f*osg::PI)+osg::PI;
 }
 
-std::string toString(int num)
-{
-    std::ostringstream stream;
-    stream << num;
-    return stream.str();
-}
-
 std::string getBestAttack (const ESM::Weapon* weapon)
 {
     int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
@@ -235,13 +228,13 @@ public:
 std::string CharacterController::chooseRandomGroup (const std::string& prefix, int* num) const
 {
     int numAnims=0;
-    while (mAnimation->hasAnimation(prefix + toString(numAnims+1)))
+    while (mAnimation->hasAnimation(prefix + std::to_string(numAnims+1)))
         ++numAnims;
 
     int roll = Misc::Rng::rollDice(numAnims) + 1; // [1, numAnims]
     if (num)
         *num = roll;
-    return prefix + toString(roll);
+    return prefix + std::to_string(roll);
 }
 
 void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
@@ -783,7 +776,7 @@ void CharacterController::playDeath(float startpoint, CharacterState death)
         mCurrentDeath = "deathknockout";
         break;
     default:
-        mCurrentDeath = "death" + toString(death - CharState_Death1 + 1);
+        mCurrentDeath = "death" + std::to_string(death - CharState_Death1 + 1);
     }
     mDeathState = death;
 

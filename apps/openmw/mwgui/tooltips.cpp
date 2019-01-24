@@ -599,9 +599,7 @@ namespace MWGui
 
     std::string ToolTips::toString(const int value)
     {
-        std::ostringstream stream;
-        stream << value;
-        return stream.str();
+        return std::to_string(value);
     }
 
     std::string ToolTips::getWeightString(const float weight, const std::string& prefix)

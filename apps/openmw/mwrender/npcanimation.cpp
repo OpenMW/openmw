@@ -317,8 +317,9 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
         mWeaponSheathing = Settings::Manager::getBool("weapon sheathing", "Game");
 
     mViewMode = viewMode;
-    rebuild();
+    MWBase::Environment::get().getWorld()->scaleObject(mPtr, mPtr.getCellRef().getScale()); // apply race height after view change
 
+    rebuild();
     setRenderBin();
 }
 

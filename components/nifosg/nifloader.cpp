@@ -5,6 +5,7 @@
 #include <osg/Geometry>
 #include <osg/Array>
 #include <osg/LOD>
+#include <osg/Switch>
 #include <osg/TexGen>
 #include <osg/ValueObject>
 
@@ -335,6 +336,13 @@ namespace NifOsg
             return lod;
         }
 
+        osg::ref_ptr<osg::Switch> handleSwitchNode(const Nif::NiSwitchNode* niSwitchNode)
+        {
+            osg::ref_ptr<osg::Switch> switchNode (new osg::Switch);
+            switchNode->setNewChildDefaultValue(false);
+            return switchNode;
+        }
+
         osg::ref_ptr<osg::Image> handleSourceTexture(const Nif::NiSourceTexture* st, Resource::ImageManager* imageManager)
         {
             if (!st)
@@ -593,6 +601,23 @@ namespace NifOsg
                 node = lod;
             }
 
+            if (nifNode->recType == Nif::RC_NiSwitchNode)
+            {
+                const Nif::NiSwitchNode* niSwitchNode = static_cast<const Nif::NiSwitchNode*>(nifNode);
+                osg::ref_ptr<osg::Switch> switchNode = handleSwitchNode(niSwitchNode);
+                node->addChild(switchNode);
+                const Nif::NodeList &children = niSwitchNode->children;
+                for(size_t i = 0;i < children.length();++i)
+                {
+                    if(!children[i].empty())
+                        handleNode(children[i].getPtr(), switchNode, imageManager, boundTextures, animflags, skipMeshes, hasMarkers, isAnimated, textKeys, rootNode);
+                }
+
+                // show only first child by default
+                switchNode->setSingleChildOn(0);
+                return switchNode;
+            }
+
             const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
             if(ninode)
             {
@@ -822,7 +847,9 @@ namespace NifOsg
                 if (particle.vertex < int(particledata->colors.size()))
                     partcolor = particledata->colors.at(particle.vertex);
 
-                float size = particledata->sizes.at(particle.vertex) * partctrl->size;
+                float size = partctrl->size;
+                if (particle.vertex < int(particledata->sizes.size()))
+                    size *= particledata->sizes.at(particle.vertex);
 
                 created->setSizeRange(osgParticle::rangef(size, size));
                 box.expandBy(osg::BoundingSphere(position, size));
@@ -1092,13 +1119,12 @@ namespace NifOsg
                 const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[i].weights;
                 for(size_t j = 0;j < weights.size();j++)
                 {
-                    std::pair<unsigned short, float> indexWeight = std::make_pair(weights[j].vertex, weights[j].weight);
-                    influence.mWeights.insert(indexWeight);
+                    influence.mWeights.emplace_back(weights[j].vertex, weights[j].weight);
                 }
                 influence.mInvBindMatrix = data->bones[i].trafo.toMatrix();
                 influence.mBoundSphere = osg::BoundingSpheref(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
 
-                map->mMap.insert(std::make_pair(boneName, influence));
+                map->mData.emplace_back(boneName, influence);
             }
             rig->setInfluenceMap(map);
 

@@ -7,7 +7,6 @@
 
 namespace VFS
 {
-
     class BsaArchiveFile : public File
     {
     public:
@@ -23,15 +22,13 @@ namespace VFS
     {
     public:
         BsaArchive(const std::string& filename);
-
+        virtual ~BsaArchive();
         virtual void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char));
 
     private:
-        Bsa::BSAFile mFile;
-
+        std::unique_ptr<Bsa::BSAFile> mFile;
         std::vector<BsaArchiveFile> mResources;
     };
-
 }
 
 #endif
