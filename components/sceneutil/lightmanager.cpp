@@ -399,7 +399,7 @@ namespace SceneUtil
                 return false;
         }
 
-        if (!(cv->getCurrentCamera()->getCullMask() & mLightManager->getLightingMask()))
+        if (!(cv->getTraversalMask() & mLightManager->getLightingMask()))
             return false;
 
         // Possible optimizations:
