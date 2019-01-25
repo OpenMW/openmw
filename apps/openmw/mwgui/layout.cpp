@@ -58,7 +58,10 @@ namespace MWGui
 
     void Layout::setTitle(const std::string& title)
     {
-        static_cast<MyGUI::Window*>(mMainWidget)->setCaptionWithReplacing(title);
+        MyGUI::Window* window = static_cast<MyGUI::Window*>(mMainWidget);
+
+        if (window->getCaption() != title)
+            window->setCaptionWithReplacing(title);
     }
 
     MyGUI::Widget* Layout::getWidget(const std::string &_name)

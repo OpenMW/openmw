@@ -30,6 +30,8 @@ namespace MWMechanics
             DynamicStat<float> mWatchedMagicka;
             DynamicStat<float> mWatchedFatigue;
 
+            int mWatchedLevel;
+
             float mWatchedTimeToStartDrowning;
 
             bool mWatchedStatsEmpty;
