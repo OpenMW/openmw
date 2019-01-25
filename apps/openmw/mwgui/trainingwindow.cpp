@@ -169,8 +169,7 @@ namespace MWGui
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
         // advance time
-        MWBase::Environment::get().getMechanicsManager()->rest(false);
-        MWBase::Environment::get().getMechanicsManager()->rest(false);
+        MWBase::Environment::get().getMechanicsManager()->rest(2, false);
         MWBase::Environment::get().getWorld ()->advanceTime (2);
 
         setVisible(false);

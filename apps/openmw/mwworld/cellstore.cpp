@@ -966,7 +966,7 @@ namespace MWWorld
         }
     }
 
-    void CellStore::rest()
+    void CellStore::rest(double hours)
     {
         if (mState == State_Loaded)
         {
@@ -975,7 +975,7 @@ namespace MWWorld
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
                 {
-                    MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, true);
+                    MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, hours, true);
                 }
             }
             for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
@@ -983,7 +983,7 @@ namespace MWWorld
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
                 {
-                    MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, true);
+                    MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, hours, true);
                 }
             }
         }

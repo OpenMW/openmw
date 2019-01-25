@@ -232,7 +232,7 @@ namespace MWGui
     void WaitDialog::onWaitingProgressChanged(int cur, int total)
     {
         mProgressBar.setProgress(cur, total);
-        MWBase::Environment::get().getMechanicsManager()->rest(mSleeping);
+        MWBase::Environment::get().getMechanicsManager()->rest(1, mSleeping);
         MWBase::Environment::get().getWorld()->advanceTime(1);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();

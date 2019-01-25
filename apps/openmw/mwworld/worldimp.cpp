@@ -3266,9 +3266,9 @@ namespace MWWorld
         return closestMarker;
     }
 
-    void World::rest()
+    void World::rest(double hours)
     {
-        mCells.rest();
+        mCells.rest(hours);
     }
 
     void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,

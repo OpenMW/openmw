@@ -568,7 +568,7 @@ namespace MWMechanics
         creatureStats.setMagicka(magicka);
     }
 
-    void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, bool sleep)
+    void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, double hours, bool sleep)
     {
         MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
         if (stats.isDead())
@@ -582,11 +582,11 @@ namespace MWMechanics
             getRestorationPerHourOfSleep(ptr, health, magicka);
 
             DynamicStat<float> stat = stats.getHealth();
-            stat.setCurrent(stat.getCurrent() + health);
+            stat.setCurrent(stat.getCurrent() + health * hours);
             stats.setHealth(stat);
 
             stat = stats.getMagicka();
-            stat.setCurrent(stat.getCurrent() + magicka);
+            stat.setCurrent(stat.getCurrent() + magicka * hours);
             stats.setMagicka(stat);
         }
 
@@ -610,7 +610,7 @@ namespace MWMechanics
         float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
         x *= fEndFatigueMult * endurance;
 
-        fatigue.setCurrent (fatigue.getCurrent() + 3600 * x);
+        fatigue.setCurrent (fatigue.getCurrent() + 3600 * x * hours);
         stats.setFatigue (fatigue);
     }
 
@@ -1685,9 +1685,9 @@ namespace MWMechanics
         }
     }
 
-    void Actors::rest(bool sleep)
+    void Actors::rest(double hours, bool sleep)
     {
-        float duration = 3600.f / MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+        float duration = hours * 3600.f / MWBase::Environment::get().getWorld()->getTimeScaleFactor();
         const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
 
@@ -1697,7 +1697,7 @@ namespace MWMechanics
                 continue;
 
             if (!sleep || iter->first == player)
-                restoreDynamicStats(iter->first, sleep);
+                restoreDynamicStats(iter->first, hours, sleep);
 
             if ((!iter->first.getRefData().getBaseNode()) ||
                     (playerPos - iter->first.getRefData().getPosition().asVec3()).length2() > mActorsProcessingRange*mActorsProcessingRange)

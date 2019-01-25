@@ -78,8 +78,7 @@ namespace MWGui
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
 
-        for (int i=0; i<mDays*24; ++i)
-            MWBase::Environment::get().getMechanicsManager()->rest(true);
+        MWBase::Environment::get().getMechanicsManager()->rest(mDays * 24, true);
         MWBase::Environment::get().getWorld()->advanceTime(mDays * 24);
 
         std::set<int> skills;

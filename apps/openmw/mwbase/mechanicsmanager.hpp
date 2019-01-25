@@ -90,9 +90,9 @@ namespace MWBase
             virtual void setPlayerClass (const ESM::Class& class_) = 0;
             ///< Set player class to custom class.
 
-            virtual void restoreDynamicStats(MWWorld::Ptr actor, bool sleep) = 0;
+            virtual void restoreDynamicStats(MWWorld::Ptr actor, double hours, bool sleep) = 0;
 
-            virtual void rest(bool sleep) = 0;
+            virtual void rest(double hours, bool sleep) = 0;
             ///< If the player is sleeping or waiting, this should be called every hour.
             /// @param sleep is the player sleeping or waiting?
 
