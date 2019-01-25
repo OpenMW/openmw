@@ -21,6 +21,7 @@
     Bug #4800: Standing collisions are not updated immediately when an object is teleported without a cell change
     Bug #4803: Stray special characters before begin statement break script compilation
     Bug #4804: Particle system with the "Has Sizes = false" causes an exception
+    Bug #4820: Spell absorption is broken
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
     Feature #3610: Option to invert X axis
