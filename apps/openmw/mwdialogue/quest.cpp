@@ -41,19 +41,6 @@ namespace MWDialogue
 
     void Quest::setIndex (int index)
     {
-        const ESM::Dialogue *dialogue =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (mTopic);
-
-        for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
-            iter!=dialogue->mInfo.end(); ++iter)
-            if (iter->mData.mDisposition==index && iter->mQuestStatus!=ESM::DialInfo::QS_Name)
-            {
-                if (iter->mQuestStatus==ESM::DialInfo::QS_Finished)
-                    mFinished = true;
-                else if (iter->mQuestStatus==ESM::DialInfo::QS_Restart)
-                    mFinished = false;
-            }
-
         // The index must be set even if no related journal entry was found
         mIndex = index;
     }
@@ -81,8 +68,18 @@ namespace MWDialogue
         if (index==-1)
             throw std::runtime_error ("unknown journal entry for topic " + mTopic);
 
+        for (auto &info : dialogue->mInfo)
+        {
+            if (info.mData.mJournalIndex == index
+            && (info.mQuestStatus == ESM::DialInfo::QS_Finished || info.mQuestStatus == ESM::DialInfo::QS_Restart))
+            {
+                mFinished = (info.mQuestStatus == ESM::DialInfo::QS_Finished);
+                break;
+            }
+        }
+
         if (index > mIndex)
-            setIndex (index);
+            mIndex = index;
 
         for (TEntryIter iter (mEntries.begin()); iter!=mEntries.end(); ++iter)
             if (iter->mInfoId==entry.mInfoId)
