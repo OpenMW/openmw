@@ -501,8 +501,11 @@ namespace MWMechanics
 
             float magnitudeMult = 1;
 
-            if (!absorbed && target.getClass().isActor())
+            if (target.getClass().isActor())
             {
+                if (absorbed)
+                    continue;
+
                 bool isHarmful = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful;
                 // Reflect harmful effects
                 if (isHarmful && !reflected && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
