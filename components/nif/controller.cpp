@@ -139,7 +139,7 @@ namespace Nif
     {
         Controller::read(nif);
 
-        nif->getUShort(); // always 0
+        uvSet = nif->getUShort();
         data.read(nif);
     }
 
