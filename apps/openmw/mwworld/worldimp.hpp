@@ -337,6 +337,8 @@ namespace MWWorld
 
             int getCurrentWeather() const override;
 
+            unsigned int getNightDayMode() const override;
+
             int getMasserPhase() const override;
 
             int getSecundaPhase() const override;

@@ -19,6 +19,7 @@ namespace SceneUtil
 
     float makeOsgColorComponent (unsigned int value, unsigned int shift);
 
+    bool hasUserDescription(const osg::Node* node, const std::string pattern);
 }
 
 #endif

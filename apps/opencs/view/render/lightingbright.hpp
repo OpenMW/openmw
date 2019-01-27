@@ -17,7 +17,7 @@ namespace CSVRender
 
             LightingBright();
 
-            virtual void activate (osg::Group* rootNode);
+            virtual void activate (osg::Group* rootNode, bool /*isExterior*/);
 
             virtual void deactivate();
 

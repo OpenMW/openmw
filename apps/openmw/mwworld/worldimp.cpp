@@ -2024,6 +2024,11 @@ namespace MWWorld
         return mWeatherManager->getWeatherID();
     }
 
+    unsigned int World::getNightDayMode() const
+    {
+        return mWeatherManager->getNightDayMode();
+    }
+
     void World::changeWeather(const std::string& region, const unsigned int id)
     {
         mWeatherManager->changeWeather(region, id);
