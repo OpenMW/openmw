@@ -737,6 +737,20 @@ bool Optimizer::CombineStaticTransformsVisitor::removeTransforms(osg::Node* node
 // RemoveEmptyNodes.
 ////////////////////////////////////////////////////////////////////////////
 
+void Optimizer::RemoveEmptyNodesVisitor::apply(osg::Switch& switchNode)
+{
+    // We should keep all switch child nodes since they reflect different switch states.
+    for (unsigned int i=0; i<switchNode.getNumChildren(); ++i)
+        traverse(*switchNode.getChild(i));
+}
+
+void Optimizer::RemoveEmptyNodesVisitor::apply(osg::LOD& lod)
+{
+    // don't remove any direct children of the LOD because they are used to define each LOD level.
+    for (unsigned int i=0; i<lod.getNumChildren(); ++i)
+        traverse(*lod.getChild(i));
+}
+
 void Optimizer::RemoveEmptyNodesVisitor::apply(osg::Group& group)
 {
     if (group.getNumParents()>0)
@@ -1856,7 +1870,8 @@ bool Optimizer::MergeGeometryVisitor::mergePrimitive(osg::DrawElementsUInt& lhs,
 
 bool Optimizer::MergeGroupsVisitor::isOperationPermissible(osg::Group& node)
 {
-    return !node.asTransform() &&
+    return !node.asSwitch() &&
+           !node.asTransform() &&
            !node.getCullCallback() &&
            !node.getEventCallback() &&
            !node.getUpdateCallback() &&
