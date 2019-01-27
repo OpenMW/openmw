@@ -325,6 +325,7 @@ namespace NifOsg
         osg::ref_ptr<osg::LOD> handleLodNode(const Nif::NiLODNode* niLodNode)
         {
             osg::ref_ptr<osg::LOD> lod (new osg::LOD);
+            lod->setName(niLodNode->name);
             lod->setCenterMode(osg::LOD::USER_DEFINED_CENTER);
             lod->setCenter(niLodNode->lodCenter);
             for (unsigned int i=0; i<niLodNode->lodLevels.size(); ++i)
@@ -339,6 +340,7 @@ namespace NifOsg
         osg::ref_ptr<osg::Switch> handleSwitchNode(const Nif::NiSwitchNode* niSwitchNode)
         {
             osg::ref_ptr<osg::Switch> switchNode (new osg::Switch);
+            switchNode->setName(niSwitchNode->name);
             switchNode->setNewChildDefaultValue(false);
             return switchNode;
         }
