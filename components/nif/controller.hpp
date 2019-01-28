@@ -112,6 +112,7 @@ class NiUVController : public Controller
 {
 public:
     NiUVDataPtr data;
+    int uvSet;
 
     void read(NIFStream *nif);
     void post(NIFFile *nif);
