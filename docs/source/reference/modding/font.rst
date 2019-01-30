@@ -23,11 +23,12 @@ This is the recommended way to install replacement fonts.
 
 -	To replace the primary "Magic Cards" font:
 
-	#.	Download `Pelagiad <https://isaskar.github.io/Pelagiad/>`_ by Isak Larborn (aka Isaskar).
-	#.	Create ``Fonts`` folder at the location of your ``openmw.cfg``.
-	#.	Copy ``openmw_font.xml`` and ``Pelagiad.ttf`` files into the folder.
-	#.	If desired, you can now delete the original ``Magic_Cards.*`` files from your ``Data Files/Fonts`` directory.
-	#.	Pelagiad glyphs may appear to be pretty small, so open ``openmw.cfg`` and adjust the following settings as you deem necessary::
+	1.	Download `Pelagiad <https://isaskar.github.io/Pelagiad/>`_ by Isak Larborn (aka Isaskar).
+	2.	Create ``Fonts`` folder at the location of your ``openmw.cfg``.
+	3.	Copy ``openmw_font.xml`` and ``Pelagiad.ttf`` files into the folder.
+	4.	Either remove the ``MonoFont`` entry from the created ``openmw_font.xml`` or copy the ``DejaVuLGCSansMono.ttf`` to the ``Fonts`` folder (prefer latter option on Windows).
+	5.	If desired, you can now delete the original ``Magic_Cards.*`` files from your ``Data Files/Fonts`` directory.
+	6.	Pelagiad glyphs may appear to be pretty small, so open ``settings.cfg`` and adjust the following settings as you deem necessary::
 
 			[GUI]
 			font size = 17
@@ -35,9 +36,9 @@ This is the recommended way to install replacement fonts.
 
 -	You can also replace the Daedric font:
 
-	#.	Download `Ayembedt <https://github.com/georgd/OpenMW-Fonts>`_ by Georg Duffner.
-	#.	Install ``OMWAyembedt.otf`` into the ``Fonts`` folder.
-	#.	Add the following lines into ``openmw_font.xml``::
+	1.	Download `Ayembedt <https://github.com/georgd/OpenMW-Fonts>`_ by Georg Duffner.
+	2.	Install ``OMWAyembedt.otf`` into the ``Fonts`` folder.
+	3.	Add the following lines into ``openmw_font.xml``::
 
 			<Resource type="ResourceTrueTypeFont" name="Daedric">
 				<Property key="Source" value="OMWAyembedt.otf"/>
@@ -51,7 +52,7 @@ This is the recommended way to install replacement fonts.
 				</Codes>
 			</Resource>
 
-	#.	This font is missing a few glyphs (mostly punctuation), but it has all the primary glyphs. If desired, you can now delete the original ``daedric.*`` files from your ``Data Files/Fonts`` directory.
+	4.	This font is missing a few glyphs (mostly punctuation), but it has all the primary glyphs. If desired, you can now delete the original ``daedric.*`` files from your ``Data Files/Fonts`` directory.
 
 Any Resolution or Size properties in the file have no effect because the engine settings override them.
 
@@ -62,15 +63,15 @@ Pre-0.45.0 way
 
 -	To replace the primary "Magic Cards" font:
 
-	#.	Download `Pelagiad <https://isaskar.github.io/Pelagiad/>`_ by Isak Larborn (aka Isaskar).
-	#.	Install the ``openmw_font.xml`` file into ``resources/mygui/openmw_font.xml`` in your OpenMW installation.
-	#.	Copy ``Pelagiad.ttf`` into ``resources/mygui/`` as well.
-	#.	If desired, you can now delete the original ``Magic_Cards.*`` files from your ``Data Files/Fonts`` directory.
+	1.	Download `Pelagiad <https://isaskar.github.io/Pelagiad/>`_ by Isak Larborn (aka Isaskar).
+	2.	Install the ``openmw_font.xml`` file into ``resources/mygui/openmw_font.xml`` in your OpenMW installation.
+	3.	Copy ``Pelagiad.ttf`` into ``resources/mygui/`` as well.
+	4.	If desired, you can now delete the original ``Magic_Cards.*`` files from your ``Data Files/Fonts`` directory.
 -	You can also replace the Daedric font:
 
-	#.	Download `Ayembedt <https://github.com/georgd/OpenMW-Fonts>`_ by Georg Duffner.
-	#.	Install ``OMWAyembedt.otf`` into ``/resources/mygui/`` folder in your OpenMW installation.
-	#.	Add the following lines to ``openmw_font.xml``::
+	1.	Download `Ayembedt <https://github.com/georgd/OpenMW-Fonts>`_ by Georg Duffner.
+	2.	Install ``OMWAyembedt.otf`` into ``/resources/mygui/`` folder in your OpenMW installation.
+	3.	Add the following lines to ``openmw_font.xml``::
 
 			<Resource type="ResourceTrueTypeFont" name="Daedric">
 				<Property key="Source" value="OMWAyembedt.otf"/>
@@ -86,12 +87,12 @@ Pre-0.45.0 way
 				</Codes>
 			</Resource>
 
-	#.	This font is missing a few glyphs (mostly punctuation), but it has all the primary glyphs. If desired, you can now delete the original ``daedric.*`` files from your ``Data Files/Fonts`` directory.
+	4.	This font is missing a few glyphs (mostly punctuation), but it has all the primary glyphs. If desired, you can now delete the original ``daedric.*`` files from your ``Data Files/Fonts`` directory.
 
 -	Another replacement for the Daedric font is `Oblivion <http://www.uesp.net/wiki/File:Obliviontt.zip>`_ by Dongle.
 
-	#.	Install the ``Oblivion.ttf`` file into ``resources/mygui/``.
-	#.	The ``openmw_font.xml`` entry is::
+	1.	Install the ``Oblivion.ttf`` file into ``resources/mygui/``.
+	2.	The ``openmw_font.xml`` entry is::
 
 			<Resource type="ResourceTrueTypeFont" name="Daedric">
 				<Property key="Source" value="Oblivion.ttf"/>
