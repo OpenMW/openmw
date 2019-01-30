@@ -519,6 +519,10 @@ namespace CSMWorld
         RaceDataPtr raceData = getRaceData(npc.mRace);
         data->reset_data(id, "", false, !npc.isMale(), raceData);
 
+        // Add head and hair
+        data->setPart(ESM::PRT_Head, npc.mHead, 0);
+        data->setPart(ESM::PRT_Hair, npc.mHair, 0);
+
         // Add inventory items
         for (auto& item : npc.mInventory.mList)
         {
@@ -526,10 +530,6 @@ namespace CSMWorld
             std::string itemId = item.mItem.toString();
             addNpcItem(itemId, data);
         }
-
-        // Add head and hair
-        data->setPart(ESM::PRT_Head, npc.mHead, 0);
-        data->setPart(ESM::PRT_Hair, npc.mHair, 0);
     }
 
     void ActorAdapter::addNpcItem(const std::string& itemId, ActorDataPtr data)
@@ -563,6 +563,10 @@ namespace CSMWorld
                     partId = part.mMale;
 
                 data->setPart(partType, partId, priority);
+
+                // An another vanilla quirk: hide hairs if an item replaces Head part
+                if (partType == ESM::PRT_Head)
+                    data->setPart(ESM::PRT_Hair, "", priority);
             }
         };
 
