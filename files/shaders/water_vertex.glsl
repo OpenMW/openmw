@@ -22,5 +22,5 @@ void main(void)
 
     depthPassthrough = gl_Position.z;
 
-    setupShadowCoords(gl_ModelViewMatrix * gl_Vertex);
+    setupShadowCoords(gl_ModelViewMatrix * gl_Vertex, normalize((gl_NormalMatrix * gl_Normal).xyz));
 }

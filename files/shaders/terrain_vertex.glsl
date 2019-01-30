@@ -25,9 +25,10 @@ void main(void)
 
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_ClipVertex = viewPos;
+    
+    vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
 
 #if !PER_PIXEL_LIGHTING
-    vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
     lighting = doLighting(viewPos.xyz, viewNormal, gl_Color, shadowDiffuseLighting);
 #else
     passColor = gl_Color;
@@ -37,5 +38,5 @@ void main(void)
 
     uv = gl_MultiTexCoord0.xy;
 
-    setupShadowCoords(viewPos);
+    setupShadowCoords(viewPos, viewNormal);
 }

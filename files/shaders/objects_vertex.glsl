@@ -103,5 +103,5 @@ void main(void)
     passViewPos = viewPos.xyz;
     passNormal = gl_Normal.xyz;
 
-    setupShadowCoords(viewPos);
+    setupShadowCoords(viewPos, viewNormal);
 }

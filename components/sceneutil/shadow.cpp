@@ -125,6 +125,10 @@ namespace SceneUtil
         else
             definesWithShadows["perspectiveShadowMaps"] = "0";
 
+        definesWithShadows["disableNormalOffsetShadows"] = Settings::Manager::getFloat("normal offset distance", "Shadows") == 0.0 ? "1" : "0";
+
+        definesWithShadows["shadowNormalOffset"] = std::to_string(Settings::Manager::getFloat("normal offset distance", "Shadows"));
+
         return definesWithShadows;
     }
 
@@ -139,6 +143,10 @@ namespace SceneUtil
         definesWithShadows["useShadowDebugOverlay"] = "0";
 
         definesWithShadows["perspectiveShadowMaps"] = "0";
+
+        definesWithShadows["enableNormalOffsetShadows"] = "0";
+
+        definesWithShadows["shadowNormalOffset"] = "0.0";
 
         return definesWithShadows;
     }
