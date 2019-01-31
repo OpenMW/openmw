@@ -103,27 +103,20 @@ namespace SceneUtil
             return getShadowsDisabledDefines();
 
         Shader::ShaderManager::DefineMap definesWithShadows;
-        definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("1")));
+
+        definesWithShadows["shadows_enabled"] = "1";
+
         for (unsigned int i = 0; i < mShadowSettings->getNumShadowMapsPerLight(); ++i)
             definesWithShadows["shadow_texture_unit_list"] += std::to_string(i) + ",";
         // remove extra comma
         definesWithShadows["shadow_texture_unit_list"] = definesWithShadows["shadow_texture_unit_list"].substr(0, definesWithShadows["shadow_texture_unit_list"].length() - 1);
 
-        if (Settings::Manager::getBool("allow shadow map overlap", "Shadows"))
-            definesWithShadows["shadowMapsOverlap"] = "1";
-        else
-            definesWithShadows["shadowMapsOverlap"] = "0";
+        definesWithShadows["shadowMapsOverlap"] = Settings::Manager::getBool("allow shadow map overlap", "Shadows") ? "1" : "0";
 
-        if (Settings::Manager::getBool("enable debug overlay", "Shadows"))
-            definesWithShadows["useShadowDebugOverlay"] = "1";
-        else
-            definesWithShadows["useShadowDebugOverlay"] = "0";
+        definesWithShadows["useShadowDebugOverlay"] = Settings::Manager::getBool("enable debug overlay", "Shadows") ? "1" : "0";
 
         // switch this to reading settings if it's ever exposed to the user
-        if (mShadowSettings->getShadowMapProjectionHint() == ShadowSettings::PERSPECTIVE_SHADOW_MAP)
-            definesWithShadows["perspectiveShadowMaps"] = "1";
-        else
-            definesWithShadows["perspectiveShadowMaps"] = "0";
+        definesWithShadows["perspectiveShadowMaps"] = mShadowSettings->getShadowMapProjectionHint() == ShadowSettings::PERSPECTIVE_SHADOW_MAP ? "1" : "0";
 
         definesWithShadows["disableNormalOffsetShadows"] = Settings::Manager::getFloat("normal offset distance", "Shadows") == 0.0 ? "1" : "0";
 
@@ -135,7 +128,9 @@ namespace SceneUtil
     Shader::ShaderManager::DefineMap ShadowManager::getShadowsDisabledDefines()
     {
         Shader::ShaderManager::DefineMap definesWithoutShadows;
-        definesWithoutShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("0")));
+
+        definesWithoutShadows["shadows_enabled"] = "0";
+
         definesWithoutShadows["shadow_texture_unit_list"] = "";
 
         definesWithoutShadows["shadowMapsOverlap"] = "0";
@@ -150,6 +145,7 @@ namespace SceneUtil
 
         return definesWithoutShadows;
     }
+
     void ShadowManager::enableIndoorMode()
     {
         if (Settings::Manager::getBool("enable indoor shadows", "Shadows"))
@@ -157,6 +153,7 @@ namespace SceneUtil
         else
             mShadowTechnique->disableShadows();
     }
+
     void ShadowManager::enableOutdoorMode()
     {
         if (mEnableShadows)
