@@ -144,7 +144,7 @@ namespace SceneUtil
 
         definesWithShadows["perspectiveShadowMaps"] = "0";
 
-        definesWithShadows["enableNormalOffsetShadows"] = "0";
+        definesWithShadows["disableNormalOffsetShadows"] = "0";
 
         definesWithShadows["shadowNormalOffset"] = "0.0";
 
