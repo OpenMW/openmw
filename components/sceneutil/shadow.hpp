@@ -4,7 +4,6 @@
 #include <osgShadow/ShadowSettings>
 #include <osgShadow/ShadowedScene>
 
-#include <components/terrain/quadtreeworld.hpp>
 #include <components/shader/shadermanager.hpp>
 
 #include "mwshadowtechnique.hpp"

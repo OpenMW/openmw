@@ -1,11 +1,6 @@
 #include "shadow.hpp"
 
 #include <osgShadow/ShadowedScene>
-#include <osg/CullFace>
-#include <osg/Geode>
-#include <osg/io_utils>
-#include <osgDB/FileUtils>
-#include <osgDB/ReadFile>
 
 #include <components/settings/settings.hpp>
 
