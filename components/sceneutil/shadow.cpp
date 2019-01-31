@@ -134,21 +134,21 @@ namespace SceneUtil
 
     Shader::ShaderManager::DefineMap ShadowManager::getShadowsDisabledDefines()
     {
-        Shader::ShaderManager::DefineMap definesWithShadows;
-        definesWithShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("0")));
-        definesWithShadows["shadow_texture_unit_list"] = "";
+        Shader::ShaderManager::DefineMap definesWithoutShadows;
+        definesWithoutShadows.insert(std::make_pair(std::string("shadows_enabled"), std::string("0")));
+        definesWithoutShadows["shadow_texture_unit_list"] = "";
 
-        definesWithShadows["shadowMapsOverlap"] = "0";
+        definesWithoutShadows["shadowMapsOverlap"] = "0";
 
-        definesWithShadows["useShadowDebugOverlay"] = "0";
+        definesWithoutShadows["useShadowDebugOverlay"] = "0";
 
-        definesWithShadows["perspectiveShadowMaps"] = "0";
+        definesWithoutShadows["perspectiveShadowMaps"] = "0";
 
-        definesWithShadows["disableNormalOffsetShadows"] = "0";
+        definesWithoutShadows["disableNormalOffsetShadows"] = "0";
 
-        definesWithShadows["shadowNormalOffset"] = "0.0";
+        definesWithoutShadows["shadowNormalOffset"] = "0.0";
 
-        return definesWithShadows;
+        return definesWithoutShadows;
     }
     void ShadowManager::enableIndoorMode()
     {
