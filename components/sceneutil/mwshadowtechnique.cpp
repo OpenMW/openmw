@@ -849,7 +849,7 @@ void SceneUtil::MWShadowTechnique::disableFrontFaceCulling()
     _useFrontFaceCulling = false;
 
     if (_shadowCastingStateSet)
-        _shadowCastingStateSet->removeAttribute(osg::StateAttribute::CULLFACE);
+        _shadowCastingStateSet->setMode(GL_CULL_FACE, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
 }
 
 void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & shaderManager)
@@ -1462,12 +1462,16 @@ void MWShadowTechnique::createShaders()
         //    In this case we will draw them in their entirety.
 
         if (_useFrontFaceCulling)
+        {
             _shadowCastingStateSet->setAttribute(new osg::CullFace(osg::CullFace::FRONT), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
-        // make sure GL_CULL_FACE is off by default
-        // we assume that if object has cull face attribute set to back
-        // it will also set cull face mode ON so no need for override
-        _shadowCastingStateSet->setMode( GL_CULL_FACE, osg::StateAttribute::OFF );
+            // make sure GL_CULL_FACE is off by default
+            // we assume that if object has cull face attribute set to back
+            // it will also set cull face mode ON so no need for override
+            _shadowCastingStateSet->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+        }
+        else
+            _shadowCastingStateSet->setMode(GL_CULL_FACE, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
     }
 
     _polygonOffset = new osg::PolygonOffset(_polygonOffsetFactor, _polygonOffsetUnits);
