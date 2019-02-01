@@ -9,12 +9,7 @@
 #include <QWidget>
 #include <QEvent>
 
-<<<<<<< HEAD
 #ifndef Q_MOC_RUN
-=======
-#include <osg/Group>
-
->>>>>>> First step towards new data structure
 #include "../../model/world/data.hpp"
 #include "../../model/world/land.hpp"
 
