@@ -139,7 +139,7 @@ void CSVRender::TerrainSelection::update()
 
     // Color
     osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array{};
-    colors->push_back(osg::Vec4f(0.f, 0.5f, 0.f, 1.f));
+    colors->push_back(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
 
     newGeometry->setColorArray(colors, osg::Array::Binding::BIND_OVERALL);
 
@@ -159,12 +159,12 @@ void CSVRender::TerrainSelection::update()
             const auto south = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x, y - 1));
             const auto east = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x + 1, y));
             const auto west = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x - 1, y));
-            const int textureSizeToLandSizeModifier = 4; // To-do: Calculate modifier according to landSize and landTextureSize
+            const int textureSizeToLandSizeModifier = (landSize - 1) / landTextureSize;
 
             // Nudge selection by 1/4th of a texture size, similar how blendmaps are nudged
             const float NudgePercentage = 0.25f;
             const int nudgeOffset = (cellSize / landTextureSize) * NudgePercentage;
-            const int landHeightsNudge = (cellSize / landSize)/64; // Does this work with all land size configurations?
+            const int landHeightsNudge = (cellSize / landSize)/ (landSize - 1); // Does this work with all land size configurations?
 
             // calculate global vertex coordinates at selection box corners
             int x1 = x * textureSizeToLandSizeModifier + landHeightsNudge;
@@ -172,30 +172,45 @@ void CSVRender::TerrainSelection::update()
             int y1 = y * textureSizeToLandSizeModifier - landHeightsNudge;
             int y2 = y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier - landHeightsNudge;
 
-            // Draw straigth edges
-            int landHeightX1Y1 = calculateLandHeight(x1, y1);
-            int landHeightX1Y2 = calculateLandHeight(x1, y2);
-            int landHeightX2Y1 = calculateLandHeight(x2, y1);
-            int landHeightX2Y2 = calculateLandHeight(x2, y2);
-
+            // Draw edges (check all sides, draw lines between vertices, +1 height to keep lines above ground)
             if (north == mSelection.end()) {
-                vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, landHeightX1Y2+5));
-                vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, landHeightX2Y2+5));
+                for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
+                {
+                    double drawPreviousX = toWorldCoords(x)+(i-1)*(cellSize / (landSize - 1));
+                    double drawCurrentX = toWorldCoords(x)+i*(cellSize / (landSize - 1));
+                    vertices->push_back(osg::Vec3f(drawPreviousX + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, calculateLandHeight(x1+(i-1), y2)+2));
+                    vertices->push_back(osg::Vec3f(drawCurrentX + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, calculateLandHeight(x1+i, y2)+2));
+                }
             }
 
             if (south == mSelection.end()) {
-                vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, toWorldCoords(y) - nudgeOffset, landHeightX1Y1+5));
-                vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, toWorldCoords(y) - nudgeOffset, landHeightX2Y1+5));
+                for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
+                {
+                    double drawPreviousX = toWorldCoords(x)+(i-1)*(cellSize / (landSize - 1));
+                    double drawCurrentX = toWorldCoords(x)+i*(cellSize / (landSize - 1));
+                    vertices->push_back(osg::Vec3f(drawPreviousX + nudgeOffset, toWorldCoords(y) - nudgeOffset, calculateLandHeight(x1+(i-1), y1)+2));
+                    vertices->push_back(osg::Vec3f(drawCurrentX + nudgeOffset, toWorldCoords(y) - nudgeOffset, calculateLandHeight(x1+i, y1)+2));
+                }
             }
 
             if (east == mSelection.end()) {
-                vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, toWorldCoords(y) - nudgeOffset, landHeightX2Y1+5));
-                vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, landHeightX2Y2+5));
+                for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
+                {
+                    double drawPreviousY = toWorldCoords(y)+(i-1)*(cellSize / (landSize - 1));
+                    double drawCurrentY = toWorldCoords(y)+i*(cellSize / (landSize - 1));
+                    vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, drawPreviousY - nudgeOffset, calculateLandHeight(x2, y1+(i-1))+2));
+                    vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, drawCurrentY - nudgeOffset, calculateLandHeight(x2, y1+i)+2));
+                }
             }
 
             if (west == mSelection.end()) {
-                vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, toWorldCoords(y) - nudgeOffset, landHeightX1Y1+5));
-                vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, landHeightX1Y2+5));
+                for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
+                {
+                    double drawPreviousY = toWorldCoords(y)+(i-1)*(cellSize / (landSize - 1));
+                    double drawCurrentY = toWorldCoords(y)+i*(cellSize / (landSize - 1));
+                    vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, drawPreviousY - nudgeOffset, calculateLandHeight(x1, y1+(i-1))+2));
+                    vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, drawCurrentY - nudgeOffset, calculateLandHeight(x1, y1+i)+2));
+                }
             }
         }
     }
