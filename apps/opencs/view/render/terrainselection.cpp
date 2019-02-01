@@ -103,8 +103,8 @@ void CSVRender::TerrainSelection::deactivate()
 
 std::pair<int, int> CSVRender::TerrainSelection::toTextureCoords(osg::Vec3d worldPos) const
 {
-    const double xd {worldPos.x() * landTextureSize / cellSize+(landTextureSize / cellSize)/4};
-    const double yd {worldPos.y() * landTextureSize / cellSize+(landTextureSize / cellSize)/4};
+    const double xd {worldPos.x() * landTextureSize / cellSize - 0.25f};
+    const double yd {worldPos.y() * landTextureSize / cellSize + 0.25f};
 
     const auto x = static_cast<int>(std::floor(xd));
     const auto y = static_cast<int>(std::floor(yd));
@@ -114,8 +114,8 @@ std::pair<int, int> CSVRender::TerrainSelection::toTextureCoords(osg::Vec3d worl
 
 std::pair<int, int> CSVRender::TerrainSelection::toVertexCoords(osg::Vec3d worldPos) const
 {
-    const double xd (worldPos.x() * landSize / cellSize+(landSize / cellSize)/4);
-    const double yd (worldPos.y() * landSize / cellSize+(landSize / cellSize)/4);
+    const double xd (worldPos.x() * landSize / cellSize);
+    const double yd (worldPos.y() * landSize / cellSize);
 
     const auto x = static_cast<int>(std::floor(xd));
     const auto y = static_cast<int>(std::floor(yd));
