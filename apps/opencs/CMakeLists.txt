@@ -89,15 +89,7 @@ opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
     previewwidget editmode instancemode instanceselectionmode instancemovemode
     orbitcameramode pathgridmode selectionmode pathgridselectionmode cameracontroller
-<<<<<<< HEAD
-<<<<<<< HEAD
-    cellwater terraintexturemode actor
-=======
-    cellwater terraintexturemode terrainselection terraintextureselection
->>>>>>> Terrain texture selection
-=======
-    cellwater terraintexturemode terrainselection
->>>>>>> First step towards new data structure
+    cellwater terraintexturemode actor terrainselection terraintextureselection
     )
 
 opencs_units_noqt (view/render
