@@ -106,7 +106,7 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
     CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
     int index = landtexturesCollection.searchId(mBrushTexture);
 
-    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit == true)
+    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit)
     {
         undoStack.beginMacro ("Edit texture records");
         if(allowLandTextureEditing(mCellId)==true)
@@ -128,7 +128,7 @@ void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResu
 
 void CSVRender::TerrainTextureMode::secondarySelectPressed(const WorldspaceHitResult& hit)
 {
-    if(hit.hit == true)
+    if(hit.hit)
     {
         mTerrainTextureSelection->toggleSelect(hit);
     }
@@ -156,7 +156,7 @@ bool CSVRender::TerrainTextureMode::primaryEditStartDrag (const QPoint& pos)
     if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
     {
         undoStack.beginMacro ("Edit texture records");
-        if(allowLandTextureEditing(mCellId)==true && hit.hit == true)
+        if(allowLandTextureEditing(mCellId)==true && hit.hit)
         {
             undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, mCellId));
             editTerrainTextureGrid(hit);
@@ -205,7 +205,7 @@ void CSVRender::TerrainTextureMode::drag (const QPoint& pos, int diffX, int diff
         CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
         int index = landtexturesCollection.searchId(mBrushTexture);
 
-        if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit == true)
+        if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit)
         {
             editTerrainTextureGrid(hit);
         }
