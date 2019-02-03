@@ -641,8 +641,6 @@ namespace MWRender
             mAnimationTimePtr[i].reset(new AnimationTime);
 
         mLightListCallback = new SceneUtil::LightListCallback;
-
-        mUseAdditionalSources = Settings::Manager::getBool ("use additional anim sources", "Game");
     }
 
     Animation::~Animation()
@@ -754,7 +752,8 @@ namespace MWRender
 
         addSingleAnimSource(kfname, baseModel);
 
-        if (mUseAdditionalSources)
+        static const bool useAdditionalSources = Settings::Manager::getBool ("use additional anim sources", "Game");
+        if (useAdditionalSources)
             loadAllAnimationsInFolder(kfname, baseModel);
     }
 
