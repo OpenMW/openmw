@@ -106,7 +106,7 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
     CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
     int index = landtexturesCollection.searchId(mBrushTexture);
 
-    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit)
+    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit && hit.tag == 0)
     {
         undoStack.beginMacro ("Edit texture records");
         if(allowLandTextureEditing(mCellId)==true)
@@ -120,7 +120,7 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
 
 void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResult& hit)
 {
-    if(hit.hit)
+    if(hit.hit && hit.tag == 0)
     {
         mTerrainTextureSelection->selectTerrainTexture(hit);
     }
@@ -128,7 +128,7 @@ void CSVRender::TerrainTextureMode::primarySelectPressed(const WorldspaceHitResu
 
 void CSVRender::TerrainTextureMode::secondarySelectPressed(const WorldspaceHitResult& hit)
 {
-    if(hit.hit)
+    if(hit.hit && hit.tag == 0)
     {
         mTerrainTextureSelection->toggleSelect(hit);
     }
@@ -153,10 +153,10 @@ bool CSVRender::TerrainTextureMode::primaryEditStartDrag (const QPoint& pos)
     CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
     int index = landtexturesCollection.searchId(mBrushTexture);
 
-    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
+    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit && hit.tag == 0)
     {
         undoStack.beginMacro ("Edit texture records");
-        if(allowLandTextureEditing(mCellId)==true && hit.hit)
+        if(allowLandTextureEditing(mCellId)==true)
         {
             undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, mCellId));
             editTerrainTextureGrid(hit);
@@ -175,7 +175,7 @@ bool CSVRender::TerrainTextureMode::primarySelectStartDrag (const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
     mDragMode = InteractionType_PrimarySelect;
-    if (!hit.hit) {
+    if (!hit.hit || hit.tag != 0) {
         mDragMode = InteractionType_None;
         return false;
     }
@@ -187,7 +187,7 @@ bool CSVRender::TerrainTextureMode::secondarySelectStartDrag (const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
     mDragMode = InteractionType_SecondarySelect;
-    if (!hit.hit) {
+    if (!hit.hit || hit.tag != 0) {
         mDragMode = InteractionType_None;
         return false;
     }
@@ -205,7 +205,7 @@ void CSVRender::TerrainTextureMode::drag (const QPoint& pos, int diffX, int diff
         CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
         int index = landtexturesCollection.searchId(mBrushTexture);
 
-        if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit)
+        if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit && hit.tag == 0)
         {
             editTerrainTextureGrid(hit);
         }
@@ -214,13 +214,13 @@ void CSVRender::TerrainTextureMode::drag (const QPoint& pos, int diffX, int diff
     if (mDragMode == InteractionType_PrimarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        if (hit.hit) mTerrainTextureSelection->selectTerrainTexture(hit);
+        if (hit.hit && hit.tag == 0) mTerrainTextureSelection->selectTerrainTexture(hit);
     }
 
     if (mDragMode == InteractionType_SecondarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        if (hit.hit) mTerrainTextureSelection->onlyAddSelect(hit);
+        if (hit.hit && hit.tag == 0) mTerrainTextureSelection->onlyAddSelect(hit);
     }
 }
 
