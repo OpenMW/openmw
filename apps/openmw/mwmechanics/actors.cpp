@@ -26,6 +26,8 @@
 
 #include "../mwmechanics/aibreathe.hpp"
 
+#include "../mwrender/vismask.hpp"
+
 #include "spellcasting.hpp"
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
@@ -1461,7 +1463,7 @@ namespace MWMechanics
                     continue;
                 }
                 else if (!isPlayer)
-                    iter->first.getRefData().getBaseNode()->setNodeMask(1<<3);
+                    iter->first.getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Actor);
 
                 if (iter->first.getClass().getCreatureStats(iter->first).isParalyzed())
                     ctrl->skipAnim();
