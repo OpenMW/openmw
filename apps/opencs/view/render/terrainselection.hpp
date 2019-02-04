@@ -76,8 +76,9 @@ namespace CSVRender
             osg::Group* mParentNode;
             WorldspaceWidget *mWorldspaceWidget;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
+            osg::ref_ptr<osg::Geometry> mGeometry;
 
-            osg::ref_ptr<osg::Geode> mGeode;
+            osg::ref_ptr<osg::Group> mSelectionNode;
             std::vector<std::pair<int, int>> mSelection; // Global cell_selection coordinate in either vertex or texture units
     };
 }

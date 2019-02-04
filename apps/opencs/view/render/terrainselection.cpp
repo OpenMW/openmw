@@ -3,7 +3,6 @@
 #include <algorithm>
 
 #include <osg/Group>
-#include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/PositionAttitudeTransform>
 
@@ -25,22 +24,10 @@ namespace
 CSVRender::TerrainSelection::TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget):
 mParentNode(parentNode), mWorldspaceWidget (worldspaceWidget)
 {
-    osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+    mGeometry = new osg::Geometry();
 
-    // Color
-    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array{};
-    colors->push_back(osg::Vec4f(0.f, 0.5f, 0.f, 1.f));
-
-    geometry->setColorArray(colors, osg::Array::Binding::BIND_OVERALL);
-
-    // Primitive
-    osg::ref_ptr<osg::DrawArrays> drawArrays = new osg::DrawArrays{osg::PrimitiveSet::Mode::LINES};
-
-    geometry->addPrimitiveSet(drawArrays);
-    geometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::Values::OFF);
-
-    mGeode = new osg::Geode();
-    mGeode->addDrawable(geometry);
+    mSelectionNode = new osg::Group();
+    mSelectionNode->addChild(mGeometry);
 
     activate();
 }
@@ -93,12 +80,12 @@ void CSVRender::TerrainSelection::toggleSelect(const WorldspaceHitResult& hit)
 
 void CSVRender::TerrainSelection::activate()
 {
-    mParentNode->addChild(mGeode);
+    mParentNode->addChild(mSelectionNode);
 }
 
 void CSVRender::TerrainSelection::deactivate()
 {
-    mParentNode->removeChild(mGeode);
+    mParentNode->removeChild(mSelectionNode);
 }
 
 std::pair<int, int> CSVRender::TerrainSelection::toTextureCoords(osg::Vec3d worldPos) const
@@ -135,15 +122,8 @@ size_t CSVRender::TerrainSelection::landIndex(int x, int y)
 
 void CSVRender::TerrainSelection::update()
 {
-    osg::ref_ptr<osg::Geometry> newGeometry = new osg::Geometry();
-
-    // Color
-    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array{};
-    colors->push_back(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-
-    newGeometry->setColorArray(colors, osg::Array::Binding::BIND_OVERALL);
-
-    newGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::Values::OFF);
+    mSelectionNode->removeChild(mGeometry);
+    mGeometry = new osg::Geometry();
 
     const osg::ref_ptr<osg::Vec3Array> vertices (new osg::Vec3Array);
 
@@ -215,15 +195,15 @@ void CSVRender::TerrainSelection::update()
         }
     }
 
-    newGeometry->setVertexArray(vertices);
+    mGeometry->setVertexArray(vertices);
 
     osg::ref_ptr<osg::DrawArrays> drawArrays = new osg::DrawArrays(osg::PrimitiveSet::LINES);
 
     drawArrays->setCount(vertices->size());
 
-    newGeometry->addPrimitiveSet(drawArrays);
+    mGeometry->addPrimitiveSet(drawArrays);
 
-    mGeode->setDrawable(0, newGeometry);
+    mSelectionNode->addChild(mGeometry);
 }
 
 int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global vertex coordinates
