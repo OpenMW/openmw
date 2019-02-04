@@ -273,8 +273,6 @@ protected:
 
     osg::ref_ptr<SceneUtil::LightListCallback> mLightListCallback;
 
-    bool mUseAdditionalSources;
-
     const NodeMap& getNodeMap() const;
 
     /* Sets the appropriate animations on the bone groups based on priority.
