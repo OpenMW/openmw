@@ -2,7 +2,7 @@
 
 brew update
 brew unlink cmake || true
-brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/a3b64391ebace30b84de8e7997665a1621c0b2c0/Formula/cmake.rb
+brew install https://gist.githubusercontent.com/nikolaykasyanov/f36da224bdef42025e480f99fa21a82d/raw/7dd8b5ed2750198757f81c6bc6456e03541999bd/cmake.rb
 brew switch cmake 3.12.4
 brew outdated pkgconfig || brew upgrade pkgconfig
 brew install qt
