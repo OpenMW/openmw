@@ -195,6 +195,7 @@ SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSyste
     , mResourceSystem(resourceSystem)
     , mLighting(nullptr)
     , mHasDefaultAmbient(false)
+    , mIsExterior(true)
     , mPrevMouseX(0)
     , mPrevMouseY(0)
     , mCamPositionSet(false)
@@ -250,7 +251,7 @@ void SceneWidget::setLighting(Lighting *lighting)
         mLighting->deactivate();
 
     mLighting = lighting;
-    mLighting->activate (mRootNode);
+    mLighting->activate (mRootNode, mIsExterior);
 
     osg::Vec4f ambient = mLighting->getAmbientColour(mHasDefaultAmbient ? &mDefaultAmbient : 0);
     setAmbient(ambient);
@@ -313,6 +314,11 @@ void SceneWidget::setDefaultAmbient (const osg::Vec4f& colour)
     mHasDefaultAmbient = true;
 
     setAmbient(mLighting->getAmbientColour(&mDefaultAmbient));
+}
+
+void SceneWidget::setExterior (bool isExterior)
+{
+    mIsExterior = isExterior;
 }
 
 void SceneWidget::mouseMoveEvent (QMouseEvent *event)

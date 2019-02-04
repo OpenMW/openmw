@@ -1,5 +1,7 @@
 #include "util.hpp"
 
+#include <osg/Node>
+
 namespace SceneUtil
 {
 
@@ -51,6 +53,24 @@ osg::Vec4f colourFromRGBA(unsigned int value)
 float makeOsgColorComponent(unsigned int value, unsigned int shift)
 {
     return float((value >> shift) & 0xFFu) / 255.0f;
+}
+
+bool hasUserDescription(const osg::Node* node, const std::string pattern)
+{
+    if (node == nullptr)
+        return false;
+
+    const osg::UserDataContainer* udc = node->getUserDataContainer();
+    if (udc && udc->getNumDescriptions() > 0)
+    {
+        for (auto& descr : udc->getDescriptions())
+        {
+            if (descr == pattern)
+                return true;
+        }
+    }
+
+    return false;
 }
 
 }

@@ -11,9 +11,11 @@
 
 // resource
 #include <components/debug/debuglog.hpp>
+#include <components/misc/constants.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
+#include <components/sceneutil/util.hpp>
 
 // particle
 #include <osgParticle/ParticleSystem>
@@ -608,6 +610,10 @@ namespace NifOsg
                 const Nif::NiSwitchNode* niSwitchNode = static_cast<const Nif::NiSwitchNode*>(nifNode);
                 osg::ref_ptr<osg::Switch> switchNode = handleSwitchNode(niSwitchNode);
                 node->addChild(switchNode);
+
+                if (niSwitchNode->name == Constants::NightDayLabel && !SceneUtil::hasUserDescription(rootNode, Constants::NightDayLabel))
+                    rootNode->getOrCreateUserDataContainer()->addDescription(Constants::NightDayLabel);
+
                 const Nif::NodeList &children = niSwitchNode->children;
                 for(size_t i = 0;i < children.length();++i)
                 {

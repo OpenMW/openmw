@@ -89,6 +89,8 @@ namespace CSVRender
             void setDefaultAmbient (const osg::Vec4f& colour);
             ///< \note The actual ambient colour may differ based on lighting settings.
 
+            void setExterior (bool isExterior);
+
         protected:
             void setLighting (Lighting *lighting);
             ///< \attention The ownership of \a lighting is not transferred to *this.
@@ -104,6 +106,7 @@ namespace CSVRender
 
             osg::Vec4f mDefaultAmbient;
             bool mHasDefaultAmbient;
+            bool mIsExterior;
             LightingDay mLightingDay;
             LightingNight mLightingNight;
             LightingBright mLightingBright;

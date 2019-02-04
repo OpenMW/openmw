@@ -11,7 +11,7 @@ namespace CSVRender
 
             LightingNight();
 
-            virtual void activate (osg::Group* rootNode);
+            virtual void activate (osg::Group* rootNode, bool isExterior);
             virtual void deactivate();
 
             virtual osg::Vec4f getAmbientColour(osg::Vec4f *defaultAmbient);

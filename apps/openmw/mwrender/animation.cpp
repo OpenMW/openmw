@@ -9,6 +9,7 @@
 #include <osg/BlendFunc>
 #include <osg/Material>
 #include <osg/PositionAttitudeTransform>
+#include <osg/Switch>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>
@@ -33,6 +34,7 @@
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/util.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -89,6 +91,47 @@ namespace
 
     private:
         std::vector<osg::ref_ptr<osg::Node> > mToRemove;
+    };
+
+    class DayNightCallback : public osg::NodeCallback
+    {
+    public:
+        DayNightCallback() : mCurrentState(0)
+        {
+        }
+
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            unsigned int state = MWBase::Environment::get().getWorld()->getNightDayMode();
+            const unsigned int newState = node->asGroup()->getNumChildren() > state ? state : 0;
+
+            if (newState != mCurrentState)
+            {
+                mCurrentState = newState;
+                node->asSwitch()->setSingleChildOn(mCurrentState);
+            }
+
+            traverse(node, nv);
+        }
+
+    private:
+        unsigned int mCurrentState;
+    };
+
+    class AddSwitchCallbacksVisitor : public osg::NodeVisitor
+    {
+    public:
+        AddSwitchCallbacksVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        { }
+
+        virtual void apply(osg::Switch &switchNode)
+        {
+            if (switchNode.getName() == Constants::NightDayLabel)
+                switchNode.addUpdateCallback(new DayNightCallback());
+
+            traverse(switchNode);
+        }
     };
 
     NifOsg::TextKeyMap::const_iterator findGroupStart(const NifOsg::TextKeyMap &keys, const std::string &groupname)
@@ -1932,6 +1975,12 @@ namespace MWRender
             RemoveParticlesVisitor visitor;
             mObjectRoot->accept(visitor);
             visitor.remove();
+        }
+
+        if (SceneUtil::hasUserDescription(mObjectRoot, Constants::NightDayLabel))
+        {
+            AddSwitchCallbacksVisitor visitor;
+            mObjectRoot->accept(visitor);
         }
     }
 

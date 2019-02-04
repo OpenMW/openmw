@@ -32,6 +32,7 @@
     Feature #4673: Weapon sheathing
     Feature #4730: Native animated containers support
     Feature #4812: Support NiSwitchNode
+    Feature #4836: Daytime node switch
     Task #4686: Upgrade media decoder to a more current FFmpeg API
 
 0.45.0
