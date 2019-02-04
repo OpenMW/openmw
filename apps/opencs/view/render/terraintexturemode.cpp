@@ -47,7 +47,8 @@ CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceW
     mBrushShape(0),
     mTextureBrushScenetool(0),
     mDragMode(InteractionType_None),
-    mParentNode(parentNode)
+    mParentNode(parentNode),
+    mIsEditing(false)
 {
 }
 
@@ -156,6 +157,7 @@ bool CSVRender::TerrainTextureMode::primaryEditStartDrag (const QPoint& pos)
     if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit && hit.tag == 0)
     {
         undoStack.beginMacro ("Edit texture records");
+        mIsEditing = true;
         if(allowLandTextureEditing(mCellId)==true)
         {
             undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, mCellId));
@@ -235,7 +237,11 @@ void CSVRender::TerrainTextureMode::dragCompleted(const QPoint& pos) {
 
         if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
         {
-             undoStack.endMacro();
+             if (mIsEditing == true)
+             {
+                 undoStack.endMacro();
+                 mIsEditing = false;
+             }
         }
     }
 }

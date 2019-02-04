@@ -100,6 +100,7 @@ namespace CSVRender
             CSVWidget::SceneToolTextureBrush *mTextureBrushScenetool;
             int mDragMode;
             osg::Group* mParentNode;
+            bool mIsEditing;
             std::unique_ptr<TerrainSelection> mTerrainTextureSelection;
 
             const int cellSize {ESM::Land::REAL_SIZE};
