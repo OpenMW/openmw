@@ -338,6 +338,14 @@ namespace CSMWorld
             ColumnId_LandColoursIndex = 304,
             ColumnId_LandTexturesIndex = 305,
 
+            ColumnId_RankName = 306,
+            ColumnId_FactionRanks = 307,
+            ColumnId_FactionPrimSkill = 308,
+            ColumnId_FactionFavSkill = 309,
+            ColumnId_FactionRep = 310,
+            ColumnId_FactionAttrib1 = 311,
+            ColumnId_FactionAttrib2 = 312,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,
