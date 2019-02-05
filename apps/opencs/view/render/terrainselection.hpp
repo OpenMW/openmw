@@ -21,26 +21,13 @@ namespace CSVRender
     struct WorldspaceHitResult;
     class WorldspaceWidget;
 
-    // should TerrainSelection know about its dependencies?
-    enum class TerrainSelectionType {
-        Texture
-    };
-
-    // class with functionality common to
-    // different terrain selection types
+    // class with functionality common to different terrain selection types
     class TerrainSelection
     {
         public:
 
             TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget);
-
-            TerrainSelection(const TerrainSelection&) = delete;
-            TerrainSelection& operator=(const TerrainSelection&) = delete;
-
-            TerrainSelection(TerrainSelection&&) = delete;
-            TerrainSelection& operator=(TerrainSelection&&) = delete;
-
-            virtual ~TerrainSelection();
+            ~TerrainSelection();
 
             void selectTerrainTexture(const WorldspaceHitResult&);
             void onlyAddSelect(const WorldspaceHitResult&);

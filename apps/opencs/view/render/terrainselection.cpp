@@ -215,26 +215,8 @@ void CSVRender::TerrainSelection::update()
 
 int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global vertex coordinates
 {
-    int cellX(0);
-    int cellY(0);
-
-    if (x >= 0)
-    {
-        cellX = std::floor(x / (landSize - 1));
-    }
-    if (y >= 0)
-    {
-        cellY = std::floor(y / (landSize - 1));
-    }
-    if (x < 0)
-    {
-        cellX = std::trunc(x / (landSize - 1)) - 1;
-    }
-    if (y < 0)
-    {
-        cellY = std::trunc(y / (landSize - 1)) - 1;
-    }
-
+    int cellX = std::floor((1.0f*x / (landSize - 1)));
+    int cellY = std::floor((1.0f*y / (landSize - 1)));
     int localX = x - cellX * (landSize - 1);
     int localY = y - cellY * (landSize - 1);
 

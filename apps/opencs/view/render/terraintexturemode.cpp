@@ -467,30 +467,11 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                 }
                 else
                 {
-                    int cellXDifference = 0;
-                    int cellYDifference = 0;
-                    int xInOtherCell = xHitInCell + value.first;
-                    int yInOtherCell = yHitInCell + value.second;
-                    if (xHitInCell + value.first > 15)
-                    {
-                        cellXDifference = (xHitInCell + value.first)/landTextureSize;
-                        xInOtherCell = xHitInCell + value.first - cellXDifference * landTextureSize;
-                    }
-                    if (yHitInCell + value.second > 15)
-                    {
-                        cellYDifference = (yHitInCell + value.second)/landTextureSize;
-                        yInOtherCell = yHitInCell + value.second - cellYDifference * landTextureSize;
-                    }
-                    if (xHitInCell + value.first < 0)
-                    {
-                        cellXDifference = (xHitInCell + value.first)/landTextureSize-1;
-                        xInOtherCell = xHitInCell + value.first - cellXDifference * landTextureSize;
-                    }
-                    if (yHitInCell + value.second < 0)
-                    {
-                        cellYDifference = (yHitInCell + value.second)/landTextureSize-1;
-                        yInOtherCell = yHitInCell + value.second - cellYDifference * landTextureSize;
-                    }
+                    int cellXDifference = std::floor(1.0f*(xHitInCell + value.first)/landTextureSize);
+                    int cellYDifference = std::floor(1.0f*(yHitInCell + value.second)/landTextureSize);
+                    int xInOtherCell = xHitInCell + value.first - cellXDifference * landTextureSize;
+                    int yInOtherCell = yHitInCell + value.second - cellYDifference * landTextureSize;
+
                     std::string cellId = CSMWorld::CellCoordinates::generateId(cellX+cellXDifference, cellY+cellYDifference);
                     if (allowLandTextureEditing(cellId)==true)
                     {
@@ -519,8 +500,8 @@ void CSVRender::TerrainTextureMode::pushEditToCommand(CSMWorld::LandTexturesColu
     QModelIndex index(landTable.getModelIndex (cellId, landTable.findColumnIndex (CSMWorld::Columns::ColumnId_LandTexturesIndex)));
 
     QUndoStack& undoStack = document.getUndoStack();
-    undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, cellId));
     undoStack.push (new CSMWorld::ModifyCommand(landTable, index, changedLand));
+    undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, cellId));
 }
 
 void CSVRender::TerrainTextureMode::createTexture(std::string textureFileName)
