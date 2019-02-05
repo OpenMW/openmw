@@ -325,13 +325,13 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
 
     if (mBrushShape == 0)
     {
-        CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(mCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
-        CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
+        CSMWorld::LandTexturesColumn::DataType newTerrainPointer = landTable.data(landTable.getModelIndex(mCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+        CSMWorld::LandTexturesColumn::DataType newTerrain(newTerrainPointer);
 
         if(allowLandTextureEditing(mCellId)==true)
         {
-            mNew[yHitInCell*landTextureSize+xHitInCell] = brushInt;
-            pushEditToCommand(mNew, document, landTable, mCellId);
+            newTerrain[yHitInCell*landTextureSize+xHitInCell] = brushInt;
+            pushEditToCommand(newTerrain, document, landTable, mCellId);
         }
     }
 
@@ -354,8 +354,8 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                 iteratedCellId = "#" + std::to_string(i_cell) + " " + std::to_string(j_cell);
                 if(allowLandTextureEditing(iteratedCellId)==true)
                 {
-                    CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(iteratedCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
-                    CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
+                    CSMWorld::LandTexturesColumn::DataType newTerrainPointer = landTable.data(landTable.getModelIndex(iteratedCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+                    CSMWorld::LandTexturesColumn::DataType newTerrain(newTerrainPointer);
                     for(int i = 0; i < landTextureSize; i++)
                     {
                         for(int j = 0; j < landTextureSize; j++)
@@ -363,7 +363,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
 
                            if (i_cell == cellX && j_cell == cellY && abs(i-xHitInCell) < r && abs(j-yHitInCell) < r)
                             {
-                                mNew[j*landTextureSize+i] = brushInt;
+                                newTerrain[j*landTextureSize+i] = brushInt;
                             }
                             else
                             {
@@ -375,11 +375,11 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                                 if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
                                 if (i_cell == cellX) distanceX = abs(i-xHitInCell);
                                 if (j_cell == cellY) distanceY = abs(j-yHitInCell);
-                                if (distanceX < r && distanceY < r) mNew[j*landTextureSize+i] = brushInt;
+                                if (distanceX < r && distanceY < r) newTerrain[j*landTextureSize+i] = brushInt;
                             }
                         }
                     }
-                    pushEditToCommand(mNew, document, landTable, iteratedCellId);
+                    pushEditToCommand(newTerrain, document, landTable, iteratedCellId);
                 }
             }
         }
@@ -404,8 +404,8 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                 iteratedCellId = "#" + std::to_string(i_cell) + " " + std::to_string(j_cell);
                 if(allowLandTextureEditing(iteratedCellId)==true)
                 {
-                    CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(iteratedCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
-                    CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
+                    CSMWorld::LandTexturesColumn::DataType newTerrainPointer = landTable.data(landTable.getModelIndex(iteratedCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+                    CSMWorld::LandTexturesColumn::DataType newTerrain(newTerrainPointer);
                     for(int i = 0; i < landTextureSize; i++)
                     {
                         for(int j = 0; j < landTextureSize; j++)
@@ -422,7 +422,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                                 if (i_cell == cellX) distanceX = abs(i-xHitInCell);
                                 if (j_cell == cellY) distanceY = abs(j-yHitInCell);
                                 distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
-                                if (distance < rf) mNew[j*landTextureSize+i] = brushInt;
+                                if (distance < rf) newTerrain[j*landTextureSize+i] = brushInt;
                             }
                             else
                             {
@@ -435,11 +435,11 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                                 if (i_cell == cellX) distanceX = abs(i-xHitInCell);
                                 if (j_cell == cellY) distanceY = abs(j-yHitInCell);
                                 distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
-                                if (distance < rf) mNew[j*landTextureSize+i] = brushInt;
+                                if (distance < rf) newTerrain[j*landTextureSize+i] = brushInt;
                             }
                         }
                     }
-                    pushEditToCommand(mNew, document, landTable, iteratedCellId);
+                    pushEditToCommand(newTerrain, document, landTable, iteratedCellId);
                 }
             }
         }
@@ -447,8 +447,8 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
 
     if (mBrushShape == 3)
     {
-        CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(mCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
-        CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
+        CSMWorld::LandTexturesColumn::DataType newTerrainPointer = landTable.data(landTable.getModelIndex(mCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+        CSMWorld::LandTexturesColumn::DataType newTerrain(newTerrainPointer);
 
         if(allowLandTextureEditing(mCellId)==true && !mCustomBrushShape.empty())
         {
@@ -456,7 +456,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
             {
                 if(yHitInCell + value.second >= 0 && yHitInCell + value.second <= 15 && xHitInCell + value.first >= 0 && xHitInCell + value.first <= 15)
                 {
-                    mNew[(yHitInCell+value.second)*landTextureSize+xHitInCell+value.first] = brushInt;
+                    newTerrain[(yHitInCell+value.second)*landTextureSize+xHitInCell+value.first] = brushInt;
                 }
                 else
                 {
@@ -487,14 +487,14 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                     std::string cellId = "#" + std::to_string(cellX+cellXDifference) + " " + std::to_string(cellY+cellYDifference);
                     if (allowLandTextureEditing(cellId)==true)
                     {
-                        CSMWorld::LandTexturesColumn::DataType mPointerOtherCell = landTable.data(landTable.getModelIndex(cellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
-                        CSMWorld::LandTexturesColumn::DataType mNewOtherCell(mPointerOtherCell);
-                        mNewOtherCell[yInOtherCell*landTextureSize+xInOtherCell] = brushInt;
-                        pushEditToCommand(mNewOtherCell, document, landTable, cellId);
+                        CSMWorld::LandTexturesColumn::DataType newTerrainPointerOtherCell = landTable.data(landTable.getModelIndex(cellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+                        CSMWorld::LandTexturesColumn::DataType newTerrainOtherCell(newTerrainPointerOtherCell);
+                        newTerrainOtherCell[yInOtherCell*landTextureSize+xInOtherCell] = brushInt;
+                        pushEditToCommand(newTerrainOtherCell, document, landTable, cellId);
                     }
                 }
             }
-            pushEditToCommand(mNew, document, landTable, mCellId);
+            pushEditToCommand(newTerrain, document, landTable, mCellId);
         }
     }
 
