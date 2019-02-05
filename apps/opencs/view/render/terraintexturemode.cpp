@@ -447,7 +447,23 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
 
     if (mBrushShape == 3)
     {
-      // Not implemented
+        CSMWorld::LandTexturesColumn::DataType mPointer = landTable.data(landTable.getModelIndex(mCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+        CSMWorld::LandTexturesColumn::DataType mNew(mPointer);
+
+        if(allowLandTextureEditing(mCellId)==true && !mCustomBrushShape.empty())
+        {
+            for(auto const& value: mCustomBrushShape)
+            {
+                if(yHitInCell + value.second >= 0 && yHitInCell + value.second <= 15)
+                {
+                    if(xHitInCell + value.first >= 0 && xHitInCell + value.first <= 15)
+                    {
+                        mNew[(yHitInCell+value.second)*landTextureSize+xHitInCell+value.first] = brushInt;
+                    }
+                }
+            }
+            pushEditToCommand(mNew, document, landTable, mCellId);
+        }
     }
 
 }
@@ -597,6 +613,33 @@ void CSVRender::TerrainTextureMode::setBrushSize(int brushSize)
 void CSVRender::TerrainTextureMode::setBrushShape(int brushShape)
 {
     mBrushShape = brushShape;
+
+    //Set custom brush shape
+    if (mBrushShape == 3 && !mTerrainTextureSelection->getTerrainSelection().empty())
+    {
+        auto terrainSelection = mTerrainTextureSelection->getTerrainSelection();
+        int selectionCenterX = 0;
+        int selectionCenterY = 0;
+        int selectionAmount = 0;
+
+        for(auto const& value: terrainSelection)
+        {
+            selectionCenterX = selectionCenterX + value.first;
+            selectionCenterY = selectionCenterY + value.second;
+            ++selectionAmount;
+        }
+        selectionCenterX = selectionCenterX / selectionAmount;
+        selectionCenterY = selectionCenterY / selectionAmount;
+
+        mCustomBrushShape.clear();
+        std::pair<int, int> differentialPos {};
+        for(auto const& value: terrainSelection)
+        {
+            differentialPos.first = value.first - selectionCenterX;
+            differentialPos.second = value.second - selectionCenterY;
+            mCustomBrushShape.push_back(differentialPos);
+        }
+    }
 }
 
 void CSVRender::TerrainTextureMode::setBrushTexture(std::string brushTexture)
