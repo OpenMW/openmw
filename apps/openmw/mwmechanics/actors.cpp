@@ -1350,7 +1350,10 @@ namespace MWMechanics
                         player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
                 }
 
-                if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
+                // For dead actors we need to remove looping spell particles
+                if (iter->first.getClass().getCreatureStats(iter->first).isDead())
+                    ctrl->updateContinuousVfx();
+                else
                 {
                     bool cellChanged = world->hasCellChanged();
                     MWWorld::Ptr actor = iter->first; // make a copy of the map key to avoid it being invalidated when the player teleports
