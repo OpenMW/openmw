@@ -95,6 +95,7 @@ namespace CSVRender
             std::string mBrushTexture;
             int mBrushSize;
             int mBrushShape;
+            std::vector<std::pair<int, int>> mCustomBrushShape;
             CSVWidget::SceneToolTextureBrush *mTextureBrushScenetool;
             int mDragMode;
             osg::Group* mParentNode;
