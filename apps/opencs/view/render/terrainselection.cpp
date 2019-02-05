@@ -69,10 +69,12 @@ void CSVRender::TerrainSelection::toggleSelect(const WorldspaceHitResult& hit)
     const std::pair<int, int> localPos {toTextureCoords(hit.worldPos)};
     const auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
 
-    if (iter != mSelection.end()) {
+    if (iter != mSelection.end())
+    {
         mSelection.erase(iter);
     }
-    else {
+    else
+    {
         mSelection.push_back(localPos);
     }
     update();
@@ -130,21 +132,18 @@ void CSVRender::TerrainSelection::update()
     if (!mSelection.empty())
     {
 
-        for (std::pair<int, int> localPos : mSelection) {
+        for (std::pair<int, int> localPos : mSelection)
+        {
             int x {localPos.first};
             int y {localPos.second};
 
             // check adjacent terrain squares to see if there should be a border between them
-            const auto north = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x, y + 1));
-            const auto south = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x, y - 1));
-            const auto east = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x + 1, y));
-            const auto west = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x - 1, y));
             const int textureSizeToLandSizeModifier = (landSize - 1) / landTextureSize;
 
             // Nudge selection by 1/4th of a texture size, similar how blendmaps are nudged
-            const float NudgePercentage = 0.25f;
-            const int nudgeOffset = (cellSize / landTextureSize) * NudgePercentage;
-            const int landHeightsNudge = (cellSize / landSize)/ (landSize - 1); // Does this work with all land size configurations?
+            const float nudgePercentage = 0.25f;
+            const int nudgeOffset = (cellSize / landTextureSize) * nudgePercentage;
+            const int landHeightsNudge = (cellSize / landSize) / (landSize - 1); // Does this work with all land size configurations?
 
             // calculate global vertex coordinates at selection box corners
             int x1 = x * textureSizeToLandSizeModifier + landHeightsNudge;
@@ -153,7 +152,9 @@ void CSVRender::TerrainSelection::update()
             int y2 = y * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier - landHeightsNudge;
 
             // Draw edges (check all sides, draw lines between vertices, +1 height to keep lines above ground)
-            if (north == mSelection.end()) {
+            const auto north = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x, y + 1));
+            if (north == mSelection.end())
+            {
                 for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
                 {
                     double drawPreviousX = toWorldCoords(x)+(i-1)*(cellSize / (landSize - 1));
@@ -163,7 +164,9 @@ void CSVRender::TerrainSelection::update()
                 }
             }
 
-            if (south == mSelection.end()) {
+            const auto south = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x, y - 1));
+            if (south == mSelection.end())
+            {
                 for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
                 {
                     double drawPreviousX = toWorldCoords(x)+(i-1)*(cellSize / (landSize - 1));
@@ -173,7 +176,9 @@ void CSVRender::TerrainSelection::update()
                 }
             }
 
-            if (east == mSelection.end()) {
+            const auto east = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x + 1, y));
+            if (east == mSelection.end())
+            {
                 for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
                 {
                     double drawPreviousY = toWorldCoords(y)+(i-1)*(cellSize / (landSize - 1));
@@ -183,7 +188,9 @@ void CSVRender::TerrainSelection::update()
                 }
             }
 
-            if (west == mSelection.end()) {
+            const auto west = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x - 1, y));
+            if (west == mSelection.end())
+            {
                 for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
                 {
                     double drawPreviousY = toWorldCoords(y)+(i-1)*(cellSize / (landSize - 1));
@@ -210,31 +217,28 @@ int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global ver
 {
     int cellX(0);
     int cellY(0);
-    int localX(0);
-    int localY(0);
 
     if (x >= 0)
     {
         cellX = std::floor(x / (landSize - 1));
-        localX = x - cellX * (landSize - 1);
     }
     if (y >= 0)
     {
         cellY = std::floor(y / (landSize - 1));
-        localY = y - cellY * (landSize - 1);
     }
     if (x < 0)
     {
         cellX = std::trunc(x / (landSize - 1)) - 1;
-        localX = x - cellX * (landSize - 1);
     }
     if (y < 0)
     {
         cellY = std::trunc(y / (landSize - 1)) - 1;
-        localY = y - cellY * (landSize - 1);
     }
 
-    std::string cellId = "#" + std::to_string(cellX) + " " + std::to_string(cellY);
+    int localX = x - cellX * (landSize - 1);
+    int localY = y - cellY * (landSize - 1);
+
+    std::string cellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
 
     CSMDoc::Document& document = mWorldspaceWidget->getDocument();
     CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (

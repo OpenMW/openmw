@@ -29,6 +29,8 @@ namespace CSMWorld
             CellCoordinates move (int x, int y) const;
             ///< Return a copy of *this, moved by the given offset.
 
+            static std::string generateId (int x, int y);
+            
             std::string getId (const std::string& worldspace) const;
             ///< Return the ID for the cell at these coordinates.
 

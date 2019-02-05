@@ -32,11 +32,13 @@ CSMWorld::CellCoordinates CSMWorld::CellCoordinates::move (int x, int y) const
 std::string CSMWorld::CellCoordinates::getId (const std::string& worldspace) const
 {
     // we ignore the worldspace for now, since there is only one (will change in 1.1)
-    std::ostringstream stream;
+    return generateId(mX, mY);
+}
 
-    stream << "#" << mX << " " << mY;
-
-    return stream.str();
+std::string CSMWorld::CellCoordinates::generateId (int x, int y)
+{
+    std::string cellId = "#" + std::to_string(x) + " " + std::to_string(y);
+    return cellId;
 }
 
 bool CSMWorld::CellCoordinates::isExteriorCell (const std::string& id)

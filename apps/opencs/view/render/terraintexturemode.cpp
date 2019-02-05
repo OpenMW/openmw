@@ -173,7 +173,8 @@ bool CSVRender::TerrainTextureMode::primarySelectStartDrag (const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
     mDragMode = InteractionType_PrimarySelect;
-    if (!hit.hit || hit.tag != 0) {
+    if (!hit.hit || hit.tag != 0)
+    {
         mDragMode = InteractionType_None;
         return false;
     }
@@ -185,7 +186,8 @@ bool CSVRender::TerrainTextureMode::secondarySelectStartDrag (const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
     mDragMode = InteractionType_SecondarySelect;
-    if (!hit.hit || hit.tag != 0) {
+    if (!hit.hit || hit.tag != 0)
+    {
         mDragMode = InteractionType_None;
         return false;
     }
@@ -222,7 +224,8 @@ void CSVRender::TerrainTextureMode::drag (const QPoint& pos, int diffX, int diff
     }
 }
 
-void CSVRender::TerrainTextureMode::dragCompleted(const QPoint& pos) {
+void CSVRender::TerrainTextureMode::dragCompleted(const QPoint& pos)
+{
     if (mDragMode == InteractionType_PrimaryEdit)
     {
         CSMDoc::Document& document = getWorldspaceWidget().getDocument();
@@ -242,12 +245,16 @@ void CSVRender::TerrainTextureMode::dragCompleted(const QPoint& pos) {
     }
 }
 
-void CSVRender::TerrainTextureMode::dragAborted() {
+void CSVRender::TerrainTextureMode::dragAborted()
+{
 }
 
-void CSVRender::TerrainTextureMode::dragWheel (int diff, double speedFactor) {}
+void CSVRender::TerrainTextureMode::dragWheel (int diff, double speedFactor)
+{
+}
 
-void CSVRender::TerrainTextureMode::handleDropEvent (QDropEvent *event) {
+void CSVRender::TerrainTextureMode::handleDropEvent (QDropEvent *event)
+{
   const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
 
   if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
@@ -304,7 +311,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
         cellY = cellY + 1;
     }
 
-    mCellId = "#" + std::to_string(cellX) + " " + std::to_string(cellY);
+    mCellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
     if(allowLandTextureEditing(mCellId)==true) {}
 
     std::string iteratedCellId;
@@ -347,7 +354,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
         {
             for(int j_cell = upperLeftCellY; j_cell <= lowerrightCellY; j_cell++)
             {
-                iteratedCellId = "#" + std::to_string(i_cell) + " " + std::to_string(j_cell);
+                iteratedCellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
                 if(allowLandTextureEditing(iteratedCellId)==true)
                 {
                     CSMWorld::LandTexturesColumn::DataType newTerrainPointer = landTable.data(landTable.getModelIndex(iteratedCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
@@ -357,7 +364,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                         for(int j = 0; j < landTextureSize; j++)
                         {
 
-                           if (i_cell == cellX && j_cell == cellY && abs(i-xHitInCell) < r && abs(j-yHitInCell) < r)
+                            if (i_cell == cellX && j_cell == cellY && abs(i-xHitInCell) < r && abs(j-yHitInCell) < r)
                             {
                                 newTerrain[j*landTextureSize+i] = brushInt;
                             }
@@ -397,7 +404,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
         {
             for(int j_cell = upperLeftCellY; j_cell <= lowerrightCellY; j_cell++)
             {
-                iteratedCellId = "#" + std::to_string(i_cell) + " " + std::to_string(j_cell);
+                iteratedCellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
                 if(allowLandTextureEditing(iteratedCellId)==true)
                 {
                     CSMWorld::LandTexturesColumn::DataType newTerrainPointer = landTable.data(landTable.getModelIndex(iteratedCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
@@ -480,7 +487,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                         cellYDifference = (yHitInCell + value.second)/landTextureSize-1;
                         yInOtherCell = yHitInCell + value.second - cellYDifference * landTextureSize;
                     }
-                    std::string cellId = "#" + std::to_string(cellX+cellXDifference) + " " + std::to_string(cellY+cellYDifference);
+                    std::string cellId = CSMWorld::CellCoordinates::generateId(cellX+cellXDifference, cellY+cellYDifference);
                     if (allowLandTextureEditing(cellId)==true)
                     {
                         CSMWorld::LandTexturesColumn::DataType newTerrainPointerOtherCell = landTable.data(landTable.getModelIndex(cellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
@@ -525,18 +532,21 @@ void CSVRender::TerrainTextureMode::createTexture(std::string textureFileName)
 
     int counter=0;
     bool freeIndexFound = false;
-    do {
+    do
+    {
         const size_t maxCounter = std::numeric_limits<uint16_t>::max() - 1;
         try
         {
             newId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
             if (ltexTable.getRecord(newId).isDeleted() == 0) counter = (counter + 1) % maxCounter;
-        } catch (const std::exception& e)
+        }
+        catch (const std::exception& e)
         {
             newId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
             freeIndexFound = true;
         }
-    } while (freeIndexFound == false);
+    }
+    while (freeIndexFound == false);
 
     std::size_t idlocation = textureFileName.find("Texture: ");
     textureFileName = textureFileName.substr (idlocation + 9);
@@ -630,7 +640,8 @@ bool CSVRender::TerrainTextureMode::allowLandTextureEditing(std::string cellId)
     return true;
 }
 
-void CSVRender::TerrainTextureMode::dragMoveEvent (QDragMoveEvent *event) {
+void CSVRender::TerrainTextureMode::dragMoveEvent (QDragMoveEvent *event)
+{
 }
 
 void CSVRender::TerrainTextureMode::setBrushSize(int brushSize)
