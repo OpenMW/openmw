@@ -454,11 +454,43 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
         {
             for(auto const& value: mCustomBrushShape)
             {
-                if(yHitInCell + value.second >= 0 && yHitInCell + value.second <= 15)
+                if(yHitInCell + value.second >= 0 && yHitInCell + value.second <= 15 && xHitInCell + value.first >= 0 && xHitInCell + value.first <= 15)
                 {
-                    if(xHitInCell + value.first >= 0 && xHitInCell + value.first <= 15)
+                    mNew[(yHitInCell+value.second)*landTextureSize+xHitInCell+value.first] = brushInt;
+                }
+                else
+                {
+                    int cellXDifference = 0;
+                    int cellYDifference = 0;
+                    int xInOtherCell = xHitInCell + value.first;
+                    int yInOtherCell = yHitInCell + value.second;
+                    if (xHitInCell + value.first > 15)
                     {
-                        mNew[(yHitInCell+value.second)*landTextureSize+xHitInCell+value.first] = brushInt;
+                        cellXDifference = (xHitInCell + value.first)/landTextureSize;
+                        xInOtherCell = xHitInCell + value.first - cellXDifference * landTextureSize;
+                    }
+                    if (yHitInCell + value.second > 15)
+                    {
+                        cellYDifference = (yHitInCell + value.second)/landTextureSize;
+                        yInOtherCell = yHitInCell + value.second - cellYDifference * landTextureSize;
+                    }
+                    if (xHitInCell + value.first < 0)
+                    {
+                        cellXDifference = (xHitInCell + value.first)/landTextureSize-1;
+                        xInOtherCell = xHitInCell + value.first - cellXDifference * landTextureSize;
+                    }
+                    if (yHitInCell + value.second < 0)
+                    {
+                        cellYDifference = (yHitInCell + value.second)/landTextureSize-1;
+                        yInOtherCell = yHitInCell + value.second - cellYDifference * landTextureSize;
+                    }
+                    std::string cellId = "#" + std::to_string(cellX+cellXDifference) + " " + std::to_string(cellY+cellYDifference);
+                    if (allowLandTextureEditing(cellId)==true)
+                    {
+                        CSMWorld::LandTexturesColumn::DataType mPointerOtherCell = landTable.data(landTable.getModelIndex(cellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+                        CSMWorld::LandTexturesColumn::DataType mNewOtherCell(mPointerOtherCell);
+                        mNewOtherCell[yInOtherCell*landTextureSize+xInOtherCell] = brushInt;
+                        pushEditToCommand(mNewOtherCell, document, landTable, cellId);
                     }
                 }
             }
