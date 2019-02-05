@@ -1457,7 +1457,7 @@ namespace MWMechanics
                 if (!inRange)
                 {
                     iter->first.getRefData().getBaseNode()->setNodeMask(0);
-                    world->setActorCollisionMode(iter->first, false);
+                    world->setActorCollisionMode(iter->first, false, false);
                     continue;
                 }
                 else if (!isPlayer)
@@ -1474,7 +1474,7 @@ namespace MWMechanics
                     continue;
                 }
 
-                world->setActorCollisionMode(iter->first, true);
+                world->setActorCollisionMode(iter->first, true, !iter->first.getClass().getCreatureStats(iter->first).isDeathAnimationFinished());
                 ctrl->update(duration);
 
                 // Fade away actors on large distance (>90% of actor's processing distance)
