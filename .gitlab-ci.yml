@@ -17,9 +17,9 @@ Debian:
   # - apt-get install -y libmygui-dev libbullet-dev  # to be updated to latest below because stretch is too old
     - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/b/bullet/libbullet-dev_2.87+dfsg-2_amd64.deb -o libbullet-dev_2.87+dfsg-2_amd64.deb
     - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/b/bullet/libbullet2.87_2.87+dfsg-2_amd64.deb -o libbullet2.87_2.87+dfsg-2_amd64.deb
-    - curl -L https://http.kali.org/pool/main/m/mygui/libmygui.openglplatform0debian1v5_3.2.2+dfsg-2+b2_amd64.deb -o libmygui.openglplatform0debian1v5_3.2.2+dfsg-2+b2_amd64.deb
-    - curl -L https://http.kali.org/pool/main/m/mygui/libmyguiengine3debian1v5_3.2.2+dfsg-2+b2_amd64.deb -o libmyguiengine3debian1v5_3.2.2+dfsg-2+b2_amd64.deb
-    - curl -L https://http.kali.org/pool/main/m/mygui/libmygui-dev_3.2.2+dfsg-2+b2_amd64.deb -o libmygui-dev_3.2.2+dfsg-2+b2_amd64.deb
+    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/m/mygui/libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb -o libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb
+    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/m/mygui/libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb -o libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb
+    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/m/mygui/libmygui-dev_3.2.2+dfsg-1_amd64.deb -o libmygui-dev_3.2.2+dfsg-1_amd64.deb
     - dpkg --ignore-depends=libmygui.ogreplatform0debian1v5 -i *.deb 
   stage: build
   script: 
