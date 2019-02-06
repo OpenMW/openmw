@@ -39,7 +39,8 @@ void CSVWidget::ColorPickerPopup::showPicker(const QPoint &position, const QColo
 
     // Calling getColor() creates a blocking dialog that will continue execution once the user chooses OK or Cancel
     QColor color = mColorPicker->getColor(initialColor);
-    mColorPicker->setCurrentColor(color);
+    if (color.isValid())
+        mColorPicker->setCurrentColor(color);
 }
 
 void CSVWidget::ColorPickerPopup::mousePressEvent(QMouseEvent *event)
