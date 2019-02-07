@@ -739,7 +739,7 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
         }
         else
         {
-            theta = static_cast<float>(osg::PI) + static_cast<float>(osg::PI) * (adjustedHour - adjustedNightStart) / nightDuration;
+            theta = static_cast<float>(osg::PI) - static_cast<float>(osg::PI) * (adjustedHour - adjustedNightStart) / nightDuration;
         }
 
         osg::Vec3f final(
