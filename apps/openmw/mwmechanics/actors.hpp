@@ -19,6 +19,7 @@ namespace MWWorld
 namespace MWMechanics
 {
     class Actor;
+    class CharacterController;
     class CreatureStats;
 
     class Actors
@@ -169,6 +170,8 @@ namespace MWMechanics
             bool isAttackingOrSpell(const MWWorld::Ptr& ptr) const;
 
     private:
+        void updateVisibility (const MWWorld::Ptr& ptr, CharacterController* ctrl);
+
         PtrActorMap mActors;
         float mTimerDisposeSummonsCorpses;
         float mActorsProcessingRange;

@@ -1169,8 +1169,46 @@ namespace MWMechanics
         if (!anim)
             return;
         mActors.insert(std::make_pair(ptr, new Actor(ptr, anim)));
+
+        CharacterController* ctrl = mActors[ptr]->getCharacterController();
         if (updateImmediately)
-            mActors[ptr]->getCharacterController()->update(0);
+            ctrl->update(0);
+
+        // We should initially hide actors outside of processing range.
+        // Note: since we update player after other actors, distance will be incorrect during teleportation.
+        // Do not update visibility if player was teleported, so actors will be visible during teleportation frame.
+        if (MWBase::Environment::get().getWorld()->getPlayer().wasTeleported())
+            return;
+
+        updateVisibility(ptr, ctrl);
+    }
+
+    void Actors::updateVisibility (const MWWorld::Ptr& ptr, CharacterController* ctrl)
+    {
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        if (ptr == player)
+            return;
+
+        const float dist = (player.getRefData().getPosition().asVec3() - ptr.getRefData().getPosition().asVec3()).length();
+        if (dist > mActorsProcessingRange)
+        {
+            ptr.getRefData().getBaseNode()->setNodeMask(0);
+            return;
+        }
+        else
+            ptr.getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Actor);
+
+        // Fade away actors on large distance (>90% of actor's processing distance)
+        float visibilityRatio = 1.0;
+        float fadeStartDistance = mActorsProcessingRange*0.9f;
+        float fadeEndDistance = mActorsProcessingRange;
+        float fadeRatio = (dist - fadeStartDistance)/(fadeEndDistance - fadeStartDistance);
+        if (fadeRatio > 0)
+            visibilityRatio -= std::max(0.f, fadeRatio);
+
+        visibilityRatio = std::min(1.f, visibilityRatio);
+
+        ctrl->setVisibility(visibilityRatio);
     }
 
     void Actors::removeActor (const MWWorld::Ptr& ptr)
@@ -1479,17 +1517,7 @@ namespace MWMechanics
                 world->setActorCollisionMode(iter->first, true, !iter->first.getClass().getCreatureStats(iter->first).isDeathAnimationFinished());
                 ctrl->update(duration);
 
-                // Fade away actors on large distance (>90% of actor's processing distance)
-                float visibilityRatio = 1.0;
-                float fadeStartDistance = mActorsProcessingRange*0.9f;
-                float fadeEndDistance = mActorsProcessingRange;
-                float fadeRatio = (dist - fadeStartDistance)/(fadeEndDistance - fadeStartDistance);
-                if (fadeRatio > 0)
-                    visibilityRatio -= std::max(0.f, fadeRatio);
-
-                visibilityRatio = std::min(1.f, visibilityRatio);
-
-                ctrl->setVisibility(visibilityRatio);
+                updateVisibility(iter->first, ctrl);
             }
 
             if (playerCharacter)
