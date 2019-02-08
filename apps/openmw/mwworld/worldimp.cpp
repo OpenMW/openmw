@@ -1684,16 +1684,6 @@ namespace MWWorld
         }
     }
 
-    void World::setActorCollisionMode(const MWWorld::Ptr& ptr, bool internal, bool external)
-    {
-        MWPhysics::Actor *physicActor = mPhysics->getActor(ptr);
-        if (physicActor && physicActor->getCollisionMode() != internal)
-        {
-            physicActor->enableCollisionMode(internal);
-            physicActor->enableCollisionBody(external);
-        }
-    }
-
     bool World::isActorCollisionEnabled(const MWWorld::Ptr& ptr)
     {
         MWPhysics::Actor *physicActor = mPhysics->getActor(ptr);
@@ -3601,6 +3591,8 @@ namespace MWWorld
     void World::explodeSpell(const osg::Vec3f& origin, const ESM::EffectList& effects, const Ptr& caster, const Ptr& ignore, ESM::RangeType rangeType,
                              const std::string& id, const std::string& sourceName, const bool fromProjectile)
     {
+        const osg::Vec3f playerPos(getPlayerPtr().getRefData().getPosition().asVec3());
+        const float aiDistance = MWBase::Environment::get().getMechanicsManager()->getActorsProcessingRange();
         std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = effects.mList.begin();
              effectIt != effects.mList.end(); ++effectIt)
@@ -3645,15 +3637,19 @@ namespace MWWorld
                 else
                     sndMgr->playSound3D(origin, schools[effect->mData.mSchool]+" area", 1.0f, 1.0f);
             }
-            // Get the actors in range of the effect
+            // Get the objects in range of the effect
             std::vector<MWWorld::Ptr> objects;
             MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
                         origin, feetToGameUnits(static_cast<float>(effectIt->mArea)), objects);
             for (const Ptr& affected : objects)
             {
-                // Ignore actors without collisions here, otherwise it will be possible to hit actors outside processing range.
-                if (affected.getClass().isActor() && !isActorCollisionEnabled(affected))
-                    continue;
+                // Ignore actors outside of the processing range
+                if (affected.getClass().isActor() && affected != getPlayerPtr())
+                {
+                    const osg::Vec3f actorPos(affected.getRefData().getPosition().asVec3());
+                    if ((playerPos-actorPos).length2() > aiDistance*aiDistance)
+                        continue;
+                }
 
                 toApply[affected].push_back(*effectIt);
             }

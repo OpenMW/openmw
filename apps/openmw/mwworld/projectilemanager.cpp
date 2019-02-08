@@ -24,6 +24,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -382,11 +383,14 @@ namespace MWWorld
 
     void ProjectileManager::moveMagicBolts(float duration)
     {
+        static const float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+            .find("fTargetSpellMaxSpeed")->mValue.getFloat();
+        const Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
+        const float aiDistance = MWBase::Environment::get().getMechanicsManager()->getActorsProcessingRange();
         for (std::vector<MagicBoltState>::iterator it = mMagicBolts.begin(); it != mMagicBolts.end();)
         {
             osg::Quat orient = it->mNode->getAttitude();
-            static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fTargetSpellMaxSpeed")->mValue.getFloat();
             float speed = fTargetSpellMaxSpeed * it->mSpeed;
             osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
             direction.normalize();
@@ -406,7 +410,7 @@ namespace MWWorld
 
             // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
             std::vector<MWWorld::Ptr> targetActors;
-            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
+            if (!caster.isEmpty() && caster.getClass().isActor() && caster != player)
                 caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
 
             // Check for impact
@@ -421,7 +425,7 @@ namespace MWWorld
                 {
                     // terrain
                 }
-                else
+                else if (!result.mHitObject.getClass().isActor() || result.mHitObject == player || (playerPos - result.mHitPos).length2() < aiDistance * aiDistance)
                 {
                     MWMechanics::CastSpell cast(caster, result.mHitObject);
                     cast.mHitPosition = pos;
@@ -430,10 +434,14 @@ namespace MWWorld
                     cast.mStack = false;
                     cast.inflict(result.mHitObject, caster, it->mEffects, ESM::RT_Target, false, true);
                 }
+                else
+                {
+                    hit = false;
+                }
             }
 
             // Explodes when hitting water
-            if (MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos))
+            if (MWBase::Environment::get().getWorld()->isUnderwater(player.getCell(), newPos))
                 hit = true;
 
             if (hit)
@@ -457,11 +465,15 @@ namespace MWWorld
 
     void ProjectileManager::moveProjectiles(float duration)
     {
+        // gravity constant - must be way lower than the gravity affecting actors, since we're not
+        // simulating aerodynamics at all
+        const osg::Vec3f gravity(0, 0, Constants::GravityConst * Constants::UnitsPerMeter * 0.1f * duration);
+        const Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
+        const float aiDistance = MWBase::Environment::get().getMechanicsManager()->getActorsProcessingRange();
         for (std::vector<ProjectileState>::iterator it = mProjectiles.begin(); it != mProjectiles.end();)
         {
-            // gravity constant - must be way lower than the gravity affecting actors, since we're not
-            // simulating aerodynamics at all
-            it->mVelocity -= osg::Vec3f(0, 0, Constants::GravityConst * Constants::UnitsPerMeter * 0.1f) * duration;
+            it->mVelocity -= gravity;
 
             osg::Vec3f pos(it->mNode->getPosition());
             osg::Vec3f newPos = pos + it->mVelocity * duration;
@@ -489,19 +501,31 @@ namespace MWWorld
             update(*it, duration);
 
             MWWorld::Ptr caster = it->getCaster();
+            MWWorld::Ptr object;
 
             // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
             std::vector<MWWorld::Ptr> targetActors;
-            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
+            if (!caster.isEmpty() && caster.getClass().isActor() && caster != player)
                 caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
 
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
             MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
 
-            bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos);
+            bool hit = false;
+            if (result.mHit)
+            {
+                // Non-actor object
+                if (result.mHitObject.isEmpty() || !result.mHitObject.getClass().isActor())
+                    hit = true;
+                // Actor in the actor processing range
+                else if (result.mHitObject == player || (playerPos - result.mHitPos).length2() <= aiDistance * aiDistance)
+                    hit = true;
+            }
 
-            if (result.mHit || underwater)
+            bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(player.getCell(), newPos);
+
+            if (hit || underwater)
             {
                 MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
 
@@ -515,10 +539,16 @@ namespace MWWorld
                         bow = *invIt;
                 }
 
-                if (caster.isEmpty())
-                    caster = result.mHitObject;
+                osg::Vec3f position = newPos;
+                if (hit)
+                {
+                    object = result.mHitObject;
+                    if (caster.isEmpty())
+                        caster = object;
+                    position = result.mHitPos;
+                }
 
-                MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHit ? result.mHitPos : newPos, it->mAttackStrength);
+                MWMechanics::projectileHit(caster, object, bow, projectileRef.getPtr(), position, it->mAttackStrength);
 
                 if (underwater)
                     mRendering->emitWaterRipple(newPos);

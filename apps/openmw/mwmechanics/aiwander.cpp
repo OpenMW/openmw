@@ -207,8 +207,7 @@ namespace MWMechanics
         }
 
         bool actorCanMoveByZ = (actor.getClass().canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
-            || MWBase::Environment::get().getWorld()->isFlying(actor)
-            || !MWBase::Environment::get().getWorld()->isActorCollisionEnabled(actor);
+            || MWBase::Environment::get().getWorld()->isFlying(actor);
 
         if(actorCanMoveByZ && mDistance > 0) {
             // Typically want to idle for a short time before the next wander
