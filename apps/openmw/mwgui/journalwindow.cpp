@@ -554,7 +554,7 @@ namespace
             mQuestMode = true;
 
             setVisible (LeftTopicIndex, false);
-            setVisible (CenterTopicIndex, true);
+            setVisible (CenterTopicIndex, false);
             setVisible (RightTopicIndex, false);
             setVisible (TopicsList, false);
             setVisible (QuestsList, true);
