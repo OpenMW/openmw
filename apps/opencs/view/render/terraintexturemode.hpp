@@ -28,9 +28,9 @@ namespace CSVWidget
 
 namespace CSVRender
 {
-
     class PagedWorldspaceWidget;
 
+    /// \brief EditMode for handling the terrain texture editing
     class TerrainTextureMode : public EditMode
     {
         Q_OBJECT
@@ -46,7 +46,7 @@ namespace CSVRender
                 InteractionType_None
             };
 
-            /// \brief Editmode for terrain texture grid
+            /// Editmode for terrain texture grid
             TerrainTextureMode(WorldspaceWidget*, osg::Group* parentNode, QWidget* parent = nullptr);
 
             void primaryOpenPressed (const WorldspaceHitResult& hit);
@@ -54,7 +54,7 @@ namespace CSVRender
             /// \brief Create single command for one-click texture editing
             void primaryEditPressed (const WorldspaceHitResult& hit);
 
-            /// \brief Open brush settings window
+            /// Open brush settings window
             void primarySelectPressed(const WorldspaceHitResult&);
 
             void secondarySelectPressed(const WorldspaceHitResult&);
@@ -62,34 +62,34 @@ namespace CSVRender
             void activate(CSVWidget::SceneToolbar*);
             void deactivate(CSVWidget::SceneToolbar*);
 
-            /// \brief Start texture editing command macro
+            /// Start texture editing command macro
             virtual bool primaryEditStartDrag (const QPoint& pos);
 
             virtual bool secondaryEditStartDrag (const QPoint& pos);
             virtual bool primarySelectStartDrag (const QPoint& pos);
             virtual bool secondarySelectStartDrag (const QPoint& pos);
 
-            /// \brief Handle texture edit behavior during dragging
+            /// Handle texture edit behavior during dragging
             virtual void drag (const QPoint& pos, int diffX, int diffY, double speedFactor);
 
-            /// \brief End texture editing command macro
+            /// End texture editing command macro
             virtual void dragCompleted(const QPoint& pos);
 
             virtual void dragAborted();
             virtual void dragWheel (int diff, double speedFactor);
             virtual void dragMoveEvent (QDragMoveEvent *event);
 
-            /// \brief Handle brush mechanics, maths regarding worldspace hit etc.
+            /// Handle brush mechanics, maths regarding worldspace hit etc.
             void editTerrainTextureGrid (const WorldspaceHitResult& hit);
 
-            /// \brief Push texture edits to command macro
+            /// Push texture edits to command macro
             void pushEditToCommand (CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,
                 CSMWorld::IdTable& landTable, std::string cellId);
 
-            /// \brief Create new land texture record from texture asset
+            /// Create new land texture record from texture asset
             void createTexture(std::string textureFileName);
 
-            /// \brief Create new cell and land if needed
+            /// Create new cell and land if needed
             bool allowLandTextureEditing(std::string textureFileName);
 
         private:

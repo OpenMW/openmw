@@ -112,14 +112,9 @@ std::pair<int, int> CSVRender::TerrainSelection::toVertexCoords(osg::Vec3d world
     return std::make_pair(x, y);
 }
 
-double CSVRender::TerrainSelection::toWorldCoords(int pos)
+double CSVRender::TerrainSelection::texSelectionToWorldCoords(int pos)
 {
     return cellSize * static_cast<double>(pos) / landTextureSize;
-}
-
-size_t CSVRender::TerrainSelection::landIndex(int x, int y)
-{
-    return y * landSize + x;
 }
 
 void CSVRender::TerrainSelection::update()
@@ -145,7 +140,7 @@ void CSVRender::TerrainSelection::update()
             const int nudgeOffset = (cellSize / landTextureSize) * nudgePercentage;
             const int landHeightsNudge = (cellSize / landSize) / (landSize - 1); // Does this work with all land size configurations?
 
-            // calculate global vertex coordinates at selection box corners
+            // convert texture selection to global vertex coordinates at selection box corners
             int x1 = x * textureSizeToLandSizeModifier + landHeightsNudge;
             int x2 = x * textureSizeToLandSizeModifier + textureSizeToLandSizeModifier + landHeightsNudge;
             int y1 = y * textureSizeToLandSizeModifier - landHeightsNudge;
@@ -157,10 +152,10 @@ void CSVRender::TerrainSelection::update()
             {
                 for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
                 {
-                    double drawPreviousX = toWorldCoords(x)+(i-1)*(cellSize / (landSize - 1));
-                    double drawCurrentX = toWorldCoords(x)+i*(cellSize / (landSize - 1));
-                    vertices->push_back(osg::Vec3f(drawPreviousX + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, calculateLandHeight(x1+(i-1), y2)+2));
-                    vertices->push_back(osg::Vec3f(drawCurrentX + nudgeOffset, toWorldCoords(y + 1) - nudgeOffset, calculateLandHeight(x1+i, y2)+2));
+                    double drawPreviousX = texSelectionToWorldCoords(x)+(i-1)*(cellSize / (landSize - 1));
+                    double drawCurrentX = texSelectionToWorldCoords(x)+i*(cellSize / (landSize - 1));
+                    vertices->push_back(osg::Vec3f(drawPreviousX + nudgeOffset, texSelectionToWorldCoords(y + 1) - nudgeOffset, calculateLandHeight(x1+(i-1), y2)+2));
+                    vertices->push_back(osg::Vec3f(drawCurrentX + nudgeOffset, texSelectionToWorldCoords(y + 1) - nudgeOffset, calculateLandHeight(x1+i, y2)+2));
                 }
             }
 
@@ -169,10 +164,10 @@ void CSVRender::TerrainSelection::update()
             {
                 for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
                 {
-                    double drawPreviousX = toWorldCoords(x)+(i-1)*(cellSize / (landSize - 1));
-                    double drawCurrentX = toWorldCoords(x)+i*(cellSize / (landSize - 1));
-                    vertices->push_back(osg::Vec3f(drawPreviousX + nudgeOffset, toWorldCoords(y) - nudgeOffset, calculateLandHeight(x1+(i-1), y1)+2));
-                    vertices->push_back(osg::Vec3f(drawCurrentX + nudgeOffset, toWorldCoords(y) - nudgeOffset, calculateLandHeight(x1+i, y1)+2));
+                    double drawPreviousX = texSelectionToWorldCoords(x)+(i-1)*(cellSize / (landSize - 1));
+                    double drawCurrentX = texSelectionToWorldCoords(x)+i*(cellSize / (landSize - 1));
+                    vertices->push_back(osg::Vec3f(drawPreviousX + nudgeOffset, texSelectionToWorldCoords(y) - nudgeOffset, calculateLandHeight(x1+(i-1), y1)+2));
+                    vertices->push_back(osg::Vec3f(drawCurrentX + nudgeOffset, texSelectionToWorldCoords(y) - nudgeOffset, calculateLandHeight(x1+i, y1)+2));
                 }
             }
 
@@ -181,10 +176,10 @@ void CSVRender::TerrainSelection::update()
             {
                 for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
                 {
-                    double drawPreviousY = toWorldCoords(y)+(i-1)*(cellSize / (landSize - 1));
-                    double drawCurrentY = toWorldCoords(y)+i*(cellSize / (landSize - 1));
-                    vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, drawPreviousY - nudgeOffset, calculateLandHeight(x2, y1+(i-1))+2));
-                    vertices->push_back(osg::Vec3f(toWorldCoords(x + 1) + nudgeOffset, drawCurrentY - nudgeOffset, calculateLandHeight(x2, y1+i)+2));
+                    double drawPreviousY = texSelectionToWorldCoords(y)+(i-1)*(cellSize / (landSize - 1));
+                    double drawCurrentY = texSelectionToWorldCoords(y)+i*(cellSize / (landSize - 1));
+                    vertices->push_back(osg::Vec3f(texSelectionToWorldCoords(x + 1) + nudgeOffset, drawPreviousY - nudgeOffset, calculateLandHeight(x2, y1+(i-1))+2));
+                    vertices->push_back(osg::Vec3f(texSelectionToWorldCoords(x + 1) + nudgeOffset, drawCurrentY - nudgeOffset, calculateLandHeight(x2, y1+i)+2));
                 }
             }
 
@@ -193,23 +188,19 @@ void CSVRender::TerrainSelection::update()
             {
                 for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
                 {
-                    double drawPreviousY = toWorldCoords(y)+(i-1)*(cellSize / (landSize - 1));
-                    double drawCurrentY = toWorldCoords(y)+i*(cellSize / (landSize - 1));
-                    vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, drawPreviousY - nudgeOffset, calculateLandHeight(x1, y1+(i-1))+2));
-                    vertices->push_back(osg::Vec3f(toWorldCoords(x) + nudgeOffset, drawCurrentY - nudgeOffset, calculateLandHeight(x1, y1+i)+2));
+                    double drawPreviousY = texSelectionToWorldCoords(y)+(i-1)*(cellSize / (landSize - 1));
+                    double drawCurrentY = texSelectionToWorldCoords(y)+i*(cellSize / (landSize - 1));
+                    vertices->push_back(osg::Vec3f(texSelectionToWorldCoords(x) + nudgeOffset, drawPreviousY - nudgeOffset, calculateLandHeight(x1, y1+(i-1))+2));
+                    vertices->push_back(osg::Vec3f(texSelectionToWorldCoords(x) + nudgeOffset, drawCurrentY - nudgeOffset, calculateLandHeight(x1, y1+i)+2));
                 }
             }
         }
     }
 
     mGeometry->setVertexArray(vertices);
-
     osg::ref_ptr<osg::DrawArrays> drawArrays = new osg::DrawArrays(osg::PrimitiveSet::LINES);
-
     drawArrays->setCount(vertices->size());
-
     mGeometry->addPrimitiveSet(drawArrays);
-
     mSelectionNode->addChild(mGeometry);
 }
 
