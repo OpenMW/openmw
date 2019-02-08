@@ -608,11 +608,7 @@ namespace MWClass
 
     int Creature::getServices(const MWWorld::ConstPtr &actor) const
     {
-        const MWWorld::LiveCellRef<ESM::Creature>* ref = actor.get<ESM::Creature>();
-        if (ref->mBase->mHasAI)
-            return ref->mBase->mAiData.mServices;
-        else
-            return 0;
+        return actor.get<ESM::Creature>()->mBase->mAiData.mServices;
     }
 
     bool Creature::isPersistent(const MWWorld::ConstPtr &actor) const

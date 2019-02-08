@@ -219,6 +219,13 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             return sb;
         }
 
+        case CSMWorld::ColumnBase::Display_UnsignedInteger16:
+        {
+            DialogueSpinBox *sb = new DialogueSpinBox(parent);
+            sb->setRange(0, std::numeric_limits<unsigned short>::max());
+            return sb;
+        }
+
         case CSMWorld::ColumnBase::Display_Var:
 
             return new QLineEdit(parent);

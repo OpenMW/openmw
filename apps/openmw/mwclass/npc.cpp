@@ -1205,11 +1205,7 @@ namespace MWClass
 
     int Npc::getServices(const MWWorld::ConstPtr &actor) const
     {
-        const MWWorld::LiveCellRef<ESM::NPC>* ref = actor.get<ESM::NPC>();
-        if (ref->mBase->mHasAI)
-            return ref->mBase->mAiData.mServices;
-        else
-            return 0;
+        return actor.get<ESM::NPC>()->mBase->mAiData.mServices;
     }
 
 

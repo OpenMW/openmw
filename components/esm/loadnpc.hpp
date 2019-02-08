@@ -122,7 +122,6 @@ struct NPC
     SpellList mSpells;
 
     AIData mAiData;
-    bool mHasAI;
 
     Transport mTransport;
 

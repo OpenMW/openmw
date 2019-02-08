@@ -660,7 +660,7 @@ void Record<ESM::Creature>::print()
 
     printTransport(mData.getTransport());
 
-    std::cout << "  Artifical Intelligence: " << mData.mHasAI << std::endl;
+    std::cout << "  Artificial Intelligence: " << std::endl;
     std::cout << "    AI Hello:" << (int)mData.mAiData.mHello << std::endl;
     std::cout << "    AI Fight:" << (int)mData.mAiData.mFight << std::endl;
     std::cout << "    AI Flee:" << (int)mData.mAiData.mFlee << std::endl;
@@ -668,7 +668,6 @@ void Record<ESM::Creature>::print()
     std::cout << "    AI U1:" << (int)mData.mAiData.mU1 << std::endl;
     std::cout << "    AI U2:" << (int)mData.mAiData.mU2 << std::endl;
     std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
-    std::cout << "    AI U4:" << (int)mData.mAiData.mU4 << std::endl;
     std::cout << "    AI Services:" << boost::format("0x%08X") % mData.mAiData.mServices << std::endl;
 
     for (const ESM::AIPackage &package : mData.mAiPackage.mList)
@@ -1079,7 +1078,7 @@ void Record<ESM::NPC>::print()
 
     printTransport(mData.getTransport());
 
-    std::cout << "  Artifical Intelligence: " << mData.mHasAI << std::endl;
+    std::cout << "  Artificial Intelligence: " << std::endl;
     std::cout << "    AI Hello:" << (int)mData.mAiData.mHello << std::endl;
     std::cout << "    AI Fight:" << (int)mData.mAiData.mFight << std::endl;
     std::cout << "    AI Flee:" << (int)mData.mAiData.mFlee << std::endl;
@@ -1087,7 +1086,6 @@ void Record<ESM::NPC>::print()
     std::cout << "    AI U1:" << (int)mData.mAiData.mU1 << std::endl;
     std::cout << "    AI U2:" << (int)mData.mAiData.mU2 << std::endl;
     std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
-    std::cout << "    AI U4:" << (int)mData.mAiData.mU4 << std::endl;
     std::cout << "    AI Services:" << boost::format("0x%08X") % mData.mAiData.mServices << std::endl;
 
     for (const ESM::AIPackage &package : mData.mAiPackage.mList)
