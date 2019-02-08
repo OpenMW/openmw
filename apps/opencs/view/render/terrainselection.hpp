@@ -21,7 +21,7 @@ namespace CSVRender
     struct WorldspaceHitResult;
     class WorldspaceWidget;
 
-    // class with functionality common to different terrain selection types
+    /// \brief Class handling the terrain selection data and rendering
     class TerrainSelection
     {
         public:
@@ -40,21 +40,20 @@ namespace CSVRender
 
         protected:
 
-            // these functions need better names
             void addToSelection(osg::Vec3d worldPos);
             void toggleSelection(osg::Vec3d worldPos);
             void deselect();
 
             void update();
 
+            ///Converts Worldspace coordinates to global texture selection, modified by texture offset.
             std::pair<int, int> toTextureCoords(osg::Vec3d worldPos) const;
+
+            ///Converts Worldspace coordinates to global vertex selection.
             std::pair<int, int> toVertexCoords(osg::Vec3d worldPos) const;
 
-            const osg::ref_ptr<osg::PositionAttitudeTransform>& getBaseNode() const;
-
-            static double toWorldCoords(int);
-
-            static size_t landIndex(int x, int y);
+            ///Converts Global texture coordinates to Worldspace coordinate at upper left corner of the selected texture.
+            static double texSelectionToWorldCoords(int);
 
             int calculateLandHeight(int x, int y);
 
@@ -64,9 +63,8 @@ namespace CSVRender
             WorldspaceWidget *mWorldspaceWidget;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
             osg::ref_ptr<osg::Geometry> mGeometry;
-
             osg::ref_ptr<osg::Group> mSelectionNode;
-            std::vector<std::pair<int, int>> mSelection; // Global cell_selection coordinate in either vertex or texture units
+            std::vector<std::pair<int, int>> mSelection; // Global terrain selection coordinate in either vertex or texture units
     };
 }
 
