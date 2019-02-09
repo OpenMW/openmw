@@ -7,8 +7,6 @@
 
 #include <QMetaType>
 
-//#include <osg/Group>
-//#include <osg/Geometry>
 #include <osg/PositionAttitudeTransform>
 
 namespace CSMWorld

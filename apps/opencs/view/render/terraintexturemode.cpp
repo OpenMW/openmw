@@ -89,7 +89,7 @@ void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
     EditMode::deactivate(toolbar);
 }
 
-void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult& hit) // Apply changes here
+void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult& hit)
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
@@ -214,13 +214,13 @@ void CSVRender::TerrainTextureMode::drag (const QPoint& pos, int diffX, int diff
     if (mDragMode == InteractionType_PrimarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        if (hit.hit && hit.tag == 0) selectTerrainTextures(CSMWorld::CellCoordinates::toTextureCoords(hit.worldPos), 0, true);//mTerrainTextureSelection->addSelect(CSMWorld::CellCoordinates::toTextureCoords(hit.worldPos));
+        if (hit.hit && hit.tag == 0) selectTerrainTextures(CSMWorld::CellCoordinates::toTextureCoords(hit.worldPos), 0, true);
     }
 
     if (mDragMode == InteractionType_SecondarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        if (hit.hit && hit.tag == 0) selectTerrainTextures(CSMWorld::CellCoordinates::toTextureCoords(hit.worldPos), 1, true);//mTerrainTextureSelection->toggleSelect(CSMWorld::CellCoordinates::toTextureCoords(hit.worldPos), true);
+        if (hit.hit && hit.tag == 0) selectTerrainTextures(CSMWorld::CellCoordinates::toTextureCoords(hit.worldPos), 1, true);
     }
 }
 
