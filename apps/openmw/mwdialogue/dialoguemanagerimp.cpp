@@ -97,9 +97,6 @@ namespace MWDialogue
                 topicId = mTranslationDataStorage.topicStandardForm(topicId);
             }
 
-            if (tok->isImplicitKeyword() && mTranslationDataStorage.hasTranslation())
-                continue;
-
             if (mActorKnownTopics.count( topicId ))
                 mKnownTopics.insert( topicId );
         }

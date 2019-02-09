@@ -19,7 +19,6 @@ namespace MWDialogue
             Token(const std::string & text, Type type) : mText(text), mType(type) {}
 
             bool isExplicitLink() { return mType == ExplicitLink; }
-            bool isImplicitKeyword() { return mType == ImplicitKeyword; }
 
             std::string mText;
             Type mType;
