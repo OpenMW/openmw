@@ -5,7 +5,15 @@
 #include <ostream>
 #include <sstream>
 
+#include <components/esm/loadland.hpp>
 #include <components/misc/constants.hpp>
+
+namespace
+{
+    const int cellSize {ESM::Land::REAL_SIZE};
+    const int landSize {ESM::Land::LAND_SIZE};
+    const int landTextureSize {ESM::Land::LAND_TEXTURE_SIZE};
+}
 
 CSMWorld::CellCoordinates::CellCoordinates() : mX (0), mY (0) {}
 
@@ -66,6 +74,33 @@ std::pair<CSMWorld::CellCoordinates, bool> CSMWorld::CellCoordinates::fromId (
 std::pair<int, int> CSMWorld::CellCoordinates::coordinatesToCellIndex (float x, float y)
 {
     return std::make_pair (std::floor (x / Constants::CellSizeInUnits), std::floor (y / Constants::CellSizeInUnits));
+}
+
+std::pair<int, int> CSMWorld::CellCoordinates::toTextureCoords(osg::Vec3d worldPos)
+{
+    const auto xd = static_cast<double>(worldPos.x() * landTextureSize / cellSize - 0.25f);
+    const auto yd = static_cast<double>(worldPos.y() * landTextureSize / cellSize + 0.25f);
+
+    const auto x = static_cast<int>(std::floor(xd));
+    const auto y = static_cast<int>(std::floor(yd));
+
+    return std::make_pair(x, y);
+}
+
+std::pair<int, int> CSMWorld::CellCoordinates::toVertexCoords(osg::Vec3d worldPos)
+{
+    const auto xd = static_cast<double>(worldPos.x() * landSize / cellSize);
+    const auto yd = static_cast<double>(worldPos.y() * landSize / cellSize);
+
+    const auto x = static_cast<int>(std::floor(xd));
+    const auto y = static_cast<int>(std::floor(yd));
+
+    return std::make_pair(x, y);
+}
+
+double CSMWorld::CellCoordinates::texSelectionToWorldCoords(int pos)
+{
+    return cellSize * static_cast<double>(pos) / landTextureSize;
 }
 
 bool CSMWorld::operator== (const CellCoordinates& left, const CellCoordinates& right)

@@ -7,6 +7,10 @@
 
 #include <QMetaType>
 
+//#include <osg/Group>
+//#include <osg/Geometry>
+#include <osg/PositionAttitudeTransform>
+
 namespace CSMWorld
 {
     class CellCoordinates
@@ -30,7 +34,7 @@ namespace CSMWorld
             ///< Return a copy of *this, moved by the given offset.
 
             static std::string generateId (int x, int y);
-            
+
             std::string getId (const std::string& worldspace) const;
             ///< Return the ID for the cell at these coordinates.
 
@@ -44,6 +48,15 @@ namespace CSMWorld
 
             /// \return cell coordinates such that given world coordinates are in it.
             static std::pair<int, int> coordinatesToCellIndex (float x, float y);
+
+            ///Converts Worldspace coordinates to global texture selection, modified by texture offset.
+            static std::pair<int, int> toTextureCoords(osg::Vec3d worldPos);
+
+            ///Converts Worldspace coordinates to global vertex selection.
+            static std::pair<int, int> toVertexCoords(osg::Vec3d worldPos);
+
+            ///Converts Global texture coordinates to Worldspace coordinate at upper left corner of the selected texture.
+            static double texSelectionToWorldCoords(int);
     };
 
     bool operator== (const CellCoordinates& left, const CellCoordinates& right);
