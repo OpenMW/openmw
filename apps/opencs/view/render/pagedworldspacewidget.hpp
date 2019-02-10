@@ -124,6 +124,12 @@ namespace CSVRender
 
             virtual Cell* getCell(const osg::Vec3d& point) const;
 
+            void setCellBeingEdited(CSMWorld::CellCoordinates coords);
+
+            void setCellNotBeingEdited(CSMWorld::CellCoordinates coords);
+
+            void discardAllBeingEdited();
+
             virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
                 const;
 

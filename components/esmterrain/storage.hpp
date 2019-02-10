@@ -13,10 +13,13 @@ namespace VFS
     class Manager;
 }
 
+namespace CSVRender
+{
+    class TerrainStorage;
+}
+
 namespace ESMTerrain
 {
-
-    class LandCache;
 
     /// @brief Wrapper around Land Data with reference counting. The wrapper needs to be held as long as the data is still in use
     class LandObject : public osg::Object
@@ -39,6 +42,13 @@ namespace ESMTerrain
         ESM::Land::LandData mData;
     };
 
+    class LandCache
+    {
+    public:
+        typedef std::map<std::pair<int, int>, osg::ref_ptr<const LandObject> > Map;
+        Map mMap;
+    };
+    
     /// @brief Feeds data from ESM terrain records (ESM::Land, ESM::LandTexture)
     ///        into the terrain component, converting it on the fly as needed.
     class Storage : public Terrain::Storage
@@ -133,6 +143,8 @@ namespace ESMTerrain
         bool mAutoUseSpecularMaps;
 
         Terrain::LayerInfo getLayerInfo(const std::string& texture);
+
+        friend class CSVRender::TerrainStorage;
     };
 
 }

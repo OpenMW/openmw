@@ -17,6 +17,7 @@ namespace CSMPrefs
 
 namespace CSMWorld
 {
+    class CellCoordinates;
     class UniversalId;
 }
 
@@ -168,6 +169,12 @@ namespace CSVRender
 
             /// \note Returns the cell if it exists, otherwise a null pointer
             virtual Cell* getCell(const osg::Vec3d& point) const = 0;
+
+            virtual void setCellBeingEdited(CSMWorld::CellCoordinates coords) = 0;
+
+            virtual void setCellNotBeingEdited(CSMWorld::CellCoordinates coords) = 0;
+
+            virtual void discardAllBeingEdited() = 0;
 
             virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
                 const = 0;

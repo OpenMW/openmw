@@ -15,11 +15,20 @@ namespace CSVRender
     {
     public:
         TerrainStorage(const CSMWorld::Data& data);
+        float mAlteredHeight;
+        void alterHeights();
+        void resetHeights();
+        
     private:
         const CSMWorld::Data& mData;
 
         virtual osg::ref_ptr<const ESMTerrain::LandObject> getLand (int cellX, int cellY);
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin);
+
+        void fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
+                                osg::ref_ptr<osg::Vec3Array> positions,
+                                osg::ref_ptr<osg::Vec3Array> normals,
+                                osg::ref_ptr<osg::Vec4Array> colours) override;
 
         virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY);
     };

@@ -16,14 +16,6 @@
 
 namespace ESMTerrain
 {
-
-    class LandCache
-    {
-    public:
-        typedef std::map<std::pair<int, int>, osg::ref_ptr<const LandObject> > Map;
-        Map mMap;
-    };
-
     LandObject::LandObject()
         : mLand(nullptr)
         , mLoadFlags(0)
