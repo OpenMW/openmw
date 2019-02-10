@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>437</width>
-    <height>343</height>
+    <height>498</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -142,6 +142,55 @@
          <widget class="QComboBox" name="resolutionComboBox"/>
         </item>
        </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gridGroupBox">
+     <property name="title">
+      <string>Distant Terrain</string>
+     </property>
+     <layout class="QGridLayout" name="terrainGridLayout" columnstretch="1,0">
+      <item row="8" column="0">
+       <widget class="QLabel" name="viewingmultLabel">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The visibility slider and actual viewing distance will be the&lt;br/&gt;&lt;span style=&quot; font-family:'monospace';&quot;&gt;&amp;quot;viewing distance&amp;quot; * &amp;quot;visibility multiplier&amp;quot;&lt;/span&gt;&lt;br/&gt;when distant terrain is enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Extended Viewing Distance</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="viewingDistanceLabel">
+        <property name="text">
+         <string>Viewing Distance</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="distantTerrainCheckBox">
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <layout class="QGridLayout" name="distantLayout">
+        <item row="0" column="0">
+         <widget class="QSpinBox" name="extendedViewingSpinBox"/>
+        </item>
+        <item row="0" column="0">
+         <layout class="QHBoxLayout" name="distantBoxLayout"/>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="viewingDistanceDoubleSpinBox"/>
       </item>
      </layout>
     </widget>

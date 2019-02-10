@@ -329,7 +329,7 @@ namespace MWRender
         mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
-        mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
+        mViewDistance = Settings::Manager::getBool("distant terrain", "Terrain") ? Settings::Manager::getFloat("viewing distance", "Camera") * Settings::Manager::getFloat("distant visibility multiplier", "Camera") : Settings::Manager::getFloat("viewing distance", "Camera");
         mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
         mFirstPersonFieldOfView = Settings::Manager::getFloat("first person field of view", "Camera");
         mStateUpdater->setFogEnd(mViewDistance);
@@ -1211,7 +1211,7 @@ namespace MWRender
             }
             else if (it->first == "Camera" && it->second == "viewing distance")
             {
-                mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
+                mViewDistance = Settings::Manager::getBool("distant terrain", "Terrain") ? Settings::Manager::getFloat("viewing distance", "Camera") * Settings::Manager::getFloat("distant visibility multiplier", "Camera") : Settings::Manager::getFloat("viewing distance", "Camera");
                 if(!mDistantFog)
                     mStateUpdater->setFogEnd(mViewDistance);
                 updateProjectionMatrix();

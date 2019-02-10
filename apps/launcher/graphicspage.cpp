@@ -2,6 +2,7 @@
 
 #include <boost/math/common_factor.hpp>
 #include <csignal>
+#include <limits>
 #include <QDesktopWidget>
 #include <QMessageBox>
 #include <QDir>
@@ -44,7 +45,9 @@ Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, Settings:
     connect(fullScreenCheckBox, SIGNAL(stateChanged(int)), this, SLOT(slotFullScreenChanged(int)));
     connect(standardRadioButton, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
     connect(screenComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(screenChanged(int)));
-
+    connect(distantTerrainCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotDistantTerrainChanged(bool)));
+    viewingDistanceDoubleSpinBox->setMaximum(std::numeric_limits<float>::max());
+    extendedViewingSpinBox->setMaximum(std::numeric_limits<float>::max());
 }
 
 bool Launcher::GraphicsPage::setupSDL()
@@ -97,7 +100,14 @@ bool Launcher::GraphicsPage::loadSettings()
 
     if (mEngineSettings.getBool("window border", "Video"))
         windowBorderCheckBox->setCheckState(Qt::Checked);
+        
+    if (mEngineSettings.getBool("distant terrain", "Terrain"))
+        distantTerrainCheckBox->setCheckState(Qt::Checked);
 
+    viewingDistanceDoubleSpinBox->setValue(mEngineSettings.getFloat("viewing distance", "Camera"));
+    
+    extendedViewingSpinBox->setValue(mEngineSettings.getFloat("viewing distance", "Terrain"));
+    
     // aaValue is the actual value (0, 1, 2, 4, 8, 16)
     int aaValue = mEngineSettings.getInt("antialiasing", "Video");
     // aaIndex is the index into the allowed values in the pull down.
@@ -109,7 +119,7 @@ bool Launcher::GraphicsPage::loadSettings()
     int height = mEngineSettings.getInt("resolution y", "Video");
     QString resolution = QString::number(width) + QString(" x ") + QString::number(height);
     screenComboBox->setCurrentIndex(mEngineSettings.getInt("screen", "Video"));
-
+    
     int resIndex = resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
 
     if (resIndex != -1) {
@@ -166,6 +176,18 @@ void Launcher::GraphicsPage::saveSettings()
     int cScreen = screenComboBox->currentIndex();
     if (cScreen != mEngineSettings.getInt("screen", "Video"))
         mEngineSettings.setInt("screen", "Video", cScreen);
+        
+    bool cDistantTerrain = distantTerrainCheckBox->checkState();
+    if (cDistantTerrain != mEngineSettings.getBool("distant terrain", "Terrain"))
+        mEngineSettings.setBool("distant terrain", "Terrain", cDistantTerrain);
+    
+    float cViewingDistance = viewingDistanceDoubleSpinBox->value();
+    if (cViewingDistance != mEngineSettings.getFloat("viewing distance", "Camera"))
+        mEngineSettings.setFloat("viewing distance", "Camera", cViewingDistance);
+
+    float cExtendedDistance = extendedViewingSpinBox->value();
+    if (cExtendedDistance != mEngineSettings.getFloat("viewing distance", "Terrain"))
+        mEngineSettings.setFloat("viewing distance", "Terrain", cExtendedDistance);
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
@@ -264,5 +286,16 @@ void Launcher::GraphicsPage::slotStandardToggled(bool checked)
         resolutionComboBox->setEnabled(false);
         customWidthSpinBox->setEnabled(true);
         customHeightSpinBox->setEnabled(true);
+    }
+}
+
+void Launcher::GraphicsPage::slotDistantTerrainChanged(bool checked)
+{
+    if (checked) {
+        viewingDistanceDoubleSpinBox->setEnabled(false);
+        extendedViewingSpinBox->setEnabled(true);
+    } else {
+        viewingDistanceDoubleSpinBox->setEnabled(true);
+        extendedViewingSpinBox->setEnabled(false);
     }
 }
