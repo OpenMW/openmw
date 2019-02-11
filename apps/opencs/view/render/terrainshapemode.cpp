@@ -84,25 +84,14 @@ void CSVRender::TerrainShapeMode::deactivate(CSVWidget::SceneToolbar* toolbar)
 
 void CSVRender::TerrainShapeMode::primaryEditPressed(const WorldspaceHitResult& hit)
 {
-    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
-        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
-    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
-        *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
-
     mCellId = getWorldspaceWidget().getCellId (hit.worldPos);
-
-    QUndoStack& undoStack = document.getUndoStack();
 
     if (hit.hit && hit.tag == 0)
     {
-        undoStack.beginMacro ("Edit shape records");
         if(allowLandShapeEditing(mCellId)==true)
         {
-            //undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, mCellId));
             editTerrainShapeGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), false);
         }
-        undoStack.endMacro();
     }
 }
 
@@ -126,25 +115,15 @@ bool CSVRender::TerrainShapeMode::primaryEditStartDrag (const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
 
-    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
-        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
-    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
-        *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
-
     mCellId = getWorldspaceWidget().getCellId (hit.worldPos);
-
-    QUndoStack& undoStack = document.getUndoStack();
 
     mDragMode = InteractionType_PrimaryEdit;
 
     if (hit.hit && hit.tag == 0)
     {
-        undoStack.beginMacro ("Edit shape records");
         mIsEditing = true;
         if(allowLandShapeEditing(mCellId)==true)
         {
-            //undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, mCellId));
             editTerrainShapeGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
         }
     }
@@ -190,7 +169,6 @@ void CSVRender::TerrainShapeMode::drag (const QPoint& pos, int diffX, int diffY,
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
         std::string cellId = getWorldspaceWidget().getCellId (hit.worldPos);
         getWorldspaceWidget().setCellBeingEdited(CSMWorld::CellCoordinates::fromId (cellId).first);
-        CSMDoc::Document& document = getWorldspaceWidget().getDocument();
 
         if (hit.hit && hit.tag == 0)
         {
@@ -224,6 +202,7 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
             undoStack.endMacro();
             mIsEditing = false;
         }
+
         resetAlteredHeightMap();
         if (CSVRender::PagedWorldspaceWidget *paged =
             dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
@@ -371,22 +350,6 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(std::pair<int, int> vertex
     if(selectMode == 1) mTerrainShapeSelection->toggleSelect(selections, dragOperation);
 
 }
-
-/*void CSVRender::TerrainShapeMode::pushEditToCommand(CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,
-    CSMWorld::IdTable& landTable, std::string cellId)
-{
-    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
-        *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
-
-    QVariant changedLand;
-    changedLand.setValue(newLandGrid);
-
-    QModelIndex index(landTable.getModelIndex (cellId, landTable.findColumnIndex (CSMWorld::Columns::ColumnId_LandTexturesIndex)));
-
-    QUndoStack& undoStack = document.getUndoStack();
-    undoStack.push (new CSMWorld::ModifyCommand(landTable, index, changedLand));
-    undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, cellId));
-}*/
 
 bool CSVRender::TerrainShapeMode::allowLandShapeEditing(std::string cellId)
 {
