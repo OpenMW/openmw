@@ -21,8 +21,8 @@ namespace
     const int landTextureSize {ESM::Land::LAND_TEXTURE_SIZE};
 }
 
-CSVRender::TerrainSelection::TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget):
-mParentNode(parentNode), mWorldspaceWidget (worldspaceWidget), mDraggedOperationFlag(false)
+CSVRender::TerrainSelection::TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget, TerrainSelectionType type):
+mParentNode(parentNode), mWorldspaceWidget (worldspaceWidget), mDraggedOperationFlag(false), mSelectionType(type)
 {
     mGeometry = new osg::Geometry();
 
@@ -125,6 +125,54 @@ void CSVRender::TerrainSelection::update()
 
     const osg::ref_ptr<osg::Vec3Array> vertices (new osg::Vec3Array);
 
+    switch (mSelectionType) {
+            case TerrainSelectionType::Texture:
+                drawTextureSelection(vertices);
+            case TerrainSelectionType::Shape:
+                drawShapeSelection(vertices);
+            }
+
+    mGeometry->setVertexArray(vertices);
+    osg::ref_ptr<osg::DrawArrays> drawArrays = new osg::DrawArrays(osg::PrimitiveSet::LINES);
+    drawArrays->setCount(vertices->size());
+    mGeometry->addPrimitiveSet(drawArrays);
+    mSelectionNode->addChild(mGeometry);
+}
+
+void CSVRender::TerrainSelection::drawShapeSelection(const osg::ref_ptr<osg::Vec3Array> vertices)
+{
+    if (!mSelection.empty())
+    {
+        for (std::pair<int, int> localPos : mSelection)
+        {
+            int x {localPos.first};
+            int y {localPos.second};
+
+            const auto vertexselection = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x, y + 1));
+            vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(x) , CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(y), calculateLandHeight(x, y) + 2));
+            vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(x), CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(y - 1), calculateLandHeight(x, y - 1) + 2));
+            vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(x) , CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(y) , calculateLandHeight(x, y) + 2));
+            vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(x - 1), CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(y), calculateLandHeight(x - 1, y) + 2));
+
+            const auto north = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x, y + 1));
+            if (north == mSelection.end())
+            {
+                vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(x) , CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(y), calculateLandHeight(x, y) + 2));
+                vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(x), CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(y + 1), calculateLandHeight(x, y + 1) + 2));
+            }
+
+            const auto east = std::find(mSelection.begin(), mSelection.end(), std::make_pair(x + 1, y));
+            if (east == mSelection.end())
+            {
+                vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(x) , CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(y), calculateLandHeight(x, y) + 2));
+                vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(x + 1), CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(y), calculateLandHeight(x + 1, y) + 2));
+            }
+        }
+    }
+}
+
+void CSVRender::TerrainSelection::drawTextureSelection(const osg::ref_ptr<osg::Vec3Array> vertices)
+{
     if (!mSelection.empty())
     {
 
@@ -197,12 +245,6 @@ void CSVRender::TerrainSelection::update()
             }
         }
     }
-
-    mGeometry->setVertexArray(vertices);
-    osg::ref_ptr<osg::DrawArrays> drawArrays = new osg::DrawArrays(osg::PrimitiveSet::LINES);
-    drawArrays->setCount(vertices->size());
-    mGeometry->addPrimitiveSet(drawArrays);
-    mSelectionNode->addChild(mGeometry);
 }
 
 int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global vertex coordinates

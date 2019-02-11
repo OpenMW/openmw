@@ -53,8 +53,17 @@ namespace CSMWorld
             ///Converts Worldspace coordinates to global vertex selection.
             static std::pair<int, int> toVertexCoords(osg::Vec3d worldPos);
 
-            ///Converts Global texture coordinates to Worldspace coordinate at upper left corner of the selected texture.
+            ///Converts Global texture coordinate to Worldspace coordinate at upper left corner of the selected texture.
             static double texSelectionToWorldCoords(int);
+
+            ///Converts Global vertex coordinate to Worldspace coordinate at upper left corner of the selected texture.
+            static double vertexSelectionToWorldCoords(int);
+
+            ///Calculates heightmap coordinate from the global vertex coordinate
+            static int vertexSelectionToInCellCoords(int);
+
+            ///Converts Global vertex coordinates to Cell Id
+            static std::string vertexGlobalToCellId(std::pair<int, int>);
     };
 
     bool operator== (const CellCoordinates& left, const CellCoordinates& right);

@@ -56,7 +56,7 @@ void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
     if (!mTerrainTextureSelection)
     {
-        mTerrainTextureSelection.reset(new TerrainSelection(mParentNode, &getWorldspaceWidget()));
+        mTerrainTextureSelection.reset(new TerrainSelection(mParentNode, &getWorldspaceWidget(), TerrainSelectionType::Texture));
     }
 
     if(!mTextureBrushScenetool)

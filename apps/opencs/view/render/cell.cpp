@@ -137,8 +137,8 @@ void CSVRender::Cell::updateLand()
                     mData.getResourceSystem().get(), mTerrainStorage, Mask_Terrain));
             }
 
-            if (mTerrainEdited == true) mTerrainStorage->alterHeights();
-            if (mTerrainEdited == false) mTerrainStorage->resetHeights();
+            //if (mTerrainEdited == true) mTerrainStorage->alterHeights(heightmap);
+            //if (mTerrainEdited == false) mTerrainStorage->resetHeights();
 
             mTerrain->loadCell(esmLand.mX, esmLand.mY);
 
@@ -350,6 +350,18 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
         return false;
 
     return addObjects (start, end);
+}
+
+void CSVRender::Cell::setAlteredHeights(float heightMap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE])
+{
+    mTerrainStorage->alterHeights(heightMap);
+    mUpdateLand = true;
+}
+
+void CSVRender::Cell::resetAlteredHeights()
+{
+    mTerrainStorage->resetHeights();
+    mUpdateLand = true;
 }
 
 void CSVRender::Cell::setBeingEdited()

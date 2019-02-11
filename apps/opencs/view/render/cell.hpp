@@ -121,6 +121,10 @@ namespace CSVRender
             /// this cell?
             bool referenceAdded (const QModelIndex& parent, int start, int end);
 
+            void setAlteredHeights(float heightMap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE]);
+
+            void resetAlteredHeights();
+
             void setBeingEdited();
 
             void setNotBeingEdited();

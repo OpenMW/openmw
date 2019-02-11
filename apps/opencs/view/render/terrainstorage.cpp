@@ -30,8 +30,17 @@ namespace CSVRender
 
     TerrainStorage::TerrainStorage(const CSMWorld::Data &data)
         : ESMTerrain::Storage(data.getResourceSystem()->getVFS())
-        , mData(data), mAlteredHeight(0.0f)
+        , mData(data)
     {
+        /*float heightMap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE];
+        for (int x = 1; x <= ESM::Land::LAND_SIZE; ++x)
+        {
+            for (int y = 1; y <= ESM::Land::LAND_SIZE; ++y)
+            {
+                heightMap[y*ESM::Land::LAND_SIZE + x] = 0;
+            }
+        }*/
+        resetHeights();
     }
 
     osg::ref_ptr<const ESMTerrain::LandObject> TerrainStorage::getLand(int cellX, int cellY)
@@ -55,14 +64,26 @@ namespace CSVRender
         return &mData.getLandTextures().getRecord(row).get();
     }
 
-    void TerrainStorage::alterHeights()
+    void TerrainStorage::alterHeights(float heightMap[])
     {
-        mAlteredHeight = 25.0f;
+        for (int x = 0; x < ESM::Land::LAND_SIZE; ++x)
+        {
+            for (int y = 0; y < ESM::Land::LAND_SIZE; ++y)
+            {
+                mAlteredHeight[y*ESM::Land::LAND_SIZE + x] = heightMap[y*ESM::Land::LAND_SIZE + x];
+            }
+        }
     }
 
     void TerrainStorage::resetHeights()
     {
-        mAlteredHeight = 0.0f;
+        for (int x = 0; x < ESM::Land::LAND_SIZE; ++x)
+        {
+            for (int y = 0; y < ESM::Land::LAND_SIZE; ++y)
+            {
+                mAlteredHeight[y*ESM::Land::LAND_SIZE + x] = 0;
+            }
+        }
     }
 
     void TerrainStorage::fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
@@ -146,7 +167,7 @@ namespace CSVRender
                         (*positions)[static_cast<unsigned int>(vertX*numVerts + vertY)]
                             = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * Constants::CellSizeInUnits,
                                          (vertY / float(numVerts - 1) - 0.5f) * size * Constants::CellSizeInUnits,
-                                         height + mAlteredHeight);
+                                         height + mAlteredHeight[static_cast<unsigned int>(col*ESM::Land::LAND_SIZE + row)]);
 
                         if (normalData)
                         {
@@ -170,7 +191,7 @@ namespace CSVRender
 
                         (*normals)[static_cast<unsigned int>(vertX*numVerts + vertY)] = normal;
 
-                        if (colourData)
+                        if (colourData && mAlteredHeight == 0)
                         {
                             for (int i=0; i<3; ++i)
                                 color[i] = colourData->mColours[srcArrayIndex+i] / 255.f;

@@ -15,10 +15,10 @@ namespace CSVRender
     {
     public:
         TerrainStorage(const CSMWorld::Data& data);
-        float mAlteredHeight;
-        void alterHeights();
+        float mAlteredHeight[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE];
+        void alterHeights(float heightmap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE]);
         void resetHeights();
-        
+
     private:
         const CSMWorld::Data& mData;
 

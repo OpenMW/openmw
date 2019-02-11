@@ -23,6 +23,7 @@
 #include "mask.hpp"
 #include "cameracontroller.hpp"
 #include "cellarrow.hpp"
+#include "terrainshapemode.hpp"
 #include "terraintexturemode.hpp"
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
@@ -136,7 +137,7 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
 
     /// \todo replace EditMode with suitable subclasses
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain shape editing"),
+        new TerrainShapeMode (this, mRootNode, tool),
         "terrain-shape");
     tool->addButton (
         new TerrainTextureMode (this, mRootNode, tool),
@@ -756,6 +757,23 @@ CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const osg::Vec3d& poi
         return searchResult->second;
     else
         return 0;
+}
+
+void CSVRender::PagedWorldspaceWidget::setCellAlteredHeights(CSMWorld::CellCoordinates coords, float heightMap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE])
+{
+    std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
+    if (searchResult != mCells.end()) searchResult->second->setAlteredHeights(heightMap);
+}
+
+void CSVRender::PagedWorldspaceWidget::resetAllAlteredHeights()
+{
+    std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+
+    while (iter!=mCells.end())
+    {
+        iter->second->resetAlteredHeights();
+        ++iter;
+    }
 }
 
 void CSVRender::PagedWorldspaceWidget::setCellBeingEdited(CSMWorld::CellCoordinates coords)

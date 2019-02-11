@@ -21,12 +21,18 @@ namespace CSVRender
     struct WorldspaceHitResult;
     class WorldspaceWidget;
 
+    enum class TerrainSelectionType {
+        Texture,
+        Shape
+    };
+    
     /// \brief Class handling the terrain selection data and rendering
     class TerrainSelection
     {
+
         public:
 
-            TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget);
+            TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget, TerrainSelectionType type);
             ~TerrainSelection();
 
             void onlySelect(const std::vector<std::pair<int, int>> localPositions);
@@ -46,6 +52,9 @@ namespace CSVRender
 
             void update();
 
+            void drawShapeSelection(const osg::ref_ptr<osg::Vec3Array> vertices);
+            void drawTextureSelection(const osg::ref_ptr<osg::Vec3Array> vertices);
+
             int calculateLandHeight(int x, int y);
 
         private:
@@ -58,6 +67,7 @@ namespace CSVRender
             std::vector<std::pair<int, int>> mSelection; // Global terrain selection coordinate in either vertex or texture units
             std::vector<std::pair<int, int>> mTemporarySelection; // Used during toggle to compare the most recent drag operation
             bool mDraggedOperationFlag; //true during drag operation, false when click-operation
+            TerrainSelectionType mSelectionType;
     };
 }
 

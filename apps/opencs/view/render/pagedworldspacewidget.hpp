@@ -124,6 +124,10 @@ namespace CSVRender
 
             virtual Cell* getCell(const osg::Vec3d& point) const;
 
+            void setCellAlteredHeights(CSMWorld::CellCoordinates coords, float heightMap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE]);
+
+            void resetAllAlteredHeights();
+
             void setCellBeingEdited(CSMWorld::CellCoordinates coords);
 
             void setCellNotBeingEdited(CSMWorld::CellCoordinates coords);

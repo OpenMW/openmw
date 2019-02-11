@@ -89,8 +89,8 @@ std::pair<int, int> CSMWorld::CellCoordinates::toTextureCoords(osg::Vec3d worldP
 
 std::pair<int, int> CSMWorld::CellCoordinates::toVertexCoords(osg::Vec3d worldPos)
 {
-    const auto xd = static_cast<double>(worldPos.x() * landSize / cellSize);
-    const auto yd = static_cast<double>(worldPos.y() * landSize / cellSize);
+    const auto xd = static_cast<double>(worldPos.x() * (landSize - 1) / cellSize);
+    const auto yd = static_cast<double>(worldPos.y() * (landSize - 1) / cellSize);
 
     const auto x = static_cast<int>(std::floor(xd));
     const auto y = static_cast<int>(std::floor(yd));
@@ -101,6 +101,24 @@ std::pair<int, int> CSMWorld::CellCoordinates::toVertexCoords(osg::Vec3d worldPo
 double CSMWorld::CellCoordinates::texSelectionToWorldCoords(int pos)
 {
     return cellSize * static_cast<double>(pos) / landTextureSize;
+}
+
+double CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(int pos)
+{
+    return cellSize * static_cast<double>(pos) / (landSize - 1);
+}
+
+int CSMWorld::CellCoordinates::vertexSelectionToInCellCoords(int pos)
+{
+    return static_cast<int>(pos - std::floor(static_cast<double>(pos) / (landSize - 1)) * (landSize - 1));
+}
+
+std::string CSMWorld::CellCoordinates::vertexGlobalToCellId(std::pair<int, int> vertexGlobal)
+{
+    int x = std::floor(static_cast<double>(vertexGlobal.first) / (landSize - 1));
+    int y = std::floor(static_cast<double>(vertexGlobal.second) / (landSize - 1));
+    std::string cellId = "#" + std::to_string(x) + " " + std::to_string(y);
+    return cellId;
 }
 
 bool CSMWorld::operator== (const CellCoordinates& left, const CellCoordinates& right)
