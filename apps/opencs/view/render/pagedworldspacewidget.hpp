@@ -126,6 +126,8 @@ namespace CSVRender
 
             void setCellAlteredHeights(CSMWorld::CellCoordinates coords, float heightMap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE]);
 
+            float* getCellAlteredHeights(CSMWorld::CellCoordinates coords);
+
             void resetAllAlteredHeights();
 
             void setCellBeingEdited(CSMWorld::CellCoordinates coords);

@@ -123,6 +123,8 @@ namespace CSVRender
 
             void setAlteredHeights(float heightMap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE]);
 
+            float* getAlteredHeights();
+
             void resetAlteredHeights();
 
             void setBeingEdited();

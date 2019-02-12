@@ -87,11 +87,15 @@ namespace CSVRender
             void selectTerrainShapes (std::pair<int, int>, unsigned char, bool);
 
             /// Push shape edits to command macro
-            void pushEditToCommand (CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,
+            void pushEditToCommand (CSMWorld::LandHeightsColumn::DataType& newLandGrid, CSMDoc::Document& document,
+                CSMWorld::IdTable& landTable, std::string cellId);
+
+            /// Push land normals edits to command macro
+            void pushNormalsEditToCommand(CSMWorld::LandNormalsColumn::DataType& newLandGrid, CSMDoc::Document& document,
                 CSMWorld::IdTable& landTable, std::string cellId);
 
             /// Create new cell and land if needed
-            bool allowLandShapeEditing(std::string textureFileName);
+            bool allowLandShapeEditing(std::string textureFileName, bool doCommands);
 
         private:
             std::string mCellId;
@@ -105,6 +109,7 @@ namespace CSVRender
             bool mIsEditing;
             std::unique_ptr<TerrainSelection> mTerrainShapeSelection;
             float mAlteredHeightMap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE];
+            std::vector<CSMWorld::CellCoordinates> mAlteredCells;
 
             const int cellSize {ESM::Land::REAL_SIZE};
             const int landSize {ESM::Land::LAND_SIZE};

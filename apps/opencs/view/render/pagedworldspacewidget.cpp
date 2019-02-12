@@ -765,6 +765,13 @@ void CSVRender::PagedWorldspaceWidget::setCellAlteredHeights(CSMWorld::CellCoord
     if (searchResult != mCells.end()) searchResult->second->setAlteredHeights(heightMap);
 }
 
+float* CSVRender::PagedWorldspaceWidget::getCellAlteredHeights(CSMWorld::CellCoordinates coords)
+{
+    std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
+    if (searchResult != mCells.end()) return searchResult->second->getAlteredHeights();
+    return nullptr;
+}
+
 void CSVRender::PagedWorldspaceWidget::resetAllAlteredHeights()
 {
     std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());

@@ -18,6 +18,7 @@ namespace CSVRender
         float mAlteredHeight[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE];
         void alterHeights(float heightmap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE]);
         void resetHeights();
+        float* getAlteredHeights();
 
     private:
         const CSMWorld::Data& mData;

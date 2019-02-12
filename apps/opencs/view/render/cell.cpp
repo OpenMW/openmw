@@ -358,6 +358,11 @@ void CSVRender::Cell::setAlteredHeights(float heightMap[ESM::Land::LAND_SIZE * E
     mUpdateLand = true;
 }
 
+float* CSVRender::Cell::getAlteredHeights()
+{
+    return mTerrainStorage->getAlteredHeights();
+}
+
 void CSVRender::Cell::resetAlteredHeights()
 {
     mTerrainStorage->resetHeights();

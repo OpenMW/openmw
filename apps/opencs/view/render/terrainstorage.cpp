@@ -1,6 +1,7 @@
 #include "terrainstorage.hpp"
 
 #include <set>
+#include <memory>
 
 #include "../../model/world/land.hpp"
 #include "../../model/world/landtexture.hpp"
@@ -70,7 +71,7 @@ namespace CSVRender
         {
             for (int y = 0; y < ESM::Land::LAND_SIZE; ++y)
             {
-                mAlteredHeight[y*ESM::Land::LAND_SIZE + x] = heightMap[y*ESM::Land::LAND_SIZE + x];
+                mAlteredHeight[y*ESM::Land::LAND_SIZE + x] = mAlteredHeight[y*ESM::Land::LAND_SIZE + x] + heightMap[y*ESM::Land::LAND_SIZE + x];
             }
         }
     }
@@ -84,6 +85,11 @@ namespace CSVRender
                 mAlteredHeight[y*ESM::Land::LAND_SIZE + x] = 0;
             }
         }
+    }
+
+    float* TerrainStorage::getAlteredHeights()
+    {
+        return mAlteredHeight;
     }
 
     void TerrainStorage::fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
