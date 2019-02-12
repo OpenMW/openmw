@@ -193,13 +193,9 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
 {
     if (mDragMode == InteractionType_PrimaryEdit)
     {
-        CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-        QUndoStack& undoStack = document.getUndoStack();
-
         getWorldspaceWidget().discardAllBeingEdited();
         if (mIsEditing == true)
         {
-            undoStack.endMacro();
             mIsEditing = false;
         }
 
