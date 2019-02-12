@@ -137,9 +137,6 @@ void CSVRender::Cell::updateLand()
                     mData.getResourceSystem().get(), mTerrainStorage, Mask_Terrain));
             }
 
-            //if (mTerrainEdited == true) mTerrainStorage->alterHeights(heightmap);
-            //if (mTerrainEdited == false) mTerrainStorage->resetHeights();
-
             mTerrain->loadCell(esmLand.mX, esmLand.mY);
 
             if (!mCellBorder)
@@ -168,7 +165,7 @@ void  CSVRender::Cell::unloadLand()
 CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
     bool deleted)
 : mData (data), mId (Misc::StringUtils::lowerCase (id)), mDeleted (deleted), mSubMode (0),
-  mSubModeElementMask (0), mUpdateLand(true), mLandDeleted(false), mTerrainEdited(false)
+  mSubModeElementMask (0), mUpdateLand(true), mLandDeleted(false)
 {
     std::pair<CSMWorld::CellCoordinates, bool> result = CSMWorld::CellCoordinates::fromId (id);
 
@@ -352,9 +349,9 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
     return addObjects (start, end);
 }
 
-void CSVRender::Cell::setAlteredHeights(float heightMap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE])
+void CSVRender::Cell::setAlteredHeights(int inCellX, int inCellY, float heightMap)
 {
-    mTerrainStorage->alterHeights(heightMap);
+    mTerrainStorage->alterHeights(inCellX, inCellY, heightMap);
     mUpdateLand = true;
 }
 
@@ -366,18 +363,6 @@ float* CSVRender::Cell::getAlteredHeights()
 void CSVRender::Cell::resetAlteredHeights()
 {
     mTerrainStorage->resetHeights();
-    mUpdateLand = true;
-}
-
-void CSVRender::Cell::setBeingEdited()
-{
-    mTerrainEdited = true;
-    mUpdateLand = true;
-}
-
-void CSVRender::Cell::setNotBeingEdited()
-{
-    mTerrainEdited = false;
     mUpdateLand = true;
 }
 

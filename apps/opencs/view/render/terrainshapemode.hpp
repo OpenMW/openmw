@@ -77,11 +77,10 @@ namespace CSVRender
             virtual void dragWheel (int diff, double speedFactor);
             virtual void dragMoveEvent (QDragMoveEvent *event);
 
-            /// Reset the height-map array
-            void resetAlteredHeightMap ();
-
             /// Handle brush mechanics for shape editing
             void editTerrainShapeGrid (std::pair<int, int> vertexCoords, bool dragOperation);
+
+            void alterHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY);
 
             /// Handle brush mechanics for shape selection
             void selectTerrainShapes (std::pair<int, int>, unsigned char, bool);
@@ -95,7 +94,7 @@ namespace CSVRender
                 CSMWorld::IdTable& landTable, std::string cellId);
 
             /// Create new cell and land if needed
-            bool allowLandShapeEditing(std::string textureFileName, bool doCommands);
+            bool allowLandShapeEditing(std::string textureFileName);
 
         private:
             std::string mCellId;
@@ -108,7 +107,7 @@ namespace CSVRender
             osg::Group* mParentNode;
             bool mIsEditing;
             std::unique_ptr<TerrainSelection> mTerrainShapeSelection;
-            float mAlteredHeightMap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE];
+            float mAlteredHeight;
             std::vector<CSMWorld::CellCoordinates> mAlteredCells;
 
             const int cellSize {ESM::Land::REAL_SIZE};

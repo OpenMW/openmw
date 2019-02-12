@@ -59,7 +59,7 @@ namespace CSVRender
             bool mDeleted;
             int mSubMode;
             unsigned int mSubModeElementMask;
-            bool mUpdateLand, mLandDeleted, mTerrainEdited;
+            bool mUpdateLand, mLandDeleted;
             TerrainStorage *mTerrainStorage;
 
             /// Ignored if cell does not have an object with the given ID.
@@ -121,15 +121,11 @@ namespace CSVRender
             /// this cell?
             bool referenceAdded (const QModelIndex& parent, int start, int end);
 
-            void setAlteredHeights(float heightMap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE]);
+            void setAlteredHeights(int inCellX, int inCellY, float heightMap);
 
             float* getAlteredHeights();
 
             void resetAlteredHeights();
-
-            void setBeingEdited();
-
-            void setNotBeingEdited();
 
             void pathgridModified();
 

@@ -201,7 +201,6 @@ void CSVRender::TerrainTextureMode::drag (const QPoint& pos, int diffX, int diff
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
         std::string cellId = getWorldspaceWidget().getCellId (hit.worldPos);
-        getWorldspaceWidget().setCellBeingEdited(CSMWorld::CellCoordinates::fromId (cellId).first);
         CSMDoc::Document& document = getWorldspaceWidget().getDocument();
 
         CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
@@ -235,8 +234,6 @@ void CSVRender::TerrainTextureMode::dragCompleted(const QPoint& pos)
 
         CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
         int index = landtexturesCollection.searchId(mBrushTexture);
-
-        getWorldspaceWidget().discardAllBeingEdited();
 
         if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
         {

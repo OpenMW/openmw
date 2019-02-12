@@ -759,10 +759,10 @@ CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const osg::Vec3d& poi
         return 0;
 }
 
-void CSVRender::PagedWorldspaceWidget::setCellAlteredHeights(CSMWorld::CellCoordinates coords, float heightMap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE])
+void CSVRender::PagedWorldspaceWidget::setCellAlteredHeights(CSMWorld::CellCoordinates coords, int inCellX, int inCellY, float heightMap)
 {
     std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
-    if (searchResult != mCells.end()) searchResult->second->setAlteredHeights(heightMap);
+    if (searchResult != mCells.end()) searchResult->second->setAlteredHeights(inCellX, inCellY, heightMap);
 }
 
 float* CSVRender::PagedWorldspaceWidget::getCellAlteredHeights(CSMWorld::CellCoordinates coords)
@@ -780,27 +780,6 @@ void CSVRender::PagedWorldspaceWidget::resetAllAlteredHeights()
     {
         iter->second->resetAlteredHeights();
         ++iter;
-    }
-}
-
-void CSVRender::PagedWorldspaceWidget::setCellBeingEdited(CSMWorld::CellCoordinates coords)
-{
-    std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
-    if (searchResult != mCells.end()) searchResult->second->setBeingEdited();
-}
-
-void CSVRender::PagedWorldspaceWidget::setCellNotBeingEdited(CSMWorld::CellCoordinates coords)
-{
-    std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
-    if (searchResult != mCells.end()) searchResult->second->setNotBeingEdited();
-}
-
-void CSVRender::PagedWorldspaceWidget::discardAllBeingEdited()
-{
-    for (std::map<CSMWorld::CellCoordinates, Cell *>::const_iterator iter = mCells.begin();
-        iter!=mCells.end(); ++iter)
-    {
-        iter->second->setNotBeingEdited();
     }
 }
 
