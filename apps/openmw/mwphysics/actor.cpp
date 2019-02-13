@@ -72,7 +72,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     mCollisionObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
     mCollisionObject->setActivationState(DISABLE_DEACTIVATION);
     mCollisionObject->setCollisionShape(mShape.get());
-    mCollisionObject->setUserPointer(static_cast<PtrHolder*>(this));
+    mCollisionObject->setUserPointer(this);
 
     updateRotation();
     updateScale();

@@ -278,6 +278,7 @@ namespace MWWorld
         MagicBoltState state;
         state.mSpellId = spellId;
         state.mCasterHandle = caster;
+        state.mHit = false;
         if (caster.getClass().isActor())
             state.mActorId = caster.getClass().getCreatureStats(caster).getActorId();
         else
@@ -301,6 +302,7 @@ namespace MWWorld
         MWWorld::Ptr ptr = ref.getPtr();
 
         osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(state.mEffects);
+
         createModel(state, ptr.getClass().getModel(ptr), pos, orient, true, true, lightDiffuseColor, texture);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -311,7 +313,8 @@ namespace MWWorld
             if (sound)
                 state.mSounds.push_back(sound);
         }
-            
+
+        state.mProjectileId = mPhysics->addProjectile(pos);
         mMagicBolts.push_back(state);
     }
 
@@ -324,9 +327,9 @@ namespace MWWorld
         state.mIdArrow = projectile.getCellRef().getRefId();
         state.mCasterHandle = actor;
         state.mAttackStrength = attackStrength;
-
         int type = projectile.get<ESM::Weapon>()->mBase->mData.mType;
         state.mThrown = MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown;
+        state.mHit = false;
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
@@ -335,6 +338,7 @@ namespace MWWorld
         if (!ptr.getClass().getEnchantment(ptr).empty())
             SceneUtil::addEnchantedGlow(state.mNode, mResourceSystem, ptr.getClass().getEnchantmentColor(ptr));
 
+        state.mProjectileId = mPhysics->addProjectile(pos);
         mProjectiles.push_back(state);
     }
 
@@ -399,6 +403,20 @@ namespace MWWorld
                 }
             }
 
+            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+            std::vector<MWWorld::Ptr> targetActors;
+            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
+                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
+
+            if (it->mHit)
+            {
+                MWBase::Environment::get().getWorld()->explodeSpell(it->mHitPosition, it->mEffects, caster, MWWorld::Ptr(),
+                                                    ESM::RT_Target, it->mSpellId, it->mSourceName);
+
+                it = mMagicBolts.erase(it);
+                continue;
+            }
+
             osg::Quat orient = it->mNode->getAttitude();
             static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("fTargetSpellMaxSpeed")->mValue.getFloat();
@@ -415,16 +433,13 @@ namespace MWWorld
 
             it->mNode->setPosition(newPos);
 
-            update(*it, duration);
+            mPhysics->updateProjectile(it->mProjectileId, newPos);
 
-            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
-            std::vector<MWWorld::Ptr> targetActors;
-            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
-                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
+            update(*it, duration);
 
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile, it->mProjectileId);
 
             bool hit = false;
             if (result.mHit)
@@ -432,7 +447,7 @@ namespace MWWorld
                 hit = true;
                 if (result.mHitObject.isEmpty())
                 {
-                    // terrain
+                    // terrain or projectile
                 }
                 else
                 {
@@ -454,11 +469,7 @@ namespace MWWorld
                 MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, result.mHitObject,
                                                                     ESM::RT_Target, it->mSpellId, it->mSourceName);
 
-                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                for (size_t soundIter = 0; soundIter != it->mSounds.size(); soundIter++)
-                    sndMgr->stopSound(it->mSounds.at(soundIter));
-
-                mParent->removeChild(it->mNode);
+                cleanupMagicBolt(*it);
 
                 it = mMagicBolts.erase(it);
                 continue;
@@ -472,6 +483,12 @@ namespace MWWorld
     {
         for (std::vector<ProjectileState>::iterator it = mProjectiles.begin(); it != mProjectiles.end();)
         {
+            if (it->mHit)
+            {
+                it = mProjectiles.erase(it);
+                continue;
+            }
+
             // gravity constant - must be way lower than the gravity affecting actors, since we're not
             // simulating aerodynamics at all
             it->mVelocity -= osg::Vec3f(0, 0, Constants::GravityConst * Constants::UnitsPerMeter * 0.1f) * duration;
@@ -489,6 +506,8 @@ namespace MWWorld
 
             it->mNode->setPosition(newPos);
 
+            mPhysics->updateProjectile(it->mProjectileId, newPos);
+
             update(*it, duration);
 
             MWWorld::Ptr caster = it->getCaster();
@@ -500,15 +519,14 @@ namespace MWWorld
 
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile, it->mProjectileId);
 
             bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos);
 
             if (result.mHit || underwater)
             {
-                MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
-
                 // Try to get a Ptr to the bow that was used. It might no longer exist.
+                MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
                 MWWorld::Ptr bow = projectileRef.getPtr();
                 if (!caster.isEmpty() && it->mIdArrow != it->mBowId)
                 {
@@ -526,8 +544,9 @@ namespace MWWorld
                 if (underwater)
                     mRendering->emitWaterRipple(newPos);
 
-                mParent->removeChild(it->mNode);
+                cleanupProjectile(*it);
                 it = mProjectiles.erase(it);
+
                 continue;
             }
 
@@ -535,14 +554,111 @@ namespace MWWorld
         }
     }
 
+    void ProjectileManager::manualHit(int projectileId, const MWWorld::Ptr& target, const osg::Vec3f& pos)
+    {
+        for (std::vector<ProjectileState>::iterator it = mProjectiles.begin(); it != mProjectiles.end(); ++it)
+        {
+            if (it->mProjectileId == projectileId)
+            {
+                if (it->mHit)
+                    return;
+
+                MWWorld::Ptr caster = it->getCaster();
+                if (caster == target)
+                    return;
+
+                if (!isValidTarget(caster, target))
+                    return;
+
+                if (caster.isEmpty())
+                    caster = target;
+
+                // Try to get a Ptr to the bow that was used. It might no longer exist.
+                MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mIdArrow);
+                MWWorld::Ptr bow = projectileRef.getPtr();
+                if (!caster.isEmpty() && it->mIdArrow != it->mBowId)
+                {
+                    MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
+                    MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                    if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
+                        bow = *invIt;
+                }
+
+                it->mHitPosition = pos;
+                cleanupProjectile(*it);
+                it->mHit = true;
+                MWMechanics::projectileHit(caster, target, bow, projectileRef.getPtr(), pos, it->mAttackStrength);
+                return;
+            }
+        }
+        for (std::vector<MagicBoltState>::iterator it = mMagicBolts.begin(); it != mMagicBolts.end(); ++it)
+        {
+            if (it->mProjectileId == projectileId)
+            {
+                if (it->mHit)
+                    return;
+
+                MWWorld::Ptr caster = it->getCaster();
+                if (caster == target)
+                    return;
+
+                if (!isValidTarget(caster, target))
+                    return;
+
+                it->mHitPosition = pos;
+                cleanupMagicBolt(*it);
+                it->mHit = true;
+
+                MWMechanics::CastSpell cast(caster, target);
+                cast.mHitPosition = pos;
+                cast.mId = it->mSpellId;
+                cast.mSourceName = it->mSourceName;
+                cast.mStack = false;
+                cast.inflict(target, caster, it->mEffects, ESM::RT_Target, false, true);
+
+                MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, target, ESM::RT_Target, it->mSpellId, it->mSourceName);
+
+                return;
+            }
+        }
+    }
+
+    bool ProjectileManager::isValidTarget(const MWWorld::Ptr& caster, const MWWorld::Ptr& target)
+    {
+        // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+        std::vector<MWWorld::Ptr> targetActors;
+        if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
+        {
+            caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
+            if (!targetActors.empty())
+            {
+                bool validTarget = false;
+                for (MWWorld::Ptr& targetActor : targetActors)
+                {
+                    if (targetActor == target)
+                    {
+                        validTarget = true;
+                        break;
+                    }
+                }
+
+                return validTarget;
+            }
+        }
+
+        return true;
+    }
+
     void ProjectileManager::cleanupProjectile(ProjectileManager::ProjectileState& state)
     {
         mParent->removeChild(state.mNode);
+        mPhysics->removeProjectile(state.mProjectileId);
     }
 
     void ProjectileManager::cleanupMagicBolt(ProjectileManager::MagicBoltState& state)
     {
         mParent->removeChild(state.mNode);
+        mPhysics->removeProjectile(state.mProjectileId);
         for (size_t soundIter = 0; soundIter != state.mSounds.size(); soundIter++)
         {
             MWBase::Environment::get().getSoundManager()->stopSound(state.mSounds.at(soundIter));
@@ -616,6 +732,7 @@ namespace MWWorld
             state.mVelocity = esm.mVelocity;
             state.mIdArrow = esm.mId;
             state.mAttackStrength = esm.mAttackStrength;
+            state.mHit = false;
 
             std::string model;
             try
@@ -623,9 +740,10 @@ namespace MWWorld
                 MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), esm.mId);
                 MWWorld::Ptr ptr = ref.getPtr();
                 model = ptr.getClass().getModel(ptr);
-
                 int weaponType = ptr.get<ESM::Weapon>()->mBase->mData.mType;
                 state.mThrown = MWMechanics::getWeaponType(weaponType)->mWeaponClass == ESM::WeaponType::Thrown;
+
+                state.mProjectileId = mPhysics->addProjectile(osg::Vec3f(esm.mPosition));
             }
             catch(...)
             {
@@ -646,6 +764,7 @@ namespace MWWorld
             state.mIdMagic.push_back(esm.mId);
             state.mSpellId = esm.mSpellId;
             state.mActorId = esm.mActorId;
+            state.mHit = false;
             std::string texture = "";
 
             try
@@ -669,6 +788,7 @@ namespace MWWorld
                 MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), state.mIdMagic.at(0));
                 MWWorld::Ptr ptr = ref.getPtr();
                 model = ptr.getClass().getModel(ptr);
+                state.mProjectileId = mPhysics->addProjectile(osg::Vec3f(esm.mPosition));
             }
             catch(...)
             {

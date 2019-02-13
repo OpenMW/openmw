@@ -576,6 +576,8 @@ namespace MWWorld
             RestPermitted canRest() const override;
             ///< check if the player is allowed to rest
 
+            void manualProjectileHit(int projectileId, const MWWorld::Ptr& target, const osg::Vec3f& pos);
+
             void rest(double hours) override;
             void rechargeItems(double duration, bool activeOnly) override;
 

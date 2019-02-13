@@ -2,6 +2,14 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
+#include <components/misc/convert.hpp>
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+
+#include "collisiontype.hpp"
+#include "projectile.hpp"
+
 namespace MWPhysics
 {
     ClosestNotMeConvexResultCallback::ClosestNotMeConvexResultCallback(const btCollisionObject *me, const btVector3 &motion, btScalar minCollisionDot)
@@ -10,10 +18,22 @@ namespace MWPhysics
     {
     }
 
-    btScalar ClosestNotMeConvexResultCallback::addSingleResult(btCollisionWorld::LocalConvexResult& convexResult,bool normalInWorldSpace)
+    btScalar ClosestNotMeConvexResultCallback::addSingleResult(btCollisionWorld::LocalConvexResult& convexResult, bool normalInWorldSpace)
     {
         if (convexResult.m_hitCollisionObject == mMe)
             return btScalar(1);
+
+        if (convexResult.m_hitCollisionObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Projectile)
+        {
+            Projectile* projectileHolder = static_cast<Projectile*>(convexResult.m_hitCollisionObject->getUserPointer());
+            int projectileId = projectileHolder->getProjectileId();
+            PtrHolder* targetHolder = static_cast<PtrHolder*>(mMe->getUserPointer());
+            const MWWorld::Ptr target = targetHolder->getPtr();
+
+            osg::Vec3f pos = Misc::Convert::makeOsgVec3f(convexResult.m_hitPointLocal);
+            MWBase::Environment::get().getWorld()->manualProjectileHit(projectileId, target, pos);
+            return btScalar(1);
+        }
 
         btVector3 hitNormalWorld;
         if (normalInWorldSpace)

@@ -41,6 +41,8 @@
 
 #include "collisiontype.hpp"
 #include "actor.hpp"
+
+#include "projectile.hpp"
 #include "trace.h"
 #include "object.hpp"
 #include "heightfield.hpp"
@@ -58,6 +60,7 @@ namespace MWPhysics
         , mResourceSystem(resourceSystem)
         , mDebugDrawEnabled(false)
         , mTimeAccum(0.0f)
+        , mProjectileId(0)
         , mWaterHeight(0)
         , mWaterEnabled(false)
         , mParentNode(parentNode)
@@ -108,6 +111,11 @@ namespace MWPhysics
         }
 
         for (ActorMap::iterator it = mActors.begin(); it != mActors.end(); ++it)
+        {
+            delete it->second;
+        }
+
+        for (ProjectileMap::iterator it = mProjectiles.begin(); it != mProjectiles.end(); ++it)
         {
             delete it->second;
         }
@@ -262,7 +270,7 @@ namespace MWPhysics
             return (point - Misc::Convert::toOsg(cb.m_hitPointWorld)).length();
     }
 
-    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group) const
+    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group, int projId) const
     {
         btVector3 btFrom = Misc::Convert::toBullet(from);
         btVector3 btTo = Misc::Convert::toBullet(to);
@@ -293,7 +301,7 @@ namespace MWPhysics
             }
         }
 
-        ClosestNotMeRayResultCallback resultCallback(me, targetCollisionObjects, btFrom, btTo);
+        ClosestNotMeRayResultCallback resultCallback(me, targetCollisionObjects, btFrom, btTo, projId);
         resultCallback.m_collisionFilterGroup = group;
         resultCallback.m_collisionFilterMask = mask;
 
@@ -306,7 +314,17 @@ namespace MWPhysics
             result.mHitPos = Misc::Convert::toOsg(resultCallback.m_hitPointWorld);
             result.mHitNormal = Misc::Convert::toOsg(resultCallback.m_hitNormalWorld);
             if (PtrHolder* ptrHolder = static_cast<PtrHolder*>(resultCallback.m_collisionObject->getUserPointer()))
+            {
                 result.mHitObject = ptrHolder->getPtr();
+
+                if (group == CollisionType_Projectile)
+                {
+                    Projectile* projectile = static_cast<Projectile*>(ptrHolder);
+                    result.mProjectileId = projectile->getProjectileId();
+                }
+                else
+                    result.mProjectileId = -1;
+            }
         }
         return result;
     }
@@ -500,6 +518,19 @@ namespace MWPhysics
         }
     }
 
+    void PhysicsSystem::removeProjectile(const int projectileId)
+    {
+        ProjectileMap::iterator foundProjectile = mProjectiles.find(projectileId);
+        if (foundProjectile != mProjectiles.end())
+        {
+            delete foundProjectile->second;
+            mProjectiles.erase(foundProjectile);
+
+            if (projectileId == mProjectileId)
+                mProjectileId--;
+        }
+    }
+
     void PhysicsSystem::updateCollisionMapPtr(CollisionMap& map, const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
     {
         CollisionMap::iterator found = map.find(old);
@@ -582,6 +613,17 @@ namespace MWPhysics
         }
     }
 
+    void PhysicsSystem::updateProjectile(const int projectileId, const osg::Vec3f &position)
+    {
+        ProjectileMap::iterator foundProjectile = mProjectiles.find(projectileId);
+        if (foundProjectile != mProjectiles.end())
+        {
+            foundProjectile->second->setPosition(position);
+            mCollisionWorld->updateSingleAabb(foundProjectile->second->getCollisionObject());
+            return;
+        }
+    }
+
     void PhysicsSystem::updateRotation(const MWWorld::Ptr &ptr)
     {
         ObjectMap::iterator found = mObjects.find(ptr);
@@ -638,6 +680,15 @@ namespace MWPhysics
 
         Actor* actor = new Actor(ptr, shape, mCollisionWorld);
         mActors.insert(std::make_pair(ptr, actor));
+    }
+
+    int PhysicsSystem::addProjectile (const osg::Vec3f& position)
+    {
+        mProjectileId++;
+        Projectile* projectile = new Projectile(mProjectileId, position, mCollisionWorld);
+        mProjectiles.insert(std::make_pair(mProjectileId, projectile));
+
+        return mProjectileId;
     }
 
     bool PhysicsSystem::toggleCollisionMode()

@@ -836,6 +836,11 @@ namespace MWWorld
         }
     }
 
+    void World::manualProjectileHit(int projectileId, const MWWorld::Ptr& target, const osg::Vec3f& pos)
+    {
+        mProjectileManager->manualHit(projectileId, target, pos);
+    }
+
     void World::disable (const Ptr& reference)
     {
         // disable is a no-op for items in containers
