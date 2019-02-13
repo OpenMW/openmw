@@ -65,9 +65,9 @@ namespace CSVRender
         return &mData.getLandTextures().getRecord(row).get();
     }
 
-    void TerrainStorage::alterHeights(int inCellX, int inCellY, float heightMap)
+    void TerrainStorage::alterHeight(int inCellX, int inCellY, float heightMap)
     {
-        mAlteredHeight[inCellY*ESM::Land::LAND_SIZE + inCellX] = mAlteredHeight[inCellY*ESM::Land::LAND_SIZE + inCellX] + heightMap;
+        mAlteredHeight[inCellY*ESM::Land::LAND_SIZE + inCellX] = heightMap - fmod(heightMap, 8); //Limit to divisible by 8 to avoid cell seam breakage
     }
 
     void TerrainStorage::resetHeights()

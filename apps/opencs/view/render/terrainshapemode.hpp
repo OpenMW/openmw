@@ -80,7 +80,7 @@ namespace CSVRender
             /// Handle brush mechanics for shape editing
             void editTerrainShapeGrid (std::pair<int, int> vertexCoords, bool dragOperation);
 
-            void alterHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY);
+            void alterHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, float alteredHeight);
 
             /// Handle brush mechanics for shape selection
             void selectTerrainShapes (std::pair<int, int>, unsigned char, bool);
@@ -107,8 +107,9 @@ namespace CSVRender
             osg::Group* mParentNode;
             bool mIsEditing;
             std::unique_ptr<TerrainSelection> mTerrainShapeSelection;
-            float mAlteredHeight;
+            int mTotalDiffY;
             std::vector<CSMWorld::CellCoordinates> mAlteredCells;
+            osg::Vec3d mEditingPos;
 
             const int cellSize {ESM::Land::REAL_SIZE};
             const int landSize {ESM::Land::LAND_SIZE};

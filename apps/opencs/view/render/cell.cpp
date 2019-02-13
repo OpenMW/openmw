@@ -349,9 +349,9 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
     return addObjects (start, end);
 }
 
-void CSVRender::Cell::setAlteredHeights(int inCellX, int inCellY, float heightMap)
+void CSVRender::Cell::setAlteredHeight(int inCellX, int inCellY, float heightMap)
 {
-    mTerrainStorage->alterHeights(inCellX, inCellY, heightMap);
+    mTerrainStorage->alterHeight(inCellX, inCellY, heightMap);
     mUpdateLand = true;
 }
 

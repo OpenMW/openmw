@@ -759,10 +759,10 @@ CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const osg::Vec3d& poi
         return 0;
 }
 
-void CSVRender::PagedWorldspaceWidget::setCellAlteredHeights(CSMWorld::CellCoordinates coords, int inCellX, int inCellY, float heightMap)
+void CSVRender::PagedWorldspaceWidget::setCellAlteredHeight(CSMWorld::CellCoordinates coords, int inCellX, int inCellY, float heightMap)
 {
     std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
-    if (searchResult != mCells.end()) searchResult->second->setAlteredHeights(inCellX, inCellY, heightMap);
+    if (searchResult != mCells.end()) searchResult->second->setAlteredHeight(inCellX, inCellY, heightMap);
 }
 
 float* CSVRender::PagedWorldspaceWidget::getCellAlteredHeights(CSMWorld::CellCoordinates coords)

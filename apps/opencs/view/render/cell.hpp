@@ -121,7 +121,7 @@ namespace CSVRender
             /// this cell?
             bool referenceAdded (const QModelIndex& parent, int start, int end);
 
-            void setAlteredHeights(int inCellX, int inCellY, float heightMap);
+            void setAlteredHeight(int inCellX, int inCellY, float heightMap);
 
             float* getAlteredHeights();
 

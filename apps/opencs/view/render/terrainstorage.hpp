@@ -16,7 +16,7 @@ namespace CSVRender
     public:
         TerrainStorage(const CSMWorld::Data& data);
         float mAlteredHeight[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE];
-        void alterHeights(int inCellX, int inCellY, float heightMap);
+        void alterHeight(int inCellX, int inCellY, float heightMap);
         void resetHeights();
         float* getAlteredHeights();
 

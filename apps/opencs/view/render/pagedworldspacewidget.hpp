@@ -124,7 +124,7 @@ namespace CSVRender
 
             virtual Cell* getCell(const osg::Vec3d& point) const;
 
-            void setCellAlteredHeights(CSMWorld::CellCoordinates coords, int inCellX, int inCellY, float heightMap);
+            void setCellAlteredHeight(CSMWorld::CellCoordinates coords, int inCellX, int inCellY, float heightMap);
 
             float* getCellAlteredHeights(CSMWorld::CellCoordinates coords);
 
