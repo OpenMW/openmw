@@ -1,6 +1,6 @@
 #include "graphicspage.hpp"
 
-#include <boost/math/common_factor.hpp>
+#include <boost/integer/common_factor.hpp>
 #include <csignal>
 #include <QDesktopWidget>
 #include <QMessageBox>
@@ -18,7 +18,7 @@
 
 QString getAspect(int x, int y)
 {
-    int gcd = boost::math::gcd (x, y);
+    int gcd = boost::integer::gcd (x, y);
     int xaspect = x / gcd;
     int yaspect = y / gcd;
     // special case: 8 : 5 is usually referred to as 16:10
