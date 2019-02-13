@@ -46,6 +46,8 @@
 
 #include "collisiontype.hpp"
 #include "actor.hpp"
+
+#include "projectile.hpp"
 #include "trace.h"
 #include "object.hpp"
 #include "heightfield.hpp"
@@ -64,6 +66,7 @@ namespace MWPhysics
         , mResourceSystem(resourceSystem)
         , mDebugDrawEnabled(false)
         , mTimeAccum(0.0f)
+        , mProjectileId(0)
         , mWaterHeight(0)
         , mWaterEnabled(false)
         , mParentNode(parentNode)
@@ -113,6 +116,10 @@ namespace MWPhysics
         mObjects.clear();
         mActors.clear();
 
+        for (ProjectileMap::iterator it = mProjectiles.begin(); it != mProjectiles.end(); ++it)
+        {
+            delete it->second;
+        }
     }
 
     void PhysicsSystem::setUnrefQueue(SceneUtil::UnrefQueue *unrefQueue)
@@ -248,7 +255,7 @@ namespace MWPhysics
         return 0.f;
     }
 
-    RayCastingResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group) const
+    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group, int projId) const
     {
         if (from == to)
         {
@@ -285,7 +292,7 @@ namespace MWPhysics
             }
         }
 
-        ClosestNotMeRayResultCallback resultCallback(me, targetCollisionObjects, btFrom, btTo);
+        ClosestNotMeRayResultCallback resultCallback(me, targetCollisionObjects, btFrom, btTo, projId);
         resultCallback.m_collisionFilterGroup = group;
         resultCallback.m_collisionFilterMask = mask;
 
@@ -298,7 +305,17 @@ namespace MWPhysics
             result.mHitPos = Misc::Convert::toOsg(resultCallback.m_hitPointWorld);
             result.mHitNormal = Misc::Convert::toOsg(resultCallback.m_hitNormalWorld);
             if (PtrHolder* ptrHolder = static_cast<PtrHolder*>(resultCallback.m_collisionObject->getUserPointer()))
+            {
                 result.mHitObject = ptrHolder->getPtr();
+
+                if (group == CollisionType_Projectile)
+                {
+                    Projectile* projectile = static_cast<Projectile*>(ptrHolder);
+                    result.mProjectileId = projectile->getProjectileId();
+                }
+                else
+                    result.mProjectileId = -1;
+            }
         }
         return result;
     }
@@ -502,6 +519,19 @@ namespace MWPhysics
         }
     }
 
+    void PhysicsSystem::removeProjectile(const int projectileId)
+    {
+        ProjectileMap::iterator foundProjectile = mProjectiles.find(projectileId);
+        if (foundProjectile != mProjectiles.end())
+        {
+            delete foundProjectile->second;
+            mProjectiles.erase(foundProjectile);
+
+            if (projectileId == mProjectileId)
+                mProjectileId--;
+        }
+    }
+
     void PhysicsSystem::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
     {
         ObjectMap::iterator found = mObjects.find(old);
@@ -572,6 +602,17 @@ namespace MWPhysics
         }
     }
 
+    void PhysicsSystem::updateProjectile(const int projectileId, const osg::Vec3f &position)
+    {
+        ProjectileMap::iterator foundProjectile = mProjectiles.find(projectileId);
+        if (foundProjectile != mProjectiles.end())
+        {
+            foundProjectile->second->setPosition(position);
+            mCollisionWorld->updateSingleAabb(foundProjectile->second->getCollisionObject());
+            return;
+        }
+    }
+
     void PhysicsSystem::updateRotation(const MWWorld::Ptr &ptr)
     {
         ObjectMap::iterator found = mObjects.find(ptr);
@@ -630,6 +671,15 @@ namespace MWPhysics
 
         auto actor = std::make_shared<Actor>(ptr, shape, mTaskScheduler.get());
         mActors.emplace(ptr, std::move(actor));
+    }
+
+    int PhysicsSystem::addProjectile (const osg::Vec3f& position)
+    {
+        mProjectileId++;
+        Projectile* projectile = new Projectile(mProjectileId, position, mCollisionWorld);
+        mProjectiles.insert(std::make_pair(mProjectileId, projectile));
+
+        return mProjectileId;
     }
 
     bool PhysicsSystem::toggleCollisionMode()

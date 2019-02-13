@@ -56,6 +56,7 @@ namespace MWPhysics
     class Object;
     class Actor;
     class PhysicsTaskScheduler;
+    class Projectile;
 
     using ActorMap = std::map<MWWorld::ConstPtr, std::shared_ptr<Actor>>;
 
@@ -127,6 +128,10 @@ namespace MWPhysics
             void addObject (const MWWorld::Ptr& ptr, const std::string& mesh, int collisionType = CollisionType_World);
             void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 
+            int addProjectile(const osg::Vec3f& position);
+            void updateProjectile(const int projectileId, const osg::Vec3f &position);
+            void removeProjectile(const int projectileId);
+
             void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
 
             Actor* getActor(const MWWorld::Ptr& ptr);
@@ -140,7 +145,6 @@ namespace MWPhysics
             void updateScale (const MWWorld::Ptr& ptr);
             void updateRotation (const MWWorld::Ptr& ptr);
             void updatePosition (const MWWorld::Ptr& ptr);
-
 
             void addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject);
 
@@ -169,10 +173,19 @@ namespace MWPhysics
             /// \note Only Actor targets are supported at the moment.
             float getHitDistance(const osg::Vec3f& point, const MWWorld::ConstPtr& target) const override;
 
+            struct RayResult
+            {
+                bool mHit;
+                osg::Vec3f mHitPos;
+                osg::Vec3f mHitNormal;
+                MWWorld::Ptr mHitObject;
+                int mProjectileId;
+            };
+
             /// @param me Optional, a Ptr to ignore in the list of results. targets are actors to filter for, ignoring all other actors.
             RayCastingResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore = MWWorld::ConstPtr(),
                     std::vector<MWWorld::Ptr> targets = std::vector<MWWorld::Ptr>(),
-                    int mask = CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff) const override;
+                    int mask = CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff, int projId=-1) const override;
 
             RayCastingResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius) const override;
 
@@ -269,6 +282,9 @@ namespace MWPhysics
 
             ActorMap mActors;
 
+            using ProjectileMap = std::map<int, Projectile *>;
+            ProjectileMap mProjectiles;
+
             using HeightFieldMap = std::map<std::pair<int, int>, HeightField *>;
             HeightFieldMap mHeightFields;
 
@@ -278,6 +294,8 @@ namespace MWPhysics
             PtrVelocityList mMovementQueue;
 
             float mTimeAccum;
+
+            int mProjectileId;
 
             float mWaterHeight;
             bool mWaterEnabled;

@@ -610,6 +610,8 @@ namespace MWBase
 
             virtual bool isPlayerInJail() const = 0;
 
+            virtual void manualProjectileHit(int projectileId, const MWWorld::Ptr& target, const osg::Vec3f& pos) = 0;
+
             virtual void rest(double hours) = 0;
             virtual void rechargeItems(double duration, bool activeOnly) = 0;
 
