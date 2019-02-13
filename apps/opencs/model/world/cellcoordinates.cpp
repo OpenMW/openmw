@@ -89,8 +89,8 @@ std::pair<int, int> CSMWorld::CellCoordinates::toTextureCoords(osg::Vec3d worldP
 
 std::pair<int, int> CSMWorld::CellCoordinates::toVertexCoords(osg::Vec3d worldPos)
 {
-    const auto xd = static_cast<double>(worldPos.x() * (landSize - 1) / cellSize);
-    const auto yd = static_cast<double>(worldPos.y() * (landSize - 1) / cellSize);
+    const auto xd = static_cast<double>(worldPos.x() * (landSize - 1) / cellSize + 0.5f);
+    const auto yd = static_cast<double>(worldPos.y() * (landSize - 1) / cellSize + 0.5f);
 
     const auto x = static_cast<int>(std::floor(xd));
     const auto y = static_cast<int>(std::floor(yd));

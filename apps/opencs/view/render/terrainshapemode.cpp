@@ -345,8 +345,8 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(std::pair<int, int> verte
 
 void CSVRender::TerrainShapeMode::alterHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, float alteredHeight)
 {
-    std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(std::make_pair(cellCoords.getX(), cellCoords.getY()));
-    if(allowLandShapeEditing(cellId)==true) {}
+    std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY());
+    if(allowLandShapeEditing(cellId)==true) {
 
     mAlteredCells.emplace_back(cellCoords);
     if (CSVRender::PagedWorldspaceWidget *paged =
@@ -362,30 +362,36 @@ void CSVRender::TerrainShapeMode::alterHeight(CSMWorld::CellCoordinates cellCoor
         {
             cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());
             cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
-            if(allowLandShapeEditing(cellId)==true) {} // Open new cell
-            inCellX = ESM::Land::LAND_SIZE - 1;
-            mAlteredCells.emplace_back(cellCoords);
-            paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+            if(allowLandShapeEditing(cellId)==true) // Open new cell
+            {
+                inCellX = ESM::Land::LAND_SIZE - 1;
+                mAlteredCells.emplace_back(cellCoords);
+                paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+            }
 
             cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() + 1, cellCoords.getY() - 1); // move one cell back and up
             cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
-            if(allowLandShapeEditing(cellId)==true) {} // Open new cell
-            inCellX = 0;
-            inCellY = ESM::Land::LAND_SIZE - 1;
-            mAlteredCells.emplace_back(cellCoords);
-            paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+            if(allowLandShapeEditing(cellId)==true)  // Open new cell
+            {
+                inCellX = 0;
+                inCellY = ESM::Land::LAND_SIZE - 1;
+                mAlteredCells.emplace_back(cellCoords);
+                paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+            }
 
-            cellId = cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());  // move one cell left
+            cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());  // move one cell left
             cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
-            if(allowLandShapeEditing(cellId)==true) {} // Open new cell
-            inCellX = ESM::Land::LAND_SIZE - 1;
-            inCellY = ESM::Land::LAND_SIZE - 1;
-            mAlteredCells.emplace_back(cellCoords);
-            paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+            if(allowLandShapeEditing(cellId)==true)  // Open new cell
+            {
+                inCellX = ESM::Land::LAND_SIZE - 1;
+                inCellY = ESM::Land::LAND_SIZE - 1;
+                mAlteredCells.emplace_back(cellCoords);
+                paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+            }
         }
         else if (inCellX == 0 && inCellY != 0) // Bind the last row to first row
         {
-            cellId = cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());
+            cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());
             cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
             if(allowLandShapeEditing(cellId)==true) {} // Open new cell
             inCellX = ESM::Land::LAND_SIZE - 1;
@@ -394,13 +400,14 @@ void CSVRender::TerrainShapeMode::alterHeight(CSMWorld::CellCoordinates cellCoor
         }
         else if (inCellX != 0 && inCellY == 0) // Bind the last row to first row
         {
-            cellId = cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY() - 1);
+            cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY() - 1);
             cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
             if(allowLandShapeEditing(cellId)==true) {} // Open new cell
             inCellY = ESM::Land::LAND_SIZE - 1;
             mAlteredCells.emplace_back(cellCoords);
             paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
         }
+    }
     }
 }
 
