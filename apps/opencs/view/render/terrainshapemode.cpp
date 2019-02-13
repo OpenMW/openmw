@@ -337,6 +337,11 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(std::pair<int, int> verte
             {
                 for(auto const& value: mCustomBrushShape)
                 {
+                    cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(std::make_pair(vertexCoords.first + value.first, vertexCoords.second + value.second));
+                    cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                    int x = CSMWorld::CellCoordinates::vertexSelectionToInCellCoords(vertexCoords.first + value.first);
+                    int y = CSMWorld::CellCoordinates::vertexSelectionToInCellCoords(vertexCoords.second + value.second);
+                    alterHeight(cellCoords, x, y, mTotalDiffY);
                 }
             }
         }
