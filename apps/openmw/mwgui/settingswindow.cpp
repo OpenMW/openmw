@@ -8,7 +8,7 @@
 #include <MyGUI_TabControl.h>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/math/common_factor.hpp>
+#include <boost/integer/common_factor.hpp>
 
 #include <SDL_video.h>
 
@@ -58,7 +58,7 @@ namespace
 
     std::string getAspect (int x, int y)
     {
-        int gcd = boost::math::gcd (x, y);
+        int gcd = boost::integer::gcd (x, y);
         int xaspect = x / gcd;
         int yaspect = y / gcd;
         // special case: 8 : 5 is usually referred to as 16:10
