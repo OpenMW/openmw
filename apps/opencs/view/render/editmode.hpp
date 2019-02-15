@@ -26,7 +26,6 @@ namespace CSVRender
         protected:
 
             WorldspaceWidget& getWorldspaceWidget();
-            WorldspaceWidget* getWorldspaceWidgetPointer();
 
         public:
 

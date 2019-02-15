@@ -125,6 +125,8 @@ namespace CSVRender
 
             float* getAlteredHeights();
 
+            float* getAlteredHeight(int inCellX, int inCellY);
+
             void resetAlteredHeights();
 
             void pathgridModified();

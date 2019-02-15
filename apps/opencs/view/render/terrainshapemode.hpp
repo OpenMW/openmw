@@ -73,19 +73,25 @@ namespace CSVRender
             /// End shape editing command macro
             virtual void dragCompleted(const QPoint& pos);
 
+            /// Cancel shape editing, and reset all pending changes
             virtual void dragAborted();
+            
             virtual void dragWheel (int diff, double speedFactor);
             virtual void dragMoveEvent (QDragMoveEvent *event);
 
             /// Handle brush mechanics for shape editing
             void editTerrainShapeGrid (std::pair<int, int> vertexCoords, bool dragOperation);
 
+            /// Do a single height alteration for transient shape edit map
             void alterHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, float alteredHeight);
 
-            /// Handle brush mechanics for shape selection
+            /// Check that the edit doesn't break save format limits, fix if necessary
+            void limitHeightChanges(CSMWorld::CellCoordinates cellCoords);
+
+            /// Handle brush mechanics for terrain shape selection
             void selectTerrainShapes (std::pair<int, int>, unsigned char, bool);
 
-            /// Push shape edits to command macro
+            /// Push terrain shape edits to command macro
             void pushEditToCommand (CSMWorld::LandHeightsColumn::DataType& newLandGrid, CSMDoc::Document& document,
                 CSMWorld::IdTable& landTable, std::string cellId);
 

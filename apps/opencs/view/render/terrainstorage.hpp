@@ -19,6 +19,7 @@ namespace CSVRender
         void alterHeight(int inCellX, int inCellY, float heightMap);
         void resetHeights();
         float* getAlteredHeights();
+        float* getAlteredHeight(int inCellX, int inCellY);
 
     private:
         const CSMWorld::Data& mData;

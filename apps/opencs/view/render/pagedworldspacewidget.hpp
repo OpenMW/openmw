@@ -128,6 +128,8 @@ namespace CSVRender
 
             float* getCellAlteredHeights(CSMWorld::CellCoordinates coords);
 
+            float* getCellAlteredHeight(CSMWorld::CellCoordinates coords, int inCellX, int inCellY);
+
             void resetAllAlteredHeights();
 
             virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)

@@ -86,6 +86,11 @@ namespace CSVRender
         return mAlteredHeight;
     }
 
+    float* TerrainStorage::getAlteredHeight(int inCellX, int inCellY)
+    {
+        return &mAlteredHeight[inCellY*ESM::Land::LAND_SIZE + inCellX];
+    }
+
     void TerrainStorage::fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
                                             osg::ref_ptr<osg::Vec3Array> positions,
                                             osg::ref_ptr<osg::Vec3Array> normals,

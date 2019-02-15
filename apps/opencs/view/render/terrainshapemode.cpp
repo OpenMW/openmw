@@ -93,6 +93,7 @@ void CSVRender::TerrainShapeMode::primaryEditPressed(const WorldspaceHitResult& 
         dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
     {
         paged->resetAllAlteredHeights();
+        mTotalDiffY = 0;
     }
 }
 
@@ -210,11 +211,12 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
         for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
         {
             std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY());
+
             if (allowLandShapeEditing(cellId) == true)
             {
-                CSMWorld::LandHeightsColumn::DataType landShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                const CSMWorld::LandHeightsColumn::DataType landShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
                 CSMWorld::LandHeightsColumn::DataType landShapeNew(landShapePointer);
-                CSMWorld::LandNormalsColumn::DataType landNormalsPointer = landTable.data(landTable.getModelIndex(cellId, landnormalsColumn)).value<CSMWorld::LandNormalsColumn::DataType>();
+                const CSMWorld::LandNormalsColumn::DataType landNormalsPointer = landTable.data(landTable.getModelIndex(cellId, landnormalsColumn)).value<CSMWorld::LandNormalsColumn::DataType>();
                 CSMWorld::LandNormalsColumn::DataType landNormalsNew(landNormalsPointer);
 
                 //Normals code modified from tesanwynn
@@ -230,7 +232,7 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
                         if (CSVRender::PagedWorldspaceWidget *paged =
                             dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
                         {
-                            landShapeNew[j * ESM::Land::LAND_SIZE + i] = landShapePointer[j * ESM::Land::LAND_SIZE + i] + std::floor(paged->getCellAlteredHeights(cellCoordinates)[j * ESM::Land::LAND_SIZE + i]);
+                            landShapeNew[j * landSize + i] = landShapePointer[j * landSize + i] + std::floor(paged->getCellAlteredHeights(cellCoordinates)[j * landSize + i]);
                         }
 
                         v1[0] = 128;
@@ -263,6 +265,7 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
             dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
         {
             paged->resetAllAlteredHeights();
+            mTotalDiffY = 0;
         }
     }
 }
@@ -273,6 +276,7 @@ void CSVRender::TerrainShapeMode::dragAborted()
         dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
     {
         paged->resetAllAlteredHeights();
+        mTotalDiffY = 0;
     }
 }
 
@@ -286,6 +290,12 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(std::pair<int, int> verte
 
     std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
     CSMWorld::CellCoordinates cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+
+    if (CSVRender::PagedWorldspaceWidget *paged =
+        dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+    {
+        paged->resetAllAlteredHeights();
+    }
 
     if(allowLandShapeEditing(cellId)==true)
     {
@@ -345,74 +355,262 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(std::pair<int, int> verte
                 }
             }
         }
+
+        sort(mAlteredCells.begin(), mAlteredCells.end());
+        mAlteredCells.erase(unique(mAlteredCells.begin(), mAlteredCells.end()), mAlteredCells.end());
+
+        for(CSMWorld::CellCoordinates const& cellCoordinates: mAlteredCells)
+        {
+            limitHeightChanges(cellCoordinates);
+        }
+
     }
 }
 
 void CSVRender::TerrainShapeMode::alterHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, float alteredHeight)
 {
     std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY());
-    if(allowLandShapeEditing(cellId)==true) {
+    if(allowLandShapeEditing(cellId)==true)
+    {
+        mAlteredCells.emplace_back(cellCoords);
+        if (CSVRender::PagedWorldspaceWidget *paged =
+            dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+        {
+            // Get distance from modified land, alter land change based on zoom
+            osg::Vec3d eye, center, up;
+            paged->getCamera()->getViewMatrixAsLookAt(eye, center, up);
+            osg::Vec3d distance = eye - mEditingPos;
+            alteredHeight = alteredHeight * (distance.length() / 500);
+            paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+            if (inCellX == 0 && inCellY == 0) // Bind the corner
+            {
+                cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());
+                cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                if(allowLandShapeEditing(cellId)==true) // Open new cell
+                {
+                    inCellX = landSize - 1;
+                    mAlteredCells.emplace_back(cellCoords);
+                    paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+                }
 
-    mAlteredCells.emplace_back(cellCoords);
+                cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() + 1, cellCoords.getY() - 1); // move one cell back and up
+                cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                if(allowLandShapeEditing(cellId)==true)  // Open new cell
+                {
+                    inCellX = 0;
+                    inCellY = landSize - 1;
+                    mAlteredCells.emplace_back(cellCoords);
+                    paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+                }
+
+                cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());  // move one cell left
+                cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                if(allowLandShapeEditing(cellId)==true)  // Open new cell
+                {
+                    inCellX = landSize - 1;
+                    inCellY = landSize - 1;
+                    mAlteredCells.emplace_back(cellCoords);
+                    paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+                }
+            }
+            else if (inCellX == 0 && inCellY != 0) // Bind the last row to first row
+            {
+                cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());
+                cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                if(allowLandShapeEditing(cellId)==true) {} // Open new cell
+                inCellX = landSize - 1;
+                mAlteredCells.emplace_back(cellCoords);
+                paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+            }
+            else if (inCellX != 0 && inCellY == 0) // Bind the last row to first row
+            {
+                cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY() - 1);
+                cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                if(allowLandShapeEditing(cellId)==true) {} // Open new cell
+                inCellY = landSize - 1;
+                mAlteredCells.emplace_back(cellCoords);
+                paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+            }
+        }
+    }
+}
+
+void CSVRender::TerrainShapeMode::limitHeightChanges(CSMWorld::CellCoordinates cellCoords)
+{
     if (CSVRender::PagedWorldspaceWidget *paged =
         dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
     {
-        osg::Vec3d eye, center, up;
-        paged->getCamera()->getViewMatrixAsLookAt(eye, center, up);
-        osg::Vec3d distance = eye - mEditingPos;
-        alteredHeight = alteredHeight * (distance.length() / 500);
+        CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+        CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
+            *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+        int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
 
-        paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
-        if (inCellX == 0 && inCellY == 0) // Bind the corner
+        std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY());
+        CSMWorld::CellCoordinates changingCellCoords = cellCoords;
+        const CSMWorld::LandHeightsColumn::DataType landShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+
+        int limitHeightChange = 1000.0f; // Limited by save format
+        int limitingPasses = 1;
+        std::vector<CSMWorld::CellCoordinates> tempAlteredCells;
+
+        //Multiple passes may be required if height limit is breached in multiple consecutive vertexes
+        for(int i = 0; i < limitingPasses && limitingPasses < 50; ++i)
         {
-            cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());
-            cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
-            if(allowLandShapeEditing(cellId)==true) // Open new cell
+            // Default check
+            for(int inCellX = 0; inCellX < landSize; ++inCellX)
             {
-                inCellX = ESM::Land::LAND_SIZE - 1;
-                mAlteredCells.emplace_back(cellCoords);
-                paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+                for(int inCellY = 0; inCellY < landSize; ++inCellY)
+                {
+                    float alteredHeight = *paged->getCellAlteredHeight(cellCoords, inCellX, inCellY);
+                    float thisHeight = landShapePointer[inCellY * landSize + inCellX] + alteredHeight;
+                    float leftHeight = 0.0f;
+                    float upHeight = 0.0f;
+
+                    if (inCellX == 0)
+                    {
+                        cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());
+                        changingCellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                        const CSMWorld::LandHeightsColumn::DataType landLeftShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                        leftHeight = landLeftShapePointer[inCellY * landSize + (landSize - 2)];
+                        if (paged->getCellAlteredHeight(changingCellCoords, landSize - 2, inCellY) != nullptr)
+                            leftHeight = landLeftShapePointer[inCellY * landSize + (landSize - 2)] + *paged->getCellAlteredHeight(changingCellCoords, landSize - 2, inCellY);
+                    }
+                    if (inCellY == 0)
+                    {
+                        cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY() - 1);
+                        changingCellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                        const CSMWorld::LandHeightsColumn::DataType landUpShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                        upHeight = landUpShapePointer[(landSize - 2) * landSize + inCellX];
+                        if (paged->getCellAlteredHeight(changingCellCoords, inCellX, landSize - 2) != nullptr)
+                            upHeight = landUpShapePointer[(landSize - 2) * landSize + inCellX] + *paged->getCellAlteredHeight(changingCellCoords, inCellX, landSize - 2);
+                    }
+                    if (inCellX != 0)
+                    {
+                        leftHeight = landShapePointer[inCellY * landSize + inCellX - 1] + *paged->getCellAlteredHeight(cellCoords, inCellX - 1, inCellY);
+                    }
+                    if (inCellY != 0)
+                    {
+                        upHeight = landShapePointer[(inCellY - 1) * landSize + inCellX] + *paged->getCellAlteredHeight(cellCoords, inCellX, inCellY - 1);
+                    }
+                    bool doChange = false;
+                    if (thisHeight - upHeight > limitHeightChange) {alteredHeight = upHeight + limitHeightChange - landShapePointer[inCellY * landSize + inCellX]; doChange = true;}
+                    if (thisHeight - upHeight < -limitHeightChange) {alteredHeight = upHeight - limitHeightChange - landShapePointer[inCellY * landSize + inCellX]; doChange = true;}
+                    if (thisHeight - leftHeight > limitHeightChange) {alteredHeight = leftHeight + limitHeightChange - landShapePointer[inCellY * landSize + inCellX]; doChange = true;}
+                    if (thisHeight - leftHeight < -limitHeightChange) {alteredHeight = leftHeight - limitHeightChange - landShapePointer[inCellY * landSize + inCellX]; doChange = true;}
+                    if (doChange == true) paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+                }
             }
 
-            cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() + 1, cellCoords.getY() - 1); // move one cell back and up
-            cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
-            if(allowLandShapeEditing(cellId)==true)  // Open new cell
+            // Inverse check
+            for(int inCellX = landSize - 1; inCellX >= 0; --inCellX)
             {
-                inCellX = 0;
-                inCellY = ESM::Land::LAND_SIZE - 1;
-                mAlteredCells.emplace_back(cellCoords);
-                paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
-            }
+                for(int inCellY = landSize - 1; inCellY >= 0; --inCellY)
+                {
+                    float alteredHeight = *paged->getCellAlteredHeight(cellCoords, inCellX, inCellY);
+                    float thisHeight = landShapePointer[inCellY * landSize + inCellX] + alteredHeight;
+                    float rightHeight = 0.0f;
+                    float downHeight = 0.0f;
 
-            cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());  // move one cell left
-            cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
-            if(allowLandShapeEditing(cellId)==true)  // Open new cell
-            {
-                inCellX = ESM::Land::LAND_SIZE - 1;
-                inCellY = ESM::Land::LAND_SIZE - 1;
-                mAlteredCells.emplace_back(cellCoords);
-                paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+                    if (inCellX == landSize - 1)
+                    {
+                        cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() + 1, cellCoords.getY());
+                        changingCellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                        const CSMWorld::LandHeightsColumn::DataType landRightShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                        rightHeight = landRightShapePointer[inCellY * landSize + 1];
+                        if (paged->getCellAlteredHeight(changingCellCoords, 1, inCellY) != nullptr)
+                            rightHeight = landRightShapePointer[inCellY * landSize + 1] + *paged->getCellAlteredHeight(changingCellCoords, 1, inCellY);
+                    }
+                    if (inCellY == landSize - 1)
+                    {
+                        cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY() + 1);
+                        changingCellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                        const CSMWorld::LandHeightsColumn::DataType landDownShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                        downHeight = landDownShapePointer[1 * landSize + inCellX];
+                        if (paged->getCellAlteredHeight(changingCellCoords, inCellX, 1) != nullptr)
+                            downHeight = landDownShapePointer[1 * landSize + inCellX] + *paged->getCellAlteredHeight(changingCellCoords, inCellX, 1);
+                    }
+                    if (inCellX < landSize - 1)
+                    {
+                        rightHeight = landShapePointer[inCellY * landSize + inCellX + 1] + *paged->getCellAlteredHeight(cellCoords, inCellX + 1, inCellY);
+                    }
+                    if (inCellY < landSize - 1)
+                    {
+                        downHeight = landShapePointer[(inCellY + 1) * landSize + inCellX] + *paged->getCellAlteredHeight(cellCoords, inCellX, inCellY + 1);
+                    }
+
+                    bool doChange = false;
+                    if (thisHeight - downHeight > limitHeightChange)
+                    {
+                        alteredHeight = downHeight + limitHeightChange - landShapePointer[inCellY * landSize + inCellX];
+                        doChange = true;
+                    }
+                    if (thisHeight - downHeight < -limitHeightChange)
+                    {
+                        alteredHeight = downHeight - limitHeightChange - landShapePointer[inCellY * landSize + inCellX];
+                        doChange = true;
+                    }
+                    if (thisHeight - rightHeight > limitHeightChange)
+                    {
+                        alteredHeight = rightHeight + limitHeightChange - landShapePointer[inCellY * landSize + inCellX];
+                        doChange = true;
+                    }
+                    if (thisHeight - rightHeight < -limitHeightChange)
+                    {
+                        alteredHeight = rightHeight - limitHeightChange - landShapePointer[inCellY * landSize + inCellX];
+                        doChange = true;
+                    }
+
+                    if (doChange == true)
+                    {
+                        paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+                        ++limitingPasses;
+
+                        // Fix edges
+                        if (inCellX == 0)
+                        {
+                            cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());
+                            CSMWorld::CellCoordinates leftCellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                            const CSMWorld::LandHeightsColumn::DataType landLeftShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                            if(landShapePointer[inCellY * landSize + inCellX] != landLeftShapePointer[inCellY * landSize + (landSize - 1)]) paged->setCellAlteredHeight(leftCellCoords, landSize - 1, inCellY, alteredHeight);
+                            tempAlteredCells.emplace_back(leftCellCoords);
+                        }
+                        if (inCellY == 0)
+                        {
+                            cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY() - 1);
+                            CSMWorld::CellCoordinates upCellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                            const CSMWorld::LandHeightsColumn::DataType landUpShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                            if(landShapePointer[inCellY * landSize + inCellX] != landUpShapePointer[inCellX]) paged->setCellAlteredHeight(upCellCoords, inCellX, landSize - 1, alteredHeight);
+                            tempAlteredCells.emplace_back(upCellCoords);
+                        }
+                        if (inCellX == 0 && inCellY == 0)
+                        {
+                            cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY() - 1);
+                            CSMWorld::CellCoordinates upLeftCellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                            const CSMWorld::LandHeightsColumn::DataType landUpLeftShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                            if(landShapePointer[inCellY * landSize + inCellX] != landUpLeftShapePointer[landSize - 1 * landSize + landSize - 1]) paged->setCellAlteredHeight(upLeftCellCoords, landSize - 1, landSize - 1, alteredHeight);
+                            tempAlteredCells.emplace_back(upLeftCellCoords);
+                        }
+                        if (inCellX == landSize - 1)
+                        {
+                            cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() + 1, cellCoords.getY());
+                            CSMWorld::CellCoordinates rightCellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                            const CSMWorld::LandHeightsColumn::DataType landRightShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                            if(landShapePointer[inCellY * landSize + inCellX] != landRightShapePointer[inCellY * landSize]) paged->setCellAlteredHeight(rightCellCoords, 0, inCellY, alteredHeight);
+                            tempAlteredCells.emplace_back(rightCellCoords);
+                        }
+                        if (inCellY == landSize - 1)
+                        {
+                            cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY() + 1);
+                            CSMWorld::CellCoordinates downCellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                            const CSMWorld::LandHeightsColumn::DataType landDownShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                            if(landShapePointer[inCellY * landSize + inCellX] != landDownShapePointer[inCellX]) paged->setCellAlteredHeight(downCellCoords, inCellX, 0, alteredHeight);
+                            tempAlteredCells.emplace_back(downCellCoords);
+                        }
+                    }
+                }
             }
         }
-        else if (inCellX == 0 && inCellY != 0) // Bind the last row to first row
-        {
-            cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());
-            cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
-            if(allowLandShapeEditing(cellId)==true) {} // Open new cell
-            inCellX = ESM::Land::LAND_SIZE - 1;
-            mAlteredCells.emplace_back(cellCoords);
-            paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
-        }
-        else if (inCellX != 0 && inCellY == 0) // Bind the last row to first row
-        {
-            cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY() - 1);
-            cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
-            if(allowLandShapeEditing(cellId)==true) {} // Open new cell
-            inCellY = ESM::Land::LAND_SIZE - 1;
-            mAlteredCells.emplace_back(cellCoords);
-            paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
-        }
-    }
+        mAlteredCells.insert(std::end(mAlteredCells), std::begin(tempAlteredCells), std::end(tempAlteredCells));
     }
 }
 
