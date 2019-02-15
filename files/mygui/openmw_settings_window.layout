@@ -222,21 +222,19 @@
                     <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 78 16" align="Left Bottom">
                         <Property key="Caption" value="Invert X Axis"/>
                     </Widget>
-                </Widget>
-                <Widget type="HBox" skin="" position="4 254 300 24" align="Left Bottom">
-                    <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Bottom">
+                    <Widget type="AutoSizedButton" skin="MW_Button" position="28 0 24 24" align="Left Bottom">
                         <UserString key="SettingCategory" value="Input"/>
                         <UserString key="SettingName" value="invert y axis"/>
                         <UserString key="SettingType" value="CheckButton"/>
                     </Widget>
-                    <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 78 16" align="Left Bottom">
+                    <Widget type="AutoSizedTextBox" skin="SandText" position="56 4 78 16" align="Left Bottom">
                         <Property key="Caption" value="#{sMouseFlip}"/>
                     </Widget>
                 </Widget>
-                <Widget type="TextBox" skin="NormalText" position="4 284 336 18" align="Left Bottom">
+                <Widget type="TextBox" skin="NormalText" position="4 254 336 18" align="Left Bottom">
                     <Property key="Caption" value="Camera Sensitivity"/>
                 </Widget>
-                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 308 336 18" align="HStretch Bottom">
+                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 278 336 18" align="HStretch Bottom">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
@@ -246,13 +244,23 @@
                     <UserString key="SettingMin" value="0.2"/>
                     <UserString key="SettingMax" value="5.0"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 332 336 18" align="Left Bottom">
+                <Widget type="TextBox" skin="SandText" position="4 302 336 18" align="Left Bottom">
                     <Property key="Caption" value="#{sLow}"/>
                     <Property key="TextAlign" value="Left"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 332 336 18" align="Right Bottom">
+                <Widget type="TextBox" skin="SandText" position="4 302 336 18" align="Right Bottom">
                     <Property key="Caption" value="#{sHigh}"/>
                     <Property key="TextAlign" value="Right"/>
+                </Widget>
+                <Widget type="HBox" skin="" position="4 324 336 24" align="Left Bottom">
+                    <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Bottom">
+                        <UserString key="SettingCategory" value="Input"/>
+                        <UserString key="SettingName" value="enable controller"/>
+                        <UserString key="SettingType" value="CheckButton"/>
+                    </Widget>
+                    <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 78 16" align="Left Bottom">
+                        <Property key="Caption" value="#{sEnableJoystick}"/>
+                    </Widget>
                 </Widget>
             </Widget>
             <Widget type="TabItem" skin="" position="4 32 360 308">
