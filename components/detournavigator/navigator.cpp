@@ -122,12 +122,17 @@ namespace DetourNavigator
         mNavMeshManager.wait();
     }
 
+    SharedNavMeshCacheItem Navigator::getNavMesh(const osg::Vec3f& agentHalfExtents) const
+    {
+        return mNavMeshManager.getNavMesh(agentHalfExtents);
+    }
+
     std::map<osg::Vec3f, SharedNavMeshCacheItem> Navigator::getNavMeshes() const
     {
         return mNavMeshManager.getNavMeshes();
     }
 
-    const Settings& Navigator::getSettings() const
+    Settings Navigator::getSettings() const
     {
         return mSettings;
     }

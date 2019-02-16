@@ -175,11 +175,18 @@ namespace DetourNavigator
                 >::value,
                 "out is not an OutputIterator"
             );
-            const auto navMesh = mNavMeshManager.getNavMesh(agentHalfExtents);
-            return findSmoothPath(navMesh.lock()->getValue(), toNavMeshCoordinates(mSettings, agentHalfExtents),
-                toNavMeshCoordinates(mSettings, start), toNavMeshCoordinates(mSettings, end), includeFlags,
-                mSettings, out);
+            const auto navMesh = getNavMesh(agentHalfExtents);
+            const auto settings = getSettings();
+            return findSmoothPath(navMesh.lock()->getValue(), toNavMeshCoordinates(settings, agentHalfExtents),
+                toNavMeshCoordinates(settings, start), toNavMeshCoordinates(settings, end), includeFlags,
+                settings, out);
         }
+
+        /**
+         * @brief getNavMesh returns navmesh for specific agent half extents
+         * @return navmesh
+         */
+        SharedNavMeshCacheItem getNavMesh(const osg::Vec3f& agentHalfExtents) const;
 
         /**
          * @brief getNavMeshes returns all current navmeshes
@@ -187,7 +194,7 @@ namespace DetourNavigator
          */
         std::map<osg::Vec3f, SharedNavMeshCacheItem> getNavMeshes() const;
 
-        const Settings& getSettings() const;
+        Settings getSettings() const;
 
     private:
         Settings mSettings;
