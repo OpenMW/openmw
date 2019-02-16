@@ -36,6 +36,8 @@ namespace DetourNavigator
         std::string mRecastMeshPathPrefix;
         std::string mNavMeshPathPrefix;
     };
+
+    Settings makeSettingsFromSettingsManager();
 }
 
 #endif
