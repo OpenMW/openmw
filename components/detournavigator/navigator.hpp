@@ -171,6 +171,8 @@ namespace DetourNavigator
                 "out is not an OutputIterator"
             );
             const auto navMesh = getNavMesh(agentHalfExtents);
+            if (!navMesh)
+                return out;
             const auto settings = getSettings();
             return findSmoothPath(navMesh.lock()->getValue(), toNavMeshCoordinates(settings, agentHalfExtents),
                 toNavMeshCoordinates(settings, start), toNavMeshCoordinates(settings, end), includeFlags,
