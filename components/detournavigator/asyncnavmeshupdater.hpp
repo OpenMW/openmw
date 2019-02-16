@@ -58,7 +58,7 @@ namespace DetourNavigator
             }
         };
 
-        using Jobs = std::priority_queue<Job, std::deque<Job>>;
+        using Jobs = std::priority_queue<Job, std::vector<Job>>;
 
         std::reference_wrapper<const Settings> mSettings;
         std::reference_wrapper<TileCachedRecastMeshManager> mRecastMeshManager;
