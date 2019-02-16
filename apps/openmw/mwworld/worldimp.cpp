@@ -25,6 +25,7 @@
 
 #include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/navigatorimpl.hpp>
+#include <components/detournavigator/navigatorstub.hpp>
 #include <components/detournavigator/recastglobalallocator.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -198,15 +199,21 @@ namespace MWWorld
 
         mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
 
-        auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
-        navigatorSettings.mMaxClimb = MWPhysics::sStepSizeUp;
-        navigatorSettings.mMaxSlope = MWPhysics::sMaxSlope;
-        navigatorSettings.mSwimHeightScale = mSwimHeightScale;
-        if (Settings::Manager::getBool("enable log", "Navigator"))
-            DetourNavigator::Log::instance().setSink(std::unique_ptr<DetourNavigator::FileSink>(
-                new DetourNavigator::FileSink(Settings::Manager::getString("log path", "Navigator"))));
-        DetourNavigator::RecastGlobalAllocator::init();
-        mNavigator.reset(new DetourNavigator::NavigatorImpl(navigatorSettings));
+        if (auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager())
+        {
+            navigatorSettings->mMaxClimb = MWPhysics::sStepSizeUp;
+            navigatorSettings->mMaxSlope = MWPhysics::sMaxSlope;
+            navigatorSettings->mSwimHeightScale = mSwimHeightScale;
+            if (Settings::Manager::getBool("enable log", "Navigator"))
+                DetourNavigator::Log::instance().setSink(std::unique_ptr<DetourNavigator::FileSink>(
+                    new DetourNavigator::FileSink(Settings::Manager::getString("log path", "Navigator"))));
+            DetourNavigator::RecastGlobalAllocator::init();
+            mNavigator.reset(new DetourNavigator::NavigatorImpl(*navigatorSettings));
+        }
+        else
+        {
+            mNavigator.reset(new DetourNavigator::NavigatorStub());
+        }
 
         mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath, *mNavigator));
         mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));

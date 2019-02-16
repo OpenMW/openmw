@@ -6,8 +6,11 @@
 
 namespace DetourNavigator
 {
-    Settings makeSettingsFromSettingsManager()
+    boost::optional<Settings> makeSettingsFromSettingsManager()
     {
+        if (!::Settings::Manager::getBool("enable", "Navigator"))
+            return boost::optional<Settings>();
+
         Settings navigatorSettings;
 
         navigatorSettings.mBorderSize = ::Settings::Manager::getInt("border size", "Navigator");
