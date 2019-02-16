@@ -81,21 +81,28 @@ namespace DetourNavigator
             return *this;
         }
 
-        OutputTransformIterator& operator ++(int)
+        OutputTransformIterator& operator ++()
         {
-            mImpl++;
+            ++mImpl.get();
             return *this;
+        }
+
+        OutputTransformIterator operator ++(int)
+        {
+            const auto copy = *this;
+            ++(*this);
+            return copy;
         }
 
         OutputTransformIterator& operator =(const osg::Vec3f& value)
         {
-            *mImpl = fromNavMeshCoordinates(mSettings, value);
+            *mImpl.get() = fromNavMeshCoordinates(mSettings, value);
             return *this;
         }
 
     private:
-        OutputIterator& mImpl;
-        const Settings& mSettings;
+        std::reference_wrapper<OutputIterator> mImpl;
+        std::reference_wrapper<const Settings> mSettings;
     };
 
     inline void initNavMeshQuery(dtNavMeshQuery& value, const dtNavMesh& navMesh, const int maxNodes)
