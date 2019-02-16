@@ -164,7 +164,7 @@ add_component_dir(detournavigator
     recastmeshmanager
     cachedrecastmeshmanager
     navmeshmanager
-    navigator
+    navigatorimpl
     asyncnavmeshupdater
     chunkytrimesh
     recastmesh

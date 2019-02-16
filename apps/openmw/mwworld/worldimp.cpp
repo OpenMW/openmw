@@ -24,7 +24,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include <components/detournavigator/debug.hpp>
-#include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/navigatorimpl.hpp>
 #include <components/detournavigator/recastglobalallocator.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -206,7 +206,7 @@ namespace MWWorld
             DetourNavigator::Log::instance().setSink(std::unique_ptr<DetourNavigator::FileSink>(
                 new DetourNavigator::FileSink(Settings::Manager::getString("log path", "Navigator"))));
         DetourNavigator::RecastGlobalAllocator::init();
-        mNavigator.reset(new DetourNavigator::Navigator(navigatorSettings));
+        mNavigator.reset(new DetourNavigator::NavigatorImpl(navigatorSettings));
 
         mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath, *mNavigator));
         mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));

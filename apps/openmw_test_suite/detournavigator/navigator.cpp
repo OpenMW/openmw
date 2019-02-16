@@ -1,6 +1,6 @@
 #include "operators.hpp"
 
-#include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/navigatorimpl.hpp>
 #include <components/detournavigator/exceptions.hpp>
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
@@ -61,7 +61,7 @@ namespace
             mSettings.mMaxSmoothPathSize = 1024;
             mSettings.mTrianglesPerChunk = 256;
             mSettings.mMaxPolys = 4096;
-            mNavigator.reset(new Navigator(mSettings));
+            mNavigator.reset(new NavigatorImpl(mSettings));
         }
     };
 

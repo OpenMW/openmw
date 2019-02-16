@@ -30,7 +30,7 @@ namespace Loading
 
 namespace DetourNavigator
 {
-    class Navigator;
+    struct Navigator;
     class Water;
 }
 
