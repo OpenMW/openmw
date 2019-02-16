@@ -85,6 +85,9 @@ namespace CSVRender
             /// Do a single height alteration for transient shape edit map
             void alterHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, float alteredHeight);
 
+            /// Do a single smoothing height alteration for transient shape edit map
+            void smoothHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, int toolStrength);
+
             /// Check that the edit doesn't break save format limits, fix if necessary
             void limitHeightChanges(CSMWorld::CellCoordinates cellCoords);
 
@@ -116,6 +119,8 @@ namespace CSVRender
             int mTotalDiffY;
             std::vector<CSMWorld::CellCoordinates> mAlteredCells;
             osg::Vec3d mEditingPos;
+            int mShapeEditTool;
+            int mShapeEditToolStrength;
 
             const int cellSize {ESM::Land::REAL_SIZE};
             const int landSize {ESM::Land::LAND_SIZE};
@@ -130,6 +135,8 @@ namespace CSVRender
             //void handleDropEvent(QDropEvent *event);
             void setBrushSize(int brushSize);
             void setBrushShape(int brushShape);
+            void setShapeEditTool(int shapeEditTool);
+            void setShapeEditToolStrength(int shapeEditToolStrength);
     };
 }
 

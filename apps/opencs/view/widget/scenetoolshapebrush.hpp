@@ -7,6 +7,7 @@
 
 #include <QWidget>
 #include <QLabel>
+#include <QComboBox>
 #include <QSpinBox>
 #include <QGroupBox>
 #include <QSlider>
@@ -67,8 +68,10 @@ namespace CSVWidget
         private:
             int mBrushShape;
             int mBrushSize;
-            CSMDoc::Document& mDocument;            
+            CSMDoc::Document& mDocument;
             QGroupBox *mHorizontalGroupBox;
+            QComboBox *mToolSelector;
+            QSlider *mToolStrengthSlider;
             std::string mBrushShapeLabel;
             QPushButton *mButtonPoint;
             QPushButton *mButtonSquare;

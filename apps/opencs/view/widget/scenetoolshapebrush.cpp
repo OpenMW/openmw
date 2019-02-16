@@ -6,6 +6,7 @@
 #include <QHBoxLayout>
 
 #include <QWidget>
+#include <QComboBox>
 #include <QSpinBox>
 #include <QGroupBox>
 #include <QSlider>
@@ -104,8 +105,22 @@ CSVWidget::ShapeBrushWindow::ShapeBrushWindow(CSMDoc::Document& document, QWidge
     mHorizontalGroupBox = new QGroupBox(tr(""));
     mHorizontalGroupBox->setLayout(layoutHorizontal);
 
+    mToolSelector = new QComboBox(this);
+    mToolSelector->addItem(tr("Height (drag)"));
+    mToolSelector->addItem(tr("Height, raise (paint)"));
+    mToolSelector->addItem(tr("Height, lower (paint)"));
+    mToolSelector->addItem(tr("Smooth (paint)"));
+
+    mToolStrengthSlider = new QSlider(Qt::Horizontal);
+    mToolStrengthSlider->setTickPosition(QSlider::TicksBothSides);
+    mToolStrengthSlider->setTickInterval(8);
+    mToolStrengthSlider->setRange(1, 256);
+    mToolStrengthSlider->setSingleStep(8);    
+
     layoutMain->addWidget(mHorizontalGroupBox);
-    layoutMain->addWidget(mSizeSliders);    
+    layoutMain->addWidget(mSizeSliders);
+    layoutMain->addWidget(mToolSelector);
+    layoutMain->addWidget(mToolStrengthSlider);
 
     setLayout(layoutMain);
 
