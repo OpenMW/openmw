@@ -13,6 +13,13 @@ Configuration files and log files
 :Mac:		``$HOME/Library/Preferences/openmw``
 :Windows:	``C:\Users\Username\Documents\my games\openmw``
 
+Screenshots
+-----------
+
+:Linux:		``/usr/share/games/openmw/resources/``
+:Mac:		``?``
+:Windows:	``?``
+
 Savegames
 ---------
 
