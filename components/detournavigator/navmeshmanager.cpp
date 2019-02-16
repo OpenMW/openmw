@@ -172,10 +172,6 @@ namespace DetourNavigator
                         else
                             tileToPost->second = addChangeType(tileToPost->second, tile.second);
                     }
-                for (const auto& tile : tilesToPost)
-                    changedTiles->second.erase(tile.first);
-                if (changedTiles->second.empty())
-                    mChangedTiles.erase(changedTiles);
             }
             const auto maxTiles = std::min(mSettings.mMaxTilesNumber, navMesh.getParams()->maxTiles);
             mRecastMeshManager.forEachTilePosition([&] (const TilePosition& tile)
@@ -191,6 +187,8 @@ namespace DetourNavigator
             });
         }
         mAsyncNavMeshUpdater.post(agentHalfExtents, cached, playerTile, tilesToPost);
+        if (changedTiles != mChangedTiles.end())
+            changedTiles->second.clear();
         log("cache update posted for agent=", agentHalfExtents,
             " playerTile=", lastPlayerTile->second,
             " recastMeshManagerRevision=", lastRevision);
