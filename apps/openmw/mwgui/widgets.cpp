@@ -41,7 +41,7 @@ namespace MWGui
             else if (skill < ESM::Skill::Length)
                 setSkillId(static_cast<ESM::Skill::SkillEnum>(skill));
             else
-                throw new std::runtime_error("Skill number out of range");
+                throw std::runtime_error("Skill number out of range");
         }
 
         void MWSkill::setSkillValue(const SkillValue& value)
