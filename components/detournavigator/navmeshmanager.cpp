@@ -44,9 +44,11 @@ namespace DetourNavigator
     bool NavMeshManager::updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                                       const AreaType areaType)
     {
-        if (!mRecastMeshManager.updateObject(id, transform, areaType))
+        const auto changedTiles = mRecastMeshManager.updateObject(id, shape, transform, areaType);
+        if (changedTiles.empty())
             return false;
-        addChangedTiles(shape, transform, ChangeType::update);
+        for (const auto& tile : changedTiles)
+            addChangedTile(tile, ChangeType::update);
         return true;
     }
 
