@@ -876,7 +876,7 @@ QStringList Wizard::UnshieldWorker::findFiles(const QString &fileName, const QSt
                     result.append(info.absoluteFilePath());
                 break;
             case Qt::MatchEndsWith:
-                if (info.fileName().endsWith(fileName), Qt::CaseInsensitive)
+                if (info.fileName().endsWith(fileName, Qt::CaseInsensitive))
                     result.append(info.absoluteFilePath());
                 break;
             }
