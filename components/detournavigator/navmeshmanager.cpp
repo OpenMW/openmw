@@ -105,6 +105,9 @@ namespace DetourNavigator
         if (!resetIfUnique(it->second))
             return false;
         mCache.erase(agentHalfExtents);
+        mChangedTiles.erase(agentHalfExtents);
+        mPlayerTile.erase(agentHalfExtents);
+        mLastRecastMeshManagerRevision.erase(agentHalfExtents);
         return true;
     }
 
