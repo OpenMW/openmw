@@ -3,6 +3,7 @@
 
 #include <mutex>
 #include <iostream>
+#include <ctime>
 
 #include <osg/io_utils>
 
@@ -61,5 +62,84 @@ public:
 private:
     Debug::Level mLevel;
 };
+
+class Profiler
+{
+public:
+    Profiler();
+
+    void start(std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now())
+    {
+        mStarts.push_back(now);
+    }
+
+    std::chrono::steady_clock::duration finish(const char* name, std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now())
+    {
+        const auto start = mStarts.back();
+        const auto duration = now - start;
+        mStarts.pop_back();
+        mRecords.push_back(Record {mStarts.size(), name, duration});
+        return duration;
+    }
+
+    void save(const std::string& path = "profile." + std::to_string(std::time(nullptr)) + ".txt");
+
+    static Profiler& instance()
+    {
+        static Profiler value;
+        return value;
+    }
+
+private:
+    struct Record
+    {
+        std::size_t mDepth;
+        const char* mName;
+        std::chrono::steady_clock::duration mDuration;
+    };
+
+    std::vector<std::chrono::steady_clock::time_point> mStarts;
+    std::vector<Record> mRecords;
+};
+
+class ProfileScope
+{
+public:
+    ProfileScope(const char* name)
+        : mName(name)
+    {
+        ::Profiler::instance().start();
+    }
+
+    ~ProfileScope()
+    {
+        ::Profiler::instance().finish(mName);
+    }
+
+private:
+    const char* mName;
+};
+
+class ProfileScopeWithLimit
+{
+public:
+    ProfileScopeWithLimit(const char* name, std::chrono::steady_clock::duration max)
+        : mName(name), mMax(max)
+    {
+        ::Profiler::instance().start();
+    }
+
+    ~ProfileScopeWithLimit()
+    {
+        const auto duration = ::Profiler::instance().finish(mName);
+        if (duration > mMax)
+            ::Log(::Debug::Verbose) << "Slow operation " << mName << " " << duration.count();
+    }
+
+private:
+    const char* mName;
+    std::chrono::steady_clock::duration mMax;
+};
+
 
 #endif

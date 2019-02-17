@@ -663,6 +663,7 @@ namespace MWSound
                                      float volume, float pitch, Type type, PlayMode mode,
                                      float offset)
     {
+        const ::ProfileScope profile("SoundManager::playSound3D");
         if(!mOutput->isInitialized())
             return nullptr;
 
@@ -718,6 +719,7 @@ namespace MWSound
 
     void SoundManager::stopSound3D(const MWWorld::ConstPtr &ptr, const std::string& soundId)
     {
+        const ::ProfileScope profile("SoundManager::stopSound3D");
         Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
         if (!sfx) return;
 
@@ -1119,6 +1121,8 @@ namespace MWSound
 
     void SoundManager::update(float duration)
     {
+        const ::ProfileScope profile("SoundManager::update");
+
         if(!mOutput->isInitialized())
             return;
 

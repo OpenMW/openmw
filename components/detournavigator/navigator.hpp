@@ -7,6 +7,8 @@
 #include "objectid.hpp"
 #include "navmeshcacheitem.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 namespace DetourNavigator
 {
     struct ObjectShapes
@@ -170,6 +172,7 @@ namespace DetourNavigator
                 >::value,
                 "out is not an OutputIterator"
             );
+            const ::ProfileScope profile("Navigator::findPath");
             const auto navMesh = getNavMesh(agentHalfExtents);
             if (!navMesh)
                 return out;

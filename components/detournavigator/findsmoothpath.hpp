@@ -8,6 +8,8 @@
 #include "settingsutils.hpp"
 #include "debug.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include <DetourCommon.h>
 #include <DetourNavMesh.h>
 #include <DetourNavMeshQuery.h>

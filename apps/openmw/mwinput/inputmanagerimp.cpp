@@ -412,6 +412,8 @@ namespace MWInput
 
     void InputManager::update(float dt, bool disableControls, bool disableEvents)
     {
+        const ::ProfileScope profile("InputManager::update");
+
         mControlsDisabled = disableControls;
 
         mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());

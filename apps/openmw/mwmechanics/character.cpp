@@ -27,6 +27,8 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
+#include <components/debug/debuglog.hpp>
+
 #include "../mwrender/animation.hpp"
 
 #include "../mwbase/environment.hpp"

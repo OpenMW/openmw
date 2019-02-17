@@ -317,6 +317,7 @@ namespace MWWorld
 
     void Scene::update (float duration, bool paused)
     {
+        const ::ProfileScope profile("Scene::update");
         mPreloadTimer += duration;
         if (mPreloadTimer > 0.1f)
         {
@@ -388,6 +389,8 @@ namespace MWWorld
 
     void Scene::loadCell (CellStore *cell, Loading::Listener* loadingListener, bool respawn)
     {
+        const ::ProfileScope profile("Scene::loadCell");
+
         std::pair<CellStoreCollection::iterator, bool> result = mActiveCells.insert(cell);
 
         if(result.second)
@@ -482,6 +485,8 @@ namespace MWWorld
 
     void Scene::playerMoved(const osg::Vec3f &pos)
     {
+        const ::ProfileScope profile("Scene::playerMoved");
+
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         navigator->update(player.getRefData().getPosition().asVec3());
@@ -506,6 +511,8 @@ namespace MWWorld
 
     void Scene::changeCellGrid (int playerCellX, int playerCellY, bool changeEvent)
     {
+        const ::ProfileScope profile("Scene::changeCellGrid");
+
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
 
@@ -805,6 +812,7 @@ namespace MWWorld
 
     void Scene::removeObjectFromScene (const Ptr& ptr)
     {
+        const ::ProfileScope profile("Scene::removeObjectFromScene");
         MWBase::Environment::get().getMechanicsManager()->remove (ptr);
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();

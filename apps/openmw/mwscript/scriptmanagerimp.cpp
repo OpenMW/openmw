@@ -91,6 +91,8 @@ namespace MWScript
 
     void ScriptManager::run (const std::string& name, Interpreter::Context& interpreterContext)
     {
+        const ::ProfileScope profile("ScriptManager::run");
+
         // compile script
         ScriptCollection::iterator iter = mScripts.find (name);
 

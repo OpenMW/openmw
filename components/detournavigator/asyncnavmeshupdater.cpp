@@ -73,6 +73,8 @@ namespace DetourNavigator
         const SharedNavMeshCacheItem& navMeshCacheItem, const TilePosition& playerTile,
         const std::map<TilePosition, ChangeType>& changedTiles)
     {
+        const ::ProfileScope profile("AsyncNavMeshUpdater::post");
+
         *mPlayerTile.lock() = playerTile;
 
         if (changedTiles.empty())

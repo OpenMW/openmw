@@ -1,5 +1,7 @@
 #include "recastmeshmanager.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
@@ -37,6 +39,7 @@ namespace DetourNavigator
 
     boost::optional<RemovedRecastMeshObject> RecastMeshManager::removeObject(const ObjectId id)
     {
+        const ::ProfileScope profile("RecastMeshManager::removeObject");
         const auto object = mObjects.find(id);
         if (object == mObjects.end())
             return boost::none;

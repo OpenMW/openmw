@@ -596,6 +596,8 @@ MWState::StateManager::CharacterIterator MWState::StateManager::characterEnd()
 
 void MWState::StateManager::update (float duration)
 {
+    const ::ProfileScope profile("StateManager::update");
+
     mTimePlayed += duration;
 
     // Note: It would be nicer to trigger this from InputManager, i.e. the very beginning of the frame update.

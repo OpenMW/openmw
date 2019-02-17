@@ -28,6 +28,8 @@
 #include "actorutil.hpp"
 #include "combat.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 namespace
 {
 
@@ -298,6 +300,8 @@ namespace MWMechanics
 
     void MechanicsManager::update(float duration, bool paused)
     {
+        const ::ProfileScope profile("MechanicsManager::update");
+
         if(!mWatched.isEmpty())
         {
             MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();

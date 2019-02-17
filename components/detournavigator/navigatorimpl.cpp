@@ -2,6 +2,8 @@
 #include "debug.hpp"
 #include "settingsutils.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include <Recast.h>
 
 namespace DetourNavigator
@@ -14,12 +16,14 @@ namespace DetourNavigator
 
     void NavigatorImpl::addAgent(const osg::Vec3f& agentHalfExtents)
     {
+        const ::ProfileScope profile("Navigator::addAgent");
         ++mAgents[agentHalfExtents];
         mNavMeshManager.addAgent(agentHalfExtents);
     }
 
     void NavigatorImpl::removeAgent(const osg::Vec3f& agentHalfExtents)
     {
+        const ::ProfileScope profile("Navigator::removeAgent");
         const auto it = mAgents.find(agentHalfExtents);
         if (it == mAgents.end() || --it->second)
             return;
@@ -29,11 +33,13 @@ namespace DetourNavigator
 
     bool NavigatorImpl::addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform)
     {
+        const ::ProfileScope profile("Navigator::addObject1");
         return mNavMeshManager.addObject(id, shape, transform, AreaType_ground);
     }
 
     bool NavigatorImpl::addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
+        const ::ProfileScope profile("Navigator::addObject2");
         bool result = addObject(id, shapes.mShape, transform);
         if (shapes.mAvoid)
         {
@@ -49,6 +55,7 @@ namespace DetourNavigator
 
     bool NavigatorImpl::addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform)
     {
+        const ::ProfileScope profile("Navigator::addObject3");
         if (addObject(id, static_cast<const ObjectShapes&>(shapes), transform))
         {
             mNavMeshManager.addOffMeshConnection(
@@ -63,11 +70,13 @@ namespace DetourNavigator
 
     bool NavigatorImpl::updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform)
     {
+        const ::ProfileScope profile("Navigator::updateObject1");
         return mNavMeshManager.updateObject(id, shape, transform, AreaType_ground);
     }
 
     bool NavigatorImpl::updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform)
     {
+        const ::ProfileScope profile("Navigator::updateObject2");
         bool result = updateObject(id, shapes.mShape, transform);
         if (shapes.mAvoid)
         {
@@ -83,11 +92,13 @@ namespace DetourNavigator
 
     bool NavigatorImpl::updateObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform)
     {
+        const ::ProfileScope profile("Navigator::updateObject3");
         return updateObject(id, static_cast<const ObjectShapes&>(shapes), transform);
     }
 
     bool NavigatorImpl::removeObject(const ObjectId id)
     {
+        const ::ProfileScope profile("Navigator::removeObject");
         bool result = mNavMeshManager.removeObject(id);
         const auto avoid = mAvoidIds.find(id);
         if (avoid != mAvoidIds.end())
@@ -102,23 +113,27 @@ namespace DetourNavigator
     bool NavigatorImpl::addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
         const btTransform& transform)
     {
+        const ::ProfileScope profile("Navigator::addWater");
         return mNavMeshManager.addWater(cellPosition, cellSize,
             btTransform(transform.getBasis(), btVector3(transform.getOrigin().x(), transform.getOrigin().y(), level)));
     }
 
     bool NavigatorImpl::removeWater(const osg::Vec2i& cellPosition)
     {
+        const ::ProfileScope profile("Navigator::removeWater");
         return mNavMeshManager.removeWater(cellPosition);
     }
 
     void NavigatorImpl::update(const osg::Vec3f& playerPosition)
     {
+        const ::ProfileScope profile("Navigator::update");
         for (const auto& v : mAgents)
             mNavMeshManager.update(playerPosition, v.first);
     }
 
     void NavigatorImpl::wait()
     {
+        const ::ProfileScope profile("Navigator::wait");
         mNavMeshManager.wait();
     }
 
@@ -129,6 +144,7 @@ namespace DetourNavigator
 
     std::map<osg::Vec3f, SharedNavMeshCacheItem> NavigatorImpl::getNavMeshes() const
     {
+        const ::ProfileScope profile("Navigator::getNavMeshes");
         return mNavMeshManager.getNavMeshes();
     }
 
@@ -139,16 +155,19 @@ namespace DetourNavigator
 
     void NavigatorImpl::updateAvoidShapeId(const ObjectId id, const ObjectId avoidId)
     {
+        const ::ProfileScope profile("Navigator::updateAvoidShapeId");
         updateId(id, avoidId, mWaterIds);
     }
 
     void NavigatorImpl::updateWaterShapeId(const ObjectId id, const ObjectId waterId)
     {
+        const ::ProfileScope profile("Navigator::updateWaterShapeId");
         updateId(id, waterId, mWaterIds);
     }
 
     void NavigatorImpl::updateId(const ObjectId id, const ObjectId updateId, std::unordered_map<ObjectId, ObjectId>& ids)
     {
+        const ::ProfileScope profile("Navigator::updateId");
         auto inserted = ids.insert(std::make_pair(id, updateId));
         if (!inserted.second)
         {

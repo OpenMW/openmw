@@ -848,6 +848,8 @@ namespace MWWorld
 
     void World::disable (const Ptr& reference)
     {
+        const ::ProfileScope profile("World::disable");
+
         // disable is a no-op for items in containers
         if (!reference.isInCell())
             return;
@@ -1160,6 +1162,8 @@ namespace MWWorld
 
     void World::deleteObject (const Ptr& ptr)
     {
+        const ::ProfileScope profile("World::deleteObject");
+
         if (!ptr.getRefData().isDeleted() && ptr.getContainerStore() == nullptr)
         {
             if (ptr == getPlayerPtr())
@@ -1199,6 +1203,8 @@ namespace MWWorld
 
     MWWorld::Ptr World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z, bool movePhysics)
     {
+        const ::ProfileScope profile("World::moveObject");
+
         ESM::Position pos = ptr.getRefData().getPosition();
 
         pos.pos[0] = x;
@@ -1310,6 +1316,7 @@ namespace MWWorld
 
     MWWorld::Ptr World::moveObjectImp(const Ptr& ptr, float x, float y, float z, bool movePhysics)
     {
+        const ::ProfileScope profile("World::moveObjectImp");
         CellStore *cell = ptr.getCell();
 
         if (cell->isExterior()) {
@@ -1542,6 +1549,8 @@ namespace MWWorld
 
     void World::doPhysics(float duration)
     {
+        const ::ProfileScope profile("World::doPhysics");
+
         mPhysics->stepSimulation(duration);
         processDoors(duration);
 
@@ -1565,6 +1574,7 @@ namespace MWWorld
 
     void World::updateNavigator()
     {
+        const ::ProfileScope profile("World::updateNavigator");
         bool updated = false;
 
         mPhysics->forEachAnimatedObject([&] (const MWPhysics::Object* object)
@@ -1607,6 +1617,7 @@ namespace MWWorld
 
     void World::processDoors(float duration)
     {
+        const ::ProfileScope profile("World::processDoors");
         std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin();
         while (it != mDoorStates.end())
         {
@@ -1782,6 +1793,8 @@ namespace MWWorld
 
     void World::update (float duration, bool paused)
     {
+        const ::ProfileScope profile("World::update");
+
         if (mGoToJail && !paused)
             goToJail();
 
@@ -1827,6 +1840,7 @@ namespace MWWorld
 
     void World::updatePlayer()
     {
+        const ::ProfileScope profile("World::updatePlayer");
         MWWorld::Ptr player = getPlayerPtr();
 
         // TODO: move to MWWorld::Player
@@ -1883,6 +1897,7 @@ namespace MWWorld
 
     void World::preloadSpells()
     {
+        const ::ProfileScope profile("World::preloadSpells");
         std::string selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
         if (!selectedSpell.empty())
         {
@@ -1916,6 +1931,7 @@ namespace MWWorld
 
     void World::updateSoundListener()
     {
+        const ::ProfileScope profile("World::updateSoundListener");
         const ESM::Position& refpos = getPlayerPtr().getRefData().getPosition();
         osg::Vec3f listenerPos;
 
@@ -3292,6 +3308,7 @@ namespace MWWorld
 
     void World::updateWeather(float duration, bool paused)
     {
+        const ::ProfileScope profile("World::updateWeather");
         bool isExterior = isCellExterior() || isCellQuasiExterior();
         if (mPlayer->wasTeleported())
         {

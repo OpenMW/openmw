@@ -1,6 +1,8 @@
 #include "cachedrecastmeshmanager.hpp"
 #include "debug.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 namespace DetourNavigator
 {
     CachedRecastMeshManager::CachedRecastMeshManager(const Settings& settings, const TileBounds& bounds)
@@ -26,6 +28,7 @@ namespace DetourNavigator
 
     boost::optional<RemovedRecastMeshObject> CachedRecastMeshManager::removeObject(const ObjectId id)
     {
+        const ::ProfileScope profile("CachedRecastMeshManager::removeObject");
         const auto object = mImpl.removeObject(id);
         if (object)
             mCached.reset();

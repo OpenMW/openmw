@@ -1239,6 +1239,8 @@ namespace MWPhysics
 
     const PtrVelocityList& PhysicsSystem::applyQueuedMovement(float dt)
     {
+        const ::ProfileScope profile("PhysicsSystem::applyQueuedMovement");
+
         mMovementResults.clear();
 
         mTimeAccum += dt;

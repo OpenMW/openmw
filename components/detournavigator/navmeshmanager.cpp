@@ -7,6 +7,8 @@
 #include "settings.hpp"
 #include "sharednavmesh.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include <DetourNavMesh.h>
 
 #include <BulletCollision/CollisionShapes/btConcaveShape.h>
@@ -54,6 +56,7 @@ namespace DetourNavigator
 
     bool NavMeshManager::removeObject(const ObjectId id)
     {
+        const ::ProfileScope profile("NavMeshManager::removeObject");
         const auto object = mRecastMeshManager.removeObject(id);
         if (!object)
             return false;
@@ -71,6 +74,7 @@ namespace DetourNavigator
 
     bool NavMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
+        const ::ProfileScope profile("NavMeshManager::removeWater");
         const auto water = mRecastMeshManager.removeWater(cellPosition);
         if (!water)
             return false;
@@ -126,6 +130,7 @@ namespace DetourNavigator
 
     void NavMeshManager::update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents)
     {
+        const ::ProfileScope profile("NavMeshManager::update");
         const auto playerTile = getTilePosition(mSettings, toNavMeshCoordinates(mSettings, playerPosition));
         auto& lastRevision = mLastRecastMeshManagerRevision[agentHalfExtents];
         auto lastPlayerTile = mPlayerTile.find(agentHalfExtents);
@@ -200,6 +205,7 @@ namespace DetourNavigator
     void NavMeshManager::addChangedTiles(const btCollisionShape& shape, const btTransform& transform,
             const ChangeType changeType)
     {
+        const ::ProfileScope profile("NavMeshManager::addChangedTiles1");
         getTilesPositions(shape, transform, mSettings,
             [&] (const TilePosition& v) { addChangedTile(v, changeType); });
     }
@@ -207,6 +213,7 @@ namespace DetourNavigator
     void NavMeshManager::addChangedTiles(const int cellSize, const btTransform& transform,
             const ChangeType changeType)
     {
+        const ::ProfileScope profile("NavMeshManager::addChangedTiles2");
         if (cellSize == std::numeric_limits<int>::max())
             return;
 

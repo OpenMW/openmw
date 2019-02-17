@@ -3,6 +3,8 @@
 #include "gettilespositions.hpp"
 #include "settingsutils.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 namespace DetourNavigator
 {
     TileCachedRecastMeshManager::TileCachedRecastMeshManager(const Settings& settings)
@@ -72,6 +74,7 @@ namespace DetourNavigator
 
     boost::optional<RemovedRecastMeshObject> TileCachedRecastMeshManager::removeObject(const ObjectId id)
     {
+        const ::ProfileScope profile("TileCachedRecastMeshManager::removeObject");
         const auto object = mObjectsTilesPositions.find(id);
         if (object == mObjectsTilesPositions.end())
             return boost::none;
@@ -206,6 +209,7 @@ namespace DetourNavigator
     boost::optional<RemovedRecastMeshObject> TileCachedRecastMeshManager::removeTile(const ObjectId id,
         const TilePosition& tilePosition, std::map<TilePosition, CachedRecastMeshManager>& tiles)
     {
+        const ::ProfileScope profile("TileCachedRecastMeshManager::removeTile");
         const auto tile = tiles.find(tilePosition);
         if (tile == tiles.end())
             return boost::optional<RemovedRecastMeshObject>();

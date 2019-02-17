@@ -69,6 +69,8 @@ namespace
 
 void OMW::Engine::executeLocalScripts()
 {
+    const ::ProfileScope profile("Engine::executeLocalScripts");
+
     MWWorld::LocalScripts& localScripts = mEnvironment.getWorld()->getLocalScripts();
 
     localScripts.startIteration();
@@ -85,6 +87,8 @@ bool OMW::Engine::frame(float frametime)
 {
     try
     {
+        const ::ProfileScope profile("Engine::frame");
+
         mStartTick = mViewer->getStartTick();
 
         mEnvironment.setFrameDuration(frametime);
@@ -752,6 +756,8 @@ void OMW::Engine::go()
 
     // Save user settings
     settings.saveUser(settingspath);
+
+    ::Profiler::instance().save();
 
     Log(Debug::Info) << "Quitting peacefully.";
 }
