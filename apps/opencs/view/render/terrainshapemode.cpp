@@ -205,6 +205,8 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
         CSMDoc::Document& document = getWorldspaceWidget().getDocument();
         CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
             *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+        CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+            *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
 
         int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
         int landnormalsColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandNormalsIndex);
@@ -216,6 +218,7 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
         for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
         {
             std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY());
+            undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, cellId));
 
             if (allowLandShapeEditing(cellId) == true)
             {
@@ -755,6 +758,8 @@ bool CSVRender::TerrainShapeMode::allowLandShapeEditing(std::string cellId)
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
     CSMWorld::IdTree& cellTable = dynamic_cast<CSMWorld::IdTree&> (
             *document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
 
