@@ -91,6 +91,9 @@ namespace DetourNavigator
     void NavMeshManager::reset(const osg::Vec3f& agentHalfExtents)
     {
         mCache.erase(agentHalfExtents);
+        mChangedTiles.erase(agentHalfExtents);
+        mPlayerTile.erase(agentHalfExtents);
+        mLastRecastMeshManagerRevision.erase(agentHalfExtents);
     }
 
     void NavMeshManager::addOffMeshConnection(const ObjectId id, const osg::Vec3f& start, const osg::Vec3f& end)
