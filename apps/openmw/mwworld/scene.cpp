@@ -809,11 +809,7 @@ namespace MWWorld
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         if (const auto object = mPhysics->getObject(ptr))
-        {
             navigator->removeObject(DetourNavigator::ObjectId(object));
-            const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            navigator->update(player.getRefData().getPosition().asVec3());
-        }
         else if (const auto actor = mPhysics->getActor(ptr))
         {
             const auto& halfExtents = ptr.getCell()->isExterior()
