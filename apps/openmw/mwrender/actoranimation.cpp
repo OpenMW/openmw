@@ -328,32 +328,32 @@ void ActorAnimation::updateQuiver()
             suitableAmmo = ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Arrow;
     }
 
-    if (ammoNode && suitableAmmo)
+    if (!suitableAmmo)
+        return;
+
+    // We should not show more ammo than equipped and more than quiver mesh has
+    ammoCount = std::min(ammoCount, ammoNode->getNumChildren());
+
+    // Remove existing ammo nodes
+    for (unsigned int i=0; i<ammoNode->getNumChildren(); ++i)
     {
-        // We should not show more ammo than equipped and more than quiver mesh has
-        ammoCount = std::min(ammoCount, ammoNode->getNumChildren());
+        osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();
+        if (!arrowNode->getNumChildren())
+            continue;
 
-        // Remove existing ammo nodes
-        for (unsigned int i=0; i<ammoNode->getNumChildren(); ++i)
-        {
-            osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();
-            if (!arrowNode->getNumChildren())
-                continue;
+        osg::ref_ptr<osg::Node> arrowChildNode = arrowNode->getChild(0);
+        arrowNode->removeChild(arrowChildNode);
+    }
 
-            osg::ref_ptr<osg::Node> arrowChildNode = arrowNode->getChild(0);
-            arrowNode->removeChild(arrowChildNode);
-        }
-
-        // Add new ones
-        osg::Vec4f glowColor = getEnchantmentColor(*ammo);
-        std::string model = ammo->getClass().getModel(*ammo);
-        for (unsigned int i=0; i<ammoCount; ++i)
-        {
-            osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();
-            osg::ref_ptr<osg::Node> arrow = mResourceSystem->getSceneManager()->getInstance(model, arrowNode);
-            if (!ammo->getClass().getEnchantment(*ammo).empty())
-                addGlow(arrow, glowColor);
-        }
+    // Add new ones
+    osg::Vec4f glowColor = getEnchantmentColor(*ammo);
+    std::string model = ammo->getClass().getModel(*ammo);
+    for (unsigned int i=0; i<ammoCount; ++i)
+    {
+        osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();
+        osg::ref_ptr<osg::Node> arrow = mResourceSystem->getSceneManager()->getInstance(model, arrowNode);
+        if (!ammo->getClass().getEnchantment(*ammo).empty())
+            addGlow(arrow, glowColor);
     }
 }
 
