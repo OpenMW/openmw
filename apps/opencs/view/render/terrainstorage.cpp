@@ -20,27 +20,12 @@
 
 namespace CSVRender
 {
-    /*class LandCache
-    {
-    public:
-        typedef std::map<std::pair<int, int>, osg::ref_ptr<const ESMTerrain::LandObject> > Map;
-        Map mMap;
-    };*/
-
     const float defaultHeight = ESM::Land::DEFAULT_HEIGHT;
 
     TerrainStorage::TerrainStorage(const CSMWorld::Data &data)
         : ESMTerrain::Storage(data.getResourceSystem()->getVFS())
         , mData(data)
     {
-        /*float heightMap[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE];
-        for (int x = 1; x <= ESM::Land::LAND_SIZE; ++x)
-        {
-            for (int y = 1; y <= ESM::Land::LAND_SIZE; ++y)
-            {
-                heightMap[y*ESM::Land::LAND_SIZE + x] = 0;
-            }
-        }*/
         resetHeights();
     }
 

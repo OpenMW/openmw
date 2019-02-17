@@ -83,7 +83,7 @@ namespace CSVRender
             void editTerrainShapeGrid (std::pair<int, int> vertexCoords, bool dragOperation);
 
             /// Do a single height alteration for transient shape edit map
-            void alterHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, float alteredHeight);
+            void alterHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, float alteredHeight, bool useTool = true);
 
             /// Do a single smoothing height alteration for transient shape edit map
             void smoothHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, int toolStrength);

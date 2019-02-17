@@ -27,6 +27,7 @@ namespace CSVRender
         virtual osg::ref_ptr<const ESMTerrain::LandObject> getLand (int cellX, int cellY);
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin);
 
+        /// Draws temporarily altered land (transient change support)
         void fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
                                 osg::ref_ptr<osg::Vec3Array> positions,
                                 osg::ref_ptr<osg::Vec3Array> normals,
