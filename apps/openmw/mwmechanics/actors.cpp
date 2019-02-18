@@ -1,10 +1,7 @@
 #include "actors.hpp"
 
-#include <typeinfo>
-#include <iostream>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/loadnpc.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/debug/debuglog.hpp>
@@ -507,7 +504,7 @@ namespace MWMechanics
 
         MagicEffects now = creatureStats.getSpells().getMagicEffects();
 
-        if (creature.getTypeName()==typeid (ESM::NPC).name())
+        if (creature.getClass().isNpc())
         {
             MWWorld::InventoryStore& store = creature.getClass().getInventoryStore (creature);
             now += store.getMagicEffects();
@@ -1423,7 +1420,7 @@ namespace MWMechanics
                         }
                     }
 
-                    if(iter->first.getTypeName() == typeid(ESM::NPC).name())
+                    if(iter->first.getClass().isNpc())
                     {
                         updateDrowning(iter->first, duration, ctrl->isKnockedOut(), isPlayer);
                         calculateNpcStatModifiers(iter->first, duration);

@@ -2,7 +2,6 @@
 #define AISTATE_H
 
 #include <typeinfo>
-#include <stdexcept>
 
 namespace MWMechanics
 {

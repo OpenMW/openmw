@@ -54,6 +54,7 @@
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwrender/vismask.hpp"
 

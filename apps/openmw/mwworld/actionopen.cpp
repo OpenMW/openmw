@@ -6,9 +6,6 @@
 
 #include "../mwmechanics/disease.hpp"
 
-#include "class.hpp"
-#include "containerstore.hpp"
-
 namespace MWWorld
 {
     ActionOpen::ActionOpen (const MWWorld::Ptr& container)

@@ -4,6 +4,7 @@
 #include <components/esm/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"

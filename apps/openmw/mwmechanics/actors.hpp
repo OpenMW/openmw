@@ -5,10 +5,23 @@
 #include <vector>
 #include <string>
 #include <list>
+#include <map>
 
-#include "../mwbase/world.hpp"
+namespace ESM
+{
+    class ESMReader;
+    class ESMWriter;
+}
 
-#include "movement.hpp"
+namespace osg
+{
+    class Vec3f;
+}
+
+namespace Loading
+{
+    class Listener;
+}
 
 namespace MWWorld
 {

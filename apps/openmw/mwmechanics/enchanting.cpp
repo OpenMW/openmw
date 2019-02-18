@@ -7,6 +7,8 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
 
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "creaturestats.hpp"
