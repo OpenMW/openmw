@@ -80,9 +80,14 @@ namespace DetourNavigator
 
         const std::lock_guard<std::mutex> lock(mMutex);
 
+        auto pushed = mPushed.find(agentHalfExtents);
+
+        if (pushed == mPushed.end())
+            pushed = mPushed.insert(std::make_pair(agentHalfExtents, std::set<TilePosition>())).first;
+
         for (const auto& changedTile : changedTiles)
         {
-            if (mPushed[agentHalfExtents].insert(changedTile.first).second)
+            if (pushed->second.insert(changedTile.first).second)
                 mJobs.push(Job {agentHalfExtents, navMeshCacheItem, changedTile.first,
                                 makePriority(changedTile.first, changedTile.second, playerTile)});
         }
