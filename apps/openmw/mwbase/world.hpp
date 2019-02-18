@@ -57,7 +57,7 @@ namespace MWMechanics
 
 namespace DetourNavigator
 {
-    class Navigator;
+    struct Navigator;
 }
 
 namespace MWWorld

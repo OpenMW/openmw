@@ -3,9 +3,9 @@
 
 #include "findsmoothpath.hpp"
 #include "flags.hpp"
-#include "navmeshmanager.hpp"
 #include "settings.hpp"
-#include "settingsutils.hpp"
+#include "objectid.hpp"
+#include "navmeshcacheitem.hpp"
 
 namespace DetourNavigator
 {
@@ -33,33 +33,28 @@ namespace DetourNavigator
     };
 
     /**
-     * @brief Top level class of detournavigator componenet. Navigator allows to build a scene with navmesh and find
+     * @brief Top level interface of detournavigator component. Navigator allows to build a scene with navmesh and find
      * a path for an agent there. Scene contains agents, geometry objects and water. Agent are distinguished only by
      * half extents. Each object has unique identifier and could be added, updated or removed. Water could be added once
      * for each world cell at given level of height. Navmesh builds asynchronously in separate threads. To start build
      * navmesh call update method.
      */
-    class Navigator
+    struct Navigator
     {
-    public:
-        /**
-         * @brief Navigator constructor initializes all internal data. Constructed object is ready to build a scene.
-         * @param settings allows to customize navigator work. Constructor is only place to set navigator settings.
-         */
-        Navigator(const Settings& settings);
+        virtual ~Navigator() = default;
 
         /**
          * @brief addAgent should be called for each agent even if all of them has same half extents.
          * @param agentHalfExtents allows to setup bounding cylinder for each agent, for each different half extents
          * there is different navmesh.
          */
-        void addAgent(const osg::Vec3f& agentHalfExtents);
+        virtual void addAgent(const osg::Vec3f& agentHalfExtents) = 0;
 
         /**
          * @brief removeAgent should be called for each agent even if all of them has same half extents
          * @param agentHalfExtents allows determine which agent to remove
          */
-        void removeAgent(const osg::Vec3f& agentHalfExtents);
+        virtual void removeAgent(const osg::Vec3f& agentHalfExtents) = 0;
 
         /**
          * @brief addObject is used to add object represented by single btCollisionShape and btTransform.
@@ -68,7 +63,7 @@ namespace DetourNavigator
          * @param transform allows to setup object geometry according to its world state.
          * @return true if object is added, false if there is already object with given id.
          */
-        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform);
+        virtual bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform) = 0;
 
         /**
          * @brief addObject is used to add complex object with allowed to walk and avoided to walk shapes
@@ -77,7 +72,7 @@ namespace DetourNavigator
          * @param transform allows to setup objects geometry according to its world state
          * @return true if object is added, false if there is already object with given id
          */
-        bool addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform);
+        virtual bool addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) = 0;
 
         /**
          * @brief addObject is used to add doors.
@@ -86,7 +81,7 @@ namespace DetourNavigator
          * @param transform allows to setup objects geometry according to its world state.
          * @return true if object is added, false if there is already object with given id.
          */
-        bool addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform);
+        virtual bool addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform) = 0;
 
         /**
          * @brief updateObject replace object geometry by given data.
@@ -95,7 +90,7 @@ namespace DetourNavigator
          * @param transform allows to setup objects geometry according to its world state.
          * @return true if object is updated, false if there is no object with given id.
          */
-        bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform);
+        virtual bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform) = 0;
 
         /**
          * @brief updateObject replace object geometry by given data.
@@ -104,7 +99,7 @@ namespace DetourNavigator
          * @param transform allows to setup objects geometry according to its world state.
          * @return true if object is updated, false if there is no object with given id.
          */
-        bool updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform);
+        virtual bool updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) = 0;
 
         /**
          * @brief updateObject replace object geometry by given data.
@@ -113,14 +108,14 @@ namespace DetourNavigator
          * @param transform allows to setup objects geometry according to its world state.
          * @return true if object is updated, false if there is no object with given id.
          */
-        bool updateObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform);
+        virtual bool updateObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform) = 0;
 
         /**
          * @brief removeObject to make it no more available at the scene.
          * @param id is used to find object.
          * @return true if object is removed, false if there is no object with given id.
          */
-        bool removeObject(const ObjectId id);
+        virtual bool removeObject(const ObjectId id) = 0;
 
         /**
          * @brief addWater is used to set water level at given world cell.
@@ -132,26 +127,26 @@ namespace DetourNavigator
          * at least single object is added to the scene, false if there is already water for given cell or there is no
          * any other objects.
          */
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
-            const btTransform& transform);
+        virtual bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
+            const btTransform& transform) = 0;
 
         /**
          * @brief removeWater to make it no more available at the scene.
          * @param cellPosition allows to find cell.
          * @return true if there was water at given cell.
          */
-        bool removeWater(const osg::Vec2i& cellPosition);
+        virtual bool removeWater(const osg::Vec2i& cellPosition) = 0;
 
         /**
          * @brief update start background navmesh update using current scene state.
          * @param playerPosition setup initial point to order build tiles of navmesh.
          */
-        void update(const osg::Vec3f& playerPosition);
+        virtual void update(const osg::Vec3f& playerPosition) = 0;
 
         /**
          * @brief wait locks thread until all tiles are updated from last update call.
          */
-        void wait();
+        virtual void wait() = 0;
 
         /**
          * @brief findPath fills output iterator with points of scene surfaces to be used for actor to walk through.
@@ -175,30 +170,28 @@ namespace DetourNavigator
                 >::value,
                 "out is not an OutputIterator"
             );
-            const auto navMesh = mNavMeshManager.getNavMesh(agentHalfExtents);
-            return findSmoothPath(navMesh.lock()->getValue(), toNavMeshCoordinates(mSettings, agentHalfExtents),
-                toNavMeshCoordinates(mSettings, start), toNavMeshCoordinates(mSettings, end), includeFlags,
-                mSettings, out);
+            const auto navMesh = getNavMesh(agentHalfExtents);
+            if (!navMesh)
+                return out;
+            const auto settings = getSettings();
+            return findSmoothPath(navMesh.lock()->getValue(), toNavMeshCoordinates(settings, agentHalfExtents),
+                toNavMeshCoordinates(settings, start), toNavMeshCoordinates(settings, end), includeFlags,
+                settings, out);
         }
+
+        /**
+         * @brief getNavMesh returns navmesh for specific agent half extents
+         * @return navmesh
+         */
+        virtual SharedNavMeshCacheItem getNavMesh(const osg::Vec3f& agentHalfExtents) const = 0;
 
         /**
          * @brief getNavMeshes returns all current navmeshes
          * @return map of agent half extents to navmesh
          */
-        std::map<osg::Vec3f, SharedNavMeshCacheItem> getNavMeshes() const;
+        virtual std::map<osg::Vec3f, SharedNavMeshCacheItem> getNavMeshes() const = 0;
 
-        const Settings& getSettings() const;
-
-    private:
-        Settings mSettings;
-        NavMeshManager mNavMeshManager;
-        std::map<osg::Vec3f, std::size_t> mAgents;
-        std::unordered_map<ObjectId, ObjectId> mAvoidIds;
-        std::unordered_map<ObjectId, ObjectId> mWaterIds;
-
-        void updateAvoidShapeId(const ObjectId id, const ObjectId avoidId);
-        void updateWaterShapeId(const ObjectId id, const ObjectId waterId);
-        void updateId(const ObjectId id, const ObjectId waterId, std::unordered_map<ObjectId, ObjectId>& ids);
+        virtual Settings getSettings() const = 0;
     };
 }
 

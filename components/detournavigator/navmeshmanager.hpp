@@ -67,7 +67,7 @@ namespace DetourNavigator
 
         void addChangedTile(const TilePosition& tilePosition, const ChangeType changeType);
 
-        const SharedNavMeshCacheItem& getCached(const osg::Vec3f& agentHalfExtents) const;
+        SharedNavMeshCacheItem getCached(const osg::Vec3f& agentHalfExtents) const;
     };
 }
 

@@ -59,7 +59,7 @@ namespace SceneUtil
 
 namespace DetourNavigator
 {
-    class Navigator;
+    struct Navigator;
     struct Settings;
 }
 

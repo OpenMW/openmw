@@ -135,7 +135,13 @@ namespace DetourNavigator
         else
             lastPlayerTile->second = playerTile;
         std::map<TilePosition, ChangeType> tilesToPost;
-        const auto& cached = getCached(agentHalfExtents);
+        const auto cached = getCached(agentHalfExtents);
+        if (!cached)
+        {
+            std::ostringstream stream;
+            stream << "Agent with half extents is not found: " << agentHalfExtents;
+            throw InvalidArgument(stream.str());
+        }
         const auto changedTiles = mChangedTiles.find(agentHalfExtents);
         {
             const auto locked = cached.lock();
@@ -220,13 +226,11 @@ namespace DetourNavigator
         }
     }
 
-    const SharedNavMeshCacheItem& NavMeshManager::getCached(const osg::Vec3f& agentHalfExtents) const
+    SharedNavMeshCacheItem NavMeshManager::getCached(const osg::Vec3f& agentHalfExtents) const
     {
         const auto cached = mCache.find(agentHalfExtents);
         if (cached != mCache.end())
             return cached->second;
-        std::ostringstream stream;
-        stream << "Agent with half extents is not found: " << agentHalfExtents;
-        throw InvalidArgument(stream.str());
+        return SharedNavMeshCacheItem();
     }
 }

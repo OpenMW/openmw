@@ -1,6 +1,6 @@
 #include "operators.hpp"
 
-#include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/navigatorimpl.hpp>
 #include <components/detournavigator/exceptions.hpp>
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
@@ -61,13 +61,14 @@ namespace
             mSettings.mMaxSmoothPathSize = 1024;
             mSettings.mTrianglesPerChunk = 256;
             mSettings.mMaxPolys = 4096;
-            mNavigator.reset(new Navigator(mSettings));
+            mNavigator.reset(new NavigatorImpl(mSettings));
         }
     };
 
-    TEST_F(DetourNavigatorNavigatorTest, find_path_for_empty_should_throw_exception)
+    TEST_F(DetourNavigatorNavigatorTest, find_path_for_empty_should_return_empty)
     {
-        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut), InvalidArgument);
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
+        EXPECT_EQ(mPath, std::deque<osg::Vec3f>());
     }
 
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_existing_agent_with_no_navmesh_should_throw_exception)
@@ -76,11 +77,12 @@ namespace
         EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut), NavigatorException);
     }
 
-    TEST_F(DetourNavigatorNavigatorTest, find_path_for_removed_agent_should_throw_exception)
+    TEST_F(DetourNavigatorNavigatorTest, find_path_for_removed_agent_should_return_empty)
     {
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->removeAgent(mAgentHalfExtents);
-        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut), InvalidArgument);
+        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
+        EXPECT_EQ(mPath, std::deque<osg::Vec3f>());
     }
 
     TEST_F(DetourNavigatorNavigatorTest, add_agent_should_count_each_agent)

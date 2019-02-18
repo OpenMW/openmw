@@ -106,6 +106,11 @@ namespace Misc
                 return Locked<const T>(*mMutex, *mValue);
             }
 
+            operator bool() const
+            {
+                return static_cast<bool>(mValue);
+            }
+
         private:
             std::shared_ptr<std::mutex> mMutex;
             std::shared_ptr<T> mValue;
