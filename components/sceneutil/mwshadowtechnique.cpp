@@ -978,7 +978,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
         osg::ref_ptr<osg::Vec3Array> vertexArray = new osg::Vec3Array();
         for (osg::Vec3d &vertex : frustum.corners)
             vertexArray->push_back((osg::Vec3)vertex);
-        _debugHud->setFrustumVertices(vertexArray);
+        _debugHud->setFrustumVertices(vertexArray, cv.getTraversalNumber());
     }
 
     double reducedNear, reducedFar;
@@ -3042,6 +3042,25 @@ void MWShadowTechnique::releaseGLObjects(osg::State* state) const
         _debugHud->releaseGLObjects(state);
 }
 
+class DoubleBufferCallback : public osg::Callback
+{
+public:
+    DoubleBufferCallback(osg::NodeList &children) : mChildren(children) {}
+
+    virtual bool run(osg::Object* node, osg::Object* visitor) override
+    {
+        // We can't use a static cast as NodeVisitor virtually inherits from Object
+        osg::ref_ptr<osg::NodeVisitor> nodeVisitor = visitor->asNodeVisitor();
+        unsigned int traversalNumber = nodeVisitor->getTraversalNumber();
+        mChildren[traversalNumber % 2]->accept(*nodeVisitor);
+
+        return true;
+    }
+
+protected:
+    osg::NodeList mChildren;
+};
+
 SceneUtil::MWShadowTechnique::DebugHUD::DebugHUD(int numberOfShadowMapsPerLight) : mDebugProgram(new osg::Program)
 {
     osg::ref_ptr<osg::Shader> vertexShader = new osg::Shader(osg::Shader::VERTEX, debugVertexShaderSource);
@@ -3049,20 +3068,23 @@ SceneUtil::MWShadowTechnique::DebugHUD::DebugHUD(int numberOfShadowMapsPerLight)
     osg::ref_ptr<osg::Shader> fragmentShader = new osg::Shader(osg::Shader::FRAGMENT, debugFragmentShaderSource);
     mDebugProgram->addShader(fragmentShader);
 
-    mFrustumGeometry = new osg::Geometry();
-    mFrustumGeometry->setCullingActive(false);
-
     osg::ref_ptr<osg::Program> frustumProgram = new osg::Program;
     vertexShader = new osg::Shader(osg::Shader::VERTEX, debugFrustumVertexShaderSource);
     frustumProgram->addShader(vertexShader);
     fragmentShader = new osg::Shader(osg::Shader::FRAGMENT, debugFrustumFragmentShaderSource);
     frustumProgram->addShader(fragmentShader);
 
-    mFrustumGeometry->getOrCreateStateSet()->setAttributeAndModes(frustumProgram, osg::StateAttribute::ON);
-    //mFrustumGeometry->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+    for (int i = 0; i < 2; ++i)
+    {
+        mFrustumGeometries.emplace_back(new osg::Geometry());
+        mFrustumGeometries[i]->setCullingActive(false);
+
+        mFrustumGeometries[i]->getOrCreateStateSet()->setAttributeAndModes(frustumProgram, osg::StateAttribute::ON);
+    }
 
     osg::ref_ptr<osg::DrawElementsUShort> frustumDrawElements = new osg::DrawElementsUShort(osg::PrimitiveSet::LINE_STRIP);
-    mFrustumGeometry->addPrimitiveSet(frustumDrawElements);
+    for (auto & geom : mFrustumGeometries)
+        geom->addPrimitiveSet(frustumDrawElements);
     frustumDrawElements->push_back(0);
     frustumDrawElements->push_back(1);
     frustumDrawElements->push_back(2);
@@ -3075,7 +3097,8 @@ SceneUtil::MWShadowTechnique::DebugHUD::DebugHUD(int numberOfShadowMapsPerLight)
     frustumDrawElements->push_back(4);
 
     frustumDrawElements = new osg::DrawElementsUShort(osg::PrimitiveSet::LINES);
-    mFrustumGeometry->addPrimitiveSet(frustumDrawElements);
+    for (auto & geom : mFrustumGeometries)
+        geom->addPrimitiveSet(frustumDrawElements);
     frustumDrawElements->push_back(1);
     frustumDrawElements->push_back(5);
     frustumDrawElements->push_back(2);
@@ -3118,12 +3141,13 @@ void SceneUtil::MWShadowTechnique::DebugHUD::releaseGLObjects(osg::State* state)
         node->releaseGLObjects(state);
     for (auto const& node : mFrustumTransforms)
         node->releaseGLObjects(state);
-    mFrustumGeometry->releaseGLObjects(state);
+    for (auto const& node : mFrustumGeometries)
+        node->releaseGLObjects(state);
 }
 
-void SceneUtil::MWShadowTechnique::DebugHUD::setFrustumVertices(osg::ref_ptr<osg::Vec3Array> vertices)
+void SceneUtil::MWShadowTechnique::DebugHUD::setFrustumVertices(osg::ref_ptr<osg::Vec3Array> vertices, unsigned int traversalNumber)
 {
-    mFrustumGeometry->setVertexArray(vertices);
+    mFrustumGeometries[traversalNumber % 2]->setVertexArray(vertices);
 }
 
 void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
@@ -3146,7 +3170,8 @@ void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
     stateSet->addUniform(textureUniform.get());
 
     mFrustumTransforms.push_back(new osg::Group);
-    mFrustumTransforms[shadowMapNumber]->addChild(mFrustumGeometry);
+    osg::NodeList frustumGeometryNodeList(mFrustumGeometries.cbegin(), mFrustumGeometries.cend());
+    mFrustumTransforms[shadowMapNumber]->setCullCallback(new DoubleBufferCallback(frustumGeometryNodeList));
     mFrustumTransforms[shadowMapNumber]->setCullingActive(false);
     mDebugCameras[shadowMapNumber]->addChild(mFrustumTransforms[shadowMapNumber]);
 

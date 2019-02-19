@@ -264,7 +264,7 @@ namespace SceneUtil {
 
             virtual void releaseGLObjects(osg::State* state = 0) const;
 
-            virtual void setFrustumVertices(osg::ref_ptr<osg::Vec3Array> vertices);
+            virtual void setFrustumVertices(osg::ref_ptr<osg::Vec3Array> vertices, unsigned int traversalNumber);
         protected:
             virtual void addAnotherShadowMap();
 
@@ -275,7 +275,7 @@ namespace SceneUtil {
             std::vector<osg::ref_ptr<osg::Node>> mDebugGeometry;
             std::vector<osg::ref_ptr<osg::Group>> mFrustumTransforms;
             std::vector<osg::ref_ptr<osg::Uniform>> mFrustumUniforms;
-            osg::ref_ptr<osg::Geometry> mFrustumGeometry;
+            std::vector<osg::ref_ptr<osg::Geometry>> mFrustumGeometries;
         };
 
         osg::ref_ptr<DebugHUD>                  _debugHud;
