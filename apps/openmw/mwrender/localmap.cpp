@@ -613,7 +613,8 @@ void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orient
             if (!segment.mFogOfWarImage || !segment.mMapTexture)
                 continue;
 
-            unsigned char* data = segment.mFogOfWarImage->data();
+            uint32_t* data = (uint32_t*)segment.mFogOfWarImage->data();
+            bool changed = false;
             for (int texV = 0; texV<sFogOfWarResolution; ++texV)
             {
                 for (int texU = 0; texU<sFogOfWarResolution; ++texU)
@@ -625,14 +626,22 @@ void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orient
                     uint8_t alpha = (clr >> 24);
 
                     alpha = std::min( alpha, (uint8_t) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
-                    *(uint32_t*)data = (uint32_t) (alpha << 24);
+                    uint32_t val = (uint32_t) (alpha << 24);
+                    if ( *data != val)
+                    {
+                        *data = val;
+                        changed = true;
+                    }
 
-                    data += 4;
+                    ++data;
                 }
             }
 
-            segment.mHasFogState = true;
-            segment.mFogOfWarImage->dirty();
+            if (changed)
+            {
+                segment.mHasFogState = true;
+                segment.mFogOfWarImage->dirty();
+            }
         }
     }
 }
