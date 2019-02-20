@@ -205,13 +205,6 @@ namespace Shader
                     mRequirements.back().mShaderRequired = true;
                 }
             }
-
-            if (diffuseMap)
-            {
-                if (!writableStateSet)
-                    writableStateSet = getWritableStateSet(node);
-                writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
-            }
         }
 
         const osg::StateSet::AttributeList& attributes = stateset->getAttributeList();
