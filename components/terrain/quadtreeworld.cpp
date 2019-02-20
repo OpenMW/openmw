@@ -360,7 +360,18 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
                 mRootNode->traverse(vd, &nv, cv->getViewPoint(), true, mViewDistance);
         }
         else
-            mRootNode->traverse(nv);
+        {
+            osgUtil::IntersectionVisitor* iv = static_cast<osgUtil::IntersectionVisitor*>(&nv);
+            osgUtil::LineSegmentIntersector* lineIntsersector = dynamic_cast<osgUtil::LineSegmentIntersector*>(iv->getIntersector());
+            if (!lineIntsersector)
+                throw std::runtime_error("Can not update QuadTreeWorld - the LineSegmentIntersector expected");
+
+            osg::Matrix matrix = osg::Matrix::identity();
+            if (lineIntsersector->getCoordinateFrame() == osgUtil::Intersector::CoordinateFrame::MODEL && iv->getModelMatrix() == 0)
+                matrix = lineIntsersector->getTransformation(*iv, osgUtil::Intersector::CoordinateFrame::MODEL);
+            osg::ref_ptr<TerrainLineIntersector> terrainIntersector (new TerrainLineIntersector(lineIntsersector, matrix));
+            mRootNode->intersect(vd, terrainIntersector);
+        }
     }
     else if (isCullVisitor)
     {

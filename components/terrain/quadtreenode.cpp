@@ -154,18 +154,21 @@ void QuadTreeNode::traverseTo(ViewData* vd, float size, const osg::Vec2f& center
     }
 }
 
-void QuadTreeNode::traverse(osg::NodeVisitor &nv)
+void QuadTreeNode::intersect(ViewData* vd, TerrainLineIntersector* intersector)
 {
     if (!hasValidBounds())
         return;
 
-    bool needsUpdate = true;
-    ViewData* vd = getView(nv, needsUpdate);
+    if (!intersector->intersectAndClip(getBoundingBox()))
+        return;
 
-    if ((mLodCallback && mLodCallback->isSufficientDetail(this, distance(vd->getViewPoint()))) || !getNumChildren())
+    if (getNumChildren() == 0)
         vd->add(this, true);
     else
-        osg::Group::traverse(nv);
+    {
+        for (unsigned int i=0; i<getNumChildren(); ++i)
+            getChild(i)->intersect(vd, intersector);
+    }
 }
 
 void QuadTreeNode::setLodCallback(LodCallback *lodCallback)
