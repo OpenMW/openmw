@@ -81,9 +81,8 @@ namespace Shader
 
             bool mShaderRequired;
 
-            bool mColorMaterial;
-            // osg::Material::ColorMode
-            int mVertexColorMode;
+            int mColorMode;
+            
             bool mMaterialOverridden;
             bool mNormalHeight; // true if normal map has height info in alpha channel
 

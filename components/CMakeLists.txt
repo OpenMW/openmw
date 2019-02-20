@@ -51,7 +51,7 @@ add_component_dir (shader
 add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry morphgeometry lightcontroller
     lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil waterutil writescene serialize optimizer
-    actorutil detourdebugdraw navmesh agentpath
+    actorutil detourdebugdraw navmesh agentpath shadow mwshadowtechnique
     )
 
 add_component_dir (nif
@@ -228,6 +228,7 @@ target_link_libraries(components
     ${OSGVIEWER_LIBRARIES}
     ${OSGTEXT_LIBRARIES}
     ${OSGGA_LIBRARIES}
+    ${OSGSHADOW_LIBRARIES}
     ${OSGANIMATION_LIBRARIES}
     ${Bullet_LIBRARIES}
     ${SDL2_LIBRARIES}

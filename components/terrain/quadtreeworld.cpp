@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include <components/misc/constants.hpp>
+#include <components/sceneutil/mwshadowtechnique.hpp>
 
 #include "quadtreenode.hpp"
 #include "storage.hpp"
@@ -332,7 +333,19 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, ChunkManager* chunk
 void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
     if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
+    {
+        if (nv.getName().find("AcceptedByComponentsTerrainQuadTreeWorld") != std::string::npos)
+        {
+            if (nv.getName().find("SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds") != std::string::npos)
+            {
+                SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds* clsb = static_cast<SceneUtil::MWShadowTechnique::ComputeLightSpaceBounds*>(&nv);
+                clsb->apply(*this);
+            }
+            else
+                nv.apply(*mRootNode);
+        }
         return;
+    }
 
     ViewData* vd = mRootNode->getView(nv);
 
@@ -350,7 +363,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
             traverseToCell(mRootNode.get(), vd, x,y);
         }
         else
-            traverse(mRootNode.get(), vd, cv, mRootNode->getLodCallback(), cv->getEyePoint(), true);
+            traverse(mRootNode.get(), vd, cv, mRootNode->getLodCallback(), cv->getViewPoint(), true);
     }
     else
         mRootNode->traverse(nv);

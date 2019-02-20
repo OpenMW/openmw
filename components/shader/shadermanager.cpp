@@ -21,6 +21,44 @@ namespace Shader
         mPath = path;
     }
 
+    bool addLineDirectivesAfterConditionalBlocks(std::string& source)
+    {
+        for (size_t position = 0; position < source.length(); )
+        {
+            size_t foundPos = source.find("#endif", position);
+            foundPos = std::min(foundPos, source.find("#elif", position));
+            foundPos = std::min(foundPos, source.find("#else", position));
+
+            if (foundPos == std::string::npos)
+                break;
+
+            foundPos = source.find_first_of("\n\r", foundPos);
+            foundPos = source.find_first_not_of("\n\r", foundPos);
+
+            size_t lineDirectivePosition = source.rfind("#line", foundPos);
+            int lineNumber;
+            if (lineDirectivePosition != std::string::npos)
+            {
+                size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
+                size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
+                std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
+                lineNumber = std::stoi(lineNumberString) - 1;
+            }
+            else
+            {
+                lineDirectivePosition = 0;
+                lineNumber = 1;
+            }
+            lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
+
+            source.replace(foundPos, 0, "#line " + std::to_string(lineNumber) + "\n");
+
+            position = foundPos;
+        }
+
+        return true;
+    }
+
     bool parseIncludes(boost::filesystem::path shaderPath, std::string& source)
     {
         boost::replace_all(source, "\r\n", "\n");
@@ -54,14 +92,30 @@ namespace Shader
 
             std::stringstream buffer;
             buffer << includeFstream.rdbuf();
+            std::string stringRepresentation = buffer.str();
+            addLineDirectivesAfterConditionalBlocks(stringRepresentation);
 
             // insert #line directives so we get correct line numbers in compiler errors
             int includedFileNumber = fileNumber++;
 
-            int lineNumber = std::count(source.begin(), source.begin() + foundPos, '\n');
+            size_t lineDirectivePosition = source.rfind("#line", foundPos);
+            int lineNumber;
+            if (lineDirectivePosition != std::string::npos)
+            {
+                size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
+                size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
+                std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
+                lineNumber = std::stoi(lineNumberString) - 1;
+            }
+            else
+            {
+                lineDirectivePosition = 0;
+                lineNumber = 1;
+            }
+            lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
 
             std::stringstream toInsert;
-            toInsert << "#line 0 " << includedFileNumber << "\n" << buffer.str() << "\n#line " << lineNumber << " 0\n";
+            toInsert << "#line 0 " << includedFileNumber << "\n" << stringRepresentation << "\n#line " << lineNumber << " 0\n";
 
             source.replace(foundPos, (end-foundPos+1), toInsert.str());
 
@@ -74,13 +128,97 @@ namespace Shader
         return true;
     }
 
-    bool parseDefines(std::string& source, const ShaderManager::DefineMap& defines)
+    bool parseFors(std::string& source)
     {
-        const char escapeCharacter = '@';
+        const char escapeCharacter = '$';
         size_t foundPos = 0;
         while ((foundPos = source.find(escapeCharacter)) != std::string::npos)
         {
-            size_t endPos = source.find_first_of(" \n\r()[].;", foundPos);
+            size_t endPos = source.find_first_of(" \n\r()[].;,", foundPos);
+            if (endPos == std::string::npos)
+            {
+                Log(Debug::Error) << "Unexpected EOF";
+                return false;
+            }
+            std::string command = source.substr(foundPos + 1, endPos - (foundPos + 1));
+            if (command != "foreach")
+            {
+                Log(Debug::Error) << "Unknown shader directive: $" << command;
+                return false;
+            }
+
+            size_t iterNameStart = endPos + 1;
+            size_t iterNameEnd = source.find_first_of(" \n\r()[].;,", iterNameStart);
+            if (iterNameEnd == std::string::npos)
+            {
+                Log(Debug::Error) << "Unexpected EOF";
+                return false;
+            }
+            std::string iteratorName = "$" + source.substr(iterNameStart, iterNameEnd - iterNameStart);
+
+            size_t listStart = iterNameEnd + 1;
+            size_t listEnd = source.find_first_of("\n\r", listStart);
+            if (listEnd == std::string::npos)
+            {
+                Log(Debug::Error) << "Unexpected EOF";
+                return false;
+            }
+            std::string list = source.substr(listStart, listEnd - listStart);
+            std::vector<std::string> listElements;
+            if (list != "")
+                boost::split(listElements, list, boost::is_any_of(","));
+
+            size_t contentStart = source.find_first_not_of("\n\r", listEnd);
+            size_t contentEnd = source.find("$endforeach", contentStart);
+            if (contentEnd == std::string::npos)
+            {
+                Log(Debug::Error) << "Unexpected EOF";
+                return false;
+            }
+            std::string content = source.substr(contentStart, contentEnd - contentStart);
+
+            size_t overallEnd = contentEnd + std::string("$endforeach").length();
+            
+            size_t lineDirectivePosition = source.rfind("#line", overallEnd);
+            int lineNumber;
+            if (lineDirectivePosition != std::string::npos)
+            {
+                size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
+                size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
+                std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
+                lineNumber = std::stoi(lineNumberString);
+            }
+            else
+            {
+                lineDirectivePosition = 0;
+                lineNumber = 2;
+            }
+            lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + overallEnd, '\n');
+
+            std::string replacement = "";
+            for (std::vector<std::string>::const_iterator element = listElements.cbegin(); element != listElements.cend(); element++)
+            {
+                std::string contentInstance = content;
+                size_t foundIterator;
+                while ((foundIterator = contentInstance.find(iteratorName)) != std::string::npos)
+                    contentInstance.replace(foundIterator, iteratorName.length(), *element);
+                replacement += contentInstance;
+            }
+            replacement += "\n#line " + std::to_string(lineNumber);
+            source.replace(foundPos, overallEnd - foundPos, replacement);
+        }
+
+        return true;
+    }
+
+    bool parseDefines(std::string& source, const ShaderManager::DefineMap& defines, const ShaderManager::DefineMap& globalDefines)
+    {
+        const char escapeCharacter = '@';
+        size_t foundPos = 0;
+        std::vector<std::string> forIterators;
+        while ((foundPos = source.find(escapeCharacter)) != std::string::npos)
+        {
+            size_t endPos = source.find_first_of(" \n\r()[].;,", foundPos);
             if (endPos == std::string::npos)
             {
                 Log(Debug::Error) << "Unexpected EOF";
@@ -88,14 +226,46 @@ namespace Shader
             }
             std::string define = source.substr(foundPos+1, endPos - (foundPos+1));
             ShaderManager::DefineMap::const_iterator defineFound = defines.find(define);
-            if (defineFound == defines.end())
+            ShaderManager::DefineMap::const_iterator globalDefineFound = globalDefines.find(define);
+            if (define == "foreach")
             {
-                Log(Debug::Error) << "Undefined " << define;
-                return false;
+                source.replace(foundPos, 1, "$");
+                size_t iterNameStart = endPos + 1;
+                size_t iterNameEnd = source.find_first_of(" \n\r()[].;,", iterNameStart);
+                if (iterNameEnd == std::string::npos)
+                {
+                    Log(Debug::Error)  << "Unexpected EOF";
+                    return false;
+                }
+                forIterators.push_back(source.substr(iterNameStart, iterNameEnd - iterNameStart));
+            }
+            else if (define == "endforeach")
+            {
+                source.replace(foundPos, 1, "$");
+                if (forIterators.empty())
+                {
+                    Log(Debug::Error) << "endforeach without foreach";
+                    return false;
+                }
+                else
+                    forIterators.pop_back();
+            }
+            else if (std::find(forIterators.begin(), forIterators.end(), define) != forIterators.end())
+            {
+                source.replace(foundPos, 1, "$");
+            }
+            else if (defineFound != defines.end())
+            {
+                source.replace(foundPos, endPos - foundPos, defineFound->second);
+            }
+            else if (globalDefineFound != globalDefines.end())
+            {
+                source.replace(foundPos, endPos - foundPos, globalDefineFound->second);
             }
             else
             {
-                source.replace(foundPos, endPos-foundPos, defineFound->second);
+                Log(Debug::Error) << "Undefined " << define;
+                return false;
             }
         }
         return true;
@@ -122,7 +292,7 @@ namespace Shader
 
             // parse includes
             std::string source = buffer.str();
-            if (!parseIncludes(boost::filesystem::path(mPath), source))
+            if (!addLineDirectivesAfterConditionalBlocks(source) || !parseIncludes(boost::filesystem::path(mPath), source))
                 return nullptr;
 
             templateIt = mShaderTemplates.insert(std::make_pair(shaderTemplate, source)).first;
@@ -132,7 +302,7 @@ namespace Shader
         if (shaderIt == mShaders.end())
         {
             std::string shaderSource = templateIt->second;
-            if (!parseDefines(shaderSource, defines))
+            if (!parseDefines(shaderSource, defines, mGlobalDefines) || !parseFors(shaderSource))
             {
                 // Add to the cache anyway to avoid logging the same error over and over.
                 mShaders.insert(std::make_pair(std::make_pair(shaderTemplate, defines), nullptr));
@@ -164,11 +334,39 @@ namespace Shader
         return found->second;
     }
 
+    ShaderManager::DefineMap ShaderManager::getGlobalDefines()
+    {
+        return DefineMap(mGlobalDefines);
+    }
+
+    void ShaderManager::setGlobalDefines(DefineMap & globalDefines)
+    {
+        mGlobalDefines = globalDefines;
+        for (auto shaderMapElement: mShaders)
+        {
+            std::string templateId = shaderMapElement.first.first;
+            ShaderManager::DefineMap defines = shaderMapElement.first.second;
+            osg::ref_ptr<osg::Shader> shader = shaderMapElement.second;
+            if (shader == nullptr)
+                // I'm not sure how to handle a shader that was already broken as there's no way to get a potential replacement to the nodes that need it.
+                continue;
+            std::string shaderSource = mShaderTemplates[templateId];
+            if (!parseDefines(shaderSource, defines, mGlobalDefines) || !parseFors(shaderSource))
+                // We just broke the shader and there's no way to force existing objects back to fixed-function mode as we would when creating the shader.
+                // If we put a nullptr in the shader map, we just lose the ability to put a working one in later.
+                continue;
+            shader->setShaderSource(shaderSource);
+        }
+    }
+
     void ShaderManager::releaseGLObjects(osg::State *state)
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
         for (auto shader : mShaders)
-            shader.second->releaseGLObjects(state);
+        {
+            if (shader.second != nullptr)
+                shader.second->releaseGLObjects(state);
+        }
         for (auto program : mPrograms)
             program.second->releaseGLObjects(state);
     }

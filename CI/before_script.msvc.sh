@@ -608,9 +608,9 @@ printf "OSG 3.4.1-scrawl... "
 		SUFFIX=""
 	fi
 	add_runtime_dlls "$(pwd)/OSG/bin/"{OpenThreads,zlib,libpng*}${SUFFIX}.dll \
-		"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer}${SUFFIX}.dll
+		"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow}${SUFFIX}.dll
 	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.1/osgdb_"{bmp,dds,jpeg,osg,png,tga}${SUFFIX}.dll
-	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.1/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer}${SUFFIX}.dll
+	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.1/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer,shadow}${SUFFIX}.dll
 	echo Done.
 }
 cd $DEPS

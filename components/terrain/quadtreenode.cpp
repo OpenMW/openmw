@@ -134,7 +134,7 @@ ViewData* QuadTreeNode::getView(osg::NodeVisitor &nv)
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
         ViewData* vd = mViewDataMap->getViewData(cv->getCurrentCamera());
-        vd->setEyePoint(nv.getEyePoint());
+        vd->setEyePoint(nv.getViewPoint());
         return vd;
     }
     else // INTERSECTION_VISITOR

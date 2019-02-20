@@ -71,6 +71,8 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
         to.setSupportsDisplayList(false);
         to.setUseVertexBufferObjects(true);
         to.setCullingActive(false); // make sure to disable culling since that's handled by this class
+        to.setComputeBoundingBoxCallback(new CopyBoundingBoxCallback());
+        to.setComputeBoundingSphereCallback(new CopyBoundingSphereCallback());
 
         // vertices and normals are modified every frame, so we need to deep copy them.
         // assign a dedicated VBO to make sure that modifications don't interfere with source geometry's VBO.
@@ -296,6 +298,14 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
         _boundingSphereComputed = true;
         for (unsigned int i=0; i<getNumParents(); ++i)
             getParent(i)->dirtyBound();
+
+        for (unsigned int i = 0; i < 2; ++i)
+        {
+            osg::Geometry& geom = *mGeometry[i];
+            static_cast<CopyBoundingBoxCallback*>(geom.getComputeBoundingBoxCallback())->boundingBox = _boundingBox;
+            static_cast<CopyBoundingSphereCallback*>(geom.getComputeBoundingSphereCallback())->boundingSphere = _boundingSphere;
+            geom.dirtyBound();
+        }
     }
 }
 

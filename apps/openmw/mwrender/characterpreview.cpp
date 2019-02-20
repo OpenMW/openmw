@@ -16,6 +16,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/shadow.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -136,6 +137,7 @@ namespace MWRender
         mCamera->attach(osg::Camera::COLOR_BUFFER, mTexture);
         mCamera->setName("CharacterPreview");
         mCamera->setComputeNearFarMode(osg::Camera::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
+        mCamera->setCullMask(~(Mask_UpdateVisitor));
 
         mCamera->setNodeMask(Mask_RenderToTexture);
 
@@ -151,6 +153,8 @@ namespace MWRender
         defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         stateset->setAttribute(defaultMat);
+
+        SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
 
         // assign large value to effectively turn off fog
         // shaders don't respect glDisable(GL_FOG)

@@ -1,38 +1,66 @@
 #define MAX_LIGHTS 8
 
-vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor)
+uniform int colorMode;
+
+void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 viewPos, vec3 viewNormal, vec4 diffuse, vec3 ambient)
 {
     vec3 lightDir;
-    float d;
+    float lightDistance;
 
-#if @colorMode == 3
-    vec4 diffuse = gl_FrontMaterial.diffuse;
-    vec3 ambient = vertexColor.xyz;
-#elif @colorMode == 2
-    vec4 diffuse = vertexColor;
-    vec3 ambient = vertexColor.xyz;
+    lightDir = gl_LightSource[lightIndex].position.xyz - (viewPos.xyz * gl_LightSource[lightIndex].position.w);
+    lightDistance = length(lightDir);
+    lightDir = normalize(lightDir);
+    float illumination = clamp(1.0 / (gl_LightSource[lightIndex].constantAttenuation + gl_LightSource[lightIndex].linearAttenuation * lightDistance + gl_LightSource[lightIndex].quadraticAttenuation * lightDistance * lightDistance), 0.0, 1.0);
+
+    ambientOut = ambient * gl_LightSource[lightIndex].ambient.xyz * illumination;
+    diffuseOut = diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0) * illumination;
+}
+
+#if PER_PIXEL_LIGHTING
+vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, float shadowing)
 #else
-    vec4 diffuse = gl_FrontMaterial.diffuse;
-    vec3 ambient = gl_FrontMaterial.ambient.xyz;
+vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadowDiffuse)
 #endif
+{
+    vec4 diffuse;
+    vec3 ambient;
+    if (colorMode == 3)
+    {
+        diffuse = gl_FrontMaterial.diffuse;
+        ambient = vertexColor.xyz;
+    }
+    else if (colorMode == 2)
+    {
+        diffuse = vertexColor;
+        ambient = vertexColor.xyz;
+    }
+    else
+    {
+        diffuse = gl_FrontMaterial.diffuse;
+        ambient = gl_FrontMaterial.ambient.xyz;
+    }
     vec4 lightResult = vec4(0.0, 0.0, 0.0, diffuse.a);
 
+    vec3 diffuseLight, ambientLight;
+    perLight(ambientLight, diffuseLight, 0, viewPos, viewNormal, diffuse, ambient);
+#if PER_PIXEL_LIGHTING
+    lightResult.xyz += diffuseLight * shadowing - diffuseLight; // This light gets added a second time in the loop to fix Mesa users' slowdown, so we need to negate its contribution here.
+#else
+    shadowDiffuse = diffuseLight;
+    lightResult.xyz -= shadowDiffuse; // This light gets added a second time in the loop to fix Mesa users' slowdown, so we need to negate its contribution here.
+#endif
     for (int i=0; i<MAX_LIGHTS; ++i)
     {
-        lightDir = gl_LightSource[i].position.xyz - (viewPos.xyz * gl_LightSource[i].position.w);
-        d = length(lightDir);
-        lightDir = normalize(lightDir);
-
-        lightResult.xyz += (ambient * gl_LightSource[i].ambient.xyz + diffuse.xyz * gl_LightSource[i].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0)) * clamp(1.0 / (gl_LightSource[i].constantAttenuation + gl_LightSource[i].linearAttenuation * d + gl_LightSource[i].quadraticAttenuation * d * d), 0.0, 1.0);
+        perLight(ambientLight, diffuseLight, i, viewPos, viewNormal, diffuse, ambient);
+        lightResult.xyz += ambientLight + diffuseLight;
     }
 
     lightResult.xyz += gl_LightModel.ambient.xyz * ambient;
 
-#if @colorMode == 1
-    lightResult.xyz += vertexColor.xyz;
-#else
-    lightResult.xyz += gl_FrontMaterial.emission.xyz;
-#endif
+    if (colorMode == 1)
+        lightResult.xyz += vertexColor.xyz;
+    else
+        lightResult.xyz += gl_FrontMaterial.emission.xyz;
 
 #if @clamp
     lightResult = clamp(lightResult, vec4(0.0, 0.0, 0.0, 0.0), vec4(1.0, 1.0, 1.0, 1.0));

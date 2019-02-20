@@ -8,6 +8,8 @@
 
 #include <osg/Shader>
 
+#include <osgViewer/Viewer>
+
 #include <OpenThreads/Mutex>
 
 namespace Shader
@@ -32,10 +34,20 @@ namespace Shader
 
         osg::ref_ptr<osg::Program> getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader);
 
+        /// Get (a copy of) the DefineMap used to construct all shaders
+        DefineMap getGlobalDefines();
+
+        /// Set the DefineMap used to construct all shaders
+        /// @param defines The DefineMap to use
+        /// @note This will change the source code for any shaders already created, potentially causing problems if they're being used to render a frame. It is recommended that any associated Viewers have their threading stopped while this function is running if any shaders are in use.
+        void setGlobalDefines(DefineMap & globalDefines);
+
         void releaseGLObjects(osg::State* state);
 
     private:
         std::string mPath;
+
+        DefineMap mGlobalDefines;
 
         // <name, code>
         typedef std::map<std::string, std::string> TemplateMap;
