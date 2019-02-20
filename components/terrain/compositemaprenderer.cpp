@@ -59,26 +59,29 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
 
     while (!mImmediateCompileSet.empty())
     {
-        CompositeMap* node = *mImmediateCompileSet.begin();
+        osg::ref_ptr<CompositeMap> node = *mImmediateCompileSet.begin();
         mCompiled.insert(node);
+        mImmediateCompileSet.erase(node);
 
+        mMutex.unlock();
         compile(*node, renderInfo, nullptr);
-
-        mImmediateCompileSet.erase(mImmediateCompileSet.begin());
+        mMutex.lock();
     }
 
     double timeLeft = availableTime;
 
     while (!mCompileSet.empty() && timeLeft > 0)
     {
-        CompositeMap* node = *mCompileSet.begin();
+        osg::ref_ptr<CompositeMap> node = *mCompileSet.begin();
 
+        mMutex.unlock();
         compile(*node, renderInfo, &timeLeft);
+        mMutex.lock();
 
         if (node->mCompiled >= node->mDrawables.size())
         {
             mCompiled.insert(node);
-            mCompileSet.erase(mCompileSet.begin());
+            mCompileSet.erase(node);
         }
     }
     mTimer.setStartTick();
