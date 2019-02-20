@@ -387,25 +387,42 @@ namespace ESMTerrain
         const int blendmapImageSize = blendmapSize * imageScaleFactor;
 
         LandCache cache;
-        std::map<UniqueTextureId, int> textureIndicesMap;
+        std::map<UniqueTextureId, unsigned int> textureIndicesMap;
 
-        for (int y=0; y<blendmapSize; ++y)
+        for (int y=0; y<blendmapSize; y++)
         {
-            for (int x=0; x<blendmapSize; ++x)
+            for (int x=0; x<blendmapSize; x++)
             {
                 UniqueTextureId id = getVtexIndexAt(cellX, cellY, x+rowStart, y+colStart, cache);
-                std::map<UniqueTextureId, int>::iterator found = textureIndicesMap.find(id);
+                std::map<UniqueTextureId, unsigned int>::iterator found = textureIndicesMap.find(id);
                 if (found == textureIndicesMap.end())
                 {
-                    found = textureIndicesMap.insert(std::make_pair(id, textureIndicesMap.size())).first;
-                    layerList.push_back(getLayerInfo(getTextureName(id)));
-                    osg::ref_ptr<osg::Image> image (new osg::Image);
-                    image->allocateImage(blendmapImageSize, blendmapImageSize, 1, GL_ALPHA, GL_UNSIGNED_BYTE);
-                    unsigned char* pData = image->data();
-                    memset(pData, 0, image->getTotalDataSize());
-                    blendmaps.push_back(image);
+                    unsigned int layerIndex = layerList.size();
+                    Terrain::LayerInfo info = getLayerInfo(getTextureName(id));
+
+                    // look for existing diffuse map, which may be present when several plugins use the same texture
+                    for (unsigned int i=0; i<layerList.size(); ++i)
+                    {
+                        if (layerList[i].mDiffuseMap == info.mDiffuseMap)
+                        {
+                            layerIndex = i;
+                            break;
+                        }
+                    }
+
+                    found = textureIndicesMap.emplace(id, layerIndex).first;
+
+                    if (layerIndex >= layerList.size())
+                    {
+                        osg::ref_ptr<osg::Image> image (new osg::Image);
+                        image->allocateImage(blendmapImageSize, blendmapImageSize, 1, GL_ALPHA, GL_UNSIGNED_BYTE);
+                        unsigned char* pData = image->data();
+                        memset(pData, 0, image->getTotalDataSize());
+                        blendmaps.emplace_back(image);
+                        layerList.emplace_back(info);
+                    }
                 }
-                int layerIndex = found->second;
+                unsigned int layerIndex = found->second;
                 unsigned char* pData = blendmaps[layerIndex]->data();
                 int realY = (blendmapSize - y - 1)*imageScaleFactor;
                 int realX = x*imageScaleFactor;
