@@ -184,6 +184,11 @@ public:
             return node;
         }
 
+        // Do not add child nodes for default cells without data.
+        // size = 1 means that the single shape covers the whole cell.
+        if (node->getSize() == 1 && !mStorage->hasData(center.x()-0.5, center.y()-0.5))
+            return node;
+
         if (node->getSize() <= mMinSize)
         {
             // We arrived at a leaf
