@@ -88,8 +88,15 @@ namespace CSVRender
             /// Do a single smoothing height alteration for transient shape edit map
             void smoothHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, int toolStrength);
 
+            /// Update the key values used in height calculations
+            void updateKeyHeightValues(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY,
+                float*, float*, float*, float*, float*, float*);
+
+            /// Bind edge vertices to next cells
+            void fixEdges(CSMWorld::CellCoordinates cellCoords);
+
             /// Check that the edit doesn't break save format limits, fix if necessary
-            void limitHeightChanges(CSMWorld::CellCoordinates cellCoords);
+            void limitAlteredHeights(CSMWorld::CellCoordinates cellCoords);
 
             /// Handle brush mechanics for terrain shape selection
             void selectTerrainShapes (std::pair<int, int>, unsigned char, bool);

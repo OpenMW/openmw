@@ -181,7 +181,7 @@ namespace CSVRender
 
                         (*normals)[static_cast<unsigned int>(vertX*numVerts + vertY)] = normal;
 
-                        if (colourData && mAlteredHeight == 0)
+                        if (colourData)
                         {
                             for (int i=0; i<3; ++i)
                                 color[i] = colourData->mColours[srcArrayIndex+i] / 255.f;
@@ -191,6 +191,31 @@ namespace CSVRender
                             color.r() = 1;
                             color.g() = 1;
                             color.b() = 1;
+                        }
+
+                        // Highlight broken height changes
+                        if ( ((col > 0 && row > 0) &&
+                            ((abs(heightData->mHeights[col*ESM::Land::LAND_SIZE + row] +
+                            mAlteredHeight[static_cast<unsigned int>(col*ESM::Land::LAND_SIZE + row)] -
+                            (heightData->mHeights[(col)*ESM::Land::LAND_SIZE + row - 1] +
+                            mAlteredHeight[static_cast<unsigned int>((col)*ESM::Land::LAND_SIZE + row - 1)])) >= 1024 ) ||
+                            abs(heightData->mHeights[col*ESM::Land::LAND_SIZE + row] +
+                            mAlteredHeight[static_cast<unsigned int>(col*ESM::Land::LAND_SIZE + row)] -
+                            (heightData->mHeights[(col - 1)*ESM::Land::LAND_SIZE + row] +
+                            mAlteredHeight[static_cast<unsigned int>((col - 1)*ESM::Land::LAND_SIZE + row)]))  >= 1024 )) ||
+                            ((col < ESM::Land::LAND_SIZE - 1 && row < ESM::Land::LAND_SIZE - 1) &&
+                            ((abs(heightData->mHeights[col*ESM::Land::LAND_SIZE + row] +
+                            mAlteredHeight[static_cast<unsigned int>(col*ESM::Land::LAND_SIZE + row)] -
+                            (heightData->mHeights[(col)*ESM::Land::LAND_SIZE + row + 1] +
+                            mAlteredHeight[static_cast<unsigned int>((col)*ESM::Land::LAND_SIZE + row + 1)])) >= 1024 ) ||
+                            abs(heightData->mHeights[col*ESM::Land::LAND_SIZE + row] +
+                            mAlteredHeight[static_cast<unsigned int>(col*ESM::Land::LAND_SIZE + row)] -
+                            (heightData->mHeights[(col + 1)*ESM::Land::LAND_SIZE + row] +
+                            mAlteredHeight[static_cast<unsigned int>((col + 1)*ESM::Land::LAND_SIZE + row)]))  >= 1024 )))
+                        {
+                            color.r() = 1;
+                            color.g() = 0;
+                            color.b() = 0;
                         }
 
                         // Unlike normals, colors mostly connect seamlessly between cells, but not always...
