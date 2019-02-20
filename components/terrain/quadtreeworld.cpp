@@ -97,12 +97,11 @@ private:
 class QuadTreeBuilder
 {
 public:
-    QuadTreeBuilder(Terrain::Storage* storage, ViewDataMap* viewDataMap, float lodFactor, float minSize)
+    QuadTreeBuilder(Terrain::Storage* storage, float lodFactor, float minSize)
         : mStorage(storage)
         , mLodFactor(lodFactor)
         , mMinX(0.f), mMaxX(0.f), mMinY(0.f), mMaxY(0.f)
         , mMinSize(minSize)
-        , mViewDataMap(viewDataMap)
     {
     }
 
@@ -120,7 +119,6 @@ public:
         float centerY = (mMinY+mMaxY)/2.f + (size-origSizeY)/2.f;
 
         mRootNode = new RootNode(size, osg::Vec2f(centerX, centerY));
-        mRootNode->setViewDataMap(mViewDataMap);
         mRootNode->setLodCallback(new DefaultLodCallback(mLodFactor, mMinSize));
         addChildren(mRootNode);
 
@@ -171,7 +169,6 @@ public:
 
         osg::ref_ptr<QuadTreeNode> node = new QuadTreeNode(parent, direction, size, center);
         node->setLodCallback(parent->getLodCallback());
-        node->setViewDataMap(mViewDataMap);
 
         if (center.x() - halfSize > mMaxX
                 || center.x() + halfSize < mMinX
@@ -220,7 +217,6 @@ private:
     float mLodFactor;
     float mMinX, mMaxX, mMinY, mMaxY;
     float mMinSize;
-    ViewDataMap* mViewDataMap;
 
     osg::ref_ptr<RootNode> mRootNode;
 };
@@ -337,8 +333,15 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         return;
     }
 
-    bool needsUpdate = false;
-    ViewData* vd = mRootNode->getView(nv, needsUpdate);
+    bool needsUpdate = true;
+    ViewData* vd = nullptr;
+    if (isCullVisitor)
+        vd = mViewDataMap->getViewData(static_cast<osgUtil::CullVisitor*>(&nv)->getCurrentCamera(), nv.getViewPoint(), needsUpdate);
+    else
+    {
+        static ViewData sIntersectionViewData;
+        vd = &sIntersectionViewData;
+    }
 
     if (needsUpdate)
     {
@@ -403,7 +406,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     }
 
     if (!isCullVisitor)
-        vd->reset(); // we can't reuse intersection views in the next frame because they only contain what is touched by the intersection ray.
+        vd->clear(); // we can't reuse intersection views in the next frame because they only contain what is touched by the intersection ray.
 
     vd->markUnchanged();
 
@@ -422,7 +425,7 @@ void QuadTreeWorld::ensureQuadTreeBuilt()
         return;
 
     const float minSize = 1/8.f;
-    QuadTreeBuilder builder(mStorage, mViewDataMap.get(), mLodFactor, minSize);
+    QuadTreeBuilder builder(mStorage, mLodFactor, minSize);
     builder.build();
 
     mRootNode = builder.getRootNode();
