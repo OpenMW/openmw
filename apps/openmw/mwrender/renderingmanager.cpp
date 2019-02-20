@@ -1198,6 +1198,10 @@ namespace MWRender
 
         mUniformNear->set(mNearClip);
         mUniformFar->set(mViewDistance);
+
+        // Since our fog is not radial yet, we should take FOV in account, otherwise terrain near viewing distance may disappear.
+        float distanceMult = std::cos(osg::DegreesToRadians(mFieldOfView)/2.f);
+        mTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f/distanceMult : 1.f));
     }
 
     void RenderingManager::updateTextureFiltering()
