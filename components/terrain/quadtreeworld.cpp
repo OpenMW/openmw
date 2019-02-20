@@ -163,7 +163,10 @@ public:
                 boundingBox.expandBy(child->getBoundingBox());
         }
 
-        parent->setBoundingBox(boundingBox);
+        if (!boundingBox.valid())
+            parent->removeChildren(0, 4);
+        else
+            parent->setBoundingBox(boundingBox);
     }
 
     QuadTreeNode* addChild(QuadTreeNode* parent, ChildDirection direction, float size)
