@@ -255,6 +255,7 @@ public:
         attach(osg::Camera::COLOR_BUFFER, mRefractionTexture);
 
         mRefractionDepthTexture = new osg::Texture2D;
+        mRefractionDepthTexture->setTextureSize(rttSize, rttSize);
         mRefractionDepthTexture->setSourceFormat(GL_DEPTH_COMPONENT);
         mRefractionDepthTexture->setInternalFormat(GL_DEPTH_COMPONENT24);
         mRefractionDepthTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
@@ -334,6 +335,7 @@ public:
         setUpdateCallback(new NoTraverseCallback);
 
         mReflectionTexture = new osg::Texture2D;
+        mReflectionTexture->setTextureSize(rttSize, rttSize);
         mReflectionTexture->setInternalFormat(GL_RGB);
         mReflectionTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mReflectionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
@@ -418,9 +420,6 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     mWaterGeom->setDrawCallback(new DepthClampCallback);
     mWaterGeom->setNodeMask(Mask_Water);
 
-    if (ico)
-        ico->add(mWaterGeom);
-
     mWaterNode = new osg::PositionAttitudeTransform;
     mWaterNode->setName("Water Root");
     mWaterNode->addChild(mWaterGeom);
@@ -439,6 +438,9 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     mRainIntensityUniform = new osg::Uniform("rainIntensity",(float) 0.0);
 
     updateWaterMaterial();
+
+    if (ico)
+        ico->add(mWaterNode);
 }
 
 osg::Uniform *Water::getRainIntensityUniform()
