@@ -92,8 +92,8 @@ namespace Terrain
         const osg::Vec2f& getCenter() const;
 
         /// Optimized version of traverse() that doesn't incur the overhead of NodeVisitor double-dispatch or fetching the various variables.
-        /// Note this doesn't do any culling for non-cull visitors (e.g. intersections) so it shouldn't be used for those.
-        void traverse(ViewData* vd, osg::NodeVisitor* nv, const osg::Vec3f& viewPoint, bool visible, float maxDist);
+        /// Note this doesn't do any culling.
+        void traverse(ViewData* vd, const osg::Vec3f& viewPoint, float maxDist);
 
         /// Traverse to a specific node and add only that node.
         void traverseTo(ViewData* vd, float size, const osg::Vec2f& center);

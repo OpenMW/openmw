@@ -108,13 +108,10 @@ void QuadTreeNode::initNeighbours()
         getChild(i)->initNeighbours();
 }
 
-void QuadTreeNode::traverse(ViewData* vd, osg::NodeVisitor* nv, const osg::Vec3f& viewPoint, bool visible, float maxDist)
+void QuadTreeNode::traverse(ViewData* vd, const osg::Vec3f& viewPoint, float maxDist)
 {
     if (!hasValidBounds())
         return;
-
-    if (nv && nv->getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
-        visible = visible && !static_cast<osgUtil::CullVisitor*>(nv)->isCulled(mBoundingBox);
 
     float dist = distance(viewPoint);
     if (dist > maxDist)
@@ -123,11 +120,11 @@ void QuadTreeNode::traverse(ViewData* vd, osg::NodeVisitor* nv, const osg::Vec3f
     bool stopTraversal = (mLodCallback->isSufficientDetail(this, dist)) || !getNumChildren();
 
     if (stopTraversal)
-        vd->add(this, visible);
+        vd->add(this, true);
     else
     {
         for (unsigned int i=0; i<getNumChildren(); ++i)
-            getChild(i)->traverse(vd, nv, viewPoint, visible, maxDist);
+            getChild(i)->traverse(vd, viewPoint, maxDist);
     }
 }
 

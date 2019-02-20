@@ -188,15 +188,14 @@ public:
 
         if (node->getSize() <= mMinSize)
         {
-            // We arrived at a leaf
-            float minZ,maxZ;
-            if (mStorage->getMinMaxHeights(size, center, minZ, maxZ))
-            {
-                float cellWorldSize = mStorage->getCellWorldSize();
-                osg::BoundingBox boundingBox(osg::Vec3f((center.x()-halfSize)*cellWorldSize, (center.y()-halfSize)*cellWorldSize, minZ),
-                                        osg::Vec3f((center.x()+halfSize)*cellWorldSize, (center.y()+halfSize)*cellWorldSize, maxZ));
-                node->setBoundingBox(boundingBox);
-            }
+            // We arrived at a leaf.
+            // Since the tree is used for LOD level selection instead of culling, we do not need to load an actual height data here.
+            float minZ = -std::numeric_limits<float>::max();
+            float maxZ = std::numeric_limits<float>::max();
+            float cellWorldSize = mStorage->getCellWorldSize();
+            osg::BoundingBox boundingBox(osg::Vec3f((center.x()-halfSize)*cellWorldSize, (center.y()-halfSize)*cellWorldSize, minZ),
+                                    osg::Vec3f((center.x()+halfSize)*cellWorldSize, (center.y()+halfSize)*cellWorldSize, maxZ));
+            node->setBoundingBox(boundingBox);
             return node;
         }
         else
@@ -360,7 +359,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
                 mRootNode->traverseTo(vd, 1, osg::Vec2f(x+0.5,y+0.5));
             }
             else
-                mRootNode->traverse(vd, &nv, cv->getViewPoint(), true, mViewDistance);
+                mRootNode->traverse(vd, cv->getViewPoint(), mViewDistance);
         }
         else
         {
@@ -376,9 +375,9 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
             mRootNode->intersect(vd, terrainIntersector);
         }
     }
-    else if (isCullVisitor)
+
+    if (isCullVisitor)
     {
-        // view point is the same, but must still update visible status in case the camera has rotated
         for (unsigned int i=0; i<vd->getNumEntries(); ++i)
         {
             ViewData::Entry& entry = vd->getEntry(i);
@@ -471,7 +470,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, std::atomic
 
     ViewData* vd = static_cast<ViewData*>(view);
     vd->setViewPoint(viewPoint);
-    mRootNode->traverse(vd, nullptr, viewPoint, false, mViewDistance);
+    mRootNode->traverse(vd, viewPoint, mViewDistance);
 
     for (unsigned int i=0; i<vd->getNumEntries() && !abort; ++i)
     {
