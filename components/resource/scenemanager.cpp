@@ -218,7 +218,6 @@ namespace Resource
         , mShaderManager(new Shader::ShaderManager)
         , mForceShaders(false)
         , mClampLighting(true)
-        , mForcePerPixelLighting(false)
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
         , mInstanceCache(new MultiObjectCache)
@@ -258,16 +257,6 @@ namespace Resource
     bool SceneManager::getClampLighting() const
     {
         return mClampLighting;
-    }
-
-    void SceneManager::setForcePerPixelLighting(bool force)
-    {
-        mForcePerPixelLighting = force;
-    }
-
-    bool SceneManager::getForcePerPixelLighting() const
-    {
-        return mForcePerPixelLighting;
     }
 
     void SceneManager::setAutoUseNormalMaps(bool use)
@@ -749,8 +738,6 @@ namespace Resource
     {
         Shader::ShaderVisitor* shaderVisitor = new Shader::ShaderVisitor(*mShaderManager.get(), *mImageManager, "objects_vertex.glsl", "objects_fragment.glsl");
         shaderVisitor->setForceShaders(mForceShaders);
-        shaderVisitor->setClampLighting(mClampLighting);
-        shaderVisitor->setForcePerPixelLighting(mForcePerPixelLighting);
         shaderVisitor->setAutoUseNormalMaps(mAutoUseNormalMaps);
         shaderVisitor->setNormalMapPattern(mNormalMapPattern);
         shaderVisitor->setNormalHeightMapPattern(mNormalHeightMapPattern);

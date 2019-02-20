@@ -23,13 +23,6 @@ namespace Shader
         /// Setting force = true will cause all objects to render using shaders, regardless of having a bump map.
         void setForceShaders(bool force);
 
-        /// Set whether lighting is clamped for visual compatibility with the fixed function pipeline.
-        void setClampLighting(bool clamp);
-
-        /// By default, only bump mapped objects use per-pixel lighting.
-        /// Setting force = true will cause all shaders to use per-pixel lighting, regardless of having a bump map.
-        void setForcePerPixelLighting(bool force);
-
         /// Set if we are allowed to modify StateSets encountered in the graph (default true).
         /// @par If set to false, then instead of modifying, the StateSet will be cloned and this new StateSet will be assigned to the node.
         /// @par This option is useful when the ShaderVisitor is run on a "live" subgraph that may have already been submitted for rendering.
@@ -57,8 +50,6 @@ namespace Shader
 
     private:
         bool mForceShaders;
-        bool mClampLighting;
-        bool mForcePerPixelLighting;
         bool mAllowedToModifyStateSets;
 
         bool mAutoUseNormalMaps;

@@ -56,13 +56,8 @@ namespace Resource
         void setForceShaders(bool force);
         bool getForceShaders() const;
 
-        /// @see ShaderVisitor::setClampLighting
         void setClampLighting(bool clamp);
         bool getClampLighting() const;
-
-        /// @see ShaderVisitor::setForcePerPixelLighting
-        void setForcePerPixelLighting(bool force);
-        bool getForcePerPixelLighting() const;
 
         /// @see ShaderVisitor::setAutoUseNormalMaps
         void setAutoUseNormalMaps(bool use);
@@ -155,7 +150,6 @@ namespace Resource
         std::unique_ptr<Shader::ShaderManager> mShaderManager;
         bool mForceShaders;
         bool mClampLighting;
-        bool mForcePerPixelLighting;
         bool mAutoUseNormalMaps;
         std::string mNormalMapPattern;
         std::string mNormalHeightMapPattern;

@@ -37,8 +37,6 @@ namespace Shader
     ShaderVisitor::ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager, const std::string &defaultVsTemplate, const std::string &defaultFsTemplate)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mForceShaders(false)
-        , mClampLighting(true)
-        , mForcePerPixelLighting(false)
         , mAllowedToModifyStateSets(true)
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
@@ -53,16 +51,6 @@ namespace Shader
     void ShaderVisitor::setForceShaders(bool force)
     {
         mForceShaders = force;
-    }
-
-    void ShaderVisitor::setClampLighting(bool clamp)
-    {
-        mClampLighting = clamp;
-    }
-
-    void ShaderVisitor::setForcePerPixelLighting(bool force)
-    {
-        mForcePerPixelLighting = force;
     }
 
     void ShaderVisitor::apply(osg::Node& node)
@@ -296,9 +284,6 @@ namespace Shader
             defineMap[texIt->second] = "1";
             defineMap[texIt->second + std::string("UV")] = std::to_string(texIt->first);
         }
-
-        defineMap["forcePPL"] = mForcePerPixelLighting ? "1" : "0";
-        defineMap["clamp"] = mClampLighting ? "1" : "0";
 
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
 
