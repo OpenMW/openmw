@@ -28,7 +28,10 @@ namespace SceneUtil
         mShadowSettings->setBaseShadowTextureUnit(8 - numberOfShadowMapsPerLight);
 
         mShadowSettings->setMinimumShadowMapNearFarRatio(Settings::Manager::getFloat("minimum lispsm near far ratio", "Shadows"));
-        mShadowSettings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
+        if (Settings::Manager::getBool("compute tight scene bounds", "Shadows"))
+            mShadowSettings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
+        else
+            mShadowSettings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
 
         int mapres = Settings::Manager::getInt("shadow map resolution", "Shadows");
         mShadowSettings->setTextureSize(osg::Vec2s(mapres, mapres));

@@ -59,6 +59,19 @@ enable debug overlay
 Enable or disable the debug overlay to see the area covered by each shadow map.
 This setting is only recommended for developers, bug reporting and advanced users performing fine-tuning of shadow settings.
 
+compute tight scene bounds
+--------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+With this setting enabled, attempt to better use the shadow map(s) by making them cover a smaller area.
+If enabled, use the triangles of objects to compute the scene bounds, otherwise use the objects precalculated bounding boxes.
+This can be especially helpful when looking downwards with a high viewing distance but will be less useful with the default value.
+The performance impact of this may be very large.
+In theory this setting should not make any difference unless there are objects that use inaccurate or very large bounding boxes. If you find a difference, please report it.
+
 shadow map resolution
 ---------------------
 

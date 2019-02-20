@@ -450,7 +450,9 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     mWaterNode->setName("Water Root");
     mWaterNode->addChild(mWaterGeom);
     mWaterNode->addCullCallback(new FudgeCallback);
-    mWaterNode->addCullCallback(new PlaneNearFarCallback(osg::Plane(osg::Vec3d(0,0,1), osg::Vec3d(0,0,0))));
+
+    if (!Settings::Manager::getBool("compute tight scene bounds", "Shadows"))
+        mWaterNode->addCullCallback(new PlaneNearFarCallback(osg::Plane(osg::Vec3d(0,0,1), osg::Vec3d(0,0,0))));
 
     // simple water fallback for the local map
     osg::ref_ptr<osg::Geometry> geom2 (osg::clone(mWaterGeom.get(), osg::CopyOp::DEEP_COPY_NODES));
