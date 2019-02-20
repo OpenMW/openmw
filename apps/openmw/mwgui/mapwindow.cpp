@@ -213,8 +213,7 @@ namespace MWGui
                 map->setNeedMouseFocus(false);
                 fog->setNeedMouseFocus(false);
 
-                mMapWidgets.push_back(map);
-                mFogWidgets.push_back(fog);
+                mMaps.emplace_back(map, fog);
             }
         }
     }
@@ -234,36 +233,37 @@ namespace MWGui
 
     void LocalMapBase::applyFogOfWar()
     {
-        TextureVector fogTextures;
         for (int mx=0; mx<mNumCells; ++mx)
         {
             for (int my=0; my<mNumCells; ++my)
             {
                 int x = mCurX + (mx - mCellDistance);
                 int y = mCurY + (-1*(my - mCellDistance));
-                MyGUI::ImageBox* fog = mFogWidgets[my + mNumCells*mx];
+
+                MapEntry& entry = mMaps[my + mNumCells*mx];
+                MyGUI::ImageBox* fog = entry.mFogWidget;
 
                 if (!mFogOfWarToggled || !mFogOfWarEnabled)
                 {
                     fog->setImageTexture("");
+                    entry.mFogTexture.reset();
                     continue;
                 }
 
                 osg::ref_ptr<osg::Texture2D> tex = mLocalMapRender->getFogOfWarTexture(x, y);
                 if (tex)
                 {
-                    std::shared_ptr<MyGUI::ITexture> myguitex (new osgMyGUI::OSGTexture(tex));
-                    fog->setRenderItemTexture(myguitex.get());
+                    entry.mFogTexture.reset(new osgMyGUI::OSGTexture(tex));
+                    fog->setRenderItemTexture(entry.mFogTexture.get());
                     fog->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
-                    fogTextures.push_back(myguitex);
                 }
                 else
+                {
                     fog->setImageTexture("black");
+                    entry.mFogTexture.reset();
+                }
             }
         }
-        // Move the textures we just set into mFogTextures, and move the previous textures into fogTextures, for deletion when this function ends.
-        // Note, above we need to ensure that all widgets are getting a new texture set, lest we delete textures that are still in use.
-        mFogTextures.swap(fogTextures);
 
         redraw();
     }
@@ -369,7 +369,6 @@ namespace MWGui
         applyFogOfWar();
 
         // Update the map textures
-        TextureVector textures;
         for (int mx=0; mx<mNumCells; ++mx)
         {
             for (int my=0; my<mNumCells; ++my)
@@ -377,21 +376,23 @@ namespace MWGui
                 int mapX = x + (mx - mCellDistance);
                 int mapY = y + (-1*(my - mCellDistance));
 
-                MyGUI::ImageBox* box = mMapWidgets[my + mNumCells*mx];
+                MapEntry& entry = mMaps[my + mNumCells*mx];
+                MyGUI::ImageBox* box = entry.mMapWidget;
 
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(mapX, mapY);
                 if (texture)
                 {
-                    std::shared_ptr<MyGUI::ITexture> guiTex (new osgMyGUI::OSGTexture(texture));
-                    textures.push_back(guiTex);
-                    box->setRenderItemTexture(guiTex.get());
+                    entry.mMapTexture.reset(new osgMyGUI::OSGTexture(texture));
+                    box->setRenderItemTexture(entry.mMapTexture.get());
                     box->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
                 }
                 else
+                {
                     box->setRenderItemTexture(nullptr);
+                    entry.mMapTexture.reset();
+                }
             }
         }
-        mMapTextures.swap(textures);
 
         // Delay the door markers update until scripts have been given a chance to run.
         // If we don't do this, door markers that should be disabled will still appear on the map.
@@ -1046,8 +1047,8 @@ namespace MWGui
         NoDrop::setAlpha(alpha);
         // can't allow showing map with partial transparency, as the fog of war will also go transparent
         // and reveal parts of the map you shouldn't be able to see
-        for (MyGUI::ImageBox* widget : mMapWidgets)
-            widget->setVisible(alpha == 1);
+        for (MapEntry& entry : mMaps)
+            entry.mMapWidget->setVisible(alpha == 1);
     }
 
     void MapWindow::customMarkerCreated(MyGUI::Widget *marker)
