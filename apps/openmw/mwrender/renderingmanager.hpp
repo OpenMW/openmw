@@ -144,7 +144,8 @@ namespace MWRender
         void setWaterHeight(float level);
 
         /// Take a screenshot of w*h onto the given image, not including the GUI.
-        void screenshot(osg::Image* image, int w, int h, osg::Matrixd cameraTransform=osg::Matrixd());
+        void screenshotScreen(osg::Image* image, int w, int h); // copie directly from framebuffer and scale to given size
+        void screenshot(osg::Image* image, int w, int h, osg::Matrixd cameraTransform=osg::Matrixd()); // make a new render at given size
         bool screenshot360(osg::Image* image, std::string settingStr);
 
         struct RayResult

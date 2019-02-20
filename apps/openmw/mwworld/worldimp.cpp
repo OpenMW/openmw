@@ -2554,7 +2554,7 @@ namespace MWWorld
 
     void World::screenshot(osg::Image* image, int w, int h)
     {
-        mRendering->screenshot(image, w, h);
+        mRendering->screenshotScreen(image, w, h);
     }
 
     bool World::screenshot360(osg::Image* image, std::string settingStr)
