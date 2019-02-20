@@ -19,7 +19,7 @@ namespace Terrain
         ViewData();
         ~ViewData();
 
-        void add(QuadTreeNode* node, bool visible);
+        void add(QuadTreeNode* node);
 
         void reset();
 
@@ -33,10 +33,9 @@ namespace Terrain
         {
             Entry();
 
-            bool set(QuadTreeNode* node, bool visible);
+            bool set(QuadTreeNode* node);
 
             QuadTreeNode* mNode;
-            bool mVisible;
 
             unsigned int mLodFlags;
             osg::ref_ptr<osg::Node> mRenderingNode;

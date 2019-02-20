@@ -186,7 +186,7 @@ public:
         if (node->getSize() <= mMinSize)
         {
             // We arrived at a leaf.
-            // Since the tree is used for LOD level selection instead of culling, we do not need to load an actual height data here.
+            // Since the tree is used for LOD level selection instead of culling, we do not need to load the actual height data here.
             float minZ = -std::numeric_limits<float>::max();
             float maxZ = std::numeric_limits<float>::max();
             float cellWorldSize = mStorage->getCellWorldSize();
@@ -226,9 +226,6 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
     , mVertexLodMod(vertexLodMod)
     , mViewDistance(std::numeric_limits<float>::max())
 {
-    // No need for culling on the Drawable / Transform level as the quad tree performs the culling already.
-    mChunkManager->setCullingActive(false);
-
     mChunkManager->setCompositeMapSize(compMapResolution);
     mChunkManager->setCompositeMapLevel(compMapLevel);
     mChunkManager->setMaxCompositeGeometrySize(maxCompGeometrySize);
@@ -362,24 +359,15 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         else
         {
             osgUtil::IntersectionVisitor* iv = static_cast<osgUtil::IntersectionVisitor*>(&nv);
-            osgUtil::LineSegmentIntersector* lineIntsersector = dynamic_cast<osgUtil::LineSegmentIntersector*>(iv->getIntersector());
-            if (!lineIntsersector)
-                throw std::runtime_error("Can not update QuadTreeWorld - the LineSegmentIntersector expected");
+            osgUtil::LineSegmentIntersector* lineIntersector = dynamic_cast<osgUtil::LineSegmentIntersector*>(iv->getIntersector());
+            if (!lineIntersector)
+                throw std::runtime_error("Cannot update QuadTreeWorld: node visitor is not LineSegmentIntersector");
 
             osg::Matrix matrix = osg::Matrix::identity();
-            if (lineIntsersector->getCoordinateFrame() == osgUtil::Intersector::CoordinateFrame::MODEL && iv->getModelMatrix() == 0)
-                matrix = lineIntsersector->getTransformation(*iv, osgUtil::Intersector::CoordinateFrame::MODEL);
-            osg::ref_ptr<TerrainLineIntersector> terrainIntersector (new TerrainLineIntersector(lineIntsersector, matrix));
+            if (lineIntersector->getCoordinateFrame() == osgUtil::Intersector::CoordinateFrame::MODEL && iv->getModelMatrix() == 0)
+                matrix = lineIntersector->getTransformation(*iv, osgUtil::Intersector::CoordinateFrame::MODEL);
+            osg::ref_ptr<TerrainLineIntersector> terrainIntersector (new TerrainLineIntersector(lineIntersector, matrix));
             mRootNode->intersect(vd, terrainIntersector);
-        }
-    }
-
-    if (isCullVisitor)
-    {
-        for (unsigned int i=0; i<vd->getNumEntries(); ++i)
-        {
-            ViewData::Entry& entry = vd->getEntry(i);
-            entry.set(entry.mNode, !static_cast<osgUtil::CullVisitor*>(&nv)->isCulled(entry.mNode->getBoundingBox()));
         }
     }
 
@@ -389,17 +377,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 
         loadRenderingNode(entry, vd, mVertexLodMod, mChunkManager.get());
 
-        if (entry.mVisible)
-        {
-            osg::UserDataContainer* udc = entry.mRenderingNode->getUserDataContainer();
-            if (udc && udc->getUserData())
-            {
-                mCompositeMapRenderer->setImmediate(static_cast<CompositeMap*>(udc->getUserData()));
-                udc->setUserData(nullptr);
-
-            }
-            entry.mRenderingNode->accept(nv);
-        }
+        entry.mRenderingNode->accept(nv);
     }
 
     if (!isCullVisitor)

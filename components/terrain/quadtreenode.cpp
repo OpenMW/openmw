@@ -120,7 +120,7 @@ void QuadTreeNode::traverse(ViewData* vd, const osg::Vec3f& viewPoint, LodCallba
     bool stopTraversal = (lodCallback->isSufficientDetail(this, dist)) || !getNumChildren();
 
     if (stopTraversal)
-        vd->add(this, true);
+        vd->add(this);
     else
     {
         for (unsigned int i=0; i<getNumChildren(); ++i)
@@ -142,7 +142,7 @@ void QuadTreeNode::traverseTo(ViewData* vd, float size, const osg::Vec2f& center
     bool stopTraversal = (getSize() == size);
 
     if (stopTraversal)
-        vd->add(this, true);
+        vd->add(this);
     else
     {
         for (unsigned int i=0; i<getNumChildren(); ++i)
@@ -159,7 +159,7 @@ void QuadTreeNode::intersect(ViewData* vd, TerrainLineIntersector* intersector)
         return;
 
     if (getNumChildren() == 0)
-        vd->add(this, true);
+        vd->add(this);
     else
     {
         for (unsigned int i=0; i<getNumChildren(); ++i)
