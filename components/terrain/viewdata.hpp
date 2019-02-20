@@ -44,9 +44,6 @@ namespace Terrain
 
         Entry& getEntry(unsigned int i);
 
-        osg::Object* getViewer() const { return mViewer.get(); }
-        void setViewer(osg::Object* viewer) { mViewer = viewer; }
-
         unsigned int getFrameLastUsed() const { return mFrameLastUsed; }
 
         /// @return Have any nodes changed since the last frame
@@ -62,7 +59,6 @@ namespace Terrain
         unsigned int mNumEntries;
         unsigned int mFrameLastUsed;
         bool mChanged;
-        osg::ref_ptr<osg::Object> mViewer;
         osg::Vec3f mEyePoint;
         bool mHasEyePoint;
     };
@@ -85,7 +81,7 @@ namespace Terrain
     private:
         std::list<ViewData> mViewVector;
 
-        typedef std::map<osg::Object*, ViewData*> Map;
+        typedef std::map<osg::ref_ptr<osg::Object>, ViewData*> Map;
         Map mViews;
 
         std::deque<ViewData*> mUnusedViews;

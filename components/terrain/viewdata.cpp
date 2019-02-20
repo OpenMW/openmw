@@ -118,7 +118,6 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer)
     if (found == mViews.end())
     {
         ViewData* vd = createOrReuseView();
-        vd->setViewer(viewer);
         mViews[viewer] = vd;
         return vd;
     }
@@ -148,7 +147,6 @@ void ViewDataMap::clearUnusedViews(unsigned int frame)
         ViewData* vd = it->second;
         if (vd->getFrameLastUsed() + 2 < frame)
         {
-            vd->setViewer(nullptr);
             vd->clear();
             mUnusedViews.push_back(vd);
             mViews.erase(it++);
