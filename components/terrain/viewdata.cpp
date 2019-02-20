@@ -132,7 +132,6 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPo
     if (found == mViews.end())
     {
         vd = createOrReuseView();
-        vd->setViewer(viewer);
         mViews[viewer] = vd;
     }
     else
