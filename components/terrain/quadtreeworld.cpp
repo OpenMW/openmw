@@ -246,52 +246,6 @@ QuadTreeWorld::~QuadTreeWorld()
     mViewDataMap->clear();
 }
 
-
-void traverse(QuadTreeNode* node, ViewData* vd, osg::NodeVisitor* nv, LodCallback* lodCallback, const osg::Vec3f& viewPoint, bool visible, float maxDist)
-{
-    if (!node->hasValidBounds())
-        return;
-
-    if (nv && nv->getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
-        visible = visible && !static_cast<osgUtil::CullVisitor*>(nv)->isCulled(node->getBoundingBox());
-
-    float dist = node->distance(viewPoint);
-    if (dist > maxDist)
-        return;
-
-    bool stopTraversal = (lodCallback && lodCallback->isSufficientDetail(node, dist)) || !node->getNumChildren();
-
-    if (stopTraversal)
-        vd->add(node, visible);
-    else
-    {
-        for (unsigned int i=0; i<node->getNumChildren(); ++i)
-            traverse(node->getChild(i), vd, nv, lodCallback, viewPoint, visible, maxDist);
-    }
-}
-
-void traverseToCell(QuadTreeNode* node, ViewData* vd, int cellX, int cellY)
-{
-    if (!node->hasValidBounds())
-        return;
-
-    if (node->getCenter().x() + node->getSize()/2.f <= cellX
-            || node->getCenter().x() - node->getSize()/2.f >= cellX+1
-            || node->getCenter().y() + node->getSize()/2.f <= cellY
-            || node->getCenter().y() - node->getSize()/2.f >= cellY+1)
-        return;
-
-    bool stopTraversal = !node->getNumChildren();
-
-    if (stopTraversal)
-        vd->add(node, true);
-    else
-    {
-        for (unsigned int i=0; i<node->getNumChildren(); ++i)
-            traverseToCell(node->getChild(i), vd, cellX, cellY);
-    }
-}
-
 /// get the level of vertex detail to render this node at, expressed relative to the native resolution of the data set.
 unsigned int getVertexLod(QuadTreeNode* node, int vertexLodMod)
 {
@@ -400,10 +354,10 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
                 int x,y;
                 stream >> x;
                 stream >> y;
-                traverseToCell(mRootNode.get(), vd, x,y);
+                mRootNode->traverseTo(vd, 1, osg::Vec2f(x+0.5,y+0.5));
             }
             else
-                traverse(mRootNode.get(), vd, cv, mRootNode->getLodCallback(), cv->getViewPoint(), true, mViewDistance);
+                mRootNode->traverse(vd, &nv, cv->getViewPoint(), true, mViewDistance);
         }
         else
             mRootNode->traverse(nv);
@@ -483,7 +437,7 @@ void QuadTreeWorld::cacheCell(View *view, int x, int y)
 {
     ensureQuadTreeBuilt();
     ViewData* vd = static_cast<ViewData*>(view);
-    traverseToCell(mRootNode.get(), vd, x, y);
+    mRootNode->traverseTo(vd, 1, osg::Vec2f(x+0.5f,y+0.5f));
 
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
@@ -503,7 +457,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, std::atomic
 
     ViewData* vd = static_cast<ViewData*>(view);
     vd->setViewPoint(viewPoint);
-    traverse(mRootNode.get(), vd, nullptr, mRootNode->getLodCallback(), viewPoint, false, mViewDistance);
+    mRootNode->traverse(vd, nullptr, viewPoint, false, mViewDistance);
 
     for (unsigned int i=0; i<vd->getNumEntries() && !abort; ++i)
     {

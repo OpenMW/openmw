@@ -109,6 +109,51 @@ void QuadTreeNode::initNeighbours()
         getChild(i)->initNeighbours();
 }
 
+void QuadTreeNode::traverse(ViewData* vd, osg::NodeVisitor* nv, const osg::Vec3f& viewPoint, bool visible, float maxDist)
+{
+    if (!hasValidBounds())
+        return;
+
+    if (nv && nv->getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+        visible = visible && !static_cast<osgUtil::CullVisitor*>(nv)->isCulled(mBoundingBox);
+
+    float dist = distance(viewPoint);
+    if (dist > maxDist)
+        return;
+
+    bool stopTraversal = (mLodCallback->isSufficientDetail(this, dist)) || !getNumChildren();
+
+    if (stopTraversal)
+        vd->add(this, visible);
+    else
+    {
+        for (unsigned int i=0; i<getNumChildren(); ++i)
+            getChild(i)->traverse(vd, nv, viewPoint, visible, maxDist);
+    }
+}
+
+void QuadTreeNode::traverseTo(ViewData* vd, float size, const osg::Vec2f& center)
+{
+    if (!hasValidBounds())
+        return;
+
+    if (getCenter().x() + getSize()/2.f <= center.x() - size/2.f
+            || getCenter().x() - getSize()/2.f >= center.x() + size/2.f
+            || getCenter().y() + getSize()/2.f <= center.y() - size/2.f
+            || getCenter().y() - getSize()/2.f >= center.y() + size/2.f)
+        return;
+
+    bool stopTraversal = (getSize() == size);
+
+    if (stopTraversal)
+        vd->add(this, true);
+    else
+    {
+        for (unsigned int i=0; i<getNumChildren(); ++i)
+            getChild(i)->traverseTo(vd, size, center);
+    }
+}
+
 void QuadTreeNode::traverse(osg::NodeVisitor &nv)
 {
     if (!hasValidBounds())

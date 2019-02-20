@@ -72,7 +72,15 @@ namespace Terrain
         /// center in cell coordinates
         const osg::Vec2f& getCenter() const;
 
+        /// Traverse the child tree and populate the ViewData
         virtual void traverse(osg::NodeVisitor& nv);
+
+        /// Optimized version of traverse() that doesn't incur the overhead of NodeVisitor double-dispatch or fetching the various variables.
+        /// Note this doesn't do any culling for non-cull visitors (e.g. intersections) so it shouldn't be used for those.
+        void traverse(ViewData* vd, osg::NodeVisitor* nv, const osg::Vec3f& viewPoint, bool visible, float maxDist);
+
+        /// Traverse to a specific node and add only that node.
+        void traverseTo(ViewData* vd, float size, const osg::Vec2f& center);
 
         /// Set the Lod callback to use for determining when to stop traversing further down the quad tree.
         void setLodCallback(LodCallback* lodCallback);
