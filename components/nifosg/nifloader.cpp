@@ -697,6 +697,10 @@ namespace NifOsg
                 {
                     handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), transformNode, animflags);
                 }
+                else if (ctrl->recType == Nif::RC_NiRollController)
+                {
+                    handleRollController(static_cast<const Nif::NiRollController*>(ctrl.getPtr()), transformNode, animflags);
+                }
                 else
                     Log(Debug::Info) << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename;
             }
@@ -706,6 +710,13 @@ namespace NifOsg
         {
             osg::ref_ptr<VisController> callback(new VisController(visctrl->data.getPtr()));
             setupController(visctrl, callback, animflags);
+            node->addUpdateCallback(callback);
+        }
+
+        void handleRollController(const Nif::NiRollController* rollctrl, osg::Node* node, int animflags)
+        {
+            osg::ref_ptr<RollController> callback(new RollController(rollctrl->data.getPtr()));
+            setupController(rollctrl, callback, animflags);
             node->addUpdateCallback(callback);
         }
 
