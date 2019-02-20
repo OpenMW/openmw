@@ -218,13 +218,13 @@ public:
     Refraction()
     {
         unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
-        setRenderOrder(osg::Camera::PRE_RENDER);
+        setRenderOrder(osg::Camera::PRE_RENDER, 1);
         setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         setReferenceFrame(osg::Camera::RELATIVE_RF);
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         setName("RefractionCamera");
-
+        setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR); // for shadows bugfix
         setCullMask(Mask_Effect|Mask_Scene|Mask_Object|Mask_Static|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
         setNodeMask(Mask_RenderToTexture);
         setViewport(0, 0, rttSize, rttSize);
@@ -264,8 +264,6 @@ public:
         mRefractionDepthTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
 
         attach(osg::Camera::DEPTH_BUFFER, mRefractionDepthTexture);
-
-        SceneUtil::ShadowManager::disableShadowsForStateSet(getOrCreateStateSet());
     }
 
     void setScene(osg::Node* scene)

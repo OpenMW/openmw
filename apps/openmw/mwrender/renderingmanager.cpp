@@ -275,7 +275,7 @@ namespace MWRender
 
         mEffectManager.reset(new EffectManager(sceneRoot, mResourceSystem));
 
-        mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
+        mWater.reset(new Water(sceneRoot->getParent(0), sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
 
         DLLandFogStart = Settings::Manager::getFloat("distant land fog start", "Fog");
         DLLandFogEnd = Settings::Manager::getFloat("distant land fog end", "Fog");
@@ -315,7 +315,6 @@ namespace MWRender
         mTerrain->setDefaultViewer(mViewer->getCamera());
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
         mTerrain->setWorkQueue(mWorkQueue.get());
-
         mCamera.reset(new Camera(mViewer->getCamera()));
 
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
