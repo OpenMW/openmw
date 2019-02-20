@@ -24,6 +24,19 @@ The distant terrain engine is currently considered experimental
 and may receive updates and/or further configuration options in the future.
 The glaring omission of non-terrain objects in the distance somewhat limits this setting's usefulness.
 
+vertex lod mod
+--------------
+
+:Type:      integer
+:Range:     any
+:Default:   0
+
+Controls only the Vertex LOD of the terrain. The amount of terrain chunks and the detail of composite maps is left unchanged.
+
+Must be changed in increments of 1. Each increment will double (for positive values) or halve (for negative values) the number of vertices rendered. For example: -2 means 4x reduced detail, +3 means 8x increased detail.
+
+Note this setting will typically not affect near terrain. When set to increase detail, the detail of near terrain can not be increased because the detail is simply not there in the data files, and when set to reduce detail, the detail of near terrain will not be reduced because it was already less detailed than the far terrain (in view relative terms) to begin with.
+
 lod factor
 ----------
 
@@ -32,6 +45,12 @@ lod factor
 :Default:	1.0
 
 Controls the level of detail if distant terrain is enabled. Higher values increase detail at the cost of performance, lower values reduce detail but increase performance.
+
+Note this also changes how the Quad Tree is split. Increasing detail with this setting results in the visible terrain being divided into more chunks, where as reducing detail with this setting would reduce the number of chunks.
+
+Fewer terrain chunks is faster for rendering, but on the other hand a larger proportion of the entire terrain must be rebuilt when LOD levels change as the camera moves. This could result in frame drops if moving across the map at high speed.
+
+For this reason, it is not recommended to change this setting if you want to change the LOD. If you want to do that, first try using the 'vertex lod mod' setting to configure the detail of the terrain outlines to your liking and then use 'composite map resolution' to configure the texture detail to your liking. But these settings can only be changed in multiples of two, so you may want to adjust 'lod factor' afterwards for even more fine-tuning.
 
 composite map level
 -------------------

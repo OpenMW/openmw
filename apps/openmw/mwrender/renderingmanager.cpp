@@ -299,7 +299,8 @@ namespace MWRender
             compMapPower = std::max(-3, compMapPower);
             float compMapLevel = pow(2, compMapPower);
             const float lodFactor = Settings::Manager::getFloat("lod factor", "Terrain");
-            mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug, compMapResolution, compMapLevel, lodFactor));
+            const int vertexLodMod = Settings::Manager::getInt("vertex lod mod", "Terrain");
+            mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug, compMapResolution, compMapLevel, lodFactor, vertexLodMod));
         }
         else
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
