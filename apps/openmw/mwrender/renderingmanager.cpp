@@ -305,7 +305,7 @@ namespace MWRender
         mTerrain->setWorkQueue(mWorkQueue.get());
 
         // water goes after terrain for correct waterculling order
-        mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), resourcePath));
+        mWater.reset(new Water(sceneRoot->getParent(0), sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), resourcePath));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
         if (Settings::Manager::getBool("view over shoulder", "Camera"))
