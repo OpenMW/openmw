@@ -7,6 +7,12 @@
 
 namespace SceneUtil
 {
+    // the waterplane is almost infnite in all directions..it makes no sense to test against such large bb so give it invalid one.. which helps to not blow up shadows frustum
+    class ComputeCallback : public osg::Drawable::ComputeBoundingBoxCallback
+    {
+         virtual osg::BoundingBox computeBound(const osg::Drawable&) const  { return osg::BoundingBox(); }
+    };
+
     osg::ref_ptr<osg::Geometry> createWaterGeometry(float size, int segments, float textureRepeats)
     {
         osg::ref_ptr<osg::Vec3Array> verts (new osg::Vec3Array);
@@ -51,6 +57,8 @@ namespace SceneUtil
         waterGeom->setNormalArray(normal, osg::Array::BIND_OVERALL);
 
         waterGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS,0,verts->size()));
+        waterGeom->setComputeBoundingBoxCallback(new ComputeCallback);
+        waterGeom->setCullingActive(false);
         return waterGeom;
     }
 
