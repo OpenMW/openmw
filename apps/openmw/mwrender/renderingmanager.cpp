@@ -314,6 +314,7 @@ namespace MWRender
 
         mTerrain->setDefaultViewer(mViewer->getCamera());
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
+        mTerrain->setWorkQueue(mWorkQueue.get());
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 

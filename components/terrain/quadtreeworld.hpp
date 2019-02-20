@@ -16,7 +16,7 @@ namespace Terrain
     class RootNode;
     class ViewDataMap;
 
-    /// @brief Terrain implementation that loads cells into a Quad Tree, with geometry LOD and texture LOD. The entire world is displayed at all times.
+    /// @brief Terrain implementation that loads cells into a Quad Tree, with geometry LOD and texture LOD.
     class QuadTreeWorld : public TerrainGrid // note: derived from TerrainGrid is only to render default cells (see loadCell)
     {
     public:
