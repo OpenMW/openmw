@@ -158,9 +158,12 @@ public:
         osg::BoundingBox boundingBox;
         for (unsigned int i=0; i<4; ++i)
         {
-            QuadTreeNode* child = addChild(parent, static_cast<ChildDirection>(i), halfSize);
+            osg::ref_ptr<QuadTreeNode> child = addChild(parent, static_cast<ChildDirection>(i), halfSize);
             if (child)
+            {
                 boundingBox.expandBy(child->getBoundingBox());
+                parent->addChild(child);
+            }
         }
 
         if (!boundingBox.valid())
@@ -169,7 +172,7 @@ public:
             parent->setBoundingBox(boundingBox);
     }
 
-    QuadTreeNode* addChild(QuadTreeNode* parent, ChildDirection direction, float size)
+    osg::ref_ptr<QuadTreeNode> addChild(QuadTreeNode* parent, ChildDirection direction, float size)
     {
         float halfSize = size/2.f;
         osg::Vec2f center;
@@ -194,7 +197,6 @@ public:
         osg::ref_ptr<QuadTreeNode> node = new QuadTreeNode(parent, direction, size, center);
         node->setLodCallback(parent->getLodCallback());
         node->setViewDataMap(mViewDataMap);
-        parent->addChild(node);
 
         if (node->getSize() > mMinSize)
         {
