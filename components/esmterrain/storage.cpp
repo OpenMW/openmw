@@ -158,7 +158,7 @@ namespace ESMTerrain
         normal.normalize();
     }
 
-    void Storage::fixColour (osg::Vec4f& color, int cellX, int cellY, int col, int row, LandCache& cache)
+    void Storage::fixColour (osg::Vec4ub& color, int cellX, int cellY, int col, int row, LandCache& cache)
     {
         if (col == ESM::Land::LAND_SIZE-1)
         {
@@ -175,22 +175,22 @@ namespace ESMTerrain
         const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VCLR) : 0;
         if (data)
         {
-            color.r() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3] / 255.f;
-            color.g() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3+1] / 255.f;
-            color.b() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3+2] / 255.f;
+            color.r() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3];
+            color.g() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3+1];
+            color.b() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3+2];
         }
         else
         {
-            color.r() = 1;
-            color.g() = 1;
-            color.b() = 1;
+            color.r() = 255;
+            color.g() = 255;
+            color.b() = 255;
         }
     }
 
     void Storage::fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
                                             osg::ref_ptr<osg::Vec3Array> positions,
                                             osg::ref_ptr<osg::Vec3Array> normals,
-                                            osg::ref_ptr<osg::Vec4Array> colours)
+                                            osg::ref_ptr<osg::Vec4ubArray> colours)
     {
         // LOD level n means every 2^n-th vertex is kept
         size_t increment = static_cast<size_t>(1) << lodLevel;
@@ -207,7 +207,7 @@ namespace ESMTerrain
         colours->resize(numVerts*numVerts);
 
         osg::Vec3f normal;
-        osg::Vec4f color;
+        osg::Vec4ub color;
 
         float vertY = 0;
         float vertX = 0;
@@ -295,20 +295,20 @@ namespace ESMTerrain
                         if (colourData)
                         {
                             for (int i=0; i<3; ++i)
-                                color[i] = colourData->mColours[srcArrayIndex+i] / 255.f;
+                                color[i] = colourData->mColours[srcArrayIndex+i];
                         }
                         else
                         {
-                            color.r() = 1;
-                            color.g() = 1;
-                            color.b() = 1;
+                            color.r() = 255;
+                            color.g() = 255;
+                            color.b() = 255;
                         }
 
                         // Unlike normals, colors mostly connect seamlessly between cells, but not always...
                         if (col == ESM::Land::LAND_SIZE-1 || row == ESM::Land::LAND_SIZE-1)
                             fixColour(color, cellX, cellY, col, row, cache);
 
-                        color.a() = 1;
+                        color.a() = 255;
 
                         (*colours)[static_cast<unsigned int>(vertX*numVerts + vertY)] = color;
 
