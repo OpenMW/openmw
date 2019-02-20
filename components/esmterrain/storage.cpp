@@ -46,19 +46,6 @@ namespace ESMTerrain
     {
     }
 
-    const ESM::Land::LandData *LandObject::getData(int flags) const
-    {
-        if ((mData.mDataLoaded & flags) != flags)
-            return nullptr;
-        return &mData;
-    }
-
-    int LandObject::getPlugin() const
-    {
-        return mLand->mPlugin;
-    }
-
-
     const float defaultHeight = ESM::Land::DEFAULT_HEIGHT;
 
     Storage::Storage(const VFS::Manager *vfs, const std::string& normalMapPattern, const std::string& normalHeightMapPattern, bool autoUseNormalMaps, const std::string& specularMapPattern, bool autoUseSpecularMaps)
