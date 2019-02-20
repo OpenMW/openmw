@@ -91,20 +91,14 @@ namespace Terrain
         /// center in cell coordinates
         const osg::Vec2f& getCenter() const;
 
-        /// Optimized version of traverse() that doesn't incur the overhead of NodeVisitor double-dispatch or fetching the various variables.
-        /// Note this doesn't do any culling.
-        void traverse(ViewData* vd, const osg::Vec3f& viewPoint, float maxDist);
+        /// Traverse nodes according to LOD selection.
+        void traverse(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback, float maxDist);
 
         /// Traverse to a specific node and add only that node.
         void traverseTo(ViewData* vd, float size, const osg::Vec2f& center);
 
         /// Adds all leaf nodes which intersect the line from start to end
         void intersect(ViewData* vd, TerrainLineIntersector* intersector);
-
-        /// Set the Lod callback to use for determining when to stop traversing further down the quad tree.
-        void setLodCallback(LodCallback* lodCallback);
-
-        LodCallback* getLodCallback();
 
     private:
         QuadTreeNode* mParent;
@@ -117,8 +111,6 @@ namespace Terrain
         bool mValidBounds;
         float mSize;
         osg::Vec2f mCenter;
-
-        osg::ref_ptr<LodCallback> mLodCallback;
     };
 
 }

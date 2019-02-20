@@ -15,6 +15,7 @@ namespace Terrain
 {
     class RootNode;
     class ViewDataMap;
+    class LodCallback;
 
     /// @brief Terrain implementation that loads cells into a Quad Tree, with geometry LOD and texture LOD.
     class QuadTreeWorld : public TerrainGrid // note: derived from TerrainGrid is only to render default cells (see loadCell)
@@ -48,6 +49,7 @@ namespace Terrain
         osg::ref_ptr<RootNode> mRootNode;
 
         osg::ref_ptr<ViewDataMap> mViewDataMap;
+        osg::ref_ptr<LodCallback> mLodCallback;
 
         OpenThreads::Mutex mQuadTreeMutex;
         bool mQuadTreeBuilt;
