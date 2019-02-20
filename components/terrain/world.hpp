@@ -116,7 +116,7 @@ namespace Terrain
         std::unique_ptr<TextureManager> mTextureManager;
         std::unique_ptr<ChunkManager> mChunkManager;
 
-        std::unique_ptr<MWRender::CellBorder> mCellBorder;
+        std::unique_ptr<CellBorder> mCellBorder;
 
         bool mBorderVisible;
 
