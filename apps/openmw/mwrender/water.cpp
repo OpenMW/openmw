@@ -400,6 +400,35 @@ public:
     }
 };
 
+/// custom NearFar calculation more suited for infinite plane where osg would use bbcorners and totally mess it up
+class PlaneNearFarCallback : public osg::NodeCallback
+{
+public:
+    PlaneNearFarCallback(const osg::Plane& plane):mPlane(plane){ }
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+        osg::CullSettings::ComputeNearFarMode mode = cv->getComputeNearFarMode();
+        if (mode == osgUtil::CullVisitor::DO_NOT_COMPUTE_NEAR_FAR)
+        {
+            traverse(node,nv);
+            return;
+        }
+        else
+        {
+            float dist = std::abs(mPlane.distance(nv->getEyePoint()));
+            if (cv->getCalculatedNearPlane() > dist)
+                cv->setCalculatedNearPlane(dist);
+            if (cv->getCalculatedFarPlane() < dist)
+                cv->setCalculatedFarPlane(dist);
+            cv->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
+            traverse(node, nv);
+            cv->setComputeNearFarMode(mode);
+        }
+    }
+    osg::Plane mPlane;
+};
+
 Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico,
              const Fallback::Map* fallback, const std::string& resourcePath)
     : mParent(parent)
@@ -425,6 +454,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     mWaterNode->setName("Water Root");
     mWaterNode->addChild(mWaterGeom);
     mWaterNode->addCullCallback(new FudgeCallback);
+    mWaterNode->addCullCallback(new PlaneNearFarCallback(osg::Plane(osg::Vec3d(0,0,1), osg::Vec3d(0,0,0))));
 
     // simple water fallback for the local map
     osg::ref_ptr<osg::Geometry> geom2 (osg::clone(mWaterGeom.get(), osg::CopyOp::DEEP_COPY_NODES));
