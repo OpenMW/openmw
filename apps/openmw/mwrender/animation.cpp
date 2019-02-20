@@ -1436,7 +1436,7 @@ namespace MWRender
                 return sceneMgr->createInstance(found->second);
         }
         else
-            return sceneMgr->createInstance(model);
+            return sceneMgr->getInstance(model);
     }
 
     void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature)
