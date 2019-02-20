@@ -154,8 +154,6 @@ ViewData* QuadTreeNode::getView(osg::NodeVisitor &nv, bool& needsUpdate)
     else // INTERSECTION_VISITOR
     {
         osg::Vec3f viewPoint = nv.getViewPoint();
-        mViewDataMap->getDefaultViewPoint(viewPoint);
-
         static osg::ref_ptr<osg::Object> dummyObj = new osg::DummyObject;
         vd = mViewDataMap->getViewData(dummyObj.get(), viewPoint, needsUpdate);
         needsUpdate = true;

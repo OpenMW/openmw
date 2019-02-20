@@ -528,11 +528,6 @@ void QuadTreeWorld::reportStats(unsigned int frameNumber, osg::Stats *stats)
     stats->setAttribute(frameNumber, "Composite", mCompositeMapRenderer->getCompileSetSize());
 }
 
-void QuadTreeWorld::setDefaultViewer(osg::Object *obj)
-{
-    mViewDataMap->setDefaultViewer(obj);
-}
-
 void QuadTreeWorld::loadCell(int x, int y)
 {
     // fallback behavior only for undefined cells (every other is already handled in quadtree)

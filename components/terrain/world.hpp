@@ -112,9 +112,6 @@ namespace Terrain
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
 
-        /// Set the default viewer (usually a Camera), used as viewpoint for any viewers that don't use their own viewpoint.
-        virtual void setDefaultViewer(osg::Object* obj) {}
-
         virtual void setViewDistance(float distance) {}
 
         Storage* getStorage() { return mStorage; }
