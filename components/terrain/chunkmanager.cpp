@@ -188,7 +188,7 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
     geometry->setUseDisplayList(false);
     geometry->setUseVertexBufferObjects(true);
 
-    if (chunkSize <= 2.f)
+    if (chunkSize <= 1.f)
         geometry->setLightListCallback(new SceneUtil::LightListCallback);
 
     unsigned int numVerts = (mStorage->getCellVertices()-1) * chunkSize / (1 << lod) + 1;
