@@ -219,13 +219,6 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
 
         for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
         {
-            limitAlteredHeights(cellCoordinates);
-        }
-
-        for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
-        {
-            //If new cells are created, edited, and limited in series, there are sequences where corners will be broken and must be fixed
-            fixEdges(cellCoordinates);
             std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY());
             undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, cellId));
             const CSMWorld::LandHeightsColumn::DataType landShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
