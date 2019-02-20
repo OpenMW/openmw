@@ -229,7 +229,7 @@ void main(void)
     float sunFade = length(gl_LightModel.ambient.xyz);
 
     float s = clamp(dot(lR, vVec)*2.0-1.2, 0.0, 1.0);
-    float lightScatter = shadow * clamp(dot(lVec,lNormal)*0.7+0.3, 0.0, 1.0) * s * SCATTER_AMOUNT * sunFade * clamp(1.0-exp(-sunHeight), 0.0, 1.0);
+    float lightScatter = clamp(dot(lVec,lNormal)*0.7+0.3, 0.0, 1.0) * s * SCATTER_AMOUNT * sunFade * clamp(1.0-exp(-sunHeight), 0.0, 1.0);
     vec3 scatterColour = mix(vec3(SCATTER_COLOUR)*vec3(1.0,0.4,0.0), SCATTER_COLOUR, clamp(1.0-exp(-sunHeight*SUN_EXT), 0.0, 1.0));
 
     // fresnel
