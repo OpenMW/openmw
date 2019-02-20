@@ -165,6 +165,8 @@ namespace SceneUtil
         , mLightingMask(~0u)
     {
         setUpdateCallback(new LightManagerUpdateCallback);
+        for (unsigned int i=0; i<8; ++i)
+            mDummies.push_back(new LightStateAttribute(i, std::vector<osg::ref_ptr<osg::Light> >()));
     }
 
     LightManager::LightManager(const LightManager &copy, const osg::CopyOp &copyop)
@@ -219,7 +221,6 @@ namespace SceneUtil
 
     osg::ref_ptr<osg::StateSet> LightManager::getLightListStateSet(const LightList &lightList, unsigned int frameNum)
     {
-
         // possible optimization: return a StateSet containing all requested lights plus some extra lights (if a suitable one exists)
         size_t hash = 0;
         for (unsigned int i=0; i<lightList.size();++i)
@@ -236,27 +237,22 @@ namespace SceneUtil
             std::vector<osg::ref_ptr<osg::Light> > lights;
             lights.reserve(lightList.size());
             for (unsigned int i=0; i<lightList.size();++i)
-            {
                 lights.push_back(lightList[i]->mLightSource->getLight(frameNum));
-            }
 
             // the first light state attribute handles the actual state setting for all lights
             // it's best to batch these up so that we don't need to touch the modelView matrix more than necessary
-            osg::ref_ptr<LightStateAttribute> attr = new LightStateAttribute(mStartLight, lights);
             // don't use setAttributeAndModes, that does not support light indices!
-            stateset->setAttribute(attr, osg::StateAttribute::ON);
+            stateset->setAttribute(new LightStateAttribute(mStartLight, std::move(lights)), osg::StateAttribute::ON);
+
             for (unsigned int i=0; i<lightList.size(); ++i)
                 stateset->setMode(GL_LIGHT0 + mStartLight + i, osg::StateAttribute::ON);
 
             // need to push some dummy attributes to ensure proper state tracking
             // lights need to reset to their default when the StateSet is popped
             for (unsigned int i=1; i<lightList.size(); ++i)
-            {
-                osg::ref_ptr<LightStateAttribute> dummy = new LightStateAttribute(mStartLight+i, std::vector<osg::ref_ptr<osg::Light> >());
-                stateset->setAttribute(dummy, osg::StateAttribute::ON);
-            }
+                stateset->setAttribute(mDummies[i+mStartLight].get(), osg::StateAttribute::ON);
 
-            stateSetCache.insert(std::make_pair(hash, stateset));
+            stateSetCache.emplace(hash, stateset);
             return stateset;
         }
     }
