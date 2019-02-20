@@ -7,7 +7,7 @@ ViewData::ViewData()
     : mNumEntries(0)
     , mFrameLastUsed(0)
     , mChanged(false)
-    , mHasEyePoint(false)
+    , mHasViewPoint(false)
 {
 
 }
@@ -15,6 +15,15 @@ ViewData::ViewData()
 ViewData::~ViewData()
 {
 
+}
+
+void ViewData::copyFrom(const ViewData& other)
+{
+    mNumEntries = other.mNumEntries;
+    mEntries = other.mEntries;
+    mChanged = other.mChanged;
+    mHasViewPoint = other.mHasViewPoint;
+    mViewPoint = other.mViewPoint;
 }
 
 void ViewData::add(QuadTreeNode *node, bool visible)
@@ -44,23 +53,23 @@ bool ViewData::hasChanged() const
     return mChanged;
 }
 
-bool ViewData::hasEyePoint() const
+bool ViewData::hasViewPoint() const
 {
-    return mHasEyePoint;
+    return mHasViewPoint;
 }
 
-void ViewData::setEyePoint(const osg::Vec3f &eye)
+void ViewData::setViewPoint(const osg::Vec3f &viewPoint)
 {
-    mEyePoint = eye;
-    mHasEyePoint = true;
+    mViewPoint = viewPoint;
+    mHasViewPoint = true;
 }
 
-const osg::Vec3f& ViewData::getEyePoint() const
+const osg::Vec3f& ViewData::getViewPoint() const
 {
-    return mEyePoint;
+    return mViewPoint;
 }
 
-void ViewData::reset(unsigned int frame)
+void ViewData::reset()
 {
     // clear any unused entries
     for (unsigned int i=mNumEntries; i<mEntries.size(); ++i)
@@ -69,8 +78,6 @@ void ViewData::reset(unsigned int frame)
     // reset index for next frame
     mNumEntries = 0;
     mChanged = false;
-
-    mFrameLastUsed = frame;
 }
 
 void ViewData::clear()
@@ -80,6 +87,7 @@ void ViewData::clear()
     mNumEntries = 0;
     mFrameLastUsed = 0;
     mChanged = false;
+    mHasViewPoint = false;
 }
 
 bool ViewData::contains(QuadTreeNode *node)
@@ -112,17 +120,42 @@ bool ViewData::Entry::set(QuadTreeNode *node, bool visible)
     }
 }
 
-ViewData *ViewDataMap::getViewData(osg::Object *viewer)
+bool suitable(ViewData* vd, const osg::Vec3f& viewPoint, float& maxDist)
+{
+    return vd->hasViewPoint() && (vd->getViewPoint() - viewPoint).length2() < maxDist*maxDist;
+}
+
+ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPoint, bool& needsUpdate)
 {
     Map::const_iterator found = mViews.find(viewer);
+    ViewData* vd = nullptr;
     if (found == mViews.end())
     {
-        ViewData* vd = createOrReuseView();
+        vd = createOrReuseView();
+        vd->setViewer(viewer);
         mViews[viewer] = vd;
-        return vd;
     }
     else
-        return found->second;
+        vd = found->second;
+
+    if (!suitable(vd, viewPoint, mReuseDistance))
+    {
+        for (Map::const_iterator other = mViews.begin(); other != mViews.end(); ++other)
+        {
+            if (suitable(other->second, viewPoint, mReuseDistance) && other->second->getNumEntries())
+            {
+                vd->copyFrom(*other->second);
+                needsUpdate = false;
+                return vd;
+            }
+        }
+        vd->setViewPoint(viewPoint);
+        needsUpdate = true;
+    }
+    else
+        needsUpdate = false;
+
+    return vd;
 }
 
 ViewData *ViewDataMap::createOrReuseView()
@@ -168,9 +201,16 @@ void ViewDataMap::setDefaultViewer(osg::Object *viewer)
     mDefaultViewer = viewer;
 }
 
-ViewData* ViewDataMap::getDefaultView()
+bool ViewDataMap::getDefaultViewPoint(osg::Vec3f& viewPoint)
 {
-    return getViewData(mDefaultViewer);
+     Map::const_iterator found = mViews.find(mDefaultViewer);
+     if (found != mViews.end() && found->second->hasViewPoint())
+     {
+        viewPoint = found->second->getViewPoint();
+        return true;
+     }
+     else
+        return false;
 }
 
 

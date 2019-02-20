@@ -21,11 +21,13 @@ namespace Terrain
 
         void add(QuadTreeNode* node, bool visible);
 
-        void reset(unsigned int frame);
+        void reset();
 
         void clear();
 
         bool contains(QuadTreeNode* node);
+
+        void copyFrom(const ViewData& other);
 
         struct Entry
         {
@@ -45,28 +47,34 @@ namespace Terrain
         Entry& getEntry(unsigned int i);
 
         unsigned int getFrameLastUsed() const { return mFrameLastUsed; }
+        void finishFrame(unsigned int frame) { mFrameLastUsed = frame; mChanged = false; }
 
         /// @return Have any nodes changed since the last frame
         bool hasChanged() const;
 
-        bool hasEyePoint() const;
+        bool hasViewPoint() const;
 
-        void setEyePoint(const osg::Vec3f& eye);
-        const osg::Vec3f& getEyePoint() const;
+        void setViewPoint(const osg::Vec3f& viewPoint);
+        const osg::Vec3f& getViewPoint() const;
 
     private:
         std::vector<Entry> mEntries;
         unsigned int mNumEntries;
         unsigned int mFrameLastUsed;
         bool mChanged;
-        osg::Vec3f mEyePoint;
-        bool mHasEyePoint;
+        osg::Vec3f mViewPoint;
+        bool mHasViewPoint;
+        float mReuseDistance;
     };
 
     class ViewDataMap : public osg::Referenced
     {
     public:
-        ViewData* getViewData(osg::Object* viewer);
+        ViewDataMap()
+            : mReuseDistance(100) // large value should be safe because the visibility of each node is still updated individually for each camera even if the base view was reused.
+        {}
+
+        ViewData* getViewData(osg::Object* viewer, const osg::Vec3f& viewPoint, bool& needsUpdate);
 
         ViewData* createOrReuseView();
 
@@ -76,13 +84,15 @@ namespace Terrain
 
         void setDefaultViewer(osg::Object* viewer);
 
-        ViewData* getDefaultView();
+        bool getDefaultViewPoint(osg::Vec3f& viewPoint);
 
     private:
         std::list<ViewData> mViewVector;
 
         typedef std::map<osg::ref_ptr<osg::Object>, ViewData*> Map;
         Map mViews;
+
+        float mReuseDistance;
 
         std::deque<ViewData*> mUnusedViews;
 

@@ -382,7 +382,7 @@ namespace MWWorld
             for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size() && !mAbort; ++i)
             {
                 mWorld->preload(mTerrainViews[i], mPreloadPositions[i], mAbort);
-                mTerrainViews[i]->reset(0);
+                mTerrainViews[i]->reset();
             }
         }
 

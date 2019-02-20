@@ -247,7 +247,7 @@ QuadTreeWorld::~QuadTreeWorld()
 }
 
 
-void traverse(QuadTreeNode* node, ViewData* vd, osg::NodeVisitor* nv, LodCallback* lodCallback, const osg::Vec3f& eyePoint, bool visible, float maxDist)
+void traverse(QuadTreeNode* node, ViewData* vd, osg::NodeVisitor* nv, LodCallback* lodCallback, const osg::Vec3f& viewPoint, bool visible, float maxDist)
 {
     if (!node->hasValidBounds())
         return;
@@ -255,7 +255,7 @@ void traverse(QuadTreeNode* node, ViewData* vd, osg::NodeVisitor* nv, LodCallbac
     if (nv && nv->getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
         visible = visible && !static_cast<osgUtil::CullVisitor*>(nv)->isCulled(node->getBoundingBox());
 
-    float dist = node->distance(eyePoint);
+    float dist = node->distance(viewPoint);
     if (dist > maxDist)
         return;
 
@@ -266,7 +266,7 @@ void traverse(QuadTreeNode* node, ViewData* vd, osg::NodeVisitor* nv, LodCallbac
     else
     {
         for (unsigned int i=0; i<node->getNumChildren(); ++i)
-            traverse(node->getChild(i), vd, nv, lodCallback, eyePoint, visible, maxDist);
+            traverse(node->getChild(i), vd, nv, lodCallback, viewPoint, visible, maxDist);
     }
 }
 
@@ -367,7 +367,8 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, C
 
 void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
-    if (nv.getVisitorType() != osg::NodeVisitor::CULL_VISITOR && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
+    bool isCullVisitor = nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR;
+    if (!isCullVisitor && nv.getVisitorType() != osg::NodeVisitor::INTERSECTION_VISITOR)
     {
         if (nv.getName().find("AcceptedByComponentsTerrainQuadTreeWorld") != std::string::npos)
         {
@@ -382,26 +383,40 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         return;
     }
 
-    ViewData* vd = mRootNode->getView(nv);
+    bool needsUpdate = false;
+    ViewData* vd = mRootNode->getView(nv, needsUpdate);
 
-    if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+    if (needsUpdate)
     {
-        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
-
-        osg::UserDataContainer* udc = cv->getCurrentCamera()->getUserDataContainer();
-        if (udc && udc->getNumDescriptions() >= 2 && udc->getDescriptions()[0] == "NoTerrainLod")
+        vd->reset();
+        if (isCullVisitor)
         {
-            std::istringstream stream(udc->getDescriptions()[1]);
-            int x,y;
-            stream >> x;
-            stream >> y;
-            traverseToCell(mRootNode.get(), vd, x,y);
+            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
+
+            osg::UserDataContainer* udc = cv->getCurrentCamera()->getUserDataContainer();
+            if (udc && udc->getNumDescriptions() >= 2 && udc->getDescriptions()[0] == "NoTerrainLod")
+            {
+                std::istringstream stream(udc->getDescriptions()[1]);
+                int x,y;
+                stream >> x;
+                stream >> y;
+                traverseToCell(mRootNode.get(), vd, x,y);
+            }
+            else
+                traverse(mRootNode.get(), vd, cv, mRootNode->getLodCallback(), cv->getViewPoint(), true, mViewDistance);
         }
         else
-            traverse(mRootNode.get(), vd, cv, mRootNode->getLodCallback(), cv->getViewPoint(), true, mViewDistance);
+            mRootNode->traverse(nv);
     }
-    else
-        mRootNode->traverse(nv);
+    else if (isCullVisitor)
+    {
+        // view point is the same, but must still update visible status in case the camera has rotated
+        for (unsigned int i=0; i<vd->getNumEntries(); ++i)
+        {
+            ViewData::Entry& entry = vd->getEntry(i);
+            entry.set(entry.mNode, !static_cast<osgUtil::CullVisitor*>(&nv)->isCulled(entry.mNode->getBoundingBox()));
+        }
+    }
 
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
@@ -416,13 +431,16 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
             {
                 mCompositeMapRenderer->setImmediate(static_cast<CompositeMap*>(udc->getUserData()));
                 udc->setUserData(nullptr);
+
             }
             entry.mRenderingNode->accept(nv);
         }
     }
 
-    vd->reset(nv.getTraversalNumber());
+    if (!isCullVisitor)
+        vd->reset(); // we can't reuse intersection views in the next frame because they only contain what is touched by the intersection ray.
 
+    vd->finishFrame(nv.getTraversalNumber());
     mRootNode->getViewDataMap()->clearUnusedViews(nv.getTraversalNumber());
 }
 
@@ -473,12 +491,13 @@ View* QuadTreeWorld::createView()
     return new ViewData;
 }
 
-void QuadTreeWorld::preload(View *view, const osg::Vec3f &eyePoint, std::atomic<bool> &abort)
+void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, std::atomic<bool> &abort)
 {
     ensureQuadTreeBuilt();
 
     ViewData* vd = static_cast<ViewData*>(view);
-    traverse(mRootNode.get(), vd, nullptr, mRootNode->getLodCallback(), eyePoint, false, mViewDistance);
+    vd->setViewPoint(viewPoint);
+    traverse(mRootNode.get(), vd, nullptr, mRootNode->getLodCallback(), viewPoint, false, mViewDistance);
 
     for (unsigned int i=0; i<vd->getNumEntries() && !abort; ++i)
     {

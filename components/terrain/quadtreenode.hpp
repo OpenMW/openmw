@@ -85,7 +85,7 @@ namespace Terrain
         ViewDataMap* getViewDataMap();
 
         /// Create or retrieve a view for the given traversal.
-        ViewData* getView(osg::NodeVisitor& nv);
+        ViewData* getView(osg::NodeVisitor& nv, bool& needsUpdate);
 
     private:
         QuadTreeNode* mParent;
