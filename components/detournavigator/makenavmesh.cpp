@@ -628,7 +628,7 @@ namespace DetourNavigator
             return removeTile();
         }
 
-        if (!shouldAddTile(changedTile, playerTile, params.maxTiles))
+        if (!shouldAddTile(changedTile, playerTile, std::min(settings.mMaxTilesNumber, params.maxTiles)))
         {
             log("ignore add tile: too far from player");
             return removeTile();

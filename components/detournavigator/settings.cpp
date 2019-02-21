@@ -24,6 +24,7 @@ namespace DetourNavigator
         navigatorSettings.mMaxEdgeLen = ::Settings::Manager::getInt("max edge len", "Navigator");
         navigatorSettings.mMaxNavMeshQueryNodes = ::Settings::Manager::getInt("max nav mesh query nodes", "Navigator");
         navigatorSettings.mMaxPolys = ::Settings::Manager::getInt("max polygons per tile", "Navigator");
+        navigatorSettings.mMaxTilesNumber = ::Settings::Manager::getInt("max tiles number", "Navigator");
         navigatorSettings.mMaxVertsPerPoly = ::Settings::Manager::getInt("max verts per poly", "Navigator");
         navigatorSettings.mRegionMergeSize = ::Settings::Manager::getInt("region merge size", "Navigator");
         navigatorSettings.mRegionMinSize = ::Settings::Manager::getInt("region min size", "Navigator");
