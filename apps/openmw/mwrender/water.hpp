@@ -70,6 +70,7 @@ namespace MWRender
         bool mEnabled;
         bool mToggled;
         float mTop;
+        bool mInterior;
 
         osg::Vec3f getSceneNodeCoordinates(int gridX, int gridY);
         void updateVisible();

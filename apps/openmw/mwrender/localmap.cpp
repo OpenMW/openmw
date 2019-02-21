@@ -178,7 +178,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     camera->setRenderOrder(osg::Camera::PRE_RENDER);
 
-    camera->setCullMask(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object);
+    camera->setCullMask(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
     camera->setNodeMask(Mask_RenderToTexture);
 
     osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
@@ -380,7 +380,7 @@ void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell)
 void LocalMap::requestInteriorMap(const MWWorld::CellStore* cell)
 {
     osg::ComputeBoundsVisitor computeBoundsVisitor;
-    computeBoundsVisitor.setTraversalMask(Mask_Scene | Mask_Terrain | Mask_Object);
+    computeBoundsVisitor.setTraversalMask(Mask_Scene | Mask_Terrain | Mask_Object | Mask_Static);
     mSceneRoot->accept(computeBoundsVisitor);
 
     osg::BoundingBox bounds = computeBoundsVisitor.getBoundingBox();

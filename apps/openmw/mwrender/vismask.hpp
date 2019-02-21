@@ -34,25 +34,26 @@ namespace MWRender
         Mask_Terrain = (1<<8),
         Mask_FirstPerson = (1<<9),
         Mask_Object = (1<<10),
+        Mask_Static = (1<<11),
 
         // child of Sky
-        Mask_Sun = (1<<11),
-        Mask_WeatherParticles = (1<<12),
+        Mask_Sun = (1<<12),
+        Mask_WeatherParticles = (1<<13),
 
         // top level masks
-        Mask_Scene = (1<<13),
-        Mask_GUI = (1<<14),
+        Mask_Scene = (1<<14),
+        Mask_GUI = (1<<15),
 
         // Set on a ParticleSystem Drawable
-        Mask_ParticleSystem = (1<<15),
+        Mask_ParticleSystem = (1<<16),
 
         // Set on cameras within the main scene graph
-        Mask_RenderToTexture = (1<<16),
+        Mask_RenderToTexture = (1<<17),
 
-        Mask_PreCompile = (1<<17),
+        Mask_PreCompile = (1<<18),
 
         // Set on a camera's cull mask to enable the LightManager
-        Mask_Lighting = (1<<18)
+        Mask_Lighting = (1<<19)
     };
 
 }
