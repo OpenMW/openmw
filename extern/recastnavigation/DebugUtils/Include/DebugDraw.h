@@ -87,6 +87,7 @@ inline unsigned int duRGBAf(float fr, float fg, float fb, float fa)
 
 unsigned int duIntToCol(int i, int a);
 void duIntToCol(int i, float* col);
+unsigned int duHeatToCol(float heat, int a);
 
 inline unsigned int duMultCol(const unsigned int col, const unsigned int d)
 {
@@ -218,6 +219,5 @@ private:
 	duDisplayList(const duDisplayList&);
 	duDisplayList& operator=(const duDisplayList&);
 };
-
 
 #endif // DEBUGDRAW_H

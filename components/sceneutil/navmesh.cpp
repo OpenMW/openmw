@@ -16,7 +16,7 @@ namespace SceneUtil
         dtNavMeshQuery navMeshQuery;
         navMeshQuery.init(&navMesh, settings.mMaxNavMeshQueryNodes);
         duDebugDrawNavMeshWithClosedList(&debugDraw, navMesh, navMeshQuery,
-                                         DU_DRAWNAVMESH_OFFMESHCONS | DU_DRAWNAVMESH_CLOSEDLIST);
+                                         DU_DRAWNAVMESH_OFFMESHCONS | DU_DRAWNAVMESH_CLOSEDLIST | DU_DRAWNAVMESH_HEAT_TILES);
         return group;
     }
 }

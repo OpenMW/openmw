@@ -22,6 +22,8 @@
 #include "DetourCommon.h"
 #include "DetourNode.h"
 
+#include <limits.h>
+
 
 static float distancePtLine2d(const float* pt, const float* p, const float* q)
 {
@@ -116,13 +118,14 @@ static void drawPolyBoundaries(duDebugDraw* dd, const dtMeshTile* tile,
 }
 
 static void drawMeshTile(duDebugDraw* dd, const dtNavMesh& mesh, const dtNavMeshQuery* query,
-						 const dtMeshTile* tile, unsigned char flags)
+						 const dtMeshTile* tile, unsigned char flags, float heat)
 {
 	dtPolyRef base = mesh.getPolyRefBase(tile);
 
 	int tileNum = mesh.decodePolyIdTile(base);
 	const unsigned int tileColor = duIntToCol(tileNum, 128);
-	
+	const unsigned int heatColor = duHeatToCol(heat, 64);
+
 	dd->depthMask(false);
 
 	dd->begin(DU_DRAW_TRIS);
@@ -141,6 +144,8 @@ static void drawMeshTile(duDebugDraw* dd, const dtNavMesh& mesh, const dtNavMesh
 		{
 			if (flags & DU_DRAWNAVMESH_COLOR_TILES)
 				col = tileColor;
+			else if (flags & DU_DRAWNAVMESH_HEAT_TILES)
+				col = heatColor;
 			else
 				col = duTransCol(dd->areaToCol(p->getArea()), 64);
 		}
@@ -232,15 +237,39 @@ static void drawMeshTile(duDebugDraw* dd, const dtNavMesh& mesh, const dtNavMesh
 	dd->depthMask(true);
 }
 
+static void getMinMaxSalt(const dtNavMesh& mesh, unsigned int* minSalt, unsigned int* maxSalt)
+{
+	for (int i = 0; i < mesh.getMaxTiles(); ++i)
+	{
+		const dtMeshTile* tile = mesh.getTile(i);
+		*minSalt = *minSalt <= tile->salt ? *minSalt : tile->salt;
+		*maxSalt = *maxSalt >= tile->salt ? *maxSalt : tile->salt;
+	}
+}
+
+static float getHeat(unsigned int salt, unsigned int minSalt, unsigned int maxSalt)
+{
+	if (maxSalt <= minSalt)
+		return 0.5;
+	return (log2f(float(salt)) / log2f(float(UINT_MAX)) * 2 + float(salt - minSalt) / float(maxSalt - minSalt)) / 3.0f;
+}
+
 void duDebugDrawNavMesh(duDebugDraw* dd, const dtNavMesh& mesh, unsigned char flags)
 {
 	if (!dd) return;
-	
+
+	unsigned int minSalt = UINT_MAX;
+	unsigned int maxSalt = 0;
+
+	if (flags & DU_DRAWNAVMESH_HEAT_TILES)
+		getMinMaxSalt(mesh, &minSalt, &maxSalt);
+
 	for (int i = 0; i < mesh.getMaxTiles(); ++i)
 	{
 		const dtMeshTile* tile = mesh.getTile(i);
 		if (!tile->header) continue;
-		drawMeshTile(dd, mesh, 0, tile, flags);
+		const float heat = getHeat(tile->salt, minSalt, maxSalt);
+		drawMeshTile(dd, mesh, 0, tile, flags, heat);
 	}
 }
 
@@ -249,12 +278,19 @@ void duDebugDrawNavMeshWithClosedList(struct duDebugDraw* dd, const dtNavMesh& m
 	if (!dd) return;
 
 	const dtNavMeshQuery* q = (flags & DU_DRAWNAVMESH_CLOSEDLIST) ? &query : 0;
+
+	unsigned int minSalt = UINT_MAX;
+	unsigned int maxSalt = 0;
+
+	if (flags & DU_DRAWNAVMESH_HEAT_TILES)
+		getMinMaxSalt(mesh, &minSalt, &maxSalt);
 	
 	for (int i = 0; i < mesh.getMaxTiles(); ++i)
 	{
 		const dtMeshTile* tile = mesh.getTile(i);
 		if (!tile->header) continue;
-		drawMeshTile(dd, mesh, q, tile, flags);
+		const float heat = getHeat(tile->salt, minSalt, maxSalt);
+		drawMeshTile(dd, mesh, q, tile, flags, heat);
 	}
 }
 

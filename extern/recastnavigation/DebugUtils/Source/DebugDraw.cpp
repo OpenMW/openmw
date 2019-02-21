@@ -21,6 +21,7 @@
 #include "DebugDraw.h"
 #include "DetourMath.h"
 #include "DetourNavMesh.h"
+#include "DetourCommon.h"
 
 
 duDebugDraw::~duDebugDraw()
@@ -62,6 +63,15 @@ void duIntToCol(int i, float* col)
 	col[0] = 1 - r*63.0f/255.0f;
 	col[1] = 1 - g*63.0f/255.0f;
 	col[2] = 1 - b*63.0f/255.0f;
+}
+
+unsigned int duHeatToCol(float heat, int a)
+{
+	const float ratio = 2 * heat;
+	const int b = static_cast<int>(roundf(dtMax(0.0f, 255 * (1 - ratio))));
+	const int r = static_cast<int>(roundf(dtMax(0.0f, 255 * (ratio - 1))));
+	const int g = 255 - b - r;
+	return duRGBA(r, g, b, a);
 }
 
 void duCalcBoxColors(unsigned int* colors, unsigned int colTop, unsigned int colSide)
