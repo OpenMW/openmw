@@ -262,7 +262,7 @@ namespace MWGui
 
             if (mode == GM_Console)
                 MWBase::Environment::get().getWindowManager()->setConsoleSelectedObject(object);
-            else if ((mode == GM_Container) || (mode == GM_Inventory))
+            else //if ((mode == GM_Container) || (mode == GM_Inventory))
             {
                 // pick up object
                 if (!object.isEmpty())

@@ -368,7 +368,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         }
         else
         {
-            throw new std::runtime_error("Tried to package non-motion event!");
+            throw std::runtime_error("Tried to package non-motion event!");
         }
 
         return pack_evt;

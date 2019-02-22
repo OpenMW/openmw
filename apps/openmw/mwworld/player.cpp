@@ -30,6 +30,7 @@ namespace MWWorld
     Player::Player (const ESM::NPC *player)
       : mCellStore(0),
         mLastKnownExteriorPosition(0,0,0),
+        mMarkedPosition(ESM::Position()),
         mMarkedCell(nullptr),
         mAutoMove(false),
         mForwardBackward(0),
