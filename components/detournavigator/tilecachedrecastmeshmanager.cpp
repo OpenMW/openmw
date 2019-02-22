@@ -61,8 +61,8 @@ namespace DetourNavigator
             for (const auto& tile : currentTiles)
                 if (!newTiles.count(tile) && removeTile(id, tile, tiles.get()))
                     changedTiles.push_back(tile);
-            std::swap(currentTiles, newTiles);
         }
+        std::swap(currentTiles, newTiles);
         if (!changedTiles.empty())
             ++mRevision;
         return changedTiles;
