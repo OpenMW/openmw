@@ -97,7 +97,7 @@ namespace ESM
         "stealth_speechcraft.dds",
         "stealth_handtohand.dds",
     };
-    const boost::array<Skill::SkillEnum, Skill::Length> Skill::sSkillIds = {{
+    const std::array<Skill::SkillEnum, Skill::Length> Skill::sSkillIds = {{
         Block,
         Armorer,
         MediumArmor,
