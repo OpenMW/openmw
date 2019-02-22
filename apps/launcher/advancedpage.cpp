@@ -80,6 +80,7 @@ bool Launcher::AdvancedPage::loadSettings()
     int unarmedFactorsStrengthIndex = mEngineSettings.getInt("strength influences hand to hand", "Game");
     if (unarmedFactorsStrengthIndex >= 0 && unarmedFactorsStrengthIndex <= 2)
         unarmedFactorsStrengthComboBox->setCurrentIndex(unarmedFactorsStrengthIndex);
+    loadSettingBool(requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
 
     // Input Settings
     loadSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
@@ -139,6 +140,7 @@ void Launcher::AdvancedPage::saveSettings()
     int unarmedFactorsStrengthIndex = unarmedFactorsStrengthComboBox->currentIndex();
     if (unarmedFactorsStrengthIndex != mEngineSettings.getInt("strength influences hand to hand", "Game"))
         mEngineSettings.setInt("strength influences hand to hand", "Game", unarmedFactorsStrengthIndex);
+    saveSettingBool(requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
 
     // Input Settings
     saveSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");

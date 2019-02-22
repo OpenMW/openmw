@@ -227,7 +227,7 @@ namespace MWMechanics
             damage += attack[0] + ((attack[1] - attack[0]) * attackStrength);
 
             adjustWeaponDamage(damage, weapon, attacker);
-            if (weapon == projectile || isNormalWeapon(weapon)) // NB: both the weapon and the projectile need to be normal
+            if (weapon == projectile || Settings::Manager::getBool("only appropriate ammunition bypasses resistance", "Game") || isNormalWeapon(weapon))
                 resistNormalWeapon(victim, attacker, projectile, damage);
             applyWerewolfDamageMult(victim, projectile, damage);
 
