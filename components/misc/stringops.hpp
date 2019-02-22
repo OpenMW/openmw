@@ -1,7 +1,6 @@
 #ifndef MISC_STRINGOPS_H
 #define MISC_STRINGOPS_H
 
-#include <cctype>
 #include <cstring>
 #include <string>
 #include <algorithm>

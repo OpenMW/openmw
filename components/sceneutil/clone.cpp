@@ -1,12 +1,10 @@
 #include "clone.hpp"
 
 #include <osg/StateSet>
-#include <osg/Version>
 
 #include <osgParticle/ParticleProcessor>
 #include <osgParticle/ParticleSystemUpdater>
 #include <osgParticle/Emitter>
-#include <osgParticle/Program>
 
 #include <components/sceneutil/morphgeometry.hpp>
 

@@ -25,7 +25,6 @@
 #include <osg/Billboard>
 #include <osg/Geometry>
 #include <osg/Notify>
-#include <osg/Texture>
 #include <osg/Timer>
 #include <osg/io_utils>
 
@@ -36,7 +35,6 @@
 #include <typeinfo>
 #include <algorithm>
 #include <numeric>
-#include <sstream>
 
 #include <iterator>
 

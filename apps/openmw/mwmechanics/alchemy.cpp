@@ -1,7 +1,6 @@
 #include "alchemy.hpp"
 
 #include <cassert>
-#include <cstdlib>
 #include <cmath>
 
 #include <algorithm>

@@ -2,8 +2,6 @@
 
 #include <components/settings/settings.hpp>
 
-#include <string>
-
 namespace DetourNavigator
 {
     boost::optional<Settings> makeSettingsFromSettingsManager()

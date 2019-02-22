@@ -5,7 +5,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm/aisequence.hpp>
 
-#include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
 #include "aipackage.hpp"

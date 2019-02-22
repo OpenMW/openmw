@@ -3,14 +3,11 @@
 #include <components/esm/loadrepa.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/actiontake.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwphysics/physicssystem.hpp"
-#include "../mwworld/nullaction.hpp"
 #include "../mwworld/actionrepair.hpp"
 
 #include "../mwgui/tooltips.hpp"

@@ -1,7 +1,6 @@
 #include "shadermanager.hpp"
 
 #include <fstream>
-#include <iostream>
 #include <algorithm>
 #include <sstream>
 

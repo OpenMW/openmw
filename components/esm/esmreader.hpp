@@ -1,8 +1,7 @@
 #ifndef OPENMW_ESM_READER_H
 #define OPENMW_ESM_READER_H
 
-#include <stdint.h>
-#include <string.h>
+#include <cstdint>
 #include <cassert>
 #include <vector>
 #include <sstream>

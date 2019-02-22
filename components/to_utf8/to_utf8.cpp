@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <cassert>
-#include <iomanip>
 #include <stdexcept>
 
 #include <components/debug/debuglog.hpp>

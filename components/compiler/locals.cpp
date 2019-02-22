@@ -1,6 +1,5 @@
 #include "locals.hpp"
 
-#include <cassert>
 #include <stdexcept>
 #include <algorithm>
 #include <ostream>

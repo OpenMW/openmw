@@ -7,7 +7,6 @@
 #include "settings.hpp"
 #include "settingsutils.hpp"
 #include "sharednavmesh.hpp"
-#include "settingsutils.hpp"
 #include "flags.hpp"
 #include "navmeshtilescache.hpp"
 

@@ -1,7 +1,6 @@
 #include "attach.hpp"
 
 #include <stdexcept>
-#include <iostream>
 
 #include <osg/NodeVisitor>
 #include <osg/Group>

@@ -8,7 +8,6 @@
 #include "../mwworld/class.hpp"
 
 #include "creaturestats.hpp"
-#include "steering.hpp"
 #include "movement.hpp"
 
 namespace MWMechanics

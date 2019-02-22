@@ -4,7 +4,6 @@
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
-#include <components/esm/savedgame.hpp>
 #include <components/esm/weatherstate.hpp>
 
 #include "../mwbase/environment.hpp"

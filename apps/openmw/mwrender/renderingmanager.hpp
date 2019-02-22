@@ -13,6 +13,7 @@
 #include "rendermode.hpp"
 
 #include <deque>
+#include <memory>
 
 namespace osg
 {

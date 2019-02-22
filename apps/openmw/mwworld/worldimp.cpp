@@ -35,7 +35,6 @@
 #include "../mwbase/scriptmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/levelledlist.hpp"
@@ -48,7 +47,6 @@
 #include "../mwrender/camera.hpp"
 #include "../mwrender/vismask.hpp"
 
-#include "../mwscript/interpretercontext.hpp"
 #include "../mwscript/globalscripts.hpp"
 
 #include "../mwclass/door.hpp"

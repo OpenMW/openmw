@@ -1,7 +1,6 @@
 #ifndef CONTENTLOADER_HPP
 #define CONTENTLOADER_HPP
 
-#include <iosfwd>
 #include <boost/filesystem/path.hpp>
 #include <MyGUI_TextIterator.h>
 

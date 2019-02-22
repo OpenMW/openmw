@@ -11,7 +11,6 @@
 #include "../mwworld/cellstore.hpp"
 
 #include "creaturestats.hpp"
-#include "steering.hpp"
 #include "movement.hpp"
 
 /*

@@ -4,14 +4,12 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_ImageBox.h>
-#include <MyGUI_FontManager.h>
 
 // correctBookartPath
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 
 #include <components/debug/debuglog.hpp>
 #include <components/interpreter/defines.hpp>

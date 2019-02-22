@@ -1,7 +1,5 @@
 #include "myguirendermanager.hpp"
 
-#include <stdexcept>
-
 #include <MyGUI_Gui.h>
 #include <MyGUI_Timer.h>
 

@@ -15,15 +15,12 @@
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwrender/animation.hpp"
-
 #include "pathgrid.hpp"
 #include "creaturestats.hpp"
 #include "steering.hpp"
 #include "movement.hpp"
 #include "character.hpp"
 #include "aicombataction.hpp"
-#include "combat.hpp"
 #include "coordinateconverter.hpp"
 #include "actorutil.hpp"
 

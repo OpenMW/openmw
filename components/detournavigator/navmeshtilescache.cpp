@@ -1,8 +1,6 @@
 #include "navmeshtilescache.hpp"
 #include "exceptions.hpp"
 
-#include <iostream>
-
 namespace DetourNavigator
 {
     namespace

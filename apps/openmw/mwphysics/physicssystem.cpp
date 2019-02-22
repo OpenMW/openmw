@@ -1,15 +1,7 @@
 ﻿#include "physicssystem.hpp"
 
-#include <stdexcept>
-#include <unordered_map>
-#include <fstream>
-#include <array>
-
-#include <boost/optional.hpp>
-
 #include <osg/Group>
 
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <BulletCollision/CollisionShapes/btConeShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btStaticPlaneShape.h>
@@ -20,12 +12,6 @@
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 
 #include <LinearMath/btQuickprof.h>
-
-#include <DetourCommon.h>
-#include <DetourNavMesh.h>
-#include <DetourNavMeshBuilder.h>
-#include <DetourNavMeshQuery.h>
-#include <Recast.h>
 
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -49,9 +35,6 @@
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/bulletdebugdraw.hpp"
-
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
 
 #include "../mwworld/class.hpp"
 

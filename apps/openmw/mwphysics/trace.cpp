@@ -1,7 +1,5 @@
 #include "trace.h"
 
-#include <map>
-
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionShapes/btConvexShape.h>
 

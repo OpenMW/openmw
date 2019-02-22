@@ -21,7 +21,6 @@
 
 #include "aicombat.hpp"
 #include "aipursue.hpp"
-#include "aitravel.hpp"
 #include "spellcasting.hpp"
 #include "autocalcspell.hpp"
 #include "npcstats.hpp"

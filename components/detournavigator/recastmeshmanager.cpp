@@ -1,6 +1,5 @@
 #include "recastmeshmanager.hpp"
 
-#include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 namespace DetourNavigator
