@@ -555,13 +555,13 @@ namespace MWMechanics
                 if (actor.getClass().isNpc())
                 {
                     baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayNPC")->mValue.getFloat();
+                }
 
-                    //say a provoking combat phrase
-                    int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->mValue.getInteger();
-                    if (Misc::Rng::roll0to99() < chance)
-                    {
-                        MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
-                    }
+                // Say a provoking combat phrase
+                const int iVoiceAttackOdds = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->mValue.getInteger();
+                if (Misc::Rng::roll0to99() < iVoiceAttackOdds)
+                {
+                    MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
                 }
                 mAttackCooldown = std::min(baseDelay + 0.01 * Misc::Rng::roll0to99(), baseDelay + 0.9);
             }
