@@ -1,7 +1,5 @@
 #include "repair.hpp"
 
-#include <boost/format.hpp>
-
 #include <components/misc/rng.hpp>
 
 #include "../mwbase/world.hpp"
@@ -85,8 +83,9 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
 
         std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                 .find("sNotifyMessage51")->mValue.getString();
+        Misc::StringUtils::replace(message, "%s", mTool.getClass().getName(mTool).c_str(), 2);
 
-        MWBase::Environment::get().getWindowManager()->messageBox((boost::format(message) % mTool.getClass().getName(mTool)).str());
+        MWBase::Environment::get().getWindowManager()->messageBox(message);
 
         // try to find a new tool of the same ID
         for (MWWorld::ContainerStoreIterator iter (store.begin());

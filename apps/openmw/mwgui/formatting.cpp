@@ -9,8 +9,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include <boost/algorithm/string/replace.hpp>
-
 #include <components/debug/debuglog.hpp>
 #include <components/interpreter/defines.hpp>
 #include <components/misc/stringops.hpp>
@@ -28,7 +26,7 @@ namespace MWGui
             MWScript::InterpreterContext interpreterContext(nullptr, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
             mText = Interpreter::fixDefinesBook(mText, interpreterContext);
 
-            boost::algorithm::replace_all(mText, "\r", "");
+            Misc::StringUtils::replaceAll(mText, "\r", "");
 
             // vanilla game does not show any text after the last EOL tag.
             const std::string lowerText = Misc::StringUtils::lowerCase(mText);
