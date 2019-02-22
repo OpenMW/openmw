@@ -1,9 +1,12 @@
 #ifndef GAME_MWMECHANICS_AICAST_H
 #define GAME_MWMECHANICS_AICAST_H
 
-#include "../mwbase/world.hpp"
-
 #include "aipackage.hpp"
+
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MWMechanics
 {

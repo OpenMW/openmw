@@ -1,6 +1,6 @@
 #include "aiface.hpp"
 
-#include "../mwbase/world.hpp"
+#include "../mwworld/ptr.hpp"
 
 #include "steering.hpp"
 

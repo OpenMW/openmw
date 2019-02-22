@@ -2,9 +2,6 @@
 
 #include <components/esm/loadskil.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/actorutil.hpp"

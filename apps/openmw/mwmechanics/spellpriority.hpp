@@ -1,9 +1,17 @@
 #ifndef OPENMW_SPELL_PRIORITY_H
 #define OPENMW_SPELL_PRIORITY_H
 
-#include <components/esm/loadspel.hpp>
+namespace ESM
+{
+    struct Spell;
+    struct EffectList;
+    struct ENAMstruct;
+}
 
-#include "../mwworld/ptr.hpp"
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MWMechanics
 {

@@ -1,7 +1,15 @@
 #ifndef OPENMW_MECHANICS_COMBAT_H
 #define OPENMW_MECHANICS_COMBAT_H
 
-#include "../mwworld/ptr.hpp"
+namespace osg
+{
+    class Vec3f;
+}
+
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MWMechanics
 {

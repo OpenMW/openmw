@@ -3,10 +3,6 @@
 
 #include "aipackage.hpp"
 
-#include "../mwbase/world.hpp"
-
-#include "pathfinding.hpp"
-
 namespace ESM
 {
 namespace AiSequence

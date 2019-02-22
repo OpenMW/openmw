@@ -7,9 +7,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
-
 namespace MWMechanics
 {
     class Enchanting

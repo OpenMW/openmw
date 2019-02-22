@@ -1,9 +1,14 @@
 #ifndef OPENMW_AUTOCALCSPELL_H
 #define OPENMW_AUTOCALCSPELL_H
 
-#include <components/esm/loadspel.hpp>
-#include <components/esm/loadskil.hpp>
-#include <components/esm/loadrace.hpp>
+#include <string>
+#include <vector>
+
+namespace ESM
+{
+    struct Spell;
+    struct Race;
+}
 
 namespace MWMechanics
 {
