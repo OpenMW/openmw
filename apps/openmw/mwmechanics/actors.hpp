@@ -122,6 +122,9 @@ namespace MWMechanics
             void rest(bool sleep);
             ///< Update actors while the player is waiting or sleeping. This should be called every hour.
 
+            void updateSneaking(CharacterController* ctrl, float duration);
+            ///< Update the sneaking indicator state according to the given player character controller.
+
             void restoreDynamicStats(const MWWorld::Ptr& actor, bool sleep);
 
             int getHoursToRest(const MWWorld::Ptr& ptr) const;

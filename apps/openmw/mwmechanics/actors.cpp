@@ -1543,72 +1543,7 @@ namespace MWMechanics
             }
 
             killDeadActors();
-
-            static float sneakTimer = 0.f; // times update of sneak icon
-
-            // if player is in sneak state see if anyone detects him
-            if (playerCharacter && playerCharacter->isSneaking())
-            {
-                static float sneakSkillTimer = 0.f; // times sneak skill progress from "avoid notice"
-
-                const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
-                const int radius = esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->mValue.getInteger();
-
-                static float fSneakUseDelay = esmStore.get<ESM::GameSetting>().find("fSneakUseDelay")->mValue.getFloat();
-
-                if (sneakTimer >= fSneakUseDelay)
-                    sneakTimer = 0.f;
-
-                if (sneakTimer == 0.f)
-                {
-                    // Set when an NPC is within line of sight and distance, but is still unaware. Used for skill progress.
-                    bool avoidedNotice = false;
-
-                    bool detected = false;
-
-                    for (PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
-                    {
-                        MWWorld::Ptr observer = iter->first;
-
-                        if (iter->first == player)  // not the player
-                            continue;
-
-                        if (observer.getClass().getCreatureStats(observer).isDead())
-                            continue;
-
-                        // is the player in range and can they be detected
-                        if ((observer.getRefData().getPosition().asVec3() - playerPos).length2() <= radius*radius
-                            && MWBase::Environment::get().getWorld()->getLOS(player, observer))
-                        {
-                            if (MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, observer))
-                            {
-                                detected = true;
-                                avoidedNotice = false;
-                                MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
-                                break;
-                            }
-                            else
-                                avoidedNotice = true;
-                        }
-                    }
-
-                    if (sneakSkillTimer >= fSneakUseDelay)
-                        sneakSkillTimer = 0.f;
-
-                    if (avoidedNotice && sneakSkillTimer == 0.f)
-                        player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 0);
-
-                    if (!detected)
-                        MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);
-                }
-                sneakTimer += duration;
-                sneakSkillTimer += duration;
-            }
-            else
-            {
-                sneakTimer = 0.f;
-                MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
-            }
+            updateSneaking(playerCharacter, duration);
         }
 
         updateCombatMusic();
@@ -1755,6 +1690,86 @@ namespace MWMechanics
         }
 
         fastForwardAi();
+    }
+
+    void Actors::updateSneaking(CharacterController* ctrl, float duration)
+    {
+        static float sneakTimer = 0.f; // Times update of sneak icon
+
+        if (!ctrl)
+        {
+            MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
+            return;
+        }
+
+        MWWorld::Ptr player = getPlayer();
+
+        CreatureStats& stats = player.getClass().getCreatureStats(player);
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+
+        bool sneaking = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
+        bool inair = !world->isOnGround(player) && !world->isSwimming(player) && !world->isFlying(player);
+        sneaking = sneaking && (ctrl->isSneaking() || inair);
+
+        if (!sneaking)
+        {
+            MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
+            return;
+        }
+
+        static float sneakSkillTimer = 0.f; // Times sneak skill progress from "avoid notice"
+
+        const MWWorld::Store<ESM::GameSetting>& gmst = world->getStore().get<ESM::GameSetting>();
+        static const float fSneakUseDist = gmst.find("fSneakUseDist")->mValue.getFloat();
+        static const float fSneakUseDelay = gmst.find("fSneakUseDelay")->mValue.getFloat();
+
+        if (sneakTimer >= fSneakUseDelay)
+            sneakTimer = 0.f;
+
+        if (sneakTimer == 0.f)
+        {
+            // Set when an NPC is within line of sight and distance, but is still unaware. Used for skill progress.
+            bool avoidedNotice = false;
+            bool detected = false;
+
+            std::vector<MWWorld::Ptr> observers;
+            osg::Vec3f position(player.getRefData().getPosition().asVec3());
+            float radius = std::min(fSneakUseDist, mActorsProcessingRange);
+            getObjectsInRange(position, radius, observers);
+
+            for (const MWWorld::Ptr &observer : observers)
+            {
+                if (observer == player || observer.getClass().getCreatureStats(observer).isDead())
+                    continue;
+
+                if (world->getLOS(player, observer))
+                {
+                    if (MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, observer))
+                    {
+                        detected = true;
+                        avoidedNotice = false;
+                        MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
+                        break;
+                    }
+                    else
+                    {
+                        avoidedNotice = true;
+                    }
+                }
+            }
+
+            if (sneakSkillTimer >= fSneakUseDelay)
+                sneakSkillTimer = 0.f;
+
+            if (avoidedNotice && sneakSkillTimer == 0.f)
+                player.getClass().skillUsageSucceeded(player, ESM::Skill::Sneak, 0);
+
+            if (!detected)
+                MWBase::Environment::get().getWindowManager()->setSneakVisibility(true);
+        }
+
+        sneakTimer += duration;
+        sneakSkillTimer += duration;
     }
 
     int Actors::getHoursToRest(const MWWorld::Ptr &ptr) const
