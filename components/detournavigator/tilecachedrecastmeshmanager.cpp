@@ -47,11 +47,9 @@ namespace DetourNavigator
             {
                 if (currentTiles.count(tilePosition))
                 {
+                    newTiles.insert(tilePosition);
                     if (updateTile(id, transform, areaType, tilePosition, tiles.get()))
-                    {
-                        newTiles.insert(tilePosition);
                         changedTiles.push_back(tilePosition);
-                    }
                 }
                 else if (addTile(id, shape, transform, areaType, tilePosition, border, tiles.get()))
                 {

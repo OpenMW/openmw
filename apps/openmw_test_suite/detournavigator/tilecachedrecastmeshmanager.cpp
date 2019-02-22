@@ -120,4 +120,22 @@ namespace
         EXPECT_EQ(manager.getMesh(TilePosition(0, -1)), nullptr);
         EXPECT_EQ(manager.getMesh(TilePosition(0, 0)), nullptr);
     }
+
+    TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, get_mesh_for_not_changed_object_after_update_should_return_recast_mesh_for_same_tiles)
+    {
+        TileCachedRecastMeshManager manager(mSettings);
+        const btBoxShape boxShape(btVector3(20, 20, 100));
+
+        manager.addObject(ObjectId(1ul), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        EXPECT_NE(manager.getMesh(TilePosition(-1, -1)), nullptr);
+        EXPECT_NE(manager.getMesh(TilePosition(-1, 0)), nullptr);
+        EXPECT_NE(manager.getMesh(TilePosition(0, -1)), nullptr);
+        EXPECT_NE(manager.getMesh(TilePosition(0, 0)), nullptr);
+
+        manager.updateObject(ObjectId(1ul), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        EXPECT_NE(manager.getMesh(TilePosition(-1, -1)), nullptr);
+        EXPECT_NE(manager.getMesh(TilePosition(-1, 0)), nullptr);
+        EXPECT_NE(manager.getMesh(TilePosition(0, -1)), nullptr);
+        EXPECT_NE(manager.getMesh(TilePosition(0, 0)), nullptr);
+    }
 }
