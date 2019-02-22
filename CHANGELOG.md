@@ -28,6 +28,7 @@
     Bug #4827: NiUVController is handled incorrectly
     Bug #4828: Potion looping effects VFX are not shown for NPCs
     Bug #4837: CTD when a mesh with NiLODNode root node with particles is loaded
+    Bug #4860: Actors outside of processing range visible for one frame after spawning
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
     Feature #3610: Option to invert X axis
