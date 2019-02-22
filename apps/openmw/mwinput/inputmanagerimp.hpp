@@ -179,6 +179,7 @@ namespace MWInput
         bool mInvertY;
 
         bool mControlsDisabled;
+        bool mJoystickEnabled;
 
         float mCameraSensitivity;
         float mCameraYMultiplier;

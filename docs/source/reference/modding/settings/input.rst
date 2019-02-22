@@ -120,3 +120,16 @@ If this setting is true, moving the mouse away from the player will look down,
 while moving it towards the player will look up. This setting does not affect cursor movement in GUI mode.
 
 This setting can be toggled in game with the Invert Y Axis button in the Controls panel of the Options menu.
+
+enable controller
+-----------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Enable support of controller input — or rather not ignore controller events,
+which are always sent if a controller is present and detected.
+Disabling this setting can be useful for working around controller-related issues or for setting up split-screen gameplay configurations.
+
+This setting can be toggled in game with the Enable Joystick button in the Controls panel of the Options menu.
