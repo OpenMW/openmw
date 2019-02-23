@@ -35,7 +35,10 @@ public:
             return false;
         return std::strncmp(self()->ro_data(), str, size) == 0;
     }
-    bool operator==(const char* const str) const
+
+    //this operator will not be used for char[N], only for char*
+    template<typename T, typename = typename std::enable_if<std::is_same<T, char>::value>::type>
+    bool operator==(const T* const& str) const
     {
         char const* const data = self()->ro_data();
         for(size_t i = 0; i < size; ++i)
