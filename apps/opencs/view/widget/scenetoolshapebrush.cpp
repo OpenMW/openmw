@@ -110,6 +110,7 @@ CSVWidget::ShapeBrushWindow::ShapeBrushWindow(CSMDoc::Document& document, QWidge
     mToolSelector->addItem(tr("Height, raise (paint)"));
     mToolSelector->addItem(tr("Height, lower (paint)"));
     mToolSelector->addItem(tr("Smooth (paint)"));
+    mToolSelector->addItem(tr("Flatten (paint)"));
 
     mToolStrengthSlider = new QSlider(Qt::Horizontal);
     mToolStrengthSlider->setTickPosition(QSlider::TicksBothSides);

@@ -88,6 +88,9 @@ namespace CSVRender
             /// Do a single smoothing height alteration for transient shape edit map
             void smoothHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, int toolStrength);
 
+            /// Do a single flattening height alteration for transient shape edit map
+            void flattenHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, int toolStrength, int targetHeight);
+
             /// Update the key values used in height calculations
             void updateKeyHeightValues(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY,
                 float*, float*, float*, float*, float*, float*);
@@ -128,6 +131,7 @@ namespace CSVRender
             osg::Vec3d mEditingPos;
             int mShapeEditTool;
             int mShapeEditToolStrength;
+            int mTargetHeight;
 
             const int cellSize {ESM::Land::REAL_SIZE};
             const int landSize {ESM::Land::LAND_SIZE};

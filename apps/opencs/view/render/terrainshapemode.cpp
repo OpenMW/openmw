@@ -50,7 +50,8 @@ CSVRender::TerrainShapeMode::TerrainShapeMode (WorldspaceWidget *worldspaceWidge
     mIsEditing(false),
     mTotalDiffY(0),
     mShapeEditTool(0),
-    mShapeEditToolStrength(0)
+    mShapeEditToolStrength(0),
+    mTargetHeight(0)
 {
 }
 
@@ -130,6 +131,22 @@ bool CSVRender::TerrainShapeMode::primaryEditStartDrag (const QPoint& pos)
     {
         mEditingPos = hit.worldPos;
         mIsEditing = true;
+        if (mShapeEditTool == 4)
+        {
+            std::pair<int, int> vertexCoords = CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos);
+            std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
+            int inCellX = CSMWorld::CellCoordinates::vertexSelectionToInCellCoords(vertexCoords.first);
+            int inCellY = CSMWorld::CellCoordinates::vertexSelectionToInCellCoords(vertexCoords.second);
+
+            CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+            CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
+                *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+            int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
+            const CSMWorld::LandHeightsColumn::DataType landShapePointer =
+                landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+
+            mTargetHeight = landShapePointer[inCellY * landSize + inCellX];
+        }
     }
 
     return true;
@@ -334,6 +351,7 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(std::pair<int, int> verte
             if (mShapeEditTool == 0) alterHeight(cellCoords, x, y, mTotalDiffY);
             if (mShapeEditTool == 1 || mShapeEditTool == 2) alterHeight(cellCoords, x, y, mShapeEditToolStrength);
             if (mShapeEditTool == 3) smoothHeight(cellCoords, x, y, mShapeEditToolStrength);
+            if (mShapeEditTool == 4) flattenHeight(cellCoords, x, y, mShapeEditToolStrength, mTargetHeight);
         }
 
         if (mBrushShape == 1)
@@ -349,6 +367,7 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(std::pair<int, int> verte
                     if (mShapeEditTool == 0) alterHeight(cellCoords, x, y, mTotalDiffY);
                     if (mShapeEditTool == 1 || mShapeEditTool == 2) alterHeight(cellCoords, x, y, mShapeEditToolStrength);
                     if (mShapeEditTool == 3) smoothHeight(cellCoords, x, y, mShapeEditToolStrength);
+                    if (mShapeEditTool == 4) flattenHeight(cellCoords, x, y, mShapeEditToolStrength, mTargetHeight);
                 }
             }
         }
@@ -374,6 +393,7 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(std::pair<int, int> verte
                     {
                         if (mShapeEditTool >= 0 && mShapeEditTool < 3) alterHeight(cellCoords, x, y, smoothedByDistance);
                         if (mShapeEditTool == 3) smoothHeight(cellCoords, x, y, mShapeEditToolStrength);
+                        if (mShapeEditTool == 4) flattenHeight(cellCoords, x, y, mShapeEditToolStrength, mTargetHeight);
                     }
                 }
             }
@@ -391,6 +411,7 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(std::pair<int, int> verte
                     if (mShapeEditTool == 0) alterHeight(cellCoords, x, y, mTotalDiffY);
                     if (mShapeEditTool == 1 || mShapeEditTool == 2) alterHeight(cellCoords, x, y, mShapeEditToolStrength);
                     if (mShapeEditTool == 3) smoothHeight(cellCoords, x, y, mShapeEditToolStrength);
+                    if (mShapeEditTool == 4) flattenHeight(cellCoords, x, y, mShapeEditToolStrength, mTargetHeight);
                 }
             }
         }
@@ -612,8 +633,42 @@ void CSVRender::TerrainShapeMode::smoothHeight(CSMWorld::CellCoordinates cellCoo
     }
 }
 
+void CSVRender::TerrainShapeMode::flattenHeight(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, int toolStrength, int targetHeight)
+{
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+    int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
+
+    float thisHeight = 0.0f;
+    float thisAlteredHeight = 0.0f;
+
+    std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY());
+    bool noCell = document.getData().getCells().searchId (cellId) == -1;
+    bool noLand = document.getData().getLand().searchId (cellId) == -1;
+
+    if (CSVRender::PagedWorldspaceWidget *paged =
+        dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+    {
+        if (!noCell && !noLand)
+        {
+            const CSMWorld::LandHeightsColumn::DataType landShapePointer =
+                landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+
+            if(paged->getCellAlteredHeight(cellCoords, inCellX, inCellY))
+                thisAlteredHeight = *paged->getCellAlteredHeight(cellCoords, inCellX, inCellY);
+            thisHeight = landShapePointer[inCellY * landSize + inCellX];
+        }
+    }
+
+    if (toolStrength > abs(thisHeight - targetHeight) && toolStrength > 8.0f) toolStrength =
+        abs(thisHeight - targetHeight); //Cut down excessive changes
+    if (thisHeight + thisAlteredHeight > targetHeight) alterHeight(cellCoords, inCellX, inCellY, -toolStrength);
+    if (thisHeight + thisAlteredHeight < targetHeight) alterHeight(cellCoords, inCellX, inCellY, +toolStrength);
+}
+
 void CSVRender::TerrainShapeMode::updateKeyHeightValues(CSMWorld::CellCoordinates cellCoords, int inCellX, int inCellY, float* thisHeight,
-    float* alteredThisHeight, float* leftHeight, float* leftAlteredHeight, float* upHeight, float* upAlteredHeight)
+    float* thisAlteredHeight, float* leftHeight, float* leftAlteredHeight, float* upHeight, float* upAlteredHeight)
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
@@ -631,8 +686,8 @@ void CSVRender::TerrainShapeMode::updateKeyHeightValues(CSMWorld::CellCoordinate
     bool noUpCell = document.getData().getCells().searchId (cellUpId) == -1;
     bool noUpLand = document.getData().getLand().searchId (cellUpId) == -1;
 
-    *thisHeight = 0.0f;
-    *alteredThisHeight = 0.0f;
+    *thisHeight = 0.0f; // real + altered height
+    *thisAlteredHeight = 0.0f;  // only altered height
     *leftHeight = 0.0f;
     *leftAlteredHeight = 0.0f;
     *upHeight = 0.0f;
@@ -647,8 +702,8 @@ void CSVRender::TerrainShapeMode::updateKeyHeightValues(CSMWorld::CellCoordinate
                 landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
 
             if(paged->getCellAlteredHeight(cellCoords, inCellX, inCellY))
-                *alteredThisHeight = *paged->getCellAlteredHeight(cellCoords, inCellX, inCellY);
-            *thisHeight = landShapePointer[inCellY * landSize + inCellX] + *alteredThisHeight;
+                *thisAlteredHeight = *paged->getCellAlteredHeight(cellCoords, inCellX, inCellY);
+            *thisHeight = landShapePointer[inCellY * landSize + inCellX] + *thisAlteredHeight;
 
             // In case of cell edge, and touching cell/land is not found, assume that left and up -heights would be the same
             // This is to prevent unnecessary action at limitHeightChange()
@@ -766,13 +821,13 @@ void CSVRender::TerrainShapeMode::limitAlteredHeights(CSMWorld::CellCoordinates 
                     // Binding = the last row or column, the one that binds cell land together
 
                     float thisHeight = 0.0f;
-                    float alteredThisHeight = 0.0f;
+                    float thisAlteredHeight = 0.0f;
                     float leftHeight = 0.0f;
                     float leftAlteredHeight = 0.0f;
                     float upHeight = 0.0f;
                     float upAlteredHeight = 0.0f;
 
-                    updateKeyHeightValues(cellCoords, inCellX, inCellY, &thisHeight, &alteredThisHeight, &leftHeight, &leftAlteredHeight,
+                    updateKeyHeightValues(cellCoords, inCellX, inCellY, &thisHeight, &thisAlteredHeight, &leftHeight, &leftAlteredHeight,
                         &upHeight, &upAlteredHeight);
 
                     bool doChange = false;
@@ -780,29 +835,29 @@ void CSVRender::TerrainShapeMode::limitAlteredHeights(CSMWorld::CellCoordinates 
                     // Check for height limits, prioritize left over up, except in left-right -cell edges
                     if (thisHeight - upHeight >= limitHeightChange)
                     {
-                        alteredThisHeight = upHeight + (limitHeightChange / 2) - landShapePointer[inCellY * landSize + inCellX];
+                        thisAlteredHeight = upHeight + (limitHeightChange / 2) - landShapePointer[inCellY * landSize + inCellX];
                         doChange = true;
                     }
                     if (thisHeight - upHeight <= -limitHeightChange)
                     {
-                        alteredThisHeight = upHeight - (limitHeightChange / 2) - landShapePointer[inCellY * landSize + inCellX];
+                        thisAlteredHeight = upHeight - (limitHeightChange / 2) - landShapePointer[inCellY * landSize + inCellX];
                         doChange = true;
                     }
                     if (thisHeight - leftHeight >= limitHeightChange && !(doChange == true && (inCellX == 0 || inCellX == landSize - 1)))
                     {
-                        alteredThisHeight = leftHeight + (limitHeightChange / 2) - landShapePointer[inCellY * landSize + inCellX];
+                        thisAlteredHeight = leftHeight + (limitHeightChange / 2) - landShapePointer[inCellY * landSize + inCellX];
                         doChange = true;
                     }
                     if (thisHeight - leftHeight <= -limitHeightChange && !(doChange == true && (inCellX == 0 || inCellX == landSize - 1)))
                     {
-                        alteredThisHeight = leftHeight - (limitHeightChange / 2) - landShapePointer[inCellY * landSize + inCellX];
+                        thisAlteredHeight = leftHeight - (limitHeightChange / 2) - landShapePointer[inCellY * landSize + inCellX];
                         doChange = true;
                     }
 
                     // Apply limits
                     if (doChange == true)
                     {
-                        alterHeight(cellCoords, inCellX, inCellY, alteredThisHeight, false);
+                        alterHeight(cellCoords, inCellX, inCellY, thisAlteredHeight, false);
                         dataAlteredAtThisCell = true;
                     }
                 }
@@ -828,13 +883,13 @@ void CSVRender::TerrainShapeMode::limitAlteredHeights(CSMWorld::CellCoordinates 
                     // Binding = the last row or column, the one that binds cell land together
 
                     float thisHeight = 0.0f;
-                    float alteredThisHeight = 0.0f;
+                    float thisAlteredHeight = 0.0f;
                     float leftHeight = 0.0f;
                     float leftAlteredHeight = 0.0f;
                     float upHeight = 0.0f;
                     float upAlteredHeight = 0.0f;
 
-                    updateKeyHeightValues(cellCoords, inCellX, inCellY, &thisHeight, &alteredThisHeight, &leftHeight, &leftAlteredHeight,
+                    updateKeyHeightValues(cellCoords, inCellX, inCellY, &thisHeight, &thisAlteredHeight, &leftHeight, &leftAlteredHeight,
                         &upHeight, &upAlteredHeight);
 
                     bool doChange = false;
@@ -842,29 +897,29 @@ void CSVRender::TerrainShapeMode::limitAlteredHeights(CSMWorld::CellCoordinates 
                     // Check for height limits, prioritize left over up, except in left-right -cell edges
                     if (thisHeight - upHeight >= limitHeightChange)
                     {
-                        alteredThisHeight = upHeight + limitHeightChange - landShapePointer[inCellY * landSize + inCellX];
+                        thisAlteredHeight = upHeight + limitHeightChange - landShapePointer[inCellY * landSize + inCellX];
                         doChange = true;
                     }
                     if (thisHeight - upHeight <= -limitHeightChange)
                     {
-                        alteredThisHeight = upHeight - limitHeightChange - landShapePointer[inCellY * landSize + inCellX];
+                        thisAlteredHeight = upHeight - limitHeightChange - landShapePointer[inCellY * landSize + inCellX];
                         doChange = true;
                     }
                     if (thisHeight - leftHeight >= limitHeightChange && !(doChange == true && (inCellX == 0 || inCellX == landSize - 1)))
                     {
-                        alteredThisHeight = leftHeight + limitHeightChange - landShapePointer[inCellY * landSize + inCellX];
+                        thisAlteredHeight = leftHeight + limitHeightChange - landShapePointer[inCellY * landSize + inCellX];
                         doChange = true;
                     }
                     if (thisHeight - leftHeight <= -limitHeightChange && !(doChange == true && (inCellX == 0 || inCellX == landSize - 1)))
                     {
-                        alteredThisHeight = leftHeight - limitHeightChange - landShapePointer[inCellY * landSize + inCellX];
+                        thisAlteredHeight = leftHeight - limitHeightChange - landShapePointer[inCellY * landSize + inCellX];
                         doChange = true;
                     }
 
                     // Apply limits
                     if (doChange == true)
                     {
-                        alterHeight(cellCoords, inCellX, inCellY, alteredThisHeight, false);
+                        alterHeight(cellCoords, inCellX, inCellY, thisAlteredHeight, false);
                         dataAlteredAtThisCell = true;
                     }
                 }
