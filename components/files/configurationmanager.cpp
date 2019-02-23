@@ -3,8 +3,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/files/escape.hpp>
 
-#include <boost/algorithm/string/erase.hpp>
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem/fstream.hpp>
 /**
  * \namespace Files
