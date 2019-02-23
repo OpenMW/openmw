@@ -326,6 +326,7 @@ namespace Compiler
             extensions.registerInstruction ("setnavmeshnumber", "l", opcodeSetNavMeshNumberToRender);
             extensions.registerInstruction ("setmovementposition", "cf", opcodeSetMovementPosition, opcodeSetMovementPositionExplicit);
             extensions.registerInstruction ("setmovementrotation", "cf", opcodeSetMovementRotation, opcodeSetMovementRotationExplicit);
+            extensions.registerInstruction ("quit", "", opcodeQuit);
         }
     }
 
