@@ -1,9 +1,8 @@
 #ifndef OPENMW_ESM_SKIL_H
 #define OPENMW_ESM_SKIL_H
 
+#include <array>
 #include <string>
-
-#include <boost/array.hpp>
 
 #include "defs.hpp"
 
@@ -76,7 +75,7 @@ struct Skill
   static const std::string sSkillNames[Length];
   static const std::string sSkillNameIds[Length];
   static const std::string sIconNames[Length];
-  static const boost::array<SkillEnum, Length> sSkillIds;
+  static const std::array<SkillEnum, Length> sSkillIds;
 
   void load(ESMReader &esm, bool &isDeleted);
   void save(ESMWriter &esm, bool isDeleted = false) const;
