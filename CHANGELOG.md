@@ -40,6 +40,7 @@
     Feature #3980: In-game option to disable controller
     Feature #4209: Editor: Faction rank sub-table
     Feature #4673: Weapon sheathing
+    Feature #4675: Support for NiRollController
     Feature #4730: Native animated containers support
     Feature #4812: Support NiSwitchNode
     Feature #4836: Daytime node switch

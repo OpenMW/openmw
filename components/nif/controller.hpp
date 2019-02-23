@@ -136,6 +136,15 @@ public:
     void post(NIFFile *nif);
 };
 
+class NiRollController : public Controller
+{
+public:
+    NiFloatDataPtr data;
+
+    void read(NIFStream *nif);
+    void post(NIFFile *nif);
+};
+
 class NiGeomMorpherController : public Controller
 {
 public:

@@ -309,6 +309,46 @@ void VisController::operator() (osg::Node* node, osg::NodeVisitor* nv)
     traverse(node, nv);
 }
 
+RollController::RollController(const Nif::NiFloatData *data)
+    : mData(data->mKeyList, 1.f)
+{
+}
+
+RollController::RollController()
+{
+}
+
+RollController::RollController(const RollController &copy, const osg::CopyOp &copyop)
+    : osg::NodeCallback(copy, copyop)
+    , Controller(copy)
+    , mData(copy.mData)
+    , mStartingTime(0)
+{
+}
+
+void RollController::operator() (osg::Node* node, osg::NodeVisitor* nv)
+{
+    traverse(node, nv);
+
+    if (hasInput())
+    {
+        double newTime = nv->getFrameStamp()->getSimulationTime();
+        double duration = newTime - mStartingTime;
+        mStartingTime = newTime;
+
+        float value = mData.interpKey(getInputValue(nv));
+        osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(node);
+        osg::Matrix matrix = transform->getMatrix();
+
+        // Rotate around "roll" axis.
+        // Note: in original game rotation speed is the framerate-dependent in a very tricky way.
+        // Do not replicate this behaviour until we will really need it.
+        // For now consider controller's current value as an angular speed in radians per 1/60 seconds.
+        matrix = osg::Matrix::rotate(value * duration * 60.f, 0, 0, 1) * matrix;
+        transform->setMatrix(matrix);
+    }
+}
+
 AlphaController::AlphaController(const Nif::NiFloatData *data)
     : mData(data->mKeyList, 1.f)
 {
