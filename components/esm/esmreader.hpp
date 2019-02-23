@@ -269,6 +269,8 @@ public:
   size_t getFileSize() const { return mFileSize; }
 
 private:
+  void clearCtx();
+
   Files::IStreamPtr mEsm;
 
   ESM_Context mCtx;
