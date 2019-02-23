@@ -54,10 +54,10 @@ namespace CSMWorld
             static std::pair<int, int> toVertexCoords(osg::Vec3d worldPos);
 
             ///Converts Global texture coordinate to Worldspace coordinate at upper left corner of the selected texture.
-            static double texSelectionToWorldCoords(int);
+            static float texSelectionToWorldCoords(int);
 
             ///Converts Global vertex coordinate to Worldspace coordinate at upper left corner of the selected texture.
-            static double vertexSelectionToWorldCoords(int);
+            static float vertexSelectionToWorldCoords(int);
 
             ///Calculates heightmap coordinate from the global vertex coordinate
             static int vertexSelectionToInCellCoords(int);
