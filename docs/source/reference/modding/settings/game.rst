@@ -211,3 +211,16 @@ disposition change of merchants caused by trading will be permanent and won't be
 This imitates the option that Morrowind Code Patch offers.
 
 This setting can be toggled in Advanced tab of the launcher.
+
+only appropriate ammunition bypasses resistance
+-----------------------------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true, you will have to use the appropriate ammunition to bypass normal weapon resistance (or weakness).
+An enchanted bow with chitin arrows will no longer be enough for the purpose, while a steel longbow with glass arrows will still work.
+This was previously the default engine behavior that diverged from Morrowind design.
+
+This setting can be toggled in Advanced tab of the launcher.

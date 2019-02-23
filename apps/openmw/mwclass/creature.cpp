@@ -308,6 +308,7 @@ namespace MWClass
             {
                 damage = attack[0] + ((attack[1]-attack[0])*attackStrength);
                 MWMechanics::adjustWeaponDamage(damage, weapon, ptr);
+                MWMechanics::resistNormalWeapon(victim, ptr, weapon, damage);
                 MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
             }
 
@@ -381,9 +382,6 @@ namespace MWClass
 
         if (!object.isEmpty())
             stats.setLastHitObject(object.getCellRef().getRefId());
-
-        if (damage > 0.0f && !object.isEmpty())
-            MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
 
         if (damage < 0.001f)
             damage = 0;

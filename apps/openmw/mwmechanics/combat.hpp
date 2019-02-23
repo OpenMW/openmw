@@ -20,7 +20,12 @@ bool applyOnStrikeEnchantment(const MWWorld::Ptr& attacker, const MWWorld::Ptr& 
 /// @return can we block the attack?
 bool blockMeleeAttack (const MWWorld::Ptr& attacker, const MWWorld::Ptr& blocker, const MWWorld::Ptr& weapon, float damage, float attackStrength);
 
+/// @return does normal weapon resistance and weakness apply to the weapon?
+bool isNormalWeapon (const MWWorld::Ptr& weapon);
+
 void resistNormalWeapon (const MWWorld::Ptr& actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float& damage);
+
+void applyWerewolfDamageMult (const MWWorld::Ptr& actor, const MWWorld::Ptr& weapon, float &damage);
 
 /// @note for a thrown weapon, \a weapon == \a projectile, for bows/crossbows, \a projectile is the arrow/bolt
 /// @note \a victim may be empty (e.g. for a hit on terrain), a non-actor (environment objects) or an actor

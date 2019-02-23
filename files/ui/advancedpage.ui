@@ -96,6 +96,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="requireAppropriateAmmunitionCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allow non-standard ammunition solely to bypass normal weapon resistance or weakness.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Only appropriate ammunition bypasses normal weapon resistance</string>
+            </property>
+           </widget>
+          </item>
           <item alignment="Qt::AlignLeft">
            <widget class="QWidget" name="unarmedFactorsStrengthGroup" native="true">
             <property name="toolTip">
