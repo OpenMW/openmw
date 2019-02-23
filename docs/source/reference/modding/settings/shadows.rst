@@ -163,6 +163,17 @@ Used as the units parameter for the polygon offset used for shadow map rendering
 Higher values reduce shadow flicker, but risk increasing Peter Panning.
 See `the OpenGL documentation for glPolygonOffset <https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glPolygonOffset.xhtml>`_ for details.
 
+normal offset distance
+----------------------
+
+:Type:		float
+:Range:		Theoretically the whole range of 32-bit floating point, but values between 0 and 2 are most sensible.
+:Default:	1.0
+
+How far along the surface normal to project shadow coordinates.
+Higher values significantly reduce shadow flicker, usually with a lower increase of Peter Panning than the Polygon Offset settings.
+This value is in in-game units, so 1.0 is roughly 1.4 cm.
+
 use front face culling
 ----------------------
 
