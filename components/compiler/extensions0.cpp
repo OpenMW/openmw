@@ -324,6 +324,8 @@ namespace Compiler
             extensions.registerInstruction ("tap", "", opcodeToggleActorsPaths);
             extensions.registerInstruction ("toggleactorspaths", "", opcodeToggleActorsPaths);
             extensions.registerInstruction ("setnavmeshnumber", "l", opcodeSetNavMeshNumberToRender);
+            extensions.registerInstruction ("setmovementposition", "cf", opcodeSetMovementPosition, opcodeSetMovementPositionExplicit);
+            extensions.registerInstruction ("setmovementrotation", "cf", opcodeSetMovementRotation, opcodeSetMovementRotationExplicit);
         }
     }
 
