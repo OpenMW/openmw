@@ -316,13 +316,14 @@ public:
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         setName("ReflectionCamera");
 
-        unsigned int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
-        reflectionDetail = std::max((unsigned int)isInterior, reflectionDetail);
+        int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
+        reflectionDetail = std::min(4, std::max(isInterior ? 2 : 0, reflectionDetail));
         unsigned int extraMask = 0;
-        if(reflectionDetail >= 1) extraMask |= Mask_Static;
-        if(reflectionDetail >= 2) extraMask |= Mask_Effect|Mask_ParticleSystem|Mask_Object;
-        if(reflectionDetail >= 3) extraMask |= Mask_Actor;
-        setCullMask(Mask_Scene|Mask_Terrain|Mask_Sky|Mask_Player|Mask_Lighting|extraMask);
+        if(reflectionDetail >= 1) extraMask |= Mask_Terrain;
+        if(reflectionDetail >= 2) extraMask |= Mask_Static;
+        if(reflectionDetail >= 3) extraMask |= Mask_Effect|Mask_ParticleSystem|Mask_Object;
+        if(reflectionDetail >= 4) extraMask |= Mask_Player|Mask_Actor;
+        setCullMask(Mask_Scene|Mask_Sky|Mask_Lighting|extraMask);
         setNodeMask(Mask_RenderToTexture);
 
         unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");

@@ -62,17 +62,18 @@ reflection detail
 --------------
 
 :Type:		integer
-:Range:		0, 1, 2, 3
-:Default:	1
+:Range:		0, 1, 2, 3, 4
+:Default:	2
 
 Controls what kinds of things are rendered in water reflections.
 
-0: only terrain and the sky are reflected (acts like level 1 in interiors)
-1: statics, activators, and doors are also reflected
-2: items, containers, and particles are also reflected
-3: actors are also reflected
+0: only sky is reflected
+1: terrain is also reflected
+2: statics, activators, and doors are also reflected
+3: items, containers, and particles are also reflected
+4: actors are also reflected
 
-The player is always reflected in third-person mode.
+In interiors the lowest level is 2.
 This setting can be changed ingame with the "Reflection shader detail" dropdown under the Water tab of the Video panel in the Options menu.
 
 small feature culling pixel size

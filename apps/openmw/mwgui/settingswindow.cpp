@@ -260,7 +260,7 @@ namespace MWGui
             mWaterTextureSize->setIndexSelected(2);
 
         int waterReflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
-        waterReflectionDetail = std::min(3, std::max(0, waterReflectionDetail));
+        waterReflectionDetail = std::min(4, std::max(0, waterReflectionDetail));
         mWaterReflectionDetail->setIndexSelected(waterReflectionDetail);
 
         mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
@@ -344,7 +344,7 @@ namespace MWGui
 
     void SettingsWindow::onWaterReflectionDetailChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
-        unsigned int level = std::min((unsigned int)3, (unsigned int)pos);
+        unsigned int level = std::min((unsigned int)4, (unsigned int)pos);
         Settings::Manager::setInt("reflection detail", "Water", level);
         apply();
     }
