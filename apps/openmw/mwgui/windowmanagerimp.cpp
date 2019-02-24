@@ -1,13 +1,11 @@
 #include "windowmanagerimp.hpp"
 
 #include <cassert>
-#include <iterator>
 
 #include <osgViewer/Viewer>
 
 #include <MyGUI_UString.h>
 #include <MyGUI_IPointer.h>
-#include <MyGUI_ResourceImageSetPointer.h>
 #include <MyGUI_TextureUtility.h>
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_LanguageManager.h>
@@ -38,7 +36,6 @@
 #include <components/translation/translation.hpp>
 
 #include <components/myguiplatform/myguiplatform.hpp>
-#include <components/myguiplatform/myguidatamanager.hpp>
 #include <components/myguiplatform/myguirendermanager.hpp>
 #include <components/myguiplatform/additivelayer.hpp>
 #include <components/myguiplatform/scalinglayer.hpp>
@@ -46,8 +43,6 @@
 #include <components/vfs/manager.hpp>
 
 #include <components/widgets/tags.hpp>
-
-#include <components/sdlutil/sdlcursormanager.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
 

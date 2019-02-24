@@ -7,11 +7,9 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/actiontake.hpp"
 #include "../mwworld/actionapply.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/containerstore.hpp"
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
 

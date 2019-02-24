@@ -19,7 +19,6 @@
 #include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/skeleton.hpp>
-#include <components/sceneutil/lightmanager.hpp>
 
 #include <components/settings/settings.hpp>
 

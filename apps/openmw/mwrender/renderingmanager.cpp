@@ -1,6 +1,5 @@
 #include "renderingmanager.hpp"
 
-#include <stdexcept>
 #include <limits>
 #include <cstdlib>
 

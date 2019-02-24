@@ -1,13 +1,10 @@
 #include "material.hpp"
 
-#include <stdexcept>
-
 #include <osg/Fog>
 #include <osg/Depth>
 #include <osg/TexEnvCombine>
 #include <osg/Texture2D>
 #include <osg/TexMat>
-#include <osg/Material>
 #include <osg/BlendFunc>
 
 #include <components/shader/shadermanager.hpp>

@@ -2,7 +2,6 @@
 
 #include <osg/Geometry>
 
-#include <components/esm/loadland.hpp>
 #include <components/esm/loadpgrd.hpp>
 
 namespace SceneUtil

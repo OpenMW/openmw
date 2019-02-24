@@ -5,13 +5,8 @@
 #include "makenavmesh.hpp"
 #include "navmeshcacheitem.hpp"
 #include "settings.hpp"
-#include "sharednavmesh.hpp"
 
 #include <DetourNavMesh.h>
-
-#include <BulletCollision/CollisionShapes/btConcaveShape.h>
-
-#include <iostream>
 
 namespace
 {

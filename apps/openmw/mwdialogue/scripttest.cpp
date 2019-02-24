@@ -15,7 +15,6 @@
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/locals.hpp>
-#include <components/compiler/output.hpp>
 #include <components/compiler/scriptparser.hpp>
 
 #include "filter.hpp"

@@ -10,9 +10,7 @@
 #include <components/resource/keyframemanager.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/stringops.hpp>
-#include <components/nifosg/nifloader.hpp>
 #include <components/terrain/world.hpp>
-#include <components/esmterrain/storage.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 #include <components/esm/loadcell.hpp>
 

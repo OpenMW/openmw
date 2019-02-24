@@ -34,7 +34,6 @@
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/aipackage.hpp"
 
-#include "../mwrender/effectmanager.hpp"
 #include "../mwrender/animation.hpp"
 #include "../mwrender/vismask.hpp"
 #include "../mwrender/renderingmanager.hpp"

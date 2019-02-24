@@ -1,7 +1,5 @@
 #include "movieaudiofactory.hpp"
 
-#include <iostream>
-
 #include <extern/osg-ffmpeg-videoplayer/audiodecoder.hpp>
 #include <extern/osg-ffmpeg-videoplayer/videostate.hpp>
 

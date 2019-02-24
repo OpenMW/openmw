@@ -13,8 +13,6 @@
 
 #include "../mwworld/esmstore.hpp"
 
-#include <iostream>
-
 namespace MWScript
 {
     void Locals::ensure (const std::string& scriptName)

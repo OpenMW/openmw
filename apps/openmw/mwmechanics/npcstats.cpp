@@ -9,7 +9,6 @@
 #include <components/esm/loadfact.hpp>
 #include <components/esm/npcstats.hpp>
 
-#include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"

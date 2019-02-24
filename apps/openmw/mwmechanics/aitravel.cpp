@@ -1,7 +1,6 @@
 #include "aitravel.hpp"
 
 #include <components/esm/aisequence.hpp>
-#include <components/esm/loadcell.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -10,7 +9,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 
-#include "steering.hpp"
 #include "movement.hpp"
 #include "creaturestats.hpp"
 

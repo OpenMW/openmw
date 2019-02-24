@@ -1,6 +1,5 @@
 #include "journalwindow.hpp"
 
-#include <sstream>
 #include <set>
 #include <stack>
 #include <string>

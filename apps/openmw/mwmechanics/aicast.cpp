@@ -8,7 +8,6 @@
 
 #include "aicombataction.hpp"
 #include "creaturestats.hpp"
-#include "spellcasting.hpp"
 #include "steering.hpp"
 
 MWMechanics::AiCast::AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell)

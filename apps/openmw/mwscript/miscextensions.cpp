@@ -2,7 +2,6 @@
 
 #include <cstdlib>
 
-#include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 #include <components/compiler/locals.hpp>
 

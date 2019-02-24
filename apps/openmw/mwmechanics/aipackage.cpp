@@ -1,7 +1,5 @@
 #include "aipackage.hpp"
 
-#include <cmath>
-
 #include <components/esm/loadcell.hpp>
 #include <components/esm/loadland.hpp>
 #include <components/esm/loadmgef.hpp>

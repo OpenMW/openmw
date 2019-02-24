@@ -8,7 +8,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
 #include <components/nif/controlled.hpp>
-#include <components/nif/nifkey.hpp>
 #include <components/nif/data.hpp>
 
 #include "userdata.hpp"

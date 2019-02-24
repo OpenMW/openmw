@@ -1,7 +1,5 @@
 #include "spells.hpp"
 
-#include <cstdlib>
-
 #include <components/esm/loadspel.hpp>
 #include <components/esm/spellstate.hpp>
 #include <components/misc/rng.hpp>

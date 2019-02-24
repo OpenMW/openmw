@@ -1,8 +1,5 @@
 #include "riggeometry.hpp"
 
-#include <stdexcept>
-#include <cstdlib>
-
 #include <osg/Version>
 
 #include <components/debug/debuglog.hpp>

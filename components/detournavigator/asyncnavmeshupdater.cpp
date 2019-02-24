@@ -5,8 +5,6 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <iostream>
-
 namespace
 {
     using DetourNavigator::ChangeType;

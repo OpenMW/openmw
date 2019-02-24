@@ -12,12 +12,10 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/actionequip.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "creaturestats.hpp"
 #include "spellcasting.hpp"
-#include "combat.hpp"
 
 namespace
 {

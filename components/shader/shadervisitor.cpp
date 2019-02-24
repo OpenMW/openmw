@@ -1,7 +1,5 @@
 #include "shadervisitor.hpp"
 
-#include <iostream>
-
 #include <osg/Texture>
 #include <osg/Material>
 #include <osg/Geometry>

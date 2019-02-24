@@ -1,7 +1,5 @@
 #include "positionattitudetransform.hpp"
 
-#include <iostream>
-
 namespace SceneUtil
 {
 

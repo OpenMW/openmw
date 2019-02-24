@@ -1,7 +1,5 @@
 #include "journalbooks.hpp"
 
-#include <MyGUI_LanguageManager.h>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 

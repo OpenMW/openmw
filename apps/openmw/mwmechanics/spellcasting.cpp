@@ -23,7 +23,6 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwrender/animation.hpp"
-#include "../mwrender/vismask.hpp"
 
 #include "npcstats.hpp"
 #include "actorutil.hpp"

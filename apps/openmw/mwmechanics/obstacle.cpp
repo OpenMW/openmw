@@ -1,9 +1,7 @@
 #include "obstacle.hpp"
 
-#include <components/esm/loadcell.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
-#include "../mwbase/world.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 

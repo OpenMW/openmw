@@ -1,13 +1,9 @@
 #include "itemmodel.hpp"
 
-#include <set>
-
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/store.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
