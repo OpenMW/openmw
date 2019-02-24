@@ -1,7 +1,8 @@
 #include "adjusterwidget.hpp"
 
+#include <components/misc/stringops.hpp>
+
 #include <boost/filesystem.hpp>
-#include <boost/algorithm/string/case_conv.hpp>
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -70,8 +71,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
     {
         boost::filesystem::path path (name.toUtf8().data());
 
-        std::string extension = path.extension().string();
-        boost::algorithm::to_lower(extension);
+        std::string extension = Misc::StringUtils::lowerCase(path.extension().string());
 
         bool isLegacyPath = (extension == ".esm" ||
                              extension == ".esp");

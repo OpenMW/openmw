@@ -13,6 +13,7 @@
 #include <SDL_video.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/stringops.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 #include <components/settings/settings.hpp>
 
@@ -159,7 +160,7 @@ namespace MWGui
             MyGUI::TextBox* textBox;
             getWidget(textBox, labelWidgetName);
             std::string labelCaption = scroller->getUserString("SettingLabelCaption");
-            boost::algorithm::replace_all(labelCaption, "%s", value);
+            Misc::StringUtils::replaceAll(labelCaption, "%s", value.c_str(), 2);
             textBox->setCaptionWithReplacing(labelCaption);
         }
     }

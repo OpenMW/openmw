@@ -3,8 +3,6 @@
 #include <limits>
 #include <iomanip>
 
-#include <boost/format.hpp>
-
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
 
@@ -1015,7 +1013,7 @@ namespace MWMechanics
         {
             // "X has no effect on you"
             std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage50")->mValue.getString();
-            message = boost::str(boost::format(message) % ingredient->mName);
+            Misc::StringUtils::replace(message, "%s", ingredient->mName.c_str(), 2);
             MWBase::Environment::get().getWindowManager()->messageBox(message);
             return false;
         }
