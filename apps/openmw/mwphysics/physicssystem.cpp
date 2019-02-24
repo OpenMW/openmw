@@ -1226,7 +1226,7 @@ namespace MWPhysics
 
         mTimeAccum += dt;
 
-        const int maxAllowedSteps = 20;
+        const int maxAllowedSteps = std::min(20, std::max(1, 40 / std::max(1, static_cast<int>(mMovementQueue.size()))));
         int numSteps = mTimeAccum / (mPhysicsDt);
         numSteps = std::min(numSteps, maxAllowedSteps);
 
