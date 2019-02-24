@@ -91,7 +91,6 @@ struct Creature
     InventoryList mInventory;
     SpellList mSpells;
 
-    bool mHasAI;
     AIData mAiData;
     AIPackageList mAiPackage;
     Transport mTransport;

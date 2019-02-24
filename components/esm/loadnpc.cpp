@@ -19,7 +19,7 @@ namespace ESM
         mTransport.mList.clear();
         mAiPackage.mList.clear();
         mAiData.blank();
-        mHasAI = false;
+        mAiData.mHello = mAiData.mFight = mAiData.mFlee = 30;
 
         bool hasName = false;
         bool hasNpdt = false;
@@ -96,7 +96,6 @@ namespace ESM
                     break;
                 case ESM::FourCC<'A','I','D','T'>::value:
                     esm.getHExact(&mAiData, sizeof(mAiData));
-                    mHasAI= true;
                     break;
                 case ESM::FourCC<'D','O','D','T'>::value:
                 case ESM::FourCC<'D','N','A','M'>::value:
@@ -165,14 +164,7 @@ namespace ESM
 
         mInventory.save(esm);
         mSpells.save(esm);
-        if (mAiData.mHello != 0
-            || mAiData.mFight != 0
-            || mAiData.mFlee != 0
-            || mAiData.mAlarm != 0
-            || mAiData.mServices != 0)
-        {
-            esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
-        }
+        esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
 
         mTransport.save(esm);
 
@@ -198,7 +190,7 @@ namespace ESM
         mInventory.mList.clear();
         mSpells.mList.clear();
         mAiData.blank();
-        mHasAI = false;
+        mAiData.mHello = mAiData.mFight = mAiData.mFlee = 30;
         mTransport.mList.clear();
         mAiPackage.mList.clear();
         mName.clear();
