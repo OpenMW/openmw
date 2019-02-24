@@ -3,6 +3,7 @@
 #include <components/files/escape.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/debug/debugging.hpp>
+#include <components/misc/rng.hpp>
 
 #include "engine.hpp"
 
@@ -131,7 +132,12 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("export-fonts", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "Export Morrowind .fnt fonts to PNG image and XML file in current directory")
 
-        ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
+        ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override")
+
+        ("random-seed", bpo::value <unsigned int> ()
+            ->default_value(Misc::Rng::generateDefaultSeed()),
+            "seed value for random number generator")
+    ;
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
         .options(desc).allow_unregistered().run();
@@ -231,6 +237,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
     engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
     engine.enableFontExport(variables["export-fonts"].as<bool>());
+    engine.setRandomSeed(variables["random-seed"].as<unsigned int>());
 
     return true;
 }

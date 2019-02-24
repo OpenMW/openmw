@@ -100,6 +100,7 @@ namespace OMW
             bool mGrab;
 
             bool mExportFonts;
+            unsigned int mRandomSeed;
 
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
@@ -202,6 +203,8 @@ namespace OMW
 
             /// Set the save game file to load after initialising the engine.
             void setSaveGameFile(const std::string& savegame);
+
+            void setRandomSeed(unsigned int seed);
 
         private:
             Files::ConfigurationManager& mCfgMgr;
