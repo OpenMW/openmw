@@ -10,10 +10,9 @@ using namespace osgShadow;
 namespace MWRender
 {
 
-/*static */osg::ref_ptr<osg::Uniform> ShadowManager::_unshadowedAmbientBias=0;
+/*static */osg::ref_ptr<osg::Uniform> ShadowManager::_unshadowedAmbientBias = new osg::Uniform("ambientBias",osg::Vec2(1,1));
 /*static */osg::Uniform* ShadowManager::getUnshadowedUniform()
 {
-    if(!_unshadowedAmbientBias.valid()) _unshadowedAmbientBias = new osg::Uniform("ambientBias",osg::Vec2(1,1));
     return _unshadowedAmbientBias ;
 }
 
