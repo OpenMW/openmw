@@ -2,6 +2,7 @@
 #define MWGUI_MAPWINDOW_H
 
 #include <stdint.h>
+#include <memory>
 
 #include "windowpinnablebase.hpp"
 

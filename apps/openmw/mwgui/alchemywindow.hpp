@@ -1,11 +1,8 @@
 #ifndef MWGUI_ALCHEMY_H
 #define MWGUI_ALCHEMY_H
 
+#include <memory>
 #include <vector>
-
-#include <MyGUI_ControllerManager.h>
-
-#include "../mwmechanics/alchemy.hpp"
 
 #include <components/widgets/numericeditbox.hpp>
 

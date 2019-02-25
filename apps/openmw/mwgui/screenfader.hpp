@@ -2,6 +2,7 @@
 #define OPENMW_MWGUI_SCREENFADER_H
 
 #include <deque>
+#include <memory>
 
 #include "windowbase.hpp"
 

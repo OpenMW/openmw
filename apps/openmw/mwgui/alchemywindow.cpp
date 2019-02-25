@@ -3,6 +3,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_ControllerManager.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
