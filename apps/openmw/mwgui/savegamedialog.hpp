@@ -1,6 +1,8 @@
 #ifndef OPENMW_MWGUI_SAVEGAMEDIALOG_H
 #define OPENMW_MWGUI_SAVEGAMEDIALOG_H
 
+#include <memory>
+
 #include "windowbase.hpp"
 
 namespace MWState

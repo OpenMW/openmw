@@ -1,6 +1,7 @@
 #ifndef OPENMW_GUI_SPELLVIEW_H
 #define OPENMW_GUI_SPELLVIEW_H
 
+#include <memory>
 #include <tuple>
 
 #include <MyGUI_Widget.h>
