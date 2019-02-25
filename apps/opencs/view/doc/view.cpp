@@ -5,6 +5,7 @@
 
 #include <QCloseEvent>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QMdiArea>
 #include <QDockWidget>
 #include <QApplication>
@@ -24,6 +25,8 @@
 #include "../world/tablesubview.hpp"
 
 #include "../tools/subviews.hpp"
+
+#include <components/version/version.hpp>
 
 #include "viewmanager.hpp"
 #include "operations.hpp"
@@ -303,6 +306,17 @@ void CSVDoc::View::setupDebugMenu()
     connect (runLog, SIGNAL (triggered()), this, SLOT (addRunLogSubView()));
 }
 
+void CSVDoc::View::setupHelpMenu()
+{
+    QMenu *help = menuBar()->addMenu (tr ("Help"));
+
+    QAction* about = createMenuEntry("About OpenMW-CS", ":./info.png", help, "document-help-about");
+    connect (about, SIGNAL (triggered()), this, SLOT (infoAbout()));
+
+    QAction* aboutQt = createMenuEntry("About Qt", ":./qt.png", help, "document-help-qt");
+    connect (aboutQt, SIGNAL (triggered()), this, SLOT (infoAboutQt()));
+}
+
 QAction* CSVDoc::View::createMenuEntry(CSMWorld::UniversalId::Type type, QMenu* menu, const char* shortcutName)
 {
     const std::string title = CSMWorld::UniversalId (type).getTypeName();
@@ -339,6 +353,7 @@ void CSVDoc::View::setupUi()
     setupCharacterMenu();
     setupAssetsMenu();
     setupDebugMenu();
+    setupHelpMenu();
 }
 
 void CSVDoc::View::setupShortcut(const char* name, QAction* action)
@@ -672,6 +687,52 @@ void CSVDoc::View::newView()
 void CSVDoc::View::save()
 {
     mDocument->save();
+}
+
+void CSVDoc::View::infoAbout()
+{
+    // Get current OpenMW version
+    QString versionInfo = (Version::getOpenmwVersionDescription(mDocument->getResourceDir().string())+
+#if defined(__x86_64__) || defined(_M_X64)
+    " (64-bit)").c_str();
+#else
+    " (32-bit)").c_str();
+#endif
+
+    // Get current year
+    time_t now = time(NULL);
+    struct tm tstruct;
+    char copyrightInfo[40];
+    tstruct = *localtime(&now);
+    strftime(copyrightInfo, sizeof(copyrightInfo), "Copyright © 2008-%Y OpenMW Team", &tstruct);
+
+    QString aboutText = QString(
+    "<p style=\"white-space: pre-wrap;\">"
+    "<b><h2>OpenMW Construction Set</h2></b>"
+    "%1\n\n"
+    "%2\n\n"
+    "%3\n\n"
+    "<table>"
+    "<tr><td>%4</td><td><a href=\"https://openmw.org\">https://openmw.org</a></td></tr>"
+    "<tr><td>%5</td><td><a href=\"https://forum.openmw.org\">https://forum.openmw.org</a></td></tr>"
+    "<tr><td>%6</td><td><a href=\"https://gitlab.com/OpenMW/openmw/issues\">https://gitlab.com/OpenMW/openmw/issues</a></td></tr>"
+    "<tr><td>%7</td><td><a href=\"https://webchat.freenode.net/?channels=openmw&uio=OT10cnVlde\">irc://irc.freenode.net/#openmw</a></td></tr>"
+    "</table>"
+    "</p>")
+    .arg(versionInfo
+        , tr("OpenMW-CS is a content file editor for OpenMW, a modern, free and open source game engine.")
+        , tr(copyrightInfo)
+        , tr("Home Page:")
+        , tr("Forum:")
+        , tr("Bug Tracker:")
+        , tr("IRC:"));
+
+    QMessageBox::about(this, "About OpenMW-CS", aboutText);
+}
+
+void CSVDoc::View::infoAboutQt()
+{
+    QMessageBox::aboutQt(this);
 }
 
 void CSVDoc::View::verify()

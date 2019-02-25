@@ -115,6 +115,8 @@ namespace CSMDoc
 
             int getState() const;
 
+            const boost::filesystem::path& getResourceDir() const;
+
             const boost::filesystem::path& getSavePath() const;
 
             const boost::filesystem::path& getProjectPath() const;
