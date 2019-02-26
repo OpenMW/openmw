@@ -277,10 +277,18 @@ namespace Compiler
     {
         if (!mExplicit.empty())
         {
-            if (mMemberOp && handleMemberAccess (name))
-                return true;
+            if (!mRefOp)
+            {
+                if (mMemberOp && handleMemberAccess (name))
+                    return true;
 
-            return Parser::parseName (name, loc, scanner);
+                return Parser::parseName (name, loc, scanner);
+            }
+            else
+            {
+                mExplicit.clear();
+                getErrorHandler().warning ("Ignoring stray explicit reference", loc);
+            }
         }
 
         mFirst = false;
