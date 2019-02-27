@@ -196,6 +196,7 @@ namespace MWInput
         float mGuiCursorX;
         float mGuiCursorY;
         int mMouseWheel;
+        float mGamepadZoom;
         bool mUserFileExists;
         bool mAlwaysRunActive;
         bool mSneakToggles;

@@ -67,6 +67,7 @@ namespace MWInput
         , mGuiCursorX(0)
         , mGuiCursorY(0)
         , mMouseWheel(0)
+        , mGamepadZoom(0)
         , mUserFileExists(userFileExists)
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
         , mSneakToggles(Settings::Manager::getBool("toggle sneak", "Input"))
@@ -253,11 +254,29 @@ namespace MWInput
         {
             if (action == A_Use)
             {
-                MWMechanics::DrawState_ state = MWBase::Environment::get().getWorld()->getPlayer().getDrawState();
-                mPlayer->setAttackingOrSpell(currentValue != 0 && state != MWMechanics::DrawState_Nothing);
+                if(mJoystickLastUsed && currentValue == 1.0 && actionIsActive(A_ToggleWeapon))
+                    action = A_CycleWeaponRight;
+
+                else if (mJoystickLastUsed && currentValue == 1.0 && actionIsActive(A_ToggleSpell))
+                    action = A_CycleSpellRight;
+
+                else
+                {
+                    MWMechanics::DrawState_ state = MWBase::Environment::get().getWorld()->getPlayer().getDrawState();
+                    mPlayer->setAttackingOrSpell(currentValue != 0 && state != MWMechanics::DrawState_Nothing);
+                }
             }
             else if (action == A_Jump)
-                mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
+            {
+                if(mJoystickLastUsed && currentValue == 1.0 && actionIsActive(A_ToggleWeapon))
+                    action = A_CycleWeaponLeft;
+
+                else if (mJoystickLastUsed && currentValue == 1.0 && actionIsActive(A_ToggleSpell))
+                    action = A_CycleSpellLeft;
+
+                else
+                    mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
+            }
         }
 
         if (currentValue == 1)
@@ -607,6 +626,13 @@ namespace MWInput
                             MWBase::Environment::get().getWorld()->togglePOV();
                         }
                         mPreviewPOVDelay = 0.f;
+                        mGamepadZoom = 0;
+                    }
+
+                    if(mGamepadZoom)
+                    {
+                        MWBase::Environment::get().getWorld()->changeVanityModeScale(mGamepadZoom);
+                        MWBase::Environment::get().getWorld()->setCameraDistance(mGamepadZoom, true, true);
                     }
                 }
             }
@@ -623,6 +649,8 @@ namespace MWInput
                 updateIdleTime(dt);
             }
         }
+        else
+            mGamepadZoom = 0;
         mAttemptJump = false; // Can only jump on first frame input is on
     }
 
@@ -926,7 +954,29 @@ namespace MWInput
     void InputManager::axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg )
     {
         if (!mControlsDisabled && mJoystickEnabled)
+        {
+            if(arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
+            {
+                mGamepadZoom = 0;
+                if(!MWBase::Environment::get().getWindowManager()->isGuiMode() && mPreviewPOVDelay == 1.f && arg.value)
+                {
+                    mGamepadZoom = static_cast<float>(arg.value / 10000 * 8.5f);
+                    return; // Do not propogate event.
+                }
+            }
+
+            else if(arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
+            {
+                mGamepadZoom = 0;
+                if(!MWBase::Environment::get().getWindowManager()->isGuiMode() && mPreviewPOVDelay == 1.f && arg.value)
+                {
+                    mGamepadZoom = static_cast<float>(-(arg.value / 10000 * 8.5f));
+                    return; // Do not propogate event.
+                }
+            }
+
             mInputBinder->axisMoved(deviceID, arg);
+        }
     }
 
     void InputManager::controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg)
@@ -1327,15 +1377,15 @@ namespace MWInput
 
         defaultButtonBindings[A_Activate] = SDL_CONTROLLER_BUTTON_A;
         defaultButtonBindings[A_ToggleWeapon] = SDL_CONTROLLER_BUTTON_X;
-        defaultButtonBindings[A_ToggleSpell] = SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
+        defaultButtonBindings[A_ToggleSpell] = SDL_CONTROLLER_BUTTON_Y;
         //defaultButtonBindings[A_QuickButtonsMenu] = SDL_GetButtonFromScancode(SDL_SCANCODE_F1); // Need to implement, should be ToggleSpell(5) AND Wait(9)
-        defaultButtonBindings[A_Sneak] = SDL_CONTROLLER_BUTTON_RIGHTSTICK;
-        defaultButtonBindings[A_Jump] = SDL_CONTROLLER_BUTTON_Y;
-        defaultButtonBindings[A_Journal] = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
-        defaultButtonBindings[A_Rest] = SDL_CONTROLLER_BUTTON_BACK;
-        defaultButtonBindings[A_TogglePOV] = SDL_CONTROLLER_BUTTON_LEFTSTICK;
+        defaultButtonBindings[A_Sneak] = SDL_CONTROLLER_BUTTON_LEFTSTICK;
+        defaultButtonBindings[A_Journal] = SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
+        defaultButtonBindings[A_Rest] = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
+        defaultButtonBindings[A_TogglePOV] = SDL_CONTROLLER_BUTTON_RIGHTSTICK;
         defaultButtonBindings[A_Inventory] = SDL_CONTROLLER_BUTTON_B;
         defaultButtonBindings[A_GameMenu] = SDL_CONTROLLER_BUTTON_START;
+        defaultButtonBindings[A_QuickKeysMenu] = SDL_CONTROLLER_BUTTON_BACK; // Ideally a new menu, A_QuickButtonsMenu should be implemented with only 4 quick keys.
         defaultButtonBindings[A_QuickSave] = SDL_CONTROLLER_BUTTON_GUIDE;
         defaultButtonBindings[A_QuickKey1] = SDL_CONTROLLER_BUTTON_DPAD_UP;
         defaultButtonBindings[A_QuickKey2] = SDL_CONTROLLER_BUTTON_DPAD_LEFT;
@@ -1348,6 +1398,7 @@ namespace MWInput
         defaultAxisBindings[A_LookUpDown] = SDL_CONTROLLER_AXIS_RIGHTY;
         defaultAxisBindings[A_LookLeftRight] = SDL_CONTROLLER_AXIS_RIGHTX;
         defaultAxisBindings[A_Use] = SDL_CONTROLLER_AXIS_TRIGGERRIGHT;
+        defaultAxisBindings[A_Jump] = SDL_CONTROLLER_AXIS_TRIGGERLEFT;
 
         for (int i = 0; i < A_Last; i++)
         {
