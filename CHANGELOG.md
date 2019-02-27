@@ -47,6 +47,7 @@
     Feature #4812: Support NiSwitchNode
     Feature #4836: Daytime node switch
     Feature #4887: Add openmw command option to set initial random seed
+    Feature #4890: Make Distant Terrain configurable
     Task #4686: Upgrade media decoder to a more current FFmpeg API
 
 0.45.0

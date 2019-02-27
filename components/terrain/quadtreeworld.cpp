@@ -75,8 +75,9 @@ namespace Terrain
 class DefaultLodCallback : public LodCallback
 {
 public:
-    DefaultLodCallback(float minSize)
-        : mMinSize(minSize)
+    DefaultLodCallback(float factor, float minSize)
+        : mFactor(factor)
+        , mMinSize(minSize)
     {
     }
 
@@ -84,12 +85,13 @@ public:
     {
         float dist = distanceToBox(node->getBoundingBox(), eyePoint);
         int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()/mMinSize));
-        int lodLevel = Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*mMinSize)));
+        int lodLevel = Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*mMinSize*mFactor)));
 
         return nativeLodLevel <= lodLevel;
     }
 
 private:
+    float mFactor;
     float mMinSize;
 };
 
@@ -123,8 +125,9 @@ private:
 class QuadTreeBuilder
 {
 public:
-    QuadTreeBuilder(Terrain::Storage* storage, ViewDataMap* viewDataMap, float minSize)
+    QuadTreeBuilder(Terrain::Storage* storage, ViewDataMap* viewDataMap, float lodFactor, float minSize)
         : mStorage(storage)
+        , mLodFactor(lodFactor)
         , mMinX(0.f), mMaxX(0.f), mMinY(0.f), mMaxY(0.f)
         , mMinSize(minSize)
         , mViewDataMap(viewDataMap)
@@ -146,7 +149,7 @@ public:
 
         mRootNode = new RootNode(size, osg::Vec2f(centerX, centerY));
         mRootNode->setViewDataMap(mViewDataMap);
-        mRootNode->setLodCallback(new DefaultLodCallback(mMinSize));
+        mRootNode->setLodCallback(new DefaultLodCallback(mLodFactor, mMinSize));
         addChildren(mRootNode);
 
         mRootNode->initNeighbours();
@@ -222,6 +225,7 @@ public:
 private:
     Terrain::Storage* mStorage;
 
+    float mLodFactor;
     float mMinX, mMaxX, mMinY, mMaxY;
     float mMinSize;
     ViewDataMap* mViewDataMap;
@@ -229,13 +233,17 @@ private:
     osg::ref_ptr<RootNode> mRootNode;
 };
 
-QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask, int borderMask)
+QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask, int borderMask, int compMapResolution, float compMapLevel, float lodFactor)
     : World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
+    , mLodFactor(lodFactor)
 {
     // No need for culling on the Drawable / Transform level as the quad tree performs the culling already.
     mChunkManager->setCullingActive(false);
+
+    mChunkManager->setCompositeMapSize(compMapResolution);
+    mChunkManager->setCompositeMapLevel(compMapLevel);
 }
 
 QuadTreeWorld::~QuadTreeWorld()
@@ -402,7 +410,7 @@ void QuadTreeWorld::ensureQuadTreeBuilt()
         return;
 
     const float minSize = 1/8.f;
-    QuadTreeBuilder builder(mStorage, mViewDataMap.get(), minSize);
+    QuadTreeBuilder builder(mStorage, mViewDataMap.get(), mLodFactor, minSize);
     builder.build();
 
     mRootNode = builder.getRootNode();

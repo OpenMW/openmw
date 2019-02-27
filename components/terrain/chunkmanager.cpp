@@ -28,6 +28,7 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
     , mTextureManager(textureManager)
     , mCompositeMapRenderer(renderer)
     , mCompositeMapSize(512)
+    , mCompositeMapLevel(1.f)
     , mCullingActive(true)
 {
 
@@ -66,11 +67,6 @@ void ChunkManager::releaseGLObjects(osg::State *state)
 {
     ResourceManager::releaseGLObjects(state);
     mBufferCache.releaseGLObjects(state);
-}
-
-void ChunkManager::setCullingActive(bool active)
-{
-    mCullingActive = active;
 }
 
 osg::ref_ptr<osg::Texture2D> ChunkManager::createCompositeMapRTT()
@@ -199,7 +195,7 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     geometry->addPrimitiveSet(mBufferCache.getIndexBuffer(numVerts, lodFlags));
 
-    bool useCompositeMap = chunkSize >= 1.f;
+    bool useCompositeMap = chunkSize >= mCompositeMapLevel;
     unsigned int numUvSets = useCompositeMap ? 1 : 2;
 
     for (unsigned int i=0; i<numUvSets; ++i)
