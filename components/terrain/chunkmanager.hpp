@@ -35,6 +35,7 @@ namespace Terrain
         void setCullingActive(bool active) { mCullingActive = active; }
         void setCompositeMapSize(unsigned int size) { mCompositeMapSize = size; }
         void setCompositeMapLevel(float level) { mCompositeMapLevel = level; }
+        void setMaxCompositeGeometrySize(float maxCompGeometrySize) { mMaxCompGeometrySize = maxCompGeometrySize; }
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 
@@ -59,6 +60,7 @@ namespace Terrain
 
         unsigned int mCompositeMapSize;
         float mCompositeMapLevel;
+        float mMaxCompGeometrySize;
 
         bool mCullingActive;
     };

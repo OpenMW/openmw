@@ -300,7 +300,11 @@ namespace MWRender
             float compMapLevel = pow(2, compMapPower);
             const float lodFactor = Settings::Manager::getFloat("lod factor", "Terrain");
             const int vertexLodMod = Settings::Manager::getInt("vertex lod mod", "Terrain");
-            mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug, compMapResolution, compMapLevel, lodFactor, vertexLodMod));
+            float maxCompGeometrySize = Settings::Manager::getFloat("max composite geometry size", "Terrain");
+            maxCompGeometrySize = std::max(maxCompGeometrySize, 1.f);
+            mTerrain.reset(new Terrain::QuadTreeWorld(
+                sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug,
+                compMapResolution, compMapLevel, lodFactor, vertexLodMod, maxCompGeometrySize));
         }
         else
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
