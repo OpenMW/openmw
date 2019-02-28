@@ -14,6 +14,8 @@
 
 #include <LinearMath/btVector3.h>
 
+#include <components/misc/convert.hpp>
+
 #include <boost/optional.hpp>
 
 #include <osg/Vec3f>
@@ -25,16 +27,6 @@ class dtNavMesh;
 namespace DetourNavigator
 {
     struct Settings;
-
-    inline osg::Vec3f makeOsgVec3f(const float* values)
-    {
-        return osg::Vec3f(values[0], values[1], values[2]);
-    }
-
-    inline osg::Vec3f makeOsgVec3f(const btVector3& value)
-    {
-        return osg::Vec3f(value.x(), value.y(), value.z());
-    }
 
     inline bool inRange(const osg::Vec3f& v1, const osg::Vec3f& v2, const float r, const float h)
     {

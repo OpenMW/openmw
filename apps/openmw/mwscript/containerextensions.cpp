@@ -87,9 +87,9 @@ namespace MWScript
                         else
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage61}");
-                            Misc::StringUtils::replace(msgBox, "%d", std::to_string(count).c_str(), 2);
+                            ::Misc::StringUtils::replace(msgBox, "%d", std::to_string(count).c_str(), 2);
                         }
-                        Misc::StringUtils::replace(msgBox, "%s", itemName.c_str(), 2);
+                        ::Misc::StringUtils::replace(msgBox, "%s", itemName.c_str(), 2);
                         MWBase::Environment::get().getWindowManager()->messageBox(msgBox, MWGui::ShowInDialogueMode_Only);
                     }
                 }
@@ -171,13 +171,13 @@ namespace MWScript
                         if (numRemoved > 1)
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage63}");
-                            Misc::StringUtils::replace(msgBox, "%d", std::to_string(numRemoved).c_str(), 2);
+                            ::Misc::StringUtils::replace(msgBox, "%d", std::to_string(numRemoved).c_str(), 2);
                         }
                         else
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage62}");
                         }
-                        Misc::StringUtils::replace(msgBox, "%s", itemName.c_str(), 2);
+                        ::Misc::StringUtils::replace(msgBox, "%s", itemName.c_str(), 2);
                         MWBase::Environment::get().getWindowManager()->messageBox(msgBox, MWGui::ShowInDialogueMode_Only);
                     }
                 }

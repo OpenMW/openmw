@@ -5,17 +5,14 @@
 #include "settingsutils.hpp"
 #include "tileposition.hpp"
 
+#include <components/misc/convert.hpp>
+
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
 #include <osg/Vec3f>
 
 namespace DetourNavigator
 {
-    inline osg::Vec3f makeOsgVec3f(const btVector3& value)
-    {
-        return osg::Vec3f(value.x(), value.y(), value.z());
-    }
-
     template <class Callback>
     void getTilesPositions(const osg::Vec3f& aabbMin, const osg::Vec3f& aabbMax,
         const Settings& settings, Callback&& callback)
@@ -49,7 +46,7 @@ namespace DetourNavigator
         btVector3 aabbMax;
         shape.getAabb(transform, aabbMin, aabbMax);
 
-        getTilesPositions(makeOsgVec3f(aabbMin), makeOsgVec3f(aabbMax), settings, std::forward<Callback>(callback));
+        getTilesPositions(Misc::Convert::makeOsgVec3f(aabbMin), Misc::Convert::makeOsgVec3f(aabbMax), settings, std::forward<Callback>(callback));
     }
 
     template <class Callback>
@@ -66,7 +63,7 @@ namespace DetourNavigator
         aabbMax.setX(std::max(aabbMin.x(), aabbMax.x()));
         aabbMax.setY(std::max(aabbMin.y(), aabbMax.y()));
 
-        getTilesPositions(makeOsgVec3f(aabbMin), makeOsgVec3f(aabbMax), settings, std::forward<Callback>(callback));
+        getTilesPositions(Misc::Convert::makeOsgVec3f(aabbMin), Misc::Convert::makeOsgVec3f(aabbMax), settings, std::forward<Callback>(callback));
     }
 }
 

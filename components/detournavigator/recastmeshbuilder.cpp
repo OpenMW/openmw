@@ -6,6 +6,7 @@
 #include "exceptions.hpp"
 
 #include <components/bullethelpers/processtrianglecallback.hpp>
+#include <components/misc/convert.hpp>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
@@ -14,14 +15,6 @@
 #include <LinearMath/btTransform.h>
 
 #include <algorithm>
-
-namespace
-{
-    osg::Vec3f makeOsgVec3f(const btVector3& value)
-    {
-        return osg::Vec3f(value.x(), value.y(), value.z());
-    }
-}
 
 namespace DetourNavigator
 {
@@ -175,7 +168,7 @@ namespace DetourNavigator
 
     void RecastMeshBuilder::addVertex(const btVector3& worldPosition)
     {
-        const auto navMeshPosition = toNavMeshCoordinates(mSettings, makeOsgVec3f(worldPosition));
+        const auto navMeshPosition = toNavMeshCoordinates(mSettings, Misc::Convert::makeOsgVec3f(worldPosition));
         mVertices.push_back(navMeshPosition.x());
         mVertices.push_back(navMeshPosition.y());
         mVertices.push_back(navMeshPosition.z());

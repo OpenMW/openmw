@@ -10,6 +10,8 @@
 #include "flags.hpp"
 #include "navmeshtilescache.hpp"
 
+#include <components/misc/convert.hpp>
+
 #include <DetourNavMesh.h>
 #include <DetourNavMeshBuilder.h>
 #include <Recast.h>
@@ -44,11 +46,6 @@ namespace
 
     using PolyMeshDetailStackPtr = std::unique_ptr<rcPolyMeshDetail, PolyMeshDetailStackDeleter>;
 
-    osg::Vec3f makeOsgVec3f(const btVector3& value)
-    {
-        return osg::Vec3f(value.x(), value.y(), value.z());
-    }
-
     struct WaterBounds
     {
         osg::Vec3f mMin;
@@ -61,8 +58,8 @@ namespace
         if (water.mCellSize == std::numeric_limits<int>::max())
         {
             const auto transform = getSwimLevelTransform(settings, water.mTransform, agentHalfExtents.z());
-            const auto min = toNavMeshCoordinates(settings, makeOsgVec3f(transform(btVector3(-1, -1, 0))));
-            const auto max = toNavMeshCoordinates(settings, makeOsgVec3f(transform(btVector3(1, 1, 0))));
+            const auto min = toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(-1, -1, 0))));
+            const auto max = toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(1, 1, 0))));
             return WaterBounds {
                 osg::Vec3f(-std::numeric_limits<float>::max(), min.y(), -std::numeric_limits<float>::max()),
                 osg::Vec3f(std::numeric_limits<float>::max(), max.y(), std::numeric_limits<float>::max())
@@ -73,8 +70,8 @@ namespace
             const auto transform = getSwimLevelTransform(settings, water.mTransform, agentHalfExtents.z());
             const auto halfCellSize = water.mCellSize / 2.0f;
             return WaterBounds {
-                toNavMeshCoordinates(settings, makeOsgVec3f(transform(btVector3(-halfCellSize, -halfCellSize, 0)))),
-                toNavMeshCoordinates(settings, makeOsgVec3f(transform(btVector3(halfCellSize, halfCellSize, 0))))
+                toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(-halfCellSize, -halfCellSize, 0)))),
+                toNavMeshCoordinates(settings, Misc::Convert::makeOsgVec3f(transform(btVector3(halfCellSize, halfCellSize, 0))))
             };
         }
     }
