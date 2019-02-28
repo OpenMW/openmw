@@ -39,6 +39,7 @@ namespace
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Referenceables, "Objects", ":./object.png" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_References, "Instances", ":./instance.png" },
         { CSMWorld::UniversalId::Class_NonRecord, CSMWorld::UniversalId::Type_RegionMap, "Region Map", ":./region-map.png" },
+        { CSMWorld::UniversalId::Class_NonRecord, CSMWorld::UniversalId::Type_ScalingTool, "Scale land...", ":./global-variable.png" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Filters, "Filters", ":./filter.png" },
         { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_Meshes, "Meshes", ":./resources-mesh" },
         { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_Icons, "Icons", ":./resources-icon" },

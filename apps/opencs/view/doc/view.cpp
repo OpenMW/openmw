@@ -175,6 +175,9 @@ void CSVDoc::View::setupWorldMenu()
 
     QAction *regionMap = createMenuEntry(CSMWorld::UniversalId::Type_RegionMap, world, "document-world-regionmap");
     connect (regionMap, SIGNAL (triggered()), this, SLOT (addRegionMapSubView()));
+
+    QAction *scalingTool = createMenuEntry(CSMWorld::UniversalId::Type_ScalingTool, world, "document-world-scalingtool");
+    connect (scalingTool, SIGNAL (triggered()), this, SLOT (showScalingTool()));
 }
 
 void CSVDoc::View::setupMechanicsMenu()
@@ -429,7 +432,7 @@ void CSVDoc::View::updateActions()
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
-      mViewTotal (totalViews), mScroll(nullptr), mScrollbarOnly(false)
+      mViewTotal (totalViews), mScroll(nullptr), mScrollbarOnly(false), mScalingTool(*document, this)
 {
     CSMPrefs::Category& windows = CSMPrefs::State::get()["Windows"];
 
@@ -1003,4 +1006,14 @@ void CSVDoc::View::createScrollArea()
     mScroll->setWidgetResizable(true);
     mScroll->setWidget(&mSubViewWindow);
     setCentralWidget(mScroll);
+}
+
+void CSVDoc::View::showScalingTool()
+{
+    if (mScalingTool.isHidden())
+        mScalingTool.show();
+
+    mScalingTool.move (QCursor::pos());
+    mScalingTool.raise();
+    mScalingTool.activateWindow();
 }

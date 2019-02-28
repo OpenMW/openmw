@@ -6,6 +6,8 @@
 
 #include <QMainWindow>
 
+#include "../../model/world/scalingtool.hpp"
+
 #include "subviewfactory.hpp"
 
 class QAction;
@@ -56,6 +58,7 @@ namespace CSVDoc
             GlobalDebugProfileMenu *mGlobalDebugProfileMenu;
             QScrollArea *mScroll;
             bool mScrollbarOnly;
+            CSMWorld::ScalingTool mScalingTool;
 
 
             // not implemented
@@ -242,6 +245,8 @@ namespace CSVDoc
             void addSearchSubView();
 
             void addMetaDataSubView();
+
+            void showScalingTool();
 
             void toggleShowStatusBar (bool show);
 
