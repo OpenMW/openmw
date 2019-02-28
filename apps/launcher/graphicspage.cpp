@@ -1,5 +1,6 @@
 #include "graphicspage.hpp"
 
+#include <boost/version.hpp>
 #if BOOST_VERSION >= 106500
 #include <boost/integer/common_factor.hpp>
 #else
