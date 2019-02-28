@@ -837,22 +837,13 @@ namespace MWGui
 
     void MapWindow::cellExplored(int x, int y)
     {
-        mQueuedToExplore.push_back(std::make_pair(x,y));
+        mGlobalMapRender->cleanupCameras();
+        mGlobalMapRender->exploreCell(x, y, mLocalMapRender->getMapTexture(x, y));
     }
 
     void MapWindow::onFrame(float dt)
     {
         LocalMapBase::onFrame(dt);
-
-        mGlobalMapRender->cleanupCameras();
-
-        for (CellId& cellId : mQueuedToExplore)
-        {
-            mGlobalMapRender->exploreCell(cellId.first, cellId.second, mLocalMapRender->getMapTexture(cellId.first, cellId.second));
-        }
-
-        mQueuedToExplore.clear();
-
         NoDrop::onFrame(dt);
     }
 

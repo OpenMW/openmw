@@ -261,10 +261,6 @@ namespace MWGui
         typedef std::pair<int, int> CellId;
         std::set<CellId> mMarkers;
 
-        // Cells that should be explored in the next frame (i.e. their map revealed on the global map)
-        // We can't do this immediately, because the map update is not immediate either (see mNeedMapUpdate in scene.cpp)
-        std::vector<CellId> mQueuedToExplore;
-
         MyGUI::Button* mEventBoxGlobal;
         MyGUI::Button* mEventBoxLocal;
 
