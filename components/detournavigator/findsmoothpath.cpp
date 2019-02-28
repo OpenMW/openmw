@@ -125,7 +125,7 @@ namespace DetourNavigator
         {
             // Stop at Off-Mesh link or when point is further than slop away.
             if ((steerPathFlags[ns] & DT_STRAIGHTPATH_OFFMESH_CONNECTION) ||
-                    !inRange(makeOsgVec3f(&steerPath[ns * 3]), startPos, minTargetDist, 1000.0f))
+                    !inRange(Misc::Convert::makeOsgVec3f(&steerPath[ns * 3]), startPos, minTargetDist, 1000.0f))
                 break;
             ns++;
         }

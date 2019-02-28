@@ -469,7 +469,7 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
     for (std::vector<ESM::AiSequence::AiPackageContainer>::const_iterator it = sequence.mPackages.begin();
          it != sequence.mPackages.end(); ++it)
     {
-        std::unique_ptr<MWMechanics::AiPackage> package (nullptr);
+        std::unique_ptr<MWMechanics::AiPackage> package;
         switch (it->mType)
         {
         case ESM::AiSequence::Ai_Wander:

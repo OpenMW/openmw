@@ -14,6 +14,7 @@
 #include <components/resource/bulletshape.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/debug.hpp>
+#include <components/misc/convert.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -28,7 +29,6 @@
 #include "../mwphysics/actor.hpp"
 #include "../mwphysics/object.hpp"
 #include "../mwphysics/heightfield.hpp"
-#include "../mwphysics/convert.hpp"
 
 #include "player.hpp"
 #include "localscripts.hpp"
@@ -135,16 +135,16 @@ namespace
 
                 const auto& transform = object->getCollisionObject()->getWorldTransform();
                 const btTransform closedDoorTransform(
-                    MWPhysics::toBullet(makeObjectOsgQuat(ptr.getCellRef().getPosition())),
+                    Misc::Convert::toBullet(makeObjectOsgQuat(ptr.getCellRef().getPosition())),
                     transform.getOrigin()
                 );
 
-                const auto start = DetourNavigator::makeOsgVec3f(closedDoorTransform(center + toPoint));
+                const auto start = Misc::Convert::makeOsgVec3f(closedDoorTransform(center + toPoint));
                 const auto startPoint = physics.castRay(start, start - osg::Vec3f(0, 0, 1000), ptr, {},
                     MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Water);
                 const auto connectionStart = startPoint.mHit ? startPoint.mHitPos : start;
 
-                const auto end = DetourNavigator::makeOsgVec3f(closedDoorTransform(center - toPoint));
+                const auto end = Misc::Convert::makeOsgVec3f(closedDoorTransform(center - toPoint));
                 const auto endPoint = physics.castRay(end, end - osg::Vec3f(0, 0, 1000), ptr, {},
                     MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Water);
                 const auto connectionEnd = endPoint.mHit ? endPoint.mHitPos : end;
