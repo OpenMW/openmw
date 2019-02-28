@@ -175,6 +175,9 @@ void CSVDoc::View::setupWorldMenu()
 
     QAction *regionMap = createMenuEntry(CSMWorld::UniversalId::Type_RegionMap, world, "document-world-regionmap");
     connect (regionMap, SIGNAL (triggered()), this, SLOT (addRegionMapSubView()));
+
+    QAction *fixEdge = createMenuEntry(CSMWorld::UniversalId::Type_FixCellEdge, world, "document-world-fixcelledge");
+    connect (fixEdge, SIGNAL (triggered()), this, SLOT (showFixTool()));
 }
 
 void CSVDoc::View::setupMechanicsMenu()
@@ -429,7 +432,7 @@ void CSVDoc::View::updateActions()
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
-      mViewTotal (totalViews), mScroll(nullptr), mScrollbarOnly(false)
+      mViewTotal (totalViews), mScroll(nullptr), mScrollbarOnly(false), mFixTool(*document, this)
 {
     CSMPrefs::Category& windows = CSMPrefs::State::get()["Windows"];
 
@@ -1003,4 +1006,14 @@ void CSVDoc::View::createScrollArea()
     mScroll->setWidgetResizable(true);
     mScroll->setWidget(&mSubViewWindow);
     setCentralWidget(mScroll);
+}
+
+void CSVDoc::View::showFixTool()
+{
+    if (mFixTool.isHidden())
+        mFixTool.show();
+
+    mFixTool.move (QCursor::pos());
+    mFixTool.raise();
+    mFixTool.activateWindow();
 }

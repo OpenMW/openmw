@@ -6,6 +6,8 @@
 
 #include <QMainWindow>
 
+#include "../../model/world/fixcelledgetool.hpp"
+
 #include "subviewfactory.hpp"
 
 class QAction;
@@ -56,6 +58,7 @@ namespace CSVDoc
             GlobalDebugProfileMenu *mGlobalDebugProfileMenu;
             QScrollArea *mScroll;
             bool mScrollbarOnly;
+            CSMWorld::FixCellEdgeTool mFixTool;
 
 
             // not implemented
@@ -242,6 +245,8 @@ namespace CSVDoc
             void addSearchSubView();
 
             void addMetaDataSubView();
+
+            void showFixTool();
 
             void toggleShowStatusBar (bool show);
 
