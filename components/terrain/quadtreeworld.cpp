@@ -163,25 +163,29 @@ public:
                 boundingBox.expandBy(child->getBoundingBox());
         }
 
-        parent->setBoundingBox(boundingBox);
+        if (!boundingBox.valid())
+            parent->removeChildren(0, 4);
+        else
+            parent->setBoundingBox(boundingBox);
     }
 
     QuadTreeNode* addChild(QuadTreeNode* parent, ChildDirection direction, float size)
     {
+        float halfSize = size/2.f;
         osg::Vec2f center;
         switch (direction)
         {
         case SW:
-            center = parent->getCenter() + osg::Vec2f(-size/2.f,-size/2.f);
+            center = parent->getCenter() + osg::Vec2f(-halfSize,-halfSize);
             break;
         case SE:
-            center = parent->getCenter() + osg::Vec2f(size/2.f, -size/2.f);
+            center = parent->getCenter() + osg::Vec2f(halfSize, -halfSize);
             break;
         case NW:
-            center = parent->getCenter() + osg::Vec2f(-size/2.f, size/2.f);
+            center = parent->getCenter() + osg::Vec2f(-halfSize, halfSize);
             break;
         case NE:
-            center = parent->getCenter() + osg::Vec2f(size/2.f, size/2.f);
+            center = parent->getCenter() + osg::Vec2f(halfSize, halfSize);
             break;
         default:
             break;
@@ -203,8 +207,8 @@ public:
         mStorage->getMinMaxHeights(size, center, minZ, maxZ);
 
         float cellWorldSize = mStorage->getCellWorldSize();
-        osg::BoundingBox boundingBox(osg::Vec3f((center.x()-size)*cellWorldSize, (center.y()-size)*cellWorldSize, minZ),
-                                osg::Vec3f((center.x()+size)*cellWorldSize, (center.y()+size)*cellWorldSize, maxZ));
+        osg::BoundingBox boundingBox(osg::Vec3f((center.x()-halfSize)*cellWorldSize, (center.y()-halfSize)*cellWorldSize, minZ),
+                                osg::Vec3f((center.x()+halfSize)*cellWorldSize, (center.y()+halfSize)*cellWorldSize, maxZ));
         node->setBoundingBox(boundingBox);
 
         return node;

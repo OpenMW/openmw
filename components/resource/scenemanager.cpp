@@ -729,6 +729,7 @@ namespace Resource
 
     void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
     {
+        if (mIncrementalCompileOperation)
         {
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(*mIncrementalCompileOperation->getToCompiledMutex());
             stats->setAttribute(frameNumber, "Compiling", mIncrementalCompileOperation->getToCompile().size());

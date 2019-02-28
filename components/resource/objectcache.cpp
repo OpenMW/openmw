@@ -75,10 +75,11 @@ void ObjectCache::updateTimeStampOfObjectsInCacheWithExternalReferences(double r
         itr!=_objectCache.end();
         ++itr)
     {
-        // if ref count is greater the 1 the object has an external reference.
-        if (itr->second.first->referenceCount()>1)
+        // If ref count is greater than 1, the object has an external reference.
+        // If the timestamp is yet to be initialized, it needs to be updated too.
+        if (itr->second.first->referenceCount()>1 || itr->second.second == 0.0)
         {
-            // so update it time stamp.
+            // So update it.
             itr->second.second = referenceTime;
         }
     }

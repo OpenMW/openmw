@@ -33,7 +33,7 @@ namespace Terrain
         // split each ESM::Cell into mNumSplits*mNumSplits terrain chunks
         unsigned int mNumSplits;
 
-        MWRender::CellBorder::CellGrid mGrid;
+        CellBorder::CellGrid mGrid;
     };
 }
 

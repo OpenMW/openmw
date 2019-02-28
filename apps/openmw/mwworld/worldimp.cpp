@@ -409,7 +409,8 @@ namespace MWWorld
                 if (getPlayerPtr().isInCell())
                 {
                     mWorldScene->preloadCell(getPlayerPtr().getCell(), true);
-                    mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3());
+                    if (getPlayerPtr().getCell()->isExterior())
+                        mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3());
                 }
                 break;
             default:
