@@ -2,6 +2,7 @@
 #define COMPONENTS_TERRAIN_QUADTREEWORLD_H
 
 #include "world.hpp"
+#include "terraingrid.hpp"
 
 #include <OpenThreads/Mutex>
 
@@ -16,7 +17,7 @@ namespace Terrain
     class ViewDataMap;
 
     /// @brief Terrain implementation that loads cells into a Quad Tree, with geometry LOD and texture LOD. The entire world is displayed at all times.
-    class QuadTreeWorld : public Terrain::World
+    class QuadTreeWorld : public TerrainGrid // note: derived from TerrainGrid is only to render default cells (see loadCell)
     {
     public:
         QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask, int compMapResolution, float comMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize);
@@ -28,6 +29,10 @@ namespace Terrain
         virtual void enable(bool enabled);
 
         void cacheCell(View *view, int x, int y);
+        /// @note Not thread safe.
+        virtual void loadCell(int x, int y);
+        /// @note Not thread safe.
+        virtual void unloadCell(int x, int y);
 
         View* createView();
         void preload(View* view, const osg::Vec3f& eyePoint);

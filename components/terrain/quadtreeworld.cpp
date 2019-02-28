@@ -249,7 +249,7 @@ private:
 };
 
 QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask, int borderMask, int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
-    : World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
+    : TerrainGrid(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
     , mLodFactor(lodFactor)
@@ -513,6 +513,26 @@ void QuadTreeWorld::reportStats(unsigned int frameNumber, osg::Stats *stats)
 void QuadTreeWorld::setDefaultViewer(osg::Object *obj)
 {
     mViewDataMap->setDefaultViewer(obj);
+}
+
+void QuadTreeWorld::loadCell(int x, int y)
+{
+    // fallback behavior only for undefined cells (every other is already handled in quadtree)
+    float dummy;
+    if (!mStorage->getMinMaxHeights(1, osg::Vec2f(x+0.5, y+0.5), dummy, dummy))
+        TerrainGrid::loadCell(x,y);
+    else
+        World::loadCell(x,y);
+}
+
+void QuadTreeWorld::unloadCell(int x, int y)
+{
+    // fallback behavior only for undefined cells (every other is already handled in quadtree)
+    float dummy;
+    if (!mStorage->getMinMaxHeights(1, osg::Vec2f(x+0.5, y+0.5), dummy, dummy))
+        TerrainGrid::unloadCell(x,y);
+    else
+        World::unloadCell(x,y);
 }
 
 
