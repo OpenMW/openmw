@@ -200,6 +200,8 @@ namespace MWInput
         bool mUserFileExists;
         bool mAlwaysRunActive;
         bool mSneakToggles;
+        float mSneakToggleShortcutTimer;
+        bool mSneakGamepadShortcut;
         bool mSneaking;
         bool mAttemptJump;
 

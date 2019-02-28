@@ -71,6 +71,8 @@ namespace MWInput
         , mUserFileExists(userFileExists)
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
         , mSneakToggles(Settings::Manager::getBool("toggle sneak", "Input"))
+        , mSneakToggleShortcutTimer(0.f)
+        , mSneakGamepadShortcut(false)
         , mSneaking(false)
         , mAttemptJump(false)
         , mInvUiScalingFactor(1.f)
@@ -579,7 +581,35 @@ namespace MWInput
 
                 if (!mSneakToggles)
                 {
-                    mPlayer->setSneak(actionIsActive(A_Sneak));
+                    if(mJoystickLastUsed)
+                    {
+                        if(actionIsActive(A_Sneak))
+                        {
+                            if(mSneakToggleShortcutTimer) // New Sneak Button Press
+                            {
+                                if(mSneakToggleShortcutTimer <= 0.3f)
+                                {
+                                    mSneakGamepadShortcut = true;
+                                    toggleSneaking();
+                                }
+                                else
+                                    mSneakGamepadShortcut = false;
+                            }
+
+                            if(!mSneaking)
+                                toggleSneaking();
+                            mSneakToggleShortcutTimer = 0.f;
+                        }
+                        else
+                        {
+                            if(!mSneakGamepadShortcut && mSneaking)
+                                toggleSneaking();
+                            if(mSneakToggleShortcutTimer <= 0.3f)
+                                mSneakToggleShortcutTimer += dt;
+                        }
+                    }
+                    else
+                        mPlayer->setSneak(actionIsActive(A_Sneak));
                 }
 
                 if (mAttemptJump && mControlSwitch["playerjumping"])
