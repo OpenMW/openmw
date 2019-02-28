@@ -201,22 +201,35 @@ public:
         node->setLodCallback(parent->getLodCallback());
         node->setViewDataMap(mViewDataMap);
 
-        if (node->getSize() > mMinSize)
+        if (center.x() - size > mMaxX
+                || center.x() + size < mMinX
+                || center.y() - size > mMaxY
+                || center.y() + size < mMinY )
+            // Out of bounds of the actual terrain - this will happen because
+            // we rounded the size up to the next power of two
+        {
+            // Still create and return an empty node so as to not break the assumption that each QuadTreeNode has either 4 or 0 children.
+            return node;
+        }
+
+        if (node->getSize() <= mMinSize)
+        {
+            // We arrived at a leaf
+            float minZ,maxZ;
+            if (mStorage->getMinMaxHeights(size, center, minZ, maxZ))
+            {
+                float cellWorldSize = mStorage->getCellWorldSize();
+                osg::BoundingBox boundingBox(osg::Vec3f((center.x()-size)*cellWorldSize, (center.y()-size)*cellWorldSize, minZ),
+                                        osg::Vec3f((center.x()+size)*cellWorldSize, (center.y()+size)*cellWorldSize, maxZ));
+                node->setBoundingBox(boundingBox);
+            }
+            return node;
+        }
+        else
         {
             addChildren(node);
             return node;
         }
-
-        // We arrived at a leaf
-        float minZ, maxZ;
-        mStorage->getMinMaxHeights(size, center, minZ, maxZ);
-
-        float cellWorldSize = mStorage->getCellWorldSize();
-        osg::BoundingBox boundingBox(osg::Vec3f((center.x()-halfSize)*cellWorldSize, (center.y()-halfSize)*cellWorldSize, minZ),
-                                osg::Vec3f((center.x()+halfSize)*cellWorldSize, (center.y()+halfSize)*cellWorldSize, maxZ));
-        node->setBoundingBox(boundingBox);
-
-        return node;
     }
 
     osg::ref_ptr<RootNode> getRootNode()
