@@ -178,7 +178,7 @@ void CSMWorld::ScalingTool::scaleLand(int cellX_Source_CornerA, int cellY_Source
             CSMWorld::LandHeightsColumn::DataType oldHeightTarget = landTable.data(landTable.getModelIndex(newCellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
             CSMWorld::LandHeightsColumn::DataType heightTarget(oldHeightTarget);
 
-            // Go through every vertex in the cell, and find correct values from the source. Nearest neighbor method, always rounding down.
+            // Go through every vertex in the cell, and find correct values from the source
             for (int xInTargetCell = 0; xInTargetCell < landSize; ++xInTargetCell)
             {
                 for (int yInTargetCell = 0; yInTargetCell < landSize; ++yInTargetCell)
@@ -199,6 +199,9 @@ void CSMWorld::ScalingTool::scaleLand(int cellX_Source_CornerA, int cellY_Source
                     int inCellSourceY1 = yTrueSource1 - (yTrueSource1 / (landSize - 1)) * (landSize - 1);
 
                     std::string sourceCellId = CSMWorld::CellCoordinates::generateId(cellSourceX0, cellSourceY0);
+                    std::string sourceCellId10 = CSMWorld::CellCoordinates::generateId(cellSourceX1, cellSourceY0);
+                    std::string sourceCellId01 = CSMWorld::CellCoordinates::generateId(cellSourceX0, cellSourceY1);
+                    std::string sourceCellId11 = CSMWorld::CellCoordinates::generateId(cellSourceX1, cellSourceY1);
 
                     bool noSourceCell = mDocument.getData().getCells().searchId (sourceCellId)==-1;
                     bool noSourceLand = mDocument.getData().getLand().searchId (sourceCellId)==-1;
@@ -207,16 +210,25 @@ void CSMWorld::ScalingTool::scaleLand(int cellX_Source_CornerA, int cellY_Source
 
                     if (!noSourceCell && !noSourceLand)
                     {
-                        CSMWorld::LandHeightsColumn::DataType heightSource = landTable.data(landTable.getModelIndex(sourceCellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
-
                         if(mMethodSelector->currentText() == "Bilinear interpolation (best)")
                         {
+                            //Use X0Y0 by default, only load heights at X1 and Y1 if there is land. TODO: Optimize
+                            CSMWorld::LandHeightsColumn::DataType heightSource00 = landTable.data(landTable.getModelIndex(sourceCellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                            CSMWorld::LandHeightsColumn::DataType heightSource10 = landTable.data(landTable.getModelIndex(sourceCellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                            CSMWorld::LandHeightsColumn::DataType heightSource01 = landTable.data(landTable.getModelIndex(sourceCellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                            CSMWorld::LandHeightsColumn::DataType heightSource11 = landTable.data(landTable.getModelIndex(sourceCellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                            if (mDocument.getData().getCells().searchId (sourceCellId10) != -1 && mDocument.getData().getLand().searchId (sourceCellId10) != -1)
+                                heightSource10 = landTable.data(landTable.getModelIndex(sourceCellId10, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                            if (mDocument.getData().getCells().searchId (sourceCellId01) != -1 && mDocument.getData().getLand().searchId (sourceCellId01) != -1)
+                                heightSource01 = landTable.data(landTable.getModelIndex(sourceCellId01, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                            if (mDocument.getData().getCells().searchId (sourceCellId11) != -1 && mDocument.getData().getLand().searchId (sourceCellId11) != -1)
+                                heightSource11 = landTable.data(landTable.getModelIndex(sourceCellId11, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
                             float distFromX1 = xTrueSource1 - (xPercentage * sourceSizeX * (landSize - 1));
                             float distFromX0 = 1 - distFromX1;
                             float distFromY1 = yTrueSource1 - (yPercentage * sourceSizeY * (landSize - 1));
                             float distFromY0 = 1 - distFromY1;
-                            float interpolatedXwhenY0 = heightSource[inCellSourceY0 * landSize + inCellSourceX0] * distFromX1 + heightSource[inCellSourceY0 * landSize + inCellSourceX1] * distFromX0;
-                            float interpolatedXwhenY1 = heightSource[inCellSourceY1 * landSize + inCellSourceX0] * distFromX1 + heightSource[inCellSourceY1 * landSize + inCellSourceX1] * distFromX0;
+                            float interpolatedXwhenY0 = heightSource00[inCellSourceY0 * landSize + inCellSourceX0] * distFromX1 + heightSource10[inCellSourceY0 * landSize + inCellSourceX1] * distFromX0;
+                            float interpolatedXwhenY1 = heightSource01[inCellSourceY1 * landSize + inCellSourceX0] * distFromX1 + heightSource11[inCellSourceY1 * landSize + inCellSourceX1] * distFromX0;
                             heightTarget[yInTargetCell * landSize + xInTargetCell] = interpolatedXwhenY0 * distFromY1 + interpolatedXwhenY1 * distFromY0;
 
                             if(mScaleZCheckBox->checkState())
@@ -228,14 +240,48 @@ void CSMWorld::ScalingTool::scaleLand(int cellX_Source_CornerA, int cellY_Source
 
                         if(mMethodSelector->currentText() == "Nearest neighbor (simple)")
                         {
-                            heightTarget[yInTargetCell * landSize + xInTargetCell] = heightSource[inCellSourceY0 * landSize + inCellSourceX0];
+                            float distFromX1 = xTrueSource1 - (xPercentage * sourceSizeX * (landSize - 1));
+                            float distFromY1 = yTrueSource1 - (yPercentage * sourceSizeY * (landSize - 1));
+
+                            // The default nearest is always X0Y0, guaranteed to have cell and land
+                            CSMWorld::LandHeightsColumn::DataType heightSource00 = landTable.data(landTable.getModelIndex(sourceCellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                            heightTarget[yInTargetCell * landSize + xInTargetCell] = heightSource00[inCellSourceY0 * landSize + inCellSourceX0];
+
+                            // In case actual nearest is at X1 or Y1, update the value only if there is cell & land
+                            if (distFromX1 <= 0.5 && distFromY1 > 0.5)
+                            {
+                                if (mDocument.getData().getCells().searchId (sourceCellId10) != -1 && mDocument.getData().getLand().searchId (sourceCellId10) != -1)
+                                {
+                                    CSMWorld::LandHeightsColumn::DataType heightSource = landTable.data(landTable.getModelIndex(sourceCellId10, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                                    heightTarget[yInTargetCell * landSize + xInTargetCell] = heightSource[inCellSourceY0 * landSize + inCellSourceX1];
+                                }
+                            }
+                            else if (distFromX1 > 0.5 && distFromY1 <= 0.5)
+                            {
+                                if (mDocument.getData().getCells().searchId (sourceCellId01) != -1 && mDocument.getData().getLand().searchId (sourceCellId01) != -1)
+                                {
+                                    CSMWorld::LandHeightsColumn::DataType heightSource = landTable.data(landTable.getModelIndex(sourceCellId01, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                                    heightTarget[yInTargetCell * landSize + xInTargetCell] = heightSource[inCellSourceY1 * landSize + inCellSourceX0];
+                                }
+                            }
+                            else if (distFromX1 <= 0.5 && distFromY1 <= 0.5)
+                            {
+                                if (mDocument.getData().getCells().searchId (sourceCellId11) != -1 && mDocument.getData().getLand().searchId (sourceCellId11) != -1)
+                                {
+                                    CSMWorld::LandHeightsColumn::DataType heightSource = landTable.data(landTable.getModelIndex(sourceCellId11, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+                                    heightTarget[yInTargetCell * landSize + xInTargetCell] = heightSource[inCellSourceY1 * landSize + inCellSourceX1];
+                                }
+                            }
+
                             if(mScaleZCheckBox->checkState())
                             {
-                            float scaleFactor = static_cast<float>(targetSizeX) / sourceSizeX;
-                            heightTarget[yInTargetCell * landSize + xInTargetCell] *= scaleFactor;
+                                float scaleFactor = static_cast<float>(targetSizeX) / sourceSizeX;
+                                heightTarget[yInTargetCell * landSize + xInTargetCell] *= scaleFactor;
                             }
                         }
                     }
+                    //Land heights must go in steps of 8 to limit land tearing because of rounding errors 
+                    heightTarget[yInTargetCell * landSize + xInTargetCell] -= fmod(heightTarget[yInTargetCell * landSize + xInTargetCell], 8);
                 }
             }
 
@@ -262,14 +308,47 @@ void CSMWorld::ScalingTool::scaleLand(int cellX_Source_CornerA, int cellY_Source
                     int inCellSourceY1 = yTrueSource1 - (yTrueSource1 / landTextureSize) * landTextureSize;
 
                     std::string sourceCellId = CSMWorld::CellCoordinates::generateId(cellSourceX0, cellSourceY0);
+                    std::string sourceCellId10 = CSMWorld::CellCoordinates::generateId(cellSourceX1, cellSourceY0);
+                    std::string sourceCellId01 = CSMWorld::CellCoordinates::generateId(cellSourceX0, cellSourceY1);
+                    std::string sourceCellId11 = CSMWorld::CellCoordinates::generateId(cellSourceX1, cellSourceY1);
 
                     bool noSourceCell = mDocument.getData().getCells().searchId (sourceCellId)==-1;
                     bool noSourceLand = mDocument.getData().getLand().searchId (sourceCellId)==-1;
 
                     if (!noSourceCell && !noSourceLand)
                     {
-                        CSMWorld::LandTexturesColumn::DataType texSource = landTable.data(landTable.getModelIndex(sourceCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
-                        texTarget[yInTargetCell * landTextureSize + xInTargetCell] = texSource[inCellSourceY0 * landTextureSize + inCellSourceX0];
+                        float distFromX1 = xTrueSource1 - (xPercentage * sourceSizeX * (landSize - 1));
+                        float distFromY1 = yTrueSource1 - (yPercentage * sourceSizeY * (landSize - 1));
+
+                        // The default nearest is always X0Y0, guaranteed to have cell and land
+                        CSMWorld::LandTexturesColumn::DataType texSource00 = landTable.data(landTable.getModelIndex(sourceCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+                        texTarget[yInTargetCell * landTextureSize + xInTargetCell] = texSource00[inCellSourceY0 * landTextureSize + inCellSourceX0];
+
+                        // In case actual nearest is at X1 or Y1, update the value only if there is cell & land
+                        if (distFromX1 <= 0.5 && distFromY1 > 0.5)
+                        {
+                            if (mDocument.getData().getCells().searchId (sourceCellId10) != -1 && mDocument.getData().getLand().searchId (sourceCellId10) != -1)
+                            {
+                                CSMWorld::LandTexturesColumn::DataType texSource10 = landTable.data(landTable.getModelIndex(sourceCellId10, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+                                texTarget[yInTargetCell * landTextureSize + xInTargetCell] = texSource10[inCellSourceY0 * landTextureSize + inCellSourceX1];
+                            }
+                        }
+                        else if (distFromX1 > 0.5 && distFromY1 <= 0.5)
+                        {
+                            if (mDocument.getData().getCells().searchId (sourceCellId01) != -1 && mDocument.getData().getLand().searchId (sourceCellId01) != -1)
+                            {
+                                CSMWorld::LandTexturesColumn::DataType texSource01 = landTable.data(landTable.getModelIndex(sourceCellId01, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+                                texTarget[yInTargetCell * landTextureSize + xInTargetCell] = texSource01[inCellSourceY1 * landTextureSize + inCellSourceX0];
+                            }
+                        }
+                        else if (distFromX1 <= 0.5 && distFromY1 <= 0.5)
+                        {
+                            if (mDocument.getData().getCells().searchId (sourceCellId11) != -1 && mDocument.getData().getLand().searchId (sourceCellId11) != -1)
+                            {
+                                CSMWorld::LandTexturesColumn::DataType texSource11 = landTable.data(landTable.getModelIndex(sourceCellId11, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+                                texTarget[yInTargetCell * landTextureSize + xInTargetCell] = texSource11[inCellSourceY1 * landTextureSize + inCellSourceX1];
+                            }
+                        }
                     }
                     else
                     {
