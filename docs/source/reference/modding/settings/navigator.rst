@@ -215,15 +215,6 @@ triangles per chunk
 
 Maximum number of triangles in each node of mesh AABB tree.
 
-recast scale factor
--------------------
-
-:Type:		floating point
-:Range:		> 0.0
-:Default:	0.013
-
-Scale of nav mesh coordinates to world coordinates.
-
 Expert Recastnavigation related settings
 ****************************************
 
