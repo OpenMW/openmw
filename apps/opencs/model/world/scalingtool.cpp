@@ -317,8 +317,8 @@ void CSMWorld::ScalingTool::scaleLand(int cellX_Source_CornerA, int cellY_Source
 
                     if (!noSourceCell && !noSourceLand)
                     {
-                        float distFromX1 = xTrueSource1 - (xPercentage * sourceSizeX * (landSize - 1));
-                        float distFromY1 = yTrueSource1 - (yPercentage * sourceSizeY * (landSize - 1));
+                        float distFromX1 = xTrueSource1 - (xPercentage * sourceSizeX * landTextureSize);
+                        float distFromY1 = yTrueSource1 - (yPercentage * sourceSizeY * landTextureSize);
 
                         // The default nearest is always X0Y0, guaranteed to have cell and land
                         CSMWorld::LandTexturesColumn::DataType texSource00 = landTable.data(landTable.getModelIndex(sourceCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
