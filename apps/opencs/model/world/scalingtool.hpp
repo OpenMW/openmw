@@ -7,6 +7,8 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGroupBox>
+#include <QComboBox>
+#include <QCheckBox>
 #include <QPushButton>
 
 #include "../doc/document.hpp"
@@ -43,6 +45,8 @@ namespace CSMWorld
         QSpinBox *mCellY_SpinBox_Target_CornerA;
         QSpinBox *mCellX_SpinBox_Target_CornerB;
         QSpinBox *mCellY_SpinBox_Target_CornerB;
+        QComboBox *mMethodSelector;
+        QCheckBox *mScaleZCheckBox;
         QPushButton *mActionButton;
 
         const int landSize {ESM::Land::LAND_SIZE};

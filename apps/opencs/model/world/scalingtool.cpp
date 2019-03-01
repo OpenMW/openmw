@@ -1,15 +1,15 @@
 #include "scalingtool.hpp"
 
-#include <iostream>
-
 #include <QWidget>
 #include <QLabel>
 #include <QSpinBox>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QUndoStack>
-#include <QPushButton>
 #include <QGroupBox>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QPushButton>
 
 #include "../doc/document.hpp"
 #include "../world/idtable.hpp"
@@ -32,8 +32,16 @@ CSMWorld::ScalingTool::ScalingTool(CSMDoc::Document& document, QWidget* parent) 
     coordinateBoxesLayout->addWidget(mTargetGroupBox);
     coordinateBoxes->setLayout(coordinateBoxesLayout);
 
+    mMethodSelector = new QComboBox(this);
+    mMethodSelector->addItem(tr("Bilinear interpolation (best)"));
+    mMethodSelector->addItem(tr("Nearest neighbor (simple)"));
+
+    mScaleZCheckBox = new QCheckBox("Scale Z", this);
+
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(coordinateBoxes);
+    mainLayout->addWidget(mScaleZCheckBox);
+    mainLayout->addWidget(mMethodSelector);
     mainLayout->addWidget(mActionButton);
     setLayout(mainLayout);
 
@@ -192,8 +200,42 @@ void CSMWorld::ScalingTool::scaleLand(int cellX_Source_CornerA, int cellY_Source
 
                     std::string sourceCellId = CSMWorld::CellCoordinates::generateId(cellSourceX0, cellSourceY0);
 
-                    CSMWorld::LandHeightsColumn::DataType heightSource = landTable.data(landTable.getModelIndex(sourceCellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
-                    heightTarget[yInTargetCell * landSize + xInTargetCell] = heightSource[inCellSourceY0 * landSize + inCellSourceX0];
+                    bool noSourceCell = mDocument.getData().getCells().searchId (sourceCellId)==-1;
+                    bool noSourceLand = mDocument.getData().getLand().searchId (sourceCellId)==-1;
+
+                    heightTarget[yInTargetCell * landSize + xInTargetCell] = 0;
+
+                    if (!noSourceCell && !noSourceLand)
+                    {
+                        CSMWorld::LandHeightsColumn::DataType heightSource = landTable.data(landTable.getModelIndex(sourceCellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+
+                        if(mMethodSelector->currentText() == "Bilinear interpolation (best)")
+                        {
+                            float distFromX1 = xTrueSource1 - (xPercentage * sourceSizeX * (landSize - 1));
+                            float distFromX0 = 1 - distFromX1;
+                            float distFromY1 = yTrueSource1 - (yPercentage * sourceSizeY * (landSize - 1));
+                            float distFromY0 = 1 - distFromY1;
+                            float interpolatedXwhenY0 = heightSource[inCellSourceY0 * landSize + inCellSourceX0] * distFromX1 + heightSource[inCellSourceY0 * landSize + inCellSourceX1] * distFromX0;
+                            float interpolatedXwhenY1 = heightSource[inCellSourceY1 * landSize + inCellSourceX0] * distFromX1 + heightSource[inCellSourceY1 * landSize + inCellSourceX1] * distFromX0;
+                            heightTarget[yInTargetCell * landSize + xInTargetCell] = interpolatedXwhenY0 * distFromY1 + interpolatedXwhenY1 * distFromY0;
+
+                            if(mScaleZCheckBox->checkState())
+                            {
+                                float scaleFactor = static_cast<float>(targetSizeX) / sourceSizeX;
+                                heightTarget[yInTargetCell * landSize + xInTargetCell] *= scaleFactor;
+                            }
+                        }
+
+                        if(mMethodSelector->currentText() == "Nearest neighbor (simple)")
+                        {
+                            heightTarget[yInTargetCell * landSize + xInTargetCell] = heightSource[inCellSourceY0 * landSize + inCellSourceX0];
+                            if(mScaleZCheckBox->checkState())
+                            {
+                            float scaleFactor = static_cast<float>(targetSizeX) / sourceSizeX;
+                            heightTarget[yInTargetCell * landSize + xInTargetCell] *= scaleFactor;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -221,8 +263,18 @@ void CSMWorld::ScalingTool::scaleLand(int cellX_Source_CornerA, int cellY_Source
 
                     std::string sourceCellId = CSMWorld::CellCoordinates::generateId(cellSourceX0, cellSourceY0);
 
-                    CSMWorld::LandTexturesColumn::DataType texSource = landTable.data(landTable.getModelIndex(sourceCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
-                    texTarget[yInTargetCell * landTextureSize + xInTargetCell] = texSource[inCellSourceY0 * landTextureSize + inCellSourceX0];
+                    bool noSourceCell = mDocument.getData().getCells().searchId (sourceCellId)==-1;
+                    bool noSourceLand = mDocument.getData().getLand().searchId (sourceCellId)==-1;
+
+                    if (!noSourceCell && !noSourceLand)
+                    {
+                        CSMWorld::LandTexturesColumn::DataType texSource = landTable.data(landTable.getModelIndex(sourceCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
+                        texTarget[yInTargetCell * landTextureSize + xInTargetCell] = texSource[inCellSourceY0 * landTextureSize + inCellSourceX0];
+                    }
+                    else
+                    {
+                        texTarget[yInTargetCell * landTextureSize + xInTargetCell] = 0;
+                    }
                 }
             }
 
