@@ -51,6 +51,7 @@
     Feature #4887: Add openmw command option to set initial random seed
     Feature #4890: Make Distant Terrain configurable
     Task #4686: Upgrade media decoder to a more current FFmpeg API
+    Task #4695: Optimize Distant Terrain memory consumption
 
 0.45.0
 ------
