@@ -42,7 +42,7 @@ namespace MWWorld
         CellStore*              mMarkedCell;
 
         bool                    mAutoMove;
-        int                     mForwardBackward;
+        float                   mForwardBackward;
         bool                    mTeleported;
 
         int                     mCurrentCrimeId;    // the id assigned witnesses
@@ -94,9 +94,9 @@ namespace MWWorld
         bool getAutoMove() const;
         void setAutoMove (bool enable);
 
-        void setLeftRight (int value);
+        void setLeftRight (float value);
 
-        void setForwardBackward (int value);
+        void setForwardBackward (float value);
         void setUpDown(int value);
 
         void setRunState(bool run);
