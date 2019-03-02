@@ -229,6 +229,7 @@ namespace MWInput
 
     private:
         void toggleMainMenu();
+        void toggleOptionsMenu();
         void toggleSpell();
         void toggleWeapon();
         void toggleInventory();
@@ -320,6 +321,8 @@ namespace MWInput
             A_LookLeftRight,
             A_MoveForwardBackward,
             A_MoveLeftRight,
+
+            A_OptionsMenu,
 
             A_Last            // Marker for the last item
         };
