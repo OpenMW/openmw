@@ -58,17 +58,23 @@ This setting has no effect if the shader setting is false.
 
 This setting can be toggled with the 'Refraction' button in the Water tab of the Video panel of the Options menu.
 
-reflect actors
+reflection detail
 --------------
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+:Type:		integer
+:Range:		0, 1, 2, 3, 4
+:Default:	2
 
-This setting controls whether or not NPCs and creatures are drawn in water reflections.
-Setting this to true will enable actors in reflections and increase realism with a likely decrease in performance.
+Controls what kinds of things are rendered in water reflections.
 
-This setting can be toggled with the 'Reflect actors' button in the Water tab of the Video panel of the Options menu.
+0: only sky is reflected
+1: terrain is also reflected
+2: statics, activators, and doors are also reflected
+3: items, containers, and particles are also reflected
+4: actors are also reflected
+
+In interiors the lowest level is 2.
+This setting can be changed ingame with the "Reflection shader detail" dropdown under the Water tab of the Video panel in the Options menu.
 
 small feature culling pixel size
 --------------------------------

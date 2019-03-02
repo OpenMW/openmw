@@ -33,6 +33,7 @@ namespace MWGui
             MyGUI::Widget* mAnisotropyBox;
 
             MyGUI::ComboBox* mWaterTextureSize;
+            MyGUI::ComboBox* mWaterReflectionDetail;
 
             // controls
             MyGUI::ScrollView* mControlsBox;
@@ -52,6 +53,7 @@ namespace MWGui
             void highlightCurrentResolution();
 
             void onWaterTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos);
+            void onWaterReflectionDetailChanged(MyGUI::ComboBox* _sender, size_t pos);
 
             void onRebindAction(MyGUI::Widget* _sender);
             void onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel);

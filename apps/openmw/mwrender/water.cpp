@@ -225,7 +225,7 @@ public:
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         setName("RefractionCamera");
 
-        setCullMask(Mask_Effect|Mask_Scene|Mask_Object|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
+        setCullMask(Mask_Effect|Mask_Scene|Mask_Object|Mask_Static|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
         setNodeMask(Mask_RenderToTexture);
         setViewport(0, 0, rttSize, rttSize);
 
@@ -307,7 +307,7 @@ private:
 class Reflection : public osg::Camera
 {
 public:
-    Reflection()
+    Reflection(bool isInterior)
     {
         setRenderOrder(osg::Camera::PRE_RENDER);
         setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -316,9 +316,14 @@ public:
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         setName("ReflectionCamera");
 
-        bool reflectActors = Settings::Manager::getBool("reflect actors", "Water");
-
-        setCullMask(Mask_Effect|Mask_Scene|Mask_Object|Mask_Terrain|Mask_ParticleSystem|Mask_Sky|Mask_Player|Mask_Lighting|(reflectActors ? Mask_Actor : 0));
+        int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
+        reflectionDetail = std::min(4, std::max(isInterior ? 2 : 0, reflectionDetail));
+        unsigned int extraMask = 0;
+        if(reflectionDetail >= 1) extraMask |= Mask_Terrain;
+        if(reflectionDetail >= 2) extraMask |= Mask_Static;
+        if(reflectionDetail >= 3) extraMask |= Mask_Effect|Mask_ParticleSystem|Mask_Object;
+        if(reflectionDetail >= 4) extraMask |= Mask_Player|Mask_Actor;
+        setCullMask(Mask_Scene|Mask_Sky|Mask_Lighting|extraMask);
         setNodeMask(Mask_RenderToTexture);
 
         unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
@@ -405,6 +410,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     , mEnabled(true)
     , mToggled(true)
     , mTop(0)
+    , mInterior(false)
 {
     mSimulation.reset(new RippleSimulation(parent, resourceSystem, fallback));
 
@@ -457,7 +463,7 @@ void Water::updateWaterMaterial()
 
     if (Settings::Manager::getBool("shader", "Water"))
     {
-        mReflection = new Reflection;
+        mReflection = new Reflection(mInterior);
         mReflection->setWaterLevel(mTop);
         mReflection->setScene(mSceneRoot);
         mParent->addChild(mReflection);
@@ -630,10 +636,20 @@ void Water::setEnabled(bool enabled)
 
 void Water::changeCell(const MWWorld::CellStore* store)
 {
-    if (store->getCell()->isExterior())
+    bool isInterior = !store->getCell()->isExterior();
+    bool wasInterior = mInterior;
+    if (!isInterior)
+    {
         mWaterNode->setPosition(getSceneNodeCoordinates(store->getCell()->mData.mX, store->getCell()->mData.mY));
+        mInterior = false;
+    }
     else
+    {
         mWaterNode->setPosition(osg::Vec3f(0,0,mTop));
+        mInterior = true;
+    }
+    if(mInterior != wasInterior)
+        updateWaterMaterial();
 
     // create a new StateSet to prevent threading issues
     osg::ref_ptr<osg::StateSet> nodeStateSet (new osg::StateSet);
