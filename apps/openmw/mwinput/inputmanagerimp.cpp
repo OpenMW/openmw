@@ -289,6 +289,9 @@ namespace MWInput
             case A_GameMenu:
                 toggleMainMenu ();
                 break;
+            case A_OptionsMenu:
+                toggleOptionsMenu();
+                break;
             case A_Screenshot:
                 screenshot();
                 break;
@@ -1042,19 +1045,29 @@ namespace MWInput
 
     void InputManager::toggleMainMenu()
     {
-        if (MyGUI::InputManager::getInstance().isModalAny()) {
-            MWBase::Environment::get().getWindowManager()->exitCurrentModal();
+        bool state = MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
+        MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
+
+        if (mode == MWGui::GM_Settings || (!state && mode == MWGui::GM_MainMenu))
+            MWBase::Environment::get().getWindowManager()->popGuiMode();
+        if(state || mode == MWGui::GM_MainMenu)
+            return;
+
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
+    }
+
+    void InputManager::toggleOptionsMenu()
+    {
+        MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
+        if (mode == MWGui::GM_Settings)
+        {
+            MWBase::Environment::get().getWindowManager()->popGuiMode();
             return;
         }
+        else if (mode == MWGui::GM_MainMenu && !(MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame))
+            MWBase::Environment::get().getWindowManager()->popGuiMode();
 
-        if(!MWBase::Environment::get().getWindowManager()->isGuiMode()) //No open GUIs, open up the MainMenu
-        {
-            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
-        }
-        else //Close current GUI
-        {
-            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
-        }
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Settings);
     }
 
     void InputManager::quickLoad() {
@@ -1415,12 +1428,12 @@ namespace MWInput
         defaultButtonBindings[A_TogglePOV] = SDL_CONTROLLER_BUTTON_RIGHTSTICK;
         defaultButtonBindings[A_Inventory] = SDL_CONTROLLER_BUTTON_B;
         defaultButtonBindings[A_GameMenu] = SDL_CONTROLLER_BUTTON_START;
-        defaultButtonBindings[A_QuickKeysMenu] = SDL_CONTROLLER_BUTTON_BACK; // Ideally a new menu, A_QuickButtonsMenu should be implemented with only 4 quick keys.
+        defaultButtonBindings[A_OptionsMenu] = SDL_CONTROLLER_BUTTON_BACK;
         defaultButtonBindings[A_QuickSave] = SDL_CONTROLLER_BUTTON_GUIDE;
-        defaultButtonBindings[A_QuickKey1] = SDL_CONTROLLER_BUTTON_DPAD_UP;
-        defaultButtonBindings[A_QuickKey2] = SDL_CONTROLLER_BUTTON_DPAD_LEFT;
-        defaultButtonBindings[A_QuickKey3] = SDL_CONTROLLER_BUTTON_DPAD_DOWN;
-        defaultButtonBindings[A_QuickKey4] = SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
+        defaultButtonBindings[A_MoveForward] = SDL_CONTROLLER_BUTTON_DPAD_UP;
+        defaultButtonBindings[A_MoveLeft] = SDL_CONTROLLER_BUTTON_DPAD_LEFT;
+        defaultButtonBindings[A_MoveBackward] = SDL_CONTROLLER_BUTTON_DPAD_DOWN;
+        defaultButtonBindings[A_MoveRight] = SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
 
         std::map<int, int> defaultAxisBindings;
         defaultAxisBindings[A_MoveForwardBackward] = SDL_CONTROLLER_AXIS_LEFTY;
