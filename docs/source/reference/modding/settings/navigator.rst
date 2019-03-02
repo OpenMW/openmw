@@ -215,19 +215,10 @@ triangles per chunk
 
 Maximum number of triangles in each node of mesh AABB tree.
 
-recast scale factor
--------------------
-
-:Type:		floating point
-:Range:		> 0.0
-:Default:	0.013
-
-Scale of nav mesh coordinates to world coordinates.
-
 Expert Recastnavigation related settings
 ****************************************
 
-This section is for OpenMW developers who knows about Recastnavigation <https://github.com/recastnavigation/recastnavigation>`_ library and understands how it works.
+This section is for OpenMW developers who knows about `Recastnavigation <https://github.com/recastnavigation/recastnavigation>`_ library and understands how it works.
 
 cell height
 -----------
@@ -329,7 +320,7 @@ max polygons per tile
 
 Maximum number of polygons per nav mesh tile. Maximum number of nav mesh tiles depends on
 this value. 22 bits is a limit to store both tile identifier and polygon identifier (tiles = 2^(22 - log2(polygons))).
-See recastnavigation <https://github.com/recastnavigation/recastnavigation>`_ for more details.
+See `recastnavigation <https://github.com/recastnavigation/recastnavigation>`_ for more details.
 
 max verts per poly
 ------------------
