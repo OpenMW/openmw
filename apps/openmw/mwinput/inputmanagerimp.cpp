@@ -518,28 +518,17 @@ namespace MWInput
                 // joystick movement
                 float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue();
                 float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue();
-                if (xAxis < .5)
+                if (xAxis != .5)
                 {
                     triedToMove = true;
-                    mPlayer->setLeftRight (-1);
-                }
-                else if (xAxis > .5)
-                {
-                    triedToMove = true;
-                    mPlayer->setLeftRight (1);
+                    mPlayer->setLeftRight((xAxis - 0.5f) * 2);
                 }
 
-                if (yAxis < .5)
+                if (yAxis != .5)
                 {
                     triedToMove = true;
                     mPlayer->setAutoMove (false);
-                    mPlayer->setForwardBackward (1);
-                }
-                else if (yAxis > .5)
-                {
-                    triedToMove = true;
-                    mPlayer->setAutoMove (false);
-                    mPlayer->setForwardBackward (-1);
+                    mPlayer->setForwardBackward((yAxis - 0.5f) * 2 * -1);
                 }
                 else if(mPlayer->getAutoMove())
                 {

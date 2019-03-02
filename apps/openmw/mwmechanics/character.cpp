@@ -1956,6 +1956,23 @@ void CharacterController::update(float duration, bool animationOnly)
         osg::Vec3f rot = cls.getRotationVector(mPtr);
 
         speed = cls.getSpeed(mPtr);
+        if(isPlayer)
+        {
+            // Joystick anologue movement.
+            float xAxis = std::abs(cls.getMovementSettings(mPtr).mPosition[0]);
+            float yAxis = std::abs(cls.getMovementSettings(mPtr).mPosition[1]);
+            float analogueMovement = ((xAxis > yAxis) ? xAxis : yAxis);
+
+            // If Strafing, our max speed is slower so multiply by X axis instead.
+            if(std::abs(vec.x()/2.0f) > std::abs(vec.y()))
+                analogueMovement = xAxis;
+
+            // Due to the half way split between walking/running, we multiply speed by 2 while walking, unless a keyboard was used.
+            if(!isrunning && !sneak && !flying && analogueMovement <= 0.5f)
+                speed *= 2;
+
+            speed *= (analogueMovement);
+        }
 
         vec.x() *= speed;
         vec.y() *= speed;
