@@ -32,13 +32,16 @@ namespace Terrain
 
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, int lod, unsigned int lodFlags);
 
+        void setCullingActive(bool active) { mCullingActive = active; }
+        void setCompositeMapSize(unsigned int size) { mCompositeMapSize = size; }
+        void setCompositeMapLevel(float level) { mCompositeMapLevel = level; }
+        void setMaxCompositeGeometrySize(float maxCompGeometrySize) { mMaxCompGeometrySize = maxCompGeometrySize; }
+
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 
         void clearCache() override;
 
         void releaseGLObjects(osg::State* state) override;
-
-        void setCullingActive(bool active);
 
     private:
         osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, int lod, unsigned int lodFlags);
@@ -56,6 +59,8 @@ namespace Terrain
         BufferCache mBufferCache;
 
         unsigned int mCompositeMapSize;
+        float mCompositeMapLevel;
+        float mMaxCompGeometrySize;
 
         bool mCullingActive;
     };

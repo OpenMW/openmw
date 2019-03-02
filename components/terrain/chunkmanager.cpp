@@ -28,6 +28,8 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
     , mTextureManager(textureManager)
     , mCompositeMapRenderer(renderer)
     , mCompositeMapSize(512)
+    , mCompositeMapLevel(1.f)
+    , mMaxCompGeometrySize(1.f)
     , mCullingActive(true)
 {
 
@@ -68,11 +70,6 @@ void ChunkManager::releaseGLObjects(osg::State *state)
     mBufferCache.releaseGLObjects(state);
 }
 
-void ChunkManager::setCullingActive(bool active)
-{
-    mCullingActive = active;
-}
-
 osg::ref_ptr<osg::Texture2D> ChunkManager::createCompositeMapRTT()
 {
     osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
@@ -89,7 +86,7 @@ osg::ref_ptr<osg::Texture2D> ChunkManager::createCompositeMapRTT()
 
 void ChunkManager::createCompositeMapGeometry(float chunkSize, const osg::Vec2f& chunkCenter, const osg::Vec4f& texCoords, CompositeMap& compositeMap)
 {
-    if (chunkSize > 1.f)
+    if (chunkSize > mMaxCompGeometrySize)
     {
         createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(chunkSize/4.f, chunkSize/4.f), osg::Vec4f(texCoords.x() + texCoords.z()/2.f, texCoords.y(), texCoords.z()/2.f, texCoords.w()/2.f), compositeMap);
         createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(-chunkSize/4.f, chunkSize/4.f), osg::Vec4f(texCoords.x(), texCoords.y(), texCoords.z()/2.f, texCoords.w()/2.f), compositeMap);
@@ -199,7 +196,7 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     geometry->addPrimitiveSet(mBufferCache.getIndexBuffer(numVerts, lodFlags));
 
-    bool useCompositeMap = chunkSize >= 1.f;
+    bool useCompositeMap = chunkSize >= mCompositeMapLevel;
     unsigned int numUvSets = useCompositeMap ? 1 : 2;
 
     for (unsigned int i=0; i<numUvSets; ++i)

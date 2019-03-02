@@ -19,7 +19,8 @@ namespace Terrain
     class QuadTreeWorld : public Terrain::World
     {
     public:
-        QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask=~0, int borderMask=0);
+        QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask, int compMapResolution, float comMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize);
+
         ~QuadTreeWorld();
 
         void accept(osg::NodeVisitor& nv);
@@ -44,6 +45,8 @@ namespace Terrain
 
         OpenThreads::Mutex mQuadTreeMutex;
         bool mQuadTreeBuilt;
+        float mLodFactor;
+        int mVertexLodMod;
     };
 
 }
