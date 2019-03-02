@@ -670,9 +670,9 @@ namespace MWGui
         // Delete any dialogs which are no longer in use
         if (!mGarbageDialogs.empty())
         {
-            for (std::vector<Layout*>::iterator it = mGarbageDialogs.begin(); it != mGarbageDialogs.end(); ++it)
+            for (Layout* widget : mGarbageDialogs)
             {
-                delete *it;
+                delete widget;
             }
             mGarbageDialogs.clear();
         }
@@ -1211,14 +1211,13 @@ namespace MWGui
     {
         mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
 
-        for (Settings::CategorySettingVector::const_iterator it = changed.begin();
-            it != changed.end(); ++it)
+        for (const auto& setting : changed)
         {
-            if (it->first == "HUD" && it->second == "crosshair")
+            if (setting.first == "HUD" && setting.second == "crosshair")
                 mCrosshairEnabled = Settings::Manager::getBool ("crosshair", "HUD");
-            else if (it->first == "GUI" && it->second == "subtitles")
+            else if (setting.first == "GUI" && setting.second == "subtitles")
                 mSubtitlesEnabled = Settings::Manager::getBool ("subtitles", "GUI");
-            else if (it->first == "GUI" && it->second == "menu transparency")
+            else if (setting.first == "GUI" && setting.second == "menu transparency")
                 setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
         }
     }

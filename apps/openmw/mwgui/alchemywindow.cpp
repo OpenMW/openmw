@@ -238,15 +238,15 @@ namespace MWGui
         std::set<MWMechanics::EffectKey> effectIds = mAlchemy->listEffects();
         Widgets::SpellEffectList list;
         unsigned int effectIndex=0;
-        for (std::set<MWMechanics::EffectKey>::iterator it2 = effectIds.begin(); it2 != effectIds.end(); ++it2)
+        for (const MWMechanics::EffectKey& effectKey : effectIds)
         {
             Widgets::SpellEffectParams params;
-            params.mEffectID = it2->mId;
-            const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(it2->mId);
+            params.mEffectID = effectKey.mId;
+            const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectKey.mId);
             if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
-                params.mSkill = it2->mArg;
+                params.mSkill = effectKey.mArg;
             else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
-                params.mAttribute = it2->mArg;
+                params.mAttribute = effectKey.mArg;
             params.mIsConstant = true;
             params.mNoTarget = true;
 

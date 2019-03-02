@@ -433,10 +433,8 @@ namespace MWGui
 
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString(titleId, titleDefault), coord1, coord2);
 
-        SkillList::const_iterator end = skills.end();
-        for (SkillList::const_iterator it = skills.begin(); it != end; ++it)
+        for (const int skillId : skills)
         {
-            int skillId = *it;
             if (skillId < 0 || skillId >= ESM::Skill::Length) // Skip unknown skill indexes
                 continue;
             const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
@@ -499,9 +497,9 @@ namespace MWGui
     {
         mChanged = false;
 
-        for (std::vector<MyGUI::Widget*>::iterator it = mSkillWidgets.begin(); it != mSkillWidgets.end(); ++it)
+        for (MyGUI::Widget* widget : mSkillWidgets)
         {
-            MyGUI::Gui::getInstance().destroyWidget(*it);
+            MyGUI::Gui::getInstance().destroyWidget(widget);
         }
         mSkillWidgets.clear();
 
@@ -550,11 +548,11 @@ namespace MWGui
             const std::set<std::string> &expelled = PCstats.getExpelled();
 
             bool firstFaction=true;
-            FactionList::const_iterator end = mFactions.end();
-            for (FactionList::const_iterator it = mFactions.begin(); it != end; ++it)
+            for (auto& factionPair : mFactions)
             {
+                const std::string& factionId = factionPair.first;
                 const ESM::Faction *faction =
-                    store.get<ESM::Faction>().find(it->first);
+                    store.get<ESM::Faction>().find(factionId);
                 if (faction->mData.mIsHidden == 1)
                     continue;
 
@@ -575,11 +573,11 @@ namespace MWGui
 
                 text += std::string("#{fontcolourhtml=header}") + faction->mName;
 
-                if (expelled.find(it->first) != expelled.end())
+                if (expelled.find(factionId) != expelled.end())
                     text += "\n#{fontcolourhtml=normal}#{sExpelled}";
                 else
                 {
-                    int rank = it->second;
+                    int rank = factionPair.second;
                     rank = std::max(0, std::min(9, rank));
                     text += std::string("\n#{fontcolourhtml=normal}") + faction->mRanks[rank];
 

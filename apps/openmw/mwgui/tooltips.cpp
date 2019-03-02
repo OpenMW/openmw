@@ -226,18 +226,17 @@ namespace MWGui
                         MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(focus->getUserString("Spell"));
                     info.caption = spell->mName;
                     Widgets::SpellEffectList effects;
-                    std::vector<ESM::ENAMstruct>::const_iterator end = spell->mEffects.mList.end();
-                    for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != end; ++it)
+                    for (const ESM::ENAMstruct& spellEffect : spell->mEffects.mList)
                     {
                         Widgets::SpellEffectParams params;
-                        params.mEffectID = it->mEffectID;
-                        params.mSkill = it->mSkill;
-                        params.mAttribute = it->mAttribute;
-                        params.mDuration = it->mDuration;
-                        params.mMagnMin = it->mMagnMin;
-                        params.mMagnMax = it->mMagnMax;
-                        params.mRange = it->mRange;
-                        params.mArea = it->mArea;
+                        params.mEffectID = spellEffect.mEffectID;
+                        params.mSkill = spellEffect.mSkill;
+                        params.mAttribute = spellEffect.mAttribute;
+                        params.mDuration = spellEffect.mDuration;
+                        params.mMagnMin = spellEffect.mMagnMin;
+                        params.mMagnMax = spellEffect.mMagnMax;
+                        params.mRange = spellEffect.mRange;
+                        params.mArea = spellEffect.mArea;
                         params.mIsConstant = (spell->mData.mType == ESM::Spell::ST_Ability);
                         params.mNoTarget = false;
                         effects.push_back(params);
@@ -260,14 +259,13 @@ namespace MWGui
                     tooltip->setVisible(true);
 
                     std::map<std::string, std::string> userStrings = focus->getUserStrings();
-                    for (std::map<std::string, std::string>::iterator it = userStrings.begin();
-                        it != userStrings.end(); ++it)
+                    for (auto& userStringPair : userStrings)
                     {
-                        size_t underscorePos = it->first.find("_");
+                        size_t underscorePos = userStringPair.first.find("_");
                         if (underscorePos == std::string::npos)
                             continue;
-                        std::string key = it->first.substr(0, underscorePos);
-                        std::string widgetName = it->first.substr(underscorePos+1, it->first.size()-(underscorePos+1));
+                        std::string key = userStringPair.first.substr(0, underscorePos);
+                        std::string widgetName = userStringPair.first.substr(underscorePos+1, userStringPair.first.size()-(underscorePos+1));
 
                         type = "Property";
                         size_t caretPos = key.find("^");
@@ -280,9 +278,9 @@ namespace MWGui
                         MyGUI::Widget* w;
                         getWidget(w, widgetName);
                         if (type == "Property")
-                            w->setProperty(key, it->second);
+                            w->setProperty(key, userStringPair.second);
                         else if (type == "UserData")
-                            w->setUserString(key, it->second);
+                            w->setUserString(key, userStringPair.second);
                     }
 
                     tooltipSize = tooltip->getSize();
@@ -458,7 +456,7 @@ namespace MWGui
         MyGUI::IntSize totalSize = MyGUI::IntSize( std::min(std::max(textSize.width,captionSize.width + ((image != "") ? imageCaptionHPadding : 0)),maximumWidth),
             ((text != "") ? textSize.height + imageCaptionVPadding : 0) + captionHeight );
 
-        for (std::vector<std::string>::const_iterator it = info.notes.begin(); it != info.notes.end(); ++it)
+        for (const std::string& note : info.notes)
         {
             MyGUI::ImageBox* icon = mDynamicToolTipBox->createWidget<MyGUI::ImageBox>("MarkerButton",
                 MyGUI::IntCoord(padding.left, totalSize.height+padding.top, 8, 8), MyGUI::Align::Default);
@@ -468,7 +466,7 @@ namespace MWGui
                                                                                     MyGUI::Align::Default);
             edit->setEditMultiLine(true);
             edit->setEditWordWrap(true);
-            edit->setCaption(*it);
+            edit->setCaption(note);
             edit->setSize(edit->getWidth(), edit->getTextSize().height);
             icon->setPosition(icon->getLeft(),(edit->getTop()+edit->getBottom())/2-icon->getHeight()/2);
             totalSize.height += std::max(edit->getHeight(), icon->getHeight());
@@ -653,12 +651,12 @@ namespace MWGui
         std::vector<std::pair<std::string, int> > itemOwners =
                 MWBase::Environment::get().getMechanicsManager()->getStolenItemOwners(cellref.getRefId());
 
-        for (std::vector<std::pair<std::string, int> >::const_iterator it = itemOwners.begin(); it != itemOwners.end(); ++it)
+        for (std::pair<std::string, int>& owner : itemOwners)
         {
-            if (it->second == std::numeric_limits<int>::max())
-                ret += std::string("\nStolen from ") + it->first; // for legacy (ESS) savegames
+            if (owner.second == std::numeric_limits<int>::max())
+                ret += std::string("\nStolen from ") + owner.first; // for legacy (ESS) savegames
             else
-                ret += std::string("\nStolen ") + MyGUI::utility::toString(it->second) + " from " + it->first;
+                ret += std::string("\nStolen ") + MyGUI::utility::toString(owner.second) + " from " + owner.first;
         }
 
         ret += getMiscString(cellref.getGlobalVariable(), "Global");
@@ -732,17 +730,16 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
 
         bool isFirst = true;
-        MWWorld::Store<ESM::Skill>::iterator it = skills.begin();
-        for (; it != skills.end(); ++it)
+        for (auto& skillPair : skills)
         {
-            if (it->second.mData.mSpecialization == specId)
+            if (skillPair.second.mData.mSpecialization == specId)
             {
                 if (isFirst)
                     isFirst = false;
                 else
                     specText += "\n";
 
-                specText += std::string("#{") + ESM::Skill::sSkillNameIds[it->first] + "}";
+                specText += std::string("#{") + ESM::Skill::sSkillNameIds[skillPair.first] + "}";
             }
         }
         widget->setUserString("Caption_ColumnText", specText);
@@ -767,9 +764,8 @@ namespace MWGui
 
         std::vector<std::string> abilities, powers, spells;
 
-        for (std::vector<std::string>::const_iterator it = sign->mPowers.mList.begin(); it != sign->mPowers.mList.end(); ++it)
+        for (const std::string& spellId : sign->mPowers.mList)
         {
-            const std::string &spellId = *it;
             const ESM::Spell *spell = store.get<ESM::Spell>().search(spellId);
             if (!spell)
                 continue; // Skip spells which cannot be found
@@ -797,14 +793,14 @@ namespace MWGui
 
         for (int category = 0; category < 3; ++category)
         {
-            for (std::vector<std::string>::const_iterator it = categories[category].spells.begin(); it != categories[category].spells.end(); ++it)
+            bool addHeader = true;
+            for (const std::string& spellId : categories[category].spells)
             {
-                if (it == categories[category].spells.begin())
+                if (addHeader)
                 {
                     text += std::string("\n\n#{fontcolourhtml=header}") + std::string("#{") + categories[category].label + "}";
+                    addHeader = false;
                 }
-
-                const std::string &spellId = *it;
 
                 const ESM::Spell *spell = store.get<ESM::Spell>().find(spellId);
                 text += "\n#{fontcolourhtml=normal}" + spell->mName;
