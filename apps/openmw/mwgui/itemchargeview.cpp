@@ -130,13 +130,13 @@ namespace MWGui
     {
         int currentY = 0;
 
-        for (Lines::const_iterator iter = mLines.begin(); iter != mLines.end(); ++iter)
+        for (Line& line : mLines)
         {
-            iter->mText->setCoord(8, currentY, mScrollView->getWidth()-8, 18);
+            line.mText->setCoord(8, currentY, mScrollView->getWidth()-8, 18);
             currentY += 19;
 
-            iter->mIcon->setCoord(16, currentY, 32, 32);
-            iter->mCharge->setCoord(72, currentY+2, std::max(199, mScrollView->getWidth()-72-38), 20);
+            line.mIcon->setCoord(16, currentY, 32, 32);
+            line.mCharge->setCoord(72, currentY+2, std::max(199, mScrollView->getWidth()-72-38), 20);
             currentY += 32 + 4;
         }
 

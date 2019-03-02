@@ -222,18 +222,17 @@ namespace MWGui
             const ESM::Spell *spell = store.get<ESM::Spell>().search(mId);
             MYGUI_ASSERT(spell, "spell with id '" << mId << "' not found");
 
-            std::vector<ESM::ENAMstruct>::const_iterator end = spell->mEffects.mList.end();
-            for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != end; ++it)
+            for (const ESM::ENAMstruct& effectInfo : spell->mEffects.mList)
             {
                 MWSpellEffectPtr effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
                 SpellEffectParams params;
-                params.mEffectID = it->mEffectID;
-                params.mSkill = it->mSkill;
-                params.mAttribute = it->mAttribute;
-                params.mDuration = it->mDuration;
-                params.mMagnMin = it->mMagnMin;
-                params.mMagnMax = it->mMagnMax;
-                params.mRange = it->mRange;
+                params.mEffectID = effectInfo.mEffectID;
+                params.mSkill = effectInfo.mSkill;
+                params.mAttribute = effectInfo.mAttribute;
+                params.mDuration = effectInfo.mDuration;
+                params.mMagnMin = effectInfo.mMagnMin;
+                params.mMagnMax = effectInfo.mMagnMax;
+                params.mRange = effectInfo.mRange;
                 params.mIsConstant = (flags & MWEffectList::EF_Constant) != 0;
                 params.mNoTarget = (flags & MWEffectList::EF_NoTarget);
                 effect->setSpellEffect(params);
@@ -289,13 +288,12 @@ namespace MWGui
             MWSpellEffectPtr effect = nullptr;
             int maxwidth = coord.width;
 
-            for (SpellEffectList::iterator it=mEffectList.begin();
-                it != mEffectList.end(); ++it)
+            for (auto& effectInfo : mEffectList)
             {
                 effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
-                it->mIsConstant = (flags & EF_Constant) || it->mIsConstant;
-                it->mNoTarget = (flags & EF_NoTarget) || it->mNoTarget;
-                effect->setSpellEffect(*it);
+                effectInfo.mIsConstant = (flags & EF_Constant) || effectInfo.mIsConstant;
+                effectInfo.mNoTarget = (flags & EF_NoTarget) || effectInfo.mNoTarget;
+                effect->setSpellEffect(effectInfo);
                 effects.push_back(effect);
                 if (effect->getRequestedWidth() > maxwidth)
                     maxwidth = effect->getRequestedWidth();
@@ -304,9 +302,9 @@ namespace MWGui
             }
 
             // ... then adjust the size for all widgets
-            for (std::vector<MyGUI::Widget*>::iterator it = effects.begin(); it != effects.end(); ++it)
+            for (MyGUI::Widget* effectWidget : effects)
             {
-                effect = (*it)->castType<MWSpellEffect>();
+                effect = effectWidget->castType<MWSpellEffect>();
                 bool needcenter = center && (maxwidth > effect->getRequestedWidth());
                 int diff = maxwidth - effect->getRequestedWidth();
                 if (needcenter)
@@ -339,18 +337,17 @@ namespace MWGui
         SpellEffectList MWEffectList::effectListFromESM(const ESM::EffectList* effects)
         {
             SpellEffectList result;
-            std::vector<ESM::ENAMstruct>::const_iterator end = effects->mList.end();
-            for (std::vector<ESM::ENAMstruct>::const_iterator it = effects->mList.begin(); it != end; ++it)
+            for (const ESM::ENAMstruct& effectInfo : effects->mList)
             {
                 SpellEffectParams params;
-                params.mEffectID = it->mEffectID;
-                params.mSkill = it->mSkill;
-                params.mAttribute = it->mAttribute;
-                params.mDuration = it->mDuration;
-                params.mMagnMin = it->mMagnMin;
-                params.mMagnMax = it->mMagnMax;
-                params.mRange = it->mRange;
-                params.mArea = it->mArea;
+                params.mEffectID = effectInfo.mEffectID;
+                params.mSkill = effectInfo.mSkill;
+                params.mAttribute = effectInfo.mAttribute;
+                params.mDuration = effectInfo.mDuration;
+                params.mMagnMin = effectInfo.mMagnMin;
+                params.mMagnMax = effectInfo.mMagnMax;
+                params.mRange = effectInfo.mRange;
+                params.mArea = effectInfo.mArea;
                 result.push_back(params);
             }
             return result;

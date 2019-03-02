@@ -353,9 +353,9 @@ namespace MWGui
 
     void ReviewDialog::updateSkillArea()
     {
-        for (std::vector<MyGUI::Widget*>::iterator it = mSkillWidgets.begin(); it != mSkillWidgets.end(); ++it)
+        for (MyGUI::Widget* skillWidget : mSkillWidgets)
         {
-            MyGUI::Gui::getInstance().destroyWidget(*it);
+            MyGUI::Gui::getInstance().destroyWidget(skillWidget);
         }
         mSkillWidgets.clear();
 
@@ -388,19 +388,18 @@ namespace MWGui
             attributes[i] = mAttributeWidgets[i]->getAttributeValue().getBase();
 
         std::vector<std::string> selectedSpells = MWMechanics::autoCalcPlayerSpells(skills, attributes, race);
-        for (std::vector<std::string>::iterator iter = selectedSpells.begin(); iter != selectedSpells.end(); ++iter)
+        for (std::string& spellId : selectedSpells)
         {
-            std::string lower = Misc::StringUtils::lowerCase(*iter);
+            std::string lower = Misc::StringUtils::lowerCase(spellId);
             if (std::find(spells.begin(), spells.end(), lower) == spells.end())
                 spells.push_back(lower);
         }
 
         if (race)
         {
-            for (std::vector<std::string>::const_iterator iter = race->mPowers.mList.begin();
-                 iter != race->mPowers.mList.end(); ++iter)
+            for (const std::string& spellId : race->mPowers.mList)
             {
-                std::string lower = Misc::StringUtils::lowerCase(*iter);
+                std::string lower = Misc::StringUtils::lowerCase(spellId);
                 if (std::find(spells.begin(), spells.end(), lower) == spells.end())
                     spells.push_back(lower);
             }
@@ -409,10 +408,9 @@ namespace MWGui
         if (!mBirthSignId.empty())
         {
             const ESM::BirthSign* sign = MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().find(mBirthSignId);
-            for (std::vector<std::string>::const_iterator iter = sign->mPowers.mList.begin();
-                 iter != sign->mPowers.mList.end(); ++iter)
+            for (const std::string& spellId : sign->mPowers.mList)
             {
-                std::string lower = Misc::StringUtils::lowerCase(*iter);
+                std::string lower = Misc::StringUtils::lowerCase(spellId);
                 if (std::find(spells.begin(), spells.end(), lower) == spells.end())
                     spells.push_back(lower);
             }
@@ -421,27 +419,27 @@ namespace MWGui
         if (!mSkillWidgets.empty())
             addSeparator(coord1, coord2);
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeAbility", "Abilities"), coord1, coord2);
-        for (std::vector<std::string>::const_iterator iter = spells.begin(); iter != spells.end(); ++iter)
+        for (std::string& spellId : spells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(*iter);
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
             if (spell->mData.mType == ESM::Spell::ST_Ability)
                 addItem(spell, coord1, coord2);
         }
 
         addSeparator(coord1, coord2);
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypePower", "Powers"), coord1, coord2);
-        for (std::vector<std::string>::const_iterator iter = spells.begin(); iter != spells.end(); ++iter)
+        for (std::string& spellId : spells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(*iter);
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
             if (spell->mData.mType == ESM::Spell::ST_Power)
                 addItem(spell, coord1, coord2);
         }
 
         addSeparator(coord1, coord2);
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeSpell", "Spells"), coord1, coord2);
-        for (std::vector<std::string>::const_iterator iter = spells.begin(); iter != spells.end(); ++iter)
+        for (std::string& spellId : spells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(*iter);
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
             if (spell->mData.mType == ESM::Spell::ST_Spell)
                 addItem(spell, coord1, coord2);
         }

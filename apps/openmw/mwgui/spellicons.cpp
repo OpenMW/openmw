@@ -65,10 +65,11 @@ namespace MWGui
 
         int w=2;
 
-        for (std::map <int, std::vector<MagicEffectInfo> >::const_iterator it = effects.begin(); it != effects.end(); ++it)
+        for (auto& effectInfoPair : effects)
         {
+            const int effectId = effectInfoPair.first;
             const ESM::MagicEffect* effect =
-                MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(it->first);
+                MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(effectId);
 
             float remainingDuration = 0;
             float totalDuration = 0;
@@ -77,46 +78,50 @@ namespace MWGui
 
             static const float fadeTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fMagicStartIconBlink")->mValue.getFloat();
 
-            for (std::vector<MagicEffectInfo>::const_iterator effectIt = it->second.begin();
-                 effectIt != it->second.end(); ++effectIt)
+            std::vector<MagicEffectInfo>& effectInfos = effectInfoPair.second;
+            bool addNewLine = true;
+            for (const MagicEffectInfo& effectInfo : effectInfos)
             {
-                if (effectIt != it->second.begin())
+                if (addNewLine)
+                {
                     sourcesDescription += "\n";
+                    addNewLine = false;
+                }
 
                 // if at least one of the effect sources is permanent, the effect will never wear off
-                if (effectIt->mPermanent)
+                if (effectInfo.mPermanent)
                 {
                     remainingDuration = fadeTime;
                     totalDuration = fadeTime;
                 }
                 else
                 {
-                    remainingDuration = std::max(remainingDuration, effectIt->mRemainingTime);
-                    totalDuration = std::max(totalDuration, effectIt->mTotalTime);
+                    remainingDuration = std::max(remainingDuration, effectInfo.mRemainingTime);
+                    totalDuration = std::max(totalDuration, effectInfo.mTotalTime);
                 }
 
-                sourcesDescription +=  effectIt->mSource;
+                sourcesDescription += effectInfo.mSource;
 
                 if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
                     sourcesDescription += " (" +
                             MWBase::Environment::get().getWindowManager()->getGameSettingString(
-                                ESM::Skill::sSkillNameIds[effectIt->mKey.mArg], "") + ")";
+                                ESM::Skill::sSkillNameIds[effectInfo.mKey.mArg], "") + ")";
                 if (effect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
                     sourcesDescription += " (" +
                             MWBase::Environment::get().getWindowManager()->getGameSettingString(
-                                ESM::Attribute::sGmstAttributeIds[effectIt->mKey.mArg], "") + ")";
+                                ESM::Attribute::sGmstAttributeIds[effectInfo.mKey.mArg], "") + ")";
 
                 ESM::MagicEffect::MagnitudeDisplayType displayType = effect->getMagnitudeDisplayType();
                 if (displayType == ESM::MagicEffect::MDT_TimesInt)
                 {
                     std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
                     std::stringstream formatter;
-                    formatter << std::fixed << std::setprecision(1) << " " << (effectIt->mMagnitude / 10.0f) << timesInt;
+                    formatter << std::fixed << std::setprecision(1) << " " << (effectInfo.mMagnitude / 10.0f) << timesInt;
                     sourcesDescription += formatter.str();
                 }
                 else if ( displayType != ESM::MagicEffect::MDT_None )
                 {
-                    sourcesDescription += ": " + MyGUI::utility::toString(effectIt->mMagnitude);
+                    sourcesDescription += ": " + MyGUI::utility::toString(effectInfo.mMagnitude);
 
                     if ( displayType == ESM::MagicEffect::MDT_Percentage )
                         sourcesDescription += MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", "");
@@ -124,32 +129,35 @@ namespace MWGui
                         sourcesDescription += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sfeet", "");
                     else if ( displayType == ESM::MagicEffect::MDT_Level )
                     {
-                        sourcesDescription += " " + ((effectIt->mMagnitude > 1) ?
+                        sourcesDescription += " " + ((effectInfo.mMagnitude > 1) ?
                             MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevels", "") :
                             MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevel", "") );
                     }
                     else // ESM::MagicEffect::MDT_Points
                     {
-                        sourcesDescription += " " + ((effectIt->mMagnitude > 1) ?
+                        sourcesDescription += " " + ((effectInfo.mMagnitude > 1) ?
                             MWBase::Environment::get().getWindowManager()->getGameSettingString("spoints", "") :
                             MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", "") );
                     }
                 }
-                if (effectIt->mRemainingTime > -1 &&
+                if (effectInfo.mRemainingTime > -1 &&
                         Settings::Manager::getBool("show effect duration","Game")) {
                     sourcesDescription += " #{sDuration}: ";
-                    float duration = effectIt->mRemainingTime;
-                    if (duration > 3600) {
+                    float duration = effectInfo.mRemainingTime;
+                    if (duration > 3600)
+                    {
                         int hour = duration / 3600;
                         duration -= hour*3600;
                         sourcesDescription += MWGui::ToolTips::toString(hour) + "h";
                     }
-                    if (duration > 60) {
+                    if (duration > 60)
+                    {
                         int minute = duration / 60;
                         duration -= minute*60;
                         sourcesDescription += MWGui::ToolTips::toString(minute) + "m";
                     }
-                    if (duration > 0.1) {
+                    if (duration > 0.1)
+                    {
                         sourcesDescription += MWGui::ToolTips::toString(duration) + "s";
                     }
                 }
@@ -158,15 +166,15 @@ namespace MWGui
             if (remainingDuration > 0.f)
             {
                 MyGUI::ImageBox* image;
-                if (mWidgetMap.find(it->first) == mWidgetMap.end())
+                if (mWidgetMap.find(effectId) == mWidgetMap.end())
                 {
                     image = parent->createWidget<MyGUI::ImageBox>
                         ("ImageBox", MyGUI::IntCoord(w,2,16,16), MyGUI::Align::Default);
-                    mWidgetMap[it->first] = image;
+                    mWidgetMap[effectId] = image;
 
                     image->setImageTexture(MWBase::Environment::get().getWindowManager()->correctIconPath(effect->mIcon));
 
-                    std::string name = ESM::MagicEffect::effectIdToString (it->first);
+                    std::string name = ESM::MagicEffect::effectIdToString (effectId);
 
                     ToolTipInfo tooltipInfo;
                     tooltipInfo.caption = "#{" + name + "}";
@@ -178,7 +186,7 @@ namespace MWGui
                     image->setUserString("ToolTipType", "ToolTipInfo");
                 }
                 else
-                    image = mWidgetMap[it->first];
+                    image = mWidgetMap[effectId];
 
                 image->setPosition(w,2);
                 image->setVisible(true);
@@ -191,9 +199,9 @@ namespace MWGui
                 if (totalDuration >= fadeTime && fadeTime > 0.f)
                     image->setAlpha(std::min(remainingDuration/fadeTime, 1.f));
             }
-            else if (mWidgetMap.find(it->first) != mWidgetMap.end())
+            else if (mWidgetMap.find(effectId) != mWidgetMap.end())
             {
-                mWidgetMap[it->first]->setVisible(false);
+                mWidgetMap[effectId]->setVisible(false);
             }
         }
 
@@ -208,10 +216,10 @@ namespace MWGui
         }
 
         // hide inactive effects
-        for (std::map<int, MyGUI::ImageBox*>::iterator it = mWidgetMap.begin(); it != mWidgetMap.end(); ++it)
+        for (auto& widgetPair : mWidgetMap)
         {
-            if (effects.find(it->first) == effects.end())
-                it->second->setVisible(false);
+            if (effects.find(widgetPair.first) == effects.end())
+                widgetPair.second->setVisible(false);
         }
     }
 

@@ -105,12 +105,12 @@ namespace MWGui
 
         Misc::StringUtils::replace(message, "%d", std::to_string(mDays).c_str(), 2);
 
-        for (std::set<int>::iterator it = skills.begin(); it != skills.end(); ++it)
+        for (const int& skill : skills)
         {
-            std::string skillName = gmst.find(ESM::Skill::sSkillNameIds[*it])->mValue.getString();
-            int skillValue = player.getClass().getNpcStats(player).getSkill(*it).getBase();
+            std::string skillName = gmst.find(ESM::Skill::sSkillNameIds[skill])->mValue.getString();
+            int skillValue = player.getClass().getNpcStats(player).getSkill(skill).getBase();
             std::string skillMsg = gmst.find("sNotifyMessage44")->mValue.getString();
-            if (*it == ESM::Skill::Sneak || *it == ESM::Skill::Security)
+            if (skill == ESM::Skill::Sneak || skill == ESM::Skill::Security)
                 skillMsg = gmst.find("sNotifyMessage39")->mValue.getString();
 
             Misc::StringUtils::replace(skillMsg, "%s", skillName.c_str(), 2);

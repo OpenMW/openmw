@@ -455,10 +455,8 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+        for (const ESM::ENAMstruct& effect : mEffects)
         {
-            const ESM::ENAMstruct& effect = *it;
-
             y += std::max(1.f, MWMechanics::calcEffectCost(effect));
 
             if (effect.mRange == ESM::RT_Target)
@@ -530,18 +528,17 @@ namespace MWGui
             if (spell->mData.mType != ESM::Spell::ST_Spell)
                 continue;
 
-            const std::vector<ESM::ENAMstruct>& list = spell->mEffects.mList;
-            for (std::vector<ESM::ENAMstruct>::const_iterator it2 = list.begin(); it2 != list.end(); ++it2)
+            for (const ESM::ENAMstruct& effectInfo : spell->mEffects.mList)
             {
-                const ESM::MagicEffect * effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(it2->mEffectID);
+                const ESM::MagicEffect * effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectInfo.mEffectID);
 
                 // skip effects that do not allow spellmaking/enchanting
                 int requiredFlags = (mType == Spellmaking) ? ESM::MagicEffect::AllowSpellmaking : ESM::MagicEffect::AllowEnchanting;
                 if (!(effect->mData.mFlags & requiredFlags))
                     continue;
 
-                if (std::find(knownEffects.begin(), knownEffects.end(), it2->mEffectID) == knownEffects.end())
-                    knownEffects.push_back(it2->mEffectID);
+                if (std::find(knownEffects.begin(), knownEffects.end(), effectInfo.mEffectID) == knownEffects.end())
+                    knownEffects.push_back(effectInfo.mEffectID);
             }
         }
 
@@ -550,23 +547,23 @@ namespace MWGui
         mAvailableEffectsList->clear ();
 
         int i=0;
-        for (std::vector<short>::const_iterator it = knownEffects.begin(); it != knownEffects.end(); ++it)
+        for (const short effectId : knownEffects)
         {
             mAvailableEffectsList->addItem(MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
-                                               ESM::MagicEffect::effectIdToString  (*it))->mValue.getString());
-            mButtonMapping[i] = *it;
+                                               ESM::MagicEffect::effectIdToString(effectId))->mValue.getString());
+            mButtonMapping[i] = effectId;
             ++i;
         }
         mAvailableEffectsList->adjustSize ();
         mAvailableEffectsList->scrollToTop();
 
-        for (std::vector<short>::const_iterator it = knownEffects.begin(); it != knownEffects.end(); ++it)
+        for (const short effectId : knownEffects)
         {
             std::string name = MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
-                                               ESM::MagicEffect::effectIdToString  (*it))->mValue.getString();
+                                               ESM::MagicEffect::effectIdToString(effectId))->mValue.getString();
             MyGUI::Widget* w = mAvailableEffectsList->getItemWidget(name);
 
-            ToolTips::createMagicEffectToolTip (w, *it);
+            ToolTips::createMagicEffectToolTip (w, effectId);
         }
 
         mEffects.clear();
@@ -646,9 +643,9 @@ namespace MWGui
         }
         else
         {
-            for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+            for (const ESM::ENAMstruct& effectInfo : mEffects)
             {
-                if (it->mEffectID == mSelectedKnownEffectId)
+                if (effectInfo.mEffectID == mSelectedKnownEffectId)
                 {
                     MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
                     return;
@@ -680,17 +677,17 @@ namespace MWGui
         MyGUI::IntSize size(0,0);
 
         int i = 0;
-        for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+        for (const ESM::ENAMstruct& effectInfo : mEffects)
         {
             Widgets::SpellEffectParams params;
-            params.mEffectID = it->mEffectID;
-            params.mSkill = it->mSkill;
-            params.mAttribute = it->mAttribute;
-            params.mDuration = it->mDuration;
-            params.mMagnMin = it->mMagnMin;
-            params.mMagnMax = it->mMagnMax;
-            params.mRange = it->mRange;
-            params.mArea = it->mArea;
+            params.mEffectID = effectInfo.mEffectID;
+            params.mSkill = effectInfo.mSkill;
+            params.mAttribute = effectInfo.mAttribute;
+            params.mDuration = effectInfo.mDuration;
+            params.mMagnMin = effectInfo.mMagnMin;
+            params.mMagnMax = effectInfo.mMagnMax;
+            params.mRange = effectInfo.mRange;
+            params.mArea = effectInfo.mArea;
             params.mIsConstant = mConstantEffect;
 
             MyGUI::Button* button = mUsedEffectsView->createWidget<MyGUI::Button>("", MyGUI::IntCoord(0, size.height, 0, 24), MyGUI::Align::Default);
