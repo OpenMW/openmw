@@ -94,7 +94,7 @@ field of view
 -------------
 
 :Type:		floating point
-:Range:		0-360
+:Range:		1-179
 :Default:	55.0
 
 Sets the camera field of view in degrees. Recommended values range from 30 degrees to 110 degrees.
@@ -109,7 +109,7 @@ first person field of view
 --------------------------
 
 :Type:		floating point
-:Range:		0-360
+:Range:		1-179
 :Default:	55.0
 
 This setting controls the field of view for first person meshes such as the player's hands and held objects.

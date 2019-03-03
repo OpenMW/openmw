@@ -371,8 +371,10 @@ namespace MWRender
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
-        mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
-        mFirstPersonFieldOfView = Settings::Manager::getFloat("first person field of view", "Camera");
+        float fov = Settings::Manager::getFloat("field of view", "Camera");
+        mFieldOfView = std::min(std::max(1.f, fov), 179.f);
+        float firstPersonFov = Settings::Manager::getFloat("first person field of view", "Camera");
+        mFirstPersonFieldOfView = std::min(std::max(1.f, firstPersonFov), 179.f);
         mStateUpdater->setFogEnd(mViewDistance);
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
@@ -1200,7 +1202,9 @@ namespace MWRender
         mUniformFar->set(mViewDistance);
 
         // Since our fog is not radial yet, we should take FOV in account, otherwise terrain near viewing distance may disappear.
-        float distanceMult = std::cos(osg::DegreesToRadians(mFieldOfView)/2.f);
+        // Limit FOV here just for sure, otherwise viewing distance can be too high.
+        fov = std::min(mFieldOfView, 140.f);
+        float distanceMult = std::cos(osg::DegreesToRadians(fov)/2.f);
         mTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f/distanceMult : 1.f));
     }
 
