@@ -1381,7 +1381,12 @@ namespace MWWorld
         ptr.getRefData().setPosition(pos);
 
         if(ptr.getRefData().getBaseNode() != 0)
+        {
             mWorldScene->updateObjectRotation(ptr, true);
+
+            if (const auto object = mPhysics->getObject(ptr))
+                updateNavigatorObject(object);
+        }
     }
 
     void World::adjustPosition(const Ptr &ptr, bool force)
