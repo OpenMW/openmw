@@ -2443,6 +2443,7 @@ namespace MWWorld
 
         applyLoopingParticles(player);
 
+        mDefaultHalfExtents = mPhysics->getOriginalHalfExtents(getPlayerPtr());
         mNavigator->addAgent(getPathfindingHalfExtents(getPlayerConstPtr()));
     }
 
@@ -3795,7 +3796,7 @@ namespace MWWorld
     osg::Vec3f World::getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const
     {
         if (actor.getCell()->isExterior())
-            return getHalfExtents(getPlayerConstPtr()); // Using player half extents for better performance
+            return mDefaultHalfExtents; // Using default half extents for better performance
         else
             return getHalfExtents(actor);
     }

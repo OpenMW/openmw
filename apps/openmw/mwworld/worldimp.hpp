@@ -111,6 +111,8 @@ namespace MWWorld
 
             std::string mUserDataPath;
 
+            osg::Vec3f mDefaultHalfExtents;
+
             // not implemented
             World (const World&);
             World& operator= (const World&);
