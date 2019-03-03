@@ -213,7 +213,7 @@
                 <Widget type="AutoSizedButton" skin="MW_Button" position="4 194 137 24" align="Left Bottom" name="ResetControlsButton">
                     <Property key="Caption" value="#{sControlsMenu1}"/>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 224 300 24" align="Left Bottom">
+                <Widget type="HBox" skin="" position="4 224 360 24" align="Left Bottom">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Bottom">
                         <UserString key="SettingCategory" value="Input"/>
                         <UserString key="SettingName" value="invert x axis"/>
