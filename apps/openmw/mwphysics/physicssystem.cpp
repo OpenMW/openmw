@@ -906,6 +906,14 @@ namespace MWPhysics
             return osg::Vec3f();
     }
 
+    osg::Vec3f PhysicsSystem::getOriginalHalfExtents(const MWWorld::ConstPtr &actor) const
+    {
+        if (const Actor* physactor = getActor(actor))
+            return physactor->getOriginalHalfExtents();
+        else
+            return osg::Vec3f();
+    }
+
     osg::Vec3f PhysicsSystem::getRenderingHalfExtents(const MWWorld::ConstPtr &actor) const
     {
         const Actor* physactor = getActor(actor);
