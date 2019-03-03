@@ -29,7 +29,10 @@ namespace testing
         for (const auto& v : value)
         {
             std::ostringstream stream;
-            stream << v;
+            stream << "osg::Vec3f("
+                   << std::setprecision(std::numeric_limits<float>::max_exponent10) << v.x() << ", "
+                   << std::setprecision(std::numeric_limits<float>::max_exponent10) << v.y() << ", "
+                   << std::setprecision(std::numeric_limits<float>::max_exponent10) << v.z() << ")";
             (*this) << stream.str() << ",\n";
         }
         return (*this) << "}";
