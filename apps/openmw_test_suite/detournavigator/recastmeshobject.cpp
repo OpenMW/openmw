@@ -69,4 +69,11 @@ namespace
         object.update(mTransform, AreaType_ground);
         EXPECT_FALSE(object.update(mTransform, AreaType_ground));
     }
+
+    TEST_F(DetourNavigatorRecastMeshObjectTest, update_for_changed_local_scaling_should_return_true)
+    {
+        RecastMeshObject object(mBoxShape, mTransform, AreaType_ground);
+        mBoxShape.setLocalScaling(btVector3(2, 2, 2));
+        EXPECT_TRUE(object.update(mTransform, AreaType_ground));
+    }
 }
