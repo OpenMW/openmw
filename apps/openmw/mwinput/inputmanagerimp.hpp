@@ -188,6 +188,7 @@ namespace MWInput
 
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
+        bool mGamepadGuiCursorEnabled;
 
         bool mDetectingKeyboard;
 
@@ -222,6 +223,9 @@ namespace MWInput
 
         void setPlayerControlsEnabled(bool enabled);
         void handleGuiArrowKey(int action);
+        // Return true if GUI consumes input.
+        bool gamepadToGuiControl(const SDL_ControllerButtonEvent &arg, bool release);
+        bool gamepadToGuiControl(const SDL_ControllerAxisEvent &arg);
 
         void updateCursorMode();
 
