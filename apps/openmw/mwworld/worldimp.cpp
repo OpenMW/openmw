@@ -1337,6 +1337,8 @@ namespace MWWorld
 
         if (mPhysics->getActor(ptr))
             mNavigator->addAgent(getPathfindingHalfExtents(ptr));
+        else if (const auto object = mPhysics->getObject(ptr))
+            mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
     }
 
     void World::rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust)
@@ -1570,19 +1572,20 @@ namespace MWWorld
 
     void World::updateNavigator()
     {
-        bool updated = false;
-
         mPhysics->forEachAnimatedObject([&] (const MWPhysics::Object* object)
         {
-            updated = updateNavigatorObject(object) || updated;
+            mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
         });
 
         for (const auto& door : mDoorStates)
             if (const auto object = mPhysics->getObject(door.first))
-                updated = updateNavigatorObject(object) || updated;
+                mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
 
-        if (updated)
+        if (mShouldUpdateNavigator)
+        {
             mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3());
+            mShouldUpdateNavigator = false;
+        }
     }
 
     bool World::updateNavigatorObject(const MWPhysics::Object* object)

@@ -13,6 +13,7 @@ namespace DetourNavigator
         : mShape(shape)
         , mTransform(transform)
         , mAreaType(areaType)
+        , mLocalScaling(shape.getLocalScaling())
         , mChildren(makeChildrenObjects(shape, mAreaType))
     {
     }
@@ -28,6 +29,11 @@ namespace DetourNavigator
         if (mAreaType != areaType)
         {
             mAreaType = areaType;
+            result = true;
+        }
+        if (!(mLocalScaling == mShape.get().getLocalScaling()))
+        {
+            mLocalScaling = mShape.get().getLocalScaling();
             result = true;
         }
         if (mShape.get().isCompound())

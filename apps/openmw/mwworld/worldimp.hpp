@@ -112,6 +112,7 @@ namespace MWWorld
             std::string mUserDataPath;
 
             osg::Vec3f mDefaultHalfExtents;
+            bool mShouldUpdateNavigator = false;
 
             // not implemented
             World (const World&);
