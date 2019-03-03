@@ -1298,6 +1298,9 @@ namespace MWWorld
             {
                 mPhysics->updatePosition(newPtr);
                 mPhysics->updatePtr(ptr, newPtr);
+
+                if (const auto object = mPhysics->getObject(newPtr))
+                    updateNavigatorObject(object);
             }
         }
         if (isPlayer)
