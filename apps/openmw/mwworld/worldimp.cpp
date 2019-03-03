@@ -1328,9 +1328,15 @@ namespace MWWorld
 
     void World::scaleObject (const Ptr& ptr, float scale)
     {
+        if (mPhysics->getActor(ptr))
+            mNavigator->removeAgent(getPathfindingHalfExtents(ptr));
+
         ptr.getCellRef().setScale(scale);
 
         mWorldScene->updateObjectScale(ptr);
+
+        if (mPhysics->getActor(ptr))
+            mNavigator->addAgent(getPathfindingHalfExtents(ptr));
     }
 
     void World::rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust)
