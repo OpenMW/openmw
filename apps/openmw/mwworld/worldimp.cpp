@@ -2408,7 +2408,7 @@ namespace MWWorld
         {
             // Remove the old CharacterController
             MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
-            mNavigator->removeAgent(mPhysics->getHalfExtents(getPlayerPtr()));
+            mNavigator->removeAgent(getPathfindingHalfExtents(getPlayerConstPtr()));
             mPhysics->remove(getPlayerPtr());
             mRendering->removePlayer(getPlayerPtr());
 
@@ -2443,7 +2443,7 @@ namespace MWWorld
 
         applyLoopingParticles(player);
 
-        mNavigator->addAgent(mPhysics->getHalfExtents(getPlayerPtr()));
+        mNavigator->addAgent(getPathfindingHalfExtents(getPlayerConstPtr()));
     }
 
     World::RestPermitted World::canRest () const
@@ -3418,6 +3418,11 @@ namespace MWWorld
         return mPlayer->getPlayer();
     }
 
+    MWWorld::ConstPtr World::getPlayerConstPtr() const
+    {
+        return mPlayer->getConstPlayer();
+    }
+
     void World::updateDialogueGlobals()
     {
         MWWorld::Ptr player = getPlayerPtr();
@@ -3785,6 +3790,14 @@ namespace MWWorld
     void World::setNavMeshNumberToRender(const std::size_t value)
     {
         mRendering->setNavMeshNumber(value);
+    }
+
+    osg::Vec3f World::getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const
+    {
+        if (actor.getCell()->isExterior())
+            return getHalfExtents(getPlayerConstPtr()); // Using player half extents for better performance
+        else
+            return getHalfExtents(actor);
     }
 
 }

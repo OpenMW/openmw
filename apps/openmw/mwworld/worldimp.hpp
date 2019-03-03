@@ -238,6 +238,7 @@ namespace MWWorld
 
             Player& getPlayer() override;
             MWWorld::Ptr getPlayerPtr() override;
+            MWWorld::ConstPtr getPlayerConstPtr() const override;
 
             const MWWorld::ESMStore& getStore() const override;
 
@@ -717,6 +718,9 @@ namespace MWWorld
             void removeActorPath(const MWWorld::ConstPtr& actor) const override;
 
             void setNavMeshNumberToRender(const std::size_t value) override;
+
+            /// Return physical half extents of the given actor to be used in pathfinding
+            osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const override;
     };
 }
 

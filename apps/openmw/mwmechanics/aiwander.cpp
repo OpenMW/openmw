@@ -155,9 +155,9 @@ namespace MWMechanics
             }
             else
             {
-                const osg::Vec3f playerHalfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(getPlayer()); // Using player half extents for better performance
+                const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
                 mPathFinder.buildPath(actor, pos.asVec3(), mDestination, actor.getCell(),
-                    getPathGridGraph(actor.getCell()), playerHalfExtents, getNavigatorFlags(actor));
+                    getPathGridGraph(actor.getCell()), halfExtents, getNavigatorFlags(actor));
             }
 
             if (mPathFinder.isPathConstructed())
@@ -312,10 +312,9 @@ namespace MWMechanics
             if ((!isWaterCreature && !destinationIsAtWater(actor, mDestination)) ||
                 (isWaterCreature && !destinationThroughGround(currentPosition, mDestination)))
             {
-                // Using player half extents for better performance
-                const osg::Vec3f playerHalfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(getPlayer());
+                const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
                 mPathFinder.buildPath(actor, currentPosition, mDestination, actor.getCell(),
-                    getPathGridGraph(actor.getCell()), playerHalfExtents, getNavigatorFlags(actor));
+                    getPathGridGraph(actor.getCell()), halfExtents, getNavigatorFlags(actor));
                 mPathFinder.addPointToPath(mDestination);
 
                 if (mPathFinder.isPathConstructed())
