@@ -471,6 +471,36 @@ namespace MWSound
         startRandomTitle();
     }
 
+    void SoundManager::playTitleMusic()
+    {
+        if (mCurrentPlaylist == "Title")
+            return;
+
+        if (mMusicFiles.find("Title") == mMusicFiles.end())
+        {
+            std::vector<std::string> filelist;
+            const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
+            // Is there an ini setting for this filename or something?
+            std::string filename = "music/special/morrowind title.mp3";
+            auto found = index.find(filename);
+            if (found != index.end())
+            {
+                filelist.emplace_back(found->first);
+                mMusicFiles["Title"] = filelist;
+            }
+            else
+            {
+                Log(Debug::Warning) << "Title music not found";
+                return;
+            }
+        }
+
+        if (mMusicFiles["Title"].empty())
+            return;
+
+        mCurrentPlaylist = "Title";
+        startRandomTitle();
+    }
 
     void SoundManager::say(const MWWorld::ConstPtr &ptr, const std::string &filename)
     {
@@ -1122,10 +1152,10 @@ namespace MWSound
         if(!mOutput->isInitialized())
             return;
 
+        updateSounds(duration);
         if (MWBase::Environment::get().getStateManager()->getState()!=
             MWBase::StateManager::State_NoGame)
         {
-            updateSounds(duration);
             updateRegionSound(duration);
             updateWaterSound(duration);
         }

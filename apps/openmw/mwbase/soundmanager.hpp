@@ -89,6 +89,9 @@ namespace MWBase
             ///< Start playing music from the selected folder
             /// \param name of the folder that contains the playlist
 
+            virtual void playTitleMusic() = 0;
+            ///< Start playing title music
+
             virtual void say(const MWWorld::ConstPtr &reference, const std::string& filename) = 0;
             ///< Make an actor say some text.
             /// \param filename name of a sound file in "Sound/" in the data directory.
