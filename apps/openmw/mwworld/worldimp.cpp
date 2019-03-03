@@ -1298,6 +1298,9 @@ namespace MWWorld
             {
                 mPhysics->updatePosition(newPtr);
                 mPhysics->updatePtr(ptr, newPtr);
+
+                if (const auto object = mPhysics->getObject(newPtr))
+                    updateNavigatorObject(object);
             }
         }
         if (isPlayer)
@@ -1328,9 +1331,17 @@ namespace MWWorld
 
     void World::scaleObject (const Ptr& ptr, float scale)
     {
+        if (mPhysics->getActor(ptr))
+            mNavigator->removeAgent(getPathfindingHalfExtents(ptr));
+
         ptr.getCellRef().setScale(scale);
 
         mWorldScene->updateObjectScale(ptr);
+
+        if (mPhysics->getActor(ptr))
+            mNavigator->addAgent(getPathfindingHalfExtents(ptr));
+        else if (const auto object = mPhysics->getObject(ptr))
+            mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
     }
 
     void World::rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust)
@@ -1370,7 +1381,12 @@ namespace MWWorld
         ptr.getRefData().setPosition(pos);
 
         if(ptr.getRefData().getBaseNode() != 0)
+        {
             mWorldScene->updateObjectRotation(ptr, true);
+
+            if (const auto object = mPhysics->getObject(ptr))
+                updateNavigatorObject(object);
+        }
     }
 
     void World::adjustPosition(const Ptr &ptr, bool force)
@@ -1564,19 +1580,20 @@ namespace MWWorld
 
     void World::updateNavigator()
     {
-        bool updated = false;
-
         mPhysics->forEachAnimatedObject([&] (const MWPhysics::Object* object)
         {
-            updated = updateNavigatorObject(object) || updated;
+            mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
         });
 
         for (const auto& door : mDoorStates)
             if (const auto object = mPhysics->getObject(door.first))
-                updated = updateNavigatorObject(object) || updated;
+                mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
 
-        if (updated)
+        if (mShouldUpdateNavigator)
+        {
             mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3());
+            mShouldUpdateNavigator = false;
+        }
     }
 
     bool World::updateNavigatorObject(const MWPhysics::Object* object)
@@ -2408,7 +2425,7 @@ namespace MWWorld
         {
             // Remove the old CharacterController
             MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
-            mNavigator->removeAgent(mPhysics->getHalfExtents(getPlayerPtr()));
+            mNavigator->removeAgent(getPathfindingHalfExtents(getPlayerConstPtr()));
             mPhysics->remove(getPlayerPtr());
             mRendering->removePlayer(getPlayerPtr());
 
@@ -2443,7 +2460,8 @@ namespace MWWorld
 
         applyLoopingParticles(player);
 
-        mNavigator->addAgent(mPhysics->getHalfExtents(getPlayerPtr()));
+        mDefaultHalfExtents = mPhysics->getOriginalHalfExtents(getPlayerPtr());
+        mNavigator->addAgent(getPathfindingHalfExtents(getPlayerConstPtr()));
     }
 
     World::RestPermitted World::canRest () const
@@ -3418,6 +3436,11 @@ namespace MWWorld
         return mPlayer->getPlayer();
     }
 
+    MWWorld::ConstPtr World::getPlayerConstPtr() const
+    {
+        return mPlayer->getConstPlayer();
+    }
+
     void World::updateDialogueGlobals()
     {
         MWWorld::Ptr player = getPlayerPtr();
@@ -3785,6 +3808,14 @@ namespace MWWorld
     void World::setNavMeshNumberToRender(const std::size_t value)
     {
         mRendering->setNavMeshNumber(value);
+    }
+
+    osg::Vec3f World::getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const
+    {
+        if (actor.getCell()->isExterior())
+            return mDefaultHalfExtents; // Using default half extents for better performance
+        else
+            return getHalfExtents(actor);
     }
 
 }
