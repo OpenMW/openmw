@@ -240,8 +240,8 @@ namespace MWClass
         std::string text;
         int lockLevel = ptr.getCellRef().getLockLevel();
         if (lockLevel > 0 && lockLevel != ESM::UnbreakableLock)
-            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ptr.getCellRef().getLockLevel());
-        else if (ptr.getCellRef().getLockLevel() < 0)
+            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(lockLevel);
+        else if (lockLevel < 0)
             text += "\n#{sUnlocked}";
         if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";
