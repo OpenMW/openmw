@@ -194,15 +194,16 @@ void ActorAnimation::injectWeaponBones()
     }
 }
 
-// To make sure we do not run morph controllers for weapons, i.e. bows
-class EmptyCallback : public osg::NodeCallback
+void ActorAnimation::resetControllers(osg::Node* node)
 {
-    public:
+    if (node == nullptr)
+        return;
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-        }
-};
+    std::shared_ptr<SceneUtil::ControllerSource> src;
+    src.reset(new NullAnimationTime);
+    SceneUtil::AssignControllerSourcesVisitor removeVisitor(src);
+    node->accept(removeVisitor);
+}
 
 void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
 {
@@ -230,7 +231,9 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
     if (mesh.empty() || boneName.empty())
         return;
 
-    // If the scabbard is not found, use a weapon mesh as fallback
+    // If the scabbard is not found, use a weapon mesh as fallback.
+    // Note: it is unclear how to handle time for controllers attached to bodyparts, so disable them for now.
+    // We use the similar approach for other bodyparts.
     scabbardName = scabbardName.replace(scabbardName.size()-4, 4, "_sh.nif");
     bool isEnchanted = !weapon->getClass().getEnchantment(*weapon).empty();
     if(!mResourceSystem->getVFS()->exists(scabbardName))
@@ -239,8 +242,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
         {
             osg::Vec4f glowColor = getEnchantmentColor(*weapon);
             mScabbard = getWeaponPart(mesh, boneName, isEnchanted, &glowColor);
-            if (mScabbard)
-                mScabbard->getNode()->setUpdateCallback(new EmptyCallback);
+            resetControllers(mScabbard->getNode());
         }
 
         return;
@@ -265,7 +267,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
         if (!weaponNode->getNumChildren())
         {
             osg::ref_ptr<osg::Node> fallbackNode = mResourceSystem->getSceneManager()->getInstance(mesh, weaponNode);
-            fallbackNode->setUpdateCallback(new EmptyCallback);
+            resetControllers(fallbackNode);
         }
 
         if (isEnchanted)
