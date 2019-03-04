@@ -27,7 +27,9 @@ namespace MWGui
         void setFilter (int filter);
 
         /// Use ItemStack::Type for sorting?
-        void setSortByType(bool sort) { mSortByType = sort; }
+        bool canSort() { return true; }
+        Sort getSort() { return mSort; }
+        void setSort(Sort sort) { mSort = sort; }
 
         void onClose();
         bool onDropItem(const MWWorld::Ptr &item, int count);
@@ -56,7 +58,7 @@ namespace MWGui
 
         int mCategory;
         int mFilter;
-        bool mSortByType;
+        Sort mSort;
     };
 
 }

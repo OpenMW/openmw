@@ -78,6 +78,21 @@ namespace MWGui
         virtual bool onDropItem(const MWWorld::Ptr &item, int count);
         virtual bool onTakeItem(const MWWorld::Ptr &item, int count);
 
+        enum Sort
+        {
+            Sort_None,
+            Sort_Name,
+            Sort_Type,
+            Sort_Weight,
+            Sort_Value,
+            Sort_ValuePerWeight,
+            Sort_Last = Sort_ValuePerWeight,
+        };
+
+        virtual bool canSort() { return false; }
+        virtual Sort getSort() { return Sort_None; }
+        virtual void setSort(Sort sort) {}
+
     private:
         ItemModel(const ItemModel&);
         ItemModel& operator=(const ItemModel&);
