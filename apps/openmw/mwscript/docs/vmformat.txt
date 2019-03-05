@@ -458,5 +458,6 @@ op 0x2000307: ToggleBorders, tb
 op 0x2000308: ToggleNavMesh
 op 0x2000309: ToggleActorsPaths
 op 0x200030a: SetNavMeshNumber
+op 0x200030b: Journal, explicit
 
-opcodes 0x200030b-0x3ffffff unused
+opcodes 0x200030c-0x3ffffff unused
