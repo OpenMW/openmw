@@ -122,6 +122,12 @@ namespace MWWorld
         return ptr;
     }
 
+    MWWorld::ConstPtr Player::getConstPlayer() const
+    {
+        MWWorld::ConstPtr ptr (&mPlayer, mCellStore);
+        return ptr;
+    }
+
     void Player::setBirthSign (const std::string &sign)
     {
         mSign = sign;

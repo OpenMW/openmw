@@ -172,12 +172,9 @@ namespace
                 );
             }
         }
-        else if (const auto actor = physics.getActor(ptr))
+        else if (physics.getActor(ptr))
         {
-            const auto halfExtents = ptr.getCell()->isExterior()
-                ? physics.getHalfExtents(MWBase::Environment::get().getWorld()->getPlayerPtr())
-                : actor->getHalfExtents();
-            navigator.addAgent(halfExtents);
+            navigator.addAgent(MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(ptr));
         }
     }
 
@@ -337,15 +334,14 @@ namespace MWWorld
         ListAndResetObjectsVisitor visitor;
 
         (*iter)->forEach<ListAndResetObjectsVisitor>(visitor);
-        const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const auto playerHalfExtents = mPhysics->getHalfExtents(player);
+        const auto world = MWBase::Environment::get().getWorld();
         for (const auto& ptr : visitor.mObjects)
         {
             if (const auto object = mPhysics->getObject(ptr))
                 navigator->removeObject(DetourNavigator::ObjectId(object));
             else if (const auto actor = mPhysics->getActor(ptr))
             {
-                navigator->removeAgent(ptr.getCell()->isExterior() ? playerHalfExtents : actor->getHalfExtents());
+                navigator->removeAgent(world->getPathfindingHalfExtents(ptr));
                 mRendering.removeActorPath(ptr);
             }
             mPhysics->remove(ptr);
@@ -372,6 +368,7 @@ namespace MWWorld
         if ((*iter)->getCell()->hasWater())
             navigator->removeWater(osg::Vec2i(cellX, cellY));
 
+        const auto player = world->getPlayerPtr();
         navigator->update(player.getRefData().getPosition().asVec3());
 
         MWBase::Environment::get().getMechanicsManager()->drop (*iter);
@@ -815,10 +812,7 @@ namespace MWWorld
         }
         else if (const auto actor = mPhysics->getActor(ptr))
         {
-            const auto& halfExtents = ptr.getCell()->isExterior()
-                ? mPhysics->getHalfExtents(MWBase::Environment::get().getWorld()->getPlayerPtr())
-                : actor->getHalfExtents();
-            navigator->removeAgent(halfExtents);
+            navigator->removeAgent(MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(ptr));
         }
         mPhysics->remove(ptr);
         mRendering.removeObject (ptr);

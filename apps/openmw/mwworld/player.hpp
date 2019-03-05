@@ -27,6 +27,7 @@ namespace Loading
 namespace MWWorld
 {
     class CellStore;
+    class ConstPtr;
 
     /// \brief NPC object representing the player and additional player data
     class Player
@@ -81,6 +82,7 @@ namespace MWWorld
         void setCell (MWWorld::CellStore *cellStore);
 
         MWWorld::Ptr getPlayer();
+        MWWorld::ConstPtr getConstPlayer() const;
 
         void setBirthSign(const std::string &sign);
         const std::string &getBirthSign() const;

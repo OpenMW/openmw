@@ -34,7 +34,7 @@ namespace MWRender
     void NavMesh::update(const dtNavMesh& navMesh, const std::size_t id,
         const std::size_t generation, const std::size_t revision, const DetourNavigator::Settings& settings)
     {
-        if (!mEnabled || (mId == id && mGeneration >= generation && mRevision >= revision))
+        if (!mEnabled || (mGroup && mId == id && mGeneration >= generation && mRevision >= revision))
             return;
 
         mId = id;
@@ -53,7 +53,10 @@ namespace MWRender
     void NavMesh::reset()
     {
         if (mGroup)
+        {
             mRootNode->removeChild(mGroup);
+            mGroup = nullptr;
+        }
     }
 
     void NavMesh::enable()
@@ -65,7 +68,8 @@ namespace MWRender
 
     void NavMesh::disable()
     {
-        reset();
+        if (mGroup)
+            mRootNode->removeChild(mGroup);
         mEnabled = false;
     }
 }

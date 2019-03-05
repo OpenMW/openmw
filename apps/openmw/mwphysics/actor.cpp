@@ -201,6 +201,11 @@ osg::Vec3f Actor::getHalfExtents() const
     return osg::componentMultiply(mHalfExtents, mScale);
 }
 
+osg::Vec3f Actor::getOriginalHalfExtents() const
+{
+    return mHalfExtents;
+}
+
 osg::Vec3f Actor::getRenderingHalfExtents() const
 {
     return osg::componentMultiply(mHalfExtents, mRenderingScale);
