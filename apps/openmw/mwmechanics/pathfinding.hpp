@@ -46,7 +46,6 @@ namespace MWMechanics
     }
 
     const float PATHFIND_Z_REACH = 50.0f;
-    //static const float sMaxSlope = 49.0f; // duplicate as in physicssystem
     // distance after which actor (failed previously to shortcut) will try again
     const float PATHFIND_SHORTCUT_RETRY_DIST = 300.0f;
 
