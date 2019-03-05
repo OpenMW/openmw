@@ -44,7 +44,7 @@ namespace MWRender
         virtual osg::Node* getWeaponNode();
         virtual Resource::ResourceSystem* getResourceSystem();
         virtual void showWeapon(bool show) { showWeapons(show); }
-        virtual void setWeaponGroup(const std::string& group) { mWeaponAnimationTime->setGroup(group); }
+        virtual void setWeaponGroup(const std::string& group, bool relativeDuration) { mWeaponAnimationTime->setGroup(group, relativeDuration); }
 
         virtual void addControllers();
 

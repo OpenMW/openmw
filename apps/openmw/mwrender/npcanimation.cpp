@@ -1030,9 +1030,9 @@ void NpcAnimation::enableHeadAnimation(bool enable)
     mHeadAnimationTime->setEnabled(enable);
 }
 
-void NpcAnimation::setWeaponGroup(const std::string &group)
+void NpcAnimation::setWeaponGroup(const std::string &group, bool relativeDuration)
 {
-    mWeaponAnimationTime->setGroup(group);
+    mWeaponAnimationTime->setGroup(group, relativeDuration);
 }
 
 void NpcAnimation::equipmentChanged()
