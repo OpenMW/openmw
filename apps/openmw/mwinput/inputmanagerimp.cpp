@@ -1146,12 +1146,21 @@ namespace MWInput
         bool state = MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
         MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
 
-        if (mode == MWGui::GM_Settings || (!state && mode == MWGui::GM_MainMenu))
+        if (mode == MWGui::GM_MainMenu)
         {
             if (MyGUI::InputManager::getInstance().isModalAny())
-                MWBase::Environment::get().getWindowManager()->exitCurrentModal();
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
+            {
+                while (MyGUI::InputManager::getInstance().isModalAny())
+                {
+                    MWBase::Environment::get().getWindowManager()->exitCurrentModal();
+                }
+            }
+            else if (!state)
+                MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
+        else if (mode == MWGui::GM_Settings)
+            MWBase::Environment::get().getWindowManager()->popGuiMode();
+
         if(state || mode == MWGui::GM_MainMenu)
             return;
 
