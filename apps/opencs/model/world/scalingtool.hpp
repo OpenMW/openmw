@@ -45,7 +45,8 @@ namespace CSMWorld
         QSpinBox *mCellY_SpinBox_Target_CornerA;
         QSpinBox *mCellX_SpinBox_Target_CornerB;
         QSpinBox *mCellY_SpinBox_Target_CornerB;
-        QComboBox *mMethodSelector;
+        QComboBox *mHeightMethodSelector;
+        QComboBox *mTextureMethodSelector;
         QCheckBox *mScaleZCheckBox;
         QPushButton *mActionButton;
 
