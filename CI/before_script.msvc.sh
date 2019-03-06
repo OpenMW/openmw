@@ -446,7 +446,7 @@ echo
 if [ -z $APPVEYOR ]; then
 	printf "Boost 1.67.0... "
 else
-	if [ $MSVC_VER -eq 12.0 ]; then
+	if [ "${MSVC_VER}" -eq 12.0 ]; then
 		printf "Boost 1.58.0 AppVeyor... "
 	else
 		printf "Boost 1.67.0 AppVeyor... "
