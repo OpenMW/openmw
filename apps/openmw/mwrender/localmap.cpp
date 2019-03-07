@@ -92,10 +92,10 @@ LocalMap::LocalMap(osg::Group* root)
 
 LocalMap::~LocalMap()
 {
-    for (CameraVector::iterator it = mActiveCameras.begin(); it != mActiveCameras.end(); ++it)
-        removeCamera(*it);
-    for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
-        removeCamera(*it);
+    for (auto& camera : mActiveCameras)
+        removeCamera(camera);
+    for (auto& camera : mCamerasPendingRemoval)
+        removeCamera(camera);
 }
 
 const osg::Vec2f LocalMap::rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle)
@@ -259,16 +259,14 @@ bool needUpdate(std::set<std::pair<int, int> >& renderedGrid, std::set<std::pair
 void LocalMap::requestMap(std::set<const MWWorld::CellStore*> cells)
 {
     std::set<std::pair<int, int> > grid;
-    for (std::set<const MWWorld::CellStore*>::iterator it = cells.begin(); it != cells.end(); ++it)
+    for (const MWWorld::CellStore* cell : cells)
     {
-        const MWWorld::CellStore* cell = *it;
         if (cell->isExterior())
             grid.insert(std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY()));
     }
 
-    for (std::set<const MWWorld::CellStore*>::iterator it = cells.begin(); it != cells.end(); ++it)
+    for (const MWWorld::CellStore* cell : cells)
     {
-        const MWWorld::CellStore* cell = *it;
         if (cell->isExterior())
         {
             int cellX = cell->getCell()->getGridX();
@@ -341,8 +339,8 @@ void LocalMap::cleanupCameras()
     if (mCamerasPendingRemoval.empty())
         return;
 
-    for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
-        removeCamera(*it);
+    for (auto& camera : mCamerasPendingRemoval)
+        removeCamera(camera);
 
     mCamerasPendingRemoval.clear();
 }

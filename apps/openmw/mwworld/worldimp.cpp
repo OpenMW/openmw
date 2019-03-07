@@ -1649,13 +1649,13 @@ namespace MWWorld
 
                 /// \todo should use convexSweepTest here
                 std::vector<MWWorld::Ptr> collisions = mPhysics->getCollisions(it->first, MWPhysics::CollisionType_Door, MWPhysics::CollisionType_Actor);
-                for (std::vector<MWWorld::Ptr>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
+                for (MWWorld::Ptr& ptr : collisions)
                 {
-                    MWWorld::Ptr ptr = *cit;
                     if (ptr.getClass().isActor())
                     {
                         // Collided with actor, ask actor to try to avoid door
-                        if(ptr != getPlayerPtr() ) {
+                        if(ptr != getPlayerPtr() )
+                        {
                             MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
                             if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
                                 seq.stack(MWMechanics::AiAvoidDoor(it->first),ptr);
@@ -3606,18 +3606,17 @@ namespace MWWorld
                              const std::string& id, const std::string& sourceName, const bool fromProjectile)
     {
         std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
-        for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = effects.mList.begin();
-             effectIt != effects.mList.end(); ++effectIt)
+        for (const ESM::ENAMstruct& effectInfo : effects.mList)
         {
-            const ESM::MagicEffect* effect = mStore.get<ESM::MagicEffect>().find(effectIt->mEffectID);
+            const ESM::MagicEffect* effect = mStore.get<ESM::MagicEffect>().find(effectInfo.mEffectID);
 
-            if (effectIt->mRange != rangeType || (effectIt->mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()))
+            if (effectInfo.mRange != rangeType || (effectInfo.mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()))
                 continue; // Not right range type, or not area effect and hit an actor
 
-            if (fromProjectile && effectIt->mArea <= 0)
+            if (fromProjectile && effectInfo.mArea <= 0)
                 continue; // Don't play explosion for projectiles with 0-area effects
 
-            if (!fromProjectile && effectIt->mRange == ESM::RT_Touch && (!ignore.isEmpty()) && (!ignore.getClass().isActor() && !ignore.getClass().canBeActivated(ignore)))
+            if (!fromProjectile && effectInfo.mRange == ESM::RT_Touch && (!ignore.isEmpty()) && (!ignore.getClass().isActor() && !ignore.getClass().canBeActivated(ignore)))
                 continue; // Don't play explosion for touch spells on non-activatable objects except when spell is from the projectile enchantment
 
             // Spawn the explosion orb effect
@@ -3629,14 +3628,14 @@ namespace MWWorld
 
             std::string texture = effect->mParticle;
 
-            if (effectIt->mArea <= 0)
+            if (effectInfo.mArea <= 0)
             {
-                if (effectIt->mRange == ESM::RT_Target)
+                if (effectInfo.mRange == ESM::RT_Target)
                     mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, 1.0f);
                 continue;
             }
             else
-                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, static_cast<float>(effectIt->mArea * 2));
+                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, static_cast<float>(effectInfo.mArea * 2));
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             static const std::string schools[] = {
@@ -3652,40 +3651,40 @@ namespace MWWorld
             // Get the actors in range of the effect
             std::vector<MWWorld::Ptr> objects;
             MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
-                        origin, feetToGameUnits(static_cast<float>(effectIt->mArea)), objects);
+                        origin, feetToGameUnits(static_cast<float>(effectInfo.mArea)), objects);
             for (const Ptr& affected : objects)
             {
                 // Ignore actors without collisions here, otherwise it will be possible to hit actors outside processing range.
                 if (affected.getClass().isActor() && !isActorCollisionEnabled(affected))
                     continue;
 
-                toApply[affected].push_back(*effectIt);
+                toApply[affected].push_back(effectInfo);
             }
         }
 
         // Now apply the appropriate effects to each actor in range
-        for (std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> >::iterator apply = toApply.begin(); apply != toApply.end(); ++apply)
+        for (auto& applyPair : toApply)
         {
             MWWorld::Ptr source = caster;
             // Vanilla-compatible behaviour of never applying the spell to the caster
             // (could be changed by mods later)
-            if (apply->first == caster)
+            if (applyPair.first == caster)
                 continue;
 
-            if (apply->first == ignore)
+            if (applyPair.first == ignore)
                 continue;
 
             if (source.isEmpty())
-                source = apply->first;
+                source = applyPair.first;
 
-            MWMechanics::CastSpell cast(source, apply->first);
+            MWMechanics::CastSpell cast(source, applyPair.first);
             cast.mHitPosition = origin;
             cast.mId = id;
             cast.mSourceName = sourceName;
             cast.mStack = false;
             ESM::EffectList effectsToApply;
-            effectsToApply.mList = apply->second;
-            cast.inflict(apply->first, caster, effectsToApply, rangeType, false, true);
+            effectsToApply.mList = applyPair.second;
+            cast.inflict(applyPair.first, caster, effectsToApply, rangeType, false, true);
         }
     }
 
@@ -3769,22 +3768,22 @@ namespace MWWorld
 
     void World::preloadEffects(const ESM::EffectList *effectList)
     {
-        for (std::vector<ESM::ENAMstruct>::const_iterator it = effectList->mList.begin(); it != effectList->mList.end(); ++it)
+        for (const ESM::ENAMstruct& effectInfo : effectList->mList)
         {
-            const ESM::MagicEffect *effect = mStore.get<ESM::MagicEffect>().find(it->mEffectID);
+            const ESM::MagicEffect *effect = mStore.get<ESM::MagicEffect>().find(effectInfo.mEffectID);
 
-            if (MWMechanics::isSummoningEffect(it->mEffectID))
+            if (MWMechanics::isSummoningEffect(effectInfo.mEffectID))
             {
                 preload(mWorldScene.get(), mStore, "VFX_Summon_Start");
-                preload(mWorldScene.get(), mStore, MWMechanics::getSummonedCreature(it->mEffectID));
+                preload(mWorldScene.get(), mStore, MWMechanics::getSummonedCreature(effectInfo.mEffectID));
             }
 
             preload(mWorldScene.get(), mStore, effect->mCasting);
             preload(mWorldScene.get(), mStore, effect->mHit);
 
-            if (it->mArea > 0)
+            if (effectInfo.mArea > 0)
                 preload(mWorldScene.get(), mStore, effect->mArea);
-            if (it->mRange == ESM::RT_Target)
+            if (effectInfo.mRange == ESM::RT_Target)
                 preload(mWorldScene.get(), mStore, effect->mBolt);
         }
     }

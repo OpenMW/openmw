@@ -72,9 +72,9 @@ namespace MWWorld
                 const std::vector<std::string>& objectIds = cell->getPreloadedIds();
 
                 // could possibly build the model list in the worker thread if we manage to make the Store thread safe
-                for (std::vector<std::string>::const_iterator it = objectIds.begin(); it != objectIds.end(); ++it)
+                for (const std::string& id : objectIds)
                 {
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), *it);
+                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id);
                     std::string model = ref.getPtr().getClass().getModel(ref.getPtr());
                     if (!model.empty())
                         mMeshes.push_back(model);
@@ -102,14 +102,13 @@ namespace MWWorld
                 }
             }
 
-            for (MeshList::const_iterator it = mMeshes.begin(); it != mMeshes.end(); ++it)
+            for (std::string& mesh: mMeshes)
             {
                 if (mAbort)
                     break;
 
                 try
                 {
-                    std::string mesh  = *it;
                     mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mSceneManager->getVFS());
 
                     if (mPreloadInstances)
