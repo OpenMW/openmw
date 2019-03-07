@@ -27,6 +27,7 @@
     Bug #4800: Standing collisions are not updated immediately when an object is teleported without a cell change
     Bug #4803: Stray special characters before begin statement break script compilation
     Bug #4804: Particle system with the "Has Sizes = false" causes an exception
+    Bug #4810: Raki creature broken in OpenMW
     Bug #4813: Creatures with known file but no "Sound Gen Creature" assigned use default sounds
     Bug #4815: "Finished" journal entry with lower index doesn't close journal, SetJournalIndex closes journal
     Bug #4820: Spell absorption is broken
