@@ -165,7 +165,7 @@ public:
             if (child)
             {
                 boundingBox.expandBy(child->getBoundingBox());
-                parent->addChild(child);
+                parent->addChildNode(child);
             }
         }
 
