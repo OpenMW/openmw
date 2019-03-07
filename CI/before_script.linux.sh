@@ -14,6 +14,10 @@ if [[ -z "${BUILD_OPENMW}" ]]; then export BUILD_OPENMW=ON; fi
 if [[ -z "${BUILD_OPENMW_CS}" ]]; then export BUILD_OPENMW_CS=ON; fi
 
 ${ANALYZE} cmake \
+    -DCMAKE_C_COMPILER="${CC}" \
+    -DCMAKE_CXX_COMPILER="${CXX}" \
+    -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
     -DBUILD_OPENMW=${BUILD_OPENMW} \
     -DBUILD_OPENCS=${BUILD_OPENMW_CS} \
     -DBUILD_LAUNCHER=${BUILD_OPENMW_CS} \
