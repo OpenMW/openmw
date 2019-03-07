@@ -220,8 +220,8 @@ namespace MWRender
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
         resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders") || Settings::Manager::getBool("enable shadows", "Shadows")); // Shadows have problems with fixed-function mode
+        // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
         resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
-        resourceSystem->getSceneManager()->setForcePerPixelLighting(Settings::Manager::getBool("force per pixel lighting", "Shaders"));
         resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::Manager::getBool("auto use object normal maps", "Shaders"));
         resourceSystem->getSceneManager()->setNormalMapPattern(Settings::Manager::getString("normal map pattern", "Shaders"));
         resourceSystem->getSceneManager()->setNormalHeightMapPattern(Settings::Manager::getString("normal height map pattern", "Shaders"));
@@ -252,6 +252,9 @@ namespace MWRender
 
         for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
             globalDefines[itr->first] = itr->second;
+
+        globalDefines["forcePPL"] = Settings::Manager::getBool("force per pixel lighting", "Shaders") ? "1" : "0";
+        globalDefines["clamp"] = Settings::Manager::getBool("clamp lighting", "Shaders") ? "1" : "0";
 
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
