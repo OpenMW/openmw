@@ -79,10 +79,9 @@ namespace
 
         void remove()
         {
-            for (std::vector<osg::ref_ptr<osg::Node> >::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
+            for (osg::Node* node : mToRemove)
             {
                 // FIXME: a Drawable might have more than one parent
-                osg::Node* node = *it;
                 if (node->getNumParents())
                     node->getParent(0)->removeChild(node);
             }

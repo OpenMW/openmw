@@ -76,17 +76,17 @@ void Pathgrid::togglePathgrid()
         mPathGridRoot->setNodeMask(Mask_Debug);
         mRootNode->addChild(mPathGridRoot);
 
-        for(CellList::iterator it = mActiveCells.begin(); it != mActiveCells.end(); ++it)
+        for(const MWWorld::CellStore* cell : mActiveCells)
         {
-            enableCellPathgrid(*it);
+            enableCellPathgrid(cell);
         }
     }
     else
     {
         // remove path grid meshes from already loaded cells
-        for(CellList::iterator it = mActiveCells.begin(); it != mActiveCells.end(); ++it)
+        for(const MWWorld::CellStore* cell : mActiveCells)
         {
-            disableCellPathgrid(*it);
+            disableCellPathgrid(cell);
         }
 
         if (mPathGridRoot)

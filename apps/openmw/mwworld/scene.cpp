@@ -230,9 +230,8 @@ namespace
     template <class AddObject>
     void InsertVisitor::insert(AddObject&& addObject)
     {
-        for (std::vector<MWWorld::Ptr>::iterator it = mToInsert.begin(); it != mToInsert.end(); ++it)
+        for (MWWorld::Ptr& ptr : mToInsert)
         {
-            MWWorld::Ptr ptr = *it;
             if (mRescale)
             {
                 if (ptr.getCellRef().getScale()<0.5)
@@ -905,24 +904,22 @@ namespace MWWorld
     void Scene::preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos, std::vector<osg::Vec3f>& exteriorPositions)
     {
         std::vector<MWWorld::ConstPtr> teleportDoors;
-        for (CellStoreCollection::const_iterator iter (mActiveCells.begin());
-            iter!=mActiveCells.end(); ++iter)
+        for (const MWWorld::CellStore* cellStore : mActiveCells)
         {
-            const MWWorld::CellStore* cellStore = *iter;
             typedef MWWorld::CellRefList<ESM::Door>::List DoorList;
             const DoorList &doors = cellStore->getReadOnlyDoors().mList;
-            for (DoorList::const_iterator doorIt = doors.begin(); doorIt != doors.end(); ++doorIt)
+            for (auto& door : doors)
             {
-                if (!doorIt->mRef.getTeleport()) {
+                if (!door.mRef.getTeleport())
+                {
                     continue;
                 }
-                teleportDoors.push_back(MWWorld::ConstPtr(&*doorIt, cellStore));
+                teleportDoors.push_back(MWWorld::ConstPtr(&door, cellStore));
             }
         }
 
-        for (std::vector<MWWorld::ConstPtr>::iterator it = teleportDoors.begin(); it != teleportDoors.end(); ++it)
+        for (const MWWorld::ConstPtr& door : teleportDoors)
         {
-            const MWWorld::ConstPtr& door = *it;
             float sqrDistToPlayer = (playerPos - door.getRefData().getPosition().asVec3()).length2();
             sqrDistToPlayer = std::min(sqrDistToPlayer, (predictedPos - door.getRefData().getPosition().asVec3()).length2());
 
@@ -1046,20 +1043,19 @@ namespace MWWorld
         const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         ListFastTravelDestinationsVisitor listVisitor(mPreloadDistance, player.getRefData().getPosition().asVec3());
 
-        for (CellStoreCollection::const_iterator iter (mActiveCells.begin()); iter!=mActiveCells.end(); ++iter)
+        for (MWWorld::CellStore* cellStore : mActiveCells)
         {
-            MWWorld::CellStore* cellStore = *iter;
             cellStore->forEachType<ESM::NPC>(listVisitor);
             cellStore->forEachType<ESM::Creature>(listVisitor);
         }
 
-        for (std::vector<ESM::Transport::Dest>::const_iterator it = listVisitor.mList.begin(); it != listVisitor.mList.end(); ++it)
+        for (ESM::Transport::Dest& dest : listVisitor.mList)
         {
-            if (!it->mCellName.empty())
-                preloadCell(MWBase::Environment::get().getWorld()->getInterior(it->mCellName));
+            if (!dest.mCellName.empty())
+                preloadCell(MWBase::Environment::get().getWorld()->getInterior(dest.mCellName));
             else
             {
-                osg::Vec3f pos = it->mPos.asVec3();
+                osg::Vec3f pos = dest.mPos.asVec3();
                 int x,y;
                 MWBase::Environment::get().getWorld()->positionToIndex( pos.x(), pos.y(), x, y);
                 preloadCell(MWBase::Environment::get().getWorld()->getExterior(x,y), true);

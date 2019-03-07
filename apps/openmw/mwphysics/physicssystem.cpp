@@ -707,11 +707,11 @@ namespace MWPhysics
 
         if (!targets.empty())
         {
-            for (std::vector<MWWorld::Ptr>::const_iterator it = targets.begin(); it != targets.end(); ++it)
+            for (MWWorld::Ptr& target : targets)
             {
-                const Actor* physactor2 = getActor(*it);
-                if (physactor2)
-                    targetCollisionObjects.push_back(physactor2->getCollisionObject());
+                const Actor* targetActor = getActor(target);
+                if (targetActor)
+                    targetCollisionObjects.push_back(targetActor->getCollisionObject());
             }
         }
 
@@ -811,9 +811,9 @@ namespace MWPhysics
 
         if (!targets.empty())
         {
-            for (std::vector<MWWorld::Ptr>::const_iterator it = targets.begin(); it != targets.end(); ++it)
+            for (MWWorld::Ptr& target : targets)
             {
-                const Actor* actor = getActor(*it);
+                const Actor* actor = getActor(target);
                 if (actor)
                     targetCollisionObjects.push_back(actor->getCollisionObject());
             }
@@ -1320,8 +1320,8 @@ namespace MWPhysics
 
     void PhysicsSystem::stepSimulation(float dt)
     {
-        for (std::set<Object*>::iterator it = mAnimatedObjects.begin(); it != mAnimatedObjects.end(); ++it)
-            (*it)->animateCollisionShapes(mCollisionWorld);
+        for (Object* animatedObject :  mAnimatedObjects)
+            animatedObject->animateCollisionShapes(mCollisionWorld);
 
 #ifndef BT_NO_PROFILE
         CProfileManager::Reset();

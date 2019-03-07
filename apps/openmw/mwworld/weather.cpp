@@ -298,10 +298,11 @@ void RegionWeather::setChances(const std::vector<char>& chances)
         mChances.reserve(chances.size());
     }
 
-    std::vector<char>::const_iterator it = chances.begin();
-    for(size_t i = 0; it != chances.end(); ++it, ++i)
+    int i = 0;
+    for(char chance : chances)
     {
-        mChances[i] = *it;
+        mChances[i] = chance;
+        i++;
     }
 
     // Regional weather no longer supports the current type, select a new weather pattern.
@@ -936,11 +937,10 @@ inline void WeatherManager::addWeather(const std::string& name,
 
 inline void WeatherManager::importRegions()
 {
-    Store<ESM::Region>::iterator it = mStore.get<ESM::Region>().begin();
-    for(; it != mStore.get<ESM::Region>().end(); ++it)
+    for(const ESM::Region& region : mStore.get<ESM::Region>())
     {
-        std::string regionID = Misc::StringUtils::lowerCase(it->mId);
-        mRegions.insert(std::make_pair(regionID, RegionWeather(*it)));
+        std::string regionID = Misc::StringUtils::lowerCase(region.mId);
+        mRegions.insert(std::make_pair(regionID, RegionWeather(region)));
     }
 }
 

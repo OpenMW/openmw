@@ -118,21 +118,22 @@ RippleSimulation::~RippleSimulation()
 void RippleSimulation::update(float dt)
 {
     const MWBase::World* world = MWBase::Environment::get().getWorld();
-    for (std::vector<Emitter>::iterator it=mEmitters.begin(); it !=mEmitters.end(); ++it)
+    for (Emitter& emitter : mEmitters)
     {
-        if (it->mPtr == MWBase::Environment::get().getWorld ()->getPlayerPtr())
+        MWWorld::ConstPtr& ptr = emitter.mPtr;
+        if (ptr == MWBase::Environment::get().getWorld ()->getPlayerPtr())
         {
             // fetch a new ptr (to handle cell change etc)
             // for non-player actors this is done in updateObjectCell
-            it->mPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+            ptr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         }
 
-        osg::Vec3f currentPos (it->mPtr.getRefData().getPosition().asVec3());
+        osg::Vec3f currentPos (ptr.getRefData().getPosition().asVec3());
 
-        bool shouldEmit = ( world->isUnderwater (it->mPtr.getCell(), it->mPtr.getRefData().getPosition().asVec3()) && !world->isSubmerged(it->mPtr) ) || world->isWalkingOnWater(it->mPtr);
-        if ( shouldEmit && (currentPos - it->mLastEmitPosition).length() > 10 )
+        bool shouldEmit = (world->isUnderwater(ptr.getCell(), currentPos) && !world->isSubmerged(ptr)) || world->isWalkingOnWater(ptr);
+        if (shouldEmit && (currentPos - emitter.mLastEmitPosition).length() > 10)
         {
-            it->mLastEmitPosition = currentPos;
+            emitter.mLastEmitPosition = currentPos;
 
             currentPos.z() = mParticleNode->getPosition().z();
 

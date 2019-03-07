@@ -1813,8 +1813,8 @@ void SkyManager::setWeather(const WeatherResult& weather)
     if (mRainFader)
         mRainFader->setAlpha(weather.mEffectFade * 0.6); // * Rain_Threshold?
 
-    for (std::vector<osg::ref_ptr<AlphaFader> >::const_iterator it = mParticleFaders.begin(); it != mParticleFaders.end(); ++it)
-        (*it)->setAlpha(weather.mEffectFade);
+    for (AlphaFader* fader : mParticleFaders)
+        fader->setAlpha(weather.mEffectFade);
 }
 
 void SkyManager::sunEnable()
