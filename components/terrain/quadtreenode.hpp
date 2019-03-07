@@ -40,7 +40,7 @@ namespace Terrain
         inline unsigned int getNumChildren() const { return _children.size(); }
 
         // osg::Group::addChild() does a lot of unrelated stuff, but we just really want to add a child node.
-        void addChild(QuadTreeNode* child)
+        void addChildNode(QuadTreeNode* child)
         {
             // QuadTree node should not contain more than 4 child nodes.
             // Reserve enough space if this node is supposed to have child nodes.
