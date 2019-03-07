@@ -25,6 +25,8 @@
 
 #include <sstream>
 
+namespace {
+
 using namespace osgShadow;
 using namespace SceneUtil;
 
@@ -330,6 +332,8 @@ void VDSMCameraCullCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 
     _projectionMatrix = cv->getProjectionMatrix();
 }
+
+} // namespace
 
 MWShadowTechnique::ComputeLightSpaceBounds::ComputeLightSpaceBounds(osg::Viewport* viewport, const osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix) :
     osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN)
