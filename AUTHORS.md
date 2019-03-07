@@ -199,6 +199,7 @@ Programmers
     viadanna
     Vincent Heuken
     Vladimir Panteleev (CyberShadow)
+    Wang Ryu (bzzt)
     Will Herrmann (Thunderforge)
     vocollapse
     xyzz
