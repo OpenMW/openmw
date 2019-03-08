@@ -87,7 +87,8 @@ namespace DetourNavigator
 
         log("posted ", mJobs.size(), " jobs");
 
-        mHasJob.notify_all();
+        if (!mJobs.empty())
+            mHasJob.notify_all();
     }
 
     void AsyncNavMeshUpdater::wait()
