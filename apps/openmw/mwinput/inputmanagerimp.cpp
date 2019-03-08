@@ -1143,23 +1143,19 @@ namespace MWInput
 
     void InputManager::toggleMainMenu()
     {
+        if (MyGUI::InputManager::getInstance().isModalAny())
+        {
+            MWBase::Environment::get().getWindowManager()->exitCurrentModal();
+            return;
+        }
+
         bool state = MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
         MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
 
-        if (mode == MWGui::GM_MainMenu)
+        if (mode == MWGui::GM_MainMenu || mode == MWGui::GM_Settings)
         {
-            if (MyGUI::InputManager::getInstance().isModalAny())
-            {
-                while (MyGUI::InputManager::getInstance().isModalAny())
-                {
-                    MWBase::Environment::get().getWindowManager()->exitCurrentModal();
-                }
-            }
-            else if (!state)
-                MWBase::Environment::get().getWindowManager()->popGuiMode();
-        }
-        else if (mode == MWGui::GM_Settings)
             MWBase::Environment::get().getWindowManager()->popGuiMode();
+        }
 
         if(state || mode == MWGui::GM_MainMenu)
             return;
@@ -1169,20 +1165,25 @@ namespace MWInput
 
     void InputManager::toggleOptionsMenu()
     {
+        if (MyGUI::InputManager::getInstance().isModalAny())
+        {
+            MWBase::Environment::get().getWindowManager()->exitCurrentModal();
+            return;
+        }
+
         MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
+        bool state = MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
         if (mode == MWGui::GM_Settings)
         {
-            if (MyGUI::InputManager::getInstance().isModalAny())
-                MWBase::Environment::get().getWindowManager()->exitCurrentModal();
             MWBase::Environment::get().getWindowManager()->popGuiMode();
             return;
         }
-        else if (mode == MWGui::GM_MainMenu && !(MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame))
+        else if (mode == MWGui::GM_MainMenu && !state)
         {
-            if (MyGUI::InputManager::getInstance().isModalAny())
-                MWBase::Environment::get().getWindowManager()->exitCurrentModal();
             MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
+        else if (mode == MWGui::GM_MainMenu)
+            return;
 
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Settings);
     }
@@ -1626,6 +1627,7 @@ namespace MWInput
         descriptions[A_Journal] = "sJournal";
         descriptions[A_Rest] = "sRestKey";
         descriptions[A_Inventory] = "sInventory";
+        descriptions[A_OptionsMenu] = "sPreferences";
         descriptions[A_TogglePOV] = "sTogglePOVCmd";
         descriptions[A_QuickKeysMenu] = "sQuickMenu";
         descriptions[A_QuickKey1] = "sQuick1Cmd";
@@ -1763,6 +1765,7 @@ namespace MWInput
         ret.push_back(A_Inventory);
         ret.push_back(A_Journal);
         ret.push_back(A_Rest);
+        ret.push_back(A_OptionsMenu);
         ret.push_back(A_Console);
         ret.push_back(A_QuickSave);
         ret.push_back(A_QuickLoad);
@@ -1795,6 +1798,7 @@ namespace MWInput
         ret.push_back(A_Inventory);
         ret.push_back(A_Journal);
         ret.push_back(A_Rest);
+        ret.push_back(A_OptionsMenu);
         ret.push_back(A_QuickSave);
         ret.push_back(A_QuickLoad);
         ret.push_back(A_Screenshot);
