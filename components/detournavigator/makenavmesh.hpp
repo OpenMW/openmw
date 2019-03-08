@@ -20,12 +20,12 @@ namespace DetourNavigator
     class RecastMesh;
     struct Settings;
 
-    enum class UpdateNavMeshStatus
+    enum class UpdateNavMeshStatus : unsigned
     {
-        ignore,
-        removed,
-        add,
-        replaced
+        ignored = 0,
+        removed = 1 << 0,
+        added = 1 << 1,
+        replaced = removed | added,
     };
 
     inline float getLength(const osg::Vec2i& value)

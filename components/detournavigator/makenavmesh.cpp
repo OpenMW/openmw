@@ -441,17 +441,47 @@ namespace
         return NavMeshData(navMeshData, navMeshDataSize);
     }
 
-    UpdateNavMeshStatus makeUpdateNavMeshStatus(bool removed, bool add)
+    class UpdateNavMeshStatusBuilder
     {
-        if (removed && add)
-            return UpdateNavMeshStatus::replaced;
-        else if (removed)
-            return UpdateNavMeshStatus::removed;
-        else if (add)
-            return UpdateNavMeshStatus::add;
-        else
-            return UpdateNavMeshStatus::ignore;
-    }
+    public:
+        UpdateNavMeshStatusBuilder() = default;
+
+        UpdateNavMeshStatusBuilder removed(bool value)
+        {
+            if (value)
+                set(UpdateNavMeshStatus::removed);
+            else
+                unset(UpdateNavMeshStatus::removed);
+            return *this;
+        }
+
+        UpdateNavMeshStatusBuilder added(bool value)
+        {
+            if (value)
+                set(UpdateNavMeshStatus::added);
+            else
+                unset(UpdateNavMeshStatus::added);
+            return *this;
+        }
+
+        UpdateNavMeshStatus getResult() const
+        {
+            return mResult;
+        }
+
+    private:
+        UpdateNavMeshStatus mResult = UpdateNavMeshStatus::ignored;
+
+        void set(UpdateNavMeshStatus value)
+        {
+            mResult = static_cast<UpdateNavMeshStatus>(static_cast<unsigned>(mResult) | static_cast<unsigned>(value));
+        }
+
+        void unset(UpdateNavMeshStatus value)
+        {
+            mResult = static_cast<UpdateNavMeshStatus>(static_cast<unsigned>(mResult) & ~static_cast<unsigned>(value));
+        }
+    };
 
     template <class T>
     unsigned long getMinValuableBitsNumber(const T value)
@@ -494,14 +524,14 @@ namespace
         if (dtStatusSucceed(addStatus))
         {
             locked->setUsedTile(changedTile, std::forward<T>(navMeshData));
-            return makeUpdateNavMeshStatus(removed, true);
+            return UpdateNavMeshStatusBuilder().added(true).removed(removed).getResult();
         }
         else
         {
             if (removed)
                 locked->removeUsedTile(changedTile);
             log("failed to add tile with status=", WriteDtStatus {addStatus});
-            return makeUpdateNavMeshStatus(removed, false);
+            return UpdateNavMeshStatusBuilder().removed(removed).getResult();
         }
     }
 }
@@ -565,7 +595,7 @@ namespace DetourNavigator
             const auto removed = dtStatusSucceed(navMesh.removeTile(tileRef, nullptr, nullptr));
             if (removed)
                 locked->removeUsedTile(changedTile);
-            return makeUpdateNavMeshStatus(removed, false);
+            return UpdateNavMeshStatusBuilder().removed(removed).getResult();
         };
 
         if (!recastMesh)

@@ -32,11 +32,11 @@ namespace DetourNavigator
     {
         switch (value)
         {
-            case UpdateNavMeshStatus::ignore:
+            case UpdateNavMeshStatus::ignored:
                 return stream << "ignore";
             case UpdateNavMeshStatus::removed:
                 return stream << "removed";
-            case UpdateNavMeshStatus::add:
+            case UpdateNavMeshStatus::added:
                 return stream << "add";
             case UpdateNavMeshStatus::replaced:
                 return stream << "replaced";
