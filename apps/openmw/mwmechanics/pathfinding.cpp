@@ -262,9 +262,10 @@ namespace MWMechanics
         if (mPath.empty())
             return;
 
-        const auto tolerance = mPath.size() > 1 ? pointTolerance : destinationTolerance;
+        while (mPath.size() > 1 && sqrDistanceIgnoreZ(mPath.front(), position) < pointTolerance * pointTolerance)
+            mPath.pop_front();
 
-        if (sqrDistanceIgnoreZ(mPath.front(), position) < tolerance * tolerance)
+        if (mPath.size() == 1 && sqrDistanceIgnoreZ(mPath.front(), position) < destinationTolerance * destinationTolerance)
             mPath.pop_front();
     }
 
