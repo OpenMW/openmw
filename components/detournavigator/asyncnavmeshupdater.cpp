@@ -14,16 +14,6 @@ namespace
     {
         return std::abs(lhs.x() - rhs.x()) + std::abs(lhs.y() - rhs.y());
     }
-
-    std::tuple<ChangeType, int, int> makePriority(const TilePosition& position, const ChangeType changeType,
-                                                    const TilePosition& playerTile)
-    {
-        return std::make_tuple(
-            changeType,
-            getManhattanDistance(position, playerTile),
-            getManhattanDistance(position, TilePosition {0, 0})
-        );
-    }
 }
 
 namespace DetourNavigator
@@ -81,8 +71,18 @@ namespace DetourNavigator
         for (const auto& changedTile : changedTiles)
         {
             if (mPushed[agentHalfExtents].insert(changedTile.first).second)
-                mJobs.push(Job {agentHalfExtents, navMeshCacheItem, changedTile.first,
-                                makePriority(changedTile.first, changedTile.second, playerTile)});
+            {
+                Job job;
+
+                job.mAgentHalfExtents = agentHalfExtents;
+                job.mNavMeshCacheItem = navMeshCacheItem;
+                job.mChangedTile = changedTile.first;
+                job.mChangeType = changedTile.second;
+                job.mDistanceToPlayer = getManhattanDistance(changedTile.first, playerTile);
+                job.mDistanceToOrigin = getManhattanDistance(changedTile.first, TilePosition {0, 0});
+
+                mJobs.push(std::move(job));
+            }
         }
 
         log("posted ", mJobs.size(), " jobs");

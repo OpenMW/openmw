@@ -50,11 +50,18 @@ namespace DetourNavigator
             osg::Vec3f mAgentHalfExtents;
             SharedNavMeshCacheItem mNavMeshCacheItem;
             TilePosition mChangedTile;
-            std::tuple<ChangeType, int, int> mPriority;
+            ChangeType mChangeType;
+            int mDistanceToPlayer;
+            int mDistanceToOrigin;
+
+            std::tuple<ChangeType, int, int> getPriority() const
+            {
+                return std::make_tuple(mChangeType, mDistanceToPlayer, mDistanceToOrigin);
+            }
 
             friend inline bool operator <(const Job& lhs, const Job& rhs)
             {
-                return lhs.mPriority > rhs.mPriority;
+                return lhs.getPriority() > rhs.getPriority();
             }
         };
 
