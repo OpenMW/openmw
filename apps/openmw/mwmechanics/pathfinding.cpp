@@ -301,8 +301,11 @@ namespace MWMechanics
     {
         try
         {
-            const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
-            navigator->findPath(halfExtents, startPoint, endPoint, flags, out);
+            const auto world = MWBase::Environment::get().getWorld();
+            const auto realHalfExtents = world->getHalfExtents(actor); // This may differ from halfExtents argument
+            const auto stepSize = 2 * std::max(realHalfExtents.x(), realHalfExtents.y());
+            const auto navigator = world->getNavigator();
+            navigator->findPath(halfExtents, stepSize, startPoint, endPoint, flags, out);
         }
         catch (const DetourNavigator::NavigatorException& exception)
         {

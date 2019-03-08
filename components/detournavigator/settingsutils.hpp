@@ -31,6 +31,11 @@ namespace DetourNavigator
         return agentHalfExtents.x() * settings.mRecastScaleFactor;
     }
 
+    inline float toNavMeshCoordinates(const Settings& settings, float value)
+    {
+        return value * settings.mRecastScaleFactor;
+    }
+
     inline osg::Vec3f toNavMeshCoordinates(const Settings& settings, osg::Vec3f position)
     {
         std::swap(position.y(), position.z());
