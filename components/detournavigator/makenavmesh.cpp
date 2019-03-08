@@ -441,17 +441,56 @@ namespace
         return NavMeshData(navMeshData, navMeshDataSize);
     }
 
-    UpdateNavMeshStatus makeUpdateNavMeshStatus(bool removed, bool add)
+    class UpdateNavMeshStatusBuilder
     {
-        if (removed && add)
-            return UpdateNavMeshStatus::replaced;
-        else if (removed)
-            return UpdateNavMeshStatus::removed;
-        else if (add)
-            return UpdateNavMeshStatus::add;
-        else
-            return UpdateNavMeshStatus::ignore;
-    }
+    public:
+        UpdateNavMeshStatusBuilder() = default;
+
+        UpdateNavMeshStatusBuilder removed(bool value)
+        {
+            if (value)
+                set(UpdateNavMeshStatus::removed);
+            else
+                unset(UpdateNavMeshStatus::removed);
+            return *this;
+        }
+
+        UpdateNavMeshStatusBuilder added(bool value)
+        {
+            if (value)
+                set(UpdateNavMeshStatus::added);
+            else
+                unset(UpdateNavMeshStatus::added);
+            return *this;
+        }
+
+        UpdateNavMeshStatusBuilder failed(bool value)
+        {
+            if (value)
+                set(UpdateNavMeshStatus::failed);
+            else
+                unset(UpdateNavMeshStatus::failed);
+            return *this;
+        }
+
+        UpdateNavMeshStatus getResult() const
+        {
+            return mResult;
+        }
+
+    private:
+        UpdateNavMeshStatus mResult = UpdateNavMeshStatus::ignored;
+
+        void set(UpdateNavMeshStatus value)
+        {
+            mResult = static_cast<UpdateNavMeshStatus>(static_cast<unsigned>(mResult) | static_cast<unsigned>(value));
+        }
+
+        void unset(UpdateNavMeshStatus value)
+        {
+            mResult = static_cast<UpdateNavMeshStatus>(static_cast<unsigned>(mResult) & ~static_cast<unsigned>(value));
+        }
+    };
 
     template <class T>
     unsigned long getMinValuableBitsNumber(const T value)
@@ -460,6 +499,49 @@ namespace
         while (power < sizeof(T) * 8 && (static_cast<T>(1) << power) < value)
             ++power;
         return power;
+    }
+
+    dtStatus addTile(dtNavMesh& navMesh, const NavMeshData& navMeshData)
+    {
+        const dtTileRef lastRef = 0;
+        dtTileRef* const result = nullptr;
+        return navMesh.addTile(navMeshData.mValue.get(), navMeshData.mSize,
+                               doNotTransferOwnership, lastRef, result);
+    }
+
+    dtStatus addTile(dtNavMesh& navMesh, const NavMeshTilesCache::Value& cachedNavMeshData)
+    {
+        const dtTileRef lastRef = 0;
+        dtTileRef* const result = nullptr;
+        return navMesh.addTile(cachedNavMeshData.get().mValue, cachedNavMeshData.get().mSize,
+                               doNotTransferOwnership, lastRef, result);
+    }
+
+    template <class T>
+    UpdateNavMeshStatus replaceTile(const SharedNavMeshCacheItem& navMeshCacheItem,
+        const TilePosition& changedTile, T&& navMeshData)
+    {
+        const auto locked = navMeshCacheItem.lock();
+        auto& navMesh = locked->getValue();
+        const int layer = 0;
+        const auto tileRef = navMesh.getTileRefAt(changedTile.x(), changedTile.y(), layer);
+        unsigned char** const data = nullptr;
+        int* const dataSize = nullptr;
+        const auto removed = dtStatusSucceed(navMesh.removeTile(tileRef, data, dataSize));
+        const auto addStatus = addTile(navMesh, navMeshData);
+
+        if (dtStatusSucceed(addStatus))
+        {
+            locked->setUsedTile(changedTile, std::forward<T>(navMeshData));
+            return UpdateNavMeshStatusBuilder().added(true).removed(removed).getResult();
+        }
+        else
+        {
+            if (removed)
+                locked->removeUsedTile(changedTile);
+            log("failed to add tile with status=", WriteDtStatus {addStatus});
+            return UpdateNavMeshStatusBuilder().removed(removed).failed((addStatus & DT_OUT_OF_MEMORY) != 0).getResult();
+        }
     }
 }
 
@@ -522,7 +604,7 @@ namespace DetourNavigator
             const auto removed = dtStatusSucceed(navMesh.removeTile(tileRef, nullptr, nullptr));
             if (removed)
                 locked->removeUsedTile(changedTile);
-            return makeUpdateNavMeshStatus(removed, false);
+            return UpdateNavMeshStatusBuilder().removed(removed).getResult();
         };
 
         if (!recastMesh)
@@ -546,7 +628,7 @@ namespace DetourNavigator
             return removeTile();
         }
 
-        if (!shouldAddTile(changedTile, playerTile, params.maxTiles))
+        if (!shouldAddTile(changedTile, playerTile, std::min(settings.mMaxTilesNumber, params.maxTiles)))
         {
             log("ignore add tile: too far from player");
             return removeTile();
@@ -583,47 +665,10 @@ namespace DetourNavigator
             if (!cachedNavMeshData)
             {
                 log("cache overflow");
-
-                const auto locked = navMeshCacheItem.lock();
-                auto& navMesh = locked->getValue();
-                const auto tileRef = navMesh.getTileRefAt(x, y, 0);
-                const auto removed = dtStatusSucceed(navMesh.removeTile(tileRef, nullptr, nullptr));
-                const auto addStatus = navMesh.addTile(navMeshData.mValue.get(), navMeshData.mSize,
-                                                       doNotTransferOwnership, 0, 0);
-
-                if (dtStatusSucceed(addStatus))
-                {
-                    locked->setUsedTile(changedTile, std::move(navMeshData));
-                    return makeUpdateNavMeshStatus(removed, true);
-                }
-                else
-                {
-                    if (removed)
-                        locked->removeUsedTile(changedTile);
-                    log("failed to add tile with status=", WriteDtStatus {addStatus});
-                    return makeUpdateNavMeshStatus(removed, false);
-                }
+                return replaceTile(navMeshCacheItem, changedTile, std::move(navMeshData));
             }
         }
 
-        const auto locked = navMeshCacheItem.lock();
-        auto& navMesh = locked->getValue();
-        const auto tileRef = navMesh.getTileRefAt(x, y, 0);
-        const auto removed = dtStatusSucceed(navMesh.removeTile(tileRef, nullptr, nullptr));
-        const auto addStatus = navMesh.addTile(cachedNavMeshData.get().mValue, cachedNavMeshData.get().mSize,
-                                               doNotTransferOwnership, 0, 0);
-
-        if (dtStatusSucceed(addStatus))
-        {
-            locked->setUsedTile(changedTile, std::move(cachedNavMeshData));
-            return makeUpdateNavMeshStatus(removed, true);
-        }
-        else
-        {
-            if (removed)
-                locked->removeUsedTile(changedTile);
-            log("failed to add tile with status=", WriteDtStatus {addStatus});
-            return makeUpdateNavMeshStatus(removed, false);
-        }
+        return replaceTile(navMeshCacheItem, changedTile, std::move(cachedNavMeshData));
     }
 }

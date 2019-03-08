@@ -61,6 +61,7 @@ namespace
             mSettings.mMaxSmoothPathSize = 1024;
             mSettings.mTrianglesPerChunk = 256;
             mSettings.mMaxPolys = 4096;
+            mSettings.mMaxTilesNumber = 512;
             mNavigator.reset(new NavigatorImpl(mSettings));
         }
     };

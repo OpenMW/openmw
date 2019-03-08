@@ -26,6 +26,7 @@ namespace DetourNavigator
         int mMaxEdgeLen = 0;
         int mMaxNavMeshQueryNodes = 0;
         int mMaxPolys = 0;
+        int mMaxTilesNumber = 0;
         int mMaxVertsPerPoly = 0;
         int mRegionMergeSize = 0;
         int mRegionMinSize = 0;
