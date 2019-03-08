@@ -157,7 +157,7 @@ namespace DetourNavigator
                 if (changedTiles->second.empty())
                     mChangedTiles.erase(changedTiles);
             }
-            const auto maxTiles = std::min(mSettings.mMaxTilesNumber, navMesh.getParams()->maxTiles);
+            const auto maxTiles = navMesh.getParams()->maxTiles;
             mRecastMeshManager.forEachTilePosition([&] (const TilePosition& tile)
             {
                 if (tilesToPost.count(tile))

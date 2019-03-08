@@ -549,22 +549,12 @@ namespace DetourNavigator
 {
     NavMeshPtr makeEmptyNavMesh(const Settings& settings)
     {
-        // Max tiles and max polys affect how the tile IDs are caculated.
-        // There are 22 bits available for identifying a tile and a polygon.
-        const int polysAndTilesBits = 22;
-        const auto polysBits = getMinValuableBitsNumber(settings.mMaxPolys);
-
-        if (polysBits >= polysAndTilesBits)
-            throw InvalidArgument("Too many polygons per tile");
-
-        const auto tilesBits = polysAndTilesBits - polysBits;
-
         dtNavMeshParams params;
         std::fill_n(params.orig, 3, 0.0f);
         params.tileWidth = settings.mTileSize * settings.mCellSize;
         params.tileHeight = settings.mTileSize * settings.mCellSize;
-        params.maxTiles = 1 << tilesBits;
-        params.maxPolys = 1 << polysBits;
+        params.maxTiles = settings.mMaxTilesNumber;
+        params.maxPolys = settings.mMaxPolys;
 
         NavMeshPtr navMesh(dtAllocNavMesh(), &dtFreeNavMesh);
         const auto status = navMesh->init(&params);
@@ -628,7 +618,7 @@ namespace DetourNavigator
             return removeTile();
         }
 
-        if (!shouldAddTile(changedTile, playerTile, std::min(settings.mMaxTilesNumber, params.maxTiles)))
+        if (!shouldAddTile(changedTile, playerTile, params.maxTiles))
         {
             log("ignore add tile: too far from player");
             return removeTile();
