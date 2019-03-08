@@ -461,6 +461,49 @@ namespace
             ++power;
         return power;
     }
+
+    dtStatus addTile(dtNavMesh& navMesh, const NavMeshData& navMeshData)
+    {
+        const dtTileRef lastRef = 0;
+        dtTileRef* const result = nullptr;
+        return navMesh.addTile(navMeshData.mValue.get(), navMeshData.mSize,
+                               doNotTransferOwnership, lastRef, result);
+    }
+
+    dtStatus addTile(dtNavMesh& navMesh, const NavMeshTilesCache::Value& cachedNavMeshData)
+    {
+        const dtTileRef lastRef = 0;
+        dtTileRef* const result = nullptr;
+        return navMesh.addTile(cachedNavMeshData.get().mValue, cachedNavMeshData.get().mSize,
+                               doNotTransferOwnership, lastRef, result);
+    }
+
+    template <class T>
+    UpdateNavMeshStatus replaceTile(const SharedNavMeshCacheItem& navMeshCacheItem,
+        const TilePosition& changedTile, T&& navMeshData)
+    {
+        const auto locked = navMeshCacheItem.lock();
+        auto& navMesh = locked->getValue();
+        const int layer = 0;
+        const auto tileRef = navMesh.getTileRefAt(changedTile.x(), changedTile.y(), layer);
+        unsigned char** const data = nullptr;
+        int* const dataSize = nullptr;
+        const auto removed = dtStatusSucceed(navMesh.removeTile(tileRef, data, dataSize));
+        const auto addStatus = addTile(navMesh, navMeshData);
+
+        if (dtStatusSucceed(addStatus))
+        {
+            locked->setUsedTile(changedTile, std::forward<T>(navMeshData));
+            return makeUpdateNavMeshStatus(removed, true);
+        }
+        else
+        {
+            if (removed)
+                locked->removeUsedTile(changedTile);
+            log("failed to add tile with status=", WriteDtStatus {addStatus});
+            return makeUpdateNavMeshStatus(removed, false);
+        }
+    }
 }
 
 namespace DetourNavigator
@@ -583,47 +626,10 @@ namespace DetourNavigator
             if (!cachedNavMeshData)
             {
                 log("cache overflow");
-
-                const auto locked = navMeshCacheItem.lock();
-                auto& navMesh = locked->getValue();
-                const auto tileRef = navMesh.getTileRefAt(x, y, 0);
-                const auto removed = dtStatusSucceed(navMesh.removeTile(tileRef, nullptr, nullptr));
-                const auto addStatus = navMesh.addTile(navMeshData.mValue.get(), navMeshData.mSize,
-                                                       doNotTransferOwnership, 0, 0);
-
-                if (dtStatusSucceed(addStatus))
-                {
-                    locked->setUsedTile(changedTile, std::move(navMeshData));
-                    return makeUpdateNavMeshStatus(removed, true);
-                }
-                else
-                {
-                    if (removed)
-                        locked->removeUsedTile(changedTile);
-                    log("failed to add tile with status=", WriteDtStatus {addStatus});
-                    return makeUpdateNavMeshStatus(removed, false);
-                }
+                return replaceTile(navMeshCacheItem, changedTile, std::move(navMeshData));
             }
         }
 
-        const auto locked = navMeshCacheItem.lock();
-        auto& navMesh = locked->getValue();
-        const auto tileRef = navMesh.getTileRefAt(x, y, 0);
-        const auto removed = dtStatusSucceed(navMesh.removeTile(tileRef, nullptr, nullptr));
-        const auto addStatus = navMesh.addTile(cachedNavMeshData.get().mValue, cachedNavMeshData.get().mSize,
-                                               doNotTransferOwnership, 0, 0);
-
-        if (dtStatusSucceed(addStatus))
-        {
-            locked->setUsedTile(changedTile, std::move(cachedNavMeshData));
-            return makeUpdateNavMeshStatus(removed, true);
-        }
-        else
-        {
-            if (removed)
-                locked->removeUsedTile(changedTile);
-            log("failed to add tile with status=", WriteDtStatus {addStatus});
-            return makeUpdateNavMeshStatus(removed, false);
-        }
+        return replaceTile(navMeshCacheItem, changedTile, std::move(cachedNavMeshData));
     }
 }
