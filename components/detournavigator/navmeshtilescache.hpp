@@ -108,7 +108,7 @@ namespace DetourNavigator
 
         struct TileMap
         {
-            std::map<std::string, ItemIterator> Map;
+            std::map<std::string, ItemIterator> mMap;
         };
 
         std::mutex mMutex;
