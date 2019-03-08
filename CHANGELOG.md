@@ -6,6 +6,7 @@
     Bug #3623: Fix HiDPI on Windows
     Bug #3733: Normal maps are inverted on mirrored UVs
     Bug #3765: DisableTeleporting makes Mark/Recall/Intervention effects undetectable
+    Bug #3778: [Mod] Improved Thrown Weapon Projectiles - weapons have wrong transformation during throw animation
     Bug #4329: Removed birthsign abilities are restored after reloading the save
     Bug #4383: Bow model obscures crosshair when arrow is drawn
     Bug #4384: Resist Normal Weapons only checks ammunition for ranged weapons

@@ -917,7 +917,10 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             if(mWeaponType != WeapType_None && mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand)
             {
                 mAnimation->showWeapons(true);
-                mAnimation->setWeaponGroup(mCurrentWeapon);
+                // Note: controllers for ranged weapon should use time for beginning of animation to play shooting properly,
+                // for other weapons they should use absolute time. Some mods rely on this behaviour (to rotate throwing projectiles, for example)
+                bool useRelativeDuration = mWeaponType == WeapType_BowAndArrow || mWeaponType == WeapType_Crossbow;
+                mAnimation->setWeaponGroup(mCurrentWeapon, useRelativeDuration);
             }
 
             mAnimation->showCarriedLeft(updateCarriedLeftVisible(mWeaponType));
@@ -1375,7 +1378,10 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaptype));
 
                 getWeaponGroup(weaptype, weapgroup);
-                mAnimation->setWeaponGroup(weapgroup);
+                // Note: controllers for ranged weapon should use time for beginning of animation to play shooting properly,
+                // for other weapons they should use absolute time. Some mods rely on this behaviour (to rotate throwing projectiles, for example)
+                bool useRelativeDuration = weaptype == WeapType_BowAndArrow || weaptype == WeapType_Crossbow;
+                mAnimation->setWeaponGroup(weapgroup, useRelativeDuration);
 
                 if (!isStillWeapon)
                 {

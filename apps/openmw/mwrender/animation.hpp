@@ -457,7 +457,7 @@ public:
 
     virtual void showWeapons(bool showWeapon) {}
     virtual void showCarriedLeft(bool show) {}
-    virtual void setWeaponGroup(const std::string& group) {}
+    virtual void setWeaponGroup(const std::string& group, bool relativeDuration) {}
     virtual void setVampire(bool vampire) {}
     /// A value < 1 makes the animation translucent, 1.f = fully opaque
     void setAlpha(float alpha);
