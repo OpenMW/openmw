@@ -101,6 +101,8 @@ namespace SceneUtil {
 
             void apply(osg::Camera&);
 
+            using osg::NodeVisitor::apply;
+
             void updateBound(const osg::BoundingBox& bb);
 
             void update(const osg::Vec3& v);
