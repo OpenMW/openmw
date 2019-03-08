@@ -50,13 +50,14 @@ namespace DetourNavigator
             osg::Vec3f mAgentHalfExtents;
             SharedNavMeshCacheItem mNavMeshCacheItem;
             TilePosition mChangedTile;
+            unsigned mTryNumber;
             ChangeType mChangeType;
             int mDistanceToPlayer;
             int mDistanceToOrigin;
 
-            std::tuple<ChangeType, int, int> getPriority() const
+            std::tuple<unsigned, ChangeType, int, int> getPriority() const
             {
-                return std::make_tuple(mChangeType, mDistanceToPlayer, mDistanceToOrigin);
+                return std::make_tuple(mTryNumber, mChangeType, mDistanceToPlayer, mDistanceToOrigin);
             }
 
             friend inline bool operator <(const Job& lhs, const Job& rhs)
@@ -83,13 +84,15 @@ namespace DetourNavigator
 
         void process() throw();
 
-        void processJob(const Job& job);
+        bool processJob(const Job& job);
 
         boost::optional<Job> getNextJob();
 
         void writeDebugFiles(const Job& job, const RecastMesh* recastMesh) const;
 
         std::chrono::steady_clock::time_point setFirstStart(const std::chrono::steady_clock::time_point& value);
+
+        void repost(Job&& job);
     };
 }
 

@@ -1,4 +1,4 @@
-#include "asyncnavmeshupdater.hpp"
+﻿#include "asyncnavmeshupdater.hpp"
 #include "debug.hpp"
 #include "makenavmesh.hpp"
 #include "settings.hpp"
@@ -30,6 +30,10 @@ namespace DetourNavigator
                 return stream << "add";
             case UpdateNavMeshStatus::replaced:
                 return stream << "replaced";
+            case UpdateNavMeshStatus::failed:
+                return stream << "failed";
+            case UpdateNavMeshStatus::lost:
+                return stream << "lost";
         }
         return stream << "unknown";
     }
@@ -77,6 +81,7 @@ namespace DetourNavigator
                 job.mAgentHalfExtents = agentHalfExtents;
                 job.mNavMeshCacheItem = navMeshCacheItem;
                 job.mChangedTile = changedTile.first;
+                job.mTryNumber = 0;
                 job.mChangeType = changedTile.second;
                 job.mDistanceToPlayer = getManhattanDistance(changedTile.first, playerTile);
                 job.mDistanceToOrigin = getManhattanDistance(changedTile.first, TilePosition {0, 0});
@@ -104,8 +109,9 @@ namespace DetourNavigator
         {
             try
             {
-                if (const auto job = getNextJob())
-                    processJob(*job);
+                if (auto job = getNextJob())
+                    if (!processJob(*job))
+                        repost(std::move(*job));
             }
             catch (const std::exception& e)
             {
@@ -115,7 +121,7 @@ namespace DetourNavigator
         log("stop process jobs");
     }
 
-    void AsyncNavMeshUpdater::processJob(const Job& job)
+    bool AsyncNavMeshUpdater::processJob(const Job& job)
     {
         log("process job for agent=", job.mAgentHalfExtents);
 
@@ -136,12 +142,16 @@ namespace DetourNavigator
 
         using FloatMs = std::chrono::duration<float, std::milli>;
 
-        const auto locked = job.mNavMeshCacheItem.lockConst();
-        log("cache updated for agent=", job.mAgentHalfExtents, " status=", status,
-            " generation=", locked->getGeneration(),
-            " revision=", locked->getNavMeshRevision(),
-            " time=", std::chrono::duration_cast<FloatMs>(finish - start).count(), "ms",
-            " total_time=", std::chrono::duration_cast<FloatMs>(finish - firstStart).count(), "ms");
+        {
+            const auto locked = job.mNavMeshCacheItem.lockConst();
+            log("cache updated for agent=", job.mAgentHalfExtents, " status=", status,
+                " generation=", locked->getGeneration(),
+                " revision=", locked->getNavMeshRevision(),
+                " time=", std::chrono::duration_cast<FloatMs>(finish - start).count(), "ms",
+                " total_time=", std::chrono::duration_cast<FloatMs>(finish - firstStart).count(), "ms");
+        }
+
+        return isSuccess(status);
     }
 
     boost::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getNextJob()
@@ -193,5 +203,20 @@ namespace DetourNavigator
         if (!*locked)
             *locked = value;
         return *locked.get();
+    }
+
+    void AsyncNavMeshUpdater::repost(Job&& job)
+    {
+        if (mShouldStop || job.mTryNumber > 2)
+            return;
+
+        const std::lock_guard<std::mutex> lock(mMutex);
+
+        if (mPushed[job.mAgentHalfExtents].insert(job.mChangedTile).second)
+        {
+            ++job.mTryNumber;
+            mJobs.push(std::move(job));
+            mHasJob.notify_all();
+        }
     }
 }

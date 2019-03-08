@@ -464,6 +464,15 @@ namespace
             return *this;
         }
 
+        UpdateNavMeshStatusBuilder failed(bool value)
+        {
+            if (value)
+                set(UpdateNavMeshStatus::failed);
+            else
+                unset(UpdateNavMeshStatus::failed);
+            return *this;
+        }
+
         UpdateNavMeshStatus getResult() const
         {
             return mResult;
@@ -531,7 +540,7 @@ namespace
             if (removed)
                 locked->removeUsedTile(changedTile);
             log("failed to add tile with status=", WriteDtStatus {addStatus});
-            return UpdateNavMeshStatusBuilder().removed(removed).getResult();
+            return UpdateNavMeshStatusBuilder().removed(removed).failed((addStatus & DT_OUT_OF_MEMORY) != 0).getResult();
         }
     }
 }
