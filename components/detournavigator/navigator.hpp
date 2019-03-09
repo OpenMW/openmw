@@ -160,7 +160,7 @@ namespace DetourNavigator
          * @throws InvalidArgument if there is no navmesh for given agentHalfExtents.
          */
         template <class OutputIterator>
-        OutputIterator findPath(const osg::Vec3f& agentHalfExtents, const osg::Vec3f& start,
+        OutputIterator findPath(const osg::Vec3f& agentHalfExtents, const float stepSize, const osg::Vec3f& start,
             const osg::Vec3f& end, const Flags includeFlags, OutputIterator out) const
         {
             static_assert(
@@ -175,8 +175,8 @@ namespace DetourNavigator
                 return out;
             const auto settings = getSettings();
             return findSmoothPath(navMesh.lock()->getValue(), toNavMeshCoordinates(settings, agentHalfExtents),
-                toNavMeshCoordinates(settings, start), toNavMeshCoordinates(settings, end), includeFlags,
-                settings, out);
+                toNavMeshCoordinates(settings, stepSize), toNavMeshCoordinates(settings, start),
+                toNavMeshCoordinates(settings, end), includeFlags, settings, out);
         }
 
         /**

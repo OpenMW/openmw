@@ -27,6 +27,7 @@ namespace
         osg::Vec3f mEnd;
         std::deque<osg::Vec3f> mPath;
         std::back_insert_iterator<std::deque<osg::Vec3f>> mOut;
+        float mStepSize;
 
         DetourNavigatorNavigatorTest()
             : mPlayerPosition(0, 0, 0)
@@ -34,6 +35,7 @@ namespace
             , mStart(-215, 215, 1)
             , mEnd(215, -215, 1)
             , mOut(mPath)
+            , mStepSize(28.333332061767578125f)
         {
             mSettings.mEnableWriteRecastMeshToFile = false;
             mSettings.mEnableWriteNavMeshToFile = false;
@@ -68,21 +70,21 @@ namespace
 
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_empty_should_return_empty)
     {
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut);
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>());
     }
 
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_existing_agent_with_no_navmesh_should_throw_exception)
     {
         mNavigator->addAgent(mAgentHalfExtents);
-        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut), NavigatorException);
+        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), NavigatorException);
     }
 
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_removed_agent_should_return_empty)
     {
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->removeAgent(mAgentHalfExtents);
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut);
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>());
     }
 
@@ -91,7 +93,7 @@ namespace
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->removeAgent(mAgentHalfExtents);
-        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut), NavigatorException);
+        EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), NavigatorException);
     }
 
     TEST_F(DetourNavigatorNavigatorTest, update_then_find_path_should_return_path)
@@ -111,7 +113,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.85963428020477294921875),
@@ -161,7 +163,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, std::back_inserter(mPath));
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, std::back_inserter(mPath));
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.85963428020477294921875),
@@ -194,7 +196,7 @@ namespace
         mNavigator->wait();
 
         mPath.clear();
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, std::back_inserter(mPath));
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, std::back_inserter(mPath));
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.87826788425445556640625),
@@ -245,7 +247,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, std::back_inserter(mPath));
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, std::back_inserter(mPath));
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.87826788425445556640625),
@@ -280,7 +282,7 @@ namespace
         mNavigator->wait();
 
         mPath.clear();
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.85963428020477294921875),
@@ -337,7 +339,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.96328866481781005859375),
@@ -393,7 +395,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.9393787384033203125),
@@ -446,7 +448,7 @@ namespace
         mEnd.x() = 0;
         mEnd.z() = 300;
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_swim, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(0, 215, 185.33331298828125),
@@ -492,7 +494,7 @@ namespace
         mStart.x() = 0;
         mEnd.x() = 0;
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_swim | Flag_walk, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(0, 215, -94.75363922119140625),
@@ -538,7 +540,7 @@ namespace
         mStart.x() = 0;
         mEnd.x() = 0;
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_swim | Flag_walk, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(0, 215, -94.75363922119140625),
@@ -584,7 +586,7 @@ namespace
         mStart.x() = 0;
         mEnd.x() = 0;
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(0, 215, -94.75363922119140625),
@@ -633,7 +635,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        mNavigator->findPath(mAgentHalfExtents, mStart, mEnd, Flag_walk, mOut);
+        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(-215, 215, 1.85963428020477294921875),

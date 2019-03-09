@@ -167,7 +167,9 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         mTimer = 0;
     }
 
-    const float pointTolerance = std::max(MIN_TOLERANCE, std::min(actor.getClass().getSpeed(actor), DEFAULT_TOLERANCE));
+    const float actorTolerance = 2 * actor.getClass().getSpeed(actor) * duration
+            + 1.2 * std::max(halfExtents.x(), halfExtents.y());
+    const float pointTolerance = std::max(MIN_TOLERANCE, actorTolerance);
 
     mPathFinder.update(position, pointTolerance, DEFAULT_TOLERANCE);
 
