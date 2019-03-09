@@ -1149,18 +1149,14 @@ namespace MWInput
             return;
         }
 
-        bool state = MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
+        bool inGame = MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_NoGame;
         MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
 
-        if (mode == MWGui::GM_MainMenu || mode == MWGui::GM_Settings)
-        {
+        if ((inGame && mode == MWGui::GM_MainMenu) || mode == MWGui::GM_Settings)
             MWBase::Environment::get().getWindowManager()->popGuiMode();
-        }
 
-        if(state || mode == MWGui::GM_MainMenu)
-            return;
-
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
+        if (inGame && mode != MWGui::GM_MainMenu)
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
     }
 
     void InputManager::toggleOptionsMenu()
@@ -1172,20 +1168,13 @@ namespace MWInput
         }
 
         MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
-        bool state = MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
-        if (mode == MWGui::GM_Settings)
-        {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
-            return;
-        }
-        else if (mode == MWGui::GM_MainMenu && !state)
-        {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
-        }
-        else if (mode == MWGui::GM_MainMenu)
-            return;
+        bool inGame = MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_NoGame;
 
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Settings);
+        if ((inGame && mode == MWGui::GM_MainMenu) || mode == MWGui::GM_Settings)
+            MWBase::Environment::get().getWindowManager()->popGuiMode();
+
+        if (inGame && mode != MWGui::GM_Settings)
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Settings);
     }
 
     void InputManager::quickLoad() {
