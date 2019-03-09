@@ -531,6 +531,8 @@ namespace Resource
 
             if (mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
+            else
+                loaded->getBound();
 
             mCache->addEntryToObjectCache(normalized, loaded);
             return loaded;
@@ -543,6 +545,12 @@ namespace Resource
         mVFS->normalizeFilename(normalized);
 
         osg::ref_ptr<osg::Node> node = createInstance(normalized);
+
+        // Note: osg::clone() does not calculate bound volumes.
+        // Do it immediately, otherwise we will need to update them for all objects
+        // during first update traversal, what may lead to stuttering during cell transitions
+        node->getBound();
+
         mInstanceCache->addEntryToObjectCache(normalized, node.get());
         return node;
     }
