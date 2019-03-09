@@ -257,7 +257,7 @@ endif()
 
 
 find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX osgShadow)
-include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+include_directories(SYSTEM ${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 set(USED_OSG_PLUGINS
                     osgdb_bmp
