@@ -5,6 +5,7 @@
 #include <osg/Referenced>
 #include <osg/Vec3f>
 
+#include <atomic>
 #include <memory>
 #include <set>
 
@@ -93,7 +94,7 @@ namespace Terrain
         virtual View* createView() { return nullptr; }
 
         /// @note Thread safe, as long as you do not attempt to load into the same view from multiple threads.
-        virtual void preload(View* view, const osg::Vec3f& eyePoint) {}
+        virtual void preload(View* view, const osg::Vec3f& eyePoint, std::atomic<bool>& abort) {}
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
 

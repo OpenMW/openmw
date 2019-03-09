@@ -30,7 +30,7 @@ namespace Terrain
         void cacheCell(View *view, int x, int y);
 
         View* createView();
-        void preload(View* view, const osg::Vec3f& eyePoint);
+        void preload(View* view, const osg::Vec3f& eyePoint, std::atomic<bool>& abort);
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats);
 

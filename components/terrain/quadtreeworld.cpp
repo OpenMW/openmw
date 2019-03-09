@@ -478,14 +478,14 @@ View* QuadTreeWorld::createView()
     return new ViewData;
 }
 
-void QuadTreeWorld::preload(View *view, const osg::Vec3f &eyePoint)
+void QuadTreeWorld::preload(View *view, const osg::Vec3f &eyePoint, std::atomic<bool> &abort)
 {
     ensureQuadTreeBuilt();
 
     ViewData* vd = static_cast<ViewData*>(view);
     traverse(mRootNode.get(), vd, nullptr, mRootNode->getLodCallback(), eyePoint, false);
 
-    for (unsigned int i=0; i<vd->getNumEntries(); ++i)
+    for (unsigned int i=0; i<vd->getNumEntries() && !abort; ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
         loadRenderingNode(entry, vd, mVertexLodMod, mChunkManager.get());
