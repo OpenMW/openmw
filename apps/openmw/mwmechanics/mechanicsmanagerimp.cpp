@@ -290,7 +290,9 @@ namespace MWMechanics
     void MechanicsManager::advanceTime (float duration)
     {
         // Uses ingame time, but scaled to real time
-        duration /= MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+        const float timeScaleFactor = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+        if (timeScaleFactor != 0.0f)
+            duration /= timeScaleFactor;
         MWWorld::Ptr player = getPlayer();
         player.getClass().getInventoryStore(player).rechargeItems(duration);
     }
