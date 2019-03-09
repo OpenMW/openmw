@@ -327,6 +327,7 @@ namespace Compiler
             extensions.registerInstruction ("setmovementposition", "cf", opcodeSetMovementPosition, opcodeSetMovementPositionExplicit);
             extensions.registerInstruction ("setmovementrotation", "cf", opcodeSetMovementRotation, opcodeSetMovementRotationExplicit);
             extensions.registerInstruction ("quit", "", opcodeQuit);
+            extensions.registerInstruction ("setcollisionmode", "ll", opcodeSetCollisionMode, opcodeSetCollisionModeExplicit);
         }
     }
 

@@ -464,5 +464,7 @@ op 0x200030d: SetMovementPosition, explicit
 op 0x200030e: SetMovementRotation
 op 0x200030f: SetMovementRotation, explicit
 op 0x2000310: Quit
+op 0x2000311: SetCollisionMode
+op 0x2000312: SetCollisionMode, explicit
 
-opcodes 0x2000311-0x3ffffff unused
+opcodes 0x2000313-0x3ffffff unused
