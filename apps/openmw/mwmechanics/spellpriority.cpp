@@ -170,7 +170,7 @@ namespace MWMechanics
 
             float rating = rateEffects(enchantment->mEffects, actor, enemy);
 
-            rating *= 2; // prefer rechargable magic items over spells
+            rating *= 1.25f; // prefer rechargable magic items over spells
             return rating;
         }
 
