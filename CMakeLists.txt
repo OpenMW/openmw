@@ -262,6 +262,7 @@ include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 set(USED_OSG_PLUGINS
                     osgdb_bmp
                     osgdb_dds
+                    osgdb_freetype
                     osgdb_jpeg
                     osgdb_osg
                     osgdb_png
