@@ -37,6 +37,7 @@
     Bug #4837: CTD when a mesh with NiLODNode root node with particles is loaded
     Bug #4860: Actors outside of processing range visible for one frame after spawning
     Bug #4876: AI ratings handling inconsistencies
+    Bug #4877: Startup script executes only on a new game start
     Bug #4888: Global variable stray explicit reference calls break script compilation
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
