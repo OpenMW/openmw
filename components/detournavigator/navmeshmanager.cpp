@@ -16,6 +16,20 @@ namespace
     {
         return current == add ? current : ChangeType::mixed;
     }
+
+    /// Safely reset shared_ptr with definite underlying object destrutor call.
+    /// Assuming there is another thread holding copy of this shared_ptr or weak_ptr to this shared_ptr.
+    template <class T>
+    bool resetIfUnique(std::shared_ptr<T>& ptr)
+    {
+        const std::weak_ptr<T> weak = std::move(ptr);
+        if (auto shared = weak.lock())
+        {
+            ptr = std::move(shared);
+            return false;
+        }
+        return true;
+    }
 }
 
 namespace DetourNavigator
@@ -83,9 +97,15 @@ namespace DetourNavigator
         log("cache add for agent=", agentHalfExtents);
     }
 
-    void NavMeshManager::reset(const osg::Vec3f& agentHalfExtents)
+    bool NavMeshManager::reset(const osg::Vec3f& agentHalfExtents)
     {
+        const auto it = mCache.find(agentHalfExtents);
+        if (it == mCache.end())
+            return true;
+        if (!resetIfUnique(it->second))
+            return false;
         mCache.erase(agentHalfExtents);
+        return true;
     }
 
     void NavMeshManager::addOffMeshConnection(const ObjectId id, const osg::Vec3f& start, const osg::Vec3f& end)
