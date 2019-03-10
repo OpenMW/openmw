@@ -48,7 +48,7 @@ namespace DetourNavigator
         struct Job
         {
             osg::Vec3f mAgentHalfExtents;
-            SharedNavMeshCacheItem mNavMeshCacheItem;
+            std::weak_ptr<GuardedNavMeshCacheItem> mNavMeshCacheItem;
             TilePosition mChangedTile;
             unsigned mTryNumber;
             ChangeType mChangeType;
