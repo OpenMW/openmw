@@ -242,7 +242,8 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
         {
             osg::Vec4f glowColor = getEnchantmentColor(*weapon);
             mScabbard = getWeaponPart(mesh, boneName, isEnchanted, &glowColor);
-            resetControllers(mScabbard->getNode());
+            if (mScabbard)
+                resetControllers(mScabbard->getNode());
         }
 
         return;
