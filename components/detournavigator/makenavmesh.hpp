@@ -20,21 +20,6 @@ namespace DetourNavigator
     class RecastMesh;
     struct Settings;
 
-    enum class UpdateNavMeshStatus : unsigned
-    {
-        ignored = 0,
-        removed = 1 << 0,
-        added = 1 << 1,
-        replaced = removed | added,
-        failed = 1 << 2,
-        lost = removed | failed,
-    };
-
-    inline bool isSuccess(UpdateNavMeshStatus value)
-    {
-        return (static_cast<unsigned>(value) & static_cast<unsigned>(UpdateNavMeshStatus::failed)) == 0;
-    }
-
     inline float getLength(const osg::Vec2i& value)
     {
         return std::sqrt(float(osg::square(value.x()) + osg::square(value.y())));

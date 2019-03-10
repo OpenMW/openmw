@@ -200,7 +200,7 @@ namespace DetourNavigator
                         + "_" + std::to_string(job.mChangedTile.y()) + "_", recastMeshRevision);
         if (mSettings.get().mEnableWriteNavMeshToFile)
             if (const auto shared = job.mNavMeshCacheItem.lock())
-                writeToFile(shared->lockConst()->getValue(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
+                writeToFile(shared->lockConst()->getImpl(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
     }
 
     std::chrono::steady_clock::time_point AsyncNavMeshUpdater::setFirstStart(const std::chrono::steady_clock::time_point& value)

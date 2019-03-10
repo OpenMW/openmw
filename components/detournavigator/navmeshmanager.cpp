@@ -160,7 +160,7 @@ namespace DetourNavigator
         const auto changedTiles = mChangedTiles.find(agentHalfExtents);
         {
             const auto locked = cached->lockConst();
-            const auto& navMesh = locked->getValue();
+            const auto& navMesh = locked->getImpl();
             if (changedTiles != mChangedTiles.end())
             {
                 for (const auto& tile : changedTiles->second)
