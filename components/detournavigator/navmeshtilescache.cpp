@@ -85,7 +85,7 @@ namespace DetourNavigator
         if (navMeshSize > mFreeNavMeshDataSize + (mMaxNavMeshDataSize - mUsedNavMeshDataSize))
             return Value();
 
-        const auto navMeshKey = makeNavMeshKey(recastMesh, offMeshConnections);
+        auto navMeshKey = makeNavMeshKey(recastMesh, offMeshConnections);
         const auto itemSize = navMeshSize + 2 * navMeshKey.size();
 
         if (itemSize > mFreeNavMeshDataSize + (mMaxNavMeshDataSize - mUsedNavMeshDataSize))
@@ -94,9 +94,8 @@ namespace DetourNavigator
         while (!mFreeItems.empty() && mUsedNavMeshDataSize + itemSize > mMaxNavMeshDataSize)
             removeLeastRecentlyUsed();
 
-        const auto iterator = mFreeItems.emplace(mFreeItems.end(), agentHalfExtents, changedTile, navMeshKey);
-        // TODO: use std::string_view or some alternative to avoid navMeshKey copy into both mFreeItems and mValues
-        const auto emplaced = mValues[agentHalfExtents][changedTile].mMap.emplace(navMeshKey, iterator);
+        const auto iterator = mFreeItems.emplace(mFreeItems.end(), agentHalfExtents, changedTile, std::move(navMeshKey));
+        const auto emplaced = mValues[agentHalfExtents][changedTile].mMap.emplace(iterator->mNavMeshKey, iterator);
 
         if (!emplaced.second)
         {
@@ -131,9 +130,10 @@ namespace DetourNavigator
 
         mUsedNavMeshDataSize -= getSize(item);
         mFreeNavMeshDataSize -= getSize(item);
-        mFreeItems.pop_back();
 
         tileValues->second.mMap.erase(value);
+        mFreeItems.pop_back();
+
         if (!tileValues->second.mMap.empty())
             return;
 

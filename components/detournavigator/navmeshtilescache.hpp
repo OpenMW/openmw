@@ -105,10 +105,24 @@ namespace DetourNavigator
             NavMeshData&& value);
 
     private:
+        class KeyView
+        {
+        public:
+            KeyView(const std::string& value)
+                : mValue(value) {}
+
+            friend bool operator <(const KeyView& lhs, const KeyView& rhs)
+            {
+                return lhs.mValue.get() < rhs.mValue.get();
+            }
+
+        private:
+            std::reference_wrapper<const std::string> mValue;
+        };
 
         struct TileMap
         {
-            std::map<std::string, ItemIterator> mMap;
+            std::map<KeyView, ItemIterator> mMap;
         };
 
         std::mutex mMutex;
