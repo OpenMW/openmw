@@ -93,7 +93,7 @@ namespace DetourNavigator
         if (cached != mCache.end())
             return;
         mCache.insert(std::make_pair(agentHalfExtents,
-            std::make_shared<NavMeshCacheItem>(makeEmptyNavMesh(mSettings), ++mGenerationCounter)));
+            std::make_shared<GuardedNavMeshCacheItem>(makeEmptyNavMesh(mSettings), ++mGenerationCounter)));
         log("cache add for agent=", agentHalfExtents);
     }
 
@@ -159,7 +159,7 @@ namespace DetourNavigator
         }
         const auto changedTiles = mChangedTiles.find(agentHalfExtents);
         {
-            const auto locked = cached.lock();
+            const auto locked = cached->lockConst();
             const auto& navMesh = locked->getValue();
             if (changedTiles != mChangedTiles.end())
             {

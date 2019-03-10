@@ -143,7 +143,7 @@ namespace DetourNavigator
         using FloatMs = std::chrono::duration<float, std::milli>;
 
         {
-            const auto locked = job.mNavMeshCacheItem.lockConst();
+            const auto locked = job.mNavMeshCacheItem->lockConst();
             log("cache updated for agent=", job.mAgentHalfExtents, " status=", status,
                 " generation=", locked->getGeneration(),
                 " revision=", locked->getNavMeshRevision(),
@@ -194,7 +194,7 @@ namespace DetourNavigator
             writeToFile(*recastMesh, mSettings.get().mRecastMeshPathPrefix + std::to_string(job.mChangedTile.x())
                         + "_" + std::to_string(job.mChangedTile.y()) + "_", recastMeshRevision);
         if (mSettings.get().mEnableWriteNavMeshToFile)
-            writeToFile(job.mNavMeshCacheItem.lockConst()->getValue(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
+            writeToFile(job.mNavMeshCacheItem->lockConst()->getValue(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
     }
 
     std::chrono::steady_clock::time_point AsyncNavMeshUpdater::setFirstStart(const std::chrono::steady_clock::time_point& value)
