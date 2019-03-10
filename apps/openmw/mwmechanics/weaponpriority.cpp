@@ -127,7 +127,9 @@ namespace MWMechanics
             value = ref->mBase->mData.mCombat;
         }
 
-        rating *= getHitChance(actor, enemy, value) / 100.f;
+        // Take hit chance in account, but do not allow rating become negative.
+        float chance = getHitChance(actor, enemy, value) / 100.f;
+        rating *= std::min(1.f, std::max(0.01f, chance));
 
         if (weapon->mData.mType < ESM::Weapon::Arrow)
             rating *= weapon->mData.mSpeed;
