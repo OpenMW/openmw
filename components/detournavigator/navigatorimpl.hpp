@@ -58,6 +58,7 @@ namespace DetourNavigator
         void updateAvoidShapeId(const ObjectId id, const ObjectId avoidId);
         void updateWaterShapeId(const ObjectId id, const ObjectId waterId);
         void updateId(const ObjectId id, const ObjectId waterId, std::unordered_map<ObjectId, ObjectId>& ids);
+        void removeUnusedNavMeshes();
     };
 }
 

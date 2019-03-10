@@ -64,7 +64,8 @@ namespace DetourNavigator
         std::map<TilePosition, std::pair<NavMeshTilesCache::Value, NavMeshData>> mUsedTiles;
     };
 
-    using SharedNavMeshCacheItem = Misc::SharedGuarded<NavMeshCacheItem>;
+    using GuardedNavMeshCacheItem = Misc::ScopeGuarded<NavMeshCacheItem>;
+    using SharedNavMeshCacheItem = std::shared_ptr<GuardedNavMeshCacheItem>;
 }
 
 #endif

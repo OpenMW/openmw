@@ -80,14 +80,6 @@ namespace
         EXPECT_THROW(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), NavigatorException);
     }
 
-    TEST_F(DetourNavigatorNavigatorTest, find_path_for_removed_agent_should_return_empty)
-    {
-        mNavigator->addAgent(mAgentHalfExtents);
-        mNavigator->removeAgent(mAgentHalfExtents);
-        mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut);
-        EXPECT_EQ(mPath, std::deque<osg::Vec3f>());
-    }
-
     TEST_F(DetourNavigatorNavigatorTest, add_agent_should_count_each_agent)
     {
         mNavigator->addAgent(mAgentHalfExtents);

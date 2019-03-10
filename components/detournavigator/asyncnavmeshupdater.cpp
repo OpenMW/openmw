@@ -129,12 +129,17 @@ namespace DetourNavigator
 
         const auto firstStart = setFirstStart(start);
 
+        const auto navMeshCacheItem = job.mNavMeshCacheItem.lock();
+
+        if (!navMeshCacheItem)
+            return true;
+
         const auto recastMesh = mRecastMeshManager.get().getMesh(job.mChangedTile);
         const auto playerTile = *mPlayerTile.lockConst();
         const auto offMeshConnections = mOffMeshConnectionsManager.get().get(job.mChangedTile);
 
         const auto status = updateNavMesh(job.mAgentHalfExtents, recastMesh.get(), job.mChangedTile, playerTile,
-            offMeshConnections, mSettings, job.mNavMeshCacheItem, mNavMeshTilesCache);
+            offMeshConnections, mSettings, navMeshCacheItem, mNavMeshTilesCache);
 
         const auto finish = std::chrono::steady_clock::now();
 
@@ -143,7 +148,7 @@ namespace DetourNavigator
         using FloatMs = std::chrono::duration<float, std::milli>;
 
         {
-            const auto locked = job.mNavMeshCacheItem.lockConst();
+            const auto locked = navMeshCacheItem->lockConst();
             log("cache updated for agent=", job.mAgentHalfExtents, " status=", status,
                 " generation=", locked->getGeneration(),
                 " revision=", locked->getNavMeshRevision(),
@@ -194,7 +199,8 @@ namespace DetourNavigator
             writeToFile(*recastMesh, mSettings.get().mRecastMeshPathPrefix + std::to_string(job.mChangedTile.x())
                         + "_" + std::to_string(job.mChangedTile.y()) + "_", recastMeshRevision);
         if (mSettings.get().mEnableWriteNavMeshToFile)
-            writeToFile(job.mNavMeshCacheItem.lockConst()->getValue(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
+            if (const auto shared = job.mNavMeshCacheItem.lock())
+                writeToFile(shared->lockConst()->getValue(), mSettings.get().mNavMeshPathPrefix, navMeshRevision);
     }
 
     std::chrono::steady_clock::time_point AsyncNavMeshUpdater::setFirstStart(const std::chrono::steady_clock::time_point& value)

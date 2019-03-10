@@ -36,7 +36,7 @@ namespace DetourNavigator
 
         bool removeWater(const osg::Vec2i& cellPosition);
 
-        void reset(const osg::Vec3f& agentHalfExtents);
+        bool reset(const osg::Vec3f& agentHalfExtents);
 
         void addOffMeshConnection(const ObjectId id, const osg::Vec3f& start, const osg::Vec3f& end);
 

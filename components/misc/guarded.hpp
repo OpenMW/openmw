@@ -83,38 +83,6 @@ namespace Misc
             std::mutex mMutex;
             T mValue;
     };
-
-    template <class T>
-    class SharedGuarded
-    {
-        public:
-            SharedGuarded()
-                : mMutex(std::make_shared<std::mutex>()), mValue()
-            {}
-
-            SharedGuarded(std::shared_ptr<T> value)
-                : mMutex(std::make_shared<std::mutex>()), mValue(std::move(value))
-            {}
-
-            Locked<T> lock() const
-            {
-                return Locked<T>(*mMutex, *mValue);
-            }
-
-            Locked<const T> lockConst() const
-            {
-                return Locked<const T>(*mMutex, *mValue);
-            }
-
-            operator bool() const
-            {
-                return static_cast<bool>(mValue);
-            }
-
-        private:
-            std::shared_ptr<std::mutex> mMutex;
-            std::shared_ptr<T> mValue;
-    };
 }
 
 #endif

@@ -521,7 +521,7 @@ namespace
     UpdateNavMeshStatus replaceTile(const SharedNavMeshCacheItem& navMeshCacheItem,
         const TilePosition& changedTile, T&& navMeshData)
     {
-        const auto locked = navMeshCacheItem.lock();
+        const auto locked = navMeshCacheItem->lock();
         auto& navMesh = locked->getValue();
         const int layer = 0;
         const auto tileRef = navMesh.getTileRefAt(changedTile.x(), changedTile.y(), layer);
@@ -591,14 +591,14 @@ namespace DetourNavigator
             " playerTile=", playerTile,
             " changedTileDistance=", getDistance(changedTile, playerTile));
 
-        const auto params = *navMeshCacheItem.lockConst()->getValue().getParams();
+        const auto params = *navMeshCacheItem->lockConst()->getValue().getParams();
         const osg::Vec3f origin(params.orig[0], params.orig[1], params.orig[2]);
 
         const auto x = changedTile.x();
         const auto y = changedTile.y();
 
         const auto removeTile = [&] {
-            const auto locked = navMeshCacheItem.lock();
+            const auto locked = navMeshCacheItem->lock();
             auto& navMesh = locked->getValue();
             const auto tileRef = navMesh.getTileRefAt(x, y, 0);
             const auto removed = dtStatusSucceed(navMesh.removeTile(tileRef, nullptr, nullptr));

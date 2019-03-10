@@ -1446,7 +1446,7 @@ namespace MWRender
         {
             try
             {
-                const auto locked = it->second.lockConst();
+                const auto locked = it->second->lockConst();
                 mNavMesh->update(locked->getValue(), mNavMeshNumber, locked->getGeneration(),
                                  locked->getNavMeshRevision(), mNavigator.getSettings());
             }
