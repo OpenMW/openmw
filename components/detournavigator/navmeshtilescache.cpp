@@ -1,6 +1,8 @@
 #include "navmeshtilescache.hpp"
 #include "exceptions.hpp"
 
+#include <cstring>
+
 namespace DetourNavigator
 {
     namespace
@@ -61,8 +63,7 @@ namespace DetourNavigator
         if (tileValues == agentValues->second.end())
             return Value();
 
-        // TODO: use different function to make key to avoid unnecessary std::string allocation
-        const auto tile = tileValues->second.mMap.find(makeNavMeshKey(recastMesh, offMeshConnections));
+        const auto tile = tileValues->second.mMap.find(RecastMeshKeyView(recastMesh, offMeshConnections));
         if (tile == tileValues->second.mMap.end())
             return Value();
 
@@ -162,5 +163,59 @@ namespace DetourNavigator
 
         mFreeItems.splice(mFreeItems.begin(), mBusyItems, iterator);
         mFreeNavMeshDataSize += getSize(*iterator);
+    }
+
+    namespace
+    {
+        struct CompareBytes
+        {
+            const char* mRhsIt;
+            const char* mRhsEnd;
+
+            template <class T>
+            int operator ()(const std::vector<T>& lhs)
+            {
+                const auto lhsBegin = reinterpret_cast<const char*>(lhs.data());
+                const auto lhsEnd = reinterpret_cast<const char*>(lhs.data() + lhs.size());
+                const auto lhsSize = static_cast<std::ptrdiff_t>(lhsEnd - lhsBegin);
+                const auto rhsSize = static_cast<std::ptrdiff_t>(mRhsEnd - mRhsIt);
+                const auto size = std::min(lhsSize, rhsSize);
+
+                if (const auto result = std::memcmp(lhsBegin, mRhsIt, size))
+                    return result;
+
+                if (lhsSize > rhsSize)
+                    return 1;
+
+                mRhsIt += size;
+
+                return 0;
+            }
+        };
+    }
+
+    int NavMeshTilesCache::RecastMeshKeyView::compare(const std::string& other) const
+    {
+        CompareBytes compareBytes {other.data(), other.data() + other.size()};
+
+        if (const auto result = compareBytes(mRecastMesh.get().getIndices()))
+            return result;
+
+        if (const auto result = compareBytes(mRecastMesh.get().getVertices()))
+            return result;
+
+        if (const auto result = compareBytes(mRecastMesh.get().getAreaTypes()))
+            return result;
+
+        if (const auto result = compareBytes(mRecastMesh.get().getWater()))
+            return result;
+
+        if (const auto result = compareBytes(mOffMeshConnections.get()))
+            return result;
+
+        if (compareBytes.mRhsIt < compareBytes.mRhsEnd)
+            return -1;
+
+        return 0;
     }
 }
