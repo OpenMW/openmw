@@ -1447,7 +1447,7 @@ namespace MWRender
             try
             {
                 const auto locked = it->second->lockConst();
-                mNavMesh->update(locked->getValue(), mNavMeshNumber, locked->getGeneration(),
+                mNavMesh->update(locked->getImpl(), mNavMeshNumber, locked->getGeneration(),
                                  locked->getNavMeshRevision(), mNavigator.getSettings());
             }
             catch (const std::exception& e)

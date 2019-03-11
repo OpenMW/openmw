@@ -174,7 +174,7 @@ namespace DetourNavigator
             if (!navMesh)
                 return out;
             const auto settings = getSettings();
-            return findSmoothPath(navMesh->lockConst()->getValue(), toNavMeshCoordinates(settings, agentHalfExtents),
+            return findSmoothPath(navMesh->lockConst()->getImpl(), toNavMeshCoordinates(settings, agentHalfExtents),
                 toNavMeshCoordinates(settings, stepSize), toNavMeshCoordinates(settings, start),
                 toNavMeshCoordinates(settings, end), includeFlags, settings, out);
         }
