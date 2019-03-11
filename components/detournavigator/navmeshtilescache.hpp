@@ -10,6 +10,7 @@
 #include <map>
 #include <list>
 #include <mutex>
+#include <cassert>
 
 namespace DetourNavigator
 {
@@ -105,10 +106,62 @@ namespace DetourNavigator
             NavMeshData&& value);
 
     private:
+        class KeyView
+        {
+        public:
+            KeyView() = default;
+
+            KeyView(const std::string& value)
+                : mValue(&value) {}
+
+            const std::string& getValue() const
+            {
+                assert(mValue);
+                return *mValue;
+            }
+
+            virtual int compare(const std::string& other) const
+            {
+                assert(mValue);
+                return mValue->compare(other);
+            }
+
+            virtual bool isLess(const KeyView& other) const
+            {
+                assert(mValue);
+                return other.compare(*mValue) > 0;
+            }
+
+            friend bool operator <(const KeyView& lhs, const KeyView& rhs)
+            {
+                return lhs.isLess(rhs);
+            }
+
+        private:
+            const std::string* mValue = nullptr;
+        };
+
+        class RecastMeshKeyView : public KeyView
+        {
+        public:
+            RecastMeshKeyView(const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections)
+                : mRecastMesh(recastMesh), mOffMeshConnections(offMeshConnections) {}
+
+            int compare(const std::string& other) const override;
+
+            bool isLess(const KeyView& other) const override
+            {
+                return compare(other.getValue()) < 0;
+            }
+
+        private:
+            std::reference_wrapper<const RecastMesh> mRecastMesh;
+            std::reference_wrapper<const std::vector<OffMeshConnection>> mOffMeshConnections;
+        };
 
         struct TileMap
         {
-            std::map<std::string, ItemIterator> mMap;
+            std::map<KeyView, ItemIterator> mMap;
         };
 
         std::mutex mMutex;
