@@ -387,6 +387,21 @@ namespace MWWorld
 
         assert(plugin < mStatic.size());
 
+        // Replace texture for records with given ID and index from all plugins.
+        for (unsigned int i=0; i<mStatic.size(); i++)
+        {
+            ESM::LandTexture* tex = const_cast<ESM::LandTexture*>(search(lt.mIndex, i));
+            if (tex)
+            {
+                const std::string texId = Misc::StringUtils::lowerCase(tex->mId);
+                const std::string ltId = Misc::StringUtils::lowerCase(lt.mId);
+                if (texId == ltId)
+                {
+                    tex->mTexture = lt.mTexture;
+                }
+            }
+        }
+
         LandTextureList &ltexl = mStatic[plugin];
         if(lt.mIndex + 1 > (int)ltexl.size())
             ltexl.resize(lt.mIndex+1);

@@ -11,18 +11,9 @@ class ESMWriter;
 
 /*
  * Texture used for texturing landscape.
- *
- * They are probably indexed by 'num', not 'id', but I don't know for
- * sure. And num is not unique between files, so one option is to keep
- * a separate list for each input file (that has LTEX records, of
- * course.) We also need to resolve references to already existing
- * land textures to save space.
-
- * I'm not sure if it is even possible to override existing land
- * textures, probably not. I'll have to try it, and have to mimic the
- * behaviour of morrowind. First, check what you are allowed to do in
- * the editor. Then make an esp which changes a commonly used land
- * texture, and see if it affects the game.
+ * They are indexed by 'num', but still use 'id' to override base records.
+ * Original editor even does not allow to create new records with existing ID's.
+ * TODO: currently OpenMW-CS does not allow to override LTEX records at all.
  */
 
 struct LandTexture
