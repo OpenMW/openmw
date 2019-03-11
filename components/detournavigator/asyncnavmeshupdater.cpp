@@ -162,9 +162,7 @@ namespace DetourNavigator
     boost::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getNextJob()
     {
         std::unique_lock<std::mutex> lock(mMutex);
-        if (mJobs.empty())
-            mHasJob.wait_for(lock, std::chrono::milliseconds(10));
-        if (mJobs.empty())
+        if (!mHasJob.wait_for(lock, std::chrono::milliseconds(10), [&] { return !mJobs.empty(); }))
         {
             mFirstStart.lock()->reset();
             mDone.notify_all();

@@ -191,7 +191,7 @@ namespace DetourNavigator
          */
         virtual std::map<osg::Vec3f, SharedNavMeshCacheItem> getNavMeshes() const = 0;
 
-        virtual Settings getSettings() const = 0;
+        virtual const Settings& getSettings() const = 0;
     };
 }
 

@@ -338,7 +338,7 @@ namespace MWWorld
         {
             if (const auto object = mPhysics->getObject(ptr))
                 navigator->removeObject(DetourNavigator::ObjectId(object));
-            else if (const auto actor = mPhysics->getActor(ptr))
+            else if (mPhysics->getActor(ptr))
             {
                 navigator->removeAgent(world->getPathfindingHalfExtents(ptr));
                 mRendering.removeActorPath(ptr);
@@ -809,7 +809,7 @@ namespace MWWorld
             const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             navigator->update(player.getRefData().getPosition().asVec3());
         }
-        else if (const auto actor = mPhysics->getActor(ptr))
+        else if (mPhysics->getActor(ptr))
         {
             navigator->removeAgent(MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(ptr));
         }

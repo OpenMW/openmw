@@ -46,7 +46,7 @@ namespace DetourNavigator
 
         std::map<osg::Vec3f, SharedNavMeshCacheItem> getNavMeshes() const override;
 
-        Settings getSettings() const override;
+        const Settings& getSettings() const override;
 
     private:
         Settings mSettings;

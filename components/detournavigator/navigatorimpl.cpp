@@ -133,7 +133,7 @@ namespace DetourNavigator
         return mNavMeshManager.getNavMeshes();
     }
 
-    Settings NavigatorImpl::getSettings() const
+    const Settings& NavigatorImpl::getSettings() const
     {
         return mSettings;
     }
