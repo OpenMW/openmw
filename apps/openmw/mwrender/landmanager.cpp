@@ -12,16 +12,15 @@ namespace MWRender
 {
 
 LandManager::LandManager(int loadFlags)
-    : ResourceManager(nullptr)
+    : GenericResourceManager<std::pair<int, int> >(nullptr)
     , mLoadFlags(loadFlags)
 {
+    mCache = new CacheType;
 }
 
 osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(int x, int y)
 {
-    std::string idstr = std::to_string(x) + " " + std::to_string(y);
-
-    osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(idstr);
+    osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(std::make_pair(x,y));
     if (obj)
         return static_cast<ESMTerrain::LandObject*>(obj.get());
     else
@@ -30,7 +29,7 @@ osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(int x, int y)
         if (!land)
             return nullptr;
         osg::ref_ptr<ESMTerrain::LandObject> landObj (new ESMTerrain::LandObject(land, mLoadFlags));
-        mCache->addEntryToObjectCache(idstr, landObj.get());
+        mCache->addEntryToObjectCache(std::make_pair(x,y), landObj.get());
         return landObj;
     }
 }
