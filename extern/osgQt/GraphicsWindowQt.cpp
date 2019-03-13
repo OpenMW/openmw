@@ -17,6 +17,7 @@
 #include <osgViewer/ViewerBase>
 #include <QInputEvent>
 #include <QPointer>
+#include <QWindow>
 
 #if (QT_VERSION>=QT_VERSION_CHECK(4, 6, 0))
 # define USE_GESTURES
@@ -518,6 +519,12 @@ bool GraphicsWindowQt::releaseContextImplementation()
 
 void GraphicsWindowQt::swapBuffersImplementation()
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    // QOpenGLContext complains if we swap on an non-exposed QWindow
+    if (!_widget || !_widget->windowHandle()->isExposed())
+        return;
+#endif
+
     _widget->swapBuffers();
 
     // FIXME: the processDeferredEvents should really be executed in a GUI (main) thread context but
