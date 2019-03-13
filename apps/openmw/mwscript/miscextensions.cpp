@@ -951,7 +951,7 @@ namespace MWScript
 
                 const std::string script = ptr.getClass().getScript(ptr);
                 if(script.empty())
-                    str<< ptr.getCellRef().getRefId()<<"  does not have a script.";
+                    str<< ptr.getCellRef().getRefId()<<" does not have a script.";
                 else
                 {
                     str<< "Local variables for "<<ptr.getCellRef().getRefId();

@@ -11,10 +11,12 @@
 #include "../mwscript/extensions.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/class.hpp"
 
 namespace MWGui
 {
@@ -173,6 +175,12 @@ namespace MWGui
         print("> " + command + "\n");
 
         Compiler::Locals locals;
+        if (!mPtr.isEmpty())
+        {
+            std::string script = mPtr.getClass().getScript(mPtr);
+            if (!script.empty())
+                locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
+        }
         Compiler::Output output (locals);
 
         if (compile (command + "\n", output))
