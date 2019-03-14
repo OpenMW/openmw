@@ -17,7 +17,10 @@
 #include <osgViewer/ViewerBase>
 #include <QInputEvent>
 #include <QPointer>
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #include <QWindow>
+#endif
 
 #if (QT_VERSION>=QT_VERSION_CHECK(4, 6, 0))
 # define USE_GESTURES
