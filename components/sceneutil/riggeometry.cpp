@@ -40,8 +40,8 @@ RigGeometry::RigGeometry()
     , mLastFrameNumber(0)
     , mBoundsFirstFrame(true)
 {
-    setUpdateCallback(new osg::Callback); // dummy to make sure getNumChildrenRequiringUpdateTraversal() is correct
-                                          // update done in accept(NodeVisitor&)
+    setNumChildrenRequiringUpdateTraversal(1);
+    // update done in accept(NodeVisitor&)
 }
 
 RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
@@ -54,6 +54,7 @@ RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
     , mBoundsFirstFrame(true)
 {
     setSourceGeometry(copy.mSourceGeometry);
+    setNumChildrenRequiringUpdateTraversal(1);
 }
 
 void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
