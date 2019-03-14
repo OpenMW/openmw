@@ -179,6 +179,17 @@ namespace DetourNavigator
                 const auto lhsEnd = reinterpret_cast<const char*>(lhs.data() + lhs.size());
                 const auto lhsSize = static_cast<std::ptrdiff_t>(lhsEnd - lhsBegin);
                 const auto rhsSize = static_cast<std::ptrdiff_t>(mRhsEnd - mRhsIt);
+
+                if (lhsBegin == nullptr || mRhsIt == nullptr)
+                {
+                    if (lhsSize < rhsSize)
+                        return -1;
+                    else if (lhsSize > rhsSize)
+                        return 1;
+                    else
+                        return 0;
+                }
+
                 const auto size = std::min(lhsSize, rhsSize);
 
                 if (const auto result = std::memcmp(lhsBegin, mRhsIt, size))
