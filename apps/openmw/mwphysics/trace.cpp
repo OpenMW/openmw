@@ -54,9 +54,9 @@ public:
             const_cast<btCollisionWorld*>(mWorld)->contactPairTest(const_cast<btCollisionObject*>(mMe), const_cast<btCollisionObject*>(convexResult.m_hitCollisionObject), isOverlapping);
             if(isOverlapping.overlapping)
             {
-                auto originA = toOsg(mMe->getWorldTransform().getOrigin());
-                auto originB = toOsg(convexResult.m_hitCollisionObject->getWorldTransform().getOrigin());
-                osg::Vec3f motion = toOsg(mUp);
+                auto originA = Misc::Convert::toOsg(mMe->getWorldTransform().getOrigin());
+                auto originB = Misc::Convert::toOsg(convexResult.m_hitCollisionObject->getWorldTransform().getOrigin());
+                osg::Vec3f motion = Misc::Convert::toOsg(mUp);
                 osg::Vec3f normal = (originA-originB);
                 normal.z() = 0;
                 normal.normalize();
@@ -67,7 +67,7 @@ public:
                 if(normal * motion > 0.0f)
                 {
                     convexResult.m_hitFraction = 0.0f;
-                    convexResult.m_hitNormalLocal = toBullet(normal);
+                    convexResult.m_hitNormalLocal = Misc::Convert::toBullet(normal);
                     return ClosestConvexResultCallback::addSingleResult(convexResult, true);
                 }
                 else
@@ -127,7 +127,7 @@ void ActorTracer::doTrace(const btCollisionObject *actor, const osg::Vec3f& star
     if(newTraceCallback.hasHit())
     {
         mFraction = newTraceCallback.m_closestHitFraction;
-        mPlaneNormal = toOsg(newTraceCallback.m_hitNormalWorld);
+        mPlaneNormal = Misc::Convert::toOsg(newTraceCallback.m_hitNormalWorld);
         mEndPos = (end-start)*mFraction + start;
         mHitPoint = Misc::Convert::toOsg(newTraceCallback.m_hitPointWorld);
         mHitObject = newTraceCallback.m_hitCollisionObject;
