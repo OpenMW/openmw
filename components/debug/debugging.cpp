@@ -2,8 +2,42 @@
 
 #include <components/crashcatcher/crashcatcher.hpp>
 
+#ifdef _WIN32
+#   undef WIN32_LEAN_AND_MEAN
+#   define WIN32_LEAN_AND_MEAN
+#   include <windows.h>
+#endif
+
 namespace Debug
 {
+#ifdef _WIN32
+    bool attachParentConsole()
+    {
+        if (GetConsoleWindow() != nullptr)
+            return true;
+
+        if (AttachConsole(ATTACH_PARENT_PROCESS))
+        {
+            fflush(stdout);
+            fflush(stderr);
+            std::cout.flush();
+            std::cerr.flush();
+
+            // this looks dubious but is really the right way
+            _wfreopen(L"CON", L"w", stdout);
+            _wfreopen(L"CON", L"w", stderr);
+            _wfreopen(L"CON", L"r", stdin);
+            freopen("CON", "w", stdout);
+            freopen("CON", "w", stderr);
+            freopen("CON", "r", stdin);
+
+            return true;
+        }
+
+        return false;
+    }
+#endif
+
     std::streamsize DebugOutputBase::write(const char *str, std::streamsize size)
     {
         // Skip debug level marker
@@ -52,6 +86,10 @@ namespace Debug
 
 int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, char *argv[], const std::string& appName)
 {
+#if defined _WIN32
+    (void)Debug::attachParentConsole();
+#endif
+
     // Some objects used to redirect cout and cerr
     // Scope must be here, so this still works inside the catch block for logging exceptions
     std::streambuf* cout_rdbuf = std::cout.rdbuf ();

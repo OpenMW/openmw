@@ -6,7 +6,7 @@
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
-#endif
+
 
 #include <components/process/processinvoker.hpp>
 
@@ -14,7 +14,7 @@
 #include <components/config/launchersettings.hpp>
 
 #include <components/settings/settings.hpp>
-
+#endif
 #include "ui_mainwindow.h"
 
 class QListWidgetItem;

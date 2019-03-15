@@ -94,14 +94,16 @@ namespace Compiler
 
     bool FileParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
     {
+        // Ignore any junk special characters
+        if (mState == BeginState)
+        {
+            if (code != Scanner::S_newline)
+                reportWarning ("Ignoring stray special character before begin statement", loc);
+            return true;
+        }
+
         if (code==Scanner::S_newline)
         {
-            if (mState==BeginState)
-            {
-                // ignore empty lines
-                return true;
-            }
-
             if (mState==BeginCompleteState)
             {
                 // parse the script body

@@ -1,7 +1,6 @@
 #include "alchemy.hpp"
 
 #include <cassert>
-#include <cstdlib>
 #include <cmath>
 
 #include <algorithm>
@@ -154,9 +153,8 @@ void MWMechanics::Alchemy::updateEffects()
 
         if (magicEffect->mData.mBaseCost<=0)
         {
-            std::ostringstream os;
-            os << "invalid base cost for magic effect " << iter->mId;
-            throw std::runtime_error (os.str());
+            const std::string os = "invalid base cost for magic effect " + std::to_string(iter->mId);
+            throw std::runtime_error (os);
         }
 
         float fPotionT1MagMul =

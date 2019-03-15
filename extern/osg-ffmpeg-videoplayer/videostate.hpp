@@ -2,8 +2,10 @@
 #define VIDEOPLAYER_VIDEOSTATE_H
 
 #include <stdint.h>
+#include <atomic>
 #include <vector>
 #include <memory>
+#include <string>
 
 #include <OpenThreads/Thread>
 #include <OpenThreads/Mutex>
@@ -13,6 +15,19 @@
 namespace osg
 {
     class Texture2D;
+}
+
+extern "C"
+{
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavutil/imgutils.h>
+#include <libavutil/channel_layout.h>
+
+// From version 54.56 binkaudio encoding format changed from S16 to FLTP. See:
+// https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d
+// https://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
+#include <libswresample/swresample.h>
 }
 
 #include "videodefs.hpp"
@@ -64,7 +79,7 @@ struct PacketQueue {
     { clear(); }
 
     AVPacketList *first_pkt, *last_pkt;
-    volatile bool flushing;
+    std::atomic<bool> flushing;
     int nb_packets;
     int size;
 
@@ -131,6 +146,8 @@ struct VideoState {
 
     std::shared_ptr<std::istream> stream;
     AVFormatContext* format_ctx;
+    AVCodecContext* video_ctx;
+    AVCodecContext* audio_ctx;
 
     int av_sync_type;
 
@@ -153,12 +170,12 @@ struct VideoState {
     std::unique_ptr<ParseThread> parse_thread;
     std::unique_ptr<VideoThread> video_thread;
 
-    volatile bool mSeekRequested;
+    std::atomic<bool> mSeekRequested;
     uint64_t mSeekPos;
 
-    volatile bool mVideoEnded;
-    volatile bool mPaused;
-    volatile bool mQuit;
+    std::atomic<bool> mVideoEnded;
+    std::atomic<bool> mPaused;
+    std::atomic<bool> mQuit;
 };
 
 }

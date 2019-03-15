@@ -46,6 +46,7 @@ namespace CSMWorld
             Display_Skill,
             Display_Class,
             Display_Faction,
+            Display_Rank,
             Display_Race,
             Display_Sound,
             Display_Region,
@@ -86,6 +87,7 @@ namespace CSMWorld
             //CONCRETE TYPES ENDS HERE
 
             Display_UnsignedInteger8,
+            Display_UnsignedInteger16,
             Display_Integer,
             Display_Float,
             Display_Double,

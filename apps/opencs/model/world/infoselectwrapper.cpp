@@ -520,7 +520,6 @@ std::pair<float, float> CSMWorld::ConstInfoSelectWrapper::getConditionFloatRange
     const float FloatMax = std::numeric_limits<float>::infinity();
     const float FloatMin = -std::numeric_limits<float>::infinity();
     const float Epsilon = std::numeric_limits<float>::epsilon();
-    const std::pair<float, float> InvalidRange(FloatMax, FloatMin);
 
     float value = mConstSelect.mValue.getFloat();
 

@@ -1,12 +1,14 @@
 #ifndef OPENMW_AUTOCALCSPELL_H
 #define OPENMW_AUTOCALCSPELL_H
 
-#include <cfloat>
-#include <set>
+#include <string>
+#include <vector>
 
-#include <components/esm/loadspel.hpp>
-#include <components/esm/loadskil.hpp>
-#include <components/esm/loadrace.hpp>
+namespace ESM
+{
+    struct Spell;
+    struct Race;
+}
 
 namespace MWMechanics
 {
@@ -21,8 +23,6 @@ std::vector<std::string> autoCalcPlayerSpells(const int* actorSkills, const int*
 // Helpers
 
 bool attrSkillCheck (const ESM::Spell* spell, const int* actorSkills, const int* actorAttributes);
-
-ESM::Skill::SkillEnum mapSchoolToSkill(int school);
 
 void calcWeakestSchool(const ESM::Spell* spell, const int* actorSkills, int& effectiveSchool, float& skillTerm);
 

@@ -1,6 +1,8 @@
 #ifndef OPENMW_CONSTANTS_H
 #define OPENMW_CONSTANTS_H
 
+#include <string>
+
 namespace Constants
 {
 
@@ -21,6 +23,9 @@ const float GravityConst = 8.96f;
 
 // Size of one exterior cell in game units
 const int CellSizeInUnits = 8192;
+
+// A label to mark night/day visual switches
+const std::string NightDayLabel = "NightDaySwitch";
 
 }
 

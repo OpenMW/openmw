@@ -4,26 +4,74 @@ Fonts
 Morrowind .fnt fonts
 --------------------
 
-Morrowind uses a custom ``.fnt`` file format. It is not compatible with the Windows Font File ``.fnt`` format, nor compatible with ``.fnt`` formats from any other Bethesda games. To our knowledge, the format is undocumented and no tools for viewing or editing these fonts exist.
+Morrowind uses a custom ``.fnt`` file format. It is not compatible with the Windows Font File ``.fnt`` format.
+To our knowledge, the format is undocumented.
 
-OpenMW can load this format and convert it on the fly into something usable (see font loader `source code <https://github.com/OpenMW/openmw/blob/master/components/fontloader/fontloader.cpp#L210>`_). In OpenMW 0.32, an --export-fonts command line option was added to write the converted font (a PNG image and an XML file describing the position of each glyph in the image) to the current directory.
+OpenMW can load this format and convert it on the fly into something usable 
+(see font loader `source code <https://github.com/OpenMW/openmw/blob/master/components/fontloader/fontloader.cpp#L210>`_). 
+In OpenMW 0.32, an --export-fonts command line option was added to write the converted font 
+(a PNG image and an XML file describing the position of each glyph in the image) to the current directory.
 
 TrueType fonts
 --------------
 
-Unlike vanilla Morrowind, OpenMW directly supports TrueType (``.ttf``) fonts. This is the recommended way to create new fonts.
+Unlike vanilla Morrowind, OpenMW directly supports TrueType (``.ttf``) fonts.
+
+0.45.0+ way
+-----------
+This is the recommended way to install replacement fonts.
 
 -	To replace the primary "Magic Cards" font:
 
-	#.	Download `Pelagiad <https://isaskar.github.io/Pelagiad/>`_ by Isak Larborn (aka Isaskar).
-	#.	Install the ``openmw_font.xml`` file into ``resources/mygui/openmw_font.xml`` in your OpenMW installation.
-	#.	Copy ``Pelagiad.ttf`` into ``resources/mygui/`` as well.
-	#.	If desired, you can now delete the original ``Magic_Cards.*`` files from your Data Files/Fonts directory.
+	1.	Download `Pelagiad <https://isaskar.github.io/Pelagiad/>`_ by Isak Larborn (aka Isaskar).
+	2.	Create ``Fonts`` folder at the location of your ``openmw.cfg``.
+	3.	Copy ``openmw_font.xml`` and ``Pelagiad.ttf`` files into the folder.
+	4.	Either remove the ``MonoFont`` entry from the created ``openmw_font.xml`` or copy the ``DejaVuLGCSansMono.ttf`` to the ``Fonts`` folder (prefer latter option on Windows).
+	5.	If desired, you can now delete the original ``Magic_Cards.*`` files from your ``Data Files/Fonts`` directory.
+	6.	Pelagiad glyphs may appear to be pretty small, so open ``settings.cfg`` and adjust the following settings as you deem necessary::
+
+			[GUI]
+			font size = 17
+			ttf resolution = 96
+
 -	You can also replace the Daedric font:
 
-	#.	Download `Ayembedt <https://github.com/georgd/OpenMW-Fonts>`_ by Georg Duffner.
-	#.	Install ``OMWAyembedt.otf`` into ``/resources/mygui/`` folder in your OpenMW installation.
-	#.	Add the following lines to openmw_font.xml::
+	1.	Download `Ayembedt <https://github.com/georgd/OpenMW-Fonts>`_ by Georg Duffner.
+	2.	Install ``OMWAyembedt.otf`` into the ``Fonts`` folder.
+	3.	Add the following lines into ``openmw_font.xml``::
+
+			<Resource type="ResourceTrueTypeFont" name="Daedric">
+				<Property key="Source" value="OMWAyembedt.otf"/>
+				<Property key="Antialias" value="false"/>
+				<Property key="TabWidth" value="8"/>
+				<Property key="OffsetHeight" value="0"/>
+				<Codes>
+					<Code range="32"/>
+					<Code range="65 90"/>
+					<Code range="97 122"/>
+				</Codes>
+			</Resource>
+
+	4.	This font is missing a few glyphs (mostly punctuation), but it has all the primary glyphs. If desired, you can now delete the original ``daedric.*`` files from your ``Data Files/Fonts`` directory.
+
+Any Resolution or Size properties in the file have no effect because the engine settings override them.
+
+The engine automatically takes UI scaling factor into account, so don't account for it when tweaking the settings.
+
+Pre-0.45.0 way
+--------------
+
+-	To replace the primary "Magic Cards" font:
+
+	1.	Download `Pelagiad <https://isaskar.github.io/Pelagiad/>`_ by Isak Larborn (aka Isaskar).
+	2.	Install the ``openmw_font.xml`` file into ``resources/mygui/openmw_font.xml`` in your OpenMW installation.
+	3.	Copy ``Pelagiad.ttf`` into ``resources/mygui/`` as well.
+	4.	If desired, you can now delete the original ``Magic_Cards.*`` files from your ``Data Files/Fonts`` directory.
+-	You can also replace the Daedric font:
+
+	1.	Download `Ayembedt <https://github.com/georgd/OpenMW-Fonts>`_ by Georg Duffner.
+	2.	Install ``OMWAyembedt.otf`` into ``/resources/mygui/`` folder in your OpenMW installation.
+	3.	Add the following lines to ``openmw_font.xml``::
 
 			<Resource type="ResourceTrueTypeFont" name="Daedric">
 				<Property key="Source" value="OMWAyembedt.otf"/>
@@ -39,12 +87,12 @@ Unlike vanilla Morrowind, OpenMW directly supports TrueType (``.ttf``) fonts. Th
 				</Codes>
 			</Resource>
 
-	#.	This font is missing a few glyphs (mostly punctuation), but is complete in the primary glyphs. If desired, you can now delete the original ``daedric.*`` files from your Data Files/Fonts directory.
+	4.	This font is missing a few glyphs (mostly punctuation), but it has all the primary glyphs. If desired, you can now delete the original ``daedric.*`` files from your ``Data Files/Fonts`` directory.
 
 -	Another replacement for the Daedric font is `Oblivion <http://www.uesp.net/wiki/File:Obliviontt.zip>`_ by Dongle.
 
-	#.	Install the ``Oblivion.ttf`` file resources/mygui/.
-	#.	The openmw_fonts.xml entry is::
+	1.	Install the ``Oblivion.ttf`` file into ``resources/mygui/``.
+	2.	The ``openmw_font.xml`` entry is::
 
 			<Resource type="ResourceTrueTypeFont" name="Daedric">
 				<Property key="Source" value="Oblivion.ttf"/>
@@ -74,4 +122,7 @@ Unlike vanilla Morrowind, OpenMW directly supports TrueType (``.ttf``) fonts. Th
 Bitmap fonts
 ------------
 
-Morrowind ``.fnt`` files are essentially a bitmap font, but using them is discouraged because of no Unicode support. MyGUI has its own format for bitmap fonts. An example can be seen by using the --export-fonts command line option (see above), which converts Morrowind ``.fnt`` to a MyGUI bitmap font. This is the recommended format to use if you wish to edit Morrowind's bitmap font or create a new bitmap font.
+Morrowind ``.fnt`` files are essentially a bitmap font, but using them is discouraged because they don't have Unicode support. 
+MyGUI has its own format for bitmap fonts. An example can be seen by using the --export-fonts command line option (see above), 
+which converts Morrowind ``.fnt`` to a MyGUI bitmap font. 
+This is the recommended format to use if you wish to edit Morrowind's bitmap font or create a new bitmap font.

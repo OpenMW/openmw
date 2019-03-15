@@ -7,11 +7,14 @@ varying float depth;
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec4 lighting;
+centroid varying vec3 shadowDiffuseLighting;
 #else
 centroid varying vec4 passColor;
 #endif
 varying vec3 passViewPos;
 varying vec3 passNormal;
+
+#include "shadows_vertex.glsl"
 
 #include "lighting.glsl"
 
@@ -22,10 +25,11 @@ void main(void)
 
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_ClipVertex = viewPos;
+    
+    vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
 
 #if !PER_PIXEL_LIGHTING
-    vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
-    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color);
+    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color, shadowDiffuseLighting);
 #else
     passColor = gl_Color;
 #endif
@@ -33,4 +37,6 @@ void main(void)
     passViewPos = viewPos.xyz;
 
     uv = gl_MultiTexCoord0.xy;
+
+    setupShadowCoords(viewPos, viewNormal);
 }

@@ -19,7 +19,8 @@
 #include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/skeleton.hpp>
-#include <components/sceneutil/lightmanager.hpp>
+
+#include <components/settings/settings.hpp>
 
 #include <components/nifosg/nifloader.hpp> // TextKeyMapHolder
 
@@ -308,9 +309,16 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     if(mViewMode == viewMode)
         return;
 
-    mViewMode = viewMode;
-    rebuild();
+    // Disable weapon sheathing in the 1st-person mode
+    if (viewMode == VM_FirstPerson)
+        mWeaponSheathing = false;
+    else
+        mWeaponSheathing = Settings::Manager::getBool("weapon sheathing", "Game");
 
+    mViewMode = viewMode;
+    MWBase::Environment::get().getWorld()->scaleObject(mPtr, mPtr.getCellRef().getScale()); // apply race height after view change
+
+    rebuild();
     setRenderBin();
 }
 
@@ -353,11 +361,16 @@ public:
         if (cv->getProjectionMatrix()->getPerspective(fov, aspect, zNear, zFar))
         {
             fov = mFov;
-            osg::RefMatrix* newProjectionMatrix = new osg::RefMatrix(*cv->getProjectionMatrix());
+            osg::ref_ptr<osg::RefMatrix> newProjectionMatrix = new osg::RefMatrix();
             newProjectionMatrix->makePerspective(fov, aspect, zNear, zFar);
-            cv->pushProjectionMatrix(newProjectionMatrix);
+            osg::ref_ptr<osg::RefMatrix> invertedOldMatrix = cv->getProjectionMatrix();
+            invertedOldMatrix = new osg::RefMatrix(osg::RefMatrix::inverse(*invertedOldMatrix));
+            osg::ref_ptr<osg::RefMatrix> viewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
+            viewMatrix->postMult(*newProjectionMatrix);
+            viewMatrix->postMult(*invertedOldMatrix);
+            cv->pushModelViewMatrix(viewMatrix, osg::Transform::ReferenceFrame::ABSOLUTE_RF);
             traverse(node, nv);
-            cv->popProjectionMatrix();
+            cv->popModelViewMatrix();
         }
         else
             traverse(node, nv);
@@ -389,6 +402,7 @@ void NpcAnimation::setRenderBin()
 
 void NpcAnimation::rebuild()
 {
+    mScabbard.reset();
     updateNpcBase();
 
     MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
@@ -455,10 +469,19 @@ void NpcAnimation::updateNpcBase()
     bool is1stPerson = mViewMode == VM_FirstPerson;
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
 
-    std::string smodel = SceneUtil::getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf);
-    smodel = Misc::ResourceHelpers::correctActorModelPath(smodel, mResourceSystem->getVFS());
+    std::string defaultSkeleton = SceneUtil::getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf);
+    defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(defaultSkeleton, mResourceSystem->getVFS());
+
+    std::string smodel = defaultSkeleton;
+    if (!is1stPerson && !isWerewolf & !mNpc->mModel.empty())
+        smodel = Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS());
 
     setObjectRoot(smodel, true, true, false);
+
+    if (mWeaponSheathing)
+        injectWeaponBones();
+
+    updateParts();
 
     if(!is1stPerson)
     {
@@ -466,15 +489,13 @@ void NpcAnimation::updateNpcBase()
         if (smodel != base)
             addAnimSource(base, smodel);
 
+        if (smodel != defaultSkeleton && base != defaultSkeleton)
+            addAnimSource(defaultSkeleton, smodel);
+
         addAnimSource(smodel, smodel);
 
-        if(!isWerewolf)
-        {
-            if(mNpc->mModel.length() > 0)
-                addAnimSource(Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS()), smodel);
-            if(Misc::StringUtils::lowerCase(mNpc->mRace).find("argonian") != std::string::npos)
-                addAnimSource("meshes\\xargonian_swimkna.nif", smodel);
-        }
+        if(!isWerewolf && Misc::StringUtils::lowerCase(mNpc->mRace).find("argonian") != std::string::npos)
+            addAnimSource("meshes\\xargonian_swimkna.nif", smodel);
     }
     else
     {
@@ -487,8 +508,6 @@ void NpcAnimation::updateNpcBase()
         mObjectRoot->setNodeMask(Mask_FirstPerson);
         mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
     }
-
-    updateParts();
 
     mWeaponAnimationTime->updateStartTime();
 }
@@ -899,7 +918,8 @@ void NpcAnimation::showWeapons(bool showWeapon)
                     attachArrow();
             }
         }
-        if (mAlpha != 1.f)
+        // Note: we will need to recreate shaders later if we use weapon sheathing anyway, so there is no point to update them here
+        if (mAlpha != 1.f && !mWeaponSheathing)
             mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
     }
     else
@@ -909,6 +929,13 @@ void NpcAnimation::showWeapons(bool showWeapon)
         if (mPtr == MWMechanics::getPlayer())
             MWBase::Environment::get().getWorld()->getPlayer().setAttackingOrSpell(false);
     }
+
+    updateHolsteredWeapon(!mShowWeapons);
+    updateQuiver();
+
+    // Recreate shaders for invisible actors, otherwise sheath nodes will be visible
+    if (mAlpha != 1.f && mWeaponSheathing)
+        mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
 }
 
 void NpcAnimation::showCarriedLeft(bool show)
@@ -936,11 +963,13 @@ void NpcAnimation::showCarriedLeft(bool show)
 void NpcAnimation::attachArrow()
 {
     WeaponAnimation::attachArrow(mPtr);
+    updateQuiver();
 }
 
 void NpcAnimation::releaseArrow(float attackStrength)
 {
     WeaponAnimation::releaseArrow(mPtr, attackStrength);
+    updateQuiver();
 }
 
 osg::Group* NpcAnimation::getArrowBone()
@@ -1001,9 +1030,9 @@ void NpcAnimation::enableHeadAnimation(bool enable)
     mHeadAnimationTime->setEnabled(enable);
 }
 
-void NpcAnimation::setWeaponGroup(const std::string &group)
+void NpcAnimation::setWeaponGroup(const std::string &group, bool relativeDuration)
 {
-    mWeaponAnimationTime->setGroup(group);
+    mWeaponAnimationTime->setGroup(group, relativeDuration);
 }
 
 void NpcAnimation::equipmentChanged()
@@ -1183,6 +1212,11 @@ const std::vector<const ESM::BodyPart *>& NpcAnimation::getBodyParts(const std::
 void NpcAnimation::setAccurateAiming(bool enabled)
 {
     mAccurateAiming = enabled;
+}
+
+bool NpcAnimation::isArrowAttached() const
+{
+    return mAmmunition != nullptr;
 }
 
 }

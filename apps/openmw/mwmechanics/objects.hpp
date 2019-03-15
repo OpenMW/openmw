@@ -3,8 +3,12 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
-#include "character.hpp"
+namespace osg
+{
+    class Vec3f;
+}
 
 namespace MWWorld
 {
@@ -14,6 +18,8 @@ namespace MWWorld
 
 namespace MWMechanics
 {
+    class CharacterController;
+
     class Objects
     {
         typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
@@ -37,6 +43,9 @@ namespace MWMechanics
 
         void update(float duration, bool paused);
         ///< Update object animations
+
+        bool onOpen(const MWWorld::Ptr& ptr);
+        void onClose(const MWWorld::Ptr& ptr);
 
         bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number, bool persist=false);
         void skipAnimation(const MWWorld::Ptr& ptr);

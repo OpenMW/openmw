@@ -25,7 +25,8 @@ Hand editing the configuration file might result in some fine tuning for alignme
 but the settings will be overwritten if a window is moved.
 
 .. note::
-	To scale the windows, making the widgets proportionally larger, see the scaling factor setting in the GUI section instead.
+	To scale the windows, making the widgets proportionally larger, 
+	see the scaling factor setting in the GUI section instead.
 
 :Type:		boolean
 :Range:		True/False
@@ -210,7 +211,7 @@ dialogue
 
 	w = 0.45
 
-The dialog window, for talking with NPCs.
+The dialogue window, for talking with NPCs.
 Activated by clicking on a NPC.
 
 alchemy

@@ -1,10 +1,7 @@
 #include "spellcasting.hpp"
 
-#include <cfloat>
 #include <limits>
 #include <iomanip>
-
-#include <boost/format.hpp>
 
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
@@ -24,7 +21,6 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwrender/animation.hpp"
-#include "../mwrender/vismask.hpp"
 
 #include "npcstats.hpp"
 #include "actorutil.hpp"
@@ -296,17 +292,6 @@ namespace MWMechanics
                     return true; // must still apply to get visual effect and have target regard it as attack
                 }
                 break;
-            case ESM::MagicEffect::AlmsiviIntervention:
-            case ESM::MagicEffect::DivineIntervention:
-            case ESM::MagicEffect::Mark:
-            case ESM::MagicEffect::Recall:
-                if (!MWBase::Environment::get().getWorld()->isTeleportingEnabled())
-                {
-                    if (castByPlayer)
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sTeleportDisabled}");
-                    return false;
-                }
-                break;
             case ESM::MagicEffect::WaterWalking:
                 if (target.getClass().isPureWaterCreature(target) && MWBase::Environment::get().getWorld()->isSwimming(target))
                     return false;
@@ -323,6 +308,34 @@ namespace MWMechanics
         }
         return true;
     }
+
+    class GetAbsorptionProbability : public MWMechanics::EffectSourceVisitor
+    {
+    public:
+        float mProbability;
+
+        GetAbsorptionProbability(const MWWorld::Ptr& actor)
+            : mProbability(0.f){}
+
+        virtual void visit (MWMechanics::EffectKey key,
+                                const std::string& sourceName, const std::string& sourceId, int casterActorId,
+                            float magnitude, float remainingTime = -1, float totalTime = -1)
+        {
+            if (key.mId == ESM::MagicEffect::SpellAbsorption)
+            {
+                if (mProbability == 0.f)
+                    mProbability = magnitude / 100;
+                else
+                {
+                    // If there are different sources of SpellAbsorption effect, multiply failing probability for all effects.
+                    // Real absorption probability will be the (1 - total fail chance) in this case.
+                    float failProbability = 1.f - mProbability;
+                    failProbability *= 1.f - magnitude / 100;
+                    mProbability = 1.f - failProbability;
+                }
+            }
+        }
+    };
 
     CastSpell::CastSpell(const MWWorld::Ptr &caster, const MWWorld::Ptr &target, const bool fromProjectile, const bool manualSpell)
         : mCaster(caster)
@@ -444,29 +457,41 @@ namespace MWMechanics
                 MWBase::Environment::get().getWindowManager()->setEnemy(target);
 
             // Try absorbing if it's a spell
-            // NOTE: Vanilla does this once per spell absorption effect source instead of adding the % from all sources together, not sure
-            // if that is worth replicating.
+            // Unlike Reflect, this is done once per spell absorption effect source
             bool absorbed = false;
             if (spell && caster != target && target.getClass().isActor())
             {
-                float absorb = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude();
-                absorbed = (Misc::Rng::roll0to99() < absorb);
-                if (absorbed)
+                CreatureStats& stats = target.getClass().getCreatureStats(target);
+                if (stats.getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude() > 0.f)
                 {
-                    const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
-                    MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
-                                "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, "");
-                    // Magicka is increased by cost of spell
-                    DynamicStat<float> magicka = target.getClass().getCreatureStats(target).getMagicka();
-                    magicka.setCurrent(magicka.getCurrent() + spell->mData.mCost);
-                    target.getClass().getCreatureStats(target).setMagicka(magicka);
+                    GetAbsorptionProbability check(target);
+                    stats.getActiveSpells().visitEffectSources(check);
+                    stats.getSpells().visitEffectSources(check);
+                    if (target.getClass().hasInventoryStore(target))
+                        target.getClass().getInventoryStore(target).visitEffectSources(check);
+
+                    int absorb = check.mProbability * 100;
+                    absorbed = (Misc::Rng::roll0to99() < absorb);
+                    if (absorbed)
+                    {
+                        const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
+                        MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
+                                    "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, "");
+                        // Magicka is increased by cost of spell
+                        DynamicStat<float> magicka = stats.getMagicka();
+                        magicka.setCurrent(magicka.getCurrent() + spell->mData.mCost);
+                        stats.setMagicka(magicka);
+                    }
                 }
             }
 
             float magnitudeMult = 1;
 
-            if (!absorbed && target.getClass().isActor())
+            if (target.getClass().isActor())
             {
+                if (absorbed)
+                    continue;
+
                 bool isHarmful = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful;
                 // Reflect harmful effects
                 if (isHarmful && !reflected && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
@@ -708,21 +733,19 @@ namespace MWMechanics
         else if (target.getClass().isActor() && target == getPlayer())
         {
             MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
+            bool teleportingEnabled = MWBase::Environment::get().getWorld()->isTeleportingEnabled();
 
-            if (effectId == ESM::MagicEffect::DivineIntervention)
+            if (effectId == ESM::MagicEffect::DivineIntervention || effectId == ESM::MagicEffect::AlmsiviIntervention)
             {
-                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "divinemarker");
-                anim->removeEffect(ESM::MagicEffect::DivineIntervention);
-                const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
-                    .search("VFX_Summon_end");
-                if (fx)
-                    anim->addEffect("meshes\\" + fx->mModel, -1);
-                return true;
-            }
-            else if (effectId == ESM::MagicEffect::AlmsiviIntervention)
-            {
-                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "templemarker");
-                anim->removeEffect(ESM::MagicEffect::AlmsiviIntervention);
+                if (!teleportingEnabled)
+                {
+                    if (caster == getPlayer())
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sTeleportDisabled}");
+                    return true;
+                }
+                std::string marker = (effectId == ESM::MagicEffect::DivineIntervention) ? "divinemarker" : "templemarker";
+                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, marker);
+                anim->removeEffect(effectId);
                 const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
                     .search("VFX_Summon_end");
                 if (fx)
@@ -731,12 +754,26 @@ namespace MWMechanics
             }
             else if (effectId == ESM::MagicEffect::Mark)
             {
-                MWBase::Environment::get().getWorld()->getPlayer().markPosition(
-                            target.getCell(), target.getRefData().getPosition());
+                if (teleportingEnabled)
+                {
+                    MWBase::Environment::get().getWorld()->getPlayer().markPosition(
+                                target.getCell(), target.getRefData().getPosition());
+                }
+                else if (caster == getPlayer())
+                {
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sTeleportDisabled}");
+                }
                 return true;
             }
             else if (effectId == ESM::MagicEffect::Recall)
             {
+                if (!teleportingEnabled)
+                {
+                    if (caster == getPlayer())
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sTeleportDisabled}");
+                    return true;
+                }
+
                 MWWorld::CellStore* markedCell = nullptr;
                 ESM::Position markedPosition;
 
@@ -746,7 +783,7 @@ namespace MWMechanics
                     MWWorld::ActionTeleport action(markedCell->isExterior() ? "" : markedCell->getCell()->mName,
                                             markedPosition, false);
                     action.execute(target);
-                    anim->removeEffect(ESM::MagicEffect::Recall);
+                    anim->removeEffect(effectId);
                 }
                 return true;
             }
@@ -976,7 +1013,7 @@ namespace MWMechanics
         {
             // "X has no effect on you"
             std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage50")->mValue.getString();
-            message = boost::str(boost::format(message) % ingredient->mName);
+            Misc::StringUtils::replace(message, "%s", ingredient->mName.c_str(), 2);
             MWBase::Environment::get().getWindowManager()->messageBox(message);
             return false;
         }

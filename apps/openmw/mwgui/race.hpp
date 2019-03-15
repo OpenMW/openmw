@@ -1,6 +1,8 @@
 #ifndef MWGUI_RACE_H
 #define MWGUI_RACE_H
 
+#include <memory>
+
 #include "windowbase.hpp"
 #include <MyGUI_RenderManager.h>
 

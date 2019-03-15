@@ -18,10 +18,6 @@ struct File
 {
     virtual ~File() = default;
 
-    virtual void fail(const std::string &msg) const = 0;
-
-    virtual void warn(const std::string &msg) const = 0;
-
     virtual Record *getRecord(size_t index) const = 0;
 
     virtual size_t numRecords() const = 0;
@@ -71,14 +67,14 @@ class NIFFile final : public File
 
 public:
     /// Used if file parsing fails
-    void fail(const std::string &msg) const override
+    void fail(const std::string &msg) const
     {
         std::string err = " NIFFile Error: " + msg;
         err += "\nFile: " + filename;
         throw std::runtime_error(err);
     }
     /// Used when something goes wrong, but not catastrophically so
-    void warn(const std::string &msg) const override
+    void warn(const std::string &msg) const
     {
         Log(Debug::Warning) << " NIFFile Warning: " << msg << "\nFile: " << filename;
     }

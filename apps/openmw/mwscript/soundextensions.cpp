@@ -1,6 +1,5 @@
-#include "extensions.hpp"
+#include "soundextensions.hpp"
 
-#include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 
 #include <components/interpreter/interpreter.hpp>

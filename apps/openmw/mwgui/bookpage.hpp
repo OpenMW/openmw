@@ -6,6 +6,7 @@
 #include "MyGUI_FontManager.h"
 
 #include <functional>
+#include <memory>
 #include <stdint.h>
 
 #include <components/settings/settings.hpp>

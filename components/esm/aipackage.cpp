@@ -7,7 +7,7 @@ namespace ESM
 {
     void AIData::blank()
     {
-        mHello = mU1 = mFight = mFlee = mAlarm = mU2 = mU3 = mU4 = 0;
+        mHello = mFight = mFlee = mAlarm = mU1 = mU2 = mU3 = 0;
         mServices = 0;
     }
 

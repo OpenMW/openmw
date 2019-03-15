@@ -19,13 +19,15 @@ namespace CSVRender
             Lighting() : mRootNode(0) {}
             virtual ~Lighting();
 
-            virtual void activate (osg::Group* rootNode) = 0;
+            virtual void activate (osg::Group* rootNode, bool isExterior) = 0;
 
             virtual void deactivate() = 0;
 
             virtual osg::Vec4f getAmbientColour(osg::Vec4f* defaultAmbient) = 0;
 
         protected:
+
+            void updateDayNightMode(int index);
 
             osg::ref_ptr<osg::LightSource> mLightSource;
             osg::Group* mRootNode;

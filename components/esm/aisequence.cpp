@@ -3,8 +3,6 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-#include "defs.hpp"
-
 #include <memory>
 
 namespace ESM
@@ -48,6 +46,7 @@ namespace AiSequence
     {
         esm.getHNT (mData, "DATA");
         mTargetId = esm.getHNString("TARG");
+        mTargetActorId = -1;
         esm.getHNOT (mTargetActorId, "TAID");
         esm.getHNT (mRemainingDuration, "DURA");
         mCellId = esm.getHNOString ("CELL");
@@ -67,6 +66,7 @@ namespace AiSequence
     {
         esm.getHNT (mData, "DATA");
         mTargetId = esm.getHNString("TARG");
+        mTargetActorId = -1;
         esm.getHNOT (mTargetActorId, "TAID");
         esm.getHNT (mRemainingDuration, "DURA");
         mCellId = esm.getHNOString ("CELL");

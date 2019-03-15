@@ -175,7 +175,7 @@ namespace Compiler
     {
         void registerExtensions (Extensions& extensions)
         {
-            extensions.registerInstruction ("journal", "cl", opcodeJournal);
+            extensions.registerInstruction ("journal", "cl", opcodeJournal, opcodeJournalExplicit);
             extensions.registerInstruction ("setjournalindex", "cl", opcodeSetJournalIndex);
             extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
             extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);
@@ -320,6 +320,10 @@ namespace Compiler
             extensions.registerInstruction ("removefromlevitem", "ccl", opcodeRemoveFromLevItem);
             extensions.registerInstruction ("tb", "", opcodeToggleBorders);
             extensions.registerInstruction ("toggleborders", "", opcodeToggleBorders);
+            extensions.registerInstruction ("togglenavmesh", "", opcodeToggleNavMesh);
+            extensions.registerInstruction ("tap", "", opcodeToggleActorsPaths);
+            extensions.registerInstruction ("toggleactorspaths", "", opcodeToggleActorsPaths);
+            extensions.registerInstruction ("setnavmeshnumber", "l", opcodeSetNavMeshNumberToRender);
         }
     }
 

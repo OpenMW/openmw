@@ -207,25 +207,25 @@ namespace MWGui
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-        std::vector<std::pair<std::string, std::string> > items; // class id, class name       
-        for (MWWorld::Store<ESM::Class>::iterator it = store.get<ESM::Class>().begin(); it != store.get<ESM::Class>().end(); ++it)
+        std::vector<std::pair<std::string, std::string> > items; // class id, class name
+        for (const ESM::Class& classInfo : store.get<ESM::Class>())
         {
-            bool playable = (it->mData.mIsPlayable != 0);
+            bool playable = (classInfo.mData.mIsPlayable != 0);
             if (!playable) // Only display playable classes
                 continue;
 
-            if (store.get<ESM::Class>().isDynamic(it->mId))
+            if (store.get<ESM::Class>().isDynamic(classInfo.mId))
                 continue; // custom-made class not relevant for this dialog
 
-            items.push_back(std::make_pair(it->mId, it->mName));
+            items.push_back(std::make_pair(classInfo.mId, classInfo.mName));
         }
         std::sort(items.begin(), items.end(), sortClasses);
 
         int index = 0;
-        for (std::vector<std::pair<std::string, std::string> >::const_iterator it = items.begin(); it != items.end(); ++it)
+        for (auto& itemPair : items)
         {
-            const std::string &id = it->first;
-            mClassList->addItem(it->second, id);
+            const std::string &id = itemPair.first;
+            mClassList->addItem(itemPair.second, id);
             if (mCurrentClassId.empty())
             {
                 mCurrentClassId = id;
@@ -332,19 +332,17 @@ namespace MWGui
 
     void InfoBoxDialog::setButtons(ButtonList &buttons)
     {
-        for (std::vector<MyGUI::Button*>::iterator it = this->mButtons.begin(); it != this->mButtons.end(); ++it)
+        for (MyGUI::Button* button : this->mButtons)
         {
-            MyGUI::Gui::getInstance().destroyWidget(*it);
+            MyGUI::Gui::getInstance().destroyWidget(button);
         }
         this->mButtons.clear();
 
         // TODO: The buttons should be generated from a template in the layout file, ie. cloning an existing widget
         MyGUI::Button* button;
         MyGUI::IntCoord coord = MyGUI::IntCoord(0, 0, mButtonBar->getWidth(), 10);
-        ButtonList::const_iterator end = buttons.end();
-        for (ButtonList::const_iterator it = buttons.begin(); it != end; ++it)
+        for (const std::string &text : buttons)
         {
-            const std::string &text = *it;
             button = mButtonBar->createWidget<MyGUI::Button>("MW_Button", coord, MyGUI::Align::Top | MyGUI::Align::HCenter, "");
             button->getSubWidgetText()->setWordWrap(true);
             button->setCaption(text);
@@ -368,11 +366,10 @@ namespace MWGui
 
     void InfoBoxDialog::onButtonClicked(MyGUI::Widget* _sender)
     {
-        std::vector<MyGUI::Button*>::const_iterator end = mButtons.end();
         int i = 0;
-        for (std::vector<MyGUI::Button*>::const_iterator it = mButtons.begin(); it != end; ++it)
+        for (MyGUI::Button* button : mButtons)
         {
-            if (*it == _sender)
+            if (button == _sender)
             {
                 eventButtonSelected(i);
                 return;
@@ -430,10 +427,9 @@ namespace MWGui
             mSkills.push_back(mMinorSkill[i]);
         }
 
-        std::vector<Widgets::MWSkillPtr>::const_iterator end = mSkills.end();
-        for (std::vector<Widgets::MWSkillPtr>::const_iterator it = mSkills.begin(); it != end; ++it)
+        for (Widgets::MWSkillPtr& skill : mSkills)
         {
-            (*it)->eventClicked += MyGUI::newDelegate(this, &CreateClassDialog::onSkillClicked);
+            skill->eventClicked += MyGUI::newDelegate(this, &CreateClassDialog::onSkillClicked);
         }
 
         setText("LabelT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sName", ""));
@@ -642,14 +638,13 @@ namespace MWGui
         ESM::Skill::SkillEnum id = mSkillDialog->getSkillId();
 
         // Avoid duplicate skills by swapping any skill field that matches the selected one
-        std::vector<Widgets::MWSkillPtr>::const_iterator end = mSkills.end();
-        for (std::vector<Widgets::MWSkillPtr>::const_iterator it = mSkills.begin(); it != end; ++it)
+        for (Widgets::MWSkillPtr& skill : mSkills)
         {
-            if (*it == mAffectedSkill)
+            if (skill == mAffectedSkill)
                 continue;
-            if ((*it)->getSkillId() == id)
+            if (skill->getSkillId() == id)
             {
-                (*it)->setSkillId(mAffectedSkill->getSkillId());
+                skill->setSkillId(mAffectedSkill->getSkillId());
                 break;
             }
         }

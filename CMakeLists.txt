@@ -1,17 +1,17 @@
 # Apps and tools
-option(BUILD_OPENMW "build OpenMW" ON)
-option(BUILD_BSATOOL "build BSA extractor" ON)
-option(BUILD_ESMTOOL "build ESM inspector" ON)
-option(BUILD_LAUNCHER "build Launcher" ON)
-option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
-option(BUILD_ESSIMPORTER "build ESS (Morrowind save game) importer" ON)
-option(BUILD_OPENCS "build OpenMW Construction Set" ON)
-option(BUILD_WIZARD "build Installation Wizard" ON)
+option(BUILD_OPENMW             "Build OpenMW" ON)
+option(BUILD_LAUNCHER           "Build Launcher" ON)
+option(BUILD_WIZARD             "Build Installation Wizard" ON)
+option(BUILD_MWINIIMPORTER      "Build MWiniImporter" ON)
+option(BUILD_OPENCS             "Build OpenMW Construction Set" ON)
+option(BUILD_ESSIMPORTER        "Build ESS (Morrowind save game) importer" ON)
+option(BUILD_BSATOOL            "Build BSA extractor" ON)
+option(BUILD_ESMTOOL            "Build ESM inspector" ON)
+option(BUILD_NIFTEST            "Build nif file tester" ON)
+option(BUILD_MYGUI_PLUGIN       "Build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
+option(BUILD_DOCS               "Build documentation." OFF )
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
-option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest" OFF)
-option(BUILD_NIFTEST "build nif file tester" OFF)
-option(BUILD_MYGUI_PLUGIN "build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
-option(BUILD_DOCS        "build documentation." OFF )
+option(BUILD_UNITTESTS          "Enable Unittests with Google C++ Unittest" OFF)
 
 if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
    set(USE_QT FALSE)
@@ -54,11 +54,12 @@ endif()
 message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
-set(OPENMW_VERSION_MINOR 44)
+set(OPENMW_VERSION_MINOR 46)
 set(OPENMW_VERSION_RELEASE 0)
 
 set(OPENMW_VERSION_COMMITHASH "")
 set(OPENMW_VERSION_TAGHASH "")
+set(OPENMW_VERSION_COMMITDATE "")
 
 set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
@@ -70,6 +71,18 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
         set(GIT_CHECKOUT TRUE)
     else(GIT_FOUND)
         message(WARNING "Git executable not found")
+    endif(GIT_FOUND)
+
+    if(GIT_FOUND)
+        execute_process (
+                COMMAND ${GIT_EXECUTABLE} log -1 --format='%aI'
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                RESULT_VARIABLE EXITCODE3
+                OUTPUT_VARIABLE OPENMW_VERSION_COMMITDATE
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if(NOT EXITCODE3)
+            string(SUBSTRING ${OPENMW_VERSION_COMMITDATE} 1 10 OPENMW_VERSION_COMMITDATE)
+        endif(NOT EXITCODE3)
     endif(GIT_FOUND)
 endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 
@@ -153,7 +166,52 @@ if (USE_QT)
 endif()
 
 # Sound setup
+
+# Require at least ffmpeg 3.2 for now
+SET(FFVER_OK FALSE)
+
 find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
+
+if(FFmpeg_FOUND)
+    SET(FFVER_OK TRUE)
+
+    # Can not detect FFmpeg version on Windows for now
+    if (NOT WIN32)
+        if(FFmpeg_AVFORMAT_VERSION VERSION_LESS "57.56.100")
+            message(STATUS "libavformat is too old! (${FFmpeg_AVFORMAT_VERSION}, wanted 57.56.100)")
+            set(FFVER_OK FALSE)
+        endif()
+        if(FFmpeg_AVCODEC_VERSION VERSION_LESS "57.64.100")
+            message(STATUS "libavcodec is too old! (${FFmpeg_AVCODEC_VERSION}, wanted 57.64.100)")
+            set(FFVER_OK FALSE)
+        endif()
+        if(FFmpeg_AVUTIL_VERSION VERSION_LESS "55.34.100")
+            message(STATUS "libavutil is too old! (${FFmpeg_AVUTIL_VERSION}, wanted 55.34.100)")
+            set(FFVER_OK FALSE)
+        endif()
+        if(FFmpeg_SWSCALE_VERSION VERSION_LESS "4.2.100")
+            message(STATUS "libswscale is too old! (${FFmpeg_SWSCALE_VERSION}, wanted 4.2.100)")
+            set(FFVER_OK FALSE)
+        endif()
+        if(FFmpeg_SWRESAMPLE_VERSION VERSION_LESS "2.3.100")
+            message(STATUS "libswresample is too old! (${FFmpeg_SWRESAMPLE_VERSION}, wanted 2.3.100)")
+            set(FFVER_OK FALSE)
+        endif()
+    endif()
+endif()
+
+if(NOT FFmpeg_FOUND)
+    message(FATAL_ERROR "FFmpeg was not found" )
+endif()
+
+if(NOT FFVER_OK)
+    message(FATAL_ERROR "FFmpeg version is too old, 3.2 is required" )
+endif()
+
+if(WIN32)
+    message("Can not detect FFmpeg version, at least the 3.2 is required" )
+endif()
+
 # Required for building the FFmpeg headers
 add_definitions(-D__STDC_CONSTANT_MACROS)
 
@@ -198,12 +256,13 @@ if(NOT HAVE_STDINT_H)
 endif()
 
 
-find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX)
-include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX osgShadow)
+include_directories(SYSTEM ${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 set(USED_OSG_PLUGINS
                     osgdb_bmp
                     osgdb_dds
+                    osgdb_freetype
                     osgdb_jpeg
                     osgdb_osg
                     osgdb_png
@@ -211,8 +270,14 @@ set(USED_OSG_PLUGINS
                     osgdb_tga
                   )
 
-get_filename_component(OSG_LIB_DIR ${OSGDB_LIBRARY} DIRECTORY)
-set(OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
+set(OSGPlugins_LIB_DIR "")
+foreach(OSGDB_LIB ${OSGDB_LIBRARY})
+	# Skip library type names
+	if(EXISTS ${OSGDB_LIB} AND NOT IS_DIRECTORY ${OSGDB_LIB})
+		get_filename_component(OSG_LIB_DIR ${OSGDB_LIB} DIRECTORY)
+		list(APPEND OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
+	endif()
+endforeach(OSGDB_LIB)
 
 if(OSG_STATIC)
     add_definitions(-DOSG_LIBRARY_STATIC)
@@ -232,9 +297,9 @@ if(QT_STATIC)
 endif()
 
 
-set(BOOST_COMPONENTS system filesystem program_options)
+set(BOOST_COMPONENTS system filesystem program_options iostreams)
 if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale zlib)
 endif(WIN32)
 
 IF(BOOST_STATIC)
@@ -275,9 +340,6 @@ if (APPLE)
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 endif (APPLE)
 
-# Set up DEBUG define
-set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_DEBUG DEBUG=1)
-
 if (NOT APPLE)
     set(OPENMW_MYGUI_FILES_ROOT ${OpenMW_BINARY_DIR})
     set(OPENMW_SHADERS_ROOT ${OpenMW_BINARY_DIR})
@@ -303,6 +365,9 @@ endif (APPLE)
 
 configure_resource_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
     "${OpenMW_BINARY_DIR}" "settings-default.cfg")
+
+configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.appdata.xml
+    "${OpenMW_BINARY_DIR}" "openmw.appdata.xml")
 
 if (NOT APPLE)
     configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
@@ -469,7 +534,7 @@ if(WIN32)
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Debug/resources" DESTINATION "." CONFIGURATIONS Debug)
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Release/resources" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
-    
+
     FILE(GLOB plugin_dir_debug "${OpenMW_BINARY_DIR}/Debug/osgPlugins-*")
     FILE(GLOB plugin_dir_release "${OpenMW_BINARY_DIR}/Release/osgPlugins-*")
     INSTALL(DIRECTORY ${plugin_dir_debug} DESTINATION "." CONFIGURATIONS Debug)
@@ -536,6 +601,11 @@ if(WIN32)
 endif(WIN32)
 
 # Extern
+set(RECASTNAVIGATION_DEMO OFF CACHE BOOL "Do not build RecastDemo")
+set(RECASTNAVIGATION_STATIC ON CACHE BOOL "Build recastnavigation static libraries")
+set(RECASTNAVIGATION_TESTS OFF CACHE BOOL "Do not build recastnavigation tests")
+
+add_subdirectory (extern/recastnavigation EXCLUDE_FROM_ALL)
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
 if (BUILD_OPENCS)
@@ -602,7 +672,7 @@ if (WIN32)
     if (USE_DEBUG_CONSOLE AND BUILD_OPENMW)
       set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
       set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-      set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+      set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:Debug>:_CONSOLE>)
     elseif (BUILD_OPENMW)
       # Turn off debug console, debug output will be written to visual studio output instead
       set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
@@ -612,7 +682,6 @@ if (WIN32)
     if (BUILD_OPENMW)
         # Release builds don't use the debug console
         set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-        set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_WINDOWS")
         set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
     endif()
 
@@ -727,6 +796,10 @@ endif()
 
 # Apple bundling
 if (OPENMW_OSX_DEPLOYMENT AND APPLE AND DESIRED_QT_VERSION MATCHES 5)
+    if (${CMAKE_MAJOR_VERSION} STREQUAL "3" AND ${CMAKE_MINOR_VERSION} STREQUAL "13")
+        message(FATAL_ERROR "macOS packaging is broken in CMake 3.13.*, see https://gitlab.com/OpenMW/openmw/issues/4767. Please use an older version like 3.12.4")
+    endif ()
+
     get_property(QT_COCOA_PLUGIN_PATH TARGET Qt5::QCocoaIntegrationPlugin PROPERTY LOCATION_RELEASE)
     get_filename_component(QT_COCOA_PLUGIN_DIR "${QT_COCOA_PLUGIN_PATH}" DIRECTORY)
     get_filename_component(QT_COCOA_PLUGIN_GROUP "${QT_COCOA_PLUGIN_DIR}" NAME)
@@ -761,15 +834,24 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE AND DESIRED_QT_VERSION MATCHES 5)
 
     set(ABSOLUTE_PLUGINS "")
 
+    set(OSGPlugins_DONT_FIND_DEPENDENCIES 1)
+    find_package(OSGPlugins REQUIRED COMPONENTS ${USED_OSG_PLUGINS})
+
     foreach (PLUGIN_NAME ${USED_OSG_PLUGINS})
-      set(PLUGIN_ABS "${OSGPlugins_LIB_DIR}/${PLUGIN_NAME}.so")
-      set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
+        string(TOUPPER ${PLUGIN_NAME} PLUGIN_NAME_UC)
+        if(${PLUGIN_NAME_UC}_LIBRARY_RELEASE)
+            set(PLUGIN_ABS ${${PLUGIN_NAME_UC}_LIBRARY_RELEASE})
+        elseif(${PLUGIN_NAME_UC}_LIBRARY)
+            set(PLUGIN_ABS ${${PLUGIN_NAME_UC}_LIBRARY})
+        else()
+            message(FATAL_ERROR "Can't find library file for ${PLUGIN_NAME}")
+            # We used to construct the path manually from OSGPlugins_LIB_DIR and the plugin name.
+            # Maybe that could be restored as a fallback?
+        endif()
+        set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
     endforeach ()
 
-    get_filename_component(OSG_PLUGIN_PREFIX_DIR "${OSGPlugins_LIB_DIR}" NAME)
-    if (NOT OSG_PLUGIN_PREFIX_DIR)
-      message(FATAL_ERROR "Can't get directory name for OSG plugins from '${OSGPlugins_LIB_DIR}'")
-    endif()
+    set(OSG_PLUGIN_PREFIX_DIR "osgPlugins-${OPENSCENEGRAPH_VERSION}")
 
     # installs used plugins in bundle at given path (bundle_path must be relative to ${CMAKE_INSTALL_PREFIX})
     # and returns list of install paths for all installed plugins

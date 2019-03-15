@@ -26,9 +26,9 @@ bool MWMechanics::AiBreathe::execute (const MWWorld::Ptr& actor, CharacterContro
     {
         if (actorClass.getNpcStats(actor).getTimeToStartDrowning() < fHoldBreathTime / 2)
         {
-            actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
+            actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
-            actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+            actorClass.getMovementSettings(actor).mPosition[1] = 1;
             smoothTurn(actor, -180, 0);
 
             return false;

@@ -17,9 +17,10 @@ namespace MWRender
         Animation* mAnimation;
         std::string mWeaponGroup;
         float mStartTime;
+        bool mRelativeTime;
     public:
-        WeaponAnimationTime(Animation* animation) : mAnimation(animation), mStartTime(0) {}
-        void setGroup(const std::string& group);
+        WeaponAnimationTime(Animation* animation) : mAnimation(animation), mStartTime(0), mRelativeTime(false) {}
+        void setGroup(const std::string& group, bool relativeTime);
         void updateStartTime();
 
         virtual float getValue(osg::NodeVisitor* nv);

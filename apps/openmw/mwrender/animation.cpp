@@ -9,18 +9,19 @@
 #include <osg/BlendFunc>
 #include <osg/Material>
 #include <osg/PositionAttitudeTransform>
+#include <osg/Switch>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/nifosg/nifloader.hpp>
-
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
 #include <components/resource/imagemanager.hpp>
+
+#include <components/misc/constants.hpp>
 
 #include <components/nifosg/nifloader.hpp> // KeyframeHolder
 #include <components/nifosg/controller.hpp>
@@ -33,6 +34,7 @@
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/util.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -77,10 +79,9 @@ namespace
 
         void remove()
         {
-            for (std::vector<osg::ref_ptr<osg::Node> >::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
+            for (osg::Node* node : mToRemove)
             {
                 // FIXME: a Drawable might have more than one parent
-                osg::Node* node = *it;
                 if (node->getNumParents())
                     node->getParent(0)->removeChild(node);
             }
@@ -89,6 +90,47 @@ namespace
 
     private:
         std::vector<osg::ref_ptr<osg::Node> > mToRemove;
+    };
+
+    class DayNightCallback : public osg::NodeCallback
+    {
+    public:
+        DayNightCallback() : mCurrentState(0)
+        {
+        }
+
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            unsigned int state = MWBase::Environment::get().getWorld()->getNightDayMode();
+            const unsigned int newState = node->asGroup()->getNumChildren() > state ? state : 0;
+
+            if (newState != mCurrentState)
+            {
+                mCurrentState = newState;
+                node->asSwitch()->setSingleChildOn(mCurrentState);
+            }
+
+            traverse(node, nv);
+        }
+
+    private:
+        unsigned int mCurrentState;
+    };
+
+    class AddSwitchCallbacksVisitor : public osg::NodeVisitor
+    {
+    public:
+        AddSwitchCallbacksVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        { }
+
+        virtual void apply(osg::Switch &switchNode)
+        {
+            if (switchNode.getName() == Constants::NightDayLabel)
+                switchNode.addUpdateCallback(new DayNightCallback());
+
+            traverse(switchNode);
+        }
     };
 
     NifOsg::TextKeyMap::const_iterator findGroupStart(const NifOsg::TextKeyMap &keys, const std::string &groupname)
@@ -641,8 +683,6 @@ namespace MWRender
             mAnimationTimePtr[i].reset(new AnimationTime);
 
         mLightListCallback = new SceneUtil::LightListCallback;
-
-        mUseAdditionalSources = Settings::Manager::getBool ("use additional anim sources", "Game");
     }
 
     Animation::~Animation()
@@ -754,7 +794,8 @@ namespace MWRender
 
         addSingleAnimSource(kfname, baseModel);
 
-        if (mUseAdditionalSources)
+        static const bool useAdditionalSources = Settings::Manager::getBool ("use additional anim sources", "Game");
+        if (useAdditionalSources)
             loadAllAnimationsInFolder(kfname, baseModel);
     }
 
@@ -801,9 +842,9 @@ namespace MWRender
 
         if (!mAccumRoot)
         {
-            NodeMap::const_iterator found = nodeMap.find("root bone");
+            NodeMap::const_iterator found = nodeMap.find("bip01");
             if (found == nodeMap.end())
-                found = nodeMap.find("bip01");
+                found = nodeMap.find("root bone");
 
             if (found != nodeMap.end())
                 mAccumRoot = found->second;
@@ -1394,7 +1435,7 @@ namespace MWRender
                 return sceneMgr->createInstance(found->second);
         }
         else
-            return sceneMgr->createInstance(model);
+            return sceneMgr->getInstance(model);
     }
 
     void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature)
@@ -1739,21 +1780,29 @@ namespace MWRender
 
         if (alpha != 1.f)
         {
-            osg::StateSet* stateset (new osg::StateSet);
+            // If we have an existing material for alpha transparency, just override alpha level
+            osg::StateSet* stateset = mObjectRoot->getOrCreateStateSet();
+            osg::Material* material = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+            if (material)
+            {
+                material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
+            }
+            else
+            {
+                osg::BlendFunc* blendfunc (new osg::BlendFunc);
+                stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
-            osg::BlendFunc* blendfunc (new osg::BlendFunc);
-            stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                // FIXME: overriding diffuse/ambient/emissive colors
+                material = new osg::Material;
+                material->setColorMode(osg::Material::OFF);
+                material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,alpha));
+                material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+                stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
-            // FIXME: overriding diffuse/ambient/emissive colors
-            osg::Material* material (new osg::Material);
-            material->setColorMode(osg::Material::OFF);
-            material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,alpha));
-            material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
-            stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                mObjectRoot->setStateSet(stateset);
 
-            mObjectRoot->setStateSet(stateset);
-
-            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
+                mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
+            }
         }
         else
         {
@@ -1789,9 +1838,12 @@ namespace MWRender
         }
         else
         {
-            effect += 3;
-            float radius = effect * 66.f;
-            float linearAttenuation = 0.5f / effect;
+            // TODO: use global attenuation settings
+
+            // 1 pt of Light magnitude corresponds to 1 foot of radius
+            float radius = effect * std::ceil(Constants::UnitsPerFoot);
+            const float linearValue = 3.f; // Currently hardcoded: unmodified Morrowind attenuation settings
+            float linearAttenuation = linearValue / radius;
 
             if (!mGlowLight || linearAttenuation != mGlowLight->getLight(0)->getLinearAttenuation())
             {
@@ -1813,7 +1865,8 @@ namespace MWRender
                 mGlowLight->setLight(light);
             }
 
-            mGlowLight->setRadius(radius);
+            // Make the obvious cut-off a bit less obvious
+            mGlowLight->setRadius(radius * 3);
         }
     }
 
@@ -1921,6 +1974,12 @@ namespace MWRender
             RemoveParticlesVisitor visitor;
             mObjectRoot->accept(visitor);
             visitor.remove();
+        }
+
+        if (SceneUtil::hasUserDescription(mObjectRoot, Constants::NightDayLabel))
+        {
+            AddSwitchCallbacksVisitor visitor;
+            mObjectRoot->accept(visitor);
         }
     }
 

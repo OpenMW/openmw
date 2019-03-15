@@ -1,9 +1,6 @@
 #include "dialoguemanagerimp.hpp"
 
-#include <cctype>
-#include <cstdlib>
 #include <algorithm>
-#include <iterator>
 #include <list>
 
 #include <components/debug/debuglog.hpp>

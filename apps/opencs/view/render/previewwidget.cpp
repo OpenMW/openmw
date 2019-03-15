@@ -20,6 +20,8 @@ CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
     connect (&mData, SIGNAL (assetTablesChanged ()),
         this, SLOT (assetTablesChanged ()));
 
+    setExterior(false);
+
     if (!referenceable)
     {
         QAbstractItemModel *references =

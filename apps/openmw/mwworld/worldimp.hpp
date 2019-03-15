@@ -61,6 +61,11 @@ namespace ToUTF8
 
 struct ContentLoader;
 
+namespace MWPhysics
+{
+    class Object;
+}
+
 namespace MWWorld
 {
     class WeatherManager;
@@ -94,6 +99,7 @@ namespace MWWorld
 
             std::unique_ptr<MWWorld::Player> mPlayer;
             std::unique_ptr<MWPhysics::PhysicsSystem> mPhysics;
+            std::unique_ptr<DetourNavigator::Navigator> mNavigator;
             std::unique_ptr<MWRender::RenderingManager> mRendering;
             std::unique_ptr<MWWorld::Scene> mWorldScene;
             std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
@@ -105,13 +111,14 @@ namespace MWWorld
 
             std::string mUserDataPath;
 
+            osg::Vec3f mDefaultHalfExtents;
+            bool mShouldUpdateNavigator = false;
+
             // not implemented
             World (const World&);
             World& operator= (const World&);
 
             int mActivationDistanceOverride;
-
-            std::string mStartupScript;
 
             std::map<MWWorld::Ptr, int> mDoorStates;
             ///< only holds doors that are currently moving. 1 = opening, 2 = closing
@@ -146,6 +153,10 @@ namespace MWWorld
 
             void doPhysics(float duration);
             ///< Run physics simulation and modify \a world accordingly.
+
+            void updateNavigator();
+
+            bool updateNavigatorObject(const MWPhysics::Object* object);
 
             void ensureNeededRecords();
 
@@ -188,7 +199,7 @@ namespace MWWorld
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& contentFiles,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-                int activationDistanceOverride, const std::string& startCell, const std::string& startupScript, const std::string& resourcePath, const std::string& userDataPath);
+                int activationDistanceOverride, const std::string& startCell, const std::string& resourcePath, const std::string& userDataPath);
 
             virtual ~World();
 
@@ -228,6 +239,7 @@ namespace MWWorld
 
             Player& getPlayer() override;
             MWWorld::Ptr getPlayerPtr() override;
+            MWWorld::ConstPtr getPlayerConstPtr() const override;
 
             const MWWorld::ESMStore& getStore() const override;
 
@@ -327,6 +339,8 @@ namespace MWWorld
 
             int getCurrentWeather() const override;
 
+            unsigned int getNightDayMode() const override;
+
             int getMasserPhase() const override;
 
             int getSecundaPhase() const override;
@@ -402,10 +416,15 @@ namespace MWWorld
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
+            void updateAnimatedCollisionShape(const Ptr &ptr) override;
+
             bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, int mask) override;
             ///< cast a Ray and return true if there is an object in the ray path.
 
             bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) override;
+
+            void setActorCollisionMode(const Ptr& ptr, bool internal, bool external) override;
+            bool isActorCollisionEnabled(const Ptr& ptr) override;
 
             bool toggleCollisionMode() override;
             ///< Toggle collision mode for player. If disabled player object should ignore
@@ -465,6 +484,7 @@ namespace MWWorld
             /// \return pointer to created record
 
             void update (float duration, bool paused) override;
+            void updatePhysics (float duration, bool paused) override;
 
             void updateWindowManager () override;
 
@@ -690,6 +710,18 @@ namespace MWWorld
 
             /// Preload VFX associated with this effect list
             void preloadEffects(const ESM::EffectList* effectList) override;
+
+            DetourNavigator::Navigator* getNavigator() const override;
+
+            void updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
+                    const osg::Vec3f& halfExtents, const osg::Vec3f& start, const osg::Vec3f& end) const override;
+
+            void removeActorPath(const MWWorld::ConstPtr& actor) const override;
+
+            void setNavMeshNumberToRender(const std::size_t value) override;
+
+            /// Return physical half extents of the given actor to be used in pathfinding
+            osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const override;
     };
 }
 

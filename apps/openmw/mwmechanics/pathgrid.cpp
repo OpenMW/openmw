@@ -257,10 +257,9 @@ namespace MWMechanics
      *       pathgrid points form (currently they are converted to world
      *       coordinates).  Essentially trading speed w/ memory.
      */
-    std::list<ESM::Pathgrid::Point> PathgridGraph::aStarSearch(const int start,
-                                                               const int goal) const
+    std::deque<ESM::Pathgrid::Point> PathgridGraph::aStarSearch(const int start, const int goal) const
     {
-        std::list<ESM::Pathgrid::Point> path;
+        std::deque<ESM::Pathgrid::Point> path;
         if(!isPointConnected(start, goal))
         {
             return path; // there is no path, return an empty path

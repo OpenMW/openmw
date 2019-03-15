@@ -150,6 +150,7 @@ namespace Compiler
     namespace Dialogue
     {
         const int opcodeJournal = 0x2000133;
+        const int opcodeJournalExplicit = 0x200030b;
         const int opcodeSetJournalIndex = 0x2000134;
         const int opcodeGetJournalIndex = 0x2000135;
         const int opcodeAddTopic = 0x200013a;
@@ -296,6 +297,9 @@ namespace Compiler
         const int opcodeShowSceneGraph = 0x2002f;
         const int opcodeShowSceneGraphExplicit = 0x20030;
         const int opcodeToggleBorders = 0x2000307;
+        const int opcodeToggleNavMesh = 0x2000308;
+        const int opcodeToggleActorsPaths = 0x2000309;
+        const int opcodeSetNavMeshNumberToRender = 0x200030a;
     }
 
     namespace Sky

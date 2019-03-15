@@ -1,7 +1,6 @@
 #include "weaponpriority.hpp"
 
 #include <components/esm/loadench.hpp>
-#include <components/esm/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -58,8 +57,16 @@ namespace MWMechanics
         }
 
         const float chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1]) / 2.f;
-        if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
+        // We need to account for the fact that thrown weapons have 2x real damage applied to the target
+        // as they're both the weapon and the ammo of the hit
+        if (weapon->mData.mType == ESM::Weapon::MarksmanThrown)
+        {
+            rating = chop * 2;
+        }
+        else if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
+        {
             rating = chop;
+        }
         else
         {
             const float slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1]) / 2.f;
@@ -70,7 +77,10 @@ namespace MWMechanics
         adjustWeaponDamage(rating, item, actor);
 
         if (weapon->mData.mType != ESM::Weapon::MarksmanBow && weapon->mData.mType != ESM::Weapon::MarksmanCrossbow)
+        {
             resistNormalWeapon(enemy, actor, item, rating);
+            applyWerewolfDamageMult(enemy, item, rating);
+        }
         else if (weapon->mData.mType == ESM::Weapon::MarksmanBow)
         {
             if (arrowRating <= 0.f)
@@ -117,7 +127,9 @@ namespace MWMechanics
             value = ref->mBase->mData.mCombat;
         }
 
-        rating *= getHitChance(actor, enemy, value) / 100.f;
+        // Take hit chance in account, but do not allow rating become negative.
+        float chance = getHitChance(actor, enemy, value) / 100.f;
+        rating *= std::min(1.f, std::max(0.01f, chance));
 
         if (weapon->mData.mType < ESM::Weapon::Arrow)
             rating *= weapon->mData.mSpeed;

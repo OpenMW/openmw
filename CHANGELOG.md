@@ -1,3 +1,62 @@
+0.46.0
+------
+
+    Bug #2969: Scripted items can stack
+    Bug #2987: Editor: some chance and AI data fields can overflow
+    Bug #3623: Fix HiDPI on Windows
+    Bug #3733: Normal maps are inverted on mirrored UVs
+    Bug #3765: DisableTeleporting makes Mark/Recall/Intervention effects undetectable
+    Bug #3778: [Mod] Improved Thrown Weapon Projectiles - weapons have wrong transformation during throw animation
+    Bug #4329: Removed birthsign abilities are restored after reloading the save
+    Bug #4383: Bow model obscures crosshair when arrow is drawn
+    Bug #4384: Resist Normal Weapons only checks ammunition for ranged weapons
+    Bug #4411: Reloading a saved game while falling prevents damage in some cases
+    Bug #4540: Rain delay when exiting water
+    Bug #4701: PrisonMarker record is not hardcoded like other markers
+    Bug #4714: Crash upon game load in the repair menu while the "Your repair failed!" message is active
+    Bug #4715: "Cannot get class of an empty object" exception after pressing ESC in the dialogue mode
+    Bug #4720: Inventory avatar has shield with two-handed weapon during [un]equipping animation
+    Bug #4723: ResetActors command works incorrectly
+    Bug #4745: Editor: Interior cell lighting field values are not displayed as colors
+    Bug #4736: LandTexture records overrides do not work
+    Bug #4746: Non-solid player can't run or sneak
+    Bug #4747: Bones are not read from X.NIF file for NPC animation
+    Bug #4750: Sneaking doesn't work in first person view if the player is in attack ready state
+    Bug #4768: Fallback numerical value recovery chokes on invalid arguments
+    Bug #4775: Slowfall effect resets player jumping flag
+    Bug #4778: Interiors of Illusion puzzle in Sotha Sil Expanded mod is broken
+    Bug #4797: Player sneaking and running stances are not accounted for when in air
+    Bug #4800: Standing collisions are not updated immediately when an object is teleported without a cell change
+    Bug #4803: Stray special characters before begin statement break script compilation
+    Bug #4804: Particle system with the "Has Sizes = false" causes an exception
+    Bug #4810: Raki creature broken in OpenMW
+    Bug #4813: Creatures with known file but no "Sound Gen Creature" assigned use default sounds
+    Bug #4815: "Finished" journal entry with lower index doesn't close journal, SetJournalIndex closes journal
+    Bug #4820: Spell absorption is broken
+    Bug #4827: NiUVController is handled incorrectly
+    Bug #4828: Potion looping effects VFX are not shown for NPCs
+    Bug #4837: CTD when a mesh with NiLODNode root node with particles is loaded
+    Bug #4860: Actors outside of processing range visible for one frame after spawning
+    Bug #4876: AI ratings handling inconsistencies
+    Bug #4877: Startup script executes only on a new game start
+    Bug #4888: Global variable stray explicit reference calls break script compilation
+    Bug #4911: Editor: QOpenGLContext::swapBuffers() warning with Qt5
+    Feature #2229: Improve pathfinding AI
+    Feature #3442: Default values for fallbacks from ini file
+    Feature #3610: Option to invert X axis
+    Feature #3893: Implicit target for "set" function in console
+    Feature #3980: In-game option to disable controller
+    Feature #4209: Editor: Faction rank sub-table
+    Feature #4673: Weapon sheathing
+    Feature #4675: Support for NiRollController
+    Feature #4730: Native animated containers support
+    Feature #4812: Support NiSwitchNode
+    Feature #4836: Daytime node switch
+    Feature #4859: Make water reflections more configurable
+    Feature #4887: Add openmw command option to set initial random seed
+    Feature #4890: Make Distant Terrain configurable
+    Task #4686: Upgrade media decoder to a more current FFmpeg API
+
 0.45.0
 ------
 
@@ -8,6 +67,7 @@
     Bug #2256: Landing sound not playing when jumping immediately after landing
     Bug #2274: Thin platform clips through player character instead of lifting
     Bug #2326: After a bound item expires the last equipped item of that type is not automatically re-equipped
+    Bug #2446: Restore Attribute/Skill should allow restoring drained attributes
     Bug #2455: Creatures attacks degrade armor
     Bug #2562: Forcing AI to activate a teleport door sometimes causes a crash
     Bug #2626: Resurrecting the player does not resume the game
@@ -33,6 +93,7 @@
     Bug #3788: GetPCInJail and GetPCTraveling do not work as in vanilla
     Bug #3836: Script fails to compile when command argument contains "\n"
     Bug #3876: Landscape texture painting is misaligned
+    Bug #3890: Magic light source attenuation is inaccurate
     Bug #3897: Have Goodbye give all choices the effects of Goodbye
     Bug #3911: [macOS] Typing in the "Content List name" dialog box produces double characters
     Bug #3920: RemoveSpellEffects doesn't remove constant effects
@@ -45,6 +106,7 @@
     Bug #4110: Fixed undo / redo menu text losing the assigned shortcuts
     Bug #4125: OpenMW logo cropped on bugtracker
     Bug #4215: OpenMW shows book text after last EOL tag
+    Bug #4217: Fixme implementation differs from Morrowind's
     Bug #4221: Characters get stuck in V-shaped terrain
     Bug #4230: AiTravel package issues break some Tribunal quests
     Bug #4231: Infected rats from the "Crimson Plague" quest rendered unconscious by change in Drain Fatigue functionality
@@ -54,6 +116,7 @@
     Bug #4274: Pre-0.43 death animations are not forward-compatible with 0.43+
     Bug #4286: Scripted animations can be interrupted
     Bug #4291: Non-persistent actors that started the game as dead do not play death animations
+    Bug #4292: CenterOnCell implementation differs from vanilla
     Bug #4293: Faction members are not aware of faction ownerships in barter
     Bug #4304: "Follow" not working as a second AI package
     Bug #4307: World cleanup should remove dead bodies only if death animation is finished
@@ -64,7 +127,7 @@
     Bug #4368: Settings window ok button doesn't have key focus by default
     Bug #4378: On-self absorb spells restore stats
     Bug #4393: NPCs walk back to where they were after using ResetActors
-    Bug #4416: Handle exception if we try to play non-music file
+    Bug #4416: Non-music files crash the game when they are tried to be played
     Bug #4419: MRK NiStringExtraData is handled incorrectly
     Bug #4426: RotateWorld behavior is incorrect
     Bug #4429: [Windows] Error on build INSTALL.vcxproj project (debug) with cmake 3.7.2
@@ -80,6 +143,7 @@
     Bug #4459: NotCell dialogue condition doesn't support partial matches
     Bug #4460: Script function "Equip" doesn't bypass beast restrictions
     Bug #4461: "Open" spell from non-player caster isn't a crime
+    Bug #4463: %g format doesn't return more digits
     Bug #4464: OpenMW keeps AiState cached storages even after we cancel AI packages
     Bug #4467: Content selector: cyrillic characters are decoded incorrectly in plugin descriptions
     Bug #4469: Abot Silt Striders – Model turn 90 degrees on horizontal
@@ -143,14 +207,17 @@
     Bug #4674: Journal can be opened when settings window is open
     Bug #4677: Crash in ESM reader when NPC record has DNAM record without DODT one
     Bug #4678: Crash in ESP parser when SCVR has no variable names
+    Bug #4684: Spell Absorption is additive
     Bug #4685: Missing sound causes an exception inside Say command
     Bug #4689: Default creature soundgen entries are not used
+    Bug #4691: Loading bar for cell should be moved up when text is still active at bottom of screen
     Feature #912: Editor: Add missing icons to UniversalId tables
     Feature #1221: Editor: Creature/NPC rendering
     Feature #1617: Editor: Enchantment effect record verifier
     Feature #1645: Casting effects from objects
     Feature #2606: Editor: Implemented (optional) case sensitive global search
     Feature #2787: Use the autogenerated collision box, if the creature mesh has no predefined one
+    Feature #2845: Editor: add record view and preview default keybindings
     Feature #2847: Content selector: allow to copy the path to a file by using the context menu
     Feature #3083: Play animation when NPC is casting spell via script
     Feature #3103: Provide option for disposition to get increased by successful trade
@@ -180,7 +247,9 @@
     Feature #4632: AI priority: utilize vanilla AI GMSTs for priority rating
     Feature #4636: Use sTo GMST in spellmaking menu
     Feature #4642: Batching potion creation
+    Feature #4647: Cull actors outside of AI processing range
     Feature #4682: Use the collision box from basic creature mesh if the X one have no collisions
+    Feature #4697: Use the real thrown weapon damage in tooltips and AI
     Task #2490: Don't open command prompt window on Release-mode builds automatically
     Task #4545: Enable is_pod string test
     Task #4605: Optimize skinning

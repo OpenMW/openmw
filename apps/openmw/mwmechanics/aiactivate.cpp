@@ -8,7 +8,6 @@
 #include "../mwworld/class.hpp"
 
 #include "creaturestats.hpp"
-#include "steering.hpp"
 #include "movement.hpp"
 
 namespace MWMechanics
@@ -29,14 +28,13 @@ namespace MWMechanics
 
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
-        if (target == MWWorld::Ptr() ||
-            !target.getRefData().getCount() || !target.getRefData().isEnabled()  // Really we should check whether the target is currently registered
-                                                                                // with the MechanicsManager
-            )
-        return true;   //Target doesn't exist
+        // Stop if the target doesn't exist
+        // Really we should be checking whether the target is currently registered with the MechanicsManager
+        if (target == MWWorld::Ptr() || !target.getRefData().getCount() || !target.getRefData().isEnabled())
+            return true;
 
         //Set the target destination for the actor
-        ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
+        const osg::Vec3f dest = target.getRefData().getPosition().asVec3();
 
         if (pathTo(actor, dest, duration, MWBase::Environment::get().getWorld()->getMaxActivationDistance())) //Stop when you get in activation range
         {

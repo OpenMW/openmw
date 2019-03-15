@@ -60,8 +60,7 @@ namespace MWMechanics
 
                 std::string msg = "sMagicContractDisease";
                 msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(msg)->mValue.getString();
-                if (msg.find("%s") != std::string::npos)
-                    msg.replace(msg.find("%s"), 2, spell->mName);
+                Misc::StringUtils::replace(msg, "%s", spell->mName.c_str(), 2);
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
             }
         }

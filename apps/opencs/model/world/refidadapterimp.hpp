@@ -627,12 +627,12 @@ namespace CSMWorld
         RecordT record2 = record.get();
         if (column==mActors.mHello)
             record2.mAiData.mHello = value.toInt();
-        else if (column==mActors.mFlee)
-            record2.mAiData.mFlee = value.toInt();
+        else if (column==mActors.mFlee) // Flee, Fight and Alarm ratings are probabilities.
+            record2.mAiData.mFlee = std::min(100, value.toInt());
         else if (column==mActors.mFight)
-            record2.mAiData.mFight = value.toInt();
+            record2.mAiData.mFight = std::min(100, value.toInt());
         else if (column==mActors.mAlarm)
-            record2.mAiData.mAlarm = value.toInt();
+            record2.mAiData.mAlarm = std::min(100, value.toInt());
         else
         {
             typename std::map<const RefIdColumn *, unsigned int>::const_iterator iter =

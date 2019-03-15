@@ -3,8 +3,6 @@
 
 #include "aipackage.hpp"
 
-#include "pathfinding.hpp"
-
 namespace ESM
 {
 namespace AiSequence

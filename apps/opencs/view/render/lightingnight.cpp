@@ -4,7 +4,7 @@
 
 CSVRender::LightingNight::LightingNight() {}
 
-void CSVRender::LightingNight::activate (osg::Group* rootNode)
+void CSVRender::LightingNight::activate (osg::Group* rootNode, bool isExterior)
 {
     mRootNode = rootNode;
 
@@ -20,6 +20,8 @@ void CSVRender::LightingNight::activate (osg::Group* rootNode)
     mLightSource->setLight(light);
 
     mRootNode->addChild(mLightSource);
+
+    updateDayNightMode(isExterior ? 1 : 0);
 }
 
 void CSVRender::LightingNight::deactivate()

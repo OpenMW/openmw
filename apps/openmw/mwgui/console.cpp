@@ -11,10 +11,12 @@
 #include "../mwscript/extensions.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/class.hpp"
 
 namespace MWGui
 {
@@ -173,6 +175,12 @@ namespace MWGui
         print("> " + command + "\n");
 
         Compiler::Locals locals;
+        if (!mPtr.isEmpty())
+        {
+            std::string script = mPtr.getClass().getScript(mPtr);
+            if (!script.empty())
+                locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
+        }
         Compiler::Output output (locals);
 
         if (compile (command + "\n", output))
@@ -231,11 +239,13 @@ namespace MWGui
             {
                 int i = 0;
                 printOK("");
-                for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end(); ++it,++i )
+                for(std::string& match : matches)
                 {
-                    printOK( *it );
-                    if( i == 50 )
+                    if(i == 50)
                         break;
+
+                    printOK(match);
+                    i++;
                 }
             }
         }
@@ -352,15 +362,16 @@ namespace MWGui
         }
 
         /* Iterate through the vector. */
-        for(std::vector<std::string>::iterator it=mNames.begin(); it < mNames.end();++it) {
+        for(std::string& name : mNames)
+        {
             bool string_different=false;
 
             /* Is the string shorter than the input string? If yes skip it. */
-            if( (*it).length() < tmp.length() )
+            if(name.length() < tmp.length())
                 continue;
 
             /* Is the beginning of the string different from the input string? If yes skip it. */
-            for( std::string::iterator iter=tmp.begin(), iter2=(*it).begin(); iter < tmp.end();++iter, ++iter2) {
+            for( std::string::iterator iter=tmp.begin(), iter2=name.begin(); iter < tmp.end();++iter, ++iter2) {
                 if( Misc::StringUtils::toLower(*iter) != Misc::StringUtils::toLower(*iter2) ) {
                     string_different=true;
                     break;
@@ -371,7 +382,7 @@ namespace MWGui
                 continue;
 
             /* The beginning of the string matches the input string, save it for the next test. */
-            matches.push_back(*it);
+            matches.push_back(name);
         }
 
         /* There are no matches. Return the unchanged input. */
@@ -399,11 +410,14 @@ namespace MWGui
         /* Check if all matching strings match further than input. If yes complete to this match. */
         int i = tmp.length();
 
-        for(std::string::iterator iter=matches.front().begin()+tmp.length(); iter < matches.front().end(); ++iter, ++i) {
-            for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end();++it) {
-                if( Misc::StringUtils::toLower((*it)[i]) != Misc::StringUtils::toLower(*iter) ) {
+        for(std::string::iterator iter=matches.front().begin()+tmp.length(); iter < matches.front().end(); ++iter, ++i)
+        {
+            for(std::string& match : matches)
+            {
+                if(Misc::StringUtils::toLower(match[i]) != Misc::StringUtils::toLower(*iter))
+                {
                     /* Append the longest match to the end of the output string*/
-                    output.append(matches.front().substr( 0, i));
+                    output.append(matches.front().substr(0, i));
                     return output;
                 }
             }

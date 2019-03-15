@@ -1,6 +1,5 @@
 #include "manager.hpp"
 
-#include <cctype>
 #include <stdexcept>
 
 #include <components/misc/stringops.hpp>

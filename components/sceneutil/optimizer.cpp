@@ -25,7 +25,6 @@
 #include <osg/Billboard>
 #include <osg/Geometry>
 #include <osg/Notify>
-#include <osg/Texture>
 #include <osg/Timer>
 #include <osg/io_utils>
 
@@ -36,7 +35,6 @@
 #include <typeinfo>
 #include <algorithm>
 #include <numeric>
-#include <sstream>
 
 #include <iterator>
 
@@ -737,6 +735,20 @@ bool Optimizer::CombineStaticTransformsVisitor::removeTransforms(osg::Node* node
 // RemoveEmptyNodes.
 ////////////////////////////////////////////////////////////////////////////
 
+void Optimizer::RemoveEmptyNodesVisitor::apply(osg::Switch& switchNode)
+{
+    // We should keep all switch child nodes since they reflect different switch states.
+    for (unsigned int i=0; i<switchNode.getNumChildren(); ++i)
+        traverse(*switchNode.getChild(i));
+}
+
+void Optimizer::RemoveEmptyNodesVisitor::apply(osg::LOD& lod)
+{
+    // don't remove any direct children of the LOD because they are used to define each LOD level.
+    for (unsigned int i=0; i<lod.getNumChildren(); ++i)
+        traverse(*lod.getChild(i));
+}
+
 void Optimizer::RemoveEmptyNodesVisitor::apply(osg::Group& group)
 {
     if (group.getNumParents()>0)
@@ -805,6 +817,13 @@ void Optimizer::RemoveRedundantNodesVisitor::apply(osg::LOD& lod)
     // don't remove any direct children of the LOD because they are used to define each LOD level.
     for (unsigned int i=0; i<lod.getNumChildren(); ++i)
         traverse(*lod.getChild(i));
+}
+
+void Optimizer::RemoveRedundantNodesVisitor::apply(osg::Switch& switchNode)
+{
+    // We should keep all switch child nodes since they reflect different switch states.
+    for (unsigned int i=0; i<switchNode.getNumChildren(); ++i)
+        traverse(*switchNode.getChild(i));
 }
 
 void Optimizer::RemoveRedundantNodesVisitor::apply(osg::Group& group)
@@ -1849,7 +1868,8 @@ bool Optimizer::MergeGeometryVisitor::mergePrimitive(osg::DrawElementsUInt& lhs,
 
 bool Optimizer::MergeGroupsVisitor::isOperationPermissible(osg::Group& node)
 {
-    return !node.asTransform() &&
+    return !node.asSwitch() &&
+           !node.asTransform() &&
            !node.getCullCallback() &&
            !node.getEventCallback() &&
            !node.getUpdateCallback() &&
@@ -1860,6 +1880,12 @@ void Optimizer::MergeGroupsVisitor::apply(osg::LOD &lod)
 {
     // don't merge the direct children of the LOD because they are used to define each LOD level.
     traverse(lod);
+}
+
+void Optimizer::MergeGroupsVisitor::apply(osg::Switch &switchNode)
+{
+    // We should keep all switch child nodes since they reflect different switch states.
+    traverse(switchNode);
 }
 
 void Optimizer::MergeGroupsVisitor::apply(osg::Group &group)

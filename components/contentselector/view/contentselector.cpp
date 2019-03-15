@@ -8,10 +8,7 @@
 #include <QContextMenuEvent>
 
 #include <QClipboard>
-#include <QGridLayout>
-#include <QMessageBox>
 #include <QModelIndex>
-#include <QDir>
 
 ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
     QObject(parent)

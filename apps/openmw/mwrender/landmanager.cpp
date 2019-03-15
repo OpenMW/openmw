@@ -2,8 +2,6 @@
 
 #include <osg/Stats>
 
-#include <sstream>
-
 #include <components/resource/objectcache.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -21,9 +19,7 @@ LandManager::LandManager(int loadFlags)
 
 osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(int x, int y)
 {
-    std::ostringstream id;
-    id << x << " " << y;
-    std::string idstr = id.str();
+    std::string idstr = std::to_string(x) + " " + std::to_string(y);
 
     osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(idstr);
     if (obj)

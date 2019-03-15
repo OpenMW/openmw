@@ -15,7 +15,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwmechanics/movement.hpp"
@@ -30,6 +29,7 @@ namespace MWWorld
     Player::Player (const ESM::NPC *player)
       : mCellStore(0),
         mLastKnownExteriorPosition(0,0,0),
+        mMarkedPosition(ESM::Position()),
         mMarkedCell(nullptr),
         mAutoMove(false),
         mForwardBackward(0),
@@ -122,6 +122,12 @@ namespace MWWorld
         return ptr;
     }
 
+    MWWorld::ConstPtr Player::getConstPlayer() const
+    {
+        MWWorld::ConstPtr ptr (&mPlayer, mCellStore);
+        return ptr;
+    }
+
     void Player::setBirthSign (const std::string &sign)
     {
         mSign = sign;
@@ -154,16 +160,16 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        ptr.getClass().getMovementSettings(ptr).mPosition[1] = static_cast<float>(value);
+        ptr.getClass().getMovementSettings(ptr).mPosition[1] = value;
     }
 
-    void Player::setLeftRight (int value)
+    void Player::setLeftRight (float value)
     {
         MWWorld::Ptr ptr = getPlayer();
-        ptr.getClass().getMovementSettings(ptr).mPosition[0] = static_cast<float>(value);
+        ptr.getClass().getMovementSettings(ptr).mPosition[0] = value;
     }
 
-    void Player::setForwardBackward (int value)
+    void Player::setForwardBackward (float value)
     {
         MWWorld::Ptr ptr = getPlayer();
 
@@ -172,7 +178,7 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        ptr.getClass().getMovementSettings(ptr).mPosition[1] = static_cast<float>(value);
+        ptr.getClass().getMovementSettings(ptr).mPosition[1] = value;
     }
 
     void Player::setUpDown(int value)
@@ -414,14 +420,6 @@ namespace MWWorld
                 const ESM::BirthSign* sign = world.getStore().get<ESM::BirthSign>().search (player.mBirthsign);
                 if (!sign)
                     throw std::runtime_error ("invalid player state record (birthsign does not exist)");
-
-                // To handle the case where a birth sign was edited in between play sessions (does not yet handle removing the old spells)
-                // Also needed for ess-imported savegames which do not specify the birtsign spells in the player's spell list.
-                for (std::vector<std::string>::const_iterator iter (sign->mPowers.mList.begin());
-                    iter!=sign->mPowers.mList.end(); ++iter)
-                {
-                    getPlayer().getClass().getCreatureStats(getPlayer()).getSpells().add (*iter);
-                }
             }
 
             mCurrentCrimeId = player.mCurrentCrimeId;

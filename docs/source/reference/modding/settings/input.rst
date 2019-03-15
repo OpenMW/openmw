@@ -94,6 +94,20 @@ meaning that it should remain set at 1.0 unless the player desires to have diffe
 
 This setting can only be configured by editing the settings configuration file.
 
+invert x axis
+-------------
+
+:Type:      boolean
+:Range:     True/False
+:Default:   False
+
+
+Invert the horizontal axis while not in GUI mode.
+If this setting is true, moving the mouse to the left will cause the view to rotate counter-clockwise,
+while moving it to the right will cause the view to rotate clockwise. This setting does not affect cursor movement in GUI mode.
+
+This setting can be toggled in game with the Invert X Axis button in the Controls panel of the Options menu.
+
 invert y axis
 -------------
 
@@ -106,3 +120,16 @@ If this setting is true, moving the mouse away from the player will look down,
 while moving it towards the player will look up. This setting does not affect cursor movement in GUI mode.
 
 This setting can be toggled in game with the Invert Y Axis button in the Controls panel of the Options menu.
+
+enable controller
+-----------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Enable support of controller input — or rather not ignore controller events,
+which are always sent if a controller is present and detected.
+Disabling this setting can be useful for working around controller-related issues or for setting up split-screen gameplay configurations.
+
+This setting can be toggled in game with the Enable Joystick button in the Controls panel of the Options menu.

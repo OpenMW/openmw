@@ -35,10 +35,19 @@ namespace Terrain
         QuadTreeNode(QuadTreeNode* parent, ChildDirection dir, float size, const osg::Vec2f& center);
         virtual ~QuadTreeNode();
 
-        QuadTreeNode* getParent();
+        inline QuadTreeNode* getParent() { return mParent; }
+        inline QuadTreeNode* getChild(unsigned int i) { return static_cast<QuadTreeNode*>(Group::getChild(i)); }
+        inline unsigned int getNumChildren() const { return _children.size(); }
 
-        QuadTreeNode* getChild(unsigned int i);
-        using osg::Group::getNumChildren;
+        // osg::Group::addChild() does a lot of unrelated stuff, but we just really want to add a child node.
+        void addChildNode(QuadTreeNode* child)
+        {
+            // QuadTree node should not contain more than 4 child nodes.
+            // Reserve enough space if this node is supposed to have child nodes.
+            _children.reserve(4);
+            _children.push_back(child);
+            child->addParent(this);
+        };
 
         /// Returns our direction relative to the parent node, or Root if we are the root node.
         ChildDirection getDirection() { return mDirection; }

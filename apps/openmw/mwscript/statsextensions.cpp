@@ -14,7 +14,6 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -27,7 +26,6 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
-#include "interpretercontext.hpp"
 #include "ref.hpp"
 
 namespace
@@ -536,7 +534,7 @@ namespace MWScript
 
                     Interpreter::Type_Integer value = 0;
 
-                    if (ptr.getClass().getCreatureStats(ptr).getSpells().hasSpell(id))
+                    if (ptr.getClass().isActor() && ptr.getClass().getCreatureStats(ptr).getSpells().hasSpell(id))
                         value = 1;
 
                     runtime.push (value);

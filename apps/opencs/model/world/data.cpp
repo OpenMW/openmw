@@ -132,6 +132,23 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mFactions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_FactionReaction, ColumnBase::Display_Integer));
 
+    // Faction Ranks
+    mFactions.addColumn (new NestedParentColumn<ESM::Faction> (Columns::ColumnId_FactionRanks));
+    index = mFactions.getColumns()-1;
+    mFactions.addAdapter (std::make_pair(&mFactions.getColumn(index), new FactionRanksAdapter ()));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_RankName, ColumnBase::Display_Rank));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_FactionAttrib1, ColumnBase::Display_Integer));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_FactionAttrib2, ColumnBase::Display_Integer));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_FactionPrimSkill, ColumnBase::Display_Integer));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_FactionFavSkill, ColumnBase::Display_Integer));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_FactionRep, ColumnBase::Display_Integer));
+
     mRaces.addColumn (new StringIdColumn<ESM::Race>);
     mRaces.addColumn (new RecordStateColumn<ESM::Race>);
     mRaces.addColumn (new FixedRecordTypeColumn<ESM::Race> (UniversalId::Type_Race));
@@ -205,7 +222,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_SoundName, ColumnBase::Display_Sound));
     mRegions.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_SoundChance, ColumnBase::Display_Integer));
+        new NestedChildColumn (Columns::ColumnId_SoundChance, ColumnBase::Display_UnsignedInteger8));
 
     mBirthsigns.addColumn (new StringIdColumn<ESM::BirthSign>);
     mBirthsigns.addColumn (new RecordStateColumn<ESM::BirthSign>);
@@ -326,11 +343,11 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
         new NestedChildColumn (Columns::ColumnId_Interior, ColumnBase::Display_Boolean,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
     mCells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Ambient, ColumnBase::Display_Integer));
+        new NestedChildColumn (Columns::ColumnId_Ambient, ColumnBase::Display_Colour));
     mCells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Sunlight, ColumnBase::Display_Integer));
+        new NestedChildColumn (Columns::ColumnId_Sunlight, ColumnBase::Display_Colour));
     mCells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Fog, ColumnBase::Display_Integer));
+        new NestedChildColumn (Columns::ColumnId_Fog, ColumnBase::Display_Colour));
     mCells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_FogDensity, ColumnBase::Display_Float));
     mCells.getNestableColumn(index)->addColumn(
@@ -977,22 +994,43 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
 void CSMWorld::Data::loadFallbackEntries()
 {
     // Load default marker definitions, if game files do not have them for some reason
-    std::pair<std::string, std::string> markers[] = {
-        std::make_pair("divinemarker", "marker_divine.nif"),
-        std::make_pair("doormarker", "marker_arrow.nif"),
-        std::make_pair("northmarker", "marker_north.nif"),
-        std::make_pair("templemarker", "marker_temple.nif"),
-        std::make_pair("travelmarker", "marker_travel.nif")
+    std::pair<std::string, std::string> staticMarkers[] = {
+        std::make_pair("DivineMarker", "marker_divine.nif"),
+        std::make_pair("DoorMarker", "marker_arrow.nif"),
+        std::make_pair("NorthMarker", "marker_north.nif"),
+        std::make_pair("TempleMarker", "marker_temple.nif"),
+        std::make_pair("TravelMarker", "marker_travel.nif")
     };
 
-    for (const std::pair<std::string, std::string> marker : markers)
+    std::pair<std::string, std::string> doorMarkers[] = {
+        std::make_pair("PrisonMarker", "marker_prison.nif")
+    };
+
+    for (const std::pair<std::string, std::string> &marker : staticMarkers)
     {
         if (mReferenceables.searchId (marker.first)==-1)
         {
+            ESM::Static newMarker;
+            newMarker.mId = marker.first;
+            newMarker.mModel = marker.second;
             CSMWorld::Record<ESM::Static> record;
-            record.mBase = ESM::Static(marker.first, marker.second);
+            record.mBase = newMarker;
             record.mState = CSMWorld::RecordBase::State_BaseOnly;
             mReferenceables.appendRecord (record, CSMWorld::UniversalId::Type_Static);
+        }
+    }
+
+    for (const std::pair<std::string, std::string> &marker : doorMarkers)
+    {
+        if (mReferenceables.searchId (marker.first)==-1)
+        {
+            ESM::Door newMarker;
+            newMarker.mId = marker.first;
+            newMarker.mModel = marker.second;
+            CSMWorld::Record<ESM::Door> record;
+            record.mBase = newMarker;
+            record.mState = CSMWorld::RecordBase::State_BaseOnly;
+            mReferenceables.appendRecord (record, CSMWorld::UniversalId::Type_Door);
         }
     }
 }

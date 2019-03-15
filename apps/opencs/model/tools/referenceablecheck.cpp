@@ -470,6 +470,13 @@ void CSMTools::ReferenceableCheckStage::creatureCheck (
     if (creature.mData.mSoul < 0)
         messages.add(id, "Soul value is negative", "", CSMDoc::Message::Severity_Error);
 
+    if (creature.mAiData.mAlarm > 100)
+        messages.add(id, "Alarm rating is over 100", "", CSMDoc::Message::Severity_Warning);
+    if (creature.mAiData.mFight > 100)
+        messages.add(id, "Fight rating is over 100", "", CSMDoc::Message::Severity_Warning);
+    if (creature.mAiData.mFlee > 100)
+        messages.add(id, "Flee rating is over 100", "", CSMDoc::Message::Severity_Warning);
+
     for (int i = 0; i < 6; ++i)
     {
         if (creature.mData.mAttack[i] < 0)
@@ -699,6 +706,13 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
 
     if (level <= 0)
         messages.add(id, "Level is non-positive", "", CSMDoc::Message::Severity_Warning);
+
+    if (npc.mAiData.mAlarm > 100)
+        messages.add(id, "Alarm rating is over 100", "", CSMDoc::Message::Severity_Warning);
+    if (npc.mAiData.mFight > 100)
+        messages.add(id, "Fight rating is over 100", "", CSMDoc::Message::Severity_Warning);
+    if (npc.mAiData.mFlee > 100)
+        messages.add(id, "Flee rating is over 100", "", CSMDoc::Message::Severity_Warning);
 
     if (gold < 0)
         messages.add(id, "Gold count is negative", "", CSMDoc::Message::Severity_Error);
@@ -1014,6 +1028,11 @@ template<typename Tool> void CSMTools::ReferenceableCheckStage::toolCheck (
 template<typename List> void CSMTools::ReferenceableCheckStage::listCheck (
     const List& someList, CSMDoc::Messages& messages, const std::string& someID)
 {
+    if (someList.mChanceNone > 100)
+    {
+        messages.add(someID, "Chance that no object is used is over 100 percent", "", CSMDoc::Message::Severity_Warning);
+    }
+
     for (unsigned i = 0; i < someList.mList.size(); ++i)
     {
         if (mReferencables.searchId(someList.mList[i].mId).first == -1)

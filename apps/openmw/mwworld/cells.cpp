@@ -11,7 +11,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
-#include "class.hpp"
 #include "esmstore.hpp"
 #include "containerstore.hpp"
 #include "cellstore.hpp"

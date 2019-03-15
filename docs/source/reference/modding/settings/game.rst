@@ -9,11 +9,11 @@ show owned
 :Default:	0
 
 Enable visual clues for items owned by NPCs when the crosshair is on the object.
-If the setting is 0, no clues are provided which is the default Morrowind behavior.
+If the setting is 0, no clues are provided which is the default Morrowind behaviour.
 If the setting is 1, the background of the tool tip for the object is highlighted
-in the color specified by the color background owned setting in the GUI Settings Section.
-If the setting is 2, the crosshair is the color of the color crosshair owned setting in the GUI Settings section.
-If the setting is 3, both the tool tip background and the crosshair are colored.
+in the colour specified by the colour background owned setting in the GUI Settings Section.
+If the setting is 2, the crosshair is the colour of the colour crosshair owned setting in the GUI Settings section.
+If the setting is 3, both the tool tip background and the crosshair are coloured.
 The crosshair is not visible if crosshair is false.
 
 This setting can be configured in Advanced tab of the launcher.
@@ -71,12 +71,14 @@ can loot during death animation
 :Range:		True/False
 :Default:	True
 
-If this setting is true, the player is allowed to loot actors (e.g. summoned creatures) during death animation, if they are not in combat.
-However disposing corpses during death animation is not recommended - death counter may not be incremented, and this behaviour can break quests.
+If this setting is true, the player is allowed to loot actors (e.g. summoned creatures) during death animation, 
+if they are not in combat. However disposing corpses during death animation is not recommended - 
+death counter may not be incremented, and this behaviour can break quests.
 This is how Morrowind behaves.
 
 If this setting is false, player has to wait until end of death animation in all cases.
-This case is more safe, but makes using of summoned creatures exploit (looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder.
+This case is more safe, but makes using of summoned creatures exploit 
+(looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder.
 Conflicts with mannequin mods, which use SkipAnim to prevent end of death animation.
 
 This setting can be toggled in Advanced tab of the launcher.
@@ -97,8 +99,21 @@ and values above 500 will result in the player inflicting no damage.
 
 This setting can be controlled in game with the Difficulty slider in the Prefs panel of the Options menu.
 
+actors processing range
+-----------------------
+
+:Type:		integer
+:Range:		3584 to 7168
+:Default:	7168
+
+This setting allows to specify a distance from player in game units, in which OpenMW updates actor's state.
+Actor state update includes AI, animations, and physics processing.
+Actors near that border start softly fade out instead of just appearing/disapperaing.
+
+This setting can be controlled in game with the "Actors processing range slider" in the Prefs panel of the Options menu.
+
 classic reflected absorb spells behavior
------------------------------------------
+----------------------------------------
 
 :Type:		boolean
 :Range: 	True/False
@@ -156,8 +171,19 @@ followers attack on sight
 Make player followers and escorters start combat with enemies who have started combat with them or the player.
 Otherwise they wait for the enemies or the player to do an attack first.
 Please note this setting has not been extensively tested and could have side effects with certain quests.
-
 This setting can be toggled in Advanced tab of the launcher.
+
+weapon sheathing
+----------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true, OpenMW will utilize weapon sheathing-compatible assets to display holstered weapons.
+
+To make use of this, you need to have an xbase_anim_sh.nif file with weapon bones that will be injected into the skeleton.
+Additional _sh suffix models are not essential for weapon sheathing to work but will act as quivers or scabbards for the weapons they correspond to.
 
 use additional anim sources
 ---------------------------
@@ -166,10 +192,11 @@ use additional anim sources
 :Range:		True/False
 :Default:	False
 
-Allow to load additional animation sources when enabled.
-For example, if the main animation mesh has name Meshes/x.nif, an engine will load all KF-files from Animations/x folder and its child folders.
-Can be useful if you want to use several animation replacers without merging them.
-Attention: animations from AnimKit have own format and are not supposed to be directly loaded in-game!
+Allow the engine to load additional animation sources when enabled.
+For example, if the main animation mesh has name Meshes/x.nif, 
+the engine will load all KF-files from Animations/x folder and its child folders.
+This can be useful if you want to use several animation replacers without merging them.
+Attention: animations from AnimKit have their own format and are not supposed to be directly loaded in-game!
 This setting can only be configured by editing the settings configuration file.
 
 barter disposition change is permanent
@@ -179,7 +206,21 @@ barter disposition change is permanent
 :Range:		True/False
 :Default:	False
 
-If this setting is true, disposition change of merchants caused by trading will be permanent and won't be discarded upon exiting dialogue with them.
-This imitates the option Morrowind Code Patch offers.
+If this setting is true, 
+disposition change of merchants caused by trading will be permanent and won't be discarded upon exiting dialogue with them.
+This imitates the option that Morrowind Code Patch offers.
+
+This setting can be toggled in Advanced tab of the launcher.
+
+only appropriate ammunition bypasses resistance
+-----------------------------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true, you will have to use the appropriate ammunition to bypass normal weapon resistance (or weakness).
+An enchanted bow with chitin arrows will no longer be enough for the purpose, while a steel longbow with glass arrows will still work.
+This was previously the default engine behavior that diverged from Morrowind design.
 
 This setting can be toggled in Advanced tab of the launcher.

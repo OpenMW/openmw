@@ -122,9 +122,9 @@ namespace MWGui
 
         std::stable_sort(spellsToSort.begin(), spellsToSort.end(), sortSpells);
 
-        for (std::vector<const ESM::Spell*>::iterator it = spellsToSort.begin() ; it != spellsToSort.end(); ++it)
+        for (const ESM::Spell* spell : spellsToSort)
         {
-            addSpell(**it);
+            addSpell(*spell);
         }
 
         spellsToSort.clear();

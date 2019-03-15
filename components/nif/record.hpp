@@ -60,6 +60,7 @@ enum RecordType
   RC_NiGeomMorpherController,
   RC_NiKeyframeController,
   RC_NiAlphaController,
+  RC_NiRollController,
   RC_NiUVController,
   RC_NiPathController,
   RC_NiMaterialColorController,

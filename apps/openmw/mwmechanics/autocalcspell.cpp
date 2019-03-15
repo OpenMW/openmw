@@ -240,19 +240,6 @@ namespace MWMechanics
         return true;
     }
 
-    ESM::Skill::SkillEnum mapSchoolToSkill(int school)
-    {
-        std::map<int, ESM::Skill::SkillEnum> schoolSkillMap; // maps spell school to skill id
-        schoolSkillMap[0] = ESM::Skill::Alteration;
-        schoolSkillMap[1] = ESM::Skill::Conjuration;
-        schoolSkillMap[3] = ESM::Skill::Illusion;
-        schoolSkillMap[2] = ESM::Skill::Destruction;
-        schoolSkillMap[4] = ESM::Skill::Mysticism;
-        schoolSkillMap[5] = ESM::Skill::Restoration;
-        assert(schoolSkillMap.find(school) != schoolSkillMap.end());
-        return schoolSkillMap[school];
-    }
-
     void calcWeakestSchool (const ESM::Spell* spell, const int* actorSkills, int& effectiveSchool, float& skillTerm)
     {
         // Morrowind for some reason uses a formula slightly different from magicka cost calculation
@@ -288,7 +275,7 @@ namespace MWMechanics
             if (effect.mRange == ESM::RT_Target)
                 x *= 1.5f;
 
-            float s = 2.f * actorSkills[mapSchoolToSkill(magicEffect->mData.mSchool)];
+            float s = 2.f * actorSkills[spellSchoolToSkill(magicEffect->mData.mSchool)];
             if (s - x < minChance)
             {
                 minChance = s - x;
@@ -308,7 +295,7 @@ namespace MWMechanics
 
         float skillTerm = 0;
         if (effectiveSchool != -1)
-            skillTerm = 2.f * actorSkills[mapSchoolToSkill(effectiveSchool)];
+            skillTerm = 2.f * actorSkills[spellSchoolToSkill(effectiveSchool)];
         else
             calcWeakestSchool(spell, actorSkills, effectiveSchool, skillTerm); // Note effectiveSchool is unused after this
 

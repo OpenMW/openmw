@@ -6,18 +6,7 @@ extern "C"
 {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-
-// From libavutil version 52.2.0 and onward the declaration of
-// AV_CH_LAYOUT_* is removed from libavcodec/avcodec.h and moved to
-// libavutil/channel_layout.h
-#if AV_VERSION_INT(52, 2, 0) <= AV_VERSION_INT(LIBAVUTIL_VERSION_MAJOR, \
-    LIBAVUTIL_VERSION_MINOR, LIBAVUTIL_VERSION_MICRO)
-    #include <libavutil/channel_layout.h>
-#endif
-
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
-#define av_frame_alloc  avcodec_alloc_frame
-#endif
+#include <libavutil/channel_layout.h>
 
 // From version 54.56 binkaudio encoding format changed from S16 to FLTP. See:
 // https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d
@@ -38,6 +27,7 @@ namespace MWSound
     class FFmpeg_Decoder final : public Sound_Decoder
     {
         AVFormatContext *mFormatCtx;
+        AVCodecContext *mCodecCtx;
         AVStream **mStream;
 
         AVPacket mPacket;

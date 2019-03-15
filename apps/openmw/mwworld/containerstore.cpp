@@ -246,7 +246,9 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
 
         && ptr1.getClass().getRemainingUsageTime(ptr1) == ptr2.getClass().getRemainingUsageTime(ptr2)
 
-        && cls1.getScript(ptr1) == cls2.getScript(ptr2)
+        // Items with scripts never stack
+        && cls1.getScript(ptr1).empty()
+        && cls2.getScript(ptr2).empty()
 
         // item that is already partly used up never stacks
         && (!cls1.hasItemHealth(ptr1) || (
@@ -306,7 +308,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     item.getCellRef().unsetRefNum(); // destroy link to content file
 
     std::string script = item.getClass().getScript(item);
-    if(script != "")
+    if (!script.empty())
     {
         if (actorPtr == player)
         {
@@ -330,7 +332,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
             item.getRefData().getLocals().setVarByInt(script, "onpcadd", 1);
     }
 
-    if (mListener)
+    // we should not fire event for InventoryStore yet - it has some custom logic
+    if (mListener && !actorPtr.getClass().hasInventoryStore(actorPtr))
         mListener->itemAdded(item, count);
 
     return it;
@@ -439,7 +442,8 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
 
     flagAsModified();
 
-    if (mListener)
+    // we should not fire event for InventoryStore yet - it has some custom logic
+    if (mListener && !actor.getClass().hasInventoryStore(actor))
         mListener->itemRemoved(item, count - toRemove);
 
     // number of removed items

@@ -1,7 +1,5 @@
 #include "globalscripts.hpp"
 
-#include <cassert>
-
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/esm/esmwriter.hpp>

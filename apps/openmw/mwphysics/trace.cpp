@@ -1,13 +1,12 @@
 #include "trace.h"
 
-#include <map>
+#include <components/misc/convert.hpp>
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionShapes/btConvexShape.h>
 
 #include "collisiontype.hpp"
 #include "actor.hpp"
-#include "convert.hpp"
 
 namespace MWPhysics
 {
@@ -104,8 +103,8 @@ protected:
 
 void ActorTracer::doTrace(const btCollisionObject *actor, const osg::Vec3f& start, const osg::Vec3f& end, const btCollisionWorld* world)
 {
-    const btVector3 btstart = toBullet(start);
-    const btVector3 btend = toBullet(end);
+    const btVector3 btstart = Misc::Convert::toBullet(start);
+    const btVector3 btend = Misc::Convert::toBullet(end);
 
     const btTransform &trans = actor->getWorldTransform();
     btTransform from(trans);
@@ -130,7 +129,7 @@ void ActorTracer::doTrace(const btCollisionObject *actor, const osg::Vec3f& star
         mFraction = newTraceCallback.m_closestHitFraction;
         mPlaneNormal = toOsg(newTraceCallback.m_hitNormalWorld);
         mEndPos = (end-start)*mFraction + start;
-        mHitPoint = toOsg(newTraceCallback.m_hitPointWorld);
+        mHitPoint = Misc::Convert::toOsg(newTraceCallback.m_hitPointWorld);
         mHitObject = newTraceCallback.m_hitCollisionObject;
     }
     else

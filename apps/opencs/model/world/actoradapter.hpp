@@ -43,6 +43,8 @@ namespace CSMWorld
         class RaceData
         {
         public:
+            RaceData();
+
             /// Retrieves the id of the race represented
             const std::string& getId() const;
             /// Checks if it's a beast race
@@ -80,6 +82,8 @@ namespace CSMWorld
         class ActorData
         {
         public:
+            ActorData();
+
             /// Retrieves the id of the actor represented
             const std::string& getId() const;
             /// Checks if the actor is a creature

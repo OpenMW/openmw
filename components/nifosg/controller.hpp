@@ -246,6 +246,22 @@ namespace NifOsg
         virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
     };
 
+    class RollController : public osg::NodeCallback, public SceneUtil::Controller
+    {
+    private:
+        FloatInterpolator mData;
+        double mStartingTime;
+
+    public:
+        RollController(const Nif::NiFloatData *data);
+        RollController();
+        RollController(const RollController& copy, const osg::CopyOp& copyop);
+
+        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
+
+        META_Object(NifOsg, RollController)
+    };
+
     class AlphaController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
     private:

@@ -4,7 +4,6 @@
 #include <string>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
-#include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 #include <BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 
@@ -13,12 +12,14 @@ namespace Resource
 
 BulletShape::BulletShape()
     : mCollisionShape(nullptr)
+    , mAvoidCollisionShape(nullptr)
 {
 
 }
 
 BulletShape::BulletShape(const BulletShape &copy, const osg::CopyOp &copyop)
     : mCollisionShape(duplicateCollisionShape(copy.mCollisionShape))
+    , mAvoidCollisionShape(duplicateCollisionShape(copy.mAvoidCollisionShape))
     , mCollisionBoxHalfExtents(copy.mCollisionBoxHalfExtents)
     , mCollisionBoxTranslate(copy.mCollisionBoxTranslate)
     , mAnimatedShapes(copy.mAnimatedShapes)
@@ -27,6 +28,7 @@ BulletShape::BulletShape(const BulletShape &copy, const osg::CopyOp &copyop)
 
 BulletShape::~BulletShape()
 {
+    deleteShape(mAvoidCollisionShape);
     deleteShape(mCollisionShape);
 }
 
@@ -77,9 +79,21 @@ btCollisionShape* BulletShape::duplicateCollisionShape(const btCollisionShape *s
     throw std::logic_error(std::string("Unhandled Bullet shape duplication: ")+shape->getName());
 }
 
-btCollisionShape *BulletShape::getCollisionShape()
+btCollisionShape *BulletShape::getCollisionShape() const
 {
     return mCollisionShape;
+}
+
+btCollisionShape *BulletShape::getAvoidCollisionShape() const
+{
+    return mAvoidCollisionShape;
+}
+
+void BulletShape::setLocalScaling(const btVector3& scale)
+{
+    mCollisionShape->setLocalScaling(scale);
+    if (mAvoidCollisionShape)
+        mAvoidCollisionShape->setLocalScaling(scale);
 }
 
 osg::ref_ptr<BulletShapeInstance> BulletShape::makeInstance() const
@@ -99,6 +113,9 @@ BulletShapeInstance::BulletShapeInstance(osg::ref_ptr<const BulletShape> source)
 
     if (source->mCollisionShape)
         mCollisionShape = duplicateCollisionShape(source->mCollisionShape);
+
+    if (source->mAvoidCollisionShape)
+        mAvoidCollisionShape = duplicateCollisionShape(source->mAvoidCollisionShape);
 }
 
 }

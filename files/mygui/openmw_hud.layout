@@ -72,7 +72,7 @@
         <!-- Selected spell box -->
         <Widget type="Button" position="122 146 36 41" align="Left Bottom" name="SpellBox">
             <Widget type="Widget" skin="HUD_Box" position="0 0 36 36">
-                <Widget type="ItemWidget" skin="MW_ItemIconNoShadow" position="-3 -3 42 42" align="Left Top" name="SpellImage"/>
+                <Widget type="SpellWidget" skin="MW_ItemIconNoShadow" position="-3 -3 42 42" align="Left Top" name="SpellImage"/>
                 <Property key="NeedMouse" value="false"/>
             </Widget>
             <Widget type="ProgressBar" skin="MW_EnergyBar_Magic" position="0 36 36 6" align="Left Bottom" name="SpellStatus">

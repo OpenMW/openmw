@@ -7,7 +7,7 @@ OpenMW is an open-source game engine that supports playing Morrowind by Bethesda
 
 OpenMW also comes with OpenMW-CS, a replacement for Bethesda's Construction Set.
 
-* Version: 0.44.0
+* Version: 0.46.0
 * License: GPLv3 (see [LICENSE](https://github.com/OpenMW/openmw/blob/master/LICENSE) for more information)
 * Website: https://www.openmw.org
 * IRC: #openmw on irc.freenode.net
@@ -105,3 +105,4 @@ Command line options
       --export-fonts [=arg(=1)] (=0)        Export Morrowind .fnt fonts to PNG
                                             image and XML file in current directory
       --activate-dist arg (=-1)             activation distance override
+      --random-seed arg (=<impl defined>)   seed value for random number generator

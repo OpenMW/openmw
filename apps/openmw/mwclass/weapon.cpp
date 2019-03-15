@@ -10,7 +10,6 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/actiontake.hpp"
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -265,7 +264,7 @@ namespace MWClass
         std::string text;
 
         // weapon type & damage
-        if ((ref->mBase->mData.mType < 12 || Settings::Manager::getBool("show projectile damage", "Game")) && ref->mBase->mData.mType < 14)
+        if ((ref->mBase->mData.mType < ESM::Weapon::Arrow || Settings::Manager::getBool("show projectile damage", "Game")) && ref->mBase->mData.mType <= ESM::Weapon::Bolt)
         {
             text += "\n#{sType} ";
 
@@ -295,7 +294,15 @@ namespace MWClass
                 ((oneOrTwoHanded != "") ? ", " + store.get<ESM::GameSetting>().find(oneOrTwoHanded)->mValue.getString() : "");
 
             // weapon damage
-            if (ref->mBase->mData.mType >= 9)
+            if (ref->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
+            {
+                // Thrown weapons have 2x real damage applied
+                // as they're both the weapon and the ammo
+                text += "\n#{sAttack}: "
+                    + MWGui::ToolTips::toString(static_cast<int>(ref->mBase->mData.mChop[0] * 2))
+                    + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->mBase->mData.mChop[1] * 2));
+            }
+            else if (ref->mBase->mData.mType >= ESM::Weapon::MarksmanBow)
             {
                 // marksman
                 text += "\n#{sAttack}: "
@@ -391,7 +398,7 @@ namespace MWClass
             && MWBase::Environment::get().getWindowManager()->isGuiMode())
             return std::make_pair(0, "#{sCantEquipWeapWarning}");
 
-        std::pair<std::vector<int>, bool> slots_ = ptr.getClass().getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
 
         if (slots_.first.empty())
             return std::make_pair (0, "");

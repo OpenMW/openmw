@@ -100,6 +100,31 @@ namespace CSMWorld
         virtual int getRowsCount(const Record<ESM::Faction>& record) const;
     };
 
+    class FactionRanksAdapter : public NestedColumnAdapter<ESM::Faction>
+    {
+    public:
+        FactionRanksAdapter ();
+
+        virtual void addRow(Record<ESM::Faction>& record, int position) const;
+
+        virtual void removeRow(Record<ESM::Faction>& record, int rowToRemove) const;
+
+        virtual void setTable(Record<ESM::Faction>& record,
+                const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* table(const Record<ESM::Faction>& record) const;
+
+        virtual QVariant getData(const Record<ESM::Faction>& record,
+                int subRowIndex, int subColIndex) const;
+
+        virtual void setData(Record<ESM::Faction>& record,
+                const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getColumnsCount(const Record<ESM::Faction>& record) const;
+
+        virtual int getRowsCount(const Record<ESM::Faction>& record) const;
+    };
+
     class RegionSoundListAdapter : public NestedColumnAdapter<ESM::Region>
     {
     public:

@@ -15,6 +15,7 @@ namespace MWGui
     class DragAndDrop;
     class SpellIcons;
     class ItemWidget;
+    class SpellWidget;
 
     class HUD : public WindowBase, public LocalMapBase
     {
@@ -64,7 +65,8 @@ namespace MWGui
         MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth, *mDrowning;
         MyGUI::Widget* mHealthFrame;
         MyGUI::Widget *mWeapBox, *mSpellBox, *mSneakBox;
-        ItemWidget *mWeapImage, *mSpellImage;
+        ItemWidget *mWeapImage;
+        SpellWidget *mSpellImage;
         MyGUI::ProgressBar *mWeapStatus, *mSpellStatus;
         MyGUI::Widget *mEffectBox, *mMinimapBox;
         MyGUI::Button* mMinimapButton;

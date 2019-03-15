@@ -6,7 +6,6 @@
 
 namespace SceneUtil
 {
-
     class Skeleton;
     class Bone;
 
@@ -31,12 +30,12 @@ namespace SceneUtil
             osg::Matrixf mInvBindMatrix;
             osg::BoundingSpheref mBoundSphere;
             // <vertex index, weight>
-            std::map<unsigned short, float> mWeights;
+            std::vector<std::pair<unsigned short, float>> mWeights;
         };
 
         struct InfluenceMap : public osg::Referenced
         {
-            std::map<std::string, BoneInfluence> mMap;
+            std::vector<std::pair<std::string, BoneInfluence>> mData;
         };
 
         void setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap);
@@ -50,6 +49,20 @@ namespace SceneUtil
         virtual void accept(osg::NodeVisitor &nv);
         virtual bool supports(const osg::PrimitiveFunctor&) const { return true; }
         virtual void accept(osg::PrimitiveFunctor&) const;
+
+        struct CopyBoundingBoxCallback : osg::Drawable::ComputeBoundingBoxCallback
+        {
+            osg::BoundingBox boundingBox;
+
+            virtual osg::BoundingBox computeBound(const osg::Drawable&) const override { return boundingBox; }
+        };
+
+        struct CopyBoundingSphereCallback : osg::Node::ComputeBoundingSphereCallback
+        {
+            osg::BoundingSphere boundingSphere;
+
+            virtual osg::BoundingSphere computeBound(const osg::Node&) const override { return boundingSphere; }
+        };
 
     private:
         void cull(osg::NodeVisitor* nv);
@@ -66,7 +79,7 @@ namespace SceneUtil
 
         osg::ref_ptr<InfluenceMap> mInfluenceMap;
 
-        typedef std::pair<Bone*, osg::Matrixf> BoneBindMatrixPair;
+        typedef std::pair<std::string, osg::Matrixf> BoneBindMatrixPair;
 
         typedef std::pair<BoneBindMatrixPair, float> BoneWeight;
 
@@ -74,11 +87,18 @@ namespace SceneUtil
 
         typedef std::map<std::vector<BoneWeight>, VertexList> Bone2VertexMap;
 
-        Bone2VertexMap mBone2VertexMap;
+        struct Bone2VertexVector : public osg::Referenced
+        {
+            std::vector<std::pair<std::vector<BoneWeight>, VertexList>> mData;
+        };
+        osg::ref_ptr<Bone2VertexVector> mBone2VertexVector;
 
-        typedef std::map<Bone*, osg::BoundingSpheref> BoneSphereMap;
-
-        BoneSphereMap mBoneSphereMap;
+        struct BoneSphereVector : public osg::Referenced
+        {
+            std::vector<std::pair<std::string, osg::BoundingSpheref>> mData;
+        };
+        osg::ref_ptr<BoneSphereVector> mBoneSphereVector;
+        std::vector<Bone*> mBoneNodesVector;
 
         unsigned int mLastFrameNumber;
         bool mBoundsFirstFrame;

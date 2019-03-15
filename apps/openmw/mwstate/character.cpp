@@ -1,5 +1,6 @@
 #include "character.hpp"
 
+#include <cctype>
 #include <sstream>
 
 #include <boost/filesystem.hpp>
@@ -58,10 +59,8 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
     int i=0;
     while (boost::filesystem::exists(slot.mPath))
     {
-           std::ostringstream test;
-           test << stream.str();
-           test << " - " << ++i;
-           slot.mPath = mPath / (test.str() + ext);
+        const std::string test = stream.str() + " - " + std::to_string(++i);
+        slot.mPath = mPath / (test + ext);
     }
 
     slot.mProfile = profile;

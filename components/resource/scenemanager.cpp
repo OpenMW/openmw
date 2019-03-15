@@ -218,7 +218,6 @@ namespace Resource
         , mShaderManager(new Shader::ShaderManager)
         , mForceShaders(false)
         , mClampLighting(true)
-        , mForcePerPixelLighting(false)
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
         , mInstanceCache(new MultiObjectCache)
@@ -258,16 +257,6 @@ namespace Resource
     bool SceneManager::getClampLighting() const
     {
         return mClampLighting;
-    }
-
-    void SceneManager::setForcePerPixelLighting(bool force)
-    {
-        mForcePerPixelLighting = force;
-    }
-
-    bool SceneManager::getForcePerPixelLighting() const
-    {
-        return mForcePerPixelLighting;
     }
 
     void SceneManager::setAutoUseNormalMaps(bool use)
@@ -396,7 +385,8 @@ namespace Resource
             {
                 const char* reserved[] = {"Head", "Neck", "Chest", "Groin", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist", "Shield Bone", "Right Forearm", "Left Forearm", "Right Upper Arm",
                                           "Left Upper Arm", "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee", "Left Knee", "Right Upper Leg", "Left Upper Leg", "Right Clavicle",
-                                          "Left Clavicle", "Weapon Bone", "Tail", "Bip01", "Root Bone", "BoneOffset", "AttachLight", "ArrowBone", "Camera"};
+                                          "Left Clavicle", "Weapon Bone", "Tail", "Bip01", "Root Bone", "BoneOffset", "AttachLight", "Arrow", "Camera"};
+
                 reservedNames = std::vector<std::string>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
 
                 for (unsigned int i=0; i<sizeof(reserved)/sizeof(reserved[0]); ++i)
@@ -541,6 +531,8 @@ namespace Resource
 
             if (mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
+            else
+                loaded->getBound();
 
             mCache->addEntryToObjectCache(normalized, loaded);
             return loaded;
@@ -553,6 +545,12 @@ namespace Resource
         mVFS->normalizeFilename(normalized);
 
         osg::ref_ptr<osg::Node> node = createInstance(normalized);
+
+        // Note: osg::clone() does not calculate bound volumes.
+        // Do it immediately, otherwise we will need to update them for all objects
+        // during first update traversal, what may lead to stuttering during cell transitions
+        node->getBound();
+
         mInstanceCache->addEntryToObjectCache(normalized, node.get());
         return node;
     }
@@ -728,6 +726,7 @@ namespace Resource
 
     void SceneManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
     {
+        if (mIncrementalCompileOperation)
         {
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(*mIncrementalCompileOperation->getToCompiledMutex());
             stats->setAttribute(frameNumber, "Compiling", mIncrementalCompileOperation->getToCompile().size());
@@ -747,8 +746,6 @@ namespace Resource
     {
         Shader::ShaderVisitor* shaderVisitor = new Shader::ShaderVisitor(*mShaderManager.get(), *mImageManager, "objects_vertex.glsl", "objects_fragment.glsl");
         shaderVisitor->setForceShaders(mForceShaders);
-        shaderVisitor->setClampLighting(mClampLighting);
-        shaderVisitor->setForcePerPixelLighting(mForcePerPixelLighting);
         shaderVisitor->setAutoUseNormalMaps(mAutoUseNormalMaps);
         shaderVisitor->setNormalMapPattern(mNormalMapPattern);
         shaderVisitor->setNormalHeightMapPattern(mNormalHeightMapPattern);

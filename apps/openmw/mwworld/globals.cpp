@@ -37,10 +37,9 @@ namespace MWWorld
 
         const MWWorld::Store<ESM::Global>& globals = store.get<ESM::Global>();
 
-        for (MWWorld::Store<ESM::Global>::iterator iter = globals.begin(); iter!=globals.end();
-            ++iter)
+        for (const ESM::Global& esmGlobal : globals)
         {
-            mVariables.insert (std::make_pair (Misc::StringUtils::lowerCase (iter->mId), *iter));
+            mVariables.insert (std::make_pair (Misc::StringUtils::lowerCase (esmGlobal.mId), esmGlobal));
         }
     }
 

@@ -37,7 +37,6 @@
 #include "mwgui/windowmanagerimp.hpp"
 
 #include "mwscript/scriptmanagerimp.hpp"
-#include "mwscript/extensions.hpp"
 #include "mwscript/interpretercontext.hpp"
 
 #include "mwsound/soundmanagerimp.hpp"
@@ -154,14 +153,23 @@ bool OMW::Engine::frame(float frametime)
                 mEnvironment.getStateManager()->endGame();
         }
 
+        // update physics
+        osg::Timer_t beforePhysicsTick = osg::Timer::instance()->tick();
+        if (mEnvironment.getStateManager()->getState()!=
+            MWBase::StateManager::State_NoGame)
+        {
+            mEnvironment.getWorld()->updatePhysics(frametime, guiActive);
+        }
+        osg::Timer_t afterPhysicsTick = osg::Timer::instance()->tick();
+
         // update world
-        osg::Timer_t beforePhysicsTick = osg::Timer::instance()->tick();;
+        osg::Timer_t beforeWorldTick = osg::Timer::instance()->tick();
         if (mEnvironment.getStateManager()->getState()!=
             MWBase::StateManager::State_NoGame)
         {
             mEnvironment.getWorld()->update(frametime, guiActive);
         }
-        osg::Timer_t afterPhysicsTick = osg::Timer::instance()->tick();
+        osg::Timer_t afterWorldTick = osg::Timer::instance()->tick();
 
         // update GUI
         mEnvironment.getWindowManager()->onFrame(frametime);
@@ -179,6 +187,10 @@ bool OMW::Engine::frame(float frametime)
         stats->setAttribute(frameNumber, "physics_time_begin", osg::Timer::instance()->delta_s(mStartTick, beforePhysicsTick));
         stats->setAttribute(frameNumber, "physics_time_taken", osg::Timer::instance()->delta_s(beforePhysicsTick, afterPhysicsTick));
         stats->setAttribute(frameNumber, "physics_time_end", osg::Timer::instance()->delta_s(mStartTick, afterPhysicsTick));
+
+        stats->setAttribute(frameNumber, "world_time_begin", osg::Timer::instance()->delta_s(mStartTick, beforeWorldTick));
+        stats->setAttribute(frameNumber, "world_time_taken", osg::Timer::instance()->delta_s(beforeWorldTick, afterWorldTick));
+        stats->setAttribute(frameNumber, "world_time_end", osg::Timer::instance()->delta_s(mStartTick, afterWorldTick));
 
         if (stats->collectStats("resource"))
         {
@@ -216,7 +228,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mNewGame (false)
   , mCfgMgr(configurationManager)
 {
-    Misc::Rng::init();
     MWClass::registerClasses();
 
     Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE|SDL_INIT_GAMECONTROLLER|SDL_INIT_JOYSTICK;
@@ -244,6 +255,9 @@ OMW::Engine::~Engine()
     mResourceSystem.reset();
 
     mViewer = nullptr;
+
+    delete mEncoder;
+    mEncoder = nullptr;
 
     if (mWindow)
     {
@@ -532,7 +546,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (mViewer, rootNode, mResourceSystem.get(), mWorkQueue.get(),
         mFileCollections, mContentFiles, mEncoder, mFallbackMap,
-        mActivationDistanceOverride, mCellName, mStartupScript, mResDir.string(), mCfgMgr.getUserDataPath().string()));
+        mActivationDistanceOverride, mCellName, mResDir.string(), mCfgMgr.getUserDataPath().string()));
     mEnvironment.getWorld()->setupPlayer();
     input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
@@ -638,14 +652,15 @@ void OMW::Engine::go()
 
     Log(Debug::Info) << "OSG version: " << osgGetVersion();
 
+    Misc::Rng::init(mRandomSeed);
+
     // Load settings
     Settings::Manager settings;
     std::string settingspath;
     settingspath = loadSettings (settings);
 
     // Create encoder
-    ToUTF8::Utf8Encoder encoder (mEncoding);
-    mEncoder = &encoder;
+    mEncoder = new ToUTF8::Utf8Encoder(mEncoding);
 
     // Setup viewer
     mViewer = new osgViewer::Viewer;
@@ -667,10 +682,12 @@ void OMW::Engine::go()
 
     statshandler->addUserStatsLine("Script", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
                                    "script_time_taken", 1000.0, true, false, "script_time_begin", "script_time_end", 10000);
-    statshandler->addUserStatsLine("Mechanics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+    statshandler->addUserStatsLine("Mech", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
                                    "mechanics_time_taken", 1000.0, true, false, "mechanics_time_begin", "mechanics_time_end", 10000);
-    statshandler->addUserStatsLine("Physics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+    statshandler->addUserStatsLine("Phys", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
                                    "physics_time_taken", 1000.0, true, false, "physics_time_begin", "physics_time_end", 10000);
+    statshandler->addUserStatsLine("World", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+                                   "world_time_taken", 1000.0, true, false, "world_time_begin", "world_time_end", 10000);
 
     mViewer->addEventHandler(statshandler);
 
@@ -700,6 +717,11 @@ void OMW::Engine::go()
     else
     {
         mEnvironment.getStateManager()->newGame (!mNewGame);
+    }
+
+    if (!mStartupScript.empty() && mEnvironment.getStateManager()->getState() == MWState::StateManager::State_Running)
+    {
+        mEnvironment.getWindowManager()->executeInConsole(mStartupScript);
     }
 
     // Start the main rendering loop
@@ -804,4 +826,9 @@ void OMW::Engine::enableFontExport(bool exportFonts)
 void OMW::Engine::setSaveGameFile(const std::string &savegame)
 {
     mSaveGameFile = savegame;
+}
+
+void OMW::Engine::setRandomSeed(unsigned int seed)
+{
+    mRandomSeed = seed;
 }

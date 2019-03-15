@@ -13,6 +13,7 @@
 #include <osg/Material>
 #include <osg/Version>
 
+#include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/lightmanager.hpp>
@@ -96,7 +97,14 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
 
 RenderWidget::~RenderWidget()
 {
-    CompositeViewer::get().removeView(mView);
+    try
+    {
+        CompositeViewer::get().removeView(mView);
+    }
+    catch(const std::exception& e)
+    {
+        Log(Debug::Error) << "Error in the destructor: " << e.what();
+    }
 }
 
 void RenderWidget::flagAsModified()
@@ -187,6 +195,7 @@ SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSyste
     , mResourceSystem(resourceSystem)
     , mLighting(nullptr)
     , mHasDefaultAmbient(false)
+    , mIsExterior(true)
     , mPrevMouseX(0)
     , mPrevMouseY(0)
     , mCamPositionSet(false)
@@ -242,7 +251,7 @@ void SceneWidget::setLighting(Lighting *lighting)
         mLighting->deactivate();
 
     mLighting = lighting;
-    mLighting->activate (mRootNode);
+    mLighting->activate (mRootNode, mIsExterior);
 
     osg::Vec4f ambient = mLighting->getAmbientColour(mHasDefaultAmbient ? &mDefaultAmbient : 0);
     setAmbient(ambient);
@@ -305,6 +314,11 @@ void SceneWidget::setDefaultAmbient (const osg::Vec4f& colour)
     mHasDefaultAmbient = true;
 
     setAmbient(mLighting->getAmbientColour(&mDefaultAmbient));
+}
+
+void SceneWidget::setExterior (bool isExterior)
+{
+    mIsExterior = isExterior;
 }
 
 void SceneWidget::mouseMoveEvent (QMouseEvent *event)

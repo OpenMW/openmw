@@ -1,7 +1,6 @@
 #include "storage.hpp"
 
 #include <set>
-#include <iostream>
 
 #include <OpenThreads/ScopedLock>
 

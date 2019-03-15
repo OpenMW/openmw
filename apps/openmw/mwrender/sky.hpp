@@ -4,7 +4,6 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include <iostream>
 
 #include <osg/ref_ptr>
 #include <osg/Vec4f>
@@ -180,6 +179,7 @@ namespace MWRender
 
         void createRain();
         void destroyRain();
+        void switchUnderwaterRain();
         void updateRainParameters();
 
         Resource::SceneManager* mSceneManager;

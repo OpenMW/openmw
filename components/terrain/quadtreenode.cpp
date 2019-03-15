@@ -71,16 +71,6 @@ QuadTreeNode::~QuadTreeNode()
 {
 }
 
-QuadTreeNode* QuadTreeNode::getParent()
-{
-    return mParent;
-}
-
-QuadTreeNode *QuadTreeNode::getChild(unsigned int i)
-{
-    return static_cast<QuadTreeNode*>(Group::getChild(i));
-}
-
 QuadTreeNode *QuadTreeNode::getNeighbour(Direction dir)
 {
     return mNeighbours[dir];
@@ -134,7 +124,7 @@ ViewData* QuadTreeNode::getView(osg::NodeVisitor &nv)
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
         ViewData* vd = mViewDataMap->getViewData(cv->getCurrentCamera());
-        vd->setEyePoint(nv.getEyePoint());
+        vd->setEyePoint(nv.getViewPoint());
         return vd;
     }
     else // INTERSECTION_VISITOR

@@ -10,6 +10,12 @@
 
 #include "debuglog.hpp"
 
+#if defined _WIN32 && defined _DEBUG
+#   undef WIN32_LEAN_AND_MEAN
+#   define WIN32_LEAN_AND_MEAN
+#   include <windows.h>
+#endif
+
 namespace Debug
 {
     // ANSI colors for terminal
@@ -43,7 +49,11 @@ namespace Debug
         }
     };
 
-#if defined(_WIN32) && defined(_DEBUG)
+#ifdef _WIN32
+    bool attachParentConsole();
+#endif
+
+#if defined _WIN32 && defined _DEBUG
     class DebugOutput : public DebugOutputBase
     {
     public:

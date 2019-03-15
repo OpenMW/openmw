@@ -1,12 +1,10 @@
 #include "actionopen.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/disease.hpp"
-
-#include "class.hpp"
-#include "containerstore.hpp"
 
 namespace MWWorld
 {
@@ -18,6 +16,9 @@ namespace MWWorld
     void ActionOpen::executeImp (const MWWorld::Ptr& actor)
     {
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+            return;
+
+        if (!MWBase::Environment::get().getMechanicsManager()->onOpen(getTarget()))
             return;
 
         MWMechanics::diseaseContact(actor, getTarget());

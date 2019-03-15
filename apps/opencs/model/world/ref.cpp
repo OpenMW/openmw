@@ -1,9 +1,5 @@
 #include "ref.hpp"
 
-#include <cmath>
-
-#include <sstream>
-
 #include "cellcoordinates.hpp"
 
 CSMWorld::CellRef::CellRef() : mNew (true)

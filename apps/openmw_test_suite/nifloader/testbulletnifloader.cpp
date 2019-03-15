@@ -115,17 +115,6 @@ static std::ostream& operator <<(std::ostream& stream, const btCollisionShape* v
     return value ? stream << "&" << *value : stream << "nullptr";
 }
 
-namespace osg
-{
-    static std::ostream& operator <<(std::ostream& stream, const Vec3f& value)
-    {
-        return stream << "osg::Vec3f {"
-            << value.x() << ", "
-            << value.y() << ", "
-            << value.z() << "}";
-    }
-}
-
 namespace std
 {
     static std::ostream& operator <<(std::ostream& stream, const map<int, int>& value)
@@ -142,6 +131,7 @@ namespace Resource
     static bool operator ==(const Resource::BulletShape& lhs, const Resource::BulletShape& rhs)
     {
         return compareObjects(lhs.mCollisionShape, rhs.mCollisionShape)
+            && compareObjects(lhs.mAvoidCollisionShape, rhs.mAvoidCollisionShape)
             && lhs.mCollisionBoxHalfExtents == rhs.mCollisionBoxHalfExtents
             && lhs.mCollisionBoxTranslate == rhs.mCollisionBoxTranslate
             && lhs.mAnimatedShapes == rhs.mAnimatedShapes;
@@ -151,7 +141,8 @@ namespace Resource
     {
         return stream << "Resource::BulletShape {"
             << value.mCollisionShape << ", "
-            << value.mCollisionBoxHalfExtents << ", "
+            << value.mAvoidCollisionShape << ", "
+            << "osg::Vec3f {" << value.mCollisionBoxHalfExtents << "}" << ", "
             << value.mAnimatedShapes
             << "}";
     }
@@ -266,7 +257,8 @@ namespace
         value.target = Nif::ControlledPtr(nullptr);
     }
 
-    void copy(const btTransform& src, Nif::Transformation& dst) {
+    void copy(const btTransform& src, Nif::Transformation& dst)
+    {
         dst.pos = osg::Vec3f(src.getOrigin().x(), src.getOrigin().y(), src.getOrigin().z());
         for (int row = 0; row < 3; ++row)
             for (int column = 0; column < 3; ++column)
@@ -275,8 +267,6 @@ namespace
 
     struct NifFileMock : Nif::File
     {
-        MOCK_CONST_METHOD1(fail, void (const std::string&));
-        MOCK_CONST_METHOD1(warn, void (const std::string&));
         MOCK_CONST_METHOD1(getRecord, Nif::Record* (std::size_t));
         MOCK_CONST_METHOD0(numRecords, std::size_t ());
         MOCK_CONST_METHOD1(getRoot, Nif::Record* (std::size_t));
@@ -837,7 +827,10 @@ namespace
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
         const auto result = mLoader.load(mNifFile);
 
+        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
+        triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         Resource::BulletShape expected;
+        expected.mAvoidCollisionShape = new Resource::TriangleMeshShape(triangles.release(), false);
 
         EXPECT_EQ(*result, expected);
     }
@@ -929,10 +922,8 @@ namespace
         mNiStringExtraData.string = "MRK";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
-        mNiNode3.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
-        mNiNode3.recType = Nif::RC_RootCollisionNode;
-        mNiNode2.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(nullptr), Nif::NodePtr(&mNiNode3)}));
-        mNiNode2.recType = Nif::RC_NiNode;
+        mNiNode2.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiTriShape)}));
+        mNiNode2.recType = Nif::RC_RootCollisionNode;
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNiNode2)}));
         mNiNode.recType = Nif::RC_NiNode;
 

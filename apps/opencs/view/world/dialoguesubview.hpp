@@ -8,11 +8,13 @@
 #include <QAbstractItemDelegate>
 #include <QScrollArea>
 
+#ifndef Q_MOC_RUN
 #include "../doc/subview.hpp"
 
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/commanddispatcher.hpp"
 #include "../../model/world/universalid.hpp"
+#endif
 
 class QDataWidgetMapper;
 class QSize;

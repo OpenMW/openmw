@@ -316,6 +316,8 @@ namespace MWGui
 
     virtual void setEnemy (const MWWorld::Ptr& enemy);
 
+    virtual int getMessagesCount() const;
+
     virtual const Translation::Storage& getTranslationDataStorage() const;
 
     void onSoulgemDialogButtonPressed (int button);

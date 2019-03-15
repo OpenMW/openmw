@@ -1,6 +1,8 @@
 #ifndef MWGUI_LOADINGSCREEN_H
 #define MWGUI_LOADINGSCREEN_H
 
+#include <memory>
+
 #include <osg/Timer>
 #include <osg/ref_ptr>
 
@@ -34,7 +36,7 @@ namespace MWGui
         virtual ~LoadingScreen();
 
         /// Overridden from Loading::Listener, see the Loading::Listener documentation for usage details
-        virtual void setLabel (const std::string& label, bool important);
+        virtual void setLabel (const std::string& label, bool important, bool center);
         virtual void loadingOn(bool visible=true);
         virtual void loadingOff();
         virtual void setProgressRange (size_t range);

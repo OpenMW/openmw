@@ -69,7 +69,7 @@ namespace MWWorld
 
             MWMechanics::MagicEffects mMagicEffects;
 
-            InventoryStoreListener* mListener;
+            InventoryStoreListener* mInventoryListener;
 
             // Enables updates of magic effects and actor model whenever items are equipped or unequipped.
             // This is disabled during autoequip to avoid excessive updates
@@ -93,6 +93,10 @@ namespace MWWorld
             typedef std::vector<ContainerStoreIterator> TSlots;
 
             TSlots mSlots;
+
+            void autoEquipWeapon(const MWWorld::Ptr& actor, TSlots& slots_);
+            void autoEquipArmor(const MWWorld::Ptr& actor, TSlots& slots_);
+            void autoEquipShield(const MWWorld::Ptr& actor, TSlots& slots_);
 
             // selected magic item (for using enchantments of type "Cast once" or "Cast when used")
             ContainerStoreIterator mSelectedEnchantItem;
@@ -163,9 +167,6 @@ namespace MWWorld
 
             void autoEquip (const MWWorld::Ptr& actor);
             ///< Auto equip items according to stats and item value.
-
-            void autoEquipShield(const MWWorld::Ptr& actor);
-            ///< Auto-equip the shield with most health.
 
             const MWMechanics::MagicEffects& getMagicEffects() const;
             ///< Return magic effects from worn items.

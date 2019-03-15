@@ -4,6 +4,7 @@
 #include <memory>
 #include <map>
 #include <set>
+#include <algorithm>
 
 #include <osg/Quat>
 #include <osg/ref_ptr>
@@ -49,6 +50,9 @@ namespace MWPhysics
     class Object;
     class Actor;
 
+    static const float sMaxSlope = 49.0f;
+    static const float sStepSizeUp = 34.0f;
+
     class PhysicsSystem
     {
         public:
@@ -84,6 +88,8 @@ namespace MWPhysics
             void addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject);
 
             void removeHeightField (int x, int y);
+
+            const HeightField* getHeightField(int x, int y) const;
 
             bool toggleCollisionMode();
 
@@ -130,6 +136,9 @@ namespace MWPhysics
             /// Get physical half extents (scaled) of the given actor.
             osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& actor) const;
 
+            /// Get physical half extents (not scaled) of the given actor.
+            osg::Vec3f getOriginalHalfExtents(const MWWorld::ConstPtr& actor) const;
+
             /// @see MWPhysics::Actor::getRenderingHalfExtents
             osg::Vec3f getRenderingHalfExtents(const MWWorld::ConstPtr& actor) const;
 
@@ -169,6 +178,14 @@ namespace MWPhysics
             void markAsNonSolid (const MWWorld::ConstPtr& ptr);
 
             bool isOnSolidGround (const MWWorld::Ptr& actor) const;
+
+            void updateAnimatedCollisionShape(const MWWorld::Ptr& object);
+
+            template <class Function>
+            void forEachAnimatedObject(Function&& function) const
+            {
+                std::for_each(mAnimatedObjects.begin(), mAnimatedObjects.end(), function);
+            }
 
         private:
 

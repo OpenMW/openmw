@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <stdexcept>
-#include <iostream>
 #include <cstdlib>
 
 #include <SDL_mouse.h>

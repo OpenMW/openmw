@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_PATHGRID_H
 #define GAME_MWMECHANICS_PATHGRID_H
 
-#include <list>
+#include <deque>
 
 #include <components/esm/loadpgrd.hpp>
 
@@ -38,8 +38,8 @@ namespace MWMechanics
             // cells) coordinates
             //
             // NOTE: if start equals end an empty path is returned
-            std::list<ESM::Pathgrid::Point> aStarSearch(const int start,
-                                                        const int end) const;
+            std::deque<ESM::Pathgrid::Point> aStarSearch(const int start, const int end) const;
+
         private:
 
             const ESM::Cell *mCell;

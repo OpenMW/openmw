@@ -860,11 +860,12 @@ std::vector<std::string>::iterator MwIniImporter::findString(std::vector<std::st
 }
 
 void MwIniImporter::addPaths(std::vector<boost::filesystem::path>& output, std::vector<std::string> input) {
-    for (auto& path : input) {
+    for (auto& path : input)
+    {
         if (path.front() == '"')
         {
-            path.erase(path.begin());
-            path.erase(path.end() - 1);
+            // Drop first and last characters - quotation marks
+            path = path.substr(1, path.size() - 2);
         }
         output.emplace_back(path);
     }

@@ -1,7 +1,5 @@
 #include "terrainstorage.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/esmstore.hpp"

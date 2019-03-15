@@ -4,7 +4,6 @@
 #include <utility>
 
 #include <vector>
-#include <string>
 #include <map>
 
 #include <osg/ref_ptr>

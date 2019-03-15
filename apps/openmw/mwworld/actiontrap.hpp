@@ -4,7 +4,6 @@
 #include <string>
 
 #include "action.hpp"
-#include "ptr.hpp"
 
 namespace MWWorld
 {

@@ -257,19 +257,17 @@ namespace MWGui
 
                     {
                         std::map<int, MWMechanics::AttributeValue > attributes = MWBase::Environment::get().getWindowManager()->getPlayerAttributeValues();
-                        for (std::map<int, MWMechanics::AttributeValue >::iterator it = attributes.begin();
-                            it != attributes.end(); ++it)
+                        for (auto& attributePair : attributes)
                         {
-                            mReviewDialog->setAttribute(static_cast<ESM::Attribute::AttributeID> (it->first), it->second);
+                            mReviewDialog->setAttribute(static_cast<ESM::Attribute::AttributeID> (attributePair.first), attributePair.second);
                         }
                     }
 
                     {
                         std::map<int, MWMechanics::SkillValue > skills = MWBase::Environment::get().getWindowManager()->getPlayerSkillValues();
-                        for (std::map<int, MWMechanics::SkillValue >::iterator it = skills.begin();
-                            it != skills.end(); ++it)
+                        for (auto& skillPair : skills)
                         {
-                            mReviewDialog->setSkillValue(static_cast<ESM::Skill::SkillEnum> (it->first), it->second);
+                            mReviewDialog->setSkillValue(static_cast<ESM::Skill::SkillEnum> (skillPair.first), skillPair.second);
                         }
                         mReviewDialog->configureSkills(MWBase::Environment::get().getWindowManager()->getPlayerMajorSkills(), MWBase::Environment::get().getWindowManager()->getPlayerMinorSkills());
                     }
@@ -554,7 +552,7 @@ namespace MWGui
     {
         if (mGenerateClassStep == 10)
         {
-            static boost::array<ClassPoint, 23> classes = { {
+            static std::array<ClassPoint, 23> classes = { {
                 {"Acrobat",     {6, 2, 2}},
                 {"Agent",       {6, 1, 3}},
                 {"Archer",      {3, 5, 2}},

@@ -17,6 +17,7 @@
 #include <components/misc/constants.hpp>
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/shadow.hpp>
 #include <components/files/memorystream.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -91,10 +92,10 @@ LocalMap::LocalMap(osg::Group* root)
 
 LocalMap::~LocalMap()
 {
-    for (CameraVector::iterator it = mActiveCameras.begin(); it != mActiveCameras.end(); ++it)
-        removeCamera(*it);
-    for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
-        removeCamera(*it);
+    for (auto& camera : mActiveCameras)
+        removeCamera(camera);
+    for (auto& camera : mCamerasPendingRemoval)
+        removeCamera(camera);
 }
 
 const osg::Vec2f LocalMap::rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle)
@@ -177,7 +178,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     camera->setRenderOrder(osg::Camera::PRE_RENDER);
 
-    camera->setCullMask(Mask_Scene|Mask_SimpleWater|Mask_Terrain);
+    camera->setCullMask(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
     camera->setNodeMask(Mask_RenderToTexture);
 
     osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
@@ -208,6 +209,8 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     lightSource->setLight(light);
 
     lightSource->setStateSetModes(*stateset, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+    SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
 
     camera->addChild(lightSource);
     camera->setStateSet(stateset);
@@ -256,16 +259,14 @@ bool needUpdate(std::set<std::pair<int, int> >& renderedGrid, std::set<std::pair
 void LocalMap::requestMap(std::set<const MWWorld::CellStore*> cells)
 {
     std::set<std::pair<int, int> > grid;
-    for (std::set<const MWWorld::CellStore*>::iterator it = cells.begin(); it != cells.end(); ++it)
+    for (const MWWorld::CellStore* cell : cells)
     {
-        const MWWorld::CellStore* cell = *it;
         if (cell->isExterior())
             grid.insert(std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY()));
     }
 
-    for (std::set<const MWWorld::CellStore*>::iterator it = cells.begin(); it != cells.end(); ++it)
+    for (const MWWorld::CellStore* cell : cells)
     {
-        const MWWorld::CellStore* cell = *it;
         if (cell->isExterior())
         {
             int cellX = cell->getCell()->getGridX();
@@ -338,8 +339,8 @@ void LocalMap::cleanupCameras()
     if (mCamerasPendingRemoval.empty())
         return;
 
-    for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
-        removeCamera(*it);
+    for (auto& camera : mCamerasPendingRemoval)
+        removeCamera(camera);
 
     mCamerasPendingRemoval.clear();
 }
@@ -377,7 +378,7 @@ void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell)
 void LocalMap::requestInteriorMap(const MWWorld::CellStore* cell)
 {
     osg::ComputeBoundsVisitor computeBoundsVisitor;
-    computeBoundsVisitor.setTraversalMask(Mask_Scene|Mask_Terrain);
+    computeBoundsVisitor.setTraversalMask(Mask_Scene | Mask_Terrain | Mask_Object | Mask_Static);
     mSceneRoot->accept(computeBoundsVisitor);
 
     osg::BoundingBox bounds = computeBoundsVisitor.getBoundingBox();

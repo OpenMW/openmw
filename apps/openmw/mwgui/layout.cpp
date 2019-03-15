@@ -21,11 +21,11 @@ namespace MWGui
             mListWindowRoot = MyGUI::LayoutManager::getInstance().loadLayout(mLayoutName, mPrefix, _parent);
 
             const std::string main_name = mPrefix + MAIN_WINDOW;
-            for (MyGUI::VectorWidgetPtr::iterator iter=mListWindowRoot.begin(); iter!=mListWindowRoot.end(); ++iter)
+            for (MyGUI::Widget* widget : mListWindowRoot)
             {
-                if ((*iter)->getName() == main_name)
+                if (widget->getName() == main_name)
                 {
-                    mMainWidget = (*iter);
+                    mMainWidget = widget;
                     break;
                 }
             }
@@ -58,15 +58,17 @@ namespace MWGui
 
     void Layout::setTitle(const std::string& title)
     {
-        static_cast<MyGUI::Window*>(mMainWidget)->setCaptionWithReplacing(title);
+        MyGUI::Window* window = static_cast<MyGUI::Window*>(mMainWidget);
+
+        if (window->getCaption() != title)
+            window->setCaptionWithReplacing(title);
     }
 
     MyGUI::Widget* Layout::getWidget(const std::string &_name)
     {
-        for (MyGUI::VectorWidgetPtr::iterator iter=mListWindowRoot.begin();
-        iter!=mListWindowRoot.end(); ++iter)
+        for (MyGUI::Widget* widget : mListWindowRoot)
         {
-            MyGUI::Widget* find = (*iter)->findWidget(mPrefix + _name);
+            MyGUI::Widget* find = widget->findWidget(mPrefix + _name);
             if (nullptr != find)
             {
                 return find;

@@ -20,19 +20,30 @@ void releaseArgv();
 
 int Java_org_libsdl_app_SDLActivity_getMouseX(JNIEnv *env, jclass cls, jobject obj) {
     int ret = 0;
-    SDL_GetMouseState(&ret, nullptr);
+    SDL_GetMouseState(&ret, NULL);
     return ret;
 }
 
 
 int Java_org_libsdl_app_SDLActivity_getMouseY(JNIEnv *env, jclass cls, jobject obj) {
     int ret = 0;
-    SDL_GetMouseState(nullptr, &ret);
+    SDL_GetMouseState(NULL, &ret);
     return ret;
 }
 
 int Java_org_libsdl_app_SDLActivity_isMouseShown(JNIEnv *env, jclass cls, jobject obj) {
     return SDL_ShowCursor(SDL_QUERY);
+}
+
+extern SDL_Window *Android_Window;
+int SDL_SendMouseMotion(SDL_Window * window, int mouseID, int relative, int x, int y);
+void Java_org_libsdl_app_SDLActivity_sendRelativeMouseMotion(JNIEnv *env, jclass cls, int x, int y) {
+    SDL_SendMouseMotion(Android_Window, 0, 1, x, y);
+}
+
+int SDL_SendMouseButton(SDL_Window * window, int mouseID, Uint8 state, Uint8 button);
+void Java_org_libsdl_app_SDLActivity_sendMouseButton(JNIEnv *env, jclass cls, int state, int button) {
+    SDL_SendMouseButton(Android_Window, 0, state, button);
 }
 
 int Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls, jobject obj) {

@@ -49,7 +49,12 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const 
         setObjectRoot(model, true, false, true);
 
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))
+        {
+            if (mWeaponSheathing)
+                injectWeaponBones();
+
             addAnimSource("meshes\\xbase_anim.nif", model);
+        }
         addAnimSource(model, model);
 
         mPtr.getClass().getInventoryStore(mPtr).setInvListener(this, mPtr);
@@ -83,6 +88,9 @@ void CreatureWeaponAnimation::updateParts()
     mAmmunition.reset();
     mWeapon.reset();
     mShield.reset();
+
+    updateHolsteredWeapon(!mShowWeapons);
+    updateQuiver();
 
     if (mShowWeapons)
         updatePart(mWeapon, MWWorld::InventoryStore::Slot_CarriedRight);
@@ -157,14 +165,21 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     }
 }
 
+bool CreatureWeaponAnimation::isArrowAttached() const
+{
+    return mAmmunition != nullptr;
+}
+
 void CreatureWeaponAnimation::attachArrow()
 {
     WeaponAnimation::attachArrow(mPtr);
+    updateQuiver();
 }
 
 void CreatureWeaponAnimation::releaseArrow(float attackStrength)
 {
     WeaponAnimation::releaseArrow(mPtr, attackStrength);
+    updateQuiver();
 }
 
 osg::Group *CreatureWeaponAnimation::getArrowBone()

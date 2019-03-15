@@ -463,6 +463,7 @@ namespace CSVRender
         , mDistance(0)
         , mOrbitSpeed(osg::PI / 4)
         , mOrbitSpeedMult(4)
+        , mConstRoll(false)
     {
         CSMPrefs::Shortcut* naviPrimaryShortcut = new CSMPrefs::Shortcut("scene-navi-primary", widget);
         naviPrimaryShortcut->enable(false);

@@ -67,7 +67,7 @@ voice volume
 :Range:		0.0 (silent) to 1.0 (maximum volume)
 :Default:	0.8
 
-This setting controls the volume for spoken dialog from NPCs.
+This setting controls the volume for spoken dialogue from NPCs.
 
 This setting can be changed in game using the Voice slider from the Audio panel of the Options menu.
 
@@ -122,7 +122,7 @@ hrtf
 
 This setting specifies which HRTF profile to use when HRTF is enabled. Blank means use the default.
 This setting has no effect if HRTF is not enabled based on the hrtf enable setting.
-Allowed values for this field are enumerated in openmw.log file is an HRTF enabled ausio system is installed.
+Allowed values for this field are enumerated in openmw.log file is an HRTF enabled audio system is installed.
 
 The default value is empty, which uses the default profile.
 This setting can only be configured by editing the settings configuration file.

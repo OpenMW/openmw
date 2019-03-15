@@ -33,15 +33,20 @@ float WeaponAnimationTime::getValue(osg::NodeVisitor*)
     return current - mStartTime;
 }
 
-void WeaponAnimationTime::setGroup(const std::string &group)
+void WeaponAnimationTime::setGroup(const std::string &group, bool relativeTime)
 {
     mWeaponGroup = group;
-    mStartTime = mAnimation->getStartTime(mWeaponGroup);
+    mRelativeTime = relativeTime;
+
+    if (mRelativeTime)
+        mStartTime = mAnimation->getStartTime(mWeaponGroup);
+    else
+        mStartTime = 0;
 }
 
 void WeaponAnimationTime::updateStartTime()
 {
-    setGroup(mWeaponGroup);
+    setGroup(mWeaponGroup, mRelativeTime);
 }
 
 WeaponAnimation::WeaponAnimation()

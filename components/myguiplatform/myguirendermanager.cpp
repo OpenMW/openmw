@@ -1,7 +1,5 @@
 #include "myguirendermanager.hpp"
 
-#include <stdexcept>
-
 #include <MyGUI_Gui.h>
 #include <MyGUI_Timer.h>
 
@@ -134,9 +132,9 @@ public:
             {
                 state->bindVertexBufferObject(bufferobject);
 
-                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)nullptr);
-                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)nullptr + 12);
-                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)nullptr + 16);
+                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), reinterpret_cast<char*>(0));
+                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), reinterpret_cast<char*>(12));
+                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), reinterpret_cast<char*>(16));
             }
             else
             {

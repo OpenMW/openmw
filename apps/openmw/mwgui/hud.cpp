@@ -25,7 +25,6 @@
 #include "itemmodel.hpp"
 #include "draganddrop.hpp"
 
-#include "itemmodel.hpp"
 #include "itemwidget.hpp"
 
 namespace MWGui
@@ -262,7 +261,7 @@ namespace MWGui
 
             if (mode == GM_Console)
                 MWBase::Environment::get().getWindowManager()->setConsoleSelectedObject(object);
-            else if ((mode == GM_Container) || (mode == GM_Inventory))
+            else //if ((mode == GM_Container) || (mode == GM_Inventory))
             {
                 // pick up object
                 if (!object.isEmpty())
@@ -417,8 +416,7 @@ namespace MWGui
         icon.insert(slashPos+1, "b_");
         icon = MWBase::Environment::get().getWindowManager()->correctIconPath(icon);
 
-        mSpellImage->setItem(MWWorld::Ptr());
-        mSpellImage->setIcon(icon);
+        mSpellImage->setSpellIcon(icon);
     }
 
     void HUD::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)

@@ -184,16 +184,16 @@ namespace MWGui
 
             BookTypesetter::Style* style = typesetter->createStyle("", textColours.normal, false);
             size_t formatted = 0; // points to the first character that is not laid out yet
-            for (std::map<Range, intptr_t>::iterator it = hyperLinks.begin(); it != hyperLinks.end(); ++it)
+            for (auto& hyperLink : hyperLinks)
             {
-                intptr_t topicId = it->second;
+                intptr_t topicId = hyperLink.second;
                 BookTypesetter::Style* hotStyle = typesetter->createHotStyle (style, textColours.link,
                                                                               textColours.linkOver, textColours.linkPressed,
                                                                               topicId);
-                if (formatted < it->first.first)
-                    typesetter->write(style, formatted, it->first.first);
-                typesetter->write(hotStyle, it->first.first, it->first.second);
-                formatted = it->first.second;
+                if (formatted < hyperLink.first.first)
+                    typesetter->write(style, formatted, hyperLink.first.first);
+                typesetter->write(hotStyle, hyperLink.first.first, hyperLink.first.second);
+                formatted = hyperLink.first.second;
             }
             if (formatted < text.size())
                 typesetter->write(style, formatted, text.size());
@@ -204,9 +204,8 @@ namespace MWGui
             keywordSearch->highlightKeywords(text.begin(), text.end(), matches);
 
             std::string::const_iterator i = text.begin ();
-            for (std::vector<KeywordSearchT::Match>::iterator it = matches.begin(); it != matches.end(); ++it)
+            for (KeywordSearchT::Match& match : matches)
             {
-                KeywordSearchT::Match match = *it;
                 if (i != match.mBeg)
                     addTopicLink (typesetter, 0, i - text.begin (), match.mBeg - text.begin ());
 
@@ -419,13 +418,13 @@ namespace MWGui
         bool sameActor = (mPtr == actor);
         if (!sameActor)
         {
-            for (std::vector<DialogueText*>::iterator it = mHistoryContents.begin(); it != mHistoryContents.end(); ++it)
-                delete (*it);
+            for (DialogueText* text : mHistoryContents)
+                delete text;
             mHistoryContents.clear();
             mKeywords.clear();
             mTopicsList->clear();
-            for (std::vector<Link*>::iterator it = mLinks.begin(); it != mLinks.end(); ++it)
-                mDeleteLater.push_back(*it); // Links are not deleted right away to prevent issues with event handlers
+            for (Link* link : mLinks)
+                mDeleteLater.push_back(link); // Links are not deleted right away to prevent issues with event handlers
             mLinks.clear();
         }
 
@@ -489,8 +488,8 @@ namespace MWGui
     void DialogueWindow::updateTopicsPane()
     {
         mTopicsList->clear();
-        for (std::map<std::string, Link*>::iterator it = mTopicLinks.begin(); it != mTopicLinks.end(); ++it)
-            mDeleteLater.push_back(it->second);
+        for (auto& linkPair : mTopicLinks)
+            mDeleteLater.push_back(linkPair.second);
         mTopicLinks.clear();
         mKeywordSearch.clear();
 
@@ -533,15 +532,15 @@ namespace MWGui
             mTopicsList->addSeparator();
 
 
-        for(std::list<std::string>::iterator it = mKeywords.begin(); it != mKeywords.end(); ++it)
+        for(std::string& keyword : mKeywords)
         {
-            mTopicsList->addItem(*it);
+            mTopicsList->addItem(keyword);
 
-            Topic* t = new Topic(*it);
+            Topic* t = new Topic(keyword);
             t->eventTopicActivated += MyGUI::newDelegate(this, &DialogueWindow::onTopicActivated);
-            mTopicLinks[Misc::StringUtils::lowerCase(*it)] = t;
+            mTopicLinks[Misc::StringUtils::lowerCase(keyword)] = t;
 
-            mKeywordSearch.seed(Misc::StringUtils::lowerCase(*it), intptr_t(t));
+            mKeywordSearch.seed(Misc::StringUtils::lowerCase(keyword), intptr_t(t));
         }
         mTopicsList->adjustSize();
 
@@ -563,9 +562,8 @@ namespace MWGui
 
         BookTypesetter::Ptr typesetter = BookTypesetter::create (mHistory->getWidth(), std::numeric_limits<int>::max());
 
-        for (std::vector<DialogueText*>::iterator it = mHistoryContents.begin(); it != mHistoryContents.end(); ++it)
-            (*it)->write(typesetter, &mKeywordSearch, mTopicLinks);
-
+        for (DialogueText* text : mHistoryContents)
+            text->write(typesetter, &mKeywordSearch, mTopicLinks);
 
         BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::White, false);
 
@@ -573,9 +571,9 @@ namespace MWGui
         // choices
         const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
         mChoices = MWBase::Environment::get().getDialogueManager()->getChoices();
-        for (std::vector<std::pair<std::string, int> >::const_iterator it = mChoices.begin(); it != mChoices.end(); ++it)
+        for (std::pair<std::string, int>& choice : mChoices)
         {
-            Choice* link = new Choice(it->second);
+            Choice* link = new Choice(choice.second);
             link->eventChoiceActivated += MyGUI::newDelegate(this, &DialogueWindow::onChoiceActivated);
             mLinks.push_back(link);
 
@@ -583,7 +581,7 @@ namespace MWGui
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, textColours.answer, textColours.answerOver,
                                                                               textColours.answerPressed,
                                                                               TypesetBook::InteractiveId(link));
-            typesetter->write(questionStyle, to_utf8_span(it->first.c_str()));
+            typesetter->write(questionStyle, to_utf8_span(choice.first.c_str()));
         }
 
         mGoodbye = MWBase::Environment::get().getDialogueManager()->isGoodbye();
@@ -740,6 +738,9 @@ namespace MWGui
 
     bool DialogueWindow::isCompanion(const MWWorld::Ptr& actor)
     {
+        if (actor.isEmpty())
+            return false;
+
         return !actor.getClass().getScript(actor).empty()
                 && actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion");
     }

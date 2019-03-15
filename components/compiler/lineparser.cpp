@@ -506,6 +506,13 @@ namespace Compiler
             return true;
         }
 
+        if (code==Scanner::S_ref && mState==SetPotentialMemberVarState)
+        {
+            getErrorHandler().warning ("Ignoring stray explicit reference", loc);
+            mState = SetState;
+            return true;
+        }
+
         if (code==Scanner::S_ref && mState==PotentialExplicitState)
         {
             mState = ExplicitState;

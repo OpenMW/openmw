@@ -15,6 +15,11 @@ namespace SceneUtil
 
     osg::Vec4f colourFromRGB (unsigned int clr);
 
+    osg::Vec4f colourFromRGBA (unsigned int value);
+
+    float makeOsgColorComponent (unsigned int value, unsigned int shift);
+
+    bool hasUserDescription(const osg::Node* node, const std::string pattern);
 }
 
 #endif

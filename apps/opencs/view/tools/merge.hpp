@@ -3,7 +3,9 @@
 
 #include <QWidget>
 
+#ifndef Q_MOC_RUN
 #include <boost/filesystem/path.hpp>
+#endif
 
 class QPushButton;
 class QListWidget;

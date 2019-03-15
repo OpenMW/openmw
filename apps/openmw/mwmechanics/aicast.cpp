@@ -2,12 +2,12 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 
 #include "aicombataction.hpp"
 #include "creaturestats.hpp"
-#include "spellcasting.hpp"
 #include "steering.hpp"
 
 MWMechanics::AiCast::AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell)
@@ -37,7 +37,7 @@ bool MWMechanics::AiCast::execute(const MWWorld::Ptr& actor, MWMechanics::Charac
         if (!target)
             return true;
 
-        if (!mManual && !pathTo(actor, target.getRefData().getPosition().pos, duration, mDistance))
+        if (!mManual && !pathTo(actor, target.getRefData().getPosition().asVec3(), duration, mDistance))
         {
             return false;
         }

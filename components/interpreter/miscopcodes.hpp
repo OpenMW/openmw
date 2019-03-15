@@ -1,7 +1,6 @@
 #ifndef INTERPRETER_MISCOPCODES_H_INCLUDED
 #define INTERPRETER_MISCOPCODES_H_INCLUDED
 
-#include <cstdlib>
 #include <stdexcept>
 #include <vector>
 #include <string>

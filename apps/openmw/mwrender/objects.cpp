@@ -1,7 +1,5 @@
 #include "objects.hpp"
 
-#include <cmath>
-
 #include <osg/Group>
 #include <osg/UserDataContainer>
 
@@ -73,6 +71,7 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
 void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool animated, bool allowLight)
 {
     insertBegin(ptr);
+    ptr.getRefData().getBaseNode()->setNodeMask(Mask_Object);
 
     osg::ref_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
 

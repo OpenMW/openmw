@@ -73,7 +73,32 @@
                         <Property key="TextAlign" value="Right"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 200 260 24">
+                <Widget type="Widget" skin="" position="4 184 352 54" align="Left Top HStretch">
+                    <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top" name="ActorProcessingText">
+                        <Property key="Caption" value="Actors Processing Range"/>
+                    </Widget>
+                    <Widget type="MWScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
+                        <Property key="Range" value="3584"/>
+                        <Property key="Page" value="300"/>
+                        <UserString key="SettingType" value="Slider"/>
+                        <UserString key="SettingCategory" value="Game"/>
+                        <UserString key="SettingName" value="actors processing range"/>
+                        <UserString key="SettingValueType" value="Float"/>
+                        <UserString key="SettingMin" value="3584"/>
+                        <UserString key="SettingMax" value="7168"/>
+                        <UserString key="SettingLabelWidget" value="ActorProcessingText"/>
+                        <UserString key="SettingLabelCaption" value="Actors Processing Range"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
+                        <Property key="Caption" value="#{sLow}"/>
+                        <Property key="TextAlign" value="Left"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Right Top">
+                        <Property key="Caption" value="#{sHigh}"/>
+                        <Property key="TextAlign" value="Right"/>
+                    </Widget>
+                </Widget>
+                <Widget type="HBox" skin="" position="4 250 260 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="Saves"/>
                         <UserString key="SettingName" value="autosave"/>
@@ -83,7 +108,7 @@
                         <Property key="Caption" value="#{sQuick_Save}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 230 260 24">
+                <Widget type="HBox" skin="" position="4 280 260 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="Game"/>
                         <UserString key="SettingName" value="best attack"/>
@@ -93,7 +118,7 @@
                         <Property key="Caption" value="#{sBestAttack}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 260 260 24">
+                <Widget type="HBox" skin="" position="4 310 260 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="GUI"/>
                         <UserString key="SettingName" value="subtitles"/>
@@ -103,7 +128,7 @@
                         <Property key="Caption" value="#{sSubtitles}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 290 260 24">
+                <Widget type="HBox" skin="" position="4 340 260 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                         <UserString key="SettingCategory" value="HUD"/>
                         <UserString key="SettingName" value="crosshair"/>
@@ -188,18 +213,26 @@
                 <Widget type="AutoSizedButton" skin="MW_Button" position="4 194 137 24" align="Left Bottom" name="ResetControlsButton">
                     <Property key="Caption" value="#{sControlsMenu1}"/>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 224 300 24" align="Left Bottom">
+                <Widget type="HBox" skin="" position="4 224 360 24" align="Left Bottom">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Bottom">
+                        <UserString key="SettingCategory" value="Input"/>
+                        <UserString key="SettingName" value="invert x axis"/>
+                        <UserString key="SettingType" value="CheckButton"/>
+                    </Widget>
+                    <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 78 16" align="Left Bottom">
+                        <Property key="Caption" value="Invert X Axis"/>
+                    </Widget>
+                    <Widget type="AutoSizedButton" skin="MW_Button" position="28 0 24 24" align="Left Bottom">
                         <UserString key="SettingCategory" value="Input"/>
                         <UserString key="SettingName" value="invert y axis"/>
                         <UserString key="SettingType" value="CheckButton"/>
                     </Widget>
-                    <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 78 16" align="Left Bottom">
+                    <Widget type="AutoSizedTextBox" skin="SandText" position="56 4 78 16" align="Left Bottom">
                         <Property key="Caption" value="#{sMouseFlip}"/>
                     </Widget>
                 </Widget>
                 <Widget type="TextBox" skin="NormalText" position="4 254 336 18" align="Left Bottom">
-                    <Property key="Caption" value="Camera sensitivity"/>
+                    <Property key="Caption" value="Camera Sensitivity"/>
                 </Widget>
                 <Widget type="MWScrollBar" skin="MW_HScroll" position="4 278 336 18" align="HStretch Bottom">
                     <Property key="Range" value="10000"/>
@@ -218,6 +251,16 @@
                 <Widget type="TextBox" skin="SandText" position="4 302 336 18" align="Right Bottom">
                     <Property key="Caption" value="#{sHigh}"/>
                     <Property key="TextAlign" value="Right"/>
+                </Widget>
+                <Widget type="HBox" skin="" position="4 324 336 24" align="Left Bottom">
+                    <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Bottom">
+                        <UserString key="SettingCategory" value="Input"/>
+                        <UserString key="SettingName" value="enable controller"/>
+                        <UserString key="SettingType" value="CheckButton"/>
+                    </Widget>
+                    <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 78 16" align="Left Bottom">
+                        <Property key="Caption" value="#{sEnableJoystick}"/>
+                    </Widget>
                 </Widget>
             </Widget>
             <Widget type="TabItem" skin="" position="4 32 360 308">
@@ -385,13 +428,15 @@
                                 </Widget>
                             </Widget>
                             <Widget type="HBox" skin="" position="4 56 350 24">
-                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
-                                    <UserString key="SettingCategory" value="Water"/>
-                                    <UserString key="SettingName" value="reflect actors"/>
-                                    <UserString key="SettingType" value="CheckButton"/>
+                                <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 115 24" align="Left Top" name="WaterReflectionDetail">
+                                    <Property key="AddItem" value="Off"/>
+                                    <Property key="AddItem" value="Terrain"/>
+                                    <Property key="AddItem" value="World"/>
+                                    <Property key="AddItem" value="Objects"/>
+                                    <Property key="AddItem" value="Actors"/>
                                 </Widget>
-                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 79 16" align="Left Top">
-                                    <Property key="Caption" value="Reflect actors"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" position="64 4 90 16" align="Left Top">
+                                    <Property key="Caption" value="Reflection shader detail"/>
                                 </Widget>
                             </Widget>
                         </Widget>

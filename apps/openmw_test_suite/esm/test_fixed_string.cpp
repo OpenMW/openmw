@@ -37,6 +37,42 @@ TEST(EsmFixedString, operator__eq_ne)
         EXPECT_TRUE(name == ss);
     }
 }
+TEST(EsmFixedString, operator__eq_ne_const)
+{
+    {
+        SCOPED_TRACE("asdc == asdc (const)");
+        ESM::NAME name;
+        name.assign("asdc");
+        const char s[4] = { 'a', 's', 'd', 'c' };
+        std::string ss(s, 4);
+
+        EXPECT_TRUE(name == s);
+        EXPECT_TRUE(name == ss.c_str());
+        EXPECT_TRUE(name == ss);
+    }
+    {
+        SCOPED_TRACE("asdc == asdcx (const)");
+        ESM::NAME name;
+        name.assign("asdc");
+        const char s[5] = { 'a', 's', 'd', 'c', 'x' };
+        std::string ss(s, 5);
+
+        EXPECT_TRUE(name != s);
+        EXPECT_TRUE(name != ss.c_str());
+        EXPECT_TRUE(name != ss);
+    }
+    {
+        SCOPED_TRACE("asdc == asdc[NULL] (const)");
+        ESM::NAME name;
+        name.assign("asdc");
+        const char s[5] = { 'a', 's', 'd', 'c', '\0' };
+        std::string ss(s, 5);
+
+        EXPECT_TRUE(name == s);
+        EXPECT_TRUE(name == ss.c_str());
+        EXPECT_TRUE(name == ss);
+    }
+}
 
 TEST(EsmFixedString, empty_strings)
 {

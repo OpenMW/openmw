@@ -1,8 +1,7 @@
 #ifndef OPENMW_ESM_READER_H
 #define OPENMW_ESM_READER_H
 
-#include <stdint.h>
-#include <string.h>
+#include <cstdint>
 #include <cassert>
 #include <vector>
 #include <sstream>
@@ -269,6 +268,8 @@ public:
   size_t getFileSize() const { return mFileSize; }
 
 private:
+  void clearCtx();
+
   Files::IStreamPtr mEsm;
 
   ESM_Context mCtx;

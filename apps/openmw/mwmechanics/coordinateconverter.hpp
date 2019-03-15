@@ -26,7 +26,7 @@ namespace MWMechanics
             /// in-place conversion from world to local
             void toLocal(osg::Vec3f& point);
 
-            osg::Vec3f toLocalVec3(const ESM::Pathgrid::Point& point);
+            osg::Vec3f toLocalVec3(const osg::Vec3f& point);
 
         private:
             int mCellX;

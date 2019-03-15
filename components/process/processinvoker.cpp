@@ -3,8 +3,6 @@
 #include <QMessageBox>
 #include <QStringList>
 #include <QString>
-#include <QFileInfo>
-#include <QFile>
 #include <QDir>
 #include <QDebug>
 #include <QCoreApplication>

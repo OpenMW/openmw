@@ -123,14 +123,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
 
         bpo::store(valid_opts, variables);
     }
-    catch(boost::program_options::unknown_option & x)
+    catch(std::exception &e)
     {
-        std::cerr << "ERROR: " << x.what() << std::endl;
-        return false;
-    }
-    catch(boost::program_options::invalid_command_line_syntax & x)
-    {
-        std::cerr << "ERROR: " << x.what() << std::endl;
+        std::cout << "ERROR parsing arguments: " << e.what() << std::endl;
         return false;
     }
 
@@ -411,13 +406,10 @@ int load(Arguments& info)
     } catch(std::exception &e) {
         std::cout << "\nERROR:\n\n  " << e.what() << std::endl;
 
-        typedef std::deque<EsmTool::RecordBase *> RecStore;
-        RecStore &store = info.data.mRecords;
-        for (RecStore::iterator it = store.begin(); it != store.end(); ++it)
-        {
-            delete *it;
-        }
-        store.clear();
+        for (const EsmTool::RecordBase* record : info.data.mRecords)
+            delete record;
+
+        info.data.mRecords.clear();
         return 1;
     }
 
@@ -449,15 +441,12 @@ int clone(Arguments& info)
     std::cout << "Loaded " << recordCount << " records:" << std::endl << std::endl;
 
     int i = 0;
-    typedef std::map<int, int> Stats;
-    Stats &stats = info.data.mRecordStats;
-    for (Stats::iterator it = stats.begin(); it != stats.end(); ++it)
+    for (std::pair<int, int> stat : info.data.mRecordStats)
     {
         ESM::NAME name;
-        name.intval = it->first;
-        int amount = it->second;
+        name.intval = stat.first;
+        int amount = stat.second;
         std::cout << std::setw(digitCount) << amount << " " << name.toString() << "  ";
-
         if (++i % 3 == 0)
             std::cout << std::endl;
     }
@@ -475,18 +464,18 @@ int clone(Arguments& info)
     esm.setVersion(info.data.version);
     esm.setRecordCount (recordCount);
 
-    for (std::vector<ESM::Header::MasterData>::iterator it = info.data.masters.begin(); it != info.data.masters.end(); ++it)
-        esm.addMaster(it->name, it->size);
+    for (const ESM::Header::MasterData &master : info.data.masters)
+        esm.addMaster(master.name, master.size);
 
     std::fstream save(info.outname.c_str(), std::fstream::out | std::fstream::binary);
     esm.save(save);
 
     int saved = 0;
-    typedef std::deque<EsmTool::RecordBase *> Records;
-    Records &records = info.data.mRecords;
-    for (Records::iterator it = records.begin(); it != records.end() && i > 0; ++it)
+    for (EsmTool::RecordBase* record : info.data.mRecords)
     {
-        EsmTool::RecordBase *record = *it;
+        if (i <= 0)
+            break;
+
         const ESM::NAME& typeName = record->getType();
 
         esm.startRecord(typeName.toString(), record->getFlags());
@@ -494,20 +483,17 @@ int clone(Arguments& info)
         record->save(esm);
         if (typeName.intval == ESM::REC_CELL) {
             ESM::Cell *ptr = &record->cast<ESM::Cell>()->get();
-            if (!info.data.mCellRefs[ptr].empty()) {
-                typedef std::deque<std::pair<ESM::CellRef, bool> > RefList;
-                RefList &refs = info.data.mCellRefs[ptr];
-                for (RefList::iterator refIt = refs.begin(); refIt != refs.end(); ++refIt)
-                {
-                    refIt->first.save(esm, refIt->second);
-                }
+            if (!info.data.mCellRefs[ptr].empty()) 
+            {
+                for (std::pair<ESM::CellRef, bool> &ref : info.data.mCellRefs[ptr])
+                    ref.first.save(esm, ref.second);
             }
         }
 
         esm.endRecord(typeName.toString());
 
         saved++;
-        int perc = (int)((saved / (float)recordCount)*100);
+        int perc = recordCount == 0 ? 100 : (int)((saved / (float)recordCount)*100);
         if (perc % 10 == 0)
         {
             std::cerr << "\r" << perc << "%";
@@ -562,9 +548,6 @@ int comp(Arguments& info)
         std::cout << "Not equal, different amount of records." << std::endl;
         return 1;
     }
-
-
-
 
     return 0;
 }

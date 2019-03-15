@@ -33,16 +33,6 @@ struct Static
 
     void blank();
     ///< Set record to default state (does not touch the ID).
-
-    Static(const std::string id, const std::string &model)
-    : mId(id)
-    , mModel(model)
-    {
-    }
-
-    Static()
-    {
-    }
 };
 }
 #endif

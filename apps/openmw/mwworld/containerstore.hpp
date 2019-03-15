@@ -68,6 +68,9 @@ namespace MWWorld
 
             static const std::string sGoldId;
 
+        protected:
+            ContainerStoreListener* mListener;
+
         private:
 
             MWWorld::CellRefList<ESM::Potion>            potions;
@@ -86,8 +89,6 @@ namespace MWWorld
             std::map<std::pair<std::string, std::string>, int> mLevelledItemMap;
             ///< Stores result of levelled item spawns. <(refId, spawningGroup), count>
             /// This is used to restock levelled items(s) if the old item was sold.
-
-            ContainerStoreListener* mListener;
 
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;

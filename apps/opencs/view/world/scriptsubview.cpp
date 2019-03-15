@@ -7,6 +7,8 @@
 #include <QSplitter>
 #include <QTimer>
 
+#include <components/debug/debuglog.hpp>
+
 #include "../../model/doc/document.hpp"
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/data.hpp"
@@ -210,18 +212,28 @@ void CSVWorld::ScriptSubView::useHint (const std::string& hint)
     unsigned line = 0, column = 0;
     char c;
     std::istringstream stream (hint.c_str()+1);
-    switch(hint[0]){
+    switch(hint[0])
+    {
         case 'R':
         case 'r':
         {
             QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
             QString source = mModel->data (index).toString();
+            unsigned stringSize = source.length();
             unsigned pos, dummy;
             if (!(stream >> c >> dummy >> pos) )
                 return;
 
-            for (unsigned i = 0; i <= pos; ++i){
-                if (source[i] == '\n'){
+            if (pos > stringSize)
+            {
+                Log(Debug::Warning) << "CSVWorld::ScriptSubView: requested position is higher than actual string length";
+                pos = stringSize;
+            }
+
+            for (unsigned i = 0; i <= pos; ++i)
+            {
+                if (source[i] == '\n')
+                {
                     ++line;
                     column = i+1;
                 }
@@ -231,7 +243,7 @@ void CSVWorld::ScriptSubView::useHint (const std::string& hint)
         }
         case 'l':
             if (!(stream >> c >> line >> column))
-                    return;
+                return;
     }
 
     QTextCursor cursor = mEditor->textCursor();

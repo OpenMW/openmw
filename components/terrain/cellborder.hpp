@@ -7,10 +7,7 @@
 namespace Terrain
 {
     class World;
-}
 
-namespace MWRender
-{
     /**
      * @Brief Handles the debug cell borders.
      */

@@ -140,7 +140,6 @@ void ESMStore::setUp(bool validateRecords)
     mMagicEffects.setUp();
     mAttributes.setUp();
     mDialogs.setUp();
-    mStatics.setUp();
 
     if (validateRecords)
         validate();

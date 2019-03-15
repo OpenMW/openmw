@@ -139,7 +139,7 @@ namespace Nif
     {
         Controller::read(nif);
 
-        nif->getUShort(); // always 0
+        uvSet = nif->getUShort();
         data.read(nif);
     }
 
@@ -168,6 +168,18 @@ namespace Nif
     }
 
     void NiAlphaController::post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
+
+    void NiRollController::read(NIFStream *nif)
+    {
+        Controller::read(nif);
+        data.read(nif);
+    }
+
+    void NiRollController::post(NIFFile *nif)
     {
         Controller::post(nif);
         data.post(nif);

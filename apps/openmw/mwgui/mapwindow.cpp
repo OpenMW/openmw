@@ -312,8 +312,8 @@ namespace MWGui
 
     void LocalMapBase::updateCustomMarkers()
     {
-        for (std::vector<MyGUI::Widget*>::iterator it = mCustomMarkerWidgets.begin(); it != mCustomMarkerWidgets.end(); ++it)
-            MyGUI::Gui::getInstance().destroyWidget(*it);
+        for (MyGUI::Widget* widget : mCustomMarkerWidgets)
+            MyGUI::Gui::getInstance().destroyWidget(widget);
         mCustomMarkerWidgets.clear();
 
         for (int dX = -mCellDistance; dX <= mCellDistance; ++dX)
@@ -487,9 +487,9 @@ namespace MWGui
         }
 
         int counter = 0;
-        for (std::vector<MWWorld::Ptr>::iterator it = markers.begin(); it != markers.end(); ++it)
+        for (const MWWorld::Ptr& ptr : markers)
         {
-            const ESM::Position& worldPos = it->getRefData().getPosition();
+            const ESM::Position& worldPos = ptr.getRefData().getPosition();
             MarkerUserData markerPos (mLocalMapRender);
             MyGUI::IntPoint widgetPos = getMarkerPosition(worldPos.pos[0], worldPos.pos[1], markerPos);
             MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
@@ -526,8 +526,8 @@ namespace MWGui
     void LocalMapBase::updateDoorMarkers()
     {
         // clear all previous door markers
-        for (std::vector<MyGUI::Widget*>::iterator it = mDoorMarkerWidgets.begin(); it != mDoorMarkerWidgets.end(); ++it)
-            MyGUI::Gui::getInstance().destroyWidget(*it);
+        for (MyGUI::Widget* widget : mDoorMarkerWidgets)
+            MyGUI::Gui::getInstance().destroyWidget(widget);
         mDoorMarkerWidgets.clear();
 
         MWBase::World* world = MWBase::Environment::get().getWorld();
@@ -553,10 +553,8 @@ namespace MWGui
 
         // Create a widget for each marker
         int counter = 0;
-        for (std::vector<MWBase::World::DoorMarker>::iterator it = doors.begin(); it != doors.end(); ++it)
+        for (MWBase::World::DoorMarker& marker : doors)
         {
-            MWBase::World::DoorMarker marker = *it;
-
             std::vector<std::string> destNotes;
             CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(marker.dest);
             for (CustomMarkerCollection::ContainerType::const_iterator iter = markers.first; iter != markers.second; ++iter)
@@ -589,8 +587,8 @@ namespace MWGui
     void LocalMapBase::updateMagicMarkers()
     {
         // clear all previous markers
-        for (std::vector<MyGUI::Widget*>::iterator it = mMagicMarkerWidgets.begin(); it != mMagicMarkerWidgets.end(); ++it)
-            MyGUI::Gui::getInstance().destroyWidget(*it);
+        for (MyGUI::Widget* widget : mMagicMarkerWidgets)
+            MyGUI::Gui::getInstance().destroyWidget(widget);
         mMagicMarkerWidgets.clear();
 
         addDetectionMarkers(MWBase::World::Detect_Creature);
@@ -848,9 +846,9 @@ namespace MWGui
 
         mGlobalMapRender->cleanupCameras();
 
-        for (std::vector<CellId>::iterator it = mQueuedToExplore.begin(); it != mQueuedToExplore.end(); ++it)
+        for (CellId& cellId : mQueuedToExplore)
         {
-            mGlobalMapRender->exploreCell(it->first, it->second, mLocalMapRender->getMapTexture(it->first, it->second));
+            mGlobalMapRender->exploreCell(cellId.first, cellId.second, mLocalMapRender->getMapTexture(cellId.first, cellId.second));
         }
 
         mQueuedToExplore.clear();
@@ -888,11 +886,11 @@ namespace MWGui
     {
         LocalMapBase::updateCustomMarkers();
 
-        for (std::map<std::pair<int, int>, MyGUI::Widget*>::iterator widgetIt = mGlobalMapMarkers.begin(); widgetIt != mGlobalMapMarkers.end(); ++widgetIt)
+        for (auto& widgetPair : mGlobalMapMarkers)
         {
-            int x = widgetIt->first.first;
-            int y = widgetIt->first.second;
-            MyGUI::Widget* markerWidget = widgetIt->second;
+            int x = widgetPair.first.first;
+            int y = widgetPair.first.second;
+            MyGUI::Widget* markerWidget = widgetPair.second;
             setGlobalMapMarkerTooltip(markerWidget, x, y);
         }
     }
@@ -1017,8 +1015,8 @@ namespace MWGui
         mGlobalMapRender->clear();
         mChanged = true;
 
-        for (std::map<std::pair<int, int>, MyGUI::Widget*>::iterator it = mGlobalMapMarkers.begin(); it != mGlobalMapMarkers.end(); ++it)
-            MyGUI::Gui::getInstance().destroyWidget(it->second);
+        for (auto& widgetPair : mGlobalMapMarkers)
+            MyGUI::Gui::getInstance().destroyWidget(widgetPair.second);
         mGlobalMapMarkers.clear();
     }
 
@@ -1043,11 +1041,11 @@ namespace MWGui
 
             mGlobalMapRender->read(map);
 
-            for (std::set<ESM::GlobalMap::CellId>::iterator it = map.mMarkers.begin(); it != map.mMarkers.end(); ++it)
+            for (const ESM::GlobalMap::CellId& cellId : map.mMarkers)
             {
-                const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(it->first, it->second);
+                const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(cellId.first, cellId.second);
                 if (cell && !cell->mName.empty())
-                    addVisitedLocation(cell->mName, it->first, it->second);
+                    addVisitedLocation(cell->mName, cellId.first, cellId.second);
             }
         }
     }
@@ -1057,8 +1055,8 @@ namespace MWGui
         NoDrop::setAlpha(alpha);
         // can't allow showing map with partial transparency, as the fog of war will also go transparent
         // and reveal parts of the map you shouldn't be able to see
-        for (std::vector<MyGUI::ImageBox*>::iterator it = mMapWidgets.begin(); it != mMapWidgets.end(); ++it)
-            (*it)->setVisible(alpha == 1);
+        for (MyGUI::ImageBox* widget : mMapWidgets)
+            widget->setVisible(alpha == 1);
     }
 
     void MapWindow::customMarkerCreated(MyGUI::Widget *marker)

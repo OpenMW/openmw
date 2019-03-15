@@ -269,7 +269,7 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
         bool interior = cellRecord.mId.substr (0, 1)!="#";
 
         // count new references and adjust RefNumCount accordingsly
-        int newRefNum = cellRecord.mRefNumCounter;
+        unsigned int newRefNum = cellRecord.mRefNumCounter;
 
         if (references!=mState.getSubRecords().end())
         {
@@ -279,11 +279,17 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                 const CSMWorld::Record<CSMWorld::CellRef>& ref =
                     mDocument.getData().getReferences().getRecord (*iter);
 
-                if (ref.get().mNew ||
+                CSMWorld::CellRef refRecord = ref.get();
+
+                if (refRecord.mNew ||
                     (!interior && ref.mState==CSMWorld::RecordBase::State_ModifiedOnly &&
                     /// \todo consider worldspace
-                    CSMWorld::CellCoordinates (ref.get().getCellIndex()).getId("")!=ref.get().mCell))
+                    CSMWorld::CellCoordinates (refRecord.getCellIndex()).getId("") != refRecord.mCell))
                     ++cellRecord.mRefNumCounter;
+
+                if (refRecord.mRefNum.mIndex >= newRefNum)
+                    newRefNum = refRecord.mRefNum.mIndex + 1;
+
             }
         }
 
@@ -328,7 +334,7 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                         stream << "#" << index.first << " " << index.second;
                     }
 
-                    if (refRecord.mNew ||
+                    if (refRecord.mNew || refRecord.mRefNum.mIndex == 0 ||
                         (!interior && ref.mState==CSMWorld::RecordBase::State_ModifiedOnly &&
                         refRecord.mCell!=stream.str()))
                     {

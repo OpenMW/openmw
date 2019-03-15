@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -ex
 
 free -m
 
@@ -8,10 +8,30 @@ GOOGLETEST_DIR="$(pwd)/googletest/build"
 mkdir build
 cd build
 export CODE_COVERAGE=1
-if [ "${CC}" = "clang" ]; then export CODE_COVERAGE=0; fi
-${ANALYZE}cmake \
+
+if [[ "${CC}" =~ "clang" ]]; then export CODE_COVERAGE=0; fi
+if [[ -z "${BUILD_OPENMW}" ]]; then export BUILD_OPENMW=ON; fi
+if [[ -z "${BUILD_OPENMW_CS}" ]]; then export BUILD_OPENMW_CS=ON; fi
+
+${ANALYZE} cmake \
+    -DCMAKE_C_COMPILER="${CC}" \
+    -DCMAKE_CXX_COMPILER="${CXX}" \
+    -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+    -DBUILD_OPENMW=${BUILD_OPENMW} \
+    -DBUILD_OPENCS=${BUILD_OPENMW_CS} \
+    -DBUILD_LAUNCHER=${BUILD_OPENMW_CS} \
+    -DBUILD_BSATOOL=${BUILD_OPENMW_CS} \
+    -DBUILD_ESMTOOL=${BUILD_OPENMW_CS} \
+    -DBUILD_MWINIIMPORTER=${BUILD_OPENMW_CS} \
+    -DBUILD_ESSIMPORTER=${BUILD_OPENMW_CS} \
+    -DBUILD_WIZARD=${BUILD_OPENMW_CS} \
+    -DBUILD_NIFTEST=${BUILD_OPENMW_CS} \
+    -DBUILD_MYGUI_PLUGIN=${BUILD_OPENMW_CS} \
     -DBUILD_WITH_CODE_COVERAGE=${CODE_COVERAGE} \
     -DBUILD_UNITTESTS=1 \
+    -DUSE_SYSTEM_TINYXML=1 \
+    -DDESIRED_QT_VERSION=5 \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DBINDIR=/usr/games \
     -DCMAKE_BUILD_TYPE="None" \

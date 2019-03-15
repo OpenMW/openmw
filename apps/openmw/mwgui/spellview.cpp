@@ -149,13 +149,13 @@ namespace MWGui
         mModel->update();
         bool fullUpdateRequired = false;
         SpellModel::ModelIndex maxSpellIndexFound = -1;
-        for (std::vector< LineInfo >::iterator it = mLines.begin(); it != mLines.end(); ++it)
+        for (LineInfo& line : mLines)
         {
             // only update the lines that are "updateable"
-            SpellModel::ModelIndex spellIndex(it->mSpellIndex);
+            SpellModel::ModelIndex spellIndex(line.mSpellIndex);
             if (spellIndex != NoSpellIndex)
             {
-                Gui::SharedStateButton* nameButton = reinterpret_cast<Gui::SharedStateButton*>(it->mLeftWidget);
+                Gui::SharedStateButton* nameButton = reinterpret_cast<Gui::SharedStateButton*>(line.mLeftWidget);
 
                 // match model against line
                 // if don't match, then major change has happened, so do a full update
@@ -176,7 +176,7 @@ namespace MWGui
                 else
                 {
                     maxSpellIndexFound = spellIndex;
-                    Gui::SharedStateButton* costButton = reinterpret_cast<Gui::SharedStateButton*>(it->mRightWidget);
+                    Gui::SharedStateButton* costButton = reinterpret_cast<Gui::SharedStateButton*>(line.mRightWidget);
                     if ((costButton != nullptr) && (costButton->getCaption() != spell.mCostColumn))
                     {
                         costButton->setCaption(spell.mCostColumn);
@@ -198,27 +198,25 @@ namespace MWGui
     void SpellView::layoutWidgets()
     {
         int height = 0;
-        for (std::vector< LineInfo >::iterator it = mLines.begin();
-             it != mLines.end(); ++it)
+        for (LineInfo& line : mLines)
         {
-            height += (it->mLeftWidget)->getHeight();
+            height += line.mLeftWidget->getHeight();
         }
 
         bool scrollVisible = height > mScrollView->getHeight();
         int width = mScrollView->getWidth() - (scrollVisible ? 18 : 0);
 
         height = 0;
-        for (std::vector< LineInfo >::iterator it = mLines.begin();
-             it != mLines.end(); ++it)
+        for (LineInfo& line : mLines)
         {
-            int lineHeight = (it->mLeftWidget)->getHeight();
-            (it->mLeftWidget)->setCoord(4, height, width - 8, lineHeight);
-            if (it->mRightWidget)
+            int lineHeight = line.mLeftWidget->getHeight();
+            line.mLeftWidget->setCoord(4, height, width - 8, lineHeight);
+            if (line.mRightWidget)
             {
-                (it->mRightWidget)->setCoord(4, height, width - 8, lineHeight);
-                MyGUI::TextBox* second = (it->mRightWidget)->castType<MyGUI::TextBox>(false);
+                line.mRightWidget->setCoord(4, height, width - 8, lineHeight);
+                MyGUI::TextBox* second = line.mRightWidget->castType<MyGUI::TextBox>(false);
                 if (second)
-                    (it->mLeftWidget)->setSize(width - 8 - second->getTextSize().width, lineHeight);
+                    line.mLeftWidget->setSize(width - 8 - second->getTextSize().width, lineHeight);
             }
 
             height += lineHeight;

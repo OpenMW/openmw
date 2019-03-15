@@ -2,7 +2,6 @@
 #define GAME_MWWORLD_ACTIONEAT_H
 
 #include "action.hpp"
-#include "ptr.hpp"
 
 namespace MWWorld
 {

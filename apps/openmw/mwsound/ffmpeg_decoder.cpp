@@ -82,7 +82,7 @@ bool FFmpeg_Decoder::getNextPacket()
         }
 
         /* Free the packet and look for another */
-        av_free_packet(&mPacket);
+        av_packet_unref(&mPacket);
     }
 
     return false;
@@ -90,32 +90,31 @@ bool FFmpeg_Decoder::getNextPacket()
 
 bool FFmpeg_Decoder::getAVAudioData()
 {
-    int got_frame;
+    bool got_frame = false;
 
-    if((*mStream)->codec->codec_type != AVMEDIA_TYPE_AUDIO)
+    if(mCodecCtx->codec_type != AVMEDIA_TYPE_AUDIO)
         return false;
 
     do {
-        if(mPacket.size == 0 && !getNextPacket())
-            return false;
-
         /* Decode some data, and check for errors */
-        int len = 0;
-        if((len=avcodec_decode_audio4((*mStream)->codec, mFrame, &got_frame, &mPacket)) < 0)
+        int ret = avcodec_receive_frame(mCodecCtx, mFrame);
+        if (ret == AVERROR(EAGAIN))
+        {
+            if (mPacket.size == 0 && !getNextPacket())
+                return false;
+            ret = avcodec_send_packet(mCodecCtx, &mPacket);
+            av_packet_unref(&mPacket);
+            if (ret == 0)
+                continue;
+        }
+        if (ret != 0)
             return false;
 
-        /* Move the unread data to the front and clear the end bits */
-        int remaining = mPacket.size - len;
-        if(remaining <= 0)
-            av_free_packet(&mPacket);
-        else
-        {
-            memmove(mPacket.data, &mPacket.data[len], remaining);
-            av_shrink_packet(&mPacket, remaining);
-        }
+        av_packet_unref(&mPacket);
 
-        if (!got_frame || mFrame->nb_samples == 0)
+        if (mFrame->nb_samples == 0)
             continue;
+        got_frame = true;
 
         if(mSwr)
         {
@@ -139,8 +138,8 @@ bool FFmpeg_Decoder::getAVAudioData()
         else
             mFrameData = &mFrame->data[0];
 
-    } while(got_frame == 0 || mFrame->nb_samples == 0);
-    mNextPts += (double)mFrame->nb_samples / (double)(*mStream)->codec->sample_rate;
+    } while(!got_frame);
+    mNextPts += (double)mFrame->nb_samples / mCodecCtx->sample_rate;
 
     return true;
 }
@@ -213,7 +212,7 @@ void FFmpeg_Decoder::open(const std::string &fname)
 
         for(size_t j = 0;j < mFormatCtx->nb_streams;j++)
         {
-            if(mFormatCtx->streams[j]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
+            if(mFormatCtx->streams[j]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
             {
                 mStream = &mFormatCtx->streams[j];
                 break;
@@ -222,39 +221,48 @@ void FFmpeg_Decoder::open(const std::string &fname)
         if(!mStream)
             throw std::runtime_error("No audio streams in "+fname);
 
-        (*mStream)->codec->request_sample_fmt = (*mStream)->codec->sample_fmt;
-
-        AVCodec *codec = avcodec_find_decoder((*mStream)->codec->codec_id);
+        AVCodec *codec = avcodec_find_decoder((*mStream)->codecpar->codec_id);
         if(!codec)
         {
             std::string ss = "No codec found for id " +
-                             std::to_string((*mStream)->codec->codec_id);
+                                std::to_string((*mStream)->codecpar->codec_id);
             throw std::runtime_error(ss);
         }
-        if(avcodec_open2((*mStream)->codec, codec, nullptr) < 0)
-            throw std::runtime_error(std::string("Failed to open audio codec ") +
-                                     codec->long_name);
+
+        AVCodecContext *avctx = avcodec_alloc_context3(codec);
+        avcodec_parameters_to_context(avctx, (*mStream)->codecpar);
+
+// This is not needed anymore above FFMpeg version 4.0
+#if LIBAVCODEC_VERSION_INT < 3805796
+        av_codec_set_pkt_timebase(avctx, (*mStream)->time_base);
+#endif
+
+        mCodecCtx = avctx;
+
+        if(avcodec_open2(mCodecCtx, codec, nullptr) < 0)
+            throw std::runtime_error(std::string("Failed to open audio codec ") + codec->long_name);
 
         mFrame = av_frame_alloc();
 
-        if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_FLT ||
-           (*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
+        if(mCodecCtx->sample_fmt == AV_SAMPLE_FMT_FLT || mCodecCtx->sample_fmt == AV_SAMPLE_FMT_FLTP)
             mOutputSampleFormat = AV_SAMPLE_FMT_S16; // FIXME: Check for AL_EXT_FLOAT32 support
-        else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_U8P)
+        else if(mCodecCtx->sample_fmt == AV_SAMPLE_FMT_U8P)
             mOutputSampleFormat = AV_SAMPLE_FMT_U8;
-        else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_S16P)
+        else if(mCodecCtx->sample_fmt == AV_SAMPLE_FMT_S16P)
             mOutputSampleFormat = AV_SAMPLE_FMT_S16;
         else
             mOutputSampleFormat = AV_SAMPLE_FMT_S16;
 
-        mOutputChannelLayout = (*mStream)->codec->channel_layout;
+        mOutputChannelLayout = (*mStream)->codecpar->channel_layout;
         if(mOutputChannelLayout == 0)
-            mOutputChannelLayout = av_get_default_channel_layout((*mStream)->codec->channels);
+            mOutputChannelLayout = av_get_default_channel_layout(mCodecCtx->channels);
+
+        mCodecCtx->channel_layout = mOutputChannelLayout;
     }
     catch(...)
     {
         if(mStream)
-            avcodec_close((*mStream)->codec);
+            avcodec_free_context(&mCodecCtx);
         mStream = nullptr;
 
         if (mFormatCtx != nullptr)
@@ -275,10 +283,10 @@ void FFmpeg_Decoder::open(const std::string &fname)
 void FFmpeg_Decoder::close()
 {
     if(mStream)
-        avcodec_close((*mStream)->codec);
+        avcodec_free_context(&mCodecCtx);
     mStream = nullptr;
 
-    av_free_packet(&mPacket);
+    av_packet_unref(&mPacket);
     av_freep(&mFrame);
     swr_free(&mSwr);
     av_freep(&mDataBuf);
@@ -308,7 +316,12 @@ void FFmpeg_Decoder::close()
 
 std::string FFmpeg_Decoder::getName()
 {
+// In the FFMpeg 4.0 a "filename" field was replaced by "url"
+#if LIBAVCODEC_VERSION_INT < 3805796
     return mFormatCtx->filename;
+#else
+    return mFormatCtx->url;
+#endif
 }
 
 void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *type)
@@ -341,11 +354,10 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
     else
     {
         char str[1024];
-        av_get_channel_layout_string(str, sizeof(str), (*mStream)->codec->channels,
-                                     (*mStream)->codec->channel_layout);
+        av_get_channel_layout_string(str, sizeof(str), mCodecCtx->channels, mCodecCtx->channel_layout);
         Log(Debug::Error) << "Unsupported channel layout: "<< str;
 
-        if((*mStream)->codec->channels == 1)
+        if(mCodecCtx->channels == 1)
         {
             mOutputChannelLayout = AV_CH_LAYOUT_MONO;
             *chans = ChannelConfig_Mono;
@@ -357,27 +369,28 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
         }
     }
 
-    *samplerate = (*mStream)->codec->sample_rate;
-    int64_t ch_layout = (*mStream)->codec->channel_layout;
+    *samplerate = mCodecCtx->sample_rate;
+    int64_t ch_layout = mCodecCtx->channel_layout;
     if(ch_layout == 0)
-        ch_layout = av_get_default_channel_layout((*mStream)->codec->channels);
+        ch_layout = av_get_default_channel_layout(mCodecCtx->channels);
 
-    if(mOutputSampleFormat != (*mStream)->codec->sample_fmt ||
+    if(mOutputSampleFormat != mCodecCtx->sample_fmt ||
        mOutputChannelLayout != ch_layout)
     {
         mSwr = swr_alloc_set_opts(mSwr,                   // SwrContext
                           mOutputChannelLayout,           // output ch layout
                           mOutputSampleFormat,            // output sample format
-                          (*mStream)->codec->sample_rate, // output sample rate
+                          mCodecCtx->sample_rate, // output sample rate
                           ch_layout,                      // input ch layout
-                          (*mStream)->codec->sample_fmt,  // input sample format
-                          (*mStream)->codec->sample_rate, // input sample rate
+                          mCodecCtx->sample_fmt,         // input sample format
+                          mCodecCtx->sample_rate, // input sample rate
                           0,                              // logging level offset
                           nullptr);                          // log context
         if(!mSwr)
             throw std::runtime_error("Couldn't allocate SwrContext");
-        if(swr_init(mSwr) < 0)
-            throw std::runtime_error("Couldn't initialize SwrContext");
+        int init=swr_init(mSwr);
+        if(init < 0)
+            throw std::runtime_error("Couldn't initialize SwrContext: "+std::to_string(init));
     }
 }
 
@@ -412,12 +425,13 @@ size_t FFmpeg_Decoder::getSampleOffset()
 {
     int delay = (mFrameSize-mFramePos) / av_get_channel_layout_nb_channels(mOutputChannelLayout) /
                 av_get_bytes_per_sample(mOutputSampleFormat);
-    return (int)(mNextPts*(*mStream)->codec->sample_rate) - delay;
+    return (int)(mNextPts*mCodecCtx->sample_rate) - delay;
 }
 
 FFmpeg_Decoder::FFmpeg_Decoder(const VFS::Manager* vfs)
   : Sound_Decoder(vfs)
   , mFormatCtx(nullptr)
+  , mCodecCtx(nullptr)
   , mStream(nullptr)
   , mFrame(nullptr)
   , mFrameSize(0)
@@ -437,7 +451,10 @@ FFmpeg_Decoder::FFmpeg_Decoder(const VFS::Manager* vfs)
     static bool done_init = false;
     if(!done_init)
     {
+// This is not needed anymore above FFMpeg version 4.0
+#if LIBAVCODEC_VERSION_INT < 3805796
         av_register_all();
+#endif
         av_log_set_level(AV_LOG_ERROR);
         done_init = true;
     }

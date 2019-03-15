@@ -5,20 +5,22 @@
 #include <osg/Geometry>
 #include <osg/Array>
 #include <osg/LOD>
+#include <osg/Switch>
 #include <osg/TexGen>
 #include <osg/ValueObject>
 
 // resource
 #include <components/debug/debuglog.hpp>
+#include <components/misc/constants.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
+#include <components/sceneutil/util.hpp>
 
 // particle
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
 #include <osgParticle/ConstantRateCounter>
-#include <osgParticle/Shooter>
 #include <osgParticle/BoxPlacer>
 #include <osgParticle/ModularProgram>
 
@@ -242,10 +244,8 @@ namespace NifOsg
                 osg::ref_ptr<NifOsg::KeyframeController> callback(new NifOsg::KeyframeController(key->data.getPtr()));
                 callback->setFunction(std::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key)));
 
-                if (target.mKeyframeControllers.find(strdata->string) != target.mKeyframeControllers.end())
+                if (!target.mKeyframeControllers.emplace(strdata->string, callback).second)
                     Log(Debug::Verbose) << "Controller " << strdata->string << " present more than once in " << nif->getFilename() << ", ignoring later version";
-                else
-                    target.mKeyframeControllers[strdata->string] = callback;
             }
         }
 
@@ -324,6 +324,7 @@ namespace NifOsg
         osg::ref_ptr<osg::LOD> handleLodNode(const Nif::NiLODNode* niLodNode)
         {
             osg::ref_ptr<osg::LOD> lod (new osg::LOD);
+            lod->setName(niLodNode->name);
             lod->setCenterMode(osg::LOD::USER_DEFINED_CENTER);
             lod->setCenter(niLodNode->lodCenter);
             for (unsigned int i=0; i<niLodNode->lodLevels.size(); ++i)
@@ -333,6 +334,14 @@ namespace NifOsg
             }
             lod->setRangeMode(osg::LOD::DISTANCE_FROM_EYE_POINT);
             return lod;
+        }
+
+        osg::ref_ptr<osg::Switch> handleSwitchNode(const Nif::NiSwitchNode* niSwitchNode)
+        {
+            osg::ref_ptr<osg::Switch> switchNode (new osg::Switch);
+            switchNode->setName(niSwitchNode->name);
+            switchNode->setNewChildDefaultValue(false);
+            return switchNode;
         }
 
         osg::ref_ptr<osg::Image> handleSourceTexture(const Nif::NiSourceTexture* st, Resource::ImageManager* imageManager)
@@ -422,8 +431,23 @@ namespace NifOsg
             osg::ref_ptr<osg::Group> node;
             osg::Object::DataVariance dataVariance = osg::Object::UNSPECIFIED;
 
+            // TODO: it is unclear how to handle transformations of LOD and Switch nodes and controllers for them.
             switch (nifNode->recType)
             {
+            case Nif::RC_NiLODNode:
+            {
+                const Nif::NiLODNode* niLodNode = static_cast<const Nif::NiLODNode*>(nifNode);
+                node = handleLodNode(niLodNode);
+                dataVariance = osg::Object::STATIC;
+                break;
+            }
+            case Nif::RC_NiSwitchNode:
+            {
+                const Nif::NiSwitchNode* niSwitchNode = static_cast<const Nif::NiSwitchNode*>(nifNode);
+                node = handleSwitchNode(niSwitchNode);
+                dataVariance = osg::Object::STATIC;
+                break;
+            }
             case Nif::RC_NiTriShape:
             case Nif::RC_NiAutoNormalParticles:
             case Nif::RC_NiRotatingParticles:
@@ -585,14 +609,6 @@ namespace NifOsg
             if (nifNode->recType != Nif::RC_NiTriShape && !nifNode->controller.empty() && node->getDataVariance() == osg::Object::DYNAMIC)
                 handleNodeControllers(nifNode, static_cast<osg::MatrixTransform*>(node.get()), animflags);
 
-            if (nifNode->recType == Nif::RC_NiLODNode)
-            {
-                const Nif::NiLODNode* niLodNode = static_cast<const Nif::NiLODNode*>(nifNode);
-                osg::ref_ptr<osg::LOD> lod = handleLodNode(niLodNode);
-                node->addChild(lod); // unsure if LOD should be above or below this node's transform
-                node = lod;
-            }
-
             const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
             if(ninode)
             {
@@ -611,6 +627,16 @@ namespace NifOsg
                 }
             }
 
+            if (nifNode->recType == Nif::RC_NiSwitchNode)
+            {
+                // show only first child by default
+                node->asSwitch()->setSingleChildOn(0);
+
+                const Nif::NiSwitchNode* niSwitchNode = static_cast<const Nif::NiSwitchNode*>(nifNode);
+                if (niSwitchNode->name == Constants::NightDayLabel && !SceneUtil::hasUserDescription(rootNode, Constants::NightDayLabel))
+                    rootNode->getOrCreateUserDataContainer()->addDescription(Constants::NightDayLabel);
+            }
+
             return node;
         }
 
@@ -623,9 +649,14 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiUVController)
                 {
                     const Nif::NiUVController *niuvctrl = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
+                    const int uvSet = niuvctrl->uvSet;
                     std::set<int> texUnits;
+                    // UVController should work only for textures which use a given UV Set, usually 0.
                     for (unsigned int i=0; i<boundTextures.size(); ++i)
-                        texUnits.insert(i);
+                    {
+                        if (boundTextures[i] == uvSet)
+                            texUnits.insert(i);
+                    }
 
                     osg::ref_ptr<UVController> uvctrl = new UVController(niuvctrl->data.getPtr(), texUnits);
                     setupController(niuvctrl, uvctrl, animflags);
@@ -663,6 +694,10 @@ namespace NifOsg
                 {
                     handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), transformNode, animflags);
                 }
+                else if (ctrl->recType == Nif::RC_NiRollController)
+                {
+                    handleRollController(static_cast<const Nif::NiRollController*>(ctrl.getPtr()), transformNode, animflags);
+                }
                 else
                     Log(Debug::Info) << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename;
             }
@@ -672,6 +707,13 @@ namespace NifOsg
         {
             osg::ref_ptr<VisController> callback(new VisController(visctrl->data.getPtr()));
             setupController(visctrl, callback, animflags);
+            node->addUpdateCallback(callback);
+        }
+
+        void handleRollController(const Nif::NiRollController* rollctrl, osg::Node* node, int animflags)
+        {
+            osg::ref_ptr<RollController> callback(new RollController(rollctrl->data.getPtr()));
+            setupController(rollctrl, callback, animflags);
             node->addUpdateCallback(callback);
         }
 
@@ -822,7 +864,9 @@ namespace NifOsg
                 if (particle.vertex < int(particledata->colors.size()))
                     partcolor = particledata->colors.at(particle.vertex);
 
-                float size = particledata->sizes.at(particle.vertex) * partctrl->size;
+                float size = partctrl->size;
+                if (particle.vertex < int(particledata->sizes.size()))
+                    size *= particledata->sizes.at(particle.vertex);
 
                 created->setSizeRange(osgParticle::rangef(size, size));
                 box.expandBy(osg::BoundingSphere(position, size));
@@ -1086,19 +1130,18 @@ namespace NifOsg
             const Nif::NodeList &bones = skin->bones;
             for(size_t i = 0;i < bones.length();i++)
             {
-                std::string boneName = bones[i].getPtr()->name;
+                std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->name);
 
                 SceneUtil::RigGeometry::BoneInfluence influence;
                 const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[i].weights;
                 for(size_t j = 0;j < weights.size();j++)
                 {
-                    std::pair<unsigned short, float> indexWeight = std::make_pair(weights[j].vertex, weights[j].weight);
-                    influence.mWeights.insert(indexWeight);
+                    influence.mWeights.emplace_back(weights[j].vertex, weights[j].weight);
                 }
                 influence.mInvBindMatrix = data->bones[i].trafo.toMatrix();
                 influence.mBoundSphere = osg::BoundingSpheref(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
 
-                map->mMap.insert(std::make_pair(boneName, influence));
+                map->mData.emplace_back(boneName, influence);
             }
             rig->setInfluenceMap(map);
 
@@ -1249,6 +1292,7 @@ namespace NifOsg
                 boundTextures.clear();
             }
 
+            // If this loop is changed such that the base texture isn't guaranteed to end up in texture unit 0, the shadow casting shader will need to be updated accordingly.
             for (int i=0; i<Nif::NiTexturingProperty::NumTextures; ++i)
             {
                 if (texprop->textures[i].inUse)

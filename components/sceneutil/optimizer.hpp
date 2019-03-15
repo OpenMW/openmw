@@ -321,6 +321,8 @@ class Optimizer
                     BaseOptimizerVisitor(optimizer, REMOVE_REDUNDANT_NODES) {}
 
                 virtual void apply(osg::Group& group);
+                virtual void apply(osg::LOD& lod);
+                virtual void apply(osg::Switch& switchNode);
 
                 void removeEmptyNodes();
 
@@ -340,6 +342,7 @@ class Optimizer
                 virtual void apply(osg::Group& group);
                 virtual void apply(osg::Transform& transform);
                 virtual void apply(osg::LOD& lod);
+                virtual void apply(osg::Switch& switchNode);
 
                 bool isOperationPermissible(osg::Node& node);
 
@@ -360,6 +363,7 @@ class Optimizer
 
             virtual void apply(osg::Group& group);
             virtual void apply(osg::LOD& lod);
+            virtual void apply(osg::Switch& switchNode);
         };
 
         class MergeGeometryVisitor : public BaseOptimizerVisitor

@@ -56,18 +56,18 @@ public:
     };
     typedef std::vector<FileStruct> FileList;
 
-private:
+protected:
     /// Table of files in this archive
-    FileList files;
+    FileList mFiles;
 
     /// Filename string buffer
-    std::vector<char> stringBuf;
+    std::vector<char> mStringBuf;
 
     /// True when an archive has been loaded
-    bool isLoaded;
+    bool mIsLoaded;
 
     /// Used for error messages
-    std::string filename;
+    std::string mFilename;
 
     /// Case insensitive string comparison
     struct iltstr
@@ -81,13 +81,16 @@ private:
         checks are case insensitive.
     */
     typedef std::map<const char*, int, iltstr> Lookup;
-    Lookup lookup;
+    Lookup mLookup;
 
     /// Error handling
     void fail(const std::string &msg);
 
     /// Read header information from the input source
-    void readHeader();
+    virtual void readHeader();
+
+    /// Read header information from the input source
+
 
     /// Get the index of a given file name, or -1 if not found
     /// @note Thread safe.
@@ -100,7 +103,10 @@ public:
      */
 
     BSAFile()
-      : isLoaded(false)
+      : mIsLoaded(false)
+    { }
+
+    virtual ~BSAFile()
     { }
 
     /// Open an archive file.
@@ -112,24 +118,24 @@ public:
      */
 
     /// Check if a file exists
-    bool exists(const char *file) const
+    virtual bool exists(const char *file) const
     { return getIndex(file) != -1; }
 
     /** Open a file contained in the archive. Throws an exception if the
         file doesn't exist.
      * @note Thread safe.
     */
-    Files::IStreamPtr getFile(const char *file);
+    virtual Files::IStreamPtr getFile(const char *file);
 
     /** Open a file contained in the archive.
      * @note Thread safe.
     */
-    Files::IStreamPtr getFile(const FileStruct* file);
+    virtual Files::IStreamPtr getFile(const FileStruct* file);
 
     /// Get a list of all files
     /// @note Thread safe.
     const FileList &getList() const
-    { return files; }
+    { return mFiles; }
 };
 
 }

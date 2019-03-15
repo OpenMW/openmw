@@ -120,7 +120,7 @@ void NiRotatingParticlesData::read(NIFStream *nif)
 
 void NiPosData::read(NIFStream *nif)
 {
-    mKeyList.reset(new Vector3KeyMap);
+    mKeyList = std::make_shared<Vector3KeyMap>();
     mKeyList->read(nif);
 }
 
@@ -128,14 +128,14 @@ void NiUVData::read(NIFStream *nif)
 {
     for(int i = 0;i < 4;i++)
     {
-        mKeyList[i].reset(new FloatKeyMap);
+        mKeyList[i] = std::make_shared<FloatKeyMap>();
         mKeyList[i]->read(nif);
     }
 }
 
 void NiFloatData::read(NIFStream *nif)
 {
-    mKeyList.reset(new FloatKeyMap);
+    mKeyList = std::make_shared<FloatKeyMap>();
     mKeyList->read(nif);
 }
 
@@ -177,7 +177,7 @@ void NiPixelData::read(NIFStream *nif)
 
 void NiColorData::read(NIFStream *nif)
 {
-    mKeyMap.reset(new Vector4KeyMap);
+    mKeyMap = std::make_shared<Vector4KeyMap>();
     mKeyMap->read(nif);
 }
 
@@ -231,7 +231,7 @@ void NiMorphData::read(NIFStream *nif)
     mMorphs.resize(morphCount);
     for(int i = 0;i < morphCount;i++)
     {
-        mMorphs[i].mKeyFrames.reset(new FloatKeyMap);
+        mMorphs[i].mKeyFrames = std::make_shared<FloatKeyMap>();
         mMorphs[i].mKeyFrames->read(nif, true);
         nif->getVector3s(mMorphs[i].mVertices, vertCount);
     }
@@ -239,22 +239,22 @@ void NiMorphData::read(NIFStream *nif)
 
 void NiKeyframeData::read(NIFStream *nif)
 {
-    mRotations.reset(new QuaternionKeyMap);
+    mRotations = std::make_shared<QuaternionKeyMap>();
     mRotations->read(nif);
     if(mRotations->mInterpolationType == Vector3KeyMap::sXYZInterpolation)
     {
         //Chomp unused float
         nif->getFloat();
-        mXRotations.reset(new FloatKeyMap);
-        mYRotations.reset(new FloatKeyMap);
-        mZRotations.reset(new FloatKeyMap);
+        mXRotations = std::make_shared<FloatKeyMap>();
+        mYRotations = std::make_shared<FloatKeyMap>();
+        mZRotations = std::make_shared<FloatKeyMap>();
         mXRotations->read(nif, true);
         mYRotations->read(nif, true);
         mZRotations->read(nif, true);
     }
-    mTranslations.reset(new Vector3KeyMap);
+    mTranslations = std::make_shared<Vector3KeyMap>();
     mTranslations->read(nif);
-    mScales.reset(new FloatKeyMap);
+    mScales = std::make_shared<FloatKeyMap>();
     mScales->read(nif);
 }
 

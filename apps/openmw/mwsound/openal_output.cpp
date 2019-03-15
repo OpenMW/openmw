@@ -1,9 +1,9 @@
 #include <algorithm>
-#include <stdexcept>
 #include <cstring>
 #include <vector>
 #include <memory>
 #include <array>
+#include <atomic>
 
 #include <stdint.h>
 
@@ -279,7 +279,7 @@ private:
 
     std::unique_ptr<Sound_Loudness> mLoudnessAnalyzer;
 
-    volatile bool mIsFinished;
+    std::atomic<bool> mIsFinished;
 
     void updateAll(bool local);
 
@@ -313,7 +313,7 @@ struct OpenAL_Output::StreamThread : public OpenThreads::Thread {
     typedef std::vector<OpenAL_SoundStream*> StreamVec;
     StreamVec mStreams;
 
-    volatile bool mQuitNow;
+    std::atomic<bool> mQuitNow;
     OpenThreads::Mutex mMutex;
     OpenThreads::Condition mCondVar;
 

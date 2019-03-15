@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <components/misc/stringops.hpp>
+#include <components/misc/constants.hpp>
 
 #include "../doc/document.hpp"
 
@@ -140,29 +141,44 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
 
     std::unique_ptr<CSMWorld::UpdateCellCommand> modifyCell;
 
+    std::unique_ptr<CSMWorld::ModifyCommand> modifyDataRefNum;
+
     int columnId = model->data (index, ColumnBase::Role_ColumnId).toInt();
 
     if (columnId==Columns::ColumnId_PositionXPos || columnId==Columns::ColumnId_PositionYPos)
     {
-        IdTableProxyModel *proxy = dynamic_cast<IdTableProxyModel *> (model);
+        const float oldPosition = model->data (index).toFloat();
 
-        int row = proxy ? proxy->mapToSource (index).row() : index.row();
-
-        // This is not guaranteed to be the same as \a model, since a proxy could be used.
-        IdTable& model2 = dynamic_cast<IdTable&> (*mDocument.getData().getTableModel (mId));
-
-        int cellColumn = model2.searchColumnIndex (Columns::ColumnId_Cell);
-
-        if (cellColumn!=-1)
+        // Modulate by cell size, update cell id if reference has been moved to a new cell
+        if (std::abs(std::fmod(oldPosition, Constants::CellSizeInUnits))
+            - std::abs(std::fmod(new_.toFloat(), Constants::CellSizeInUnits)) >= 0.5f)
         {
-            QModelIndex cellIndex = model2.index (row, cellColumn);
+            IdTableProxyModel *proxy = dynamic_cast<IdTableProxyModel *> (model);
 
-            std::string cellId = model2.data (cellIndex).toString().toUtf8().data();
+            int row = proxy ? proxy->mapToSource (index).row() : index.row();
 
-            if (cellId.find ('#')!=std::string::npos)
+            // This is not guaranteed to be the same as \a model, since a proxy could be used.
+            IdTable& model2 = dynamic_cast<IdTable&> (*mDocument.getData().getTableModel (mId));
+
+            int cellColumn = model2.searchColumnIndex (Columns::ColumnId_Cell);
+
+            if (cellColumn!=-1)
             {
-                // Need to recalculate the cell
-                modifyCell.reset (new UpdateCellCommand (model2, row));
+                QModelIndex cellIndex = model2.index (row, cellColumn);
+
+                std::string cellId = model2.data (cellIndex).toString().toUtf8().data();
+
+                if (cellId.find ('#')!=std::string::npos)
+                {
+                    // Need to recalculate the cell and (if necessary) clear the instance's refNum
+                    modifyCell.reset (new UpdateCellCommand (model2, row));
+
+                    // Not sure which model this should be applied to
+                    int refNumColumn = model2.searchColumnIndex (Columns::ColumnId_RefNum);
+
+                    if (refNumColumn!=-1)
+                        modifyDataRefNum.reset (new ModifyCommand(*model, model->index(row, refNumColumn), 0));
+                }
             }
         }
     }
@@ -175,6 +191,8 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
         CommandMacro macro (mDocument.getUndoStack());
         macro.push (modifyData.release());
         macro.push (modifyCell.release());
+        if (modifyDataRefNum.get())
+            macro.push (modifyDataRefNum.release());
     }
     else
         mDocument.getUndoStack().push (modifyData.release());

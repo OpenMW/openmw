@@ -1,5 +1,8 @@
 #include "cellpreloader.hpp"
 
+#include <atomic>
+#include <limits>
+
 #include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -7,9 +10,7 @@
 #include <components/resource/keyframemanager.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/stringops.hpp>
-#include <components/nifosg/nifloader.hpp>
 #include <components/terrain/world.hpp>
-#include <components/esmterrain/storage.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 #include <components/esm/loadcell.hpp>
 
@@ -71,9 +72,9 @@ namespace MWWorld
                 const std::vector<std::string>& objectIds = cell->getPreloadedIds();
 
                 // could possibly build the model list in the worker thread if we manage to make the Store thread safe
-                for (std::vector<std::string>::const_iterator it = objectIds.begin(); it != objectIds.end(); ++it)
+                for (const std::string& id : objectIds)
                 {
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), *it);
+                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id);
                     std::string model = ref.getPtr().getClass().getModel(ref.getPtr());
                     if (!model.empty())
                         mMeshes.push_back(model);
@@ -101,14 +102,13 @@ namespace MWWorld
                 }
             }
 
-            for (MeshList::const_iterator it = mMeshes.begin(); it != mMeshes.end(); ++it)
+            for (std::string& mesh: mMeshes)
             {
                 if (mAbort)
                     break;
 
                 try
                 {
-                    std::string mesh  = *it;
                     mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mSceneManager->getVFS());
 
                     if (mPreloadInstances)
@@ -159,7 +159,7 @@ namespace MWWorld
         MWRender::LandManager* mLandManager;
         bool mPreloadInstances;
 
-        volatile bool mAbort;
+        std::atomic<bool> mAbort;
 
         osg::ref_ptr<Terrain::View> mTerrainView;
 
@@ -249,7 +249,7 @@ namespace MWWorld
         {
             // throw out oldest cell to make room
             PreloadMap::iterator oldestCell = mPreloadCells.begin();
-            double oldestTimestamp = DBL_MAX;
+            double oldestTimestamp = std::numeric_limits<double>::max();
             double threshold = 1.0; // seconds
             for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end(); ++it)
             {
@@ -381,7 +381,7 @@ namespace MWWorld
         {
             for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size() && !mAbort; ++i)
             {
-                mWorld->preload(mTerrainViews[i], mPreloadPositions[i]);
+                mWorld->preload(mTerrainViews[i], mPreloadPositions[i], mAbort);
                 mTerrainViews[i]->reset(0);
             }
         }
@@ -392,7 +392,7 @@ namespace MWWorld
         }
 
     private:
-        volatile bool mAbort;
+        std::atomic<bool> mAbort;
         std::vector<osg::ref_ptr<Terrain::View> > mTerrainViews;
         Terrain::World* mWorld;
         std::vector<osg::Vec3f> mPreloadPositions;

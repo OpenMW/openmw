@@ -234,6 +234,7 @@ namespace SceneUtil
         {
             osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
             std::vector<osg::ref_ptr<osg::Light> > lights;
+            lights.reserve(lightList.size());
             for (unsigned int i=0; i<lightList.size();++i)
             {
                 lights.push_back(lightList[i]->mLightSource->getLight(frameNum));
@@ -399,7 +400,7 @@ namespace SceneUtil
                 return false;
         }
 
-        if (!(cv->getCurrentCamera()->getCullMask() & mLightManager->getLightingMask()))
+        if (!(cv->getTraversalMask() & mLightManager->getLightingMask()))
             return false;
 
         // Possible optimizations:

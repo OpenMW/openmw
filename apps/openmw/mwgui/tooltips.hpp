@@ -59,6 +59,8 @@ namespace MWGui
 
         void setDelay(float delay);
 
+        void clear();
+
         void setFocusObject(const MWWorld::Ptr& focus);
         void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
         ///< set the screen-space position of the tooltip for focused object
