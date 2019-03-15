@@ -651,6 +651,9 @@ void OMW::Engine::go()
     assert (!mContentFiles.empty());
 
     Log(Debug::Info) << "OSG version: " << osgGetVersion();
+    SDL_version sdlVersion;
+    SDL_GetVersion(&sdlVersion);
+    Log(Debug::Info) << "SDL version: " << (int)sdlVersion.major << "." << (int)sdlVersion.minor << "." << (int)sdlVersion.patch;
 
     Misc::Rng::init(mRandomSeed);
 
