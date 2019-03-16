@@ -78,5 +78,5 @@ vec3 getSpecular(vec3 viewNormal, vec3 viewDirection, float shininess, vec3 matS
     if (NdotL < 0.0)
         return vec3(0.,0.,0.);
     vec3 halfVec = normalize(lightDir - viewDirection);
-    return pow(max(dot(viewNormal, halfVec), 0.0), 128.) * gl_LightSource[0].specular.xyz * matSpec;
+    return pow(max(dot(viewNormal, halfVec), 0.0), shininess) * gl_LightSource[0].specular.xyz * matSpec;
 }
