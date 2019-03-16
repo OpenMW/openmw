@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <sstream>
+#include <string>
 
 #include <QMouseEvent>
 #include <QApplication>
@@ -615,7 +616,39 @@ void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
         }
         else if (hint[0]=='r')
         {
-            /// \todo implement 'r' type hints
+            // syntax r:ref#number (e.g. r:ref#100)
+            char ignore;
+
+            std::istringstream stream (hint.c_str());
+            if (stream >> ignore) // ignore r
+            {
+                char ignore1; // : or ;
+
+                std::string refCode; // ref#number (e.g. ref#100)
+
+                while (stream >> ignore1 >> refCode) {}
+
+                //Find out cell coordinate
+                CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
+                    *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_References));
+                int cellColumn = references.findColumnIndex(CSMWorld::Columns::ColumnId_Cell);
+                QVariant cell = references.data(references.getModelIndex(refCode, cellColumn)).value<QVariant>();
+                QString cellqs = cell.toString();
+                std::istringstream streamCellCoord (cellqs.toStdString().c_str());
+
+                if (streamCellCoord >> ignore) //ignore #
+                {
+                    // Current coordinate
+                    int x, y;
+
+                    // Loop through all the coordinates to add them to selection
+                    while (streamCellCoord >> x >> y)
+                        selection.add (CSMWorld::CellCoordinates (x, y));
+
+                    // Mark that camera needs setup
+                    mCamPositionSet=false;
+                }
+            }
         }
 
         setCellSelection (selection);
