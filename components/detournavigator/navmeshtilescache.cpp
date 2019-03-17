@@ -1,6 +1,8 @@
 #include "navmeshtilescache.hpp"
 #include "exceptions.hpp"
 
+#include <osg/Stats>
+
 #include <cstring>
 
 namespace DetourNavigator
@@ -111,6 +113,24 @@ namespace DetourNavigator
         acquireItemUnsafe(iterator);
 
         return Value(*this, iterator);
+    }
+
+    void NavMeshTilesCache::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    {
+        std::size_t navMeshCacheSize = 0;
+        std::size_t usedNavMeshTiles = 0;
+        std::size_t cachedNavMeshTiles = 0;
+
+        {
+            const std::lock_guard<std::mutex> lock(mMutex);
+            navMeshCacheSize = mUsedNavMeshDataSize;
+            usedNavMeshTiles = mBusyItems.size();
+            cachedNavMeshTiles = mFreeItems.size();
+        }
+
+        stats.setAttribute(frameNumber, "NavMesh CacheSize", navMeshCacheSize);
+        stats.setAttribute(frameNumber, "NavMesh UsedTiles", usedNavMeshTiles);
+        stats.setAttribute(frameNumber, "NavMesh CachedTiles", cachedNavMeshTiles);
     }
 
     void NavMeshTilesCache::removeLeastRecentlyUsed()

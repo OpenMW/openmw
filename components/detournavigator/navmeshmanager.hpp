@@ -50,6 +50,8 @@ namespace DetourNavigator
 
         std::map<osg::Vec3f, SharedNavMeshCacheItem> getNavMeshes() const;
 
+        void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
+
     private:
         const Settings& mSettings;
         TileCachedRecastMeshManager mRecastMeshManager;

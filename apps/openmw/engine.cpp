@@ -32,6 +32,8 @@
 
 #include <components/version/version.hpp>
 
+#include <components/detournavigator/navigator.hpp>
+
 #include "mwinput/inputmanagerimp.hpp"
 
 #include "mwgui/windowmanagerimp.hpp"
@@ -198,6 +200,8 @@ bool OMW::Engine::frame(float frametime)
 
             stats->setAttribute(frameNumber, "WorkQueue", mWorkQueue->getNumItems());
             stats->setAttribute(frameNumber, "WorkThread", mWorkQueue->getNumActiveThreads());
+
+            mEnvironment.getWorld()->getNavigator()->reportStats(frameNumber, *stats);
         }
 
     }

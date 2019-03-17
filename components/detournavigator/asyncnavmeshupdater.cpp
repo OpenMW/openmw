@@ -5,6 +5,8 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include <osg/Stats>
+
 namespace
 {
     using DetourNavigator::ChangeType;
@@ -100,6 +102,20 @@ namespace DetourNavigator
     {
         std::unique_lock<std::mutex> lock(mMutex);
         mDone.wait(lock, [&] { return mJobs.empty(); });
+    }
+
+    void AsyncNavMeshUpdater::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    {
+        std::size_t jobs = 0;
+
+        {
+            const std::lock_guard<std::mutex> lock(mMutex);
+            jobs = mJobs.size();
+        }
+
+        stats.setAttribute(frameNumber, "NavMesh UpdateJobs", jobs);
+
+        mNavMeshTilesCache.reportStats(frameNumber, stats);
     }
 
     void AsyncNavMeshUpdater::process() throw()

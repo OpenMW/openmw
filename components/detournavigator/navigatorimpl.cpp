@@ -138,6 +138,11 @@ namespace DetourNavigator
         return mSettings;
     }
 
+    void NavigatorImpl::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    {
+        mNavMeshManager.reportStats(frameNumber, stats);
+    }
+
     void NavigatorImpl::updateAvoidShapeId(const ObjectId id, const ObjectId avoidId)
     {
         updateId(id, avoidId, mWaterIds);
