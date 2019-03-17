@@ -197,14 +197,14 @@ class ResourceStatsTextDrawCallback : public osg::Drawable::DrawCallback
 {
 public:
     ResourceStatsTextDrawCallback(osg::Stats* stats, const std::vector<std::string>& statNames)
-        : _stats(stats)
-        , _statNames(statNames)
+        : mStats(stats)
+        , mStatNames(statNames)
     {
     }
 
     virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const
     {
-        if (!_stats) return;
+        if (!mStats) return;
 
         osgText::Text* text = (osgText::Text*)(drawable);
 
@@ -218,14 +218,14 @@ public:
 
         unsigned int frameNumber = renderInfo.getState()->getFrameStamp()->getFrameNumber()-1;
 
-        for (std::vector<std::string>::const_iterator it = _statNames.begin(); it != _statNames.end(); ++it)
+        for (const auto& statName : mStatNames.get())
         {
-            if (it->empty())
+            if (statName.empty())
                 viewStr << std::endl;
             else
             {
                 double value = 0.0;
-                if (_stats->getAttribute(frameNumber, *it, value))
+                if (mStats->getAttribute(frameNumber, statName, value))
                     viewStr << std::setw(8) << value << std::endl;
                 else
                     viewStr << std::setw(8) << "." << std::endl;
@@ -237,8 +237,8 @@ public:
         text->drawImplementation(renderInfo);
     }
 
-    osg::ref_ptr<osg::Stats> _stats;
-    std::vector<std::string> _statNames;
+    osg::ref_ptr<osg::Stats> mStats;
+    std::reference_wrapper<const std::vector<std::string>> mStatNames;
 };
 
 void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
@@ -269,9 +269,30 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
         _resourceStatsChildNum = _switch->getNumChildren();
         _switch->addChild(group, false);
 
-        const char* statNames[] = {"Compiling", "WorkQueue", "WorkThread", "", "Texture", "StateSet", "Node", "Node Instance", "Shape", "Shape Instance", "Image", "Nif", "Keyframe", "", "Terrain Chunk", "Terrain Texture", "Land", "Composite", "", "UnrefQueue"};
+        static const std::vector<std::string> statNames({
+            "Compiling",
+            "WorkQueue",
+            "WorkThread",
+            "",
+            "Texture",
+            "StateSet",
+            "Node",
+            "Node Instance",
+            "Shape",
+            "Shape Instance",
+            "Image",
+            "Nif",
+            "Keyframe",
+            "",
+            "Terrain Chunk",
+            "Terrain Texture",
+            "Land",
+            "Composite",
+            "",
+            "UnrefQueue",
+        });
 
-        int numLines = sizeof(statNames) / sizeof(statNames[0]);
+        const int numLines = statNames.size();
 
         group->addChild(createBackgroundRectangle(pos + osg::Vec3(-backgroundMargin, _characterSize + backgroundMargin, 0),
                                                         10 * _characterSize + 2 * backgroundMargin,
@@ -289,9 +310,9 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
         viewStr.clear();
         viewStr.setf(std::ios::left, std::ios::adjustfield);
         viewStr.width(14);
-        for (size_t i = 0; i<sizeof(statNames)/sizeof(statNames[0]); ++i)
+        for (const auto& statName : statNames)
         {
-            viewStr << statNames[i] << std::endl;
+            viewStr << statName << std::endl;
         }
 
         staticText->setText(viewStr.str());
@@ -311,7 +332,7 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
         statsText->setCharacterSize(_characterSize);
         statsText->setPosition(pos);
         statsText->setText("");
-        statsText->setDrawCallback(new ResourceStatsTextDrawCallback(viewer->getViewerStats(), std::vector<std::string>(statNames, statNames + numLines)));
+        statsText->setDrawCallback(new ResourceStatsTextDrawCallback(viewer->getViewerStats(), statNames));
     }
 }
 
