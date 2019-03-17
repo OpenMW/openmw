@@ -126,7 +126,8 @@ namespace MWGui
             {
                 MyGUI::ScrollBar* scroll = current->castType<MyGUI::ScrollBar>();
                 std::string valueStr;
-                if (getSettingValueType(current) == "Float")
+                std::string valueType = getSettingValueType(current);
+                if (valueType == "Float" || valueType == "Integer")
                 {
                     // TODO: ScrollBar isn't meant for this. should probably use a dedicated FloatSlider widget
                     float min,max;
@@ -423,14 +424,18 @@ namespace MWGui
         if (getSettingType(scroller) == "Slider")
         {
             std::string valueStr;
-            if (getSettingValueType(scroller) == "Float")
+            std::string valueType = getSettingValueType(scroller);
+            if (valueType == "Float" || valueType == "Integer")
             {
                 float value = pos / float(scroller->getScrollRange()-1);
 
                 float min,max;
                 getSettingMinMax(scroller, min, max);
                 value = min + (max-min) * value;
-                Settings::Manager::setFloat(getSettingName(scroller), getSettingCategory(scroller), value);
+                if (valueType == "Float")
+                    Settings::Manager::setFloat(getSettingName(scroller), getSettingCategory(scroller), value);
+                else
+                    Settings::Manager::setInt(getSettingName(scroller), getSettingCategory(scroller), (int)value);
                 valueStr = MyGUI::utility::toString(int(value));
             }
             else

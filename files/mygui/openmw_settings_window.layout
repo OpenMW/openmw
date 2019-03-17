@@ -53,12 +53,12 @@
                         <Property key="Caption" value="#{sDifficulty}"/>
                     </Widget>
                     <Widget type="MWScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
-                        <Property key="Range" value="10000"/>
-                        <Property key="Page" value="300"/>
+                        <Property key="Range" value="201"/>
+                        <Property key="Page" value="1"/>
                         <UserString key="SettingType" value="Slider"/>
                         <UserString key="SettingCategory" value="Game"/>
                         <UserString key="SettingName" value="difficulty"/>
-                        <UserString key="SettingValueType" value="Float"/>
+                        <UserString key="SettingValueType" value="Integer"/>
                         <UserString key="SettingMin" value="-100"/>
                         <UserString key="SettingMax" value="100"/>
                         <UserString key="SettingLabelWidget" value="DifficultyText"/>
@@ -83,11 +83,11 @@
                         <UserString key="SettingType" value="Slider"/>
                         <UserString key="SettingCategory" value="Game"/>
                         <UserString key="SettingName" value="actors processing range"/>
-                        <UserString key="SettingValueType" value="Float"/>
+                        <UserString key="SettingValueType" value="Integer"/>
                         <UserString key="SettingMin" value="3584"/>
                         <UserString key="SettingMax" value="7168"/>
                         <UserString key="SettingLabelWidget" value="ActorProcessingText"/>
-                        <UserString key="SettingLabelCaption" value="Actors Processing Range"/>
+                        <UserString key="SettingLabelCaption" value="Actors Processing Range (%s)"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
                         <Property key="Caption" value="#{sLow}"/>
@@ -309,12 +309,12 @@
                         <Widget type="TextBox" skin="NormalText" position="0 198 329 18" align="Left Top" name="FovText">
                         </Widget>
                         <Widget type="MWScrollBar" skin="MW_HScroll" position="0 222 329 18" align="HStretch Top">
-                            <Property key="Range" value="10000"/>
-                            <Property key="Page" value="300"/>
+                            <Property key="Range" value="81"/>
+                            <Property key="Page" value="1"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="field of view"/>
-                            <UserString key="SettingValueType" value="Float"/>
+                            <UserString key="SettingValueType" value="Integer"/>
                             <UserString key="SettingMin" value="30"/>
                             <UserString key="SettingMax" value="110"/>
                             <UserString key="SettingLabelWidget" value="FovText"/>
@@ -353,18 +353,19 @@
                     <Widget type="TabItem" skin="" position="0 28 352 268">
                         <Property key="Caption" value="  Detail  "/>
                         <Widget type="TextBox" skin="NormalText" position="4 4 300 24" align="Left Top">
-                            <Property key="Caption" value="Texture filtering"/>
+                            <Property key="Caption" value="Texture Filtering"/>
                         </Widget>
                         <Widget type="ComboBox" skin="MW_ComboBox" position="14 28 110 24" align="Left Top" name="TextureFilteringButton">
                             <Property key="AddItem" value="Bilinear"/>
                             <Property key="AddItem" value="Trilinear"/>
                         </Widget>
                         <Widget type="Widget" skin="" position="184 4 300 50" align="Left Top" name="AnisotropyBox">
-                            <Widget type="TextBox" skin="SandText" position="0 0 300 24" align="Left Top" name="AnisotropyLabel">
+                            <Widget type="TextBox" skin="NormalText" position="0 0 300 24" align="Left Top" name="AnisotropyLabel">
                                 <Property key="Caption" value="Anisotropy"/>
                             </Widget>
                             <Widget type="MWScrollBar" skin="MW_HScroll" position="0 28 150 18" align="Left Top">
                                 <Property key="Range" value="17"/>
+                                <Property key="Page" value="1"/>
                                 <UserString key="SettingType" value="Slider"/>
                                 <UserString key="SettingCategory" value="General"/>
                                 <UserString key="SettingName" value="anisotropy"/>
@@ -372,18 +373,20 @@
                                 <UserString key="SettingLabelCaption" value="Anisotropy (%s)"/>
                             </Widget>
                         </Widget>
-                        <Widget type="TextBox" skin="NormalText" position="4 130 322 18" align="Left Top">
+                        <Widget type="TextBox" skin="NormalText" position="4 130 322 18" align="Left Top" name="RenderDistanceLabel">
                             <Property key="Caption" value="#{sRender_Distance}"/>
                         </Widget>
                         <Widget type="MWScrollBar" skin="MW_HScroll" position="4 154 322 18" align="Left Top">
-                            <Property key="Range" value="10000"/>
+                            <Property key="Range" value="4667"/>
                             <Property key="Page" value="300"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="viewing distance"/>
-                            <UserString key="SettingValueType" value="Float"/>
+                            <UserString key="SettingValueType" value="Integer"/>
                             <UserString key="SettingMin" value="2000"/>
                             <UserString key="SettingMax" value="6666"/>
+                            <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
+                            <UserString key="SettingLabelCaption" value="#{sRender_Distance} (%s)"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="4 178 332 18" align="Left Top">
                             <Property key="Caption" value="#{sNear}"/>
