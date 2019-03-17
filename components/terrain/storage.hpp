@@ -52,7 +52,7 @@ namespace Terrain
         virtual void fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
                                 osg::ref_ptr<osg::Vec3Array> positions,
                                 osg::ref_ptr<osg::Vec3Array> normals,
-                                osg::ref_ptr<osg::Vec4Array> colours) = 0;
+                                osg::ref_ptr<osg::Vec4ubArray> colours) = 0;
 
         typedef std::vector<osg::ref_ptr<osg::Image> > ImageVector;
         /// Create textures holding layer blend values for a terrain chunk.

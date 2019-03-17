@@ -172,7 +172,8 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     osg::ref_ptr<osg::Vec3Array> positions (new osg::Vec3Array);
     osg::ref_ptr<osg::Vec3Array> normals (new osg::Vec3Array);
-    osg::ref_ptr<osg::Vec4Array> colors (new osg::Vec4Array);
+    osg::ref_ptr<osg::Vec4ubArray> colors (new osg::Vec4ubArray);
+    colors->setNormalize(true);
 
     osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
     positions->setVertexBufferObject(vbo);
