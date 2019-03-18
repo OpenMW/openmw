@@ -25,6 +25,11 @@ namespace Resource
     class ResourceSystem;
 }
 
+namespace SceneUtil
+{
+    class WorkQueue;
+}
+
 namespace Terrain
 {
     class Storage;
@@ -59,6 +64,9 @@ namespace Terrain
         /// @param preCompileMask mask for pre compiling textures
         World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask);
         virtual ~World();
+
+        /// Set a WorkQueue to delete objects in the background thread.
+        void setWorkQueue(SceneUtil::WorkQueue* workQueue);
 
         /// See CompositeMapRenderer::setTargetFrameRate
         void setTargetFrameRate(float rate);
