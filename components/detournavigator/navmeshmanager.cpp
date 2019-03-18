@@ -22,7 +22,8 @@ namespace
     template <class T>
     bool resetIfUnique(std::shared_ptr<T>& ptr)
     {
-        const std::weak_ptr<T> weak = std::move(ptr);
+        const std::weak_ptr<T> weak(ptr);
+        ptr.reset();
         if (auto shared = weak.lock())
         {
             ptr = std::move(shared);
