@@ -40,33 +40,6 @@ namespace
         return targetlevel;
     }
 
-    float distanceToBox(const osg::BoundingBox& box, const osg::Vec3f& v)
-    {
-        if (box.contains(v))
-            return 0;
-        else
-        {
-            osg::Vec3f maxDist(0,0,0);
-
-            if (v.x() < box.xMin())
-                maxDist.x() = box.xMin() - v.x();
-            else if (v.x() > box.xMax())
-                maxDist.x() = v.x() - box.xMax();
-
-            if (v.y() < box.yMin())
-                maxDist.y() = box.yMin() - v.y();
-            else if (v.y() > box.yMax())
-                maxDist.y() = v.y() - box.yMax();
-
-            if (v.z() < box.zMin())
-                maxDist.z() = box.zMin() - v.z();
-            else if (v.z() > box.zMax())
-                maxDist.z() = v.z() - box.zMax();
-
-            return maxDist.length();
-        }
-    }
-
 }
 
 namespace Terrain
@@ -81,9 +54,8 @@ public:
     {
     }
 
-    virtual bool isSufficientDetail(QuadTreeNode* node, const osg::Vec3f& eyePoint)
+    virtual bool isSufficientDetail(QuadTreeNode* node, float dist)
     {
-        float dist = distanceToBox(node->getBoundingBox(), eyePoint);
         int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()/mMinSize));
         int lodLevel = Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*mMinSize*mFactor)));
 
@@ -201,22 +173,40 @@ public:
         node->setLodCallback(parent->getLodCallback());
         node->setViewDataMap(mViewDataMap);
 
-        if (node->getSize() > mMinSize)
+        if (center.x() - halfSize > mMaxX
+                || center.x() + halfSize < mMinX
+                || center.y() - halfSize > mMaxY
+                || center.y() + halfSize < mMinY )
+            // Out of bounds of the actual terrain - this will happen because
+            // we rounded the size up to the next power of two
+        {
+            // Still create and return an empty node so as to not break the assumption that each QuadTreeNode has either 4 or 0 children.
+            return node;
+        }
+
+        // Do not add child nodes for default cells without data.
+        // size = 1 means that the single shape covers the whole cell.
+        if (node->getSize() == 1 && !mStorage->hasData(center.x()-0.5, center.y()-0.5))
+            return node;
+
+        if (node->getSize() <= mMinSize)
+        {
+            // We arrived at a leaf
+            float minZ,maxZ;
+            if (mStorage->getMinMaxHeights(size, center, minZ, maxZ))
+            {
+                float cellWorldSize = mStorage->getCellWorldSize();
+                osg::BoundingBox boundingBox(osg::Vec3f((center.x()-halfSize)*cellWorldSize, (center.y()-halfSize)*cellWorldSize, minZ),
+                                        osg::Vec3f((center.x()+halfSize)*cellWorldSize, (center.y()+halfSize)*cellWorldSize, maxZ));
+                node->setBoundingBox(boundingBox);
+            }
+            return node;
+        }
+        else
         {
             addChildren(node);
             return node;
         }
-
-        // We arrived at a leaf
-        float minZ, maxZ;
-        mStorage->getMinMaxHeights(size, center, minZ, maxZ);
-
-        float cellWorldSize = mStorage->getCellWorldSize();
-        osg::BoundingBox boundingBox(osg::Vec3f((center.x()-halfSize)*cellWorldSize, (center.y()-halfSize)*cellWorldSize, minZ),
-                                osg::Vec3f((center.x()+halfSize)*cellWorldSize, (center.y()+halfSize)*cellWorldSize, maxZ));
-        node->setBoundingBox(boundingBox);
-
-        return node;
     }
 
     osg::ref_ptr<RootNode> getRootNode()
@@ -236,11 +226,12 @@ private:
 };
 
 QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask, int borderMask, int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
-    : World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
+    : TerrainGrid(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
     , mLodFactor(lodFactor)
     , mVertexLodMod(vertexLodMod)
+    , mViewDistance(std::numeric_limits<float>::max())
 {
     // No need for culling on the Drawable / Transform level as the quad tree performs the culling already.
     mChunkManager->setCullingActive(false);
@@ -256,7 +247,7 @@ QuadTreeWorld::~QuadTreeWorld()
 }
 
 
-void traverse(QuadTreeNode* node, ViewData* vd, osg::NodeVisitor* nv, LodCallback* lodCallback, const osg::Vec3f& eyePoint, bool visible)
+void traverse(QuadTreeNode* node, ViewData* vd, osg::NodeVisitor* nv, LodCallback* lodCallback, const osg::Vec3f& eyePoint, bool visible, float maxDist)
 {
     if (!node->hasValidBounds())
         return;
@@ -264,14 +255,18 @@ void traverse(QuadTreeNode* node, ViewData* vd, osg::NodeVisitor* nv, LodCallbac
     if (nv && nv->getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
         visible = visible && !static_cast<osgUtil::CullVisitor*>(nv)->isCulled(node->getBoundingBox());
 
-    bool stopTraversal = (lodCallback && lodCallback->isSufficientDetail(node, eyePoint)) || !node->getNumChildren();
+    float dist = node->distance(eyePoint);
+    if (dist > maxDist)
+        return;
+
+    bool stopTraversal = (lodCallback && lodCallback->isSufficientDetail(node, dist)) || !node->getNumChildren();
 
     if (stopTraversal)
         vd->add(node, visible);
     else
     {
         for (unsigned int i=0; i<node->getNumChildren(); ++i)
-            traverse(node->getChild(i), vd, nv, lodCallback, eyePoint, visible);
+            traverse(node->getChild(i), vd, nv, lodCallback, eyePoint, visible, maxDist);
     }
 }
 
@@ -403,7 +398,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
             traverseToCell(mRootNode.get(), vd, x,y);
         }
         else
-            traverse(mRootNode.get(), vd, cv, mRootNode->getLodCallback(), cv->getViewPoint(), true);
+            traverse(mRootNode.get(), vd, cv, mRootNode->getLodCallback(), cv->getViewPoint(), true, mViewDistance);
     }
     else
         mRootNode->traverse(nv);
@@ -483,7 +478,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &eyePoint, std::atomic<
     ensureQuadTreeBuilt();
 
     ViewData* vd = static_cast<ViewData*>(view);
-    traverse(mRootNode.get(), vd, nullptr, mRootNode->getLodCallback(), eyePoint, false);
+    traverse(mRootNode.get(), vd, nullptr, mRootNode->getLodCallback(), eyePoint, false, mViewDistance);
 
     for (unsigned int i=0; i<vd->getNumEntries() && !abort; ++i)
     {
@@ -500,6 +495,26 @@ void QuadTreeWorld::reportStats(unsigned int frameNumber, osg::Stats *stats)
 void QuadTreeWorld::setDefaultViewer(osg::Object *obj)
 {
     mViewDataMap->setDefaultViewer(obj);
+}
+
+void QuadTreeWorld::loadCell(int x, int y)
+{
+    // fallback behavior only for undefined cells (every other is already handled in quadtree)
+    float dummy;
+    if (!mStorage->getMinMaxHeights(1, osg::Vec2f(x+0.5, y+0.5), dummy, dummy))
+        TerrainGrid::loadCell(x,y);
+    else
+        World::loadCell(x,y);
+}
+
+void QuadTreeWorld::unloadCell(int x, int y)
+{
+    // fallback behavior only for undefined cells (every other is already handled in quadtree)
+    float dummy;
+    if (!mStorage->getMinMaxHeights(1, osg::Vec2f(x+0.5, y+0.5), dummy, dummy))
+        TerrainGrid::unloadCell(x,y);
+    else
+        World::unloadCell(x,y);
 }
 
 

@@ -23,7 +23,7 @@ namespace Terrain
     public:
         virtual ~LodCallback() {}
 
-        virtual bool isSufficientDetail(QuadTreeNode *node, const osg::Vec3f& eyePoint) = 0;
+        virtual bool isSufficientDetail(QuadTreeNode *node, float dist) = 0;
     };
 
     class ViewDataMap;
@@ -48,6 +48,8 @@ namespace Terrain
             _children.push_back(child);
             child->addParent(this);
         };
+
+        float distance(const osg::Vec3f& v) const;
 
         /// Returns our direction relative to the parent node, or Root if we are the root node.
         ChildDirection getDirection() { return mDirection; }
