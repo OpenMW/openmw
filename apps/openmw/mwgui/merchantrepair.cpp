@@ -127,7 +127,7 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
     MWWorld::Ptr item = *sender->getUserData<MWWorld::Ptr>();
     item.getCellRef().setCharge(item.getClass().getItemMaxHealth(item));
 
-    player.getClass().getContainerStore(player).restack(item);
+    player.getClass().getContainerStore(player).restack(item, player);
 
     MWBase::Environment::get().getWindowManager()->playSound("Repair");
 

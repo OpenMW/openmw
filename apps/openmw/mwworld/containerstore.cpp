@@ -58,6 +58,13 @@ namespace
 
         return MWWorld::Ptr();
     }
+
+    bool shouldStackByHolder(const MWWorld::ConstPtr& withoutOwner, const MWWorld::ConstPtr& withOwner,
+        const MWWorld::ConstPtr& holder)
+    {
+        return withoutOwner.getCellRef().getOwner().empty()
+            && withOwner.getCellRef().getOwner() == holder.getCellRef().getRefId();
+    }
 }
 
 template<typename T>
@@ -192,7 +199,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr &ptr,
     return it;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::Ptr& item)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::Ptr& item, const ConstPtr& holder)
 {
     MWWorld::ContainerStoreIterator retval = end();
     for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
@@ -209,7 +216,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::
 
     for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
     {
-        if (stacks(*iter, item))
+        if (stacks(*iter, item, holder))
         {
             iter->getRefData().setCount(iter->getRefData().getCount() + item.getRefData().getCount());
             item.getRefData().setCount(0);
@@ -220,7 +227,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::
     return retval;
 }
 
-bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const
+bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2, const ConstPtr& holder) const
 {
     const MWWorld::Class& cls1 = ptr1.getClass();
     const MWWorld::Class& cls2 = ptr2.getClass();
@@ -241,7 +248,12 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
     }
 
     return ptr1 != ptr2 // an item never stacks onto itself
-        && ptr1.getCellRef().getOwner() == ptr2.getCellRef().getOwner()
+        && (
+            ptr1.getCellRef().getOwner() == ptr2.getCellRef().getOwner()
+            // if item has no owner we stack it with other item which has owner same to holder
+            || shouldStackByHolder(ptr1, ptr2, holder)
+            || shouldStackByHolder(ptr2, ptr1, holder)
+        )
         && ptr1.getCellRef().getSoul() == ptr2.getCellRef().getSoul()
 
         && ptr1.getClass().getRemainingUsageTime(ptr1) == ptr2.getClass().getRemainingUsageTime(ptr2)
@@ -280,7 +292,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
         itemPtr.getCellRef().setOwner(actorPtr.getCellRef().getRefId());
     }
 
-    it = addImp(itemPtr, count);
+    it = addImp(itemPtr, count, actorPtr);
 
     itemPtr.getCellRef().setOwner(oldOwner);
 
@@ -339,7 +351,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     return it;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr, int count)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr, int count, const ConstPtr& holder)
 {
     int type = getType(ptr);
 
@@ -369,7 +381,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
     // determine whether to stack or not
     for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
     {
-        if (stacks(*iter, ptr))
+        if (stacks(*iter, ptr, holder))
         {
             // stack
             iter->getRefData().setCount( iter->getRefData().getCount() + count );
@@ -450,19 +462,19 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
     return count - toRemove;
 }
 
-void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner)
+void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const ConstPtr& holder)
 {
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
         ++iter)
     {
         std::string id = Misc::StringUtils::lowerCase(iter->mItem.toString());
-        addInitialItem(id, owner, iter->mCount);
+        addInitialItem(holder, id, owner, iter->mCount);
     }
 
     flagAsModified();
 }
 
-void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner,
+void MWWorld::ContainerStore::addInitialItem (const ConstPtr& holder, const std::string& id, const std::string& owner,
                                               int count, bool topLevel, const std::string& levItem)
 {
     if (count == 0) return; //Don't restock with nothing.
@@ -476,7 +488,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
             if (topLevel && std::abs(count) > 1 && levItemList->mFlags & ESM::ItemLevList::Each)
             {
                 for (int i=0; i<std::abs(count); ++i)
-                    addInitialItem(id, owner, count > 0 ? 1 : -1, true, levItemList->mId);
+                    addInitialItem(holder, id, owner, count > 0 ? 1 : -1, true, levItemList->mId);
                 return;
             }
             else
@@ -484,7 +496,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
                 std::string itemId = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
                 if (itemId.empty())
                     return;
-                addInitialItem(itemId, owner, count, false, levItemList->mId);
+                addInitialItem(holder, itemId, owner, count, false, levItemList->mId);
             }
         }
         else
@@ -502,7 +514,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
             count = std::abs(count);
 
             ref.getPtr().getCellRef().setOwner(owner);
-            addImp (ref.getPtr(), count);
+            addImp (ref.getPtr(), count, holder);
         }
     }
     catch (const std::exception& e)
@@ -512,7 +524,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 
 }
 
-void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner)
+void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& holder, const std::string& owner)
 {
     //allowedForReplace - Holds information about how many items from the list were not sold;
     //                    Hence, tells us how many items we don't need to restock.
@@ -533,7 +545,7 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
             if(parent == "")
             {
                 //Remove it, from shop,
-                remove(it->first.first, itemCount, ptr);//ptr is the NPC
+                remove(it->first.first, itemCount, holder);//ptr is the NPC
                 //And remove it from map, so that when we restock, the new item will have proper parent.
                 mLevelledItemMap.erase(it++);
                 continue;
@@ -584,14 +596,14 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
             if(listInMap != allowedForReplace.end())
                 restockNum -= std::min(restockNum, listInMap->second);
             //restock
-            addInitialItem(itemOrList, owner, -restockNum, true);
+            addInitialItem(holder, itemOrList, owner, -restockNum, true);
         }
         else
         {
             //Restocking static item - just restock to the max count
             int currentCount = restockCount(itemOrList);
             if (currentCount < std::abs(it->mCount))
-                addInitialItem(itemOrList, owner, -(std::abs(it->mCount) - currentCount), true);
+                addInitialItem(holder, itemOrList, owner, -(std::abs(it->mCount) - currentCount), true);
         }
     }
     flagAsModified();

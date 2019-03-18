@@ -175,7 +175,7 @@ namespace MWWorld
             ///< \attention This function is internal to the world model and should not be called from
             /// outside.
 
-            virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
+            virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2, const ConstPtr& holder) const;
             ///< @return true if the two specified objects can stack with each other
 
             virtual int remove(const std::string& itemId, int count, const Ptr& actor);
@@ -216,7 +216,7 @@ namespace MWWorld
 
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
 
-            void rechargeItems (float duration);
+            void rechargeItems (float duration, const ConstPtr& holder);
             ///< Restore charge on enchanted items. Note this should only be done for the player.
 
             void purgeEffect (short effectId);

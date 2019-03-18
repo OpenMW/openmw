@@ -403,7 +403,7 @@ namespace MWClass
 
             // inventory
             // setting ownership is used to make the NPC auto-equip his initial equipment only, and not bartered items
-            data->mInventoryStore.fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
+            data->mInventoryStore.fill(ref->mBase->mInventory, ptr.getCellRef().getRefId(), ptr);
 
             data->mNpcStats.setGoldPool(gold);
 

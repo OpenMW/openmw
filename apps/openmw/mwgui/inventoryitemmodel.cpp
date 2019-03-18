@@ -18,6 +18,7 @@ namespace MWGui
 InventoryItemModel::InventoryItemModel(const MWWorld::Ptr &actor)
     : mActor(actor)
 {
+    assert(mActor);
 }
 
 ItemStack InventoryItemModel::getItem (ModelIndex index)
@@ -106,7 +107,7 @@ void InventoryItemModel::update()
         if (!item.getClass().showsInInventory(item))
             continue;
 
-        ItemStack newItem (item, this, item.getRefData().getCount());
+        ItemStack newItem (item, this, item.getRefData().getCount(), mActor);
 
         if (mActor.getClass().hasInventoryStore(mActor))
         {

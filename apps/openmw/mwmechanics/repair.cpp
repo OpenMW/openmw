@@ -55,7 +55,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
         itemToRepair.getCellRef().setCharge(charge);
 
         // attempt to re-stack item, in case it was fully repaired
-        MWWorld::ContainerStoreIterator stacked = player.getClass().getContainerStore(player).restack(itemToRepair);
+        MWWorld::ContainerStoreIterator stacked = player.getClass().getContainerStore(player).restack(itemToRepair, player);
 
         // set the OnPCRepair variable on the item's script
         std::string script = stacked->getClass().getScript(itemToRepair);

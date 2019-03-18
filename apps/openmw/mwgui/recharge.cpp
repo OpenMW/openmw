@@ -164,7 +164,7 @@ void Recharge::onItemClicked(MyGUI::Widget *sender, const MWWorld::Ptr& item)
 
         MWBase::Environment::get().getWindowManager()->playSound("Enchant Success");
 
-        player.getClass().getContainerStore(player).restack(item);
+        player.getClass().getContainerStore(player).restack(item, player);
     }
     else
     {

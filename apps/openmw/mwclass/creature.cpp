@@ -163,7 +163,7 @@ namespace MWClass
             // store
             ptr.getRefData().setCustomData(data.release());
 
-            getContainerStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
+            getContainerStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId(), ptr);
 
             if (hasInventory)
                 getInventoryStore(ptr).autoEquip(ptr);

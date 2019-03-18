@@ -479,7 +479,7 @@ namespace MWScript
                     item.getCellRef().setSoul(creature);
 
                     // Restack the gem with other gems with the same soul
-                    item.getContainerStore()->restack(item);
+                    item.getContainerStore()->restack(item, ptr);
                 }
         };
 

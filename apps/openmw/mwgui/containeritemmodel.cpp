@@ -16,23 +16,23 @@
 namespace
 {
 
-    bool stacks (const MWWorld::Ptr& left, const MWWorld::Ptr& right)
+    bool stacks (const MWWorld::ConstPtr& left, const MWWorld::ConstPtr& right, const MWWorld::ConstPtr& holder)
     {
         if (left == right)
             return true;
 
         // If one of the items is in an inventory and currently equipped, we need to check stacking both ways to be sure
         if (left.getContainerStore() && right.getContainerStore())
-            return left.getContainerStore()->stacks(left, right)
-                    && right.getContainerStore()->stacks(left, right);
+            return left.getContainerStore()->stacks(left, right, holder)
+                    && right.getContainerStore()->stacks(left, right, holder);
 
         if (left.getContainerStore())
-            return left.getContainerStore()->stacks(left, right);
+            return left.getContainerStore()->stacks(left, right, holder);
         if (right.getContainerStore())
-            return right.getContainerStore()->stacks(left, right);
+            return right.getContainerStore()->stacks(left, right, holder);
 
         MWWorld::ContainerStore store;
-        return store.stacks(left, right);
+        return store.stacks(left, right, holder);
     }
 
 }
@@ -40,11 +40,14 @@ namespace
 namespace MWGui
 {
 
-ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSources, const std::vector<MWWorld::Ptr>& worldItems)
+ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSources, const std::vector<MWWorld::Ptr>& worldItems,
+                                       const MWWorld::ConstPtr& owner)
     : mItemSources(itemSources)
     , mWorldItems(worldItems)
+    , mOwner(owner)
 {
     assert (!mItemSources.empty());
+    assert (mOwner);
 }
 
 ContainerItemModel::ContainerItemModel (const MWWorld::Ptr& source)
@@ -109,7 +112,7 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
 
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
-            if (stacks(*it, item.mBase))
+            if (stacks(*it, item.mBase, mOwner))
             {
                 toRemove -= store.remove(*it, toRemove, source);
                 if (toRemove <= 0)
@@ -119,7 +122,7 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
     }
     for (MWWorld::Ptr& source : mWorldItems)
     {
-        if (stacks(source, item.mBase))
+        if (stacks(source, item.mBase, mOwner))
         {
             int refCount = source.getRefData().getCount();
             if (refCount - toRemove <= 0)
@@ -150,7 +153,7 @@ void ContainerItemModel::update()
             bool found = false;
             for (ItemStack& itemStack : mItems)
             {
-                if (stacks(*it, itemStack.mBase))
+                if (stacks(*it, itemStack.mBase, mOwner))
                 {
                     // we already have an item stack of this kind, add to it
                     itemStack.mCount += it->getRefData().getCount();
@@ -162,7 +165,7 @@ void ContainerItemModel::update()
             if (!found)
             {
                 // no stack yet, create one
-                ItemStack newItem (*it, this, it->getRefData().getCount());
+                ItemStack newItem (*it, this, it->getRefData().getCount(), mOwner);
                 mItems.push_back(newItem);
             }
         }
@@ -172,7 +175,7 @@ void ContainerItemModel::update()
         bool found = false;
         for (ItemStack& itemStack : mItems)
         {
-            if (stacks(source, itemStack.mBase))
+            if (stacks(source, itemStack.mBase, mOwner))
             {
                 // we already have an item stack of this kind, add to it
                 itemStack.mCount += source.getRefData().getCount();
@@ -184,7 +187,7 @@ void ContainerItemModel::update()
         if (!found)
         {
             // no stack yet, create one
-            ItemStack newItem (source, this, source.getRefData().getCount());
+            ItemStack newItem (source, this, source.getRefData().getCount(), mOwner);
             mItems.push_back(newItem);
         }
     }

@@ -212,7 +212,7 @@ namespace MWMechanics
             gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
 
             // Restack the gem with other gems with the same soul
-            gem->getContainerStore()->restack(*gem);
+            gem->getContainerStore()->restack(*gem, caster);
 
             mTrapped = true;
 

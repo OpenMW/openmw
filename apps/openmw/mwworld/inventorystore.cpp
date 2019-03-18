@@ -724,9 +724,9 @@ void MWWorld::InventoryStore::flagAsModified()
     mRechargingItemsUpToDate = false;
 }
 
-bool MWWorld::InventoryStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const
+bool MWWorld::InventoryStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2, const ConstPtr& holder) const
 {
-    bool canStack = MWWorld::ContainerStore::stacks(ptr1, ptr2);
+    bool canStack = MWWorld::ContainerStore::stacks(ptr1, ptr2, holder);
     if (!canStack)
         return false;
 
@@ -839,7 +839,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
 
         if (it->getRefData().getCount())
         {
-            retval = restack(*it);
+            retval = restack(*it, actor);
 
             if (actor == MWMechanics::getPlayer())
             {
@@ -892,7 +892,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItemQuantity(con
     // Moving counts manually here, since ContainerStore's restack can't target unequipped stacks.
     for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
     {
-        if (stacks(*iter, item) && !isEquipped(*iter))
+        if (stacks(*iter, item, actor) && !isEquipped(*iter))
         {
             iter->getRefData().setCount(iter->getRefData().getCount() + count);
             item.getRefData().setCount(item.getRefData().getCount() - count);
@@ -989,7 +989,7 @@ void MWWorld::InventoryStore::updateRechargingItems()
     }
 }
 
-void MWWorld::InventoryStore::rechargeItems(float duration)
+void MWWorld::InventoryStore::rechargeItems(float duration, const ConstPtr& holder)
 {
     if (!mRechargingItemsUpToDate)
     {
@@ -1012,7 +1012,7 @@ void MWWorld::InventoryStore::rechargeItems(float duration)
 
             // attempt to restack when fully recharged
             if (it->first->getCellRef().getEnchantmentCharge() == it->second)
-                it->first = restack(*it->first);
+                it->first = restack(*it->first, holder);
         }
     }
 }

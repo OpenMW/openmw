@@ -58,8 +58,7 @@ namespace MWClass
 
             // setting ownership not needed, since taking items from a container inherits the
             // container's owner automatically
-            data->mContainerStore.fill(
-                ref->mBase->mInventory, "");
+            data->mContainerStore.fill(ref->mBase->mInventory, "", ptr);
 
             // store
             ptr.getRefData().setCustomData (data.release());

@@ -10,12 +10,13 @@
 namespace MWGui
 {
 
-    ItemStack::ItemStack(const MWWorld::Ptr &base, ItemModel *creator, size_t count)
+    ItemStack::ItemStack(const MWWorld::Ptr &base, ItemModel *creator, size_t count, const MWWorld::ConstPtr& holder)
         : mType(Type_Normal)
         , mFlags(0)
         , mCreator(creator)
         , mCount(count)
         , mBase(base)
+        , mHolder(holder)
     {
         if (base.getClass().getEnchantment(base) != "")
             mFlags |= Flag_Enchanted;
@@ -40,18 +41,21 @@ namespace MWGui
         if(left.mBase == right.mBase)
             return true;
 
+        if (left.mHolder != right.mHolder)
+            return false;
+
         // If one of the items is in an inventory and currently equipped, we need to check stacking both ways to be sure
         if (left.mBase.getContainerStore() && right.mBase.getContainerStore())
-            return left.mBase.getContainerStore()->stacks(left.mBase, right.mBase)
-                    && right.mBase.getContainerStore()->stacks(left.mBase, right.mBase);
+            return left.mBase.getContainerStore()->stacks(left.mBase, right.mBase, left.mHolder)
+                    && right.mBase.getContainerStore()->stacks(left.mBase, right.mBase, left.mHolder);
 
         if (left.mBase.getContainerStore())
-            return left.mBase.getContainerStore()->stacks(left.mBase, right.mBase);
+            return left.mBase.getContainerStore()->stacks(left.mBase, right.mBase, left.mHolder);
         if (right.mBase.getContainerStore())
-            return right.mBase.getContainerStore()->stacks(left.mBase, right.mBase);
+            return right.mBase.getContainerStore()->stacks(left.mBase, right.mBase, left.mHolder);
 
         MWWorld::ContainerStore store;
-        return store.stacks(left.mBase, right.mBase);
+        return store.stacks(left.mBase, right.mBase, left.mHolder);
     }
 
     ItemModel::ItemModel()

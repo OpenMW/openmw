@@ -294,7 +294,7 @@ namespace MWMechanics
         if (timeScaleFactor != 0.0f)
             duration /= timeScaleFactor;
         MWWorld::Ptr player = getPlayer();
-        player.getClass().getInventoryStore(player).rechargeItems(duration);
+        player.getClass().getInventoryStore(player).rechargeItems(duration, player);
     }
 
     void MechanicsManager::update(float duration, bool paused)

@@ -11,7 +11,7 @@ namespace MWGui
     /// @brief A single item stack managed by an item model
     struct ItemStack
     {
-        ItemStack (const MWWorld::Ptr& base, ItemModel* creator, size_t count);
+        ItemStack (const MWWorld::Ptr& base, ItemModel* creator, size_t count, const MWWorld::ConstPtr& holder);
         ItemStack();
         ///< like operator==, only without checking mType
 
@@ -33,6 +33,7 @@ namespace MWGui
         ItemModel* mCreator;
         size_t mCount;
         MWWorld::Ptr mBase;
+        MWWorld::ConstPtr mHolder;
     };
 
     bool operator == (const ItemStack& left, const ItemStack& right);

@@ -92,8 +92,9 @@ namespace MWWorld
 
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
-            ContainerStoreIterator addImp (const Ptr& ptr, int count);
-            void addInitialItem (const std::string& id, const std::string& owner, int count, bool topLevel=true, const std::string& levItem = "");
+            ContainerStoreIterator addImp (const Ptr& ptr, int count, const ConstPtr& holder);
+            void addInitialItem (const ConstPtr& holder, const std::string& id, const std::string& owner,
+                                 int count, bool topLevel=true, const std::string& levItem = "");
 
             template<typename T>
             ContainerStoreIterator getState (CellRefList<T>& collection,
@@ -158,7 +159,7 @@ namespace MWWorld
             ///
             /// @return an iterator to the new stack, or end() if no new stack was created.
 
-            MWWorld::ContainerStoreIterator restack (const MWWorld::Ptr& item);
+            MWWorld::ContainerStoreIterator restack (const MWWorld::Ptr& item, const ConstPtr& holder);
             ///< Attempt to re-stack an item in this container.
             /// If a compatible stack is found, the item's count is added to that stack, then the original is deleted.
             /// @return If the item was stacked, return the stack, otherwise return the old (untouched) item.
@@ -181,13 +182,13 @@ namespace MWWorld
 
         public:
 
-            virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
+            virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2, const ConstPtr& holder) const;
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner);
+            void fill (const ESM::InventoryList& items, const std::string& owner, const ConstPtr& holder);
             ///< Insert items into *this.
 
-            void restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner);
+            void restock (const ESM::InventoryList& items, const MWWorld::Ptr& holder, const std::string& owner);
 
             virtual void clear();
             ///< Empty container.
