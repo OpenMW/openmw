@@ -13,7 +13,6 @@ namespace MWGui
     {
         ItemStack (const MWWorld::Ptr& base, ItemModel* creator, size_t count);
         ItemStack();
-        bool stacks (const ItemStack& other);
         ///< like operator==, only without checking mType
 
         enum Type
