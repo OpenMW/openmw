@@ -212,6 +212,11 @@ namespace DetourNavigator
         return mCache;
     }
 
+    void NavMeshManager::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    {
+        mAsyncNavMeshUpdater.reportStats(frameNumber, stats);
+    }
+
     void NavMeshManager::addChangedTiles(const btCollisionShape& shape, const btTransform& transform,
             const ChangeType changeType)
     {

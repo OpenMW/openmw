@@ -12,6 +12,11 @@
 #include <mutex>
 #include <cassert>
 
+namespace osg
+{
+    class Stats;
+}
+
 namespace DetourNavigator
 {
     struct NavMeshDataRef
@@ -105,6 +110,8 @@ namespace DetourNavigator
             const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections,
             NavMeshData&& value);
 
+        void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
+
     private:
         class KeyView
         {
@@ -164,7 +171,7 @@ namespace DetourNavigator
             std::map<KeyView, ItemIterator> mMap;
         };
 
-        std::mutex mMutex;
+        mutable std::mutex mMutex;
         std::size_t mMaxNavMeshDataSize;
         std::size_t mUsedNavMeshDataSize;
         std::size_t mFreeNavMeshDataSize;

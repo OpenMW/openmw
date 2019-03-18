@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
 
 #include <osg/PolygonMode>
 
@@ -197,14 +198,14 @@ class ResourceStatsTextDrawCallback : public osg::Drawable::DrawCallback
 {
 public:
     ResourceStatsTextDrawCallback(osg::Stats* stats, const std::vector<std::string>& statNames)
-        : _stats(stats)
-        , _statNames(statNames)
+        : mStats(stats)
+        , mStatNames(statNames)
     {
     }
 
     virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const
     {
-        if (!_stats) return;
+        if (!mStats) return;
 
         osgText::Text* text = (osgText::Text*)(drawable);
 
@@ -218,14 +219,14 @@ public:
 
         unsigned int frameNumber = renderInfo.getState()->getFrameStamp()->getFrameNumber()-1;
 
-        for (std::vector<std::string>::const_iterator it = _statNames.begin(); it != _statNames.end(); ++it)
+        for (const auto& statName : mStatNames.get())
         {
-            if (it->empty())
+            if (statName.empty())
                 viewStr << std::endl;
             else
             {
                 double value = 0.0;
-                if (_stats->getAttribute(frameNumber, *it, value))
+                if (mStats->getAttribute(frameNumber, statName, value))
                     viewStr << std::setw(8) << value << std::endl;
                 else
                     viewStr << std::setw(8) << "." << std::endl;
@@ -237,8 +238,8 @@ public:
         text->drawImplementation(renderInfo);
     }
 
-    osg::ref_ptr<osg::Stats> _stats;
-    std::vector<std::string> _statNames;
+    osg::ref_ptr<osg::Stats> mStats;
+    std::reference_wrapper<const std::vector<std::string>> mStatNames;
 };
 
 void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
@@ -255,7 +256,7 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
     stateset->setAttribute(new osg::PolygonMode(), osg::StateAttribute::PROTECTED);
 #endif
 
-    osg::Vec3 pos(_statsWidth-300.f, _statsHeight-500.0f,0.0f);
+    osg::Vec3 pos(_statsWidth-420.f, _statsHeight-500.0f,0.0f);
     osg::Vec4 backgroundColor(0.0, 0.0, 0.0f, 0.3);
     osg::Vec4 staticTextColor(1.0, 1.0, 0.0f, 1.0);
     osg::Vec4 dynamicTextColor(1.0, 1.0, 1.0f, 1.0);
@@ -269,12 +270,41 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
         _resourceStatsChildNum = _switch->getNumChildren();
         _switch->addChild(group, false);
 
-        const char* statNames[] = {"Compiling", "WorkQueue", "WorkThread", "", "Texture", "StateSet", "Node", "Node Instance", "Shape", "Shape Instance", "Image", "Nif", "Keyframe", "", "Terrain Chunk", "Terrain Texture", "Land", "Composite", "", "UnrefQueue"};
+        static const std::vector<std::string> statNames({
+            "Compiling",
+            "WorkQueue",
+            "WorkThread",
+            "",
+            "Texture",
+            "StateSet",
+            "Node",
+            "Node Instance",
+            "Shape",
+            "Shape Instance",
+            "Image",
+            "Nif",
+            "Keyframe",
+            "",
+            "Terrain Chunk",
+            "Terrain Texture",
+            "Land",
+            "Composite",
+            "",
+            "UnrefQueue",
+            "",
+            "NavMesh UpdateJobs",
+            "NavMesh CacheSize",
+            "NavMesh UsedTiles",
+            "NavMesh CachedTiles",
+        });
 
-        int numLines = sizeof(statNames) / sizeof(statNames[0]);
+        static const auto longest = std::max_element(statNames.begin(), statNames.end(),
+            [] (const std::string& lhs, const std::string& rhs) { return lhs.size() < rhs.size(); });
+        const int numLines = statNames.size();
+        const float statNamesWidth = 13 * _characterSize + 2 * backgroundMargin;
 
         group->addChild(createBackgroundRectangle(pos + osg::Vec3(-backgroundMargin, _characterSize + backgroundMargin, 0),
-                                                        10 * _characterSize + 2 * backgroundMargin,
+                                                        statNamesWidth,
                                                         numLines * _characterSize + 2 * backgroundMargin,
                                                         backgroundColor));
 
@@ -288,18 +318,18 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
         std::ostringstream viewStr;
         viewStr.clear();
         viewStr.setf(std::ios::left, std::ios::adjustfield);
-        viewStr.width(14);
-        for (size_t i = 0; i<sizeof(statNames)/sizeof(statNames[0]); ++i)
+        viewStr.width(longest->size());
+        for (const auto& statName : statNames)
         {
-            viewStr << statNames[i] << std::endl;
+            viewStr << statName << std::endl;
         }
 
         staticText->setText(viewStr.str());
 
-        pos.x() += 10 * _characterSize + 2 * backgroundMargin + backgroundSpacing;
+        pos.x() += statNamesWidth + backgroundSpacing;
 
         group->addChild(createBackgroundRectangle(pos + osg::Vec3(-backgroundMargin, _characterSize + backgroundMargin, 0),
-                                                        5 * _characterSize + 2 * backgroundMargin,
+                                                        7 * _characterSize + 2 * backgroundMargin,
                                                         numLines * _characterSize + 2 * backgroundMargin,
                                                         backgroundColor));
 
@@ -311,7 +341,7 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
         statsText->setCharacterSize(_characterSize);
         statsText->setPosition(pos);
         statsText->setText("");
-        statsText->setDrawCallback(new ResourceStatsTextDrawCallback(viewer->getViewerStats(), std::vector<std::string>(statNames, statNames + numLines)));
+        statsText->setDrawCallback(new ResourceStatsTextDrawCallback(viewer->getViewerStats(), statNames));
     }
 }
 
