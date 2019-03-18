@@ -79,14 +79,11 @@ namespace MWGui
             static const float fadeTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fMagicStartIconBlink")->mValue.getFloat();
 
             std::vector<MagicEffectInfo>& effectInfos = effectInfoPair.second;
-            bool addNewLine = true;
+            bool addNewLine = false;
             for (const MagicEffectInfo& effectInfo : effectInfos)
             {
                 if (addNewLine)
-                {
                     sourcesDescription += "\n";
-                    addNewLine = false;
-                }
 
                 // if at least one of the effect sources is permanent, the effect will never wear off
                 if (effectInfo.mPermanent)
@@ -161,6 +158,8 @@ namespace MWGui
                         sourcesDescription += MWGui::ToolTips::toString(duration) + "s";
                     }
                 }
+
+                addNewLine = true;
             }
 
             if (remainingDuration > 0.f)
