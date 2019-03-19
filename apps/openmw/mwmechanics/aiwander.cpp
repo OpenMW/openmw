@@ -309,22 +309,25 @@ namespace MWMechanics
             mDestination = osg::Vec3f(destinationX, destinationY, destinationZ);
 
             // Check if land creature will walk onto water or if water creature will swim onto land
-            if ((!isWaterCreature && !destinationIsAtWater(actor, mDestination)) ||
-                (isWaterCreature && !destinationThroughGround(currentPosition, mDestination)))
-            {
-                const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
-                mPathFinder.buildPath(actor, currentPosition, mDestination, actor.getCell(),
-                    getPathGridGraph(actor.getCell()), halfExtents, getNavigatorFlags(actor));
-                mPathFinder.addPointToPath(mDestination);
+            if (!isWaterCreature && destinationIsAtWater(actor, mDestination))
+                continue;
 
-                if (mPathFinder.isPathConstructed())
-                {
-                    storage.setState(AiWanderStorage::Wander_Walking, true);
-                    mHasDestination = true;
-                    mUsePathgrid = false;
-                }
-                return;
+            if (isWaterCreature && destinationThroughGround(currentPosition, mDestination))
+                continue;
+
+            const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
+            mPathFinder.buildPath(actor, currentPosition, mDestination, actor.getCell(),
+                getPathGridGraph(actor.getCell()), halfExtents, getNavigatorFlags(actor));
+            mPathFinder.addPointToPath(mDestination);
+
+            if (mPathFinder.isPathConstructed())
+            {
+                storage.setState(AiWanderStorage::Wander_Walking, true);
+                mHasDestination = true;
+                mUsePathgrid = false;
             }
+
+            break;
         } while (--attempts);
     }
 
