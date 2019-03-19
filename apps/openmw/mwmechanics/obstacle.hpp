@@ -30,7 +30,7 @@ namespace MWMechanics
             bool isEvading() const;
 
             // Updates internal state, call each frame for moving actor
-            void update(const MWWorld::Ptr& actor, float duration, float scaleMinimumDistance = 1.0f);
+            void update(const MWWorld::Ptr& actor, float duration);
 
             // change direction to try to fix "stuck" actor
             void takeEvasiveAction(MWMechanics::Movement& actorMovement) const;

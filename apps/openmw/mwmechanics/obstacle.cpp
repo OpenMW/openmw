@@ -121,13 +121,13 @@ namespace MWMechanics
      * u = how long to move sideways
      *
      */
-    void ObstacleCheck::update(const MWWorld::Ptr& actor, float duration, float scaleMinimumDistance)
+    void ObstacleCheck::update(const MWWorld::Ptr& actor, float duration)
     {
         const MWWorld::Class& cls = actor.getClass();
         ESM::Position pos = actor.getRefData().getPosition();
 
         if(mDistSameSpot == -1)
-            mDistSameSpot = DIST_SAME_SPOT * cls.getSpeed(actor) * scaleMinimumDistance;
+            mDistSameSpot = DIST_SAME_SPOT * cls.getSpeed(actor);
 
         float distSameSpot = mDistSameSpot * duration;
 
