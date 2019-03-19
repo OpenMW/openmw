@@ -80,6 +80,9 @@ public:
 
         SDL_Window *mWindow;
     };
+
+private:
+    void setSwapInterval(bool enable);
 };
 
 }
