@@ -13,6 +13,8 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 
+#include "../mwphysics/collisiontype.hpp"
+
 #include "pathgrid.hpp"
 #include "creaturestats.hpp"
 #include "steering.hpp"
@@ -346,8 +348,10 @@ namespace MWMechanics
      * Returns true if the start to end point travels through a collision point (land).
      */
     bool AiWander::destinationThroughGround(const osg::Vec3f& startPoint, const osg::Vec3f& destination) {
+        const int mask = MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Door;
         return MWBase::Environment::get().getWorld()->castRay(startPoint.x(), startPoint.y(), startPoint.z(),
-                                                              destination.x(), destination.y(), destination.z());
+                                                              destination.x(), destination.y(), destination.z(),
+                                                              mask);
     }
 
     void AiWander::completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage) {
