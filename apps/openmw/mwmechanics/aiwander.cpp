@@ -298,7 +298,8 @@ namespace MWMechanics
         const auto currentPosition = actor.getRefData().getPosition().asVec3();
 
         std::size_t attempts = 10; // If a unit can't wander out of water, don't want to hang here
-        bool isWaterCreature = actor.getClass().isPureWaterCreature(actor);
+        const bool isWaterCreature = actor.getClass().isPureWaterCreature(actor);
+        const bool isFlyingCreature = actor.getClass().isPureFlyingCreature(actor);
         do {
             // Determine a random location within radius of original position
             const float wanderRadius = (0.2f + Misc::Rng::rollClosedProbability() * 0.8f) * wanderDistance;
@@ -312,7 +313,7 @@ namespace MWMechanics
             if (!isWaterCreature && destinationIsAtWater(actor, mDestination))
                 continue;
 
-            if (isWaterCreature && destinationThroughGround(currentPosition, mDestination))
+            if ((isWaterCreature || isFlyingCreature) && destinationThroughGround(currentPosition, mDestination))
                 continue;
 
             const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
