@@ -54,10 +54,8 @@ std::string getVampireHead(const std::string& race, bool female)
     if (sVampireMapping.find(thisCombination) == sVampireMapping.end())
     {
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
-        for(MWWorld::Store<ESM::BodyPart>::iterator it = partStore.begin(); it != partStore.end(); ++it)
+        for (const ESM::BodyPart& bodypart : store.get<ESM::BodyPart>())
         {
-            const ESM::BodyPart& bodypart = *it;
             if (!bodypart.mData.mVampire)
                 continue;
             if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
@@ -68,12 +66,11 @@ std::string getVampireHead(const std::string& race, bool female)
                 continue;
             if (!Misc::StringUtils::ciEqual(bodypart.mRace, race))
                 continue;
-            sVampireMapping[thisCombination] = &*it;
+            sVampireMapping[thisCombination] = &bodypart;
         }
     }
 
-    if (sVampireMapping.find(thisCombination) == sVampireMapping.end())
-        sVampireMapping[thisCombination] = nullptr;
+    sVampireMapping.emplace(thisCombination, nullptr);
 
     const ESM::BodyPart* bodyPart = sVampireMapping[thisCombination];
     if (!bodyPart)
@@ -448,36 +445,33 @@ void NpcAnimation::updateNpcBase()
     bool isVampire = (curType == Type_Vampire);
     bool isFemale = !mNpc->isMale();
 
-    if (isWerewolf)
-    {
-        mHeadModel = "meshes\\" + store.get<ESM::BodyPart>().find("WerewolfHead")->mModel;
-        mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find("WerewolfHair")->mModel;
-    }
-    else
-    {
-        mHeadModel = "";
-        const std::string& vampireHead = getVampireHead(mNpc->mRace, isFemale);
-        if (isVampire && !vampireHead.empty())
-            mHeadModel = vampireHead;
-        else if (!mNpc->mHead.empty())
-        {
-            const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(mNpc->mHead);
-            if (bp)
-                mHeadModel = "meshes\\" + bp->mModel;
-            else
-                Log(Debug::Warning) << "Warning: Failed to load body part '" << mNpc->mHead << "'";
-        }
+    mHeadModel.clear();
+    mHairModel.clear();
 
-        mHairModel = "";
-        if (!mNpc->mHair.empty())
-        {
-            const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(mNpc->mHair);
-            if (bp)
-                mHairModel = "meshes\\" + bp->mModel;
-            else
-                Log(Debug::Warning) << "Warning: Failed to load body part '" << mNpc->mHair << "'";
-        }
+    std::string headName = isWerewolf ? "WerewolfHead" : mNpc->mHead;
+    std::string hairName = isWerewolf ? "WerewolfHair" : mNpc->mHair;
+
+    if (!headName.empty())
+    {
+        const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(headName);
+        if (bp)
+            mHeadModel = "meshes\\" + bp->mModel;
+        else
+            Log(Debug::Warning) << "Warning: Failed to load body part '" << headName << "'";
     }
+
+    if (!hairName.empty())
+    {
+        const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(hairName);
+        if (bp)
+            mHairModel = "meshes\\" + bp->mModel;
+        else
+            Log(Debug::Warning) << "Warning: Failed to load body part '" << hairName << "'";
+    }
+
+    const std::string& vampireHead = getVampireHead(mNpc->mRace, isFemale);
+    if (!isWerewolf && isVampire && !vampireHead.empty())
+        mHeadModel = vampireHead;
 
     bool is1stPerson = mViewMode == VM_FirstPerson;
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
@@ -486,7 +480,7 @@ void NpcAnimation::updateNpcBase()
     defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(defaultSkeleton, mResourceSystem->getVFS());
 
     std::string smodel = defaultSkeleton;
-    if (!is1stPerson && !isWerewolf & !mNpc->mModel.empty())
+    if (!is1stPerson && !isWerewolf && !mNpc->mModel.empty())
         smodel = Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS());
 
     setObjectRoot(smodel, true, true, false);
@@ -736,10 +730,7 @@ void NpcAnimation::removePartGroup(int group)
 
 bool NpcAnimation::isFirstPersonPart(const ESM::BodyPart* bodypart)
 {
-    return (bodypart->mId.size() >= 3)
-        && bodypart->mId[bodypart->mId.size()-3] == '1'
-        && bodypart->mId[bodypart->mId.size()-2] == 's'
-        && bodypart->mId[bodypart->mId.size()-1] == 't';
+    return bodypart->mId.size() >= 3 && bodypart->mId.substr(bodypart->mId.size()-3, 3) == "1st";
 }
 
 bool NpcAnimation::isFemalePart(const ESM::BodyPart* bodypart)
@@ -799,16 +790,16 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
                     osg::Object* obj = node->getUserDataContainer()->getUserObject(i);
                     if (NifOsg::TextKeyMapHolder* keys = dynamic_cast<NifOsg::TextKeyMapHolder*>(obj))
                     {
-                        for (NifOsg::TextKeyMap::const_iterator it = keys->mTextKeys.begin(); it != keys->mTextKeys.end(); ++it)
+                        for (const std::pair<float, std::string> &key : keys->mTextKeys)
                         {
-                            if (Misc::StringUtils::ciEqual(it->second, "talk: start"))
-                                mHeadAnimationTime->setTalkStart(it->first);
-                            if (Misc::StringUtils::ciEqual(it->second, "talk: stop"))
-                                mHeadAnimationTime->setTalkStop(it->first);
-                            if (Misc::StringUtils::ciEqual(it->second, "blink: start"))
-                                mHeadAnimationTime->setBlinkStart(it->first);
-                            if (Misc::StringUtils::ciEqual(it->second, "blink: stop"))
-                                mHeadAnimationTime->setBlinkStop(it->first);
+                            if (Misc::StringUtils::ciEqual(key.second, "talk: start"))
+                                mHeadAnimationTime->setTalkStart(key.first);
+                            if (Misc::StringUtils::ciEqual(key.second, "talk: stop"))
+                                mHeadAnimationTime->setTalkStop(key.first);
+                            if (Misc::StringUtils::ciEqual(key.second, "blink: start"))
+                                mHeadAnimationTime->setBlinkStart(key.first);
+                            if (Misc::StringUtils::ciEqual(key.second, "blink: stop"))
+                                mHeadAnimationTime->setBlinkStop(key.first);
                         }
 
                         break;
@@ -834,16 +825,15 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
     const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
 
     const char *ext = (mViewMode == VM_FirstPerson) ? ".1st" : "";
-    std::vector<ESM::PartReference>::const_iterator part(parts.begin());
-    for(;part != parts.end();++part)
+    for(const ESM::PartReference& part : parts)
     {
-        const ESM::BodyPart *bodypart = 0;
-        if(!mNpc->isMale() && !part->mFemale.empty())
+        const ESM::BodyPart *bodypart = nullptr;
+        if(!mNpc->isMale() && !part.mFemale.empty())
         {
-            bodypart = partStore.search(part->mFemale+ext);
+            bodypart = partStore.search(part.mFemale+ext);
             if(!bodypart && mViewMode == VM_FirstPerson)
             {
-                bodypart = partStore.search(part->mFemale);
+                bodypart = partStore.search(part.mFemale);
                 if(bodypart && !(bodypart->mData.mPart == ESM::BodyPart::MP_Hand ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Wrist ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Forearm ||
@@ -851,14 +841,14 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                     bodypart = nullptr;
             }
             else if (!bodypart)
-                Log(Debug::Warning) << "Warning: Failed to find body part '" << part->mFemale << "'";
+                Log(Debug::Warning) << "Warning: Failed to find body part '" << part.mFemale << "'";
         }
-        if(!bodypart && !part->mMale.empty())
+        if(!bodypart && !part.mMale.empty())
         {
-            bodypart = partStore.search(part->mMale+ext);
+            bodypart = partStore.search(part.mMale+ext);
             if(!bodypart && mViewMode == VM_FirstPerson)
             {
-                bodypart = partStore.search(part->mMale);
+                bodypart = partStore.search(part.mMale);
                 if(bodypart && !(bodypart->mData.mPart == ESM::BodyPart::MP_Hand ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Wrist ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Forearm ||
@@ -866,13 +856,13 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                     bodypart = nullptr;
             }
             else if (!bodypart)
-                Log(Debug::Warning) << "Warning: Failed to find body part '" << part->mMale << "'";
+                Log(Debug::Warning) << "Warning: Failed to find body part '" << part.mMale << "'";
         }
 
         if(bodypart)
-            addOrReplaceIndividualPart((ESM::PartReferenceType)part->mPart, group, priority, "meshes\\"+bodypart->mModel, enchantedGlow, glowColor);
+            addOrReplaceIndividualPart((ESM::PartReferenceType)part.mPart, group, priority, "meshes\\"+bodypart->mModel, enchantedGlow, glowColor);
         else
-            reserveIndividualPart((ESM::PartReferenceType)part->mPart, group, priority);
+            reserveIndividualPart((ESM::PartReferenceType)part.mPart, group, priority);
     }
 }
 
@@ -891,7 +881,7 @@ void NpcAnimation::addControllers()
             osg::MatrixTransform* node = found->second.get();
             mFirstPersonNeckController = new NeckController(mObjectRoot.get());
             node->addUpdateCallback(mFirstPersonNeckController);
-            mActiveControllers.insert(std::make_pair(node, mFirstPersonNeckController));
+            mActiveControllers.emplace(node, mFirstPersonNeckController);
         }
     }
     else if (mViewMode == VM_Normal)
@@ -1093,40 +1083,39 @@ const std::vector<const ESM::BodyPart *>& NpcAnimation::getBodyParts(const std::
         std::vector<const ESM::BodyPart*>& parts = sRaceMapping[std::make_pair(race, flags)];
 
         typedef std::multimap<ESM::BodyPart::MeshPart,ESM::PartReferenceType> BodyPartMapType;
-        static BodyPartMapType sBodyPartMap;
-        if(sBodyPartMap.empty())
+        static const BodyPartMapType sBodyPartMap =
         {
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Neck, ESM::PRT_Neck));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Chest, ESM::PRT_Cuirass));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Groin, ESM::PRT_Groin));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Hand, ESM::PRT_RHand));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Hand, ESM::PRT_LHand));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Wrist, ESM::PRT_RWrist));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Wrist, ESM::PRT_LWrist));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Forearm, ESM::PRT_RForearm));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Forearm, ESM::PRT_LForearm));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperarm, ESM::PRT_RUpperarm));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperarm, ESM::PRT_LUpperarm));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Foot, ESM::PRT_RFoot));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Foot, ESM::PRT_LFoot));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Ankle, ESM::PRT_RAnkle));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Ankle, ESM::PRT_LAnkle));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Knee, ESM::PRT_RKnee));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Knee, ESM::PRT_LKnee));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperleg, ESM::PRT_RLeg));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperleg, ESM::PRT_LLeg));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Tail, ESM::PRT_Tail));
-        }
+            {ESM::BodyPart::MP_Neck, ESM::PRT_Neck},
+            {ESM::BodyPart::MP_Chest, ESM::PRT_Cuirass},
+            {ESM::BodyPart::MP_Groin, ESM::PRT_Groin},
+            {ESM::BodyPart::MP_Hand, ESM::PRT_RHand},
+            {ESM::BodyPart::MP_Hand, ESM::PRT_LHand},
+            {ESM::BodyPart::MP_Wrist, ESM::PRT_RWrist},
+            {ESM::BodyPart::MP_Wrist, ESM::PRT_LWrist},
+            {ESM::BodyPart::MP_Forearm, ESM::PRT_RForearm},
+            {ESM::BodyPart::MP_Forearm, ESM::PRT_LForearm},
+            {ESM::BodyPart::MP_Upperarm, ESM::PRT_RUpperarm},
+            {ESM::BodyPart::MP_Upperarm, ESM::PRT_LUpperarm},
+            {ESM::BodyPart::MP_Foot, ESM::PRT_RFoot},
+            {ESM::BodyPart::MP_Foot, ESM::PRT_LFoot},
+            {ESM::BodyPart::MP_Ankle, ESM::PRT_RAnkle},
+            {ESM::BodyPart::MP_Ankle, ESM::PRT_LAnkle},
+            {ESM::BodyPart::MP_Knee, ESM::PRT_RKnee},
+            {ESM::BodyPart::MP_Knee, ESM::PRT_LKnee},
+            {ESM::BodyPart::MP_Upperleg, ESM::PRT_RLeg},
+            {ESM::BodyPart::MP_Upperleg, ESM::PRT_LLeg},
+            {ESM::BodyPart::MP_Tail, ESM::PRT_Tail}
+        };
 
         parts.resize(ESM::PRT_Count, nullptr);
 
+        if (werewolf)
+            return parts;
+
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
-        for(MWWorld::Store<ESM::BodyPart>::iterator it = partStore.begin(); it != partStore.end(); ++it)
+
+        for(const ESM::BodyPart& bodypart : store.get<ESM::BodyPart>())
         {
-            if(werewolf)
-                break;
-            const ESM::BodyPart& bodypart = *it;
             if (bodypart.mData.mFlags & ESM::BodyPart::BPF_NotPlayable)
                 continue;
             if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
