@@ -777,6 +777,7 @@ MWShadowTechnique::MWShadowTechnique(const MWShadowTechnique& vdsm, const osg::C
     ShadowTechnique(vdsm,copyop)
 {
     _shadowRecievingPlaceholderStateSet = new osg::StateSet;
+    _enableShadows = vdsm._enableShadows;
 }
 
 MWShadowTechnique::~MWShadowTechnique()
@@ -2011,18 +2012,20 @@ struct ConvexHull
             Vertices unwantedEdgeEnds = findInternalEdges(vertex, connectedVertices);
             for (auto edgeEnd : unwantedEdgeEnds)
             {
-                for (auto itr = _edges.begin(); itr != _edges.end(); ++itr)
+                for (auto itr = _edges.begin(); itr != _edges.end();)
                 {
                     if (*itr == Edge(vertex, edgeEnd))
                     {
-                        _edges.erase(itr);
+                        itr = _edges.erase(itr);
                         break;
                     }
                     else if (*itr == Edge(edgeEnd, vertex))
                     {
-                        _edges.erase(itr);
+                        itr = _edges.erase(itr);
                         break;
                     }
+                    else
+                        ++itr;
                 }
             }
         }
