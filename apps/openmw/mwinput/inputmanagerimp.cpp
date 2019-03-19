@@ -196,8 +196,6 @@ namespace MWInput
 
     void InputManager::handleGuiArrowKey(int action)
     {
-        // Temporary shut-down of this function until deemed necessary.
-        return;
         if (SDL_IsTextInputActive())
             return;
 
@@ -402,7 +400,8 @@ namespace MWInput
             case A_MoveRight:
             case A_MoveForward:
             case A_MoveBackward:
-                handleGuiArrowKey(action);
+                // Temporary shut-down of this function until deemed necessary.
+                //handleGuiArrowKey(action);
                 break;
             case A_Journal:
                 toggleJournal ();
