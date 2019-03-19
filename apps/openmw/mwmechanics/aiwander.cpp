@@ -318,10 +318,17 @@ namespace MWMechanics
             if ((isWaterCreature || isFlyingCreature) && destinationThroughGround(currentPosition, mDestination))
                 continue;
 
-            const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
-            mPathFinder.buildPath(actor, currentPosition, mDestination, actor.getCell(),
-                getPathGridGraph(actor.getCell()), halfExtents, getNavigatorFlags(actor));
-            mPathFinder.addPointToPath(mDestination);
+            if (isWaterCreature || isFlyingCreature)
+            {
+                mPathFinder.buildStraightPath(mDestination);
+            }
+            else
+            {
+                const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
+                mPathFinder.buildPath(actor, currentPosition, mDestination, actor.getCell(),
+                    getPathGridGraph(actor.getCell()), halfExtents, getNavigatorFlags(actor));
+                mPathFinder.addPointToPath(mDestination);
+            }
 
             if (mPathFinder.isPathConstructed())
             {

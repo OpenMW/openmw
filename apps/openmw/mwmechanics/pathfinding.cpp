@@ -269,6 +269,13 @@ namespace MWMechanics
             mPath.pop_front();
     }
 
+    void PathFinder::buildStraightPath(const osg::Vec3f& endPoint)
+    {
+        mPath.clear();
+        mPath.push_back(endPoint);
+        mConstructed = true;
+    }
+
     void PathFinder::buildPathByPathgrid(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
         const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph)
     {
