@@ -47,6 +47,16 @@ namespace MWMechanics
         std::string("idle9"),
     };
 
+    namespace
+    {
+        inline int getCountBeforeReset(const MWWorld::ConstPtr& actor)
+        {
+            if (actor.getClass().isPureWaterCreature(actor) || actor.getClass().isPureFlyingCreature(actor))
+                return 1;
+            return COUNT_BEFORE_RESET;
+        }
+    }
+
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mRemainingDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle),
         mRepeat(repeat), mStoredInitialActorPosition(false), mInitialActorPosition(osg::Vec3f(0, 0, 0)),
@@ -493,7 +503,7 @@ namespace MWMechanics
         }
 
         // if stuck for sufficiently long, act like current location was the destination
-        if (storage.mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
+        if (storage.mStuckCount >= getCountBeforeReset(actor)) // something has gone wrong, reset
         {
             mObstacleCheck.clear();
             stopWalking(actor, storage);
