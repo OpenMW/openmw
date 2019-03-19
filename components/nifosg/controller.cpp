@@ -311,10 +311,11 @@ void VisController::operator() (osg::Node* node, osg::NodeVisitor* nv)
 
 RollController::RollController(const Nif::NiFloatData *data)
     : mData(data->mKeyList, 1.f)
+    , mStartingTime(0)
 {
 }
 
-RollController::RollController()
+RollController::RollController() : mStartingTime(0)
 {
 }
 
