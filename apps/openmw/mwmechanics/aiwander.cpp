@@ -325,9 +325,8 @@ namespace MWMechanics
             else
             {
                 const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
-                mPathFinder.buildPath(actor, currentPosition, mDestination, actor.getCell(),
-                    getPathGridGraph(actor.getCell()), halfExtents, getNavigatorFlags(actor));
-                mPathFinder.addPointToPath(mDestination);
+                mPathFinder.buildPathByNavMesh(actor, currentPosition, mDestination, halfExtents,
+                    getNavigatorFlags(actor));
             }
 
             if (mPathFinder.isPathConstructed())
