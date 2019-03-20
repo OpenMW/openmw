@@ -2554,6 +2554,13 @@ void CharacterController::forceStateUpdate()
         return;
     clearAnimQueue();
 
+    // Make sure we canceled the current attack or spellcasting,
+    // because we disabled attack animations anyway.
+    mCastingManualSpell = false;
+    mAttackingOrSpell = false;
+    if (mUpperBodyState != UpperCharState_Nothing)
+        mUpperBodyState = UpperCharState_WeapEquiped;
+
     refreshCurrentAnims(mIdleState, mMovementState, mJumpState, true);
 
     if(mDeathState != CharState_None)
