@@ -74,6 +74,8 @@ private:
 
     void updateNpcBase();
 
+    NpcType getNpcType();
+
     PartHolderPtr insertBoundedPart(const std::string &model, const std::string &bonename,
                                         const std::string &bonefilter, bool enchantedGlow, osg::Vec4f* glowColor=nullptr);
 
