@@ -238,6 +238,18 @@ void HeadAnimationTime::setBlinkStop(float value)
 
 // ----------------------------------------------------
 
+NpcAnimation::NpcType NpcAnimation::getNpcType()
+{
+    const MWWorld::Class &cls = mPtr.getClass();
+    NpcAnimation::NpcType curType = Type_Normal;
+    if (cls.getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0)
+        curType = Type_Vampire;
+    if (cls.getNpcStats(mPtr).isWerewolf())
+        curType = Type_Werewolf;
+
+    return curType;
+}
+
 static NpcAnimation::PartBoneMap createPartListMap()
 {
     NpcAnimation::PartBoneMap result;
@@ -283,7 +295,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
     mViewMode(viewMode),
     mShowWeapons(false),
     mShowCarriedLeft(true),
-    mNpcType(Type_Normal),
+    mNpcType(getNpcType()),
     mFirstPersonFieldOfView(firstPersonFieldOfView),
     mSoundsDisabled(disableSounds),
     mAccurateAiming(false),
@@ -431,8 +443,9 @@ void NpcAnimation::updateNpcBase()
 
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
-    bool isWerewolf = (mNpcType == Type_Werewolf);
-    bool isVampire = (mNpcType == Type_Vampire);
+    NpcType curType = getNpcType();
+    bool isWerewolf = (curType == Type_Werewolf);
+    bool isVampire = (curType == Type_Vampire);
     bool isFemale = !mNpc->isMale();
 
     if (isWerewolf)
@@ -517,14 +530,7 @@ void NpcAnimation::updateParts()
     if (!mObjectRoot.get())
         return;
 
-    const MWWorld::Class &cls = mPtr.getClass();
-
-    NpcType curType = Type_Normal;
-    if (cls.getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0)
-        curType = Type_Vampire;
-    if (cls.getNpcStats(mPtr).isWerewolf())
-        curType = Type_Werewolf;
-
+    NpcType curType = getNpcType();
     if (curType != mNpcType)
     {
         mNpcType = curType;
@@ -632,7 +638,7 @@ void NpcAnimation::updateParts()
     showWeapons(mShowWeapons);
     showCarriedLeft(mShowCarriedLeft);
 
-    bool isWerewolf = (mNpcType == Type_Werewolf);
+    bool isWerewolf = (getNpcType() == Type_Werewolf);
     std::string race = (isWerewolf ? "werewolf" : Misc::StringUtils::lowerCase(mNpc->mRace));
 
     const std::vector<const ESM::BodyPart*> &parts = getBodyParts(race, !mNpc->isMale(), mViewMode == VM_FirstPerson, isWerewolf);
