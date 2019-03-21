@@ -70,14 +70,17 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
     while (!mCompileSet.empty() && timeLeft > 0)
     {
         osg::ref_ptr<CompositeMap> node = *mCompileSet.begin();
+        mCompileSet.erase(node);
 
         mMutex.unlock();
         compile(*node, renderInfo, &timeLeft);
         mMutex.lock();
 
-        if (node->mCompiled >= node->mDrawables.size())
+        if (node->mCompiled < node->mDrawables.size())
         {
-            mCompileSet.erase(node);
+            // We did not compile the map fully.
+            // Place it back to queue to continue work in the next time.
+            mCompileSet.insert(node);
         }
     }
     mTimer.setStartTick();
