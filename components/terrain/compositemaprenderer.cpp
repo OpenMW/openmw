@@ -47,8 +47,6 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
     double availableTime = std::max((targetFrameTime - dt)*conservativeTimeRatio,
                                     mMinimumTimeAvailable);
 
-    mCompiled.clear();
-
     if (mWorkQueue)
         mUnrefQueue->flush(mWorkQueue.get());
 
@@ -60,7 +58,6 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
     while (!mImmediateCompileSet.empty())
     {
         osg::ref_ptr<CompositeMap> node = *mImmediateCompileSet.begin();
-        mCompiled.insert(node);
         mImmediateCompileSet.erase(node);
 
         mMutex.unlock();
@@ -80,7 +77,6 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
 
         if (node->mCompiled >= node->mDrawables.size())
         {
-            mCompiled.insert(node);
             mCompileSet.erase(node);
         }
     }

@@ -76,8 +76,6 @@ namespace Terrain
         mutable CompileSet mCompileSet;
         mutable CompileSet mImmediateCompileSet;
 
-        mutable CompileSet mCompiled;
-
         mutable OpenThreads::Mutex mMutex;
 
         osg::ref_ptr<osg::FrameBufferObject> mFBO;
