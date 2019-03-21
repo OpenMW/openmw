@@ -47,8 +47,6 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
     double availableTime = std::max((targetFrameTime - dt)*conservativeTimeRatio,
                                     mMinimumTimeAvailable);
 
-    mCompiled.clear();
-
     if (mWorkQueue)
         mUnrefQueue->flush(mWorkQueue.get());
 
@@ -59,26 +57,30 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
 
     while (!mImmediateCompileSet.empty())
     {
-        CompositeMap* node = *mImmediateCompileSet.begin();
-        mCompiled.insert(node);
+        osg::ref_ptr<CompositeMap> node = *mImmediateCompileSet.begin();
+        mImmediateCompileSet.erase(node);
 
+        mMutex.unlock();
         compile(*node, renderInfo, nullptr);
-
-        mImmediateCompileSet.erase(mImmediateCompileSet.begin());
+        mMutex.lock();
     }
 
     double timeLeft = availableTime;
 
     while (!mCompileSet.empty() && timeLeft > 0)
     {
-        CompositeMap* node = *mCompileSet.begin();
+        osg::ref_ptr<CompositeMap> node = *mCompileSet.begin();
+        mCompileSet.erase(node);
 
+        mMutex.unlock();
         compile(*node, renderInfo, &timeLeft);
+        mMutex.lock();
 
-        if (node->mCompiled >= node->mDrawables.size())
+        if (node->mCompiled < node->mDrawables.size())
         {
-            mCompiled.insert(node);
-            mCompileSet.erase(mCompileSet.begin());
+            // We did not compile the map fully.
+            // Place it back to queue to continue work in the next time.
+            mCompileSet.insert(node);
         }
     }
     mTimer.setStartTick();
