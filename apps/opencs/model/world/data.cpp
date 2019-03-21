@@ -1006,7 +1006,7 @@ void CSMWorld::Data::loadFallbackEntries()
         std::make_pair("PrisonMarker", "marker_prison.nif")
     };
 
-    for (const std::pair<std::string, std::string> &marker : staticMarkers)
+    for (const auto &marker : staticMarkers)
     {
         if (mReferenceables.searchId (marker.first)==-1)
         {
@@ -1020,7 +1020,7 @@ void CSMWorld::Data::loadFallbackEntries()
         }
     }
 
-    for (const std::pair<std::string, std::string> &marker : doorMarkers)
+    for (const auto &marker : doorMarkers)
     {
         if (mReferenceables.searchId (marker.first)==-1)
         {

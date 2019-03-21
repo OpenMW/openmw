@@ -790,7 +790,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
                     osg::Object* obj = node->getUserDataContainer()->getUserObject(i);
                     if (NifOsg::TextKeyMapHolder* keys = dynamic_cast<NifOsg::TextKeyMapHolder*>(obj))
                     {
-                        for (const std::pair<float, std::string> &key : keys->mTextKeys)
+                        for (const auto &key : keys->mTextKeys)
                         {
                             if (Misc::StringUtils::ciEqual(key.second, "talk: start"))
                                 mHeadAnimationTime->setTalkStart(key.first);

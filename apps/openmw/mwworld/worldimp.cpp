@@ -470,7 +470,7 @@ namespace MWWorld
         gmst["iWereWolfBounty"] = ESM::Variant(1000);
         gmst["fCombatDistanceWerewolfMod"] = ESM::Variant(0.3f);
 
-        for (const std::pair<std::string, ESM::Variant> &params : gmst)
+        for (const auto &params : gmst)
         {
             if (!mStore.get<ESM::GameSetting>().search(params.first))
             {
@@ -500,7 +500,7 @@ namespace MWWorld
         globals["crimegoldturnin"] = ESM::Variant(0);
         globals["pchasturnin"] = ESM::Variant(0);
 
-        for (const std::pair<std::string, ESM::Variant> &params : globals)
+        for (const auto &params : globals)
         {
             if (!mStore.get<ESM::Global>().search(params.first))
             {
@@ -519,7 +519,7 @@ namespace MWWorld
         statics["templemarker"] = "marker_temple.nif";
         statics["travelmarker"] = "marker_travel.nif";
 
-        for (const std::pair<std::string, std::string> &params : statics)
+        for (const auto &params : statics)
         {
             if (!mStore.get<ESM::Static>().search(params.first))
             {
@@ -533,7 +533,7 @@ namespace MWWorld
         std::map<std::string, std::string> doors;
         doors["prisonmarker"] = "marker_prison.nif";
 
-        for (const std::pair<std::string, std::string> &params : doors)
+        for (const auto &params : doors)
         {
             if (!mStore.get<ESM::Door>().search(params.first))
             {
