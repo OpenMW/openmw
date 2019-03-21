@@ -37,8 +37,8 @@ namespace Terrain
         virtual void unloadCell(int x, int y);
 
         View* createView();
-
-        void preload(View* view, const osg::Vec3f& viewPoint, std::atomic<bool>& abort);
+        void preload(View* view, const osg::Vec3f& eyePoint, std::atomic<bool>& abort);
+        void storeView(const View* view, double referenceTime);
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats);
 

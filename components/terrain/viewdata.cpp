@@ -5,7 +5,7 @@ namespace Terrain
 
 ViewData::ViewData()
     : mNumEntries(0)
-    , mFrameLastUsed(0)
+    , mLastUsageTimeStamp(0.0)
     , mChanged(false)
     , mHasViewPoint(false)
 {
@@ -85,7 +85,7 @@ void ViewData::clear()
     for (unsigned int i=0; i<mEntries.size(); ++i)
         mEntries[i].set(nullptr, false);
     mNumEntries = 0;
-    mFrameLastUsed = 0;
+    mLastUsageTimeStamp = 0;
     mChanged = false;
     mHasViewPoint = false;
 }
@@ -173,12 +173,12 @@ ViewData *ViewDataMap::createOrReuseView()
     }
 }
 
-void ViewDataMap::clearUnusedViews(unsigned int frame)
+void ViewDataMap::clearUnusedViews(double referenceTime)
 {
     for (Map::iterator it = mViews.begin(); it != mViews.end(); )
     {
         ViewData* vd = it->second;
-        if (vd->getFrameLastUsed() + 2 < frame)
+        if (vd->getLastUsageTimeStamp() + mExpiryDelay < referenceTime)
         {
             vd->clear();
             mUnusedViews.push_back(vd);

@@ -440,8 +440,14 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     if (!isCullVisitor)
         vd->reset(); // we can't reuse intersection views in the next frame because they only contain what is touched by the intersection ray.
 
-    vd->finishFrame(nv.getTraversalNumber());
-    mRootNode->getViewDataMap()->clearUnusedViews(nv.getTraversalNumber());
+    vd->markUnchanged();
+
+    double referenceTime = nv.getFrameStamp() ? nv.getFrameStamp()->getReferenceTime() : 0.0;
+    if (referenceTime != 0.0)
+    {
+        vd->setLastUsageTimeStamp(referenceTime);
+        mViewDataMap->clearUnusedViews(referenceTime);
+    }
 }
 
 void QuadTreeWorld::ensureQuadTreeBuilt()
@@ -504,6 +510,17 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, std::atomic
         ViewData::Entry& entry = vd->getEntry(i);
         loadRenderingNode(entry, vd, mVertexLodMod, mChunkManager.get());
     }
+    vd->markUnchanged();
+}
+
+void QuadTreeWorld::storeView(const View* view, double referenceTime)
+{
+    osg::ref_ptr<osg::Object> dummy = new osg::DummyObject;
+    const ViewData* vd = static_cast<const ViewData*>(view);
+    bool needsUpdate = false;
+    ViewData* stored = mViewDataMap->getViewData(dummy, vd->getViewPoint(), needsUpdate);
+    stored->copyFrom(*vd);
+    stored->setLastUsageTimeStamp(referenceTime);
 }
 
 void QuadTreeWorld::reportStats(unsigned int frameNumber, osg::Stats *stats)

@@ -82,7 +82,7 @@ namespace Terrain
         /// @note Thread safe.
         virtual void clearAssociatedCaches();
 
-        /// Load a terrain cell at maximum LOD and store it in the View for later use.
+        /// Load a terrain cell and store it in the View for later use.
         /// @note Thread safe.
         virtual void cacheCell(View* view, int x, int y) {}
 
@@ -105,6 +105,10 @@ namespace Terrain
         /// @note Thread safe, as long as you do not attempt to load into the same view from multiple threads.
 
         virtual void preload(View* view, const osg::Vec3f& viewPoint, std::atomic<bool>& abort) {}
+
+        /// Store a preloaded view into the cache with the intent that the next rendering traversal can use it.
+        /// @note Not thread safe.
+        virtual void storeView(const View* view, double referenceTime) {}
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
 
