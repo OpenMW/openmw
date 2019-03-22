@@ -72,8 +72,13 @@ namespace MWMechanics
                 mCell = nullptr;
             }
 
+            void buildStraightPath(const osg::Vec3f& endPoint);
+
             void buildPathByPathgrid(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                 const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
+
+            void buildPathByNavMesh(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
+                const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags);
 
             void buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                 const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
