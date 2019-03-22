@@ -739,7 +739,7 @@ void Record<ESM::Faction>::print()
             std::cout << "    Faction Reaction: "
                       << mData.mData.mRankData[i].mFactReaction << std::endl;
         }
-    for (const std::pair<std::string, int> &reaction : mData.mReactions)
+    for (const auto &reaction : mData.mReactions)
         std::cout << "  Reaction: " << reaction.second << " = " << reaction.first << std::endl;
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
