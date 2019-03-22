@@ -119,7 +119,7 @@ std::vector<osg::ref_ptr<osg::StateSet> > ChunkManager::createPasses(float chunk
 {
     std::vector<LayerInfo> layerList;
     std::vector<osg::ref_ptr<osg::Image> > blendmaps;
-    mStorage->getBlendmaps(chunkSize, chunkCenter, false, blendmaps, layerList);
+    mStorage->getBlendmaps(chunkSize, chunkCenter, blendmaps, layerList);
 
     bool useShaders = mSceneManager->getForceShaders();
     if (!mSceneManager->getClampLighting())

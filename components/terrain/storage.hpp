@@ -69,14 +69,10 @@ namespace Terrain
         /// @note May be called from background threads. Make sure to only call thread-safe functions from here!
         /// @param chunkSize size of the terrain chunk in cell units
         /// @param chunkCenter center of the chunk in cell units
-        /// @param pack Whether to pack blend values for up to 4 layers into one texture (one in each channel) -
-        ///        otherwise, each texture contains blend values for one layer only. Shader-based rendering
-        ///        can utilize packing, FFP can't.
         /// @param blendmaps created blendmaps will be written here
         /// @param layerList names of the layer textures used will be written here
-        virtual void getBlendmaps (float chunkSize, const osg::Vec2f& chunkCenter, bool pack,
-                           ImageVector& blendmaps,
-                           std::vector<LayerInfo>& layerList) = 0;
+        virtual void getBlendmaps (float chunkSize, const osg::Vec2f& chunkCenter, ImageVector& blendmaps,
+                               std::vector<LayerInfo>& layerList) = 0;
 
         virtual float getHeightAt (const osg::Vec3f& worldPos) = 0;
 

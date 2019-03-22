@@ -375,8 +375,7 @@ namespace ESMTerrain
         return texture;
     }
 
-    void Storage::getBlendmaps(float chunkSize, const osg::Vec2f &chunkCenter,
-        bool pack, ImageVector &blendmaps, std::vector<Terrain::LayerInfo> &layerList)
+    void Storage::getBlendmaps(float chunkSize, const osg::Vec2f &chunkCenter, ImageVector &blendmaps, std::vector<Terrain::LayerInfo> &layerList)
     {
         osg::Vec2f origin = chunkCenter - osg::Vec2f(chunkSize/2.f, chunkSize/2.f);
         int cellX = static_cast<int>(std::floor(origin.x()));
@@ -416,11 +415,8 @@ namespace ESMTerrain
             layerList.push_back(getLayerInfo(getTextureName(*it)));
         }
 
-        int numTextures = textureIndices.size();
-        // numTextures-1 since the base layer doesn't need blending
-        int numBlendmaps = pack ? static_cast<int>(std::ceil((numTextures - 1) / 4.f)) : (numTextures - 1);
-
-        int channels = pack ? 4 : 1;
+        // size-1 since the base layer doesn't need blending
+        int numBlendmaps = textureIndices.size() - 1;
 
         // Second iteration - create and fill in the blend maps
         const int blendmapSize = (realTextureSize-1) * chunkSize + 1;
@@ -430,10 +426,8 @@ namespace ESMTerrain
 
         for (int i=0; i<numBlendmaps; ++i)
         {
-            GLenum format = pack ? GL_RGBA : GL_ALPHA;
-
             osg::ref_ptr<osg::Image> image (new osg::Image);
-            image->allocateImage(blendmapImageSize, blendmapImageSize, 1, format, GL_UNSIGNED_BYTE);
+            image->allocateImage(blendmapImageSize, blendmapImageSize, 1, GL_ALPHA, GL_UNSIGNED_BYTE);
             unsigned char* pData = image->data();
 
             for (int y=0; y<blendmapSize; ++y)
@@ -443,18 +437,16 @@ namespace ESMTerrain
                     UniqueTextureId id = getVtexIndexAt(cellX, cellY, x+rowStart, y+colStart, cache);
                     assert(textureIndicesMap.find(id) != textureIndicesMap.end());
                     int layerIndex = textureIndicesMap.find(id)->second;
-                    int blendIndex = (pack ? static_cast<int>(std::floor((layerIndex - 1) / 4.f)) : layerIndex - 1);
-                    int channel = pack ? std::max(0, (layerIndex-1) % 4) : 0;
 
-                    int alpha = (blendIndex == i) ? 255 : 0;
+                    int alpha = (layerIndex == i+1) ? 255 : 0;
 
                     int realY = (blendmapSize - y - 1)*imageScaleFactor;
                     int realX = x*imageScaleFactor;
 
-                    pData[((realY+0)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
-                    pData[((realY+1)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
-                    pData[((realY+0)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
-                    pData[((realY+1)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
+                    pData[(realY+0)*blendmapImageSize + realX + 0] = alpha;
+                    pData[(realY+1)*blendmapImageSize + realX + 0] = alpha;
+                    pData[(realY+0)*blendmapImageSize + realX + 1] = alpha;
+                    pData[(realY+1)*blendmapImageSize + realX + 1] = alpha;
                 }
             }
             blendmaps.push_back(image);
