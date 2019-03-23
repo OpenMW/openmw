@@ -352,11 +352,6 @@ namespace ESMTerrain
 
     std::string Storage::getTextureName(UniqueTextureId id)
     {
-        // Goes under used terrain blend transitions
-        static const std::string baseTexture = "textures\\tx_black_01.dds";
-        if (id.first == -1)
-            return baseTexture;
-
         static const std::string defaultTexture = "textures\\_land_default.dds";
         if (id.first == 0)
             return defaultTexture; // Not sure if the default texture really is hardcoded?
@@ -391,9 +386,6 @@ namespace ESMTerrain
         // Save the used texture indices so we know the total number of textures
         // and number of required blend maps
         std::set<UniqueTextureId> textureIndices;
-        // Due to the way the blending works, the base layer will bleed between texture transitions so we want it to be a black texture
-        // The subsequent passes are added instead of blended, so this gives the correct result
-        textureIndices.insert(std::make_pair(-1,0)); // -1 goes to tx_black_01
 
         LandCache cache;
 
@@ -415,8 +407,9 @@ namespace ESMTerrain
             layerList.push_back(getLayerInfo(getTextureName(*it)));
         }
 
-        // size-1 since the base layer doesn't need blending
-        int numBlendmaps = textureIndices.size() - 1;
+        int numBlendmaps = textureIndices.size();
+        if (numBlendmaps == 1)
+            return; // There is no need to blend a single texture
 
         // Second iteration - create and fill in the blend maps
         const int blendmapSize = (realTextureSize-1) * chunkSize + 1;
