@@ -1834,6 +1834,17 @@ namespace MWInput
             MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
             return;
         }
+
+        // Disallow binding reserved keys
+        if (key == SDL_SCANCODE_F3 || key == SDL_SCANCODE_F4 || key == SDL_SCANCODE_F10 || key == SDL_SCANCODE_F11)
+            return;
+
+        #ifndef __APPLE__
+        // Disallow binding Windows/Meta keys
+        if (key == SDL_SCANCODE_LGUI || key == SDL_SCANCODE_RGUI)
+            return;
+        #endif
+
         if(!mDetectingKeyboard)
             return;
 
