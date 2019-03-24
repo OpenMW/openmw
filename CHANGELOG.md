@@ -48,6 +48,7 @@
     Bug #4916: Specular power (shininess) material parameter is ignored when shaders are used.
     Bug #4922: Werewolves can not attack if the transformation happens during attack
     Feature #2229: Improve pathfinding AI
+    Feature #2780: Make OpenMW version information easily available in-game
     Feature #3442: Default values for fallbacks from ini file
     Feature #3610: Option to invert X axis
     Feature #3893: Implicit target for "set" function in console

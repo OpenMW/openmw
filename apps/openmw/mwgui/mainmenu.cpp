@@ -226,8 +226,6 @@ namespace MWGui
 
         MWBase::StateManager::State state = MWBase::Environment::get().getStateManager()->getState();
 
-        mVersionText->setVisible(state == MWBase::StateManager::State_NoGame);
-
         std::vector<std::string> buttons;
 
         if (state==MWBase::StateManager::State_Running)
