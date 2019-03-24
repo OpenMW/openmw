@@ -287,11 +287,10 @@ namespace MWGui
 
             MyGUI::IntSize requested = button->getRequestedSize();
 
+            button->setImageCoord(MyGUI::IntCoord(0, 0, requested.width, requested.height));
             // Trim off some of the excessive padding
             // TODO: perhaps do this within ImageButton?
-            int trim = 8;
-            button->setImageCoord(MyGUI::IntCoord(0, trim, requested.width, requested.height-trim));
-            int height = requested.height-trim*2;
+            int height = requested.height-16;
             button->setImageTile(MyGUI::IntSize(requested.width, height));
             button->setCoord((maxwidth-requested.width) / 2, curH, requested.width, height);
             curH += height;
