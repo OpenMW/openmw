@@ -22,7 +22,7 @@ namespace Resource
     class ImageManager;
     class NifFileManager;
     class KeyframeManager;
-    class ResourceManager;
+    class BaseResourceManager;
 
     /// @brief Wrapper class that constructs and provides access to the most commonly used resource subsystems.
     /// @par Resource subsystems can be used with multiple OpenGL contexts, just like the OSG equivalents, but
@@ -48,10 +48,10 @@ namespace Resource
 
         /// Add this ResourceManager to be handled by the ResourceSystem.
         /// @note Does not transfer ownership.
-        void addResourceManager(ResourceManager* resourceMgr);
+        void addResourceManager(BaseResourceManager* resourceMgr);
         /// @note Do nothing if resourceMgr does not exist.
         /// @note Does not delete resourceMgr.
-        void removeResourceManager(ResourceManager* resourceMgr);
+        void removeResourceManager(BaseResourceManager* resourceMgr);
 
         /// How long to keep objects in cache after no longer being referenced.
         void setExpiryDelay(double expiryDelay);
@@ -72,7 +72,7 @@ namespace Resource
 
         // Store the base classes separately to get convenient access to the common interface
         // Here users can register their own resourcemanager as well
-        std::vector<ResourceManager*> mResourceManagers;
+        std::vector<BaseResourceManager*> mResourceManagers;
 
         const VFS::Manager* mVFS;
 
