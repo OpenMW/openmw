@@ -649,9 +649,6 @@ void NpcAnimation::updateParts()
 
     if (wasArrowAttached)
         attachArrow();
-
-    if (mAlpha != 1.f)
-        mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
 }
 
 
@@ -914,9 +911,6 @@ void NpcAnimation::showWeapons(bool showWeapon)
                     attachArrow();
             }
         }
-        // Note: we will need to recreate shaders later if we use weapon sheathing anyway, so there is no point to update them here
-        if (mAlpha != 1.f && !mWeaponSheathing)
-            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
     }
     else
     {
@@ -928,10 +922,6 @@ void NpcAnimation::showWeapons(bool showWeapon)
 
     updateHolsteredWeapon(!mShowWeapons);
     updateQuiver();
-
-    // Recreate shaders for invisible actors, otherwise sheath nodes will be visible
-    if (mAlpha != 1.f && mWeaponSheathing)
-        mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
 }
 
 void NpcAnimation::showCarriedLeft(bool show)
@@ -949,8 +939,6 @@ void NpcAnimation::showCarriedLeft(bool show)
             if (iter->getTypeName() == typeid(ESM::Light).name() && mObjectParts[ESM::PRT_Shield])
                 addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), iter->get<ESM::Light>()->mBase);
         }
-        if (mAlpha != 1.f)
-            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
     }
     else
         removeIndividualPart(ESM::PRT_Shield);

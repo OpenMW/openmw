@@ -1798,17 +1798,13 @@ namespace MWRender
                 material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,alpha));
                 material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
                 stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-
+                stateset->addUniform(new osg::Uniform("colorMode", 0), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
                 mObjectRoot->setStateSet(stateset);
-
-                mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
             }
         }
         else
         {
             mObjectRoot->setStateSet(nullptr);
-
-            mResourceSystem->getSceneManager()->recreateShaders(mObjectRoot);
         }
 
         setRenderBin();
