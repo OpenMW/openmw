@@ -6,6 +6,8 @@
 #include <components/debug/debugging.hpp>
 #include <components/misc/rng.hpp>
 
+#include "mwmechanics/weapontype.hpp"
+
 #include "engine.hpp"
 
 #if defined(_WIN32)
@@ -102,6 +104,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
         ("script-blacklist", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
             ->multitoken(), "ignore the specified script (if the use of the blacklist is enabled)")
+
+        ("weapon-type", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+            ->multitoken(), "override data for given weapon type")
 
         ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
             ->default_value(true), "enable script blacklisting")
@@ -222,6 +227,10 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setSkipMenu (variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
     if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
         Log(Debug::Warning) << "Warning: new-game used without skip-menu -> ignoring it";
+
+    const std::vector<std::string>& weaponTypes = variables["weapon-type"].as<Files::EscapeStringVector>().toStdStringVector();
+    for (const std::string& type : weaponTypes)
+        MWMechanics::registerWeaponType(type);
 
     // scripts
     engine.setCompileAll(variables["script-all"].as<bool>());

@@ -1,22 +1,11 @@
 #include "weapontype.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include "../mwworld/class.hpp"
 
 namespace MWMechanics
 {
-    static const WeaponType *sWeaponTypeListEnd = &sWeaponTypeList[sizeof(sWeaponTypeList)/sizeof(sWeaponTypeList[0])];
-
-    class FindWeaponType
-    {
-        int type;
-
-    public:
-        FindWeaponType(int _type) : type(_type) { }
-
-        bool operator()(const WeaponType &weap) const
-        { return weap.mType == type; }
-    };
-
     MWWorld::ContainerStoreIterator getActiveWeapon(MWWorld::Ptr actor, int *weaptype)
     {
         MWWorld::InventoryStore &inv = actor.getClass().getInventoryStore(actor);
@@ -52,14 +41,46 @@ namespace MWMechanics
 
     const WeaponType* getWeaponType(const int weaponType)
     {
-        const WeaponType *weap = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(weaponType));
-        if (weap == sWeaponTypeListEnd)
+        std::map<int, WeaponType>::const_iterator found = sWeaponTypeList.find(weaponType);
+        if (found == sWeaponTypeList.end())
         {
             // Use one-handed short blades as fallback
-            const WeaponType *fallback = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(ESM::Weapon::ShortBladeOneHand));
-            return fallback;
+            return &sWeaponTypeList[0];
         }
 
-        return weap;
+        return &found->second;
+    }
+
+    void registerWeaponType(const std::string& type)
+    {
+        std::vector<std::string> weaponData;
+        Misc::StringUtils::split(type, ';', weaponData);
+
+        if (weaponData.size() < 11)
+        {
+            Log(Debug::Warning) << "Can not override weapon type info: can not parse string \"" << type << "\", ignore the override";
+            return;
+        }
+
+        try
+        {
+            WeaponType weapon;
+            weapon.mDisplayName = weaponData[1];
+            weapon.mShortGroup = weaponData[2];
+            weapon.mLongGroup = weaponData[3];
+            weapon.mSoundId = weaponData[4];
+            weapon.mAttachBone = weaponData[5];
+            weapon.mSheathingBone = weaponData[6];
+            weapon.mSkill = ESM::Skill::SkillEnum(std::stoi(weaponData[7]));
+            weapon.mWeaponClass = MWMechanics::WeaponClass(std::stoi(weaponData[8]));
+            weapon.mAmmoType = std::stoi(weaponData[9]);
+            weapon.mFlags = std::stoi(weaponData[10]);
+
+            sWeaponTypeList[std::stoi(weaponData[0])] = weapon;
+        }
+        catch(const std::exception& e)
+        {
+            Log(Debug::Warning) << "Can not override weapon type info: can not parse string \"" << type << "\", ignore the override";
+        }
     }
 }
