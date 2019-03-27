@@ -35,6 +35,7 @@
     Bug #4813: Creatures with known file but no "Sound Gen Creature" assigned use default sounds
     Bug #4815: "Finished" journal entry with lower index doesn't close journal, SetJournalIndex closes journal
     Bug #4820: Spell absorption is broken
+    Bug #4823: Jail progress bar works incorrectly
     Bug #4827: NiUVController is handled incorrectly
     Bug #4828: Potion looping effects VFX are not shown for NPCs
     Bug #4837: CTD when a mesh with NiLODNode root node with particles is loaded

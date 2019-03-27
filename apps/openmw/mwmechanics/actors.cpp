@@ -130,23 +130,45 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
     const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-    bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).getMagnitude() > 0;
     int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
-
     health = 0.1f * endurance;
 
-    magicka = 0;
-    if (!stunted)
-    {
-        float fRestMagicMult = settings.find("fRestMagicMult")->mValue.getFloat ();
-        magicka = fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
-    }
+    float fRestMagicMult = settings.find("fRestMagicMult")->mValue.getFloat ();
+    magicka = fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
 }
 
 }
 
 namespace MWMechanics
 {
+    class GetStuntedMagickaDuration : public MWMechanics::EffectSourceVisitor
+    {
+    public:
+        float mRemainingTime;
+
+        GetStuntedMagickaDuration(const MWWorld::Ptr& actor)
+            : mRemainingTime(0.f){}
+
+        virtual void visit (MWMechanics::EffectKey key,
+                                const std::string& sourceName, const std::string& sourceId, int casterActorId,
+                            float magnitude, float remainingTime = -1, float totalTime = -1)
+        {
+            if (mRemainingTime == -1) return;
+
+            if (key.mId == ESM::MagicEffect::StuntedMagicka)
+            {
+                if (totalTime == -1)
+                {
+                    mRemainingTime = -1;
+                    return;
+                }
+
+                if (remainingTime > mRemainingTime)
+                    mRemainingTime = remainingTime;
+            }
+        }
+    };
+
     class SoulTrap : public MWMechanics::EffectSourceVisitor
     {
         MWWorld::Ptr mCreature;
@@ -568,7 +590,7 @@ namespace MWMechanics
         creatureStats.setMagicka(magicka);
     }
 
-    void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, bool sleep)
+    void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, double hours, bool sleep)
     {
         MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
         if (stats.isDead())
@@ -582,12 +604,36 @@ namespace MWMechanics
             getRestorationPerHourOfSleep(ptr, health, magicka);
 
             DynamicStat<float> stat = stats.getHealth();
-            stat.setCurrent(stat.getCurrent() + health);
+            stat.setCurrent(stat.getCurrent() + health * hours);
             stats.setHealth(stat);
 
-            stat = stats.getMagicka();
-            stat.setCurrent(stat.getCurrent() + magicka);
-            stats.setMagicka(stat);
+            double restoreHours = hours;
+            bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).getMagnitude() > 0;
+            if (stunted)
+            {
+                // Stunted Magicka effect should be taken into account.
+                GetStuntedMagickaDuration visitor(ptr);
+                stats.getActiveSpells().visitEffectSources(visitor);
+                stats.getSpells().visitEffectSources(visitor);
+                if (ptr.getClass().hasInventoryStore(ptr))
+                    ptr.getClass().getInventoryStore(ptr).visitEffectSources(visitor);
+
+                // Take a maximum remaining duration of Stunted Magicka effects (-1 is a constant one) in game hours.
+                if (visitor.mRemainingTime > 0)
+                {
+                    double timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+                    restoreHours = std::max(0.0, hours - visitor.mRemainingTime * timeScale / 3600.f);
+                }
+                else if (visitor.mRemainingTime == -1)
+                    restoreHours = 0;
+            }
+
+            if (restoreHours > 0)
+            {
+                stat = stats.getMagicka();
+                stat.setCurrent(stat.getCurrent() + magicka * restoreHours);
+                stats.setMagicka(stat);
+            }
         }
 
         // Current fatigue can be above base value due to a fortify effect.
@@ -610,7 +656,7 @@ namespace MWMechanics
         float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
         x *= fEndFatigueMult * endurance;
 
-        fatigue.setCurrent (fatigue.getCurrent() + 3600 * x);
+        fatigue.setCurrent (fatigue.getCurrent() + 3600 * x * hours);
         stats.setFatigue (fatigue);
     }
 
@@ -1685,9 +1731,9 @@ namespace MWMechanics
         }
     }
 
-    void Actors::rest(bool sleep)
+    void Actors::rest(double hours, bool sleep)
     {
-        float duration = 3600.f / MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+        float duration = hours * 3600.f / MWBase::Environment::get().getWorld()->getTimeScaleFactor();
         const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
 
@@ -1697,7 +1743,7 @@ namespace MWMechanics
                 continue;
 
             if (!sleep || iter->first == player)
-                restoreDynamicStats(iter->first, sleep);
+                restoreDynamicStats(iter->first, hours, sleep);
 
             if ((!iter->first.getRefData().getBaseNode()) ||
                     (playerPos - iter->first.getRefData().getPosition().asVec3()).length2() > mActorsProcessingRange*mActorsProcessingRange)
@@ -1809,11 +1855,12 @@ namespace MWMechanics
         getRestorationPerHourOfSleep(ptr, healthPerHour, magickaPerHour);
 
         CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+        bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).getMagnitude() > 0;
 
         float healthHours  = healthPerHour > 0
                              ? (stats.getHealth().getModified() - stats.getHealth().getCurrent()) / healthPerHour
                              : 1.0f;
-        float magickaHours = magickaPerHour > 0
+        float magickaHours = magickaPerHour > 0 && !stunted
                               ? (stats.getMagicka().getModified() - stats.getMagicka().getCurrent()) / magickaPerHour
                               : 1.0f;
 

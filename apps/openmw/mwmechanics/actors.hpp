@@ -121,13 +121,13 @@ namespace MWMechanics
             void updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
                                             MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance);
 
-            void rest(bool sleep);
-            ///< Update actors while the player is waiting or sleeping. This should be called every hour.
+            void rest(double hours, bool sleep);
+            ///< Update actors while the player is waiting or sleeping.
 
             void updateSneaking(CharacterController* ctrl, float duration);
             ///< Update the sneaking indicator state according to the given player character controller.
 
-            void restoreDynamicStats(const MWWorld::Ptr& actor, bool sleep);
+            void restoreDynamicStats(const MWWorld::Ptr& actor, double hours, bool sleep);
 
             int getHoursToRest(const MWWorld::Ptr& ptr) const;
             ///< Calculate how many hours the given actor needs to rest in order to be fully healed

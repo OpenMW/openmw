@@ -576,7 +576,7 @@ namespace MWWorld
             RestPermitted canRest() const override;
             ///< check if the player is allowed to rest
 
-            void rest() override;
+            void rest(double hours) override;
 
             /// \todo Probably shouldn't be here
             MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) override;

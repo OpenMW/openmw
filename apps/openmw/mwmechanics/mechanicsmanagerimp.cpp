@@ -480,17 +480,17 @@ namespace MWMechanics
         return mActors.isSneaking(ptr);
     }
 
-    void MechanicsManager::rest(bool sleep)
+    void MechanicsManager::rest(double hours, bool sleep)
     {
         if (sleep)
-            MWBase::Environment::get().getWorld()->rest();
+            MWBase::Environment::get().getWorld()->rest(hours);
 
-        mActors.rest(sleep);
+        mActors.rest(hours, sleep);
     }
 
-    void MechanicsManager::restoreDynamicStats(MWWorld::Ptr actor, bool sleep)
+    void MechanicsManager::restoreDynamicStats(MWWorld::Ptr actor, double hours, bool sleep)
     {
-        mActors.restoreDynamicStats(actor, sleep);
+        mActors.restoreDynamicStats(actor, hours, sleep);
     }
 
     int MechanicsManager::getHoursToRest() const
