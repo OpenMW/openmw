@@ -11,7 +11,7 @@ namespace Compiler
     {
         public:
         
-            virtual const char *what() const throw() { return "compile error";} 
+            virtual const char *what() const throw() { return "Compile error";} 
             ///< Return error message
     };
 
@@ -21,7 +21,7 @@ namespace Compiler
     {
         public:
         
-            virtual const char *what() const throw() { return "can't read file"; }
+            virtual const char *what() const throw() { return "Can't read file"; }
             ///< Return error message
     };
 
@@ -31,7 +31,7 @@ namespace Compiler
     {       
         public:
         
-            virtual const char *what() const throw() { return "end of file"; }
+            virtual const char *what() const throw() { return "End of file"; }
             ///< Return error message
     };
 }

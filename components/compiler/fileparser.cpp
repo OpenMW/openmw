@@ -98,7 +98,7 @@ namespace Compiler
         if (mState == BeginState)
         {
             if (code != Scanner::S_newline)
-                reportWarning ("Ignoring stray special character before begin statement", loc);
+                reportWarning ("Stray special character before begin statement", loc);
             return true;
         }
 

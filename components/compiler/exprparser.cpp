@@ -99,7 +99,7 @@ namespace Compiler
         else if (t1=='f' || t2=='f')
             mOperands.push_back ('f');
         else
-            throw std::logic_error ("failed to determine result operand type");
+            throw std::logic_error ("Failed to determine result operand type");
     }
 
     void ExprParser::pop()
@@ -158,7 +158,7 @@ namespace Compiler
 
             default:
 
-                throw std::logic_error ("unknown operator");
+                throw std::logic_error ("Unknown operator");
         }
     }
 
@@ -287,7 +287,7 @@ namespace Compiler
             else
             {
                 mExplicit.clear();
-                getErrorHandler().warning ("Ignoring stray explicit reference", loc);
+                getErrorHandler().warning ("Stray explicit reference", loc);
             }
         }
 
@@ -430,7 +430,7 @@ namespace Compiler
                     {
                         if (!hasExplicit)
                         {
-                            getErrorHandler().warning ("ignoring stray explicit reference", loc);
+                            getErrorHandler().warning ("Stray explicit reference", loc);
                             mExplicit.clear();
                         }
 
@@ -735,13 +735,13 @@ namespace Compiler
     {
         if (mOperands.empty() && mOperators.empty())
         {
-            getErrorHandler().error ("missing expression", mTokenLoc);
+            getErrorHandler().error ("Missing expression", mTokenLoc);
             return 'l';
         }
 
         if (mNextOperand || mOperands.empty())
         {
-            getErrorHandler().error ("syntax error in expression", mTokenLoc);
+            getErrorHandler().error ("Syntax error in expression", mTokenLoc);
             return 'l';
         }
 
@@ -799,7 +799,7 @@ namespace Compiler
                         ++optionalCount;
                 }
                 else
-                    getErrorHandler().warning ("ignoring extra argument",
+                    getErrorHandler().warning ("Extra argument",
                         stringParser.getTokenLoc());
             }
             else if (*iter=='X')
@@ -813,7 +813,7 @@ namespace Compiler
                 if (parser.isEmpty())
                     break;
                 else
-                    getErrorHandler().warning("ignoring extra argument", parser.getTokenLoc());
+                    getErrorHandler().warning("Extra argument", parser.getTokenLoc());
             }
             else if (*iter=='z')
             {
@@ -825,7 +825,7 @@ namespace Compiler
                 if (discardParser.isEmpty())
                     break;
                 else
-                    getErrorHandler().warning("ignoring extra argument", discardParser.getTokenLoc());
+                    getErrorHandler().warning("Extra argument", discardParser.getTokenLoc());
             }
             else if (*iter=='j')
             {
