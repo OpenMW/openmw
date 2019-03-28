@@ -119,6 +119,7 @@ include_directories(
 )
 
 target_link_libraries(openmw
+    ${OPENMW_CXX_FLAGS}
     ${OSG_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
     ${OSGPARTICLE_LIBRARIES}
@@ -141,7 +142,33 @@ target_link_libraries(openmw
     components
 )
 
-if (ANDROID)
+if (OPENMW_STATIC AND NOT OPENMW_NO_PKGCONFIG AND (NOT WIN32 OR MINGW))
+    find_package(PkgConfig)
+
+    pkg_check_modules(openmw_pkgconfig REQUIRED
+        libjpeg
+        openal
+        freetype2
+        sdl2
+        gl
+        libavcodec
+        libavdevice
+        libavfilter
+        libavformat
+        libavresample
+        libavutil
+    )
+
+    target_link_libraries(openmw
+        ${openmw_pkgconfig_STATIC_LIBRARIES}
+    )
+
+    target_compile_options(openmw PUBLIC
+        ${openmw_pkgconfig_STATIC_CFLAGS_OTHER}
+    )
+endif()
+
+if (ANDROID OR OPENMW_STATIC)
     set (OSG_PLUGINS
         -Wl,--whole-archive
     )
@@ -154,15 +181,20 @@ if (ANDROID)
     )
 
     target_link_libraries(openmw
-        EGL
-        android
-        log
         dl
         z
         ${OPENSCENEGRAPH_LIBRARIES}
         freetype
         jpeg
-    	png
+        png
+    )
+endif (ANDROID OR OPENMW_STATIC)
+
+if (ANDROID)
+    target_link_libraries(openmw
+        EGL
+        android
+        log
     )
 endif (ANDROID)
 

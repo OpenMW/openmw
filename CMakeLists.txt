@@ -289,8 +289,8 @@ endif()
 if(QT_STATIC)
    if(WIN32)
       if(DESIRED_QT_VERSION MATCHES 4)
-         # QtCore needs WSAAsyncSelect from Ws2_32.lib
-         set(QT_QTCORE_LIBRARY ${QT_QTCORE_LIBRARY} Ws2_32.lib)
+         # QtCore needs WSAAsyncSelect from ws2_32.lib
+         set(QT_QTCORE_LIBRARY ${QT_QTCORE_LIBRARY} ws2_32.lib)
          message("QT_QTCORE_LIBRARY: ${QT_QTCORE_LIBRARY}")
       endif()
    endif()
@@ -299,8 +299,12 @@ endif()
 
 set(BOOST_COMPONENTS system filesystem program_options iostreams)
 if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale zlib)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
 endif(WIN32)
+
+if (WIN32 AND NOT MINGW)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} zlib)
+endif()
 
 IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)

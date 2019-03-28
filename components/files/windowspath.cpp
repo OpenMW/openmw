@@ -6,7 +6,7 @@
 
 #include <shlobj.h>
 #include <shlwapi.h>
-#include <WinReg.h>
+#include <winreg.h>
 
 #include <boost/locale.hpp>
 namespace bconv = boost::locale::conv;

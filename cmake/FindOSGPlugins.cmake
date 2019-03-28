@@ -28,10 +28,14 @@ foreach(_library ${OSGPlugins_FIND_COMPONENTS})
     set(_component OSGPlugins_${_library})
 
     set(${_library_uc}_DIR ${OSGPlugins_LIB_DIR}) # to help function osg_find_library
-    set(_saved_lib_prefix ${CMAKE_FIND_LIBRARY_PREFIXES}) # save CMAKE_FIND_LIBRARY_PREFIXES
-    set(CMAKE_FIND_LIBRARY_PREFIXES "") # search libraries with no prefix
+    if (NOT MINGW)
+        set(_saved_lib_prefix ${CMAKE_FIND_LIBRARY_PREFIXES}) # save CMAKE_FIND_LIBRARY_PREFIXES
+        set(CMAKE_FIND_LIBRARY_PREFIXES "") # search also libraries with no prefix
+    endif()
     osg_find_library(${_library_uc} ${_library}) # find it into ${_library_uc}_LIBRARIES
-    set(CMAKE_FIND_LIBRARY_PREFIXES ${_saved_lib_prefix}) # restore prefix
+    if (NOT MINGW)
+        set(CMAKE_FIND_LIBRARY_PREFIXES ${_saved_lib_prefix}) # restore prefix
+    endif()
 
     if (${_library_uc}_LIBRARIES)
         set(${_component}_LIBRARY ${${_library_uc}_LIBRARIES}) # fake as if we call find_library
